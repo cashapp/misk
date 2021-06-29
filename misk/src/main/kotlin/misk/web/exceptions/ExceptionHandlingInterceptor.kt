@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.UncheckedExecutionException
 import com.squareup.wire.GrpcStatus
 import com.squareup.wire.ProtoAdapter
 import misk.Action
-import misk.exceptions.StatusCode
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.grpc.GrpcMessageSink
@@ -23,6 +22,7 @@ import okio.ByteString
 import wisp.logging.getLogger
 import wisp.logging.log
 import java.lang.reflect.InvocationTargetException
+import java.net.HttpURLConnection
 import javax.inject.Inject
 
 /**
@@ -134,19 +134,19 @@ class ExceptionHandlingInterceptor(
     val INTERNAL_SERVER_ERROR_RESPONSE = Response(
       "internal server error".toResponseBody(),
       listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      StatusCode.INTERNAL_SERVER_ERROR.code
+      HttpURLConnection.HTTP_INTERNAL_ERROR
     )
 
     val UNAUTHENTICATED_RESPONSE = Response(
       "unauthenticated".toResponseBody(),
       listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      StatusCode.UNAUTHENTICATED.code
+      HttpURLConnection.HTTP_UNAUTHORIZED
     )
 
     val UNAUTHORIZED_RESPONSE = Response(
       "unauthorized".toResponseBody(),
       listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      StatusCode.FORBIDDEN.code
+      HttpURLConnection.HTTP_FORBIDDEN
     )
   }
 }

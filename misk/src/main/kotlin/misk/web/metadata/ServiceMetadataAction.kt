@@ -7,7 +7,7 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import wisp.deployment.getDeploymentFromEnvironmentVariable
+import wisp.deployment.Deployment
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,9 +23,12 @@ class ServiceMetadataAction @Inject constructor(
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getAll(): Response {
-    return Response(
-      serviceMetadata = optionalBinder.serviceMetadata
-    )
+    // Misk-web expects an UPPERCASE environment. Since this action could get a serviceMetadata
+    // object from anywhere, it must be transformed here.
+    val metadata = with(optionalBinder.serviceMetadata) {
+      copy(environment = this.environment.toUpperCase())
+    }
+    return Response(serviceMetadata = metadata)
   }
 
   data class ServiceMetadata(
@@ -39,9 +42,8 @@ class ServiceMetadataAction @Inject constructor(
    * https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor
    */
   @Singleton
-  class OptionalBinder @Inject constructor(@AppName val appName: String) {
+  class OptionalBinder @Inject constructor(@AppName val appName: String, deployment: Deployment) {
     @com.google.inject.Inject(optional = true)
-    var serviceMetadata: ServiceMetadata =
-      ServiceMetadata(appName, getDeploymentFromEnvironmentVariable().name)
+    var serviceMetadata: ServiceMetadata = ServiceMetadata(appName, deployment.name)
   }
 }

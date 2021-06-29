@@ -74,6 +74,45 @@ class FakeRedisTest {
   }
 
   @Test
+  fun hgetAndHset() {
+    val key1 = "key1"
+    val key2 = "key2"
+    val field1 = "field1"
+    val field2 = "field2"
+    val valueKey1Field1 = "valueKey1Field1".encodeUtf8()
+    val valueKey1Field2 = "valueKey2Field2".encodeUtf8()
+    val valueKey2Field1 = "valueKey2Field1".encodeUtf8()
+    val valueKey2Field2 = "valueKey2Field2".encodeUtf8()
+
+    assertThat(redis.hget(key1, field1)).isNull()
+    assertThat(redis.hget(key1, field2)).isNull()
+    assertThat(redis.hget(key2, field1)).isNull()
+    assertThat(redis.hget(key2, field2)).isNull()
+    assertThat(redis.hgetAll(key1)).isNull()
+    assertThat(redis.hgetAll(key2)).isNull()
+
+    redis.hset(key1, field1, valueKey1Field1)
+    redis.hset(key1, field2, valueKey1Field2)
+    redis.hset(key2, field1, valueKey2Field1)
+    redis.hset(key2, field2, valueKey2Field2)
+
+    assertThat(redis.hget(key1, field1)).isEqualTo(valueKey1Field1)
+    assertThat(redis.hget(key1, field2)).isEqualTo(valueKey1Field2)
+    assertThat(redis.hget(key2, field1)).isEqualTo(valueKey2Field1)
+    assertThat(redis.hget(key2, field2)).isEqualTo(valueKey2Field2)
+
+    assertThat(redis.hgetAll(key1)).isEqualTo(mapOf(
+      field1 to valueKey1Field1,
+      field2 to valueKey1Field2
+    ))
+
+    assertThat(redis.hgetAll(key2)).isEqualTo(mapOf(
+      field1 to valueKey2Field1,
+      field2 to valueKey2Field2
+    ))
+  }
+
+  @Test
   fun badArgumentsToBatchSet() {
     assertThatThrownBy {
       redis.mset("key".encodeUtf8())

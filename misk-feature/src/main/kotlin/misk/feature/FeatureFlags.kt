@@ -1,4 +1,4 @@
-package wisp.feature
+package misk.feature
 
 import java.util.concurrent.Executor
 
@@ -232,61 +232,3 @@ inline fun <reified T> FeatureFlags.trackJson(
   executor: Executor,
   noinline tracker: (T) -> Unit
 ): TrackerReference = trackJson(feature, key, T::class.java, attributes, executor, tracker)
-
-/**
- * Typed feature string.
- */
-open class Feature(val name: String) {
-  override fun equals(other: Any?): Boolean {
-    if (this === other) return true
-    if (other !is Feature) return false
-
-    if (name != other.name) return false
-
-    return true
-  }
-
-  override fun hashCode(): Int {
-    return name.hashCode()
-  }
-
-  override fun toString(): String {
-    return "Feature(name='$name')"
-  }
-}
-
-/**
- * Extra attributes to be used for evaluating features.
- */
-open class Attributes @JvmOverloads constructor(
-  val text: Map<String, String> = mapOf(),
-  // NB: LaunchDarkly uses typed Gson attributes. We could leak that through, but that could make
-  // code unwieldly. Numerical attributes are likely to be rarely used, so we make it a separate,
-  // optional field rather than trying to account for multiple possible attribute types.
-  val number: Map<String, Number>? = null,
-  // Indicates that the user is anonymous, which may have backend-specific behavior, like not
-  // including the user in analytics.
-  val anonymous: Boolean = false
-) {
-  override fun equals(other: Any?): Boolean {
-    if (this === other) return true
-    if (other !is Attributes) return false
-
-    if (text != other.text) return false
-    if (number != other.number) return false
-    if (anonymous != other.anonymous) return false
-
-    return true
-  }
-
-  override fun hashCode(): Int {
-    var result = text.hashCode()
-    result = 31 * result + (number?.hashCode() ?: 0)
-    result = 31 * result + anonymous.hashCode()
-    return result
-  }
-
-  override fun toString(): String {
-    return "Attributes(text=$text, number=$number, anonymous=$anonymous)"
-  }
-}

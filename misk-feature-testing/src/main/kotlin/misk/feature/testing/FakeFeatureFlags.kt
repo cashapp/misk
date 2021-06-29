@@ -3,27 +3,32 @@ package misk.feature.testing
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
 import misk.feature.FeatureService
-import wisp.feature.Attributes
-import wisp.feature.DynamicConfig
-import wisp.feature.Feature
-import wisp.feature.FeatureFlags
+import misk.feature.Attributes
+import misk.feature.DynamicConfig
+import misk.feature.Feature
+import misk.feature.FeatureFlags
+import misk.feature.toMisk
 import wisp.feature.toSafeJson
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
 @Singleton
-class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleService(), FeatureFlags, FeatureService, DynamicConfig {
+class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : AbstractIdleService(),
+  FeatureFlags,
+  FeatureService,
+  DynamicConfig {
   companion object {
     const val KEY = "fake_dynamic_flag"
     val defaultAttributes = Attributes()
   }
 
   private val delegate: wisp.feature.testing.FakeFeatureFlags by lazy {
-    wisp.feature.testing.FakeFeatureFlags(moshi)
+    wisp.feature.testing.FakeFeatureFlags { moshi.get() }
   }
 
   override fun startUp() {}
@@ -76,7 +81,7 @@ class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleServi
     attributes: Attributes,
     executor: Executor,
     tracker: (Boolean) -> Unit
-  ) = delegate.trackBoolean(feature, key, attributes, executor, tracker)
+  ) = delegate.trackBoolean(feature, key, attributes, executor, tracker).toMisk()
 
   override fun trackInt(
     feature: Feature,
@@ -84,7 +89,7 @@ class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleServi
     attributes: Attributes,
     executor: Executor,
     tracker: (Int) -> Unit
-  ) = delegate.trackInt(feature, key, attributes, executor, tracker)
+  ) = delegate.trackInt(feature, key, attributes, executor, tracker).toMisk()
 
   override fun trackString(
     feature: Feature,
@@ -92,7 +97,7 @@ class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleServi
     attributes: Attributes,
     executor: Executor,
     tracker: (String) -> Unit
-  ) = delegate.trackString(feature, key, attributes, executor, tracker)
+  ) = delegate.trackString(feature, key, attributes, executor, tracker).toMisk()
 
   override fun <T : Enum<T>> trackEnum(
     feature: Feature,
@@ -101,7 +106,7 @@ class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleServi
     attributes: Attributes,
     executor: Executor,
     tracker: (T) -> Unit
-  ) = delegate.trackEnum(feature, key, clazz, attributes, executor, tracker)
+  ) = delegate.trackEnum(feature, key, clazz, attributes, executor, tracker).toMisk()
 
   override fun <T> trackJson(
     feature: Feature,
@@ -110,39 +115,39 @@ class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleServi
     attributes: Attributes,
     executor: Executor,
     tracker: (T) -> Unit
-  ) = delegate.trackJson(feature, key, clazz, attributes, executor, tracker)
+  ) = delegate.trackJson(feature, key, clazz, attributes, executor, tracker).toMisk()
 
   override fun trackBoolean(
     feature: Feature,
     executor: Executor,
     tracker: (Boolean) -> Unit
-  ) = delegate.trackBoolean(feature, KEY, executor, tracker)
+  ) = delegate.trackBoolean(feature, KEY, executor, tracker).toMisk()
 
   override fun trackInt(
     feature: Feature,
     executor: Executor,
     tracker: (Int) -> Unit
-  ) = delegate.trackInt(feature, KEY, executor, tracker)
+  ) = delegate.trackInt(feature, KEY, executor, tracker).toMisk()
 
   override fun trackString(
     feature: Feature,
     executor: Executor,
     tracker: (String) -> Unit
-  ) = delegate.trackString(feature, KEY, executor, tracker)
+  ) = delegate.trackString(feature, KEY, executor, tracker).toMisk()
 
   override fun <T : Enum<T>> trackEnum(
     feature: Feature,
     clazz: Class<T>,
     executor: Executor,
     tracker: (T) -> Unit
-  ) = delegate.trackEnum(feature, KEY, clazz, executor, tracker)
+  ) = delegate.trackEnum(feature, KEY, clazz, executor, tracker).toMisk()
 
   override fun <T> trackJson(
     feature: Feature,
     clazz: Class<T>,
     executor: Executor,
     tracker: (T) -> Unit
-  ) = delegate.trackJson(feature, KEY, clazz, executor, tracker)
+  ) = delegate.trackJson(feature, KEY, clazz, executor, tracker).toMisk()
 
   fun override(
     feature: Feature,
@@ -243,7 +248,7 @@ class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleServi
     value: T,
     attributes: Attributes = defaultAttributes
   ) {
-    val jsonValue = { moshi.adapter(T::class.java).toSafeJson(value) }
+    val jsonValue = { moshi.get().adapter(T::class.java).toSafeJson(value) }
     overrideKey(feature, key, jsonValue, attributes)
   }
 

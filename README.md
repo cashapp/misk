@@ -11,7 +11,7 @@ Misk is not ready for use. The API is not stable.
 Our [change log][changelog] has release history. API is subject to change. 
 
 ```kotlin
-implementation("com.squareup.misk:misk:0.17.1")
+implementation("com.squareup.misk:misk:0.19.0")
 ```
 
 Snapshot builds are [available][snap].

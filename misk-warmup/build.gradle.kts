@@ -1,18 +1,13 @@
-plugins {
-  `kotlin-dsl`
-}
-
 dependencies {
+  implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.moshiKotlin)
+  implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
-  implementation(project(":misk-policy"))
+  implementation(project(":misk-service"))
+  api(project(":wisp-logging"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.logbackClassic)
   testImplementation(project(":misk-testing"))
-  testImplementation(Dependencies.mockitoCore)
 }
 
 afterEvaluate {

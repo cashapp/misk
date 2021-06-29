@@ -7,10 +7,10 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import wisp.feature.Attributes
-import wisp.feature.Feature
-import wisp.feature.getEnum
-import wisp.feature.getJson
+import misk.feature.Attributes
+import misk.feature.Feature
+import misk.feature.getEnum
+import misk.feature.getJson
 import javax.inject.Inject
 
 @MiskTest
@@ -22,6 +22,7 @@ internal class FakeFeatureFlagsTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(FakeFeatureFlagsModule())
+      install(MoshiTestingModule())
     }
   }
 

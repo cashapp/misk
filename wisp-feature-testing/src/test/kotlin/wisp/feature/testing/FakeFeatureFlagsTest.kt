@@ -25,7 +25,7 @@ internal class FakeFeatureFlagsTest {
 
   @BeforeEach
   fun beforeEachTest() {
-    subject = FakeFeatureFlags(moshi)
+    subject = FakeFeatureFlags { moshi }
   }
 
   @Test

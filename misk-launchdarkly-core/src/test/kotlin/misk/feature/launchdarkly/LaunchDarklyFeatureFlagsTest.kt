@@ -20,11 +20,11 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import wisp.feature.Attributes
-import wisp.feature.Feature
-import wisp.feature.FeatureFlags
-import wisp.feature.getEnum
-import wisp.feature.getJson
+import misk.feature.Attributes
+import misk.feature.Feature
+import misk.feature.FeatureFlags
+import misk.feature.getEnum
+import misk.feature.getJson
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
