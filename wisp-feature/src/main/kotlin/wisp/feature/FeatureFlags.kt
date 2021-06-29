@@ -236,12 +236,25 @@ inline fun <reified T> FeatureFlags.trackJson(
 /**
  * Typed feature string.
  */
-data class Feature(val name: String)
+open class Feature(val name: String) {
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is Feature) return false
+
+    if (name != other.name) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    return name.hashCode()
+  }
+}
 
 /**
  * Extra attributes to be used for evaluating features.
  */
-data class Attributes @JvmOverloads constructor(
+open class Attributes @JvmOverloads constructor(
   val text: Map<String, String> = mapOf(),
   // NB: LaunchDarkly uses typed Gson attributes. We could leak that through, but that could make
   // code unwieldly. Numerical attributes are likely to be rarely used, so we make it a separate,
@@ -250,4 +263,22 @@ data class Attributes @JvmOverloads constructor(
   // Indicates that the user is anonymous, which may have backend-specific behavior, like not
   // including the user in analytics.
   val anonymous: Boolean = false
-)
+) {
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is Attributes) return false
+
+    if (text != other.text) return false
+    if (number != other.number) return false
+    if (anonymous != other.anonymous) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = text.hashCode()
+    result = 31 * result + (number?.hashCode() ?: 0)
+    result = 31 * result + anonymous.hashCode()
+    return result
+  }
+}
