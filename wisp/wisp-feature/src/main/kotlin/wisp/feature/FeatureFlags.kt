@@ -249,6 +249,10 @@ open class Feature(val name: String) {
   override fun hashCode(): Int {
     return name.hashCode()
   }
+
+  override fun toString(): String {
+    return "Feature(name='$name')"
+  }
 }
 
 /**
@@ -280,5 +284,9 @@ open class Attributes @JvmOverloads constructor(
     result = 31 * result + (number?.hashCode() ?: 0)
     result = 31 * result + anonymous.hashCode()
     return result
+  }
+
+  override fun toString(): String {
+    return "Attributes(text=$text, number=$number, anonymous=$anonymous)"
   }
 }
