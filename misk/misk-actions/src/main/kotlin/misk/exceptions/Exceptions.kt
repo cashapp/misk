@@ -27,19 +27,25 @@ open class WebActionException(
 ) : Exception(message, cause) {
   val isClientError = code in (400..499)
   val isServerError = code in (500..599)
+
+  constructor(
+    code: Int,
+    message: String,
+    cause: Throwable? = null
+  ) : this(code, message, message, cause)
 }
 
 /** Base exception for when resources are not found */
 open class NotFoundException(message: String = "", cause: Throwable? = null) :
-  WebActionException(HTTP_NOT_FOUND, message, message, cause)
+  WebActionException(HTTP_NOT_FOUND, message, cause)
 
 /** Base exception for when authentication fails */
 open class UnauthenticatedException(message: String = "", cause: Throwable? = null) :
-  WebActionException(HTTP_UNAUTHORIZED, message, message, cause)
+  WebActionException(HTTP_UNAUTHORIZED, message, cause)
 
 /** Base exception for when authenticated credentials lack access to a resource */
 open class UnauthorizedException(message: String = "", cause: Throwable? = null) :
-  WebActionException(HTTP_FORBIDDEN, message, message, cause)
+  WebActionException(HTTP_FORBIDDEN, message, cause)
 
 /**
  * Base exception for when a resource is unavailable. The message is not exposed to the caller.
@@ -49,19 +55,19 @@ open class ResourceUnavailableException(message: String = "", cause: Throwable? 
 
 /** Base exception for bad client requests */
 open class BadRequestException(message: String = "", cause: Throwable? = null) :
-  WebActionException(HTTP_BAD_REQUEST, message, message, cause)
+  WebActionException(HTTP_BAD_REQUEST, message, cause)
 
 /** Base exception for when a request causes a conflict */
 open class ConflictException(message: String = "", cause: Throwable? = null) :
-  WebActionException(HTTP_CONFLICT, message, message, cause)
+  WebActionException(HTTP_CONFLICT, message, cause)
 
 /** This exception is custom to Misk. */
 open class UnprocessableEntityException(message: String = "", cause: Throwable? = null) :
-  WebActionException(422, message, message, cause)
+  WebActionException(422, message, cause)
 
 /** This exception is custom to Misk. */
 open class TooManyRequestsException(message: String = "", cause: Throwable? = null) :
-  WebActionException(429, message, message, cause)
+  WebActionException(429, message, cause)
 
 /** This exception is custom to Misk. */
 open class ClientClosedRequestException(message: String = "", cause: Throwable? = null) :
@@ -75,10 +81,10 @@ open class GatewayTimeoutException(message: String = "", cause: Throwable? = nul
   WebActionException(HTTP_GATEWAY_TIMEOUT, "GATEWAY_TIMEOUT", message, cause)
 
 open class PayloadTooLargeException(message: String = "", cause: Throwable? = null) :
-  WebActionException(HTTP_ENTITY_TOO_LARGE, message, message, cause)
+  WebActionException(HTTP_ENTITY_TOO_LARGE, message, cause)
 
 open class UnsupportedMediaTypeException(message: String = "", cause: Throwable? = null) :
-  WebActionException(HTTP_UNSUPPORTED_TYPE, message, message, cause)
+  WebActionException(HTTP_UNSUPPORTED_TYPE, message, cause)
 
 /** Similar to [kotlin.require], but throws [BadRequestException] if the check fails */
 inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {

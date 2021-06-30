@@ -1,9 +1,14 @@
 package misk.web.exceptions
 
 import com.google.common.util.concurrent.UncheckedExecutionException
+import com.squareup.wire.GrpcStatus
+import com.squareup.wire.ProtoAdapter
 import misk.Action
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
+import misk.grpc.GrpcMessageSink
+import misk.web.DispatchMechanism
+import misk.web.HttpCall
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
@@ -11,6 +16,9 @@ import misk.web.ResponseBody
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers.Companion.toHeaders
+import okio.Buffer
+import okio.BufferedSink
+import okio.ByteString
 import wisp.logging.getLogger
 import wisp.logging.log
 import java.lang.reflect.InvocationTargetException
@@ -37,10 +45,64 @@ class ExceptionHandlingInterceptor(
     } catch (th: Throwable) {
       val response = toResponse(th)
       chain.httpCall.statusCode = response.statusCode
-      chain.httpCall.takeResponseBody()?.use { sink ->
-        chain.httpCall.addResponseHeaders(response.headers)
-        (response.body as ResponseBody).writeTo(sink)
+      if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
+        sendGrpcFailure(chain.httpCall, response)
+      } else {
+        sendHttpFailure(chain.httpCall, response)
       }
+    }
+  }
+
+  private fun sendHttpFailure(httpCall: HttpCall, response: Response<*>) {
+    httpCall.takeResponseBody()?.use { sink ->
+      httpCall.addResponseHeaders(response.headers)
+      (response.body as ResponseBody).writeTo(sink)
+    }
+  }
+
+  /**
+   * Borrow behavior from [GrpcFeatureBinding] to send a gRPC error with an HTTP 200 status code.
+   * This is weird but it's how gRPC clients work.
+   *
+   * One thing to note is for our metrics we want to pretend that the HTTP code is what we sent.
+   * Otherwise gRPC requests that crashed and yielded an HTTP 200 code will confuse operators.
+   */
+  private fun sendGrpcFailure(httpCall: HttpCall, response: Response<*>) {
+    httpCall.setStatusCodes(httpCall.statusCode, 200)
+    httpCall.requireTrailers()
+    httpCall.setResponseHeader("grpc-encoding", "identity")
+    httpCall.setResponseHeader("Content-Type", MediaTypes.APPLICATION_GRPC)
+    httpCall.setResponseTrailer(
+      "grpc-status",
+      toGrpcStatus(response.statusCode).code.toString()
+    )
+    httpCall.setResponseTrailer("grpc-message", this.grpcMessage(response))
+    httpCall.takeResponseBody()?.use { responseBody: BufferedSink ->
+      GrpcMessageSink(responseBody, ProtoAdapter.BYTES, grpcEncoding = "identity")
+        .use { messageSink ->
+          messageSink.write(ByteString.EMPTY)
+        }
+    }
+  }
+
+  private fun grpcMessage(response: Response<*>): String {
+    val buffer = Buffer()
+    (response.body as ResponseBody).writeTo(buffer)
+    return buffer.readUtf8()
+  }
+
+  /** https://grpc.github.io/grpc/core/md_doc_http-grpc-status-mapping.html */
+  private fun toGrpcStatus(statusCode: Int): GrpcStatus {
+    return when (statusCode) {
+      400 -> GrpcStatus.INTERNAL
+      401 -> GrpcStatus.UNAUTHENTICATED
+      403 -> GrpcStatus.PERMISSION_DENIED
+      404 -> GrpcStatus.UNIMPLEMENTED
+      429 -> GrpcStatus.UNAVAILABLE
+      502 -> GrpcStatus.UNAVAILABLE
+      503 -> GrpcStatus.UNAVAILABLE
+      504 -> GrpcStatus.UNAVAILABLE
+      else -> GrpcStatus.UNKNOWN
     }
   }
 
