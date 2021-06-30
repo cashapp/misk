@@ -62,6 +62,7 @@ sourceSets {
 
 dependencies {
   implementation(Dependencies.assertj)
+  implementation(Dependencies.awaitility)
   implementation(Dependencies.junitApi)
   implementation(Dependencies.kotlinTest)
   implementation(Dependencies.docker)

@@ -19,6 +19,14 @@ import misk.testing.MiskTestModule
 import misk.web.interceptors.RequestLoggingInterceptor
 import okhttp3.HttpUrl
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS
+import org.awaitility.Durations.ONE_MILLISECOND
+import org.awaitility.kotlin.atMost
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
+import org.awaitility.kotlin.withPollDelay
+import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import routeguide.Feature
@@ -157,14 +165,13 @@ class MiskClientMiskServerTest {
   }
 
   private fun assertResponseCount(code: Int, count: Int) {
-    val responseCount = metrics.histogramCount(
-      "http_request_latency_ms",
-      "action" to "GetFeatureGrpcAction",
-      "caller" to "unknown",
-      "code" to code.toString(),
-    )?.toInt() ?: 0
-    assertThat(responseCount)
-      .withFailMessage("Expected metrics to indicate $count responses with HTTP status $code but got $responseCount")
-      .isEqualTo(count)
+    await withPollInterval ONE_MILLISECOND atMost ONE_HUNDRED_MILLISECONDS untilCallTo {
+      metrics.histogramCount(
+        "http_request_latency_ms",
+        "action" to "GetFeatureGrpcAction",
+        "caller" to "unknown",
+        "code" to code.toString(),
+      )?.toInt() ?: 0
+    } matches { it == count }
   }
 }
