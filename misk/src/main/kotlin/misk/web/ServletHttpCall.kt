@@ -25,15 +25,25 @@ internal data class ServletHttpCall(
   var responseBody: BufferedSink? = null,
   var webSocket: WebSocket? = null
 ) : HttpCall {
+  private var _actualStatusCode: Int? = null
 
   override var statusCode: Int
-    get() = upstreamResponse.statusCode
+    get() = _actualStatusCode ?: upstreamResponse.statusCode
     set(value) {
+      _actualStatusCode = value
       upstreamResponse.statusCode = value
     }
 
+  override val networkStatusCode: Int
+    get() = upstreamResponse.statusCode
+
   override val responseHeaders: Headers
     get() = upstreamResponse.headers
+
+  override fun setStatusCodes(statusCode: Int, networkStatusCode: Int) {
+    _actualStatusCode = statusCode
+    upstreamResponse.statusCode = networkStatusCode
+  }
 
   override fun setResponseHeader(name: String, value: String) {
     upstreamResponse.setHeader(name, value)

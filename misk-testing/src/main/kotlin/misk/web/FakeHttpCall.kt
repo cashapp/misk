@@ -16,6 +16,7 @@ data class FakeHttpCall(
   override val dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,
   override val requestHeaders: Headers = headersOf(),
   override var statusCode: Int = 200,
+  override var networkStatusCode: Int = 200,
   val headersBuilder: Headers.Builder = Headers.Builder(),
   var sendTrailers: Boolean = false,
   val trailersBuilder: Headers.Builder = Headers.Builder(),
@@ -27,6 +28,11 @@ data class FakeHttpCall(
 
   override val responseHeaders: Headers
     get() = headersBuilder.build()
+
+  override fun setStatusCodes(statusCode: Int, networkStatusCode: Int) {
+    this.statusCode = statusCode
+    this.networkStatusCode = networkStatusCode
+  }
 
   override fun setResponseHeader(name: String, value: String) {
     headersBuilder.set(name, value)
