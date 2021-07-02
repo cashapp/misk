@@ -1,0 +1,18 @@
+metrics:
+  - name: "test_histogram"
+    type: HISTOGRAM
+    help: "Test histogram"
+    labelNames:
+      - "label_a"
+      - "label_b"
+  - name: "test_counter"
+    type: COUNTER
+    help: "Test counter"
+    labelNames:
+      - "label_c"
+  - name: "test_gauge"
+    type: GAUGE
+    help: "Test gauge"
+    labelNames:
+      - "label_d"
+      - "label_e"
