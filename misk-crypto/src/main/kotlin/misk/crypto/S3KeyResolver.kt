@@ -6,7 +6,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.google.inject.Inject
 import misk.config.MiskConfig
-import misk.environment.Env
+import wisp.deployment.Deployment
 import wisp.logging.getLogger
 
 /**
@@ -32,7 +32,7 @@ import wisp.logging.getLogger
  *  If a requested key alias does not exist, this will raise a [ExternalKeyManagerException]
  */
 class S3KeyResolver @Inject constructor(
-  private val env: Env,
+  private val deployment: Deployment,
 
   private val defaultS3: AmazonS3,
 
@@ -40,7 +40,7 @@ class S3KeyResolver @Inject constructor(
 
   @Inject(optional = true)
   private val bucketNameSource: BucketNameSource = object : BucketNameSource {
-    override fun getBucketName(env: Env) = env.name.toLowerCase()
+    override fun getBucketName(deployment: Deployment) = deployment.mapToEnvironmentName()
   },
 
   // The data keys bucket might live in a different region than the region this service executes
@@ -49,7 +49,7 @@ class S3KeyResolver @Inject constructor(
   private val awsCredentials: AWSCredentialsProvider,
 ) : ExternalKeyResolver {
 
-  private val s3: AmazonS3 = bucketNameSource.getBucketRegion(env)?.let { region ->
+  private val s3: AmazonS3 = bucketNameSource.getBucketRegion(deployment)?.let { region ->
     logger.info("creating S3ExternalKeyManager S3 client for $region")
     AmazonS3ClientBuilder
       .standard()
@@ -63,7 +63,7 @@ class S3KeyResolver @Inject constructor(
 
   private fun getRemoteKey(alias: KeyAlias, type: KeyType): Key {
     val path = objectPath(alias)
-    val name = bucketNameSource.getBucketName(env)
+    val name = bucketNameSource.getBucketName(deployment)
     try {
       val obj = s3.getObject(name, path)
 

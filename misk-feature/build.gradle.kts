@@ -3,6 +3,7 @@ dependencies {
   implementation(Dependencies.guava)
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.loggingApi)
+  api(project(":wisp-feature"))
 }
 
 afterEvaluate {

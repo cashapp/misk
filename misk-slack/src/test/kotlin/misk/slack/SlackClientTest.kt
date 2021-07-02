@@ -2,8 +2,7 @@ package misk.slack
 
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import wisp.deployment.TESTING
 import javax.inject.Inject
 
 @MiskTest
@@ -32,13 +32,15 @@ class SlackClientTest {
   internal fun testPostMessage() {
     mockWebServer.enqueue(MockResponse())
 
-    val postMessage = slackClient.postMessage("mgersh", ":sweatingtowelguy:", "kudos", "#misk-discuss")
+    val postMessage =
+      slackClient.postMessage("mgersh", ":sweatingtowelguy:", "kudos", "#misk-discuss")
     assertThat(postMessage).isEqualTo(SlackWebhookResponse.ok)
 
     val recordedRequest = mockWebServer.takeRequest()
     assertThat(recordedRequest.path).isEqualTo("/secret_webhook_path")
     assertThat(recordedRequest.body.readUtf8()).isEqualTo(
-        """{"channel":"#misk-discuss","username":"mgersh","text":"kudos","icon_emoji":":sweatingtowelguy:"}""")
+      """{"channel":"#misk-discuss","username":"mgersh","text":"kudos","icon_emoji":":sweatingtowelguy:"}"""
+    )
   }
 
   @Test
@@ -51,21 +53,25 @@ class SlackClientTest {
     val recordedRequest = mockWebServer.takeRequest()
     assertThat(recordedRequest.path).isEqualTo("/secret_webhook_path")
     assertThat(recordedRequest.body.readUtf8()).isEqualTo(
-        """{"channel":"#default-channel","username":"mgersh","text":"kudos","icon_emoji":":sweatingtowelguy:"}""")
+      """{"channel":"#default-channel","username":"mgersh","text":"kudos","icon_emoji":":sweatingtowelguy:"}"""
+    )
   }
 
   @ParameterizedTest
-  @ValueSource(strings = [
-    "invalid_payload",
-    "user_not_found",
-    "channel_not_found",
-    "channel_is_archived",
-    "action_prohibited",
-    "missing_text_or_fallback_or_attachments"])
+  @ValueSource(
+    strings = [
+      "invalid_payload",
+      "user_not_found",
+      "channel_not_found",
+      "channel_is_archived",
+      "action_prohibited",
+      "missing_text_or_fallback_or_attachments"]
+  )
   internal fun testFailedPost(failure: String) {
     mockWebServer.enqueue(MockResponse().setBody(failure).setResponseCode(500))
 
-    val postMessage = slackClient.postMessage("mgersh", ":sweatingtowelguy:", "kudos", "#misk-discuss")
+    val postMessage =
+      slackClient.postMessage("mgersh", ":sweatingtowelguy:", "kudos", "#misk-discuss")
     assertThat(postMessage).isEqualTo(SlackWebhookResponse.valueOf(failure))
   }
 
@@ -73,7 +79,8 @@ class SlackClientTest {
   internal fun testUnknownFailurePost() {
     mockWebServer.enqueue(MockResponse().setBody("unknown_failure").setResponseCode(500))
 
-    val postMessage = slackClient.postMessage("mgersh", ":sweatingtowelguy:", "kudos", "#misk-discuss")
+    val postMessage =
+      slackClient.postMessage("mgersh", ":sweatingtowelguy:", "kudos", "#misk-discuss")
     assertThat(postMessage).isNull()
   }
 
@@ -81,13 +88,17 @@ class SlackClientTest {
     override fun configure() {
       mockWebServer.start()
 
-      install(EnvironmentModule(Environment.TESTING))
+      install(DeploymentModule(TESTING))
       install(MiskTestingServiceModule())
-      install(SlackModule(config = SlackConfig(
-          baseUrl = mockWebServer.url("/").toString(),
-          webhook_path = MiskConfig.RealSecret("secret_webhook_path"),
-          default_channel = "#default-channel"
-      )))
+      install(
+        SlackModule(
+          config = SlackConfig(
+            baseUrl = mockWebServer.url("/").toString(),
+            webhook_path = MiskConfig.RealSecret("secret_webhook_path"),
+            default_channel = "#default-channel"
+          )
+        )
+      )
     }
   }
 }

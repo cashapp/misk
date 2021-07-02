@@ -1,13 +1,12 @@
 package misk.web.dashboard
 
-import misk.environment.Deployment
-import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.proxy.WebProxyAction
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
+import wisp.deployment.Deployment
 
 /**
  * Declare how to serve the resources for a [WebTab] (JS, HTML, CSS...)
@@ -15,7 +14,7 @@ import misk.web.resources.StaticResourceEntry
  * In Development environment, requests are proxied through to a local running build server.
  * In all other environments, resource requests are served from the classpath.
  *
- * @property environment Misk Environment which toggles how requests are served
+ * @property isDevelopment is true if this deployment is in development environment
  *   * In Development environment, requests are proxied through to a local running build server.
  *   * In all other environments, resource requests are served from the classpath.
  * @property slug A unique slug to identify the tab namespace, it must match the tab's corresponding
@@ -41,18 +40,6 @@ class WebTabResourceModule(
     url_path_prefix: String = "/_tab/$slug/",
     resourcePath: String = "classpath:/web/_tab/$slug/"
   ) : this(deployment.isLocalDevelopment, slug, web_proxy_url, url_path_prefix, resourcePath)
-
-  @Deprecated("the Environment enum is deprecated")
-  constructor(
-    environment: Environment,
-    slug: String,
-    web_proxy_url: String,
-    url_path_prefix: String = "/_tab/$slug/",
-    resourcePath: String = "classpath:/web/_tab/$slug/"
-  ) : this(
-    environment == Environment.DEVELOPMENT, slug, web_proxy_url, url_path_prefix,
-    resourcePath
-  )
 
   override fun configure() {
     // Environment Dependent WebProxyAction or StaticResourceAction bindings

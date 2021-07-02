@@ -15,7 +15,6 @@ import misk.cloud.aws.AwsRegion
 import misk.clustering.lease.LeaseManager
 import misk.concurrent.ExecutorServiceModule
 import misk.config.AppName
-import misk.feature.FeatureFlags
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.jobqueue.JobConsumer
@@ -25,6 +24,7 @@ import misk.jobqueue.TransactionalJobQueue
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueConfig
 import misk.tasks.RepeatedTaskQueueFactory
+import misk.feature.FeatureFlags
 import javax.inject.Inject
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */

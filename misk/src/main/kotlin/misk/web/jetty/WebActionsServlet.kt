@@ -1,10 +1,10 @@
 package misk.web.jetty
 
-import misk.exceptions.StatusCode
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
 import misk.web.SocketAddress
+import misk.web.WebConfig
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
@@ -27,6 +27,7 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
 import wisp.logging.getLogger
+import java.net.HttpURLConnection
 import java.net.ProtocolException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,7 +37,8 @@ import javax.servlet.http.HttpServletResponse
 @Singleton
 internal class WebActionsServlet @Inject constructor(
   webActionFactory: WebActionFactory,
-  webActionEntries: List<WebActionEntry>
+  webActionEntries: List<WebActionEntry>,
+  config: WebConfig,
 ) : WebSocketServlet() {
 
   companion object {
@@ -62,6 +64,16 @@ internal class WebActionsServlet @Inject constructor(
           "Actions [${action.action.name}, ${other.action.name}] have identical routing " +
             "annotations."
         }
+      }
+    }
+    // Check http2 is enabled if any gRPC actions are bound.
+    if (boundActions.any { it.action.dispatchMechanism == DispatchMechanism.GRPC }) {
+      if(config.http2) {
+        log.warn { "HTTP/2 must be enabled if any gRPC actions are bound. " +
+          "This will cause an error in the future. Check these actions: " +
+          "${boundActions
+            .filter { it.action.dispatchMechanism == DispatchMechanism.GRPC  }
+            .map { it.action.name }}" }
       }
     }
   }
@@ -134,14 +146,14 @@ internal class WebActionsServlet @Inject constructor(
     } catch (e: Throwable) {
       log.error(e) { "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}" }
 
-      response.status = StatusCode.INTERNAL_SERVER_ERROR.code
+      response.status = HttpURLConnection.HTTP_INTERNAL_ERROR
       response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
       response.writer.close()
 
       return
     }
 
-    response.status = StatusCode.NOT_FOUND.code
+    response.status = HttpURLConnection.HTTP_NOT_FOUND
     response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
     response.writer.print("Nothing found at ${request.httpUrl()}")
     response.writer.close()

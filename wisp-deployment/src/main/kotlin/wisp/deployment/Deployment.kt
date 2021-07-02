@@ -1,9 +1,8 @@
 package wisp.deployment
 
 /** Deployment describes the context in which the application is running
- * TODO: convert to data class when misk Deployment removed.
  */
-open class Deployment(
+data class Deployment(
   /**
    * The name of this deployment. This is used for debugging and should not be parsed.
    *
@@ -31,95 +30,33 @@ open class Deployment(
    */
   val isLocalDevelopment: Boolean = false
 ) {
-
-  val delegateDeployment =
-    DelegateDeployment(
-      name = name,
-      isProduction = isProduction,
-      isStaging = isStaging,
-      isTest = isTest,
-      isLocalDevelopment = isLocalDevelopment
-    )
+  init {
+    when {
+      isProduction -> check(!isStaging && !isTest && !isLocalDevelopment)
+      isStaging -> check(!isProduction && !isTest && !isLocalDevelopment)
+      isTest -> check(!isProduction && !isStaging && !isLocalDevelopment)
+      isLocalDevelopment -> check(!isProduction && !isStaging && !isTest)
+    }
+  }
 
   /**
    * Returns true if running in a managed cluster, such as a staging or production cluster. Mutually exclusive with isFake.
    */
   val isReal: Boolean
-    get() = delegateDeployment.isReal
+    get() = !isFake
 
   /**
    * Returns true if running outside of a cluster (CI or local development). Mutually exclusive with isReal.
    */
   val isFake: Boolean
-    get() = delegateDeployment.isFake
+    get() = isTest || isLocalDevelopment
 
-  /**
-   * TEMPORARY, move into [Deployment] when misk's Deployment is removed.
-   */
-  data class DelegateDeployment(
-    /**
-     * The name of this deployment. This is used for debugging and should not be parsed.
-     *
-     * All pods in the same deployment will have this same name.
-     */
-    val name: String,
-
-    /**
-     * Whether the service is running in a production environment, having an SLA or handling customer data.
-     */
-    val isProduction: Boolean = false,
-
-    /**
-     * Whether the service is running in a staging environment.
-     */
-    val isStaging: Boolean = false,
-
-    /**
-     * Whether the service is running in a test environment, either locally or in a CI.
-     */
-    val isTest: Boolean = false,
-
-    /**
-     * Whether the service is running on a local developer machine, including as a Docker image.
-     */
-    val isLocalDevelopment: Boolean = false
-  ) {
-    init {
-      when {
-        isProduction -> check(!isStaging && !isTest && !isLocalDevelopment)
-        isStaging -> check(!isProduction && !isTest && !isLocalDevelopment)
-        isTest -> check(!isProduction && !isStaging && !isLocalDevelopment)
-        isLocalDevelopment -> check(!isProduction && !isStaging && !isTest)
-      }
-    }
-
-    /**
-     * Returns true if running in a managed cluster, such as a staging or production cluster. Mutually exclusive with isFake.
-     */
-    val isReal: Boolean
-      get() = !isFake
-
-    /**
-     * Returns true if running outside of a cluster (CI or local development). Mutually exclusive with isReal.
-     */
-    val isFake: Boolean
-      get() = isTest || isLocalDevelopment
-
+  fun mapToEnvironmentName() = when {
+    isProduction -> "production"
+    isStaging -> "staging"
+    isTest -> "testing"
+    else -> "development"
   }
-
-  override fun equals(other: Any?): Boolean {
-    if (this === other) return true
-    if (other !is Deployment) return false
-
-    if (delegateDeployment != other.delegateDeployment) return false
-
-    return true
-  }
-
-  override fun hashCode(): Int {
-    return delegateDeployment.hashCode()
-  }
-
 }
 
 val PRODUCTION = Deployment(
@@ -168,23 +105,12 @@ val deployments = mapOf(
  * local development if not set (i.e. isLocalDevelopment == true)
  */
 fun getDeploymentFromEnvironmentVariable(
-
-  /** The name for the deployment, if not supplied, use the environment name */
-  name: String? = null,
-
-  /** The default environment if ENVIRONMENT is not set */
-  defaultDeploymentName: String = "development",
+  /** The default deployment if ENVIRONMENT is not set */
+  defaultDeployment: Deployment = DEVELOPMENT,
 
   /** Environment Variable loader, use the real version if none supplied */
   environmentVariableLoader: EnvironmentVariableLoader = EnvironmentVariableLoader.real
-
 ): Deployment {
-
-  val environment = environmentVariableLoader.getEnvironmentVariableOrDefault(
-    "ENVIRONMENT",
-    defaultDeploymentName
-  )
-  val deploymentName = name ?: environment
-
-  return deployments[deploymentName.toLowerCase()] ?: DEVELOPMENT
+  val environment = environmentVariableLoader.getEnvironmentVariableOrDefault("ENVIRONMENT", "")
+  return deployments[environment.toLowerCase()] ?: defaultDeployment
 }

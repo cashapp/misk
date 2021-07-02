@@ -15,19 +15,20 @@ import kotlin.reflect.KClass
 class FakeFeatureFlagsModule(
   private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
-  private val overrides = mutableListOf< FakeFeatureFlags.() -> Unit>()
+  private val overrides = mutableListOf<FakeFeatureFlags.() -> Unit>()
 
   override fun configure() {
+    requireBinding<Moshi>()
     val testFeatureFlags = FakeFeatureFlags(getProvider(Moshi::class.java))
-    overrides.forEach {
-      it.invoke(testFeatureFlags)
-    }
     val key = FakeFeatureFlags::class.toKey(qualifier)
     bind(key).toInstance(testFeatureFlags)
     bind(FeatureFlags::class.toKey(qualifier)).to(key)
     bind(FeatureService::class.toKey(qualifier)).to(key)
     bind(DynamicConfig::class.toKey(qualifier)).to(key)
     install(ServiceModule(FeatureService::class.toKey(qualifier)))
+    overrides.forEach {
+      it.invoke(testFeatureFlags)
+    }
   }
 
   /**

@@ -4,7 +4,6 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceConfig
@@ -12,6 +11,7 @@ import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 import misk.testing.MockTracingBackendModule
 import misk.time.FakeClockModule
+import wisp.deployment.TESTING
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule(
@@ -32,9 +32,9 @@ class MoviesTestModule(
         MockTracingBackendModule()
       )
     )
-    install(DeploymentModule.forTesting())
+    install(DeploymentModule(TESTING))
 
-    val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
+    val config = MiskConfig.load<MoviesConfig>("moviestestmodule", TESTING)
     val dataSourceConfig = selectDataSourceConfig(config)
     install(
       HibernateTestingModule(

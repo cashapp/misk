@@ -1,16 +1,16 @@
 package misk.feature.testing
 
 import com.squareup.moshi.JsonDataException
-import misk.feature.Attributes
-import misk.feature.Feature
-import misk.feature.getEnum
-import misk.feature.getJson
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import misk.feature.Attributes
+import misk.feature.Feature
+import misk.feature.getEnum
+import misk.feature.getJson
 import javax.inject.Inject
 
 @MiskTest

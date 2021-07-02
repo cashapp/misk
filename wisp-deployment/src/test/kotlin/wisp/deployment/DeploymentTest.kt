@@ -17,7 +17,7 @@ internal class DeploymentTest {
   @Test
   fun defaultDeploymentEnvIsDevelopment() {
     val deployment = getDeploymentFromEnvironmentVariable(
-      name = "foo", environmentVariableLoader = environmentVariableLoader
+      environmentVariableLoader = environmentVariableLoader
     )
     assertTrue(deployment.isLocalDevelopment)
     assertFalse(deployment.isTest)

@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
  *   - any number of non-whitespace characters (including additional path segments or "/")
  *   - must terminate with a non-"/" because rest of path will start with "/"
  */
-internal class WebActionEntry(
+class WebActionEntry(
   val actionClass: KClass<out WebAction>,
   url_path_prefix: String
 ) : ValidWebEntry(url_path_prefix = url_path_prefix)

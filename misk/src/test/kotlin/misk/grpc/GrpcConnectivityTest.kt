@@ -3,6 +3,7 @@ package misk.grpc
 import com.google.inject.Guice
 import com.squareup.protos.test.grpc.HelloReply
 import com.squareup.protos.test.grpc.HelloRequest
+import com.squareup.wire.GrpcStatus
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import misk.MiskTestingServiceModule
@@ -12,7 +13,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -41,6 +41,7 @@ import javax.inject.Singleton
  * That sample includes a client and a server that connect to each other. You can also connect this
  * test's client to that sample server, or that sample client to this test's server.
  */
+@Disabled("gRPC tests are flaky in CI, see https://github.com/cashapp/misk/issues/1853")
 @MiskTest(startService = true)
 class GrpcConnectivityTest {
   @MiskTestModule
@@ -57,7 +58,6 @@ class GrpcConnectivityTest {
     client = clientInjector.getInstance(OkHttpClient::class.java)
   }
 
-  @Disabled("gRPC tests are flaky, see https://github.com/cashapp/misk/issues/1853")
   @Test
   fun happyPath() {
     val request = Request.Builder()
@@ -119,12 +119,11 @@ class GrpcConnectivityTest {
     val call = client.newCall(request)
     val response = call.execute()
     response.use {
-      assertThat(response.code).isEqualTo(400)
-      assertThat(response.body!!.string()).isEqualTo("bad request!")
-      assertThat(response.headers["grpc-status"]).isNull()
-      assertThat(response.headers["grpc-encoding"]).isNull()
-      assertThat(response.trailers().size).isEqualTo(0)
-      assertThat(response.body?.contentType()).isEqualTo("text/plain;charset=utf-8".toMediaType())
+      assertThat(response.code).isEqualTo(200)
+      assertThat(response.headers["grpc-encoding"]).isEqualTo("identity")
+      assertThat(response.body!!.contentType()).isEqualTo("application/grpc".toMediaType())
+      response.body?.close()
+      assertThat(response.trailers()["grpc-status"]).isEqualTo(GrpcStatus.INTERNAL.code.toString())
     }
   }
 
@@ -180,9 +179,7 @@ class GrpcConnectivityTest {
     override fun configure() {
       install(
         WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            http2 = true
-          )
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
         )
       )
       install(MiskTestingServiceModule())

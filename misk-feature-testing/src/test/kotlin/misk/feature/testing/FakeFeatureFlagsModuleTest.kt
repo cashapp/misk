@@ -1,11 +1,11 @@
 package misk.feature.testing
 
 import com.google.inject.Guice
+import misk.feature.testing.FakeFeatureFlagsTest.JsonFeature
+import org.junit.jupiter.api.Test
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.feature.getJson
-import misk.feature.testing.FakeFeatureFlagsTest.JsonFeature
-import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class FakeFeatureFlagsModuleTest {

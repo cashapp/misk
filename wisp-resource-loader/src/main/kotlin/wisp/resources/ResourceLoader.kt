@@ -1,7 +1,5 @@
 package wisp.resources
 
-import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableSet
 import java.nio.file.Files
 import java.nio.file.Path
 import wisp.resources.ResourceLoader.Backend
@@ -10,6 +8,7 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.buffer
 import okio.sink
+import java.util.Collections
 
 /**
  * ResourceLoader is a testable API for loading resources from the classpath, from the filesystem,
@@ -91,7 +90,7 @@ class ResourceLoader(
   }
 
   fun walk(address: String): List<String> {
-    val resourcesResult = ImmutableList.builder<String>()
+    val resourcesResult = mutableListOf<String>()
     for (resource in list(address)) {
       if (list(resource).isEmpty()) {
         resourcesResult.add(resource)
@@ -99,7 +98,7 @@ class ResourceLoader(
         resourcesResult.addAll(walk(resource))
       }
     }
-    return resourcesResult.build()
+    return Collections.unmodifiableList(resourcesResult)
   }
 
   /**
@@ -174,7 +173,7 @@ class ResourceLoader(
 
     open fun list(path: String): List<String> {
       val prefix = if (path.endsWith("/")) path else "$path/"
-      val result = ImmutableSet.builder<String>()
+      val result = mutableSetOf<String>()
       for (key in all()) {
         if (!key.startsWith(prefix)) continue
         val slash = key.indexOf('/', prefix.length)
@@ -184,7 +183,7 @@ class ResourceLoader(
           result.add(key.substring(0, slash))
         }
       }
-      return result.build().toList()
+      return Collections.unmodifiableList(result.toList())
     }
   }
 

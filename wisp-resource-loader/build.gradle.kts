@@ -1,7 +1,6 @@
 dependencies {
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.guava)
   implementation(Dependencies.okio)
 
   testImplementation(Dependencies.assertj)

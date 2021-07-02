@@ -6,3 +6,5 @@ package misk.policy.opa
 data class Request<T>(
   val input: T
 )
+
+interface OpaRequest

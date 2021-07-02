@@ -2,12 +2,12 @@ package misk.feature.testing;
 
 import java.util.Map;
 import javax.inject.Inject;
-import misk.feature.Attributes;
-import misk.feature.Feature;
 import misk.inject.KAbstractModule;
 import misk.testing.MiskTest;
 import misk.testing.MiskTestModule;
 import org.junit.jupiter.api.Test;
+import misk.feature.Attributes;
+import misk.feature.Feature;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

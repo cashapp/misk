@@ -1,6 +1,5 @@
 package misk.web.exceptions
 
-import misk.exceptions.ActionException
 import misk.exceptions.NotFoundException
 import misk.exceptions.WebActionException
 import misk.web.Response
@@ -17,7 +16,7 @@ internal class ExceptionMapperResolverTest {
   @Test
   fun resolvesToSpecificMapper() {
     mappers[NotFoundException::class] = NotFoundExceptionMapper()
-    mappers[ActionException::class] = ActionExceptionMapper()
+    mappers[WebActionException::class] = WebActionExceptionMapper()
 
     assertThat(resolver.mapperFor(NotFoundException()))
       .isInstanceOf(NotFoundExceptionMapper::class.java)
@@ -46,7 +45,6 @@ internal class ExceptionMapperResolverTest {
   }
 
   class NotFoundExceptionMapper : BaseExceptionMapper<NotFoundException>()
-  class ActionExceptionMapper : BaseExceptionMapper<ActionException>()
   class ArithmeticExceptionMapper : BaseExceptionMapper<ArithmeticException>()
   class WebActionExceptionMapper : BaseExceptionMapper<WebActionException>()
 
