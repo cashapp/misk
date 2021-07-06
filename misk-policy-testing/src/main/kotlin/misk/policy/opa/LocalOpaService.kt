@@ -20,9 +20,8 @@ import wisp.logging.getLogger
 import java.io.File
 import javax.inject.Singleton
 
-@Singleton
 class LocalOpaService(
-  private val policyPath: String = DEFAULT_POLICY_DIRECTORY
+  private val policyPath: String
 ) : AbstractIdleService() {
   private var containerId: String = ""
   private val dockerClient: DockerClient = DockerClientBuilder.getInstance()
