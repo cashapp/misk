@@ -6,8 +6,10 @@ dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.moshiKotlin)
+  implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-policy"))
+  implementation(Dependencies.okio)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.logbackClassic)
