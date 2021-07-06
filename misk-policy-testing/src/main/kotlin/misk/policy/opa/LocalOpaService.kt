@@ -5,7 +5,6 @@ import com.github.dockerjava.api.model.Bind
 import com.github.dockerjava.api.model.Binds
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
-import com.github.dockerjava.api.model.HealthCheck
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.PortBinding
 import com.github.dockerjava.api.model.Ports
@@ -18,10 +17,10 @@ import com.google.common.util.concurrent.AbstractIdleService
 import okio.Buffer
 import wisp.logging.getLogger
 import java.io.File
-import javax.inject.Singleton
 
 class LocalOpaService(
-  private val policyPath: String
+  private val policyPath: String,
+  private val withLogging: Boolean
 ) : AbstractIdleService() {
   private var containerId: String = ""
   private val dockerClient: DockerClient = DockerClientBuilder.getInstance()
@@ -73,13 +72,15 @@ class LocalOpaService(
       .exec()
 
     // Attach an okio backed buffer to dump the container logs.
-    dockerClient.logContainerCmd(containerId)
-      .withSince(0)
-      .withStdErr(true)
-      .withStdOut(true)
-      .withFollowStream(true)
-      .exec(Callback())
-      .awaitStarted()
+    if (withLogging) {
+      dockerClient.logContainerCmd(containerId)
+        .withSince(0)
+        .withStdErr(true)
+        .withStdOut(true)
+        .withFollowStream(true)
+        .exec(Callback())
+        .awaitStarted()
+    }
   }
 
   override fun shutDown() {
