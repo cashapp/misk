@@ -5,6 +5,7 @@ import com.github.dockerjava.api.model.Bind
 import com.github.dockerjava.api.model.Binds
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
+import com.github.dockerjava.api.model.HealthCheck
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.PortBinding
 import com.github.dockerjava.api.model.Ports
@@ -39,6 +40,12 @@ class LocalOpaService(
   override fun startUp() {
     val policyDir = File(policyPath).absolutePath
 
+    try {
+      dockerClient.pingCmd().exec()
+    } catch(e: Exception) {
+      throw IllegalStateException("Couldn't connect to Docker daemon", e)
+    }
+
     // Pull the image to the local docker registry.
     dockerClient.pullImageCmd(OPA_DOCKER_IMAGE).exec(PullImageResultCallback())
       .awaitCompletion()
@@ -61,6 +68,7 @@ class LocalOpaService(
             PortBinding(Ports.Binding.bindPort(OPA_EXPOSED_PORT), ExposedPort.tcp(OPA_EXPOSED_PORT))
           )
       )
+//      .withHealthcheck(HealthCheck())
       .withExposedPorts(ExposedPort.tcp(OPA_EXPOSED_PORT))
       .withName(OPA_CONTAINER_NAME)
       .withTty(true)
