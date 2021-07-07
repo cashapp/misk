@@ -25,7 +25,6 @@ import org.awaitility.kotlin.atMost
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
-import org.awaitility.kotlin.withPollDelay
 import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -130,7 +129,7 @@ class MiskClientMiskServerTest {
       val e = assertFailsWith<GrpcException> {
         routeGuide.GetFeature().execute(point)
       }
-      assertThat(e.grpcMessage).isEqualTo("Internal Server Error")
+      assertThat(e.grpcMessage).isEqualTo("unexpected latitude error!")
       assertThat(e.grpcStatus).isEqualTo(GrpcStatus.UNKNOWN)
 
       // Assert that _metrics_ counted a 500 and no 200s, even though an HTTP 200 was returned
