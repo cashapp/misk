@@ -18,6 +18,13 @@ interface ExceptionMapper<in T : Throwable> {
   // then the action method return value
   fun toResponse(th: T): Response<ResponseBody>
 
+  // gRPC has a different response mechanism where it leaves the body empty, sends HTTP 200, and
+  // sets two _headers_, :grpc-status and :grpc-message. ExceptionMappers can _optionally_ override
+  // toGrpcResponse to have more control over the status and message returned to gRPC clients.
+  // If not overridden, a default mapping will be used that converts the HTTP status to a gRPC
+  // status and puts the ResponseBody text in :grpc-message.
+  fun toGrpcResponse(th: T): GrpcErrorResponse? = null
+
   /**
    * @return the level at which the given exception should be logged. defaults to ERROR but can
    * be overridden by the mapper for the given exception
