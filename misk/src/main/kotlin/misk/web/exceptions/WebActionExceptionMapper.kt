@@ -26,6 +26,10 @@ internal class WebActionExceptionMapper @Inject internal constructor(
     return Response(message.toResponseBody(), HEADERS, statusCode = th.code)
   }
 
+  override fun toGrpcResponse(th: WebActionException): GrpcErrorResponse {
+    return GrpcErrorResponse(toGrpcStatus(th.code), th.responseBody)
+  }
+
   private fun friendlyMessage(code: Int): String =
     EnglishReasonPhraseCatalog.INSTANCE.getReason(code, Locale.ENGLISH)
 
