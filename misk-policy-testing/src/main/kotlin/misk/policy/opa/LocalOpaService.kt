@@ -67,7 +67,7 @@ class LocalOpaService(
 
     // Create a new test container.
     containerId = dockerClient.createContainerCmd(OPA_DOCKER_IMAGE)
-      .withCmd(listOf("run", "-b", "-s", "/repo"))
+      .withCmd(listOf("run", "-b", "-s", "-w", "/repo"))
       .withHostConfig(
         HostConfig.newHostConfig()
           .withBinds(Binds(Bind(policyDir, Volume("/repo"))))
