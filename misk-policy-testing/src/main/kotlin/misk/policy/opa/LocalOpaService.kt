@@ -124,7 +124,7 @@ class LocalOpaService(
       {
         val client = OkHttpClient()
         val request = Request.Builder()
-          .url("http://localhost:8181/health")
+          .url("http://localhost:$OPA_EXPOSED_PORT/health")
           .build()
 
         client.newCall(request).execute().use { response ->
