@@ -1,11 +1,11 @@
 package misk.policy.opa
 
 import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.exception.DockerException
 import com.github.dockerjava.api.model.Bind
 import com.github.dockerjava.api.model.Binds
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
-import com.github.dockerjava.api.model.HealthCheck
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.PortBinding
 import com.github.dockerjava.api.model.Ports
@@ -18,6 +18,13 @@ import com.google.common.util.concurrent.AbstractIdleService
 import okio.Buffer
 import wisp.logging.getLogger
 import java.io.File
+import java.time.Duration
+import misk.backoff.ExponentialBackoff
+import misk.backoff.retry
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
+import java.net.ConnectException
 
 class LocalOpaService(
   private val policyPath: String,
@@ -68,7 +75,6 @@ class LocalOpaService(
             PortBinding(Ports.Binding.bindPort(OPA_EXPOSED_PORT), ExposedPort.tcp(OPA_EXPOSED_PORT))
           )
       )
-//      .withHealthcheck(HealthCheck())
       .withExposedPorts(ExposedPort.tcp(OPA_EXPOSED_PORT))
       .withName(OPA_CONTAINER_NAME)
       .withTty(true)
@@ -76,7 +82,6 @@ class LocalOpaService(
 
     // Start the container and let it run.
     dockerClient.startContainerCmd(containerId)
-      .withContainerId(containerId)
       .exec()
 
     // Attach an okio backed buffer to dump the container logs.
@@ -89,6 +94,7 @@ class LocalOpaService(
         .exec(Callback())
         .awaitStarted()
     }
+    waitUntilHealthy()
   }
 
   override fun shutDown() {
@@ -101,6 +107,32 @@ class LocalOpaService(
     override fun onNext(item: Frame) {
       buffer.write(item.payload)
       logger.info(buffer.readUtf8())
+    }
+  }
+
+  private fun waitUntilHealthy() {
+    if (!dockerClient.inspectContainerCmd(containerId).exec().state.running!!) {
+      throw Exception("OPA is not running")
+    }
+    try {
+      retry(
+        5, ExponentialBackoff(
+        Duration.ofSeconds(1),
+        Duration.ofSeconds(5)
+      )
+      )
+      {
+        val client = OkHttpClient()
+        val request = Request.Builder()
+          .url("http://localhost:8181/health")
+          .build()
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw IOException("OPA is not healthy")
+        }
+      }
+    } catch (e: Exception) {
+      throw e
     }
   }
 }

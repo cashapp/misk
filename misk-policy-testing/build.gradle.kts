@@ -4,6 +4,8 @@ dependencies {
   implementation(Dependencies.docker)
   implementation(Dependencies.okio)
   implementation(Dependencies.loggingApi)
+  implementation(Dependencies.okHttp)
+  implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   api(project(":misk-policy"))
   api(project(":misk-service"))
