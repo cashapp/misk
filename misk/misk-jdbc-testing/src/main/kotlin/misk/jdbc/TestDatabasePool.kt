@@ -121,7 +121,7 @@ class TestDatabasePool(
 
       val todaysLatest = getDatabases()
         .filter { it.yearMonthDay == todayYearMonthDay }
-        .maxBy { it.version }
+        .maxByOrNull { it.version }
 
       val nextVersion = (todaysLatest?.version ?: 0) + 1
 
