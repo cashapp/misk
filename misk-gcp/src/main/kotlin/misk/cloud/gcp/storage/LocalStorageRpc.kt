@@ -276,6 +276,17 @@ class LocalStorageRpc(
     }
   }
 
+  override fun writeWithResponse(
+    p0: String?,
+    p1: ByteArray?,
+    p2: Int,
+    p3: Long,
+    p4: Int,
+    p5: Boolean
+  ): StorageObject {
+    TODO("Not yet implemented")
+  }
+
   override fun openRewrite(request: StorageRpc.RewriteRequest): StorageRpc.RewriteResponse {
     return try {
       // NB(mmihic): We have to lock both the source and target in deterministic order

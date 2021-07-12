@@ -2,6 +2,8 @@ package misk.cloud.gcp.storage
 
 import com.google.api.services.storage.model.Bucket
 import com.google.api.services.storage.model.BucketAccessControl
+import com.google.api.services.storage.model.HmacKey
+import com.google.api.services.storage.model.HmacKeyMetadata
 import com.google.api.services.storage.model.Notification
 import com.google.api.services.storage.model.ObjectAccessControl
 import com.google.api.services.storage.model.Policy
@@ -202,4 +204,32 @@ abstract class BaseCustomStorageRpc : StorageRpc {
   override fun deleteNotification(bucket: String?, notification: String?): Boolean {
     throw UnsupportedOperationException()
   }
+
+  override fun getCurrentUploadOffset(p0: String?): Long {
+    throw UnsupportedOperationException()
+  }
+
+  override fun createHmacKey(p0: String?, p1: MutableMap<StorageRpc.Option, *>?): HmacKey {
+    throw UnsupportedOperationException()
+  }
+
+  override fun listHmacKeys(p0: MutableMap<StorageRpc.Option, *>?): Tuple<String, MutableIterable<HmacKeyMetadata>> {
+    throw UnsupportedOperationException()
+  }
+
+  override fun updateHmacKey(
+    p0: HmacKeyMetadata?,
+    p1: MutableMap<StorageRpc.Option, *>?
+  ): HmacKeyMetadata {
+    throw UnsupportedOperationException()
+  }
+
+  override fun getHmacKey(p0: String?, p1: MutableMap<StorageRpc.Option, *>?): HmacKeyMetadata {
+    throw UnsupportedOperationException()
+  }
+
+  override fun deleteHmacKey(p0: HmacKeyMetadata?, p1: MutableMap<StorageRpc.Option, *>?) {
+    throw UnsupportedOperationException()
+  }
+
 }
