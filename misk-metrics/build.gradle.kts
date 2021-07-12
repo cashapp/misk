@@ -1,5 +1,8 @@
 dependencies {
   api(Dependencies.prometheusClient)
+  api(project(":misk-inject"))
+  implementation(Dependencies.guice)
+  implementation(Dependencies.javaxInject)
   implementation(Dependencies.prometheusHotspot)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.guava)

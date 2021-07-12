@@ -30,7 +30,7 @@ interface Metrics {
   ): Histogram
 }
 
-private val defaultQuantiles = mapOf(
+internal val defaultQuantiles = mapOf(
   0.5 to 0.05,
   0.75 to 0.02,
   0.95 to 0.01,
