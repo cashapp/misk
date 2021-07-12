@@ -8,7 +8,7 @@ import java.util.concurrent.Executor
 interface FeatureFlags {
 
   /**
-   * Calculates the value of an boolean feature flag for the given key and attributes.
+   * Calculates the value of a boolean feature flag for the given key and attributes.
    * @see [getEnum] for param details
    */
   fun getBoolean(
@@ -16,6 +16,16 @@ interface FeatureFlags {
     key: String,
     attributes: Attributes = Attributes()
   ): Boolean
+
+  /**
+   * Calculates the value of a double feature flag for the given key and attributes.
+   * @see [getEnum] for param details
+   */
+  fun getDouble(
+    feature: Feature,
+    key: String,
+    attributes: Attributes = Attributes()
+  ): Double
 
   /**
    * Calculates the value of an integer feature flag for the given key and attributes.
@@ -68,7 +78,7 @@ interface FeatureFlags {
   ): T
 
   /**
-   * Registers a tracker for the value of an boolean feature flag for the given key and attributes.
+   * Registers a tracker for the value of a boolean feature flag for the given key and attributes.
    * @see [trackEnum] for param details
    */
   fun trackBoolean(
@@ -77,6 +87,18 @@ interface FeatureFlags {
     attributes: Attributes = Attributes(),
     executor: Executor,
     tracker: (Boolean) -> Unit
+  ): TrackerReference
+
+  /**
+   * Registers a tracker for the value of a double feature flag for the given key and attributes.
+   * @see [trackEnum] for param details
+   */
+  fun trackDouble(
+    feature: Feature,
+    key: String,
+    attributes: Attributes = Attributes(),
+    executor: Executor,
+    tracker: (Double) -> Unit
   ): TrackerReference
 
   /**
@@ -145,6 +167,11 @@ interface FeatureFlags {
     key: String
   ) = getBoolean(feature, key, Attributes())
 
+  fun getDouble(
+    feature: Feature,
+    key: String
+  ) = getDouble(feature, key, Attributes())
+
   fun getInt(
     feature: Feature,
     key: String
@@ -173,6 +200,13 @@ interface FeatureFlags {
     executor: Executor,
     tracker: (Boolean) -> Unit
   ) = trackBoolean(feature, key, Attributes(), executor, tracker)
+
+  fun trackDouble(
+    feature: Feature,
+    key: String,
+    executor: Executor,
+    tracker: (Double) -> Unit
+  ) = trackDouble(feature, key, Attributes(), executor, tracker)
 
   fun trackInt(
     feature: Feature,

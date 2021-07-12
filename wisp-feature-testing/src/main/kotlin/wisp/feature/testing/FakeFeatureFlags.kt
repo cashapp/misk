@@ -32,6 +32,11 @@ class FakeFeatureFlags constructor(
       "Boolean flag $feature must be overridden with override() before use; the default value of false has been DEPRECATED"
     )
 
+  override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
+    get(feature, key, attributes) as? Double ?: throw IllegalArgumentException(
+      "Double flag $feature must be overridden with override() before use; the default value of false has been DEPRECATED"
+    )
+
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
     get(feature, key, attributes) as? Int ?: throw IllegalArgumentException(
       "Int flag $feature must be overridden with override() before use"
@@ -71,6 +76,7 @@ class FakeFeatureFlags constructor(
   }
 
   override fun getBoolean(feature: Feature) = getBoolean(feature, KEY)
+  override fun getDouble(feature: Feature) = getDouble(feature, KEY)
   override fun getInt(feature: Feature) = getInt(feature, KEY)
   override fun getString(feature: Feature) = getString(feature, KEY)
   override fun <T : Enum<T>> getEnum(feature: Feature, clazz: Class<T>): T = getEnum(
@@ -135,6 +141,14 @@ class FakeFeatureFlags constructor(
     tracker: (Boolean) -> Unit
   ) = trackAny(feature, key, attributes, executor, tracker)
 
+  override fun trackDouble(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Double) -> Unit
+  ) = trackAny(feature, key, attributes, executor, tracker)
+
   override fun trackInt(
     feature: Feature,
     key: String,
@@ -175,6 +189,12 @@ class FakeFeatureFlags constructor(
     tracker: (Boolean) -> Unit
   ) = trackBoolean(feature, KEY, executor, tracker)
 
+  override fun trackDouble(
+    feature: Feature,
+    executor: Executor,
+    tracker: (Double) -> Unit
+  ) = trackDouble(feature, KEY, executor, tracker)
+
   override fun trackInt(
     feature: Feature,
     executor: Executor,
@@ -205,6 +225,11 @@ class FakeFeatureFlags constructor(
     feature: Feature,
     value: Boolean
   ) = override<Boolean>(feature, value)
+
+  fun override(
+    feature: Feature,
+    value: Double
+  ) = override<Double>(feature, value)
 
   fun override(
     feature: Feature,
@@ -250,6 +275,14 @@ class FakeFeatureFlags constructor(
     value: Boolean,
     attributes: Attributes = defaultAttributes
   ) = overrideKey<Boolean>(feature, key, value, attributes)
+
+  @JvmOverloads
+  fun overrideKey(
+    feature: Feature,
+    key: String,
+    value: Double,
+    attributes: Attributes = defaultAttributes
+  ) = overrideKey<Double>(feature, key, value, attributes)
 
   @JvmOverloads
   fun overrideKey(
