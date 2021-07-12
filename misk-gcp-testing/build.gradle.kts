@@ -6,6 +6,7 @@ sourceSets {
 
 dependencies {
   implementation(Dependencies.guice)
+  implementation(Dependencies.gcpCloudCore)
   implementation(Dependencies.gcpCloudStorage)
   implementation(Dependencies.gcpDatastore) {
     exclude(group = "com.google.protobuf")
