@@ -232,4 +232,15 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
+  override fun writeWithResponse(
+    p0: String?,
+    p1: ByteArray?,
+    p2: Int,
+    p3: Long,
+    p4: Int,
+    p5: Boolean
+  ): StorageObject {
+    throw UnsupportedOperationException()
+  }
+
 }
