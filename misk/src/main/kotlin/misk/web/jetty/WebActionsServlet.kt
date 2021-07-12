@@ -134,7 +134,7 @@ internal class WebActionsServlet @Inject constructor(
       val candidateActions = boundActions.mapNotNull {
         it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
       }
-      val bestAction = candidateActions.min()
+      val bestAction = candidateActions.minOrNull()
 
       if (bestAction != null) {
         bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
