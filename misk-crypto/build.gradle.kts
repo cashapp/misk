@@ -1,4 +1,5 @@
 dependencies {
+  implementation(Dependencies.grpcContext)
   implementation(Dependencies.guice)
   implementation(Dependencies.okio)
   implementation(Dependencies.moshiCore)
