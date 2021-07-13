@@ -14,7 +14,6 @@ import misk.web.actions.WebActionEntry
 import okio.ExperimentalFileSystem
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import okio.ResourceFileSystem
 import wisp.logging.getLogger
 import javax.inject.Singleton
 import kotlin.reflect.KClass
@@ -42,7 +41,7 @@ class GrpcReflectModule : KAbstractModule() {
   @OptIn(ExperimentalFileSystem::class)
   @Provides @Singleton
   fun provideSchema(webActions: List<WebActionEntry>): Schema {
-    val fileSystem = ResourceFileSystem.SYSTEM_RESOURCES
+    val fileSystem = FileSystem.RESOURCES
     val schemaLoader = SchemaLoader(fileSystem)
     schemaLoader.initRoots(
       sourcePath = toSourceLocations(fileSystem, webActions).toList(),
