@@ -1,0 +1,11 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.inject$asSingleton(com.google.inject.binder.ScopedBindingBuilder)misk.inject/com.google.inject.binder.-scoped-binding-builder/as-singleton.md
+$dokka.location:misk.inject$getInstance(com.google.inject.Injector, kotlin.Annotation)misk.inject/com.google.inject.-injector/get-instance.md
+$dokka.location:misk.inject$getSetOf(com.google.inject.Injector, kotlin.reflect.KClass((misk.inject.getSetOf.T)), kotlin.reflect.KClass((kotlin.Annotation)))misk.inject/com.google.inject.-injector/get-set-of.md
+$dokka.location:misk.inject$toKey(com.google.inject.TypeLiteral((misk.inject.toKey.T)), kotlin.reflect.KClass((kotlin.Annotation)))misk.inject/com.google.inject.-type-literal/to-key.md
+$dokka.location:misk.inject$toKey(kotlin.reflect.KClass((misk.inject.toKey.T)), kotlin.reflect.KClass((kotlin.Annotation)))misk.inject/kotlin.reflect.-k-class/to-key.md
+$dokka.location:misk.inject$typeLiteral(java.lang.reflect.Type)misk.inject/java.lang.reflect.-type/type-literal.md
+$dokka.location:misk.inject$typeLiteral(kotlin.reflect.KClass((misk.inject.typeLiteral.T)))misk.inject/kotlin.reflect.-k-class/type-literal.md
+$dokka.location:misk.inject$typeLiteral(kotlin.reflect.KType)misk.inject/kotlin.reflect.-k-type/type-literal.md
+misk.inject

@@ -1,0 +1,4 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:wisp.config$addWispConfigSources(com.sksamuel.hoplite.ConfigLoader.Builder, kotlin.collections.List((wisp.config.ConfigSource)), wisp.resources.ResourceLoader)wisp.config/com.sksamuel.hoplite.-config-loader.-builder/add-wisp-config-sources.md
+wisp.config

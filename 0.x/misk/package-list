@@ -1,0 +1,57 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk$asAction(kotlin.reflect.KFunction((kotlin.Any)), misk.web.DispatchMechanism)misk/kotlin.reflect.-k-function/as-action.md
+$dokka.location:misk.grpc$consumeEachAndClose(com.squareup.wire.MessageSource((misk.grpc.consumeEachAndClose.T)), kotlin.Function1((misk.grpc.consumeEachAndClose.T, kotlin.Unit)))misk.grpc/com.squareup.wire.-message-source/consume-each-and-close.md
+$dokka.location:misk.io$listRecursively(java.nio.file.Path, kotlin.Boolean)misk.io/java.nio.file.-path/list-recursively.md
+$dokka.location:misk.moshi$adapter(com.squareup.moshi.Moshi)misk.moshi/com.squareup.moshi.-moshi/adapter.md
+$dokka.location:misk.okio$forEachBlock(okio.BufferedSource, kotlin.ByteArray, kotlin.Function2((kotlin.ByteArray, kotlin.Int, kotlin.Unit)))misk.okio/okio.-buffered-source/for-each-block.md
+$dokka.location:misk.okio$forEachBlock(okio.BufferedSource, kotlin.Int, kotlin.Function2((kotlin.ByteArray, kotlin.Int, kotlin.Unit)))misk.okio/okio.-buffered-source/for-each-block.md
+$dokka.location:misk.okio$split(okio.BufferedSource, okio.ByteString)misk.okio/okio.-buffered-source/split.md
+$dokka.location:misk.security.cert$isSelfSigned#java.security.cert.X509Certificatemisk.security.cert/java.security.cert.-x509-certificate/is-self-signed.md
+$dokka.location:misk.security.cert$isSignedBy(java.security.cert.X509Certificate, java.security.PublicKey)misk.security.cert/java.security.cert.-x509-certificate/is-signed-by.md
+$dokka.location:misk.security.cert$isSignedBy(java.security.cert.X509Certificate, java.security.cert.Certificate)misk.security.cert/java.security.cert.-x509-certificate/is-signed-by.md
+$dokka.location:misk.tracing$trace(io.opentracing.Tracer, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.Function0((misk.tracing.trace.T)))misk.tracing/io.opentracing.-tracer/trace.md
+$dokka.location:misk.tracing$traceWithNewRootSpan(io.opentracing.Tracer, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.Function1((io.opentracing.Span, misk.tracing.traceWithNewRootSpan.T)))misk.tracing/io.opentracing.-tracer/trace-with-new-root-span.md
+$dokka.location:misk.tracing$traceWithSpan(io.opentracing.Tracer, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.Function1((io.opentracing.Span, misk.tracing.traceWithSpan.T)))misk.tracing/io.opentracing.-tracer/trace-with-span.md
+$dokka.location:misk.web$toMisk(okhttp3.Response)misk.web/okhttp3.-response/to-misk.md
+$dokka.location:misk.web$toResponseBody(kotlin.String)misk.web/kotlin.-string/to-response-body.md
+misk
+misk.client
+misk.clustering.kubernetes
+misk.clustering.weights
+misk.concurrent
+misk.config
+misk.environment
+misk.flags
+misk.flags.memory
+misk.grpc
+misk.io
+misk.moshi
+misk.moshi.adapters
+misk.moshi.okio
+misk.moshi.time
+misk.okio
+misk.scope
+misk.scope.executor
+misk.security.authz
+misk.security.cert
+misk.security.keys
+misk.security.ssl
+misk.tasks
+misk.time
+misk.tracing
+misk.web
+misk.web.actions
+misk.web.dashboard
+misk.web.exceptions
+misk.web.formatter
+misk.web.interceptors
+misk.web.jetty
+misk.web.marshal
+misk.web.mdc
+misk.web.metadata
+misk.web.metadata.config
+misk.web.metadata.database
+misk.web.metadata.webaction
+misk.web.proxy
+misk.web.resources

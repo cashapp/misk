@@ -1,0 +1,5 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+
+grpc.reflection.v1alpha
+misk.grpc.reflect

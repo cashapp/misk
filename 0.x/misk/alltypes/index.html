@@ -1,0 +1,1517 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Misk: Microservice Container for Kotlin">
+      
+      
+      
+        <meta name="author" content="Square, Inc.">
+      
+      
+      <link rel="icon" href="../../../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.2.1, mkdocs-material-7.1.10">
+    
+    
+      
+        <title>All Types - Misk - Misk</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.1fe995fd.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.f1a3b89f.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#757575">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../../css/app.css">
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="grey" data-md-color-accent="green">
+  
+    
+    <script>function __prefix(e){return new URL("../../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#all-types" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../index.html" title="Misk" class="md-header__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../img/cashapp.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Misk
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              All Types - Misk
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/cashapp/misk/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../index.html" title="Misk" class="md-nav__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../img/cashapp.png" alt="logo">
+
+    </a>
+    Misk
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/cashapp/misk/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../index.html" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started.html" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../actions.html" class="md-nav__link">
+        Actions
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients.html" class="md-nav__link">
+        Clients
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        0.x API
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="0.x API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          0.x API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        misk
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-aws/index.html" class="md-nav__link">
+        misk-aws
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-aws-dynamodb/index.html" class="md-nav__link">
+        misk-aws-dynamodb
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-aws2-dynamodb/index.html" class="md-nav__link">
+        misk-aws2-dynamodb
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-crypto/index.html" class="md-nav__link">
+        misk-crypto
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-eventrouter/index.html" class="md-nav__link">
+        misk-eventrouter
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-events-core/index.html" class="md-nav__link">
+        misk-events-core
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-events/index.html" class="md-nav__link">
+        misk-events
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-gcp/index.html" class="md-nav__link">
+        misk-gcp
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-gcp-testing/index.html" class="md-nav__link">
+        misk-gcp-testing
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-grpc-tests/index.html" class="md-nav__link">
+        misk-grpc-tests
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-hibernate/index.html" class="md-nav__link">
+        misk-hibernate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-hibernate-testing/index.html" class="md-nav__link">
+        misk-hibernate-testing
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-inject/index.html" class="md-nav__link">
+        misk-inject
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-jobqueue/index.html" class="md-nav__link">
+        misk-jobqueue
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-jobqueue-testing/index.html" class="md-nav__link">
+        misk-jobqueue-testing
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-metrics-digester/index.html" class="md-nav__link">
+        misk-metrics-digester
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-prometheus/index.html" class="md-nav__link">
+        misk-prometheus
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-redis/index.html" class="md-nav__link">
+        misk-redis
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-testing/index.html" class="md-nav__link">
+        misk-testing
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-zookeeper/index.html" class="md-nav__link">
+        misk-zookeeper
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-zoopkeeper-testing/index.md" class="md-nav__link">
+        misk-zoopkeeper-testing
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../changelog.html" class="md-nav__link">
+        Change Log
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../releasing.html" class="md-nav__link">
+        Releasing
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../releasing-manual.html" class="md-nav__link">
+        Manual Releasing
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing.html" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://stackoverflow.com/questions/tagged/misk?sort=active" class="md-nav__link">
+        Stack Overflow ⏏
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#all-types" class="md-nav__link">
+    All Types
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/cashapp/misk/edit/master/docs/0.x/misk/alltypes/index.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                  <h1>All Types - Misk</h1>
+                
+                <h3 id="all-types">All Types<a class="headerlink" href="#all-types" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../misk.security.authz/-access-annotation-entry/index.html">misk.security.authz.AccessAnnotationEntry</a></td>
+<td>Use this to alias an annotation to a set of services and capabilities. This can be used to decouple code that needs access control from the policy that defines it.</td>
+</tr>
+<tr>
+<td><a href="../misk.security.authz/-access-control-module/index.html">misk.security.authz.AccessControlModule</a></td>
+<td>Install support for performing access control checks for actions based on the incoming caller.</td>
+</tr>
+<tr>
+<td><a href="../misk.security.authz/-access-interceptor/index.html">misk.security.authz.AccessInterceptor</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk/-action/index.html">misk.Action</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.exceptions/-action-exception-log-level-config/index.html">misk.web.exceptions.ActionExceptionLogLevelConfig</a></td>
+<td>Configures the log <a href="#">Level</a> for an ActionException.</td>
+</tr>
+<tr>
+<td><a href="../misk.scope/-action-scope/index.html">misk.scope.ActionScope</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.scope.executor/-action-scoped-executor-service/index.html">misk.scope.executor.ActionScopedExecutorService</a></td>
+<td>Wraps a <a href="#">ListeningExecutorService</a> to propagate the current action scope to any tasks submitted by the current thread</td>
+</tr>
+<tr>
+<td><a href="../misk.scope/-action-scoped-provider/index.html">misk.scope.ActionScopedProvider</a></td>
+<td>An <a href="../misk.scope/-action-scoped-provider/index.html">ActionScopedProvider</a> is implemented by components and application code that wants provide contextual information based on an incoming request, job data, etc.</td>
+</tr>
+<tr>
+<td><a href="../misk.scope/-action-scoped-provider-module/index.html">misk.scope.ActionScopedProviderModule</a></td>
+<td>Module used by components and applications to provide <a href="#">ActionScoped</a> context objects</td>
+</tr>
+<tr>
+<td><a href="../misk.clustering.weights/-active-cluster-weight/index.html">misk.clustering.weights.ActiveClusterWeight</a></td>
+<td>A static <a href="../misk.clustering.weights/-cluster-weight-provider/index.html">ClusterWeightProvider</a> that always returns 100</td>
+</tr>
+<tr>
+<td><a href="../misk.clustering.weights/-active-cluster-weight-module/index.html">misk.clustering.weights.ActiveClusterWeightModule</a></td>
+<td>Provides an <a href="../misk.clustering.weights/-active-cluster-weight/index.html">ActiveClusterWeight</a></td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-admin-dashboard/index.html">misk.web.dashboard.AdminDashboard</a></td>
+<td>Dashboard Annotation used for all tabs bound in the Misk Admin Dashboard</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-admin-dashboard-access/index.html">misk.web.dashboard.AdminDashboardAccess</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-admin-dashboard-module/index.html">misk.web.dashboard.AdminDashboardModule</a></td>
+<td>Installs default Admin Dashboard that runs at multibound DashboardHomeUrl</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-admin-dashboard-testing-module/index.html">misk.web.dashboard.AdminDashboardTestingModule</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk/-application-interceptor/index.html">misk.ApplicationInterceptor</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.config/-app-name/index.html">misk.config.AppName</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.config/-app-name-module/index.html">misk.config.AppNameModule</a></td>
+<td>Binds a @AppName String to the provided application name</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-backwards-compatible-clients-config/index.html">misk.client.BackwardsCompatibleClientsConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-backwards-compatible-clients-config-converter/index.html">misk.client.BackwardsCompatibleClientsConfigConverter</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-backwards-compatible-endpoint-config/index.html">misk.client.BackwardsCompatibleEndpointConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-begin-client-call-chain/index.html">misk.client.BeginClientCallChain</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.moshi.adapters/-big-decimal-adapter/index.html">misk.moshi.adapters.BigDecimalAdapter</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.okio/okio.-buffered-source/index.html">okio.BufferedSource</a> (extensions in package misk.okio)</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.moshi.okio/-byte-string-adapter/index.html">misk.moshi.okio.ByteStringAdapter</a></td>
+<td>JSON adapter converting <a href="#">ByteString</a>s as base64 encoded strings</td>
+</tr>
+<tr>
+<td><a href="../misk/-chain/index.html">misk.Chain</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.security.ssl/-cipher-suites/index.html">misk.security.ssl.CipherSuites</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.formatter/-class-name-formatter/index.html">misk.web.formatter.ClassNameFormatter</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-client-action/index.html">misk.client.ClientAction</a></td>
+<td>Metadata about a client action</td>
+</tr>
+<tr>
+<td><a href="../misk.security.ssl/-client-cert-chain/index.html">misk.security.ssl.ClientCertChain</a></td>
+<td>Qualifier annotation for an <a href="#">ActionScoped</a> array of <a href="https://docs.oracle.com/javase/8/docs/api/java/security/cert/X509Certificate.html">X509Certificate</a>s containing the certificate chain provided by the client (if any)</td>
+</tr>
+<tr>
+<td><a href="../misk.security.ssl/-client-cert-issuer/index.html">misk.security.ssl.ClientCertIssuer</a></td>
+<td>Qualifier annotation for an <a href="../misk.security.cert/-x500-name/index.html">ActionScoped</a> containing the issuer of the client cert</td>
+</tr>
+<tr>
+<td><a href="../misk.security.ssl/-client-cert-subject/index.html">misk.security.ssl.ClientCertSubject</a></td>
+<td>Qualifier annotation for an <a href="../misk.security.cert/-x500-name/index.html">ActionScoped</a> containing the subject of the client cert</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-client-chain/index.html">misk.client.ClientChain</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-client-metrics-interceptor/index.html">misk.client.ClientMetricsInterceptor</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-client-network-chain/index.html">misk.client.ClientNetworkChain</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-client-network-interceptor/index.html">misk.client.ClientNetworkInterceptor</a></td>
+<td>Intercepts client side calls at the application level, able to view and modify the outgoing HTTP request and observe the returned HTTP response</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-client-network-interceptors-module/index.html">misk.client.ClientNetworkInterceptorsModule</a></td>
+<td>The common set of <a href="../misk.client/-client-network-interceptor/index.html">ClientNetworkInterceptor</a>s for all misk apps.</td>
+</tr>
+<tr>
+<td><a href="../misk.clustering.weights/-cluster-weight-provider/index.html">misk.clustering.weights.ClusterWeightProvider</a></td>
+<td>Provides the current weight assigned to the cluster.</td>
+</tr>
+<tr>
+<td><a href="../misk.clustering.weights/-cluster-weight-service.html">misk.clustering.weights.ClusterWeightService</a></td>
+<td>A marker interface for the Service that produces the <a href="../misk.clustering.weights/-cluster-weight-provider/index.html">ClusterWeightProvider</a>.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.interceptors/-concurrency-limiter-factory/index.html">misk.web.interceptors.ConcurrencyLimiterFactory</a></td>
+<td>Multibind an instance to provide a custom Limiter for concurrency shedding. The first instance to return non-null is used.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-config-dashboard-tab-module/index.html">misk.web.dashboard.ConfigDashboardTabModule</a></td>
+<td>Installs Config tab for the Misk Admin Dashboard</td>
+</tr>
+<tr>
+<td><a href="../misk.web.metadata.config/-config-metadata-action/index.html">misk.web.metadata.config.ConfigMetadataAction</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.config/-config-module/index.html">misk.config.ConfigModule</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/-cors-config/index.html">misk.web.CorsConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-dashboard-home-url/index.html">misk.web.dashboard.DashboardHomeUrl</a></td>
+<td>Url to link to for the home button in the dashboard navbar 1 <a href="../misk.web.dashboard/-dashboard-home-url/index.html">DashboardHomeUrl</a> should be bound per dashboard</td>
+</tr>
+<tr>
+<td><a href="../misk.web.metadata/-dashboard-metadata-action/index.html">misk.web.metadata.DashboardMetadataAction</a></td>
+<td>Serve metadata related to a Misk-Web Dashboard</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-dashboard-module/index.html">misk.web.dashboard.DashboardModule</a></td>
+<td>Support Misk-Web Dashboards including the Misk <a href="../misk.web.dashboard/-admin-dashboard/index.html">AdminDashboard</a> and service specific front end apps</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-dashboard-navbar-item/index.html">misk.web.dashboard.DashboardNavbarItem</a></td>
+<td>A list of elements to add to the dashboard navbar Misk-Web&rsquo;s default navbar handles responsive layout of these items so overflow navbar items are included in the drop down menu</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-dashboard-navbar-status/index.html">misk.web.dashboard.DashboardNavbarStatus</a></td>
+<td>Banner text to show below the dashboard navbar 0 or 1 <a href="../misk.web.dashboard/-dashboard-navbar-status/index.html">DashboardNavbarStatus</a> should be bound per dashboard</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-dashboard-tab/index.html">misk.web.dashboard.DashboardTab</a></td>
+<td>A <a href="../misk.web.dashboard/-web-tab/index.html">WebTab</a> with additional fields to bind to a specific Dashboard that has a tabs menu</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-dashboard-tab-provider/index.html">misk.web.dashboard.DashboardTabProvider</a></td>
+<td>Sets the tab&rsquo;s authentication capabilities/services by the multibound <a href="../misk.security.authz/-access-annotation-entry/index.html">AccessAnnotationEntry</a></td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-dashboard-theme/index.html">misk.web.dashboard.DashboardTheme</a></td>
+<td>Per dashboard customization of the navbar theme</td>
+</tr>
+<tr>
+<td><a href="../misk.web.metadata.database/-database-query-function-metadata/index.html">misk.web.metadata.database.DatabaseQueryFunctionMetadata</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.metadata.database/-database-query-metadata/index.html">misk.web.metadata.database.DatabaseQueryMetadata</a></td>
+<td>Metadata front end model for Database Query Misk-Web Tab</td>
+</tr>
+<tr>
+<td><a href="../misk.web.metadata.database/-database-query-metadata-action/index.html">misk.web.metadata.database.DatabaseQueryMetadataAction</a></td>
+<td>Display available queries and their types</td>
+</tr>
+<tr>
+<td><a href="../misk.tasks/-delayed-task/index.html">misk.tasks.DelayedTask</a></td>
+<td>A <a href="../misk.tasks/-delayed-task/index.html">DelayedTask</a> is a task that runs in  the future</td>
+</tr>
+<tr>
+<td><a href="../misk.environment/-deployment-module/index.html">misk.environment.DeploymentModule</a></td>
+<td>Binds <a href="#">Deployment</a> to make it available to services and actions</td>
+</tr>
+<tr>
+<td><a href="../misk.security.authz/-development-only/index.html">misk.security.authz.DevelopmentOnly</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/-dispatch-mechanism/index.html">misk.web.DispatchMechanism</a></td>
+<td>Describes how an action is processed. This is like the HTTP method but has special cases for web sockets and gRPC. These protocols layer on top of HTTP methods and have different semantics.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-environment-to-color-lookup/index.html">misk.web.dashboard.EnvironmentToColorLookup</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.environment/-env-var-loader/index.html">misk.environment.EnvVarLoader</a></td>
+<td>Loads an environment variable value.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.exceptions/-exception-handling-interceptor/index.html">misk.web.exceptions.ExceptionHandlingInterceptor</a></td>
+<td>Converts and logs application and component level dispatch exceptions into the appropriate response format. Allows application and component code to control how exceptions are represented to clients; for example by setting the status code appropriately, or by returning a specialized response format specific to the error. Components can control how exceptions are mapped by installing <a href="../misk.web.exceptions/-exception-mapper/index.html">ExceptionMapper</a> via the <a href="../misk.web.exceptions/-exception-mapper-module/index.html">ExceptionMapperModule</a></td>
+</tr>
+<tr>
+<td><a href="../misk.web.exceptions/-exception-mapper/index.html">misk.web.exceptions.ExceptionMapper</a></td>
+<td>Maps an exception to a <a href="#">Response</a></td>
+</tr>
+<tr>
+<td><a href="../misk.web.exceptions/-exception-mapper-module/index.html">misk.web.exceptions.ExceptionMapperModule</a></td>
+<td>Binds a <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a> to an <a href="../misk.web.exceptions/-exception-mapper/index.html">ExceptionMapper</a>.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.exceptions/-exception-mapper-resolver/index.html">misk.web.exceptions.ExceptionMapperResolver</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.concurrent/-executor-service-module/index.html">misk.concurrent.ExecutorServiceModule</a></td>
+<td>Install this to bind an executor service with <a href="#">annotation</a>. The executor service will be automatically shut down when the service shuts down.</td>
+</tr>
+<tr>
+<td><a href="../misk.concurrent/-explicit-release-blocking-queue/index.html">misk.concurrent.ExplicitReleaseBlockingQueue</a></td>
+<td>An <a href="../misk.concurrent/-explicit-release-blocking-queue/index.html">ExplicitReleaseBlockingQueue</a> is a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/BlockingQueue.html">BlockingQueue</a> that only returns elements from <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/BlockingQueue.html#take()">BlockingQueue.take</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/BlockingQueue.html#poll(long, java.util.concurrent.TimeUnit)">BlockingQueue.poll</a>, and <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html#peek()">BlockingQueue.peek</a> after a call to <a href="../misk.concurrent/-explicit-release-blocking-queue/release.html">ExplicitReleaseBlockingQueue.release</a>. Used by tests that want to explicitly control when pollers receive queued items.</td>
+</tr>
+<tr>
+<td><a href="../misk.concurrent/-explicit-release-delay-queue/index.html">misk.concurrent.ExplicitReleaseDelayQueue</a></td>
+<td>An <a href="../misk.concurrent/-explicit-release-delay-queue/index.html">ExplicitReleaseDelayQueue</a> is an <a href="../misk.concurrent/-explicit-release-blocking-queue/index.html">ExplicitReleaseBlockingQueue</a> that release elements in the order in which they expire</td>
+</tr>
+<tr>
+<td><a href="../misk.security.authz/-fake-caller-authenticator/index.html">misk.security.authz.FakeCallerAuthenticator</a></td>
+<td>A caller authenticator that blindly trusts HTTP headers. Unsafe for production use.</td>
+</tr>
+<tr>
+<td><a href="../misk.clustering.weights/-fake-cluster-weight/index.html">misk.clustering.weights.FakeClusterWeight</a></td>
+<td>A <a href="../misk.clustering.weights/-cluster-weight-provider/index.html">ClusterWeightProvider</a> for testing</td>
+</tr>
+<tr>
+<td><a href="../misk.clustering.weights/-fake-cluster-weight-module/index.html">misk.clustering.weights.FakeClusterWeightModule</a></td>
+<td>Provides a <a href="../misk.clustering.weights/-fake-cluster-weight/index.html">FakeClusterWeight</a> for testing</td>
+</tr>
+<tr>
+<td><a href="../misk.environment/-fake-env-var-module/index.html">misk.environment.FakeEnvVarModule</a></td>
+<td>Binds a <a href="../misk.environment/-env-var-loader/index.html">EnvVarLoader</a> for tests. Tests can contribute values through the <code>@ForEnvVars Map&lt;String, String&gt;</code> binding.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.actions/-fake-web-socket/index.html">misk.web.actions.FakeWebSocket</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/-feature-binding/index.html">misk.web.FeatureBinding</a></td>
+<td>Binds an HTTP call to a <a href="#">WebAction</a> function.</td>
+</tr>
+<tr>
+<td><a href="../misk.flags/-flag/index.html">misk.flags.Flag</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.flags/-flags/index.html">misk.flags.Flags</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.flags/-flags-module/index.html">misk.flags.FlagsModule</a></td>
+<td>Installs support for flag. Applications should inherit from this module and override <a href="../misk.flags/-flags-module/configure-flags.html">configureFlags</a>, calling the various bindXXXFlags methods to make flag variables available</td>
+</tr>
+<tr>
+<td><a href="../misk.flags/-flag-store/index.html">misk.flags.FlagStore</a></td>
+<td>Applications register their interest in monitoring flags through the <a href="../misk.flags/-flag-store/register-flag.html">registerFlag</a> calls. If registration and watching requires contacting a remote service (e.g. a flag service, Zookeeper, etc), this should be done asynchronously so that multiple flags can be registered in parallel, with the <a href="../misk.flags/-flag/get.html">Flag.get</a> calls blocking until the registration for that flag is complete. An application can also call <a href="../misk.flags/-flag-store/await-registrations-complete.html">awaitRegistrationsComplete</a> to block until all pending registrations have completed, allowing e.g. the application to avoid processing incoming requests until all of its flags are available and watched</td>
+</tr>
+<tr>
+<td><a href="../misk.time/-force-utc-time-zone-service/index.html">misk.time.ForceUtcTimeZoneService</a></td>
+<td>Forces the default JVM timezone to UTC.</td>
+</tr>
+<tr>
+<td><a href="../misk.environment/-for-env-vars/index.html">misk.environment.ForEnvVars</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-generic-marshallers/index.html">misk.web.marshal.GenericMarshallers</a></td>
+<td>Handles generic marshalling, for cases where the action doesn&rsquo;t explicitly specify return content</td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-generic-unmarshallers/index.html">misk.web.marshal.GenericUnmarshallers</a></td>
+<td>Handles generic unmarshalling, for cases where the action can accept anything</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-grpc-client-module/index.html">misk.client.GrpcClientModule</a></td>
+<td>Creates a gRPC client given a Wire-generated interface and HTTP configuration.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.exceptions/-grpc-error-response/index.html">misk.web.exceptions.GrpcErrorResponse</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/-http-call/index.html">misk.web.HttpCall</a></td>
+<td>A live HTTP call from a client for use by a chain of network interceptors.</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-http-client-config/index.html">misk.client.HttpClientConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-http-client-config-url-provider/index.html">misk.client.HttpClientConfigUrlProvider</a></td>
+<td>Calculates the url for an http client config, which can differ depending on if the client is envoy-based or connects directly.</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-http-client-endpoint-config/index.html">misk.client.HttpClientEndpointConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-http-client-envoy-config/index.html">misk.client.HttpClientEnvoyConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-http-client-factory/index.html">misk.client.HttpClientFactory</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-http-client-module/index.html">misk.client.HttpClientModule</a></td>
+<td>Provides an <a href="#">OkHttpClient</a> and <a href="../misk.client/-proto-message-http-client/index.html">ProtoMessageHttpClient</a> for a peer service</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-http-clients-config/index.html">misk.client.HttpClientsConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-http-clients-config-module/index.html">misk.client.HttpClientsConfigModule</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-http-client-s-s-l-config/index.html">misk.client.HttpClientSSLConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.flags.memory/-in-memory-boolean-flag/index.html">misk.flags.memory.InMemoryBooleanFlag</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.flags.memory/-in-memory-double-flag/index.html">misk.flags.memory.InMemoryDoubleFlag</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.flags.memory/-in-memory-flag/index.html">misk.flags.memory.InMemoryFlag</a></td>
+<td>In-memory representation of flags, allowing the flag to be programmatically changed by tests</td>
+</tr>
+<tr>
+<td><a href="../misk.flags.memory/-in-memory-flag-store/index.html">misk.flags.memory.InMemoryFlagStore</a></td>
+<td>In memory implementation of a <a href="../misk.flags/-flag-store/index.html">FlagStore</a>, suitable for use in testing</td>
+</tr>
+<tr>
+<td><a href="../misk.flags.memory/-in-memory-flag-store-module/index.html">misk.flags.memory.InMemoryFlagStoreModule</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.flags.memory/-in-memory-int-flag/index.html">misk.flags.memory.InMemoryIntFlag</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.flags.memory/-in-memory-string-flag/index.html">misk.flags.memory.InMemoryStringFlag</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.moshi.time/-instant-adapter/index.html">misk.moshi.time.InstantAdapter</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.actions/-internal-error-action/index.html">misk.web.actions.InternalErrorAction</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.interceptors/-internal-error-interceptor-factory/index.html">misk.web.interceptors.InternalErrorInterceptorFactory</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-jetty-port-peer-client-module/index.html">misk.client.JettyPortPeerClientModule</a></td>
+<td>For testing.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.jetty/-jetty-service/index.html">misk.web.jetty.JettyService</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.flags/-json-flag/index.html">misk.flags.JsonFlag</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-json-marshaller/index.html">misk.web.marshal.JsonMarshaller</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-json-unmarshaller/index.html">misk.web.marshal.JsonUnmarshaller</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.security.keys/-key-service/index.html">misk.security.keys.KeyService</a></td>
+<td>Handles encryption and decryption using keys stored in a key management service</td>
+</tr>
+<tr>
+<td><a href="../misk/kotlin.reflect.-k-function/index.html">kotlin.reflect.KFunction</a> (extensions in package misk)</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.clustering.kubernetes/-kubernetes-cluster-module/index.html">misk.clustering.kubernetes.KubernetesClusterModule</a></td>
+<td><a href="../misk.clustering.kubernetes/-kubernetes-cluster-module/index.html">KubernetesClusterModule</a> installs cluster support based on Kubernetes</td>
+</tr>
+<tr>
+<td><a href="../misk.clustering.kubernetes/-kubernetes-config/index.html">misk.clustering.kubernetes.KubernetesConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.actions/-liveness-check-action/index.html">misk.web.actions.LivenessCheckAction</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.moshi.time/-local-date-adapter/index.html">misk.moshi.time.LocalDateAdapter</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.mdc/-log-context-provider/index.html">misk.web.mdc.LogContextProvider</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.interceptors/-log-rate-limiter/index.html">misk.web.interceptors.LogRateLimiter</a></td>
+<td>Holds rate limiters for logging success and error responses. There is a rate limiter for every action and service that calls it, for both success and error. The rate limiters are created according to the value set in <a href="#">LogRequestResponse</a> annotation.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-marshaller/index.html">misk.web.marshal.Marshaller</a></td>
+<td>Marshalls typed kotlin objects into a <a href="#">ResponseBody</a></td>
+</tr>
+<tr>
+<td><a href="../misk.web.jetty/-measured-queued-thread-pool/index.html">misk.web.jetty.MeasuredQueuedThreadPool</a></td>
+<td>A <a href="../misk.web.jetty/-measured-thread-pool/index.html">MeasuredThreadPool</a> for a <a href="#">QueuedThreadPool</a></td>
+</tr>
+<tr>
+<td><a href="../misk.web.jetty/-measured-thread-pool/index.html">misk.web.jetty.MeasuredThreadPool</a></td>
+<td>A common interface that can emit metrics about a thread pool.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.jetty/-measured-thread-pool-executor/index.html">misk.web.jetty.MeasuredThreadPoolExecutor</a></td>
+<td>A <a href="../misk.web.jetty/-measured-thread-pool/index.html">MeasuredThreadPool</a> for a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor</a></td>
+</tr>
+<tr>
+<td><a href="../misk.grpc/com.squareup.wire.-message-source/index.html">com.squareup.wire.MessageSource</a> (extensions in package misk.grpc)</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk/-misk-application/index.html">misk.MiskApplication</a></td>
+<td>The entry point for misk applications</td>
+</tr>
+<tr>
+<td><a href="../misk.security.authz/-misk-caller-authenticator/index.html">misk.security.authz.MiskCallerAuthenticator</a></td>
+<td>Interface for determining the current <a href="#">MiskCaller</a>. Typically use an <a href="#">ActionScoped</a>, <a href="#">ActionScoped</a>, etc to determine the caller based on request headers or client certificate information.</td>
+</tr>
+<tr>
+<td><a href="../misk/-misk-command/index.html">misk.MiskCommand</a></td>
+<td>A command to run from the command line. Each command has an associated name and the list of modules to use in initializing the command. Commands can specify optional and required arguments via JCommander annotations. The command line will pick the appropriate command based on the name, create an injector based on that command&rsquo;s modules, use the injector to initialize the command, and then run the command.</td>
+</tr>
+<tr>
+<td><a href="../misk/-misk-common-service-module/index.html">misk.MiskCommonServiceModule</a></td>
+<td>This module has common bindings for all environments (both real and testing).</td>
+</tr>
+<tr>
+<td><a href="../misk.config/-misk-config/index.html">misk.config.MiskConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk/-misk-real-service-module/index.html">misk.MiskRealServiceModule</a></td>
+<td>Install this module in real environments.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-misk-web-color/index.html">misk.web.dashboard.MiskWebColor</a></td>
+<td>Matches the Misk-Web Color enum in @misk/core/src/utilities/css.ts</td>
+</tr>
+<tr>
+<td><a href="../misk.web/-misk-web-form-builder/index.html">misk.web.MiskWebFormBuilder</a></td>
+<td>Provides a mapping from field name to Type definition given a KType. Useful for processes that want to have a schema definition of a type. For example: used by the WebActions admin dashboard tab to show a statically typed form containing request fields for developers to fill out. Currently only supports Wire request type messages; non-Wire messages return an empty mapping.</td>
+</tr>
+<tr>
+<td><a href="../misk.web/-misk-web-module/index.html">misk.web.MiskWebModule</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-misk-web-theme/index.html">misk.web.dashboard.MiskWebTheme</a></td>
+<td>Matches the Misk-Web Theme interface  in @misk/core/src/utilities/theme.ts</td>
+</tr>
+<tr>
+<td><a href="../misk.moshi/com.squareup.moshi.-moshi/index.html">com.squareup.moshi.Moshi</a> (extensions in package misk.moshi)</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.moshi/-moshi-adapter-module/index.html">misk.moshi.MoshiAdapterModule</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.moshi/-moshi-module/index.html">misk.moshi.MoshiModule</a></td>
+<td>For service setup, prefer to install <a href="../misk/-misk-common-service-module/index.html">misk.MiskCommonServiceModule</a> over installing <a href="../misk.moshi/-moshi-module/index.html">MoshiModule</a> directly.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-multipart-unmarshaller/index.html">misk.web.marshal.MultipartUnmarshaller</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/-network-chain/index.html">misk.web.NetworkChain</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/-network-interceptor/index.html">misk.web.NetworkInterceptor</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.metadata.database/-no-admin-dashboard-database-access/index.html">misk.web.metadata.database.NoAdminDashboardDatabaseAccess</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.actions/-not-found-action/index.html">misk.web.actions.NotFoundAction</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-ok-http-client-common-configurator/index.html">misk.client.OkHttpClientCommonConfigurator</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.proxy/-optional-binder/index.html">misk.web.proxy.OptionalBinder</a></td>
+<td><a href="https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor">https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor</a></td>
+</tr>
+<tr>
+<td><a href="../misk.io/java.nio.file.-path/index.html">java.nio.file.Path</a> (extensions in package misk.io)</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/-path-pattern/index.html">misk.web.PathPattern</a></td>
+<td>A path with placeholders for variables. Paths may be constant like <code>/app/home/</code> or dynamic like <code>/user/{username}</code>. Variables are delimited by curly braces and may specify an optional regex like this: <code>{username:[a-z]+}</code>. If no regex is specified the variable is a sequence of non-&lsquo;/&rsquo; characters.</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-peer-client-factory/index.html">misk.client.PeerClientFactory</a></td>
+<td>Factory that creates <a href="#">OkHttpClient</a>s for connecting to another instance of the same application running in the same cluster.</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-peer-client-module/index.html">misk.client.PeerClientModule</a></td>
+<td>Binds a <a href="../misk.client/-peer-client-factory/index.html">PeerClientFactory</a> that calls peers on the HTTPS port of this process&rsquo;s server, as determined by the SSL port in the <a href="../misk.web/-web-config/index.html">WebConfig</a>.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-plain-text-marshaller/index.html">misk.web.marshal.PlainTextMarshaller</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-plain-text-unmarshaller/index.html">misk.web.marshal.PlainTextUnmarshaller</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-protobuf-marshaller/index.html">misk.web.marshal.ProtobufMarshaller</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-protobuf-unmarshaller/index.html">misk.web.marshal.ProtobufUnmarshaller</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-proto-message-http-client/index.html">misk.client.ProtoMessageHttpClient</a></td>
+<td>This helper class is for making HTTP requests to an endpoint that handles protobuf Message classes.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.actions/-readiness-check-action/index.html">misk.web.actions.ReadinessCheckAction</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.environment/-real-env-var-module/index.html">misk.environment.RealEnvVarModule</a></td>
+<td>Binds a <a href="../misk.environment/-env-var-loader/index.html">EnvVarLoader</a> for production</td>
+</tr>
+<tr>
+<td><a href="../misk.web.interceptors/-rebalancing-interceptor/index.html">misk.web.interceptors.RebalancingInterceptor</a></td>
+<td>When we&rsquo;re deploying and redeploying our pods, we want to make sure that clients rebalance onto the new pods. This randomly closes connections so they will be recreated, naturally balancing connections across pods.</td>
+</tr>
+<tr>
+<td><a href="../misk.tasks/-repeated-task-queue/index.html">misk.tasks.RepeatedTaskQueue</a></td>
+<td>A <a href="../misk.tasks/-repeated-task-queue/index.html">RepeatedTaskQueue</a> runs repeated tasks at a user controlled rate. Internally it uses a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/DelayQueue.html">DelayQueue</a> to hold the pending tasks; a background thread pulls the next task from the <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/DelayQueue.html">DelayQueue</a> and hands it off to an executor service for execution.</td>
+</tr>
+<tr>
+<td><a href="../misk.tasks/-repeated-task-queue-config/index.html">misk.tasks.RepeatedTaskQueueConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.tasks/-repeated-task-queue-factory/index.html">misk.tasks.RepeatedTaskQueueFactory</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.tasks/-repeated-task-queue-metrics/index.html">misk.tasks.RepeatedTaskQueueMetrics</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.interceptors/-request-body-logging-interceptor/index.html">misk.web.interceptors.RequestBodyLoggingInterceptor</a></td>
+<td>Stores request and response information for an action in a ThreadLocal, to be logged in <a href="../misk.web.interceptors/-request-logging-interceptor/index.html">RequestLoggingInterceptor</a></td>
+</tr>
+<tr>
+<td><a href="../misk.web.interceptors/-request-logging-interceptor/index.html">misk.web.interceptors.RequestLoggingInterceptor</a></td>
+<td>Logs request and response information for an action. Timing information doesn&rsquo;t count time writing the response to the remote client.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.resources/-resource-entry-finder/index.html">misk.web.resources.ResourceEntryFinder</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/okhttp3.-response/index.html">okhttp3.Response</a> (extensions in package misk.web)</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.interceptors/-response-body-marshaller-factory/index.html">misk.web.interceptors.ResponseBodyMarshallerFactory</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.tasks/-result/index.html">misk.tasks.Result</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.config/-secret/index.html">misk.config.Secret</a></td>
+<td>Type for any secrets that need to be loaded as reference in their config file. Secret addresses should use format specified in <a href="#">misk.resources.ResourceLoader</a>.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.metadata/-service-metadata-action/index.html">misk.web.metadata.ServiceMetadataAction</a></td>
+<td>Service Metadata used for front end dashboards including App Name and Misk.Deployment name</td>
+</tr>
+<tr>
+<td><a href="../misk.web/-socket-address/index.html">misk.web.SocketAddress</a></td>
+<td>Information about the socket on which a HTTP call arrived.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.resources/-static-resource-action/index.html">misk.web.resources.StaticResourceAction</a></td>
+<td>StaticResourceAction This data class is used with Guice multibindings. Register instances by calling <code>multibind()</code> in a <code>KAbstractModule</code>:</td>
+</tr>
+<tr>
+<td><a href="../misk.web.resources/-static-resource-entry/index.html">misk.web.resources.StaticResourceEntry</a></td>
+<td>This data class is used with Guice multibindings. Register instances by calling <code>multibind()</code> in a <code>KAbstractModule</code>:</td>
+</tr>
+<tr>
+<td><a href="../misk.tasks/-status/index.html">misk.tasks.Status</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.actions/-status-action/index.html">misk.web.actions.StatusAction</a></td>
+<td>Returns the current status of the service for programmatic tools that want to query for the current state of the server</td>
+</tr>
+<tr>
+<td><a href="../misk.web/kotlin.-string/index.html">kotlin.String</a> (extensions in package misk.web)</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.jetty/-thread-pool-queue-metrics/index.html">misk.web.jetty.ThreadPoolQueueMetrics</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.security.ssl/-tls-protocols/index.html">misk.security.ssl.TlsProtocols</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.tracing/io.opentracing.-tracer/index.html">io.opentracing.Tracer</a> (extensions in package misk.tracing)</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-typed-client-factory/index.html">misk.client.TypedClientFactory</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.client/-typed-http-client-module/index.html">misk.client.TypedHttpClientModule</a></td>
+<td>Creates a retrofit-backed typed client given an API interface and an HTTP configuration.</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-typed-peer-client-factory/index.html">misk.client.TypedPeerClientFactory</a></td>
+<td>Factory for creating typed clients that call other members of a cluster.</td>
+</tr>
+<tr>
+<td><a href="../misk.client/-typed-peer-http-client-module/index.html">misk.client.TypedPeerHttpClientModule</a></td>
+<td>Creates a retrofit-backed typed client factory given an API interface and an HTTP configuration.</td>
+</tr>
+<tr>
+<td><a href="../misk.web.marshal/-unmarshaller/index.html">misk.web.marshal.Unmarshaller</a></td>
+<td>Unmarshalls a typed object from an incoming source</td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-valid-web-entry/index.html">misk.web.dashboard.ValidWebEntry</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.actions/-web-action-entry/index.html">misk.web.actions.WebActionEntry</a></td>
+<td>WebActionEntry</td>
+</tr>
+<tr>
+<td><a href="../misk.web.metadata.webaction/-web-action-metadata/index.html">misk.web.metadata.webaction.WebActionMetadata</a></td>
+<td>Metadata front end model for Web Action Misk-Web Tab</td>
+</tr>
+<tr>
+<td><a href="../misk.web.metadata.webaction/-web-action-metadata-action/index.html">misk.web.metadata.webaction.WebActionMetadataAction</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/-web-action-module/index.html">misk.web.WebActionModule</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web/-web-config/index.html">misk.web.WebConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.proxy/-web-proxy-action/index.html">misk.web.proxy.WebProxyAction</a></td>
+<td>WebProxyAction</td>
+</tr>
+<tr>
+<td><a href="../misk.web.proxy/-web-proxy-entry/index.html">misk.web.proxy.WebProxyEntry</a></td>
+<td>Maps URLs requested against this server to URLs of servers to delegate to</td>
+</tr>
+<tr>
+<td><a href="../misk.web/-web-ssl-config/index.html">misk.web.WebSslConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-web-tab/index.html">misk.web.dashboard.WebTab</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.web.dashboard/-web-tab-resource-module/index.html">misk.web.dashboard.WebTabResourceModule</a></td>
+<td>Declare how to serve the resources for a <a href="../misk.web.dashboard/-web-tab/index.html">WebTab</a> (JS, HTML, CSS&hellip;)</td>
+</tr>
+<tr>
+<td><a href="../misk.web/-web-unix-domain-socket-config/index.html">misk.web.WebUnixDomainSocketConfig</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.concurrent/-wrapping-listening-executor-service/index.html">misk.concurrent.WrappingListeningExecutorService</a></td>
+<td><a href="#">ListeningExecutorService</a> which wraps all calls</td>
+</tr>
+<tr>
+<td><a href="../misk.security.cert/-x500-name/index.html">misk.security.cert.X500Name</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="../misk.security.cert/java.security.cert.-x509-certificate/index.html">java.security.cert.X509Certificate</a> (extensions in package misk.security.cert)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2018-2021 Square, Inc.
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../../assets/javascripts/workers/search.477d984a.min.js", "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.ddd52ceb.min.js"></script>
+      
+    
+  </body>
+</html>

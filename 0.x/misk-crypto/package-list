@@ -1,0 +1,6 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.crypto$computeMac(com.google.crypto.tink.Mac, kotlin.String)misk.crypto/com.google.crypto.tink.-mac/compute-mac.md
+$dokka.location:misk.crypto$verifyMac(com.google.crypto.tink.Mac, kotlin.String, kotlin.String)misk.crypto/com.google.crypto.tink.-mac/verify-mac.md
+misk.crypto
+misk.crypto.pgp

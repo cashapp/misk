@@ -1,0 +1,17 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.jdbc$map(java.sql.ResultSet, kotlin.Function1((java.sql.ResultSet, misk.jdbc.map.T)))misk.jdbc/java.sql.-result-set/map.md
+$dokka.location:misk.jdbc$maybeInt(java.sql.ResultSet)misk.jdbc/java.sql.-result-set/maybe-int.md
+$dokka.location:misk.jdbc$maybeLong(java.sql.ResultSet)misk.jdbc/java.sql.-result-set/maybe-long.md
+$dokka.location:misk.jdbc$maybeResult(java.sql.ResultSet, kotlin.Function1((java.sql.ResultSet, misk.jdbc.maybeResult.T)))misk.jdbc/java.sql.-result-set/maybe-result.md
+$dokka.location:misk.jdbc$maybeString(java.sql.ResultSet)misk.jdbc/java.sql.-result-set/maybe-string.md
+$dokka.location:misk.jdbc$uniqueInt(java.sql.ResultSet)misk.jdbc/java.sql.-result-set/unique-int.md
+$dokka.location:misk.jdbc$uniqueLong(java.sql.ResultSet)misk.jdbc/java.sql.-result-set/unique-long.md
+$dokka.location:misk.jdbc$uniqueResult(java.sql.ResultSet, kotlin.Function1((java.sql.ResultSet, misk.jdbc.uniqueResult.T)))misk.jdbc/java.sql.-result-set/unique-result.md
+$dokka.location:misk.jdbc$uniqueString(java.sql.ResultSet)misk.jdbc/java.sql.-result-set/unique-string.md
+$dokka.location:misk.vitess$failSafeRead(java.sql.Connection, kotlin.Function1((java.sql.Connection, misk.vitess.failSafeRead.T)))misk.vitess/java.sql.-connection/fail-safe-read.md
+$dokka.location:misk.vitess$failSafeRead(java.sql.Connection, misk.vitess.Shard, kotlin.Function1((java.sql.Connection, misk.vitess.failSafeRead.T)))misk.vitess/java.sql.-connection/fail-safe-read.md
+$dokka.location:misk.vitess$target(java.sql.Connection, misk.vitess.Shard, kotlin.Function1((java.sql.Connection, misk.vitess.target.T)))misk.vitess/java.sql.-connection/target.md
+misk.database
+misk.jdbc
+misk.vitess

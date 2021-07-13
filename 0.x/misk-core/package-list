@@ -1,0 +1,32 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.logging$sampled(mu.KLogger, misk.sampling.Sampler)misk.logging/mu.-k-logger/sampled.md
+$dokka.location:misk.security.ssl$aliasesOfType(java.security.KeyStore)misk.security.ssl/java.security.-key-store/aliases-of-type.md
+$dokka.location:misk.security.ssl$aliasesOfType(java.security.KeyStore, java.lang.Class((java.security.KeyStore.Entry)))misk.security.ssl/java.security.-key-store/aliases-of-type.md
+$dokka.location:misk.security.ssl$getCertificateAndKey(java.security.KeyStore, kotlin.CharArray)misk.security.ssl/java.security.-key-store/get-certificate-and-key.md
+$dokka.location:misk.security.ssl$getCertificateAndKey(java.security.KeyStore, kotlin.String, kotlin.CharArray)misk.security.ssl/java.security.-key-store/get-certificate-and-key.md
+$dokka.location:misk.security.ssl$getPrivateKey(java.security.KeyStore, kotlin.CharArray)misk.security.ssl/java.security.-key-store/get-private-key.md
+$dokka.location:misk.security.ssl$getPrivateKey(java.security.KeyStore, kotlin.String, kotlin.CharArray)misk.security.ssl/java.security.-key-store/get-private-key.md
+$dokka.location:misk.security.ssl$getX509Certificate(java.security.KeyStore)misk.security.ssl/java.security.-key-store/get-x509-certificate.md
+$dokka.location:misk.security.ssl$getX509Certificate(java.security.KeyStore, kotlin.String)misk.security.ssl/java.security.-key-store/get-x509-certificate.md
+$dokka.location:misk.security.ssl$getX509CertificateChain(java.security.KeyStore)misk.security.ssl/java.security.-key-store/get-x509-certificate-chain.md
+$dokka.location:misk.security.ssl$getX509CertificateChain(java.security.KeyStore, kotlin.String)misk.security.ssl/java.security.-key-store/get-x509-certificate-chain.md
+$dokka.location:misk.security.ssl$onlyAlias#java.security.KeyStoremisk.security.ssl/java.security.-key-store/only-alias.md
+$dokka.location:misk.web.mediatype$asMediaRange(kotlin.String)misk.web.mediatype/kotlin.-string/as-media-range.md
+$dokka.location:misk.web.mediatype$asMediaType(kotlin.String)misk.web.mediatype/kotlin.-string/as-media-type.md
+$dokka.location:misk.web.mediatype$compareTo(okhttp3.MediaType, okhttp3.MediaType)misk.web.mediatype/okhttp3.-media-type/compare-to.md
+misk.clustering
+misk.clustering.fake
+misk.clustering.fake.lease
+misk.clustering.lease
+misk.concurrent
+misk.config
+misk.healthchecks
+misk.logging
+misk.random
+misk.resources
+misk.retries
+misk.sampling
+misk.security.ssl
+misk.tokens
+misk.web.mediatype

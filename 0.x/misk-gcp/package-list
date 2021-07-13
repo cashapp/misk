@@ -1,0 +1,20 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.cloud.gcp.datastore$asList(com.google.cloud.datastore.QueryResults((misk.cloud.gcp.datastore.asList.T)))misk.cloud.gcp.datastore/com.google.cloud.datastore.-query-results/as-list.md
+$dokka.location:misk.cloud.gcp.datastore$getByteString(com.google.cloud.datastore.Entity, kotlin.String)misk.cloud.gcp.datastore/com.google.cloud.datastore.-entity/get-byte-string.md
+$dokka.location:misk.cloud.gcp.datastore$getProto(com.google.cloud.datastore.Entity, kotlin.String, com.squareup.wire.ProtoAdapter((misk.cloud.gcp.datastore.getProto.T)))misk.cloud.gcp.datastore/com.google.cloud.datastore.-entity/get-proto.md
+$dokka.location:misk.cloud.gcp.datastore$set(com.google.cloud.datastore.Entity.Builder, kotlin.String, okio.ByteString)misk.cloud.gcp.datastore/com.google.cloud.datastore.-entity.-builder/set.md
+$dokka.location:misk.cloud.gcp.datastore$toByteString(com.google.cloud.datastore.Blob)misk.cloud.gcp.datastore/com.google.cloud.datastore.-blob/to-byte-string.md
+$dokka.location:misk.cloud.gcp.storage$blobIds#com.google.api.gax.paging.Page((com.google.cloud.storage.Blob))misk.cloud.gcp.storage/com.google.api.gax.paging.-page/blob-ids.md
+$dokka.location:misk.cloud.gcp.storage$compareTo(com.google.cloud.storage.BlobId, com.google.cloud.storage.BlobId)misk.cloud.gcp.storage/com.google.cloud.storage.-blob-id/compare-to.md
+$dokka.location:misk.cloud.gcp.storage$forEachChunk(com.google.cloud.ReadChannel, java.nio.ByteBuffer, kotlin.Function2((java.nio.ByteBuffer, kotlin.Int, kotlin.Unit)))misk.cloud.gcp.storage/com.google.cloud.-read-channel/for-each-chunk.md
+$dokka.location:misk.cloud.gcp.storage$forEachChunk(com.google.cloud.ReadChannel, kotlin.Int, kotlin.Function2((java.nio.ByteBuffer, kotlin.Int, kotlin.Unit)))misk.cloud.gcp.storage/com.google.cloud.-read-channel/for-each-chunk.md
+$dokka.location:misk.cloud.gcp.storage$toList(com.google.api.gax.paging.Page((misk.cloud.gcp.storage.toList.T)))misk.cloud.gcp.storage/com.google.api.gax.paging.-page/to-list.md
+$dokka.location:misk.cloud.gcp.storage$withLock(java.nio.channels.FileChannel, kotlin.Boolean, kotlin.Function0((misk.cloud.gcp.storage.withLock.T)))misk.cloud.gcp.storage/java.nio.channels.-file-channel/with-lock.md
+misk.cloud.gcp
+misk.cloud.gcp.datastore
+misk.cloud.gcp.logging
+misk.cloud.gcp.security.keys
+misk.cloud.gcp.storage
+misk.cloud.gcp.tracing
+misk.logging

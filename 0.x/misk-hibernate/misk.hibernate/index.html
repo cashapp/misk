@@ -1,0 +1,1034 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Misk: Microservice Container for Kotlin">
+      
+      
+      
+        <meta name="author" content="Square, Inc.">
+      
+      
+      <link rel="icon" href="../../../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.2.1, mkdocs-material-7.1.10">
+    
+    
+      
+        <title>Package misk.hibernate - Misk - Misk</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.1fe995fd.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.f1a3b89f.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#757575">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../../css/app.css">
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="grey" data-md-color-accent="green">
+  
+    
+    <script>function __prefix(e){return new URL("../../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#package-miskhibernate" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../index.html" title="Misk" class="md-header__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../img/cashapp.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Misk
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Package misk.hibernate - Misk
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/cashapp/misk/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../index.html" title="Misk" class="md-nav__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../img/cashapp.png" alt="logo">
+
+    </a>
+    Misk
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/cashapp/misk/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../index.html" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started.html" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../actions.html" class="md-nav__link">
+        Actions
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients.html" class="md-nav__link">
+        Clients
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        0.x API
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="0.x API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          0.x API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk/index.html" class="md-nav__link">
+        misk
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-aws/index.html" class="md-nav__link">
+        misk-aws
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-aws-dynamodb/index.html" class="md-nav__link">
+        misk-aws-dynamodb
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-aws2-dynamodb/index.html" class="md-nav__link">
+        misk-aws2-dynamodb
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-crypto/index.html" class="md-nav__link">
+        misk-crypto
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-eventrouter/index.html" class="md-nav__link">
+        misk-eventrouter
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-events-core/index.html" class="md-nav__link">
+        misk-events-core
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-events/index.html" class="md-nav__link">
+        misk-events
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-gcp/index.html" class="md-nav__link">
+        misk-gcp
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-gcp-testing/index.html" class="md-nav__link">
+        misk-gcp-testing
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-grpc-tests/index.html" class="md-nav__link">
+        misk-grpc-tests
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        misk-hibernate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-hibernate-testing/index.html" class="md-nav__link">
+        misk-hibernate-testing
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-inject/index.html" class="md-nav__link">
+        misk-inject
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-jobqueue/index.html" class="md-nav__link">
+        misk-jobqueue
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-jobqueue-testing/index.html" class="md-nav__link">
+        misk-jobqueue-testing
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-metrics-digester/index.html" class="md-nav__link">
+        misk-metrics-digester
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-prometheus/index.html" class="md-nav__link">
+        misk-prometheus
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-redis/index.html" class="md-nav__link">
+        misk-redis
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-testing/index.html" class="md-nav__link">
+        misk-testing
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-zookeeper/index.html" class="md-nav__link">
+        misk-zookeeper
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misk-zoopkeeper-testing/index.md" class="md-nav__link">
+        misk-zoopkeeper-testing
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../changelog.html" class="md-nav__link">
+        Change Log
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../releasing.html" class="md-nav__link">
+        Releasing
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../releasing-manual.html" class="md-nav__link">
+        Manual Releasing
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing.html" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://stackoverflow.com/questions/tagged/misk?sort=active" class="md-nav__link">
+        Stack Overflow ⏏
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#package-miskhibernate" class="md-nav__link">
+    Package misk.hibernate
+  </a>
+  
+    <nav class="md-nav" aria-label="Package misk.hibernate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exceptions" class="md-nav__link">
+    Exceptions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#type-aliases" class="md-nav__link">
+    Type Aliases
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extensions-for-external-classes" class="md-nav__link">
+    Extensions for External Classes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/cashapp/misk/edit/master/docs/0.x/misk-hibernate/misk.hibernate/index.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                  <h1>Package misk.hibernate - Misk</h1>
+                
+                <p><a href="../index.html">misk-hibernate</a> / <a href="index.html">misk.hibernate</a></p>
+<h2 id="package-miskhibernate">Package misk.hibernate<a class="headerlink" href="#package-miskhibernate" title="Permanent link">&para;</a></h2>
+<h3 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-db-child/index.html">DbChild</a></td>
+<td><code>interface DbChild&lt;R :</code><a href="-db-root/index.html"><code>DbRoot</code></a><code>&lt;</code><a href="-db-child/index.html#R"><code>R</code></a><code>&gt;, T :</code><a href="-db-child/index.html"><code>DbChild</code></a><code>&lt;</code><a href="-db-child/index.html#R"><code>R</code></a><code>,</code><a href="-db-child/index.html#T"><code>T</code></a><code>&gt;&gt; :</code><a href="-db-sharded/index.html"><code>DbSharded</code></a><code>&lt;</code><a href="-db-child/index.html#R"><code>R</code></a><code>,</code><a href="-db-child/index.html#T"><code>T</code></a><code>&gt;</code><br>Marker interface for sharded entities that stay with their root inside an entity group. Entity group children will always stay inside the same shard regardless of shard splits and so on. That means transactions inside an entity group is always safe. A typical sharding strategy has a <code>DbCustomer</code> as a root and all of the entities that belong to that customer as children.</td>
+</tr>
+<tr>
+<td><a href="-db-entity/index.html">DbEntity</a></td>
+<td><code>interface DbEntity&lt;T :</code><a href="-db-entity/index.html"><code>DbEntity</code></a><code>&lt;</code><a href="-db-entity/index.html#T"><code>T</code></a><code>&gt;&gt;</code><br>Marker interface for persistent entities. Ensures that only persistent entities can be passed into <a href="-session/index.html">Session</a> methods.</td>
+</tr>
+<tr>
+<td><a href="-db-root/index.html">DbRoot</a></td>
+<td><code>interface DbRoot&lt;T :</code><a href="-db-root/index.html"><code>DbRoot</code></a><code>&lt;</code><a href="-db-root/index.html#T"><code>T</code></a><code>&gt;&gt; :</code><a href="-db-sharded/index.html"><code>DbSharded</code></a><code>&lt;</code><a href="-db-root/index.html#T"><code>T</code></a><code>,</code><a href="-db-root/index.html#T"><code>T</code></a><code>&gt;</code><br>Marker interface for sharded entity group roots. Entity group roots are spread out across shards they can also have children in the form of <a href="-db-child/index.html">DbChild</a> subclasses that always stay in the same shard as their roots. A typical root is for example <code>DbCustomer</code>.</td>
+</tr>
+<tr>
+<td><a href="-db-sharded/index.html">DbSharded</a></td>
+<td><code>interface DbSharded&lt;R :</code><a href="-db-root/index.html"><code>DbRoot</code></a><code>&lt;</code><a href="-db-sharded/index.html#R"><code>R</code></a><code>&gt;, T :</code><a href="-db-sharded/index.html"><code>DbSharded</code></a><code>&lt;</code><a href="-db-sharded/index.html#R"><code>R</code></a><code>,</code><a href="-db-sharded/index.html#T"><code>T</code></a><code>&gt;&gt; :</code><a href="-db-entity/index.html"><code>DbEntity</code></a><code>&lt;</code><a href="-db-sharded/index.html#T"><code>T</code></a><code>&gt;</code><br>Marker interface for sharded persistent entities. Do not subclass directly, instead subclass either <a href="-db-root/index.html">DbRoot</a> for entity group roots or <a href="-db-child/index.html">DbChild</a> for entity group children.</td>
+</tr>
+<tr>
+<td><a href="-db-timestamped-entity/index.html">DbTimestampedEntity</a></td>
+<td><code>interface DbTimestampedEntity</code><br>This complements <a href="-db-entity/index.html">DbEntity</a> for entities that keep updated_at and created_at timestamps.</td>
+</tr>
+<tr>
+<td><a href="-db-unsharded.html">DbUnsharded</a></td>
+<td><code>interface DbUnsharded&lt;T :</code><a href="-db-unsharded.html"><code>DbUnsharded</code></a><code>&lt;</code><a href="-db-unsharded.html#T"><code>T</code></a><code>&gt;&gt; :</code><a href="-db-entity/index.html"><code>DbEntity</code></a><code>&lt;</code><a href="-db-unsharded.html#T"><code>T</code></a><code>&gt;</code><br>Marker interface for persistent entities that have a bounded growth and do not require sharding.</td>
+</tr>
+<tr>
+<td><a href="-gid/index.html">Gid</a></td>
+<td><code>data class Gid&lt;R :</code><a href="-db-root/index.html"><code>DbRoot</code></a><code>&lt;</code><a href="-gid/index.html#R"><code>R</code></a><code>&gt;, T :</code><a href="-db-sharded/index.html"><code>DbSharded</code></a><code>&lt;</code><a href="-gid/index.html#R"><code>R</code></a><code>,</code><a href="-gid/index.html#T"><code>T</code></a><code>&gt;&gt; :</code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html"><code>Serializable</code></a><br>Entity group id, maps to two long columns one for the root id and one for the row</td>
+</tr>
+<tr>
+<td><a href="-gid-generator/index.html">GidGenerator</a></td>
+<td><code>class GidGenerator : AbstractPostInsertGenerator, Configurable</code></td>
+</tr>
+<tr>
+<td><a href="-hibernate-entity-module/index.html">HibernateEntityModule</a></td>
+<td><code>abstract class HibernateEntityModule : KAbstractModule</code><br>Binds hibernate entities and event listeners intended for the <a href="-transacter/index.html">Transacter</a> annotated by <a href="#">qualifier</a>.</td>
+</tr>
+<tr>
+<td><a href="-hibernate-module/index.html">HibernateModule</a></td>
+<td><code>class HibernateModule : KAbstractModule</code></td>
+</tr>
+<tr>
+<td><a href="-id/index.html">Id</a></td>
+<td><code>data class Id&lt;T :</code><a href="-db-entity/index.html"><code>DbEntity</code></a><code>&lt;</code><a href="-id/index.html#T"><code>T</code></a><code>&gt;&gt; :</code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html"><code>Serializable</code></a><code>,</code><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-comparable/index.html"><code>Comparable</code></a><code>&lt;</code><a href="-id/index.html"><code>Id</code></a><code>&lt;</code><a href="-id/index.html#T"><code>T</code></a><code>&gt;&gt;</code><br>Type-safe persistent identifier, mapped to a long column.</td>
+</tr>
+<tr>
+<td><a href="-id-type/index.html">IdType</a></td>
+<td><code>class IdType : UserType, ResultSetIdentifierConsumer</code><br>Binds Id&lt;*&gt; in the DB to a bigint in MySQL.</td>
+</tr>
+<tr>
+<td><a href="-operator/index.html">Operator</a></td>
+<td><code>enum class Operator</code></td>
+</tr>
+<tr>
+<td><a href="-or-builder/index.html">OrBuilder</a></td>
+<td><code>interface OrBuilder&lt;Q :</code><a href="-query/index.html"><code>Query</code></a><code>&lt;*&gt;&gt;</code><br>This functional interface accepts a set of options. Each option lambda is executed within the scope of a query. It is inappropriate to call methods like list() and uniqueResult() on this query.</td>
+</tr>
+<tr>
+<td><a href="-path/index.html">Path</a></td>
+<td><code>data class Path</code></td>
+</tr>
+<tr>
+<td><a href="-projection.html">Projection</a></td>
+<td><code>interface Projection</code><br>Marker interface for query projections.</td>
+</tr>
+<tr>
+<td><a href="-query/index.html">Query</a></td>
+<td><code>interface Query&lt;T&gt;</code><br>Base class for SQL queries.</td>
+</tr>
+<tr>
+<td><a href="-session/index.html">Session</a></td>
+<td><code>interface Session : Session</code></td>
+</tr>
+<tr>
+<td><a href="-transacter/index.html">Transacter</a></td>
+<td><code>interface Transacter</code><br>Provides explicit block-based transaction demarcation.</td>
+</tr>
+<tr>
+<td><a href="-transacter-service.html">TransacterService</a></td>
+<td><code>interface TransacterService : Service</code><br>Marker interface for services that provide database transactors.</td>
+</tr>
+<tr>
+<td><a href="-transformer/index.html">Transformer</a></td>
+<td><code>abstract class Transformer</code></td>
+</tr>
+<tr>
+<td><a href="-transformer-context/index.html">TransformerContext</a></td>
+<td><code>data class TransformerContext</code></td>
+</tr>
+<tr>
+<td><a href="-validation-report/index.html">ValidationReport</a></td>
+<td><code>data class ValidationReport</code></td>
+</tr>
+<tr>
+<td><a href="-vitess-dialect/index.html">VitessDialect</a></td>
+<td><code>class VitessDialect : MySQL57Dialect</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="annotations">Annotations<a class="headerlink" href="#annotations" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-constraint/index.html">Constraint</a></td>
+<td><code>annotation class Constraint</code><br>Annotates a function on a subinterface of <a href="-query/index.html">Query</a> to indicate which column (or path of columns) it constrains and using which operator.</td>
+</tr>
+<tr>
+<td><a href="-json-column/index.html">JsonColumn</a></td>
+<td><code>annotation class JsonColumn</code><br>Put this on a column field to get Hibernate to persist it as JSON using Moshi. It will use the injector&rsquo;s configured Moshi instance. Use <a href="#">misk.moshi.MoshiModule</a> to customize.</td>
+</tr>
+<tr>
+<td><a href="-order/index.html">Order</a></td>
+<td><code>annotation class Order</code><br>Annotates a function on a subinterface of <a href="-query/index.html">Query</a> to indicate which columns to order the the selected columns.</td>
+</tr>
+<tr>
+<td><a href="-property/index.html">Property</a></td>
+<td><code>annotation class Property</code><br>Annotates a parameter of a <a href="-projection.html">Projection</a> data class to indicate which column (or path of columns) to populate the parameter with.</td>
+</tr>
+<tr>
+<td><a href="-proto-column/index.html">ProtoColumn</a></td>
+<td><code>annotation class ProtoColumn</code><br>Put this on a column field for a class generated by Wire to get Hibernate to persist with protobuf serialization.</td>
+</tr>
+<tr>
+<td><a href="-secret-column/index.html">SecretColumn</a></td>
+<td><code>annotation class SecretColumn</code><br><a href="-secret-column/index.html">SecretColumn</a> is an annotation used to get Hibernate to encrypt a field before writing it to the database.</td>
+</tr>
+<tr>
+<td><a href="-select/index.html">Select</a></td>
+<td><code>annotation class Select</code><br>Annotates a function on a subinterface of <a href="-query/index.html">Query</a> to execute a <code>SELECT</code> query. Functions with this annotation must return a <code>List</code> to fetch multiple rows results, or a regular type to fetch a unique result.</td>
+</tr>
+<tr>
+<td><a href="-transformed-type/index.html">TransformedType</a></td>
+<td><code>annotation class TransformedType</code><br><a href="-transformed-type/index.html">TransformedType</a> is a meta-annotation for assigning arbitrary transformers to entity fields. Use it to annotate attributes that will mark a field to be transformed.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="exceptions">Exceptions<a class="headerlink" href="#exceptions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-post-commit-hook-failed-exception/index.html">PostCommitHookFailedException</a></td>
+<td><code>class PostCommitHookFailedException :</code><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html"><code>Exception</code></a><br><a href="-post-commit-hook-failed-exception/index.html">PostCommitHookFailedException</a> is raised when a code run as part of a post-commit hook fails. Because post-commit hooks are run after the transaction is committed, failure in these hooks does not cause the transaction to rollback, and applications may need to differentiate the two cases (exception occurred and caused the transaction to rollback, exception occurred during a post-commit hook</td>
+</tr>
+<tr>
+<td><a href="-retry-transaction-exception/index.html">RetryTransactionException</a></td>
+<td><code>class RetryTransactionException :</code><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html"><code>Exception</code></a><br>Thrown to explicitly trigger a retry, subject to retry limits and config such as noRetries().</td>
+</tr>
+</tbody>
+</table>
+<h3 id="type-aliases">Type Aliases<a class="headerlink" href="#type-aliases" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-check.html">Check</a></td>
+<td><code>typealias Check = Check</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="extensions-for-external-classes">Extensions for External Classes<a class="headerlink" href="#extensions-for-external-classes" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="java.sql.-prepared-statement/index.html">java.sql.PreparedStatement</a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="java.sql.-result-set/index.html">java.sql.ResultSet</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="allow-full-scatter.html">allowFullScatter</a></td>
+<td><code>fun &lt;T, Q :</code><a href="-query/index.html"><code>Query</code></a><code>&lt;</code><a href="allow-full-scatter.html#T"><code>T</code></a><code>&gt;&gt;</code><a href="allow-full-scatter.html#Q"><code>Q</code></a><code>.allowFullScatter():</code><a href="allow-full-scatter.html#Q"><code>Q</code></a></td>
+</tr>
+<tr>
+<td><a href="allow-table-scan.html">allowTableScan</a></td>
+<td><code>fun &lt;T, Q :</code><a href="-query/index.html"><code>Query</code></a><code>&lt;</code><a href="allow-table-scan.html#T"><code>T</code></a><code>&gt;&gt;</code><a href="allow-table-scan.html#Q"><code>Q</code></a><code>.allowTableScan():</code><a href="allow-table-scan.html#Q"><code>Q</code></a></td>
+</tr>
+<tr>
+<td><a href="constraint.html">constraint</a></td>
+<td><code>fun &lt;T, Q :</code><a href="-query/index.html"><code>Query</code></a><code>&lt;</code><a href="constraint.html#T"><code>T</code></a><code>&gt;&gt;</code><a href="constraint.html#Q"><code>Q</code></a><code>.constraint(block: CriteriaBuilder.(root: Root&lt;*&gt;) -&gt; Predicate):</code><a href="constraint.html#Q"><code>Q</code></a><br>Equivalent to Query.addConstraint, but takes the <a href="#">CriteriaBuilder</a> as a receiver and returns this. This may be easier to use with method chaining.</td>
+</tr>
+<tr>
+<td><a href="fail-safe-read.html">failSafeRead</a></td>
+<td><code>fun &lt;T&gt;</code><a href="-transacter/index.html"><code>Transacter</code></a><code>.failSafeRead(block: (session:</code><a href="-session/index.html"><code>Session</code></a><code>) -&gt;</code><a href="fail-safe-read.html#T"><code>T</code></a><code>):</code><a href="fail-safe-read.html#T"><code>T</code></a><br>Runs a read on master first then tries it on replicas on failure. This method is here only for health check purpose for standby regions.<code>fun &lt;T&gt;</code><a href="-transacter/index.html"><code>Transacter</code></a><code>.failSafeRead(shard: Shard, block: (session:</code><a href="-session/index.html"><code>Session</code></a><code>) -&gt;</code><a href="fail-safe-read.html#T"><code>T</code></a><code>):</code><a href="fail-safe-read.html#T"><code>T</code></a></td>
+</tr>
+<tr>
+<td><a href="load.html">load</a></td>
+<td><code>fun &lt;T :</code><a href="-db-entity/index.html"><code>DbEntity</code></a><code>&lt;</code><a href="load.html#T"><code>T</code></a><code>&gt;&gt;</code><a href="-session/index.html"><code>Session</code></a><code>.load(id:</code><a href="-id/index.html"><code>Id</code></a><code>&lt;</code><a href="load.html#T"><code>T</code></a><code>&gt;):</code><a href="load.html#T"><code>T</code></a></td>
+</tr>
+<tr>
+<td><a href="load-or-null.html">loadOrNull</a></td>
+<td><code>fun &lt;T :</code><a href="-db-entity/index.html"><code>DbEntity</code></a><code>&lt;</code><a href="load-or-null.html#T"><code>T</code></a><code>&gt;&gt;</code><a href="-session/index.html"><code>Session</code></a><code>.loadOrNull(id:</code><a href="-id/index.html"><code>Id</code></a><code>&lt;</code><a href="load-or-null.html#T"><code>T</code></a><code>&gt;):</code><a href="load-or-null.html#T"><code>T</code></a><code>?</code></td>
+</tr>
+<tr>
+<td><a href="load-sharded.html">loadSharded</a></td>
+<td><code>fun &lt;R :</code><a href="-db-root/index.html"><code>DbRoot</code></a><code>&lt;</code><a href="load-sharded.html#R"><code>R</code></a><code>&gt;, S :</code><a href="-db-sharded/index.html"><code>DbSharded</code></a><code>&lt;</code><a href="load-sharded.html#R"><code>R</code></a><code>,</code><a href="load-sharded.html#S"><code>S</code></a><code>&gt;&gt;</code><a href="-session/index.html"><code>Session</code></a><code>.loadSharded(gid:</code><a href="-gid/index.html"><code>Gid</code></a><code>&lt;</code><a href="load-sharded.html#R"><code>R</code></a><code>,</code><a href="load-sharded.html#S"><code>S</code></a><code>&gt;):</code><a href="load-sharded.html#S"><code>S</code></a></td>
+</tr>
+<tr>
+<td><a href="new-query.html">newQuery</a></td>
+<td><code>fun &lt;T :</code><a href="-query/index.html"><code>Query</code></a><code>&lt;*&gt;&gt;</code><a href="-query/-factory/index.html"><code>Query.Factory</code></a><code>.newQuery():</code><a href="new-query.html#T"><code>T</code></a></td>
+</tr>
+<tr>
+<td><a href="or.html">or</a></td>
+<td><code>fun &lt;T, Q :</code><a href="-query/index.html"><code>Query</code></a><code>&lt;</code><a href="or.html#T"><code>T</code></a><code>&gt;&gt;</code><a href="or.html#Q"><code>Q</code></a><code>.or(lambda:</code><a href="-or-builder/index.html"><code>OrBuilder</code></a><code>&lt;</code><a href="or.html#Q"><code>Q</code></a><code>&gt;.() -&gt;</code><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><code>Unit</code></a><code>):</code><a href="or.html#Q"><code>Q</code></a><br>Collects options that are all OR&rsquo;d together. If any are true the predicate matches.</td>
+</tr>
+<tr>
+<td><a href="shards.html">shards</a></td>
+<td><code>fun</code><a href="-transacter/index.html"><code>Transacter</code></a><code>.shards():</code><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><code>Set</code></a><code>&lt;Shard&gt;</code><br><code>fun</code><a href="-transacter/index.html"><code>Transacter</code></a><code>.shards(keyspace: Keyspace):</code><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-collection/index.html"><code>Collection</code></a><code>&lt;Shard&gt;</code></td>
+</tr>
+<tr>
+<td><a href="transaction.html">transaction</a></td>
+<td><code>fun &lt;T&gt;</code><a href="-transacter/index.html"><code>Transacter</code></a><code>.transaction(shard: Shard, block: (session:</code><a href="-session/index.html"><code>Session</code></a><code>) -&gt;</code><a href="transaction.html#T"><code>T</code></a><code>):</code><a href="transaction.html#T"><code>T</code></a><br>Commits a transaction with operations of <a href="transaction.html#misk.hibernate$transaction(misk.hibernate.Transacter, misk.vitess.Shard, kotlin.Function1((misk.hibernate.Session, misk.hibernate.transaction.T)))/block">block</a>.</td>
+</tr>
+</tbody>
+</table>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2018-2021 Square, Inc.
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../../assets/javascripts/workers/search.477d984a.min.js", "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.ddd52ceb.min.js"></script>
+      
+    
+  </body>
+</html>

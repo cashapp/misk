@@ -1,0 +1,6 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+
+com.squareup.digester.protos.service
+com.squareup.digester.protos.tdigest
+misk.metrics.digester

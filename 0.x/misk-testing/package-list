@@ -1,0 +1,17 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.testing$retrieve(org.junit.jupiter.api.extension.ExtensionContext, kotlin.String)misk.testing/org.junit.jupiter.api.extension.-extension-context/retrieve.md
+$dokka.location:misk.testing$store(org.junit.jupiter.api.extension.ExtensionContext, kotlin.String, misk.testing.store.T)misk.testing/org.junit.jupiter.api.extension.-extension-context/store.md
+misk
+misk.cloud.fake.security.keys
+misk.concurrent
+misk.containers
+misk.logging
+misk.mockito
+misk.random
+misk.service
+misk.services
+misk.testing
+misk.time
+misk.web
+org.assertj.core.api

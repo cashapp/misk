@@ -1,0 +1,8 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.clustering.zookeeper$asZkNamespace#kotlin.Stringmisk.clustering.zookeeper/kotlin.-string/as-zk-namespace.md
+$dokka.location:misk.clustering.zookeeper$asZkPath#kotlin.Stringmisk.clustering.zookeeper/kotlin.-string/as-zk-path.md
+$dokka.location:misk.clustering.zookeeper$isConnected#org.apache.curator.framework.CuratorFrameworkmisk.clustering.zookeeper/org.apache.curator.framework.-curator-framework/is-connected.md
+$dokka.location:misk.clustering.zookeeper$isRunning#org.apache.curator.framework.CuratorFrameworkmisk.clustering.zookeeper/org.apache.curator.framework.-curator-framework/is-running.md
+misk.clustering.zookeeper
+misk.zookeeper

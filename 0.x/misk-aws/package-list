@@ -1,0 +1,11 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.cloud.aws$toMiskAwsAccountId(wisp.aws.environment.AwsAccountId)misk.cloud.aws/wisp.aws.environment.-aws-account-id/to-misk-aws-account-id.md
+$dokka.location:misk.cloud.aws$toMiskAwsRegion(wisp.aws.environment.AwsRegion)misk.cloud.aws/wisp.aws.environment.-aws-region/to-misk-aws-region.md
+$dokka.location:misk.jobqueue.sqs$isRetryQueue#misk.jobqueue.QueueNamemisk.jobqueue.sqs/misk.jobqueue.-queue-name/is-retry-queue.md
+$dokka.location:misk.jobqueue.sqs$parentQueue#misk.jobqueue.QueueNamemisk.jobqueue.sqs/misk.jobqueue.-queue-name/parent-queue.md
+$dokka.location:misk.jobqueue.sqs$retryQueue#misk.jobqueue.QueueNamemisk.jobqueue.sqs/misk.jobqueue.-queue-name/retry-queue.md
+$dokka.location:misk.jobqueue.sqs$withNoPrefetching(com.amazonaws.services.sqs.buffered.QueueBufferConfig)misk.jobqueue.sqs/com.amazonaws.services.sqs.buffered.-queue-buffer-config/with-no-prefetching.md
+misk.cloud.aws
+misk.jobqueue.sqs
+misk.s3

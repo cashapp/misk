@@ -1,0 +1,13 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:wisp.logging$debug(mu.KLogger, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/debug.md
+$dokka.location:wisp.logging$debug(mu.KLogger, kotlin.Throwable, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/debug.md
+$dokka.location:wisp.logging$error(mu.KLogger, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/error.md
+$dokka.location:wisp.logging$error(mu.KLogger, kotlin.Throwable, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/error.md
+$dokka.location:wisp.logging$info(mu.KLogger, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/info.md
+$dokka.location:wisp.logging$info(mu.KLogger, kotlin.Throwable, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/info.md
+$dokka.location:wisp.logging$log(mu.KLogger, org.slf4j.event.Level, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/log.md
+$dokka.location:wisp.logging$log(mu.KLogger, org.slf4j.event.Level, kotlin.Throwable, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/log.md
+$dokka.location:wisp.logging$warn(mu.KLogger, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/warn.md
+$dokka.location:wisp.logging$warn(mu.KLogger, kotlin.Throwable, kotlin.Array((kotlin.Pair((kotlin.String, kotlin.Any)))), kotlin.Function0((kotlin.Any)))wisp.logging/mu.-k-logger/warn.md
+wisp.logging

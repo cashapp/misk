@@ -1,0 +1,12 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.jooq$fetchOneOrNull(org.jooq.ResultQuery((misk.jooq.fetchOneOrNull.RECORD)))misk.jooq/org.jooq.-result-query/fetch-one-or-null.md
+$dokka.location:misk.jooq$toInstant(java.time.LocalDateTime)misk.jooq/java.time.-local-date-time/to-instant.md
+$dokka.location:misk.jooq$toLocalDateTime(java.time.Instant)misk.jooq/java.time.-instant/to-local-date-time.md
+misk.jooq
+misk.jooq.listeners
+misk.jooq.testgen
+misk.jooq.testgen.keys
+misk.jooq.testgen.tables
+misk.jooq.testgen.tables.records
+misk.jooq.testgen.tables.references

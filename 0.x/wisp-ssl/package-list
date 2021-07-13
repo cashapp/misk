@@ -1,0 +1,14 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:wisp.security.ssl$aliasesOfType(java.security.KeyStore)wisp.security.ssl/java.security.-key-store/aliases-of-type.md
+$dokka.location:wisp.security.ssl$aliasesOfType(java.security.KeyStore, java.lang.Class((java.security.KeyStore.Entry)))wisp.security.ssl/java.security.-key-store/aliases-of-type.md
+$dokka.location:wisp.security.ssl$getCertificateAndKey(java.security.KeyStore, kotlin.CharArray)wisp.security.ssl/java.security.-key-store/get-certificate-and-key.md
+$dokka.location:wisp.security.ssl$getCertificateAndKey(java.security.KeyStore, kotlin.String, kotlin.CharArray)wisp.security.ssl/java.security.-key-store/get-certificate-and-key.md
+$dokka.location:wisp.security.ssl$getPrivateKey(java.security.KeyStore, kotlin.CharArray)wisp.security.ssl/java.security.-key-store/get-private-key.md
+$dokka.location:wisp.security.ssl$getPrivateKey(java.security.KeyStore, kotlin.String, kotlin.CharArray)wisp.security.ssl/java.security.-key-store/get-private-key.md
+$dokka.location:wisp.security.ssl$getX509Certificate(java.security.KeyStore)wisp.security.ssl/java.security.-key-store/get-x509-certificate.md
+$dokka.location:wisp.security.ssl$getX509Certificate(java.security.KeyStore, kotlin.String)wisp.security.ssl/java.security.-key-store/get-x509-certificate.md
+$dokka.location:wisp.security.ssl$getX509CertificateChain(java.security.KeyStore)wisp.security.ssl/java.security.-key-store/get-x509-certificate-chain.md
+$dokka.location:wisp.security.ssl$getX509CertificateChain(java.security.KeyStore, kotlin.String)wisp.security.ssl/java.security.-key-store/get-x509-certificate-chain.md
+$dokka.location:wisp.security.ssl$onlyAlias#java.security.KeyStorewisp.security.ssl/java.security.-key-store/only-alias.md
+wisp.security.ssl

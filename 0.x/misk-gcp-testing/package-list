@@ -1,0 +1,7 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+$dokka.location:misk.cloud.gcp.storage$check(kotlin.collections.Map((com.google.cloud.storage.spi.v1.StorageRpc.Option, kotlin.Any)), com.google.api.services.storage.model.StorageObject)misk.cloud.gcp.storage/kotlin.collections.-map/check.md
+$dokka.location:misk.cloud.gcp.testing$setJsonContent(com.google.api.client.testing.http.MockLowLevelHttpResponse, kotlin.Any)misk.cloud.gcp.testing/com.google.api.client.testing.http.-mock-low-level-http-response/set-json-content.md
+misk.cloud.gcp.datastore
+misk.cloud.gcp.storage
+misk.cloud.gcp.testing
