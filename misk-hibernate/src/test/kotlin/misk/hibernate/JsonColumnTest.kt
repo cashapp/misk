@@ -59,6 +59,7 @@ class JsonColumnTest {
       install(object : HibernateEntityModule(WillFerrellDb::class) {
         override fun configureHibernate() {
           addEntities(DbWillFerrellMovie::class)
+          addEntities(DbWillFerrellMovie2::class)
         }
       })
     }
@@ -77,6 +78,29 @@ class JsonColumnTest {
       assertThat(movie.name).isEqualTo("Anchorman")
       assertThat(movie.cameos).isEqualTo(listOf("Vince Vaughn", "Christina Applegate"))
       assertNull(movie.setting)
+    }
+  }
+
+  @Test
+  fun nullFieldTest() {
+    transacter.transaction { session ->
+      session.save(
+        DbWillFerrellMovie(
+          "Anchorman",
+          listOf("Vince Vaughn", "Christina Applegate"),
+          Setting("San Diego", "1970")
+        )
+      )
+    }
+    transacter.transaction { session ->
+      val movie = queryFactory.newQuery(WillFerrellMovie2Query::class)
+        .allowTableScan()
+        .name("Anchorman")
+        .nameAndCameosAndSetting(session)[0]
+      assertThat(movie.name).isEqualTo("Anchorman")
+      assertThat(movie.cameos).isEqualTo(listOf("Vince Vaughn", "Christina Applegate"))
+      assertThat(movie.setting).isEqualTo(Setting2("San Diego"))
+
     }
   }
 
@@ -111,12 +135,44 @@ class JsonColumnTest {
     }
   }
 
+  @Entity
+  @Table(name = "will_ferrell_movies")
+  class DbWillFerrellMovie2 : DbUnsharded<DbWillFerrellMovie2> {
+    @javax.persistence.Id
+    @GeneratedValue
+    override lateinit var id: Id<DbWillFerrellMovie2>
+
+    @Column(nullable = false)
+    var name: String
+
+    @Column(nullable = false)
+    @JsonColumn
+    var cameos: List<String>
+
+    @Column
+    @JsonColumn
+    var setting: Setting2?
+
+    constructor(name: String, cameos: List<String>, setting: Setting2? = null) {
+      this.name = name
+      this.cameos = cameos
+      this.setting = setting
+    }
+  }
+
   data class Setting(val place: String, val year: String)
+  data class Setting2(val place: String)
 
   data class NameAndCameos(
     @Property("name") val name: String,
     @Property("cameos") val cameos: List<String>,
     @Property("setting") val setting: Setting?
+  ) : Projection
+
+  data class NameAndCameos2(
+    @Property("name") val name: String,
+    @Property("cameos") val cameos: List<String>,
+    @Property("setting") val setting: Setting2?
   ) : Projection
 
   interface WillFerrellMovieQuery : Query<DbWillFerrellMovie> {
@@ -125,5 +181,13 @@ class JsonColumnTest {
 
     @Select
     fun nameAndCameosAndSetting(session: Session): List<NameAndCameos>
+  }
+
+  interface WillFerrellMovie2Query : Query<DbWillFerrellMovie2> {
+    @Constraint(path = "name")
+    fun name(name: String): WillFerrellMovie2Query
+
+    @Select
+    fun nameAndCameosAndSetting(session: Session): List<NameAndCameos2>
   }
 }
