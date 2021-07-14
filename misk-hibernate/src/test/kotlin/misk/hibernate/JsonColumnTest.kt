@@ -59,6 +59,7 @@ class JsonColumnTest {
       install(object : HibernateEntityModule(WillFerrellDb::class) {
         override fun configureHibernate() {
           addEntities(DbWillFerrellMovie::class)
+          addEntities(DbWillFerrellMovieLegacy::class)
         }
       })
     }
@@ -77,6 +78,29 @@ class JsonColumnTest {
       assertThat(movie.name).isEqualTo("Anchorman")
       assertThat(movie.cameos).isEqualTo(listOf("Vince Vaughn", "Christina Applegate"))
       assertNull(movie.setting)
+    }
+  }
+
+  @Test
+  fun rollbackAdditiveChangesTest() {
+    transacter.transaction { session ->
+      session.save(
+        DbWillFerrellMovie(
+          "Anchorman",
+          listOf("Vince Vaughn", "Christina Applegate"),
+          Setting("San Diego", "1970")
+        )
+      )
+    }
+    transacter.transaction { session ->
+      val movie = queryFactory.newQuery(WillFerrellMovieLegacyQuery::class)
+        .allowTableScan()
+        .name("Anchorman")
+        .nameAndCameosAndSetting(session)[0]
+      assertThat(movie.name).isEqualTo("Anchorman")
+      assertThat(movie.cameos).isEqualTo(listOf("Vince Vaughn", "Christina Applegate"))
+      assertThat(movie.setting).isEqualTo(SettingLegacy("San Diego"))
+
     }
   }
 
@@ -111,12 +135,44 @@ class JsonColumnTest {
     }
   }
 
+  @Entity
+  @Table(name = "will_ferrell_movies")
+  class DbWillFerrellMovieLegacy : DbUnsharded<DbWillFerrellMovieLegacy> {
+    @javax.persistence.Id
+    @GeneratedValue
+    override lateinit var id: Id<DbWillFerrellMovieLegacy>
+
+    @Column(nullable = false)
+    var name: String
+
+    @Column(nullable = false)
+    @JsonColumn
+    var cameos: List<String>
+
+    @Column
+    @JsonColumn
+    var setting: SettingLegacy?
+
+    constructor(name: String, cameos: List<String>, setting: SettingLegacy? = null) {
+      this.name = name
+      this.cameos = cameos
+      this.setting = setting
+    }
+  }
+
   data class Setting(val place: String, val year: String)
+  data class SettingLegacy(val place: String)
 
   data class NameAndCameos(
     @Property("name") val name: String,
     @Property("cameos") val cameos: List<String>,
     @Property("setting") val setting: Setting?
+  ) : Projection
+
+  data class NameAndCameosLegacy(
+    @Property("name") val name: String,
+    @Property("cameos") val cameos: List<String>,
+    @Property("setting") val setting: SettingLegacy?
   ) : Projection
 
   interface WillFerrellMovieQuery : Query<DbWillFerrellMovie> {
@@ -125,5 +181,13 @@ class JsonColumnTest {
 
     @Select
     fun nameAndCameosAndSetting(session: Session): List<NameAndCameos>
+  }
+
+  interface WillFerrellMovieLegacyQuery : Query<DbWillFerrellMovieLegacy> {
+    @Constraint(path = "name")
+    fun name(name: String): WillFerrellMovieLegacyQuery
+
+    @Select
+    fun nameAndCameosAndSetting(session: Session): List<NameAndCameosLegacy>
   }
 }
