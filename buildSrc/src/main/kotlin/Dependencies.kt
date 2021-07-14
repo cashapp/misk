@@ -1,6 +1,6 @@
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
 object Dependencies {
-  val assertj = "org.assertj:assertj-core:3.15.0"
+  val assertj = "org.assertj:assertj-core:3.20.2"
   val awaitility = "org.awaitility:awaitility-kotlin:4.1.0"
   val aws2Dynamodb = "software.amazon.awssdk:dynamodb:2.16.54"
   val aws2DynamodbEnhanced = "software.amazon.awssdk:dynamodb-enhanced:2.16.54"
