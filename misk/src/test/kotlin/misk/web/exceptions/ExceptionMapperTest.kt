@@ -41,10 +41,10 @@ internal class ExceptionMapperTest {
   }
 
   @Test
-  fun masksMessageOnServerError() {
+  fun returnsMessageOnServerError() {
     val response = get("/throws/action/503")
     assertThat(response.code).isEqualTo(HTTP_UNAVAILABLE)
-    assertThat(response.body?.string()).isEqualTo("Service Unavailable")
+    assertThat(response.body?.string()).isEqualTo("you asked for an error")
   }
 
   @Test
