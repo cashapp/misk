@@ -59,7 +59,7 @@ class JsonColumnTest {
       install(object : HibernateEntityModule(WillFerrellDb::class) {
         override fun configureHibernate() {
           addEntities(DbWillFerrellMovie::class)
-          addEntities(DbWillFerrellMovie2::class)
+          addEntities(DbWillFerrellMovieLegacy::class)
         }
       })
     }
@@ -82,7 +82,7 @@ class JsonColumnTest {
   }
 
   @Test
-  fun nullFieldTest() {
+  fun rollbackAdditiveChangesTest() {
     transacter.transaction { session ->
       session.save(
         DbWillFerrellMovie(
@@ -93,13 +93,13 @@ class JsonColumnTest {
       )
     }
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery(WillFerrellMovie2Query::class)
+      val movie = queryFactory.newQuery(WillFerrellMovieLegacyQuery::class)
         .allowTableScan()
         .name("Anchorman")
         .nameAndCameosAndSetting(session)[0]
       assertThat(movie.name).isEqualTo("Anchorman")
       assertThat(movie.cameos).isEqualTo(listOf("Vince Vaughn", "Christina Applegate"))
-      assertThat(movie.setting).isEqualTo(Setting2("San Diego"))
+      assertThat(movie.setting).isEqualTo(SettingLegacy("San Diego"))
 
     }
   }
@@ -137,10 +137,10 @@ class JsonColumnTest {
 
   @Entity
   @Table(name = "will_ferrell_movies")
-  class DbWillFerrellMovie2 : DbUnsharded<DbWillFerrellMovie2> {
+  class DbWillFerrellMovieLegacy : DbUnsharded<DbWillFerrellMovieLegacy> {
     @javax.persistence.Id
     @GeneratedValue
-    override lateinit var id: Id<DbWillFerrellMovie2>
+    override lateinit var id: Id<DbWillFerrellMovieLegacy>
 
     @Column(nullable = false)
     var name: String
@@ -151,9 +151,9 @@ class JsonColumnTest {
 
     @Column
     @JsonColumn
-    var setting: Setting2?
+    var setting: SettingLegacy?
 
-    constructor(name: String, cameos: List<String>, setting: Setting2? = null) {
+    constructor(name: String, cameos: List<String>, setting: SettingLegacy? = null) {
       this.name = name
       this.cameos = cameos
       this.setting = setting
@@ -161,7 +161,7 @@ class JsonColumnTest {
   }
 
   data class Setting(val place: String, val year: String)
-  data class Setting2(val place: String)
+  data class SettingLegacy(val place: String)
 
   data class NameAndCameos(
     @Property("name") val name: String,
@@ -169,10 +169,10 @@ class JsonColumnTest {
     @Property("setting") val setting: Setting?
   ) : Projection
 
-  data class NameAndCameos2(
+  data class NameAndCameosLegacy(
     @Property("name") val name: String,
     @Property("cameos") val cameos: List<String>,
-    @Property("setting") val setting: Setting2?
+    @Property("setting") val setting: SettingLegacy?
   ) : Projection
 
   interface WillFerrellMovieQuery : Query<DbWillFerrellMovie> {
@@ -183,11 +183,11 @@ class JsonColumnTest {
     fun nameAndCameosAndSetting(session: Session): List<NameAndCameos>
   }
 
-  interface WillFerrellMovie2Query : Query<DbWillFerrellMovie2> {
+  interface WillFerrellMovieLegacyQuery : Query<DbWillFerrellMovieLegacy> {
     @Constraint(path = "name")
-    fun name(name: String): WillFerrellMovie2Query
+    fun name(name: String): WillFerrellMovieLegacyQuery
 
     @Select
-    fun nameAndCameosAndSetting(session: Session): List<NameAndCameos2>
+    fun nameAndCameosAndSetting(session: Session): List<NameAndCameosLegacy>
   }
 }
