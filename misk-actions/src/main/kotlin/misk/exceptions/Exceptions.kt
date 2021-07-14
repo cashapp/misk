@@ -14,9 +14,8 @@ open class WebActionException(
   /** The HTTP status code. Should be 400..599. */
   val code: Int,
   /**
-   * This is returned to the caller as is for 4xx responses. 5xx responses are always masked.
-   * Be mindful not to leak internal implementation details and possible vulnerabilities in the
-   * response body.
+   * This is returned to the caller as is. Be mindful not to leak internal implementation details
+   * and possible vulnerabilities in the response body.
    */
   val responseBody: String,
   /**
