@@ -29,6 +29,70 @@ internal class FakeFeatureFlagsTest {
   }
 
   @Test
+  fun getBoolean() {
+    // Default throws.
+    assertThrows<RuntimeException> { subject.getBoolean(FEATURE, TOKEN) }
+
+    // Can be overridden
+    subject.override(FEATURE, true)
+    subject.override(OTHER_FEATURE, false)
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
+    assertThat(subject.getBoolean(OTHER_FEATURE, TOKEN)).isEqualTo(false)
+
+    // Can override with specific keys
+    subject.overrideKey(FEATURE, "joker", false)
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
+    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
+
+    // Can override with specific keys and attributes
+    val attributes = Attributes(mapOf("type" to "bad"))
+    subject.overrideKey(FEATURE, "joker", false, attributes)
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
+    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
+    assertThat(subject.getBoolean(FEATURE, "joker", attributes)).isEqualTo(false)
+    // Provides the key level override when there is no match on attributes
+    assertThat(
+      subject.getBoolean(
+        FEATURE,
+        "joker",
+        Attributes(mapOf("don't" to "exist"))
+      )
+    ).isEqualTo(false)
+  }
+
+  @Test
+  fun getDouble() {
+    // Default throws.
+    assertThrows<RuntimeException> { subject.getDouble(FEATURE, TOKEN) }
+
+    // Can be overridden
+    subject.override(FEATURE, 1.0)
+    subject.override(OTHER_FEATURE, 2.0)
+    assertThat(subject.getDouble(FEATURE, TOKEN)).isEqualTo(1.0)
+    assertThat(subject.getDouble(OTHER_FEATURE, TOKEN)).isEqualTo(2.0)
+
+    // Can override with specific keys
+    subject.overrideKey(FEATURE, "joker", 3.0)
+    assertThat(subject.getDouble(FEATURE, TOKEN)).isEqualTo(1.0)
+    assertThat(subject.getDouble(FEATURE, "joker")).isEqualTo(3.0)
+
+    // Can override with specific keys and attributes
+    val attributes = Attributes(mapOf("type" to "bad"))
+    subject.overrideKey(FEATURE, "joker", 4.0, attributes)
+    assertThat(subject.getDouble(FEATURE, TOKEN)).isEqualTo(1.0)
+    assertThat(subject.getDouble(FEATURE, "joker")).isEqualTo(3.0)
+    assertThat(subject.getDouble(FEATURE, "joker", attributes)).isEqualTo(4.0)
+    // Provides the key level override when there is no match on attributes
+    assertThat(
+      subject.getDouble(
+        FEATURE,
+        "joker",
+        Attributes(mapOf("don't" to "exist"))
+      )
+    ).isEqualTo(3.0)
+  }
+
+  @Test
   fun getInt() {
     // Default throws.
     assertThrows<RuntimeException> {
@@ -151,38 +215,6 @@ internal class FakeFeatureFlagsTest {
       .isEqualTo(JsonFeature("test-class"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, "joker"))
       .isEqualTo(JsonFeature("test-key-class"))
-  }
-
-  @Test
-  fun getBoolean() {
-    // Default throws.
-    assertThrows<RuntimeException> { subject.getBoolean(FEATURE, TOKEN) }
-
-    // Can be overridden
-    subject.override(FEATURE, true)
-    subject.override(OTHER_FEATURE, false)
-    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
-    assertThat(subject.getBoolean(OTHER_FEATURE, TOKEN)).isEqualTo(false)
-
-    // Can override with specific keys
-    subject.overrideKey(FEATURE, "joker", false)
-    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
-    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
-
-    // Can override with specific keys and attributes
-    val attributes = Attributes(mapOf("type" to "bad"))
-    subject.overrideKey(FEATURE, "joker", false, attributes)
-    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
-    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
-    assertThat(subject.getBoolean(FEATURE, "joker", attributes)).isEqualTo(false)
-    // Provides the key level override when there is no match on attributes
-    assertThat(
-      subject.getBoolean(
-        FEATURE,
-        "joker",
-        Attributes(mapOf("don't" to "exist"))
-      )
-    ).isEqualTo(false)
   }
 
   @Test
