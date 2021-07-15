@@ -88,7 +88,7 @@ object Dependencies {
   val nettyBom = "io.netty:netty-bom:4.1.65.Final"
   val okHttp = "com.squareup.okhttp3:okhttp:4.9.1"
   val okHttpMockWebServer = "com.squareup.okhttp3:mockwebserver:4.9.1"
-  val okio = "com.squareup.okio:okio:3.0.0-alpha.7"
+  val okio = "com.squareup.okio:okio:3.0.0-alpha.8"
   val openTracing = "io.opentracing:opentracing-api:0.33.0"
   val openTracingDatadog = "com.datadoghq:dd-trace-ot:0.80.0"
   val openTracingJdbc = "io.opentracing.contrib:opentracing-jdbc:0.2.15"
