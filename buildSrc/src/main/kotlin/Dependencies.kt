@@ -127,6 +127,6 @@ object Dependencies {
   val wireReflector = "com.squareup.wire:wire-reflector:4.0.0-alpha.5"
   val wireRuntime = "com.squareup.wire:wire-runtime:4.0.0-alpha.5"
   val wireSchema = "com.squareup.wire:wire-schema:4.0.0-alpha.5"
-  val zookeeper = "org.apache.zookeeper:zookeeper:3.7.0"
+  val zookeeper = "org.apache.zookeeper:zookeeper:3.5.9"
 }
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
