@@ -182,7 +182,7 @@ class ConcurrencyLimitsInterceptorTest {
       "concurrency_limits_outcomes",
       arrayOf("quota_path", "outcome"),
       arrayOf(id, "success")
-    )
+    ) ?: 0.0
   }
 
   class TestModule : KAbstractModule() {
