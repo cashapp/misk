@@ -34,17 +34,6 @@ val testShardHibernate by tasks.creating() {
     "This target is intended for manually sharding tests to make CI faster."
 }
 
-tasks.withType<DokkaTask>().configureEach {
-  outputDirectory.set(file("$rootDir/docs/0.x"))
-  dokkaSourceSets {
-    configureEach {
-      reportUndocumented.set(false)
-      skipDeprecated.set(true)
-      jdkVersion.set(8)
-    }
-  }
-}
-
 subprojects {
   apply(plugin = "java")
   apply(plugin = "kotlin")
@@ -137,4 +126,17 @@ subprojects {
       )
     }
   }
+
+
+  tasks.withType<DokkaTask>().configureEach {
+    outputDirectory.set(file("$rootDir/docs/0.x"))
+    dokkaSourceSets {
+      configureEach {
+        reportUndocumented.set(false)
+        skipDeprecated.set(true)
+        jdkVersion.set(8)
+      }
+    }
+  }
+
 }
