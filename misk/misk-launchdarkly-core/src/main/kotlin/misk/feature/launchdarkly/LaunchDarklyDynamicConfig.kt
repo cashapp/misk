@@ -17,6 +17,9 @@ class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : Dynami
   override fun getBoolean(feature: Feature) =
     featureFlags.getBoolean(feature, KEY, ATTRIBUTES)
 
+  override fun getDouble(feature: Feature) =
+    featureFlags.getDouble(feature, KEY, ATTRIBUTES)
+
   override fun getInt(feature: Feature) =
     featureFlags.getInt(feature, KEY, ATTRIBUTES)
 
@@ -31,6 +34,9 @@ class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : Dynami
 
   override fun trackBoolean(feature: Feature, executor: Executor, tracker: (Boolean) -> Unit) =
     featureFlags.trackBoolean(feature, KEY, ATTRIBUTES, executor, tracker)
+
+  override fun trackDouble(feature: Feature, executor: Executor, tracker: (Double) -> Unit) =
+    featureFlags.trackDouble(feature, KEY, ATTRIBUTES, executor, tracker)
 
   override fun trackInt(feature: Feature, executor: Executor, tracker: (Int) -> Unit) =
     featureFlags.trackInt(feature, KEY, ATTRIBUTES, executor, tracker)

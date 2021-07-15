@@ -41,6 +41,9 @@ public class FakeFeatureFlagsJavaTest {
 
     subject.overrideKey(FEATURE, "joker4", JokerTest.A);
     assertThat(subject.getEnum(FEATURE, "joker4", JokerTest.class)).isEqualTo(JokerTest.A);
+
+    subject.overrideKey(FEATURE, "joker5", 1.0);
+    assertThat(subject.getDouble(FEATURE, "joker5")).isEqualTo(1.0);
   }
 
   @Test public void testOverrideWithAttributes() {
@@ -56,6 +59,9 @@ public class FakeFeatureFlagsJavaTest {
 
     subject.overrideKey(FEATURE, "joker4", JokerTest.A);
     assertThat(subject.getEnum(FEATURE, "joker4", JokerTest.class, attributes)).isEqualTo(JokerTest.A);
+
+    subject.overrideKey(FEATURE, "joker5", 1.0);
+    assertThat(subject.getDouble(FEATURE, "joker5", attributes)).isEqualTo(1.0);
   }
 
 }
