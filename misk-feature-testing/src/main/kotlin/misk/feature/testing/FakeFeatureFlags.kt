@@ -37,6 +37,9 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
     delegate.getBoolean(feature, key, attributes)
 
+  override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
+    delegate.getDouble(feature, key, attributes)
+
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
     delegate.getInt(feature, key, attributes)
 
@@ -61,6 +64,7 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
   }
 
   override fun getBoolean(feature: Feature) = delegate.getBoolean(feature, KEY)
+  override fun getDouble(feature: Feature) = delegate.getDouble(feature, KEY)
   override fun getInt(feature: Feature) = delegate.getInt(feature, KEY)
   override fun getString(feature: Feature) = delegate.getString(feature, KEY)
   override fun <T : Enum<T>> getEnum(feature: Feature, clazz: Class<T>): T = delegate.getEnum(
@@ -82,6 +86,14 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
     executor: Executor,
     tracker: (Boolean) -> Unit
   ) = delegate.trackBoolean(feature, key, attributes, executor, tracker).toMisk()
+
+  override fun trackDouble(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Double) -> Unit
+  ) = delegate.trackDouble(feature, key, attributes, executor, tracker).toMisk()
 
   override fun trackInt(
     feature: Feature,
@@ -123,6 +135,12 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
     tracker: (Boolean) -> Unit
   ) = delegate.trackBoolean(feature, KEY, executor, tracker).toMisk()
 
+  override fun trackDouble(
+    feature: Feature,
+    executor: Executor,
+    tracker: (Double) -> Unit
+  ) = delegate.trackDouble(feature, KEY, executor, tracker).toMisk()
+
   override fun trackInt(
     feature: Feature,
     executor: Executor,
@@ -153,6 +171,11 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
     feature: Feature,
     value: Boolean
   ) = delegate.override<Boolean>(feature, value)
+
+  fun override(
+    feature: Feature,
+    value: Double
+  ) = delegate.override<Double>(feature, value)
 
   fun override(
     feature: Feature,
@@ -197,6 +220,14 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
     value: Boolean,
     attributes: Attributes = defaultAttributes
   ) = delegate.overrideKey<Boolean>(feature, key, value, attributes)
+
+  @JvmOverloads
+  fun overrideKey(
+    feature: Feature,
+    key: String,
+    value: Double,
+    attributes: Attributes = defaultAttributes
+  ) = delegate.overrideKey<Double>(feature, key, value, attributes)
 
   @JvmOverloads
   fun overrideKey(

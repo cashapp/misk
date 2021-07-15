@@ -60,6 +60,16 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     return result.value
   }
 
+  override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double {
+    val result = ldClient.doubleVariationDetail(
+      feature.name,
+      buildUser(feature, key, attributes),
+      0.0
+    )
+    checkDefaultNotUsed(feature, result)
+    return result.value
+  }
+
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int {
     checkInitialized()
     val result = ldClient.intVariationDetail(
@@ -145,6 +155,14 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     executor: Executor,
     tracker: (Boolean) -> Unit
   ) = track(feature, key, attributes, { it.booleanValue() }, executor, tracker )
+
+  override fun trackDouble(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Double) -> Unit
+  ) = track(feature, key, attributes, { it.doubleValue() }, executor, tracker )
 
   override fun trackInt(
     feature: Feature,
