@@ -48,11 +48,8 @@ internal class AssertExtensionsTest {
       }
     ).hasMessage(
       """
-Expecting:
- <"{ "my_structure2" : [ "this" , 45, "zip" ], "my_value" : "another value" }">
-to be equal to:
- <"{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }">
-but was not."""
+expected: "{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }"
+ but was: "{ "my_structure2" : [ "this" , 45, "zip" ], "my_value" : "another value" }""""
     )
   }
 
@@ -78,11 +75,8 @@ but was not."""
       }
     ).hasMessage(
       """
-Expecting:
- <"{ "my_structure" : [ "thisisit" , 45, "zip" ], "my_value" : "another value" }">
-to be equal to:
- <"{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }">
-but was not."""
+expected: "{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }"
+ but was: "{ "my_structure" : [ "thisisit" , 45, "zip" ], "my_value" : "another value" }""""
     )
   }
 
@@ -108,11 +102,8 @@ but was not."""
       }
     ).hasMessage(
       """
-Expecting:
- <"{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }">
-to be equal to:
- <"{ "my_structure" : [ "thi  s" , 45, "zip" ], "my_value" : "another value" }">
-but was not."""
+expected: "{ "my_structure" : [ "thi  s" , 45, "zip" ], "my_value" : "another value" }"
+ but was: "{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }""""
     )
   }
 }
