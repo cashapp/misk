@@ -94,10 +94,10 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
       }
     })
 
-    log.info { "starting services and waiting for them to be healthy" }
+    log.info { "starting services" }
     serviceManager.startAsync()
     serviceManager.awaitHealthy()
-    log.info { "all services are healthy" }
+    log.info { "all services started successfully" }
     serviceManager.awaitStopped()
     log.info { "all services stopped" }
   }

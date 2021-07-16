@@ -10,6 +10,9 @@ import misk.web.AvailableWhenDegraded
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
+import wisp.logging.getLogger
+import java.time.Clock
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -21,8 +24,10 @@ import javax.inject.Singleton
 @Singleton
 class StatusAction @Inject internal constructor(
   private val serviceManagerProvider: Provider<ServiceManager>,
+  private val clock: Clock,
   @JvmSuppressWildcards private val healthChecks: List<HealthCheck>
 ) : WebAction {
+  private var lastUnhealthyAt: Instant? = null
 
   @Get("/_status")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -37,11 +42,26 @@ class StatusAction @Inject internal constructor(
       }
     }.toMap()
     val healthCheckStatus = healthChecks.map { it.javaClass.simpleName to it.status() }.toMap()
+    maybeLog(healthCheckStatus)
     return ServerStatus(serviceStatus, healthCheckStatus)
+  }
+
+  /** Log a warning if a health check fails, no more than once every 5 seconds. */
+  private fun maybeLog(healthCheckStatus: Map<String, HealthStatus>) {
+    val now = clock.instant()
+    if (healthCheckStatus.values.any { !it.isHealthy }) {
+      if (lastUnhealthyAt?.plusSeconds(5)?.isBefore(now) == false) return
+      lastUnhealthyAt = now
+      logger.warn("health checks failed: $healthCheckStatus")
+    }
   }
 
   data class ServerStatus(
     val serviceStatus: Map<String, Service.State>,
     val healthCheckStatus: Map<String, HealthStatus>
   )
+
+  companion object {
+    private val logger = getLogger<StatusAction>()
+  }
 }
