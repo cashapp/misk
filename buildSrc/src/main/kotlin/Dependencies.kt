@@ -12,7 +12,7 @@ object Dependencies {
   val bouncycastlePgp = "org.bouncycastle:bcpg-jdk15on:1.69"
   val concurrencyLimitsCore = "com.netflix.concurrency-limits:concurrency-limits-core:0.3.6"
   val cronUtils = "com.cronutils:cron-utils:9.1.5"
-  val curatorFramework = "org.apache.curator:curator-framework:4.0.1"
+  val curatorFramework = "org.apache.curator:curator-framework:5.1.0"
   val datasourceProxy = "net.ttddyy:datasource-proxy:1.7"
   val docker = "com.github.docker-java:docker-java:3.1.5"
   val gcpCloudCore = "com.google.cloud:google-cloud-core:1.95.4"
@@ -128,6 +128,6 @@ object Dependencies {
   val wireReflector = "com.squareup.wire:wire-reflector:4.0.0-alpha.5"
   val wireRuntime = "com.squareup.wire:wire-runtime:4.0.0-alpha.5"
   val wireSchema = "com.squareup.wire:wire-schema:4.0.0-alpha.5"
-  val zookeeper = "org.apache.zookeeper:zookeeper:3.5.9"
+  val zookeeper = "org.apache.zookeeper:zookeeper:3.7.0"
 }
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
