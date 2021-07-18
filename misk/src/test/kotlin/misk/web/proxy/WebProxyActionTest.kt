@@ -9,7 +9,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
