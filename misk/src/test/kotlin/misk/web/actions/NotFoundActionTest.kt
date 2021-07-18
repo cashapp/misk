@@ -11,7 +11,6 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
