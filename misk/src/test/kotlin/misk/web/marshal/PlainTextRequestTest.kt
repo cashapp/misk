@@ -11,7 +11,6 @@ import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.WebTestClient
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okio.ByteString

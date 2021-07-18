@@ -24,7 +24,6 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.jetty.JettyService

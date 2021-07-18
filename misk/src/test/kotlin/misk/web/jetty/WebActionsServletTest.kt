@@ -13,7 +13,6 @@ import misk.web.ResponseContentType
 import misk.web.SocketAddress
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.WebUnixDomainSocketConfig
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes

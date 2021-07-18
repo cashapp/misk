@@ -12,7 +12,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes.APPLICATION_JAVASCRIPT
 import misk.web.mediatype.MediaTypes.TEXT_CSS
