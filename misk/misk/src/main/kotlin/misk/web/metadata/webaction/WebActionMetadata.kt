@@ -8,9 +8,9 @@ import misk.web.PathPattern
 import misk.web.formatter.ClassNameFormatter
 import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
+import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
-import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.javaMethod
 
 /** Metadata front end model for Web Action Misk-Web Tab */

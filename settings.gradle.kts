@@ -11,6 +11,7 @@ gradleEnterprise {
 
 include(":misk")
 include(":misk-actions")
+include(":misk-admin")
 include(":misk-aws")
 include(":misk-aws-dynamodb")
 include(":misk-aws-dynamodb-testing")
