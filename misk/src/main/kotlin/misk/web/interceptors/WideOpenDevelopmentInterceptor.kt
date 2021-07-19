@@ -6,14 +6,14 @@ import misk.web.NetworkInterceptor
 import wisp.deployment.Deployment
 import javax.inject.Inject
 
-internal class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInterceptor {
+class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
     chain.httpCall.setResponseHeader("Access-Control-Allow-Origin", "*")
     chain.proceed(chain.httpCall)
   }
 }
 
-internal class WideOpenDevelopmentInterceptorFactory @Inject constructor(
+class WideOpenDevelopmentInterceptorFactory @Inject constructor(
   private val wideOpenDevelopmentInterceptor: WideOpenDevelopmentInterceptor,
   private val deployment: Deployment
 ) : NetworkInterceptor.Factory {
