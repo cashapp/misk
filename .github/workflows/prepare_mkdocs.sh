@@ -71,7 +71,6 @@ preserve_index() {
 ./gradlew --no-daemon wisp-deployment-testing:dokkaGfm ; preserve_index
 ./gradlew --no-daemon wisp-feature:dokkaGfm ; preserve_index
 ./gradlew --no-daemon wisp-feature-testing:dokkaGfm ; preserve_index
-./gradlew --no-daemon wisp-launchdarkly:dokkaGfm ; preserve_index
 ./gradlew --no-daemon wisp-logging:dokkaGfm ; preserve_index
 ./gradlew --no-daemon wisp-logging-testing:dokkaGfm ; preserve_index
 ./gradlew --no-daemon wisp-resource-loader:dokkaGfm ; preserve_index
