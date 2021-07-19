@@ -28,6 +28,7 @@ dependencies {
   implementation(Dependencies.tink)
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
+  implementation(project(":misk-admin"))
   implementation(project(":misk-core"))
   implementation(project(":misk-crypto"))
   implementation(project(":misk-inject"))
