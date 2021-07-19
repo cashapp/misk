@@ -8,9 +8,14 @@ import java.util.concurrent.Executor
  */
 interface DynamicConfig {
   /**
-   * Returns the value of an boolean dynamic flag.
+   * Returns the value of a boolean dynamic flag.
    */
   fun getBoolean(feature: Feature): Boolean
+
+  /**
+   * Returns the value of a double dynamic flag.
+   */
+  fun getDouble(feature: Feature): Double
 
   /**
    * Returns the value of an integer dynamic flag.
@@ -39,6 +44,14 @@ interface DynamicConfig {
    * Returns a tracker reference which can be used to un-register the tracker.
    */
   fun trackBoolean(feature: Feature, executor: Executor, tracker: (Boolean) -> Unit): TrackerReference
+
+  /**
+   * Registers a double dynamic config tracker which will be invoked whenever the double
+   * dynamic config changes value.
+   *
+   * Returns a tracker reference which can be used to un-register the tracker.
+   */
+  fun trackDouble(feature: Feature, executor: Executor, tracker: (Double) -> Unit): TrackerReference
 
   /**
    * Registers a integer dynamic config tracker which will be invoked whenever the integer

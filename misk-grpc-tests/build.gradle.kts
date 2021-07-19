@@ -63,6 +63,7 @@ sourceSets {
 dependencies {
   implementation(Dependencies.assertj)
   implementation(Dependencies.awaitility)
+  implementation(Dependencies.javaxAnnotation)
   implementation(Dependencies.junitApi)
   implementation(Dependencies.kotlinTest)
   implementation(Dependencies.docker)
