@@ -1,0 +1,44 @@
+syntax = "proto2";
+
+package test;
+
+option java_package = "com.squareup.protos.test.parsing";
+
+message Robot {
+  optional int32 robot_id = 1;
+  optional string robot_token = 2;
+}
+
+message Warehouse {
+  optional int64 warehouse_id = 1;
+  optional string warehouse_token = 2;
+  optional Warehouse central_repo = 3;
+  repeated Warehouse alternates = 4;
+  map<string, string> dropoff_points = 6;
+  map<int32, Robot> robots = 7;
+}
+
+message Shipment {
+  enum State {
+    VALIDATING = 0;
+    PICKING_UP = 1;
+    DELIVERING = 2;
+    CONSUMING = 4;
+  }
+
+  optional int64 shipment_id = 1;
+  optional string shipment_token = 2;
+  optional Warehouse source = 4;
+  optional Warehouse destination = 5;
+  optional State status = 6;
+  optional double load_ratio = 7;
+  optional bool deleted = 8;
+  optional bytes source_signature = 9;
+  optional bytes destination_signature = 10;
+  repeated string notes = 12;
+  oneof PaymentType {
+    string account_token = 13;
+    string card_token = 14;
+    string transfer_id = 15;
+  }
+}
