@@ -12,6 +12,7 @@ dependencies {
   // TODO: these should be implementation("com.squareup.misk:*")
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
+  implementation(project(":misk-admin"))
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-prometheus"))
