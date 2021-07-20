@@ -63,6 +63,7 @@ sourceSets {
 dependencies {
   implementation(Dependencies.assertj)
   implementation(Dependencies.awaitility)
+  implementation(Dependencies.javaxAnnotation)
   implementation(Dependencies.junitApi)
   implementation(Dependencies.kotlinTest)
   implementation(Dependencies.docker)
@@ -83,13 +84,6 @@ dependencies {
   implementation(project(":misk-testing"))
 
   testImplementation(Dependencies.logbackClassic)
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

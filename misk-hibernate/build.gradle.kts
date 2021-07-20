@@ -28,6 +28,7 @@ dependencies {
   implementation(Dependencies.tink)
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
+  implementation(project(":misk-admin"))
   implementation(project(":misk-core"))
   implementation(project(":misk-crypto"))
   implementation(project(":misk-inject"))
@@ -53,13 +54,6 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-hibernate-testing"))
   testImplementation(project(":wisp-config"))
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

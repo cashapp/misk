@@ -57,11 +57,11 @@ dependencies {
   implementation(Dependencies.prometheusHotspot)
   implementation(Dependencies.jnrUnixsocket)
   implementation(Dependencies.concurrencyLimitsCore)
-  implementation(project(":misk-actions"))
   implementation(project(":misk-core"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-service"))
+  api(project(":misk-actions"))
   api(project(":misk-inject"))
   api(project(":wisp-client"))
   api(project(":wisp-config"))
@@ -81,13 +81,6 @@ dependencies {
   }
   testImplementation(Dependencies.openTracingMock)
   testImplementation(Dependencies.guavaTestLib)
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

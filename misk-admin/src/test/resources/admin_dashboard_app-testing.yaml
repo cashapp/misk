@@ -1,0 +1,5 @@
+included_config:
+  key: testing
+
+redacted_config:
+  password: phrase123

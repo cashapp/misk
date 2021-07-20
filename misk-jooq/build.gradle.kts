@@ -19,13 +19,6 @@ dependencies {
   jooqGenerator(Dependencies.mysql)
 }
 
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
-}
-
 apply(from = "$rootDir/gradle-mvn-publish.gradle")
 
 // Needed to generate jooq test db classes
@@ -37,7 +30,7 @@ buildscript {
 }
 // Needed to generate jooq test db classes
 plugins {
-  id("org.flywaydb.flyway") version "7.11.2"
+  id("org.flywaydb.flyway") version "7.11.3"
   id("nu.studer.jooq") version "6.0"
 }
 
