@@ -32,10 +32,14 @@ class LaunchDarklyModule(
   override fun configure() {
     val key = LaunchDarklyFeatureFlags::class.toKey(qualifier)
     bind(FeatureFlags::class.toKey(qualifier)).to(key)
+    bind(wisp.feature.FeatureFlags::class.toKey(qualifier)).to(key)
     bind(FeatureService::class.toKey(qualifier)).to(key)
     val featureFlagsProvider = getProvider(key)
+    val launchDarklyDynamicConfig = LaunchDarklyDynamicConfig(featureFlagsProvider.get())
     bind(DynamicConfig::class.toKey(qualifier)).toProvider(
-      Provider<DynamicConfig> { LaunchDarklyDynamicConfig(featureFlagsProvider.get()) })
+      Provider<DynamicConfig> { launchDarklyDynamicConfig })
+    bind(wisp.feature.DynamicConfig::class.toKey(qualifier)).toProvider(
+      Provider<DynamicConfig> { launchDarklyDynamicConfig })
     install(ServiceModule(FeatureService::class.toKey(qualifier)))
   }
 
