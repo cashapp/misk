@@ -1,16 +1,5 @@
-sourceSets {
-  val main by getting {
-    resources.srcDir(listOf(
-      "web/tabs/admin-dashboard/lib",
-      "web/tabs/config/lib",
-      "web/tabs/database/lib",
-      "web/tabs/web-actions/lib"
-    ))
-    resources.exclude("**/node_modules")
-  }
-  val test by getting {
-    java.srcDir("src/test/kotlin/")
-  }
+plugins {
+  id("com.squareup.wire")
 }
 
 dependencies {
@@ -87,6 +76,40 @@ afterEvaluate {
   project.tasks.dokka {
     outputDirectory = "$rootDir/docs/0.x"
     outputFormat = "gfm"
+  }
+}
+
+val generatedSourceDir = "$buildDir/generated/source/wire-test"
+
+wire {
+  sourcePath {
+    srcDir("src/test/proto/")
+  }
+  java {
+    out = generatedSourceDir
+  }
+}
+
+// Make sure the Wire-generated sources are test-only.
+afterEvaluate {
+  val generatedSourceGlob = "$generatedSourceDir/**"
+
+  sourceSets {
+    val main by getting {
+      java.setSrcDirs(java.srcDirs.filter { !it.path.contains(generatedSourceDir) })
+    }
+    val test by getting {
+      java.srcDir(generatedSourceDir)
+    }
+  }
+
+  tasks {
+    compileJava {
+      exclude(generatedSourceGlob)
+    }
+    compileTestJava {
+      include(generatedSourceGlob)
+    }
   }
 }
 
