@@ -3,15 +3,22 @@ apply plugin: "com.vanniktech.maven.publish"
 mavenPublish {
   releaseSigningEnabled = !getGpgKey().isEmpty()
 
-  publishing {
-    repositories {
-      maven {
-        //releaseRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
-        // snapshotRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
-        url = "${rootProject.buildDir}/localMaven"
-      }
+  targets {
+    installArchives {
+      releaseRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
+      snapshotRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
     }
   }
+
+//  publishing {
+//    repositories {
+//      maven {
+//        //releaseRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
+//        // snapshotRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
+//        url = "${rootProject.buildDir}/localMaven"
+//      }
+//    }
+//  }
 }
 
 def getGpgKey() {
