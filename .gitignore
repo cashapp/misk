@@ -20,6 +20,7 @@ lib
 dist
 .hash
 hooks.gradle
+*.hprof
 
 **/site/
 docs/0.x/*

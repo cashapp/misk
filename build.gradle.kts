@@ -10,6 +10,7 @@ buildscript {
   }
 
   dependencies {
+    classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.5.0")
     classpath(Dependencies.kotlinAllOpenPlugin)
     classpath(Dependencies.kotlinGradlePlugin)
     classpath(Dependencies.kotlinNoArgPlugin)
@@ -24,13 +25,13 @@ buildscript {
 val testShardNonHibernate by tasks.creating() {
   group = "Continuous integration"
   description = "Runs all tests that don't depend on misk-hibernate. " +
-          "This target is intended for manually sharding tests to make CI faster."
+    "This target is intended for manually sharding tests to make CI faster."
 }
 
 val testShardHibernate by tasks.creating() {
   group = "Continuous integration"
   description = "Runs all tests that depend on misk-hibernate. " +
-          "This target is intended for manually sharding tests to make CI faster."
+    "This target is intended for manually sharding tests to make CI faster."
 }
 
 subprojects {
@@ -55,7 +56,7 @@ subprojects {
       jvmTarget = "1.8"
 
       // TODO(alec): Enable again once Environment enum is deleted
-       allWarningsAsErrors = false
+      allWarningsAsErrors = false
     }
   }
   val compileTestKotlin by tasks.getting(KotlinCompile::class) {
@@ -63,7 +64,7 @@ subprojects {
       jvmTarget = "1.8"
 
       // TODO(alec): Enable again once Environment enum is deleted
-       allWarningsAsErrors = false
+      allWarningsAsErrors = false
     }
   }
 
@@ -81,16 +82,6 @@ subprojects {
     add("api", enforcedPlatform(Dependencies.nettyBom))
   }
 
-  // We have to set the dokka configuration after evaluation since the com.vanniktech.maven.publish
-  // plugin overwrites our dokka configuration on projects where it's applied.
-  afterEvaluate {
-    val dokka by tasks.getting(DokkaTask::class) {
-      reportUndocumented = false
-      skipDeprecated = true
-      jdkVersion = 8
-    }
-  }
-
   tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
@@ -105,7 +96,16 @@ subprojects {
 
   val testTask = tasks.findByName("test")
   if (testTask != null) {
-    if (listOf("misk-aws","misk-events","misk-jobqueue","misk-jobqueue-testing","misk-jdbc","misk-jdbc-testing","misk-hibernate","misk-hibernate-testing").contains(name)) {
+    if (listOf(
+        "misk-aws",
+        "misk-events",
+        "misk-jobqueue",
+        "misk-jobqueue-testing",
+        "misk-jdbc",
+        "misk-jdbc-testing",
+        "misk-hibernate",
+        "misk-hibernate-testing"
+      ).contains(name)) {
       testShardHibernate.dependsOn(testTask)
     } else {
       testShardNonHibernate.dependsOn(testTask)
@@ -120,7 +120,23 @@ subprojects {
   // https://github.com/square/okio/issues/647
   configurations.all {
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
-      attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
+      attributes.attribute(
+        Usage.USAGE_ATTRIBUTE,
+        this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
+      )
     }
   }
+
+
+  tasks.withType<DokkaTask>().configureEach {
+    outputDirectory.set(file("$rootDir/docs/0.x"))
+    dokkaSourceSets {
+      configureEach {
+        reportUndocumented.set(false)
+        skipDeprecated.set(true)
+        jdkVersion.set(8)
+      }
+    }
+  }
+
 }
