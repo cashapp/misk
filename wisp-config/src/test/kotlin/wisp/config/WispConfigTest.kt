@@ -107,8 +107,8 @@ internal class WispConfigTest {
     assertEquals("RRRRRRRRRRRRRRRRR", myConfig.aws.AWS_SECRET_ACCESS_KEY.value)
 
     // values should me masked
-    assertNotEquals("AAAAAAAAAAAAAAAA", myConfig.aws.AWS_ACCESS_KEY_ID.toString())
-    assertNotEquals("RRRRRRRRRRRRRRRRR", myConfig.aws.AWS_SECRET_ACCESS_KEY.toString())
+    assertNotEquals("AAAAAAAAAAAAAAAA", myConfig.aws.AWS_ACCESS_KEY_ID)
+    assertNotEquals("RRRRRRRRRRRRRRRRR", myConfig.aws.AWS_SECRET_ACCESS_KEY)
   }
 
   @Test
@@ -125,8 +125,8 @@ internal class WispConfigTest {
     assertEquals("RRRRRRRRRRRRRRRRR", myConfig.AWS_SECRET_ACCESS_KEY.value)
 
     // values should me masked
-    assertNotEquals("AAAAAAAAAAAAAAAA", myConfig.AWS_ACCESS_KEY_ID.toString())
-    assertNotEquals("RRRRRRRRRRRRRRRRR", myConfig.AWS_SECRET_ACCESS_KEY.toString())
+    assertNotEquals("AAAAAAAAAAAAAAAA", myConfig.AWS_ACCESS_KEY_ID)
+    assertNotEquals("RRRRRRRRRRRRRRRRR", myConfig.AWS_SECRET_ACCESS_KEY)
   }
 
   // TODO(chrisryan): add tests to support other formats
