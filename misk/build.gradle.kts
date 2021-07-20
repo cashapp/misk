@@ -72,13 +72,6 @@ dependencies {
   testImplementation(Dependencies.guavaTestLib)
 }
 
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
-}
-
 val generatedSourceDir = "$buildDir/generated/source/wire-test"
 
 wire {

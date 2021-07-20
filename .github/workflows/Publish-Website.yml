@@ -1,7 +1,6 @@
-name: Build docs site (& deploy if on master to gh-pages)
+name: Build docs site & deploy to gh-pages (master only)
 
 on:
-  pull_request:
   push:
     branches:
       - master
