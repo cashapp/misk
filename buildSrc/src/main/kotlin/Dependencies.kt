@@ -91,7 +91,7 @@ object Dependencies {
   val okHttpMockWebServer = "com.squareup.okhttp3:mockwebserver:4.9.1"
   val okio = "com.squareup.okio:okio:3.0.0-alpha.8"
   val openTracing = "io.opentracing:opentracing-api:0.33.0"
-  val openTracingDatadog = "com.datadoghq:dd-trace-ot:0.80.0"
+  val openTracingDatadog = "com.datadoghq:dd-trace-ot:0.83.2"
   val openTracingJdbc = "io.opentracing.contrib:opentracing-jdbc:0.2.15"
   val openTracingMock = "io.opentracing:opentracing-mock:0.33.0"
   val openTracingOkHttp = "io.opentracing.contrib:opentracing-okhttp3:3.0.0"
