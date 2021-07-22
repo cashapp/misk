@@ -1,16 +1,14 @@
 package misk.feature.launchdarkly
 
-import wisp.feature.Attributes
-import wisp.feature.DynamicConfig
-import wisp.feature.Feature
-import wisp.feature.FeatureFlags
+import misk.feature.Attributes
+import misk.feature.DynamicConfig
+import misk.feature.Feature
+import misk.feature.FeatureFlags
 import java.util.concurrent.Executor
 import javax.inject.Singleton
 
 @Singleton
-class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) :
-  misk.feature.DynamicConfig,
-  DynamicConfig {
+class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : DynamicConfig {
   companion object {
     const val KEY = "dynamic_flag"
     val ATTRIBUTES = Attributes(anonymous = true)

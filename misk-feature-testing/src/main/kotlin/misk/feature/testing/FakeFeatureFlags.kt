@@ -3,10 +3,10 @@ package misk.feature.testing
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
 import misk.feature.FeatureService
-import wisp.feature.Attributes
-import wisp.feature.DynamicConfig
-import wisp.feature.Feature
-import wisp.feature.FeatureFlags
+import misk.feature.Attributes
+import misk.feature.DynamicConfig
+import misk.feature.Feature
+import misk.feature.FeatureFlags
 import misk.feature.toMisk
 import wisp.feature.toSafeJson
 import java.util.concurrent.Executor
@@ -19,10 +19,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : AbstractIdleService(),
-  misk.feature.FeatureFlags,
   FeatureFlags,
   FeatureService,
-  misk.feature.DynamicConfig,
   DynamicConfig {
   companion object {
     const val KEY = "fake_dynamic_flag"
