@@ -11,10 +11,10 @@ import com.squareup.moshi.Moshi
 import wisp.feature.FeatureFlagValidation
 import misk.feature.FeatureService
 import mu.KotlinLogging
-import wisp.feature.Attributes
-import wisp.feature.Feature
-import wisp.feature.FeatureFlags
-import wisp.feature.TrackerReference
+import misk.feature.Attributes
+import misk.feature.Feature
+import misk.feature.FeatureFlags
+import misk.feature.TrackerReference
 import wisp.feature.fromSafeJson
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -28,11 +28,7 @@ import javax.inject.Singleton
 class LaunchDarklyFeatureFlags @Inject constructor(
   private val ldClient: LDClientInterface,
   private val moshi: Moshi
-) :
-  AbstractIdleService(),
-  misk.feature.FeatureFlags,
-  FeatureFlags,
-  FeatureService {
+) : AbstractIdleService(), FeatureFlags, FeatureService {
   override fun startUp() {
     var attempts = 300
     val intervalMillis = 100L
