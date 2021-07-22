@@ -97,14 +97,24 @@ d. Make sure to run `jooq-test-regenerate.sh` every time you add a migration.
 After wiring the `JooqModule` in like this
 
 ```
-install(JooqModule(<qualifier>, datasourceConfig, <reader qualifier>))
+  install(JooqModule(
+      qualifier = JooqDBIdentifier::class,
+      dataSourceClusterConfig = datasourceConfig,
+      jooqCodeGenSchemaName = "jooq",
+      jooqTimestampRecordListenerOptions = JooqTimestampRecordListenerOptions(
+        install = true,
+        createdAtColumnName = "created_at",
+        updatedAtColumnName = "updated_at"
+      ),
+      readerQualifier = JooqDBReadOnlyIdentifier::class
+    ))
 ```
 
 You can now start using the `JooqTransacter` anywhere like this  
 
 ```
 class Service @Inject constructor(
-   @JooqDBIdentifier val transacter: JooqTransacter\
+   @JooqDBIdentifier val transacter: JooqTransacter
 ) {
  
  // You can insert a row in a table like this
@@ -132,7 +142,7 @@ ctx.select()
        .where(BOOK.NAME.like("sum of all%")   
        .fetch()
 
-//more info in the joow website here - https://www.jooq.org/doc/latest/manual/ 
+//more info in the jooq website here - https://www.jooq.org/doc/latest/manual/ 
 }
 
 ```
@@ -145,7 +155,7 @@ ctx.select()
    SchemaMigrationService built into a gradle plugin. That same plugin can also generate the 
    jooq classes.  
    Further, in order to use jooq we can't have migrations placed in a folder called `migrations`. 
-   The issue is jooq.jar is shipped with a directory called `migrations` with the some 
+   The issue is jooq.jar ships with a directory called `migrations` with the some 
    [migrations](https://github.com/jOOQ/jOOQ/tree/main/jOOQ/src/main/resources/migrations) 
    we don't care about in it. When the service starts up it finds this folder as well and tries 
    to run those migrations. Renaming misk service migrations to somethinq like `db-migrations` works. 
