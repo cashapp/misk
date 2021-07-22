@@ -46,7 +46,9 @@ class ClientJooqTestingModule : KAbstractModule() {
         updatedAtColumnName = "updated_at"
       ),
       readerQualifier = JooqDBReadOnlyIdentifier::class
-    ))
+    ) {
+      set(DeleteOrUpdateWithoutWhereListener())
+    })
     install(JdbcTestingModule(JooqDBIdentifier::class))
     install(LogCollectorModule())
   }
