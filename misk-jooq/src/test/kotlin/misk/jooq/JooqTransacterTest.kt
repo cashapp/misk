@@ -3,6 +3,7 @@ package misk.jooq
 import misk.jdbc.PostCommitHookFailedException
 import misk.jooq.JooqTransacter.Companion.noRetriesOptions
 import misk.jooq.config.ClientJooqTestingModule
+import misk.jooq.config.DeleteOrUpdateWithoutWhereException
 import misk.jooq.config.JooqDBIdentifier
 import misk.jooq.config.JooqDBReadOnlyIdentifier
 import misk.jooq.model.Genre
@@ -302,4 +303,21 @@ internal class JooqTransacterTest {
       }
     }
   }
+
+  @Test fun `delete without where throws an error`() {
+    transacter.transaction { (ctx) ->
+      ctx.newRecord(MOVIE).apply {
+        this.genre = Genre.COMEDY.name
+        this.name = "Dumb and dumber"
+      }.also { it.store() }
+    }
+    assertThatExceptionOfType(DeleteOrUpdateWithoutWhereException::class.java).isThrownBy {
+      transacter.transaction { (ctx) ->
+        // this is expected to throw an error because of the [DeleteOrUpdateWithoutWhereListener]
+        // registered
+        ctx.deleteFrom(MOVIE).execute()
+      }
+    }
+  }
+
 }
