@@ -14,12 +14,14 @@ import misk.jdbc.RealDatabasePool
 import misk.jooq.listeners.JooqSQLLogger
 import misk.jooq.listeners.JooqTimestampRecordListener
 import misk.jooq.listeners.JooqTimestampRecordListenerOptions
+import org.jooq.Configuration
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.conf.MappedSchema
 import org.jooq.conf.RenderMapping
 import org.jooq.conf.Settings
 import org.jooq.impl.DSL
+import org.jooq.impl.DefaultConfiguration
 import org.jooq.impl.DefaultTransactionProvider
 import java.time.Clock
 import javax.inject.Inject
@@ -33,7 +35,8 @@ class JooqModule(
   private val databasePool: DatabasePool = RealDatabasePool,
   private val readerQualifier: KClass<out Annotation>? = null,
   private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions =
-    JooqTimestampRecordListenerOptions(install = false)
+    JooqTimestampRecordListenerOptions(install = false),
+  private val jooqConfigExtension: Configuration.() -> Unit = {}
 ) : KAbstractModule() {
 
   override fun configure() {
@@ -120,7 +123,7 @@ class JooqModule(
             updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
           ))
         }
-      }
+      }.apply(jooqConfigExtension)
     }
   }
 }
