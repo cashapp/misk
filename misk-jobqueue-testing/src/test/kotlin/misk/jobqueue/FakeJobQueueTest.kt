@@ -146,6 +146,20 @@ internal class FakeJobQueueTest {
   }
 
   @Test
+  fun deadletteredJobPassesIfNotAcknowledged() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    exampleJobEnqueuer.enqueueGreen("dead-letter", hint = ExampleJobHint.DEAD_LETTER)
+
+    val jobs = fakeJobQueue.peekJobs(GREEN_QUEUE)
+    assertThat(jobs).hasSize(1)
+
+    val handledJobs = fakeJobQueue.handleJobs(assertAcknowledged = true)
+    val onlyJob = handledJobs.single()
+    assertThat(onlyJob.deadLettered).isTrue()
+  }
+
+  @Test
   fun expectedMissingAcknowledge() {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
 
