@@ -48,7 +48,7 @@ data class Container(
  *         withEnv("ZOOKEEPER_CLIENT_PORT=2181")
  *     }
  *     val kafka = Container {
- *         withImage("confluentinc/cp-kafka"
+ *         withImage("confluentinc/cp-kafka")
  *         withName("kafka")
  *         withExposedPorts(ExposedPort.tcp(port))
  *         withPortBindings(Ports().apply {
