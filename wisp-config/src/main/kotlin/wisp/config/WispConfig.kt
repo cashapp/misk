@@ -34,7 +34,7 @@ object WispConfig {
    *                ...
    *                .addWispConfigSources(...)
    *                ...
-   *                .build
+   *                .build()
    *                .loadConfigOrThrow<MyConfig>()
    * Note that if you are passing configuration fragments within Wisp, MyConfig should implement
    * [Config]
