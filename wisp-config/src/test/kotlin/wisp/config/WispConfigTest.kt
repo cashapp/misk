@@ -106,7 +106,7 @@ internal class WispConfigTest {
     assertEquals("AAAAAAAAAAAAAAAA", myConfig.aws.AWS_ACCESS_KEY_ID.value)
     assertEquals("RRRRRRRRRRRRRRRRR", myConfig.aws.AWS_SECRET_ACCESS_KEY.value)
 
-    // values should me masked
+    // values should be masked
     assertNotEquals("AAAAAAAAAAAAAAAA", myConfig.aws.AWS_ACCESS_KEY_ID)
     assertNotEquals("RRRRRRRRRRRRRRRRR", myConfig.aws.AWS_SECRET_ACCESS_KEY)
   }
@@ -124,7 +124,7 @@ internal class WispConfigTest {
     assertEquals("AAAAAAAAAAAAAAAA", myConfig.AWS_ACCESS_KEY_ID.value)
     assertEquals("RRRRRRRRRRRRRRRRR", myConfig.AWS_SECRET_ACCESS_KEY.value)
 
-    // values should me masked
+    // values should be masked
     assertNotEquals("AAAAAAAAAAAAAAAA", myConfig.AWS_ACCESS_KEY_ID)
     assertNotEquals("RRRRRRRRRRRRRRRRR", myConfig.AWS_SECRET_ACCESS_KEY)
   }
