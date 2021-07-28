@@ -1,5 +1,6 @@
 package misk.feature.launchdarkly
 
+import ch.qos.logback.classic.Level
 import com.launchdarkly.sdk.EvaluationDetail
 import com.launchdarkly.sdk.EvaluationReason
 import com.launchdarkly.sdk.LDUser
@@ -25,6 +26,9 @@ import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.feature.getEnum
 import misk.feature.getJson
+import org.junit.jupiter.api.AfterEach
+import wisp.logging.WispQueuedLogCollector
+import java.util.function.Function
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
@@ -32,10 +36,17 @@ internal class LaunchDarklyFeatureFlagsTest {
     .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
     .build()
   private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(client, moshi)
+  private val logCollector = WispQueuedLogCollector()
 
   @BeforeEach
   fun beforeEach() {
     Mockito.`when`(client.isInitialized).thenReturn(true)
+    logCollector.startUp()
+  }
+
+  @AfterEach
+  fun afterEach() {
+    logCollector.shutDown()
   }
 
   @Test
@@ -151,6 +162,43 @@ internal class LaunchDarklyFeatureFlagsTest {
     val feature = featureFlags.getJson<JsonFeature>(Feature("which-dinosaur"), "abcd")
 
     assertThat(feature).isEqualTo(JsonFeature("dino"))
+  }
+
+  @Test
+  fun getJsonWithUnknownFieldsLogsOnce() {
+    val json = """{
+      "value" : "dino",
+      "new_field": "more dinos"
+    }
+    """.trimIndent()
+    Mockito
+      .`when`(
+        client.jsonValueVariationDetail(
+          anyString(), any(LDUser::class.java),
+          any(LDValue::class.java)
+        )
+      )
+      .thenReturn(
+        EvaluationDetail.fromValue(
+          LDValue.parse(json), 1, EvaluationReason.targetMatch()
+        )
+      )
+
+    val feature = featureFlags.getJson<JsonFeature>(Feature("which-dinosaur"), "abcd")
+
+    // Unknown fields are ignored. A log entry occurred. This will be asserted on later.
+    assertThat(feature).isEqualTo(JsonFeature("dino"))
+
+    // Eval again, to check later that the warning was logged once.
+    featureFlags.getJson<JsonFeature>(Feature("which-dinosaur"), "abcd")
+
+    // Check log events.
+    val logEvents = logCollector.takeEvents(LaunchDarklyFeatureFlags::class)
+    assertThat(logEvents).extracting(Function { it.level }).containsExactly(Level.WARN)
+    assertThat(logEvents).extracting(Function { it.message })
+      .containsExactly(
+        "failed to parse JSON due to unknown fields. ignoring those fields and trying again"
+      )
   }
 
   @Test

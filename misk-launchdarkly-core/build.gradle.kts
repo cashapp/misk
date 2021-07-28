@@ -11,6 +11,7 @@ dependencies {
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.moshiKotlin)
   testImplementation(Dependencies.moshiAdapters)
+  testImplementation(project(":wisp-logging-testing"))
 }
 
 afterEvaluate {
