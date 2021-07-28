@@ -31,7 +31,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   private val moshi: Moshi
 ) : AbstractIdleService(), FeatureFlags, FeatureService {
 
-  private var featuresWithMigrationWarnings: List<Feature> = listOf()
+  private val featuresWithMigrationWarnings: MutableList<Feature> = mutableListOf()
 
   override fun startUp() {
     var attempts = 300
@@ -291,7 +291,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
 
   private fun logJsonMigrationWarningOnce(feature: Feature, exception: JsonDataException) {
     if (!featuresWithMigrationWarnings.contains(feature)) {
-      featuresWithMigrationWarnings = featuresWithMigrationWarnings + feature
+      featuresWithMigrationWarnings += feature
 
       logger.warn(exception) {
         "failed to parse JSON due to unknown fields. ignoring those fields and trying again"
