@@ -1,8 +1,8 @@
 dependencies {
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.kotlinReflection)
-  implementation(Dependencies.launchDarkly)
-  implementation(Dependencies.moshiKotlin)
+  api(Dependencies.launchDarkly)
+  api(Dependencies.moshiKotlin)
   implementation(project(":wisp-client"))
   implementation(project(":wisp-feature"))
   implementation(project(":wisp-logging"))
