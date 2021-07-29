@@ -10,6 +10,10 @@ import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 import java.net.HttpURLConnection.HTTP_UNSUPPORTED_TYPE
 
+/**
+ * Even though all kotlin exceptions are runtime exceptions.
+ * To ensure java inter-op all exception need to extend from RuntimeException.
+ */
 open class WebActionException(
   /** The HTTP status code. Should be 400..599. */
   val code: Int,
@@ -23,7 +27,7 @@ open class WebActionException(
    */
   message: String,
   cause: Throwable? = null
-) : Exception(message, cause) {
+) : RuntimeException(message, cause) {
   val isClientError = code in (400..499)
   val isServerError = code in (500..599)
 
