@@ -1,0 +1,10 @@
+public abstract interface class misk/jobqueue/TransactionalJobQueue {
+	public abstract fun enqueue (Lmisk/hibernate/Session;Lmisk/hibernate/Gid;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+	public abstract fun enqueue (Lmisk/hibernate/Session;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+}
+
+public final class misk/jobqueue/TransactionalJobQueue$DefaultImpls {
+	public static synthetic fun enqueue$default (Lmisk/jobqueue/TransactionalJobQueue;Lmisk/hibernate/Session;Lmisk/hibernate/Gid;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)V
+	public static synthetic fun enqueue$default (Lmisk/jobqueue/TransactionalJobQueue;Lmisk/hibernate/Session;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)V
+}
+

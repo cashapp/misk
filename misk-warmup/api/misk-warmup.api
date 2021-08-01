@@ -1,0 +1,9 @@
+public final class misk/warmup/WarmupModule : misk/inject/KAbstractModule {
+	public fun <init> (Ljava/lang/String;Lcom/google/inject/Key;)V
+}
+
+public abstract class misk/warmup/WarmupTask {
+	public fun <init> ()V
+	public abstract fun execute ()V
+}
+

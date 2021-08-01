@@ -1,0 +1,5 @@
+public final class misk/hibernate/HibernateTestingModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Ljava/util/List;Ljava/util/List;Z)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Ljava/util/List;Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+

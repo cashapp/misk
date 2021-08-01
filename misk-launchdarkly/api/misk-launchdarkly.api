@@ -1,0 +1,22 @@
+public final class misk/feature/launchdarkly/LaunchDarklyConfig : wisp/config/Config {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/client/HttpClientSSLConfig;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/client/HttpClientSSLConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lmisk/client/HttpClientSSLConfig;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lmisk/client/HttpClientSSLConfig;)Lmisk/feature/launchdarkly/LaunchDarklyConfig;
+	public static synthetic fun copy$default (Lmisk/feature/launchdarkly/LaunchDarklyConfig;Ljava/lang/String;Ljava/lang/String;Lmisk/client/HttpClientSSLConfig;ILjava/lang/Object;)Lmisk/feature/launchdarkly/LaunchDarklyConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBase_uri ()Ljava/lang/String;
+	public final fun getSdk_key ()Ljava/lang/String;
+	public final fun getSsl ()Lmisk/client/HttpClientSSLConfig;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/feature/launchdarkly/LaunchDarklyModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/feature/launchdarkly/LaunchDarklyConfig;Lkotlin/reflect/KClass;)V
+	public synthetic fun <init> (Lmisk/feature/launchdarkly/LaunchDarklyConfig;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun provideLaunchDarklyClient (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/resources/ResourceLoader;)Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;
+}
+

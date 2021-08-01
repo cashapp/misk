@@ -68,6 +68,7 @@ object Dependencies {
   val junitGradlePlugin = "org.junit.platform:junit-platform-gradle-plugin:1.2.0"
   val junitParams = "org.junit.jupiter:junit-jupiter-params:5.7.2"
   val kotlinAllOpenPlugin = "org.jetbrains.kotlin:kotlin-allopen:1.4.32"
+  val kotlinBinaryCompatibilityPlugin = "org.jetbrains.kotlinx:binary-compatibility-validator:0.6.0"
   val kotlinBom = "org.jetbrains.kotlin:kotlin-bom:1.4.32"
   val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.32"
   val kotlinNoArgPlugin = "org.jetbrains.kotlin:kotlin-noarg:1.4.32"

@@ -1,0 +1,101 @@
+public abstract interface class misk/jobqueue/Job {
+	public abstract fun acknowledge ()V
+	public abstract fun deadLetter ()V
+	public abstract fun getAttributes ()Ljava/util/Map;
+	public abstract fun getBody ()Ljava/lang/String;
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getIdempotenceKey ()Ljava/lang/String;
+	public abstract fun getQueueName ()Lmisk/jobqueue/QueueName;
+}
+
+public abstract interface class misk/jobqueue/JobConsumer {
+	public abstract fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/JobHandler;)V
+}
+
+public final class misk/jobqueue/JobConsumerKt {
+	public static final fun subscribe (Lmisk/jobqueue/JobConsumer;Lmisk/jobqueue/QueueName;Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface class misk/jobqueue/JobHandler {
+	public abstract fun handleJob (Lmisk/jobqueue/Job;)V
+}
+
+public abstract interface class misk/jobqueue/JobQueue {
+	public static final field Companion Lmisk/jobqueue/JobQueue$Companion;
+	public static final field SQS_MAX_BATCH_ENQUEUE_JOB_SIZE I
+	public abstract fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;)V
+	public abstract fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+	public abstract fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+}
+
+public final class misk/jobqueue/JobQueue$BatchEnqueueException : java/lang/Exception {
+	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/util/List;Ljava/util/List;)V
+	public final fun component1 ()Lmisk/jobqueue/QueueName;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Lmisk/jobqueue/QueueName;Ljava/util/List;Ljava/util/List;)Lmisk/jobqueue/JobQueue$BatchEnqueueException;
+	public static synthetic fun copy$default (Lmisk/jobqueue/JobQueue$BatchEnqueueException;Lmisk/jobqueue/QueueName;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/JobQueue$BatchEnqueueException;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFailed ()Ljava/util/List;
+	public final fun getQueueName ()Lmisk/jobqueue/QueueName;
+	public final fun getSuccessful ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jobqueue/JobQueue$Companion {
+	public static final field SQS_MAX_BATCH_ENQUEUE_JOB_SIZE I
+}
+
+public final class misk/jobqueue/JobQueue$DefaultImpls {
+	public static fun enqueue (Lmisk/jobqueue/JobQueue;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+	public static synthetic fun enqueue$default (Lmisk/jobqueue/JobQueue;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)V
+	public static synthetic fun enqueue$default (Lmisk/jobqueue/JobQueue;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)V
+}
+
+public final class misk/jobqueue/JobQueue$EnqueueErrorResult {
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)Lmisk/jobqueue/JobQueue$EnqueueErrorResult;
+	public static synthetic fun copy$default (Lmisk/jobqueue/JobQueue$EnqueueErrorResult;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/jobqueue/JobQueue$EnqueueErrorResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientError ()Z
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getIdempotenceKey ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jobqueue/JobQueue$JobRequest {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/time/Duration;
+	public final fun component4 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Lmisk/jobqueue/JobQueue$JobRequest;
+	public static synthetic fun copy$default (Lmisk/jobqueue/JobQueue$JobRequest;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)Lmisk/jobqueue/JobQueue$JobRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAttributes ()Ljava/util/Map;
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getDeliveryDelay ()Ljava/time/Duration;
+	public final fun getIdempotenceKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jobqueue/QueueName {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/jobqueue/QueueName;
+	public static synthetic fun copy$default (Lmisk/jobqueue/QueueName;Ljava/lang/String;ILjava/lang/Object;)Lmisk/jobqueue/QueueName;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

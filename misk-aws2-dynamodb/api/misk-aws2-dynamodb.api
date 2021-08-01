@@ -1,0 +1,32 @@
+public final class misk/aws2/dynamodb/DynamoDbHealthCheck : misk/healthchecks/HealthCheck {
+	public static final field Companion Lmisk/aws2/dynamodb/DynamoDbHealthCheck$Companion;
+	public fun <init> (Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Ljava/util/List;)V
+	public fun status ()Lmisk/healthchecks/HealthStatus;
+}
+
+public final class misk/aws2/dynamodb/DynamoDbHealthCheck$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+}
+
+public abstract interface class misk/aws2/dynamodb/DynamoDbService : com/google/common/util/concurrent/Service {
+}
+
+public final class misk/aws2/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public fun <init> (Lsoftware/amazon/awssdk/core/client/config/ClientOverrideConfiguration;Ljava/util/List;)V
+	public synthetic fun <init> (Lsoftware/amazon/awssdk/core/client/config/ClientOverrideConfiguration;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun provideRequiredTables ()Ljava/util/List;
+	public final fun providesDynamoDbClient (Lmisk/cloud/aws/AwsRegion;Lsoftware/amazon/awssdk/auth/credentials/AwsCredentialsProvider;)Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;
+}
+
+public final class misk/aws2/dynamodb/RequiredDynamoDbTable {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/aws2/dynamodb/RequiredDynamoDbTable;
+	public static synthetic fun copy$default (Lmisk/aws2/dynamodb/RequiredDynamoDbTable;Ljava/lang/String;ILjava/lang/Object;)Lmisk/aws2/dynamodb/RequiredDynamoDbTable;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

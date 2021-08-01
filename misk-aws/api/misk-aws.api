@@ -1,0 +1,176 @@
+public final class misk/cloud/aws/AwsAccountId {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/cloud/aws/AwsAccountId;
+	public static synthetic fun copy$default (Lmisk/cloud/aws/AwsAccountId;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsAccountId;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/cloud/aws/AwsEnvironmentModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun awsAccountId (Lmisk/environment/EnvVarLoader;)Lmisk/cloud/aws/AwsAccountId;
+	public final fun awsRegion (Lmisk/environment/EnvVarLoader;)Lmisk/cloud/aws/AwsRegion;
+}
+
+public final class misk/cloud/aws/AwsRegion {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/cloud/aws/AwsRegion;
+	public static synthetic fun copy$default (Lmisk/cloud/aws/AwsRegion;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsRegion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/cloud/aws/FakeAwsEnvironmentModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/cloud/aws/TypesKt {
+	public static final fun toMiskAwsAccountId (Lwisp/aws/environment/AwsAccountId;)Lmisk/cloud/aws/AwsAccountId;
+	public static final fun toMiskAwsRegion (Lwisp/aws/environment/AwsRegion;)Lmisk/cloud/aws/AwsRegion;
+}
+
+public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+}
+
+public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
+	public final synthetic fun create (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+}
+
+public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIII)V
+	public synthetic fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getExternal_queues ()Ljava/util/Map;
+	public final fun getMessage_batch_size ()I
+	public final fun getQueue_attribute_importer_frequency_ms ()J
+	public final fun getSqs_sending_connect_timeout_ms ()I
+	public final fun getSqs_sending_request_timeout_ms ()I
+	public final fun getSqs_sending_socket_timeout_ms ()I
+	public final fun getTask_queue ()Lmisk/tasks/RepeatedTaskQueueConfig;
+}
+
+public final class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobQueueModule$Companion;
+	public fun <init> (Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)V
+	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)Lmisk/tasks/RepeatedTaskQueue;
+	public final fun provideSQSClient (Ljava/lang/String;Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;Lmisk/feature/FeatureFlags;)Lcom/amazonaws/services/sqs/AmazonSQS;
+	public final fun provideSQSClientForReceiving (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/sqs/AmazonSQS;
+}
+
+public final class misk/jobqueue/sqs/AwsSqsJobQueueModule$Companion {
+}
+
+public final class misk/jobqueue/sqs/AwsSqsJobQueueModuleKt {
+	public static final fun withNoPrefetching (Lcom/amazonaws/services/sqs/buffered/QueueBufferConfig;)Lcom/amazonaws/services/sqs/buffered/QueueBufferConfig;
+}
+
+public final class misk/jobqueue/sqs/AwsSqsQueueConfig {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/jobqueue/sqs/AwsSqsQueueConfig;
+	public static synthetic fun copy$default (Lmisk/jobqueue/sqs/AwsSqsQueueConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsQueueConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccount_id ()Ljava/lang/String;
+	public final fun getRegion ()Ljava/lang/String;
+	public final fun getSqs_queue_name ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class misk/jobqueue/sqs/DeadLetterQueueProvider {
+	public abstract fun deadLetterQueueFor (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
+}
+
+public final class misk/jobqueue/sqs/DefaultDeadLetterQueueProvider : misk/jobqueue/sqs/DeadLetterQueueProvider {
+	public fun <init> ()V
+	public fun deadLetterQueueFor (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
+}
+
+public final class misk/jobqueue/sqs/FlaggedBufferedSqsClient : com/amazonaws/services/sqs/AmazonSQS {
+	public static final field Companion Lmisk/jobqueue/sqs/FlaggedBufferedSqsClient$Companion;
+	public fun <init> (Lcom/amazonaws/services/sqs/AmazonSQS;Lcom/amazonaws/services/sqs/AmazonSQS;Ljava/lang/String;Lmisk/feature/FeatureFlags;)V
+	public fun addPermission (Lcom/amazonaws/services/sqs/model/AddPermissionRequest;)Lcom/amazonaws/services/sqs/model/AddPermissionResult;
+	public fun addPermission (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lcom/amazonaws/services/sqs/model/AddPermissionResult;
+	public fun changeMessageVisibility (Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityRequest;)Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityResult;
+	public fun changeMessageVisibility (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityResult;
+	public fun changeMessageVisibilityBatch (Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityBatchRequest;)Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityBatchResult;
+	public fun changeMessageVisibilityBatch (Ljava/lang/String;Ljava/util/List;)Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityBatchResult;
+	public fun createQueue (Lcom/amazonaws/services/sqs/model/CreateQueueRequest;)Lcom/amazonaws/services/sqs/model/CreateQueueResult;
+	public fun createQueue (Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/CreateQueueResult;
+	public fun deleteMessage (Lcom/amazonaws/services/sqs/model/DeleteMessageRequest;)Lcom/amazonaws/services/sqs/model/DeleteMessageResult;
+	public fun deleteMessage (Ljava/lang/String;Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/DeleteMessageResult;
+	public fun deleteMessageBatch (Lcom/amazonaws/services/sqs/model/DeleteMessageBatchRequest;)Lcom/amazonaws/services/sqs/model/DeleteMessageBatchResult;
+	public fun deleteMessageBatch (Ljava/lang/String;Ljava/util/List;)Lcom/amazonaws/services/sqs/model/DeleteMessageBatchResult;
+	public fun deleteQueue (Lcom/amazonaws/services/sqs/model/DeleteQueueRequest;)Lcom/amazonaws/services/sqs/model/DeleteQueueResult;
+	public fun deleteQueue (Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/DeleteQueueResult;
+	public fun getCachedResponseMetadata (Lcom/amazonaws/AmazonWebServiceRequest;)Lcom/amazonaws/ResponseMetadata;
+	public fun getQueueAttributes (Lcom/amazonaws/services/sqs/model/GetQueueAttributesRequest;)Lcom/amazonaws/services/sqs/model/GetQueueAttributesResult;
+	public fun getQueueAttributes (Ljava/lang/String;Ljava/util/List;)Lcom/amazonaws/services/sqs/model/GetQueueAttributesResult;
+	public fun getQueueUrl (Lcom/amazonaws/services/sqs/model/GetQueueUrlRequest;)Lcom/amazonaws/services/sqs/model/GetQueueUrlResult;
+	public fun getQueueUrl (Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/GetQueueUrlResult;
+	public fun listDeadLetterSourceQueues (Lcom/amazonaws/services/sqs/model/ListDeadLetterSourceQueuesRequest;)Lcom/amazonaws/services/sqs/model/ListDeadLetterSourceQueuesResult;
+	public fun listQueueTags (Lcom/amazonaws/services/sqs/model/ListQueueTagsRequest;)Lcom/amazonaws/services/sqs/model/ListQueueTagsResult;
+	public fun listQueueTags (Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/ListQueueTagsResult;
+	public fun listQueues ()Lcom/amazonaws/services/sqs/model/ListQueuesResult;
+	public fun listQueues (Lcom/amazonaws/services/sqs/model/ListQueuesRequest;)Lcom/amazonaws/services/sqs/model/ListQueuesResult;
+	public fun listQueues (Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/ListQueuesResult;
+	public fun purgeQueue (Lcom/amazonaws/services/sqs/model/PurgeQueueRequest;)Lcom/amazonaws/services/sqs/model/PurgeQueueResult;
+	public fun receiveMessage (Lcom/amazonaws/services/sqs/model/ReceiveMessageRequest;)Lcom/amazonaws/services/sqs/model/ReceiveMessageResult;
+	public fun receiveMessage (Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/ReceiveMessageResult;
+	public fun removePermission (Lcom/amazonaws/services/sqs/model/RemovePermissionRequest;)Lcom/amazonaws/services/sqs/model/RemovePermissionResult;
+	public fun removePermission (Ljava/lang/String;Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/RemovePermissionResult;
+	public fun sendMessage (Lcom/amazonaws/services/sqs/model/SendMessageRequest;)Lcom/amazonaws/services/sqs/model/SendMessageResult;
+	public fun sendMessage (Ljava/lang/String;Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/SendMessageResult;
+	public fun sendMessageBatch (Lcom/amazonaws/services/sqs/model/SendMessageBatchRequest;)Lcom/amazonaws/services/sqs/model/SendMessageBatchResult;
+	public fun sendMessageBatch (Ljava/lang/String;Ljava/util/List;)Lcom/amazonaws/services/sqs/model/SendMessageBatchResult;
+	public fun setEndpoint (Ljava/lang/String;)V
+	public fun setQueueAttributes (Lcom/amazonaws/services/sqs/model/SetQueueAttributesRequest;)Lcom/amazonaws/services/sqs/model/SetQueueAttributesResult;
+	public fun setQueueAttributes (Ljava/lang/String;Ljava/util/Map;)Lcom/amazonaws/services/sqs/model/SetQueueAttributesResult;
+	public fun setRegion (Lcom/amazonaws/regions/Region;)V
+	public fun shutdown ()V
+	public fun tagQueue (Lcom/amazonaws/services/sqs/model/TagQueueRequest;)Lcom/amazonaws/services/sqs/model/TagQueueResult;
+	public fun tagQueue (Ljava/lang/String;Ljava/util/Map;)Lcom/amazonaws/services/sqs/model/TagQueueResult;
+	public fun untagQueue (Lcom/amazonaws/services/sqs/model/UntagQueueRequest;)Lcom/amazonaws/services/sqs/model/UntagQueueResult;
+	public fun untagQueue (Ljava/lang/String;Ljava/util/List;)Lcom/amazonaws/services/sqs/model/UntagQueueResult;
+}
+
+public final class misk/jobqueue/sqs/FlaggedBufferedSqsClient$Companion {
+	public final fun getFEATURE ()Lmisk/feature/Feature;
+}
+
+public final class misk/jobqueue/sqs/QueueResolverKt {
+	public static final fun getParentQueue (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
+	public static final fun getRetryQueue (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
+	public static final fun isRetryQueue (Lmisk/jobqueue/QueueName;)Z
+}
+
+public final class misk/jobqueue/sqs/StaticDeadLetterQueueProvider : misk/jobqueue/sqs/DeadLetterQueueProvider {
+	public fun <init> (Ljava/lang/String;)V
+	public fun deadLetterQueueFor (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
+}
+
+public final class misk/s3/RealS3Module : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun provideS3 (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/s3/AmazonS3;
+}
+

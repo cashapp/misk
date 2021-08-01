@@ -1,0 +1,8 @@
+public abstract interface class misk/events/ProducerService : com/google/common/util/concurrent/Service {
+}
+
+public abstract interface class misk/events/SpooledProducer {
+	public abstract fun publish (Lmisk/hibernate/Session;Lmisk/hibernate/Gid;Lmisk/events/Topic;[Lmisk/events/Event;)V
+	public abstract fun publishUnsharded (Lmisk/hibernate/Session;Lmisk/events/Topic;[Lmisk/events/Event;)V
+}
+

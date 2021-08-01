@@ -1,0 +1,19 @@
+public abstract interface class grpc/reflection/v1alpha/ServerReflectionServerReflectionInfoBlockingServer : com/squareup/wire/Service {
+	public abstract fun ServerReflectionInfo (Lcom/squareup/wire/MessageSource;Lcom/squareup/wire/MessageSink;)V
+}
+
+public final class misk/grpc/reflect/GrpcReflectModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/grpc/reflect/GrpcReflectModule$Companion;
+	public fun <init> ()V
+	public final fun provideSchema (Ljava/util/List;)Lcom/squareup/wire/schema/Schema;
+	public final fun provideServiceReflector (Lcom/squareup/wire/schema/Schema;)Lcom/squareup/wire/reflector/SchemaReflector;
+}
+
+public final class misk/grpc/reflect/GrpcReflectModule$Companion {
+}
+
+public final class misk/grpc/reflect/ServerReflectionApi : grpc/reflection/v1alpha/ServerReflectionServerReflectionInfoBlockingServer, misk/web/actions/WebAction {
+	public fun <init> (Lcom/squareup/wire/reflector/SchemaReflector;)V
+	public fun ServerReflectionInfo (Lcom/squareup/wire/MessageSource;Lcom/squareup/wire/MessageSink;)V
+}
+

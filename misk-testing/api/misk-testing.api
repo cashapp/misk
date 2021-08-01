@@ -1,0 +1,345 @@
+public final class misk/MiskTestingServiceModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/cloud/fake/security/keys/FakeKeyManagementModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/cloud/fake/security/keys/FakeKeyService : misk/security/keys/KeyService {
+	public fun <init> ()V
+	public fun decrypt (Ljava/lang/String;Lokio/ByteString;)Lokio/ByteString;
+	public fun encrypt (Ljava/lang/String;Lokio/ByteString;)Lokio/ByteString;
+}
+
+public final class misk/concurrent/FakeScheduledExecutorService : java/util/concurrent/ExecutorService, java/util/concurrent/ScheduledExecutorService {
+	public fun <init> (Ljava/time/Clock;)V
+	public fun awaitTermination (JLjava/util/concurrent/TimeUnit;)Z
+	public fun execute (Ljava/lang/Runnable;)V
+	public fun invokeAll (Ljava/util/Collection;)Ljava/util/List;
+	public fun invokeAll (Ljava/util/Collection;JLjava/util/concurrent/TimeUnit;)Ljava/util/List;
+	public fun invokeAny (Ljava/util/Collection;)Ljava/lang/Object;
+	public fun invokeAny (Ljava/util/Collection;JLjava/util/concurrent/TimeUnit;)Ljava/lang/Object;
+	public fun isShutdown ()Z
+	public fun isTerminated ()Z
+	public fun schedule (Ljava/lang/Runnable;JLjava/util/concurrent/TimeUnit;)Ljava/util/concurrent/ScheduledFuture;
+	public fun schedule (Ljava/util/concurrent/Callable;JLjava/util/concurrent/TimeUnit;)Ljava/util/concurrent/ScheduledFuture;
+	public fun scheduleAtFixedRate (Ljava/lang/Runnable;JJLjava/util/concurrent/TimeUnit;)Ljava/util/concurrent/ScheduledFuture;
+	public fun scheduleWithFixedDelay (Ljava/lang/Runnable;JJLjava/util/concurrent/TimeUnit;)Ljava/util/concurrent/ScheduledFuture;
+	public fun shutdown ()V
+	public fun shutdownNow ()Ljava/util/List;
+	public fun submit (Ljava/lang/Runnable;)Ljava/util/concurrent/Future;
+	public fun submit (Ljava/lang/Runnable;Ljava/lang/Object;)Ljava/util/concurrent/Future;
+	public fun submit (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Future;
+	public final fun tick ()V
+}
+
+public final class misk/concurrent/FakeScheduledExecutorService$ScheduledFutureTask : java/util/concurrent/FutureTask, java/util/concurrent/ScheduledFuture {
+	public fun <init> (Lmisk/concurrent/FakeScheduledExecutorService;JJLjava/time/Clock;Lkotlin/jvm/functions/Function0;)V
+	public fun <init> (Lmisk/concurrent/FakeScheduledExecutorService;JLjava/time/Clock;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Ljava/util/concurrent/Delayed;)I
+	public final fun getClock ()Ljava/time/Clock;
+	public fun getDelay (Ljava/util/concurrent/TimeUnit;)J
+	public final fun getExecuteAt ()J
+	public final fun getTask ()Lkotlin/jvm/functions/Function0;
+	public final fun isRepeated ()Z
+	public fun runAndReset ()Z
+	public final fun setExecuteAt (J)V
+}
+
+public final class misk/concurrent/FakeSleeper : misk/concurrent/Sleeper {
+	public fun <init> (Ljava/time/Clock;)V
+	public final fun lastSleepDuration ()Ljava/time/Duration;
+	public fun sleep (Ljava/time/Duration;)V
+	public final fun sleepCount ()I
+	public final fun tick ()V
+	public final fun waitForSleep (I)V
+}
+
+public final class misk/concurrent/FakeSleeperModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/concurrent/FakeTicker : com/google/common/base/Ticker, misk/concurrent/Sleeper {
+	public fun <init> ()V
+	public final fun getNowMs ()J
+	public fun read ()J
+	public fun sleep (Ljava/time/Duration;)V
+	public final fun sleepMs (J)V
+}
+
+public final class misk/containers/Composer {
+	public fun <init> (Ljava/lang/String;[Lmisk/containers/Container;)V
+	public final fun start ()V
+	public final fun stop ()V
+}
+
+public final class misk/containers/Container {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public fun <init> (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function1;
+	public final fun component2 ()Lkotlin/jvm/functions/Function2;
+	public final fun copy (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)Lmisk/containers/Container;
+	public static synthetic fun copy$default (Lmisk/containers/Container;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lmisk/containers/Container;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBeforeStartHook ()Lkotlin/jvm/functions/Function2;
+	public final fun getCreateCmd ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/logging/LogCollectorModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public abstract interface class misk/logging/LogCollectorService : com/google/common/util/concurrent/Service {
+}
+
+public final class misk/mockito/Mockito {
+	public static final field INSTANCE Lmisk/mockito/Mockito;
+}
+
+public final class misk/random/FakeRandom : misk/random/Random {
+	public fun <init> ()V
+	public final fun getNextBoolean ()Ljava/lang/Boolean;
+	public final fun getNextDouble ()Ljava/lang/Double;
+	public final fun getNextFloat ()Ljava/lang/Float;
+	public final fun getNextInt ()Ljava/lang/Integer;
+	public final fun getNextLong ()Ljava/lang/Long;
+	public fun nextBoolean ()Z
+	public fun nextDouble ()D
+	public fun nextFloat ()F
+	public fun nextInt ()I
+	public fun nextLong ()J
+	public final fun setNextBoolean (Ljava/lang/Boolean;)V
+	public final fun setNextDouble (Ljava/lang/Double;)V
+	public final fun setNextFloat (Ljava/lang/Float;)V
+	public final fun setNextInt (Ljava/lang/Integer;)V
+	public final fun setNextLong (Ljava/lang/Long;)V
+}
+
+public final class misk/random/FakeRandomModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/random/FakeThreadLocalRandom : misk/random/ThreadLocalRandom {
+	public field fakeRandom Lmisk/random/FakeRandom;
+	public fun <init> ()V
+	public synthetic fun current ()Ljava/util/Random;
+	public fun current ()Lmisk/random/FakeRandom;
+	public final fun getFakeRandom ()Lmisk/random/FakeRandom;
+	public final fun setFakeRandom (Lmisk/random/FakeRandom;)V
+}
+
+public abstract class misk/service/CachedTestService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/service/CachedTestService$Companion;
+	public fun <init> ()V
+	public abstract fun actualShutdown ()V
+	public abstract fun actualStartup ()V
+	protected final fun shutDown ()V
+	protected final fun startUp ()V
+}
+
+public final class misk/service/CachedTestService$Companion {
+}
+
+public final class misk/services/FakeService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> ()V
+}
+
+public final class misk/services/FakeServiceModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/testing/ConcurrentMockTracer : io/opentracing/mock/MockTracer {
+	public fun <init> ()V
+	public final fun take ()Lio/opentracing/mock/MockSpan;
+	public final fun take (Ljava/lang/String;)Lio/opentracing/mock/MockSpan;
+}
+
+public final class misk/testing/ExtensionContextExtensionsKt {
+	public static final fun store (Lorg/junit/jupiter/api/extension/ExtensionContext;Ljava/lang/String;Ljava/lang/Object;)V
+}
+
+public abstract interface class misk/testing/ExternalDependency {
+	public abstract fun afterEach ()V
+	public abstract fun beforeEach ()V
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun shutdown ()V
+	public abstract fun startup ()V
+}
+
+public final class misk/testing/ExternalDependency$DefaultImpls {
+	public static fun getId (Lmisk/testing/ExternalDependency;)Ljava/lang/String;
+}
+
+public abstract interface annotation class misk/testing/MiskExternalDependency : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class misk/testing/MiskTest : java/lang/annotation/Annotation {
+	public abstract fun startService ()Z
+}
+
+public abstract interface annotation class misk/testing/MiskTestModule : java/lang/annotation/Annotation {
+}
+
+public final class misk/testing/MockTracingBackendModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/testing/TemporaryFolder {
+	public fun <init> (Ljava/nio/file/Path;)V
+	public final fun delete ()V
+	public final fun getRoot ()Ljava/nio/file/Path;
+	public final fun newFile ()Ljava/nio/file/Path;
+	public final fun newFile (Ljava/lang/String;)Ljava/nio/file/Path;
+	public final fun newFolder ()Ljava/nio/file/Path;
+	public final fun newFolder (Ljava/lang/String;)Ljava/nio/file/Path;
+}
+
+public final class misk/testing/TemporaryFolderModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun provideTemporaryFolder ()Lmisk/testing/TemporaryFolder;
+}
+
+public final class misk/testing/TemporaryFolderModule$DeleteTempFolder : org/junit/jupiter/api/extension/AfterEachCallback {
+	public fun <init> (Lmisk/testing/TemporaryFolder;)V
+	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+}
+
+public final class misk/time/FakeClock : java/time/Clock {
+	public fun <init> ()V
+	public fun <init> (JLjava/time/ZoneId;)V
+	public synthetic fun <init> (JLjava/time/ZoneId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun add (JLjava/util/concurrent/TimeUnit;)J
+	public final fun add (Ljava/time/Duration;)J
+	public fun getZone ()Ljava/time/ZoneId;
+	public fun instant ()Ljava/time/Instant;
+	public final fun setNow (Ljava/time/Instant;)V
+	public fun withZone (Ljava/time/ZoneId;)Ljava/time/Clock;
+}
+
+public final class misk/time/FakeClockModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/time/FakeTickerModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/web/FakeHttpCall : misk/web/HttpCall {
+	public fun <init> ()V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;)V
+	public synthetic fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun accepts ()Ljava/util/List;
+	public fun addResponseHeaders (Lokhttp3/Headers;)V
+	public fun asOkHttpRequest ()Lokhttp3/Request;
+	public final fun component1 ()Lokhttp3/HttpUrl;
+	public final fun component10 ()Lokio/BufferedSource;
+	public final fun component11 ()Lokio/BufferedSink;
+	public final fun component12 ()Lmisk/web/actions/WebSocket;
+	public final fun component13 ()Lmisk/web/actions/WebSocketListener;
+	public final fun component2 ()Lmisk/web/SocketAddress;
+	public final fun component3 ()Lmisk/web/DispatchMechanism;
+	public final fun component4 ()Lokhttp3/Headers;
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()Lokhttp3/Headers$Builder;
+	public final fun component8 ()Z
+	public final fun component9 ()Lokhttp3/Headers$Builder;
+	public fun contentType ()Lokhttp3/MediaType;
+	public final fun copy (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;)Lmisk/web/FakeHttpCall;
+	public static synthetic fun copy$default (Lmisk/web/FakeHttpCall;Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;ILjava/lang/Object;)Lmisk/web/FakeHttpCall;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
+	public final fun getHeadersBuilder ()Lokhttp3/Headers$Builder;
+	public fun getLinkLayerLocalAddress ()Lmisk/web/SocketAddress;
+	public fun getNetworkStatusCode ()I
+	public final fun getRequestBody ()Lokio/BufferedSource;
+	public fun getRequestHeaders ()Lokhttp3/Headers;
+	public final fun getResponseBody ()Lokio/BufferedSink;
+	public fun getResponseHeaders ()Lokhttp3/Headers;
+	public final fun getSendTrailers ()Z
+	public fun getStatusCode ()I
+	public final fun getTrailersBuilder ()Lokhttp3/Headers$Builder;
+	public fun getUrl ()Lokhttp3/HttpUrl;
+	public final fun getWebSocket ()Lmisk/web/actions/WebSocket;
+	public final fun getWebSocketListener ()Lmisk/web/actions/WebSocketListener;
+	public fun hashCode ()I
+	public fun initWebSocketListener (Lmisk/web/actions/WebSocketListener;)V
+	public fun putRequestBody (Lokio/BufferedSource;)V
+	public fun putResponseBody (Lokio/BufferedSink;)V
+	public fun putWebSocket (Lmisk/web/actions/WebSocket;)V
+	public fun requireTrailers ()V
+	public fun setNetworkStatusCode (I)V
+	public final fun setRequestBody (Lokio/BufferedSource;)V
+	public final fun setResponseBody (Lokio/BufferedSink;)V
+	public fun setResponseHeader (Ljava/lang/String;Ljava/lang/String;)V
+	public fun setResponseTrailer (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun setSendTrailers (Z)V
+	public fun setStatusCode (I)V
+	public fun setStatusCodes (II)V
+	public final fun setWebSocket (Lmisk/web/actions/WebSocket;)V
+	public final fun setWebSocketListener (Lmisk/web/actions/WebSocketListener;)V
+	public fun takeRequestBody ()Lokio/BufferedSource;
+	public fun takeResponseBody ()Lokio/BufferedSink;
+	public fun takeWebSocket ()Lmisk/web/actions/WebSocket;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/FakeWebSocketListener : okhttp3/WebSocketListener {
+	public fun <init> ()V
+	public final fun getMessages ()Ljava/util/concurrent/LinkedBlockingDeque;
+	public fun onMessage (Lokhttp3/WebSocket;Ljava/lang/String;)V
+	public final fun takeMessage ()Ljava/lang/String;
+}
+
+public final class misk/web/WebServerTestingModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/web/WebServerTestingModule$Companion;
+	public fun <init> ()V
+	public fun <init> (Lmisk/web/WebConfig;)V
+	public synthetic fun <init> (Lmisk/web/WebConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/web/WebServerTestingModule$Companion {
+	public final fun getTESTING_WEB_CONFIG ()Lmisk/web/WebConfig;
+}
+
+public final class misk/web/WebTestClient {
+	public fun <init> (Lcom/squareup/moshi/Moshi;Lmisk/web/jetty/JettyService;)V
+	public final fun call (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun get (Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun post (Ljava/lang/String;Ljava/lang/Object;Lkotlin/reflect/KClass;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun post (Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;)Lmisk/web/WebTestClient$WebTestResponse;
+	public static synthetic fun post$default (Lmisk/web/WebTestClient;Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;ILjava/lang/Object;)Lmisk/web/WebTestClient$WebTestResponse;
+}
+
+public final class misk/web/WebTestClient$WebTestResponse {
+	public fun <init> (Lokhttp3/Response;Lcom/squareup/moshi/Moshi;)V
+	public final fun component1 ()Lokhttp3/Response;
+	public final fun copy (Lokhttp3/Response;Lcom/squareup/moshi/Moshi;)Lmisk/web/WebTestClient$WebTestResponse;
+	public static synthetic fun copy$default (Lmisk/web/WebTestClient$WebTestResponse;Lokhttp3/Response;Lcom/squareup/moshi/Moshi;ILjava/lang/Object;)Lmisk/web/WebTestClient$WebTestResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResponse ()Lokhttp3/Response;
+	public fun hashCode ()I
+	public final fun parseJson (Lkotlin/reflect/KClass;)Ljava/lang/Object;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/WebTestingModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/web/WebTestingModule$Companion;
+	public fun <init> ()V
+	public fun <init> (Lmisk/web/WebConfig;)V
+	public synthetic fun <init> (Lmisk/web/WebConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/web/WebTestingModule$Companion {
+	public final fun getTESTING_WEB_CONFIG ()Lmisk/web/WebConfig;
+}
+
+public final class org/assertj/core/api/AssertExtensionsKt {
+	public static final fun assertOrdering ([Ljava/lang/Comparable;)V
+	public static final fun isEqualToAsJson (Lorg/assertj/core/api/AbstractCharSequenceAssert;Ljava/lang/CharSequence;)Lorg/assertj/core/api/AbstractCharSequenceAssert;
+}
+

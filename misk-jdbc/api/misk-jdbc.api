@@ -1,0 +1,601 @@
+public final class misk/database/CockroachCluster {
+	public fun <init> (Ljava/lang/String;Lmisk/jdbc/DataSourceConfig;)V
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getExternalHttpPort ()I
+	public final fun getInternalHttpPort ()I
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPostgresPort ()I
+	public final fun openConnection ()Ljava/sql/Connection;
+}
+
+public abstract interface class misk/database/DatabaseServer {
+	public abstract fun pullImage ()V
+	public abstract fun start ()V
+	public abstract fun stop ()V
+}
+
+public final class misk/database/DockerCockroachCluster : misk/database/DatabaseServer {
+	public static final field CONTAINER_NAME Ljava/lang/String;
+	public static final field Companion Lmisk/database/DockerCockroachCluster$Companion;
+	public static final field IMAGE Ljava/lang/String;
+	public static final field SHA Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Lcom/squareup/moshi/Moshi;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/github/dockerjava/api/DockerClient;)V
+	public final fun getCluster ()Lmisk/database/CockroachCluster;
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
+	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
+	public fun pullImage ()V
+	public fun start ()V
+	public fun stop ()V
+}
+
+public final class misk/database/DockerCockroachCluster$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+	public final fun pullImage ()V
+}
+
+public final class misk/database/DockerCockroachCluster$LogContainerResultCallback : com/github/dockerjava/core/async/ResultCallbackTemplate {
+	public fun <init> ()V
+	public fun onNext (Lcom/github/dockerjava/api/model/Frame;)V
+	public synthetic fun onNext (Ljava/lang/Object;)V
+}
+
+public final class misk/database/DockerPostgresServer : misk/database/DatabaseServer {
+	public static final field CONTAINER_NAME Ljava/lang/String;
+	public static final field Companion Lmisk/database/DockerPostgresServer$Companion;
+	public static final field IMAGE Ljava/lang/String;
+	public static final field SHA Ljava/lang/String;
+	public fun <init> (Lmisk/jdbc/DataSourceConfig;Lcom/github/dockerjava/api/DockerClient;)V
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
+	public fun pullImage ()V
+	public fun start ()V
+	public fun stop ()V
+}
+
+public final class misk/database/DockerPostgresServer$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+	public final fun pullImage ()V
+}
+
+public final class misk/database/DockerPostgresServer$LogContainerResultCallback : com/github/dockerjava/core/async/ResultCallbackTemplate {
+	public fun <init> ()V
+	public fun onNext (Lcom/github/dockerjava/api/model/Frame;)V
+	public synthetic fun onNext (Ljava/lang/Object;)V
+}
+
+public final class misk/database/DockerTidbCluster : misk/database/DatabaseServer {
+	public static final field CONTAINER_NAME Ljava/lang/String;
+	public static final field Companion Lmisk/database/DockerTidbCluster$Companion;
+	public static final field IMAGE Ljava/lang/String;
+	public static final field SHA Ljava/lang/String;
+	public fun <init> (Lcom/squareup/moshi/Moshi;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/github/dockerjava/api/DockerClient;)V
+	public final fun getCluster ()Lmisk/database/TidbCluster;
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
+	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
+	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
+	public fun pullImage ()V
+	public fun start ()V
+	public fun stop ()V
+}
+
+public final class misk/database/DockerTidbCluster$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+	public final fun pullImage ()V
+}
+
+public final class misk/database/DockerTidbCluster$LogContainerResultCallback : com/github/dockerjava/core/async/ResultCallbackTemplate {
+	public fun <init> ()V
+	public fun onNext (Lcom/github/dockerjava/api/model/Frame;)V
+	public synthetic fun onNext (Ljava/lang/Object;)V
+}
+
+public final class misk/database/DockerVitessCluster : misk/database/DatabaseServer {
+	public static final field CONTAINER_NAME_PREFIX Ljava/lang/String;
+	public static final field Companion Lmisk/database/DockerVitessCluster$Companion;
+	public static final field VITESS_IMAGE Ljava/lang/String;
+	public static final field VITESS_SHA Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Lcom/squareup/moshi/Moshi;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/github/dockerjava/api/DockerClient;)V
+	public final fun getCluster ()Lmisk/database/VitessCluster;
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
+	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
+	public fun pullImage ()V
+	public fun start ()V
+	public fun stop ()V
+}
+
+public final class misk/database/DockerVitessCluster$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+	public final fun pullImage ()V
+	public final fun startVitessDaemon (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;)V
+}
+
+public final class misk/database/DockerVitessCluster$LogContainerResultCallback : com/github/dockerjava/core/async/ResultCallbackTemplate {
+	public fun <init> ()V
+	public fun onNext (Lcom/github/dockerjava/api/model/Frame;)V
+	public synthetic fun onNext (Ljava/lang/Object;)V
+}
+
+public final class misk/database/Keyspace {
+	public fun <init> (ZLjava/util/Map;)V
+	public final fun getSharded ()Z
+	public final fun getTables ()Ljava/util/Map;
+	public final fun shardCount ()I
+}
+
+public final class misk/database/StartDatabaseService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/database/StartDatabaseService$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;Lwisp/deployment/Deployment;Lmisk/jdbc/DataSourceConfig;)V
+	public final fun getServer ()Lmisk/database/DatabaseServer;
+	public final fun setServer (Lmisk/database/DatabaseServer;)V
+}
+
+public final class misk/database/StartDatabaseService$CacheKey {
+	public fun <init> (Ljava/lang/String;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lmisk/jdbc/DataSourceConfig;
+	public final fun component3 ()Lwisp/deployment/Deployment;
+	public final fun copy (Ljava/lang/String;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;)Lmisk/database/StartDatabaseService$CacheKey;
+	public static synthetic fun copy$default (Lmisk/database/StartDatabaseService$CacheKey;Ljava/lang/String;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;ILjava/lang/Object;)Lmisk/database/StartDatabaseService$CacheKey;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getDeployment ()Lwisp/deployment/Deployment;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/database/StartDatabaseService$Companion {
+	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
+	public final fun getLogger ()Lmu/KLogger;
+	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
+	public final fun getServers ()Lcom/google/common/cache/LoadingCache;
+}
+
+public final class misk/database/StartDatabaseServiceKt {
+	public static final fun runCommand (Ljava/lang/String;)I
+}
+
+public final class misk/database/StartVitessService {
+	public static final field Companion Lmisk/database/StartVitessService$Companion;
+	public fun <init> ()V
+}
+
+public final class misk/database/StartVitessService$Companion {
+	public final fun startVitessDaemon (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;)V
+}
+
+public final class misk/database/Table {
+	public fun <init> ()V
+}
+
+public final class misk/database/TidbCluster {
+	public fun <init> (Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;)V
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getConfigDir ()Ljava/nio/file/Path;
+	public final fun getHttpPort ()I
+	public final fun getMysqlPort ()I
+	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
+	public final fun openConnection ()Ljava/sql/Connection;
+}
+
+public final class misk/database/VitessCluster {
+	public fun <init> (Ljava/lang/String;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/squareup/moshi/Moshi;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/squareup/moshi/Moshi;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getConfigDir ()Ljava/nio/file/Path;
+	public final fun getGrpcPort ()I
+	public final fun getHttpPort ()I
+	public final fun getKeyspaceAdapter ()Lcom/squareup/moshi/JsonAdapter;
+	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
+	public final fun getMysqlPort ()I
+	public final fun getName ()Ljava/lang/String;
+	public final fun getSchemaDir ()Ljava/nio/file/Path;
+	public final fun getVtgateMysqlPort ()I
+	public final fun keyspaces ()Ljava/util/Map;
+	public final fun openMysqlConnection ()Ljava/sql/Connection;
+	public final fun openVtgateConnection ()Ljava/sql/Connection;
+}
+
+public final class misk/jdbc/Check : java/lang/Enum {
+	public static final field COWRITE Lmisk/jdbc/Check;
+	public static final field FULL_SCATTER Lmisk/jdbc/Check;
+	public static final field TABLE_SCAN Lmisk/jdbc/Check;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/jdbc/Check;
+	public static fun values ()[Lmisk/jdbc/Check;
+}
+
+public final class misk/jdbc/CheckDisabler {
+	public static final field INSTANCE Lmisk/jdbc/CheckDisabler;
+	public final fun disableChecks (Ljava/util/Collection;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public final fun getDisabledChecks ()Ljava/lang/ThreadLocal;
+	public final fun isCheckEnabled (Lmisk/jdbc/Check;)Z
+	public final fun withoutChecks ([Lmisk/jdbc/Check;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public class misk/jdbc/CheckException : java/sql/SQLException {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/jdbc/Cluster {
+	public abstract fun getReader ()Ljava/lang/Object;
+	public abstract fun getWriter ()Ljava/lang/Object;
+}
+
+public final class misk/jdbc/DataSourceCluster : misk/jdbc/Cluster {
+	public fun <init> (Ljavax/sql/DataSource;Ljavax/sql/DataSource;)V
+	public synthetic fun getReader ()Ljava/lang/Object;
+	public fun getReader ()Ljavax/sql/DataSource;
+	public synthetic fun getWriter ()Ljava/lang/Object;
+	public fun getWriter ()Ljavax/sql/DataSource;
+}
+
+public final class misk/jdbc/DataSourceClusterConfig {
+	public fun <init> (Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceConfig;)V
+	public final fun component1 ()Lmisk/jdbc/DataSourceConfig;
+	public final fun component2 ()Lmisk/jdbc/DataSourceConfig;
+	public final fun copy (Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/DataSourceClusterConfig;
+	public static synthetic fun copy$default (Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceConfig;ILjava/lang/Object;)Lmisk/jdbc/DataSourceClusterConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReader ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getWriter ()Lmisk/jdbc/DataSourceConfig;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jdbc/DataSourceClustersConfig : java/util/LinkedHashMap, wisp/config/Config {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public final fun containsKey (Ljava/lang/Object;)Z
+	public fun containsKey (Ljava/lang/String;)Z
+	public final fun containsValue (Ljava/lang/Object;)Z
+	public fun containsValue (Lmisk/jdbc/DataSourceClusterConfig;)Z
+	public final fun entrySet ()Ljava/util/Set;
+	public final fun get (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun get (Ljava/lang/String;)Lmisk/jdbc/DataSourceClusterConfig;
+	public fun getEntries ()Ljava/util/Set;
+	public fun getKeys ()Ljava/util/Set;
+	public final fun getOrDefault (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun getOrDefault (Ljava/lang/String;Lmisk/jdbc/DataSourceClusterConfig;)Lmisk/jdbc/DataSourceClusterConfig;
+	public fun getSize ()I
+	public fun getValues ()Ljava/util/Collection;
+	public final fun keySet ()Ljava/util/Set;
+	public final fun remove (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun remove (Ljava/lang/Object;Ljava/lang/Object;)Z
+	public fun remove (Ljava/lang/String;)Lmisk/jdbc/DataSourceClusterConfig;
+	public fun remove (Ljava/lang/String;Lmisk/jdbc/DataSourceClusterConfig;)Z
+	public final fun size ()I
+	public final fun values ()Ljava/util/Collection;
+}
+
+public final class misk/jdbc/DataSourceConfig {
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun asReplica ()Lmisk/jdbc/DataSourceConfig;
+	public final fun buildJdbcUrl (Lwisp/deployment/Deployment;)Ljava/lang/String;
+	public final fun canRecoverOnReplica ()Z
+	public final fun component1 ()Lmisk/jdbc/DataSourceType;
+	public final fun component10 ()Ljava/time/Duration;
+	public final fun component11 ()Ljava/time/Duration;
+	public final fun component12 ()Ljava/lang/String;
+	public final fun component13 ()Ljava/util/List;
+	public final fun component14 ()Ljava/lang/String;
+	public final fun component15 ()Ljava/lang/String;
+	public final fun component16 ()Ljava/lang/String;
+	public final fun component17 ()Ljava/lang/String;
+	public final fun component18 ()Ljava/lang/String;
+	public final fun component19 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/lang/String;
+	public final fun component21 ()Z
+	public final fun component22 ()Ljava/lang/String;
+	public final fun component23 ()Ljava/lang/Integer;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()I
+	public final fun component8 ()Ljava/time/Duration;
+	public final fun component9 ()Ljava/time/Duration;
+	public final fun copy (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;)Lmisk/jdbc/DataSourceConfig;
+	public static synthetic fun copy$default (Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/jdbc/DataSourceConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClient_certificate_key_store_password ()Ljava/lang/String;
+	public final fun getClient_certificate_key_store_path ()Ljava/lang/String;
+	public final fun getClient_certificate_key_store_url ()Ljava/lang/String;
+	public final fun getConnection_max_lifetime ()Ljava/time/Duration;
+	public final fun getConnection_timeout ()Ljava/time/Duration;
+	public final fun getDatabase ()Ljava/lang/String;
+	public final fun getFixed_pool_size ()I
+	public final fun getHost ()Ljava/lang/String;
+	public final fun getJdbc_statement_batch_size ()Ljava/lang/Integer;
+	public final fun getMigrations_resource ()Ljava/lang/String;
+	public final fun getMigrations_resources ()Ljava/util/List;
+	public final fun getPassword ()Ljava/lang/String;
+	public final fun getPort ()Ljava/lang/Integer;
+	public final fun getQuery_timeout ()Ljava/time/Duration;
+	public final fun getShow_sql ()Ljava/lang/String;
+	public final fun getTrust_certificate_key_store_password ()Ljava/lang/String;
+	public final fun getTrust_certificate_key_store_path ()Ljava/lang/String;
+	public final fun getTrust_certificate_key_store_url ()Ljava/lang/String;
+	public final fun getType ()Lmisk/jdbc/DataSourceType;
+	public final fun getUsername ()Ljava/lang/String;
+	public final fun getValidation_timeout ()Ljava/time/Duration;
+	public final fun getVerify_server_identity ()Z
+	public final fun getVitess_schema_resource_root ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun withDefaults ()Lmisk/jdbc/DataSourceConfig;
+}
+
+public abstract interface class misk/jdbc/DataSourceConnector {
+	public abstract fun config ()Lmisk/jdbc/DataSourceConfig;
+}
+
+public abstract interface class misk/jdbc/DataSourceDecorator {
+	public abstract fun decorate (Ljavax/sql/DataSource;)Ljavax/sql/DataSource;
+}
+
+public final class misk/jdbc/DataSourceService : com/google/common/util/concurrent/AbstractIdleService, javax/inject/Provider, misk/jdbc/DataSourceConnector {
+	public static final field Companion Lmisk/jdbc/DataSourceService$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun config ()Lmisk/jdbc/DataSourceConfig;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Ljavax/sql/DataSource;
+}
+
+public final class misk/jdbc/DataSourceService$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+}
+
+public final class misk/jdbc/DataSourceType : java/lang/Enum {
+	public static final field COCKROACHDB Lmisk/jdbc/DataSourceType;
+	public static final field HSQLDB Lmisk/jdbc/DataSourceType;
+	public static final field MYSQL Lmisk/jdbc/DataSourceType;
+	public static final field POSTGRESQL Lmisk/jdbc/DataSourceType;
+	public static final field TIDB Lmisk/jdbc/DataSourceType;
+	public static final field VITESS_MYSQL Lmisk/jdbc/DataSourceType;
+	public final fun getDriverClassName ()Ljava/lang/String;
+	public final fun getHibernateDialect ()Ljava/lang/String;
+	public final fun isVitess ()Z
+	public static fun valueOf (Ljava/lang/String;)Lmisk/jdbc/DataSourceType;
+	public static fun values ()[Lmisk/jdbc/DataSourceType;
+}
+
+public abstract interface class misk/jdbc/DatabasePool {
+	public abstract fun releaseDatabase (Lmisk/jdbc/DataSourceConfig;)V
+	public abstract fun takeDatabase (Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/DataSourceConfig;
+}
+
+public abstract interface class misk/jdbc/DatabaseReadyService : com/google/common/util/concurrent/Service {
+}
+
+public final class misk/jdbc/JDBCSession : misk/jdbc/Session {
+	public fun <init> (Ljava/sql/Connection;)V
+	public final fun add (Ljava/util/concurrent/ConcurrentMap;Lmisk/jdbc/JDBCSession$HookType;Lkotlin/jvm/functions/Function0;)V
+	public final fun component1 ()Ljava/sql/Connection;
+	public final fun executePostCommitHooks ()V
+	public final fun executePreCommitHooks ()V
+	public final fun executeSessionCloseHooks ()V
+	public final fun getConnection ()Ljava/sql/Connection;
+	public fun onPostCommit (Lkotlin/jvm/functions/Function0;)V
+	public fun onPreCommit (Lkotlin/jvm/functions/Function0;)V
+	public fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
+	public fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jdbc/JDBCSession$HookType : java/lang/Enum {
+	public static final field POST Lmisk/jdbc/JDBCSession$HookType;
+	public static final field PRE Lmisk/jdbc/JDBCSession$HookType;
+	public static final field SESSION_CLOSE Lmisk/jdbc/JDBCSession$HookType;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/jdbc/JDBCSession$HookType;
+	public static fun values ()[Lmisk/jdbc/JDBCSession$HookType;
+}
+
+public final class misk/jdbc/JdbcExtensionsKt {
+	public static final fun map (Ljava/sql/ResultSet;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
+	public static final fun maybeInt (Ljava/sql/ResultSet;)Ljava/lang/Integer;
+	public static final fun maybeLong (Ljava/sql/ResultSet;)Ljava/lang/Long;
+	public static final fun maybeResult (Ljava/sql/ResultSet;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun maybeString (Ljava/sql/ResultSet;)Ljava/lang/String;
+	public static final fun uniqueInt (Ljava/sql/ResultSet;)I
+	public static final fun uniqueLong (Ljava/sql/ResultSet;)J
+	public static final fun uniqueResult (Ljava/sql/ResultSet;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun uniqueString (Ljava/sql/ResultSet;)Ljava/lang/String;
+}
+
+public final class misk/jdbc/JdbcModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getDatabasePool ()Lmisk/jdbc/DatabasePool;
+	public final fun getReaderConfig ()Lmisk/jdbc/DataSourceConfig;
+}
+
+public final class misk/jdbc/PingDatabaseService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> (Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;)V
+}
+
+public final class misk/jdbc/PostCommitHookFailedException : java/lang/Exception {
+	public fun <init> (Ljava/lang/Throwable;)V
+}
+
+public final class misk/jdbc/RealDatabasePool : misk/jdbc/DatabasePool {
+	public static final field INSTANCE Lmisk/jdbc/RealDatabasePool;
+	public fun releaseDatabase (Lmisk/jdbc/DataSourceConfig;)V
+	public fun takeDatabase (Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/DataSourceConfig;
+}
+
+public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
+	public fun <init> (Ljavax/sql/DataSource;)V
+	public fun getInTransaction ()Z
+	public fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jdbc/SchemaMigratorService : com/google/common/util/concurrent/AbstractIdleService, misk/healthchecks/HealthCheck, misk/jdbc/DatabaseReadyService {
+	public fun status ()Lmisk/healthchecks/HealthStatus;
+}
+
+public abstract interface class misk/jdbc/Session {
+	public abstract fun onPostCommit (Lkotlin/jvm/functions/Function0;)V
+	public abstract fun onPreCommit (Lkotlin/jvm/functions/Function0;)V
+	public abstract fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
+	public abstract fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jdbc/SpanInjector : misk/jdbc/DataSourceDecorator, net/ttddyy/dsproxy/transform/QueryTransformer {
+	public fun <init> (Lio/opentracing/Tracer;Lmisk/jdbc/DataSourceConfig;)V
+	public fun decorate (Ljavax/sql/DataSource;)Ljavax/sql/DataSource;
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getTracer ()Lio/opentracing/Tracer;
+	public fun transformQuery (Lnet/ttddyy/dsproxy/transform/TransformInfo;)Ljava/lang/String;
+}
+
+public final class misk/jdbc/StringBuilderCarrier : io/opentracing/propagation/TextMap {
+	public fun <init> ()V
+	public final fun getMap ()Ljava/util/HashMap;
+	public fun iterator ()Ljava/util/Iterator;
+	public fun put (Ljava/lang/String;Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jdbc/TableScanException : misk/jdbc/CheckException {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/jdbc/Transacter {
+	public abstract fun getInTransaction ()Z
+	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/vitess/ConnectionExtensionsKt {
+	public static final fun failSafeRead (Ljava/sql/Connection;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun failSafeRead (Ljava/sql/Connection;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun getRootCause (Ljava/lang/Throwable;)Ljava/lang/Throwable;
+	public static final fun tabletDoesNotExists (Ljava/lang/Exception;)Z
+	public static final fun target (Ljava/sql/Connection;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/vitess/CowriteException : misk/jdbc/CheckException {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/Destination {
+	public static final field Companion Lmisk/vitess/Destination$Companion;
+	public fun <init> (Lmisk/vitess/Keyspace;Lmisk/vitess/Shard;Lmisk/vitess/TabletType;)V
+	public fun <init> (Lmisk/vitess/Shard;)V
+	public fun <init> (Lmisk/vitess/Shard;Lmisk/vitess/TabletType;)V
+	public fun <init> (Lmisk/vitess/TabletType;)V
+	public final fun component1 ()Lmisk/vitess/Keyspace;
+	public final fun component2 ()Lmisk/vitess/Shard;
+	public final fun component3 ()Lmisk/vitess/TabletType;
+	public final fun copy (Lmisk/vitess/Keyspace;Lmisk/vitess/Shard;Lmisk/vitess/TabletType;)Lmisk/vitess/Destination;
+	public static synthetic fun copy$default (Lmisk/vitess/Destination;Lmisk/vitess/Keyspace;Lmisk/vitess/Shard;Lmisk/vitess/TabletType;ILjava/lang/Object;)Lmisk/vitess/Destination;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKeyspace ()Lmisk/vitess/Keyspace;
+	public final fun getShard ()Lmisk/vitess/Shard;
+	public final fun getTabletType ()Lmisk/vitess/TabletType;
+	public fun hashCode ()I
+	public final fun isBlank ()Z
+	public final fun mergedWith (Lmisk/vitess/Destination;)Lmisk/vitess/Destination;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/Destination$Companion {
+	public final fun parse (Ljava/lang/String;)Lmisk/vitess/Destination;
+}
+
+public final class misk/vitess/FullScatterException : misk/jdbc/CheckException {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/Keyspace {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/vitess/Keyspace;
+	public static synthetic fun copy$default (Lmisk/vitess/Keyspace;Ljava/lang/String;ILjava/lang/Object;)Lmisk/vitess/Keyspace;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/Shard {
+	public static final field Companion Lmisk/vitess/Shard$Companion;
+	public static final field MAX_LENGTH I
+	public static final field SINGLE_SHARD_ID Ljava/lang/String;
+	public fun <init> (Lmisk/vitess/Keyspace;Ljava/lang/String;)V
+	public final fun component1 ()Lmisk/vitess/Keyspace;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun contains (Lmisk/vitess/Shard$Key;)Z
+	public final fun copy (Lmisk/vitess/Keyspace;Ljava/lang/String;)Lmisk/vitess/Shard;
+	public static synthetic fun copy$default (Lmisk/vitess/Shard;Lmisk/vitess/Keyspace;Ljava/lang/String;ILjava/lang/Object;)Lmisk/vitess/Shard;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKeyspace ()Lmisk/vitess/Keyspace;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun keyRange ()Lcom/google/common/collect/Range;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/Shard$Companion {
+	public final fun getSINGLE_KEYSPACE ()Lmisk/vitess/Keyspace;
+	public final fun getSINGLE_SHARD ()Lmisk/vitess/Shard;
+	public final fun getSINGLE_SHARD_SET ()Lcom/google/common/collect/ImmutableSet;
+	public final fun parse (Ljava/lang/String;)Lmisk/vitess/Shard;
+}
+
+public final class misk/vitess/Shard$Key : java/lang/Comparable {
+	public static final field Companion Lmisk/vitess/Shard$Key$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Lokio/ByteString;)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Lmisk/vitess/Shard$Key;)I
+	public final fun component1 ()Lokio/ByteString;
+	public final fun copy (Lokio/ByteString;)Lmisk/vitess/Shard$Key;
+	public static synthetic fun copy$default (Lmisk/vitess/Shard$Key;Lokio/ByteString;ILjava/lang/Object;)Lmisk/vitess/Shard$Key;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBytes ()Lokio/ByteString;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/Shard$Key$Companion {
+	public final fun hash (J)Lmisk/vitess/Shard$Key;
+}
+
+public final class misk/vitess/ShardKt {
+	public static final fun checkValidShardIdentifier (Ljava/lang/String;)V
+}
+
+public final class misk/vitess/ShardsKt {
+	public static final fun shards (Lmisk/jdbc/DataSourceService;)Ljava/util/function/Supplier;
+}
+
+public final class misk/vitess/TabletType : java/lang/Enum {
+	public static final field MASTER Lmisk/vitess/TabletType;
+	public static final field REPLICA Lmisk/vitess/TabletType;
+	public final fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lmisk/vitess/TabletType;
+	public static fun values ()[Lmisk/vitess/TabletType;
+}
+

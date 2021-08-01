@@ -1,0 +1,117 @@
+public class misk/jdbc/ExtendedQueryExecutionListener : net/ttddyy/dsproxy/listener/MethodExecutionListener, net/ttddyy/dsproxy/listener/QueryExecutionListener {
+	public static final field Companion Lmisk/jdbc/ExtendedQueryExecutionListener$Companion;
+	public fun <init> ()V
+	protected fun afterCommitTransaction ()V
+	protected fun afterEndTransaction ()V
+	public fun afterMethod (Lnet/ttddyy/dsproxy/listener/MethodExecutionContext;)V
+	protected fun afterQuery (Ljava/lang/String;)V
+	public final fun afterQuery (Lnet/ttddyy/dsproxy/ExecutionInfo;Ljava/util/List;)V
+	protected fun afterRollbackTransaction ()V
+	protected fun afterStartTransaction ()V
+	protected fun beforeCommitTransaction ()V
+	protected fun beforeEndTransaction ()V
+	public fun beforeMethod (Lnet/ttddyy/dsproxy/listener/MethodExecutionContext;)V
+	protected fun beforeQuery (Ljava/lang/String;)V
+	public final fun beforeQuery (Lnet/ttddyy/dsproxy/ExecutionInfo;Ljava/util/List;)V
+	protected fun beforeRollbackTransaction ()V
+	protected fun beforeStartTransaction ()V
+}
+
+public final class misk/jdbc/ExtendedQueryExecutionListener$Companion {
+}
+
+public final class misk/jdbc/JdbcTestingModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;Z)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/jdbc/MySqlScaleSafetyChecks : misk/jdbc/DataSourceDecorator {
+	public fun <init> (Lmisk/jdbc/DataSourceConfig;)V
+	public final fun connect ()Ljava/sql/Connection;
+	public fun decorate (Ljavax/sql/DataSource;)Ljavax/sql/DataSource;
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+}
+
+public final class misk/jdbc/MySqlScaleSafetyChecks$TableScanDetector : misk/jdbc/ExtendedQueryExecutionListener {
+	public fun <init> (Lmisk/jdbc/MySqlScaleSafetyChecks;)V
+}
+
+public final class misk/jdbc/ScaleSafetyChecks {
+	public static final field INSTANCE Lmisk/jdbc/ScaleSafetyChecks;
+	public final fun checkQueryForTableScan (Ljava/sql/Connection;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun extractQueriesSince (Ljava/sql/Connection;Ljava/sql/Timestamp;)Ljava/util/List;
+	public final fun getLastLoggedCommand (Ljava/sql/Connection;)Ljava/sql/Timestamp;
+	public final fun isDml (Ljava/lang/String;)Z
+	public final fun turnOnSqlGeneralLogging (Ljava/sql/Connection;)V
+}
+
+public final class misk/jdbc/TestDatabasePool : misk/jdbc/DatabasePool {
+	public static final field Companion Lmisk/jdbc/TestDatabasePool$Companion;
+	public fun <init> (Lmisk/jdbc/TestDatabasePool$Backend;Ljava/time/Clock;)V
+	public final fun getBackend ()Lmisk/jdbc/TestDatabasePool$Backend;
+	public final fun getClock ()Ljava/time/Clock;
+	public final fun pruneOldDatabases (Ljava/time/Duration;)V
+	public static synthetic fun pruneOldDatabases$default (Lmisk/jdbc/TestDatabasePool;Ljava/time/Duration;ILjava/lang/Object;)V
+	public fun releaseDatabase (Lmisk/jdbc/DataSourceConfig;)V
+	public fun takeDatabase (Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/DataSourceConfig;
+}
+
+public abstract interface class misk/jdbc/TestDatabasePool$Backend {
+	public abstract fun createDatabase (Ljava/lang/String;)V
+	public abstract fun dropDatabase (Ljava/lang/String;)V
+	public abstract fun showDatabases ()Ljava/util/Set;
+}
+
+public final class misk/jdbc/TestDatabasePool$Companion {
+}
+
+public final class misk/jdbc/TestDatabasePool$DatabaseName {
+	public fun <init> (Ljava/lang/String;JI)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun component3 ()I
+	public final fun copy (Ljava/lang/String;JI)Lmisk/jdbc/TestDatabasePool$DatabaseName;
+	public static synthetic fun copy$default (Lmisk/jdbc/TestDatabasePool$DatabaseName;Ljava/lang/String;JIILjava/lang/Object;)Lmisk/jdbc/TestDatabasePool$DatabaseName;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getVersion ()I
+	public final fun getYearMonthDay ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jdbc/TestDatabasePoolKt {
+	public static final fun getSHARED_TEST_DATABASE_POOL ()Lmisk/jdbc/TestDatabasePool;
+}
+
+public final class misk/jdbc/TruncateTablesService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/VitessScaleSafetyChecks : misk/jdbc/DataSourceDecorator {
+	public static final field Companion Lmisk/vitess/VitessScaleSafetyChecks$Companion;
+	public fun <init> (Lmisk/jdbc/DataSourceConfig;Lokhttp3/OkHttpClient;Lcom/squareup/moshi/Moshi;Lmisk/database/StartDatabaseService;)V
+	public final fun connect ()Ljava/sql/Connection;
+	public fun decorate (Ljavax/sql/DataSource;)Ljavax/sql/DataSource;
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
+	public final fun getOkHttpClient ()Lokhttp3/OkHttpClient;
+	public final fun getStartDatabaseService ()Lmisk/database/StartDatabaseService;
+}
+
+public final class misk/vitess/VitessScaleSafetyChecks$Companion {
+}
+
+public final class misk/vitess/VitessScaleSafetyChecks$CowriteDetector : misk/jdbc/ExtendedQueryExecutionListener {
+	public fun <init> (Lmisk/vitess/VitessScaleSafetyChecks;)V
+}
+
+public final class misk/vitess/VitessScaleSafetyChecks$FullScatterDetector : misk/jdbc/ExtendedQueryExecutionListener {
+	public fun <init> (Lmisk/vitess/VitessScaleSafetyChecks;)V
+}
+
+public final class misk/vitess/VitessScaleSafetyChecks$TableScanDetector : misk/jdbc/ExtendedQueryExecutionListener {
+	public fun <init> (Lmisk/vitess/VitessScaleSafetyChecks;)V
+}
+

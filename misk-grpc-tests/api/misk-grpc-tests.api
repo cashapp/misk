@@ -1,0 +1,1075 @@
+public final class misk/grpc/miskclient/MiskGrpcClientModule : misk/inject/KAbstractModule {
+	public fun <init> (Lokhttp3/HttpUrl;)V
+	public final fun getUrl ()Lokhttp3/HttpUrl;
+	public final fun provideHttpClientsConfig ()Lmisk/client/HttpClientsConfig;
+}
+
+public final class misk/grpc/miskclient/RouteGuideCallCounter : misk/client/ClientNetworkInterceptor$Factory {
+	public fun <init> ()V
+	public final fun counter (Ljava/lang/String;)Ljava/util/concurrent/atomic/AtomicInteger;
+	public fun create (Lmisk/client/ClientAction;)Lmisk/client/ClientNetworkInterceptor;
+	public final fun getActionNameToCount ()Ljava/util/Map;
+}
+
+public final class misk/grpc/miskserver/GetFeatureGrpcAction : misk/web/actions/WebAction, routeguide/RouteGuideGetFeatureBlockingServer {
+	public fun <init> ()V
+	public fun GetFeature (Lrouteguide/Point;)Lrouteguide/Feature;
+}
+
+public final class misk/grpc/miskserver/RouteChatGrpcAction : misk/web/actions/WebAction, routeguide/RouteGuideRouteChatBlockingServer {
+	public fun <init> ()V
+	public fun RouteChat (Lcom/squareup/wire/MessageSource;Lcom/squareup/wire/MessageSink;)V
+	public final fun getWelcomeMessage ()Ljava/lang/String;
+	public final fun setWelcomeMessage (Ljava/lang/String;)V
+}
+
+public final class misk/grpc/miskserver/RouteGuideMiskServiceModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun provideServerUrl (Lmisk/web/jetty/JettyService;)Lokhttp3/HttpUrl;
+}
+
+public final class misk/grpc/protocclient/GrpcChannelFactory {
+	public fun <init> (Lmisk/resources/ResourceLoader;)V
+	public final fun createClientChannel (Ljava/net/SocketAddress;Ljava/lang/String;)Lio/grpc/ManagedChannel;
+	public static synthetic fun createClientChannel$default (Lmisk/grpc/protocclient/GrpcChannelFactory;Ljava/net/SocketAddress;Ljava/lang/String;ILjava/lang/Object;)Lio/grpc/ManagedChannel;
+	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
+}
+
+public final class misk/grpc/protocclient/ProtocGrpcClientModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun provideChannel (Lokhttp3/HttpUrl;Lmisk/grpc/protocclient/GrpcChannelFactory;)Lio/grpc/ManagedChannel;
+}
+
+public final class misk/grpc/protocserver/ProtocGrpcService : com/google/common/util/concurrent/AbstractIdleService {
+	public field server Lio/grpc/Server;
+	public fun <init> (Ljava/util/List;Lmisk/resources/ResourceLoader;)V
+	public final fun getServer ()Lio/grpc/Server;
+	public final fun getUrl ()Lokhttp3/HttpUrl;
+	public final fun setServer (Lio/grpc/Server;)V
+}
+
+public final class misk/grpc/protocserver/RouteGuideProtocServiceModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun provideServerUrl (Lmisk/grpc/protocserver/ProtocGrpcService;)Lokhttp3/HttpUrl;
+}
+
+public final class routeguide/Feature : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lrouteguide/Feature$Companion;
+	public final field location Lrouteguide/Point;
+	public final field name Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lrouteguide/Point;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Lrouteguide/Point;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Lrouteguide/Point;Lokio/ByteString;)Lrouteguide/Feature;
+	public static synthetic fun copy$default (Lrouteguide/Feature;Ljava/lang/String;Lrouteguide/Point;Lokio/ByteString;ILjava/lang/Object;)Lrouteguide/Feature;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Lrouteguide/Feature$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class routeguide/Feature$Builder : com/squareup/wire/Message$Builder {
+	public field location Lrouteguide/Point;
+	public field name Ljava/lang/String;
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Lrouteguide/Feature;
+	public final fun location (Lrouteguide/Point;)Lrouteguide/Feature$Builder;
+	public final fun name (Ljava/lang/String;)Lrouteguide/Feature$Builder;
+}
+
+public final class routeguide/Feature$Companion {
+}
+
+public final class routeguide/FeatureDatabase : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lrouteguide/FeatureDatabase$Companion;
+	public final field feature Ljava/util/List;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/util/List;Lokio/ByteString;)Lrouteguide/FeatureDatabase;
+	public static synthetic fun copy$default (Lrouteguide/FeatureDatabase;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lrouteguide/FeatureDatabase;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Lrouteguide/FeatureDatabase$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class routeguide/FeatureDatabase$Builder : com/squareup/wire/Message$Builder {
+	public field feature Ljava/util/List;
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Lrouteguide/FeatureDatabase;
+	public final fun feature (Ljava/util/List;)Lrouteguide/FeatureDatabase$Builder;
+}
+
+public final class routeguide/FeatureDatabase$Companion {
+}
+
+public final class routeguide/GrpcRouteGuideClient : routeguide/RouteGuideClient {
+	public fun <init> (Lcom/squareup/wire/GrpcClient;)V
+	public fun GetFeature ()Lcom/squareup/wire/GrpcCall;
+	public fun ListFeatures ()Lcom/squareup/wire/GrpcStreamingCall;
+	public fun RecordRoute ()Lcom/squareup/wire/GrpcStreamingCall;
+	public fun RouteChat ()Lcom/squareup/wire/GrpcStreamingCall;
+}
+
+public final class routeguide/Point : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lrouteguide/Point$Companion;
+	public final field latitude Ljava/lang/Integer;
+	public final field longitude Ljava/lang/Integer;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;Lokio/ByteString;)Lrouteguide/Point;
+	public static synthetic fun copy$default (Lrouteguide/Point;Ljava/lang/Integer;Ljava/lang/Integer;Lokio/ByteString;ILjava/lang/Object;)Lrouteguide/Point;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Lrouteguide/Point$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class routeguide/Point$Builder : com/squareup/wire/Message$Builder {
+	public field latitude Ljava/lang/Integer;
+	public field longitude Ljava/lang/Integer;
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Lrouteguide/Point;
+	public final fun latitude (Ljava/lang/Integer;)Lrouteguide/Point$Builder;
+	public final fun longitude (Ljava/lang/Integer;)Lrouteguide/Point$Builder;
+}
+
+public final class routeguide/Point$Companion {
+}
+
+public final class routeguide/Rectangle : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lrouteguide/Rectangle$Companion;
+	public final field hi Lrouteguide/Point;
+	public final field lo Lrouteguide/Point;
+	public fun <init> ()V
+	public fun <init> (Lrouteguide/Point;Lrouteguide/Point;Lokio/ByteString;)V
+	public synthetic fun <init> (Lrouteguide/Point;Lrouteguide/Point;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lrouteguide/Point;Lrouteguide/Point;Lokio/ByteString;)Lrouteguide/Rectangle;
+	public static synthetic fun copy$default (Lrouteguide/Rectangle;Lrouteguide/Point;Lrouteguide/Point;Lokio/ByteString;ILjava/lang/Object;)Lrouteguide/Rectangle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Lrouteguide/Rectangle$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class routeguide/Rectangle$Builder : com/squareup/wire/Message$Builder {
+	public field hi Lrouteguide/Point;
+	public field lo Lrouteguide/Point;
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Lrouteguide/Rectangle;
+	public final fun hi (Lrouteguide/Point;)Lrouteguide/Rectangle$Builder;
+	public final fun lo (Lrouteguide/Point;)Lrouteguide/Rectangle$Builder;
+}
+
+public final class routeguide/Rectangle$Companion {
+}
+
+public abstract interface class routeguide/RouteGuideClient : com/squareup/wire/Service {
+	public abstract fun GetFeature ()Lcom/squareup/wire/GrpcCall;
+	public abstract fun ListFeatures ()Lcom/squareup/wire/GrpcStreamingCall;
+	public abstract fun RecordRoute ()Lcom/squareup/wire/GrpcStreamingCall;
+	public abstract fun RouteChat ()Lcom/squareup/wire/GrpcStreamingCall;
+}
+
+public abstract interface class routeguide/RouteGuideGetFeatureBlockingServer : com/squareup/wire/Service {
+	public abstract fun GetFeature (Lrouteguide/Point;)Lrouteguide/Feature;
+}
+
+public final class routeguide/RouteGuideGrpc {
+	public static final field SERVICE_NAME Ljava/lang/String;
+	public static fun getGetFeatureMethod ()Lio/grpc/MethodDescriptor;
+	public static fun getListFeaturesMethod ()Lio/grpc/MethodDescriptor;
+	public static fun getRecordRouteMethod ()Lio/grpc/MethodDescriptor;
+	public static fun getRouteChatMethod ()Lio/grpc/MethodDescriptor;
+	public static fun getServiceDescriptor ()Lio/grpc/ServiceDescriptor;
+	public static fun newBlockingStub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideBlockingStub;
+	public static fun newFutureStub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideFutureStub;
+	public static fun newStub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideStub;
+}
+
+public final class routeguide/RouteGuideGrpc$RouteGuideBlockingStub : io/grpc/stub/AbstractBlockingStub {
+	public fun getFeature (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Feature;
+	public fun listFeatures (Lrouteguide/RouteGuideProto$Rectangle;)Ljava/util/Iterator;
+}
+
+public final class routeguide/RouteGuideGrpc$RouteGuideFutureStub : io/grpc/stub/AbstractFutureStub {
+	public fun getFeature (Lrouteguide/RouteGuideProto$Point;)Lcom/google/common/util/concurrent/ListenableFuture;
+}
+
+public abstract class routeguide/RouteGuideGrpc$RouteGuideImplBase : io/grpc/BindableService {
+	public fun <init> ()V
+	public final fun bindService ()Lio/grpc/ServerServiceDefinition;
+	public fun getFeature (Lrouteguide/RouteGuideProto$Point;Lio/grpc/stub/StreamObserver;)V
+	public fun listFeatures (Lrouteguide/RouteGuideProto$Rectangle;Lio/grpc/stub/StreamObserver;)V
+	public fun recordRoute (Lio/grpc/stub/StreamObserver;)Lio/grpc/stub/StreamObserver;
+	public fun routeChat (Lio/grpc/stub/StreamObserver;)Lio/grpc/stub/StreamObserver;
+}
+
+public final class routeguide/RouteGuideGrpc$RouteGuideStub : io/grpc/stub/AbstractAsyncStub {
+	public fun getFeature (Lrouteguide/RouteGuideProto$Point;Lio/grpc/stub/StreamObserver;)V
+	public fun listFeatures (Lrouteguide/RouteGuideProto$Rectangle;Lio/grpc/stub/StreamObserver;)V
+	public fun recordRoute (Lio/grpc/stub/StreamObserver;)Lio/grpc/stub/StreamObserver;
+	public fun routeChat (Lio/grpc/stub/StreamObserver;)Lio/grpc/stub/StreamObserver;
+}
+
+public abstract interface class routeguide/RouteGuideListFeaturesBlockingServer : com/squareup/wire/Service {
+	public abstract fun ListFeatures (Lrouteguide/Rectangle;Lcom/squareup/wire/MessageSink;)V
+}
+
+public final class routeguide/RouteGuideProto {
+	public static fun getDescriptor ()Lcom/google/protobuf/Descriptors$FileDescriptor;
+	public static fun registerAllExtensions (Lcom/google/protobuf/ExtensionRegistry;)V
+	public static fun registerAllExtensions (Lcom/google/protobuf/ExtensionRegistryLite;)V
+}
+
+public final class routeguide/RouteGuideProto$Feature : com/google/protobuf/GeneratedMessageV3, routeguide/RouteGuideProto$FeatureOrBuilder {
+	public static final field LOCATION_FIELD_NUMBER I
+	public static final field NAME_FIELD_NUMBER I
+	public static final field PARSER Lcom/google/protobuf/Parser;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun getDefaultInstance ()Lrouteguide/RouteGuideProto$Feature;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$Feature;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getLocation ()Lrouteguide/RouteGuideProto$Point;
+	public fun getLocationOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public fun getName ()Ljava/lang/String;
+	public fun getNameBytes ()Lcom/google/protobuf/ByteString;
+	public fun getParserForType ()Lcom/google/protobuf/Parser;
+	public fun getSerializedSize ()I
+	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
+	public fun hasLocation ()Z
+	public fun hasName ()Z
+	public fun hashCode ()I
+	public final fun isInitialized ()Z
+	public static fun newBuilder ()Lrouteguide/RouteGuideProto$Feature$Builder;
+	public static fun newBuilder (Lrouteguide/RouteGuideProto$Feature;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun newBuilderForType ()Lrouteguide/RouteGuideProto$Feature$Builder;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom ([B)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parseFrom ([BLcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Feature;
+	public static fun parser ()Lcom/google/protobuf/Parser;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun toBuilder ()Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun writeTo (Lcom/google/protobuf/CodedOutputStream;)V
+}
+
+public final class routeguide/RouteGuideProto$Feature$Builder : com/google/protobuf/GeneratedMessageV3$Builder, routeguide/RouteGuideProto$FeatureOrBuilder {
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun build ()Lcom/google/protobuf/Message;
+	public synthetic fun build ()Lcom/google/protobuf/MessageLite;
+	public fun build ()Lrouteguide/RouteGuideProto$Feature;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/Message;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/MessageLite;
+	public fun buildPartial ()Lrouteguide/RouteGuideProto$Feature;
+	public synthetic fun clear ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun clear ()Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun clearLocation ()Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun clearName ()Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/MessageLite$Builder;
+	public synthetic fun clone ()Ljava/lang/Object;
+	public fun clone ()Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$Feature;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getDescriptorForType ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getLocation ()Lrouteguide/RouteGuideProto$Point;
+	public fun getLocationBuilder ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun getLocationOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public fun getName ()Ljava/lang/String;
+	public fun getNameBytes ()Lcom/google/protobuf/ByteString;
+	public fun hasLocation ()Z
+	public fun hasName ()Z
+	public final fun isInitialized ()Z
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/Message$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/MessageLite$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/Message$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/Message;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun mergeFrom (Lrouteguide/RouteGuideProto$Feature;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun mergeLocation (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun setLocation (Lrouteguide/RouteGuideProto$Point$Builder;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun setLocation (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun setName (Ljava/lang/String;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun setNameBytes (Lcom/google/protobuf/ByteString;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$Feature$Builder;
+}
+
+public final class routeguide/RouteGuideProto$FeatureDatabase : com/google/protobuf/GeneratedMessageV3, routeguide/RouteGuideProto$FeatureDatabaseOrBuilder {
+	public static final field FEATURE_FIELD_NUMBER I
+	public static final field PARSER Lcom/google/protobuf/Parser;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun getDefaultInstance ()Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getFeature (I)Lrouteguide/RouteGuideProto$Feature;
+	public fun getFeatureCount ()I
+	public fun getFeatureList ()Ljava/util/List;
+	public fun getFeatureOrBuilder (I)Lrouteguide/RouteGuideProto$FeatureOrBuilder;
+	public fun getFeatureOrBuilderList ()Ljava/util/List;
+	public fun getParserForType ()Lcom/google/protobuf/Parser;
+	public fun getSerializedSize ()I
+	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
+	public fun hashCode ()I
+	public final fun isInitialized ()Z
+	public static fun newBuilder ()Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public static fun newBuilder (Lrouteguide/RouteGuideProto$FeatureDatabase;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun newBuilderForType ()Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom ([B)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parseFrom ([BLcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static fun parser ()Lcom/google/protobuf/Parser;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun toBuilder ()Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun writeTo (Lcom/google/protobuf/CodedOutputStream;)V
+}
+
+public final class routeguide/RouteGuideProto$FeatureDatabase$Builder : com/google/protobuf/GeneratedMessageV3$Builder, routeguide/RouteGuideProto$FeatureDatabaseOrBuilder {
+	public fun addAllFeature (Ljava/lang/Iterable;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun addFeature (ILrouteguide/RouteGuideProto$Feature$Builder;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun addFeature (ILrouteguide/RouteGuideProto$Feature;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun addFeature (Lrouteguide/RouteGuideProto$Feature$Builder;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun addFeature (Lrouteguide/RouteGuideProto$Feature;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun addFeatureBuilder ()Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun addFeatureBuilder (I)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun build ()Lcom/google/protobuf/Message;
+	public synthetic fun build ()Lcom/google/protobuf/MessageLite;
+	public fun build ()Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/Message;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/MessageLite;
+	public fun buildPartial ()Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public synthetic fun clear ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun clear ()Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun clearFeature ()Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/MessageLite$Builder;
+	public synthetic fun clone ()Ljava/lang/Object;
+	public fun clone ()Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$FeatureDatabase;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getDescriptorForType ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getFeature (I)Lrouteguide/RouteGuideProto$Feature;
+	public fun getFeatureBuilder (I)Lrouteguide/RouteGuideProto$Feature$Builder;
+	public fun getFeatureBuilderList ()Ljava/util/List;
+	public fun getFeatureCount ()I
+	public fun getFeatureList ()Ljava/util/List;
+	public fun getFeatureOrBuilder (I)Lrouteguide/RouteGuideProto$FeatureOrBuilder;
+	public fun getFeatureOrBuilderList ()Ljava/util/List;
+	public final fun isInitialized ()Z
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/Message$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/MessageLite$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/Message$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/Message;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun mergeFrom (Lrouteguide/RouteGuideProto$FeatureDatabase;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun removeFeature (I)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun setFeature (ILrouteguide/RouteGuideProto$Feature$Builder;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public fun setFeature (ILrouteguide/RouteGuideProto$Feature;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
+}
+
+public abstract interface class routeguide/RouteGuideProto$FeatureDatabaseOrBuilder : com/google/protobuf/MessageOrBuilder {
+	public abstract fun getFeature (I)Lrouteguide/RouteGuideProto$Feature;
+	public abstract fun getFeatureCount ()I
+	public abstract fun getFeatureList ()Ljava/util/List;
+	public abstract fun getFeatureOrBuilder (I)Lrouteguide/RouteGuideProto$FeatureOrBuilder;
+	public abstract fun getFeatureOrBuilderList ()Ljava/util/List;
+}
+
+public abstract interface class routeguide/RouteGuideProto$FeatureOrBuilder : com/google/protobuf/MessageOrBuilder {
+	public abstract fun getLocation ()Lrouteguide/RouteGuideProto$Point;
+	public abstract fun getLocationOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getNameBytes ()Lcom/google/protobuf/ByteString;
+	public abstract fun hasLocation ()Z
+	public abstract fun hasName ()Z
+}
+
+public final class routeguide/RouteGuideProto$Point : com/google/protobuf/GeneratedMessageV3, routeguide/RouteGuideProto$PointOrBuilder {
+	public static final field LATITUDE_FIELD_NUMBER I
+	public static final field LONGITUDE_FIELD_NUMBER I
+	public static final field PARSER Lcom/google/protobuf/Parser;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun getDefaultInstance ()Lrouteguide/RouteGuideProto$Point;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$Point;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getLatitude ()I
+	public fun getLongitude ()I
+	public fun getParserForType ()Lcom/google/protobuf/Parser;
+	public fun getSerializedSize ()I
+	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
+	public fun hasLatitude ()Z
+	public fun hasLongitude ()Z
+	public fun hashCode ()I
+	public final fun isInitialized ()Z
+	public static fun newBuilder ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public static fun newBuilder (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun newBuilderForType ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom ([B)Lrouteguide/RouteGuideProto$Point;
+	public static fun parseFrom ([BLcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Point;
+	public static fun parser ()Lcom/google/protobuf/Parser;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun toBuilder ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun writeTo (Lcom/google/protobuf/CodedOutputStream;)V
+}
+
+public final class routeguide/RouteGuideProto$Point$Builder : com/google/protobuf/GeneratedMessageV3$Builder, routeguide/RouteGuideProto$PointOrBuilder {
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun build ()Lcom/google/protobuf/Message;
+	public synthetic fun build ()Lcom/google/protobuf/MessageLite;
+	public fun build ()Lrouteguide/RouteGuideProto$Point;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/Message;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/MessageLite;
+	public fun buildPartial ()Lrouteguide/RouteGuideProto$Point;
+	public synthetic fun clear ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun clear ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun clearLatitude ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun clearLongitude ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/MessageLite$Builder;
+	public synthetic fun clone ()Ljava/lang/Object;
+	public fun clone ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$Point;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getDescriptorForType ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getLatitude ()I
+	public fun getLongitude ()I
+	public fun hasLatitude ()Z
+	public fun hasLongitude ()Z
+	public final fun isInitialized ()Z
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/Message$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/MessageLite$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/Message$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/Message;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun mergeFrom (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun setLatitude (I)Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun setLongitude (I)Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lrouteguide/RouteGuideProto$Point$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$Point$Builder;
+}
+
+public abstract interface class routeguide/RouteGuideProto$PointOrBuilder : com/google/protobuf/MessageOrBuilder {
+	public abstract fun getLatitude ()I
+	public abstract fun getLongitude ()I
+	public abstract fun hasLatitude ()Z
+	public abstract fun hasLongitude ()Z
+}
+
+public final class routeguide/RouteGuideProto$Rectangle : com/google/protobuf/GeneratedMessageV3, routeguide/RouteGuideProto$RectangleOrBuilder {
+	public static final field HI_FIELD_NUMBER I
+	public static final field LO_FIELD_NUMBER I
+	public static final field PARSER Lcom/google/protobuf/Parser;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun getDefaultInstance ()Lrouteguide/RouteGuideProto$Rectangle;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$Rectangle;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getHi ()Lrouteguide/RouteGuideProto$Point;
+	public fun getHiOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public fun getLo ()Lrouteguide/RouteGuideProto$Point;
+	public fun getLoOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public fun getParserForType ()Lcom/google/protobuf/Parser;
+	public fun getSerializedSize ()I
+	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
+	public fun hasHi ()Z
+	public fun hasLo ()Z
+	public fun hashCode ()I
+	public final fun isInitialized ()Z
+	public static fun newBuilder ()Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public static fun newBuilder (Lrouteguide/RouteGuideProto$Rectangle;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun newBuilderForType ()Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom ([B)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parseFrom ([BLcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Rectangle;
+	public static fun parser ()Lcom/google/protobuf/Parser;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun toBuilder ()Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun writeTo (Lcom/google/protobuf/CodedOutputStream;)V
+}
+
+public final class routeguide/RouteGuideProto$Rectangle$Builder : com/google/protobuf/GeneratedMessageV3$Builder, routeguide/RouteGuideProto$RectangleOrBuilder {
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun build ()Lcom/google/protobuf/Message;
+	public synthetic fun build ()Lcom/google/protobuf/MessageLite;
+	public fun build ()Lrouteguide/RouteGuideProto$Rectangle;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/Message;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/MessageLite;
+	public fun buildPartial ()Lrouteguide/RouteGuideProto$Rectangle;
+	public synthetic fun clear ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun clear ()Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun clearHi ()Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun clearLo ()Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/MessageLite$Builder;
+	public synthetic fun clone ()Ljava/lang/Object;
+	public fun clone ()Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$Rectangle;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getDescriptorForType ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getHi ()Lrouteguide/RouteGuideProto$Point;
+	public fun getHiBuilder ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun getHiOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public fun getLo ()Lrouteguide/RouteGuideProto$Point;
+	public fun getLoBuilder ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun getLoOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public fun hasHi ()Z
+	public fun hasLo ()Z
+	public final fun isInitialized ()Z
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/Message$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/MessageLite$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/Message$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/Message;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun mergeFrom (Lrouteguide/RouteGuideProto$Rectangle;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun mergeHi (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun mergeLo (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun setHi (Lrouteguide/RouteGuideProto$Point$Builder;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun setHi (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun setLo (Lrouteguide/RouteGuideProto$Point$Builder;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public fun setLo (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$Rectangle$Builder;
+}
+
+public abstract interface class routeguide/RouteGuideProto$RectangleOrBuilder : com/google/protobuf/MessageOrBuilder {
+	public abstract fun getHi ()Lrouteguide/RouteGuideProto$Point;
+	public abstract fun getHiOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public abstract fun getLo ()Lrouteguide/RouteGuideProto$Point;
+	public abstract fun getLoOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public abstract fun hasHi ()Z
+	public abstract fun hasLo ()Z
+}
+
+public final class routeguide/RouteGuideProto$RouteNote : com/google/protobuf/GeneratedMessageV3, routeguide/RouteGuideProto$RouteNoteOrBuilder {
+	public static final field LOCATION_FIELD_NUMBER I
+	public static final field MESSAGE_FIELD_NUMBER I
+	public static final field PARSER Lcom/google/protobuf/Parser;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun getDefaultInstance ()Lrouteguide/RouteGuideProto$RouteNote;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$RouteNote;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getLocation ()Lrouteguide/RouteGuideProto$Point;
+	public fun getLocationOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public fun getMessage ()Ljava/lang/String;
+	public fun getMessageBytes ()Lcom/google/protobuf/ByteString;
+	public fun getParserForType ()Lcom/google/protobuf/Parser;
+	public fun getSerializedSize ()I
+	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
+	public fun hasLocation ()Z
+	public fun hasMessage ()Z
+	public fun hashCode ()I
+	public final fun isInitialized ()Z
+	public static fun newBuilder ()Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public static fun newBuilder (Lrouteguide/RouteGuideProto$RouteNote;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun newBuilderForType ()Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom ([B)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parseFrom ([BLcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteNote;
+	public static fun parser ()Lcom/google/protobuf/Parser;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun toBuilder ()Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public fun writeTo (Lcom/google/protobuf/CodedOutputStream;)V
+}
+
+public final class routeguide/RouteGuideProto$RouteNote$Builder : com/google/protobuf/GeneratedMessageV3$Builder, routeguide/RouteGuideProto$RouteNoteOrBuilder {
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun build ()Lcom/google/protobuf/Message;
+	public synthetic fun build ()Lcom/google/protobuf/MessageLite;
+	public fun build ()Lrouteguide/RouteGuideProto$RouteNote;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/Message;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/MessageLite;
+	public fun buildPartial ()Lrouteguide/RouteGuideProto$RouteNote;
+	public synthetic fun clear ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun clear ()Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public fun clearLocation ()Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public fun clearMessage ()Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/MessageLite$Builder;
+	public synthetic fun clone ()Ljava/lang/Object;
+	public fun clone ()Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$RouteNote;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getDescriptorForType ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getLocation ()Lrouteguide/RouteGuideProto$Point;
+	public fun getLocationBuilder ()Lrouteguide/RouteGuideProto$Point$Builder;
+	public fun getLocationOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public fun getMessage ()Ljava/lang/String;
+	public fun getMessageBytes ()Lcom/google/protobuf/ByteString;
+	public fun hasLocation ()Z
+	public fun hasMessage ()Z
+	public final fun isInitialized ()Z
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/Message$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/MessageLite$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/Message$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/Message;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public fun mergeFrom (Lrouteguide/RouteGuideProto$RouteNote;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public fun mergeLocation (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public fun setLocation (Lrouteguide/RouteGuideProto$Point$Builder;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public fun setLocation (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public fun setMessage (Ljava/lang/String;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public fun setMessageBytes (Lcom/google/protobuf/ByteString;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$RouteNote$Builder;
+}
+
+public abstract interface class routeguide/RouteGuideProto$RouteNoteOrBuilder : com/google/protobuf/MessageOrBuilder {
+	public abstract fun getLocation ()Lrouteguide/RouteGuideProto$Point;
+	public abstract fun getLocationOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
+	public abstract fun getMessage ()Ljava/lang/String;
+	public abstract fun getMessageBytes ()Lcom/google/protobuf/ByteString;
+	public abstract fun hasLocation ()Z
+	public abstract fun hasMessage ()Z
+}
+
+public final class routeguide/RouteGuideProto$RouteSummary : com/google/protobuf/GeneratedMessageV3, routeguide/RouteGuideProto$RouteSummaryOrBuilder {
+	public static final field DISTANCE_FIELD_NUMBER I
+	public static final field ELAPSED_TIME_FIELD_NUMBER I
+	public static final field FEATURE_COUNT_FIELD_NUMBER I
+	public static final field PARSER Lcom/google/protobuf/Parser;
+	public static final field POINT_COUNT_FIELD_NUMBER I
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun getDefaultInstance ()Lrouteguide/RouteGuideProto$RouteSummary;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$RouteSummary;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getDistance ()I
+	public fun getElapsedTime ()I
+	public fun getFeatureCount ()I
+	public fun getParserForType ()Lcom/google/protobuf/Parser;
+	public fun getPointCount ()I
+	public fun getSerializedSize ()I
+	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
+	public fun hasDistance ()Z
+	public fun hasElapsedTime ()Z
+	public fun hasFeatureCount ()Z
+	public fun hasPointCount ()Z
+	public fun hashCode ()I
+	public final fun isInitialized ()Z
+	public static fun newBuilder ()Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public static fun newBuilder (Lrouteguide/RouteGuideProto$RouteSummary;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun newBuilderForType ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun newBuilderForType ()Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseDelimitedFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom (Lcom/google/protobuf/ByteString;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom (Ljava/io/InputStream;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom (Ljava/io/InputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom (Ljava/nio/ByteBuffer;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom ([B)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parseFrom ([BLcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteSummary;
+	public static fun parser ()Lcom/google/protobuf/Parser;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun toBuilder ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun toBuilder ()Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun writeTo (Lcom/google/protobuf/CodedOutputStream;)V
+}
+
+public final class routeguide/RouteGuideProto$RouteSummary$Builder : com/google/protobuf/GeneratedMessageV3$Builder, routeguide/RouteGuideProto$RouteSummaryOrBuilder {
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun addRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun build ()Lcom/google/protobuf/Message;
+	public synthetic fun build ()Lcom/google/protobuf/MessageLite;
+	public fun build ()Lrouteguide/RouteGuideProto$RouteSummary;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/Message;
+	public synthetic fun buildPartial ()Lcom/google/protobuf/MessageLite;
+	public fun buildPartial ()Lrouteguide/RouteGuideProto$RouteSummary;
+	public synthetic fun clear ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clear ()Lcom/google/protobuf/MessageLite$Builder;
+	public fun clear ()Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun clearDistance ()Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun clearElapsedTime ()Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun clearFeatureCount ()Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearField (Lcom/google/protobuf/Descriptors$FieldDescriptor;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lcom/google/protobuf/Message$Builder;
+	public fun clearOneof (Lcom/google/protobuf/Descriptors$OneofDescriptor;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun clearPointCount ()Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/Message$Builder;
+	public synthetic fun clone ()Lcom/google/protobuf/MessageLite$Builder;
+	public synthetic fun clone ()Ljava/lang/Object;
+	public fun clone ()Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/Message;
+	public synthetic fun getDefaultInstanceForType ()Lcom/google/protobuf/MessageLite;
+	public fun getDefaultInstanceForType ()Lrouteguide/RouteGuideProto$RouteSummary;
+	public static final fun getDescriptor ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getDescriptorForType ()Lcom/google/protobuf/Descriptors$Descriptor;
+	public fun getDistance ()I
+	public fun getElapsedTime ()I
+	public fun getFeatureCount ()I
+	public fun getPointCount ()I
+	public fun hasDistance ()Z
+	public fun hasElapsedTime ()Z
+	public fun hasFeatureCount ()Z
+	public fun hasPointCount ()Z
+	public final fun isInitialized ()Z
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/AbstractMessageLite$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/Message$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lcom/google/protobuf/MessageLite$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/CodedInputStream;Lcom/google/protobuf/ExtensionRegistryLite;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeFrom (Lcom/google/protobuf/Message;)Lcom/google/protobuf/Message$Builder;
+	public fun mergeFrom (Lcom/google/protobuf/Message;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun mergeFrom (Lrouteguide/RouteGuideProto$RouteSummary;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/AbstractMessage$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun mergeUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun setDistance (I)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun setElapsedTime (I)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun setFeatureCount (I)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setField (Lcom/google/protobuf/Descriptors$FieldDescriptor;Ljava/lang/Object;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public fun setPointCount (I)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lcom/google/protobuf/Message$Builder;
+	public fun setRepeatedField (Lcom/google/protobuf/Descriptors$FieldDescriptor;ILjava/lang/Object;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/GeneratedMessageV3$Builder;
+	public synthetic fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lcom/google/protobuf/Message$Builder;
+	public final fun setUnknownFields (Lcom/google/protobuf/UnknownFieldSet;)Lrouteguide/RouteGuideProto$RouteSummary$Builder;
+}
+
+public abstract interface class routeguide/RouteGuideProto$RouteSummaryOrBuilder : com/google/protobuf/MessageOrBuilder {
+	public abstract fun getDistance ()I
+	public abstract fun getElapsedTime ()I
+	public abstract fun getFeatureCount ()I
+	public abstract fun getPointCount ()I
+	public abstract fun hasDistance ()Z
+	public abstract fun hasElapsedTime ()Z
+	public abstract fun hasFeatureCount ()Z
+	public abstract fun hasPointCount ()Z
+}
+
+public abstract interface class routeguide/RouteGuideRecordRouteBlockingServer : com/squareup/wire/Service {
+	public abstract fun RecordRoute (Lcom/squareup/wire/MessageSource;)Lrouteguide/RouteSummary;
+}
+
+public abstract interface class routeguide/RouteGuideRouteChatBlockingServer : com/squareup/wire/Service {
+	public abstract fun RouteChat (Lcom/squareup/wire/MessageSource;Lcom/squareup/wire/MessageSink;)V
+}
+
+public final class routeguide/RouteNote : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lrouteguide/RouteNote$Companion;
+	public final field location Lrouteguide/Point;
+	public final field message Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Lrouteguide/Point;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Lrouteguide/Point;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lrouteguide/Point;Ljava/lang/String;Lokio/ByteString;)Lrouteguide/RouteNote;
+	public static synthetic fun copy$default (Lrouteguide/RouteNote;Lrouteguide/Point;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lrouteguide/RouteNote;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Lrouteguide/RouteNote$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class routeguide/RouteNote$Builder : com/squareup/wire/Message$Builder {
+	public field location Lrouteguide/Point;
+	public field message Ljava/lang/String;
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Lrouteguide/RouteNote;
+	public final fun location (Lrouteguide/Point;)Lrouteguide/RouteNote$Builder;
+	public final fun message (Ljava/lang/String;)Lrouteguide/RouteNote$Builder;
+}
+
+public final class routeguide/RouteNote$Companion {
+}
+
+public final class routeguide/RouteSummary : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lrouteguide/RouteSummary$Companion;
+	public final field distance Ljava/lang/Integer;
+	public final field elapsed_time Ljava/lang/Integer;
+	public final field feature_count Ljava/lang/Integer;
+	public final field point_count Ljava/lang/Integer;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lokio/ByteString;)Lrouteguide/RouteSummary;
+	public static synthetic fun copy$default (Lrouteguide/RouteSummary;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lokio/ByteString;ILjava/lang/Object;)Lrouteguide/RouteSummary;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Lrouteguide/RouteSummary$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class routeguide/RouteSummary$Builder : com/squareup/wire/Message$Builder {
+	public field distance Ljava/lang/Integer;
+	public field elapsed_time Ljava/lang/Integer;
+	public field feature_count Ljava/lang/Integer;
+	public field point_count Ljava/lang/Integer;
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Lrouteguide/RouteSummary;
+	public final fun distance (Ljava/lang/Integer;)Lrouteguide/RouteSummary$Builder;
+	public final fun elapsed_time (Ljava/lang/Integer;)Lrouteguide/RouteSummary$Builder;
+	public final fun feature_count (Ljava/lang/Integer;)Lrouteguide/RouteSummary$Builder;
+	public final fun point_count (Ljava/lang/Integer;)Lrouteguide/RouteSummary$Builder;
+}
+
+public final class routeguide/RouteSummary$Companion {
+}
+
