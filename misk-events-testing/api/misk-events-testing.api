@@ -1,0 +1,29 @@
+public final class misk/events/FakeEventProcessor : misk/events/Producer {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun deliverAll (IZ)V
+	public static synthetic fun deliverAll$default (Lmisk/events/FakeEventProcessor;IZILjava/lang/Object;)V
+	public final fun getDroppedQueue ()Ljava/util/concurrent/BlockingDeque;
+	public final fun getQueue ()Ljava/util/concurrent/BlockingDeque;
+	public final fun getRetryQueue ()Ljava/util/concurrent/BlockingDeque;
+	public fun publish (Lmisk/events/Topic;[Lmisk/events/Event;)V
+}
+
+public final class misk/events/FakeEventProcessor$PublishedEvent {
+	public fun <init> (Lmisk/events/Topic;Lmisk/events/Event;Z)V
+	public final fun component1 ()Lmisk/events/Topic;
+	public final fun component2 ()Lmisk/events/Event;
+	public final fun component3 ()Z
+	public final fun copy (Lmisk/events/Topic;Lmisk/events/Event;Z)Lmisk/events/FakeEventProcessor$PublishedEvent;
+	public static synthetic fun copy$default (Lmisk/events/FakeEventProcessor$PublishedEvent;Lmisk/events/Topic;Lmisk/events/Event;ZILjava/lang/Object;)Lmisk/events/FakeEventProcessor$PublishedEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEvent ()Lmisk/events/Event;
+	public final fun getTopic ()Lmisk/events/Topic;
+	public fun hashCode ()I
+	public final fun isRetry ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/events/FakeEventProcessorModule : misk/inject/KAbstractModule {
+	public static final field INSTANCE Lmisk/events/FakeEventProcessorModule;
+}
+

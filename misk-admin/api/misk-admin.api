@@ -1,0 +1,615 @@
+public final class com/squareup/protos/test/grpc/HelloReply : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_MESSAGE Ljava/lang/String;
+	public final field message Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/protos/test/grpc/HelloReply$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/protos/test/grpc/HelloReply$Builder : com/squareup/wire/Message$Builder {
+	public field message Ljava/lang/String;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/protos/test/grpc/HelloReply;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun message (Ljava/lang/String;)Lcom/squareup/protos/test/grpc/HelloReply$Builder;
+}
+
+public final class com/squareup/protos/test/grpc/HelloRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_NAME Ljava/lang/String;
+	public final field name Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/protos/test/grpc/HelloRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/protos/test/grpc/HelloRequest$Builder : com/squareup/wire/Message$Builder {
+	public field name Ljava/lang/String;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/protos/test/grpc/HelloRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun name (Ljava/lang/String;)Lcom/squareup/protos/test/grpc/HelloRequest$Builder;
+}
+
+public final class com/squareup/protos/test/parsing/Robot : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_ROBOT_ID Ljava/lang/Integer;
+	public static final field DEFAULT_ROBOT_TOKEN Ljava/lang/String;
+	public final field robot_id Ljava/lang/Integer;
+	public final field robot_token Ljava/lang/String;
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/protos/test/parsing/Robot$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/protos/test/parsing/Robot$Builder : com/squareup/wire/Message$Builder {
+	public field robot_id Ljava/lang/Integer;
+	public field robot_token Ljava/lang/String;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/protos/test/parsing/Robot;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun robot_id (Ljava/lang/Integer;)Lcom/squareup/protos/test/parsing/Robot$Builder;
+	public fun robot_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Robot$Builder;
+}
+
+public final class com/squareup/protos/test/parsing/Shipment : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_ACCOUNT_TOKEN Ljava/lang/String;
+	public static final field DEFAULT_CARD_TOKEN Ljava/lang/String;
+	public static final field DEFAULT_DELETED Ljava/lang/Boolean;
+	public static final field DEFAULT_DESTINATION_SIGNATURE Lokio/ByteString;
+	public static final field DEFAULT_LOAD_RATIO Ljava/lang/Double;
+	public static final field DEFAULT_SHIPMENT_ID Ljava/lang/Long;
+	public static final field DEFAULT_SHIPMENT_TOKEN Ljava/lang/String;
+	public static final field DEFAULT_SOURCE_SIGNATURE Lokio/ByteString;
+	public static final field DEFAULT_STATUS Lcom/squareup/protos/test/parsing/Shipment$State;
+	public static final field DEFAULT_TRANSFER_ID Ljava/lang/String;
+	public final field account_token Ljava/lang/String;
+	public final field card_token Ljava/lang/String;
+	public final field deleted Ljava/lang/Boolean;
+	public final field destination Lcom/squareup/protos/test/parsing/Warehouse;
+	public final field destination_signature Lokio/ByteString;
+	public final field load_ratio Ljava/lang/Double;
+	public final field notes Ljava/util/List;
+	public final field shipment_id Ljava/lang/Long;
+	public final field shipment_token Ljava/lang/String;
+	public final field source Lcom/squareup/protos/test/parsing/Warehouse;
+	public final field source_signature Lokio/ByteString;
+	public final field status Lcom/squareup/protos/test/parsing/Shipment$State;
+	public final field transfer_id Ljava/lang/String;
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/parsing/Warehouse;Lcom/squareup/protos/test/parsing/Warehouse;Lcom/squareup/protos/test/parsing/Shipment$State;Ljava/lang/Double;Ljava/lang/Boolean;Lokio/ByteString;Lokio/ByteString;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/parsing/Warehouse;Lcom/squareup/protos/test/parsing/Warehouse;Lcom/squareup/protos/test/parsing/Shipment$State;Ljava/lang/Double;Ljava/lang/Boolean;Lokio/ByteString;Lokio/ByteString;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/protos/test/parsing/Shipment$Builder : com/squareup/wire/Message$Builder {
+	public field account_token Ljava/lang/String;
+	public field card_token Ljava/lang/String;
+	public field deleted Ljava/lang/Boolean;
+	public field destination Lcom/squareup/protos/test/parsing/Warehouse;
+	public field destination_signature Lokio/ByteString;
+	public field load_ratio Ljava/lang/Double;
+	public field notes Ljava/util/List;
+	public field shipment_id Ljava/lang/Long;
+	public field shipment_token Ljava/lang/String;
+	public field source Lcom/squareup/protos/test/parsing/Warehouse;
+	public field source_signature Lokio/ByteString;
+	public field status Lcom/squareup/protos/test/parsing/Shipment$State;
+	public field transfer_id Ljava/lang/String;
+	public fun <init> ()V
+	public fun account_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun build ()Lcom/squareup/protos/test/parsing/Shipment;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun card_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun deleted (Ljava/lang/Boolean;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun destination (Lcom/squareup/protos/test/parsing/Warehouse;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun destination_signature (Lokio/ByteString;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun load_ratio (Ljava/lang/Double;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun notes (Ljava/util/List;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun shipment_id (Ljava/lang/Long;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun shipment_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun source (Lcom/squareup/protos/test/parsing/Warehouse;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun source_signature (Lokio/ByteString;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun status (Lcom/squareup/protos/test/parsing/Shipment$State;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+	public fun transfer_id (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
+}
+
+public final class com/squareup/protos/test/parsing/Shipment$State : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field CONSUMING Lcom/squareup/protos/test/parsing/Shipment$State;
+	public static final field DELIVERING Lcom/squareup/protos/test/parsing/Shipment$State;
+	public static final field PICKING_UP Lcom/squareup/protos/test/parsing/Shipment$State;
+	public static final field VALIDATING Lcom/squareup/protos/test/parsing/Shipment$State;
+	public static fun fromValue (I)Lcom/squareup/protos/test/parsing/Shipment$State;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$State;
+	public static fun values ()[Lcom/squareup/protos/test/parsing/Shipment$State;
+}
+
+public final class com/squareup/protos/test/parsing/Warehouse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_WAREHOUSE_ID Ljava/lang/Long;
+	public static final field DEFAULT_WAREHOUSE_TOKEN Ljava/lang/String;
+	public final field alternates Ljava/util/List;
+	public final field central_repo Lcom/squareup/protos/test/parsing/Warehouse;
+	public final field dropoff_points Ljava/util/Map;
+	public final field robots Ljava/util/Map;
+	public final field warehouse_id Ljava/lang/Long;
+	public final field warehouse_token Ljava/lang/String;
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/parsing/Warehouse;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;)V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/parsing/Warehouse;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/protos/test/parsing/Warehouse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/protos/test/parsing/Warehouse$Builder : com/squareup/wire/Message$Builder {
+	public field alternates Ljava/util/List;
+	public field central_repo Lcom/squareup/protos/test/parsing/Warehouse;
+	public field dropoff_points Ljava/util/Map;
+	public field robots Ljava/util/Map;
+	public field warehouse_id Ljava/lang/Long;
+	public field warehouse_token Ljava/lang/String;
+	public fun <init> ()V
+	public fun alternates (Ljava/util/List;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
+	public fun build ()Lcom/squareup/protos/test/parsing/Warehouse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun central_repo (Lcom/squareup/protos/test/parsing/Warehouse;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
+	public fun dropoff_points (Ljava/util/Map;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
+	public fun robots (Ljava/util/Map;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
+	public fun warehouse_id (Ljava/lang/Long;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
+	public fun warehouse_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
+}
+
+public abstract interface annotation class misk/web/dashboard/AdminDashboard : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class misk/web/dashboard/AdminDashboardAccess : java/lang/annotation/Annotation {
+}
+
+public final class misk/web/dashboard/AdminDashboardModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
+}
+
+public final class misk/web/dashboard/AdminDashboardTestingModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/web/dashboard/ConfigDashboardTabModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
+}
+
+public final class misk/web/dashboard/DashboardHomeUrl : misk/web/dashboard/ValidWebEntry {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/dashboard/DashboardHomeUrl;
+	public static synthetic fun copy$default (Lmisk/web/dashboard/DashboardHomeUrl;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/dashboard/DashboardHomeUrl;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDashboard_slug ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/DashboardModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/web/dashboard/DashboardNavbarItem : misk/web/dashboard/ValidWebEntry {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;I)Lmisk/web/dashboard/DashboardNavbarItem;
+	public static synthetic fun copy$default (Lmisk/web/dashboard/DashboardNavbarItem;Ljava/lang/String;Ljava/lang/String;IILjava/lang/Object;)Lmisk/web/dashboard/DashboardNavbarItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDashboard_slug ()Ljava/lang/String;
+	public final fun getItem ()Ljava/lang/String;
+	public final fun getOrder ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/DashboardNavbarStatus : misk/web/dashboard/ValidWebEntry {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/dashboard/DashboardNavbarStatus;
+	public static synthetic fun copy$default (Lmisk/web/dashboard/DashboardNavbarStatus;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/dashboard/DashboardNavbarStatus;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDashboard_slug ()Ljava/lang/String;
+	public final fun getStatus ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/DashboardTab : misk/web/dashboard/WebTab {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCategory ()Ljava/lang/String;
+	public final fun getDashboard_slug ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/DashboardTabProvider : javax/inject/Provider {
+	public field accessAnnotationEntries Ljava/util/List;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/util/Set;Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/web/dashboard/DashboardTab;
+	public final fun getAccessAnnotation ()Lkotlin/reflect/KClass;
+	public final fun getAccessAnnotationEntries ()Ljava/util/List;
+	public final fun getCapabilities ()Ljava/util/Set;
+	public final fun getCategory ()Ljava/lang/String;
+	public final fun getDashboard_slug ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getServices ()Ljava/util/Set;
+	public final fun getSlug ()Ljava/lang/String;
+	public final fun getUrl_path_prefix ()Ljava/lang/String;
+	public final fun setAccessAnnotationEntries (Ljava/util/List;)V
+}
+
+public final class misk/web/dashboard/DashboardTheme {
+	public fun <init> (Ljava/lang/String;Lmisk/web/dashboard/MiskWebTheme;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lmisk/web/dashboard/MiskWebTheme;
+	public final fun copy (Ljava/lang/String;Lmisk/web/dashboard/MiskWebTheme;)Lmisk/web/dashboard/DashboardTheme;
+	public static synthetic fun copy$default (Lmisk/web/dashboard/DashboardTheme;Ljava/lang/String;Lmisk/web/dashboard/MiskWebTheme;ILjava/lang/Object;)Lmisk/web/dashboard/DashboardTheme;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDashboard_slug ()Ljava/lang/String;
+	public final fun getTheme ()Lmisk/web/dashboard/MiskWebTheme;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/EnvironmentToColorLookup {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/dashboard/EnvironmentToColorLookup;
+	public static synthetic fun copy$default (Lmisk/web/dashboard/EnvironmentToColorLookup;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/dashboard/EnvironmentToColorLookup;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDEVELOPMENT ()Ljava/lang/String;
+	public final fun getDefault ()Ljava/lang/String;
+	public final fun getPRODUCTION ()Ljava/lang/String;
+	public final fun getSTAGING ()Ljava/lang/String;
+	public final fun getTESTING ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/MiskWebColor : java/lang/Enum {
+	public static final field ACCENT Lmisk/web/dashboard/MiskWebColor;
+	public static final field BLUE Lmisk/web/dashboard/MiskWebColor;
+	public static final field CADET Lmisk/web/dashboard/MiskWebColor;
+	public static final field CHARCOAL Lmisk/web/dashboard/MiskWebColor;
+	public static final field GRAY Lmisk/web/dashboard/MiskWebColor;
+	public static final field GREEN Lmisk/web/dashboard/MiskWebColor;
+	public static final field INDIGO Lmisk/web/dashboard/MiskWebColor;
+	public static final field LIME Lmisk/web/dashboard/MiskWebColor;
+	public static final field ORANGE Lmisk/web/dashboard/MiskWebColor;
+	public static final field PLATINUM Lmisk/web/dashboard/MiskWebColor;
+	public static final field PLUM Lmisk/web/dashboard/MiskWebColor;
+	public static final field PURPLE Lmisk/web/dashboard/MiskWebColor;
+	public static final field RED Lmisk/web/dashboard/MiskWebColor;
+	public static final field ROSE Lmisk/web/dashboard/MiskWebColor;
+	public static final field SILVER Lmisk/web/dashboard/MiskWebColor;
+	public static final field TEAL Lmisk/web/dashboard/MiskWebColor;
+	public static final field TEXT Lmisk/web/dashboard/MiskWebColor;
+	public static final field WHITE Lmisk/web/dashboard/MiskWebColor;
+	public static final field YELLOW Lmisk/web/dashboard/MiskWebColor;
+	public final fun getHexColor ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/web/dashboard/MiskWebColor;
+	public static fun values ()[Lmisk/web/dashboard/MiskWebColor;
+}
+
+public final class misk/web/dashboard/MiskWebTheme {
+	public static final field Companion Lmisk/web/dashboard/MiskWebTheme$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/web/dashboard/EnvironmentToColorLookup;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Lmisk/web/dashboard/EnvironmentToColorLookup;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/web/dashboard/EnvironmentToColorLookup;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/dashboard/MiskWebTheme;
+	public static synthetic fun copy$default (Lmisk/web/dashboard/MiskWebTheme;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/web/dashboard/EnvironmentToColorLookup;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/dashboard/MiskWebTheme;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBannerLinkHover ()Ljava/lang/String;
+	public final fun getBannerText ()Ljava/lang/String;
+	public final fun getButton ()Ljava/lang/String;
+	public final fun getButtonHover ()Ljava/lang/String;
+	public final fun getCategoryText ()Ljava/lang/String;
+	public final fun getEnvironmentToColor ()Lmisk/web/dashboard/EnvironmentToColorLookup;
+	public final fun getNavbarBackground ()Ljava/lang/String;
+	public final fun getNavbarLinkHover ()Ljava/lang/String;
+	public final fun getNavbarText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/MiskWebTheme$Companion {
+	public final fun getDEFAULT_THEME ()Lmisk/web/dashboard/MiskWebTheme;
+}
+
+public abstract class misk/web/dashboard/WebTab : misk/web/dashboard/ValidWebEntry {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCapabilities ()Ljava/util/Set;
+	public final fun getServices ()Ljava/util/Set;
+}
+
+public final class misk/web/dashboard/WebTabResourceModule : misk/inject/KAbstractModule {
+	public fun <init> (Lwisp/deployment/Deployment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Lwisp/deployment/Deployment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getResourcePath ()Ljava/lang/String;
+	public final fun getSlug ()Ljava/lang/String;
+	public final fun getUrl_path_prefix ()Ljava/lang/String;
+	public final fun getWeb_proxy_url ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/DashboardMetadataAction : misk/web/actions/WebAction {
+	public field callerProvider Lmisk/scope/ActionScoped;
+	public fun <init> ()V
+	public final fun getAll (Ljava/lang/String;)Lmisk/web/metadata/DashboardMetadataAction$Response;
+	public final fun getCallerProvider ()Lmisk/scope/ActionScoped;
+	public final fun setCallerProvider (Lmisk/scope/ActionScoped;)V
+}
+
+public final class misk/web/metadata/DashboardMetadataAction$DashboardMetadata {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lmisk/web/dashboard/MiskWebTheme;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lmisk/web/dashboard/MiskWebTheme;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Lmisk/web/dashboard/MiskWebTheme;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lmisk/web/dashboard/MiskWebTheme;)Lmisk/web/metadata/DashboardMetadataAction$DashboardMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/DashboardMetadataAction$DashboardMetadata;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lmisk/web/dashboard/MiskWebTheme;ILjava/lang/Object;)Lmisk/web/metadata/DashboardMetadataAction$DashboardMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHome_url ()Ljava/lang/String;
+	public final fun getNavbar_items ()Ljava/util/List;
+	public final fun getNavbar_status ()Ljava/lang/String;
+	public final fun getTabs ()Ljava/util/List;
+	public final fun getTheme ()Lmisk/web/dashboard/MiskWebTheme;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/DashboardMetadataAction$Response {
+	public fun <init> ()V
+	public fun <init> (Lmisk/web/metadata/DashboardMetadataAction$DashboardMetadata;)V
+	public synthetic fun <init> (Lmisk/web/metadata/DashboardMetadataAction$DashboardMetadata;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lmisk/web/metadata/DashboardMetadataAction$DashboardMetadata;
+	public final fun copy (Lmisk/web/metadata/DashboardMetadataAction$DashboardMetadata;)Lmisk/web/metadata/DashboardMetadataAction$Response;
+	public static synthetic fun copy$default (Lmisk/web/metadata/DashboardMetadataAction$Response;Lmisk/web/metadata/DashboardMetadataAction$DashboardMetadata;ILjava/lang/Object;)Lmisk/web/metadata/DashboardMetadataAction$Response;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDashboardMetadata ()Lmisk/web/metadata/DashboardMetadataAction$DashboardMetadata;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/ServiceMetadataAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/web/metadata/ServiceMetadataAction$OptionalBinder;)V
+	public final fun getAll ()Lmisk/web/metadata/ServiceMetadataAction$Response;
+}
+
+public final class misk/web/metadata/ServiceMetadataAction$OptionalBinder {
+	public fun <init> (Ljava/lang/String;Lwisp/deployment/Deployment;)V
+	public final fun getAppName ()Ljava/lang/String;
+	public final fun getServiceMetadata ()Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;
+	public final fun setServiceMetadata (Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;)V
+}
+
+public final class misk/web/metadata/ServiceMetadataAction$Response {
+	public fun <init> (Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;)V
+	public final fun component1 ()Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;
+	public final fun copy (Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;)Lmisk/web/metadata/ServiceMetadataAction$Response;
+	public static synthetic fun copy$default (Lmisk/web/metadata/ServiceMetadataAction$Response;Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;ILjava/lang/Object;)Lmisk/web/metadata/ServiceMetadataAction$Response;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getServiceMetadata ()Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/ServiceMetadataAction$ServiceMetadata {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/metadata/ServiceMetadataAction$ServiceMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApp_name ()Ljava/lang/String;
+	public final fun getEnvironment ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/config/ConfigMetadataAction : misk/web/actions/WebAction {
+	public static final field Companion Lmisk/web/metadata/config/ConfigMetadataAction$Companion;
+	public fun <init> (Ljava/lang/String;Lwisp/deployment/Deployment;Lwisp/config/Config;)V
+	public final fun getAll ()Lmisk/web/metadata/config/ConfigMetadataAction$Response;
+	public final fun getAppName ()Ljava/lang/String;
+	public final fun getConfig ()Lwisp/config/Config;
+	public final fun getDeployment ()Lwisp/deployment/Deployment;
+	public final fun getResources ()Ljava/util/Map;
+}
+
+public final class misk/web/metadata/config/ConfigMetadataAction$Companion {
+	public final fun generateConfigResources (Ljava/lang/String;Lwisp/deployment/Deployment;Lwisp/config/Config;)Ljava/util/Map;
+	public final fun redact (Ljava/lang/String;Lkotlin/text/Regex;)Ljava/lang/String;
+	public final fun redact (Ljava/util/Map;Lkotlin/text/Regex;)Ljava/util/Map;
+}
+
+public final class misk/web/metadata/config/ConfigMetadataAction$Response {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lmisk/web/metadata/config/ConfigMetadataAction$Response;
+	public static synthetic fun copy$default (Lmisk/web/metadata/config/ConfigMetadataAction$Response;Ljava/util/Map;ILjava/lang/Object;)Lmisk/web/metadata/config/ConfigMetadataAction$Response;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResources ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class misk/web/metadata/database/DatabaseQueryFunctionMetadata {
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getParametersTypeName ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/database/DatabaseQueryMetadata {
+	public static final field Companion Lmisk/web/metadata/database/DatabaseQueryMetadata$Companion;
+	public static final field DYNAMIC_QUERY_KCLASS_SUFFIX Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/util/Map;Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/util/Map;Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/util/List;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Ljava/util/Map;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/util/Map;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;)Lmisk/web/metadata/database/DatabaseQueryMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/database/DatabaseQueryMetadata;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;ILjava/lang/Object;)Lmisk/web/metadata/database/DatabaseQueryMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccessAnnotation ()Ljava/lang/String;
+	public final fun getAllowedCapabilities ()Ljava/util/Set;
+	public final fun getAllowedServices ()Ljava/util/Set;
+	public final fun getConstraints ()Ljava/util/List;
+	public final fun getEntityClass ()Ljava/lang/String;
+	public final fun getEntitySchema ()Ljava/util/Map;
+	public final fun getOrders ()Ljava/util/List;
+	public final fun getQueryClass ()Ljava/lang/String;
+	public final fun getQueryWebActionPath ()Ljava/lang/String;
+	public final fun getSelects ()Ljava/util/List;
+	public final fun getTable ()Ljava/lang/String;
+	public final fun getTypes ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/database/DatabaseQueryMetadata$Companion {
+}
+
+public final class misk/web/metadata/database/DatabaseQueryMetadata$ConstraintMetadata : misk/web/metadata/database/DatabaseQueryFunctionMetadata {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/metadata/database/DatabaseQueryMetadata$ConstraintMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/database/DatabaseQueryMetadata$ConstraintMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/metadata/database/DatabaseQueryMetadata$ConstraintMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public final fun getOperator ()Ljava/lang/String;
+	public fun getParametersTypeName ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/database/DatabaseQueryMetadata$OrderMetadata : misk/web/metadata/database/DatabaseQueryFunctionMetadata {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lmisk/web/metadata/database/DatabaseQueryMetadata$OrderMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/database/DatabaseQueryMetadata$OrderMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lmisk/web/metadata/database/DatabaseQueryMetadata$OrderMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAscending ()Z
+	public fun getName ()Ljava/lang/String;
+	public fun getParametersTypeName ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/database/DatabaseQueryMetadata$SelectMetadata : misk/web/metadata/database/DatabaseQueryFunctionMetadata {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/web/metadata/database/DatabaseQueryMetadata$SelectMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/database/DatabaseQueryMetadata$SelectMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/metadata/database/DatabaseQueryMetadata$SelectMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public fun getParametersTypeName ()Ljava/lang/String;
+	public final fun getPaths ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/database/DatabaseQueryMetadataAction : misk/web/actions/WebAction {
+	public fun <init> (Ljava/util/List;)V
+	public final fun getAll ()Lmisk/web/metadata/database/DatabaseQueryMetadataAction$Response;
+	public final fun getMetadata ()Ljava/util/List;
+}
+
+public final class misk/web/metadata/database/DatabaseQueryMetadataAction$Response {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lmisk/web/metadata/database/DatabaseQueryMetadataAction$Response;
+	public static synthetic fun copy$default (Lmisk/web/metadata/database/DatabaseQueryMetadataAction$Response;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/metadata/database/DatabaseQueryMetadataAction$Response;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDatabaseQueryMetadata ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface annotation class misk/web/metadata/database/NoAdminDashboardDatabaseAccess : java/lang/annotation/Annotation {
+}
+
+public final class misk/web/metadata/webaction/WebActionMetadataAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/web/metadata/webaction/WebActionMetadataList;)V
+	public final fun getAll ()Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;
+	public final fun getWebActionMetadataList ()Lmisk/web/metadata/webaction/WebActionMetadataList;
+}
+
+public final class misk/web/metadata/webaction/WebActionMetadataAction$Response {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;
+	public static synthetic fun copy$default (Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getWebActionMetadata ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

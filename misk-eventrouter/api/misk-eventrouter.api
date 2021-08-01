@@ -1,0 +1,138 @@
+public final class misk/eventrouter/ClusterSnapshot {
+	public fun <init> (Ljava/util/List;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;)Lmisk/eventrouter/ClusterSnapshot;
+	public static synthetic fun copy$default (Lmisk/eventrouter/ClusterSnapshot;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/ClusterSnapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHosts ()Ljava/util/List;
+	public final fun getSelf ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/eventrouter/ConsistentHashing : misk/eventrouter/ClusterMapper {
+	public fun <init> ()V
+	public fun <init> (Lcom/google/common/hash/HashFunction;JI)V
+	public synthetic fun <init> (Lcom/google/common/hash/HashFunction;JIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun topicToHost (Lmisk/eventrouter/ClusterSnapshot;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public abstract interface class misk/eventrouter/EventRouter {
+	public abstract fun getTopic (Ljava/lang/String;)Lmisk/eventrouter/Topic;
+}
+
+public final class misk/eventrouter/EventRouterTester {
+	public fun <init> ()V
+	public final fun processEverything ()V
+}
+
+public final class misk/eventrouter/EventRouterTestingModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun getDistributed ()Z
+}
+
+public final class misk/eventrouter/KubernetesHealthCheck : misk/healthchecks/HealthCheck {
+	public fun <init> ()V
+	public fun status ()Lmisk/healthchecks/HealthStatus;
+}
+
+public abstract interface class misk/eventrouter/Listener {
+	public abstract fun onClose (Lmisk/eventrouter/Subscription;)V
+	public abstract fun onEvent (Lmisk/eventrouter/Subscription;Ljava/lang/Object;)V
+	public abstract fun onOpen (Lmisk/eventrouter/Subscription;)V
+}
+
+public final class misk/eventrouter/RealEventRouterModule : misk/inject/KAbstractModule {
+	public fun <init> (Lwisp/deployment/Deployment;)V
+	public final fun actionExecutor ()Ljava/util/concurrent/ExecutorService;
+	public final fun getDeployment ()Lwisp/deployment/Deployment;
+	public final fun kubernetesExecutor ()Ljava/util/concurrent/ExecutorService;
+	public final fun subscriberExecutor ()Ljava/util/concurrent/ExecutorService;
+}
+
+public abstract class misk/eventrouter/SocketEvent {
+}
+
+public final class misk/eventrouter/SocketEvent$Ack : misk/eventrouter/SocketEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/eventrouter/SocketEvent$Ack;
+	public static synthetic fun copy$default (Lmisk/eventrouter/SocketEvent$Ack;Ljava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/SocketEvent$Ack;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTopic ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/eventrouter/SocketEvent$Event : misk/eventrouter/SocketEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/eventrouter/SocketEvent$Event;
+	public static synthetic fun copy$default (Lmisk/eventrouter/SocketEvent$Event;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/SocketEvent$Event;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getTopic ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/eventrouter/SocketEvent$Subscribe : misk/eventrouter/SocketEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/eventrouter/SocketEvent$Subscribe;
+	public static synthetic fun copy$default (Lmisk/eventrouter/SocketEvent$Subscribe;Ljava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/SocketEvent$Subscribe;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTopic ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/eventrouter/SocketEvent$UnknownItem : misk/eventrouter/SocketEvent {
+	public static final field INSTANCE Lmisk/eventrouter/SocketEvent$UnknownItem;
+}
+
+public final class misk/eventrouter/SocketEvent$Unsubscribe : misk/eventrouter/SocketEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/eventrouter/SocketEvent$Unsubscribe;
+	public static synthetic fun copy$default (Lmisk/eventrouter/SocketEvent$Unsubscribe;Ljava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/SocketEvent$Unsubscribe;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTopic ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/eventrouter/SocketEventJsonAdapter {
+	public static final field INSTANCE Lmisk/eventrouter/SocketEventJsonAdapter;
+	public final fun fromJson (Lmisk/eventrouter/SocketEventJsonAdapter$SocketEventJson;)Lmisk/eventrouter/SocketEvent;
+	public final fun toJson (Lmisk/eventrouter/SocketEvent;)Lmisk/eventrouter/SocketEventJsonAdapter$SocketEventJson;
+}
+
+public final class misk/eventrouter/SocketEventJsonAdapter$SocketEventJson {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/eventrouter/SocketEventJsonAdapter$SocketEventJson;
+	public static synthetic fun copy$default (Lmisk/eventrouter/SocketEventJsonAdapter$SocketEventJson;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/SocketEventJsonAdapter$SocketEventJson;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getTopic ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class misk/eventrouter/Subscription {
+	public abstract fun cancel ()V
+	public abstract fun getTopic ()Lmisk/eventrouter/Topic;
+}
+
+public abstract interface class misk/eventrouter/Topic {
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun publish (Ljava/lang/Object;)V
+	public abstract fun subscribe (Lmisk/eventrouter/Listener;)Lmisk/eventrouter/Subscription;
+}
+
