@@ -1,0 +1,15 @@
+public abstract interface class wisp/lease/Lease {
+	public abstract fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
+	public abstract fun checkHeld ()Z
+	public abstract fun getName ()Ljava/lang/String;
+}
+
+public abstract interface class wisp/lease/Lease$StateChangeListener {
+	public abstract fun afterAcquire (Lwisp/lease/Lease;)V
+	public abstract fun beforeRelease (Lwisp/lease/Lease;)V
+}
+
+public abstract interface class wisp/lease/LeaseManager {
+	public abstract fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
+}
+
