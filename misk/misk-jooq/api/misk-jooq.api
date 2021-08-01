@@ -1,0 +1,247 @@
+public final class misk/jooq/JooqExtensionsKt {
+	public static final fun fetchOneOrNull (Lorg/jooq/ResultQuery;)Lorg/jooq/Record;
+	public static final fun getOrThrow (Ljava/lang/Object;)Ljava/lang/Object;
+	public static final fun ifNotNull (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lorg/jooq/Condition;
+	public static final fun toInstant (Ljava/time/LocalDateTime;)Ljava/time/Instant;
+	public static final fun toLocalDateTime (Ljava/time/Instant;)Ljava/time/LocalDateTime;
+}
+
+public final class misk/jooq/JooqHealthCheck : misk/healthchecks/HealthCheck {
+	public static final field Companion Lmisk/jooq/JooqHealthCheck$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljava/time/Clock;)V
+	public fun status ()Lmisk/healthchecks/HealthStatus;
+}
+
+public final class misk/jooq/JooqHealthCheck$Companion {
+	public final fun getCLOCK_SKEW_UNHEALTHY_THRESHOLD ()Ljava/time/Duration;
+	public final fun getCLOCK_SKEW_WARN_THRESHOLD ()Ljava/time/Duration;
+	public final fun getLog ()Lmu/KLogger;
+}
+
+public final class misk/jooq/JooqModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/jooq/JooqSession : misk/jdbc/Session {
+	public fun <init> (Lorg/jooq/DSLContext;)V
+	public final fun add (Ljava/util/concurrent/ConcurrentMap;Lmisk/jooq/JooqSession$HookType;Lkotlin/jvm/functions/Function0;)V
+	public final fun component1 ()Lorg/jooq/DSLContext;
+	public final fun executePostCommitHooks ()V
+	public final fun executePreCommitHooks ()V
+	public final fun executeSessionCloseHooks ()V
+	public final fun getCtx ()Lorg/jooq/DSLContext;
+	public fun onPostCommit (Lkotlin/jvm/functions/Function0;)V
+	public fun onPreCommit (Lkotlin/jvm/functions/Function0;)V
+	public fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
+	public fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jooq/JooqSession$HookType : java/lang/Enum {
+	public static final field POST Lmisk/jooq/JooqSession$HookType;
+	public static final field PRE Lmisk/jooq/JooqSession$HookType;
+	public static final field SESSION_CLOSE Lmisk/jooq/JooqSession$HookType;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/jooq/JooqSession$HookType;
+	public static fun values ()[Lmisk/jooq/JooqSession$HookType;
+}
+
+public final class misk/jooq/JooqTransacter {
+	public static final field Companion Lmisk/jooq/JooqTransacter$Companion;
+	public fun <init> (Lorg/jooq/DSLContext;)V
+	public final fun transaction (Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static synthetic fun transaction$default (Lmisk/jooq/JooqTransacter;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class misk/jooq/JooqTransacter$Companion {
+	public final fun getLog ()Lmu/KLogger;
+	public final fun getNoRetriesOptions ()Lmisk/jooq/JooqTransacter$TransacterOptions;
+}
+
+public final class misk/jooq/JooqTransacter$TransacterOptions {
+	public fun <init> ()V
+	public fun <init> (IJ)V
+	public synthetic fun <init> (IJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()J
+	public final fun copy (IJ)Lmisk/jooq/JooqTransacter$TransacterOptions;
+	public static synthetic fun copy$default (Lmisk/jooq/JooqTransacter$TransacterOptions;IJILjava/lang/Object;)Lmisk/jooq/JooqTransacter$TransacterOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMaxAttempts ()I
+	public final fun getMaxRetryDelayMillis ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jooq/listeners/JooqSQLLogger : org/jooq/impl/DefaultExecuteListener {
+	public static final field Companion Lmisk/jooq/listeners/JooqSQLLogger$Companion;
+	public fun <init> ()V
+	public fun exception (Lorg/jooq/ExecuteContext;)V
+	public fun executeEnd (Lorg/jooq/ExecuteContext;)V
+	public fun outEnd (Lorg/jooq/ExecuteContext;)V
+	public fun recordEnd (Lorg/jooq/ExecuteContext;)V
+	public fun renderEnd (Lorg/jooq/ExecuteContext;)V
+	public fun resultEnd (Lorg/jooq/ExecuteContext;)V
+}
+
+public final class misk/jooq/listeners/JooqSQLLogger$Companion {
+	public final fun getLog ()Lmu/KLogger;
+}
+
+public final class misk/jooq/listeners/JooqTimestampRecordListener : org/jooq/impl/DefaultRecordListener {
+	public fun <init> (Ljava/time/Clock;Ljava/lang/String;Ljava/lang/String;)V
+	public fun insertStart (Lorg/jooq/RecordContext;)V
+	public fun updateStart (Lorg/jooq/RecordContext;)V
+}
+
+public final class misk/jooq/listeners/JooqTimestampRecordListenerOptions {
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (ZLjava/lang/String;Ljava/lang/String;)Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;
+	public static synthetic fun copy$default (Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatedAtColumnName ()Ljava/lang/String;
+	public final fun getInstall ()Z
+	public final fun getUpdatedAtColumnName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class misk/jooq/testgen/DefaultCatalog : org/jooq/impl/CatalogImpl {
+	public static final field Companion Lmisk/jooq/testgen/DefaultCatalog$Companion;
+	public fun <init> ()V
+	public final fun getJOOQ ()Lmisk/jooq/testgen/Jooq;
+	public fun getSchemas ()Ljava/util/List;
+}
+
+public final class misk/jooq/testgen/DefaultCatalog$Companion {
+	public final fun getDEFAULT_CATALOG ()Lmisk/jooq/testgen/DefaultCatalog;
+}
+
+public class misk/jooq/testgen/Jooq : org/jooq/impl/SchemaImpl {
+	public static final field Companion Lmisk/jooq/testgen/Jooq$Companion;
+	public fun <init> ()V
+	public fun getCatalog ()Lorg/jooq/Catalog;
+	public final fun getMOVIE ()Lmisk/jooq/testgen/tables/Movie;
+	public fun getTables ()Ljava/util/List;
+}
+
+public final class misk/jooq/testgen/Jooq$Companion {
+	public final fun getJOOQ ()Lmisk/jooq/testgen/Jooq;
+}
+
+public final class misk/jooq/testgen/keys/KeysKt {
+	public static final fun getKEY_MOVIE_PRIMARY ()Lorg/jooq/UniqueKey;
+}
+
+public class misk/jooq/testgen/tables/Movie : org/jooq/impl/TableImpl {
+	public static final field Companion Lmisk/jooq/testgen/tables/Movie$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Lorg/jooq/Name;)V
+	public fun <init> (Lorg/jooq/Name;Lorg/jooq/Table;Lorg/jooq/ForeignKey;Lorg/jooq/Table;[Lorg/jooq/Field;)V
+	public fun <init> (Lorg/jooq/Table;Lorg/jooq/ForeignKey;)V
+	public fun as (Ljava/lang/String;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun as (Lorg/jooq/Name;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/Table;
+	public fun fieldsRow ()Lorg/jooq/Row6;
+	public synthetic fun fieldsRow ()Lorg/jooq/Row;
+	public final fun getCREATED_AT ()Lorg/jooq/TableField;
+	public final fun getGENRE ()Lorg/jooq/TableField;
+	public final fun getID ()Lorg/jooq/TableField;
+	public fun getIdentity ()Lorg/jooq/Identity;
+	public fun getKeys ()Ljava/util/List;
+	public final fun getNAME ()Lorg/jooq/TableField;
+	public fun getPrimaryKey ()Lorg/jooq/UniqueKey;
+	public fun getRecordType ()Ljava/lang/Class;
+	public fun getRecordVersion ()Lorg/jooq/TableField;
+	public fun getSchema ()Lorg/jooq/Schema;
+	public final fun getUPDATED_AT ()Lorg/jooq/TableField;
+	public final fun getVERSION ()Lorg/jooq/TableField;
+	public fun rename (Ljava/lang/String;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun rename (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun rename (Lorg/jooq/Name;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun rename (Lorg/jooq/Name;)Lorg/jooq/Table;
+}
+
+public final class misk/jooq/testgen/tables/Movie$Companion {
+	public final fun getMOVIE ()Lmisk/jooq/testgen/tables/Movie;
+}
+
+public class misk/jooq/testgen/tables/records/MovieRecord : org/jooq/impl/UpdatableRecordImpl, org/jooq/Record6 {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;)V
+	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun component1 ()Ljava/lang/Long;
+	public synthetic fun component1 ()Ljava/lang/Object;
+	public synthetic fun component2 ()Ljava/lang/Object;
+	public fun component2 ()Ljava/lang/String;
+	public synthetic fun component3 ()Ljava/lang/Object;
+	public fun component3 ()Ljava/lang/String;
+	public fun component4 ()Ljava/lang/Integer;
+	public synthetic fun component4 ()Ljava/lang/Object;
+	public synthetic fun component5 ()Ljava/lang/Object;
+	public fun component5 ()Ljava/time/LocalDateTime;
+	public synthetic fun component6 ()Ljava/lang/Object;
+	public fun component6 ()Ljava/time/LocalDateTime;
+	public fun field1 ()Lorg/jooq/Field;
+	public fun field2 ()Lorg/jooq/Field;
+	public fun field3 ()Lorg/jooq/Field;
+	public fun field4 ()Lorg/jooq/Field;
+	public fun field5 ()Lorg/jooq/Field;
+	public fun field6 ()Lorg/jooq/Field;
+	public fun fieldsRow ()Lorg/jooq/Row6;
+	public synthetic fun fieldsRow ()Lorg/jooq/Row;
+	public final fun getCreatedAt ()Ljava/time/LocalDateTime;
+	public final fun getGenre ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/Long;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getUpdatedAt ()Ljava/time/LocalDateTime;
+	public final fun getVersion ()Ljava/lang/Integer;
+	public fun key ()Lorg/jooq/Record1;
+	public synthetic fun key ()Lorg/jooq/Record;
+	public final fun setCreatedAt (Ljava/time/LocalDateTime;)V
+	public final fun setGenre (Ljava/lang/String;)V
+	public final fun setId (Ljava/lang/Long;)V
+	public final fun setName (Ljava/lang/String;)V
+	public final fun setUpdatedAt (Ljava/time/LocalDateTime;)V
+	public final fun setVersion (Ljava/lang/Integer;)V
+	public fun value1 ()Ljava/lang/Long;
+	public synthetic fun value1 ()Ljava/lang/Object;
+	public fun value1 (Ljava/lang/Long;)Lmisk/jooq/testgen/tables/records/MovieRecord;
+	public synthetic fun value1 (Ljava/lang/Object;)Lorg/jooq/Record6;
+	public synthetic fun value2 ()Ljava/lang/Object;
+	public fun value2 ()Ljava/lang/String;
+	public synthetic fun value2 (Ljava/lang/Object;)Lorg/jooq/Record6;
+	public fun value2 (Ljava/lang/String;)Lmisk/jooq/testgen/tables/records/MovieRecord;
+	public synthetic fun value3 ()Ljava/lang/Object;
+	public fun value3 ()Ljava/lang/String;
+	public synthetic fun value3 (Ljava/lang/Object;)Lorg/jooq/Record6;
+	public fun value3 (Ljava/lang/String;)Lmisk/jooq/testgen/tables/records/MovieRecord;
+	public fun value4 ()Ljava/lang/Integer;
+	public synthetic fun value4 ()Ljava/lang/Object;
+	public fun value4 (Ljava/lang/Integer;)Lmisk/jooq/testgen/tables/records/MovieRecord;
+	public synthetic fun value4 (Ljava/lang/Object;)Lorg/jooq/Record6;
+	public synthetic fun value5 ()Ljava/lang/Object;
+	public fun value5 ()Ljava/time/LocalDateTime;
+	public synthetic fun value5 (Ljava/lang/Object;)Lorg/jooq/Record6;
+	public fun value5 (Ljava/time/LocalDateTime;)Lmisk/jooq/testgen/tables/records/MovieRecord;
+	public synthetic fun value6 ()Ljava/lang/Object;
+	public fun value6 ()Ljava/time/LocalDateTime;
+	public synthetic fun value6 (Ljava/lang/Object;)Lorg/jooq/Record6;
+	public fun value6 (Ljava/time/LocalDateTime;)Lmisk/jooq/testgen/tables/records/MovieRecord;
+	public fun values (Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;)Lmisk/jooq/testgen/tables/records/MovieRecord;
+	public synthetic fun values (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Lorg/jooq/Record6;
+	public fun valuesRow ()Lorg/jooq/Row6;
+	public synthetic fun valuesRow ()Lorg/jooq/Row;
+	public synthetic fun with (Lorg/jooq/Field;Ljava/lang/Object;)Lorg/jooq/Record6;
+	public synthetic fun with (Lorg/jooq/Field;Ljava/lang/Object;Lorg/jooq/Converter;)Lorg/jooq/Record6;
+}
+
+public final class misk/jooq/testgen/tables/references/TablesKt {
+	public static final fun getMOVIE ()Lmisk/jooq/testgen/tables/Movie;
+}
+

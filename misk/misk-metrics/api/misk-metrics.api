@@ -1,0 +1,29 @@
+public abstract interface class misk/metrics/Histogram {
+	public abstract fun count ([Ljava/lang/String;)I
+	public abstract fun record (D[Ljava/lang/String;)V
+	public abstract fun timedMills ([Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class misk/metrics/Histogram$DefaultImpls {
+	public static fun timedMills (Lmisk/metrics/Histogram;[Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/metrics/HistogramRegistry {
+	public abstract fun newHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
+}
+
+public abstract interface class misk/metrics/Metrics {
+	public abstract fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public abstract fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public abstract fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
+}
+
+public final class misk/metrics/Metrics$DefaultImpls {
+	public static synthetic fun counter$default (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Counter;
+	public static synthetic fun gauge$default (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Gauge;
+	public static synthetic fun histogram$default (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;ILjava/lang/Object;)Lmisk/metrics/Histogram;
+}
+
+public class misk/metrics/MetricsScope {
+}
+
