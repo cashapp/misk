@@ -11,6 +11,7 @@ buildscript {
 
   dependencies {
     classpath(Dependencies.kotlinAllOpenPlugin)
+    classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
     classpath(Dependencies.kotlinGradlePlugin)
     classpath(Dependencies.kotlinNoArgPlugin)
     classpath(Dependencies.junitGradlePlugin)
@@ -126,5 +127,5 @@ subprojects {
 }
 
 plugins {
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.6.0"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator")
 }
