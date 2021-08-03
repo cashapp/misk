@@ -52,6 +52,7 @@ class LaunchDarklyFeatureFlags constructor(
   }
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
+    checkInitialized()
     val result = ldClient.boolVariationDetail(
       feature.name,
       buildUser(feature, key, attributes),
@@ -62,6 +63,7 @@ class LaunchDarklyFeatureFlags constructor(
   }
 
   override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double {
+    checkInitialized()
     val result = ldClient.doubleVariationDetail(
       feature.name,
       buildUser(feature, key, attributes),
@@ -135,6 +137,7 @@ class LaunchDarklyFeatureFlags constructor(
     executor: Executor,
     tracker: (T) -> Unit
   ): TrackerReference {
+    checkInitialized()
     val listener = ldClient.flagTracker.addFlagValueChangeListener(
       feature.name,
       buildUser(feature, key, attributes)
@@ -222,13 +225,17 @@ class LaunchDarklyFeatureFlags constructor(
   private fun checkInitialized() {
     checkState(
       ldClient.isInitialized,
-      "LaunchDarkly feature flags not initialized. " +
-        "Did you forget to make your service depend on [FeatureFlags]?"
+      "LaunchDarkly feature flags not initialized."
     )
   }
 
   private fun <T> checkDefaultNotUsed(feature: Feature, detail: EvaluationDetail<T>) {
     if (!detail.isDefaultValue) {
+      return
+    }
+
+    // if we're in offline mode, using the default value if ok
+    if (ldClient.isOffline) {
       return
     }
 
