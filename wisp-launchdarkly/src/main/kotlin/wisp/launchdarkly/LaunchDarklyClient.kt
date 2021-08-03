@@ -24,6 +24,7 @@ object LaunchDarklyClient {
   ): LDClientInterface {
     val baseUri = URI.create(config.base_uri)
     val ldConfig = LDConfig.Builder()
+      .offline(config.offline)
       // Set wait to 0 to not block here. Block in service initialization instead.
       .startWait(Duration.ofMillis(0))
       .dataSource(Components.streamingDataSource().baseURI(baseUri))
