@@ -91,6 +91,7 @@ internal class LaunchDarklyFeatureFlagsTest {
 
   @Test
   fun getEnumThrowsOnDefault() {
+    Mockito.`when`(client.isInitialized).thenReturn(false)
     Mockito
       .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
       .thenReturn(
