@@ -6,5 +6,6 @@ import wisp.config.Config
 data class LaunchDarklyConfig(
   val sdk_key: String,
   val base_uri: String,
-  val ssl: HttpClientSSLConfig? = null
+  val ssl: HttpClientSSLConfig? = null,
+  val offline: Boolean = false
 ) : Config
