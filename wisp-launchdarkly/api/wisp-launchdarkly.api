@@ -4,15 +4,17 @@ public final class wisp/launchdarkly/LaunchDarklyClient {
 }
 
 public final class wisp/launchdarkly/LaunchDarklyConfig : wisp/config/Config {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Lwisp/client/HttpClientSSLConfig;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;)Lwisp/launchdarkly/LaunchDarklyConfig;
-	public static synthetic fun copy$default (Lwisp/launchdarkly/LaunchDarklyConfig;Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;ILjava/lang/Object;)Lwisp/launchdarkly/LaunchDarklyConfig;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;Z)Lwisp/launchdarkly/LaunchDarklyConfig;
+	public static synthetic fun copy$default (Lwisp/launchdarkly/LaunchDarklyConfig;Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;ZILjava/lang/Object;)Lwisp/launchdarkly/LaunchDarklyConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBase_uri ()Ljava/lang/String;
+	public final fun getOffline ()Z
 	public final fun getSdk_key ()Ljava/lang/String;
 	public final fun getSsl ()Lwisp/client/HttpClientSSLConfig;
 	public fun hashCode ()I
