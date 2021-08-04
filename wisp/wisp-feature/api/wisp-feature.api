@@ -95,10 +95,10 @@ public final class wisp/feature/FeatureFlags$DefaultImpls {
 }
 
 public final class wisp/feature/MoshiExtKt {
+	public static final fun fromSafeJson (Lcom/squareup/moshi/JsonAdapter;Ljava/lang/String;)Ljava/lang/Object;
 	public static final fun fromSafeJson (Lcom/squareup/moshi/JsonAdapter;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public static synthetic fun fromSafeJson$default (Lcom/squareup/moshi/JsonAdapter;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun toSafeJson (Lcom/squareup/moshi/JsonAdapter;Ljava/lang/Object;)Ljava/lang/String;
 	public static final fun toSafeJson (Lcom/squareup/moshi/JsonAdapter;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
-	public static synthetic fun toSafeJson$default (Lcom/squareup/moshi/JsonAdapter;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public abstract interface class wisp/feature/TrackerReference {
