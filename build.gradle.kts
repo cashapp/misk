@@ -18,6 +18,7 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
+    classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
   }
 }
 
@@ -112,8 +113,9 @@ subprojects {
     }
   }
 
-  if (!path.startsWith(":samples") && !path.startsWith(":misk-embedded-sample")) {
+  if (!path.startsWith(":samples")) {
     apply(plugin = "com.vanniktech.maven.publish")
+    apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
   }
 
   // Workaround the Gradle bug resolving multiplatform dependencies.
@@ -125,6 +127,3 @@ subprojects {
   }
 }
 
-plugins {
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.6.0"
-}
