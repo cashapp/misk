@@ -1,6 +1,6 @@
 import React from "react"
 import { HTMLTable, UL } from "@blueprintjs/core"
-import { WebActionMetadata} from "./types"
+import { WebActionMetadata } from "./types"
 import WebActionCollapse from "./WebActionCollapse"
 import WebActionProtoField from "./WebActionProtoField"
 
@@ -9,7 +9,8 @@ interface Props {
 }
 
 export default function WebActionResponseType({ webActionMetadata }: Props) {
-  const responseType = webActionMetadata.responseTypes[webActionMetadata.responseType]
+  const responseType =
+    webActionMetadata.responseTypes[webActionMetadata.responseType]
   const parameters = webActionMetadata.parameters
 
   if (parameters.length == 0) {
@@ -22,7 +23,8 @@ export default function WebActionResponseType({ webActionMetadata }: Props) {
         <WebActionCollapse
           title={"Response Type"}
           subtitle={webActionMetadata.responseType}
-          doubleWidth={true}>
+          doubleWidth={true}
+        >
           <UL style={{ listStyle: "none" }}>
             <li>
               <HTMLTable style={{ marginBottom: "0px" }}>
