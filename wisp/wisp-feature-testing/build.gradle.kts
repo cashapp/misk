@@ -10,7 +10,9 @@ dependencies {
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.moshiAdapters)
+  api(project(":wisp-config"))
   api(project(":wisp-feature"))
+  api(project(":wisp-resource-loader"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)

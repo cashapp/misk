@@ -7,6 +7,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.feature.Attributes
 import wisp.feature.Feature
 import wisp.feature.getEnum
@@ -319,4 +322,17 @@ internal class FakeFeatureFlagsTest {
     TYRANNOSAURUS,
     TALARURUS
   }
+
+  @Test
+  fun configureOverridesFeatures() {
+    val configSource = ConfigSource("classpath:/featureFlagsConfig.yaml")
+    val config = WispConfig.builder().addWispConfigSources(listOf(configSource)).build()
+      .loadConfigOrThrow<FakeFeatureFlagsConfig>()
+    subject.configure(config)
+
+    assertThat(subject.getInt(Feature("foo1"))).isEqualTo(1)
+    assertThat(subject.getJson<JsonFeature>(Feature("fooJson")).optional).isEqualTo("value")
+
+  }
+
 }
