@@ -104,12 +104,12 @@ subprojects {
     apply(from = file("$rootDir/hooks.gradle"))
   }
 
-  val testTask = tasks.findByName("test")
-  if (testTask != null) {
+  val checkTask = tasks.findByName("check")
+  if (checkTask != null) {
     if (listOf("misk-aws","misk-events","misk-jobqueue","misk-jobqueue-testing","misk-jdbc","misk-jdbc-testing","misk-hibernate","misk-hibernate-testing").contains(name)) {
-      testShardHibernate.dependsOn(testTask)
+      testShardHibernate.dependsOn(checkTask)
     } else {
-      testShardNonHibernate.dependsOn(testTask)
+      testShardNonHibernate.dependsOn(checkTask)
     }
   }
 
