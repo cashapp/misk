@@ -158,11 +158,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
           <label
             class="bp3-label"
           >
-            <span
+            <div
               class="emotion-2"
             >
               Int Field (Int)
-            </span>
+            </div>
              
             <span
               class="bp3-text-muted"
@@ -360,11 +360,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
           <label
             class="bp3-label"
           >
-            <span
+            <div
               class="emotion-2"
             >
               Field 1 (Short)
-            </span>
+            </div>
              
             <span
               class="bp3-text-muted"
@@ -464,11 +464,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
           <label
             class="bp3-label"
           >
-            <span
+            <div
               class="emotion-2"
             >
               Field 2 (Int)
-            </span>
+            </div>
              
             <span
               class="bp3-text-muted"
@@ -568,11 +568,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
           <label
             class="bp3-label"
           >
-            <span
+            <div
               class="emotion-2"
             >
               Field 3 (Long)
-            </span>
+            </div>
              
             <span
               class="bp3-text-muted"
@@ -672,11 +672,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
           <label
             class="bp3-label"
           >
-            <span
+            <div
               class="emotion-2"
             >
               Field 4 (Short)
-            </span>
+            </div>
              
             <span
               class="bp3-text-muted"
@@ -878,11 +878,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
               <label
                 class="bp3-label"
               >
-                <span
+                <div
                   class="emotion-2"
                 >
                   Int Field (Int)
-                </span>
+                </div>
                  
                 <span
                   class="bp3-text-muted"
@@ -1079,11 +1079,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
         <label
           class="bp3-label"
         >
-          <span
+          <div
             class="emotion-2"
           >
             Repeated Nested Int Field (nestedNoRepeatedInt)
-          </span>
+          </div>
         </label>
         <div
           class="bp3-button-group"
@@ -1129,11 +1129,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
             <label
               class="bp3-label"
             >
-              <span
+              <div
                 class="emotion-2"
               >
                 Repeated Nested Int Field (nestedNoRepeatedInt)
-              </span>
+              </div>
             </label>
             <div
               class="bp3-button-group"
@@ -1245,11 +1245,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                 <label
                   class="bp3-label"
                 >
-                  <span
+                  <div
                     class="emotion-2"
                   >
                     Nested Int Field (noRepeatedInt)
-                  </span>
+                  </div>
                 </label>
                 <div
                   class="bp3-button-group"
@@ -1298,11 +1298,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                       <label
                         class="bp3-label"
                       >
-                        <span
+                        <div
                           class="emotion-2"
                         >
                           Int Field (Int)
-                        </span>
+                        </div>
                          
                         <span
                           class="bp3-text-muted"
@@ -1503,11 +1503,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
         <label
           class="bp3-label"
         >
-          <span
+          <div
             class="emotion-2"
           >
             Nested Repeated Short Field (nestedRepeatedShort)
-          </span>
+          </div>
         </label>
         <div
           class="bp3-button-group"
@@ -1553,11 +1553,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
             <label
               class="bp3-label"
             >
-              <span
+              <div
                 class="emotion-2"
               >
                 Nested Repeated Short Field (nestedRepeatedShort)
-              </span>
+              </div>
             </label>
             <div
               class="bp3-button-group"
@@ -1669,11 +1669,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                 <label
                   class="bp3-label"
                 >
-                  <span
+                  <div
                     class="emotion-2"
                   >
                     Nested Short Field (repeatedShort)
-                  </span>
+                  </div>
                 </label>
                 <div
                   class="bp3-button-group"
@@ -1723,11 +1723,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                         <label
                           class="bp3-label"
                         >
-                          <span
+                          <div
                             class="emotion-2"
                           >
                             Repeated Short Field (Short)
-                          </span>
+                          </div>
                            
                           <span
                             class="bp3-text-muted"
@@ -1966,11 +1966,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
             <label
               class="bp3-label"
             >
-              <span
+              <div
                 class="emotion-2"
               >
                 Repeated Short Field (Short)
-              </span>
+              </div>
                
               <span
                 class="bp3-text-muted"
