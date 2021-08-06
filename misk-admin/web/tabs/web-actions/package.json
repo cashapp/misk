@@ -28,7 +28,8 @@
     "@misk/dev": "0.3.3",
     "@misk/test": "0.3.3",
     "@misk/prettier": "0.3.3",
-    "@misk/tslint": "0.3.3"
+    "@misk/tslint": "0.3.3",
+    "tslib": "2.3.0"
   },
   "jest": {
     "testEnvironment": "jsdom",
