@@ -17,7 +17,7 @@ public final class wisp/config/ConfigSource {
 
 public abstract interface class wisp/config/Configurable {
 	public abstract fun configure (Lwisp/config/Config;)V
-	public abstract fun getConfigClass ()Ljava/lang/Class;
+	public abstract fun getConfigClass ()Lkotlin/reflect/KClass;
 }
 
 public final class wisp/config/WispConfig {

@@ -14,6 +14,7 @@ import wisp.feature.toSafeJson
 import java.util.PriorityQueue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
+import kotlin.reflect.KClass
 
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
@@ -448,8 +449,8 @@ class FakeFeatureFlags constructor(
     }
   }
 
-  override fun getConfigClass(): Class<FakeFeatureFlagsConfig> {
-    return FakeFeatureFlagsConfig::class.java
+  override fun getConfigClass(): KClass<FakeFeatureFlagsConfig> {
+    return FakeFeatureFlagsConfig::class
   }
 
 }
