@@ -7,7 +7,7 @@ public final class wisp/feature/testing/FakeFeatureFlags : wisp/config/Configura
 	public fun getBoolean (Lwisp/feature/Feature;)Z
 	public fun getBoolean (Lwisp/feature/Feature;Ljava/lang/String;)Z
 	public fun getBoolean (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Z
-	public fun getConfigClass ()Ljava/lang/Class;
+	public fun getConfigClass ()Lkotlin/reflect/KClass;
 	public fun getDouble (Lwisp/feature/Feature;)D
 	public fun getDouble (Lwisp/feature/Feature;Ljava/lang/String;)D
 	public fun getDouble (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)D

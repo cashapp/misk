@@ -326,13 +326,15 @@ internal class FakeFeatureFlagsTest {
   @Test
   fun configureOverridesFeatures() {
     val configSource = ConfigSource("classpath:/featureFlagsConfig.yaml")
+
+    val clazz = subject.getConfigClass()
+
     val config = WispConfig.builder().addWispConfigSources(listOf(configSource)).build()
-      .loadConfigOrThrow<FakeFeatureFlagsConfig>()
+      .loadConfigOrThrow(clazz, emptyList())
     subject.configure(config)
 
     assertThat(subject.getInt(Feature("foo1"))).isEqualTo(1)
     assertThat(subject.getJson<JsonFeature>(Feature("fooJson")).optional).isEqualTo("value")
-
   }
 
 }
