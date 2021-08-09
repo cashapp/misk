@@ -1,8 +1,6 @@
 package wisp.feature.testing
 
 import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,15 +18,11 @@ internal class FakeFeatureFlagsTest {
   val OTHER_FEATURE = Feature("bar")
   val TOKEN = "cust_abcdef123"
 
-  val moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-    .build()
-
   lateinit var subject: FakeFeatureFlags
 
   @BeforeEach
   fun beforeEachTest() {
-    subject = FakeFeatureFlags { moshi }
+    subject = FakeFeatureFlags()
   }
 
   @Test
