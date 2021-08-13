@@ -31,6 +31,16 @@ public final class wisp/deployment/DeploymentKt {
 	public static final fun getTESTING ()Lwisp/deployment/Deployment;
 }
 
+public abstract interface class wisp/deployment/DeploymentLocation {
+	public abstract fun getId ()Ljava/lang/String;
+}
+
+public final class wisp/deployment/EnvironmentVariableDeploymentLocation : wisp/deployment/DeploymentLocation {
+	public fun <init> (Ljava/lang/String;Lwisp/deployment/EnvironmentVariableLoader;)V
+	public synthetic fun <init> (Ljava/lang/String;Lwisp/deployment/EnvironmentVariableLoader;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getId ()Ljava/lang/String;
+}
+
 public abstract interface class wisp/deployment/EnvironmentVariableLoader {
 	public static final field Companion Lwisp/deployment/EnvironmentVariableLoader$Companion;
 	public abstract fun getEnvironmentVariable (Ljava/lang/String;)Ljava/lang/String;
