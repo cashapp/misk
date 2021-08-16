@@ -16,9 +16,14 @@ val leaseManager: LeaseManager = SomeLeaseManagerImplementation()
 // request a lease
 val lease = leaseManager.requestLease("MY LEASE")
 
-// check if lease is held
+// acquire the lease
+if (lease.acquire()) {
+  // got the lease....
+}
+
+// check if the lease is held (might have timed out, etc)
 if (lease.checkHeld()) {
-  // got the lease...
+  // lease is held
 }
 
 // add a listener and test if the lease is held...
@@ -33,4 +38,8 @@ lease.addListener(object : Lease.StateChangeListener {
 })
 
 assertThat(acquireCalled.get()).isTrue()
+
+// release the lease explicitly
+lease.release()
+
 ```
