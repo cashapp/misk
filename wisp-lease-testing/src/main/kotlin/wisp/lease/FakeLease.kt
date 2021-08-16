@@ -8,6 +8,26 @@ class FakeLease(
 
   override fun checkHeld() = manager.isLeaseHeld(name)
 
+  /**
+   * @return true if this process acquires the lease.
+   */
+  override fun acquire(): Boolean {
+    notifyAfterAcquire()
+    return true
+  }
+
+  /**
+   * Release the lease.  This will return true if released.  Note that it will return false
+   * if the lease was not held.
+   */
+  override fun release(): Boolean {
+    if (!checkHeld()) {
+      return false
+    }
+    notifyBeforeRelease()
+    return true
+  }
+
   override fun addListener(listener: Lease.StateChangeListener) {
     listeners.add(listener)
     if (checkHeld()) {
