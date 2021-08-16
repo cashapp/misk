@@ -64,7 +64,7 @@ class ReflectionQueryFactoryValidationTest {
     ).hasMessage(
       """
         |Query class ${AnnotationRequiredOnQuery::class.java.name} has problems:
-        |  name() must be annotated @Constraint, @Order or @Select""".trimMargin()
+        |  name() must be annotated @Constraint, @Fetch, @Order, or @Select""".trimMargin()
     )
   }
 

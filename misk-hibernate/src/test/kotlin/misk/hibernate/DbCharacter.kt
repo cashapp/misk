@@ -100,6 +100,9 @@ interface CharacterQuery : Query<DbCharacter> {
 
   @Order(path = "name", asc = false)
   fun nameDesc(): CharacterQuery
+
+  @Fetch(path = "actor")
+  fun withActor(): CharacterQuery
 }
 
 data class NameAndReleaseDate(

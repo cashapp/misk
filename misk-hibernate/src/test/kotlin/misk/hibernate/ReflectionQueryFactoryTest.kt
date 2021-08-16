@@ -7,6 +7,8 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.LazyInitializationException
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import java.time.Duration.ofSeconds
@@ -19,9 +21,9 @@ class ReflectionQueryFactoryTest {
   @MiskTestModule
   val module = MoviesTestModule()
 
-  val maxMaxRows = 40
-  val rowCountErrorLimit = 30
-  val rowCountWarningLimit = 20
+  private val maxMaxRows = 40
+  private val rowCountErrorLimit = 30
+  private val rowCountWarningLimit = 20
   private val queryFactory = ReflectionQuery.Factory(
     ReflectionQuery.QueryLimitsConfig(
       maxMaxRows, rowCountErrorLimit, rowCountWarningLimit
@@ -864,6 +866,51 @@ class ReflectionQueryFactoryTest {
       )
         .containsExactly(jurassicPark, rocky, starWars)
     }
+  }
+
+  @Test
+  fun fetchActorEagerly() {
+    val actorName = "Jeff Goldblum"
+    val characterName = "Ian Malcolm"
+
+    transacter.transaction { session ->
+      val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      val jg = session.save(DbActor(actorName, LocalDate.of(1952, 10, 22)))
+      session.save(DbCharacter(characterName, session.load(jp), session.load(jg)))
+    }
+
+    val character = transacter.transaction { session ->
+      queryFactory.newQuery<CharacterQuery>()
+        .name(characterName)
+        .withActor()
+        .uniqueResult(session)
+    }
+
+    assertThat(character?.actor?.name).isEqualTo(actorName)
+  }
+
+  @Test
+  fun fetchActorWithoutSpecifyingEager() {
+    val characterName = "Ian Malcolm"
+
+    transacter.transaction { session ->
+      val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      val jg = session.save(DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
+      session.save(DbCharacter(characterName, session.load(jp), session.load(jg)))
+    }
+
+    val character = transacter.transaction { session ->
+      queryFactory.newQuery<CharacterQuery>()
+        .name(characterName)
+        .uniqueResult(session)
+    }
+
+    val exception = assertThrows(LazyInitializationException::class.java) {
+      character?.actor?.name
+    }
+
+    assertThat(exception).isNotNull
+    assertThat(exception.message).isNotNull
   }
 
   @Test
