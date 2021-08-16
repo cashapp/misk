@@ -16,12 +16,16 @@ val myRealAppClass = MyRealAppClass(leaseManager = fakeLeaseManager)
 val lease: Lease = fakeLeaseManager.requestLease("YourLeaseName")
 val fakeLease: FakeLease = lease as FakeLease
 
+// fake leases are acquired by default, so this next statement is not required.
+lease.acquire()
+
 // add a listener and test if the lease is held...
 val acquireCalled = AtomicBoolean()
 lease.addListener(object : Lease.StateChangeListener {
   override fun afterAcquire(lease: Lease) {
-    lease.checkHeld()
-    acquireCalled.set(true)
+    if (lease.checkHeld()) {
+      acquireCalled.set(true)
+    }
   }
 
   override fun beforeRelease(lease: Lease) {}

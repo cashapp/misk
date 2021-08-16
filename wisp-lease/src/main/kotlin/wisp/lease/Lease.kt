@@ -2,22 +2,33 @@ package wisp.lease
 
 /**
  * A [Lease] is a cluster-wide time-based lock on a given resource. Leases are retrieved via
- * [LeaseManager.requestLease]. A ready service instance will automatically attempt to acquire
- * leases that it thinks it should own (typically based on the resource being leased consistently
- * hashing to the service instance), and will continue to maintain the lease for as long as it is
- * still ready. Leases should be released if the service transitions into not ready; to avoid
- * flapping, service lease owners may want to delay releasing leases until they've been not ready
- * for a particular amount of time.
+ * [LeaseManager.requestLease].
+ *
+ * It should be assumed that calls to [checkHeld], [acquire] and [release] could invoke remote
+ * calls, so consider usage carefully.
  */
 interface Lease {
   /** @property String the name of the resource being leased */
   val name: String
 
   /**
-   * @return true if the lease is owned by this process instance. This may involve remote calls,
-   * so it is marked as a function rather than a property to make the potential expense clearer
+   * @return true if the lease is owned by this process instance.
    */
   fun checkHeld(): Boolean
+
+  /**
+   * Attempts to acquire the lock on the lease.  If the lock was not already held and the lock
+   * was successfully obtained, listeners should be notified.
+   *
+   * @return true if this process acquires the lease.
+   */
+  fun acquire(): Boolean
+
+  /**
+   * Release the lock on the lease.  This will return true if released.  Note that it will return
+   * false if the lease was not held.  Listeners should be notified before the lock is released.
+   */
+  fun release(): Boolean
 
   /**
    * Registers a listener that is called on lease state changes.
