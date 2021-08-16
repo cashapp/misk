@@ -911,9 +911,6 @@ class ReflectionQueryFactoryTest {
 
     assertThat(exception).isNotNull
     assertThat(exception.message).isNotNull
-
-    val errorMessageRegex = "^could not initialize proxy .* - no Session".toRegex()
-    assertThat(exception.message!!.contains(errorMessageRegex))
   }
 
   @Test
