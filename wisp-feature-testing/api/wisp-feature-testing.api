@@ -1,13 +1,15 @@
 public final class wisp/feature/testing/FakeFeatureFlags : wisp/config/Configurable, wisp/feature/DynamicConfig, wisp/feature/FeatureFlags {
 	public static final field Companion Lwisp/feature/testing/FakeFeatureFlags$Companion;
 	public static final field KEY Ljava/lang/String;
+	public fun <init> (Lcom/squareup/moshi/Moshi;)V
+	public synthetic fun <init> (Lcom/squareup/moshi/Moshi;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/jvm/functions/Function0;)V
 	public synthetic fun configure (Lwisp/config/Config;)V
 	public fun configure (Lwisp/feature/testing/FakeFeatureFlagsConfig;)V
 	public fun getBoolean (Lwisp/feature/Feature;)Z
 	public fun getBoolean (Lwisp/feature/Feature;Ljava/lang/String;)Z
 	public fun getBoolean (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Z
-	public fun getConfigClass ()Ljava/lang/Class;
+	public fun getConfigClass ()Lkotlin/reflect/KClass;
 	public fun getDouble (Lwisp/feature/Feature;)D
 	public fun getDouble (Lwisp/feature/Feature;Ljava/lang/String;)D
 	public fun getDouble (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)D

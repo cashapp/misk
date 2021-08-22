@@ -1,6 +1,7 @@
 package wisp.feature.testing
 
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import wisp.config.Config
 import wisp.config.Configurable
 import wisp.feature.Attributes
@@ -14,13 +15,26 @@ import wisp.feature.toSafeJson
 import java.util.PriorityQueue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
+import kotlin.reflect.KClass
 
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
-class FakeFeatureFlags constructor(
+class FakeFeatureFlags
+@Deprecated("Needed for Misk Provider usage...")
+constructor(
   val moshi: () -> Moshi
 ) : FeatureFlags, DynamicConfig, Configurable<FakeFeatureFlagsConfig> {
+
+  /**
+   * Preferred constructor for Wisp
+   */
+  constructor(
+    moshi: Moshi = Moshi.Builder()
+      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+      .build()
+  ) : this({ moshi })
+
   companion object {
     const val KEY = "fake_dynamic_flag"
     val defaultAttributes = Attributes()
@@ -448,8 +462,8 @@ class FakeFeatureFlags constructor(
     }
   }
 
-  override fun getConfigClass(): Class<FakeFeatureFlagsConfig> {
-    return FakeFeatureFlagsConfig::class.java
+  override fun getConfigClass(): KClass<FakeFeatureFlagsConfig> {
+    return FakeFeatureFlagsConfig::class
   }
 
 }

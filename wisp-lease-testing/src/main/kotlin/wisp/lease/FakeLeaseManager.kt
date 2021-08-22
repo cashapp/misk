@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * A [FakeLeaseManager] provides explicit control over leases for the purposes of testing. By
- * default a lease is considered held, but it can be explicitly marked as not held if desired
+ * default, a fake lease is considered held, but it can be explicitly marked as not held if desired
  */
 class FakeLeaseManager : LeaseManager {
   private val leasesHeldElsewhere = ConcurrentHashMap<String, Int>()
@@ -20,11 +20,11 @@ class FakeLeaseManager : LeaseManager {
 
   fun markLeaseHeld(name: String) {
     leasesHeldElsewhere.remove(name)
-    (requestLease(name) as FakeLease).notifyAfterAcquire()
+    (requestLease(name) as FakeLease).acquire()
   }
 
   fun markLeaseHeldElsewhere(name: String) {
-    (requestLease(name) as FakeLease).notifyBeforeRelease()
+    (requestLease(name) as FakeLease).release()
     leasesHeldElsewhere[name] = 1
   }
 
