@@ -14,6 +14,7 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
@@ -57,6 +58,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   private val constraints = mutableListOf<PredicateFactory>()
   private val orderFactories = mutableListOf<OrderFactory>()
+  private val fetchFactories = mutableListOf<FetchFactory>()
 
   private val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java)
 
@@ -80,6 +82,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     copy.constraints.addAll(this.constraints)
     copy.orderFactories.addAll(this.orderFactories)
     copy.disabledChecks.addAll(this.disabledChecks)
+    copy.fetchFactories.addAll(this.fetchFactories)
 
     @Suppress("UNCHECKED_CAST")
     return copy.toProxy() as Q
@@ -161,6 +164,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       } else {
         builder.desc(root.traverse<Any?>(pathList))
       }
+    }
+  }
+
+  override fun dynamicAddFetch(path: String, joinType: JoinType) {
+    addFetch { root ->
+      root.fetch<Any?, Any?>(path, joinType)
     }
   }
 
@@ -249,6 +258,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
 
+    fetchFactories.forEach { it(queryRoot) }
+
     query.select(selection(criteriaBuilder, queryRoot))
 
     val typedQuery = session.hibernateSession.createQuery(query)
@@ -278,6 +289,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     query.where(predicate)
 
     query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
+
+    fetchFactories.forEach { it(queryRoot) }
 
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.firstResult = firstResult
@@ -461,6 +474,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       query.select(select(criteriaBuilder, root))
       query.where(reflectionQuery.buildWherePredicate(root, criteriaBuilder))
       query.orderBy(reflectionQuery.buildOrderBys(root, criteriaBuilder))
+
+      reflectionQuery.fetchFactories.forEach { it(root) }
+
       val typedQuery = session.hibernateSession.createQuery(query)
       typedQuery.firstResult = reflectionQuery.firstResult
       typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
@@ -499,14 +515,20 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         val constraint = function.findAnnotation<Constraint>()
         val select = function.findAnnotation<Select>()
         val order = function.findAnnotation<Order>()
+        val fetch = function.findAnnotation<Fetch>()
 
-        if (constraint != null && select != null) {
+        if (listOfNotNull(constraint, select, order, fetch).size > 1) {
           errors.add("${function.name}() has too many annotations")
           return
         }
 
         if (constraint != null) {
           createConstraint(errors, function, result, constraint)
+          return
+        }
+
+        if (fetch != null) {
+          createFetch(errors, function, result, fetch)
           return
         }
 
@@ -520,7 +542,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
 
-        errors.add("${function.name}() must be annotated @Constraint, @Order or @Select")
+        errors.add("${function.name}() must be annotated @Constraint, @Fetch, @Order, or @Select")
       }
 
       private fun createOrder(
@@ -555,6 +577,35 @@ internal class ReflectionQuery<T : DbEntity<T>>(
               } else {
                 builder.desc(root.traverse<Any?>(path))
               }
+            }
+          }
+        }
+      }
+
+      private fun createFetch(
+        errors: MutableList<String>,
+        function: KFunction<*>,
+        result: MutableMap<Method, QueryMethodHandler>,
+        fetch: Fetch
+      ) {
+        if (!fetch.path.matches(PATH_PATTERN)) {
+          errors.add("${function.name}() path is not valid: '${fetch.path}'")
+          return
+        }
+
+        val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
+        if (javaMethod.returnType != javaMethod.declaringClass) {
+          errors.add(
+            "${function.name}() returns ${javaMethod.returnType.name} but " +
+              "@Fetch methods must return this (${javaMethod.declaringClass.name})"
+          )
+          return
+        }
+
+        result[javaMethod] = object : QueryMethodHandler {
+          override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+            return reflectionQuery.addFetch { root ->
+              root.fetch<Any?, Any?>(fetch.path, fetch.joinType)
             }
           }
         }
@@ -829,6 +880,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return orderFactories.map { it(root, criteriaBuilder) }
   }
 
+  internal fun addFetch(fetchFactory: FetchFactory): ReflectionQuery<T>{
+    fetchFactories.add(fetchFactory)
+    return this
+  }
+
   override fun <Q : Query<*>> newOrBuilder(): OrBuilder<Q> {
     val orPredicateFactory = OrClausePredicateFactory<Q>()
     constraints += orPredicateFactory
@@ -885,6 +941,8 @@ private typealias PredicateFactory = (root: Root<*>, criteriaBuilder: CriteriaBu
 
 private typealias OrderFactory =
   (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
+
+private typealias FetchFactory = (root: Root<*>) -> javax.persistence.criteria.Fetch<*, *>
 
 private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
 

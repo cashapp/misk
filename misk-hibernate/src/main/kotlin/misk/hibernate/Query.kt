@@ -1,6 +1,8 @@
 package misk.hibernate
 
 import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.JoinType
+import javax.persistence.criteria.JoinType.LEFT
 import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
 import javax.persistence.criteria.Selection
@@ -21,6 +23,9 @@ interface Query<T> {
   fun dynamicAddConstraint(path: String, operator: Operator, value: Any? = null)
 
   fun dynamicAddOrder(path: String, asc: Boolean)
+
+  /** Fetch the given path as a join, using the given joinType */
+  fun dynamicAddFetch(path: String, joinType: JoinType)
 
   fun disableCheck(check: Check)
 
@@ -189,4 +194,14 @@ annotation class Select(
 annotation class Order(
   val path: String,
   val asc: Boolean = true
+)
+
+/**
+ * Annotates a function on a subinterface of [Query] to specify that the association at
+ * the given `path` should be fetched in a single query. The type of join used will be
+ * specified by `joinType`.
+ */
+annotation class Fetch(
+  val path: String = "",
+  val joinType: JoinType = LEFT
 )
