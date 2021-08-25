@@ -3,7 +3,6 @@ package misk.clustering.zookeeper
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import misk.clustering.Cluster
-import misk.clustering.lease.LeaseManager
 import misk.clustering.weights.ClusterWeightProvider
 import misk.config.AppName
 import misk.tasks.RepeatedTaskQueue
@@ -12,6 +11,7 @@ import misk.tasks.Status
 import misk.zookeeper.SERVICES_NODE
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.state.ConnectionStateListener
+import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap

@@ -9,7 +9,6 @@ import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
-import misk.clustering.lease.LeaseManager
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
@@ -19,6 +18,7 @@ import misk.time.timed
 import misk.tracing.traceWithNewRootSpan
 import misk.feature.Feature
 import misk.feature.FeatureFlags
+import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
