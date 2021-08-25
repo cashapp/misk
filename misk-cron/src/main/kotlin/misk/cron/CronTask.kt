@@ -25,7 +25,7 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
 
     taskQueue.scheduleWithBackoff(INTERVAL) {
       val now = clock.instant()
-      if (lease.checkHeld()) {
+      if (lease.checkHeld() || lease.acquire()) {
         cronManager.runReadyCrons(lastRun)
       }
       lastRun = now

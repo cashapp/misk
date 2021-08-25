@@ -17,6 +17,7 @@ internal class FakeLeaseManagerTest {
 
     leaseManager.markLeaseHeldElsewhere("my-lease")
     assertThat(lease.checkHeld()).isFalse()
+    assertThat(lease.acquire()).isFalse()
     assertThat(otherLease.checkHeld()).isTrue()
 
     leaseManager.markLeaseHeld("my-lease")

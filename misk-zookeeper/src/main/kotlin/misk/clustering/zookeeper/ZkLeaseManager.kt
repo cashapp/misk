@@ -132,7 +132,7 @@ internal class ZkLeaseManager @Inject internal constructor(
     if (state.get() != State.RUNNING) return
 
     // Reconfirm whether we should hold any of the leases that we have
-    leases.values.forEach { it.checkHeld() }
+    leases.values.forEach { it.checkHeld() || it.acquire() }
   }
 
   companion object {

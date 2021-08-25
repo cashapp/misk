@@ -120,7 +120,7 @@ internal class SqsJobConsumer @Inject internal constructor(
       return (1..receiversForQueue())
         .filter { num ->
           val lease = leaseManager.requestLease("sqs-job-consumer-${queue.name.value}-$num")
-          lease.checkHeld()
+          lease.checkHeld() || lease.acquire()
         }
     }
 
