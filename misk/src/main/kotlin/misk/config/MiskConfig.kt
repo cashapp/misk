@@ -29,7 +29,7 @@ import java.io.FilenameFilter
 import java.util.Locale
 
 object MiskConfig {
-  val logger = getLogger<MiskConfig>()
+  private val logger = getLogger<MiskConfig>()
 
   @JvmStatic
   inline fun <reified T : Config> load(
