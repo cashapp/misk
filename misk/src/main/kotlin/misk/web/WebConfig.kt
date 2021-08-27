@@ -9,8 +9,10 @@ data class WebConfig(
   /** HTTP port to listen on, or 0 for any available port. */
   val port: Int,
 
-  /** If a connection is unused for this many milliseconds, it is closed. */
-  val idle_timeout: Long,
+  /**
+   * If a connection is unused for this many milliseconds, it is closed. If zero, it is not closed.
+   */
+  val idle_timeout: Long = 0,
 
   /**
    * If >= 0, use a dedicated jetty thread pool for health checking.
