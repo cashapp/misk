@@ -10,9 +10,10 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.lang.IllegalArgumentException
+import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import javax.inject.Inject
+import kotlin.IllegalArgumentException
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -236,5 +237,55 @@ class FakeRedisTest {
 
     // Keys should be deleted
     listOf(*keysToInsert, key3).forEach { assertNull(redis[it], "Key should have been deleted") }
+  }
+
+  @Test fun incrOnKeyThatDoesNotExist() {
+    // Setup
+    val key = "does_not_exist_at_first"
+    assertNull(redis[key])
+
+    // Exercise
+    val result = redis.incr(key)
+
+    // Verify
+    assertEquals(1, result)
+    assertEquals("1".encodeUtf8(), redis[key])
+  }
+
+  @Test fun incrOnKeyThatExists() {
+    // Setup
+    val key = "bla"
+    redis.incr(key)
+
+    // Exercise
+    val result = redis.incr(key)
+
+    assertEquals(2, result)
+    assertEquals("2".encodeUtf8(), redis[key])
+  }
+
+  @Test fun incrBy() {
+    // Setup
+    val key = "bla"
+
+    // Exercise
+    val result = redis.incrBy(key, 3)
+
+    assertEquals(3, result)
+    assertEquals("3".encodeUtf8(), redis[key])
+  }
+
+  @Test fun incrOnInvalidData() {
+    // Setup
+    val key = "bla"
+    redis[key] = "Not a number".encodeUtf8()
+
+    // Exercise
+    assertThrows<IllegalArgumentException> {
+      redis.incrBy(key, 3)
+    }
+
+    // Verify
+    assertEquals("Not a number".encodeUtf8(), redis[key])
   }
 }
