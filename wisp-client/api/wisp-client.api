@@ -71,7 +71,9 @@ public final class wisp/client/HttpClientEnvoyConfig {
 
 public final class wisp/client/HttpClientFactory {
 	public static final field Companion Lwisp/client/HttpClientFactory$Companion;
+	public fun <init> ()V
 	public fun <init> (Lwisp/security/ssl/SslLoader;Lwisp/security/ssl/SslContextFactory;Lwisp/client/OkHttpClientCommonConfigurator;Lwisp/client/EnvoyClientEndpointProvider;Ljava/util/List;)V
+	public synthetic fun <init> (Lwisp/security/ssl/SslLoader;Lwisp/security/ssl/SslContextFactory;Lwisp/client/OkHttpClientCommonConfigurator;Lwisp/client/EnvoyClientEndpointProvider;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun create (Lwisp/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient;
 }
 
