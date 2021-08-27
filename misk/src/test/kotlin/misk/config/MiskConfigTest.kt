@@ -2,14 +2,19 @@ package misk.config
 
 import com.google.inject.util.Modules
 import misk.environment.DeploymentModule
+import misk.logging.LogCollectorModule
+import misk.logging.LogCollectorService
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.event.Level
 import wisp.deployment.TESTING
+import wisp.logging.LogCollector
 import java.io.File
 import java.time.Duration
 import javax.inject.Inject
@@ -22,12 +27,29 @@ class MiskConfigTest {
   @MiskTestModule
   val module = Modules.combine(
     ConfigModule.create("test_app", config),
-    DeploymentModule(TESTING)
+    DeploymentModule(TESTING),
+    LogCollectorModule()
     // @TODO(jwilson) https://github.com/square/misk/issues/272
   )
 
   @Inject
   private lateinit var testConfig: TestConfig
+
+  @Inject
+  private lateinit var logCollector: LogCollector
+
+  @Inject
+  private lateinit var logCollectorService: LogCollectorService
+
+  @BeforeEach
+  fun setUp() {
+    logCollectorService.startAsync()
+  }
+
+  @AfterEach
+  fun tearDown() {
+    logCollectorService.stopAsync()
+  }
 
   @Test
   fun configIsProperlyParsed() {
@@ -83,21 +105,54 @@ class MiskConfigTest {
   }
 
   @Test
-  fun friendlyErrorMessagesWhenPropertiesNotFound() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("unknownproperty", TESTING)
-    }
+  fun friendlyLogsWhenPropertiesNotFound() {
+    // Unknown properties don't cause an exception. If a missing property were misspelled, it
+    // would fail because of it being a missing property, rather than due to a new property being
+    // present.
+    MiskConfig.load<TestConfig>("unknownproperty", TESTING)
 
-    assertThat(exception).hasMessageContaining("'consumer_b.blue_items' not found")
+    assertThat(logCollector.takeMessages(MiskConfig::class))
+      .hasSize(1)
+      .allMatch { it.contains("'consumer_b.blue_items' not found") }
   }
 
   @Test
-  fun friendlyErrorMessagesWhenPropertiesMisspelled() {
+  fun misspelledRequiredPrimitivePropertiesFail() {
     val exception = assertFailsWith<IllegalStateException> {
       MiskConfig.load<TestConfig>("misspelledproperty", TESTING)
     }
 
-    assertThat(exception).hasMessageContaining("Did you mean")
+    assertThat(exception).hasMessageContaining(
+      "could not find 'consumer_b.max_items' of 'TestConfig' in misspelledproperty-testing.yaml"
+    )
+    // Also contains a message about similar properties that it had found.
+    assertThat(exception).hasMessageContaining("consumer_b.mox_items")
+  }
+
+  @Test
+  fun misspelledRequiredObjectPropertiesFail() {
+    val exception = assertFailsWith<IllegalStateException> {
+      MiskConfig.load<TestConfig>("misspelledobject", TESTING)
+    }
+
+    assertThat(exception).hasMessageContaining(
+      "could not find 'duration.interval' of 'TestConfig' in misspelledobject-testing.yaml"
+    )
+    // Also contains a message about similar properties that it had found.
+    assertThat(exception).hasMessageContaining("duration.intervel")
+  }
+
+  @Test
+  fun misspelledRequiredStringPropertiesFail() {
+    val exception = assertFailsWith<IllegalStateException> {
+      MiskConfig.load<TestConfig>("misspelledstring", TESTING)
+    }
+
+    assertThat(exception).hasMessageContaining(
+      "could not find 'nested.child_nested.nested_value' of 'TestConfig' in misspelledstring-testing.yaml"
+    )
+    // Also contains a message about similar properties that it had found.
+    assertThat(exception).hasMessageContaining("nested.child_nested.nexted_value")
   }
 
   @Test
