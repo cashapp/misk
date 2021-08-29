@@ -1,6 +1,7 @@
 package misk.redis
 
 import okio.ByteString
+import okio.ByteString.Companion.encode
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -107,5 +108,16 @@ class FakeRedis : Redis {
       data = value,
       expiryInstant = Instant.MAX
     )
+  }
+
+  override fun incr(key: String): Long {
+    return incrBy(key, 1)
+  }
+
+  override fun incrBy(key: String, increment: Long): Long {
+    val encodedValue = get(key)?.utf8() ?: "0"
+    val value = encodedValue.toLong() + increment
+    set(key, value.toString().encode(Charsets.UTF_8))
+    return value
   }
 }
