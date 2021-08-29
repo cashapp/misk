@@ -27,19 +27,20 @@ if (lease.checkHeld()) {
 }
 
 // add a listener and test if the lease is held...
-val acquireCalled = AtomicBoolean()
+val leaseHeld = AtomicBoolean()
 lease.addListener(object : Lease.StateChangeListener {
   override fun afterAcquire(lease: Lease) {
-    lease.checkHeld()
-    acquireCalled.set(true)
+    // lease should be held at this point, but it's best to check
+    if (lease.checkHeld()) {
+      leaseHeld.set(true)
+    }
   }
 
   override fun beforeRelease(lease: Lease) {}
 })
 
-assertThat(acquireCalled.get()).isTrue()
+assertThat(leaseHeld.get()).isTrue()
 
 // release the lease explicitly
 lease.release()
-
 ```

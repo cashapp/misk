@@ -2,10 +2,10 @@ package misk.clustering.zookeeper
 
 import misk.clustering.Cluster
 import misk.clustering.NoMembersAvailableException
-import misk.clustering.lease.Lease
 import misk.clustering.weights.ClusterWeightProvider
 import org.apache.zookeeper.CreateMode
 import org.apache.zookeeper.KeeperException
+import wisp.lease.Lease
 import wisp.logging.getLogger
 import java.util.concurrent.locks.ReentrantLock
 import javax.annotation.concurrent.GuardedBy
@@ -89,6 +89,16 @@ internal class ZkLease(
     }
   }
 
+  /**
+   * Attempts to acquire the lock on the lease.  If the lock was not already held and the lock
+   * was successfully obtained, listeners should be notified.
+   *
+   * @return true if this process acquires the lease.
+   */
+  override fun acquire(): Boolean {
+    return checkHeld()
+  }
+
   override fun addListener(listener: Lease.StateChangeListener) {
     lock.withLock {
       listeners.add(listener)
@@ -119,7 +129,7 @@ internal class ZkLease(
     }
   }
 
-  private fun release(): Boolean {
+  override fun release(): Boolean {
     try {
       if (checkLeaseNodeExists() && checkLeaseDataMatches()) {
         notifyBeforeRelease()
