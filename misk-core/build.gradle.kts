@@ -1,5 +1,7 @@
 dependencies {
   api(project(":wisp-config"))
+  api(project(":wisp-lease"))
+  api(project(":wisp-lease-testing"))
   api(project(":wisp-logging"))
   api(project(":wisp-resource-loader"))
   api(project(":wisp-resource-loader-testing"))
