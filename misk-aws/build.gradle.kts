@@ -17,6 +17,7 @@ dependencies {
   api(project(":wisp-aws-environment"))
   api(project(":wisp-config"))
   api(project(":wisp-containers-testing"))
+  api(project(":wisp-lease"))
   api(project(":wisp-logging"))
 
   testImplementation(Dependencies.assertj)

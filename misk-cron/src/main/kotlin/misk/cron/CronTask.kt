@@ -1,9 +1,9 @@
 package misk.cron
 
 import com.google.common.util.concurrent.AbstractIdleService
-import misk.clustering.lease.LeaseManager
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
+import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Duration
@@ -25,7 +25,11 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
 
     taskQueue.scheduleWithBackoff(INTERVAL) {
       val now = clock.instant()
-      if (lease.checkHeld()) {
+      var leaseHeld = lease.checkHeld()
+      if (!leaseHeld) {
+        leaseHeld = lease.acquire()
+      }
+      if (leaseHeld) {
         cronManager.runReadyCrons(lastRun)
       }
       lastRun = now
