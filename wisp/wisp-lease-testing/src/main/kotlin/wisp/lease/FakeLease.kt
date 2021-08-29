@@ -12,8 +12,11 @@ class FakeLease(
    * @return true if this process acquires the lease.
    */
   override fun acquire(): Boolean {
-    notifyAfterAcquire()
-    return true
+    val result = checkHeld()
+    if (checkHeld()) {
+      notifyAfterAcquire()
+    }
+    return result
   }
 
   /**
