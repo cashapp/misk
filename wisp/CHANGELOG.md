@@ -1,6 +1,33 @@
 Change Log
 ==========
 
+Version 0.20.0 *(2021-08-31)*
+----------------------------
+
+Unstable public release.
+
+Breaking changes:
+
+* Leases now use a different package
+* Wisp Lease API is changing to handle explicit acquire/release on lease (#2113)
+* Log on properties present in config yaml but not in object (#2118)
+* Config now requires defaults for primitive types
+* Move misk admin components to misk-admin (#2065)
+* Reinstate WebActionExceptionMapper sending a response body based on the WebActionException's responseBody (#2050)
+
+New features and fixes:
+
+* Add incr and incrBy operations to misk-redis (#2119)
+* Add @fetch as a valid hibernate query annotation (#2112)
+* When evaluating JSON LD feature flags, log unknown fields once (#2086)
+* Make additional jooq configurations possible (#2078)
+* Log a warning if health checks fail (#2063)
+* Add support for double feature flags (#2029)
+* Send gRPC errors properly (#1983)
+* Bump log level for invalid access (#2024)
+* misk-policy: To query specific paths, treat document path as urlencoded (#2030)
+* Create LaunchDarkly in Wisp (#2088)
+
 Version 0.19.0 *(2021-06-30)*
 ----------------------------
 
