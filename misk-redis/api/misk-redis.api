@@ -3,6 +3,8 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun <init> ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
+	public fun expire (Ljava/lang/String;J)J
+	public fun expireAt (Ljava/lang/String;J)J
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public final fun getClock ()Ljava/time/Clock;
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
@@ -12,6 +14,8 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
+	public fun pExpire (Ljava/lang/String;J)J
+	public fun pExpireAt (Ljava/lang/String;J)J
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public final fun setClock (Ljava/time/Clock;)V
@@ -25,6 +29,8 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public final fun close ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
+	public fun expire (Ljava/lang/String;J)J
+	public fun expireAt (Ljava/lang/String;J)J
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
@@ -33,6 +39,8 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
+	public fun pExpire (Ljava/lang/String;J)J
+	public fun pExpireAt (Ljava/lang/String;J)J
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
@@ -45,6 +53,8 @@ public final class misk/redis/RealRedis$Companion {
 public abstract interface class misk/redis/Redis {
 	public abstract fun del (Ljava/lang/String;)Z
 	public abstract fun del ([Ljava/lang/String;)I
+	public abstract fun expire (Ljava/lang/String;J)J
+	public abstract fun expireAt (Ljava/lang/String;J)J
 	public abstract fun get (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
@@ -53,6 +63,8 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun incrBy (Ljava/lang/String;J)J
 	public abstract fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public abstract fun mset ([Lokio/ByteString;)V
+	public abstract fun pExpire (Ljava/lang/String;J)J
+	public abstract fun pExpireAt (Ljava/lang/String;J)J
 	public abstract fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
