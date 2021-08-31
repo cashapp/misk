@@ -1,6 +1,7 @@
 package misk.web.exceptions
 
 import com.google.common.util.concurrent.UncheckedExecutionException
+import com.google.rpc.Status
 import com.squareup.wire.GrpcStatus
 import com.squareup.wire.ProtoAdapter
 import misk.Action
@@ -23,6 +24,7 @@ import wisp.logging.getLogger
 import wisp.logging.log
 import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
+import java.util.Base64
 import javax.inject.Inject
 
 /**
@@ -78,6 +80,7 @@ class ExceptionHandlingInterceptor(
       "grpc-status",
       response.status.code.toString()
     )
+    httpCall.setResponseTrailer("grpc-status-details-bin", response.toEncodedStatusProto)
     httpCall.setResponseTrailer("grpc-message", response.message ?: response.status.name)
     httpCall.takeResponseBody()?.use { responseBody: BufferedSink ->
       GrpcMessageSink(responseBody, ProtoAdapter.BYTES, grpcEncoding = "identity")
@@ -92,7 +95,6 @@ class ExceptionHandlingInterceptor(
     (response.body as ResponseBody).writeTo(buffer)
     return buffer.readUtf8()
   }
-
 
   private fun toResponse(th: Throwable): Response<*> = when (th) {
     is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
@@ -170,3 +172,15 @@ fun toGrpcStatus(statusCode: Int): GrpcStatus {
     else -> GrpcStatus.UNKNOWN
   }
 }
+
+/** Convert the error response to a compatible base64-proto-encoded google.rpc.Status value. */
+private val GrpcErrorResponse.toEncodedStatusProto
+  get() : String {
+    val status = Status(
+      code = status.code,
+      message = message ?: "",
+      details = details
+    )
+    // In gRPC, base64-encoded binary fields must be un-padded.
+    return Base64.getEncoder().withoutPadding().encodeToString(Status.ADAPTER.encode(status))
+  }
