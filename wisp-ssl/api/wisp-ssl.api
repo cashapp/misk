@@ -91,6 +91,7 @@ public final class wisp/security/ssl/SslLoader {
 	public static final field FORMAT_JCEKS Ljava/lang/String;
 	public static final field FORMAT_JKS Ljava/lang/String;
 	public static final field FORMAT_PEM Ljava/lang/String;
+	public static final field FORMAT_PKCS12 Ljava/lang/String;
 	public fun <init> (Lwisp/resources/ResourceLoader;)V
 	public final fun getResourceLoader ()Lwisp/resources/ResourceLoader;
 	public final fun loadCertStore (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lwisp/security/ssl/CertStore;
