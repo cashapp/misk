@@ -1,6 +1,7 @@
 package wisp.logging
 
 import ch.qos.logback.classic.Level
+import org.assertj.core.api.Assertions.`as`
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -67,12 +68,30 @@ class LogCollectorTest {
   }
 
   @Test
-  fun takeConsumesUnmatched() {
+  fun canTakeWithoutConsumingUnmatchedLogs() {
     val logger = getLogger<LogCollectorTest>()
+    val logger2 = getLogger<LoggingDummyClass>()
 
-    logger.info("this is a log message!")
-    assertThat(logCollector.takeMessages(minLevel = Level.ERROR)).isEmpty()
+    logger.info("A thing happened")
+    logger2.info("Another thing happened")
+
+    // We can collect messages from different log sources.
+    assertThat(logCollector.takeMessages(LogCollectorTest::class)).containsExactly("A thing happened")
+    assertThat(logCollector.takeMessages(LoggingDummyClass::class)).containsExactly("Another thing happened")
     assertThat(logCollector.takeMessages()).isEmpty()
+
+    // We can collect messages of different error levels.
+    logger.info { "this is a log message!" }
+    assertThat(logCollector.takeMessages(minLevel = Level.ERROR)).isEmpty()
+    assertThat(logCollector.takeMessages()).containsExactly("this is a log message!")
+    assertThat(logCollector.takeMessages()).isEmpty()
+
+    // We can collect messages matching certain patterns.
+    logger.info { "hit by pattern match" }
+    logger.info { "missed by pattern match"}
+    assertThat(logCollector.takeMessages(pattern = Regex("hit.*")))
+      .containsExactly("hit by pattern match")
+    assertThat(logCollector.takeMessages()).containsExactly("missed by pattern match")
   }
 
   @Test
