@@ -370,4 +370,21 @@ class FakeRedisTest {
     clock.add(Duration.ofMillis(1))
     assertNull(redis["foo"])
   }
+
+  @Test fun expireOnKeyThatExists() {
+    // Setup
+    redis["foo"] = "bar".encodeUtf8()
+
+    // Exercise
+    assertTrue {
+      redis.expire("foo", 1)
+    }
+  }
+
+  @Test fun expireOnKeyThatDoesNotExist() {
+    // Exercise
+    assertFalse {
+      redis.expire("foo", 1)
+    }
+  }
 }

@@ -115,27 +115,27 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  override fun expire(key: String, seconds: Long): Long {
+  override fun expire(key: String, seconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.expire(key, seconds)!!
+      jedis.expire(key, seconds)!! == 1L
     }
   }
 
-  override fun expireAt(key: String, timestampSeconds: Long): Long {
+  override fun expireAt(key: String, timestampSeconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.expireAt(key, timestampSeconds)!!
+      jedis.expireAt(key, timestampSeconds)!! == 1L
     }
   }
 
-  override fun pExpire(key: String, milliseconds: Long): Long {
+  override fun pExpire(key: String, milliseconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.expireAt(key, milliseconds)!!
+      jedis.expireAt(key, milliseconds)!! == 1L
     }
   }
 
-  override fun pExpireAt(key: String, timestampMilliseconds: Long): Long {
+  override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.expireAt(key, timestampMilliseconds)!!
+      jedis.expireAt(key, timestampMilliseconds)!! == 1L
     }
   }
 

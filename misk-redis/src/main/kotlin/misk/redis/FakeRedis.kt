@@ -138,21 +138,21 @@ class FakeRedis : Redis {
     return value
   }
 
-  override fun expire(key: String, seconds: Long): Long {
+  override fun expire(key: String, seconds: Long): Boolean {
     val ttlMillis = Duration.ofSeconds(seconds).toMillis()
     return pExpireAt(key, clock.millis().plus(ttlMillis))
   }
 
-  override fun expireAt(key: String, timestampSeconds: Long): Long {
+  override fun expireAt(key: String, timestampSeconds: Long): Boolean {
     val epochMillis = Instant.ofEpochSecond(timestampSeconds).toEpochMilli()
     return pExpireAt(key, epochMillis)
   }
 
-  override fun pExpire(key: String, milliseconds: Long): Long {
+  override fun pExpire(key: String, milliseconds: Long): Boolean {
     return pExpireAt(key, clock.millis().plus(milliseconds))
   }
 
-  override fun pExpireAt(key: String, timestampMilliseconds: Long): Long {
+  override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
     val value = keyValueStore[key]
     val hValue = hKeyValueStore[key]
     val expiresAt = Instant.ofEpochMilli(timestampMilliseconds)
@@ -164,8 +164,8 @@ class FakeRedis : Redis {
       hValue != null -> {
         hValue.expiryInstant = expiresAt
       }
-      else -> return 0
+      else -> return false
     }
-    return 1
+    return true
   }
 }

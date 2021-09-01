@@ -157,10 +157,10 @@ interface Redis {
    * a time in the past will result in the key being deleted rather than expired (accordingly, the
    * emitted key event will be del, not expired).
    *
-   * @return 1 if the timeout was set. 0 if the timeout was not set. e.g. key doesn't exist, or
-   * operation skipped due to the provided arguments.
+   * @return true if the timeout was set. false if the timeout was not set. e.g. key doesn't exist,
+   * or operation skipped due to the provided arguments.
    */
-  fun expire(key: String, seconds: Long): Long
+  fun expire(key: String, seconds: Long): Boolean
 
   /**
    * [expireAt] has the same effect and semantic as [expire], but instead of specifying the number
@@ -169,26 +169,26 @@ interface Redis {
    *
    * Please for the specific semantics of the command refer to the documentation of [expire].
    *
-   * @return 1 if the timeout was set. 0 if the timeout was not set. e.g. key doesn't exist, or
-   * operation skipped due to the provided arguments.
+   * @return true if the timeout was set. false if the timeout was not set. e.g. key doesn't exist,
+   * or operation skipped due to the provided arguments.
    */
-  fun expireAt(key: String, timestampSeconds: Long): Long
+  fun expireAt(key: String, timestampSeconds: Long): Boolean
 
   /**
    * This command works exactly like [expire] but the time to live of the key is specified in
    * milliseconds instead of seconds.
    *
-   * @return 1 if the timeout was set. 0 if the timeout was not set. e.g. key doesn't exist, or
-   * operation skipped due to the provided arguments.
+   * @return true if the timeout was set. false if the timeout was not set. e.g. key doesn't exist,
+   * or operation skipped due to the provided arguments.
    */
-  fun pExpire(key: String, milliseconds: Long): Long
+  fun pExpire(key: String, milliseconds: Long): Boolean
 
   /**
    * [pExpireAt] has the same effect and semantic as [expireAt], but the Unix time at which the key
    * will expire is specified in milliseconds instead of seconds.
    *
-   * @return 1 if the timeout was set. 0 if the timeout was not set. e.g. key doesn't exist, or
-   * operation skipped due to the provided arguments.
+   * @return true if the timeout was set. false if the timeout was not set. e.g. key doesn't exist,
+   * or operation skipped due to the provided arguments.
    */
-  fun pExpireAt(key: String, timestampMilliseconds: Long): Long
+  fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean
 }
