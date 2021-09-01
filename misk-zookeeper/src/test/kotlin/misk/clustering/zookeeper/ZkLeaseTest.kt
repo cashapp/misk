@@ -5,7 +5,6 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.clustering.fake.FakeCluster
-import misk.clustering.lease.Lease
 import misk.clustering.weights.FakeClusterWeight
 import misk.mockito.Mockito
 import misk.testing.MiskTest
@@ -23,6 +22,7 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
+import wisp.lease.Lease
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean

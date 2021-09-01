@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap
  * A [FakeLeaseManager] provides explicit control over leases for the purposes of testing. By
  * default, a fake lease is considered held, but it can be explicitly marked as not held if desired
  */
-class FakeLeaseManager : LeaseManager {
+open class FakeLeaseManager : LeaseManager {
   private val leasesHeldElsewhere = ConcurrentHashMap<String, Int>()
   private val leases = ConcurrentHashMap<String, FakeLease>()
 
