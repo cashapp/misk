@@ -177,8 +177,8 @@ fun toGrpcStatus(statusCode: Int): GrpcStatus {
 private val GrpcErrorResponse.toEncodedStatusProto
   get() : String {
     val status = Status(
-      code = status.code,
-      message = message ?: "",
+      code = status.code, // must match "grpc-status"
+      message = message ?: status.name, // must match "grpc-message"
       details = details
     )
     // In gRPC, base64-encoded binary fields must be un-padded.
