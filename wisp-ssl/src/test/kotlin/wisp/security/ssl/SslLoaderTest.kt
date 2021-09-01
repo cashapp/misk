@@ -12,6 +12,8 @@ internal class SslLoaderTest {
   val serverKeystoreJceksPath = "classpath:/ssl/server_keystore.jceks"
   val keystoreJksPath = "classpath:/ssl/keystore.jks"
   val truststoreJksPath = "classpath:/ssl/truststore.jks"
+  val keystoreP12Path = "classpath:/ssl/keystore.p12"
+  val truststoreP12Path = "classpath:/ssl/truststore.p12"
 
   val sslLoader: SslLoader = SslLoader(ResourceLoader.SYSTEM)
 
@@ -90,6 +92,37 @@ internal class SslLoaderTest {
       sslLoader.loadTrustStore(
         truststoreJksPath,
         SslLoader.Companion.FORMAT_JKS, "changeit"
+      )!!.keyStore
+    assertThat(keystore.aliases().toList()).containsExactly("ca")
+    assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
+      .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
+    assertThat(keystore.getX509Certificate().subjectAlternativeNames.toList()[0][1])
+      .isEqualTo("127.0.0.1")
+  }
+
+  @Test
+  fun loadKeystoreFromP12() {
+    val keystore = sslLoader.loadCertStore(
+      keystoreP12Path,
+      SslLoader.Companion.FORMAT_PKCS12, "changeit"
+    )!!.keyStore
+    assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly(
+      "combined-key-cert"
+    )
+    assertThat(keystore.getPrivateKey("changeit".toCharArray())).isNotNull()
+
+    assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
+      .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
+    assertThat(keystore.getX509Certificate().subjectAlternativeNames.toList()[0][1])
+      .isEqualTo("127.0.0.1")
+  }
+
+  @Test
+  fun loadTrustFromP12() {
+    val keystore =
+      sslLoader.loadTrustStore(
+        truststoreP12Path,
+        SslLoader.Companion.FORMAT_PKCS12, "changeit"
       )!!.keyStore
     assertThat(keystore.aliases().toList()).containsExactly("ca")
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
