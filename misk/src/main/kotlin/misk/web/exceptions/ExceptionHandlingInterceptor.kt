@@ -1,13 +1,13 @@
 package misk.web.exceptions
 
 import com.google.common.util.concurrent.UncheckedExecutionException
-import com.google.rpc.Status
 import com.squareup.wire.GrpcStatus
 import com.squareup.wire.ProtoAdapter
 import misk.Action
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.grpc.GrpcMessageSink
+import misk.proto.Status
 import misk.web.DispatchMechanism
 import misk.web.HttpCall
 import misk.web.NetworkChain
@@ -173,7 +173,7 @@ fun toGrpcStatus(statusCode: Int): GrpcStatus {
   }
 }
 
-/** Convert the error response to a compatible base64-proto-encoded google.rpc.Status value. */
+/** Convert to a compatible base64-proto-encoded google.rpc.Status-compatible value. */
 private val GrpcErrorResponse.toEncodedStatusProto
   get() : String {
     val status = Status(
