@@ -320,7 +320,7 @@ class FakeRedisTest {
     redis["foo"] = "baz".encodeUtf8()
 
     // Exercise
-    // Expire immediately
+    // Expire in one second
     redis.expire("foo", 1)
 
     // Verify
