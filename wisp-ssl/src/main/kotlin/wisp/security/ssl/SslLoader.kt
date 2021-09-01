@@ -24,7 +24,7 @@ class SslLoader constructor(
         // a certificate chain and no private keys.
         load(path, passphrase).toTrustStore()
       }
-      FORMAT_JCEKS, FORMAT_JKS -> {
+      FORMAT_JCEKS, FORMAT_JKS, FORMAT_PKCS12 -> {
         // TODO(young): This function should check that the underlying keystore complies with what
         // TrustStore provides.
         TrustStore(loadJavaKeystore(path, format, passphrase))
@@ -67,7 +67,7 @@ class SslLoader constructor(
         // contain a single private key and a cert chain.
         load(path, passphrase).toCertStore()
       }
-      FORMAT_JCEKS, FORMAT_JKS -> {
+      FORMAT_JCEKS, FORMAT_JKS, FORMAT_PKCS12 -> {
         // TODO(young): This function should check that the underlying keystore complies with what
         // CertStore provides.
         CertStore(loadJavaKeystore(path, format, passphrase))
@@ -128,5 +128,6 @@ class SslLoader constructor(
     const val FORMAT_PEM = "PEM"
     const val FORMAT_JCEKS = "JCEKS"
     const val FORMAT_JKS = "JKS"
+    const val FORMAT_PKCS12 = "PKCS12"
   }
 }
