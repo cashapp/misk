@@ -53,7 +53,7 @@ open class WebActionException(
     cause: Throwable? = null
   ) : this(code, message, message, cause)
 
-  constructor( // for API backward compatibility
+  constructor( // backward compatibility
     code: Int,
     responseBody: String,
     message: String,
@@ -126,7 +126,7 @@ private val GrpcStatus.isGrpcServerCode
     GrpcStatus.ABORTED,
     GrpcStatus.OUT_OF_RANGE,
     GrpcStatus.DATA_LOSS,
-    GrpcStatus.PERMISSION_DENIED, // the spec leaves this one out
+    GrpcStatus.PERMISSION_DENIED, // the spec doesn't mention if is client only, but sounds like it
   )
 
 private val GrpcStatus.isGrpcClientCode get() = true
