@@ -52,6 +52,13 @@ open class WebActionException(
     message: String,
     cause: Throwable? = null
   ) : this(code, message, message, cause)
+
+  constructor( // for API backward compatibility
+    code: Int,
+    responseBody: String,
+    message: String,
+    cause: Throwable? = null,
+  ): this(code, responseBody, message, cause, null, listOf())
 }
 
 /** Base exception for when resources are not found */
