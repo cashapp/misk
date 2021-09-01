@@ -1,12 +1,17 @@
 apply plugin: "com.vanniktech.maven.publish"
 
-mavenPublish {
-  releaseSigningEnabled = !getGpgKey().isEmpty()
+plugins.withId("com.vanniktech.maven.publish") {
+  mavenPublish {
+    releaseSigningEnabled = !getGpgKey().isEmpty()
+  }
+}
 
-  targets {
-    installArchives {
-      releaseRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
-      snapshotRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
+publishing {
+  repositories {
+    maven {
+      def releasesRepoUrl = "$buildDir/localMaven"
+      def snapshotsRepoUrl = "$buildDir/localMaven"
+      url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
     }
   }
 }
