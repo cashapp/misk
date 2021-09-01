@@ -12,6 +12,7 @@ buildscript {
   dependencies {
     classpath(Dependencies.kotlinAllOpenPlugin)
     classpath(Dependencies.kotlinGradlePlugin)
+    classpath(Dependencies.dokkaGradlePlugin)
     classpath(Dependencies.kotlinNoArgPlugin)
     classpath(Dependencies.junitGradlePlugin)
     classpath(Dependencies.mavenPublishGradlePlugin)
@@ -85,10 +86,15 @@ subprojects {
   // We have to set the dokka configuration after evaluation since the com.vanniktech.maven.publish
   // plugin overwrites our dokka configuration on projects where it's applied.
   afterEvaluate {
-    val dokka by tasks.getting(DokkaTask::class) {
-      reportUndocumented = false
-      skipDeprecated = true
-      jdkVersion = 8
+    tasks.withType(DokkaTask::class).configureEach {
+      dokkaSourceSets.configureEach {
+        reportUndocumented.set(false)
+        skipDeprecated.set(true)
+        jdkVersion.set(8)
+        if (name == "dokkaGfm") {
+          outputDirectory.set(project.file("$rootDir/docs/0.x"))
+        }
+      }
     }
   }
 
