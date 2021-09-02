@@ -2,6 +2,7 @@ package misk.redis
 
 import okio.ByteString
 import java.time.Duration
+import java.time.Instant
 
 /** A Redis client. */
 interface Redis {
@@ -130,4 +131,64 @@ interface Redis {
    * See [incr] for extra information.
    */
   fun incrBy(key: String, increment: Long): Long
+
+  /**
+   * Set a timeout on key. After the timeout has expired, the key will automatically be deleted. A
+   * key with an associated timeout is often said to be volatile in Redis terminology.
+   *
+   * The timeout will only be cleared by commands that delete or overwrite the contents of the key,
+   * including [del], [set], GETSET and all the *STORE commands. This means that all the operations
+   * that conceptually alter the value stored at the key without replacing it with a new one will
+   * leave the timeout untouched. For instance, incrementing the value of a key with [incr], pushing
+   * a new value into a list with LPUSH, or altering the field value of a hash with [hset] are all
+   * operations that will leave the timeout untouched.
+   *
+   * The timeout can also be cleared, turning the key back into a persistent key, using the PERSIST
+   * command.
+   *
+   * If a key is renamed with RENAME, the associated time to live is transferred to the new key
+   * name.
+   *
+   * If a key is overwritten by RENAME, like in the case of an existing key Key_A that is
+   * overwritten by a call like RENAME Key_B Key_A, it does not matter if the original Key_A had a
+   * timeout associated or not, the new key Key_A will inherit all the characteristics of Key_B.
+   *
+   * Note that calling [expire]/[pExpire] with a non-positive timeout or [expireAt]/[pExpireAt] with
+   * a time in the past will result in the key being deleted rather than expired (accordingly, the
+   * emitted key event will be del, not expired).
+   *
+   * @return true if the timeout was set. false if the timeout was not set. e.g. key doesn't exist,
+   * or operation skipped due to the provided arguments.
+   */
+  fun expire(key: String, seconds: Long): Boolean
+
+  /**
+   * [expireAt] has the same effect and semantic as [expire], but instead of specifying the number
+   * of seconds representing the TTL (time to live), it takes an absolute Unix timestamp (seconds
+   * since January 1, 1970). A timestamp in the past will delete the key immediately.
+   *
+   * Please for the specific semantics of the command refer to the documentation of [expire].
+   *
+   * @return true if the timeout was set. false if the timeout was not set. e.g. key doesn't exist,
+   * or operation skipped due to the provided arguments.
+   */
+  fun expireAt(key: String, timestampSeconds: Long): Boolean
+
+  /**
+   * This command works exactly like [expire] but the time to live of the key is specified in
+   * milliseconds instead of seconds.
+   *
+   * @return true if the timeout was set. false if the timeout was not set. e.g. key doesn't exist,
+   * or operation skipped due to the provided arguments.
+   */
+  fun pExpire(key: String, milliseconds: Long): Boolean
+
+  /**
+   * [pExpireAt] has the same effect and semantic as [expireAt], but the Unix time at which the key
+   * will expire is specified in milliseconds instead of seconds.
+   *
+   * @return true if the timeout was set. false if the timeout was not set. e.g. key doesn't exist,
+   * or operation skipped due to the provided arguments.
+   */
+  fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean
 }
