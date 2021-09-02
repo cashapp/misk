@@ -96,9 +96,13 @@ public class misk/exceptions/UnsupportedMediaTypeException : misk/exceptions/Web
 public class misk/exceptions/WebActionException : java/lang/RuntimeException {
 	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;Lcom/squareup/wire/GrpcStatus;Ljava/util/List;)V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;Lcom/squareup/wire/GrpcStatus;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (ILjava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getCode ()I
+	public final fun getDetails ()Ljava/util/List;
+	public final fun getGrpcStatus ()Lcom/squareup/wire/GrpcStatus;
 	public final fun getResponseBody ()Ljava/lang/String;
 	public final fun isClientError ()Z
 	public final fun isServerError ()Z

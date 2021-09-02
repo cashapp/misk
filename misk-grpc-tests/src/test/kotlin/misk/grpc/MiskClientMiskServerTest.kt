@@ -33,6 +33,7 @@ import routeguide.Point
 import routeguide.RouteGuideClient
 import routeguide.RouteNote
 import wisp.logging.LogCollector
+import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.test.assertFailsWith
@@ -173,4 +174,28 @@ class MiskClientMiskServerTest {
       )?.toInt() ?: 0
     } matches { it == count }
   }
+
+  @Test
+  fun grpcStatusError() {
+    val point = Point(
+      latitude = -91,
+      longitude = 10,
+    )
+
+    runBlocking {
+      val e = assertFailsWith<GrpcException> {
+        routeGuide.GetFeature().execute(point)
+      }
+      assertThat(e.grpcMessage).isEqualTo("invalid coordinates")
+      assertThat(e.grpcStatus).isEqualTo(GrpcStatus.INVALID_ARGUMENT)
+        .withFailMessage("wrong gRPC status ${e.grpcStatus.name}")
+
+      // Assert that _metrics_ counted a HTTP_BAD_REQUEST and no 200s, even though an HTTP 200 was
+      // returned over HTTP. The 200 is implicitly asserted by the fact that we got a GrpcException,
+      // which is only thrown if a properly constructed gRPC error is received.
+      assertResponseCount(200, 0)
+      assertResponseCount(HTTP_BAD_REQUEST, 1)
+    }
+  }
+
 }

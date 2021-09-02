@@ -1,5 +1,7 @@
 package misk.exceptions
 
+import com.squareup.wire.AnyMessage
+import com.squareup.wire.GrpcStatus
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import java.net.HttpURLConnection.HTTP_CONFLICT
 import java.net.HttpURLConnection.HTTP_ENTITY_TOO_LARGE
@@ -26,16 +28,37 @@ open class WebActionException(
    * This is logged as the exception message.
    */
   message: String,
-  cause: Throwable? = null
+  cause: Throwable? = null,
+  /**
+   * The gPRC status code. If unset, it will be inferred from [code].
+   *
+   * Reference: https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
+   * */
+  val grpcStatus: GrpcStatus? = null,
+  /**
+   * Details are used to enrich gRPC errors with additional proto-encoded messages.
+   * error_details.proto is a well-known collection of details, but clients can define their own.
+   * This field is ignored for REST responses.
+   *
+   * Reference: https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto
+   */
+  val details: List<AnyMessage> = listOf(),
 ) : RuntimeException(message, cause) {
-  val isClientError = code in (400..499)
-  val isServerError = code in (500..599)
+  val isClientError = grpcStatus?.isGrpcClientCode ?: code in (400..499)
+  val isServerError = grpcStatus?.isGrpcServerCode ?: code in (500..599)
 
   constructor(
     code: Int,
     message: String,
     cause: Throwable? = null
   ) : this(code, message, message, cause)
+
+  constructor( // backward compatibility
+    code: Int,
+    responseBody: String,
+    message: String,
+    cause: Throwable? = null,
+  ): this(code, responseBody, message, cause, null, listOf())
 }
 
 /** Base exception for when resources are not found */
@@ -93,3 +116,17 @@ open class UnsupportedMediaTypeException(message: String = "", cause: Throwable?
 inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {
   if (!check) throw BadRequestException(lazyMessage())
 }
+
+private val GrpcStatus.isGrpcServerCode
+  get() = this !in setOf(
+    GrpcStatus.INVALID_ARGUMENT,
+    GrpcStatus.NOT_FOUND,
+    GrpcStatus.ALREADY_EXISTS,
+    GrpcStatus.FAILED_PRECONDITION,
+    GrpcStatus.ABORTED,
+    GrpcStatus.OUT_OF_RANGE,
+    GrpcStatus.DATA_LOSS,
+    GrpcStatus.PERMISSION_DENIED, // the spec doesn't mention if is client only, but sounds like it
+  )
+
+private val GrpcStatus.isGrpcClientCode get() = true
