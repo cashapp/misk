@@ -62,7 +62,7 @@ class WispQueuedLogCollector : LogCollector {
     minLevel: Level,
     pattern: Regex?
   ): List<ILoggingEvent> {
-    val resultList = queue.filter { matchLog(loggerClass, it, minLevel, pattern) }.toList()
+    val resultList = queue.filter { matchLog(it, loggerClass, minLevel, pattern) }.toList()
     queue.removeAll(resultList)
     return resultList
   }
@@ -109,7 +109,7 @@ class WispQueuedLogCollector : LogCollector {
       if (queue.isEmpty()) sleep(100) else continue
     }
     require(queue.isNotEmpty()) { "no events to take!" }
-    val event = queue.find { matchLog(loggerClass, it, minLevel, pattern) }
+    val event = queue.find { matchLog(it, loggerClass, minLevel, pattern) }
       ?: error("no matching events for (logger=$loggerClass, minLevel=$minLevel, pattern=$pattern)")
     queue.remove(event)
     return event
@@ -141,16 +141,12 @@ class WispQueuedLogCollector : LogCollector {
     val event = queue.poll(500, TimeUnit.MILLISECONDS)
       ?: throw IllegalArgumentException("no events to take!")
 
-    if (loggerClass != null && loggerClass.qualifiedName != event.loggerName) return null
-    if (event.level.toInt() < minLevel.toInt()) return null
-    if (pattern != null && !pattern.containsMatchIn(event.message.toString())) return null
-
-    return event
+    return if (matchLog(event, loggerClass, minLevel, pattern)) event else null
   }
 
   private fun matchLog(
-    loggerClass: KClass<*>?,
     event: ILoggingEvent,
+    loggerClass: KClass<*>?,
     minLevel: Level,
     pattern: Regex?
   ) = when {
