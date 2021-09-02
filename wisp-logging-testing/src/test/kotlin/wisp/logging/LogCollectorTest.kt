@@ -1,7 +1,6 @@
 package wisp.logging
 
 import ch.qos.logback.classic.Level
-import org.assertj.core.api.Assertions.`as`
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -68,6 +67,15 @@ class LogCollectorTest {
   }
 
   @Test
+  fun takeConsumesUnmatched() {
+    val logger = getLogger<LogCollectorTest>()
+
+    logger.info("this is a log message!")
+    assertThat(logCollector.takeMessages(minLevel = Level.ERROR)).isEmpty()
+    assertThat(logCollector.takeMessages()).isEmpty()
+  }
+
+  @Test
   fun canTakeWithoutConsumingUnmatchedLogs() {
     val logger = getLogger<LogCollectorTest>()
     val logger2 = getLogger<LoggingDummyClass>()
@@ -76,22 +84,27 @@ class LogCollectorTest {
     logger2.info("Another thing happened")
 
     // We can collect messages from different log sources.
-    assertThat(logCollector.takeMessages(LogCollectorTest::class)).containsExactly("A thing happened")
-    assertThat(logCollector.takeMessages(LoggingDummyClass::class)).containsExactly("Another thing happened")
-    assertThat(logCollector.takeMessages()).isEmpty()
+    assertThat(logCollector.takeMessages(LogCollectorTest::class, consumeUnmatchedLogs = false))
+      .containsExactly("A thing happened")
+    assertThat(logCollector.takeMessages(LoggingDummyClass::class, consumeUnmatchedLogs = false))
+      .containsExactly("Another thing happened")
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false)).isEmpty()
 
     // We can collect messages of different error levels.
     logger.info { "this is a log message!" }
-    assertThat(logCollector.takeMessages(minLevel = Level.ERROR)).isEmpty()
-    assertThat(logCollector.takeMessages()).containsExactly("this is a log message!")
-    assertThat(logCollector.takeMessages()).isEmpty()
+    assertThat(logCollector.takeMessages(minLevel = Level.ERROR, consumeUnmatchedLogs = false))
+      .isEmpty()
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
+      .containsExactly("this is a log message!")
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false)).isEmpty()
 
     // We can collect messages matching certain patterns.
     logger.info { "hit by pattern match" }
     logger.info { "missed by pattern match"}
-    assertThat(logCollector.takeMessages(pattern = Regex("hit.*")))
+    assertThat(logCollector.takeMessages(pattern = Regex("hit.*"), consumeUnmatchedLogs = false))
       .containsExactly("hit by pattern match")
-    assertThat(logCollector.takeMessages()).containsExactly("missed by pattern match")
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
+      .containsExactly("missed by pattern match")
   }
 
   @Test

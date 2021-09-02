@@ -43,7 +43,8 @@ interface LogCollector {
   fun takeMessages(
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
-    pattern: Regex? = null
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = true,
   ): List<String>
 
   /**
@@ -53,7 +54,8 @@ interface LogCollector {
   fun takeMessage(
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
-    pattern: Regex? = null
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = true,
   ): String
 
   /**
@@ -62,8 +64,9 @@ interface LogCollector {
   fun takeEvents(
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
-    pattern: Regex? = null
-  ): List<ILoggingEvent>
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = true,
+    ): List<ILoggingEvent>
 
   /**
    * Waits until a matching event is logged, and returns it. The returned event and all preceding
@@ -72,6 +75,7 @@ interface LogCollector {
   fun takeEvent(
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
-    pattern: Regex? = null
-  ): ILoggingEvent
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = true,
+    ): ILoggingEvent
 }
