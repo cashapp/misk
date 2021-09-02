@@ -24,6 +24,12 @@ class WispQueuedLogCollector : LogCollector {
   override fun takeMessages(
     loggerClass: KClass<*>?,
     minLevel: Level,
+    pattern: Regex?
+  ): List<String> = takeMessages(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
+
+  override fun takeMessages(
+    loggerClass: KClass<*>?,
+    minLevel: Level,
     pattern: Regex?,
     consumeUnmatchedLogs: Boolean,
   ): List<String> = takeEvents(
@@ -36,9 +42,21 @@ class WispQueuedLogCollector : LogCollector {
   override fun takeMessage(
     loggerClass: KClass<*>?,
     minLevel: Level,
+    pattern: Regex?
+  ): String = takeMessage(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
+
+  override fun takeMessage(
+    loggerClass: KClass<*>?,
+    minLevel: Level,
     pattern: Regex?,
     consumeUnmatchedLogs: Boolean,
   ): String = takeEvent(loggerClass, minLevel, pattern, consumeUnmatchedLogs).message
+
+  override fun takeEvents(
+    loggerClass: KClass<*>?,
+    minLevel: Level,
+    pattern: Regex?
+  ): List<ILoggingEvent> = takeEvents(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
 
   override fun takeEvents(
     loggerClass: KClass<*>?,
@@ -48,16 +66,22 @@ class WispQueuedLogCollector : LogCollector {
   ): List<ILoggingEvent> {
     sleep(100) // Give the logger some time to flush events.
     if (!consumeUnmatchedLogs) {
-      return takeEvents(loggerClass, minLevel, pattern)
+      return takeEventsNonConsuming(loggerClass, minLevel, pattern)
     }
     return takeEventsConsuming(loggerClass, minLevel, pattern)
   }
+
+  override fun takeEvent(
+    loggerClass: KClass<*>?,
+    minLevel: Level,
+    pattern: Regex?
+  ): ILoggingEvent = takeEvent(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
 
   /**
    * Takes all events currently on the queue which match the constraints.
    * Leaves behind events that don't match.
    */
-  private fun takeEvents(
+  private fun takeEventsNonConsuming(
     loggerClass: KClass<*>?,
     minLevel: Level,
     pattern: Regex?
@@ -91,7 +115,7 @@ class WispQueuedLogCollector : LogCollector {
   ): ILoggingEvent {
     require(wasStarted) { "not collecting logs: did you forget to start the service?" }
     if (!consumeUnmatchedLogs) {
-      return take(loggerClass, minLevel, pattern)
+      return takeNonConsuming(loggerClass, minLevel, pattern)
     }
     return takeConsuming(loggerClass, minLevel, pattern)
   }
@@ -100,7 +124,7 @@ class WispQueuedLogCollector : LogCollector {
    * Takes an event matching the constraints, leaving behind all other non-matching events
    * in the queue. Throws if there are no matching events.
    */
-  private fun take(
+  private fun takeNonConsuming(
     loggerClass: KClass<*>?,
     minLevel: Level,
     pattern: Regex?
@@ -116,7 +140,7 @@ class WispQueuedLogCollector : LogCollector {
   }
 
   /**
-   * Like [take], but consumes all events in the queue preceding the first match.
+   * Takes a matching event and consumes all events in the queue preceding the first match.
    * Waits forever until there is a matching event.
    */
   private fun takeConsuming(

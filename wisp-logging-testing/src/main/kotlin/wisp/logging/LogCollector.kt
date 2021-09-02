@@ -44,7 +44,16 @@ interface LogCollector {
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
     pattern: Regex? = null,
-    consumeUnmatchedLogs: Boolean = true,
+  ): List<String>
+
+  /**
+   * Takes all matching messages, optionally leaving unmatched logs in this collector.
+   */
+  fun takeMessages(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = false,
   ): List<String>
 
   /**
@@ -55,7 +64,16 @@ interface LogCollector {
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
     pattern: Regex? = null,
-    consumeUnmatchedLogs: Boolean = true,
+  ): String
+
+  /**
+   * Takes the first matching message, optionally leaving unmatched logs in this collector.
+   */
+  fun takeMessage(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = false,
   ): String
 
   /**
@@ -65,8 +83,17 @@ interface LogCollector {
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
     pattern: Regex? = null,
-    consumeUnmatchedLogs: Boolean = true,
     ): List<ILoggingEvent>
+
+  /**
+   * Takes all matching events, optionally leaving unmatched logs in this collector.
+   */
+  fun takeEvents(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = false,
+  ): List<ILoggingEvent>
 
   /**
    * Waits until a matching event is logged, and returns it. The returned event and all preceding
@@ -76,6 +103,15 @@ interface LogCollector {
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
     pattern: Regex? = null,
-    consumeUnmatchedLogs: Boolean = true,
     ): ILoggingEvent
+
+  /**
+   * Take the first matching event, optionally leaving unmatched logs in this collector.
+   */
+  fun takeEvent(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = false,
+  ): ILoggingEvent
 }
