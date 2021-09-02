@@ -49,6 +49,7 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-prometheus"))
+  implementation(project(":misk-proto"))
   implementation(project(":misk-service"))
   api(project(":misk-actions"))
   api(project(":misk-inject"))
