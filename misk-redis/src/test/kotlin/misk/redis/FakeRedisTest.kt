@@ -288,4 +288,103 @@ class FakeRedisTest {
     // Verify
     assertEquals("Not a number".encodeUtf8(), redis[key])
   }
+
+  @Test fun expireOnHValueImmediately() {
+    // Setup
+    redis.hset("foo", "bar", "baz".encodeUtf8())
+
+    // Exercise
+    // Expire immediately
+    redis.expire("foo", -1)
+
+    // Verify
+    assertNull(redis.hget("foo", "bar"))
+    assertNull(redis["foo"])
+  }
+
+  @Test fun expireImmediately() {
+    // Setup
+    redis["foo"] = "baz".encodeUtf8()
+
+    // Exercise
+    // Expire immediately
+    redis.expire("foo", -1)
+
+    // Verify
+    assertNull(redis.hget("foo", "bar"))
+    assertNull(redis["foo"])
+  }
+
+  @Test fun expireInOneSecond() {
+    // Setup
+    redis["foo"] = "baz".encodeUtf8()
+
+    // Exercise
+    // Expire in one second
+    redis.expire("foo", 1)
+
+    // Verify
+    assertEquals("baz".encodeUtf8(), redis["foo"])
+    clock.add(Duration.ofSeconds(1))
+    assertNull(redis["foo"])
+  }
+
+  @Test fun expireInOneSecondTimestamp() {
+    // Setup
+    redis["foo"] = "baz".encodeUtf8()
+
+    // Exercise
+    // Expire in one second
+    redis.expireAt("foo", clock.instant().plusSeconds(1).epochSecond)
+
+    // Verify
+    assertEquals("baz".encodeUtf8(), redis["foo"])
+    clock.add(Duration.ofSeconds(1))
+    assertNull(redis["foo"])
+  }
+
+  @Test fun pExpireInOneMilliSecond() {
+    // Setup
+    redis["foo"] = "baz".encodeUtf8()
+
+    // Exercise
+    // Expire in one milli
+    redis.pExpire("foo", 1)
+
+    // Verify
+    assertEquals("baz".encodeUtf8(), redis["foo"])
+    clock.add(Duration.ofMillis(1))
+    assertNull(redis["foo"])
+  }
+
+  @Test fun pExpireInOneMilliTimestamp() {
+    // Setup
+    redis["foo"] = "baz".encodeUtf8()
+
+    // Exercise
+    // Expire in one milli
+    redis.pExpireAt("foo", clock.instant().plusMillis(1).toEpochMilli())
+
+    // Verify
+    assertEquals("baz".encodeUtf8(), redis["foo"])
+    clock.add(Duration.ofMillis(1))
+    assertNull(redis["foo"])
+  }
+
+  @Test fun expireOnKeyThatExists() {
+    // Setup
+    redis["foo"] = "bar".encodeUtf8()
+
+    // Exercise
+    assertTrue {
+      redis.expire("foo", 1)
+    }
+  }
+
+  @Test fun expireOnKeyThatDoesNotExist() {
+    // Exercise
+    assertFalse {
+      redis.expire("foo", 1)
+    }
+  }
 }
