@@ -19,6 +19,13 @@ dependencies {
   jooqGenerator(Dependencies.mysql)
 }
 
+afterEvaluate {
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = "gfm"
+  }
+}
+
 apply(from = "$rootDir/gradle-mvn-publish.gradle")
 
 // Needed to generate jooq test db classes
