@@ -43,7 +43,17 @@ interface LogCollector {
   fun takeMessages(
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
-    pattern: Regex? = null
+    pattern: Regex? = null,
+  ): List<String>
+
+  /**
+   * Takes all matching messages, optionally leaving unmatched logs in this collector.
+   */
+  fun takeMessages(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = false,
   ): List<String>
 
   /**
@@ -53,7 +63,17 @@ interface LogCollector {
   fun takeMessage(
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
-    pattern: Regex? = null
+    pattern: Regex? = null,
+  ): String
+
+  /**
+   * Takes the first matching message, optionally leaving unmatched logs in this collector.
+   */
+  fun takeMessage(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = false,
   ): String
 
   /**
@@ -62,7 +82,17 @@ interface LogCollector {
   fun takeEvents(
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
-    pattern: Regex? = null
+    pattern: Regex? = null,
+    ): List<ILoggingEvent>
+
+  /**
+   * Takes all matching events, optionally leaving unmatched logs in this collector.
+   */
+  fun takeEvents(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = false,
   ): List<ILoggingEvent>
 
   /**
@@ -72,6 +102,16 @@ interface LogCollector {
   fun takeEvent(
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
-    pattern: Regex? = null
+    pattern: Regex? = null,
+    ): ILoggingEvent
+
+  /**
+   * Take the first matching event, optionally leaving unmatched logs in this collector.
+   */
+  fun takeEvent(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null,
+    consumeUnmatchedLogs: Boolean = false,
   ): ILoggingEvent
 }

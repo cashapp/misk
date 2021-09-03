@@ -76,6 +76,38 @@ class LogCollectorTest {
   }
 
   @Test
+  fun canTakeWithoutConsumingUnmatchedLogs() {
+    val logger = getLogger<LogCollectorTest>()
+    val logger2 = getLogger<LoggingDummyClass>()
+
+    logger.info("A thing happened")
+    logger2.info("Another thing happened")
+
+    // We can collect messages from different log sources.
+    assertThat(logCollector.takeMessages(LogCollectorTest::class, consumeUnmatchedLogs = false))
+      .containsExactly("A thing happened")
+    assertThat(logCollector.takeMessages(LoggingDummyClass::class, consumeUnmatchedLogs = false))
+      .containsExactly("Another thing happened")
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false)).isEmpty()
+
+    // We can collect messages of different error levels.
+    logger.info { "this is a log message!" }
+    assertThat(logCollector.takeMessages(minLevel = Level.ERROR, consumeUnmatchedLogs = false))
+      .isEmpty()
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
+      .containsExactly("this is a log message!")
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false)).isEmpty()
+
+    // We can collect messages matching certain patterns.
+    logger.info { "hit by pattern match" }
+    logger.info { "missed by pattern match"}
+    assertThat(logCollector.takeMessages(pattern = Regex("hit.*"), consumeUnmatchedLogs = false))
+      .containsExactly("hit by pattern match")
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
+      .containsExactly("missed by pattern match")
+  }
+
+  @Test
   fun takeTimeout() {
     val exception = assertFailsWith<IllegalArgumentException> {
       logCollector.takeEvent()
