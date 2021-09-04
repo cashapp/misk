@@ -1,10 +1,14 @@
 package misk.grpc.reflect
 
+import com.google.common.collect.LinkedHashMultimap
+import com.google.common.collect.Multimap
 import com.google.inject.Provides
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import com.squareup.wire.reflector.SchemaReflector
 import com.squareup.wire.schema.Location
+import com.squareup.wire.schema.Pruner
+import com.squareup.wire.schema.PruningRules
 import com.squareup.wire.schema.Schema
 import com.squareup.wire.schema.SchemaLoader
 import misk.inject.KAbstractModule
@@ -15,6 +19,7 @@ import okio.ExperimentalFileSystem
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import wisp.logging.getLogger
+import java.util.regex.Pattern
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
@@ -43,32 +48,77 @@ class GrpcReflectModule : KAbstractModule() {
   fun provideSchema(webActions: List<WebActionEntry>): Schema {
     val fileSystem = FileSystem.RESOURCES
     val schemaLoader = SchemaLoader(fileSystem)
+    val sourceLocations = toSourceLocations(fileSystem, webActions)
     schemaLoader.initRoots(
-      sourcePath = toSourceLocations(fileSystem, webActions).toList(),
+      sourcePath = sourceLocations.keys().toList(),
       protoPath = listOf(Location.get("."))
     )
     schemaLoader.loadExhaustively = true
-    return schemaLoader.loadSchema()
+    val completeSchema = schemaLoader.loadSchema()
+    return prune(completeSchema, sourceLocations.values())
   }
 
+  private fun prune(completeSchema: Schema, keepPaths: Collection<String>): Schema {
+    // Match a string like "/routeguide.RouteGuide/GetFeature" to extract "routeguide.RouteGuide"
+    val urlPathPattern = Pattern.compile("/([^/]+)/([^/]+)")
+    val serviceNamesToKeep = keepPaths.mapNotNull {
+      val matcher = urlPathPattern.matcher(it)
+      if (!matcher.matches()) return@mapNotNull null
+      matcher.group(1)
+    }.toSet()
+
+    val pruningRules = PruningRules.Builder()
+    for (protoFile in completeSchema.protoFiles) {
+      for (service in protoFile.services) {
+        if (service.type.toString() !in serviceNamesToKeep) {
+          pruningRules.prune(service.type.toString())
+        }
+      }
+    }
+
+    return Pruner(completeSchema, pruningRules.build()).prune()
+  }
+
+  /**
+   * Returns a map whose keys are the locations of .proto files declaring services, and whose values
+   * are the URL paths served by those services.
+   *
+   * A typical result looks like this:
+   *
+   * ```
+   * {
+   *   "./grpc/reflection/v1alpha/reflection.proto": [
+   *     "/grpc.reflection.v1alpha.ServerReflection/ServerReflectionInfo",
+   *   ],
+   *   "./routeguide/RouteGuideProto.proto": [
+   *     "/routeguide.RouteGuide/GetFeature",
+   *     "/routeguide.RouteGuide/ListFeatures",
+   *     "/routeguide.RouteGuide/RecordRoute",
+   *     "/routeguide.RouteGuide/RouteChat"
+   *   ]
+   * }
+   * ```
+   */
   @OptIn(ExperimentalFileSystem::class)
   private fun toSourceLocations(
     fileSystem: FileSystem,
     webActions: List<WebActionEntry>
-  ): Set<Location> {
-    val result = mutableSetOf<Location>()
+  ): Multimap<Location, String> {
+    val result = LinkedHashMultimap.create<Location, String>()
     for (webAction in webActions) {
       val wireRpcAnnotation = getWireRpcAnnotation(webAction.actionClass) ?: continue
       val sourceFile = wireRpcAnnotation.sourceFile
       if (sourceFile == "") continue // Generated before @WireRpc.sourceFile existed.
-      result += Location.get(".", sourceFile)
+      result.put(Location.get(".", sourceFile), wireRpcAnnotation.path)
     }
-    result.removeIf {
-      val fileDoesNotExist = !fileSystem.exists(it.path.toPath())
+    val iterator = result.keySet().iterator()
+    while (iterator.hasNext()) {
+      val location = iterator.next()
+      val fileDoesNotExist = !fileSystem.exists(location.path.toPath())
       if (fileDoesNotExist) {
-        logger.info("Omitting ${it.path} from ServerReflectionApi; file is not in artifact")
+        logger.info("Omitting ${location.path} from ServerReflectionApi; file is not in artifact")
+        iterator.remove()
       }
-      fileDoesNotExist
     }
     return result
   }

@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+package multipleservices;
+
+message PaintRequest {
+  optional string subject = 1;
+}
+
+message PaintResponse {
+}
+
+// This is unused. It should not show up in served results.
+service BluePaintService {
+  rpc PaintItBlue (PaintRequest) returns (PaintResponse) {}
+}
+
+service RedPaintService {
+  rpc PaintItRed (PaintRequest) returns (PaintResponse) {}
+}

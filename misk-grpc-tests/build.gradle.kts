@@ -42,7 +42,11 @@ wire {
 
   // Generate service interfaces also.
   kotlin {
-    includes = listOf("routeguide.RouteGuide")
+    includes = listOf(
+      "multipleservices.BluePaintService",
+      "multipleservices.RedPaintService",
+      "routeguide.RouteGuide"
+    )
     exclusive = false
     rpcRole = "server"
     rpcCallStyle = "blocking"

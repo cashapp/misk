@@ -1,5 +1,6 @@
 package misk.grpc
 
+import com.squareup.wire.schema.Schema
 import grpc.reflection.v1alpha.ListServiceResponse
 import grpc.reflection.v1alpha.ServerReflectionClient
 import grpc.reflection.v1alpha.ServerReflectionRequest
@@ -10,6 +11,10 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
+import multipleservices.PaintRequest
+import multipleservices.PaintResponse
+import multipleservices.RedPaintServicePaintItRedBlockingServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import routeguide.Feature
@@ -26,11 +31,25 @@ class GrpcReflectTest {
     override fun configure() {
       install(GrpcReflectTestingModule())
       install(WebActionModule.create<FakeRouteGuideGetFeatureBlockingServer>())
+      install(WebActionModule.create<FakeRedPaintServicePaintItRedBlockingServer>())
     }
   }
 
   @Inject lateinit var clientProvider: Provider<ServerReflectionClient>
+  @Inject lateinit var schema: Schema
+  @Inject lateinit var webActions: List<WebActionEntry>
 
+  /**
+   * Note that this test expects three services returned:
+   *
+   *  * ServerReflection (which is how this feature is implemented)
+   *  * RedPaintService (whose `PaintItRed` action is explicitly bound)
+   *  * RouteGuide (whose `GetFeature` action is explicitly bound)
+   *
+   * It also requires that the `BluePaintService` service is not returned. This service is in the
+   * same file as `RedPaintService`, but because none of its actions are implemented by this service
+   * it is not included in the [ServerReflectionResponse].
+   */
   @Test
   fun `happy path`() {
     val client = clientProvider.get()
@@ -49,6 +68,7 @@ class GrpcReflectTest {
             list_services_response = ListServiceResponse(
               service = listOf(
                 ServiceResponse(name = "grpc.reflection.v1alpha.ServerReflection"),
+                ServiceResponse(name = "multipleservices.RedPaintService"),
                 ServiceResponse(name = "routeguide.RouteGuide"),
               )
             )
@@ -63,5 +83,12 @@ class GrpcReflectTest {
   private class FakeRouteGuideGetFeatureBlockingServer @Inject constructor(
   ) : RouteGuideGetFeatureBlockingServer, WebAction {
     override fun GetFeature(request: Point): Feature = error("unsupported")
+  }
+
+  /** Another endpoint for sample data. */
+  @Singleton
+  private class FakeRedPaintServicePaintItRedBlockingServer @Inject constructor(
+  ) : RedPaintServicePaintItRedBlockingServer, WebAction {
+    override fun PaintItRed(request: PaintRequest): PaintResponse = error("unsupported")
   }
 }
