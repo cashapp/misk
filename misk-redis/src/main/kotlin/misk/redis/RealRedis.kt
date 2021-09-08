@@ -129,13 +129,13 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
 
   override fun pExpire(key: String, milliseconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.pExpire(key, milliseconds)!! == 1L
+      jedis.pexpire(key, milliseconds)!! == 1L
     }
   }
 
   override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.pExpireAt(key, timestampMilliseconds)!! == 1L
+      jedis.pexpireAt(key, timestampMilliseconds)!! == 1L
     }
   }
 
