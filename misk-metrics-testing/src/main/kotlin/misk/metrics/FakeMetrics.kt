@@ -4,6 +4,7 @@ import io.prometheus.client.Collector.MetricFamilySamples.Sample
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
+import io.prometheus.client.Histogram as PrometheusHistogram
 import io.prometheus.client.Summary
 
 /**
@@ -24,13 +25,13 @@ class FakeMetrics internal constructor() : Metrics {
       .labelNames(*labelNames.toTypedArray())
       .register(registry)
 
-  override fun histogram(
+  override fun summary(
     name: String,
     help: String,
     labelNames: List<String>,
     quantiles: Map<Double, Double>
-  ): Histogram {
-    val summary = Summary.build(name, help)
+  ): Summary =
+    Summary.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .apply {
         quantiles.forEach { (key, value) ->
@@ -39,6 +40,24 @@ class FakeMetrics internal constructor() : Metrics {
       }
       .register(registry)
 
+  override fun distribution(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    buckets: List<Double>
+  ): PrometheusHistogram =
+    PrometheusHistogram.build(name, help)
+      .labelNames(*labelNames.toTypedArray())
+      .buckets(*buckets.toDoubleArray())
+      .register(registry)
+
+  override fun histogram(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    quantiles: Map<Double, Double>
+  ): Histogram {
+    val summary = summary(name, help, labelNames, quantiles)
     return object : Histogram {
       override fun record(duration: Double, vararg labelValues: String) {
         summary.labels(*labelValues).observe(duration)
@@ -72,17 +91,17 @@ class FakeMetrics internal constructor() : Metrics {
    * Returns the median for a [histogram]. In small samples this is the element preceding
    * the middle element.
    */
-  fun histogramP50(name: String, vararg labels: Pair<String, String>): Double? =
-    histogramQuantile(name, "0.5", *labels)
+  fun summaryP50(name: String, vararg labels: Pair<String, String>): Double? =
+    summaryQuantile(name, "0.5", *labels)
 
   /**
    * Returns the 0.99th percentile for a [histogram]. In small samples this is the second largest
    * element.
    */
-  fun histogramP99(name: String, vararg labels: Pair<String, String>): Double? =
-    histogramQuantile(name, "0.99", *labels)
+  fun summaryP99(name: String, vararg labels: Pair<String, String>): Double? =
+    summaryQuantile(name, "0.99", *labels)
 
-  fun histogramQuantile(
+  fun summaryQuantile(
     name: String,
     quantile: String,
     vararg labels: Pair<String, String>

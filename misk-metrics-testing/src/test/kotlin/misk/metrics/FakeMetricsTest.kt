@@ -35,20 +35,20 @@ class FakeMetricsTest {
   }
 
   @Test
-  internal fun `histogram happy path`() {
+  internal fun `summary happy path`() {
     assertThat(metrics.get("call_times", "status" to "200")).isNull()
-    val histogram = metrics.histogram("call_times", "-", labelNames = listOf("status"))
+    val histogram = metrics.summary("call_times", "-", labelNames = listOf("status"))
     histogram.record(100.0, "200")
     assertThat(metrics.histogramMean("call_times", "status" to "200")).isEqualTo(100.0)
     assertThat(metrics.histogramSum("call_times", "status" to "200")).isEqualTo(100.0)
     assertThat(metrics.histogramCount("call_times", "status" to "200")).isEqualTo(1.0)
-    assertThat(metrics.histogramP50("call_times", "status" to "200")).isEqualTo(100.0)
+    assertThat(metrics.summaryP50("call_times", "status" to "200")).isEqualTo(100.0)
     histogram.record(99.0, "200")
     histogram.record(101.0, "200")
     assertThat(metrics.histogramMean("call_times", "status" to "200")).isEqualTo(100.0)
     assertThat(metrics.histogramSum("call_times", "status" to "200")).isEqualTo(300.0)
     assertThat(metrics.histogramCount("call_times", "status" to "200")).isEqualTo(3.0)
-    assertThat(metrics.histogramP50("call_times", "status" to "200")).isIn(99.0, 100.0, 101.0)
+    assertThat(metrics.summaryP50("call_times", "status" to "200")).isIn(99.0, 100.0, 101.0)
   }
 
   @Test
@@ -91,27 +91,27 @@ class FakeMetricsTest {
   }
 
   @Test
-  internal fun `histogram quantiles`() {
-    val histogram = metrics.histogram("call_times", "-", labelNames = listOf())
+  internal fun `summary quantiles`() {
+    val histogram = metrics.summary("call_times", "-", labelNames = listOf())
 
     histogram.record(400.0)
-    assertThat(metrics.histogramP50("call_times")).isEqualTo(400.0)
-    assertThat(metrics.histogramP99("call_times")).isEqualTo(400.0)
+    assertThat(metrics.summaryP50("call_times")).isEqualTo(400.0)
+    assertThat(metrics.summaryP99("call_times")).isEqualTo(400.0)
 
     histogram.record(450.0)
-    assertThat(metrics.histogramP50("call_times")).isEqualTo(400.0)
-    assertThat(metrics.histogramP99("call_times")).isEqualTo(400.0)
+    assertThat(metrics.summaryP50("call_times")).isEqualTo(400.0)
+    assertThat(metrics.summaryP99("call_times")).isEqualTo(400.0)
 
     histogram.record(500.0)
-    assertThat(metrics.histogramP50("call_times")).isEqualTo(400.0)
-    assertThat(metrics.histogramP99("call_times")).isEqualTo(450.0)
+    assertThat(metrics.summaryP50("call_times")).isEqualTo(400.0)
+    assertThat(metrics.summaryP99("call_times")).isEqualTo(450.0)
 
     histogram.record(550.0)
-    assertThat(metrics.histogramP50("call_times")).isEqualTo(450.0)
-    assertThat(metrics.histogramP99("call_times")).isEqualTo(500.0)
+    assertThat(metrics.summaryP50("call_times")).isEqualTo(450.0)
+    assertThat(metrics.summaryP99("call_times")).isEqualTo(500.0)
 
     histogram.record(600.0)
-    assertThat(metrics.histogramP50("call_times")).isEqualTo(450.0)
-    assertThat(metrics.histogramP99("call_times")).isEqualTo(550.0)
+    assertThat(metrics.summaryP50("call_times")).isEqualTo(450.0)
+    assertThat(metrics.summaryP99("call_times")).isEqualTo(550.0)
   }
 }

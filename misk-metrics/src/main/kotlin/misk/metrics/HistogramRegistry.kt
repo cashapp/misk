@@ -6,7 +6,7 @@ package misk.metrics
  * Implementation should register the histogram upon creation.
  * An example implementation can be found in PrometheusHistogramRegistry
  */
-@Deprecated("use Metrics.histogram() instead")
+@Deprecated("use Metrics.summary() or Metrics.distribution() instead")
 interface HistogramRegistry {
   /** Creates a new histogram */
   fun newHistogram(
