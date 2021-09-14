@@ -110,7 +110,7 @@ val defaultQuantiles = mapOf(
 )
 
 /**
- * defaultBuckets is a default set of buckets which assumes the value is in milliseconds (ms).
+ * defaultSparseBuckets is a default set of buckets which assumes the value is in milliseconds (ms).
  *
  * It contains 21 buckets which range from 1ms to 8m.
  *
