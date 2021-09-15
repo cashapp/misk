@@ -8,6 +8,12 @@ import io.prometheus.client.Histogram
 /**
  * Interface for application code to emit metrics to a metrics backend like Prometheus.
  *
+ * NOTE: `misk.metrics.v2.Metrics` is NOT backward compatible with `misk.metrics.Metrics`.
+ *   This is because the metric type of the `histogram(...)` function has changes.
+ *   If a callsrite which used `misk.metrics.Metrics.histogram(...)` is upgraded to use
+ *   `misk.metrics.v2.Metrics.histogram(...)`, the metics will likely break because the data
+ *   type of the metric will have changed.
+ *
  * Tests that use this should install a metrics client like `PrometheusMetricsClientModule`.
  * Services that use this should install a metrics service like `PrometheusMetricsServiceModule`.
  */
@@ -45,11 +51,13 @@ interface Metrics {
   ): Gauge
 
   /**
-   * distribution creates a new `Histogram` prometheus type with the supplied parameters.
+   * histogram creates a new `Histogram` prometheus type with the supplied parameters.
    *
-   * This function can't be named `histogram(...)` because there was already a histogram method
-   * on the metric type which emitted a prometheus `Summary`. Updating that method is a
-   * backward-incompatible change.
+   * NOTE: `misk.metrics.v2.Metrics` is NOT backward compatible with `misk.metrics.Metrics`.
+   *   This is because the metric type of the `histogram(...)` function has changes.
+   *   If a callsrite which used `misk.metrics.Metrics.histogram(...)` is upgraded to use
+   *   `misk.metrics.v2.Metrics.histogram(...)`, the metics will likely break because the data
+   *   type of the metric will have changed.
    *
    * See https://prometheus.github.io/client_java/io/prometheus/client/Histogram.html for more info.
    *
