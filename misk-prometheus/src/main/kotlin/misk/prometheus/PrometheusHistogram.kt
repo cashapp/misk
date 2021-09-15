@@ -2,7 +2,7 @@ package misk.prometheus
 
 import misk.metrics.Histogram
 
-@Deprecated("Unexpected tha this is used. Checkout Metrics instead")
+@Deprecated("Unexpected that this is used. Checkout Metrics instead")
 class PrometheusHistogram constructor(
   val histogram: io.prometheus.client.Summary
 ) : Histogram {
