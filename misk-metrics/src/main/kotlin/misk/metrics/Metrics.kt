@@ -45,9 +45,8 @@ interface Metrics {
   ): Gauge
 
   /**
-   * histogram is a now deprecated function that creates and registers a new `Summary` prometheus type.
+   * histogram is "old" function that creates and registers a new `Summary` prometheus type.
    */
-  @Deprecated("`summary` replaces this function with a more clear name. Checkout `histogram` for a better alternative.")
   fun histogram(
     name: String,
     help: String = "",

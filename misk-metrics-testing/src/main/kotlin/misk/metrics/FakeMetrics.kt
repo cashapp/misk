@@ -91,17 +91,17 @@ class FakeMetrics internal constructor() : Metrics {
    * Returns the median for a [histogram]. In small samples this is the element preceding
    * the middle element.
    */
-  fun summaryP50(name: String, vararg labels: Pair<String, String>): Double? =
-    summaryQuantile(name, "0.5", *labels)
+  fun histogramP50(name: String, vararg labels: Pair<String, String>): Double? =
+    histogramQuantile(name, "0.5", *labels)
 
   /**
    * Returns the 0.99th percentile for a [histogram]. In small samples this is the second largest
    * element.
    */
-  fun summaryP99(name: String, vararg labels: Pair<String, String>): Double? =
-    summaryQuantile(name, "0.99", *labels)
+  fun histogramP99(name: String, vararg labels: Pair<String, String>): Double? =
+    histogramQuantile(name, "0.99", *labels)
 
-  fun summaryQuantile(
+  fun histogramQuantile(
     name: String,
     quantile: String,
     vararg labels: Pair<String, String>
