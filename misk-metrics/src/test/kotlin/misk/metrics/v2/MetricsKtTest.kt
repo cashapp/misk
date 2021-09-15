@@ -1,4 +1,4 @@
-package misk.metrics
+package misk.metrics.v2
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals

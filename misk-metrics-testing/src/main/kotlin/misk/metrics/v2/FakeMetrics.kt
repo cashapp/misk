@@ -1,10 +1,10 @@
-package misk.metrics
+package misk.metrics.v2
 
 import io.prometheus.client.Collector.MetricFamilySamples.Sample
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
-import io.prometheus.client.Histogram as PrometheusHistogram
+import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
 
 /**
@@ -15,12 +15,20 @@ import io.prometheus.client.Summary
 class FakeMetrics internal constructor() : Metrics {
   private val registry = CollectorRegistry(true)
 
-  override fun counter(name: String, help: String?, labelNames: List<String>): Counter =
+  override fun counter(
+    name: String,
+    help: String?,
+    labelNames: List<String>
+  ): Counter =
     Counter.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .register(registry)
 
-  override fun gauge(name: String, help: String, labelNames: List<String>): Gauge =
+  override fun gauge(
+    name: String,
+    help: String,
+    labelNames: List<String>
+  ): Gauge =
     Gauge.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .register(registry)
@@ -29,9 +37,20 @@ class FakeMetrics internal constructor() : Metrics {
     name: String,
     help: String,
     labelNames: List<String>,
+    buckets: List<Double>
+  ): Histogram =
+    Histogram.build(name, help)
+      .labelNames(*labelNames.toTypedArray())
+      .buckets(*buckets.toDoubleArray())
+      .register(registry)
+
+  override fun summary(
+    name: String,
+    help: String,
+    labelNames: List<String>,
     quantiles: Map<Double, Double>
-  ): Histogram {
-    val summary =     Summary.build(name, help)
+  ): Summary =
+    Summary.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .apply {
         quantiles.forEach { (key, value) ->
@@ -39,15 +58,6 @@ class FakeMetrics internal constructor() : Metrics {
         }
       }
       .register(registry)
-    return object : Histogram {
-      override fun record(duration: Double, vararg labelValues: String) {
-        summary.labels(*labelValues).observe(duration)
-      }
-
-      override fun count(vararg labelValues: String): Int =
-        summary.labels(*labelValues).get().count.toInt()
-    }
-  }
 
   /** Returns a measurement for a [counter] or [gauge]. */
   fun get(name: String, vararg labels: Pair<String, String>): Double? =
