@@ -4,7 +4,6 @@ import io.prometheus.client.Collector.MetricFamilySamples.Sample
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
-import io.prometheus.client.Histogram as PrometheusHistogram
 import io.prometheus.client.Summary
 
 /**
@@ -31,7 +30,7 @@ class FakeMetrics internal constructor() : Metrics {
     labelNames: List<String>,
     quantiles: Map<Double, Double>
   ): Histogram {
-    val summary =     Summary.build(name, help)
+    val summary = Summary.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .apply {
         quantiles.forEach { (key, value) ->
@@ -39,6 +38,7 @@ class FakeMetrics internal constructor() : Metrics {
         }
       }
       .register(registry)
+
     return object : Histogram {
       override fun record(duration: Double, vararg labelValues: String) {
         summary.labels(*labelValues).observe(duration)

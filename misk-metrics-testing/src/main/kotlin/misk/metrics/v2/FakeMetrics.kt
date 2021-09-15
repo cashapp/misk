@@ -64,17 +64,17 @@ class FakeMetrics internal constructor() : Metrics {
     getSample(name, labels)?.value
 
   /** Returns the number of histogram samples taken. */
-  fun histogramCount(name: String, vararg labels: Pair<String, String>): Double? =
+  fun summaryCount(name: String, vararg labels: Pair<String, String>): Double? =
     getSample(name, labels, sampleName = name + "_count")?.value
 
   /** Returns the sum of all histogram samples taken. */
-  fun histogramSum(name: String, vararg labels: Pair<String, String>): Double? =
+  fun summarySum(name: String, vararg labels: Pair<String, String>): Double? =
     getSample(name, labels, sampleName = name + "_sum")?.value
 
   /** Returns the average of all histogram samples taken. */
-  fun histogramMean(name: String, vararg labels: Pair<String, String>): Double? {
-    val sum = histogramSum(name, *labels) ?: return null
-    val count = histogramCount(name, *labels) ?: return null
+  fun summaryMean(name: String, vararg labels: Pair<String, String>): Double? {
+    val sum = summarySum(name, *labels) ?: return null
+    val count = summaryCount(name, *labels) ?: return null
     return sum / count
   }
 
@@ -82,17 +82,17 @@ class FakeMetrics internal constructor() : Metrics {
    * Returns the median for a [histogram]. In small samples this is the element preceding
    * the middle element.
    */
-  fun histogramP50(name: String, vararg labels: Pair<String, String>): Double? =
-    histogramQuantile(name, "0.5", *labels)
+  fun summaryP50(name: String, vararg labels: Pair<String, String>): Double? =
+    summaryQuantile(name, "0.5", *labels)
 
   /**
    * Returns the 0.99th percentile for a [histogram]. In small samples this is the second largest
    * element.
    */
-  fun histogramP99(name: String, vararg labels: Pair<String, String>): Double? =
-    histogramQuantile(name, "0.99", *labels)
+  fun summaryP99(name: String, vararg labels: Pair<String, String>): Double? =
+    summaryQuantile(name, "0.99", *labels)
 
-  fun histogramQuantile(
+  fun summaryQuantile(
     name: String,
     quantile: String,
     vararg labels: Pair<String, String>
