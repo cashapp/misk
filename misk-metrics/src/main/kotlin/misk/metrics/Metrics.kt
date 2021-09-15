@@ -45,7 +45,11 @@ interface Metrics {
   ): Gauge
 
   /**
-   * histogram is "old" function that creates and registers a new `Summary` prometheus type.
+   * histogram is legacy function that creates and registers a new `Summary` prometheus type.
+   *
+   * Calling this function is equivalent to calling `summary(...)`. It's retained for backward
+   * compatibility despite it's naming being relatively confusing.
+   *
    */
   fun histogram(
     name: String,
