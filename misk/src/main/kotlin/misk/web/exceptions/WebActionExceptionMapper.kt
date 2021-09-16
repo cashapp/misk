@@ -21,7 +21,7 @@ internal class WebActionExceptionMapper @Inject internal constructor(
   }
 
   override fun toGrpcResponse(th: WebActionException): GrpcErrorResponse {
-    return GrpcErrorResponse(toGrpcStatus(th.code), th.responseBody)
+    return GrpcErrorResponse(th.grpcStatus ?: toGrpcStatus(th.code), th.responseBody, th.details)
   }
 
   override fun canHandle(th: Throwable): Boolean = th is WebActionException

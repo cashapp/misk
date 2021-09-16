@@ -2,10 +2,10 @@ package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
 import com.amazonaws.services.sqs.model.QueueAttributeName
-import misk.clustering.lease.LeaseManager
 import misk.jobqueue.QueueName
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
+import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Duration
 import javax.inject.Inject
@@ -31,7 +31,11 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
     taskQueue.scheduleWithBackoff(frequency) {
       val queue = queues.getForSending(queueName)
       val lease = leaseManager.requestLease("sqs-queue-attributes-${queue.queueName}")
-      if (!lease.checkHeld()) {
+      var leaseHeld = lease.checkHeld()
+      if (!leaseHeld) {
+        leaseHeld = lease.acquire()
+      }
+      if (!leaseHeld) {
         metrics.sqsApproxNumberOfMessages.clear()
         metrics.sqsApproxNumberOfMessagesNotVisible.clear()
       } else {

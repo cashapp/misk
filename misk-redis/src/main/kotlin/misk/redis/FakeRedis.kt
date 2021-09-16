@@ -1,6 +1,7 @@
 package misk.redis
 
 import okio.ByteString
+import okio.ByteString.Companion.encode
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -12,15 +13,16 @@ class FakeRedis : Redis {
   @Inject lateinit var clock: Clock
 
   /** The value type stored in our key-value store. */
-  private data class Value(
-    val data: ByteString,
-    val expiryInstant: Instant
+  private data class Value<T>(
+    val data: T,
+    var expiryInstant: Instant
   )
 
   /** Acts as the Redis key-value store. */
-  private val keyValueStore = ConcurrentHashMap<String, Value>()
+  private val keyValueStore = ConcurrentHashMap<String, Value<ByteString>>()
   /** A nested hash map for the hget and hset operations. */
-  private val hKeyValueStore = ConcurrentHashMap<String, ConcurrentHashMap<String, Value>>()
+  private val hKeyValueStore =
+    ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
 
   override fun del(key: String): Boolean {
     if (!keyValueStore.containsKey(key)) {
@@ -60,13 +62,29 @@ class FakeRedis : Redis {
   }
 
   override fun hget(key: String, field: String): ByteString? {
-    val keyMap = hKeyValueStore[key] ?: return null
-    return keyMap[field]?.data
+    val value = hKeyValueStore[key] ?: return null
+
+    // Check if the key has expired
+    if (clock.instant() >= value.expiryInstant) {
+      hKeyValueStore.remove(key)
+      return null
+    }
+
+
+    return value.data[field]
   }
 
   override fun hgetAll(key: String): Map<String, ByteString>? {
-    return hKeyValueStore[key]?.mapValues {
-      it.value.data
+    val value = hKeyValueStore[key] ?: return null
+
+    // Check if the key has expired
+    if (clock.instant() >= value.expiryInstant) {
+      hKeyValueStore.remove(key)
+      return null
+    }
+
+    return value.data.mapValues {
+      it.value
     }
   }
 
@@ -100,12 +118,54 @@ class FakeRedis : Redis {
   }
 
   override fun hset(key: String, field: String, value: ByteString) {
-    if (hKeyValueStore[key].isNullOrEmpty()) {
-      hKeyValueStore[key] = ConcurrentHashMap()
+    if (!hKeyValueStore.containsKey(key)) {
+      hKeyValueStore[key] = Value(
+        data = ConcurrentHashMap(),
+        expiryInstant = Instant.MAX
+      )
     }
-    hKeyValueStore[key]!![field] = Value(
-      data = value,
-      expiryInstant = Instant.MAX
-    )
+    hKeyValueStore[key]!!.data[field] = value
+  }
+
+  override fun incr(key: String): Long {
+    return incrBy(key, 1)
+  }
+
+  override fun incrBy(key: String, increment: Long): Long {
+    val encodedValue = get(key)?.utf8() ?: "0"
+    val value = encodedValue.toLong() + increment
+    set(key, value.toString().encode(Charsets.UTF_8))
+    return value
+  }
+
+  override fun expire(key: String, seconds: Long): Boolean {
+    val ttlMillis = Duration.ofSeconds(seconds).toMillis()
+    return pExpireAt(key, clock.millis().plus(ttlMillis))
+  }
+
+  override fun expireAt(key: String, timestampSeconds: Long): Boolean {
+    val epochMillis = Instant.ofEpochSecond(timestampSeconds).toEpochMilli()
+    return pExpireAt(key, epochMillis)
+  }
+
+  override fun pExpire(key: String, milliseconds: Long): Boolean {
+    return pExpireAt(key, clock.millis().plus(milliseconds))
+  }
+
+  override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
+    val value = keyValueStore[key]
+    val hValue = hKeyValueStore[key]
+    val expiresAt = Instant.ofEpochMilli(timestampMilliseconds)
+
+    when {
+      value != null -> {
+        value.expiryInstant = expiresAt
+      }
+      hValue != null -> {
+        hValue.expiryInstant = expiresAt
+      }
+      else -> return false
+    }
+    return true
   }
 }

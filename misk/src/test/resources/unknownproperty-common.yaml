@@ -16,3 +16,7 @@ duration:
 
 action_exception_log_level:
   client_error_level: INFO
+
+nested:
+  child_nested:
+    nested_value: nested value

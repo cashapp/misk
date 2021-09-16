@@ -3,13 +3,19 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun <init> ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
+	public fun expire (Ljava/lang/String;J)Z
+	public fun expireAt (Ljava/lang/String;J)Z
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public final fun getClock ()Ljava/time/Clock;
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public fun incr (Ljava/lang/String;)J
+	public fun incrBy (Ljava/lang/String;J)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
+	public fun pExpire (Ljava/lang/String;J)Z
+	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public final fun setClock (Ljava/time/Clock;)V
@@ -23,12 +29,18 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public final fun close ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
+	public fun expire (Ljava/lang/String;J)Z
+	public fun expireAt (Ljava/lang/String;J)Z
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public fun incr (Ljava/lang/String;)J
+	public fun incrBy (Ljava/lang/String;J)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
+	public fun pExpire (Ljava/lang/String;J)Z
+	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
@@ -41,12 +53,18 @@ public final class misk/redis/RealRedis$Companion {
 public abstract interface class misk/redis/Redis {
 	public abstract fun del (Ljava/lang/String;)Z
 	public abstract fun del ([Ljava/lang/String;)I
+	public abstract fun expire (Ljava/lang/String;J)Z
+	public abstract fun expireAt (Ljava/lang/String;J)Z
 	public abstract fun get (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public abstract fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public abstract fun incr (Ljava/lang/String;)J
+	public abstract fun incrBy (Ljava/lang/String;J)J
 	public abstract fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public abstract fun mset ([Lokio/ByteString;)V
+	public abstract fun pExpire (Ljava/lang/String;J)Z
+	public abstract fun pExpireAt (Ljava/lang/String;J)Z
 	public abstract fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
@@ -61,16 +79,16 @@ public final class misk/redis/RedisConfig : java/util/LinkedHashMap, wisp/config
 	public final fun containsValue (Ljava/lang/Object;)Z
 	public fun containsValue (Lmisk/redis/RedisReplicationGroupConfig;)Z
 	public final fun entrySet ()Ljava/util/Set;
-	public final fun get (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun get (Ljava/lang/Object;)Lmisk/redis/RedisReplicationGroupConfig;
 	public fun get (Ljava/lang/String;)Lmisk/redis/RedisReplicationGroupConfig;
 	public fun getEntries ()Ljava/util/Set;
 	public fun getKeys ()Ljava/util/Set;
-	public final fun getOrDefault (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun getOrDefault (Ljava/lang/Object;Lmisk/redis/RedisReplicationGroupConfig;)Lmisk/redis/RedisReplicationGroupConfig;
 	public fun getOrDefault (Ljava/lang/String;Lmisk/redis/RedisReplicationGroupConfig;)Lmisk/redis/RedisReplicationGroupConfig;
 	public fun getSize ()I
 	public fun getValues ()Ljava/util/Collection;
 	public final fun keySet ()Ljava/util/Set;
-	public final fun remove (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun remove (Ljava/lang/Object;)Lmisk/redis/RedisReplicationGroupConfig;
 	public final fun remove (Ljava/lang/Object;Ljava/lang/Object;)Z
 	public fun remove (Ljava/lang/String;)Lmisk/redis/RedisReplicationGroupConfig;
 	public fun remove (Ljava/lang/String;Lmisk/redis/RedisReplicationGroupConfig;)Z
