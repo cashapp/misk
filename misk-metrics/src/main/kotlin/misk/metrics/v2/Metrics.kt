@@ -9,10 +9,10 @@ import io.prometheus.client.Histogram
  * Interface for application code to emit metrics to a metrics backend like Prometheus.
  *
  * NOTE: `misk.metrics.v2.Metrics` is NOT backward compatible with `misk.metrics.Metrics`.
- *   This is because the metric type of the `histogram(...)` function has changes.
- *   If a callsrite which used `misk.metrics.Metrics.histogram(...)` is upgraded to use
- *   `misk.metrics.v2.Metrics.histogram(...)`, the metics will likely break because the data
- *   type of the metric will have changed.
+ *   This is because the metric type of the `histogram(...)` function has changed.
+ *   If a callsite which used `misk.metrics.Metrics.histogram(...)` is upgraded to use
+ *   `misk.metrics.v2.Metrics.histogram(...)`, the dashboards and monitors based on the
+ *   metric will break because the data type of the metric will have changed.
  *
  * Tests that use this should install a metrics client like `PrometheusMetricsClientModule`.
  * Services that use this should install a metrics service like `PrometheusMetricsServiceModule`.
@@ -54,10 +54,10 @@ interface Metrics {
    * histogram creates a new `Histogram` prometheus type with the supplied parameters.
    *
    * NOTE: `misk.metrics.v2.Metrics` is NOT backward compatible with `misk.metrics.Metrics`.
-   *   This is because the metric type of the `histogram(...)` function has changes.
-   *   If a callsrite which used `misk.metrics.Metrics.histogram(...)` is upgraded to use
-   *   `misk.metrics.v2.Metrics.histogram(...)`, the metics will likely break because the data
-   *   type of the metric will have changed.
+   *   This is because the metric type of the `histogram(...)` function has changed.
+   *   If a callsite which used `misk.metrics.Metrics.histogram(...)` is upgraded to use
+   *   `misk.metrics.v2.Metrics.histogram(...)`, the dashboards and monitors based on the
+   *   metric will break because the data type of the metric will have changed.
    *
    * See https://prometheus.github.io/client_java/io/prometheus/client/Histogram.html for more info.
    *
