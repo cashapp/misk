@@ -49,7 +49,7 @@ class MetricsInterceptorTest {
 
   @Test
   fun responseCodes() {
-    val requestDuration = metricsInterceptorFactory.requestDurationSummary
+    val requestDuration = metricsInterceptorFactory.requestDuration
     requestDuration.labels("MetricsInterceptorTestAction", "unknown", "200").observe(1.0)
     assertThat(requestDuration.labels("MetricsInterceptorTestAction", "unknown", "200").get().count.toInt()).isEqualTo(3)
     requestDuration.labels("MetricsInterceptorTestAction", "unknown", "202").observe(1.0)

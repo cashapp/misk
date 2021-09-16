@@ -43,20 +43,20 @@ internal class MetricsInterceptor internal constructor(
     m: Metrics,
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>
   ) : NetworkInterceptor.Factory {
-    val requestDurationSummary = m.summary(
+    val requestDuration = m.summary(
       name = "http_request_latency_ms",
       help = "count and duration in ms of incoming web requests",
       labelNames = listOf("action", "caller", "code")
     )
-    val requestDurationHistogram = m.histogram(
-      name = "http_request_latency_ms_histo",
+    private val requestDurationHistogram = m.histogram(
+      name = "histo_http_request_latency_ms",
       help = "count and duration in ms of incoming web requests",
       labelNames = listOf("action", "caller", "code")
     )
 
     override fun create(action: Action) = MetricsInterceptor(
       action.name,
-      requestDurationSummary,
+      requestDuration,
       requestDurationHistogram,
       caller,
     )
