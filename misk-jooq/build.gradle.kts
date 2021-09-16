@@ -30,7 +30,7 @@ buildscript {
 }
 // Needed to generate jooq test db classes
 plugins {
-  id("org.flywaydb.flyway") version "7.14.0"
+  id("org.flywaydb.flyway") version "7.15.0"
   id("nu.studer.jooq") version "6.0"
 }
 
