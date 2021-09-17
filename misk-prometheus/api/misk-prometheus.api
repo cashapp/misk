@@ -28,6 +28,10 @@ public final class misk/metrics/backends/prometheus/PrometheusMetricsServiceModu
 	public fun <init> (Lmisk/metrics/backends/prometheus/PrometheusConfig;)V
 }
 
+public final class misk/metrics/backends/prometheus/v2/PrometheusMetricsClientModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
 public final class misk/prometheus/PrometheusHistogram : misk/metrics/Histogram {
 	public fun <init> (Lio/prometheus/client/Summary;)V
 	public fun count ([Ljava/lang/String;)I

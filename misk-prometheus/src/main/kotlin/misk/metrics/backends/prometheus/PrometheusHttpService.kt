@@ -14,7 +14,6 @@ internal class PrometheusHttpService @Inject internal constructor(
   private val config: PrometheusConfig,
   private val registry: CollectorRegistry
 ) : AbstractIdleService() {
-
   private var httpServer: HTTPServer? = null
 
   override fun startUp() {
