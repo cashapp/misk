@@ -1,9 +1,10 @@
 package misk.web.interceptors
 
+import io.prometheus.client.Histogram
+import io.prometheus.client.Summary
 import misk.Action
 import misk.MiskCaller
-import misk.metrics.Histogram
-import misk.metrics.Metrics
+import misk.metrics.v2.Metrics
 import misk.scope.ActionScoped
 import misk.time.timed
 import misk.web.NetworkChain
@@ -13,7 +14,8 @@ import javax.inject.Singleton
 
 internal class MetricsInterceptor internal constructor(
   private val actionName: String,
-  private val requestDuration: Histogram,
+  private val requestDurationSummary: Summary,
+  private val requestDurationHistogram: Histogram,
   private val caller: ActionScoped<MiskCaller?>
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
@@ -27,7 +29,12 @@ internal class MetricsInterceptor internal constructor(
     }
 
     val statusCode = chain.httpCall.statusCode
-    requestDuration.record(elapsedTimeMillis, actionName, callingPrincipal, statusCode.toString())
+    requestDurationSummary
+      .labels(actionName, callingPrincipal, statusCode.toString())
+      .observe(elapsedTimeMillis)
+    requestDurationHistogram
+      .labels(actionName, callingPrincipal, statusCode.toString())
+      .observe(elapsedTimeMillis)
     return result
   }
 
@@ -36,12 +43,22 @@ internal class MetricsInterceptor internal constructor(
     m: Metrics,
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>
   ) : NetworkInterceptor.Factory {
-    internal val requestDuration = m.histogram(
+    val requestDuration = m.summary(
       name = "http_request_latency_ms",
       help = "count and duration in ms of incoming web requests",
       labelNames = listOf("action", "caller", "code")
     )
+    private val requestDurationHistogram = m.histogram(
+      name = "histo_http_request_latency_ms",
+      help = "count and duration in ms of incoming web requests",
+      labelNames = listOf("action", "caller", "code")
+    )
 
-    override fun create(action: Action) = MetricsInterceptor(action.name, requestDuration, caller)
+    override fun create(action: Action) = MetricsInterceptor(
+      action.name,
+      requestDuration,
+      requestDurationHistogram,
+      caller,
+    )
   }
 }
