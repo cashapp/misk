@@ -3,6 +3,7 @@ package misk.metrics.backends.prometheus
 import io.prometheus.client.CollectorRegistry
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.metrics.backends.prometheus.v2.PrometheusMetricsClientModule as PrometheusMetricsClientModuleV2
 import misk.metrics.HistogramRegistry
 import misk.metrics.Metrics
 import misk.prometheus.PrometheusHistogramRegistry
@@ -18,6 +19,8 @@ class PrometheusMetricsClientModule : KAbstractModule() {
     bind<HistogramRegistry>().to<PrometheusHistogramRegistry>()
     bind<Metrics>().to<PrometheusMetrics>()
     bind<CollectorRegistry>().toProvider(CollectorRegistryProvider::class.java).asSingleton()
+
+    install(PrometheusMetricsClientModuleV2())
   }
 
   /**
