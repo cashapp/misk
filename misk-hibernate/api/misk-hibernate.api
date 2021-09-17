@@ -1,0 +1,451 @@
+public abstract interface annotation class misk/hibernate/Constraint : java/lang/annotation/Annotation {
+	public abstract fun operator ()Lmisk/hibernate/Operator;
+	public abstract fun path ()Ljava/lang/String;
+}
+
+public abstract interface class misk/hibernate/DbChild : misk/hibernate/DbSharded {
+	public abstract fun getId ()Lmisk/hibernate/Id;
+}
+
+public final class misk/hibernate/DbChild$DefaultImpls {
+	public static fun getId (Lmisk/hibernate/DbChild;)Lmisk/hibernate/Id;
+}
+
+public abstract interface class misk/hibernate/DbEntity {
+	public abstract fun getId ()Lmisk/hibernate/Id;
+}
+
+public abstract interface class misk/hibernate/DbRoot : misk/hibernate/DbSharded {
+	public abstract fun getGid ()Lmisk/hibernate/Gid;
+	public abstract fun getRootId ()Lmisk/hibernate/Id;
+}
+
+public final class misk/hibernate/DbRoot$DefaultImpls {
+	public static fun getGid (Lmisk/hibernate/DbRoot;)Lmisk/hibernate/Gid;
+	public static fun getRootId (Lmisk/hibernate/DbRoot;)Lmisk/hibernate/Id;
+}
+
+public abstract interface class misk/hibernate/DbSharded : misk/hibernate/DbEntity {
+	public abstract fun getGid ()Lmisk/hibernate/Gid;
+	public abstract fun getRootId ()Lmisk/hibernate/Id;
+}
+
+public abstract interface class misk/hibernate/DbTimestampedEntity {
+	public abstract fun getCreated_at ()Ljava/time/Instant;
+	public abstract fun getUpdated_at ()Ljava/time/Instant;
+	public abstract fun setCreated_at (Ljava/time/Instant;)V
+	public abstract fun setUpdated_at (Ljava/time/Instant;)V
+}
+
+public abstract interface class misk/hibernate/DbUnsharded : misk/hibernate/DbEntity {
+}
+
+public abstract interface annotation class misk/hibernate/Fetch : java/lang/annotation/Annotation {
+	public abstract fun joinType ()Ljavax/persistence/criteria/JoinType;
+	public abstract fun path ()Ljava/lang/String;
+}
+
+public class misk/hibernate/Gid : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Lmisk/hibernate/Id;Lmisk/hibernate/Id;)V
+	public final fun component1 ()Lmisk/hibernate/Id;
+	public final fun component2 ()Lmisk/hibernate/Id;
+	public final fun copy (Lmisk/hibernate/Id;Lmisk/hibernate/Id;)Lmisk/hibernate/Gid;
+	public static synthetic fun copy$default (Lmisk/hibernate/Gid;Lmisk/hibernate/Id;Lmisk/hibernate/Id;ILjava/lang/Object;)Lmisk/hibernate/Gid;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getId ()Lmisk/hibernate/Id;
+	public fun getRootId ()Lmisk/hibernate/Id;
+	public fun hashCode ()I
+	public fun shardKey ()Lmisk/vitess/Shard$Key;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/GidGenerator : org/hibernate/id/AbstractPostInsertGenerator, org/hibernate/id/Configurable {
+	public fun <init> ()V
+	public fun configure (Lorg/hibernate/type/Type;Ljava/util/Properties;Lorg/hibernate/service/ServiceRegistry;)V
+	public fun getInsertGeneratedIdentifierDelegate (Lorg/hibernate/id/PostInsertIdentityPersister;Lorg/hibernate/dialect/Dialect;Z)Lorg/hibernate/id/insert/InsertGeneratedIdentifierDelegate;
+}
+
+public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	protected final fun addEntities (Lkotlin/reflect/KClass;[Lkotlin/reflect/KClass;)V
+	protected final fun addEntities ([Lkotlin/reflect/KClass;)V
+	protected final fun addEntity (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
+	public static synthetic fun addEntity$default (Lmisk/hibernate/HibernateEntityModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)V
+	protected final fun bindListener (Lorg/hibernate/event/spi/EventType;)Lcom/google/inject/binder/LinkedBindingBuilder;
+	protected fun configure ()V
+	public abstract fun configureHibernate ()V
+	protected final fun installHibernateAdminDashboardWebActions ()V
+}
+
+public final class misk/hibernate/HibernateModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
+	public final fun getDatabasePool ()Lmisk/jdbc/DatabasePool;
+	public final fun getReaderConfig ()Lmisk/jdbc/DataSourceConfig;
+}
+
+public final class misk/hibernate/Id : java/io/Serializable, java/lang/Comparable {
+	public fun <init> (J)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Lmisk/hibernate/Id;)I
+	public final fun component1 ()J
+	public final fun copy (J)Lmisk/hibernate/Id;
+	public static synthetic fun copy$default (Lmisk/hibernate/Id;JILjava/lang/Object;)Lmisk/hibernate/Id;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()J
+	public fun hashCode ()I
+	public final fun shardKey ()Lmisk/vitess/Shard$Key;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/IdType : org/hibernate/id/ResultSetIdentifierConsumer, org/hibernate/usertype/UserType {
+	public fun <init> ()V
+	public fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun consumeIdentifier (Ljava/sql/ResultSet;)Ljava/io/Serializable;
+	public fun deepCopy (Ljava/lang/Object;)Ljava/lang/Object;
+	public synthetic fun disassemble (Ljava/lang/Object;)Ljava/io/Serializable;
+	public fun disassemble (Ljava/lang/Object;)Ljava/lang/Long;
+	public fun equals (Ljava/lang/Object;Ljava/lang/Object;)Z
+	public fun hashCode (Ljava/lang/Object;)I
+	public fun isMutable ()Z
+	public fun nullSafeGet (Ljava/sql/ResultSet;[Ljava/lang/String;Lorg/hibernate/engine/spi/SharedSessionContractImplementor;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun nullSafeSet (Ljava/sql/PreparedStatement;Ljava/lang/Object;ILorg/hibernate/engine/spi/SharedSessionContractImplementor;)V
+	public fun replace (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun returnedClass ()Ljava/lang/Class;
+	public fun sqlTypes ()[I
+}
+
+public abstract interface annotation class misk/hibernate/JsonColumn : java/lang/annotation/Annotation {
+}
+
+public final class misk/hibernate/Operator : java/lang/Enum {
+	public static final field EQ Lmisk/hibernate/Operator;
+	public static final field EQ_OR_IS_NULL Lmisk/hibernate/Operator;
+	public static final field GE Lmisk/hibernate/Operator;
+	public static final field GT Lmisk/hibernate/Operator;
+	public static final field IN Lmisk/hibernate/Operator;
+	public static final field IS_NOT_NULL Lmisk/hibernate/Operator;
+	public static final field IS_NULL Lmisk/hibernate/Operator;
+	public static final field LE Lmisk/hibernate/Operator;
+	public static final field LT Lmisk/hibernate/Operator;
+	public static final field NE Lmisk/hibernate/Operator;
+	public static final field NOT_IN Lmisk/hibernate/Operator;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/hibernate/Operator;
+	public static fun values ()[Lmisk/hibernate/Operator;
+}
+
+public abstract interface class misk/hibernate/OrBuilder {
+	public abstract fun option (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface annotation class misk/hibernate/Order : java/lang/annotation/Annotation {
+	public abstract fun asc ()Z
+	public abstract fun path ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/Path {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/hibernate/Path;
+	public static synthetic fun copy$default (Lmisk/hibernate/Path;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/hibernate/Path;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColumn ()Ljava/lang/String;
+	public final fun getSchema ()Ljava/lang/String;
+	public final fun getTable ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/PostCommitHookFailedException : java/lang/Exception {
+	public fun <init> (Ljava/lang/Throwable;)V
+}
+
+public abstract interface class misk/hibernate/Projection {
+}
+
+public abstract interface annotation class misk/hibernate/Property : java/lang/annotation/Annotation {
+	public abstract fun path ()Ljava/lang/String;
+}
+
+public abstract interface annotation class misk/hibernate/ProtoColumn : java/lang/annotation/Annotation {
+}
+
+public abstract interface class misk/hibernate/Query {
+	public abstract fun addJpaConstraint (Lkotlin/jvm/functions/Function2;)V
+	public abstract fun clone ()Lmisk/hibernate/Query;
+	public abstract fun count (Lmisk/hibernate/Session;)J
+	public abstract fun delete (Lmisk/hibernate/Session;)I
+	public abstract fun disableCheck (Lmisk/jdbc/Check;)V
+	public abstract fun dynamicAddConstraint (Ljava/lang/String;Lmisk/hibernate/Operator;Ljava/lang/Object;)V
+	public abstract fun dynamicAddFetch (Ljava/lang/String;Ljavax/persistence/criteria/JoinType;)V
+	public abstract fun dynamicAddOrder (Ljava/lang/String;Z)V
+	public abstract fun dynamicList (Lmisk/hibernate/Session;Ljava/util/List;)Ljava/util/List;
+	public abstract fun dynamicList (Lmisk/hibernate/Session;Lkotlin/jvm/functions/Function2;)Ljava/util/List;
+	public abstract fun dynamicUniqueResult (Lmisk/hibernate/Session;Ljava/util/List;)Ljava/util/List;
+	public abstract fun dynamicUniqueResult (Lmisk/hibernate/Session;Lkotlin/jvm/functions/Function2;)Ljava/util/List;
+	public abstract fun getFirstResult ()I
+	public abstract fun getMaxRows ()I
+	public abstract fun list (Lmisk/hibernate/Session;)Ljava/util/List;
+	public abstract fun newOrBuilder ()Lmisk/hibernate/OrBuilder;
+	public abstract fun setFirstResult (I)V
+	public abstract fun setMaxRows (I)V
+	public abstract fun uniqueResult (Lmisk/hibernate/Session;)Ljava/lang/Object;
+}
+
+public final class misk/hibernate/Query$DefaultImpls {
+	public static synthetic fun dynamicAddConstraint$default (Lmisk/hibernate/Query;Ljava/lang/String;Lmisk/hibernate/Operator;Ljava/lang/Object;ILjava/lang/Object;)V
+}
+
+public abstract interface class misk/hibernate/Query$Factory {
+	public abstract fun dynamicQuery (Lkotlin/reflect/KClass;)Lmisk/hibernate/Query;
+	public abstract fun newQuery (Lkotlin/reflect/KClass;)Lmisk/hibernate/Query;
+}
+
+public final class misk/hibernate/QueryKt {
+	public static final fun constraint (Lmisk/hibernate/Query;Lkotlin/jvm/functions/Function2;)Lmisk/hibernate/Query;
+}
+
+public final class misk/hibernate/RetryTransactionException : java/lang/Exception {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface annotation class misk/hibernate/SecretColumn : java/lang/annotation/Annotation {
+	public abstract fun indexable ()Z
+	public abstract fun keyName ()Ljava/lang/String;
+}
+
+public abstract interface annotation class misk/hibernate/Select : java/lang/annotation/Annotation {
+	public abstract fun path ()Ljava/lang/String;
+}
+
+public abstract interface class misk/hibernate/Session : misk/jdbc/Session {
+	public abstract fun delete (Lmisk/hibernate/DbEntity;)V
+	public abstract fun disableChecks (Ljava/util/Collection;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun getHibernateSession ()Lorg/hibernate/Session;
+	public abstract fun load (Lmisk/hibernate/Id;Lkotlin/reflect/KClass;)Lmisk/hibernate/DbEntity;
+	public abstract fun loadOrNull (Lmisk/hibernate/Id;Lkotlin/reflect/KClass;)Lmisk/hibernate/DbEntity;
+	public abstract fun loadSharded (Lmisk/hibernate/Gid;Lkotlin/reflect/KClass;)Lmisk/hibernate/DbSharded;
+	public abstract fun save (Lmisk/hibernate/DbEntity;)Lmisk/hibernate/Id;
+	public abstract fun shards ()Ljava/util/Set;
+	public abstract fun shards (Lmisk/vitess/Keyspace;)Ljava/util/Collection;
+	public abstract fun target (Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun withoutChecks ([Lmisk/jdbc/Check;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/hibernate/Transacter {
+	public abstract fun allowCowrites ()Lmisk/hibernate/Transacter;
+	public abstract fun config ()Lmisk/jdbc/DataSourceConfig;
+	public abstract fun entities ()Ljava/util/Set;
+	public abstract fun getInTransaction ()Z
+	public abstract fun isCheckEnabled (Lmisk/jdbc/Check;)Z
+	public abstract fun noRetries ()Lmisk/hibernate/Transacter;
+	public abstract fun readOnly ()Lmisk/hibernate/Transacter;
+	public abstract fun replicaRead (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun retries (I)Lmisk/hibernate/Transacter;
+	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/hibernate/Transacter$DefaultImpls {
+	public static synthetic fun retries$default (Lmisk/hibernate/Transacter;IILjava/lang/Object;)Lmisk/hibernate/Transacter;
+}
+
+public final class misk/hibernate/TransacterKt {
+	public static final fun failSafeRead (Lmisk/hibernate/Transacter;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun failSafeRead (Lmisk/hibernate/Transacter;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun shards (Lmisk/hibernate/Transacter;)Ljava/util/Set;
+	public static final fun shards (Lmisk/hibernate/Transacter;Lmisk/vitess/Keyspace;)Ljava/util/Collection;
+	public static final fun transaction (Lmisk/hibernate/Transacter;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/hibernate/TransacterService : com/google/common/util/concurrent/Service {
+}
+
+public final class misk/hibernate/TransformedColumnTypeKt {
+	public static final fun getByType (Ljava/sql/ResultSet;Lkotlin/reflect/KClass;Ljava/lang/String;)Ljava/io/Serializable;
+	public static final fun setByType (Ljava/sql/PreparedStatement;Lkotlin/reflect/KClass;ILjava/lang/Object;)V
+}
+
+public abstract interface annotation class misk/hibernate/TransformedType : java/lang/annotation/Annotation {
+	public abstract fun targetType ()Ljava/lang/Class;
+	public abstract fun transformer ()Ljava/lang/Class;
+}
+
+public abstract class misk/hibernate/Transformer {
+	public fun <init> (Lmisk/hibernate/TransformerContext;)V
+	public abstract fun assemble (Ljava/lang/Object;Ljava/io/Serializable;)Ljava/lang/Object;
+	public abstract fun disassemble (Ljava/lang/Object;)Ljava/io/Serializable;
+	public final fun getContext ()Lmisk/hibernate/TransformerContext;
+}
+
+public final class misk/hibernate/TransformerContext {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/reflect/KClass;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/Map;
+	public final fun component4 ()Lkotlin/reflect/KClass;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/reflect/KClass;)Lmisk/hibernate/TransformerContext;
+	public static synthetic fun copy$default (Lmisk/hibernate/TransformerContext;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/hibernate/TransformerContext;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArguments ()Ljava/util/Map;
+	public final fun getColumnName ()Ljava/lang/String;
+	public final fun getField ()Lkotlin/reflect/KClass;
+	public final fun getTableName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setArguments (Ljava/util/Map;)V
+	public final fun setField (Lkotlin/reflect/KClass;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/ValidationReport {
+	public fun <init> (Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;)Lmisk/hibernate/ValidationReport;
+	public static synthetic fun copy$default (Lmisk/hibernate/ValidationReport;Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)Lmisk/hibernate/ValidationReport;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColumns ()Ljava/util/Set;
+	public final fun getSchemas ()Ljava/util/Set;
+	public final fun getTables ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/VitessDialect : org/hibernate/dialect/MySQL57Dialect {
+	public fun <init> ()V
+	public fun buildSQLExceptionConversionDelegate ()Lorg/hibernate/exception/spi/SQLExceptionConversionDelegate;
+	public fun useInputStreamToInsertBlob ()Z
+}
+
+public abstract interface annotation class misk/hibernate/annotation/Keyspace : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/annotation/KeyspaceKt {
+	public static final fun keyspace (Lmisk/hibernate/annotation/Keyspace;)Lmisk/vitess/Keyspace;
+}
+
+public final class misk/hibernate/migrate/BulkShardMigrator {
+	public static final field Companion Lmisk/hibernate/migrate/BulkShardMigrator$Companion;
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lorg/hibernate/SessionFactory;Lmisk/hibernate/Transacter;Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun batchSize (I)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun batched ()Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun execute (Z)V
+	public static synthetic fun execute$default (Lmisk/hibernate/migrate/BulkShardMigrator;ZILjava/lang/Object;)V
+	public final fun inc (Ljava/lang/String;)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun latestBatchOnly (Z)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun now (Ljava/lang/String;)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun rootColumn (Ljava/lang/String;)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun set (Ljava/lang/String;Ljava/lang/Object;)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun set (Ljava/lang/String;Ljava/util/function/Function;)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun source (Lmisk/hibernate/Id;)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun target (Lmisk/hibernate/Id;)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun where (Ljava/lang/String;Ljava/util/List;)Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun where (Ljava/lang/String;[Ljava/lang/Object;)Lmisk/hibernate/migrate/BulkShardMigrator;
+}
+
+public final class misk/hibernate/migrate/BulkShardMigrator$Companion {
+}
+
+public final class misk/hibernate/migrate/BulkShardMigrator$Factory {
+	public fun <init> ()V
+	public final fun create (Lmisk/hibernate/Transacter;Lorg/hibernate/SessionFactory;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/hibernate/migrate/BulkShardMigrator;
+}
+
+public final class misk/hibernate/migrate/BulkShardMigrator$IncMutation : misk/hibernate/migrate/BulkShardMigrator$Mutation {
+	public fun <init> (Ljava/lang/String;)V
+	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
+	public fun bindUpdate (Ljava/sql/PreparedStatement;I)I
+	public fun updateSql ()Ljava/lang/String;
+}
+
+public abstract class misk/hibernate/migrate/BulkShardMigrator$Mutation {
+	public fun <init> ()V
+	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
+	public abstract fun bindUpdate (Ljava/sql/PreparedStatement;I)I
+	public fun insertSql ()Ljava/lang/String;
+	public fun updateSql ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/migrate/BulkShardMigrator$NowMutation : misk/hibernate/migrate/BulkShardMigrator$Mutation {
+	public fun <init> (Ljava/lang/String;)V
+	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
+	public fun bindUpdate (Ljava/sql/PreparedStatement;I)I
+	public fun insertSql ()Ljava/lang/String;
+	public fun updateSql ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/migrate/BulkShardMigrator$SetMappingMutation : misk/hibernate/migrate/BulkShardMigrator$Mutation {
+	public fun <init> (Ljava/lang/String;Ljava/util/function/Function;)V
+	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
+	public fun bindUpdate (Ljava/sql/PreparedStatement;I)I
+}
+
+public final class misk/hibernate/migrate/BulkShardMigrator$SetMutation : misk/hibernate/migrate/BulkShardMigrator$Mutation {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;)V
+	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
+	public fun bindUpdate (Ljava/sql/PreparedStatement;I)I
+}
+
+public final class misk/hibernate/pagination/IdPaginatorKt {
+	public static final fun idAscPaginator (Ljava/lang/String;)Lmisk/hibernate/pagination/Paginator;
+	public static synthetic fun idAscPaginator$default (Ljava/lang/String;ILjava/lang/Object;)Lmisk/hibernate/pagination/Paginator;
+	public static final fun idDescPaginator (Ljava/lang/String;)Lmisk/hibernate/pagination/Paginator;
+	public static synthetic fun idDescPaginator$default (Ljava/lang/String;ILjava/lang/Object;)Lmisk/hibernate/pagination/Paginator;
+}
+
+public final class misk/hibernate/pagination/Offset {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/hibernate/pagination/Offset;
+	public static synthetic fun copy$default (Lmisk/hibernate/pagination/Offset;Ljava/lang/String;ILjava/lang/Object;)Lmisk/hibernate/pagination/Offset;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOffset ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/pagination/Page {
+	public static final field Companion Lmisk/hibernate/pagination/Page$Companion;
+	public fun <init> (Ljava/util/List;Lmisk/hibernate/pagination/Offset;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Lmisk/hibernate/pagination/Offset;
+	public final fun copy (Ljava/util/List;Lmisk/hibernate/pagination/Offset;)Lmisk/hibernate/pagination/Page;
+	public static synthetic fun copy$default (Lmisk/hibernate/pagination/Page;Ljava/util/List;Lmisk/hibernate/pagination/Offset;ILjava/lang/Object;)Lmisk/hibernate/pagination/Page;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContents ()Ljava/util/List;
+	public final fun getNextOffset ()Lmisk/hibernate/pagination/Offset;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/pagination/Page$Companion {
+	public final fun empty ()Lmisk/hibernate/pagination/Page;
+}
+
+public abstract interface class misk/hibernate/pagination/Pager {
+	public abstract fun hasNext ()Z
+	public abstract fun nextPage (Lmisk/hibernate/Session;)Lmisk/hibernate/pagination/Page;
+}
+
+public final class misk/hibernate/pagination/PagerKt {
+	public static final fun listAll (Lmisk/hibernate/pagination/Pager;Lmisk/hibernate/Transacter;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
+	public static final fun newPager (Lmisk/hibernate/Query;Lmisk/hibernate/pagination/Paginator;Lmisk/hibernate/pagination/Offset;I)Lmisk/hibernate/pagination/Pager;
+	public static synthetic fun newPager$default (Lmisk/hibernate/Query;Lmisk/hibernate/pagination/Paginator;Lmisk/hibernate/pagination/Offset;IILjava/lang/Object;)Lmisk/hibernate/pagination/Pager;
+}
+
+public abstract interface class misk/hibernate/pagination/Paginator {
+	public abstract fun applyOffset (Lmisk/hibernate/Query;Lmisk/hibernate/pagination/Offset;)V
+	public abstract fun getOffset (Ljava/lang/Object;)Lmisk/hibernate/pagination/Offset;
+}
+

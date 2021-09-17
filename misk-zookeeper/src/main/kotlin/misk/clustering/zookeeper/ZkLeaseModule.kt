@@ -4,13 +4,13 @@ import com.google.inject.Key
 import com.google.inject.Provides
 import misk.ServiceModule
 import misk.clustering.ClusterService
-import misk.clustering.lease.LeaseManager
 import misk.clustering.weights.ClusterWeightService
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import misk.zookeeper.ZkService
 import misk.zookeeper.ZookeeperDefaultModule
+import wisp.lease.LeaseManager
 import javax.inject.Singleton
 
 /**

@@ -1,0 +1,55 @@
+public final class misk/feature/launchdarkly/LaunchDarklyDynamicConfig : misk/feature/DynamicConfig {
+	public static final field Companion Lmisk/feature/launchdarkly/LaunchDarklyDynamicConfig$Companion;
+	public static final field KEY Ljava/lang/String;
+	public fun <init> (Lmisk/feature/FeatureFlags;)V
+	public fun getBoolean (Lmisk/feature/Feature;)Z
+	public fun getDouble (Lmisk/feature/Feature;)D
+	public fun getEnum (Lmisk/feature/Feature;Ljava/lang/Class;)Ljava/lang/Enum;
+	public fun getInt (Lmisk/feature/Feature;)I
+	public fun getJson (Lmisk/feature/Feature;Ljava/lang/Class;)Ljava/lang/Object;
+	public fun getString (Lmisk/feature/Feature;)Ljava/lang/String;
+	public fun trackBoolean (Lmisk/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackDouble (Lmisk/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackEnum (Lmisk/feature/Feature;Ljava/lang/Class;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackInt (Lmisk/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackJson (Lmisk/feature/Feature;Ljava/lang/Class;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackString (Lmisk/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+}
+
+public final class misk/feature/launchdarkly/LaunchDarklyDynamicConfig$Companion {
+	public final fun getATTRIBUTES ()Lmisk/feature/Attributes;
+}
+
+public final class misk/feature/launchdarkly/LaunchDarklyFeatureFlags : com/google/common/util/concurrent/AbstractIdleService, misk/feature/FeatureFlags, misk/feature/FeatureService {
+	public static final field Companion Lmisk/feature/launchdarkly/LaunchDarklyFeatureFlags$Companion;
+	public fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;)V
+	public fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;)Z
+	public fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Z
+	public fun getDouble (Lmisk/feature/Feature;Ljava/lang/String;)D
+	public fun getDouble (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)D
+	public fun getEnum (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;
+	public fun getEnum (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;)Ljava/lang/Enum;
+	public fun getInt (Lmisk/feature/Feature;Ljava/lang/String;)I
+	public fun getInt (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)I
+	public fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
+	public fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;)Ljava/lang/Object;
+	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;
+	public fun trackBoolean (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackBoolean (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackDouble (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackDouble (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackEnum (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackEnum (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackInt (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackInt (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackString (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public fun trackString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+}
+
+public final class misk/feature/launchdarkly/LaunchDarklyFeatureFlags$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+}
+

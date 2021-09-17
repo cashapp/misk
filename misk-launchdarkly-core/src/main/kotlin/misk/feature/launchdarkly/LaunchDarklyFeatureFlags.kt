@@ -7,6 +7,7 @@ import com.launchdarkly.sdk.LDUser
 import com.launchdarkly.sdk.LDValue
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import wisp.feature.FeatureFlagValidation
 import misk.feature.FeatureService
@@ -29,6 +30,9 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   private val ldClient: LDClientInterface,
   private val moshi: Moshi
 ) : AbstractIdleService(), FeatureFlags, FeatureService {
+
+  private val featuresWithMigrationWarnings: MutableList<Feature> = mutableListOf()
+
   override fun startUp() {
     var attempts = 300
     val intervalMillis = 100L
@@ -120,7 +124,9 @@ class LaunchDarklyFeatureFlags @Inject constructor(
       LDValue.ofNull()
     )
     checkDefaultNotUsed(feature, result)
-    return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString())
+    return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString()) {
+      logJsonMigrationWarningOnce(feature, it)
+    }
       ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
 
@@ -154,7 +160,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (Boolean) -> Unit
-  ) = track(feature, key, attributes, { it.booleanValue() }, executor, tracker )
+  ) = track(feature, key, attributes, { it.booleanValue() }, executor, tracker)
 
   override fun trackDouble(
     feature: Feature,
@@ -162,7 +168,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (Double) -> Unit
-  ) = track(feature, key, attributes, { it.doubleValue() }, executor, tracker )
+  ) = track(feature, key, attributes, { it.doubleValue() }, executor, tracker)
 
   override fun trackInt(
     feature: Feature,
@@ -170,7 +176,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (Int) -> Unit
-  ) = track(feature, key, attributes, { it.intValue() }, executor, tracker )
+  ) = track(feature, key, attributes, { it.intValue() }, executor, tracker)
 
   override fun trackString(
     feature: Feature,
@@ -178,7 +184,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (String) -> Unit
-  ) = track(feature, key, attributes, { it.stringValue() }, executor, tracker )
+  ) = track(feature, key, attributes, { it.stringValue() }, executor, tracker)
 
   override fun <T : Enum<T>> trackEnum(
     feature: Feature,
@@ -207,7 +213,11 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     feature,
     key,
     attributes,
-    { moshi.adapter(clazz).fromSafeJson(it.toJsonString())!! },
+    {
+      moshi.adapter(clazz).fromSafeJson(it.toJsonString()) {
+        logJsonMigrationWarningOnce(feature, it)
+      }!!
+    },
     executor,
     tracker
   )
@@ -277,6 +287,16 @@ class LaunchDarklyFeatureFlags @Inject constructor(
       builder.anonymous(true)
     }
     return builder.build()
+  }
+
+  private fun logJsonMigrationWarningOnce(feature: Feature, exception: JsonDataException) {
+    if (!featuresWithMigrationWarnings.contains(feature)) {
+      featuresWithMigrationWarnings += feature
+
+      logger.warn(exception) {
+        "failed to parse JSON due to unknown fields. ignoring those fields and trying again"
+      }
+    }
   }
 
   companion object {

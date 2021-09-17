@@ -1,0 +1,71 @@
+public final class misk/slack/RealSlackClient : misk/slack/SlackClient {
+	public static final field Companion Lmisk/slack/RealSlackClient$Companion;
+	public fun <init> (Lmisk/slack/SlackWebhookApi;Lmisk/slack/SlackConfig;)V
+	public fun postMessage (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/SlackWebhookResponse;
+}
+
+public final class misk/slack/RealSlackClient$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+}
+
+public class misk/slack/SlackClient {
+	public fun <init> ()V
+	public fun postMessage (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/SlackWebhookResponse;
+	public static synthetic fun postMessage$default (Lmisk/slack/SlackClient;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/SlackWebhookResponse;
+}
+
+public final class misk/slack/SlackConfig {
+	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lmisk/config/Secret;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;)Lmisk/slack/SlackConfig;
+	public static synthetic fun copy$default (Lmisk/slack/SlackConfig;Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/SlackConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBaseUrl ()Ljava/lang/String;
+	public final fun getDefault_channel ()Ljava/lang/String;
+	public final fun getWebhook_path ()Lmisk/config/Secret;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/SlackModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/slack/SlackConfig;)V
+	public final fun provideMoshi ()Lcom/squareup/moshi/Moshi;
+	public final fun provideSlackWebhookApi (Lmisk/client/HttpClientFactory;Lcom/squareup/moshi/Moshi;)Lmisk/slack/SlackWebhookApi;
+}
+
+public abstract interface class misk/slack/SlackWebhookApi {
+	public abstract fun post (Ljava/lang/String;Lmisk/slack/SlackWebhookRequest;)Lretrofit2/Call;
+}
+
+public final class misk/slack/SlackWebhookRequest {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/SlackWebhookRequest;
+	public static synthetic fun copy$default (Lmisk/slack/SlackWebhookRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/SlackWebhookRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChannel ()Ljava/lang/String;
+	public final fun getIcon_emoji ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public final fun getUsername ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/SlackWebhookResponse : java/lang/Enum {
+	public static final field action_prohibited Lmisk/slack/SlackWebhookResponse;
+	public static final field channel_is_archived Lmisk/slack/SlackWebhookResponse;
+	public static final field channel_not_found Lmisk/slack/SlackWebhookResponse;
+	public static final field invalid_payload Lmisk/slack/SlackWebhookResponse;
+	public static final field missing_text_or_fallback_or_attachments Lmisk/slack/SlackWebhookResponse;
+	public static final field ok Lmisk/slack/SlackWebhookResponse;
+	public static final field user_not_found Lmisk/slack/SlackWebhookResponse;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/slack/SlackWebhookResponse;
+	public static fun values ()[Lmisk/slack/SlackWebhookResponse;
+}
+

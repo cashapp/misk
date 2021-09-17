@@ -101,6 +101,44 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  /** Interpret the value at [key] as a Long and increment it by 1. */
+  override fun incr(key: String): Long {
+    return jedisPool.resource.use { jedis ->
+      jedis.incr(key.toByteArray(charset))!!
+    }
+  }
+
+  /** Interpret the value at [key] as a Long and increment it by [increment]. */
+  override fun incrBy(key: String, increment: Long): Long {
+    return jedisPool.resource.use { jedis ->
+      jedis.incrBy(key.toByteArray(charset), increment)!!
+    }
+  }
+
+  override fun expire(key: String, seconds: Long): Boolean {
+    return jedisPool.resource.use { jedis ->
+      jedis.expire(key, seconds)!! == 1L
+    }
+  }
+
+  override fun expireAt(key: String, timestampSeconds: Long): Boolean {
+    return jedisPool.resource.use { jedis ->
+      jedis.expireAt(key, timestampSeconds)!! == 1L
+    }
+  }
+
+  override fun pExpire(key: String, milliseconds: Long): Boolean {
+    return jedisPool.resource.use { jedis ->
+      jedis.pexpire(key, milliseconds)!! == 1L
+    }
+  }
+
+  override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
+    return jedisPool.resource.use { jedis ->
+      jedis.pexpireAt(key, timestampMilliseconds)!! == 1L
+    }
+  }
+
   /** Closes the connection to Redis. */
   fun close() {
     return jedisPool.close()

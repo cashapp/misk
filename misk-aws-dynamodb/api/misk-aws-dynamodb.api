@@ -1,0 +1,44 @@
+public abstract interface class misk/dynamodb/DyTimestampedEntity {
+	public abstract fun getCreated_at ()Ljava/util/Date;
+	public abstract fun getUpdated_at ()Ljava/util/Date;
+	public abstract fun setCreated_at (Ljava/util/Date;)V
+	public abstract fun setUpdated_at (Ljava/util/Date;)V
+}
+
+public abstract interface class misk/dynamodb/DyVersionedEntity {
+	public abstract fun getVersion ()J
+	public abstract fun setVersion (J)V
+}
+
+public final class misk/dynamodb/DynamoDbHealthCheck : misk/healthchecks/HealthCheck {
+	public static final field Companion Lmisk/dynamodb/DynamoDbHealthCheck$Companion;
+	public fun <init> (Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;Ljava/util/List;)V
+	public fun status ()Lmisk/healthchecks/HealthStatus;
+}
+
+public final class misk/dynamodb/DynamoDbHealthCheck$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+}
+
+public abstract interface class misk/dynamodb/DynamoDbService : com/google/common/util/concurrent/Service {
+}
+
+public final class misk/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule {
+	public fun <init> (Lcom/amazonaws/ClientConfiguration;[Lkotlin/reflect/KClass;)V
+	public synthetic fun <init> (Lcom/amazonaws/ClientConfiguration;[Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun provideRequiredTables ()Ljava/util/List;
+	public final fun providesAmazonDynamoDB (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;
+	public final fun providesAmazonDynamoDBStreams (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBStreams;
+}
+
+public final class misk/dynamodb/RequiredDynamoDbTable {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/dynamodb/RequiredDynamoDbTable;
+	public static synthetic fun copy$default (Lmisk/dynamodb/RequiredDynamoDbTable;Ljava/lang/String;ILjava/lang/Object;)Lmisk/dynamodb/RequiredDynamoDbTable;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

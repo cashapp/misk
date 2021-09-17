@@ -12,12 +12,14 @@ buildscript {
   dependencies {
     classpath(Dependencies.kotlinAllOpenPlugin)
     classpath(Dependencies.kotlinGradlePlugin)
+    classpath(Dependencies.dokkaGradlePlugin)
     classpath(Dependencies.kotlinNoArgPlugin)
     classpath(Dependencies.junitGradlePlugin)
     classpath(Dependencies.mavenPublishGradlePlugin)
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
+    classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
   }
 }
 
@@ -84,10 +86,15 @@ subprojects {
   // We have to set the dokka configuration after evaluation since the com.vanniktech.maven.publish
   // plugin overwrites our dokka configuration on projects where it's applied.
   afterEvaluate {
-    val dokka by tasks.getting(DokkaTask::class) {
-      reportUndocumented = false
-      skipDeprecated = true
-      jdkVersion = 8
+    tasks.withType(DokkaTask::class).configureEach {
+      dokkaSourceSets.configureEach {
+        reportUndocumented.set(false)
+        skipDeprecated.set(true)
+        jdkVersion.set(8)
+        if (name == "dokkaGfm") {
+          outputDirectory.set(project.file("$rootDir/docs/0.x"))
+        }
+      }
     }
   }
 
@@ -103,17 +110,18 @@ subprojects {
     apply(from = file("$rootDir/hooks.gradle"))
   }
 
-  val testTask = tasks.findByName("test")
-  if (testTask != null) {
+  val checkTask = tasks.findByName("check")
+  if (checkTask != null) {
     if (listOf("misk-aws","misk-events","misk-jobqueue","misk-jobqueue-testing","misk-jdbc","misk-jdbc-testing","misk-hibernate","misk-hibernate-testing").contains(name)) {
-      testShardHibernate.dependsOn(testTask)
+      testShardHibernate.dependsOn(checkTask)
     } else {
-      testShardNonHibernate.dependsOn(testTask)
+      testShardNonHibernate.dependsOn(checkTask)
     }
   }
 
-  if (!path.startsWith(":samples") && !path.startsWith(":misk-embedded-sample")) {
+  if (!path.startsWith(":samples")) {
     apply(plugin = "com.vanniktech.maven.publish")
+    apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
   }
 
   // Workaround the Gradle bug resolving multiplatform dependencies.
@@ -124,3 +132,4 @@ subprojects {
     }
   }
 }
+

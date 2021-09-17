@@ -39,10 +39,10 @@ dependencies {
   testImplementation(Dependencies.docker)
   // The docker-java we use in tests depends on an old version of junixsocket that depends on
   // log4j. We force it up a minor version in packages that use it.
-  testImplementation("com.kohlschutter.junixsocket:junixsocket-native-common:2.3.4") {
+  testImplementation("com.kohlschutter.junixsocket:junixsocket-native-common:2.4.0") {
     isForce = true
   }
-  testImplementation("com.kohlschutter.junixsocket:junixsocket-common:2.3.4") {
+  testImplementation("com.kohlschutter.junixsocket:junixsocket-common:2.4.0") {
     isForce = true
   }
   testImplementation(Dependencies.prometheusClient)
@@ -54,13 +54,6 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-hibernate-testing"))
   testImplementation(project(":wisp-config"))
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")
