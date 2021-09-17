@@ -1,15 +1,11 @@
-package misk.metrics
+package misk.metrics.v2
 
 import io.prometheus.client.CollectorRegistry
 import misk.inject.KAbstractModule
-import javax.inject.Inject
-import javax.inject.Provider
-import misk.metrics.v2.FakeMetricsModule as FakeMetricsModuleV2
 
 class FakeMetricsModule : KAbstractModule() {
   override fun configure() {
+    bind<CollectorRegistry>().toInstance(CollectorRegistry(true))
     bind<Metrics>().to<FakeMetrics>()
-
-    install(FakeMetricsModuleV2())
   }
 }
