@@ -1,11 +1,11 @@
-package misk.metrics
+package misk.metrics.v2
 
 import io.prometheus.client.Collector.MetricFamilySamples.Sample
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
+import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
-import misk.metrics.Metrics
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,12 +18,20 @@ import javax.inject.Singleton
 class FakeMetrics @Inject internal constructor(
   private val registry: CollectorRegistry
 ) : Metrics {
-  override fun counter(name: String, help: String?, labelNames: List<String>): Counter =
+  override fun counter(
+    name: String,
+    help: String?,
+    labelNames: List<String>
+  ): Counter =
     Counter.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .register(registry)
 
-  override fun gauge(name: String, help: String, labelNames: List<String>): Gauge =
+  override fun gauge(
+    name: String,
+    help: String,
+    labelNames: List<String>
+  ): Gauge =
     Gauge.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .register(registry)
@@ -32,9 +40,20 @@ class FakeMetrics @Inject internal constructor(
     name: String,
     help: String,
     labelNames: List<String>,
+    buckets: List<Double>
+  ): Histogram =
+    Histogram.build(name, help)
+      .labelNames(*labelNames.toTypedArray())
+      .buckets(*buckets.toDoubleArray())
+      .register(registry)
+
+  override fun summary(
+    name: String,
+    help: String,
+    labelNames: List<String>,
     quantiles: Map<Double, Double>
-  ): Histogram {
-    val summary = Summary.build(name, help)
+  ): Summary =
+    Summary.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .apply {
         quantiles.forEach { (key, value) ->
@@ -43,32 +62,22 @@ class FakeMetrics @Inject internal constructor(
       }
       .register(registry)
 
-    return object : Histogram {
-      override fun record(duration: Double, vararg labelValues: String) {
-        summary.labels(*labelValues).observe(duration)
-      }
-
-      override fun count(vararg labelValues: String): Int =
-        summary.labels(*labelValues).get().count.toInt()
-    }
-  }
-
   /** Returns a measurement for a [counter] or [gauge]. */
   fun get(name: String, vararg labels: Pair<String, String>): Double? =
     getSample(name, labels)?.value
 
   /** Returns the number of histogram samples taken. */
-  fun histogramCount(name: String, vararg labels: Pair<String, String>): Double? =
+  fun summaryCount(name: String, vararg labels: Pair<String, String>): Double? =
     getSample(name, labels, sampleName = name + "_count")?.value
 
   /** Returns the sum of all histogram samples taken. */
-  fun histogramSum(name: String, vararg labels: Pair<String, String>): Double? =
+  fun summarySum(name: String, vararg labels: Pair<String, String>): Double? =
     getSample(name, labels, sampleName = name + "_sum")?.value
 
   /** Returns the average of all histogram samples taken. */
-  fun histogramMean(name: String, vararg labels: Pair<String, String>): Double? {
-    val sum = histogramSum(name, *labels) ?: return null
-    val count = histogramCount(name, *labels) ?: return null
+  fun summaryMean(name: String, vararg labels: Pair<String, String>): Double? {
+    val sum = summarySum(name, *labels) ?: return null
+    val count = summaryCount(name, *labels) ?: return null
     return sum / count
   }
 
@@ -76,17 +85,17 @@ class FakeMetrics @Inject internal constructor(
    * Returns the median for a [histogram]. In small samples this is the element preceding
    * the middle element.
    */
-  fun histogramP50(name: String, vararg labels: Pair<String, String>): Double? =
-    histogramQuantile(name, "0.5", *labels)
+  fun summaryP50(name: String, vararg labels: Pair<String, String>): Double? =
+    summaryQuantile(name, "0.5", *labels)
 
   /**
    * Returns the 0.99th percentile for a [histogram]. In small samples this is the second largest
    * element.
    */
-  fun histogramP99(name: String, vararg labels: Pair<String, String>): Double? =
-    histogramQuantile(name, "0.99", *labels)
+  fun summaryP99(name: String, vararg labels: Pair<String, String>): Double? =
+    summaryQuantile(name, "0.99", *labels)
 
-  fun histogramQuantile(
+  fun summaryQuantile(
     name: String,
     quantile: String,
     vararg labels: Pair<String, String>

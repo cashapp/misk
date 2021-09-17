@@ -2,10 +2,10 @@ package misk.prometheus
 
 import misk.metrics.Histogram
 
+@Deprecated("Unexpected that this is used. Checkout Metrics instead")
 class PrometheusHistogram constructor(
   val histogram: io.prometheus.client.Summary
 ) : Histogram {
-
   override fun record(duration: Double, vararg labelValues: String) {
     histogram.labels(*labelValues).observe(duration)
   }
