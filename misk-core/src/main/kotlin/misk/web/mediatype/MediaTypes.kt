@@ -33,6 +33,9 @@ object MediaTypes {
   const val IMAGE_PNG = "image/png"
   val IMAGE_PNG_MEDIA_TYPE = IMAGE_PNG.asMediaType()
 
+  const val IMAGE_SVG = "image/svg+xml"
+  val IMAGE_SVG_MEDIA_TYPE = IMAGE_SVG.asMediaType()
+
   const val APPLICATION_GRPC = "application/grpc"
   val APPLICATION_GRPC_MEDIA_TYPE = APPLICATION_GRPC.asMediaType()
 
@@ -42,6 +45,7 @@ object MediaTypes {
       "html", "htm" -> TEXT_HTML_MEDIA_TYPE
       "js" -> APPLICATION_JAVASCRIPT_MEDIA_TYPE
       "png" -> IMAGE_PNG_MEDIA_TYPE
+      "svg" -> IMAGE_SVG_MEDIA_TYPE
       else -> APPLICATION_OCTETSTREAM_MEDIA_TYPE
     }
   }
