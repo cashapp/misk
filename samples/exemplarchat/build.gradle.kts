@@ -10,7 +10,7 @@ dependencies {
   implementation(project(":misk-prometheus"))
 
   testImplementation(project(":misk-testing"))
-  testImplementation("org.assertj:assertj-core:3.20.2")
+  testImplementation("org.assertj:assertj-core:3.21.0")
 }
 
 val jar by tasks.getting(Jar::class) {
