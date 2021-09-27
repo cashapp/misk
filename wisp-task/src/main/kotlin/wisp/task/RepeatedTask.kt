@@ -49,8 +49,8 @@ class RepeatedTask(
         base = repeatedTaskConfig.defaultJitterMs,
         max = repeatedTaskConfig.defaultMaxDelayMs
       ),
-  private val taskConfig: TaskConfig = TaskConfig(name),
-  private val task: (taskConfig: TaskConfig) -> Status
+  private val taskConfig: TaskConfig = TaskConfig(),
+  private val task: (name: String, taskConfig: TaskConfig) -> Status
 ) {
   private val running = AtomicBoolean(false)
   private var timer: Timer? = null
@@ -89,7 +89,7 @@ class RepeatedTask(
 
   private fun runWithBackoff(
     retryPolicy: suspend RetryFailure<Throwable>.() -> RetryInstruction,
-    task: (taskConfig: TaskConfig) -> Status
+    task: (name: String, taskConfig: TaskConfig) -> Status
   ): Status {
     return runBlocking {
       var status = Status.OK
@@ -97,7 +97,7 @@ class RepeatedTask(
         // TODO: metrics
         val startTime = clock.instant()
         val timedResult = measureTimeMillis {
-          status = task(taskConfig)
+          status = task(name, taskConfig)
         }
         when (status) {
           Status.NO_WORK -> {

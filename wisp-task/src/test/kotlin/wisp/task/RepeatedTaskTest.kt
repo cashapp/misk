@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import wisp.task.exception.FailedTaskException
 
 internal class RepeatedTaskTest {
-  private val taskConfig = TaskConfig("testTask")
   private val repeatedTaskConfig = RepeatedTaskConfig(
     timeBetweenRunsMs = 100L
   )
@@ -16,9 +15,9 @@ internal class RepeatedTaskTest {
   fun noRescheduleStopsRepeatedTask() {
     var counter = 0
     val repeatedTask = RepeatedTask(
-      name = taskConfig.name,
-      repeatedTaskConfig = repeatedTaskConfig,
-      taskConfig = taskConfig) {
+      name = "taskName",
+      repeatedTaskConfig = repeatedTaskConfig
+    ) { name: String, taskConfig: TaskConfig ->
       counter++
       Status.NO_RESCHEDULE
     }
@@ -33,9 +32,9 @@ internal class RepeatedTaskTest {
   fun repeatedTaskRepeatsIfResultStatusOk() {
     var counter = 0
     val repeatedTask = RepeatedTask(
-      name = taskConfig.name,
-      repeatedTaskConfig = repeatedTaskConfig,
-      taskConfig = taskConfig) {
+      name = "taskName",
+      repeatedTaskConfig = repeatedTaskConfig
+    ) { name: String, taskConfig: TaskConfig ->
       counter++
       Status.OK
     }
@@ -52,9 +51,9 @@ internal class RepeatedTaskTest {
     var counter = 0
     var retryCounter = 0
     val repeatedTask = RepeatedTask(
-      name = taskConfig.name,
-      repeatedTaskConfig = repeatedTaskConfig,
-      taskConfig = taskConfig) {
+      name = "taskName",
+      repeatedTaskConfig = repeatedTaskConfig
+    ) { name: String, taskConfig: TaskConfig ->
       retryCounter++
       if (retryCounter < 3) {
         throw FailedTaskException()
@@ -74,5 +73,25 @@ internal class RepeatedTaskTest {
     assertEquals(3, retryCounter)
 
   }
+  class MyTaskConfig(
+    val foo: String,
+    val allResults: MutableList<String> = mutableListOf()
+  ): TaskConfig()
+
+  @Test
+  fun `Using custom task config works`() {
+    val myClassConfig = MyTaskConfig("foo")
+
+    val repeatedTask = RepeatedTask(
+      name = "taskName",
+      repeatedTaskConfig = repeatedTaskConfig,
+      taskConfig = myClassConfig
+    ) { name: String, taskConfig: TaskConfig ->
+      val config = taskConfig as MyTaskConfig
+
+      Status.NO_RESCHEDULE
+    }
+
+    }
 
 }

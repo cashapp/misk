@@ -8,7 +8,6 @@ import wisp.task.exception.NoTaskFoundException
 import kotlin.test.assertSame
 
 internal class RepeatedTaskManagerTest {
-  private val taskConfig = TaskConfig("testTask")
   private val repeatedTaskConfig = RepeatedTaskConfig(
     timeBetweenRunsMs = 100L
   )
@@ -17,10 +16,9 @@ internal class RepeatedTaskManagerTest {
   fun createTask() {
     val manager = RepeatedTaskManager()
     val newTask = manager.createTask(
-      name = taskConfig.name,
-      repeatedTaskConfig = repeatedTaskConfig,
-      taskConfig = taskConfig
-    ) {
+      name = "taskName",
+      repeatedTaskConfig = repeatedTaskConfig
+    ) { name: String, taskConfig: TaskConfig ->
       Status.NO_RESCHEDULE
     }
 
@@ -29,16 +27,16 @@ internal class RepeatedTaskManagerTest {
 
   @Test
   fun getTask() {
+    val taskName = "taskName"
     val manager = RepeatedTaskManager()
     val newTask = manager.createTask(
-      name = taskConfig.name,
-      repeatedTaskConfig = repeatedTaskConfig,
-      taskConfig = taskConfig
-    ) {
+      name = taskName,
+      repeatedTaskConfig = repeatedTaskConfig
+    ) { name: String, taskConfig: TaskConfig ->
       Status.NO_RESCHEDULE
     }
 
-    val repeatedTask = manager.getTask(taskConfig.name)
+    val repeatedTask = manager.getTask(taskName)
     assertSame(newTask, repeatedTask)
   }
 
@@ -46,10 +44,9 @@ internal class RepeatedTaskManagerTest {
   fun taskExists() {
     val manager = RepeatedTaskManager()
     val repeatedTask1 = manager.createTask(
-      name = taskConfig.name,
-      repeatedTaskConfig = repeatedTaskConfig,
-      taskConfig = taskConfig
-    ) {
+      name = "taskName",
+      repeatedTaskConfig = repeatedTaskConfig
+    ) { name: String, taskConfig: TaskConfig ->
       Status.NO_RESCHEDULE
     }
     assertTrue(manager.taskExists(repeatedTask1.name))
@@ -68,18 +65,16 @@ internal class RepeatedTaskManagerTest {
   fun shutDown() {
     val manager = RepeatedTaskManager()
     val repeatedTask1 = manager.createTask(
-      name = taskConfig.name,
-      repeatedTaskConfig = repeatedTaskConfig,
-      taskConfig = taskConfig
-    ) {
+      name = "taskName",
+      repeatedTaskConfig = repeatedTaskConfig
+    ) { name: String, taskConfig: TaskConfig ->
       Thread.sleep(100L)
       Status.OK
     }
     val repeatedTask2 = manager.createTask(
       name = "differentTask",
-      repeatedTaskConfig = repeatedTaskConfig,
-      taskConfig = TaskConfig("differentTask")
-    ) {
+      repeatedTaskConfig = repeatedTaskConfig
+    ) { name: String, taskConfig: TaskConfig ->
       Thread.sleep(100L)
       Status.OK
     }

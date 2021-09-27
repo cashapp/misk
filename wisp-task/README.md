@@ -20,7 +20,6 @@ backoff delay - which itself is configured from the supplied
 Create a repeated task and start it running.
 
 ```kotlin
-val taskConfig = TaskConfig("taskName")
 val repeatedTaskConfig = RepeatedTaskConfig(
   timeBetweenRunsMs = 10000L  // 10 sec delay between task runs or retries
 )
@@ -28,10 +27,9 @@ val repeatedTaskConfig = RepeatedTaskConfig(
 val manager = RepeatedTaskManager()
 
 val newTask = manager.createTask(
-  name = taskConfig.name,
+  name = "taskName",
   repeatedTaskConfig = repeatedTaskConfig,
-  taskConfig = taskConfig
-) {
+) { name: String, taskConfig: TaskConfig ->
   // do task stuff
   // ...
   
@@ -57,24 +55,24 @@ The task to be run takes a TaskConfig (which could be loaded using
 
 ```kotlin
 class MyTaskConfig(
-  name: String, 
   val foo: String,
   val allResults: MutableList<String> = mutableListOf()
-): TaskConfig(name)
+): TaskConfig()
 
 val taskName = "myTask"
 val anotherTask = manager.createTask(
-  name = taskNamee,
+  name = taskName,
   repeatedTaskConfig = repeatedTaskConfig,
-  taskConfig = MyTaskConfig(taskName, "fooString")
-) {
+  taskConfig = MyTaskConfig("fooString")
+) { name: String, taskConfig: TaskConfig ->
+  val config = taskConfig as MyTaskConfig
   
   // access the taskConfig
-  println("Foo is ${it.foo}")
+  println("Foo is ${config.foo}")
   
   // do task stuff
   // ...
-  it.allResults.add("another result")
+  config.allResults.add("another result")
 
   // if the task completes correctly, return OK.
   Status.OK

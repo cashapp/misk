@@ -33,8 +33,8 @@ class RepeatedTaskManager(private val meterRegistry: MeterRegistry = Metrics.glo
           base = repeatedTaskConfig.defaultJitterMs,
           max = repeatedTaskConfig.defaultMaxDelayMs
         ),
-    taskConfig: TaskConfig = TaskConfig(name),
-    task: (taskConfig: TaskConfig) -> Status
+    taskConfig: TaskConfig = TaskConfig(),
+    task: (name: String, taskConfig: TaskConfig) -> Status
   ): RepeatedTask {
     if (taskExists(name)) {
       throw TaskAlreadyExistsException(name)
