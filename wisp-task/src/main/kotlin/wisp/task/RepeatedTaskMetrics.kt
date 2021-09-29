@@ -4,9 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.MeterRegistry
 
-/**
- *
- */
 class RepeatedTaskMetrics(meterRegistry: MeterRegistry) {
 
   internal var taskDuration: DistributionSummary =
