@@ -98,8 +98,11 @@ class RepeatedTask(
           timedResult = measureTimeMillis {
             status = task(name, taskConfig)
           }
+        } catch (nwfte: NoWorkForTaskException) {
+          repeatedTaskMetrics.noWorkCount.increment()
+          throw nwfte
         } catch (e: Exception) {
-          repeatedTaskMetrics.retryCount.increment()
+          repeatedTaskMetrics.failedCount.increment()
           throw e
         } finally {
           repeatedTaskMetrics.taskDuration.record(timedResult.toDouble())
@@ -110,7 +113,7 @@ class RepeatedTask(
             throw NoWorkForTaskException()
           }
           Status.FAILED -> {
-            repeatedTaskMetrics.retryCount.increment()
+            repeatedTaskMetrics.failedCount.increment()
             throw FailedTaskException()
           }
           else -> {

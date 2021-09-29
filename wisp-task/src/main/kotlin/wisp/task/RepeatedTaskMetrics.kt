@@ -9,7 +9,7 @@ import io.micrometer.core.instrument.MeterRegistry
  *
  *   Duration
  *   Success Count
- *   Retry Count
+ *   Failures Count
  *   Count of No Work Required
  */
 class RepeatedTaskMetrics(meterRegistry: MeterRegistry) {
@@ -27,8 +27,8 @@ class RepeatedTaskMetrics(meterRegistry: MeterRegistry) {
     .description("count of successful repeated tasks")
     .register(meterRegistry)
 
-  internal var retryCount: Counter = Counter.builder("repeated.task.retry")
-    .description("count of repeated tasks retries")
+  internal var failedCount: Counter = Counter.builder("repeated.task.failed")
+    .description("count of repeated tasks failures")
     .register(meterRegistry)
 
   internal var noWorkCount: Counter = Counter.builder("repeated.task.no.work")
