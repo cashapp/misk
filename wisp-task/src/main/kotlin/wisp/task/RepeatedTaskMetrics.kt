@@ -4,10 +4,18 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.MeterRegistry
 
+/**
+ * Metrics for repeated tasks:
+ *
+ *   Duration
+ *   Success Count
+ *   Retry Count
+ *   Count of No Work Required
+ */
 class RepeatedTaskMetrics(meterRegistry: MeterRegistry) {
 
   internal var taskDuration: DistributionSummary =
-    DistributionSummary.builder("repeated_task_duration")
+    DistributionSummary.builder("repeated.task")
       .description("count and duration in ms of periodic tasks")
       .tag("name", "result")
       .percentilePrecision(4)
@@ -15,15 +23,15 @@ class RepeatedTaskMetrics(meterRegistry: MeterRegistry) {
       .publishPercentileHistogram()
       .register(meterRegistry)
 
-  internal var successCount: Counter = Counter.builder("repeated_task_success_count")
+  internal var successCount: Counter = Counter.builder("repeated.task.success")
     .description("count of successful repeated tasks")
     .register(meterRegistry)
 
-  internal var retryCount: Counter = Counter.builder("repeated_task_retry_count")
+  internal var retryCount: Counter = Counter.builder("repeated.task.retry")
     .description("count of repeated tasks retries")
     .register(meterRegistry)
 
-  internal var noWorkCount: Counter = Counter.builder("repeated_task_no_work_count")
+  internal var noWorkCount: Counter = Counter.builder("repeated.task.no.work")
     .description("count of repeated tasks invocations with no work to do")
     .register(meterRegistry)
 }
