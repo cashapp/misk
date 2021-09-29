@@ -8,7 +8,6 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Metrics
 import wisp.task.exception.NoTaskFoundException
 import wisp.task.exception.TaskAlreadyExistsException
-import java.time.Clock
 
 /**
  * Basic management of repeated tasks.
@@ -24,7 +23,6 @@ class RepeatedTaskManager(private val meterRegistry: MeterRegistry = Metrics.glo
    */
   fun createTask(
     name: String,
-    clock: Clock = Clock.systemUTC(),
     meterRegistry: MeterRegistry = this.meterRegistry,
     repeatedTaskConfig: RepeatedTaskConfig = RepeatedTaskConfig(),
     retryPolicy: suspend RetryFailure<Throwable>.() -> RetryInstruction =
@@ -42,7 +40,6 @@ class RepeatedTaskManager(private val meterRegistry: MeterRegistry = Metrics.glo
 
     val repeatedTask = RepeatedTask(
       name,
-      clock,
       meterRegistry,
       repeatedTaskConfig,
       retryPolicy,
