@@ -13,7 +13,6 @@ import kotlinx.coroutines.runBlocking
 import wisp.logging.getLogger
 import wisp.task.exception.FailedTaskException
 import wisp.task.exception.NoWorkForTaskException
-import java.time.Clock
 import java.util.Timer
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.measureTimeMillis
@@ -40,7 +39,6 @@ import kotlin.system.measureTimeMillis
  */
 class RepeatedTask(
   val name: String,
-  private val clock: Clock = Clock.systemUTC(),
   private val meterRegistry: MeterRegistry = Metrics.globalRegistry,
   private val repeatedTaskConfig: RepeatedTaskConfig = RepeatedTaskConfig(),
   private val retryPolicy: suspend RetryFailure<Throwable>.() -> RetryInstruction =
@@ -54,6 +52,7 @@ class RepeatedTask(
 ) {
   private val running = AtomicBoolean(false)
   private var timer: Timer? = null
+  private val repeatedTaskMetrics = RepeatedTaskMetrics(meterRegistry)
 
   fun isRunning(): Boolean {
     return running.get()
@@ -94,19 +93,28 @@ class RepeatedTask(
     return runBlocking {
       var status = Status.OK
       retry(retryPolicy) {
-        // TODO: metrics
-        val startTime = clock.instant()
-        val timedResult = measureTimeMillis {
-          status = task(name, taskConfig)
+        var timedResult = 0L
+        try {
+          timedResult = measureTimeMillis {
+            status = task(name, taskConfig)
+          }
+        } catch (e: Exception) {
+          repeatedTaskMetrics.retryCount.increment()
+          throw e
+        } finally {
+          repeatedTaskMetrics.taskDuration.record(timedResult.toDouble())
         }
         when (status) {
           Status.NO_WORK -> {
+            repeatedTaskMetrics.noWorkCount.increment()
             throw NoWorkForTaskException()
           }
           Status.FAILED -> {
+            repeatedTaskMetrics.retryCount.increment()
             throw FailedTaskException()
           }
           else -> {
+            repeatedTaskMetrics.successCount.increment()
           }
         }
         status
