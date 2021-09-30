@@ -1,0 +1,26 @@
+public final class misk/exceptions/dynamodb/ClientExecutionTimeoutExceptionMapper : misk/web/exceptions/ExceptionMapper {
+	public fun <init> ()V
+	public fun canHandle (Ljava/lang/Throwable;)Z
+	public fun loggingLevel (Lcom/amazonaws/http/timers/client/ClientExecutionTimeoutException;)Lorg/slf4j/event/Level;
+	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
+	public fun toGrpcResponse (Lcom/amazonaws/http/timers/client/ClientExecutionTimeoutException;)Lmisk/web/exceptions/GrpcErrorResponse;
+	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
+	public fun toResponse (Lcom/amazonaws/http/timers/client/ClientExecutionTimeoutException;)Lmisk/web/Response;
+	public synthetic fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
+}
+
+public final class misk/exceptions/dynamodb/DynamoDbExceptionMapperModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/exceptions/dynamodb/TransactionCanceledExceptionMapper : misk/web/exceptions/ExceptionMapper {
+	public fun <init> ()V
+	public fun canHandle (Ljava/lang/Throwable;)Z
+	public fun loggingLevel (Lcom/amazonaws/services/dynamodbv2/model/TransactionCanceledException;)Lorg/slf4j/event/Level;
+	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
+	public fun toGrpcResponse (Lcom/amazonaws/services/dynamodbv2/model/TransactionCanceledException;)Lmisk/web/exceptions/GrpcErrorResponse;
+	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
+	public fun toResponse (Lcom/amazonaws/services/dynamodbv2/model/TransactionCanceledException;)Lmisk/web/Response;
+	public synthetic fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
+}
+
