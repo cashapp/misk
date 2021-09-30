@@ -1,0 +1,61 @@
+public abstract interface class misk/events/Consumer {
+	public abstract fun subscribe (Lmisk/events/Topic;Lmisk/events/Consumer$Handler;)V
+}
+
+public abstract interface class misk/events/Consumer$Context {
+	public abstract fun getTopic ()Lmisk/events/Topic;
+	public abstract fun isRetry ()Z
+	public abstract fun retryLater ([Lmisk/events/Event;)V
+}
+
+public abstract interface class misk/events/Consumer$Handler {
+	public abstract fun handleEvents (Lmisk/events/Consumer$Context;[Lmisk/events/Event;)V
+}
+
+public final class misk/events/ConsumerKt {
+	public static final fun subscribe (Lmisk/events/Consumer;Lmisk/events/Topic;Lkotlin/jvm/functions/Function2;)V
+}
+
+public final class misk/events/Event {
+	public fun <init> (Ljava/lang/String;Lokio/ByteString;Ljava/time/Instant;Lokio/ByteString;Ljava/lang/Long;Ljava/lang/String;Lokio/ByteString;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Lokio/ByteString;Ljava/time/Instant;Lokio/ByteString;Ljava/lang/Long;Ljava/lang/String;Lokio/ByteString;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun bodyAs (Lcom/squareup/wire/ProtoAdapter;)Lcom/squareup/wire/Message;
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lokio/ByteString;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun component4 ()Lokio/ByteString;
+	public final fun component5 ()Ljava/lang/Long;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Lokio/ByteString;
+	public final fun component8 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Lokio/ByteString;Ljava/time/Instant;Lokio/ByteString;Ljava/lang/Long;Ljava/lang/String;Lokio/ByteString;Ljava/util/Map;)Lmisk/events/Event;
+	public static synthetic fun copy$default (Lmisk/events/Event;Ljava/lang/String;Lokio/ByteString;Ljava/time/Instant;Lokio/ByteString;Ljava/lang/Long;Ljava/lang/String;Lokio/ByteString;Ljava/util/Map;ILjava/lang/Object;)Lmisk/events/Event;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Lokio/ByteString;
+	public final fun getEntityIdentifier ()Ljava/lang/String;
+	public final fun getHeaders ()Ljava/util/Map;
+	public final fun getId ()Lokio/ByteString;
+	public final fun getOccurredAt ()Ljava/time/Instant;
+	public final fun getPartitionKey ()Lokio/ByteString;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUpdateVersion ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public final fun header (Ljava/lang/String;Lcom/squareup/wire/ProtoAdapter;)Lcom/squareup/wire/Message;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class misk/events/Producer {
+	public abstract fun publish (Lmisk/events/Topic;[Lmisk/events/Event;)V
+}
+
+public final class misk/events/Topic {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/events/Topic;
+	public static synthetic fun copy$default (Lmisk/events/Topic;Ljava/lang/String;ILjava/lang/Object;)Lmisk/events/Topic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

@@ -1,0 +1,19 @@
+{
+  "name": "Web Actions",
+  "output_path": "lib/web/_tab/web-actions",
+  "port": "3201",
+  "rawGitginore": "",
+  "rawIndex": false,
+  "rawPackageJson": {},
+  "rawTsconfig": {},
+  "rawTslint": {},
+  "rawWebpackConfig": {},
+  "relative_path_prefix": "",
+  "slug": "web-actions",
+  "useWebpackBundleAnalyzer": false,
+  "useWebpackExternals": true,
+  "version": "0.3.3",
+  "zipOnBuild": false,
+  "___DeprecatedKeys": "Any keys below this point in your miskTab.json are deprecated and can be safely removed.",
+  "rawTsconfigInclude": []
+}

@@ -1,0 +1,338 @@
+public final class com/squareup/digester/protos/service/DigestData : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_COUNT Ljava/lang/Long;
+	public static final field DEFAULT_SUM Ljava/lang/Double;
+	public static final field DEFAULT_VENEUR_DIGEST Lokio/ByteString;
+	public final field count Ljava/lang/Long;
+	public final field sum Ljava/lang/Double;
+	public final field veneur_digest Lokio/ByteString;
+	public fun <init> (Ljava/lang/Long;Ljava/lang/Double;Lokio/ByteString;)V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/Double;Lokio/ByteString;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/digester/protos/service/DigestData$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/digester/protos/service/DigestData$Builder : com/squareup/wire/Message$Builder {
+	public field count Ljava/lang/Long;
+	public field sum Ljava/lang/Double;
+	public field veneur_digest Lokio/ByteString;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/digester/protos/service/DigestData;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun count (Ljava/lang/Long;)Lcom/squareup/digester/protos/service/DigestData$Builder;
+	public fun sum (Ljava/lang/Double;)Lcom/squareup/digester/protos/service/DigestData$Builder;
+	public fun veneur_digest (Lokio/ByteString;)Lcom/squareup/digester/protos/service/DigestData$Builder;
+}
+
+public final class com/squareup/digester/protos/service/GetDigestsRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_WINDOWS_END_FROM_MS Ljava/lang/Long;
+	public static final field DEFAULT_WINDOWS_END_TO_MS Ljava/lang/Long;
+	public final field windows_end_from_ms Ljava/lang/Long;
+	public final field windows_end_to_ms Ljava/lang/Long;
+	public fun <init> (Ljava/lang/Long;Ljava/lang/Long;)V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/Long;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/digester/protos/service/GetDigestsRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/digester/protos/service/GetDigestsRequest$Builder : com/squareup/wire/Message$Builder {
+	public field windows_end_from_ms Ljava/lang/Long;
+	public field windows_end_to_ms Ljava/lang/Long;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/digester/protos/service/GetDigestsRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun windows_end_from_ms (Ljava/lang/Long;)Lcom/squareup/digester/protos/service/GetDigestsRequest$Builder;
+	public fun windows_end_to_ms (Ljava/lang/Long;)Lcom/squareup/digester/protos/service/GetDigestsRequest$Builder;
+}
+
+public final class com/squareup/digester/protos/service/GetDigestsResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public final field metric_family Lcom/squareup/digester/protos/service/MetricFamily;
+	public fun <init> (Lcom/squareup/digester/protos/service/MetricFamily;)V
+	public fun <init> (Lcom/squareup/digester/protos/service/MetricFamily;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/digester/protos/service/GetDigestsResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/digester/protos/service/GetDigestsResponse$Builder : com/squareup/wire/Message$Builder {
+	public field metric_family Lcom/squareup/digester/protos/service/MetricFamily;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/digester/protos/service/GetDigestsResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun metric_family (Lcom/squareup/digester/protos/service/MetricFamily;)Lcom/squareup/digester/protos/service/GetDigestsResponse$Builder;
+}
+
+public final class com/squareup/digester/protos/service/MetricFamily : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public final field metric_descriptor Lcom/squareup/digester/protos/service/MetricFamily$MetricDescriptor;
+	public final field metrics Ljava/util/List;
+	public fun <init> (Lcom/squareup/digester/protos/service/MetricFamily$MetricDescriptor;Ljava/util/List;)V
+	public fun <init> (Lcom/squareup/digester/protos/service/MetricFamily$MetricDescriptor;Ljava/util/List;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/digester/protos/service/MetricFamily$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/digester/protos/service/MetricFamily$Builder : com/squareup/wire/Message$Builder {
+	public field metric_descriptor Lcom/squareup/digester/protos/service/MetricFamily$MetricDescriptor;
+	public field metrics Ljava/util/List;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/digester/protos/service/MetricFamily;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun metric_descriptor (Lcom/squareup/digester/protos/service/MetricFamily$MetricDescriptor;)Lcom/squareup/digester/protos/service/MetricFamily$Builder;
+	public fun metrics (Ljava/util/List;)Lcom/squareup/digester/protos/service/MetricFamily$Builder;
+}
+
+public final class com/squareup/digester/protos/service/MetricFamily$Digest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_END_AT_MS Ljava/lang/Long;
+	public static final field DEFAULT_STAGGER Ljava/lang/Long;
+	public static final field DEFAULT_START_AT_MS Ljava/lang/Long;
+	public final field digest_data Lcom/squareup/digester/protos/service/DigestData;
+	public final field end_at_ms Ljava/lang/Long;
+	public final field stagger Ljava/lang/Long;
+	public final field start_at_ms Ljava/lang/Long;
+	public fun <init> (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;Lcom/squareup/digester/protos/service/DigestData;)V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;Lcom/squareup/digester/protos/service/DigestData;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/digester/protos/service/MetricFamily$Digest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/digester/protos/service/MetricFamily$Digest$Builder : com/squareup/wire/Message$Builder {
+	public field digest_data Lcom/squareup/digester/protos/service/DigestData;
+	public field end_at_ms Ljava/lang/Long;
+	public field stagger Ljava/lang/Long;
+	public field start_at_ms Ljava/lang/Long;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/digester/protos/service/MetricFamily$Digest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun digest_data (Lcom/squareup/digester/protos/service/DigestData;)Lcom/squareup/digester/protos/service/MetricFamily$Digest$Builder;
+	public fun end_at_ms (Ljava/lang/Long;)Lcom/squareup/digester/protos/service/MetricFamily$Digest$Builder;
+	public fun stagger (Ljava/lang/Long;)Lcom/squareup/digester/protos/service/MetricFamily$Digest$Builder;
+	public fun start_at_ms (Ljava/lang/Long;)Lcom/squareup/digester/protos/service/MetricFamily$Digest$Builder;
+}
+
+public final class com/squareup/digester/protos/service/MetricFamily$Metric : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public final field digests Ljava/util/List;
+	public final field labels Ljava/util/Map;
+	public fun <init> (Ljava/util/Map;Ljava/util/List;)V
+	public fun <init> (Ljava/util/Map;Ljava/util/List;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/digester/protos/service/MetricFamily$Metric$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/digester/protos/service/MetricFamily$Metric$Builder : com/squareup/wire/Message$Builder {
+	public field digests Ljava/util/List;
+	public field labels Ljava/util/Map;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/digester/protos/service/MetricFamily$Metric;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun digests (Ljava/util/List;)Lcom/squareup/digester/protos/service/MetricFamily$Metric$Builder;
+	public fun labels (Ljava/util/Map;)Lcom/squareup/digester/protos/service/MetricFamily$Metric$Builder;
+}
+
+public final class com/squareup/digester/protos/service/MetricFamily$MetricDescriptor : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_HELP Ljava/lang/String;
+	public static final field DEFAULT_NAME Ljava/lang/String;
+	public final field help Ljava/lang/String;
+	public final field name Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/digester/protos/service/MetricFamily$MetricDescriptor$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/digester/protos/service/MetricFamily$MetricDescriptor$Builder : com/squareup/wire/Message$Builder {
+	public field help Ljava/lang/String;
+	public field name Ljava/lang/String;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/digester/protos/service/MetricFamily$MetricDescriptor;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun help (Ljava/lang/String;)Lcom/squareup/digester/protos/service/MetricFamily$MetricDescriptor$Builder;
+	public fun name (Ljava/lang/String;)Lcom/squareup/digester/protos/service/MetricFamily$MetricDescriptor$Builder;
+}
+
+public final class com/squareup/digester/protos/tdigest/Centroid : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_MEAN Ljava/lang/Double;
+	public static final field DEFAULT_WEIGHT Ljava/lang/Double;
+	public final field mean Ljava/lang/Double;
+	public final field samples Ljava/util/List;
+	public final field weight Ljava/lang/Double;
+	public fun <init> (Ljava/lang/Double;Ljava/lang/Double;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/Double;Ljava/lang/Double;Ljava/util/List;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/digester/protos/tdigest/Centroid$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/digester/protos/tdigest/Centroid$Builder : com/squareup/wire/Message$Builder {
+	public field mean Ljava/lang/Double;
+	public field samples Ljava/util/List;
+	public field weight Ljava/lang/Double;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/digester/protos/tdigest/Centroid;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun mean (Ljava/lang/Double;)Lcom/squareup/digester/protos/tdigest/Centroid$Builder;
+	public fun samples (Ljava/util/List;)Lcom/squareup/digester/protos/tdigest/Centroid$Builder;
+	public fun weight (Ljava/lang/Double;)Lcom/squareup/digester/protos/tdigest/Centroid$Builder;
+}
+
+public final class com/squareup/digester/protos/tdigest/MergingDigestData : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_COMPRESSION Ljava/lang/Double;
+	public static final field DEFAULT_MAX Ljava/lang/Double;
+	public static final field DEFAULT_MIN Ljava/lang/Double;
+	public final field compression Ljava/lang/Double;
+	public final field main_centroids Ljava/util/List;
+	public final field max Ljava/lang/Double;
+	public final field min Ljava/lang/Double;
+	public fun <init> (Ljava/util/List;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)V
+	public fun <init> (Ljava/util/List;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/digester/protos/tdigest/MergingDigestData$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/digester/protos/tdigest/MergingDigestData$Builder : com/squareup/wire/Message$Builder {
+	public field compression Ljava/lang/Double;
+	public field main_centroids Ljava/util/List;
+	public field max Ljava/lang/Double;
+	public field min Ljava/lang/Double;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/digester/protos/tdigest/MergingDigestData;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun compression (Ljava/lang/Double;)Lcom/squareup/digester/protos/tdigest/MergingDigestData$Builder;
+	public fun main_centroids (Ljava/util/List;)Lcom/squareup/digester/protos/tdigest/MergingDigestData$Builder;
+	public fun max (Ljava/lang/Double;)Lcom/squareup/digester/protos/tdigest/MergingDigestData$Builder;
+	public fun min (Ljava/lang/Double;)Lcom/squareup/digester/protos/tdigest/MergingDigestData$Builder;
+}
+
+public final class misk/metrics/digester/FakeDigest : misk/metrics/digester/TDigest {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public fun add (D)V
+	public fun count ()J
+	public fun mergeInto (Lmisk/metrics/digester/FakeDigest;)V
+	public synthetic fun mergeInto (Lmisk/metrics/digester/TDigest;)V
+	public fun proto ()Lcom/squareup/digester/protos/service/DigestData;
+	public fun quantile (D)D
+	public fun sum ()D
+}
+
+public final class misk/metrics/digester/MergingDigest {
+	public fun <init> (D)V
+	public fun <init> (Lcom/squareup/digester/protos/tdigest/MergingDigestData;)V
+	public final fun add (DD)V
+	public final fun data ()Lcom/squareup/digester/protos/tdigest/MergingDigestData;
+	public final fun mergeFrom (Lmisk/metrics/digester/MergingDigest;)V
+	public final fun quantile (D)D
+}
+
+public final class misk/metrics/digester/SlidingWindowDigest {
+	public fun <init> (Lmisk/metrics/digester/Windower;Lkotlin/jvm/functions/Function0;Ljava/time/Clock;)V
+	public synthetic fun <init> (Lmisk/metrics/digester/Windower;Lkotlin/jvm/functions/Function0;Ljava/time/Clock;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun closedDigests (Ljava/time/ZonedDateTime;)Ljava/util/List;
+	public final fun mergeIn (Ljava/util/List;)V
+	public final fun observe (D)V
+	public final fun openDigests (Z)Ljava/util/List;
+	public final fun quantile (D)D
+	public final fun snapshot (Ljava/util/List;)Lmisk/metrics/digester/Snapshot;
+}
+
+public final class misk/metrics/digester/Snapshot {
+	public fun <init> (Ljava/util/List;JD)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()J
+	public final fun component3 ()D
+	public final fun copy (Ljava/util/List;JD)Lmisk/metrics/digester/Snapshot;
+	public static synthetic fun copy$default (Lmisk/metrics/digester/Snapshot;Ljava/util/List;JDILjava/lang/Object;)Lmisk/metrics/digester/Snapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCount ()J
+	public final fun getQuantileVals ()Ljava/util/List;
+	public final fun getSum ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class misk/metrics/digester/TDigest {
+	public abstract fun add (D)V
+	public abstract fun count ()J
+	public abstract fun mergeInto (Lmisk/metrics/digester/TDigest;)V
+	public abstract fun proto ()Lcom/squareup/digester/protos/service/DigestData;
+	public abstract fun quantile (D)D
+	public abstract fun sum ()D
+}
+
+public final class misk/metrics/digester/VeneurDigest : misk/metrics/digester/TDigest {
+	public fun <init> ()V
+	public fun <init> (Lcom/squareup/digester/protos/service/DigestData;)V
+	public fun add (D)V
+	public fun count ()J
+	public synthetic fun mergeInto (Lmisk/metrics/digester/TDigest;)V
+	public fun mergeInto (Lmisk/metrics/digester/VeneurDigest;)V
+	public final fun mergingDigest ()Lmisk/metrics/digester/MergingDigest;
+	public fun proto ()Lcom/squareup/digester/protos/service/DigestData;
+	public fun quantile (D)D
+	public fun sum ()D
+}
+
+public final class misk/metrics/digester/Window {
+	public fun <init> (Ljava/time/ZonedDateTime;Ljava/time/ZonedDateTime;)V
+	public final fun component1 ()Ljava/time/ZonedDateTime;
+	public final fun component2 ()Ljava/time/ZonedDateTime;
+	public final fun contains (Ljava/time/ZonedDateTime;)Z
+	public final fun copy (Ljava/time/ZonedDateTime;Ljava/time/ZonedDateTime;)Lmisk/metrics/digester/Window;
+	public static synthetic fun copy$default (Lmisk/metrics/digester/Window;Ljava/time/ZonedDateTime;Ljava/time/ZonedDateTime;ILjava/lang/Object;)Lmisk/metrics/digester/Window;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()Ljava/time/ZonedDateTime;
+	public final fun getStart ()Ljava/time/ZonedDateTime;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/metrics/digester/WindowDigest {
+	public fun <init> (Lmisk/metrics/digester/Window;Lmisk/metrics/digester/TDigest;)V
+	public final fun component1 ()Lmisk/metrics/digester/Window;
+	public final fun component2 ()Lmisk/metrics/digester/TDigest;
+	public final fun copy (Lmisk/metrics/digester/Window;Lmisk/metrics/digester/TDigest;)Lmisk/metrics/digester/WindowDigest;
+	public static synthetic fun copy$default (Lmisk/metrics/digester/WindowDigest;Lmisk/metrics/digester/Window;Lmisk/metrics/digester/TDigest;ILjava/lang/Object;)Lmisk/metrics/digester/WindowDigest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDigest ()Lmisk/metrics/digester/TDigest;
+	public final fun getWindow ()Lmisk/metrics/digester/Window;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/metrics/digester/Windower {
+	public fun <init> (II)V
+	public final fun windowsContaining (Ljava/time/ZonedDateTime;)Ljava/util/List;
+}
+

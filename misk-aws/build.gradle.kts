@@ -17,6 +17,7 @@ dependencies {
   api(project(":wisp-aws-environment"))
   api(project(":wisp-config"))
   api(project(":wisp-containers-testing"))
+  api(project(":wisp-lease"))
   api(project(":wisp-logging"))
 
   testImplementation(Dependencies.assertj)
@@ -29,13 +30,6 @@ dependencies {
   testImplementation(Dependencies.mockitoCore)
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-feature-testing"))
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

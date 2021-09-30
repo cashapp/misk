@@ -1,4 +1,5 @@
 dependencies {
+  api(project(":misk-exceptions-dynamodb"))
   api(Dependencies.aws2Dynamodb)
 
   implementation(Dependencies.guice)
@@ -6,13 +7,6 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

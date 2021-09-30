@@ -15,7 +15,6 @@ import misk.web.PathParam
 import misk.web.Response
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
@@ -51,20 +50,20 @@ class MetricsInterceptorTest {
   @Test
   fun responseCodes() {
     val requestDuration = metricsInterceptorFactory.requestDuration
-    requestDuration.record(1.0, "MetricsInterceptorTestAction", "unknown", "200")
-    assertThat(requestDuration.count("MetricsInterceptorTestAction", "unknown", "200")).isEqualTo(3)
-    requestDuration.record(1.0, "MetricsInterceptorTestAction", "unknown", "202")
-    assertThat(requestDuration.count("MetricsInterceptorTestAction", "unknown", "202")).isEqualTo(2)
-    requestDuration.record(1.0, "MetricsInterceptorTestAction", "unknown", "404")
-    assertThat(requestDuration.count("MetricsInterceptorTestAction", "unknown", "404")).isEqualTo(2)
-    requestDuration.record(1.0, "MetricsInterceptorTestAction", "unknown", "403")
-    assertThat(requestDuration.count("MetricsInterceptorTestAction", "unknown", "403")).isEqualTo(3)
+    requestDuration.labels("MetricsInterceptorTestAction", "unknown", "200").observe(1.0)
+    assertThat(requestDuration.labels("MetricsInterceptorTestAction", "unknown", "200").get().count.toInt()).isEqualTo(3)
+    requestDuration.labels("MetricsInterceptorTestAction", "unknown", "202").observe(1.0)
+    assertThat(requestDuration.labels("MetricsInterceptorTestAction", "unknown", "202").get().count.toInt()).isEqualTo(2)
+    requestDuration.labels("MetricsInterceptorTestAction", "unknown", "404").observe(1.0)
+    assertThat(requestDuration.labels("MetricsInterceptorTestAction", "unknown", "404").get().count.toInt()).isEqualTo(2)
+    requestDuration.labels("MetricsInterceptorTestAction", "unknown", "403").observe(1.0)
+    assertThat(requestDuration.labels("MetricsInterceptorTestAction", "unknown", "403").get().count.toInt()).isEqualTo(3)
 
-    requestDuration.record(1.0, "MetricsInterceptorTestAction", "my-peer", "200")
-    assertThat(requestDuration.count("MetricsInterceptorTestAction", "my-peer", "200")).isEqualTo(5)
+    requestDuration.labels("MetricsInterceptorTestAction", "my-peer", "200").observe(1.0)
+    assertThat(requestDuration.labels("MetricsInterceptorTestAction", "my-peer", "200").get().count.toInt()).isEqualTo(5)
 
-    requestDuration.record(1.0, "MetricsInterceptorTestAction", "<user>", "200")
-    assertThat(requestDuration.count("MetricsInterceptorTestAction", "<user>", "200")).isEqualTo(2)
+    requestDuration.labels("MetricsInterceptorTestAction", "<user>", "200").observe(1.0)
+    assertThat(requestDuration.labels("MetricsInterceptorTestAction", "<user>", "200").get().count.toInt()).isEqualTo(2)
   }
 
   fun invoke(

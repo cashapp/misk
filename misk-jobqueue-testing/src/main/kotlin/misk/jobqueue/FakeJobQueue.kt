@@ -183,7 +183,7 @@ class FakeJobQueue @Inject constructor(
       }
 
       result += job
-      if (assertAcknowledged) {
+      if (!job.deadLettered && assertAcknowledged) {
         check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
       }
     }

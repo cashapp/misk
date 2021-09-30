@@ -14,6 +14,7 @@ import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import misk.ServiceModule
+import misk.exceptions.dynamodb.DynamoDbExceptionMapperModule
 import misk.cloud.aws.AwsRegion
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
@@ -40,6 +41,7 @@ class RealDynamoDbModule constructor(
     multibind<HealthCheck>().to<DynamoDbHealthCheck>()
     bind<DynamoDbService>().to<RealDynamoDbService>()
     install(ServiceModule<DynamoDbService>())
+    install(DynamoDbExceptionMapperModule())
   }
 
   @Provides @Singleton

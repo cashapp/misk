@@ -12,17 +12,9 @@ dependencies {
   api(project(":wisp-logging"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.logbackClassic)
   testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.retrofitMock)
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

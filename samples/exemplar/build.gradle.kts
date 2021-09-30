@@ -12,12 +12,13 @@ dependencies {
   // TODO: these should be implementation("com.squareup.misk:*")
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
+  implementation(project(":misk-admin"))
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-prometheus"))
 
   testImplementation(project(":misk-testing"))
-  testImplementation("org.assertj:assertj-core:3.20.2")
+  testImplementation("org.assertj:assertj-core:3.21.0")
 }
 
 val jar by tasks.getting(Jar::class) {

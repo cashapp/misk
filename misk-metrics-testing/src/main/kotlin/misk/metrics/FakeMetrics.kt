@@ -5,15 +5,19 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
+import misk.metrics.Metrics
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * An in-memory metrics store with APIs to verify which metrics were collected.
  *
  * The only way to create an instance of this is with [FakeMetricsModule].
  */
-class FakeMetrics internal constructor() : Metrics {
-  private val registry = CollectorRegistry(true)
-
+@Singleton
+class FakeMetrics @Inject internal constructor(
+  private val registry: CollectorRegistry
+) : Metrics {
   override fun counter(name: String, help: String?, labelNames: List<String>): Counter =
     Counter.build(name, help)
       .labelNames(*labelNames.toTypedArray())

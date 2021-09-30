@@ -11,13 +11,7 @@ dependencies {
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.moshiKotlin)
   testImplementation(Dependencies.moshiAdapters)
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
+  testImplementation(project(":wisp-logging-testing"))
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

@@ -1,16 +1,5 @@
-sourceSets {
-  val main by getting {
-    resources.srcDir(listOf(
-      "web/tabs/admin-dashboard/lib",
-      "web/tabs/config/lib",
-      "web/tabs/database/lib",
-      "web/tabs/web-actions/lib"
-    ))
-    resources.exclude("**/node_modules")
-  }
-  val test by getting {
-    java.srcDir("src/test/kotlin/")
-  }
+plugins {
+  id("com.squareup.wire")
 }
 
 dependencies {
@@ -57,11 +46,12 @@ dependencies {
   implementation(Dependencies.prometheusHotspot)
   implementation(Dependencies.jnrUnixsocket)
   implementation(Dependencies.concurrencyLimitsCore)
-  implementation(project(":misk-actions"))
   implementation(project(":misk-core"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-prometheus"))
+  implementation(project(":misk-proto"))
   implementation(project(":misk-service"))
+  api(project(":misk-actions"))
   api(project(":misk-inject"))
   api(project(":wisp-client"))
   api(project(":wisp-config"))
@@ -83,10 +73,37 @@ dependencies {
   testImplementation(Dependencies.guavaTestLib)
 }
 
+val generatedSourceDir = "$buildDir/generated/source/wire-test"
+
+wire {
+  sourcePath {
+    srcDir("src/test/proto/")
+  }
+  java {
+    out = generatedSourceDir
+  }
+}
+
+// Make sure the Wire-generated sources are test-only.
 afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
+  val generatedSourceGlob = "$generatedSourceDir/**"
+
+  sourceSets {
+    val main by getting {
+      java.setSrcDirs(java.srcDirs.filter { !it.path.contains(generatedSourceDir) })
+    }
+    val test by getting {
+      java.srcDir(generatedSourceDir)
+    }
+  }
+
+  tasks {
+    compileJava {
+      exclude(generatedSourceGlob)
+    }
+    compileTestJava {
+      include(generatedSourceGlob)
+    }
   }
 }
 

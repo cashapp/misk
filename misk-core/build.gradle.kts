@@ -1,5 +1,7 @@
 dependencies {
   api(project(":wisp-config"))
+  api(project(":wisp-lease"))
+  api(project(":wisp-lease-testing"))
   api(project(":wisp-logging"))
   api(project(":wisp-resource-loader"))
   api(project(":wisp-resource-loader-testing"))
@@ -23,13 +25,6 @@ dependencies {
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp-logging-testing"))
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

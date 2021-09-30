@@ -6,6 +6,7 @@ sourceSets {
 
 dependencies {
   implementation(Dependencies.guice)
+  implementation(Dependencies.gcpCloudCore)
   implementation(Dependencies.gcpCloudStorage)
   implementation(Dependencies.gcpDatastore) {
     exclude(group = "com.google.protobuf")
@@ -24,13 +25,6 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-service"))
   api(project(":misk-testing"))
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

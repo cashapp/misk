@@ -1,4 +1,5 @@
 dependencies {
+  implementation(Dependencies.gcpCloudCore)
   implementation(Dependencies.gcpCloudStorage)
   implementation(Dependencies.gcpDatastore) {
     exclude(group = "com.google.protobuf")
@@ -7,6 +8,7 @@ dependencies {
   }
   implementation(Dependencies.gcpKms)
   implementation(Dependencies.gcpLogback)
+  implementation(Dependencies.gcpLogging)
   implementation(Dependencies.guice)
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.openTracingDatadog)
@@ -27,13 +29,6 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-gcp-testing"))
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
-  }
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")

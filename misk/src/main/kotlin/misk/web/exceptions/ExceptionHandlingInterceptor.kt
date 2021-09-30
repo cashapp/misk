@@ -7,6 +7,7 @@ import misk.Action
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.grpc.GrpcMessageSink
+import misk.proto.Status
 import misk.web.DispatchMechanism
 import misk.web.HttpCall
 import misk.web.NetworkChain
@@ -23,6 +24,7 @@ import wisp.logging.getLogger
 import wisp.logging.log
 import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
+import java.util.Base64
 import javax.inject.Inject
 
 /**
@@ -44,10 +46,10 @@ class ExceptionHandlingInterceptor(
       chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
       val response = toResponse(th)
-      chain.httpCall.statusCode = response.statusCode
       if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
-        sendGrpcFailure(chain.httpCall, response)
+        sendGrpcFailure(chain.httpCall, response.statusCode, toGrpcResponse(th))
       } else {
+        chain.httpCall.statusCode = response.statusCode
         sendHttpFailure(chain.httpCall, response)
       }
     }
@@ -67,16 +69,19 @@ class ExceptionHandlingInterceptor(
    * One thing to note is for our metrics we want to pretend that the HTTP code is what we sent.
    * Otherwise gRPC requests that crashed and yielded an HTTP 200 code will confuse operators.
    */
-  private fun sendGrpcFailure(httpCall: HttpCall, response: Response<*>) {
-    httpCall.setStatusCodes(httpCall.statusCode, 200)
+  private fun sendGrpcFailure(httpCall: HttpCall, httpStatus: Int, response: GrpcErrorResponse) {
+    // set the statusCode to what we would've sent for an HTTP error so that metrics on HTTP
+    // status continue to count errors, instead of forcing them all to "200" on account of gRPC.
+    httpCall.setStatusCodes(httpStatus, 200)
     httpCall.requireTrailers()
     httpCall.setResponseHeader("grpc-encoding", "identity")
     httpCall.setResponseHeader("Content-Type", MediaTypes.APPLICATION_GRPC)
     httpCall.setResponseTrailer(
       "grpc-status",
-      toGrpcStatus(response.statusCode).code.toString()
+      response.status.code.toString()
     )
-    httpCall.setResponseTrailer("grpc-message", this.grpcMessage(response))
+    httpCall.setResponseTrailer("grpc-status-details-bin", response.toEncodedStatusProto)
+    httpCall.setResponseTrailer("grpc-message", response.message ?: response.status.name)
     httpCall.takeResponseBody()?.use { responseBody: BufferedSink ->
       GrpcMessageSink(responseBody, ProtoAdapter.BYTES, grpcEncoding = "identity")
         .use { messageSink ->
@@ -91,21 +96,6 @@ class ExceptionHandlingInterceptor(
     return buffer.readUtf8()
   }
 
-  /** https://grpc.github.io/grpc/core/md_doc_http-grpc-status-mapping.html */
-  private fun toGrpcStatus(statusCode: Int): GrpcStatus {
-    return when (statusCode) {
-      400 -> GrpcStatus.INTERNAL
-      401 -> GrpcStatus.UNAUTHENTICATED
-      403 -> GrpcStatus.PERMISSION_DENIED
-      404 -> GrpcStatus.UNIMPLEMENTED
-      429 -> GrpcStatus.UNAVAILABLE
-      502 -> GrpcStatus.UNAVAILABLE
-      503 -> GrpcStatus.UNAVAILABLE
-      504 -> GrpcStatus.UNAVAILABLE
-      else -> GrpcStatus.UNKNOWN
-    }
-  }
-
   private fun toResponse(th: Throwable): Response<*> = when (th) {
     is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
     is UnauthorizedException -> UNAUTHORIZED_RESPONSE
@@ -115,6 +105,23 @@ class ExceptionHandlingInterceptor(
       log.log(it.loggingLevel(th), th) { "exception dispatching to $actionName" }
       it.toResponse(th)
     } ?: toInternalServerError(th)
+  }
+
+  private fun toGrpcResponse(th: Throwable): GrpcErrorResponse = when (th) {
+    is UnauthenticatedException -> GrpcErrorResponse(GrpcStatus.UNAUTHENTICATED, th.message)
+    is UnauthorizedException -> GrpcErrorResponse(GrpcStatus.PERMISSION_DENIED, th.message)
+    is InvocationTargetException -> toGrpcResponse(th.targetException)
+    is UncheckedExecutionException -> toGrpcResponse(th.cause!!)
+    else -> mapperResolver.mapperFor(th)?.let {
+      log.log(it.loggingLevel(th), th) { "exception dispatching to $actionName" }
+      val grpcResponse = it.toGrpcResponse(th)
+      if (grpcResponse == null) {
+        val httpResponse = toResponse(th)
+        GrpcErrorResponse(toGrpcStatus(httpResponse.statusCode), grpcMessage(httpResponse))
+      } else {
+        grpcResponse
+      }
+    } ?: GrpcErrorResponse.INTERNAL_SERVER_ERROR
   }
 
   private fun toInternalServerError(th: Throwable): Response<*> {
@@ -150,3 +157,31 @@ class ExceptionHandlingInterceptor(
     )
   }
 }
+
+/** https://grpc.github.io/grpc/core/md_doc_http-grpc-status-mapping.html */
+fun toGrpcStatus(statusCode: Int): GrpcStatus {
+  return when (statusCode) {
+    400 -> GrpcStatus.INTERNAL
+    401 -> GrpcStatus.UNAUTHENTICATED
+    403 -> GrpcStatus.PERMISSION_DENIED
+    404 -> GrpcStatus.UNIMPLEMENTED
+    409 -> GrpcStatus.ALREADY_EXISTS
+    429 -> GrpcStatus.UNAVAILABLE
+    502 -> GrpcStatus.UNAVAILABLE
+    503 -> GrpcStatus.UNAVAILABLE
+    504 -> GrpcStatus.UNAVAILABLE
+    else -> GrpcStatus.UNKNOWN
+  }
+}
+
+/** Convert to a compatible base64-proto-encoded google.rpc.Status-compatible value. */
+private val GrpcErrorResponse.toEncodedStatusProto
+  get() : String {
+    val status = Status(
+      code = status.code, // must match "grpc-status"
+      message = message ?: status.name, // must match "grpc-message"
+      details = details
+    )
+    // In gRPC, base64-encoded binary fields must be un-padded.
+    return Base64.getEncoder().withoutPadding().encodeToString(Status.ADAPTER.encode(status))
+  }

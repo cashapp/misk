@@ -25,6 +25,8 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
   api(project(":wisp-config"))
+  api(project(":wisp-lease"))
+  api(project(":wisp-lease-testing"))
   api(project(":wisp-logging"))
 
   testImplementation(Dependencies.docker)
@@ -45,13 +47,6 @@ sourceSets {
     resources {
       srcDir("../misk-zookeeper-testing/src/main/resources")
     }
-  }
-}
-
-afterEvaluate {
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = "gfm"
   }
 }
 

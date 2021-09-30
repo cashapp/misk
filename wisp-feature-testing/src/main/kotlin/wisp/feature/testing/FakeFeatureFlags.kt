@@ -1,6 +1,9 @@
 package wisp.feature.testing
 
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import wisp.config.Config
+import wisp.config.Configurable
 import wisp.feature.Attributes
 import wisp.feature.DynamicConfig
 import wisp.feature.Feature
@@ -12,13 +15,26 @@ import wisp.feature.toSafeJson
 import java.util.PriorityQueue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
+import kotlin.reflect.KClass
 
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
-class FakeFeatureFlags constructor(
+class FakeFeatureFlags
+@Deprecated("Needed for Misk Provider usage...")
+constructor(
   val moshi: () -> Moshi
-) : FeatureFlags, DynamicConfig {
+) : FeatureFlags, DynamicConfig, Configurable<FakeFeatureFlagsConfig> {
+
+  /**
+   * Preferred constructor for Wisp
+   */
+  constructor(
+    moshi: Moshi = Moshi.Builder()
+      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+      .build()
+  ) : this({ moshi })
+
   companion object {
     const val KEY = "fake_dynamic_flag"
     val defaultAttributes = Attributes()
@@ -30,6 +46,11 @@ class FakeFeatureFlags constructor(
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
     get(feature, key, attributes) as? Boolean ?: throw IllegalArgumentException(
       "Boolean flag $feature must be overridden with override() before use; the default value of false has been DEPRECATED"
+    )
+
+  override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
+    get(feature, key, attributes) as? Double ?: throw IllegalArgumentException(
+      "Double flag $feature must be overridden with override() before use; the default value of false has been DEPRECATED"
     )
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
@@ -71,6 +92,7 @@ class FakeFeatureFlags constructor(
   }
 
   override fun getBoolean(feature: Feature) = getBoolean(feature, KEY)
+  override fun getDouble(feature: Feature) = getDouble(feature, KEY)
   override fun getInt(feature: Feature) = getInt(feature, KEY)
   override fun getString(feature: Feature) = getString(feature, KEY)
   override fun <T : Enum<T>> getEnum(feature: Feature, clazz: Class<T>): T = getEnum(
@@ -135,6 +157,14 @@ class FakeFeatureFlags constructor(
     tracker: (Boolean) -> Unit
   ) = trackAny(feature, key, attributes, executor, tracker)
 
+  override fun trackDouble(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Double) -> Unit
+  ) = trackAny(feature, key, attributes, executor, tracker)
+
   override fun trackInt(
     feature: Feature,
     key: String,
@@ -175,6 +205,12 @@ class FakeFeatureFlags constructor(
     tracker: (Boolean) -> Unit
   ) = trackBoolean(feature, KEY, executor, tracker)
 
+  override fun trackDouble(
+    feature: Feature,
+    executor: Executor,
+    tracker: (Double) -> Unit
+  ) = trackDouble(feature, KEY, executor, tracker)
+
   override fun trackInt(
     feature: Feature,
     executor: Executor,
@@ -205,6 +241,11 @@ class FakeFeatureFlags constructor(
     feature: Feature,
     value: Boolean
   ) = override<Boolean>(feature, value)
+
+  fun override(
+    feature: Feature,
+    value: Double
+  ) = override<Double>(feature, value)
 
   fun override(
     feature: Feature,
@@ -250,6 +291,14 @@ class FakeFeatureFlags constructor(
     value: Boolean,
     attributes: Attributes = defaultAttributes
   ) = overrideKey<Boolean>(feature, key, value, attributes)
+
+  @JvmOverloads
+  fun overrideKey(
+    feature: Feature,
+    key: String,
+    value: Double,
+    attributes: Attributes = defaultAttributes
+  ) = overrideKey<Double>(feature, key, value, attributes)
 
   @JvmOverloads
   fun overrideKey(
@@ -325,6 +374,16 @@ class FakeFeatureFlags constructor(
     overrideKey(feature, key, jsonValue, attributes)
   }
 
+  @JvmOverloads
+  fun overrideKeyJsonString(
+    feature: Feature,
+    key: String,
+    value: String,
+    attributes: Attributes = defaultAttributes
+  ) {
+    overrideKey(feature, key, { value }, attributes)
+  }
+
   fun reset() {
     overrides.clear()
   }
@@ -355,9 +414,68 @@ class FakeFeatureFlags constructor(
   /**
    * Data class that holds a tracker for the given [feature, key, attributes].
    */
-  private data class TrackerMapValue<T> (
+  private data class TrackerMapValue<T>(
     val attributes: Attributes = defaultAttributes,
     val executor: Executor,
     val tracker: (T) -> Unit
   )
+
+  /**
+   * Configures the feature flags values from supplied config.
+   */
+  override fun configure(config: FakeFeatureFlagsConfig) {
+    config.featuresConfig.forEach {
+      val key = it.key ?: KEY
+
+      when (it.type) {
+        "Boolean" -> overrideKey(
+          Feature(it.featureName),
+          key,
+          it.value.toBoolean(),
+          it.attributes
+        )
+        "Int" -> overrideKey(Feature(it.featureName), key, it.value.toInt(), it.attributes)
+        "Double" -> overrideKey(
+          Feature(it.featureName),
+          key,
+          it.value.toDouble(),
+          it.attributes
+        )
+        "String" -> overrideKey(Feature(it.featureName), key, it.value, it.attributes)
+        "ENUM" -> {
+          TODO(
+            "Need to work out how to dynamically create an Enum of type X " +
+              "with the String value"
+          )
+        }
+        "JSON" -> overrideKeyJsonString(
+          Feature(it.featureName),
+          key,
+          it.value,
+          it.attributes
+        )
+        else -> {
+          // unknown type 'T' for the value, pass it on
+          TODO("Need a way to convert from String to unknown type 'T'")
+        }
+      }
+    }
+  }
+
+  override fun getConfigClass(): KClass<FakeFeatureFlagsConfig> {
+    return FakeFeatureFlagsConfig::class
+  }
+
 }
+
+data class FeaturesConfig(
+  val featureName: String,
+  val key: String? = null,
+  val attributes: Attributes = Attributes(),
+  val value: String,
+  val type: String = "String"
+)
+
+data class FakeFeatureFlagsConfig(
+  val featuresConfig: List<FeaturesConfig> = emptyList()
+) : Config

@@ -3,10 +3,9 @@ package misk.metrics.backends.prometheus
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
-import io.prometheus.client.Summary
 import misk.metrics.Histogram
 import misk.metrics.Metrics
-import misk.prometheus.PrometheusHistogram
+import misk.metrics.v2.Metrics as MetricsV2
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,28 +14,26 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class PrometheusMetrics @Inject internal constructor(
-  private val registry: CollectorRegistry
+  private val metricsV2: MetricsV2
 ) : Metrics {
-  override fun counter(name: String, help: String?, labelNames: List<String>): Counter {
-    return Counter.build(name, help).labelNames(*labelNames.toTypedArray()).register(registry)
-  }
+  override fun counter(
+    name: String,
+    help: String?,
+    labelNames: List<String>
+  ): Counter = metricsV2.counter(name, help, labelNames)
 
-  override fun gauge(name: String, help: String, labelNames: List<String>): Gauge {
-    return Gauge.build(name, help).labelNames(*labelNames.toTypedArray()).register(registry)
-  }
+  override fun gauge(
+    name: String,
+    help: String,
+    labelNames: List<String>
+  ): Gauge = metricsV2.gauge(name, help, labelNames)
 
   override fun histogram(
     name: String,
     help: String,
     labelNames: List<String>,
     quantiles: Map<Double, Double>
-  ): Histogram {
-    val builder = Summary.build(name, help).labelNames(*labelNames.toTypedArray())
-    quantiles.forEach { quantile ->
-      builder.quantile(quantile.key, quantile.value)
-    }
-    return PrometheusHistogram(builder.register(registry))
-  }
+  ): Histogram = PrometheusHistogram(metricsV2.summary(name, help, labelNames, quantiles))
 
   companion object {
     /**

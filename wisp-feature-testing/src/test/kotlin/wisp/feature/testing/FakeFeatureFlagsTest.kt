@@ -1,12 +1,13 @@
 package wisp.feature.testing
 
 import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.feature.Attributes
 import wisp.feature.Feature
 import wisp.feature.getEnum
@@ -17,15 +18,75 @@ internal class FakeFeatureFlagsTest {
   val OTHER_FEATURE = Feature("bar")
   val TOKEN = "cust_abcdef123"
 
-  val moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-    .build()
-
   lateinit var subject: FakeFeatureFlags
 
   @BeforeEach
   fun beforeEachTest() {
-    subject = FakeFeatureFlags { moshi }
+    subject = FakeFeatureFlags()
+  }
+
+  @Test
+  fun getBoolean() {
+    // Default throws.
+    assertThrows<RuntimeException> { subject.getBoolean(FEATURE, TOKEN) }
+
+    // Can be overridden
+    subject.override(FEATURE, true)
+    subject.override(OTHER_FEATURE, false)
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
+    assertThat(subject.getBoolean(OTHER_FEATURE, TOKEN)).isEqualTo(false)
+
+    // Can override with specific keys
+    subject.overrideKey(FEATURE, "joker", false)
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
+    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
+
+    // Can override with specific keys and attributes
+    val attributes = Attributes(mapOf("type" to "bad"))
+    subject.overrideKey(FEATURE, "joker", false, attributes)
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
+    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
+    assertThat(subject.getBoolean(FEATURE, "joker", attributes)).isEqualTo(false)
+    // Provides the key level override when there is no match on attributes
+    assertThat(
+      subject.getBoolean(
+        FEATURE,
+        "joker",
+        Attributes(mapOf("don't" to "exist"))
+      )
+    ).isEqualTo(false)
+  }
+
+  @Test
+  fun getDouble() {
+    // Default throws.
+    assertThrows<RuntimeException> { subject.getDouble(FEATURE, TOKEN) }
+
+    // Can be overridden
+    subject.override(FEATURE, 1.0)
+    subject.override(OTHER_FEATURE, 2.0)
+    assertThat(subject.getDouble(FEATURE, TOKEN)).isEqualTo(1.0)
+    assertThat(subject.getDouble(OTHER_FEATURE, TOKEN)).isEqualTo(2.0)
+
+    // Can override with specific keys
+    subject.overrideKey(FEATURE, "joker", 3.0)
+    assertThat(subject.getDouble(FEATURE, TOKEN)).isEqualTo(1.0)
+    assertThat(subject.getDouble(FEATURE, "joker")).isEqualTo(3.0)
+
+    // Can override with specific keys and attributes
+    val attributes = Attributes(mapOf("type" to "bad"))
+    subject.overrideKey(FEATURE, "joker", 4.0, attributes)
+    assertThat(subject.getDouble(FEATURE, TOKEN)).isEqualTo(1.0)
+    assertThat(subject.getDouble(FEATURE, "joker")).isEqualTo(3.0)
+    assertThat(subject.getDouble(FEATURE, "joker", attributes)).isEqualTo(4.0)
+    // Provides the key level override when there is no match on attributes
+    assertThat(
+      subject.getDouble(
+        FEATURE,
+        "joker",
+        Attributes(mapOf("don't" to "exist"))
+      )
+    ).isEqualTo(3.0)
   }
 
   @Test
@@ -154,38 +215,6 @@ internal class FakeFeatureFlagsTest {
   }
 
   @Test
-  fun getBoolean() {
-    // Default throws.
-    assertThrows<RuntimeException> { subject.getBoolean(FEATURE, TOKEN) }
-
-    // Can be overridden
-    subject.override(FEATURE, true)
-    subject.override(OTHER_FEATURE, false)
-    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
-    assertThat(subject.getBoolean(OTHER_FEATURE, TOKEN)).isEqualTo(false)
-
-    // Can override with specific keys
-    subject.overrideKey(FEATURE, "joker", false)
-    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
-    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
-
-    // Can override with specific keys and attributes
-    val attributes = Attributes(mapOf("type" to "bad"))
-    subject.overrideKey(FEATURE, "joker", false, attributes)
-    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
-    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
-    assertThat(subject.getBoolean(FEATURE, "joker", attributes)).isEqualTo(false)
-    // Provides the key level override when there is no match on attributes
-    assertThat(
-      subject.getBoolean(
-        FEATURE,
-        "joker",
-        Attributes(mapOf("don't" to "exist"))
-      )
-    ).isEqualTo(false)
-  }
-
-  @Test
   fun getString() {
     // Default returns false and not throw as the other variants.
     assertThrows<RuntimeException> { subject.getString(FEATURE, TOKEN) }
@@ -287,4 +316,19 @@ internal class FakeFeatureFlagsTest {
     TYRANNOSAURUS,
     TALARURUS
   }
+
+  @Test
+  fun configureOverridesFeatures() {
+    val configSource = ConfigSource("classpath:/featureFlagsConfig.yaml")
+
+    val clazz = subject.getConfigClass()
+
+    val config = WispConfig.builder().addWispConfigSources(listOf(configSource)).build()
+      .loadConfigOrThrow(clazz, emptyList())
+    subject.configure(config)
+
+    assertThat(subject.getInt(Feature("foo1"))).isEqualTo(1)
+    assertThat(subject.getJson<JsonFeature>(Feature("fooJson")).optional).isEqualTo("value")
+  }
+
 }
