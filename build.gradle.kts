@@ -74,13 +74,13 @@ subprojects {
     add("testRuntimeOnly", Dependencies.junitEngine)
 
     // Platform/BOM dependencies constrain versions only.
-    add("api", enforcedPlatform(Dependencies.grpcBom))
-    add("api", enforcedPlatform(Dependencies.guava))
-    add("api", enforcedPlatform(Dependencies.jacksonBom))
-    add("api", enforcedPlatform(Dependencies.jerseyBom))
-    add("api", enforcedPlatform(Dependencies.jettyBom))
-    add("api", enforcedPlatform(Dependencies.kotlinBom))
-    add("api", enforcedPlatform(Dependencies.nettyBom))
+    add("api", platform(Dependencies.grpcBom))
+    add("api", platform(Dependencies.guava))
+    add("api", platform(Dependencies.jacksonBom))
+    add("api", platform(Dependencies.jerseyBom))
+    add("api", platform(Dependencies.jettyBom))
+    add("api", platform(Dependencies.kotlinBom))
+    add("api", platform(Dependencies.nettyBom))
   }
 
   // We have to set the dokka configuration after evaluation since the com.vanniktech.maven.publish
