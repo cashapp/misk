@@ -173,4 +173,27 @@ class DataSourceConfigTest {
       config.buildJdbcUrl(TESTING)
     )
   }
+
+  @Test
+  fun buildMysqlJDBCUrlWithEnabledTlsProtocols() {
+    val config = DataSourceConfig(
+      DataSourceType.MYSQL,
+      trust_certificate_key_store_url = "file://path/to/truststore",
+      trust_certificate_key_store_password = "changeit",
+      client_certificate_key_store_url = "file://path/to/keystore",
+      client_certificate_key_store_password = "changeit",
+      verify_server_identity = true,
+      enabledTlsProtocols = listOf("TLSv1.2", "TLSv1.3"),
+    )
+    assertEquals(
+      "jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
+        "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
+        "trustCertificateKeyStoreUrl=file://path/to/truststore&" +
+        "trustCertificateKeyStorePassword=changeit&" +
+        "clientCertificateKeyStoreUrl=file://path/to/keystore&" +
+        "clientCertificateKeyStorePassword=changeit&" +
+        "sslMode=VERIFY_IDENTITY&enabledTLSProtocols=TLSv1.2,TLSv1.3",
+      config.buildJdbcUrl(TESTING)
+    )
+  }
 }
