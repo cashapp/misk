@@ -90,7 +90,7 @@ internal class GrpcClientProviderTest {
       ">> robots.Locate /RobotLocator/Locate",
       "<< robots.Locate /RobotLocator/Locate 200"
     )
-    assertThat(clientMetricsInterceptorFactory.requestDuration.count("robots.SayHello", "200"))
+    assertThat(clientMetricsInterceptorFactory.requestDuration.labels("robots.SayHello", "200").get().count.toInt())
       .isEqualTo(1)
   }
 
