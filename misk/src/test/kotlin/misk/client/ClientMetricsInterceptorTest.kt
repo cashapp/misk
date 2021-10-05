@@ -69,11 +69,11 @@ internal class ClientMetricsInterceptorTest {
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "403").get().count.toInt()).isEqualTo(1)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "503").get().count.toInt()).isEqualTo(1)
 
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "202").get().buckets.sum().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "404").get().buckets.sum().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.sum().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.sum().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "503").get().buckets.sum().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "202").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "404").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "503").get().buckets.last().toInt()).isEqualTo(1)
     }
   }
 
@@ -85,7 +85,7 @@ internal class ClientMetricsInterceptorTest {
 
     SoftAssertions.assertSoftly { softly ->
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "timeout").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "timeout").get().buckets.sum().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "timeout").get().buckets.last().toInt()).isEqualTo(1)
     }
   }
 
