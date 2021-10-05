@@ -3,8 +3,9 @@ package misk.client
 import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
 import com.squareup.wire.GrpcMethod
-import misk.metrics.Histogram
-import misk.metrics.Metrics
+import io.prometheus.client.Histogram
+import io.prometheus.client.Summary
+import misk.metrics.v2.Metrics
 import okhttp3.Interceptor
 import okhttp3.Response
 import retrofit2.Invocation
@@ -15,7 +16,8 @@ import javax.inject.Singleton
 
 class ClientMetricsInterceptor private constructor(
   val clientName: String,
-  private val requestDuration: Histogram
+  private val requestDurationSummary: Summary,
+  private val requestDurationHistogram: Histogram,
 ) : Interceptor {
 
   override fun intercept(chain: Interceptor.Chain): Response {
@@ -26,11 +28,13 @@ class ClientMetricsInterceptor private constructor(
     try {
       val result = chain.proceed(chain.request())
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
-      requestDuration.record(elapsedMillis, actionName, "${result.code}")
+      requestDurationSummary.labels(actionName, "${result.code}").observe(elapsedMillis)
+      requestDurationHistogram.labels(actionName, "${result.code}").observe(elapsedMillis)
       return result
     } catch (e: SocketTimeoutException) {
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
-      requestDuration.record(elapsedMillis, actionName, "timeout")
+      requestDurationSummary.labels(actionName, "timeout").observe(elapsedMillis)
+      requestDurationHistogram.labels(actionName, "timeout").observe(elapsedMillis)
       throw e
     }
   }
@@ -47,12 +51,17 @@ class ClientMetricsInterceptor private constructor(
 
   @Singleton
   class Factory @Inject internal constructor(m: Metrics) {
-    internal val requestDuration = m.histogram(
+    internal val requestDuration = m.summary(
       name = "client_http_request_latency_ms",
       help = "count and duration in ms of outgoing client requests",
       labelNames = listOf("action", "code")
     )
+    internal val requestDurationHistogram = m.histogram(
+      name = "histo_client_http_request_latency_ms",
+      help = "histogram in ms of outgoing client requests",
+      labelNames = listOf("action", "code")
+    )
 
-    fun create(clientName: String) = ClientMetricsInterceptor(clientName, requestDuration)
+    fun create(clientName: String) = ClientMetricsInterceptor(clientName, requestDuration, requestDurationHistogram)
   }
 }
