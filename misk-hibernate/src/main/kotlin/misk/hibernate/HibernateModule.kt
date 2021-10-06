@@ -54,6 +54,13 @@ class HibernateModule(
   readerConfig: DataSourceConfig?,
   val databasePool: DatabasePool = RealDatabasePool
 ) : KAbstractModule() {
+
+  // Make sure Hibernate logs use slf4j. Otherwise, it will base its decision on the classpath and
+  // prefer log4j: https://docs.jboss.org/hibernate/orm/4.3/topical/html/logging/Logging.html
+  init {
+    System.setProperty("org.jboss.logging.provider", "slf4j")
+  }
+
   val config = config.withDefaults()
   val readerConfig = readerConfig?.withDefaults()
 

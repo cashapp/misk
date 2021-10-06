@@ -1,4 +1,5 @@
 dependencies {
+  api(project(":misk-exceptions-dynamodb"))
   api(Dependencies.aws2Dynamodb)
 
   implementation(Dependencies.guice)
