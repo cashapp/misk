@@ -7,11 +7,14 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Table
+import javax.persistence.Transient
 
 @Entity
 @misk.hibernate.annotation.Keyspace("movies")
 @Table(name = "movies")
 class DbMovie() : DbRoot<DbMovie>, DbTimestampedEntity {
+  @Transient private val transientField: String = "foo"
+
   @javax.persistence.Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override lateinit var id: Id<DbMovie>

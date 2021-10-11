@@ -16,7 +16,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import javax.inject.Inject
+import javax.persistence.Transient
 import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.javaField
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -81,7 +83,9 @@ class HibernateDatabaseQueryStaticActionTest {
     )
     assertEquals(3, results.results.size)
     assertThat(results.results.map { (it as Map<String, Any>).keys }.first()).containsAll(
-      DbMovie::class.declaredMemberProperties.map { it.name }
+      DbMovie::class.declaredMemberProperties.filter {
+        it.javaField?.getAnnotation(Transient::class.java) == null
+      }.map { it.name }
     )
   }
 
