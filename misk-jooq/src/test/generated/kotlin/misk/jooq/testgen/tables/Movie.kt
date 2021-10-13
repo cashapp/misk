@@ -85,12 +85,12 @@ open class Movie(
     /**
      * The column <code>jooq.movie.created_at</code>.
      */
-    val CREATED_AT: TableField<MovieRecord, LocalDateTime?> = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(0).nullable(false).defaultValue(DSL.field("CURRENT_TIMESTAMP", SQLDataType.LOCALDATETIME)), this, "")
+    val CREATED_AT: TableField<MovieRecord, LocalDateTime?> = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(3).nullable(false).defaultValue(DSL.field("CURRENT_TIMESTAMP(3)", SQLDataType.LOCALDATETIME)), this, "")
 
     /**
      * The column <code>jooq.movie.updated_at</code>.
      */
-    val UPDATED_AT: TableField<MovieRecord, LocalDateTime?> = createField(DSL.name("updated_at"), SQLDataType.LOCALDATETIME(0).nullable(false).defaultValue(DSL.inline("0000-00-00 00:00:00", SQLDataType.LOCALDATETIME)), this, "")
+    val UPDATED_AT: TableField<MovieRecord, LocalDateTime?> = createField(DSL.name("updated_at"), SQLDataType.LOCALDATETIME(3).nullable(false).defaultValue(DSL.field("CURRENT_TIMESTAMP(3)", SQLDataType.LOCALDATETIME)), this, "")
 
     private constructor(alias: Name, aliased: Table<MovieRecord>?): this(alias, null, null, aliased, null)
     private constructor(alias: Name, aliased: Table<MovieRecord>?, parameters: Array<Field<*>?>?): this(alias, null, null, aliased, parameters)

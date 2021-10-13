@@ -24,7 +24,7 @@ apply(from = "$rootDir/gradle-mvn-publish.gradle")
 // Needed to generate jooq test db classes
 buildscript {
   dependencies {
-    classpath("gradle.plugin.com.boxfuse.client:flyway-release:5.0.2")
+    classpath("org.flywaydb:flyway-gradle-plugin:7.15.0")
     classpath(Dependencies.mysql)
   }
 }

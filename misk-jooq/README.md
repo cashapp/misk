@@ -22,12 +22,12 @@ a. Add the below lines to your build.gradle.kts
 ```
 buildscript {
   dependencies {
-    classpath("gradle.plugin.com.boxfuse.client:flyway-release:5.0.2")
+    classpath("org.flywaydb:flyway-gradle-plugin:7.15.0")
     classpath(Dependencies.mysql)
   }
 }
 plugins {
-  id("org.flywaydb.flyway") version "5.2.4"
+  id("org.flywaydb.flyway") version "7.15.0"
   id("nu.studer.jooq") version "5.2"
 }
 // We are using flyway here in order to run the migrations to create a schema. 
