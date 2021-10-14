@@ -40,7 +40,13 @@ class TestWebActionModule : KAbstractModule() {
       AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments"))
     )
     multibind<AccessAnnotationEntry>().toInstance(
+      AccessAnnotationEntry<CustomServiceAccess2>(services = listOf("some_other_service"))
+    )
+    multibind<AccessAnnotationEntry>().toInstance(
       AccessAnnotationEntry<CustomCapabilityAccess>(capabilities = listOf("admin"))
+    )
+    multibind<AccessAnnotationEntry>().toInstance(
+      AccessAnnotationEntry<CustomCapabilityAccess2>(capabilities = listOf("some_other_group"))
     )
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
   }
@@ -63,12 +69,17 @@ class CustomServiceAccessAction @Inject constructor() : WebAction {
   @Get("/custom_service_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
   @CustomServiceAccess
+  @CustomServiceAccess2
   fun get() = "${scopedCaller.get()} authorized as custom service".toResponseBody()
 }
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class CustomServiceAccess
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class CustomServiceAccess2
 
 class CustomCapabilityAccessAction @Inject constructor() : WebAction {
   @Inject
@@ -77,12 +88,17 @@ class CustomCapabilityAccessAction @Inject constructor() : WebAction {
   @Get("/custom_capability_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
   @CustomCapabilityAccess
+  @CustomCapabilityAccess2
   fun get() = "${scopedCaller.get()} authorized with custom capability".toResponseBody()
 }
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class CustomCapabilityAccess
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class CustomCapabilityAccess2
 
 class RequestTypeAction @Inject constructor() : WebAction {
   @Post("/request_type")
