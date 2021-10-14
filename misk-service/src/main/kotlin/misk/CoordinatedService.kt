@@ -6,7 +6,7 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.Listener
 import com.google.common.util.concurrent.Service.State
 import javax.inject.Provider
-import misk.CoordinatedService.Companion.checkNew
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class CoordinatedService(
@@ -19,22 +19,21 @@ internal class CoordinatedService(
         created.checkNew("$created must be NEW for it to be coordinated")
         created.addListener(
           object : Listener() {
+
+            val outerService = this@CoordinatedService
+
             override fun running() {
-              synchronized(this) {
-                notifyStarted()
-              }
+              outerService.notifyStarted()
               downstreamServices.forEach { it.startIfReady() }
             }
 
             override fun terminated(from: State) {
-              synchronized(this) {
-                notifyStopped()
-              }
+              outerService.notifyStopped()
               upstreamServices.forEach { it.stopIfReady() }
             }
 
             override fun failed(from: State, failure: Throwable) {
-              notifyFailed(failure)
+              outerService.notifyFailed(failure)
             }
           },
           MoreExecutors.directExecutor()
@@ -56,6 +55,12 @@ internal class CoordinatedService(
 
   /** Service that starts up before this, and whose [directDependencies] also depend on this. */
   private var enhancementTarget: CoordinatedService? = null
+
+  /**
+   * Used to track internally if this [CoordinatedService] has invoked [startAsync] on the inner
+   * [Service] [service]
+   * */
+  private val innerServiceStarted = AtomicBoolean(false)
 
   /**
    * Returns a set of services that are required by this service.
@@ -134,16 +139,14 @@ internal class CoordinatedService(
   }
 
   private fun startIfReady() {
-    synchronized(this) {
-      if (state() != State.STARTING) return
+    val canStartInner = state() == State.STARTING && upstreamServices.all { it.isRunning() }
 
-      // If any upstream service or its enhancements are not running, don't start.
-      if (upstreamServices.any { !it.isRunning() }) return
-
-      if (service.state() != State.NEW) return
-
-      // Actually start.
-      service.startAsync()
+    // startAsync must be called exactly once
+    if (canStartInner) {
+      val started = innerServiceStarted.getAndSet(true)
+      if (!started) {
+        service.startAsync()
+      }
     }
   }
 
@@ -152,15 +155,11 @@ internal class CoordinatedService(
   }
 
   private fun stopIfReady() {
-    synchronized(this) {
-      if (state() != State.STOPPING) return
+    val canStopInner =
+      state() == State.STOPPING && downstreamServices.all { it.isTerminated() }
 
-      // If any downstream service or its enhancements haven't stopped, don't stop.
-      if (downstreamServices.any { !it.isTerminated() }) return
-
-      if (service.state() != State.RUNNING) return
-
-      // Actually stop.
+    // stopAsync can be called multiple times, with subsequent calls being ignored
+    if (canStopInner) {
       service.stopAsync()
     }
   }
