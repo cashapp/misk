@@ -1,12 +1,15 @@
 package wisp.tracing
 
+import io.opentracing.Span
 import io.opentracing.mock.MockSpan
 import io.opentracing.mock.MockTracer
-import org.junit.jupiter.api.assertThrows
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class TracingTest {
@@ -16,10 +19,26 @@ class TracingTest {
     tracer = MockTracer()
   }
 
+  @Test fun `Tracer#spanned() produces a trace and finishes the span`() {
+    // NB: The span isn't finished until after block executes, but is intentionally unavailable
+    // afterwards to avoid undefined behaviour from re-using finished spans.
+    // To assert that the span has finished, we take an AtomicReference.
+    val spanRef = AtomicReference<Span>()
+    tracer.spanned("test-span") {
+      spanRef.set(span)
+      assertNotFinished(span)
+    }
+    assertFinished(spanRef.get())
+
+    val spans = tracer.finishedSpans()
+    assertTrue(spans.size == 1, "Expected exactly one span")
+    assertContains(spans.map { it.operationName() }, "test-span")
+  }
+
   @Test fun `Tracer#scoped() produces a trace`() {
     val span = tracer.buildSpan("test-scoped").start()
-    tracer.scoped(span) {
-      // NOP.
+    tracer.scoped(span, finishSpan = true) {
+      assertNotFinished(span)
     }
     assertFinished(span)
 
@@ -28,10 +47,10 @@ class TracingTest {
     assertContains(spans.map { it.operationName() }, "test-scoped")
   }
 
-  @Test fun `Tracer#newScope() allows spans to be re-used before they are closed`() {
+  @Test fun `Tracer#scoped() allows spans to be re-used before they are closed`() {
     val span = tracer.buildSpan("test-scoped").start()
-    tracer.scoped(span) { outerScope ->
-      tracer.newScope(span) { innerScope ->
+    tracer.scoped(span, finishSpan = true) { outerScope ->
+      tracer.scoped(span, finishSpan = false /* default */) { innerScope ->
         assertNotSame(outerScope, innerScope, "Expected a new scope")
       }
       assertNotFinished(span)
@@ -41,30 +60,34 @@ class TracingTest {
     assertTrue(spans.size == 1, "Expected exactly one span")
   }
 
-  @Test fun `Tracer#scoped() can be nested with new spans`() {
-    val span = tracer.buildSpan("parent-span").start()
-    tracer.scoped(span) {
-      val childSpan = tracer.buildSpan("child-span").asChildOf(span).start()
-      tracer.scoped(childSpan) {
-        // NOP.
+  @Test fun `Tracer#spanned() can be used with child spans`() {
+    val parentRef = AtomicReference<Span>()
+    tracer.spanned("parent-span") {
+      parentRef.set(span)
+      assertSame(tracer.activeSpan(), span)
+
+      val childSpan = tracer.childSpan("child-span", span)
+      tracer.scoped(childSpan, finishSpan = true) {
+        assertSame(tracer.activeSpan(), childSpan)
+        assertNotFinished(childSpan)
       }
+      
+      assertSame(tracer.activeSpan(), span)
       assertFinished(childSpan)
+      assertNotFinished(span)
     }
-    assertFinished(span)
+    assertFinished(parentRef.get())
     val spans = tracer.finishedSpans()
     assertTrue(spans.size == 2, "Expected exactly two spans")
   }
 
   @Test fun `Span#setBaggageItems() works`() {
     // No baggage.
-    val noBaggage = tracer.buildSpan("no-baggage").start()
-    noBaggage.setBaggageItems(mapOf())
-    tracer.scoped(noBaggage) {
-      // NOP.
+    tracer.spanned("no-baggage") {
+      span.setBaggageItems(mapOf())
     }
     var spans = tracer.finishedSpans()
     assertTrue(spans.size == 1, "Expected exactly one span")
-
     assertTrue(
       spans.map { it.context().baggageItems() }.first().toList().isEmpty(),
       "Expected no baggage"
@@ -73,19 +96,15 @@ class TracingTest {
     tracer.reset()
 
     // With baggage.
-    val withBaggage = tracer.buildSpan("set-baggage").start()
-    withBaggage.setBaggageItems(
-      mapOf(
-        "movie" to "star wars",
-        "release-year" to 1977,
-        "producer" to Person("George Lucas")
+    tracer.spanned("set-baggage") {
+      span.setBaggageItems(
+        mapOf(
+          "movie" to "star wars",
+          "release-year" to 1977,
+          "producer" to Person("George Lucas")
+        )
       )
-    )
-
-    tracer.scoped(withBaggage) {
-      // NOP.
     }
-
     spans = tracer.finishedSpans()
     assertTrue(spans.size == 1, "Expected exactly one span")
 
@@ -101,12 +120,14 @@ class TracingTest {
 
   private data class Person(val name: String)
 
-  private fun assertFinished(span: MockSpan) {
+  private fun assertFinished(span: Span) {
+    span as? MockSpan ?: throw AssertionError("Expected MockSpan")
     assertTrue(span.finishMicros() > 0, "Expected span to be finished.")
   }
 
-  private fun assertNotFinished(span: MockSpan) {
-    assertThrows<AssertionError> { span.finishMicros() }
+  private fun assertNotFinished(span: Span) {
+    span as? MockSpan ?: throw AssertionError("Expected MockSpan")
+    assertFailsWith<AssertionError> { span.finishMicros() }
   }
 
   private fun <T> assertContainsAll(iterable: Iterable<T>, iterable2: Iterable<T>) {

@@ -1,6 +1,21 @@
+public final class wisp/tracing/SpanAndScope {
+	public fun <init> (Lio/opentracing/Span;Lio/opentracing/Scope;)V
+	public final fun component1 ()Lio/opentracing/Span;
+	public final fun component2 ()Lio/opentracing/Scope;
+	public final fun copy (Lio/opentracing/Span;Lio/opentracing/Scope;)Lwisp/tracing/SpanAndScope;
+	public static synthetic fun copy$default (Lwisp/tracing/SpanAndScope;Lio/opentracing/Span;Lio/opentracing/Scope;ILjava/lang/Object;)Lwisp/tracing/SpanAndScope;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getScope ()Lio/opentracing/Scope;
+	public final fun getSpan ()Lio/opentracing/Span;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class wisp/tracing/TracingKt {
-	public static final fun newScope (Lio/opentracing/Tracer;Lio/opentracing/Span;Lkotlin/jvm/functions/Function1;)V
-	public static final fun scoped (Lio/opentracing/Tracer;Lio/opentracing/Span;Lkotlin/jvm/functions/Function1;)V
+	public static final fun childSpan (Lio/opentracing/Tracer;Ljava/lang/String;Lio/opentracing/Span;)Lio/opentracing/Span;
+	public static final fun scoped (Lio/opentracing/Tracer;Lio/opentracing/Span;ZLkotlin/jvm/functions/Function1;)V
+	public static synthetic fun scoped$default (Lio/opentracing/Tracer;Lio/opentracing/Span;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static final fun setBaggageItems (Lio/opentracing/Span;Ljava/util/Map;)V
+	public static final fun spanned (Lio/opentracing/Tracer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
