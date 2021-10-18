@@ -1,0 +1,6 @@
+public final class wisp/tracing/TracingKt {
+	public static final fun newScope (Lio/opentracing/Tracer;Lio/opentracing/Span;Lkotlin/jvm/functions/Function1;)V
+	public static final fun scoped (Lio/opentracing/Tracer;Lio/opentracing/Span;Lkotlin/jvm/functions/Function1;)V
+	public static final fun setBaggageItems (Lio/opentracing/Span;Ljava/util/Map;)V
+}
+
