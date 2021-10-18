@@ -13,5 +13,3 @@ dependencies {
   testImplementation(Dependencies.moshiAdapters)
   testImplementation(project(":wisp-logging-testing"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

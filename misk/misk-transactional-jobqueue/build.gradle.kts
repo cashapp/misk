@@ -5,5 +5,3 @@ dependencies {
 
   testImplementation(project(":misk-testing"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

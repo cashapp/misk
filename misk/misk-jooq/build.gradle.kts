@@ -19,8 +19,6 @@ dependencies {
   jooqGenerator(Dependencies.mysql)
 }
 
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
-
 // Needed to generate jooq test db classes
 buildscript {
   dependencies {
