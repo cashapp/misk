@@ -12,5 +12,3 @@ dependencies {
   api(Dependencies.logbackClassic)
   api(project(":wisp-logging"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

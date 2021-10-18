@@ -8,5 +8,3 @@ dependencies {
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.kotlinTest)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

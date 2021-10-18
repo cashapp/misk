@@ -122,6 +122,7 @@ subprojects {
   if (!path.startsWith(":samples")) {
     apply(plugin = "com.vanniktech.maven.publish")
     apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
+    apply(from = "$rootDir/gradle-mvn-publish.gradle")
   }
 
   // Workaround the Gradle bug resolving multiplatform dependencies.
