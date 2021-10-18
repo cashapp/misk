@@ -8,5 +8,3 @@ dependencies {
   testImplementation(project(":wisp-deployment-testing"))
 
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
