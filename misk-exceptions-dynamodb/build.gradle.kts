@@ -12,3 +12,5 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.assertj)
 }
+
+apply(from = "$rootDir/gradle-mvn-publish.gradle")
