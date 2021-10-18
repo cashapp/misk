@@ -72,11 +72,3 @@ inline fun Tracer.scoped(span: Span, finishSpan: Boolean = false, crossinline bl
 fun Tracer.childSpan(name: String, parent: Span): Span =
   this.buildSpan(name).asChildOf(parent).start()
 
-/**
- * Conveniently sets baggage items all at once. Baggage values come from [Any.toString].
- */
-fun Span.setBaggageItems(baggage: Map<String, Any>) {
-  for ((key, value) in baggage) {
-    setBaggageItem(key, value.toString())
-  }
-}

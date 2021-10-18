@@ -71,7 +71,7 @@ class TracingTest {
         assertSame(tracer.activeSpan(), childSpan)
         assertNotFinished(childSpan)
       }
-      
+
       assertSame(tracer.activeSpan(), span)
       assertFinished(childSpan)
       assertNotFinished(span)
@@ -114,6 +114,46 @@ class TracingTest {
         "movie" to "star wars",
         "release-year" to "1977",
         "producer" to Person("George Lucas").toString()
+      ).entries
+    )
+  }
+
+  @Test fun `Span#setTags() works`() {
+    // No tags.
+    tracer.spanned("no-tags") {
+      span.setTags(listOf())
+    }
+    var spans = tracer.finishedSpans()
+    assertTrue(spans.size == 1, "Expected exactly one span")
+    assertTrue(
+      spans.map { it.tags() }.first().toList().isEmpty(),
+      "Expected no tags"
+    )
+    tracer.reset()
+
+    // With tags.
+    tracer.spanned("set-tags") {
+      span.setTags(listOf(
+        Tag("int", 9999),
+        Tag("long", Long.MAX_VALUE),
+        Tag("double", Double.MAX_VALUE),
+        Tag("float", Float.MIN_VALUE),
+        Tag("string", "string"),
+        Tag("boolean", true),
+      ))
+    }
+    spans = tracer.finishedSpans()
+    assertTrue(spans.size == 1, "Expected exactly one span")
+
+    assertContainsAll(
+      spans.map { it.tags() }.first().entries,
+      mapOf(
+        "int" to 9999,
+        "long" to Long.MAX_VALUE,
+        "double" to Double.MAX_VALUE,
+        "float" to Float.MIN_VALUE,
+        "string" to "string",
+        "boolean" to true
       ).entries
     )
   }

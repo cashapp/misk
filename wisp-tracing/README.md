@@ -71,7 +71,23 @@ tracer.spanned("parent-span") {
 }
 ```
 
-### Add baggage
+### Add baggage and tags
+
+Add all your tags at once, instead of processing and adding them one tag at a time.
+
+```kotlin
+import wisp.tracing.spanned
+import wisp.tracing.setTags
+import wisp.tracing.Tag
+
+tracer.spanned("tags-example") {
+  span.setTags(listOf(
+    Tag("string-tag", "string-value"),
+    Tag("int-tag", 9999),
+    Tag("bool-tag", true)
+  ))
+}
+```
 
 Add all your baggage at once, instead of processing and adding it one piece at a time.
 This information will be available in downstream traces.
