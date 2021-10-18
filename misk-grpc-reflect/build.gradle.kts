@@ -41,5 +41,3 @@ dependencies {
   testImplementation(Dependencies.logbackClassic)
   testImplementation(project(":misk-grpc-tests"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
