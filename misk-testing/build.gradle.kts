@@ -38,5 +38,3 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-service"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

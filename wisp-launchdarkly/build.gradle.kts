@@ -16,5 +16,3 @@ dependencies {
   testImplementation(Dependencies.moshiAdapters)
 
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

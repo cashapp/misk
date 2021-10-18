@@ -16,5 +16,3 @@ dependencies {
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.retrofitMock)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

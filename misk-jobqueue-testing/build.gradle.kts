@@ -22,5 +22,3 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.logbackClassic)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

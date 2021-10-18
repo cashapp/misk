@@ -26,5 +26,3 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp-logging-testing"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

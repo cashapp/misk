@@ -35,5 +35,3 @@ dependencies {
   api(project(":misk-zookeeper"))
   api(project(":wisp-containers-testing"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

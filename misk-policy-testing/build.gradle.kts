@@ -14,5 +14,3 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.mockitoCore)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

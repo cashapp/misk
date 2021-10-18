@@ -5,5 +5,3 @@ dependencies {
   implementation(Dependencies.loggingApi)
   api(project(":wisp-feature"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

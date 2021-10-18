@@ -4,5 +4,3 @@ dependencies {
   implementation(project(":misk-inject"))
   api(project(":wisp-logging"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

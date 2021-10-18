@@ -22,5 +22,3 @@ dependencies {
     exclude(group = "junit")
   }
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

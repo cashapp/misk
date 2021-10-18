@@ -9,5 +9,3 @@ dependencies {
   api(project(":misk-hibernate"))
   testImplementation(Dependencies.junitApi)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
