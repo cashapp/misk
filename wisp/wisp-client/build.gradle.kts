@@ -19,5 +19,3 @@ dependencies {
   implementation(Dependencies.retrofitProtobuf)
   implementation(Dependencies.retrofitWire)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
