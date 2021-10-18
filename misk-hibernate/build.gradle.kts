@@ -55,5 +55,3 @@ dependencies {
   testImplementation(project(":misk-hibernate-testing"))
   testImplementation(project(":wisp-config"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

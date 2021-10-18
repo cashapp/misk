@@ -3,5 +3,3 @@ dependencies {
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.loggingApi)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

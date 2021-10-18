@@ -49,5 +49,3 @@ sourceSets {
     }
   }
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
