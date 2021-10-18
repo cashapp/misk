@@ -19,12 +19,10 @@ dependencies {
   jooqGenerator(Dependencies.mysql)
 }
 
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
-
 // Needed to generate jooq test db classes
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:7.15.0")
+    classpath("org.flywaydb:flyway-gradle-plugin:8.0.1")
     classpath(Dependencies.mysql)
   }
 }
