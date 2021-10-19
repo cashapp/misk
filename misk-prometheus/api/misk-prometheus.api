@@ -16,6 +16,9 @@ public final class misk/metrics/backends/prometheus/PrometheusConfig : wisp/conf
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/metrics/backends/prometheus/PrometheusHttpService : com/google/common/util/concurrent/AbstractIdleService {
+}
+
 public final class misk/metrics/backends/prometheus/PrometheusMetricsClientModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
