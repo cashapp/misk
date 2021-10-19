@@ -23,9 +23,9 @@ import kotlin.test.assertFailsWith
 internal class FakeJobQueueTest {
   @MiskTestModule private val module = TestModule()
 
+  @Inject private lateinit var exampleJobEnqueuer: ExampleJobEnqueuer
   @Inject private lateinit var fakeClock: FakeClock
   @Inject private lateinit var fakeJobQueue: FakeJobQueue
-  @Inject private lateinit var exampleJobEnqueuer: ExampleJobEnqueuer
   @Inject private lateinit var logCollector: LogCollector
 
   @Test
@@ -143,6 +143,7 @@ internal class FakeJobQueueTest {
     }
 
     assertThat(e.message).isEqualTo("Expected ${jobs.first()} to be acknowledged after handling")
+    assertThat(fakeJobQueue.peekDeadlettered(GREEN_QUEUE)).hasSize(1)
   }
 
   @Test
@@ -172,6 +173,7 @@ internal class FakeJobQueueTest {
     val onlyJob = handledJobs.single()
     assertThat(onlyJob.acknowledged).isFalse()
     assertThat(onlyJob.deadLettered).isFalse()
+    assertThat(fakeJobQueue.peekDeadlettered(GREEN_QUEUE)).hasSize(1)
   }
 
   @Test

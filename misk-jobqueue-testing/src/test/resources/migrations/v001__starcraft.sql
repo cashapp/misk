@@ -1,3 +1,0 @@
-CREATE TABLE starcraft(
-  id bigint NOT NULL PRIMARY KEY AUTO_INCREMENT
-);
