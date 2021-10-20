@@ -65,17 +65,3 @@ public final class misk/jobqueue/FakeJobQueueModule : misk/inject/KAbstractModul
 	public fun <init> ()V
 }
 
-public final class misk/jobqueue/FakeTransactionalJobQueue : misk/jobqueue/TransactionalJobQueue {
-	public fun <init> (Lmisk/jobqueue/FakeJobQueue;)V
-	public fun enqueue (Lmisk/hibernate/Session;Lmisk/hibernate/Gid;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
-	public fun enqueue (Lmisk/hibernate/Session;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
-	public final fun handleJobs (Lmisk/jobqueue/QueueName;ZI)Ljava/util/List;
-	public final fun handleJobs (Z)Ljava/util/List;
-	public static synthetic fun handleJobs$default (Lmisk/jobqueue/FakeTransactionalJobQueue;Lmisk/jobqueue/QueueName;ZIILjava/lang/Object;)Ljava/util/List;
-	public static synthetic fun handleJobs$default (Lmisk/jobqueue/FakeTransactionalJobQueue;ZILjava/lang/Object;)Ljava/util/List;
-	public final fun peekDeadlettered (Lmisk/jobqueue/QueueName;)Ljava/util/List;
-	public final fun peekJobs (Lmisk/jobqueue/QueueName;)Ljava/util/List;
-	public final fun reprocessDeadlettered (Lmisk/jobqueue/QueueName;ZI)Ljava/util/List;
-	public static synthetic fun reprocessDeadlettered$default (Lmisk/jobqueue/FakeTransactionalJobQueue;Lmisk/jobqueue/QueueName;ZIILjava/lang/Object;)Ljava/util/List;
-}
-

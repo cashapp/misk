@@ -14,7 +14,7 @@ class FakeJobHandlerModule<T : JobHandler> private constructor(
 
   companion object {
     inline fun <reified T : JobHandler> create(queueName: QueueName):
-        FakeJobHandlerModule<T> = create(queueName, T::class)
+      FakeJobHandlerModule<T> = create(queueName, T::class)
 
     @JvmStatic
     fun <T : JobHandler> create(
