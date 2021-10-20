@@ -72,13 +72,15 @@ class FakeJobQueue @Inject constructor(
   ) {
     val id = tokenGenerator.generate("fakeJobQueue")
     val job =
-        FakeJob(queueName, id, idempotenceKey, body, attributes, clock.instant(), deliveryDelay)
+      FakeJob(queueName, id, idempotenceKey, body, attributes, clock.instant(), deliveryDelay)
     jobQueues.getOrPut(queueName, ::PriorityBlockingQueue).add(job)
   }
 
-  override fun batchEnqueue(queueName: QueueName,
-    jobs: List<JobQueue.JobRequest>) {
-    jobs.forEach{
+  override fun batchEnqueue(
+    queueName: QueueName,
+    jobs: List<JobQueue.JobRequest>
+  ) {
+    jobs.forEach {
       enqueue(queueName, it.body, it.idempotenceKey, it.deliveryDelay, it.attributes)
     }
   }
@@ -183,14 +185,15 @@ class FakeJobQueue @Inject constructor(
       }
 
       result += job
-      if (!job.deadLettered && assertAcknowledged) {
-        check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
+      if (!job.deadLettered && assertAcknowledged && !job.acknowledged) {
+        deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
+        error("Expected $job to be acknowledged after handling")
       }
     }
 
     // Reenqueue deadlettered jobs outside of the main loop to prevent an infinite loop.
     result.forEach { job ->
-      if (job.deadLettered) {
+      if (job.deadLettered || !job.acknowledged) {
         deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
       }
     }
@@ -206,7 +209,7 @@ class FakeJobQueue @Inject constructor(
       // [jobs] queue is sorted by [deliverAt].
       val job = jobs.peek()
       if (job == null
-          || (job.deliveryDelay != null && job.deliverAt.isAfter(now))) {
+        || (job.deliveryDelay != null && job.deliverAt.isAfter(now))) {
         return null
       }
       // If remove() is false, then we lost race to another worker and should retry.
