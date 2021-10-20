@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class PrometheusHttpService @Inject internal constructor(
+class PrometheusHttpService @Inject internal constructor(
   private val config: PrometheusConfig,
   private val registry: CollectorRegistry
 ) : AbstractIdleService() {
