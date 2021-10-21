@@ -233,7 +233,13 @@ data class DataSourceConfig(
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"
       }
       DataSourceType.GCP_SPANNER -> {
-        "jdbc:cloudspanner:/projects/${gcp_project_id}/instances/${gcp_instance_id}/databases/${database}?numChannels=${spanner_num_channels}"
+        var queryParams = "?numChannels=${spanner_num_channels}&lenient=true"
+
+        if (deployment.isTest || deployment.isLocalDevelopment) {
+          queryParams += "&usePlainText=true"
+        }
+
+        "jdbc:cloudspanner:/projects/${gcp_project_id}/instances/${gcp_instance_id}/databases/${database}${queryParams}"
       }
       DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
         var params = "ssl=false&user=${config.username}"

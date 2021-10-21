@@ -817,3 +817,9 @@ class PostgresqlTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.POSTGRESQL)
 }
+
+@MiskTest(startService = true)
+class GcpSpannerTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.GCP_SPANNER)
+}

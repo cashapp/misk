@@ -27,3 +27,9 @@ postgresql_data_source:
   username: postgres
   password: password
   migrations_resource: classpath:/misk/hibernate/moviestestmodule-cockroachdb
+gcp_spanner_data_source:
+  type: GCP_SPANNER
+  database: movies
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/hibernate/moviestestmodule-gcpspanner

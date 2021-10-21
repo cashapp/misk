@@ -59,7 +59,7 @@ class MoviesTestModule(
       DataSourceType.COCKROACHDB -> config.cockroachdb_data_source
       DataSourceType.POSTGRESQL -> config.postgresql_data_source
       DataSourceType.TIDB -> config.tidb_data_source
-      DataSourceType.GCP_SPANNER -> throw RuntimeException("Not supported (yet?)")
+      DataSourceType.GCP_SPANNER -> config.gcp_spanner_data_source
       DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
     }
   }
