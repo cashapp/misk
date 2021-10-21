@@ -18,6 +18,7 @@ sourceSets {
 dependencies {
   api(Dependencies.hibernateCore)
   implementation(Dependencies.guice)
+  implementation(Dependencies.gcpSpannerHibernateDialect)
   implementation(Dependencies.okio)
   implementation(Dependencies.okHttp)
   implementation(Dependencies.loggingApi)

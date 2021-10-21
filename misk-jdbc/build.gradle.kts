@@ -18,6 +18,7 @@ dependencies {
   implementation(Dependencies.openTracing)
   implementation(Dependencies.openTracingUtil)
   implementation(Dependencies.openTracingJdbc)
+  implementation(Dependencies.gcpSpannerJdbc)
   implementation(Dependencies.postgresql)
   implementation(Dependencies.vitess)
   implementation(Dependencies.moshiCore)
