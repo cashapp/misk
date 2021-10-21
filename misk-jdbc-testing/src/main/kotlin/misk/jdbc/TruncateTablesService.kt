@@ -56,7 +56,7 @@ class TruncateTablesService(
               DataSourceType.VITESS_MYSQL -> {
                 "SHOW VSCHEMA TABLES"
               }
-              DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
+              DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL, DataSourceType.GCP_SPANNER -> {
                 "SELECT table_name FROM information_schema.tables WHERE table_catalog='${config.database}' AND table_schema='public'"
               }
             }

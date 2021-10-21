@@ -40,6 +40,11 @@ enum class DataSourceType(
     hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
     isVitess = false
   ),
+  GCP_SPANNER(
+    driverClassName = "com.google.cloud.spanner.jdbc.JdbcDriver",
+    hibernateDialect = "com.google.cloud.spanner.hibernate.SpannerDialect",
+    isVitess = false
+  )
 }
 
 /** Configuration element for an individual datasource */
@@ -76,7 +81,13 @@ data class DataSourceConfig(
   val enabledTlsProtocols: List<String> = listOf(),
   val show_sql: String? = "false",
   // Consider using this if you want Hibernate to automagically batch inserts/updates when it can.
-  val jdbc_statement_batch_size: Int? = null
+  val jdbc_statement_batch_size: Int? = null,
+  // GCP Spanner configuration
+  // https://github.com/GoogleCloudPlatform/google-cloud-spanner-hibernate/blob/master/README.adoc
+  val gcp_project_id: String? = null,
+  val gcp_instance_id: String? = null,
+  val spanner_num_channels: Int = 4,
+
 ) {
   fun withDefaults(): DataSourceConfig {
     return when (type) {
@@ -115,6 +126,13 @@ data class DataSourceConfig(
       DataSourceType.POSTGRESQL -> {
         copy(
           port = port ?: 5432,
+          host = host ?: "127.0.0.1",
+          database = database ?: ""
+        )
+      }
+      DataSourceType.GCP_SPANNER -> {
+        copy(
+          port = port ?: 9010,
           host = host ?: "127.0.0.1",
           database = database ?: ""
         )
@@ -213,6 +231,9 @@ data class DataSourceConfig(
       }
       DataSourceType.HSQLDB -> {
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"
+      }
+      DataSourceType.GCP_SPANNER -> {
+        "jdbc:cloudspanner:/projects/${gcp_project_id}/instances/${gcp_instance_id}/databases/${database}?numChannels=${spanner_num_channels}"
       }
       DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
         var params = "ssl=false&user=${config.username}"
