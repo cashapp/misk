@@ -543,7 +543,8 @@ public final class misk/web/mediatype/MediaRange : java/lang/Comparable {
 public final class misk/web/mediatype/MediaRange$Companion {
 	public final fun getALL_MEDIA ()Lmisk/web/mediatype/MediaRange;
 	public final fun parse (Ljava/lang/String;)Lmisk/web/mediatype/MediaRange;
-	public final fun parseRanges (Ljava/lang/String;)Ljava/util/List;
+	public final fun parseRanges (Ljava/lang/String;Z)Ljava/util/List;
+	public static synthetic fun parseRanges$default (Lmisk/web/mediatype/MediaRange$Companion;Ljava/lang/String;ZILjava/lang/Object;)Ljava/util/List;
 }
 
 public final class misk/web/mediatype/MediaRange$Matcher : java/lang/Comparable {
