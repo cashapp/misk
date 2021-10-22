@@ -32,7 +32,6 @@ internal class ContentBasedDispatchTest {
   private val weirdMediaType = "weird/weird".asMediaType()
 
   @Inject private lateinit var moshi: Moshi
-
   @Inject private lateinit var jettyService: JettyService
 
   private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
@@ -92,6 +91,13 @@ internal class ContentBasedDispatchTest {
       weirdMediaType
     ).source()
     assertThat(responseContent.readUtf8()).isEqualTo("*->* my friend")
+  }
+
+  @Test
+  fun doesntThrowOnInvalidMediaType() {
+    val request = newRequest("/hello", plainTextMediaType, "hello", "Totally Invalid Media Type")
+    val response = httpClient.newCall(request).execute()
+    assertThat(response.code).isEqualTo(200)
   }
 
   class TestModule : KAbstractModule() {
@@ -167,7 +173,7 @@ internal class ContentBasedDispatchTest {
     content: String,
     acceptedMediaType: MediaType? = null
   ): okhttp3.ResponseBody {
-    val request = newRequest("/hello", contentType, content, acceptedMediaType)
+    val request = newRequest("/hello", contentType, content, acceptedMediaType.toString())
     val response = httpClient.newCall(request)
       .execute()
     assertThat(response.code).isEqualTo(200)
@@ -178,7 +184,7 @@ internal class ContentBasedDispatchTest {
     path: String,
     contentType: MediaType,
     content: String,
-    acceptedMediaType: MediaType? = null
+    acceptedMediaType: String? = null
   ): Request {
     val request = Request.Builder()
       .post(content.toRequestBody(contentType))
