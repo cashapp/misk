@@ -77,8 +77,17 @@ data class MediaRange(
     const val WILDCARD = "*"
     val ALL_MEDIA = MediaRange(WILDCARD, WILDCARD, rawText = "*/*")
 
-    fun parseRanges(s: String): List<MediaRange> {
-      return s.split(',').map { parse(it) }
+    fun parseRanges(s: String, swallowExceptions: Boolean = false): List<MediaRange> {
+      return s.split(',').mapNotNull {
+        try {
+          parse(it)
+        } catch (th: Throwable) {
+          if (!swallowExceptions) {
+            throw th
+          }
+          null
+        }
+      }
     }
 
     fun parse(s: String): MediaRange {
@@ -88,8 +97,8 @@ data class MediaRange(
 
       val type = typeParts[0].trim()
       val subtype = typeParts[1].trim()
-      require(!type.isEmpty()) { "$s is not a valid media range" }
-      require(!subtype.isEmpty()) { "$s is not a valid media range" }
+      require(type.isNotEmpty()) { "$s is not a valid media range" }
+      require(subtype.isNotEmpty()) { "$s is not a valid media range" }
       require(type != WILDCARD || subtype == WILDCARD) { "$s is not a valid media range" }
 
       if (typeParametersAndExtensions.size == 1) {
@@ -122,8 +131,8 @@ data class MediaRange(
 
             charset = Charset.forName(p.second.toUpperCase())
           }
-          inParameters -> parameters.put(p.first, p.second)
-          else -> extensions.put(p.first, p.second)
+          inParameters -> parameters[p.first] = p.second
+          else -> extensions[p.first] = p.second
         }
       }
 
@@ -143,8 +152,8 @@ data class MediaRange(
       require(parts.size == 2) { "$s is not a valid name/value pair" }
       val name = parts[0].trim()
       val value = parts[1].trim()
-      require(!name.isEmpty()) { "$s is not a valid name/value pair" }
-      require(!value.isEmpty()) { "$s is not a valid name/value pair" }
+      require(name.isNotEmpty()) { "$s is not a valid name/value pair" }
+      require(value.isNotEmpty()) { "$s is not a valid name/value pair" }
       return name to value
     }
   }
