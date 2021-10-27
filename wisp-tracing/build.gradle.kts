@@ -8,5 +8,3 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.openTracingMock)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
