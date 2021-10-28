@@ -25,7 +25,6 @@ import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.ssl.CertificatesModule
-import misk.web.actions.InternalErrorAction
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
@@ -187,7 +186,6 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(CertificatesModule())
 
     // Bind build-in actions.
-    install(WebActionModule.create<InternalErrorAction>())
     install(WebActionModule.create<StatusAction>())
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
