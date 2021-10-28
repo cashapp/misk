@@ -4,7 +4,6 @@ import com.google.inject.Module
 import com.google.inject.Provides
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.inject.KAbstractModule
 import misk.mockito.Mockito
 import misk.testing.MiskTest
@@ -19,6 +18,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.anyString
 import retrofit2.Response
 import retrofit2.mock.Calls
+import wisp.moshi.defaultKotlinMoshi
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -35,9 +35,7 @@ internal class RealOpaPolicyEngineTest {
 
     @Provides @Singleton @Named("opa-moshi")
     fun provideMoshi(): Moshi {
-      return Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
+      return defaultKotlinMoshi
     }
   }
 

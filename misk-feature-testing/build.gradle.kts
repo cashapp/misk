@@ -20,4 +20,5 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(project(":misk-testing"))
+  testImplementation(project(":wisp-moshi"))
 }

@@ -2,12 +2,12 @@ package misk.policy.opa
 
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
 import misk.inject.KAbstractModule
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import wisp.moshi.buildMoshi
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -43,8 +43,6 @@ class OpaModule @Inject constructor(
 
   @Provides @Singleton @Named("opa-moshi")
   fun provideMoshi(): Moshi {
-    return Moshi.Builder()
-      .add(KotlinJsonAdapterFactory())
-      .build()
+    return buildMoshi(emptyList())
   }
 }

@@ -10,6 +10,7 @@ dependencies {
   implementation(project(":misk-actions"))
   api(project(":wisp-config"))
   api(project(":wisp-logging"))
+  api(project(":wisp-moshi"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(project(":misk-testing"))

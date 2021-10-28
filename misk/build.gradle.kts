@@ -58,6 +58,7 @@ dependencies {
   api(project(":wisp-deployment"))
   api(project(":wisp-deployment-testing"))  // for fake implementation
   api(project(":wisp-logging"))
+  api(project(":wisp-moshi"))
 
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(Dependencies.mockitoCore)
