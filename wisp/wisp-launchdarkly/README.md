@@ -25,9 +25,7 @@ val ldClient = LaunchDarklyClient.createLaunchDarklyClient(
   resourceLoader = ResourceLoader.SYSTEM
 )
 
-val moshi = Moshi.Builder()
-  .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-  .build()
+val moshi = DEFAULT_KOTLIN_MOSHI
 
 val ldFeatureFlags = LaunchDarklyFeatureFlags(
   ldClient = ldClient,
