@@ -1,8 +1,8 @@
 package misk.feature.testing
 
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.inject.KAbstractModule
+import wisp.moshi.DEFAULT_KOTLIN_MOSHI
 
 /**
  * Binds a [Moshi] instance for testing.
@@ -11,10 +11,6 @@ import misk.inject.KAbstractModule
  */
 internal class MoshiTestingModule : KAbstractModule() {
   override fun configure() {
-    bind<Moshi>().toInstance(
-      Moshi.Builder()
-        .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-        .build()
-    )
+    bind<Moshi>().toInstance(DEFAULT_KOTLIN_MOSHI)
   }
 }

@@ -6,8 +6,6 @@ import com.launchdarkly.sdk.LDUser
 import com.launchdarkly.sdk.LDValue
 import com.launchdarkly.sdk.UserAttribute
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,12 +23,11 @@ import wisp.feature.Feature
 import wisp.feature.FeatureFlags
 import wisp.feature.getEnum
 import wisp.feature.getJson
+import wisp.moshi.DEFAULT_KOTLIN_MOSHI
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
-  private val moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-    .build()
+  private val moshi = DEFAULT_KOTLIN_MOSHI
   private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(client, moshi)
 
   @BeforeEach

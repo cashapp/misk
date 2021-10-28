@@ -25,4 +25,5 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-service"))
   api(project(":misk-testing"))
+  api(project(":wisp-moshi"))
 }

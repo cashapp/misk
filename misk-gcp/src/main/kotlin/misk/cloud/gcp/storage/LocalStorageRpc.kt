@@ -8,12 +8,12 @@ import com.google.cloud.storage.spi.v1.StorageRpc
 import com.google.cloud.storage.spi.v1.StorageRpc.Option.IF_GENERATION_MATCH
 import com.google.cloud.storage.spi.v1.StorageRpc.Option.IF_GENERATION_NOT_MATCH
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.io.listRecursively
 import misk.moshi.adapter
 import misk.okio.forEachBlock
 import okio.buffer
 import okio.source
+import wisp.moshi.DEFAULT_KOTLIN_MOSHI
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -96,9 +96,7 @@ import kotlin.streams.asSequence
  */
 class LocalStorageRpc(
   root: Path,
-  moshi: Moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-    .build()
+  moshi: Moshi = DEFAULT_KOTLIN_MOSHI
 ) : BaseCustomStorageRpc() {
   // Handles in-process synchronization; cross-process synchronization is handled by file locks
   private val internalLock = ReentrantReadWriteLock()

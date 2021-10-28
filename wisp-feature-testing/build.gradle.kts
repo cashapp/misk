@@ -12,6 +12,7 @@ dependencies {
   implementation(Dependencies.moshiAdapters)
   api(project(":wisp-config"))
   api(project(":wisp-feature"))
+  api(project(":wisp-moshi"))
   api(project(":wisp-resource-loader"))
 
   testImplementation(Dependencies.assertj)

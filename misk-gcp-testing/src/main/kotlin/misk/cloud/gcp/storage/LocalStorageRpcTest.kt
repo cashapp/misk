@@ -1,11 +1,10 @@
 package misk.cloud.gcp.storage
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
 import misk.testing.TemporaryFolderModule
+import wisp.moshi.DEFAULT_KOTLIN_MOSHI
 import javax.inject.Inject
 
 @MiskTest(startService = false)
@@ -16,10 +15,5 @@ internal class LocalStorageRpcTest : CustomStorageRpcTestCases<LocalStorageRpc>(
   @Inject
   private lateinit var tempFolder: TemporaryFolder
 
-  override fun newStorageRpc() = LocalStorageRpc(
-    tempFolder.newFolder(),
-    Moshi.Builder()
-      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-      .build()
-  )
+  override fun newStorageRpc() = LocalStorageRpc(tempFolder.newFolder(), DEFAULT_KOTLIN_MOSHI)
 }
