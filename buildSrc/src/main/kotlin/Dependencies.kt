@@ -22,6 +22,7 @@ object Dependencies {
   val gcpKms = "com.google.apis:google-api-services-cloudkms:v1-rev20190626-1.30.1"
   val gcpLogback = "com.google.cloud:google-cloud-logging-logback:0.121.3-alpha"
   val gcpLogging = "com.google.cloud:google-cloud-logging:2.3.2"
+  val gcpSpanner = "com.google.cloud:google-cloud-spanner:6.13.0"
   val grpcBom = "io.grpc:grpc-bom:1.41.0"
   val grpcContext = "io.grpc:grpc-context:1.41.0"
   val grpcGenJava = "io.grpc:protoc-gen-grpc-java:1.41.0"
