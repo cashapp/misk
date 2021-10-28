@@ -1,7 +1,6 @@
 package wisp.feature.testing
 
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import wisp.config.Config
 import wisp.config.Configurable
 import wisp.feature.Attributes
@@ -12,6 +11,7 @@ import wisp.feature.FeatureFlags
 import wisp.feature.TrackerReference
 import wisp.feature.fromSafeJson
 import wisp.feature.toSafeJson
+import wisp.moshi.defaultKotlinMoshi
 import java.util.PriorityQueue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
@@ -30,9 +30,7 @@ constructor(
    * Preferred constructor for Wisp
    */
   constructor(
-    moshi: Moshi = Moshi.Builder()
-      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-      .build()
+    moshi: Moshi = defaultKotlinMoshi
   ) : this({ moshi })
 
   companion object {

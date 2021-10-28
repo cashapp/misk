@@ -12,4 +12,5 @@ dependencies {
   testImplementation(Dependencies.moshiKotlin)
   testImplementation(Dependencies.moshiAdapters)
   testImplementation(project(":wisp-logging-testing"))
+  testImplementation(project(":wisp-moshi"))
 }
