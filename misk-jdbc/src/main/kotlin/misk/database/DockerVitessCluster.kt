@@ -24,7 +24,7 @@ import mu.KotlinLogging
 import okio.buffer
 import okio.source
 import wisp.deployment.TESTING
-import wisp.moshi.DEFAULT_KOTLIN_MOSHI
+import wisp.moshi.defaultKotlinMoshi
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -46,7 +46,7 @@ class VitessCluster(
   val name: String,
   resourceLoader: ResourceLoader,
   val config: DataSourceConfig,
-  val moshi: Moshi = DEFAULT_KOTLIN_MOSHI
+  val moshi: Moshi = defaultKotlinMoshi
 ) {
   val schemaDir: Path
   val configDir: Path
@@ -227,7 +227,7 @@ class DockerVitessCluster(
       val docker: DockerClient = DockerClientBuilder.getInstance()
         .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
         .build()
-      val moshi = DEFAULT_KOTLIN_MOSHI
+      val moshi = defaultKotlinMoshi
       val dockerCluster =
         DockerVitessCluster(
           name = qualifier.simpleName!!,

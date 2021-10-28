@@ -26,12 +26,12 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import wisp.logging.WispQueuedLogCollector
-import wisp.moshi.DEFAULT_KOTLIN_MOSHI
+import wisp.moshi.defaultKotlinMoshi
 import java.util.function.Function
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
-  private val moshi = DEFAULT_KOTLIN_MOSHI
+  private val moshi = defaultKotlinMoshi
   private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(client, moshi)
   private val logCollector = WispQueuedLogCollector()
 

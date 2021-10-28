@@ -2,7 +2,7 @@ package misk.feature.testing
 
 import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
-import wisp.moshi.DEFAULT_KOTLIN_MOSHI
+import wisp.moshi.defaultKotlinMoshi
 
 /**
  * Binds a [Moshi] instance for testing.
@@ -11,6 +11,6 @@ import wisp.moshi.DEFAULT_KOTLIN_MOSHI
  */
 internal class MoshiTestingModule : KAbstractModule() {
   override fun configure() {
-    bind<Moshi>().toInstance(DEFAULT_KOTLIN_MOSHI)
+    bind<Moshi>().toInstance(defaultKotlinMoshi)
   }
 }

@@ -23,11 +23,11 @@ import wisp.feature.Feature
 import wisp.feature.FeatureFlags
 import wisp.feature.getEnum
 import wisp.feature.getJson
-import wisp.moshi.DEFAULT_KOTLIN_MOSHI
+import wisp.moshi.defaultKotlinMoshi
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
-  private val moshi = DEFAULT_KOTLIN_MOSHI
+  private val moshi = defaultKotlinMoshi
   private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(client, moshi)
 
   @BeforeEach

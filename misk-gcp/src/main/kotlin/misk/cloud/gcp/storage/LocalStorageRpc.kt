@@ -13,7 +13,7 @@ import misk.moshi.adapter
 import misk.okio.forEachBlock
 import okio.buffer
 import okio.source
-import wisp.moshi.DEFAULT_KOTLIN_MOSHI
+import wisp.moshi.defaultKotlinMoshi
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -96,7 +96,7 @@ import kotlin.streams.asSequence
  */
 class LocalStorageRpc(
   root: Path,
-  moshi: Moshi = DEFAULT_KOTLIN_MOSHI
+  moshi: Moshi = defaultKotlinMoshi
 ) : BaseCustomStorageRpc() {
   // Handles in-process synchronization; cross-process synchronization is handled by file locks
   private val internalLock = ReentrantReadWriteLock()

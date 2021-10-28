@@ -12,7 +12,7 @@ import misk.jdbc.DataSourceType
 import misk.resources.ResourceLoader
 import mu.KotlinLogging
 import wisp.deployment.Deployment
-import wisp.moshi.DEFAULT_KOTLIN_MOSHI
+import wisp.moshi.defaultKotlinMoshi
 import java.io.IOException
 import java.util.Optional
 import java.util.concurrent.TimeUnit
@@ -83,7 +83,7 @@ class StartDatabaseService(
     val docker: DockerClient = DockerClientBuilder.getInstance()
       .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
       .build()
-    val moshi = DEFAULT_KOTLIN_MOSHI
+    val moshi = defaultKotlinMoshi
 
     /**
      * Global cache of running database servers.

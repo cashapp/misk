@@ -4,7 +4,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
 import misk.testing.TemporaryFolderModule
-import wisp.moshi.DEFAULT_KOTLIN_MOSHI
+import wisp.moshi.defaultKotlinMoshi
 import javax.inject.Inject
 
 @MiskTest(startService = false)
@@ -15,5 +15,5 @@ internal class LocalStorageRpcTest : CustomStorageRpcTestCases<LocalStorageRpc>(
   @Inject
   private lateinit var tempFolder: TemporaryFolder
 
-  override fun newStorageRpc() = LocalStorageRpc(tempFolder.newFolder(), DEFAULT_KOTLIN_MOSHI)
+  override fun newStorageRpc() = LocalStorageRpc(tempFolder.newFolder(), defaultKotlinMoshi)
 }

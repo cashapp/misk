@@ -18,7 +18,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.anyString
 import retrofit2.Response
 import retrofit2.mock.Calls
-import wisp.moshi.DEFAULT_KOTLIN_MOSHI
+import wisp.moshi.defaultKotlinMoshi
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -35,7 +35,7 @@ internal class RealOpaPolicyEngineTest {
 
     @Provides @Singleton @Named("opa-moshi")
     fun provideMoshi(): Moshi {
-      return DEFAULT_KOTLIN_MOSHI
+      return defaultKotlinMoshi
     }
   }
 

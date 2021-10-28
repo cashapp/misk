@@ -11,7 +11,7 @@ import wisp.feature.FeatureFlags
 import wisp.feature.TrackerReference
 import wisp.feature.fromSafeJson
 import wisp.feature.toSafeJson
-import wisp.moshi.DEFAULT_KOTLIN_MOSHI
+import wisp.moshi.defaultKotlinMoshi
 import java.util.PriorityQueue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
@@ -30,7 +30,7 @@ constructor(
    * Preferred constructor for Wisp
    */
   constructor(
-    moshi: Moshi = DEFAULT_KOTLIN_MOSHI
+    moshi: Moshi = defaultKotlinMoshi
   ) : this({ moshi })
 
   companion object {
