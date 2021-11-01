@@ -2,14 +2,12 @@ package misk.slack
 
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
-import misk.client.HttpClientModule
 import misk.inject.KAbstractModule
-import okhttp3.Interceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import wisp.moshi.buildMoshi
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -39,8 +37,6 @@ class SlackModule(private val config: SlackConfig) : KAbstractModule() {
   }
 
   @Provides @Singleton @Named("misk-slack") fun provideMoshi(): Moshi {
-    return Moshi.Builder()
-        .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-        .build()
+    return buildMoshi(emptyList())
   }
 }

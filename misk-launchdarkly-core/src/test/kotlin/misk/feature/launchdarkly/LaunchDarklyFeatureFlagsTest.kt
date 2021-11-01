@@ -7,9 +7,13 @@ import com.launchdarkly.sdk.LDUser
 import com.launchdarkly.sdk.LDValue
 import com.launchdarkly.sdk.UserAttribute
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import misk.feature.Attributes
+import misk.feature.Feature
+import misk.feature.FeatureFlags
+import misk.feature.getEnum
+import misk.feature.getJson
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -21,20 +25,13 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import misk.feature.Attributes
-import misk.feature.Feature
-import misk.feature.FeatureFlags
-import misk.feature.getEnum
-import misk.feature.getJson
-import org.junit.jupiter.api.AfterEach
 import wisp.logging.WispQueuedLogCollector
+import wisp.moshi.defaultKotlinMoshi
 import java.util.function.Function
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
-  private val moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-    .build()
+  private val moshi = defaultKotlinMoshi
   private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(client, moshi)
   private val logCollector = WispQueuedLogCollector()
 
