@@ -14,7 +14,6 @@ dependencies {
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.moshiKotlin)
   testImplementation(Dependencies.moshiAdapters)
+  testImplementation(project(":wisp-moshi"))
 
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

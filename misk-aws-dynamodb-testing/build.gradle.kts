@@ -23,5 +23,3 @@ dependencies {
   testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.awaitility)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

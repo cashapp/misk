@@ -31,6 +31,7 @@ dependencies {
   api(project(":wisp-config"))
   api(project(":wisp-deployment"))
   api(project(":wisp-logging"))
+  api(project(":wisp-moshi"))
 
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-jdbc-testing"))
@@ -41,5 +42,3 @@ dependencies {
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.openTracingMock)
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

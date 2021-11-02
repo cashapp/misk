@@ -58,12 +58,14 @@ dependencies {
   api(project(":wisp-deployment"))
   api(project(":wisp-deployment-testing"))  // for fake implementation
   api(project(":wisp-logging"))
+  api(project(":wisp-moshi"))
 
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(Dependencies.mockitoCore)
   testImplementation(project(":misk-metrics-testing"))
   testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.junit4Api)
+  testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.okHttpMockWebServer) {
@@ -106,5 +108,3 @@ afterEvaluate {
     }
   }
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

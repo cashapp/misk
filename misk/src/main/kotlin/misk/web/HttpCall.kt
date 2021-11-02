@@ -111,18 +111,18 @@ interface HttpCall {
   fun initWebSocketListener(webSocketListener: WebSocketListener)
 
   fun contentType(): MediaType? {
-    val contentType = requestHeaders.get("Content-Type") ?: return null
+    val contentType = requestHeaders["Content-Type"] ?: return null
     return contentType.toMediaTypeOrNull()
   }
 
   fun accepts(): List<MediaRange> {
-    // TODO(mmihic): Don't blow up if one of the accept headers can't be parsed
-    val accepts = requestHeaders.values("Accept").flatMap { MediaRange.parseRanges(it) }
+    // If no media types are valid we'll use MediaRange.ALL_MEDIA.
+    val accepts = requestHeaders.values("Accept").flatMap {
+      MediaRange.parseRanges(it, swallowExceptions = true)
+    }
 
-    return if (accepts.isEmpty()) {
+    return accepts.ifEmpty {
       listOf(MediaRange.ALL_MEDIA)
-    } else {
-      accepts
     }
   }
 

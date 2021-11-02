@@ -10,5 +10,3 @@ dependencies {
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(project(":wisp-logging-testing"))
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

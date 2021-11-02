@@ -1,5 +1,4 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -12,7 +11,6 @@ buildscript {
   dependencies {
     classpath(Dependencies.kotlinAllOpenPlugin)
     classpath(Dependencies.kotlinGradlePlugin)
-    classpath(Dependencies.dokkaGradlePlugin)
     classpath(Dependencies.kotlinNoArgPlugin)
     classpath(Dependencies.junitGradlePlugin)
     classpath(Dependencies.mavenPublishGradlePlugin)
@@ -38,7 +36,6 @@ val testShardHibernate by tasks.creating() {
 subprojects {
   apply(plugin = "java")
   apply(plugin = "kotlin")
-  apply(plugin = "org.jetbrains.dokka")
 
   buildscript {
     repositories {
@@ -83,21 +80,6 @@ subprojects {
     add("api", enforcedPlatform(Dependencies.nettyBom))
   }
 
-  // We have to set the dokka configuration after evaluation since the com.vanniktech.maven.publish
-  // plugin overwrites our dokka configuration on projects where it's applied.
-  afterEvaluate {
-    tasks.withType(DokkaTask::class).configureEach {
-      dokkaSourceSets.configureEach {
-        reportUndocumented.set(false)
-        skipDeprecated.set(true)
-        jdkVersion.set(8)
-        if (name == "dokkaGfm") {
-          outputDirectory.set(project.file("$rootDir/docs/0.x"))
-        }
-      }
-    }
-  }
-
   tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
@@ -122,6 +104,7 @@ subprojects {
   if (!path.startsWith(":samples")) {
     apply(plugin = "com.vanniktech.maven.publish")
     apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
+    apply(from = "$rootDir/gradle-mvn-publish.gradle")
   }
 
   // Workaround the Gradle bug resolving multiplatform dependencies.
