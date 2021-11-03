@@ -12,6 +12,7 @@ Breaking changes:
 
 New features and fixes:
 
+- Ignore @transient fields when constructing queries (#2162)
 - Add support for Google Spanner to misk-gcp (#2188)
 - Add a default Moshi build in wisp, and move the builder from Misk (#2187)
 - Add wisp-token* - copied from misk.tokens (#2186)
