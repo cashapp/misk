@@ -25,7 +25,6 @@ import com.google.cloud.spanner.Statement
 import com.google.common.util.concurrent.AbstractIdleService
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import wisp.deployment.Deployment
 import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -34,8 +33,7 @@ import javax.inject.Singleton
 
 @Singleton
 class GoogleSpannerEmulator @Inject constructor(
-  private val deployment: Deployment,
-  private val config: SpannerConfig,
+  val config: SpannerConfig,
 ): AbstractIdleService()  {
   private val server: SpannerServer
   private val client: Spanner
@@ -61,7 +59,7 @@ class GoogleSpannerEmulator @Inject constructor(
     }
   }
 
-  private fun shouldStartServer() = config.emulator.enabled && (deployment.isTest || deployment.isLocalDevelopment)
+  private fun shouldStartServer() = config.emulator.enabled
 
   /**
    * Starts a Docker container running the Google Spanner emulator.
@@ -71,6 +69,7 @@ class GoogleSpannerEmulator @Inject constructor(
     if (startupFailure != null) throw startupFailure
     if (containerIsRunning) return
     containerIsRunning = true
+
     try {
       doStart()
     } catch (e: Exception) {
@@ -94,7 +93,7 @@ class GoogleSpannerEmulator @Inject constructor(
       synchronized(this) {
         if (imagePulled.get()) return
 
-        val process = ProcessBuilder("bash", "-c", "docker pull ${IMAGE}")
+        val process = ProcessBuilder("bash", "-c", "docker pull $IMAGE")
           .redirectOutput(ProcessBuilder.Redirect.INHERIT)
           .redirectError(ProcessBuilder.Redirect.INHERIT)
           .start()
@@ -117,7 +116,7 @@ class GoogleSpannerEmulator @Inject constructor(
    * Pulls a Docker container containing the Google Spanner emulator.
    */
   fun pullImage() {
-    GoogleSpannerEmulator.pullImage()
+    Companion.pullImage()
   }
 
   private fun doStart() {

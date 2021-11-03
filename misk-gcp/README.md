@@ -112,10 +112,16 @@ data class PersonResponse(val id: String)
 
 ### Testing with the Spanner module
 
+To use Spanner in CI, you'll first need to install the `miskGcpTesting`
+dependency in your project, which adds support for running the Google Spanner
+Emulator. 
+
 Like loading the module for your main application runtime, you'll want to add
-the `GoogleSpannerModule` to your service's testing module:
+the `GoogleSpannerEmulatorModule` and `GoogleSpannerModule` to your service's
+testing module. Note that `startService` must be true to start the emulator:
 
 ```kotlin
+@MiskTest(startService = true)
 class MyServiceTestingModule : KAbstractModule() {
   override fun configure() {
     val config: MyServiceConfig = SkimConfig.load(
@@ -125,6 +131,7 @@ class MyServiceTestingModule : KAbstractModule() {
     )
     install(ConfigModule.create(SERVICE_NAME, config))
     install(MiskTestingServiceModule())
+    install(GoogleSpannerEmulatorModule(config.gcp_spanner))
     install(GoogleSpannerModule(config.gcp_spanner))
   }
 }

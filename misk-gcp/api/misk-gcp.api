@@ -101,21 +101,6 @@ public final class misk/cloud/gcp/security/keys/GcpKmsConfig : wisp/config/Confi
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator : com/google/common/util/concurrent/AbstractIdleService {
-	public static final field CONTAINER_NAME Ljava/lang/String;
-	public static final field Companion Lmisk/cloud/gcp/spanner/GoogleSpannerEmulator$Companion;
-	public static final field IMAGE Ljava/lang/String;
-	public fun <init> (Lwisp/deployment/Deployment;Lmisk/cloud/gcp/spanner/SpannerConfig;)V
-	public final fun clearTables ()V
-	public final fun pullImage ()V
-}
-
-public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator$Companion {
-	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
-	public final fun getLogger ()Lmu/KLogger;
-	public final fun pullImage ()V
-}
-
 public final class misk/cloud/gcp/spanner/GoogleSpannerModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/cloud/gcp/spanner/SpannerConfig;)V
 	public final fun provideCloudSpanner (Lmisk/cloud/gcp/spanner/SpannerConfig;)Lcom/google/cloud/spanner/Spanner;

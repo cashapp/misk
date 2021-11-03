@@ -2,6 +2,7 @@ package misk.cloud.gcp.spanner
 
 import com.google.cloud.spanner.Spanner
 import com.google.inject.util.Modules
+import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import javax.inject.Inject
 
-@MiskTest()
+@MiskTest(startService = true)
 class GoogleSpannerModuleTest {
   val spannerConfig = SpannerConfig(
     project_id = "test-project",
@@ -23,7 +24,9 @@ class GoogleSpannerModuleTest {
 
   @MiskTestModule
   val module = Modules.combine(
+    MiskTestingServiceModule(),
     DeploymentModule(TESTING),
+    GoogleSpannerEmulatorModule(spannerConfig),
     GoogleSpannerModule(spannerConfig),
   )
 

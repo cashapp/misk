@@ -26,7 +26,6 @@ class GoogleSpannerModule(
 ) : KAbstractModule() {
   override fun configure() {
     bind<SpannerConfig>().toInstance(spannerConfig)
-    install(ServiceModule<GoogleSpannerEmulator>())
   }
 
   @Provides
