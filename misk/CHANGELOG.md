@@ -1,6 +1,26 @@
 Change Log
 ==========
 
+Version 0.22.0 *(2021-11-03)*
+----------------------------
+
+Unstable public release.
+
+Breaking changes:
+
+- The `/error` action is no longer installed by default (#2190)
+
+New features and fixes:
+
+- Ignore @transient fields when constructing queries (#2162)
+- Add support for Google Spanner to misk-gcp (#2188)
+- Add a default Moshi build in wisp, and move the builder from Misk (#2187)
+- Add wisp-token* - copied from misk.tokens (#2186)
+- Allow invalid accept headers (#2185)
+- Put unack'd jobs on the deadletter queue and remove FakeTransactionalJobQueue (#2180)
+- Remove internal visibility modifier from PrometheusHttpService (#2181)
+- Add wisp-tracing module (#2171)
+
 Version 0.21.0 *(2021-10-18)*
 ----------------------------
 
