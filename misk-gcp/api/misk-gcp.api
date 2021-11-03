@@ -101,6 +101,50 @@ public final class misk/cloud/gcp/security/keys/GcpKmsConfig : wisp/config/Confi
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/cloud/gcp/spanner/GoogleSpannerModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/cloud/gcp/spanner/SpannerConfig;)V
+	public final fun provideCloudSpanner (Lmisk/cloud/gcp/spanner/SpannerConfig;)Lcom/google/cloud/spanner/Spanner;
+}
+
+public final class misk/cloud/gcp/spanner/SpannerConfig : wisp/config/Config {
+	public fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;Lmisk/cloud/gcp/TransportConfig;)V
+	public synthetic fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;Lmisk/cloud/gcp/TransportConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/google/auth/Credentials;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Lmisk/cloud/gcp/TransportConfig;
+	public final fun copy (Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;Lmisk/cloud/gcp/TransportConfig;)Lmisk/cloud/gcp/spanner/SpannerConfig;
+	public static synthetic fun copy$default (Lmisk/cloud/gcp/spanner/SpannerConfig;Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;Lmisk/cloud/gcp/TransportConfig;ILjava/lang/Object;)Lmisk/cloud/gcp/spanner/SpannerConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCredentials ()Lcom/google/auth/Credentials;
+	public final fun getDatabase ()Ljava/lang/String;
+	public final fun getEmulator ()Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;
+	public final fun getInstance_id ()Ljava/lang/String;
+	public final fun getProject_id ()Ljava/lang/String;
+	public final fun getTransport ()Lmisk/cloud/gcp/TransportConfig;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/cloud/gcp/spanner/SpannerEmulatorConfig {
+	public fun <init> ()V
+	public fun <init> (ZLjava/lang/String;I)V
+	public synthetic fun <init> (ZLjava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun copy (ZLjava/lang/String;I)Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;
+	public static synthetic fun copy$default (Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;ZLjava/lang/String;IILjava/lang/Object;)Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getHostname ()Ljava/lang/String;
+	public final fun getPort ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class misk/cloud/gcp/storage/BaseCustomStorageRpc : com/google/cloud/storage/spi/v1/StorageRpc {
 	public fun <init> ()V
 	public fun compose (Ljava/lang/Iterable;Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;)Lcom/google/api/services/storage/model/StorageObject;
