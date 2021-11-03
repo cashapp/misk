@@ -9,10 +9,10 @@ dependencies {
   implementation(Dependencies.gcpKms)
   implementation(Dependencies.gcpLogback)
   implementation(Dependencies.gcpLogging)
+  implementation(Dependencies.gcpSpanner)
   implementation(Dependencies.guice)
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.openTracingDatadog)
-
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.moshiAdapters)
