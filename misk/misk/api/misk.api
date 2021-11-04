@@ -1737,6 +1737,10 @@ public final class misk/web/exceptions/GrpcErrorResponse$Companion {
 	public final fun getINTERNAL_SERVER_ERROR ()Lmisk/web/exceptions/GrpcErrorResponse;
 }
 
+public final class misk/web/extractors/StringConverterKt {
+	public static final fun converterFor (Lkotlin/reflect/KType;)Lkotlin/jvm/functions/Function1;
+}
+
 public final class misk/web/formatter/ClassNameFormatter {
 	public static final field Companion Lmisk/web/formatter/ClassNameFormatter$Companion;
 	public fun <init> ()V
