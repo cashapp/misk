@@ -67,21 +67,6 @@ internal class WebActionFactory @Inject constructor(
         "on ${webActionClass.simpleName}"
     }
 
-    require(actionFunctions.size == 1) {
-      val actionFunctionNames = actionFunctions.joinToString(", ") { it.name }
-      "multiple annotated methods on ${webActionClass.simpleName}: $actionFunctionNames"
-    }
-
-    // Bind providers for each supported HTTP method.
-    val actionFunction = actionFunctions.first()
-    val get = actionFunction.findAnnotationWithOverrides<Get>()
-    val post = actionFunction.findAnnotationWithOverrides<Post>()
-    val patch = actionFunction.findAnnotationWithOverrides<Patch>()
-    val put = actionFunction.findAnnotationWithOverrides<Put>()
-    val delete = actionFunction.findAnnotationWithOverrides<Delete>()
-    val connectWebSocket = actionFunction.findAnnotationWithOverrides<ConnectWebSocket>()
-    val grpc = actionFunction.findAnnotationWithOverrides<WireRpc>()
-
     // TODO(adrw) fix this using first provider below so that WebAction::class or WebAction can be passed in
     // val provider = Providers.of(theInstance)
 
@@ -92,47 +77,57 @@ internal class WebActionFactory @Inject constructor(
     require(pathPrefix.last() == '/')
     val effectivePrefix = pathPrefix.dropLast(1)
 
-    if (get != null) {
-      collectBoundActions(
-        result, provider, actionFunction,
-        effectivePrefix + get.pathPattern, DispatchMechanism.GET
-      )
-    }
-    if (post != null) {
-      collectBoundActions(
-        result, provider, actionFunction,
-        effectivePrefix + post.pathPattern, DispatchMechanism.POST
-      )
-    }
-    if (patch != null) {
-      collectBoundActions(
-        result, provider, actionFunction,
-        effectivePrefix + patch.pathPattern, DispatchMechanism.PATCH
-      )
-    }
-    if (put != null) {
-      collectBoundActions(
-        result, provider, actionFunction,
-        effectivePrefix + put.pathPattern, DispatchMechanism.PUT
-      )
-    }
-    if (delete != null) {
-      collectBoundActions(
-        result, provider, actionFunction,
-        effectivePrefix + delete.pathPattern, DispatchMechanism.DELETE
-      )
-    }
-    if (connectWebSocket != null) {
-      collectBoundActions(
-        result, provider, actionFunction,
-        effectivePrefix + connectWebSocket.pathPattern, DispatchMechanism.WEBSOCKET
-      )
-    }
-    if (grpc != null) {
-      collectBoundActions(
-        result, provider, actionFunction,
-        effectivePrefix + grpc.path, DispatchMechanism.GRPC
-      )
+    actionFunctions.forEach { actionFunction ->
+      val get = actionFunction.findAnnotationWithOverrides<Get>()
+      val post = actionFunction.findAnnotationWithOverrides<Post>()
+      val patch = actionFunction.findAnnotationWithOverrides<Patch>()
+      val put = actionFunction.findAnnotationWithOverrides<Put>()
+      val delete = actionFunction.findAnnotationWithOverrides<Delete>()
+      val connectWebSocket = actionFunction.findAnnotationWithOverrides<ConnectWebSocket>()
+      val grpc = actionFunction.findAnnotationWithOverrides<WireRpc>()
+
+      if (get != null) {
+        collectBoundActions(
+          result, provider, actionFunction,
+          effectivePrefix + get.pathPattern, DispatchMechanism.GET
+        )
+      }
+      if (post != null) {
+        collectBoundActions(
+          result, provider, actionFunction,
+          effectivePrefix + post.pathPattern, DispatchMechanism.POST
+        )
+      }
+      if (patch != null) {
+        collectBoundActions(
+          result, provider, actionFunction,
+          effectivePrefix + patch.pathPattern, DispatchMechanism.PATCH
+        )
+      }
+      if (put != null) {
+        collectBoundActions(
+          result, provider, actionFunction,
+          effectivePrefix + put.pathPattern, DispatchMechanism.PUT
+        )
+      }
+      if (delete != null) {
+        collectBoundActions(
+          result, provider, actionFunction,
+          effectivePrefix + delete.pathPattern, DispatchMechanism.DELETE
+        )
+      }
+      if (connectWebSocket != null) {
+        collectBoundActions(
+          result, provider, actionFunction,
+          effectivePrefix + connectWebSocket.pathPattern, DispatchMechanism.WEBSOCKET
+        )
+      }
+      if (grpc != null) {
+        collectBoundActions(
+          result, provider, actionFunction,
+          effectivePrefix + grpc.path, DispatchMechanism.GRPC
+        )
+      }
     }
 
     return result
