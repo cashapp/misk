@@ -99,6 +99,35 @@ internal class WebDispatchTest {
   }
 
   @Test
+  fun multiMethod() {
+    val httpClient = OkHttpClient()
+
+    val getResponse = httpClient.newCall(
+      Request.Builder()
+        .get()
+        .url(serverUrlBuilder().encodedPath("/multi/hello/my_friend").build())
+        .build()
+    ).execute()
+    assertThat(getResponse.code).isEqualTo(200)
+    assertThat(helloByeJsonAdapter.fromJson(getResponse.body!!.source())!!.message)
+      .isEqualTo("get hello my_friend")
+
+    val response = httpClient.newCall(
+      Request.Builder()
+        .post(
+          helloByeJsonAdapter
+            .toJson(HelloBye("my friend"))
+            .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
+        )
+        .url(serverUrlBuilder().encodedPath("/multi/hello").build())
+        .build()
+    ).execute()
+    assertThat(response.code).isEqualTo(200)
+    assertThat(helloByeJsonAdapter.fromJson(response.body!!.source())!!.message)
+      .isEqualTo("post hello my friend")
+  }
+
+  @Test
   fun entryWithSingleSegment() {
     WebActionEntry(GetHello::class, "/good/")
   }
@@ -127,6 +156,7 @@ internal class WebDispatchTest {
       install(WebActionModule.create<GetBye>())
       install(WebActionModule.create<GetNothing>())
       install(WebActionModule.createWithPrefix<GetHello>("/path/prefix/"))
+      install(WebActionModule.create<MultiMethod>())
     }
   }
 
@@ -165,6 +195,19 @@ internal class WebDispatchTest {
     fun doNothing(): Nothing {
       throw UnsupportedOperationException("we did nothing")
     }
+  }
+
+  class MultiMethod @Inject constructor() : WebAction {
+    @Get("/multi/hello/{message}")
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun hello(@PathParam("message") message: String) =
+      HelloBye("get hello $message")
+
+    @Post("/multi/hello")
+    @RequestContentType(MediaTypes.APPLICATION_JSON)
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun hello(@misk.web.RequestBody request: HelloBye) =
+      HelloBye("post hello ${request.message}")
   }
 
   private fun serverUrlBuilder(): HttpUrl.Builder {
