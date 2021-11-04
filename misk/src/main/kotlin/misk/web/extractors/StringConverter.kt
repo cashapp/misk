@@ -18,9 +18,9 @@ private val doubleTypeNullable: KType = Double::class.createType(nullable = true
 private val booleanType: KType = Boolean::class.createType(nullable = false)
 private val booleanTypeNullable: KType = Boolean::class.createType(nullable = true)
 
-internal typealias StringConverter = (String) -> Any?
+typealias StringConverter = (String) -> Any?
 
-internal fun converterFor(type: KType): StringConverter? {
+fun converterFor(type: KType): StringConverter? {
 
   return when {
     type.isSubtypeOf(stringType) -> { it -> it }
