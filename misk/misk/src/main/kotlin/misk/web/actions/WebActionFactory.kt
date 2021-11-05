@@ -63,7 +63,7 @@ internal class WebActionFactory @Inject constructor(
     }
 
     require(actionFunctions.isNotEmpty()) {
-      "no @Get, @Post, @Patch, @Put, @Delete, @ConnectWebSocket, or @Grpc annotations " +
+      "no @Get, @Post, @Patch, @Put, @Delete, @ConnectWebSocket, or @WireRpc annotations " +
         "on ${webActionClass.simpleName}"
     }
 
