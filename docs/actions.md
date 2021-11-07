@@ -74,6 +74,15 @@ fun main(args: Array<String>) {
 }
 ```
 
+### Testing HTTP responses
+
+In your testing module configuration, add this:
+```kotlin
+ override fun configure(){
+    install(WebServerTestingModule())
+ }
+```
+
 ### Response type
 
 If you change the action's response type to `Response<T>`, it gives you better control over the 
