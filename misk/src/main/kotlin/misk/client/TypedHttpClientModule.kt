@@ -33,6 +33,7 @@ class TypedHttpClientModule<T : Any>(
 
   override fun configure() {
     // Initialize empty sets for our multibindings.
+    newMultibinder<ClientApplicationInterceptorFactory>()
     newMultibinder<ClientNetworkInterceptor.Factory>()
 
     // Install raw HTTP client support
@@ -98,6 +99,7 @@ class TypedPeerHttpClientModule<T : Any>(
     requireBinding(PeerClientFactory::class.java)
 
     // Initialize empty sets for our multibindings.
+    newMultibinder<ClientApplicationInterceptorFactory>()
     newMultibinder<ClientNetworkInterceptor.Factory>()
 
     @Suppress("UNCHECKED_CAST")
@@ -145,6 +147,10 @@ class TypedClientFactory @Inject constructor() {
   @Inject
   private lateinit var clientNetworkInterceptorFactories:
     Provider<List<ClientNetworkInterceptor.Factory>>
+
+  @Inject
+  private lateinit var clientApplicationInterceptorFactories:
+    Provider<List<ClientApplicationInterceptorFactory>>
 
   @Inject
   private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
@@ -212,6 +218,7 @@ class TypedClientFactory @Inject constructor() {
       retrofit,
       client,
       clientNetworkInterceptorFactories,
+      clientApplicationInterceptorFactories,
       eventListenerFactory,
       tracer,
       moshi,
