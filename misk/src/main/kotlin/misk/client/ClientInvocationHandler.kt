@@ -36,6 +36,7 @@ internal class ClientInvocationHandler(
   retrofit: Retrofit,
   okHttpTemplate: OkHttpClient,
   networkInterceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>,
+  applicationInterceptorFactories: Provider<List<ClientApplicationInterceptorFactory>>,
   eventListenerFactory: EventListener.Factory?,
   tracer: Tracer?,
   moshi: Moshi,
@@ -51,9 +52,11 @@ internal class ClientInvocationHandler(
   // Each method might have a different set of network interceptors, so sadly we potentially
   // need to create a separate OkHttpClient and retrofit proxy per method
   private val proxiesByMethod: Map<String, Any> = actionsByMethod.map { (methodName, action) ->
+    val applicationInterceptors = applicationInterceptorFactories.get().mapNotNull { it.create(action) }
     val networkInterceptors = networkInterceptorFactories.get().mapNotNull { it.create(action) }
     val clientBuilder = okHttpTemplate.newBuilder()
     clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(clientName))
+    applicationInterceptors.forEach { clientBuilder.addInterceptor(it) }
     networkInterceptors.forEach {
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
     }

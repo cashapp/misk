@@ -13,6 +13,7 @@ import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.jetty.JettyService
+import okhttp3.Interceptor
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -42,6 +43,7 @@ internal class TypedHttpClientInterceptorTest {
     assertThat(response.body()).isNotNull()
     assertThat(response.body()?.name!!).isEqualTo("supertrex")
     assertThat(response.headers()["X-Original-From"]).isEqualTo("dinosaur.getDinosaur")
+    assertThat(response.headers()["X-Application-Action-Name"]).isEqualTo("dinosaur.getDinosaur")
   }
 
   /** Server [NetworkInterceptor] that echos back the X-Originating-Action from the request. */
@@ -56,6 +58,17 @@ internal class TypedHttpClientInterceptorTest {
 
     class Factory @Inject constructor() : NetworkInterceptor.Factory {
       override fun create(action: Action) = ServerHeaderInterceptor()
+    }
+  }
+
+  class ClientActionHeaderInterceptor(val action: ClientAction) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain) =
+      chain.proceed(chain.request()).newBuilder()
+        .addHeader("X-Application-Action-Name", action.name)
+        .build()
+
+    class Factory: ClientApplicationInterceptorFactory {
+      override fun create(action: ClientAction) = ClientActionHeaderInterceptor(action)
     }
   }
 
@@ -87,6 +100,7 @@ internal class TypedHttpClientInterceptorTest {
       install(MiskTestingServiceModule())
       install(DinoClientModule(jetty))
       multibind<ClientNetworkInterceptor.Factory>().to<ClientHeaderInterceptor.Factory>()
+      multibind<ClientApplicationInterceptorFactory>().to<ClientActionHeaderInterceptor.Factory>()
     }
   }
 }

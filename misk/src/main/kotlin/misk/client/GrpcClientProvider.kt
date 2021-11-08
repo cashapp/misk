@@ -58,6 +58,8 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
   @Inject
   private lateinit var interceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
+  @Inject
+  private lateinit var appInterceptorFactories:Provider<List<ClientApplicationInterceptorFactory>>
   @Inject private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
 
   override fun get(): T {
@@ -66,14 +68,16 @@ internal class GrpcClientProvider<T : Service, G : T>(
     return get(
       endpointConfig = endpointConfig,
       httpClient = httpClient,
-      interceptorFactories = interceptorFactories.get()
+      interceptorFactories = interceptorFactories.get(),
+      appInterceptorFactories = appInterceptorFactories.get(),
     )
   }
 
   fun get(
     endpointConfig: HttpClientEndpointConfig,
     httpClient: OkHttpClient,
-    interceptorFactories: List<ClientNetworkInterceptor.Factory>
+    interceptorFactories: List<ClientNetworkInterceptor.Factory>,
+    appInterceptorFactories: List<ClientApplicationInterceptorFactory>,
   ): T {
     val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
 
@@ -94,6 +98,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
         clientPrototype = clientPrototype,
         baseUrl = baseUrl,
         interceptorFactories = interceptorFactories,
+        appInterceptorFactories = appInterceptorFactories,
         endpointConfig = endpointConfig
       ) ?: continue
       handlers[method.name] = handler
@@ -148,6 +153,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
     clientPrototype: OkHttpClient,
     baseUrl: String,
     interceptorFactories: List<ClientNetworkInterceptor.Factory>,
+    appInterceptorFactories: List<ClientApplicationInterceptorFactory>,
     endpointConfig: HttpClientEndpointConfig
   ): MethodInvocationHandler<T, G>? {
     val action = toClientAction(method) ?: return null
@@ -160,6 +166,10 @@ internal class GrpcClientProvider<T : Service, G : T>(
     )
 
     clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(name))
+    for (factory in appInterceptorFactories) {
+      val interceptor = factory.create(action) ?: continue
+      clientBuilder.addInterceptor(interceptor)
+    }
     for (factory in interceptorFactories) {
       val interceptor = factory.create(action) ?: continue
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, interceptor))
