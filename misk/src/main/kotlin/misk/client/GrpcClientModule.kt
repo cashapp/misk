@@ -38,6 +38,7 @@ class GrpcClientModule<T : Service, G : T>(
       .`in`(Singleton::class.java)
 
     // Initialize empty sets for our multibindings.
+    newMultibinder<ClientApplicationInterceptorFactory>()
     newMultibinder<ClientNetworkInterceptor.Factory>()
   }
 
