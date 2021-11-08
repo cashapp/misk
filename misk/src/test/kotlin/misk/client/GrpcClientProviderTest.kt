@@ -13,6 +13,8 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import misk.ApplicationInterceptor
+import misk.Chain
 import java.time.Duration
 import java.util.concurrent.LinkedBlockingDeque
 import javax.inject.Inject
@@ -29,6 +31,7 @@ import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
+import okhttp3.Interceptor
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -71,8 +74,10 @@ internal class GrpcClientProviderTest {
         .build()
     )
     assertThat(log).containsExactly(
-      ">> robots.SayHello /RobotLocator/SayHello",
-      "<< robots.SayHello /RobotLocator/SayHello 200"
+      ">> ApplicationInterceptor robots.SayHello /RobotLocator/SayHello",
+      ">> NetworkInterceptor robots.SayHello /RobotLocator/SayHello",
+      "<< NetworkInterceptor robots.SayHello /RobotLocator/SayHello 200",
+      "<< ApplicationInterceptor robots.SayHello /RobotLocator/SayHello 200",
     )
     log.clear()
 
@@ -87,8 +92,10 @@ internal class GrpcClientProviderTest {
         .build()
     )
     assertThat(log).containsExactly(
-      ">> robots.Locate /RobotLocator/Locate",
-      "<< robots.Locate /RobotLocator/Locate 200"
+      ">> ApplicationInterceptor robots.Locate /RobotLocator/Locate",
+      ">> NetworkInterceptor robots.Locate /RobotLocator/Locate",
+      "<< NetworkInterceptor robots.Locate /RobotLocator/Locate 200",
+      "<< ApplicationInterceptor robots.Locate /RobotLocator/Locate 200",
     )
     assertThat(clientMetricsInterceptorFactory.requestDuration.labels("robots.SayHello", "200").get().count.toInt()).isEqualTo(1)
     assertThat(clientMetricsInterceptorFactory.requestDurationHistogram.labels("robots.SayHello", "200").get().buckets.last().toInt()).isEqualTo(1)
@@ -120,6 +127,10 @@ internal class GrpcClientProviderTest {
       install(GrpcClientModule.create<RobotLocator, GrpcRobotLocator>("robots"))
       install(ClientNetworkInterceptorsModule())
       multibind<ClientNetworkInterceptor.Factory>().toInstance(SimpleInterceptorFactory())
+      multibind<ClientApplicationInterceptorFactory>().toInstance(
+        object : ClientApplicationInterceptorFactory {
+        override fun create(action: ClientAction) = SimpleApplicationInterceptor(action)
+      })
     }
 
     @Provides
@@ -143,9 +154,18 @@ internal class GrpcClientProviderTest {
   inner class SimpleInterceptor(val action: ClientAction) : ClientNetworkInterceptor {
     override fun intercept(chain: ClientNetworkChain): Response {
       require(chain.action == action)
-      log += ">> ${chain.action.name} ${chain.request.url.encodedPath}"
+      log += ">> NetworkInterceptor ${chain.action.name} ${chain.request.url.encodedPath}"
       val response = chain.proceed(chain.request)
-      log += "<< ${chain.action.name} ${chain.request.url.encodedPath} ${response.code}"
+      log += "<< NetworkInterceptor ${chain.action.name} ${chain.request.url.encodedPath} ${response.code}"
+      return response
+    }
+  }
+
+  inner class SimpleApplicationInterceptor(val action: ClientAction) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+      log += ">> ApplicationInterceptor ${action.name} ${chain.request().url.encodedPath}"
+      val response = chain.proceed(chain.request())
+      log += "<< ApplicationInterceptor ${action.name} ${chain.request().url.encodedPath} ${response.code}"
       return response
     }
   }
