@@ -367,6 +367,10 @@ public final class misk/client/ClientAction {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class misk/client/ClientApplicationInterceptorFactory {
+	public abstract fun create (Lmisk/client/ClientAction;)Lokhttp3/Interceptor;
+}
+
 public abstract interface class misk/client/ClientChain {
 	public abstract fun getAction ()Lmisk/client/ClientAction;
 	public abstract fun getArgs ()Ljava/util/List;
