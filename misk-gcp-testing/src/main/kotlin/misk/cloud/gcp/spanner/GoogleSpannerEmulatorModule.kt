@@ -9,7 +9,10 @@ class GoogleSpannerEmulatorModule(
   private val config: SpannerConfig,
 ): KAbstractModule() {
   override fun configure() {
-    install(ServiceModule<GoogleSpannerEmulator>())
+    install(
+      ServiceModule<GoogleSpannerEmulator>()
+        .dependsOn<GoogleSpannerService>()
+    )
     bind(keyOf<GoogleSpannerEmulator>()).toInstance(
       GoogleSpannerEmulator(config)
     )

@@ -106,6 +106,14 @@ public final class misk/cloud/gcp/spanner/GoogleSpannerModule : misk/inject/KAbs
 	public final fun provideCloudSpanner (Lmisk/cloud/gcp/spanner/SpannerConfig;)Lcom/google/cloud/spanner/Spanner;
 }
 
+public final class misk/cloud/gcp/spanner/GoogleSpannerService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/cloud/gcp/spanner/GoogleSpannerService$Companion;
+	public fun <init> (Lcom/google/cloud/spanner/Spanner;)V
+}
+
+public final class misk/cloud/gcp/spanner/GoogleSpannerService$Companion {
+}
+
 public final class misk/cloud/gcp/spanner/SpannerConfig : wisp/config/Config {
 	public fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;Lmisk/cloud/gcp/TransportConfig;)V
 	public synthetic fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;Lmisk/cloud/gcp/TransportConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
