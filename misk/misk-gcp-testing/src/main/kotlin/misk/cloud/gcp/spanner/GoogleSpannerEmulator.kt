@@ -216,6 +216,7 @@ class GoogleSpannerEmulator @Inject constructor(
    * Stops a Docker container running the Google Spanner emulator.
    */
   override fun shutDown() {
+    client.close()
     logger.info(
       "Leaving Spanner docker container running in the background. " +
         "If you need to kill it because you messed up migrations or something use:" +
