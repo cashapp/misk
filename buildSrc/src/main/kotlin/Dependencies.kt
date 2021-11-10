@@ -15,7 +15,7 @@ object Dependencies {
   val curatorFramework = "org.apache.curator:curator-framework:5.1.0"
   val datasourceProxy = "net.ttddyy:datasource-proxy:1.7"
   val docker = "com.github.docker-java:docker-java:3.1.5"
-  val dokkaGradlePlugin = "org.jetbrains.dokka:dokka-gradle-plugin:1.5.0"
+  val dokkaGradlePlugin = "org.jetbrains.dokka:dokka-gradle-plugin:1.5.31"
   val gcpCloudCore = "com.google.cloud:google-cloud-core:1.95.4"
   val gcpCloudStorage = "com.google.cloud:google-cloud-storage:1.117.1"
   val gcpDatastore = "com.google.cloud:google-cloud-datastore:1.107.1"
