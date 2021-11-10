@@ -19,6 +19,7 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
+    classpath(Dependencies.wireSchema)
     classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
   }
 }
