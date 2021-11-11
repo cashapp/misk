@@ -36,6 +36,13 @@ class ClientMetricsInterceptor private constructor(
       requestDurationSummary.labels(actionName, "timeout").observe(elapsedMillis)
       requestDurationHistogram.labels(actionName, "timeout").observe(elapsedMillis)
       throw e
+    } catch (e: Exception) {
+      // Something else happened while the connection was in progress and we didn't receive
+      // a complete response. We still want to record any long-running calls, however.
+      val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
+      requestDurationSummary.labels(actionName, "incomplete-response").observe(elapsedMillis)
+      requestDurationHistogram.labels(actionName, "incomplete-response").observe(elapsedMillis)
+      throw e
     }
   }
 
