@@ -9,6 +9,8 @@ import java.net.SocketTimeoutException
 import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.channels.Channel
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -22,6 +24,8 @@ import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
@@ -35,6 +39,7 @@ internal class ClientMetricsInterceptorTest {
   val module = TestModule()
 
   @Named("pinger") @Inject private lateinit var client: Pinger
+  @Named("pingerDelay") @Inject private lateinit var clientDelay: PingerDelay
   @Inject private lateinit var factory: ClientMetricsInterceptor.Factory
   @Inject private lateinit var mockWebServer: MockWebServer
 
@@ -89,10 +94,45 @@ internal class ClientMetricsInterceptorTest {
     }
   }
 
+  @Test
+  fun incomplete() {
+    // Used to signal when the callback has had a chance to run.
+    val channel = Channel<Unit>()
+
+    val call = clientDelay.ping(AppRequest(200))
+    call.enqueue(object: Callback<AppResponse> {
+      override fun onResponse(call: Call<AppResponse>, response: Response<AppResponse>) {
+        runBlocking {
+          channel.send(Unit)
+        }
+      }
+      override fun onFailure(call: Call<AppResponse>, t: Throwable) {
+        runBlocking {
+          channel.send(Unit)
+        }
+      }
+    })
+
+    // Give the call a chance to start executing in the background.
+    Thread.sleep(500)
+    call.cancel()
+
+    // Ensure the response fails or completes before the remainder of the test runs.
+    runBlocking {
+      channel.receive()
+    }
+
+    SoftAssertions.assertSoftly { softly ->
+      softly.assertThat(requestDurationSummary.labels("pingerDelay.ping", "incomplete-response").get().count.toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pingerDelay.ping", "incomplete-response").get().buckets.last().toInt()).isEqualTo(1)
+    }
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(TypedHttpClientModule.create<Pinger>("pinger", Names.named("pinger")))
+      install(TypedHttpClientModule.create<PingerDelay>("pingerDelay", Names.named("pingerDelay")))
       bind<MockWebServer>().toInstance(MockWebServer())
     }
 
@@ -107,6 +147,12 @@ internal class ClientMetricsInterceptorTest {
             clientConfig = HttpClientConfig(
               readTimeout = Duration.ofMillis(100)
             )
+          ),
+          "pingerDelay" to HttpClientEndpointConfig(
+            url = url.toString(),
+            clientConfig = HttpClientConfig(
+              readTimeout = Duration.ofSeconds(5)
+            )
           )
         )
       )
@@ -114,6 +160,15 @@ internal class ClientMetricsInterceptorTest {
   }
 
   interface Pinger {
+    @POST("/ping")
+    @Headers(
+      "Accept: " + MediaTypes.APPLICATION_JSON,
+      "Content-type: " + MediaTypes.APPLICATION_JSON
+    )
+    fun ping(@Body request: AppRequest): Call<AppResponse>
+  }
+
+  interface PingerDelay {
     @POST("/ping")
     @Headers(
       "Accept: " + MediaTypes.APPLICATION_JSON,
