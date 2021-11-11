@@ -6,7 +6,8 @@ Without Misk, you would instantiate units under test and their dependencies:
 
 ```kotlin
 class FeatureWithoutMiskTest {
-    @Test fun `tests something`() {
+    @Test 
+    fun `tests something`() {
         val repository = MyRepository()
         val handler = MyHandler(repository)
 
