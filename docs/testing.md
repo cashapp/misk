@@ -26,7 +26,7 @@ class. For instance, with a test that looks like this:
 class HelloWebIntegrationTest {
   @MiskTestModule val module = MyTestingModule()
 
-  @Inject lateinit var myHandler: MyHandler()
+  @Inject lateinit var myHandler: MyHandler
 
   @Test
   fun `makes a call to the service`() {
