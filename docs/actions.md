@@ -318,7 +318,7 @@ class RobotLocatorIntegrationTest {
 
   @Inject lateinit var jettyService: JettyService
 
-  @Test fun `makes a call to the service() {
+  @Test fun `makes a call to the service`() {
     val robotLocator = Guice.createInjector(MyClientModule(jettyService))
       .getInstance<RobotLocator>()
     
