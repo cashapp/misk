@@ -220,3 +220,110 @@ Misk has a few `ActionScoped` items built in:
 * [`MiskCaller`](0.x/misk-actions/misk/-misk-caller/index.md) - access derived authorization details
 * [`HttpCall`](0.x/misk/misk.web/-http-call/index.md) - access lower level HTTP details, e.g. 
   request headers
+
+## Testing
+
+Use [tests annotated with `@MiskTest`](testing.md) to perform tests. There are two common patterns
+to testing actions:
+
+### Test Action classes directly
+
+Make sure that the module under test contains a Guice binding for the action and its dependencies, 
+then inject your action.
+
+```kotlin
+class MyModule : KAbstractModule() {
+  override fun configure() {
+    install(WebActionModule.create<HelloWebAction>())
+    // Alternatively, a direct or just-in-time binding might be sufficient.
+  }
+}
+
+@MiskTest class MyTest {
+  @MiskTestModule val module = MyModule()
+  @Inject lateinit var action: HelloWebAction
+
+  // use action...
+}
+```
+
+### Integration tests
+
+It's possible to perform tests terminating at the app's HTTP/gRPC interface.
+
+The module under test should include `WebServerTestingModule` so that Misk stands up a server during
+tests:
+
+```kotlin
+class MyModule : KAbstractModule() {
+   override fun configure(){
+    install(WebServerTestingModule())
+    // install other modules...
+ }
+}
+```
+
+Then test HTTP requests using `WebTestClient` (assertions here were made using
+ [Kotest](https://kotest.io/docs/assertions/assertions.html)):
+
+```kotlin
+@MiskTest(startService = true)
+class HelloWebIntegrationTest {
+  @Suppress("unused")
+  @MiskTestModule val module = MyModule()
+
+  @Inject lateinit var webTestClient: WebTestClient
+
+  @Test
+  fun `makes a call to the service`() {
+    val response = webTestClient.post("/hello", HelloRequest("world"))
+    response.response.code shouldBe 200
+    response.parseJson<HelloResponse>() shouldBe HelloResponse("hello world")
+  }
+}
+```
+
+Test gRPC requests by setting up a gRPC client pointing to the running app:
+
+```kotlin
+class MyServerModule : KAbstractModule() {
+  override fun configure() {
+    install(WebServerTestingModule())
+    // Assume RobotLocatorWebAction is a gRPC action.
+    install(WebActionModule.create<RobotLocatorWebAction>())
+  }
+}
+
+class MyClientModule(val jetty: JettyService): KAbstractModule() {
+  override fun configure() {
+    // Assume RobotLocator was generated via Wire.
+    install(GrpcClientModule.create<RobotLocator, GrpcRobotLocator>("robots"))
+  }
+  
+  @Provides
+  @Singleton
+  fun provideHttpClientConfig(): HttpClientsConfig {
+    return HttpClientsConfig(
+      endpoints = mapOf(
+        "robots" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
+      )
+    )
+  }
+}
+
+@MiskTest(startService = true)
+class RobotLocatorIntegrationTest {
+  @Suppress("unused")
+  @MiskTestModule val module = MyServerModule()
+
+  @Inject lateinit var jettyService: JettyService
+
+  @Test fun `makes a call to the service() {
+    val robotLocator = Guice.createInjector(MyClientModule(jettyService))
+      .getInstance<RobotLocator>()
+    
+    robotLocator.SayHello().executeBlocking(HelloRequest.builder().name("world").build()) shouldBe 
+      HelloReply.Builder().message("hello world").build()
+  }
+}
+```
