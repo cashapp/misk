@@ -128,7 +128,8 @@ class HelloWebActionTest {
 
 Integration tests set up a module for you, and adds an injector to the test class.
 
-You can use `WebTestingModule` to set up a running web server and make `WebTestClient` available.
+You can use `WebServerTestingModule` to set up a running web server and make `WebTestClient` 
+available.
 
 ```kotlin
 @MiskTest(startService = true)
@@ -147,12 +148,14 @@ class HelloWebActionTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
       install(HelloModule())
     }
   }
 }
 ```
+
+Read more about this in [Actions](actions.md#testing)
 
 ## Create services
 
