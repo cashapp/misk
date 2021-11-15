@@ -44,11 +44,6 @@ data class SpannerConfig(
    * > GCP project - any string will do.
    */
   val project_id: String,
-
-  /**
-   * Options for how requests are made to the Spanner APIs.
-   */
-  val transport: TransportConfig = TransportConfig(),
 ) : Config
 
 /**

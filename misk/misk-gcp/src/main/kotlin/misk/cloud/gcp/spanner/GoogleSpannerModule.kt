@@ -43,13 +43,6 @@ class GoogleSpannerModule(
     } else {
       builder = builder
         .setCredentials(credentials)
-        .setHost(config.transport.host)
-        .setTransportOptions(
-          HttpTransportOptions.newBuilder()
-            .setConnectTimeout(config.transport.connect_timeout_ms)
-            .setReadTimeout(config.transport.read_timeout_ms)
-            .build()
-        )
     }
 
     return builder.build().service
