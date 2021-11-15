@@ -12,6 +12,26 @@ public final class misk/cloud/gcp/datastore/FakeDatastoreModule$FakeDatastoreSer
 	public fun <init> (Lcom/google/cloud/datastore/testing/LocalDatastoreHelper;)V
 }
 
+public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field CONTAINER_NAME Ljava/lang/String;
+	public static final field Companion Lmisk/cloud/gcp/spanner/GoogleSpannerEmulator$Companion;
+	public static final field IMAGE Ljava/lang/String;
+	public fun <init> (Lmisk/cloud/gcp/spanner/SpannerConfig;)V
+	public final fun clearTables ()V
+	public final fun getConfig ()Lmisk/cloud/gcp/spanner/SpannerConfig;
+	public final fun pullImage ()V
+}
+
+public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator$Companion {
+	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
+	public final fun getLogger ()Lmu/KLogger;
+	public final fun pullImage ()V
+}
+
+public final class misk/cloud/gcp/spanner/GoogleSpannerEmulatorModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/cloud/gcp/spanner/SpannerConfig;)V
+}
+
 public final class misk/cloud/gcp/storage/FakeStorageModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun provideStorage ()Lcom/google/cloud/storage/Storage;

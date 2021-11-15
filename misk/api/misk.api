@@ -367,6 +367,10 @@ public final class misk/client/ClientAction {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class misk/client/ClientApplicationInterceptorFactory {
+	public abstract fun create (Lmisk/client/ClientAction;)Lokhttp3/Interceptor;
+}
+
 public abstract interface class misk/client/ClientChain {
 	public abstract fun getAction ()Lmisk/client/ClientAction;
 	public abstract fun getArgs ()Ljava/util/List;
@@ -1735,6 +1739,10 @@ public final class misk/web/exceptions/GrpcErrorResponse {
 
 public final class misk/web/exceptions/GrpcErrorResponse$Companion {
 	public final fun getINTERNAL_SERVER_ERROR ()Lmisk/web/exceptions/GrpcErrorResponse;
+}
+
+public final class misk/web/extractors/StringConverterKt {
+	public static final fun converterFor (Lkotlin/reflect/KType;)Lkotlin/jvm/functions/Function1;
 }
 
 public final class misk/web/formatter/ClassNameFormatter {
