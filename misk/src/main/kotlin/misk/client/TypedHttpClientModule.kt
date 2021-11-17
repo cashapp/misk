@@ -144,13 +144,15 @@ class TypedClientFactory @Inject constructor() {
   // Use Providers for the interceptors so Guice can properly detect cycles when apps inject
   // an HTTP Client in an Interceptor.
   // https://gist.github.com/ryanhall07/e3eac6d2d47b72a4c37bce87219d7ced
-  @Inject
-  private lateinit var clientNetworkInterceptorFactories:
-    Provider<List<ClientNetworkInterceptor.Factory>>
+  // Also, these are optional because the end user may not have used TypedHttpClientModule at all
+  // and thus may not have had multibindings provided here.
+  @Inject(optional = true)
+  private val clientNetworkInterceptorFactories:
+    Provider<List<ClientNetworkInterceptor.Factory>> = Provider { emptyList() }
 
-  @Inject
-  private lateinit var clientApplicationInterceptorFactories:
-    Provider<List<ClientApplicationInterceptorFactory>>
+  @Inject(optional = true)
+  private val clientApplicationInterceptorFactories:
+    Provider<List<ClientApplicationInterceptorFactory>> = Provider { emptyList() }
 
   @Inject
   private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory

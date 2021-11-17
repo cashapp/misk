@@ -67,6 +67,18 @@ internal class TypedHttpClientTest {
   fun buildDynamicClients() {
     val typedClientFactory = clientInjector.getInstance(TypedClientFactory::class.java)
 
+    testBuildAndUseDynamicClient(typedClientFactory)
+  }
+
+  @Test
+  fun buildDynamicClientWithoutHavingBuiltAnyOtherClients() {
+    val injector = Guice.createInjector(MiskTestingServiceModule())
+    val typedClientFactory = injector.getInstance(TypedClientFactory::class.java)
+
+    testBuildAndUseDynamicClient(typedClientFactory)
+  }
+
+  private fun testBuildAndUseDynamicClient(typedClientFactory: TypedClientFactory) {
     val dinoClient = typedClientFactory.build<ReturnADinosaur>(
       HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
       "dynamicDino"
