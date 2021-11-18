@@ -40,17 +40,25 @@ internal class AggregateListener(
   PostInsertEventListener,
   SaveOrUpdateEventListener {
   private val multimap = LinkedHashMultimap.create<EventType<*>, Provider<*>>()!!
+  private val listenerAddPolicy = LinkedHashMap<EventType<*>, BindPolicy>()
 
   init {
     for (eventTypeAndListener in registrations) {
       multimap.put(eventTypeAndListener.type, eventTypeAndListener.provider)
+      listenerAddPolicy[eventTypeAndListener.type] = eventTypeAndListener.policy
     }
   }
 
   fun registerAll(eventListenerRegistry: EventListenerRegistry) {
     for (eventType in multimap.keySet()) {
       @Suppress("UNCHECKED_CAST") // We don't have static type information for the event type.
-      eventListenerRegistry.appendListeners(eventType as EventType<Any>, this)
+      eventType as EventType<Any>
+
+      when (listenerAddPolicy[eventType]) {
+        BindPolicy.PREPEND -> eventListenerRegistry.prependListeners(eventType, this)
+        BindPolicy.REPLACE -> eventListenerRegistry.setListeners(eventType, this)
+        BindPolicy.APPEND -> eventListenerRegistry.appendListeners(eventType, this)
+      }
     }
   }
 

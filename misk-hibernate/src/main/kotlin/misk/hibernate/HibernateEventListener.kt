@@ -4,13 +4,23 @@ import org.hibernate.event.spi.EventType
 import javax.inject.Provider
 
 /**
+ * Control how we register listeners.
+ */
+enum class BindPolicy {
+  PREPEND,
+  REPLACE,
+  APPEND
+}
+
+/**
  * A registration of a listener for one of many Hibernate event types. This class uses providers to
  * get a new listener instance each time it is needed. This is intended to prevent circular
  * dependencies.
  */
 internal class ListenerRegistration(
   val type: EventType<*>,
-  val provider: Provider<*>
+  val provider: Provider<*>,
+  val policy: BindPolicy
 ) {
   init {
     when (type) {
