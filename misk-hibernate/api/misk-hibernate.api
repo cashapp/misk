@@ -1,3 +1,11 @@
+public final class misk/hibernate/BindPolicy : java/lang/Enum {
+	public static final field APPEND Lmisk/hibernate/BindPolicy;
+	public static final field PREPEND Lmisk/hibernate/BindPolicy;
+	public static final field REPLACE Lmisk/hibernate/BindPolicy;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/hibernate/BindPolicy;
+	public static fun values ()[Lmisk/hibernate/BindPolicy;
+}
+
 public abstract interface annotation class misk/hibernate/Constraint : java/lang/annotation/Annotation {
 	public abstract fun operator ()Lmisk/hibernate/Operator;
 	public abstract fun path ()Ljava/lang/String;
@@ -72,7 +80,8 @@ public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstra
 	protected final fun addEntities ([Lkotlin/reflect/KClass;)V
 	protected final fun addEntity (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
 	public static synthetic fun addEntity$default (Lmisk/hibernate/HibernateEntityModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)V
-	protected final fun bindListener (Lorg/hibernate/event/spi/EventType;)Lcom/google/inject/binder/LinkedBindingBuilder;
+	protected final fun bindListener (Lorg/hibernate/event/spi/EventType;Lmisk/hibernate/BindPolicy;)Lcom/google/inject/binder/LinkedBindingBuilder;
+	public static synthetic fun bindListener$default (Lmisk/hibernate/HibernateEntityModule;Lorg/hibernate/event/spi/EventType;Lmisk/hibernate/BindPolicy;ILjava/lang/Object;)Lcom/google/inject/binder/LinkedBindingBuilder;
 	protected fun configure ()V
 	public abstract fun configureHibernate ()V
 	protected final fun installHibernateAdminDashboardWebActions ()V

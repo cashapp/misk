@@ -3,6 +3,8 @@ package misk.hibernate
 import com.google.common.collect.LinkedHashMultimap
 import org.hibernate.event.service.spi.EventListenerRegistry
 import org.hibernate.event.spi.EventType
+import org.hibernate.event.spi.FlushEntityEvent
+import org.hibernate.event.spi.FlushEntityEventListener
 import org.hibernate.event.spi.PostDeleteEvent
 import org.hibernate.event.spi.PostDeleteEventListener
 import org.hibernate.event.spi.PostInsertEvent
@@ -21,6 +23,9 @@ import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
 import org.hibernate.event.spi.SaveOrUpdateEvent
 import org.hibernate.event.spi.SaveOrUpdateEventListener
+import org.hibernate.jpa.event.spi.Callback
+import org.hibernate.jpa.event.spi.CallbackRegistry
+import org.hibernate.jpa.event.spi.CallbackRegistryConsumer
 import org.hibernate.persister.entity.EntityPersister
 import javax.inject.Provider
 
@@ -38,19 +43,29 @@ internal class AggregateListener(
   PostUpdateEventListener,
   PreInsertEventListener,
   PostInsertEventListener,
-  SaveOrUpdateEventListener {
+  SaveOrUpdateEventListener,
+  FlushEntityEventListener,
+  CallbackRegistryConsumer {
   private val multimap = LinkedHashMultimap.create<EventType<*>, Provider<*>>()!!
+  private val listenerAddPolicy = LinkedHashMap<EventType<*>, BindPolicy>()
 
   init {
     for (eventTypeAndListener in registrations) {
       multimap.put(eventTypeAndListener.type, eventTypeAndListener.provider)
+      listenerAddPolicy[eventTypeAndListener.type] = eventTypeAndListener.policy
     }
   }
 
   fun registerAll(eventListenerRegistry: EventListenerRegistry) {
     for (eventType in multimap.keySet()) {
       @Suppress("UNCHECKED_CAST") // We don't have static type information for the event type.
-      eventListenerRegistry.appendListeners(eventType as EventType<Any>, this)
+      eventType as EventType<Any>
+
+      when (listenerAddPolicy[eventType]) {
+        BindPolicy.PREPEND -> eventListenerRegistry.prependListeners(eventType, this)
+        BindPolicy.REPLACE -> eventListenerRegistry.setListeners(eventType, this)
+        BindPolicy.APPEND -> eventListenerRegistry.appendListeners(eventType, this)
+      }
     }
   }
 
@@ -130,4 +145,18 @@ internal class AggregateListener(
       (provider.get() as SaveOrUpdateEventListener).onSaveOrUpdate(event)
     }
   }
+
+  override fun onFlushEntity(event: FlushEntityEvent?) {
+    for (provider in multimap[EventType.FLUSH_ENTITY]) {
+      (provider.get() as FlushEntityEventListener).onFlushEntity(event)
+    }
+  }
+
+  override fun injectCallbackRegistry(callbackRegistry: CallbackRegistry?) {
+    for (provider in multimap.values()) {
+      val handler = provider.get() as? CallbackRegistryConsumer ?: continue
+      handler.injectCallbackRegistry(callbackRegistry)
+    }
+  }
+
 }
