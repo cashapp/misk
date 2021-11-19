@@ -98,7 +98,10 @@ abstract class HibernateEntityModule(
     addEntity(T::class, Q::class, AA::class)
   }
 
-  protected fun <T> bindListener(type: EventType<T>): LinkedBindingBuilder<in T> {
+  protected fun <T> bindListener(
+    type: EventType<T>,
+    policy: BindPolicy = BindPolicy.APPEND
+  ): LinkedBindingBuilder<in T> {
     // Bind the listener as an anonymous key. We can get the provider for this before its bound!
     val key = Key.get(
       Any::class.java,
@@ -107,7 +110,7 @@ abstract class HibernateEntityModule(
 
     // Create a multibinding for a ListenerRegistration that uses the above key.
     multibind<ListenerRegistration>(qualifier)
-      .toInstance(ListenerRegistration(type, getProvider(key)))
+      .toInstance(ListenerRegistration(type, getProvider(key), policy))
 
     // Start the binding.
     return bind(key)
