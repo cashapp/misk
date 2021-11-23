@@ -71,8 +71,6 @@ data class DataSourceConfig(
   val trust_certificate_key_store_path: String? = null,
   val client_certificate_key_store_path: String? = null,
   val verify_server_identity: Boolean = false,
-  // For MySQL: TLS versions to enable, e.g. "TLSv1.2".
-  // Falls back to default driver behavior when not specified.
   val enabledTlsProtocols: List<String> = listOf("TLSv1.2", "TLSv1.3"),
   val show_sql: String? = "false",
   // Consider using this if you want Hibernate to automagically batch inserts/updates when it can.
