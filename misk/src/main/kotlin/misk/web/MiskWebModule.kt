@@ -192,7 +192,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(WebActionModule.create<NotFoundAction>())
 
     val maxThreads = config.jetty_max_thread_pool_size
-    val minThreads = Math.min(8, maxThreads)
+    val minThreads = Math.min(config.jetty_min_thread_pool_size, maxThreads)
     val idleTimeout = 60_000
     if (config.jetty_max_thread_pool_queue_size > 0) {
       val threadPool = QueuedThreadPool(

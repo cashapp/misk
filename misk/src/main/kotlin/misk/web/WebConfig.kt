@@ -51,6 +51,9 @@ data class WebConfig(
   /** Maximum number of threads in Jetty's thread pool. */
   val jetty_max_thread_pool_size: Int = 200,
 
+  /** Minimum number of threads in Jetty's thread pool. */
+  val jetty_min_thread_pool_size: Int = 8,
+
   /**
    * Maximum number of items in the queue for Jetty's thread pool.
    *
