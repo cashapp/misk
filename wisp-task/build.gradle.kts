@@ -1,5 +1,6 @@
 dependencies {
   implementation(Dependencies.kotlinxCoroutines)
+  implementation(Dependencies.kotlinxCoroutinesCoreJvm)
   implementation(Dependencies.kotlinStdLibJdk8)
   api(Dependencies.kotlinRetry)
   implementation(Dependencies.micrometerPrometheus)

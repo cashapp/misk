@@ -8,5 +8,6 @@ dependencies {
 
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.kotlinxCoroutines)
+  testImplementation(Dependencies.kotlinxCoroutinesCoreJvm)
   testImplementation(project(":wisp-logging"))
 }

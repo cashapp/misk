@@ -25,6 +25,7 @@ dependencies {
   implementation(Dependencies.junitApi)
   implementation(Dependencies.kotlinTest)
   implementation(Dependencies.kotlinxCoroutines)
+  implementation(Dependencies.kotlinxCoroutinesCoreJvm)
   implementation(Dependencies.okio)
   implementation(Dependencies.wireCompiler)
   implementation(Dependencies.wireGrpcClient)

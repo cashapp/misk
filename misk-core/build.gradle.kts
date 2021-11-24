@@ -23,6 +23,7 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.kotlinxCoroutines)
+  testImplementation(Dependencies.kotlinxCoroutinesCoreJvm)
   testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp-logging-testing"))
 }

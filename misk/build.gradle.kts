@@ -61,6 +61,7 @@ dependencies {
   api(project(":wisp-moshi"))
 
   testImplementation(Dependencies.kotlinxCoroutines)
+  testImplementation(Dependencies.kotlinxCoroutinesCoreJvm)
   testImplementation(Dependencies.mockitoCore)
   testImplementation(project(":misk-metrics-testing"))
   testImplementation(project(":misk-testing"))

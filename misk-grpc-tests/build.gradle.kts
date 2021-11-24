@@ -72,6 +72,7 @@ dependencies {
   implementation(Dependencies.grpcProtobuf)
   implementation(Dependencies.grpcStub)
   implementation(Dependencies.kotlinxCoroutines)
+  implementation(Dependencies.kotlinxCoroutinesCoreJvm)
   implementation(Dependencies.wireGrpcClient)
   implementation(Dependencies.wireRuntime)
   implementation(project(":misk"))
