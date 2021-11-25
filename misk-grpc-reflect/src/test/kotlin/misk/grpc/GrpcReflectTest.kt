@@ -1,5 +1,6 @@
 package misk.grpc
 
+import com.google.protobuf.DescriptorProtos
 import grpc.reflection.v1alpha.ListServiceResponse
 import grpc.reflection.v1alpha.ServerReflectionClient
 import grpc.reflection.v1alpha.ServerReflectionRequest
@@ -32,7 +33,7 @@ class GrpcReflectTest {
   @Inject lateinit var clientProvider: Provider<ServerReflectionClient>
 
   @Test
-  fun `happy path`() {
+  fun listServices() {
     val client = clientProvider.get()
 
     val call = client.ServerReflectionInfo()
@@ -42,8 +43,8 @@ class GrpcReflectTest {
         val request = ServerReflectionRequest(list_services = "*")
         requests.write(request)
 
-        val firstResponse = responses.read()
-        assertThat(firstResponse).isEqualTo(
+        val response = responses.read()
+        assertThat(response).isEqualTo(
           ServerReflectionResponse(
             original_request = request,
             list_services_response = ListServiceResponse(
@@ -54,6 +55,28 @@ class GrpcReflectTest {
             )
           )
         )
+      }
+    }
+  }
+
+  @Test
+  fun fileContainingSymbol() {
+    val client = clientProvider.get()
+
+    val call = client.ServerReflectionInfo()
+    val (requests, responses) = call.executeBlocking()
+    responses.use {
+      requests.use {
+        val request = ServerReflectionRequest(
+          file_containing_symbol = "routeguide.RouteGuide"
+        )
+        requests.write(request)
+
+        val response = responses.read()
+        val fileDescriptor = DescriptorProtos.FileDescriptorProto.parseFrom(
+          response!!.file_descriptor_response!!.file_descriptor_proto.single().toByteArray()
+        )
+        assertThat(fileDescriptor.name).isEqualTo("routeguide/RouteGuideProto.proto")
       }
     }
   }
