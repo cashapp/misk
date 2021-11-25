@@ -11,7 +11,6 @@ import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
-import okio.ExperimentalFileSystem
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import wisp.logging.getLogger
@@ -38,7 +37,6 @@ class GrpcReflectModule : KAbstractModule() {
   }
 
   /** Interrogate the installed gRPC actions and create a Wire schema from that. */
-  @OptIn(ExperimentalFileSystem::class)
   @Provides @Singleton
   fun provideSchema(webActions: List<WebActionEntry>): Schema {
     val fileSystem = FileSystem.RESOURCES
@@ -51,7 +49,6 @@ class GrpcReflectModule : KAbstractModule() {
     return schemaLoader.loadSchema()
   }
 
-  @OptIn(ExperimentalFileSystem::class)
   private fun toSourceLocations(
     fileSystem: FileSystem,
     webActions: List<WebActionEntry>
