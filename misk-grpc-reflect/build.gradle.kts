@@ -16,14 +16,11 @@ wire {
 }
 
 dependencies {
-  implementation(Dependencies.assertj)
   implementation(Dependencies.docker)
   implementation(Dependencies.grpcNetty)
   implementation(Dependencies.grpcProtobuf)
   implementation(Dependencies.grpcStub)
   implementation(Dependencies.guice)
-  implementation(Dependencies.junitApi)
-  implementation(Dependencies.kotlinTest)
   implementation(Dependencies.kotlinxCoroutines)
   implementation(Dependencies.okio)
   implementation(Dependencies.wireCompiler)
@@ -38,6 +35,9 @@ dependencies {
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
 
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.logbackClassic)
   testImplementation(project(":misk-grpc-tests"))
 }
