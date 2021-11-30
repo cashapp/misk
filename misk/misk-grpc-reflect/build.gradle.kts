@@ -33,11 +33,8 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
-  implementation(project(":misk-testing"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.logbackClassic)
   testImplementation(project(":misk-grpc-tests"))
+  testImplementation(project(":misk-testing"))
 }
