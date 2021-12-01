@@ -11,7 +11,7 @@ import misk.jdbc.DataSourceService
 import misk.jdbc.DatabasePool
 import misk.jdbc.JdbcModule
 import misk.jdbc.RealDatabasePool
-import misk.jooq.listeners.AvoidUsingSelectStartListener
+import misk.jooq.listeners.AvoidUsingSelectStarListener
 import misk.jooq.listeners.JooqSQLLogger
 import misk.jooq.listeners.JooqTimestampRecordListener
 import misk.jooq.listeners.JooqTimestampRecordListenerOptions
@@ -115,7 +115,7 @@ class JooqModule(
         )
       ).apply {
         val executeListeners = mutableListOf(
-          DefaultExecuteListenerProvider(AvoidUsingSelectStartListener())
+          DefaultExecuteListenerProvider(AvoidUsingSelectStarListener())
         )
         if ("true" == datasourceConfig.show_sql) {
           executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
