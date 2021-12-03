@@ -46,6 +46,13 @@ import java.security.GeneralSecurityException
  *
  * For the full documentation of the [CiphertextFormat] serialization, read FORMAT.md
  */
+@Deprecated(
+  message = "This class has been moved to its own library. " +
+    "See https://github.com/squareup/cash-ciphertext-format",
+  level = DeprecationLevel.WARNING,
+  replaceWith = ReplaceWith("CiphertextFormat",
+  "com.squareup.cash.crypto.format.CiphertextFormat")
+)
 class CiphertextFormat private constructor() {
 
   companion object {
