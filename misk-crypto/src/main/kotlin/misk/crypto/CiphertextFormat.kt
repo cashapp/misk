@@ -46,13 +46,6 @@ import java.security.GeneralSecurityException
  *
  * For the full documentation of the [CiphertextFormat] serialization, read FORMAT.md
  */
-@Deprecated(
-  message = "This class has been moved to its own library. " +
-    "See https://github.com/squareup/cash-ciphertext-format",
-  level = DeprecationLevel.WARNING,
-  replaceWith = ReplaceWith("CiphertextFormat",
-  "com.squareup.cash.crypto.format.CiphertextFormat")
-)
 class CiphertextFormat private constructor() {
 
   companion object {
@@ -64,6 +57,13 @@ class CiphertextFormat private constructor() {
     /**
      * Serializes the given [ciphertext] and associated encryption context to a [ByteArray]
      */
+    @Deprecated(
+      message = "This function has been moved to its own library. " +
+        "See https://github.com/squareup/cash-ciphertext-format",
+      level = DeprecationLevel.WARNING,
+      replaceWith = ReplaceWith("CiphertextFormat.serialize",
+        "com.squareup.cash.crypto.format.CiphertextFormat")
+    )
     fun serialize(ciphertext: ByteArray, aad: ByteArray?): ByteArray {
       val outputStream = ByteStreams.newDataOutput()
       outputStream.writeByte(CURRENT_VERSION)
@@ -83,6 +83,13 @@ class CiphertextFormat private constructor() {
      * This method also compares the given [context] to the serialized AAD
      * and will throw an exception if they do not match.
      */
+    @Deprecated(
+      message = "This function has been moved to its own library. " +
+        "See https://github.com/squareup/cash-ciphertext-format",
+      level = DeprecationLevel.WARNING,
+      replaceWith = ReplaceWith("CiphertextFormat.deserialize",
+        "com.squareup.cash.crypto.format.CiphertextFormat")
+    )
     fun deserialize(
       serialized: ByteArray,
       context: Map<String, String>?
@@ -116,7 +123,7 @@ class CiphertextFormat private constructor() {
      * Serializes the encryption context to a [ByteArray] so it could be passed to Tink's
      * encryption/decryption methods.
      */
-    fun serializeEncryptionContext(context: Map<String, String>?): ByteArray? {
+    private fun serializeEncryptionContext(context: Map<String, String>?): ByteArray? {
       if (context == null || context.isEmpty()) {
         return null
       }
@@ -154,27 +161,6 @@ class CiphertextFormat private constructor() {
       }
       val aad = buff.toByteArray()
       return aad
-    }
-
-    @VisibleForTesting
-    internal fun deserializeEncryptionContext(aad: ByteArray?): Map<String, String>? {
-      if (aad == null) {
-        return null
-      }
-      val src = DataInputStream(ByteArrayInputStream(aad))
-      val entries = decodeVarInt(src)
-      if (entries == 0) {
-        return null
-      }
-      return (1..entries).map {
-        val keySize = decodeVarInt(src)
-        val keyBytes = ByteArray(keySize)
-        src.readFully(keyBytes)
-        val valueSize = decodeVarInt(src)
-        val valueBytes = ByteArray(valueSize)
-        src.readFully(valueBytes)
-        keyBytes.toString(Charsets.UTF_8) to valueBytes.toString(Charsets.UTF_8)
-      }.toMap()
     }
 
     private fun readCiphertext(src: DataInputStream): ByteArray {
