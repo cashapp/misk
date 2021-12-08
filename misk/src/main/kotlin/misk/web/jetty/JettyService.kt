@@ -29,7 +29,7 @@ import org.eclipse.jetty.servlet.FilterHolder
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.servlets.CrossOriginFilter
-import org.eclipse.jetty.unixsocket.UnixSocketConnector
+import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import wisp.logging.getLogger
@@ -259,7 +259,7 @@ class JettyService @Inject internal constructor(
       // GET is enabled by default for gzipHandler.
       gzipHandler.addExcludedMethods("GET")
     }
-    servletContextHandler.gzipHandler = gzipHandler
+    servletContextHandler.insertHandler(gzipHandler)
 
     server.handler = statisticsHandler
 
