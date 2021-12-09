@@ -37,19 +37,23 @@ public final class misk/cloud/aws/TypesKt {
 
 public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;
-	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
 	public final synthetic fun create (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
-	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
-	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public final synthetic fun create (Lmisk/jobqueue/QueueName;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
