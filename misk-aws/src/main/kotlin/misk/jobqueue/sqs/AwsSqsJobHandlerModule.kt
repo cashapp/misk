@@ -1,6 +1,8 @@
 package misk.jobqueue.sqs
 
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.Service
+import com.google.inject.Key
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobHandler
@@ -8,6 +10,7 @@ import misk.jobqueue.QueueName
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+import misk.inject.toKey
 
 /**
  * Install this module to register a handler for an SQS queue,
@@ -16,7 +19,8 @@ import kotlin.reflect.KClass
 class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   private val queueName: QueueName,
   private val handler: KClass<T>,
-  private val installRetryQueue: Boolean
+  private val installRetryQueue: Boolean,
+  private val dependsOn: List<Key<out Service>>,
 ) : KAbstractModule() {
   override fun configure() {
     newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
@@ -25,23 +29,28 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
     }
 
-    install(ServiceModule<AwsSqsJobHandlerSubscriptionService>())
+    install(ServiceModule(
+      key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
+      dependsOn = dependsOn
+    ))
   }
 
   companion object {
     @JvmOverloads
     inline fun <reified T : JobHandler> create(
       queueName: QueueName,
-      installRetryQueue: Boolean = true
-    ): AwsSqsJobHandlerModule<T> = create(queueName, T::class, installRetryQueue)
+      installRetryQueue: Boolean = true,
+      dependsOn: List<Key<out Service>> = emptyList(),
+    ): AwsSqsJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
 
     @JvmStatic @JvmOverloads
     fun <T : JobHandler> create(
       queueName: QueueName,
       handlerClass: Class<T>,
-      installRetryQueue: Boolean = true
+      installRetryQueue: Boolean = true,
+      dependsOn: List<Key<out Service>> = emptyList(),
     ): AwsSqsJobHandlerModule<T> {
-      return create(queueName, handlerClass.kotlin, installRetryQueue)
+      return create(queueName, handlerClass.kotlin, installRetryQueue, dependsOn)
     }
 
     /**
@@ -51,9 +60,10 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
     fun <T : JobHandler> create(
       queueName: QueueName,
       handlerClass: KClass<T>,
-      installRetryQueue: Boolean = true
+      installRetryQueue: Boolean = true,
+      dependsOn: List<Key<out Service>> = emptyList(),
     ): AwsSqsJobHandlerModule<T> {
-      return AwsSqsJobHandlerModule(queueName, handlerClass, installRetryQueue)
+      return AwsSqsJobHandlerModule(queueName, handlerClass, installRetryQueue, dependsOn)
     }
   }
 }
