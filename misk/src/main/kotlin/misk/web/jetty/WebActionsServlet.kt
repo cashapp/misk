@@ -208,8 +208,7 @@ internal fun HttpServletResponse.headers(): Headers {
 }
 
 internal fun HttpServletRequest.httpUrl(): HttpUrl {
-  //LOL, the joys of shoehorning jetty server http objects into okhttp.
-  val rUrl = requestURL.toString().replace("ws", "http")
+  val rUrl = requestURL.replaceFirst(Regex("^ws://"), "http://")
   return if (queryString == null) {
     rUrl.toHttpUrl()
   } else {
