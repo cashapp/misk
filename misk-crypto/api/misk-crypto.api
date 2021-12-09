@@ -26,7 +26,6 @@ public final class misk/crypto/CiphertextFormat$Companion {
 	public final fun deserialize ([BLjava/util/Map;)Lkotlin/Pair;
 	public final fun deserializeFleFormat ([B)Lkotlin/Pair;
 	public final fun serialize ([B[B)[B
-	public final fun serializeEncryptionContext (Ljava/util/Map;)[B
 }
 
 public final class misk/crypto/CiphertextFormat$EncryptionContextMismatchException : java/security/GeneralSecurityException {
