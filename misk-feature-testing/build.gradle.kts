@@ -1,3 +1,8 @@
+plugins {
+  kotlin("jvm")
+  `java-library`
+}
+
 sourceSets {
   val test by getting {
     java.srcDir("src/test/kotlin/")
