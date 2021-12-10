@@ -22,13 +22,18 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node: [12]
+        node: [14]
         cmd:
           - sudo npm install -g @misk/cli && miskweb ci-build -e
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Configure Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
 
       - name: Test
         run: ${{ matrix.cmd }}
