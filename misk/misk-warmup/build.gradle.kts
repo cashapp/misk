@@ -1,3 +1,8 @@
+plugins {
+  kotlin("jvm")
+  `java-library`
+}
+
 dependencies {
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
