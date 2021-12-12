@@ -1,4 +1,7 @@
 plugins {
+  kotlin("jvm")
+  `java-library`
+  
   id("com.squareup.wire")
 }
 

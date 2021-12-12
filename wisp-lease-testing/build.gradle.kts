@@ -1,3 +1,8 @@
+plugins {
+  kotlin("jvm")
+  `java-library`
+}
+
 dependencies {
   api(project(":wisp-lease"))
   implementation(Dependencies.kotlinStdLibJdk8)
