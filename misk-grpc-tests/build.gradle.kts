@@ -6,6 +6,9 @@ import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 
 plugins {
+  kotlin("jvm")
+  `java-library`
+  
   id("com.google.protobuf")
   id("com.squareup.wire")
 }

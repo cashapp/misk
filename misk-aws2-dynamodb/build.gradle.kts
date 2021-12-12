@@ -1,3 +1,8 @@
+plugins {
+  kotlin("jvm")
+  `java-library`
+}
+
 dependencies {
   api(project(":misk-exceptions-dynamodb"))
   api(Dependencies.aws2Dynamodb)

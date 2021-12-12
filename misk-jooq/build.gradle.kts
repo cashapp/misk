@@ -1,3 +1,12 @@
+plugins {
+  kotlin("jvm")
+  `java-library`
+  
+  // Needed to generate jooq test db classes
+  id("org.flywaydb.flyway") version "7.15.0"
+  id("nu.studer.jooq") version "6.0.1"
+}
+
 dependencies {
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
@@ -25,11 +34,6 @@ buildscript {
     classpath("org.flywaydb:flyway-gradle-plugin:8.0.1")
     classpath(Dependencies.mysql)
   }
-}
-// Needed to generate jooq test db classes
-plugins {
-  id("org.flywaydb.flyway") version "7.15.0"
-  id("nu.studer.jooq") version "6.0.1"
 }
 
 // Needed to generate jooq test db classes

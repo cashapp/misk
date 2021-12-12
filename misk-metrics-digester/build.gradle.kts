@@ -1,3 +1,8 @@
+plugins {
+  kotlin("jvm")
+  `java-library`
+}
+
 sourceSets {
   val main by getting {
     java.srcDir("src/main/kotlin/")

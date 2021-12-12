@@ -1,4 +1,8 @@
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
+plugins {
+  kotlin("jvm")
+  `java-library`
+}
 
 buildscript {
   dependencies {

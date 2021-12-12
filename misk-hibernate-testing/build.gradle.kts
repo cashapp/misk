@@ -1,3 +1,8 @@
+plugins {
+  kotlin("jvm")
+  `java-library`
+}
+
 dependencies {
   implementation(Dependencies.guice)
   api(project(":misk-jdbc-testing"))

@@ -1,5 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+plugins {
+  kotlin("jvm")
+}
+
 dependencies {
   // TODO: these should be implementation("com.squareup.misk:*")
   implementation(project(":misk"))
