@@ -1,6 +1,5 @@
 plugins {
   `java-platform`
-  `maven-publish`
 }
 
 dependencies {
@@ -11,11 +10,16 @@ dependencies {
   }
 }
 
+apply(plugin = "com.vanniktech.maven.publish.base")
 
-publishing {
-  publications {
-    create<MavenPublication>("maven") {
-      from(components["javaPlatform"])
+mavenPublishing {
+  pomFromGradleProperties()
+
+  publishing {
+    publications {
+      create<MavenPublication>("maven") {
+        from(components["javaPlatform"])
+      }
     }
   }
 }
