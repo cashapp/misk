@@ -5,7 +5,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 buildscript {
   repositories {
     mavenCentral()
-    jcenter()
     maven(url = "https://plugins.gradle.org/m2/")
   }
 
@@ -82,6 +81,10 @@ subprojects {
       add("api", platform(Dependencies.jettyBom))
       add("api", platform(Dependencies.kotlinBom))
       add("api", platform(Dependencies.nettyBom))
+    }
+
+    tasks.withType<GenerateModuleMetadata> {
+      suppressedValidationErrors.add("enforced-platform")
     }
   }
 
