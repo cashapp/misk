@@ -1,3 +1,8 @@
+plugins {
+  kotlin("jvm")
+  `java-library`
+}
+
 dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-jobqueue"))
