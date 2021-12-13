@@ -5,9 +5,11 @@ import com.beust.jcommander.ParameterException
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
+import com.google.inject.Key
 import com.google.inject.Module
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
+import misk.web.WebConfig
 import wisp.logging.getLogger
 
 /** The entry point for misk applications */
@@ -88,6 +90,10 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
     Runtime.getRuntime().addShutdownHook(object : Thread() {
       override fun run() {
         log.info { "received a shutdown hook! performing an orderly shutdown" }
+        if (injector.getExistingBinding(Key.get(WebConfig::class.java)) != null) {
+          val config = injector.getInstance<WebConfig>()
+          sleep(config.shutdown_sleep_ms.toLong())
+        }
         serviceManager.stopAsync()
         serviceManager.awaitStopped()
         log.info { "orderly shutdown complete" }
