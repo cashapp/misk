@@ -89,6 +89,9 @@ data class WebConfig(
 
   /** If true, disables automatic load shedding when degraded. */
   val concurrency_limiter_disabled: Boolean = false,
+
+  /** The number of milliseconds to sleep before commencing service shutdown. */
+  val shutdown_sleep_ms: Int = 0,
 ) : Config
 
 data class WebSslConfig(
