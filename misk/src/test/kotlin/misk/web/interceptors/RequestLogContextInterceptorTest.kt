@@ -51,6 +51,7 @@ internal class RequestLogContextInterceptorTest {
     assertThat(contextFields[RequestLogContextInterceptor.MDC_REQUEST_URI])
       .isEqualTo("/call/me")
     assertThat(contextFields[RequestLogContextInterceptor.MDC_REMOTE_ADDR]).isNotEmpty()
+    assertThat(contextFields[RequestLogContextInterceptor.MDC_SENTRY_ROUTING]).isNull()
   }
 
   fun invoke(asService: String? = null): okhttp3.Response {

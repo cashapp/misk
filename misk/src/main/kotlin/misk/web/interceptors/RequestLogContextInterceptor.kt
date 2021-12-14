@@ -58,10 +58,13 @@ internal class RequestLogContextInterceptor private constructor(
     const val MDC_REQUEST_URI = "request_uri"
     const val MDC_PROTOCOL = "protocol"
     const val MDC_HTTP_METHOD = "http_method"
+    // Used by services to customized sentry issue routing.
+    const val MDC_SENTRY_ROUTING = "sentry_routing"
 
     val allContextNames = listOf(
       MDC_ACTION,
       MDC_CALLING_PRINCIPAL,
+      MDC_SENTRY_ROUTING
     )
   }
 }
