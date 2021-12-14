@@ -5,7 +5,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 buildscript {
   repositories {
     mavenCentral()
-    jcenter()
     maven(url = "https://plugins.gradle.org/m2/")
   }
 
@@ -36,51 +35,57 @@ val testShardHibernate by tasks.creating() {
 }
 
 subprojects {
-  apply(plugin = "java")
-  apply(plugin = "kotlin")
   apply(plugin = "org.jetbrains.dokka")
 
   buildscript {
     repositories {
       mavenCentral()
-      jcenter()
     }
   }
+
   repositories {
     mavenCentral()
-    jcenter()
     maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
   }
 
-  val compileKotlin by tasks.getting(KotlinCompile::class) {
-    kotlinOptions {
-      jvmTarget = "1.8"
+  // Only apply if the project has the kotlin plugin added:
+  plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper>() {
+    val compileKotlin by tasks.getting(KotlinCompile::class) {
+      kotlinOptions {
+        jvmTarget = "1.8"
 
-      // TODO(alec): Enable again once Environment enum is deleted
-       allWarningsAsErrors = false
+        // TODO(alec): Enable again once Environment enum is deleted
+        allWarningsAsErrors = false
+      }
     }
-  }
-  val compileTestKotlin by tasks.getting(KotlinCompile::class) {
-    kotlinOptions {
-      jvmTarget = "1.8"
+    val compileTestKotlin by tasks.getting(KotlinCompile::class) {
+      kotlinOptions {
+        jvmTarget = "1.8"
 
-      // TODO(alec): Enable again once Environment enum is deleted
-       allWarningsAsErrors = false
+        // TODO(alec): Enable again once Environment enum is deleted
+        allWarningsAsErrors = false
+      }
     }
-  }
 
-  dependencies {
-    add("testImplementation", Dependencies.junitApi)
-    add("testRuntimeOnly", Dependencies.junitEngine)
+    dependencies {
+      add("testImplementation", Dependencies.junitApi)
+      add("testRuntimeOnly", Dependencies.junitEngine)
 
-    // Platform/BOM dependencies constrain versions only.
-    add("api", platform(Dependencies.grpcBom))
-    add("api", platform(Dependencies.guava))
-    add("api", platform(Dependencies.jacksonBom))
-    add("api", platform(Dependencies.jerseyBom))
-    add("api", platform(Dependencies.jettyBom))
-    add("api", platform(Dependencies.kotlinBom))
-    add("api", platform(Dependencies.nettyBom))
+      // Platform/BOM dependencies constrain versions only.
+      // Enforce misk-bom -- it should take priority over external BOMs.
+      add("api", enforcedPlatform(project(":misk-bom")))
+      add("api", platform(Dependencies.grpcBom))
+      add("api", platform(Dependencies.guava))
+      add("api", platform(Dependencies.jacksonBom))
+      add("api", platform(Dependencies.jerseyBom))
+      add("api", platform(Dependencies.jettyBom))
+      add("api", platform(Dependencies.kotlinBom))
+      add("api", platform(Dependencies.nettyBom))
+    }
+
+    tasks.withType<GenerateModuleMetadata> {
+      suppressedValidationErrors.add("enforced-platform")
+    }
   }
 
   tasks.withType<DokkaTask>().configureEach {
@@ -103,6 +108,7 @@ subprojects {
       showStandardStreams = false
     }
   }
+
   if (file("$rootDir/hooks.gradle").exists()) {
     apply(from = file("$rootDir/hooks.gradle"))
   }
