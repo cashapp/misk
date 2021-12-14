@@ -1,5 +1,6 @@
 plugins {
   `java-platform`
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
@@ -9,8 +10,6 @@ dependencies {
     api(Dependencies.slf4jApi)
   }
 }
-
-apply(plugin = "com.vanniktech.maven.publish.base")
 
 mavenPublishing {
   pomFromGradleProperties()
