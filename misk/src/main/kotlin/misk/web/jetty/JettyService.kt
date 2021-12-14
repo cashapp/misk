@@ -13,13 +13,13 @@ import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
+import org.eclipse.jetty.io.ConnectionStatistics
 import org.eclipse.jetty.server.ConnectionFactory
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.SecureRequestCustomizer
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.ServerConnectionStatistics
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.ContextHandler
@@ -241,23 +241,6 @@ class JettyService @Inject internal constructor(
     // TODO(mmihic): Force security handler?
     val servletContextHandler = ServletContextHandler()
     servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
-//
-//    val inflaterPool = InflaterPool(333, false)
-//    val deflaterPool = DeflaterPool(333, Deflater.BEST_SPEED, false)
-//    servletContextHandler.setAttribute(
-//      WebSocketServerComponents.WEBSOCKET_DEFLATER_POOL_ATTRIBUTE,
-//      deflaterPool
-//    )
-//    servletContextHandler.setAttribute(
-//      WebSocketServerComponents.WEBSOCKET_INFLATER_POOL_ATTRIBUTE,
-//      inflaterPool
-//    )
-//
-
-//    servletContextHandler.addServletContainerInitializer(ServletContainerInitializerHolder({ c, ctx->
-//      WebSocketServerComponents.ensureWebSocketComponents(server, servletContext)
-//      JettyWebSocketServerContainer.ensureContainer(servletContext)
-//    }))
 
     JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
     server.addManaged(servletContextHandler)
@@ -268,8 +251,8 @@ class JettyService @Inject internal constructor(
     server.stopAtShutdown = true
     // Kubernetes sends a SIG_TERM and gives us 30 seconds to stop gracefully.
     server.stopTimeout = 25_000
-    // TODO: check this deprecated method.
-    ServerConnectionStatistics.addToAllConnectors(server)
+    val serverStats = ConnectionStatistics()
+    server.addBean(serverStats)
 
     gzipHandler.server = server
     if (webConfig.gzip) {
