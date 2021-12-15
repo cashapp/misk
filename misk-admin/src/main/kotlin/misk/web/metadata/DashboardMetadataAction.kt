@@ -1,6 +1,7 @@
 package misk.web.metadata
 
 import misk.MiskCaller
+import misk.exceptions.UnauthorizedException
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
@@ -31,61 +32,78 @@ import javax.inject.Singleton
  *   the requested dashboard.
  */
 @Singleton
-class DashboardMetadataAction @Inject constructor() : WebAction {
-  @Inject private lateinit var allTabs: List<DashboardTab>
-  @Inject private lateinit var allNavbarItems: List<DashboardNavbarItem>
-  @Inject private lateinit var allNavbarStatus: List<DashboardNavbarStatus>
-  @Inject private lateinit var allHomeUrls: List<DashboardHomeUrl>
-  @Inject private lateinit var allThemes: List<DashboardTheme>
-  @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
-
+class DashboardMetadataAction @Inject constructor(
+  private val allHomeUrls: List<DashboardHomeUrl>,
+  private val allNavbarItems: List<DashboardNavbarItem>,
+  private val allNavbarStatus: List<DashboardNavbarStatus>,
+  private val allTabs: List<DashboardTab>,
+  private val allThemes: List<DashboardTheme>,
+  private val callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
+) : WebAction {
   @Get("/api/dashboard/{dashboard_slug}/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
-  fun getAll(
-    @PathParam dashboard_slug: String
-  ): Response {
-    val caller = callerProvider.get() ?: return Response()
+  fun getAll(@PathParam dashboard_slug: String): Response {
+    val caller = callerProvider.get() ?: throw UnauthorizedException("Caller not found.")
 
-    val authorizedDashboardTabs = allTabs
+    val dashboardTabs = allTabs
       .filter { it.dashboard_slug == dashboard_slug }
-      .filter { caller.isAllowed(it.capabilities, it.services) }
+      .map { it.toDashboardTabJson(caller.isAllowed(it.capabilities, it.services)) }
 
-    val homeUrl = allHomeUrls
-      .find { it.dashboard_slug == dashboard_slug }?.url ?: ""
+    val homeUrl = allHomeUrls.find { it.dashboard_slug == dashboard_slug }?.url ?: ""
 
     val navbarItems = allNavbarItems
       .filter { it.dashboard_slug == dashboard_slug }
       .sortedBy { it.order }
       .map { it.item }
 
-    val navbarStatus = allNavbarStatus
-      .find { it.dashboard_slug == dashboard_slug }?.status ?: ""
-
-    val theme = allThemes
-      .find { it.dashboard_slug == dashboard_slug }?.theme
+    val navbarStatus = allNavbarStatus.find { it.dashboard_slug == dashboard_slug }?.status ?: ""
+    val theme = allThemes.find { it.dashboard_slug == dashboard_slug }?.theme
 
     val dashboardMetadata = DashboardMetadata(
       home_url = homeUrl,
       navbar_items = navbarItems,
       navbar_status = navbarStatus,
-      tabs = authorizedDashboardTabs,
+      tabs = dashboardTabs,
       theme = theme,
     )
-    return Response(
-      dashboardMetadata = dashboardMetadata
-    )
+
+    return Response(dashboardMetadata = dashboardMetadata)
   }
 
   data class DashboardMetadata(
-    val home_url: String = "",
-    val navbar_items: List<String> = listOf(),
-    val navbar_status: String = "",
-    val tabs: List<DashboardTab> = listOf(),
+    val home_url: String,
+    val navbar_items: List<String>,
+    val navbar_status: String,
+    val tabs: List<DashboardTabJson>,
     /** If null, uses default theme that ships with Misk-Web */
-    val theme: MiskWebTheme? = null,
+    val theme: MiskWebTheme?
   )
 
-  data class Response(val dashboardMetadata: DashboardMetadata = DashboardMetadata())
+  // Simply a wrapper around DashboardTab with an additional field for authorized which is
+  // determined at time of calling.
+  data class DashboardTabJson(
+    val slug: String,
+    val url_path_prefix: String,
+    val dashboard_slug: String,
+    val name: String,
+    val category: String,
+    val capabilities: Set<String>,
+    val services: Set<String>,
+    val authorized: Boolean
+  )
+
+  data class Response(val dashboardMetadata: DashboardMetadata)
+
+  private fun DashboardTab.toDashboardTabJson(authorized: Boolean) = DashboardTabJson(
+    slug = slug,
+    url_path_prefix = url_path_prefix,
+    dashboard_slug = dashboard_slug,
+    name = name,
+    category = category,
+    capabilities = capabilities,
+    services = services,
+    authorized = authorized
+  )
 }
