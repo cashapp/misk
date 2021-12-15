@@ -32,7 +32,7 @@ import javax.inject.Singleton
 @Singleton
 class FakeJobQueue @Inject constructor(
   private val clock: Clock,
-  private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
+  @FakeHandler private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
   private val tokenGenerator: TokenGenerator
 ) : JobQueue, TransactionalJobQueue {
   private val jobQueues = ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>()

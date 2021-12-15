@@ -11,6 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import misk.inject.toKey
+import javax.inject.Qualifier
 
 /**
  * Install this module to register a handler for an SQS queue,
@@ -23,7 +24,7 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   private val dependsOn: List<Key<out Service>>,
 ) : KAbstractModule() {
   override fun configure() {
-    newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
+    newMapBinder<QueueName, JobHandler>(AwsHandler::class).addBinding(queueName).to(handler.java)
 
     if (installRetryQueue) {
       newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
@@ -72,7 +73,7 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
 internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
   private val attributeImporter: AwsSqsQueueAttributeImporter,
   private val consumer: SqsJobConsumer,
-  private val consumerMapping: Map<QueueName, JobHandler>,
+  @AwsHandler private val consumerMapping: Map<QueueName, JobHandler>,
   private val externalQueues: Map<QueueName, AwsSqsQueueConfig>
 ) : AbstractIdleService() {
   override fun startUp() {
@@ -82,3 +83,6 @@ internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
 
   override fun shutDown() {}
 }
+
+@Qualifier
+internal annotation class AwsHandler

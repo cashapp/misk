@@ -1,6 +1,7 @@
 package misk.jobqueue
 
 import misk.inject.KAbstractModule
+import javax.inject.Qualifier
 import kotlin.reflect.KClass
 
 class FakeJobHandlerModule<T : JobHandler> private constructor(
@@ -9,7 +10,7 @@ class FakeJobHandlerModule<T : JobHandler> private constructor(
 ) : KAbstractModule() {
 
   override fun configure() {
-    newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
+    newMapBinder<QueueName, JobHandler>(FakeHandler::class).addBinding(queueName).to(handler.java)
   }
 
   companion object {
@@ -35,3 +36,6 @@ class FakeJobHandlerModule<T : JobHandler> private constructor(
     }
   }
 }
+
+@Qualifier
+internal annotation class FakeHandler
