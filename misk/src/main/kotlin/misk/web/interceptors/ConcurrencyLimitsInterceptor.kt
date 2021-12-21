@@ -1,5 +1,6 @@
 package misk.web.interceptors
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.netflix.concurrency.limits.Limiter
@@ -170,7 +171,8 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
       )
     }
 
-    private fun createLimiterForAction(action: Action, quotaPath: String?): Limiter<String> {
+    @VisibleForTesting
+    internal fun createLimiterForAction(action: Action, quotaPath: String?): Limiter<String> {
       return limiterFactories.asSequence()
         .mapNotNull { it.create(action) }
         .firstOrNull()
