@@ -19,6 +19,8 @@ import org.slf4j.event.Level
 import wisp.logging.getLogger
 import wisp.logging.log
 import java.net.HttpURLConnection
+import java.time.Duration
+import java.time.Instant
 
 /**
  * Detects degraded behavior and sheds requests accordingly. Internally this uses adaptive limiting
@@ -173,7 +175,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
         .mapNotNull { it.create(action) }
         .firstOrNull()
         ?: SimpleLimiter.Builder()
-          .clock { clock.millis() }
+          .clock { Duration.between(Instant.EPOCH, clock.instant()).toNanos() }
           .named(quotaPath ?: action.name)
           .build()
     }
