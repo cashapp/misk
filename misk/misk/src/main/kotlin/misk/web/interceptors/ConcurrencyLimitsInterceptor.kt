@@ -1,5 +1,6 @@
 package misk.web.interceptors
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.netflix.concurrency.limits.Limiter
@@ -21,6 +22,8 @@ import org.slf4j.event.Level
 import wisp.logging.getLogger
 import wisp.logging.log
 import java.net.HttpURLConnection
+import java.time.Duration
+import java.time.Instant
 
 /**
  * Detects degraded behavior and sheds requests accordingly. Internally this uses adaptive limiting
@@ -171,12 +174,13 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
       )
     }
 
-    private fun createLimiterForAction(action: Action, quotaPath: String?): Limiter<String> {
+    @VisibleForTesting
+    internal fun createLimiterForAction(action: Action, quotaPath: String?): Limiter<String> {
       return limiterFactories.asSequence()
         .mapNotNull { it.create(action) }
         .firstOrNull()
         ?: SimpleLimiter.Builder()
-          .clock { clock.millis() }
+          .clock { Duration.between(Instant.EPOCH, clock.instant()).toNanos() }
           .limit(VegasLimit.newBuilder()
             // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints
             // that receive the majority of traffic (power law, yay!), and those endpoints should
