@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.netflix.concurrency.limits.Limiter
+import com.netflix.concurrency.limits.limit.VegasLimit
 import com.netflix.concurrency.limits.limiter.AbstractLimiter
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import java.time.Clock
@@ -16,6 +17,7 @@ import misk.metrics.Metrics
 import misk.web.AvailableWhenDegraded
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
+import misk.web.WebConfig
 import org.slf4j.event.Level
 import wisp.logging.getLogger
 import wisp.logging.log
@@ -134,6 +136,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   class Factory @Inject constructor(
     private val clock: Clock,
     private val limiterFactories: List<ConcurrencyLimiterFactory>,
+    private val config: WebConfig,
     metrics: Metrics,
   ) : NetworkInterceptor.Factory {
     val outcomeCounter = metrics.counter(
@@ -178,6 +181,13 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
         .firstOrNull()
         ?: SimpleLimiter.Builder()
           .clock { Duration.between(Instant.EPOCH, clock.instant()).toNanos() }
+          .limit(VegasLimit.newBuilder()
+            // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints
+            // that receive the majority of traffic (power law, yay!), and those endpoints should
+            // _start up_ without triggering the concurrency limiter at the parallelism that we
+            // configured Jetty to support.
+            .initialLimit(config.jetty_max_thread_pool_size / 2)
+            .build())
           .named(quotaPath ?: action.name)
           .build()
     }
