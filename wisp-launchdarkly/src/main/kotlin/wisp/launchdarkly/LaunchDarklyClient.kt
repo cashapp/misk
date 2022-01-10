@@ -36,9 +36,16 @@ object LaunchDarklyClient {
       val x509TrustManager = trustManagers.mapNotNull { it as? X509TrustManager }.firstOrNull()
         ?: throw IllegalStateException("no x509 trust manager in ${it.trust_store}")
       val sslContext = sslContextFactory.create(it.cert_store, it.trust_store)
-      ldConfig.http(
-        Components.httpConfiguration().sslSocketFactory(sslContext.socketFactory, x509TrustManager)
-      )
+      var httpConfiguration = Components.httpConfiguration()
+        .sslSocketFactory(sslContext.socketFactory, x509TrustManager)
+      val proxyHost = System.getProperty("http.proxyHost")
+      if (proxyHost != null) {
+        httpConfiguration = httpConfiguration.proxyHostAndPort(
+          proxyHost,
+          System.getProperty("http.proxyPort", "3128").toInt()
+        )
+      }
+      ldConfig.http(httpConfiguration)
     }
 
     return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
