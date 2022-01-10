@@ -84,8 +84,7 @@ internal class SqsJobConsumer @Inject internal constructor(
     fun run(): Status {
       // Receive messages in parallel. Default to 1 if feature flag is not defined.
       val futures = receiverIds().map {
-        CompletableFuture.supplyAsync(
-          Supplier {
+        CompletableFuture.supplyAsync({
             receive()
           },
           receivingThreads
@@ -144,7 +143,7 @@ internal class SqsJobConsumer @Inject internal constructor(
               .withAttributeNames("All")
               .withMessageAttributeNames("All")
               .withQueueUrl(queue.url)
-              .withMaxNumberOfMessages(config.message_batch_size)
+              .withMaxNumberOfMessages(batchSize())
 
             client.receiveMessage(receiveRequest).messages
           }
@@ -157,10 +156,13 @@ internal class SqsJobConsumer @Inject internal constructor(
       return messages.map { SqsJob(queue.name, queues, metrics, moshi, it) }
     }
 
+    private fun batchSize() = featureFlags.getInt(CONSUMERS_BATCH_SIZE, queue.queueName)
+
+
     private fun receive(): List<Status> {
       val messages = fetchMessages()
 
-      if (messages.size == 0) {
+      if (messages.isEmpty()) {
         return listOf(Status.NO_WORK)
       }
 
@@ -173,8 +175,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
     private fun handleMessages(messages: List<SqsJob>): List<CompletableFuture<Status>> {
       return messages.map { message ->
-        CompletableFuture.supplyAsync(
-          Supplier {
+        CompletableFuture.supplyAsync({
             metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc()
 
             tracer.traceWithNewRootSpan("handle-job-${queue.queueName}") { span ->
@@ -212,6 +213,7 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val log = getLogger<SqsJobConsumer>()
     internal val POD_CONSUMERS_PER_QUEUE = Feature("pod-jobqueue-consumers")
     internal val CONSUMERS_PER_QUEUE = Feature("jobqueue-consumers")
+    internal val CONSUMERS_BATCH_SIZE = Feature("jobqueue-consumers-fetch-batch-size")
     private val ORIGINAL_TRACE_ID_TAG = StringTag("original.trace_id")
   }
 }

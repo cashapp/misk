@@ -7,6 +7,7 @@ import misk.feature.testing.FakeFeatureFlags
 import misk.jobqueue.Job
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
+import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_BATCH_SIZE
 import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_PER_QUEUE
 import misk.jobqueue.sqs.SqsJobConsumer.Companion.POD_CONSUMERS_PER_QUEUE
 import misk.jobqueue.subscribe
@@ -60,6 +61,7 @@ internal class SqsJobQueueTest {
           )
         )
     )
+    fakeFeatureFlags.override(CONSUMERS_BATCH_SIZE, 10)
   }
 
   @ParameterizedTest

@@ -17,6 +17,9 @@ class AwsSqsJobQueueConfig(
   /**
    * Max number of messages to pull from SQS with each request.
    */
+  @Deprecated("Since this flag is set for all queues, this has been replaced with a Launch " +
+    "Darkly flag called jobqueue-consumers-fetch-batch-size. The value of this flag is set as 10 by default " +
+    "and can be customised per queue.")
   val message_batch_size: Int = 10,
 
   /**
