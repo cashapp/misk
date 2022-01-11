@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -49,10 +50,10 @@ subprojects {
   }
 
   // Only apply if the project has the kotlin plugin added:
-  plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper>() {
+  plugins.withType<KotlinPluginWrapper> {
     val compileKotlin by tasks.getting(KotlinCompile::class) {
       kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
 
         // TODO(alec): Enable again once Environment enum is deleted
         allWarningsAsErrors = false
@@ -60,7 +61,7 @@ subprojects {
     }
     val compileTestKotlin by tasks.getting(KotlinCompile::class) {
       kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
 
         // TODO(alec): Enable again once Environment enum is deleted
         allWarningsAsErrors = false
@@ -109,17 +110,27 @@ subprojects {
     }
   }
 
-  if (file("$rootDir/hooks.gradle").exists()) {
-    apply(from = file("$rootDir/hooks.gradle"))
+  plugins.withType<BasePlugin> {
+    tasks.findByName("check")!!.apply {
+      if (listOf(
+          "misk-aws",
+          "misk-events",
+          "misk-jobqueue",
+          "misk-jobqueue-testing",
+          "misk-jdbc",
+          "misk-jdbc-testing",
+          "misk-hibernate",
+          "misk-hibernate-testing"
+        ).contains(project.name)) {
+        testShardHibernate.dependsOn(this)
+      } else {
+        testShardNonHibernate.dependsOn(this)
+      }
+    }
   }
 
-  val checkTask = tasks.findByName("check")
-  if (checkTask != null) {
-    if (listOf("misk-aws","misk-events","misk-jobqueue","misk-jobqueue-testing","misk-jdbc","misk-jdbc-testing","misk-hibernate","misk-hibernate-testing").contains(name)) {
-      testShardHibernate.dependsOn(checkTask)
-    } else {
-      testShardNonHibernate.dependsOn(checkTask)
-    }
+  if (file("$rootDir/hooks.gradle").exists()) {
+    apply(from = file("$rootDir/hooks.gradle"))
   }
 
   if (!path.startsWith(":samples")) {
