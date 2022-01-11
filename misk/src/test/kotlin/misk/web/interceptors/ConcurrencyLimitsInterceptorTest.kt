@@ -1,14 +1,11 @@
 package misk.web.interceptors
 
 import ch.qos.logback.classic.Level
+import com.google.inject.util.Modules
 import com.netflix.concurrency.limits.Limiter
 import com.netflix.concurrency.limits.limit.SettableLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import io.prometheus.client.CollectorRegistry
-import java.time.Duration
-import java.time.temporal.ChronoUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.asAction
@@ -24,6 +21,7 @@ import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.RealNetworkChain
+import misk.web.WebConfig
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
@@ -33,6 +31,11 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
+import java.time.Clock
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @MiskTest(startService = true)
 class ConcurrencyLimitsInterceptorTest {
@@ -40,7 +43,7 @@ class ConcurrencyLimitsInterceptorTest {
   val module = TestModule()
 
   @Inject private lateinit var factory: ConcurrencyLimitsInterceptor.Factory
-  @Inject private lateinit var clock: FakeClock
+  @Inject private lateinit var clock: FakeNanoClock
   @Inject lateinit var logCollector: LogCollector
   @Inject lateinit var prometheusRegistry: CollectorRegistry
 
@@ -148,6 +151,33 @@ class ConcurrencyLimitsInterceptorTest {
     assertThat(callSuccessCount("/event_consumer/topic_baz")).isEqualTo(1.0)
   }
 
+  @Test
+  fun limiterResolutionExceedsMicroseconds() {
+    val action = HelloAction::call.asAction(DispatchMechanism.GET)
+    val limiter = factory.createLimiterForAction(action, null)
+    val interceptor = ConcurrencyLimitsInterceptor(factory, action, limiter, clock)
+
+    // load up some inflight requests so we get past "Prevent upward drift if not close to the limit"
+    repeat(10) {
+      limiter.acquire(action.name)
+    }
+    // establish a baseline rtt
+    call(action, interceptor, callDuration = Duration.ofNanos(2400 * 1000))
+    // new request just 0.8ms longer. This should bump the limit up because its rtt implies a
+    // fairly empty queue.
+    call(action, interceptor, callDuration = Duration.ofNanos(3200 * 1000))
+    // metrics updated before, not after, request, so we need another request to trigger an update
+    call(action, interceptor, callDuration = Duration.ofNanos(2500 * 1000))
+
+    val limit = prometheusRegistry.getSampleValue(
+      "concurrency_limits_limit",
+      arrayOf("quota_path"),
+      arrayOf("HelloAction")
+    )
+    // VegasLimit should've bumped _up_ the concurrency limit
+    assertThat(limit).isGreaterThanOrEqualTo(20.0)
+  }
+
   private fun call(
     action: Action,
     interceptor: NetworkInterceptor,
@@ -188,7 +218,16 @@ class ConcurrencyLimitsInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(LogCollectorModule())
-      install(MiskTestingServiceModule())
+      install(Modules.override(MiskTestingServiceModule()).with(object : KAbstractModule() {
+        override fun configure() {
+          bind<Clock>().to<FakeNanoClock>()
+          bind<FakeNanoClock>().toInstance(FakeNanoClock())
+        }
+      }))
+
+      bind<WebConfig>().toInstance(WebConfig(
+        port = 0,
+      ))
 
       multibind<ConcurrencyLimiterFactory>().to<CustomLimiterFactory>()
     }
