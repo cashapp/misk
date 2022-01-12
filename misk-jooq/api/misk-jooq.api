@@ -72,6 +72,20 @@ public final class misk/jooq/JooqTransacter$TransacterOptions {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/jooq/listeners/AvoidUsingSelectStarException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class misk/jooq/listeners/AvoidUsingSelectStarListener : org/jooq/impl/DefaultExecuteListener {
+	public static final field Companion Lmisk/jooq/listeners/AvoidUsingSelectStarListener$Companion;
+	public fun <init> ()V
+	public fun renderEnd (Lorg/jooq/ExecuteContext;)V
+}
+
+public final class misk/jooq/listeners/AvoidUsingSelectStarListener$Companion {
+	public final fun getSelectStarFromRegex ()Lkotlin/text/Regex;
+}
+
 public final class misk/jooq/listeners/JooqSQLLogger : org/jooq/impl/DefaultExecuteListener {
 	public static final field Companion Lmisk/jooq/listeners/JooqSQLLogger$Companion;
 	public fun <init> ()V
