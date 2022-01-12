@@ -6,6 +6,7 @@ import misk.jooq.config.ClientJooqTestingModule
 import misk.jooq.config.DeleteOrUpdateWithoutWhereException
 import misk.jooq.config.JooqDBIdentifier
 import misk.jooq.config.JooqDBReadOnlyIdentifier
+import misk.jooq.listeners.AvoidUsingSelectStarException
 import misk.jooq.model.Genre
 import misk.jooq.testgen.tables.references.MOVIE
 import misk.testing.MiskTest
@@ -316,6 +317,19 @@ internal class JooqTransacterTest {
         // this is expected to throw an error because of the [DeleteOrUpdateWithoutWhereListener]
         // registered
         ctx.deleteFrom(MOVIE).execute()
+      }
+    }
+  }
+
+  @Test fun `using select star throws an exception`() {
+    assertThatExceptionOfType(AvoidUsingSelectStarException::class.java).isThrownBy {
+      transacter.transaction { (ctx) ->
+        ctx.newRecord(MOVIE).apply {
+          this.genre = Genre.COMEDY.name
+          this.name = "Dumb and dumber"
+        }.also { it.store() }
+
+        ctx.select(MOVIE.asterisk()).from(MOVIE).fetchOne()
       }
     }
   }

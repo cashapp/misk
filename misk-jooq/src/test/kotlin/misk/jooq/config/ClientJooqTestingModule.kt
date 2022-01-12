@@ -10,6 +10,7 @@ import misk.jdbc.JdbcTestingModule
 import misk.jooq.JooqModule
 import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import misk.logging.LogCollectorModule
+import org.jooq.impl.DefaultExecuteListenerProvider
 import wisp.deployment.TESTING
 import javax.inject.Qualifier
 
@@ -47,7 +48,9 @@ class ClientJooqTestingModule : KAbstractModule() {
       ),
       readerQualifier = JooqDBReadOnlyIdentifier::class
     ) {
-      set(DeleteOrUpdateWithoutWhereListener())
+      val executeListeners = this.executeListenerProviders().toMutableList()
+        .apply { add(DefaultExecuteListenerProvider(DeleteOrUpdateWithoutWhereListener())) }
+      set(*executeListeners.toTypedArray())
     })
     install(JdbcTestingModule(JooqDBIdentifier::class))
     install(LogCollectorModule())

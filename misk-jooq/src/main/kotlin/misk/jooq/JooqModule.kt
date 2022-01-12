@@ -11,6 +11,7 @@ import misk.jdbc.DataSourceService
 import misk.jdbc.DatabasePool
 import misk.jdbc.JdbcModule
 import misk.jdbc.RealDatabasePool
+import misk.jooq.listeners.AvoidUsingSelectStarListener
 import misk.jooq.listeners.JooqSQLLogger
 import misk.jooq.listeners.JooqTimestampRecordListener
 import misk.jooq.listeners.JooqTimestampRecordListenerOptions
@@ -21,7 +22,7 @@ import org.jooq.conf.MappedSchema
 import org.jooq.conf.RenderMapping
 import org.jooq.conf.Settings
 import org.jooq.impl.DSL
-import org.jooq.impl.DefaultConfiguration
+import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
 import java.time.Clock
 import javax.inject.Inject
@@ -113,9 +114,14 @@ class JooqModule(
           false
         )
       ).apply {
+        val executeListeners = mutableListOf(
+          DefaultExecuteListenerProvider(AvoidUsingSelectStarListener())
+        )
         if ("true" == datasourceConfig.show_sql) {
-          set(JooqSQLLogger())
+          executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
         }
+        set(*executeListeners.toTypedArray())
+
         if(jooqTimestampRecordListenerOptions.install) {
           set(JooqTimestampRecordListener(
             clock = clock,
