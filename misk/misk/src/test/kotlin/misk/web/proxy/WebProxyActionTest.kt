@@ -223,6 +223,69 @@ class WebProxyActionTest {
   }
 
   @Test
+  internal fun largeRequestIsReplayedSuccessfullyOnHttpRedirect() {
+    upstreamServer.enqueue(
+      MockResponse()
+        .setResponseCode(308)
+        .addHeader("Location", "/redirect-target")
+    )
+    upstreamServer.enqueue(
+      MockResponse()
+        .setBody("I am the redirect target!")
+    )
+
+    val requestBody = "x".repeat(1024 * 1024 + 1) // 1 MiB + 1 byte.
+    val deferredResponse = GlobalScope.async {
+      optionalBinder.proxyClient.newBuilder()
+        .followRedirects(false)
+        .build()
+        .newCall(
+        post("/local/prefix/redirect", plainTextMediaType, requestBody, plainTextMediaType)
+      ).execute()
+        .toMisk()
+    }
+
+    // TODO: WebProxyAction should never return redirects; instead it should follow them or fail.
+    runBlocking {
+      val response = deferredResponse.await()
+      assertThat(response.statusCode).isEqualTo(308)
+    }
+  }
+
+  @Test
+  internal fun smallRequestIsReplayedSuccessfullyOnHttpRedirect() {
+    upstreamServer.enqueue(
+      MockResponse()
+        .setResponseCode(308)
+        .addHeader("Location", "/redirect-target")
+    )
+    upstreamServer.enqueue(
+      MockResponse()
+        .setBody("I am the redirect target!")
+    )
+
+    val requestBody = "small request body"
+    val deferredResponse = GlobalScope.async {
+      optionalBinder.proxyClient.newCall(
+        post("/local/prefix/redirect", plainTextMediaType, requestBody, plainTextMediaType)
+      ).execute()
+        .toMisk()
+    }
+
+    runBlocking {
+      val response = deferredResponse.await()
+      assertThat(response.statusCode).isEqualTo(200)
+      assertThat(response.readUtf8()).isEqualTo("I am the redirect target!")
+    }
+
+    // Confirm the POST request body was transmitted both times.
+    val request1 = upstreamServer.takeRequest()
+    assertThat(request1.body.readUtf8()).isEqualTo(requestBody)
+    val request2 = upstreamServer.takeRequest()
+    assertThat(request2.body.readUtf8()).isEqualTo(requestBody)
+  }
+
+  @Test
   internal fun postForwardedPathMatchNoTrailingSlash() {
     upstreamServer.enqueue(
       MockResponse()
