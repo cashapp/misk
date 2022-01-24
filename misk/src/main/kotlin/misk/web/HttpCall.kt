@@ -8,6 +8,7 @@ import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import okio.BufferedSource
 
@@ -125,16 +126,31 @@ interface HttpCall {
       listOf(MediaRange.ALL_MEDIA)
     }
   }
-
   fun asOkHttpRequest(): okhttp3.Request {
     // TODO(adrw) https://github.com/square/misk/issues/279
     val okRequestBody = when (dispatchMechanism) {
       DispatchMechanism.GET -> null
       DispatchMechanism.WEBSOCKET -> null
-      else -> object : RequestBody() {
-        override fun contentType(): MediaType? = null
-        override fun writeTo(sink: BufferedSink) {
-          sink.writeAll(takeRequestBody()!!)
+      else -> {
+        val requestBody = takeRequestBody()!!
+        if (requestBody.request(MAX_BUFFERED_REQUEST_BODY_BYTES)) {
+          // If we were able to successfully buffer this much, this request might be huge! Let's
+          // just stream it. (This is one-shot, if the call breaks for any reason it cannot be
+          // retried later!)
+          object : RequestBody() {
+            override fun contentType(): MediaType? = null
+
+            override fun isOneShot() = true // Don't stream the request body 2x.
+
+            override fun writeTo(sink: BufferedSink) {
+              sink.writeAll(requestBody)
+            }
+          }
+
+        } else {
+          // This request is short. Let's not stream it. That way we can retry if the HTTP request
+          // out fails.
+          requestBody.readByteString().toRequestBody()
         }
       }
     }
@@ -146,3 +162,6 @@ interface HttpCall {
       .build()
   }
 }
+
+/** 1 MiB. */
+private const val MAX_BUFFERED_REQUEST_BODY_BYTES: Long = 1L * 1024 * 1024
