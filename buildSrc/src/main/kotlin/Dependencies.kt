@@ -2,9 +2,9 @@
 object Dependencies {
   val assertj = "org.assertj:assertj-core:3.20.2"
   val awaitility = "org.awaitility:awaitility-kotlin:4.1.0"
-  val aws2Dynamodb = "software.amazon.awssdk:dynamodb:2.17.73"
-  val aws2DynamodbEnhanced = "software.amazon.awssdk:dynamodb-enhanced:2.17.73"
-  val aws2Regions = "software.amazon.awssdk:regions:2.17.73"
+  val aws2Dynamodb = "software.amazon.awssdk:dynamodb:2.17.121"
+  val aws2DynamodbEnhanced = "software.amazon.awssdk:dynamodb-enhanced:2.17.121"
+  val aws2Regions = "software.amazon.awssdk:regions:2.17.121"
   val awsDynamodb = "com.amazonaws:aws-java-sdk-dynamodb:1.11.960"
   val awsS3 = "com.amazonaws:aws-java-sdk-s3:1.11.960"
   val awsSqs = "com.amazonaws:aws-java-sdk-sqs:1.11.960"
