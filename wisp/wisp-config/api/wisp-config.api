@@ -1,3 +1,11 @@
+public final class wisp/config/ClasspathResourceLoaderPreprocessor : com/sksamuel/hoplite/preprocessor/PrefixProcessor {
+	public fun <init> ()V
+	public fun <init> (Lwisp/resources/ResourceLoader;)V
+	public synthetic fun <init> (Lwisp/resources/ResourceLoader;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getResourceLoader ()Lwisp/resources/ResourceLoader;
+	public fun processString (Ljava/lang/String;)Ljava/lang/String;
+}
+
 public abstract interface class wisp/config/Config {
 }
 

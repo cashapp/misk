@@ -59,6 +59,8 @@ fun ConfigLoader.Builder.addWispConfigSources(
   resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
 ): ConfigLoader.Builder {
 
+  addPreprocessor(ClasspathResourceLoaderPreprocessor(resourceLoader))
+
   configSources
     .filter {
       (resourceLoader.exists(it.configLocation))
@@ -84,3 +86,4 @@ fun ConfigLoader.Builder.addWispConfigSources(
 
   return this
 }
+
