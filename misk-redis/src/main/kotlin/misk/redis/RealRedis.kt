@@ -81,7 +81,7 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   /** Set a ByteArray value with an expiration. */
   override fun set(key: String, expiryDuration: Duration, value: ByteString) {
     jedisPool.resource.use { jedis ->
-      jedis.setex(key.toByteArray(charset), expiryDuration.seconds, value.toByteArray())
+      jedis.setex(key.toByteArray(charset), expiryDuration.seconds.toInt(), value.toByteArray())
     }
   }
 
@@ -94,7 +94,7 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
 
   /** Set a ByteArray value if it doesn't already exist with an expiration. */
   override fun setnx(key: String, expiryDuration: Duration, value: ByteString) {
-    val setParams = SetParams.setParams().ex(expiryDuration.seconds).nx()
+    val setParams = SetParams.setParams().ex(expiryDuration.seconds.toInt()).nx()
     jedisPool.resource.use { jedis ->
       jedis.set(key.toByteArray(charset), value.toByteArray(), setParams)
     }
