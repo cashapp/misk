@@ -33,7 +33,7 @@ internal class PrometheusMetrics @Inject internal constructor(
     help: String,
     labelNames: List<String>,
     quantiles: Map<Double, Double>,
-    maxAgeSeconds: Long?
+    maxAgeSeconds: Long? = null,
   ): Histogram = PrometheusHistogram(metricsV2.summary(name, help, labelNames, quantiles, maxAgeSeconds))
 
   companion object {
