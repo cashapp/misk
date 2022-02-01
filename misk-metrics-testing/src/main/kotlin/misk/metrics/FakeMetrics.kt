@@ -32,7 +32,8 @@ class FakeMetrics @Inject internal constructor(
     name: String,
     help: String,
     labelNames: List<String>,
-    quantiles: Map<Double, Double>
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?
   ): Histogram {
     val summary = Summary.build(name, help)
       .labelNames(*labelNames.toTypedArray())

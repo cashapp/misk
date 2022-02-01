@@ -51,13 +51,19 @@ class FakeMetrics @Inject internal constructor(
     name: String,
     help: String,
     labelNames: List<String>,
-    quantiles: Map<Double, Double>
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?
   ): Summary =
     Summary.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .apply {
         quantiles.forEach { (key, value) ->
           quantile(key, value)
+        }
+      }
+      .apply {
+        if (maxAgeSeconds != null) {
+          maxAgeSeconds(maxAgeSeconds)
         }
       }
       .register(registry)
