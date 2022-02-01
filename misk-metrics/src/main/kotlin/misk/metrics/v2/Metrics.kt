@@ -71,7 +71,8 @@ interface Metrics {
     name: String,
     help: String = "",
     labelNames: List<String>,
-    buckets: List<Double> = defaultBuckets
+    buckets: List<Double> = defaultBuckets,
+    maxAgeSeconds: Long?
   ): Histogram
 
   /**
