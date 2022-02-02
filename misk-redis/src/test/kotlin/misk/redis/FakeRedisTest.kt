@@ -2,6 +2,7 @@ package misk.redis
 
 import com.google.inject.Module
 import com.google.inject.util.Modules
+import com.squareup.wire.durationOfSeconds
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -300,6 +301,53 @@ class FakeRedisTest {
     // Verify
     assertNull(redis.hget("foo", "bar"))
     assertNull(redis["foo"])
+  }
+
+  @Test fun hIncrBySupportsExpiry() {
+    // Setup
+    redis.hset("foo", "bar", "1".encodeUtf8())
+    redis.expire("foo", 1)
+
+    // Assert that the expiry hasn't taken affect yet
+    redis.hincrBy("foo", "bar", 2)
+    assertEquals("3", redis.hget("foo", "bar")?.utf8())
+
+    // Exercise
+    clock.add(Duration.ofSeconds(1))
+    redis.hincrBy("foo", "bar", 4)
+
+    // Verify
+    assertEquals("4", redis.hget("foo", "bar")?.utf8())
+  }
+
+  @Test fun hIncrByOnInvalidData() {
+    // Setup
+    redis.hset("foo", "bar", "baz".encodeUtf8())
+
+    // Verify
+    assertThrows<IllegalArgumentException> {
+      redis.hincrBy("foo", "bar", 2)
+    }
+  }
+
+  @Test fun hIncrByOnKeyThatDoesNotExist() {
+    // Exercise
+    redis.hincrBy("foo", "bar", 2)
+
+    // Verify
+    assertEquals("2", redis.hget("foo", "bar")?.utf8())
+  }
+
+  @Test fun hIncrByOnFieldThatDoesNotExist() {
+    // Setup
+    redis.hincrBy("foo", "baz", 3)
+
+    // Exercise
+    redis.hincrBy("foo", "bar", 2)
+
+    // Verify
+    assertEquals("3", redis.hget("foo", "baz")?.utf8())
+    assertEquals("2", redis.hget("foo", "bar")?.utf8())
   }
 
   @Test fun expireImmediately() {
