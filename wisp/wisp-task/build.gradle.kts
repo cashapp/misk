@@ -7,7 +7,7 @@ dependencies {
   implementation(Dependencies.kotlinxCoroutines)
   implementation(Dependencies.kotlinStdLibJdk8)
   api(Dependencies.kotlinRetry)
-  implementation(Dependencies.micrometerPrometheus)
+  api(Dependencies.micrometerPrometheus)
   implementation(project(":wisp-config"))
   implementation(project(":wisp-logging"))
 
