@@ -28,6 +28,14 @@ public abstract interface class wisp/config/Configurable {
 	public abstract fun getConfigClass ()Lkotlin/reflect/KClass;
 }
 
+public final class wisp/config/FilesystemResourceLoaderPreprocessor : com/sksamuel/hoplite/preprocessor/PrefixProcessor {
+	public fun <init> ()V
+	public fun <init> (Lwisp/resources/ResourceLoader;)V
+	public synthetic fun <init> (Lwisp/resources/ResourceLoader;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getResourceLoader ()Lwisp/resources/ResourceLoader;
+	public fun processString (Ljava/lang/String;)Ljava/lang/String;
+}
+
 public final class wisp/config/WispConfig {
 	public static final field INSTANCE Lwisp/config/WispConfig;
 	public final fun builder ()Lcom/sksamuel/hoplite/ConfigLoader$Builder;
