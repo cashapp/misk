@@ -18,7 +18,7 @@ import javax.inject.Singleton
 class FakeMetrics @Inject internal constructor(
   private val registry: CollectorRegistry
 ) : Metrics {
-  override fun counter(name: String, help: String?, labelNames: List<String>): Counter =
+  override fun counter(name: String, help: String, labelNames: List<String>): Counter =
     Counter.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .register(registry)

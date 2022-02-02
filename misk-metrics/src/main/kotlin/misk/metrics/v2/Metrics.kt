@@ -30,7 +30,7 @@ interface Metrics {
    */
   fun counter(
     name: String,
-    help: String? = "",
+    help: String,
     labelNames: List<String> = listOf()
   ): Counter
 

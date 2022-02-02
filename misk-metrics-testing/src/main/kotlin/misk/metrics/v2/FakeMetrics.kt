@@ -20,7 +20,7 @@ class FakeMetrics @Inject internal constructor(
 ) : Metrics {
   override fun counter(
     name: String,
-    help: String?,
+    help: String,
     labelNames: List<String>
   ): Counter =
     Counter.build(name, help)
