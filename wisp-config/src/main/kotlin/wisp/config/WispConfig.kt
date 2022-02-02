@@ -60,6 +60,7 @@ fun ConfigLoader.Builder.addWispConfigSources(
 ): ConfigLoader.Builder {
 
   addPreprocessor(ClasspathResourceLoaderPreprocessor(resourceLoader))
+  addPreprocessor(FilesystemResourceLoaderPreprocessor(resourceLoader))
 
   configSources
     .filter {
