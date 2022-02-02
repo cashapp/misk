@@ -50,7 +50,7 @@ internal class PrometheusMetrics @Inject internal constructor(
     help: String,
     labelNames: List<String>,
     quantiles: Map<Double, Double>,
-    maxAgeSeconds: Long?,
+    maybeMaxAgeSeconds: Long?,
   ): Summary = Summary
     .build(name, help)
     .labelNames(*labelNames.toTypedArray())
@@ -60,8 +60,8 @@ internal class PrometheusMetrics @Inject internal constructor(
       }
     }
     .apply {
-      if (maxAgeSeconds != null) {
-        maxAgeSeconds(maxAgeSeconds)
+      if (maybeMaxAgeSeconds != null) {
+        maxAgeSeconds(maybeMaxAgeSeconds)
       }
     }
     .register(registry)

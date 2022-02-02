@@ -5,7 +5,6 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
-import misk.metrics.Metrics
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,13 +32,18 @@ class FakeMetrics @Inject internal constructor(
     help: String,
     labelNames: List<String>,
     quantiles: Map<Double, Double>,
-    maxAgeSeconds: Long?
+    maybeMaxAgeSeconds: Long?
   ): Histogram {
     val summary = Summary.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .apply {
         quantiles.forEach { (key, value) ->
           quantile(key, value)
+        }
+      }
+      .apply {
+        if (maybeMaxAgeSeconds != null) {
+          maxAgeSeconds(maybeMaxAgeSeconds)
         }
       }
       .register(registry)
