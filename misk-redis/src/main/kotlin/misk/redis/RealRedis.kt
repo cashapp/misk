@@ -65,6 +65,12 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  override fun hincrBy(key: String, field: String, increment: Long): Long {
+    jedisPool.resource.use { jedis ->
+      return jedis.hincrBy(key, field, increment)
+    }
+  }
+
   /** Set a ByteArray value. */
   override fun set(key: String, value: ByteString) {
     jedisPool.resource.use { jedis ->
