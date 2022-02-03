@@ -18,7 +18,7 @@ internal class PrometheusMetrics @Inject internal constructor(
 ) : Metrics {
   override fun counter(
     name: String,
-    help: String?,
+    help: String,
     labelNames: List<String>
   ): Counter = metricsV2.counter(name, help, labelNames)
 
