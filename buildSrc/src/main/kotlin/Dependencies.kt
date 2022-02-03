@@ -31,7 +31,7 @@ object Dependencies {
   val grpcStub = "io.grpc:grpc-stub:1.41.0"
   val guava = "com.google.guava:guava:30.1.1-jre"
   val guavaTestLib = "com.google.guava:guava-testlib:30.1.1-jre"
-  val guice = "com.google.inject:guice:5.0.1"
+  val guice = "com.google.inject:guice:5.1.0"
   val hibernateCore = "org.hibernate:hibernate-core:5.5.3.Final"
   val hikariCp = "com.zaxxer:HikariCP:4.0.3"
   val hopliteCore = "com.sksamuel.hoplite:hoplite-core:1.4.15"
