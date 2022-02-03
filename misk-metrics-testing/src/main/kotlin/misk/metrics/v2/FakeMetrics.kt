@@ -52,7 +52,7 @@ class FakeMetrics @Inject internal constructor(
     help: String,
     labelNames: List<String>,
     quantiles: Map<Double, Double>,
-    maybeMaxAgeSeconds: Long?
+    maxAgeSeconds: Long?
   ): Summary =
     Summary.build(name, help)
       .labelNames(*labelNames.toTypedArray())
@@ -62,8 +62,8 @@ class FakeMetrics @Inject internal constructor(
         }
       }
       .apply {
-        if (maybeMaxAgeSeconds != null) {
-          maxAgeSeconds(maybeMaxAgeSeconds)
+        if (maxAgeSeconds != null) {
+          this.maxAgeSeconds(maxAgeSeconds)
         }
       }
       .register(registry)
