@@ -62,7 +62,8 @@ interface Metrics {
     name: String,
     help: String = "",
     labelNames: List<String>,
-    quantiles: Map<Double, Double> = defaultQuantiles
+    quantiles: Map<Double, Double> = defaultQuantiles,
+    maxAgeSeconds: Long? = null
   ): Histogram
 }
 
