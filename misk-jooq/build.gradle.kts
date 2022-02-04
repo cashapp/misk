@@ -4,7 +4,7 @@ plugins {
   
   // Needed to generate jooq test db classes
   id("org.flywaydb.flyway") version "7.15.0"
-  id("nu.studer.jooq") version "6.0.1"
+  id("nu.studer.jooq") version "7.0"
 }
 
 dependencies {
