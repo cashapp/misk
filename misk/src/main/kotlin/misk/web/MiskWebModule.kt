@@ -34,10 +34,12 @@ import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
 import misk.web.exceptions.IOExceptionMapper
+import misk.web.exceptions.RequestBodyExceptionMapper
 import misk.web.exceptions.WebActionExceptionMapper
 import misk.web.extractors.FormValueFeatureBinding
 import misk.web.extractors.PathParamFeatureBinding
 import misk.web.extractors.QueryParamFeatureBinding
+import misk.web.extractors.RequestBodyException
 import misk.web.extractors.RequestBodyFeatureBinding
 import misk.web.extractors.RequestHeadersFeatureBinding
 import misk.web.extractors.ResponseBodyFeatureBinding
@@ -170,6 +172,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(ExceptionMapperModule.create<WebActionException, WebActionExceptionMapper>())
     install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
     install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
+    install(ExceptionMapperModule.create<RequestBodyException, RequestBodyExceptionMapper>())
 
     // Register built-in feature bindings.
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)
