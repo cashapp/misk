@@ -3,6 +3,8 @@ package misk.web.ssl
 import ch.qos.logback.classic.Level
 import com.google.inject.Guice
 import com.google.inject.Provides
+import misk.Action
+import misk.MiskDefault
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
@@ -18,6 +20,8 @@ import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.Post
 import misk.web.Response
 import misk.web.ResponseBody
@@ -40,8 +44,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import java.io.IOException
+import java.io.InterruptedIOException
 import java.net.SocketTimeoutException
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -55,6 +63,7 @@ class Http2ConnectivityTest {
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var logCollector: LogCollector
   @Inject private lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
+
 
   private lateinit var client: OkHttpClient
 
@@ -145,22 +154,36 @@ class Http2ConnectivityTest {
     assertFailsWith<IOException> {
       call.execute()
     }
+
+    val code = module.lockInterceptorFactory.queue.take()
+    assertThat(code).isEqualTo(500)
+
+    val requestDuration = metricsInterceptorFactory.requestDuration
+    assertThat(
+      requestDuration.labels(
+        "Http2ConnectivityTest.DisconnectWithLargeResponseAction",
+        "unknown",
+        "500"
+      ).get().count.toInt()
+    ).isEqualTo(1)
   }
 
   /** Confirm we don't page oncall and we record a 499 in the metrics. **/
   @Test
   fun clientTimeoutWritingTheRequest() {
     val http1Client = client.newBuilder()
-      .protocols(listOf(Protocol.HTTP_1_1))
       .writeTimeout(1, TimeUnit.MILLISECONDS)
+      .callTimeout(1, TimeUnit.MILLISECONDS)
       .build()
     val requestBody = object : RequestBody() {
       override fun contentType() = "text/plain;charset=utf-8".toMediaType()
 
       override fun writeTo(sink: BufferedSink) {
-        Thread.sleep(1000L)
         for (i in 0 until 1024 * 1024) {
           sink.writeUtf8("impossible: $i\n")
+          if ( i > 1000) {
+            throw RuntimeException("yolo")
+          }
         }
       }
     }
@@ -172,9 +195,47 @@ class Http2ConnectivityTest {
         .build()
     )
 
-    assertFailsWith<SocketTimeoutException> {
+    assertFailsWith<InterruptedIOException> {
       call.execute()
     }
+  }
+
+
+    @Test
+    fun clientTimeoutWritingTheRequest2() {
+      val http1Client = client.newBuilder()
+        .writeTimeout(50, TimeUnit.MILLISECONDS)
+        .callTimeout(50, TimeUnit.MILLISECONDS)
+        .build()
+      val requestBody = object : RequestBody() {
+        override fun contentType() = "application/json;charset=utf-8".toMediaType()
+
+        override fun writeTo(sink: BufferedSink) {
+          sink.writeUtf8("{\n" +
+            "  \"include_price_at_market_open\" : true,\n" +
+            "  \"investment_entity_tokens\" : [\n" +
+            "    \"IE_gqpfdrjfx27ksf05fr1mp7\"\n" +
+            "  ]\n" +
+            "}")
+
+        }
+      }
+
+      val call = http1Client.newCall(
+        Request.Builder()
+          .url("http://localhost:7070/2.0/cash/investing/get-current-prices")
+          .header("Authorization",  "App authToken")
+          .post(requestBody)
+          .build()
+      )
+
+      val response = call.execute()
+
+//    val code = module.lockInterceptorFactory.queue.take()
+//    assertThat(code).isEqualTo(499)
+
+    val requestDuration = metricsInterceptorFactory.requestDuration
+    assertThat(requestDuration.labels("Http2ConnectivityTest.DisconnectWithLargeRequestAction", "unknown", "499").get().count.toInt()).isEqualTo(1)
   }
 
   class HelloAction @Inject constructor() : WebAction {
@@ -226,13 +287,19 @@ class Http2ConnectivityTest {
   }
 
   class TestModule : KAbstractModule() {
+    val lockInterceptorFactory = LockInterceptor.Factory()
     override fun configure() {
+      multibind<NetworkInterceptor.Factory>(MiskDefault::class)
+        .toInstance(lockInterceptorFactory)
+
       install(LogCollectorModule())
       install(
         WebServerTestingModule(
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
         )
       )
+
+
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())
       install(WebActionModule.create<DisconnectWithEmptyResponseAction>())
@@ -240,6 +307,30 @@ class Http2ConnectivityTest {
       install(WebActionModule.create<DisconnectWithLargeRequestAction>())
     }
   }
+
+  class LockInterceptor constructor(val queue: ArrayBlockingQueue<Int>) : NetworkInterceptor {
+    override fun intercept(chain: NetworkChain) {
+
+      val statusCode =  try {
+        chain.proceed(chain.httpCall)
+        chain.httpCall.statusCode
+      } catch (e: Exception) {
+        -1
+      }
+      queue.add(statusCode)
+    }
+
+    @Singleton
+    class Factory @Inject constructor() : NetworkInterceptor.Factory {
+      val queue = ArrayBlockingQueue<Int>(1)
+
+      override fun create(action: Action): NetworkInterceptor? {
+        return LockInterceptor(queue)
+      }
+
+    }
+  }
+
 
   // NB: The server doesn't get a port until after it starts so we create the client module
   // _after_ we start the services
