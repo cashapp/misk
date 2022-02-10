@@ -18,7 +18,7 @@ internal class PrometheusMetrics @Inject internal constructor(
 ) : Metrics {
   override fun counter(
     name: String,
-    help: String?,
+    help: String,
     labelNames: List<String>
   ): Counter = metricsV2.counter(name, help, labelNames)
 
@@ -32,8 +32,9 @@ internal class PrometheusMetrics @Inject internal constructor(
     name: String,
     help: String,
     labelNames: List<String>,
-    quantiles: Map<Double, Double>
-  ): Histogram = PrometheusHistogram(metricsV2.summary(name, help, labelNames, quantiles))
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?,
+  ): Histogram = PrometheusHistogram(metricsV2.summary(name, help, labelNames, quantiles, maxAgeSeconds))
 
   companion object {
     /**

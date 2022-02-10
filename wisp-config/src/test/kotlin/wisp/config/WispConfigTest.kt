@@ -19,14 +19,18 @@ internal class WispConfigTest {
     val bar: Int
   )
 
-  data class AWSCredentials (
+  data class AWSCredentials(
     val AWS_ACCESS_KEY_ID: Masked,
     val AWS_SECRET_ACCESS_KEY: Masked
   ) : Config
 
-  data class AWSConfigYaml (
+  data class AWSConfigYaml(
     val aws: AWSCredentials
   ) : Config
+
+  data class ResourceLoaderPreprocessorContents(
+    val content: Masked
+  )
 
   @Test
   fun `config for a single config file loads`() {
@@ -92,7 +96,6 @@ internal class WispConfigTest {
     assertEquals("xyz", myConfig.baz)
   }
 
-
   @Test
   fun `config for a aws credential yaml file loads with correct values and should be masked`() {
     val builder = WispConfig.builder()
@@ -127,6 +130,23 @@ internal class WispConfigTest {
     // values should be masked
     assertNotEquals("AAAAAAAAAAAAAAAA", myConfig.AWS_ACCESS_KEY_ID.toString())
     assertNotEquals("RRRRRRRRRRRRRRRRR", myConfig.AWS_SECRET_ACCESS_KEY.toString())
+  }
+
+  @Test
+  fun `ResourceLoader preprocessor loads data`() {
+    val builder = WispConfig.builder()
+    builder.addWispConfigSources(
+      listOf(
+        ConfigSource("classpath:/d.yaml"),
+      )
+    )
+
+    val contents = builder.build().loadConfigOrThrow<ResourceLoaderPreprocessorContents>()
+    assertEquals("some data", contents.content.value)
+
+    // values should be masked
+    assertNotEquals("some data", contents.content.toString())
+
   }
 
   // TODO(chrisryan): add tests to support other formats
