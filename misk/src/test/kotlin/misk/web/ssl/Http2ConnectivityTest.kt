@@ -172,6 +172,48 @@ class Http2ConnectivityTest {
   @Test
   fun clientTimeoutWritingTheRequest() {
     val http1Client = client.newBuilder()
+      .protocols(listOf(Protocol.HTTP_1_1))
+      .writeTimeout(1, TimeUnit.MILLISECONDS)
+      .build()
+
+    val requestBody = object : RequestBody() {
+      override fun contentType() = "text/plain;charset=utf-8".toMediaType()
+
+      override fun writeTo(sink: BufferedSink) {
+        Thread.sleep(1000L)
+        for (i in 0 until 1024 * 1024) {
+          sink.writeUtf8("impossible: $i\n")
+        }
+        throw IOException("boom")
+      }
+    }
+
+    val call = http1Client.newCall(
+      Request.Builder()
+        .url(jetty.httpsServerUrl!!.resolve("/large/request")!!)
+        .post(requestBody)
+        .build()
+    )
+
+    assertFailsWith<SocketTimeoutException> {
+      call.execute()
+    }
+
+    val code = module.lockInterceptorFactory.queue.take()
+    assertThat(code).isEqualTo(499)
+
+    val requestDuration = metricsInterceptorFactory.requestDuration
+    assertThat(
+      requestDuration.labels(
+        "Http2ConnectivityTest.DisconnectWithLargeRequestAction",
+        "unknown",
+        "499"
+      ).get().count.toInt()
+    ).isEqualTo(1)
+  }
+  @Test
+  fun clientCancelsWritingTheRequest() {
+    val http1Client = client.newBuilder()
       .build()
 
     val requestBody = object : RequestBody() {
@@ -269,8 +311,6 @@ class Http2ConnectivityTest {
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
         )
       )
-
-
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())
       install(WebActionModule.create<DisconnectWithEmptyResponseAction>())
@@ -281,7 +321,6 @@ class Http2ConnectivityTest {
 
   class LockInterceptor constructor(val queue: ArrayBlockingQueue<Int>) : NetworkInterceptor {
     override fun intercept(chain: NetworkChain) {
-
       val statusCode =  try {
         chain.proceed(chain.httpCall)
         chain.httpCall.statusCode
