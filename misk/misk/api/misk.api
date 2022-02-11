@@ -1745,6 +1745,25 @@ public final class misk/web/exceptions/GrpcErrorResponse$Companion {
 	public final fun getINTERNAL_SERVER_ERROR ()Lmisk/web/exceptions/GrpcErrorResponse;
 }
 
+public final class misk/web/exceptions/RequestBodyExceptionMapper : misk/web/exceptions/ExceptionMapper {
+	public static final field Companion Lmisk/web/exceptions/RequestBodyExceptionMapper$Companion;
+	public fun canHandle (Ljava/lang/Throwable;)Z
+	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
+	public fun loggingLevel (Lmisk/web/extractors/RequestBodyException;)Lorg/slf4j/event/Level;
+	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
+	public fun toGrpcResponse (Lmisk/web/extractors/RequestBodyException;)Lmisk/web/exceptions/GrpcErrorResponse;
+	public synthetic fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
+	public fun toResponse (Lmisk/web/extractors/RequestBodyException;)Lmisk/web/Response;
+}
+
+public final class misk/web/exceptions/RequestBodyExceptionMapper$Companion {
+	public final fun getCLIENT_CLOSED_REQUEST ()Lmisk/web/Response;
+}
+
+public final class misk/web/extractors/RequestBodyException : java/io/IOException {
+	public fun <init> (Ljava/lang/Throwable;)V
+}
+
 public final class misk/web/extractors/StringConverterKt {
 	public static final fun converterFor (Lkotlin/reflect/KType;)Lkotlin/jvm/functions/Function1;
 }
