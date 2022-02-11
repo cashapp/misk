@@ -9,6 +9,7 @@ import misk.web.RequestBody
 import misk.web.marshal.GenericUnmarshallers
 import misk.web.marshal.Unmarshaller
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KParameter
@@ -26,7 +27,11 @@ internal class RequestBodyFeatureBinding(
       ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
 
     val requestBody = subject.httpCall.takeRequestBody()!!
-    val value = unmarshaller.unmarshal(subject.httpCall.requestHeaders, requestBody)
+    val value = try {
+      unmarshaller.unmarshal(subject.httpCall.requestHeaders, requestBody)
+    } catch (e: IOException) {
+      throw RequestBodyException(e)
+    }
     subject.setParameter(parameter, value)
   }
 
@@ -46,3 +51,7 @@ internal class RequestBodyFeatureBinding(
     }
   }
 }
+
+class RequestBodyException(
+  cause: Throwable
+) : IOException("unmarshalling the request body failed: $cause", cause)
