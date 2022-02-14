@@ -18,7 +18,7 @@ internal class PrometheusMetrics @Inject internal constructor(
 ) : Metrics {
   override fun counter(
     name: String,
-    help: String?,
+    help: String,
     labelNames: List<String>
   ): Counter = Counter
     .build(name, help)
@@ -49,13 +49,19 @@ internal class PrometheusMetrics @Inject internal constructor(
     name: String,
     help: String,
     labelNames: List<String>,
-    quantiles: Map<Double, Double>
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?,
   ): Summary = Summary
     .build(name, help)
     .labelNames(*labelNames.toTypedArray())
     .apply {
       quantiles.forEach { (key, value) ->
         quantile(key, value)
+      }
+    }
+    .apply {
+      if (maxAgeSeconds != null) {
+        this.maxAgeSeconds(maxAgeSeconds)
       }
     }
     .register(registry)

@@ -22,7 +22,7 @@ interface Metrics {
    */
   fun counter(
     name: String,
-    help: String? = "",
+    help: String,
     labelNames: List<String> = listOf()
   ): Counter
 
@@ -62,7 +62,8 @@ interface Metrics {
     name: String,
     help: String = "",
     labelNames: List<String>,
-    quantiles: Map<Double, Double> = defaultQuantiles
+    quantiles: Map<Double, Double> = defaultQuantiles,
+    maxAgeSeconds: Long? = null
   ): Histogram
 }
 

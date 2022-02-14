@@ -21,6 +21,7 @@ import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.RealNetworkChain
+import misk.web.WebConfig
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
@@ -223,6 +224,10 @@ class ConcurrencyLimitsInterceptorTest {
           bind<FakeNanoClock>().toInstance(FakeNanoClock())
         }
       }))
+
+      bind<WebConfig>().toInstance(WebConfig(
+        port = 0,
+      ))
 
       multibind<ConcurrencyLimiterFactory>().to<CustomLimiterFactory>()
     }

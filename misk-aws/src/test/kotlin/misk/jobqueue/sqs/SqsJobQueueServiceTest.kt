@@ -5,9 +5,11 @@ import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
 import misk.ServiceModule
+import misk.feature.testing.FakeFeatureFlags
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
+import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_BATCH_SIZE
 import misk.jobqueue.subscribe
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
@@ -36,11 +38,13 @@ internal class SqsJobQueueServiceTest {
   @Inject private lateinit var consumer: JobConsumer
   @Inject private lateinit var serviceManager: ServiceManager
   @Inject private lateinit var manualStartService: ManualStartService
+  @Inject private lateinit var fakeFeatureFlags: FakeFeatureFlags
 
   private val queueName = QueueName("sqs_job_queue_service_test")
 
   @BeforeEach fun createQueues() {
     sqs.createQueue(queueName.value)
+    fakeFeatureFlags.override(CONSUMERS_BATCH_SIZE, 10)
   }
 
   @AfterEach
