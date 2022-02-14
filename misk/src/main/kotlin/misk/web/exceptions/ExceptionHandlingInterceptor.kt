@@ -14,6 +14,7 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
 import misk.web.ResponseBody
+import misk.web.extractors.RequestBodyException
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers.Companion.toHeaders
@@ -22,6 +23,7 @@ import okio.BufferedSink
 import okio.ByteString
 import wisp.logging.getLogger
 import wisp.logging.log
+import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
 import java.util.Base64
@@ -46,11 +48,17 @@ class ExceptionHandlingInterceptor(
       chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
       val response = toResponse(th)
-      if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
-        sendGrpcFailure(chain.httpCall, response.statusCode, toGrpcResponse(th))
-      } else {
-        chain.httpCall.statusCode = response.statusCode
-        sendHttpFailure(chain.httpCall, response)
+      try {
+        if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
+          sendGrpcFailure(chain.httpCall, response.statusCode, toGrpcResponse(th))
+        } else {
+          chain.httpCall.statusCode = response.statusCode
+          sendHttpFailure(chain.httpCall, response)
+        }
+      } catch (e: IOException) {
+        // We failed to write the response for some reason.
+        log.info(e) { "failed to write the response" }
+
       }
     }
   }
