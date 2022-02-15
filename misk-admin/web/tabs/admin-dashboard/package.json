@@ -19,15 +19,15 @@
     "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='admin-dashboard.tgz' -czvf admin-dashboard.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.3.3",
-    "@misk/core": "0.3.3",
-    "@misk/simpleredux": "0.3.3"
+    "@misk/common": "0.4.0",
+    "@misk/core": "0.4.0",
+    "@misk/simpleredux": "0.4.0"
   },
   "devDependencies": {
-    "@misk/dev": "0.3.3",
-    "@misk/test": "0.3.3",
-    "@misk/prettier": "0.3.3",
-    "@misk/tslint": "0.3.3"
+    "@misk/dev": "0.4.0",
+    "@misk/test": "0.4.0",
+    "@misk/prettier": "0.4.0",
+    "@misk/tslint": "0.4.0"
   },
   "jest": {
     "testEnvironment": "jsdom",
