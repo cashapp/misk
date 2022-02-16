@@ -6,7 +6,7 @@ The only supported policy engine is [Open Policy Agent (OPA)](https://www.openpo
 ## Assumptions
 
 Setup of OPA is not included.  
-The policy modules assumes that the policy engine is accessible via HTTPS.
+The policy modules assumes that the policy engine is accessible via HTTP(s).
 
 ## Setup
 
