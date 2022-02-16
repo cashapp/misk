@@ -6,5 +6,8 @@ import wisp.config.Config
 data class PrometheusConfig(
   // The hostname on which metrics are exposed; if null uses any addr bound to this host
   val hostname: String? = null,
-  val http_port: Int // The port on metrics are exposed
+  // The port on metrics are exposed
+  val http_port: Int,
+  // How long observations are kept before they are discarded. Only used for Summary.
+  val max_age_in_seconds: Long? = null,
 ) : Config
