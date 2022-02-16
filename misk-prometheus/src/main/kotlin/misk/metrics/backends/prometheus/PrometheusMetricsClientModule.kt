@@ -16,6 +16,7 @@ import javax.inject.Provider
  */
 class PrometheusMetricsClientModule : KAbstractModule() {
   override fun configure() {
+    bind<PrometheusConfig>().toInstance(PrometheusConfig(http_port = 9021))
     bind<HistogramRegistry>().to<PrometheusHistogramRegistry>()
     bind<Metrics>().to<PrometheusMetrics>()
     bind<CollectorRegistry>().toProvider(CollectorRegistryProvider::class.java).asSingleton()
