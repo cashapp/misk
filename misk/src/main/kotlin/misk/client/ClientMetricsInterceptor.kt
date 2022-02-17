@@ -5,7 +5,6 @@ import com.google.common.base.Ticker
 import com.squareup.wire.GrpcMethod
 import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
-import misk.metrics.backends.prometheus.PrometheusConfig
 import misk.metrics.v2.Metrics
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -58,15 +57,11 @@ class ClientMetricsInterceptor private constructor(
   }
 
   @Singleton
-  class Factory @Inject internal constructor(
-    m: Metrics,
-    config: PrometheusConfig,
-  ) {
+  class Factory @Inject internal constructor(m: Metrics) {
     internal val requestDuration = m.summary(
       name = "client_http_request_latency_ms",
       help = "count and duration in ms of outgoing client requests",
-      labelNames = listOf("action", "code"),
-      maxAgeSeconds = config.max_age_in_seconds,
+      labelNames = listOf("action", "code")
     )
     internal val requestDurationHistogram = m.histogram(
       name = "histo_client_http_request_latency_ms",
