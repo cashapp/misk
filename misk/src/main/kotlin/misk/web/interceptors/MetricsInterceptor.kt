@@ -4,6 +4,7 @@ import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
 import misk.Action
 import misk.MiskCaller
+import misk.metrics.backends.prometheus.PrometheusConfig
 import misk.metrics.v2.Metrics
 import misk.scope.ActionScoped
 import misk.time.timed
@@ -41,12 +42,14 @@ internal class MetricsInterceptor internal constructor(
   @Singleton
   class Factory @Inject constructor(
     m: Metrics,
-    private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>
+    private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
+    config: PrometheusConfig,
   ) : NetworkInterceptor.Factory {
     internal val requestDuration = m.summary(
       name = "http_request_latency_ms",
       help = "count and duration in ms of incoming web requests",
-      labelNames = listOf("action", "caller", "code")
+      labelNames = listOf("action", "caller", "code"),
+      maxAgeSeconds = config.max_age_in_seconds,
     )
     private val requestDurationHistogram = m.histogram(
       name = "histo_http_request_latency_ms",
