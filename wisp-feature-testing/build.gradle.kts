@@ -22,4 +22,5 @@ dependencies {
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
+  testImplementation(Dependencies.kotestAssertions)
 }
