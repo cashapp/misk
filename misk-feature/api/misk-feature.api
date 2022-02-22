@@ -26,6 +26,12 @@ public final class misk/feature/Feature : wisp/feature/Feature {
 }
 
 public abstract interface class misk/feature/FeatureFlags {
+	public abstract fun get (Lwisp/feature/BooleanFeatureFlag;)Z
+	public abstract fun get (Lwisp/feature/DoubleFeatureFlag;)D
+	public abstract fun get (Lwisp/feature/EnumFeatureFlag;)Ljava/lang/Enum;
+	public abstract fun get (Lwisp/feature/IntFeatureFlag;)I
+	public abstract fun get (Lwisp/feature/JsonFeatureFlag;)Ljava/lang/Object;
+	public abstract fun get (Lwisp/feature/StringFeatureFlag;)Ljava/lang/String;
 	public abstract fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;)Z
 	public abstract fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Z
 	public abstract fun getDouble (Lmisk/feature/Feature;Ljava/lang/String;)D
@@ -38,6 +44,12 @@ public abstract interface class misk/feature/FeatureFlags {
 	public abstract fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;)Ljava/lang/Object;
 	public abstract fun getString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public abstract fun getString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;
+	public abstract fun track (Lwisp/feature/BooleanFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public abstract fun track (Lwisp/feature/DoubleFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public abstract fun track (Lwisp/feature/EnumFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public abstract fun track (Lwisp/feature/IntFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public abstract fun track (Lwisp/feature/JsonFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
+	public abstract fun track (Lwisp/feature/StringFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
 	public abstract fun trackBoolean (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
 	public abstract fun trackBoolean (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
 	public abstract fun trackDouble (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;

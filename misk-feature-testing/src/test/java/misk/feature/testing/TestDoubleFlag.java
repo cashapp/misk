@@ -2,19 +2,20 @@ package misk.feature.testing;
 
 import org.jetbrains.annotations.NotNull;
 import wisp.feature.Attributes;
-import wisp.feature.BooleanFeatureFlag;
+import wisp.feature.DoubleFeatureFlag;
 import wisp.feature.Feature;
 
-public class TestBooleanFlag implements BooleanFeatureFlag {
+public class TestDoubleFlag implements DoubleFeatureFlag {
   public final String clientIdentifier;
   public final TestCountry country;
 
-  public TestBooleanFlag(String clientIdentifier, TestCountry country) {
+  public TestDoubleFlag(String clientIdentifier, TestCountry country) {
     this.clientIdentifier = clientIdentifier;
     this.country = country;
   }
 
-  @NotNull @Override public Feature getFeature() { return new Feature("test-boolean-flag"); }
+  @NotNull
+  @Override public Feature getFeature() { return new Feature("test-boolean-flag"); }
   @NotNull @Override public String getKey() {
     return clientIdentifier;
   }
