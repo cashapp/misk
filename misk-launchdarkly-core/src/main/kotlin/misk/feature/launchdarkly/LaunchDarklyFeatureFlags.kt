@@ -78,42 +78,6 @@ class LaunchDarklyFeatureFlags private constructor (
     attributes: Attributes
   ): T = delegate.getJson(feature, key, clazz, attributes)
 
-  override fun track(
-    flag: BooleanFeatureFlag,
-    executor: Executor,
-    tracker: (Boolean) -> Unit
-  ): TrackerReference = delegate.track(flag, executor, tracker).toMisk()
-
-  override fun track(
-    flag: StringFeatureFlag,
-    executor: Executor,
-    tracker: (String) -> Unit
-  ): TrackerReference = delegate.track(flag, executor, tracker).toMisk()
-
-  override fun track(
-    flag: IntFeatureFlag,
-    executor: Executor,
-    tracker: (Int) -> Unit
-  ): TrackerReference = delegate.track(flag, executor, tracker).toMisk()
-
-  override fun track(
-    flag: DoubleFeatureFlag,
-    executor: Executor,
-    tracker: (Double) -> Unit
-  ): TrackerReference = delegate.track(flag, executor, tracker).toMisk()
-
-  override fun <T : Enum<T>> track(
-    flag: EnumFeatureFlag<T>,
-    executor: Executor,
-    tracker: (T) -> Unit
-  ): TrackerReference = delegate.track(flag, executor, tracker).toMisk()
-
-  override fun <T : Any> track(
-    flag: JsonFeatureFlag<T>,
-    executor: Executor,
-    tracker: (T) -> Unit
-  ): TrackerReference = delegate.track(flag, executor, tracker).toMisk()
-
   override fun trackBoolean(
     feature: Feature,
     key: String,

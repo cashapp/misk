@@ -17,19 +17,9 @@ public class wisp/feature/Attributes {
 }
 
 public abstract interface class wisp/feature/BooleanFeatureFlag : wisp/feature/FeatureFlag {
-	public abstract fun getReturnType ()Lkotlin/reflect/KClass;
-}
-
-public final class wisp/feature/BooleanFeatureFlag$DefaultImpls {
-	public static fun getReturnType (Lwisp/feature/BooleanFeatureFlag;)Lkotlin/reflect/KClass;
 }
 
 public abstract interface class wisp/feature/DoubleFeatureFlag : wisp/feature/FeatureFlag {
-	public abstract fun getReturnType ()Lkotlin/reflect/KClass;
-}
-
-public final class wisp/feature/DoubleFeatureFlag$DefaultImpls {
-	public static fun getReturnType (Lwisp/feature/DoubleFeatureFlag;)Lkotlin/reflect/KClass;
 }
 
 public abstract interface class wisp/feature/DynamicConfig {
@@ -48,6 +38,7 @@ public abstract interface class wisp/feature/DynamicConfig {
 }
 
 public abstract interface class wisp/feature/EnumFeatureFlag : wisp/feature/FeatureFlag {
+	public abstract fun getReturnType ()Ljava/lang/Class;
 }
 
 public class wisp/feature/Feature {
@@ -62,7 +53,6 @@ public abstract interface class wisp/feature/FeatureFlag {
 	public abstract fun getAttributes ()Lwisp/feature/Attributes;
 	public abstract fun getFeature ()Lwisp/feature/Feature;
 	public abstract fun getKey ()Ljava/lang/String;
-	public abstract fun getReturnType ()Lkotlin/reflect/KClass;
 }
 
 public final class wisp/feature/FeatureFlagValidation {
@@ -89,14 +79,10 @@ public final class wisp/feature/FeatureFlags$DefaultImpls {
 }
 
 public abstract interface class wisp/feature/IntFeatureFlag : wisp/feature/FeatureFlag {
-	public abstract fun getReturnType ()Lkotlin/reflect/KClass;
-}
-
-public final class wisp/feature/IntFeatureFlag$DefaultImpls {
-	public static fun getReturnType (Lwisp/feature/IntFeatureFlag;)Lkotlin/reflect/KClass;
 }
 
 public abstract interface class wisp/feature/JsonFeatureFlag : wisp/feature/FeatureFlag {
+	public abstract fun getReturnType ()Ljava/lang/Class;
 }
 
 public abstract interface class wisp/feature/LegacyFeatureFlags {
@@ -161,11 +147,6 @@ public final class wisp/feature/MoshiExtKt {
 }
 
 public abstract interface class wisp/feature/StringFeatureFlag : wisp/feature/FeatureFlag {
-	public abstract fun getReturnType ()Lkotlin/reflect/KClass;
-}
-
-public final class wisp/feature/StringFeatureFlag$DefaultImpls {
-	public static fun getReturnType (Lwisp/feature/StringFeatureFlag;)Lkotlin/reflect/KClass;
 }
 
 public abstract interface class wisp/feature/StrongFeatureFlags {
@@ -175,12 +156,6 @@ public abstract interface class wisp/feature/StrongFeatureFlags {
 	public abstract fun get (Lwisp/feature/IntFeatureFlag;)I
 	public abstract fun get (Lwisp/feature/JsonFeatureFlag;)Ljava/lang/Object;
 	public abstract fun get (Lwisp/feature/StringFeatureFlag;)Ljava/lang/String;
-	public abstract fun track (Lwisp/feature/BooleanFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun track (Lwisp/feature/DoubleFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun track (Lwisp/feature/EnumFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun track (Lwisp/feature/IntFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun track (Lwisp/feature/JsonFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun track (Lwisp/feature/StringFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 }
 
 public abstract interface class wisp/feature/TrackerReference {

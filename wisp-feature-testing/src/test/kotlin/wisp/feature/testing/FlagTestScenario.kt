@@ -73,18 +73,6 @@ interface FlagTestScenario<Flag : FeatureFlag<in T>, T : Any> {
   fun FakeFeatureFlags.scenarioGet(flag: Flag): T
 
   /**
-   * Call the appropriate strongly typed [FakeFeatureFlags.track] method depending on the scenario.
-   *
-   * For example, if we are in [StringFlagTestScenario], this will call call
-   * `FakeFeatureFlags.track<TestStringFlag>()`
-  */
-  fun FakeFeatureFlags.scenarioTrack(
-    flag: Flag,
-    executor: Executor,
-    tracker: (T) -> Unit
-  ): TrackerReference
-
-  /**
    * Call the appropriate strongly typed [FakeFeatureFlags.override] method depending on the
    * scenario.
    *
@@ -110,12 +98,6 @@ object StringFlagTestScenario : FlagTestScenario<TestStringFlag, String> {
 
   override fun FakeFeatureFlags.scenarioGet(flag: TestStringFlag): String = this.get(flag)
 
-  override fun FakeFeatureFlags.scenarioTrack(
-    flag: TestStringFlag,
-    executor: Executor,
-    tracker: (String) -> Unit
-  ): TrackerReference = this.track(flag, executor, tracker)
-
   override fun FakeFeatureFlags.scenarioOverride(
     value: String,
     matcher: (TestFlag<String>) -> Boolean
@@ -131,12 +113,6 @@ object BooleanFlagTestScenario : FlagTestScenario<TestBooleanFlag, Boolean> {
     TestBooleanFlag(username, segment)
 
   override fun FakeFeatureFlags.scenarioGet(flag: TestBooleanFlag): Boolean = this.get(flag)
-
-  override fun FakeFeatureFlags.scenarioTrack(
-    flag: TestBooleanFlag,
-    executor: Executor,
-    tracker: (Boolean) -> Unit
-  ): TrackerReference = this.track(flag, executor, tracker)
 
   override fun FakeFeatureFlags.scenarioOverride(
     value: Boolean,
@@ -154,12 +130,6 @@ object IntFlagTestScenario : FlagTestScenario<TestIntFlag, Int> {
 
   override fun FakeFeatureFlags.scenarioGet(flag: TestIntFlag): Int = this.get(flag)
 
-  override fun FakeFeatureFlags.scenarioTrack(
-    flag: TestIntFlag,
-    executor: Executor,
-    tracker: (Int) -> Unit
-  ): TrackerReference = this.track(flag, executor, tracker)
-
   override fun FakeFeatureFlags.scenarioOverride(
     value: Int,
     matcher: (TestFlag<Int>) -> Boolean
@@ -175,12 +145,6 @@ object DoubleFlagTestScenario : FlagTestScenario<TestDoubleFlag, Double> {
     TestDoubleFlag(username, segment)
 
   override fun FakeFeatureFlags.scenarioGet(flag: TestDoubleFlag): Double = this.get(flag)
-
-  override fun FakeFeatureFlags.scenarioTrack(
-    flag: TestDoubleFlag,
-    executor: Executor,
-    tracker: (Double) -> Unit
-  ): TrackerReference = this.track(flag, executor, tracker)
 
   override fun FakeFeatureFlags.scenarioOverride(
     value: Double,
@@ -198,12 +162,6 @@ object EnumFlagTestScenario : FlagTestScenario<TestEnumFlag, TestEnum> {
 
   override fun FakeFeatureFlags.scenarioGet(flag: TestEnumFlag): TestEnum = this.get(flag)
 
-  override fun FakeFeatureFlags.scenarioTrack(
-    flag: TestEnumFlag,
-    executor: Executor,
-    tracker: (TestEnum) -> Unit
-  ): TrackerReference = this.track(flag, executor, tracker)
-
   override fun FakeFeatureFlags.scenarioOverride(
     value: TestEnum,
     matcher: (TestFlag<TestEnum>) -> Boolean
@@ -219,12 +177,6 @@ object JsonFlagTestScenario : FlagTestScenario<TestJsonFlag, TestJsonObject> {
     TestJsonFlag(username, segment)
 
   override fun FakeFeatureFlags.scenarioGet(flag: TestJsonFlag): TestJsonObject = this.get(flag)
-
-  override fun FakeFeatureFlags.scenarioTrack(
-    flag: TestJsonFlag,
-    executor: Executor,
-    tracker: (TestJsonObject) -> Unit
-  ): TrackerReference = this.track(flag, executor, tracker)
 
   override fun FakeFeatureFlags.scenarioOverride(
     value: TestJsonObject,

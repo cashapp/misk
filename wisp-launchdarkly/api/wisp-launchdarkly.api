@@ -66,12 +66,6 @@ public final class wisp/launchdarkly/LaunchDarklyFeatureFlags : wisp/feature/Fea
 	public fun getString (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/String;
 	public final fun shutDown ()V
 	public final fun startUp ()Lwisp/launchdarkly/LaunchDarklyFeatureFlags;
-	public fun track (Lwisp/feature/BooleanFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public fun track (Lwisp/feature/DoubleFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public fun track (Lwisp/feature/EnumFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public fun track (Lwisp/feature/IntFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public fun track (Lwisp/feature/JsonFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public fun track (Lwisp/feature/StringFeatureFlag;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public fun trackBoolean (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public fun trackBoolean (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public fun trackDouble (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;

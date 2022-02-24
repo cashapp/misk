@@ -163,46 +163,6 @@ class LaunchDarklyFeatureFlags constructor(
     }
   }
 
-  override fun track(
-    flag: BooleanFeatureFlag,
-    executor: Executor,
-    tracker: (Boolean) -> Unit
-  ): TrackerReference = trackBoolean(flag.feature, flag.key, flag.attributes, executor, tracker)
-
-  override fun track(
-    flag: StringFeatureFlag,
-    executor: Executor,
-    tracker: (String) -> Unit
-  ): TrackerReference = trackString(flag.feature, flag.key, flag.attributes, executor, tracker)
-
-  override fun track(
-    flag: IntFeatureFlag,
-    executor: Executor,
-    tracker: (Int) -> Unit
-  ): TrackerReference = trackInt(flag.feature, flag.key, flag.attributes, executor, tracker)
-
-  override fun track(
-    flag: DoubleFeatureFlag,
-    executor: Executor,
-    tracker: (Double) -> Unit
-  ): TrackerReference = trackDouble(flag.feature, flag.key, flag.attributes, executor, tracker)
-
-  override fun <T : Enum<T>> track(
-    flag: EnumFeatureFlag<T>,
-    executor: Executor,
-    tracker: (T) -> Unit
-  ): TrackerReference = trackEnum(
-    flag.feature, flag.key, flag.returnType, flag.attributes, executor, tracker
-  )
-
-  override fun <T : Any> track(
-    flag: JsonFeatureFlag<T>,
-    executor: Executor,
-    tracker: (T) -> Unit
-  ): TrackerReference = trackJson(
-    flag.feature, flag.key, flag.returnType, flag.attributes, executor, tracker
-  )
-
   override fun trackBoolean(
     feature: Feature,
     key: String,

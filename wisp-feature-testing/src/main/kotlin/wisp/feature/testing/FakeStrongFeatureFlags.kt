@@ -31,19 +31,12 @@ class FakeStrongFeatureFlags : StrongFeatureFlags {
   }
 
   private data class FeatureFlagConfig<T : Any>(
-    val matchers: MutableList<FeatureMatcher<T>> = mutableListOf(),
-    val trackers: MutableList<FeatureTracker<T>> = mutableListOf()
+    val matchers: MutableList<FeatureMatcher<T>> = mutableListOf()
   )
 
   private data class FeatureMatcher<T : Any>(
     val condition: (FeatureFlag<in T>) -> Boolean,
     val value: T
-  )
-
-  private data class FeatureTracker<T : Any>(
-    val flag: FeatureFlag<T>,
-    val executor: Executor,
-    val tracker: (T) -> Unit
   )
 
   fun reset(): FakeStrongFeatureFlags {
@@ -67,13 +60,6 @@ class FakeStrongFeatureFlags : StrongFeatureFlags {
     val typedMatcher = matcher as (FeatureFlag<in T>) -> Boolean
     val featureMatcher = FeatureMatcher(typedMatcher, value)
     featureConfig.matchers.add(featureMatcher)
-
-    synchronized(featureConfig.trackers) {
-      val matchingTrackers = featureConfig.trackers.filter { featureMatcher.condition(it.flag) }
-      matchingTrackers.forEach { tracker ->
-        tracker.executor.execute { tracker.tracker(value) }
-      }
-    }
 
     return this
   }
@@ -120,61 +106,5 @@ class FakeStrongFeatureFlags : StrongFeatureFlags {
   override fun get(flag: DoubleFeatureFlag): Double = getAny(flag)
   override fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T = getAny(flag)
   override fun <T : Any> get(flag: JsonFeatureFlag<T>): T = getAny(flag)
-
-  override fun track(
-    flag: BooleanFeatureFlag,
-    executor: Executor,
-    tracker: (Boolean) -> Unit
-  ): TrackerReference = trackAny(flag, flag.javaClass, executor, tracker)
-
-  override fun track(
-    flag: StringFeatureFlag,
-    executor: Executor,
-    tracker: (String) -> Unit
-  ): TrackerReference = trackAny(flag, flag.javaClass, executor, tracker)
-
-  override fun track(
-    flag: IntFeatureFlag,
-    executor: Executor,
-    tracker: (Int) -> Unit
-  ): TrackerReference = trackAny(flag, flag.javaClass, executor, tracker)
-
-  override fun track(
-    flag: DoubleFeatureFlag,
-    executor: Executor,
-    tracker: (Double) -> Unit
-  ): TrackerReference = trackAny(flag, flag.javaClass, executor, tracker)
-
-  override fun <T : Enum<T>> track(
-    flag: EnumFeatureFlag<T>,
-    executor: Executor,
-    tracker: (T) -> Unit
-  ): TrackerReference = trackAny(flag, flag.javaClass, executor, tracker)
-
-  override fun <T : Any> track(
-    flag: JsonFeatureFlag<T>,
-    executor: Executor,
-    tracker: (T) -> Unit
-  ): TrackerReference = trackAny(flag, flag.javaClass, executor, tracker)
-
-  private fun <T : Any> trackAny(
-    flag: FeatureFlag<T>,
-    clazz: Class<out FeatureFlag<T>>,
-    executor: Executor,
-    tracker: (T) -> Unit
-  ): TrackerReference {
-    val featureConfig = getFeatureConfig(clazz)
-
-    return synchronized(featureConfig.trackers) {
-      val featureTracker = FeatureTracker(flag, executor, tracker)
-      featureConfig.trackers.add(featureTracker)
-
-      object : TrackerReference {
-        override fun unregister() {
-          featureConfig.trackers.remove(featureTracker)
-        }
-      }
-    }
-  }
 }
 
