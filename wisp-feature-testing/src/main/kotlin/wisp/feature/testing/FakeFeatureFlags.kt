@@ -78,6 +78,11 @@ class FakeFeatureFlags private constructor(
     noinline matcher: (Flag) -> Boolean = { _ -> true }
   ): FakeFeatureFlags = this.also { strongFeatureFlags.override(value, matcher) }
 
+  inline fun <reified Flag: DoubleFeatureFlag> override(
+    value: Double,
+    noinline matcher: (Flag) -> Boolean = { _ -> true }
+  ): FakeFeatureFlags = this.also { strongFeatureFlags.override(value, matcher) }
+
   inline fun <reified Flag: JsonFeatureFlag<T>, T : Any> override(
     value: T,
     noinline matcher: (Flag) -> Boolean = { _ -> true }
