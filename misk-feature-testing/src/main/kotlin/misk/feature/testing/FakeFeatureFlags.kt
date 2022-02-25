@@ -7,8 +7,15 @@ import misk.feature.Attributes
 import misk.feature.DynamicConfig
 import misk.feature.Feature
 import misk.feature.FeatureFlags
+import misk.feature.TrackerReference
 import misk.feature.toMisk
-import wisp.feature.toSafeJson
+import wisp.feature.BooleanFeatureFlag
+import wisp.feature.DoubleFeatureFlag
+import wisp.feature.EnumFeatureFlag
+import wisp.feature.FeatureFlag
+import wisp.feature.IntFeatureFlag
+import wisp.feature.JsonFeatureFlag
+import wisp.feature.StringFeatureFlag
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Provider
@@ -18,7 +25,9 @@ import javax.inject.Singleton
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
 @Singleton
-class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : AbstractIdleService(),
+class FakeFeatureFlags private constructor(
+  val delegate: wisp.feature.testing.FakeFeatureFlags
+) : AbstractIdleService(),
   FeatureFlags,
   FeatureService,
   DynamicConfig {
@@ -27,12 +36,22 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
     val defaultAttributes = Attributes()
   }
 
-  private val delegate: wisp.feature.testing.FakeFeatureFlags by lazy {
+  constructor() : this(wisp.feature.testing.FakeFeatureFlags())
+
+  @Inject
+  constructor(moshi: Provider<Moshi>) : this(
     wisp.feature.testing.FakeFeatureFlags { moshi.get() }
-  }
+  )
 
   override fun startUp() {}
   override fun shutDown() {}
+
+  override fun get(flag: BooleanFeatureFlag): Boolean = delegate.get(flag)
+  override fun get(flag: StringFeatureFlag): String = delegate.get(flag)
+  override fun get(flag: IntFeatureFlag): Int = delegate.get(flag)
+  override fun get(flag: DoubleFeatureFlag): Double = delegate.get(flag)
+  override fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T = delegate.get(flag)
+  override fun <T : Any> get(flag: JsonFeatureFlag<T>): T = delegate.get(flag)
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
     delegate.getBoolean(feature, key, attributes)
@@ -167,6 +186,53 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
     tracker: (T) -> Unit
   ) = delegate.trackJson(feature, KEY, clazz, executor, tracker).toMisk()
 
+  fun <T : Any, Flag : FeatureFlag<in T>> overrideAny(
+    clazz: Class<out FeatureFlag<T>>,
+    value: T
+  ): FakeFeatureFlags {
+    delegate.overrideAny(clazz, value)
+    return this
+  }
+
+  fun <T : Any, Flag : FeatureFlag<in T>> overrideAny(
+    clazz: Class<out FeatureFlag<T>>,
+    value: T,
+    matcher: (Flag) -> Boolean = { _ -> true }
+  ): FakeFeatureFlags {
+    delegate.overrideAny(clazz, value, matcher)
+    return this
+  }
+
+  inline fun <reified Flag : BooleanFeatureFlag> override(
+    value: Boolean,
+    noinline matcher: (Flag) -> Boolean = { _ -> true }
+  ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
+
+  inline fun <reified Flag : StringFeatureFlag> override(
+    value: String,
+    noinline matcher: (Flag) -> Boolean = { _ -> true }
+  ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
+
+  inline fun <reified Flag: IntFeatureFlag> override(
+    value: Int,
+    noinline matcher: (Flag) -> Boolean = { _ -> true }
+  ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
+
+  inline fun <reified Flag: DoubleFeatureFlag> override(
+    value: Double,
+    noinline matcher: (Flag) -> Boolean = { _ -> true }
+  ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
+
+  inline fun <reified Flag: JsonFeatureFlag<T>, T : Any> override(
+    value: T,
+    noinline matcher: (Flag) -> Boolean = { _ -> true }
+  ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
+
+  inline fun <reified Flag: EnumFeatureFlag<T>, T : Enum<T>> override(
+    value: T,
+    noinline matcher: (Flag) -> Boolean = { _ -> true }
+  ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
+
   fun override(
     feature: Feature,
     value: Boolean
@@ -210,7 +276,7 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
   }
 
   inline fun <reified T> overrideJson(feature: Feature, value: T) {
-    overrideKeyJson(feature, KEY, value, defaultAttributes)
+    delegate.overrideKeyJson(feature, KEY, value, defaultAttributes)
   }
 
   @JvmOverloads
@@ -278,13 +344,9 @@ class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : Abstrac
     key: String,
     value: T,
     attributes: Attributes = defaultAttributes
-  ) {
-    val jsonValue = { moshi.get().adapter(T::class.java).toSafeJson(value) }
-    overrideKey(feature, key, jsonValue, attributes)
-  }
+  ) = delegate.overrideKeyJson(feature, key, value, attributes)
 
   fun reset() {
     delegate.reset()
   }
-
 }
