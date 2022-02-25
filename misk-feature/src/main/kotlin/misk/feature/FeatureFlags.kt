@@ -1,11 +1,66 @@
 package misk.feature
 
+import wisp.feature.BooleanFeatureFlag
+import wisp.feature.DoubleFeatureFlag
+import wisp.feature.EnumFeatureFlag
+import wisp.feature.IntFeatureFlag
+import wisp.feature.JsonFeatureFlag
+import wisp.feature.StringFeatureFlag
 import java.util.concurrent.Executor
 
 /**
  * Interface for evaluating feature flags.
  */
 interface FeatureFlags {
+  /**
+   * Calculates the value of a boolean feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   */
+  fun get(flag: BooleanFeatureFlag): Boolean
+
+  /**
+   * Calculates the value of a string feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   */
+  fun get(flag: StringFeatureFlag): String
+
+  /**
+   * Calculates the value of an int feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   */
+  fun get(flag: IntFeatureFlag): Int
+
+  /**
+   * Calculates the value of a double feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   */
+  fun get(flag: DoubleFeatureFlag): Double
+
+  /**
+   * Calculates the value of an enum feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   * @throws [IllegalStateException] if the flag is off with no default value.
+   */
+  fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T
+
+  /**
+   * Calculates the value of a json feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   * @throws [IllegalStateException] if the flag is off with no default value.
+   */
+  fun <T : Any> get(flag: JsonFeatureFlag<T>): T
 
   /**
    * Calculates the value of an boolean feature flag for the given key and attributes.

@@ -10,6 +10,7 @@ dependencies {
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.moshiCore)
   implementation(project(":misk-feature"))
+  implementation(project(":wisp-launchdarkly"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)

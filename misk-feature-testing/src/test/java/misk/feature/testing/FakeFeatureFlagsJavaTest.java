@@ -46,6 +46,27 @@ public class FakeFeatureFlagsJavaTest {
     assertThat(subject.getDouble(FEATURE, "joker5")).isEqualTo(1.0);
   }
 
+  @Test public void testStrongOverrideWithoutProvidingAttributes() {
+    subject.overrideAny(TestBooleanFlag.class, true);
+    assertThat(subject.get(new TestBooleanFlag("id", TestCountry.AUSTRALIA))).isEqualTo(true);
+
+    subject.overrideAny(TestStringFlag.class, "hello");
+    assertThat(subject.get(new TestStringFlag("id", TestCountry.AUSTRALIA))).isEqualTo("hello");
+
+    subject.overrideAny(TestDoubleFlag.class, 5.0);
+    assertThat(subject.get(new TestDoubleFlag("id", TestCountry.AUSTRALIA))).isEqualTo(5.0);
+
+    subject.overrideAny(TestIntFlag.class, 1);
+    assertThat(subject.get(new TestIntFlag("id", TestCountry.AUSTRALIA))).isEqualTo(1);
+
+    subject.overrideAny(TestEnumFlag.class, TestEnum.TEST_VALUE_1);
+    assertThat(subject.get(new TestEnumFlag("id", TestCountry.AUSTRALIA))).isEqualTo(TestEnum.TEST_VALUE_1);
+
+    subject.overrideAny(TestJsonFlag.class, new TestJsonObject("bob", 37));
+    assertThat(subject.get(new TestJsonFlag("id", TestCountry.AUSTRALIA)))
+      .isEqualTo(new TestJsonObject("bob", 37));
+  }
+
   @Test public void testOverrideWithAttributes() {
     Attributes attributes = new Attributes(Map.of("type", "bad"));
     subject.overrideKey(FEATURE, "joker1", 55, attributes);
@@ -64,4 +85,37 @@ public class FakeFeatureFlagsJavaTest {
     assertThat(subject.getDouble(FEATURE, "joker5", attributes)).isEqualTo(1.0);
   }
 
+  @Test public void testStrongOverrideWithAttributes() {
+    // While possible, this statement is also a good argument for moving to Kotlin
+    subject.<Boolean, TestBooleanFlag>overrideAny(TestBooleanFlag.class, true, (f) ->
+        f.country == TestCountry.AUSTRALIA
+    );
+    assertThat(subject.get(new TestBooleanFlag("id", TestCountry.AUSTRALIA))).isEqualTo(true);
+
+    subject.<String, TestStringFlag>overrideAny(TestStringFlag.class, "hello", (f) ->
+        f.country == TestCountry.AUSTRALIA
+    );
+    assertThat(subject.get(new TestStringFlag("id", TestCountry.AUSTRALIA))).isEqualTo("hello");
+
+    subject.<Double, TestDoubleFlag>overrideAny(TestDoubleFlag.class, 5.0, (f) ->
+        f.country == TestCountry.AUSTRALIA
+    );
+    assertThat(subject.get(new TestDoubleFlag("id", TestCountry.AUSTRALIA))).isEqualTo(5.0);
+
+    subject.<Integer, TestIntFlag>overrideAny(TestIntFlag.class, 1, (f) ->
+        f.country == TestCountry.AUSTRALIA
+    );
+    assertThat(subject.get(new TestIntFlag("id", TestCountry.AUSTRALIA))).isEqualTo(1);
+
+    subject.<TestEnum, TestEnumFlag>overrideAny(TestEnumFlag.class, TestEnum.TEST_VALUE_1, (f) ->
+        f.country == TestCountry.AUSTRALIA
+    );
+    assertThat(subject.get(new TestEnumFlag("id", TestCountry.AUSTRALIA))).isEqualTo(TestEnum.TEST_VALUE_1);
+
+    subject.<TestJsonObject, TestJsonFlag>overrideAny(TestJsonFlag.class, new TestJsonObject("bob", 37), (f) ->
+        f.country == TestCountry.AUSTRALIA
+    );
+    assertThat(subject.get(new TestJsonFlag("id", TestCountry.AUSTRALIA)))
+        .isEqualTo(new TestJsonObject("bob", 37));
+  }
 }

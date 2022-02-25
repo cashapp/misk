@@ -16,6 +16,13 @@ import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.feature.TrackerReference
+import misk.feature.toMisk
+import wisp.feature.BooleanFeatureFlag
+import wisp.feature.DoubleFeatureFlag
+import wisp.feature.EnumFeatureFlag
+import wisp.feature.IntFeatureFlag
+import wisp.feature.JsonFeatureFlag
+import wisp.feature.StringFeatureFlag
 import wisp.feature.fromSafeJson
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -26,133 +33,50 @@ import javax.inject.Singleton
  * See https://docs.launchdarkly.com/docs/java-sdk-reference documentation.
  */
 @Singleton
-class LaunchDarklyFeatureFlags @Inject constructor(
-  private val ldClient: LDClientInterface,
-  private val moshi: Moshi
+class LaunchDarklyFeatureFlags private constructor (
+  private val delegate: wisp.launchdarkly.LaunchDarklyFeatureFlags
 ) : AbstractIdleService(), FeatureFlags, FeatureService {
+  @Inject
+  constructor(
+    ldClient: LDClientInterface,
+    moshi: Moshi
+  ) : this(wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi))
 
-  private val featuresWithMigrationWarnings: MutableList<Feature> = mutableListOf()
+  override fun startUp() { delegate.startUp() }
+  override fun shutDown() { delegate.shutDown() }
 
-  override fun startUp() {
-    var attempts = 300
-    val intervalMillis = 100L
+  override fun get(flag: BooleanFeatureFlag): Boolean = delegate.get(flag)
+  override fun get(flag: StringFeatureFlag): String = delegate.get(flag)
+  override fun get(flag: IntFeatureFlag): Int = delegate.get(flag)
+  override fun get(flag: DoubleFeatureFlag): Double = delegate.get(flag)
+  override fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T = delegate.get(flag)
+  override fun <T : Any> get(flag: JsonFeatureFlag<T>): T = delegate.get(flag)
 
-    // LaunchDarkly has its own threads for initialization. We just need to keep checking until
-    // it's done. Unfortunately there's no latch or event to wait on.
-    while (!ldClient.isInitialized && attempts > 0) {
-      Thread.sleep(intervalMillis)
-      attempts--
-    }
+  override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
+    delegate.getBoolean(feature, key, attributes)
 
-    if (attempts == 0 && !ldClient.isInitialized) {
-      throw Exception("LaunchDarkly did not initialize in 30 seconds")
-    }
-  }
+  override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
+    delegate.getDouble(feature, key, attributes)
 
-  override fun shutDown() {
-    ldClient.flush()
-    ldClient.close()
-  }
+  override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
+    delegate.getInt(feature, key, attributes)
 
-  override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
-    val result = ldClient.boolVariationDetail(
-      feature.name,
-      buildUser(feature, key, attributes),
-      false
-    )
-    checkDefaultNotUsed(feature, result)
-    return result.value
-  }
-
-  override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double {
-    val result = ldClient.doubleVariationDetail(
-      feature.name,
-      buildUser(feature, key, attributes),
-      0.0
-    )
-    checkDefaultNotUsed(feature, result)
-    return result.value
-  }
-
-  override fun getInt(feature: Feature, key: String, attributes: Attributes): Int {
-    checkInitialized()
-    val result = ldClient.intVariationDetail(
-      feature.name,
-      buildUser(feature, key, attributes),
-      0
-    )
-
-    checkDefaultNotUsed(feature, result)
-    return result.value
-  }
-
-  override fun getString(feature: Feature, key: String, attributes: Attributes): String {
-    checkInitialized()
-    val result =
-      ldClient.stringVariationDetail(
-        feature.name,
-        buildUser(feature, key, attributes),
-        ""
-      )
-    checkDefaultNotUsed(feature, result)
-    return result.value
-  }
+  override fun getString(feature: Feature, key: String, attributes: Attributes): String =
+    delegate.getString(feature, key, attributes)
 
   override fun <T : Enum<T>> getEnum(
     feature: Feature,
     key: String,
     clazz: Class<T>,
     attributes: Attributes
-  ): T {
-    checkInitialized()
-    val result =
-      ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
-    checkDefaultNotUsed(feature, result)
-    return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
-  }
+  ): T = delegate.getEnum(feature, key, clazz, attributes)
 
   override fun <T> getJson(
     feature: Feature,
     key: String,
     clazz: Class<T>,
     attributes: Attributes
-  ): T {
-    checkInitialized()
-    val result = ldClient.jsonValueVariationDetail(
-      feature.name,
-      buildUser(feature, key, attributes),
-      LDValue.ofNull()
-    )
-    checkDefaultNotUsed(feature, result)
-    return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString()) {
-      logJsonMigrationWarningOnce(feature, it)
-    }
-      ?: throw IllegalArgumentException("null value deserialized from $feature")
-  }
-
-  private fun <T> track(
-    feature: Feature,
-    key: String,
-    attributes: Attributes,
-    mapper: (LDValue) -> T,
-    executor: Executor,
-    tracker: (T) -> Unit
-  ): TrackerReference {
-    val listener = ldClient.flagTracker.addFlagValueChangeListener(
-      feature.name,
-      buildUser(feature, key, attributes)
-    ) { event ->
-      executor.execute {
-        tracker(mapper(event.newValue))
-      }
-    }
-
-    return object : TrackerReference {
-      override fun unregister() {
-        ldClient.flagTracker.removeFlagChangeListener(listener)
-      }
-    }
-  }
+  ): T = delegate.getJson(feature, key, clazz, attributes)
 
   override fun trackBoolean(
     feature: Feature,
@@ -160,7 +84,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (Boolean) -> Unit
-  ) = track(feature, key, attributes, { it.booleanValue() }, executor, tracker)
+  ) = delegate.trackBoolean(feature, key, attributes, executor, tracker).toMisk()
 
   override fun trackDouble(
     feature: Feature,
@@ -168,7 +92,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (Double) -> Unit
-  ) = track(feature, key, attributes, { it.doubleValue() }, executor, tracker)
+  ) = delegate.trackDouble(feature, key, attributes, executor, tracker).toMisk()
 
   override fun trackInt(
     feature: Feature,
@@ -176,7 +100,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (Int) -> Unit
-  ) = track(feature, key, attributes, { it.intValue() }, executor, tracker)
+  ) = delegate.trackInt(feature, key, attributes, executor, tracker).toMisk()
 
   override fun trackString(
     feature: Feature,
@@ -184,7 +108,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (String) -> Unit
-  ) = track(feature, key, attributes, { it.stringValue() }, executor, tracker)
+  ) = delegate.trackString(feature, key, attributes, executor, tracker).toMisk()
 
   override fun <T : Enum<T>> trackEnum(
     feature: Feature,
@@ -193,14 +117,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (T) -> Unit
-  ) = track(
-    feature,
-    key,
-    attributes,
-    { java.lang.Enum.valueOf(clazz, it.stringValue().toUpperCase()) },
-    executor,
-    tracker
-  )
+  ) = delegate.trackEnum(feature, key, clazz, attributes, executor, tracker).toMisk()
 
   override fun <T> trackJson(
     feature: Feature,
@@ -209,97 +126,5 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
     executor: Executor,
     tracker: (T) -> Unit
-  ) = track(
-    feature,
-    key,
-    attributes,
-    {
-      moshi.adapter(clazz).fromSafeJson(it.toJsonString()) {
-        logJsonMigrationWarningOnce(feature, it)
-      }!!
-    },
-    executor,
-    tracker
-  )
-
-  private fun checkInitialized() {
-    checkState(
-      ldClient.isInitialized,
-      "LaunchDarkly feature flags not initialized. " +
-        "Did you forget to make your service depend on [FeatureFlags]?"
-    )
-  }
-
-  private fun <T> checkDefaultNotUsed(feature: Feature, detail: EvaluationDetail<T>) {
-    if (!detail.isDefaultValue) {
-      return
-    }
-
-    if (detail.reason.kind == EvaluationReason.Kind.ERROR) {
-      val reason = detail.reason
-      throw RuntimeException(
-        "Feature flag $feature evaluation failed: ${reason}", reason.exception
-      )
-    }
-
-    throw IllegalStateException("Feature flag $feature is off but no off variation is specified")
-  }
-
-  private fun buildUser(feature: Feature, key: String, attributes: Attributes): LDUser {
-    FeatureFlagValidation.checkValidKey(feature, key)
-    val builder = LDUser.Builder(key)
-    attributes.text.forEach { (k, v) ->
-      when (k) {
-        // LaunchDarkly has some built-in keys that have to be initialized with their named
-        // methods.
-        "secondary" -> builder.secondary(v)
-        "ip" -> builder.ip(v)
-        "email" -> builder.email(v)
-        "name" -> builder.name(v)
-        "avatar" -> builder.avatar(v)
-        "firstName" -> builder.firstName(v)
-        "lastName" -> builder.lastName(v)
-        "country" -> builder.country(v)
-        else -> builder.privateCustom(k, v)
-      }
-    }
-    if (attributes.number != null) {
-      attributes.number!!.forEach { (k, v) ->
-        when (v) {
-          is Long -> {
-            builder.privateCustom(k, LDValue.of(v))
-          }
-          is Int -> {
-            builder.privateCustom(k, LDValue.of(v))
-          }
-          is Double -> {
-            builder.privateCustom(k, LDValue.of(v))
-          }
-          is Float -> {
-            builder.privateCustom(k, LDValue.of(v))
-          }
-        }
-      }
-    }
-    if (attributes.anonymous) {
-      // This prevents the user from being stored in the LaunchDarkly dashboard, see
-      // https://docs.launchdarkly.com/docs/anonymous-users
-      builder.anonymous(true)
-    }
-    return builder.build()
-  }
-
-  private fun logJsonMigrationWarningOnce(feature: Feature, exception: JsonDataException) {
-    if (!featuresWithMigrationWarnings.contains(feature)) {
-      featuresWithMigrationWarnings += feature
-
-      logger.warn(exception) {
-        "failed to parse JSON due to unknown fields. ignoring those fields and trying again"
-      }
-    }
-  }
-
-  companion object {
-    val logger = KotlinLogging.logger {}
-  }
+  ) = delegate.trackJson(feature, key, clazz, attributes, executor, tracker).toMisk()
 }

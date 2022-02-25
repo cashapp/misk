@@ -46,6 +46,12 @@ public final class wisp/launchdarkly/LaunchDarklyDynamicConfig$Companion {
 public final class wisp/launchdarkly/LaunchDarklyFeatureFlags : wisp/feature/FeatureFlags {
 	public static final field Companion Lwisp/launchdarkly/LaunchDarklyFeatureFlags$Companion;
 	public fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;)V
+	public fun get (Lwisp/feature/BooleanFeatureFlag;)Z
+	public fun get (Lwisp/feature/DoubleFeatureFlag;)D
+	public fun get (Lwisp/feature/EnumFeatureFlag;)Ljava/lang/Enum;
+	public fun get (Lwisp/feature/IntFeatureFlag;)I
+	public fun get (Lwisp/feature/JsonFeatureFlag;)Ljava/lang/Object;
+	public fun get (Lwisp/feature/StringFeatureFlag;)Ljava/lang/String;
 	public fun getBoolean (Lwisp/feature/Feature;Ljava/lang/String;)Z
 	public fun getBoolean (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Z
 	public fun getDouble (Lwisp/feature/Feature;Ljava/lang/String;)D

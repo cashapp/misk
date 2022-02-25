@@ -28,6 +28,7 @@ import org.mockito.Mockito.verify
 import wisp.logging.WispQueuedLogCollector
 import wisp.moshi.defaultKotlinMoshi
 import java.util.function.Function
+import wisp.launchdarkly.LaunchDarklyFeatureFlags as WispLaunchDarklyFeatureFlags
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
@@ -190,7 +191,7 @@ internal class LaunchDarklyFeatureFlagsTest {
     featureFlags.getJson<JsonFeature>(Feature("which-dinosaur"), "abcd")
 
     // Check log events.
-    val logEvents = logCollector.takeEvents(LaunchDarklyFeatureFlags::class)
+    val logEvents = logCollector.takeEvents(WispLaunchDarklyFeatureFlags::class)
     assertThat(logEvents).extracting(Function { it.level }).containsExactly(Level.WARN)
     assertThat(logEvents).extracting(Function { it.message })
       .containsExactly(

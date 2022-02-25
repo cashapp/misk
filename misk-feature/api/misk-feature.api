@@ -26,6 +26,12 @@ public final class misk/feature/Feature : wisp/feature/Feature {
 }
 
 public abstract interface class misk/feature/FeatureFlags {
+	public abstract fun get (Lwisp/feature/BooleanFeatureFlag;)Z
+	public abstract fun get (Lwisp/feature/DoubleFeatureFlag;)D
+	public abstract fun get (Lwisp/feature/EnumFeatureFlag;)Ljava/lang/Enum;
+	public abstract fun get (Lwisp/feature/IntFeatureFlag;)I
+	public abstract fun get (Lwisp/feature/JsonFeatureFlag;)Ljava/lang/Object;
+	public abstract fun get (Lwisp/feature/StringFeatureFlag;)Ljava/lang/String;
 	public abstract fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;)Z
 	public abstract fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Z
 	public abstract fun getDouble (Lmisk/feature/Feature;Ljava/lang/String;)D

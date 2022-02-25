@@ -13,6 +13,12 @@ import mu.KotlinLogging
 import wisp.feature.Attributes
 import wisp.feature.Feature
 import wisp.feature.FeatureFlags
+import wisp.feature.BooleanFeatureFlag
+import wisp.feature.StringFeatureFlag
+import wisp.feature.IntFeatureFlag
+import wisp.feature.DoubleFeatureFlag
+import wisp.feature.EnumFeatureFlag
+import wisp.feature.JsonFeatureFlag
 import wisp.feature.TrackerReference
 import wisp.feature.fromSafeJson
 import java.util.concurrent.Executor
@@ -51,51 +57,58 @@ class LaunchDarklyFeatureFlags constructor(
     ldClient.close()
   }
 
-  override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
+  private fun <T> get(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    callLdVariation: (String, LDUser) -> EvaluationDetail<T>
+  ): T {
     checkInitialized()
-    val result = ldClient.boolVariationDetail(
+    val result = callLdVariation(
       feature.name,
       buildUser(feature, key, attributes),
-      false
     )
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
-  override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double {
-    checkInitialized()
-    val result = ldClient.doubleVariationDetail(
-      feature.name,
-      buildUser(feature, key, attributes),
-      0.0
-    )
-    checkDefaultNotUsed(feature, result)
-    return result.value
-  }
+  override fun get(flag: BooleanFeatureFlag): Boolean =
+    getBoolean(flag.feature, flag.key, flag.attributes)
 
-  override fun getInt(feature: Feature, key: String, attributes: Attributes): Int {
-    checkInitialized()
-    val result = ldClient.intVariationDetail(
-      feature.name,
-      buildUser(feature, key, attributes),
-      0
-    )
+  override fun get(flag: StringFeatureFlag): String =
+    getString(flag.feature, flag.key, flag.attributes)
 
-    checkDefaultNotUsed(feature, result)
-    return result.value
-  }
+  override fun get(flag: IntFeatureFlag): Int =
+    getInt(flag.feature, flag.key, flag.attributes)
 
-  override fun getString(feature: Feature, key: String, attributes: Attributes): String {
-    checkInitialized()
-    val result =
-      ldClient.stringVariationDetail(
-        feature.name,
-        buildUser(feature, key, attributes),
-        ""
-      )
-    checkDefaultNotUsed(feature, result)
-    return result.value
-  }
+  override fun get(flag: DoubleFeatureFlag): Double =
+    getDouble(flag.feature, flag.key, flag.attributes)
+
+  override fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T =
+    getEnum(flag.feature, flag.key, flag.returnType, flag.attributes)
+
+  override fun <T : Any> get(flag: JsonFeatureFlag<T>): T =
+    getJson(flag.feature, flag.key, flag.returnType, flag.attributes)
+
+  override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
+    get(feature, key, attributes) { name, user ->
+      ldClient.boolVariationDetail(name, user, false)
+    }
+
+  override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
+    get(feature, key, attributes) { name, user ->
+      ldClient.doubleVariationDetail(name, user, 0.0)
+    }
+
+  override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
+    get(feature, key, attributes) { name, user ->
+      ldClient.intVariationDetail(name, user, 0)
+    }
+
+  override fun getString(feature: Feature, key: String, attributes: Attributes): String =
+    get(feature, key, attributes) { name, user ->
+      ldClient.stringVariationDetail(name, user, "")
+    }
 
   override fun <T : Enum<T>> getEnum(
     feature: Feature,
@@ -103,11 +116,10 @@ class LaunchDarklyFeatureFlags constructor(
     clazz: Class<T>,
     attributes: Attributes
   ): T {
-    checkInitialized()
-    val result =
-      ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
-    checkDefaultNotUsed(feature, result)
-    return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
+    val result = get(feature, key, attributes) { name, user ->
+      ldClient.stringVariationDetail(name, user, "")
+    }
+    return java.lang.Enum.valueOf(clazz, result.toUpperCase())
   }
 
   override fun <T> getJson(
@@ -116,16 +128,13 @@ class LaunchDarklyFeatureFlags constructor(
     clazz: Class<T>,
     attributes: Attributes
   ): T {
-    checkInitialized()
-    val result = ldClient.jsonValueVariationDetail(
-      feature.name,
-      buildUser(feature, key, attributes),
-      LDValue.ofNull()
-    )
-    checkDefaultNotUsed(feature, result)
-    return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString()) { exception ->
-      logJsonMigrationWarningOnce(feature, exception)
+    val result = get(feature, key, attributes) { name, user ->
+      ldClient.jsonValueVariationDetail(name, user, LDValue.ofNull())
     }
+    return moshi.adapter(clazz)
+      .fromSafeJson(result.toJsonString()) { exception ->
+        logJsonMigrationWarningOnce(feature, exception)
+      }
       ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
 
