@@ -1,9 +1,12 @@
 package wisp.feature.testing
 
 import com.squareup.moshi.JsonDataException
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.assertThrows
 import wisp.config.ConfigSource
 import wisp.config.WispConfig
@@ -331,4 +334,91 @@ internal class FakeFeatureFlagsTest {
     assertThat(subject.getJson<JsonFeature>(Feature("fooJson")).optional).isEqualTo("value")
   }
 
+  /**
+   * The heavy-lifying for strong feature flag testing lives in the other `TestFactory`-based
+   * tests below, but they use a lot of generic magic to test every type of flag.
+   *
+   * To make sure we didn't miss anything, we also do a normal smoke test on String, if this works
+   * and all the below tests also work we can be reasonably confident things are working well.
+   */
+  @Test
+  fun `string feature flags should act as expected`() {
+    // Default throws
+    shouldThrow<RuntimeException> { subject.get(TestStringFlag()) }
+
+    // Can be overridden
+    subject.override<TestStringFlag>("feature")
+    subject.get(TestStringFlag()).shouldBe("feature")
+
+    // Can override with specific keys
+    subject.override<TestStringFlag>("feature-joker") { it.username == "joker" }
+    subject.get(TestStringFlag()).shouldBe("feature")
+    subject.get(TestStringFlag(username = "joker")).shouldBe("feature-joker")
+
+    // Can override with specific keys and attributes
+    subject.override<TestStringFlag>("feature-joker-bad") {
+      it.username == "joker" && it.segment == "bad"
+    }
+    subject.get(TestStringFlag()).shouldBe("feature")
+    subject.get(TestStringFlag(username = "joker")).shouldBe("feature-joker")
+    subject.get(TestStringFlag(username = "joker", segment = "bad")).shouldBe("feature-joker-bad")
+  }
+
+  @TestFactory
+  fun `strong feature flags should throw if no override is set`() = forAllStrongFlagTypes {
+    val featureFlags = FakeFeatureFlags()
+    shouldThrow<RuntimeException> { featureFlags.scenarioGet(scenarioFlag()) }
+  }
+
+  @TestFactory
+  fun `strong feature flags should return overriden value`() = forAllStrongFlagTypes {
+    val featureFlags = FakeFeatureFlags()
+      .scenarioOverride(scenarioValueOne)
+
+    featureFlags.scenarioGet(scenarioFlag()).shouldBe(scenarioValueOne)
+  }
+
+  @TestFactory
+  fun `strong feature flags should prefer last override value`() = forAllStrongFlagTypes {
+    val featureFlags = FakeFeatureFlags()
+      .scenarioOverride(scenarioValueOne)
+      .scenarioOverride(scenarioValueTwo)
+
+    featureFlags.scenarioGet(scenarioFlag()).shouldBe(scenarioValueTwo)
+  }
+
+  @TestFactory
+  fun `strong feature flags should use latest override if condition is met`() = forAllStrongFlagTypes {
+    val featureFlags = FakeFeatureFlags()
+      .scenarioOverride(scenarioValueOne)
+      .scenarioOverride(scenarioValueTwo) { it.username == "vip" }
+
+    featureFlags.scenarioGet(scenarioFlag(username = "vip")).shouldBe(scenarioValueTwo)
+  }
+
+  @TestFactory
+  fun `strong feature flags should work for non-key attributes`() = forAllStrongFlagTypes {
+    val featureFlags = FakeFeatureFlags()
+      .scenarioOverride(scenarioValueOne) { it.segment == "pro-segment" }
+
+    featureFlags.scenarioGet(scenarioFlag(segment = "pro-segment")).shouldBe(scenarioValueOne)
+  }
+
+  @TestFactory
+  fun `strong feature flags should still use older overrides if newer ones don't match`() =
+    forAllStrongFlagTypes {
+      val featureFlags = FakeFeatureFlags()
+        .scenarioOverride(scenarioValueOne)
+        .scenarioOverride(scenarioValueTwo) { it.username == "vip" }
+
+      featureFlags.scenarioGet(scenarioFlag(username = "shlub")).shouldBe(scenarioValueOne)
+    }
+
+  @TestFactory
+  fun `strong feature flags should not match if condition is not met`() = forAllStrongFlagTypes {
+    val featureFlags = FakeFeatureFlags()
+      .scenarioOverride(scenarioValueOne) { it.username == "vip" }
+
+    shouldThrow<RuntimeException> { featureFlags.scenarioGet(scenarioFlag(username = "shlub")) }
+  }
 }
