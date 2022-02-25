@@ -5,8 +5,61 @@ import java.util.concurrent.Executor
 /**
  * Interface for evaluating feature flags.
  */
-interface FeatureFlags {
+interface FeatureFlags : StrongFeatureFlags, LegacyFeatureFlags
 
+interface StrongFeatureFlags {
+  /**
+   * Calculates the value of a boolean feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   */
+  fun get(flag: BooleanFeatureFlag): Boolean
+
+  /**
+   * Calculates the value of a string feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   */
+  fun get(flag: StringFeatureFlag): String
+
+  /**
+   * Calculates the value of an int feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   */
+  fun get(flag: IntFeatureFlag): Int
+
+  /**
+   * Calculates the value of a double feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   */
+  fun get(flag: DoubleFeatureFlag): Double
+
+  /**
+   * Calculates the value of an enum feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   * @throws [IllegalStateException] if the flag is off with no default value.
+   */
+  fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T
+
+  /**
+   * Calculates the value of a json feature flag
+   *
+   * @param flag the feature flag to evaluate
+   * @throws [RuntimeException] if the service is unavailable.
+   * @throws [IllegalStateException] if the flag is off with no default value.
+   */
+  fun <T : Any> get(flag: JsonFeatureFlag<T>): T
+}
+
+interface LegacyFeatureFlags {
   /**
    * Calculates the value of a boolean feature flag for the given key and attributes.
    * @see [getEnum] for param details
@@ -302,6 +355,20 @@ open class Attributes @JvmOverloads constructor(
   // including the user in analytics.
   val anonymous: Boolean = false
 ) {
+  fun with(name: String, value: String): Attributes =
+    copy(text = text.plus(name to value))
+
+  fun with(name: String, value: Number): Attributes {
+    val number = number ?: mapOf()
+    return copy(number = number.plus(name to value))
+  }
+
+  fun copy(
+    text: Map<String, String> = this.text,
+    number: Map<String, Number>? = this.number,
+    anonymous: Boolean = this.anonymous
+  ): Attributes = Attributes(text, number, anonymous)
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is Attributes) return false
