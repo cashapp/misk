@@ -59,6 +59,7 @@ class JdbcModule(
       @Inject lateinit var deployment: Deployment
       override fun get(): StartDatabaseService {
         return StartDatabaseService(deployment = deployment, config = config, qualifier = qualifier)
+          .init()
       }
     }).asSingleton()
 

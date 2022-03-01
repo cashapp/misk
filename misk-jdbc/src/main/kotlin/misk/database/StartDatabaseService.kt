@@ -45,50 +45,14 @@ fun runCommand(command: String): Int {
  * will be left running.
  */
 class StartDatabaseService(
-  qualifier: KClass<out Annotation>,
+  private val qualifier: KClass<out Annotation>,
   private val deployment: Deployment,
-  config: DataSourceConfig
+  private val config: DataSourceConfig
 ) : AbstractIdleService() {
   var server: DatabaseServer? = null
-  private var startupFailure: Throwable? = null
 
-  init {
-    if (shouldStartServer()) {
-      val name = qualifier.simpleName!!
-      server = servers[CacheKey(name, config, deployment)].orElse(null)
-
-      // We need to do this outside of the service start up because this takes a really long time
-      // the first time you do it and can cause service manager to time out.
-      server?.pullImage()
-    }
-  }
-
-  override fun startUp() {
-    this.server?.start()
-  }
-
-  private fun shouldStartServer() = deployment.isTest || deployment.isLocalDevelopment
-
-  override fun shutDown() {
-  }
-
-  data class CacheKey(
-    val name: String,
-    val config: DataSourceConfig,
-    val deployment: Deployment
-  )
-
-  companion object {
-    val logger = KotlinLogging.logger {}
-    val docker: DockerClient = DockerClientBuilder.getInstance()
-      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
-      .build()
-    val moshi = defaultKotlinMoshi
-
-    /**
-     * Global cache of running database servers.
-     */
-    val servers: LoadingCache<CacheKey, Optional<DatabaseServer>> = CacheBuilder.newBuilder()
+  fun init(): StartDatabaseService {
+    servers = CacheBuilder.newBuilder()
       .removalListener<CacheKey, Optional<DatabaseServer>> { entry ->
         entry.value.ifPresent { it.stop() }
       }
@@ -98,50 +62,84 @@ class StartDatabaseService(
         })
       })
 
-    private fun createDatabaseServer(config: CacheKey): DatabaseServer? =
-      when (config.config.type) {
-        DataSourceType.VITESS_MYSQL -> {
-          DockerVitessCluster(
-            name = config.name,
-            config = config.config,
-            resourceLoader = ResourceLoader.SYSTEM,
-            moshi = moshi,
-            docker = docker
-          )
-        }
-        DataSourceType.COCKROACHDB -> {
-          DockerCockroachCluster(
-            name = config.name,
-            config = config.config,
-            resourceLoader = ResourceLoader.SYSTEM,
-            moshi = moshi,
-            docker = docker
-          )
-        }
-        DataSourceType.TIDB -> {
-          DockerTidbCluster(
-            moshi = moshi,
-            resourceLoader = ResourceLoader.SYSTEM,
-            config = config.config,
-            docker = docker
-          )
-        }
-        DataSourceType.POSTGRESQL -> {
-          DockerPostgresServer(
-            config = config.config,
-            docker = docker
-          )
-        }
-        else -> null
+    Runtime.getRuntime().addShutdownHook(Thread {
+      servers.invalidateAll()
+    })
+
+    if (shouldStartServer()) {
+      val name = qualifier.simpleName!!
+      server = servers[CacheKey(name, config, deployment)].orElse(null)
+
+      // We need to do this outside of the service start up because this takes a really long time
+      // the first time you do it and can cause service manager to time out.
+      server?.pullImage()
+    }
+    return this
+  }
+
+  override fun startUp() {
+    this.server?.start()
+  }
+
+  override fun shutDown() {
+  }
+
+  private fun shouldStartServer() = deployment.isTest || deployment.isLocalDevelopment
+
+  private val docker: DockerClient = DockerClientBuilder.getInstance()
+    .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+    .build()
+  private val moshi = defaultKotlinMoshi
+
+  private fun createDatabaseServer(config: CacheKey): DatabaseServer? =
+    when (config.config.type) {
+      DataSourceType.VITESS_MYSQL -> {
+        DockerVitessCluster(
+          name = config.name,
+          config = config.config,
+          resourceLoader = ResourceLoader.SYSTEM,
+          moshi = moshi,
+          docker = docker
+        )
       }
+      DataSourceType.COCKROACHDB -> {
+        DockerCockroachCluster(
+          name = config.name,
+          config = config.config,
+          resourceLoader = ResourceLoader.SYSTEM,
+          moshi = moshi,
+          docker = docker
+        )
+      }
+      DataSourceType.TIDB -> {
+        DockerTidbCluster(
+          moshi = moshi,
+          resourceLoader = ResourceLoader.SYSTEM,
+          config = config.config,
+          docker = docker
+        )
+      }
+      DataSourceType.POSTGRESQL -> {
+        DockerPostgresServer(
+          config = config.config,
+          docker = docker
+        )
+      }
+      else -> null
+    }
+
+  data class CacheKey(
+    val name: String,
+    val config: DataSourceConfig,
+    val deployment: Deployment
+  )
+
+  companion object {
+    val logger = KotlinLogging.logger {}
 
     /**
-     * Shut down the cached clusters on JVM exit.
+     * Global cache of running database servers.
      */
-    init {
-      Runtime.getRuntime().addShutdownHook(Thread {
-        servers.invalidateAll()
-      })
-    }
+    lateinit var servers: LoadingCache<CacheKey, Optional<DatabaseServer>>
   }
 }
