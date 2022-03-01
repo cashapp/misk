@@ -131,8 +131,10 @@ public final class misk/database/Keyspace {
 
 public final class misk/database/StartDatabaseService : com/google/common/util/concurrent/AbstractIdleService {
 	public static final field Companion Lmisk/database/StartDatabaseService$Companion;
+	public static field servers Lcom/google/common/cache/LoadingCache;
 	public fun <init> (Lkotlin/reflect/KClass;Lwisp/deployment/Deployment;Lmisk/jdbc/DataSourceConfig;)V
 	public final fun getServer ()Lmisk/database/DatabaseServer;
+	public final fun init ()Lmisk/database/StartDatabaseService;
 	public final fun setServer (Lmisk/database/DatabaseServer;)V
 }
 
@@ -152,10 +154,9 @@ public final class misk/database/StartDatabaseService$CacheKey {
 }
 
 public final class misk/database/StartDatabaseService$Companion {
-	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
 	public final fun getLogger ()Lmu/KLogger;
-	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
 	public final fun getServers ()Lcom/google/common/cache/LoadingCache;
+	public final fun setServers (Lcom/google/common/cache/LoadingCache;)V
 }
 
 public final class misk/database/StartDatabaseServiceKt {
