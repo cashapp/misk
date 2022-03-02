@@ -3,10 +3,9 @@ package misk.scope
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
-import misk.exceptions.UnauthenticatedException
 import javax.inject.Inject
 
-class TestActionScopedProviderModule : ActionScopedProviderModule() {
+internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
   override fun configureProviders() {
     bindSeedData(String::class, Names.named("from-seed"))
     bindProvider(String::class, FooProvider::class, Names.named("foo"))
@@ -36,7 +35,7 @@ class TestActionScopedProviderModule : ActionScopedProviderModule() {
   ) : ActionScopedProvider<String> {
     override fun get(): String {
       val seedData = seedData.get()
-      if (seedData == "unauthenticated") throw UnauthenticatedException()
+      if (seedData == "illegal-state") throw IllegalStateException()
       return "$seedData and zed*"
     }
   }

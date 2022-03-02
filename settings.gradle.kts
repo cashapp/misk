@@ -10,6 +10,7 @@ gradleEnterprise {
 }
 
 include(":misk")
+include(":misk-action-scopes")
 include(":misk-actions")
 include(":misk-admin")
 include(":misk-aws")

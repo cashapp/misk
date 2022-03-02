@@ -54,6 +54,7 @@ dependencies {
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-proto"))
   implementation(project(":misk-service"))
+  api(project(":misk-action-scopes"))
   api(project(":misk-actions"))
   api(project(":misk-inject"))
   api(project(":wisp-client"))

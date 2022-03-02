@@ -4,7 +4,6 @@ import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.name.Named
 import com.google.inject.name.Names
-import misk.exceptions.UnauthenticatedException
 import misk.inject.keyOf
 import misk.inject.uninject
 import org.assertj.core.api.Assertions.assertThat
@@ -13,7 +12,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
-class ActionScopedTest {
+internal class ActionScopedTest {
   @Inject @Named("foo")
   private lateinit var foo: ActionScoped<String>
 
@@ -98,14 +97,14 @@ class ActionScopedTest {
 
   @Test
   fun providerExceptionsPropagate() {
-    assertFailsWith<UnauthenticatedException> {
+    assertFailsWith<IllegalStateException> {
       val injector = Guice.createInjector(TestActionScopedProviderModule())
       injector.injectMembers(this)
 
       // NB(mmihic): Seed data set to a value that causes zed resolution to fail
       // with a user-defined exception
       val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<String>(Names.named("from-seed")) to "unauthenticated"
+        keyOf<String>(Names.named("from-seed")) to "illegal-state"
       )
       scope.enter(seedData).use { zed.get() }
     }
