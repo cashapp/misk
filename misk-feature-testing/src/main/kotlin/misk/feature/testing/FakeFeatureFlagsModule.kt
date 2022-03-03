@@ -1,6 +1,7 @@
 package misk.feature.testing
 
 import com.google.inject.Provider
+import com.google.inject.TypeLiteral
 import com.squareup.moshi.Moshi
 import misk.ServiceModule
 import misk.feature.DynamicConfig
@@ -9,7 +10,9 @@ import misk.feature.FeatureService
 import misk.feature.testing.FakeFeatureFlagsOverrideModule.FakeFeatureFlagsOverride
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.inject.parameterizedType
 import misk.inject.toKey
+import misk.inject.typeLiteral
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
@@ -30,12 +33,13 @@ class FakeFeatureFlagsModule(
     newMultibinder<FakeFeatureFlagsOverride>()
     overrides.forEach { install(it) }
     val key = FakeFeatureFlags::class.toKey(qualifier)
-
+    val overridesType =
+      parameterizedType<Set<*>>(FakeFeatureFlagsOverride::class.java).typeLiteral() as TypeLiteral<Set<FakeFeatureFlagsOverride>>
+    val overrides = getProvider(overridesType.toKey(qualifier))
     bind(key).toProvider(object : Provider<FakeFeatureFlags> {
-      @Inject private lateinit var overrides: Set<FakeFeatureFlagsOverride>
       @Inject private lateinit var moshi: Provider<Moshi>
       override fun get() = FakeFeatureFlags(moshi).apply {
-        overrides.forEach { it.overrideLambda(this) }
+        overrides.get().forEach { it.overrideLambda(this) }
       }
     }).asSingleton()
 
@@ -58,7 +62,7 @@ class FakeFeatureFlagsModule(
    */
   @Deprecated(message = "replaced by FakeFeatureFlagsOverrideModule")
   fun withOverrides(lambda: FakeFeatureFlags.() -> Unit): FakeFeatureFlagsModule {
-    overrides.add(FakeFeatureFlagsOverrideModule(lambda))
+    overrides.add(FakeFeatureFlagsOverrideModule(qualifier, lambda))
     return this
   }
 }

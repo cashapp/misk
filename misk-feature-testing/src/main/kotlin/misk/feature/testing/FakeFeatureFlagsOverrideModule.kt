@@ -1,6 +1,7 @@
 package misk.feature.testing
 
 import misk.inject.KAbstractModule
+import kotlin.reflect.KClass
 
 /**
  * Install defaults for [FakeFeatureFlags]. This module can be install many times, allowing for
@@ -15,15 +16,20 @@ import misk.inject.KAbstractModule
  * ```
  */
 class FakeFeatureFlagsOverrideModule private constructor(
+  private val qualifier: KClass<out Annotation>? = null,
   private val override: FakeFeatureFlagsOverride,
 ) : KAbstractModule() {
 
-  constructor(overrideLambda: FakeFeatureFlags.() -> Unit) : this(
+  constructor(
+    qualifier: KClass<out Annotation>? = null,
+    overrideLambda: FakeFeatureFlags.() -> Unit,
+  ) : this(
+    qualifier,
     FakeFeatureFlagsOverride(overrideLambda)
   )
 
   override fun configure() {
-    multibind<FakeFeatureFlagsOverride>().toInstance(override)
+    multibind<FakeFeatureFlagsOverride>(qualifier).toInstance(override)
   }
 
   class FakeFeatureFlagsOverride(
