@@ -7,6 +7,7 @@ import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException
+import java.io.File
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
 import misk.jobqueue.sqs.DockerSqs.clientPort
@@ -58,8 +59,20 @@ internal object DockerSqs : ExternalDependency {
     }
   }
 
+  private fun isRunningInDocker() = File("/proc/1/cgroup")
+    .takeIf { it.exists() }?.useLines { lines ->
+      lines.any { it.contains("/docker") }
+    } ?: false
+
+  private fun getTargetHost(): String {
+    if (isRunningInDocker()) 
+      return "host.docker.internal" 
+    else 
+      return "127.0.0.1"
+  }
+
   val endpoint = AwsClientBuilder.EndpointConfiguration(
-    "http://127.0.0.1:$clientPort",
+    "http://${getTargetHost()}:$clientPort",
     "us-east-1"
   )
 
