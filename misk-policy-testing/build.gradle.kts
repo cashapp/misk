@@ -6,7 +6,8 @@ plugins {
 dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.docker)
+  implementation(Dependencies.dockerCore)
+  implementation(Dependencies.dockerTransport)
   implementation(Dependencies.okio)
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.okHttp)
