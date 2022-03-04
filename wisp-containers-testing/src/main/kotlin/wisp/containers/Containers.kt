@@ -1,15 +1,17 @@
 package wisp.containers
 
 import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.async.ResultCallbackTemplate
 import com.github.dockerjava.api.command.CreateContainerCmd
+import com.github.dockerjava.api.command.PullImageResultCallback
+import com.github.dockerjava.api.command.WaitContainerResultCallback
 import com.github.dockerjava.api.exception.NotFoundException
 import com.github.dockerjava.api.model.Frame
-import com.github.dockerjava.core.DockerClientBuilder
-import com.github.dockerjava.core.async.ResultCallbackTemplate
-import com.github.dockerjava.core.command.PullImageResultCallback
-import com.github.dockerjava.core.command.WaitContainerResultCallback
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientImpl
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import wisp.logging.getLogger
+import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -139,14 +141,9 @@ class Composer(private val name: String, private vararg val containers: Containe
     for (container in containers) {
       val name = container.name()
       containerIds[name]?.let {
-        log.info { "killing $name with container id $it" }
-        docker.removeContainerCmd(it).withForce(true).exec()
-
         try {
-          log.info { "waiting for $name to terminate" }
-          docker.waitContainerCmd(it).exec(
-            GracefulWaitContainerResultCallback()
-          ).awaitCompletion()
+          log.info { "killing $name with container id $it" }
+          docker.killContainerCmd(it).exec()
         } catch (th: Throwable) {
           log.error(th) { "could not kill $name with container id $it" }
         }
@@ -179,9 +176,17 @@ class Composer(private val name: String, private vararg val containers: Containe
 
   private companion object {
     private val log = getLogger<Composer>()
-    private val docker: DockerClient = DockerClientBuilder.getInstance()
-      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+    private val defaultDockerClientConfig =
+      DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+    private val httpClient = ApacheDockerHttpClient.Builder()
+      .dockerHost(defaultDockerClientConfig.dockerHost)
+      .sslConfig(defaultDockerClientConfig.sslConfig)
+      .maxConnections(100)
+      .connectionTimeout(Duration.ofSeconds(60))
+      .responseTimeout(Duration.ofSeconds(120))
       .build()
+    private val docker: DockerClient =
+      DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
   }
 }
 
