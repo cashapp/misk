@@ -59,8 +59,9 @@ class FakeFeatureFlagsModule(
    *   override(Feature("foo"), true)
    * })
    * ```
+   *
+   * For overriding in many modules see [FakeFeatureFlagsOverrideModule]
    */
-  @Deprecated(message = "replaced by FakeFeatureFlagsOverrideModule")
   fun withOverrides(lambda: FakeFeatureFlags.() -> Unit): FakeFeatureFlagsModule {
     overrides.add(FakeFeatureFlagsOverrideModule(qualifier, lambda))
     return this
