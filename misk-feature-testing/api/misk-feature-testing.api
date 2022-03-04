@@ -91,3 +91,13 @@ public final class misk/feature/testing/FakeFeatureFlagsModule : misk/inject/KAb
 	public final fun withOverrides (Lkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlagsModule;
 }
 
+public final class misk/feature/testing/FakeFeatureFlagsOverrideModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/feature/testing/FakeFeatureFlagsOverrideModule$FakeFeatureFlagsOverride {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final fun getOverrideLambda ()Lkotlin/jvm/functions/Function1;
+}
+
