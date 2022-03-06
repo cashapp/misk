@@ -34,7 +34,8 @@ dependencies {
   api(project(":wisp-lease-testing"))
   api(project(":wisp-logging"))
 
-  testImplementation(Dependencies.docker)
+  testImplementation(Dependencies.dockerCore)
+  testImplementation(Dependencies.dockerTransport)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.zookeeper) {
     exclude(group = "org.slf4j", module = "slf4j-log4j12")

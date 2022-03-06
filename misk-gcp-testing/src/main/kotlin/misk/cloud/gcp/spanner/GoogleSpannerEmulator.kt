@@ -1,31 +1,32 @@
 package misk.cloud.gcp.spanner
 
+import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
-import com.github.dockerjava.core.DockerClientBuilder
+import com.github.dockerjava.api.model.Ports
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.core.command.LogContainerResultCallback
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
+import com.github.michaelbull.retry.policy.binaryExponentialBackoff
+import com.github.michaelbull.retry.policy.limitAttempts
+import com.github.michaelbull.retry.policy.plus
+import com.github.michaelbull.retry.retry
 import com.google.cloud.NoCredentials
+import com.google.cloud.spanner.DatabaseId
 import com.google.cloud.spanner.Instance
+import com.google.cloud.spanner.InstanceConfigId
 import com.google.cloud.spanner.InstanceId
 import com.google.cloud.spanner.InstanceInfo
 import com.google.cloud.spanner.Spanner
 import com.google.cloud.spanner.SpannerException
 import com.google.cloud.spanner.SpannerOptions
-
-import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.api.model.ExposedPort
-import com.github.dockerjava.api.model.Ports
-import com.github.michaelbull.retry.policy.binaryExponentialBackoff
-import com.github.michaelbull.retry.policy.limitAttempts
-import com.github.michaelbull.retry.policy.plus
-import com.github.michaelbull.retry.retry
-import com.google.cloud.spanner.DatabaseId
-import com.google.cloud.spanner.InstanceConfigId
 import com.google.cloud.spanner.Statement
 import com.google.common.util.concurrent.AbstractIdleService
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import java.lang.IllegalStateException
+import wisp.containers.Composer
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -80,9 +81,17 @@ class GoogleSpannerEmulator @Inject constructor(
 
   companion object {
     val logger = KotlinLogging.logger {}
-    val docker: DockerClient = DockerClientBuilder.getInstance()
-      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+    val defaultDockerClientConfig =
+      DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+    val httpClient = ApacheDockerHttpClient.Builder()
+      .dockerHost(defaultDockerClientConfig.dockerHost)
+      .sslConfig(defaultDockerClientConfig.sslConfig)
+      .maxConnections(100)
+      .connectionTimeout(Duration.ofSeconds(60))
+      .responseTimeout(Duration.ofSeconds(120))
       .build()
+    val docker: DockerClient =
+      DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
     const val IMAGE = "gcr.io/cloud-spanner-emulator/emulator"
     const val CONTAINER_NAME = "misk-spanner-testing"
 

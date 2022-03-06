@@ -41,6 +41,7 @@ import okio.BufferedSink
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import java.io.IOException
@@ -170,6 +171,7 @@ class Http2ConnectivityTest {
 
   /** Confirm we don't page oncall and we record a 499 in the metrics. **/
   @Test
+  @Disabled("Too flaky")
   fun clientTimeoutWritingTheRequest() {
     val http1Client = client.newBuilder()
       .protocols(listOf(Protocol.HTTP_1_1))

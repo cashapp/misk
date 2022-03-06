@@ -7,9 +7,10 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
-import com.github.dockerjava.core.DockerClientBuilder
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.core.async.ResultCallbackTemplate
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
@@ -224,9 +225,17 @@ class DockerVitessCluster(
       /** Config for the Vitess cluster */
       config: DataSourceConfig
     ) {
-      val docker: DockerClient = DockerClientBuilder.getInstance()
-        .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+      val defaultDockerClientConfig =
+        DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+      val httpClient = ApacheDockerHttpClient.Builder()
+        .dockerHost(defaultDockerClientConfig.dockerHost)
+        .sslConfig(defaultDockerClientConfig.sslConfig)
+        .maxConnections(100)
+        .connectionTimeout(Duration.ofSeconds(60))
+        .responseTimeout(Duration.ofSeconds(120))
         .build()
+      val docker: DockerClient =
+        DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
       val moshi = defaultKotlinMoshi
       val dockerCluster =
         DockerVitessCluster(

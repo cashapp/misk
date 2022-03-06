@@ -1,8 +1,9 @@
 package misk.database
 
 import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.core.DockerClientBuilder
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientImpl
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
@@ -14,6 +15,7 @@ import mu.KotlinLogging
 import wisp.deployment.Deployment
 import wisp.moshi.defaultKotlinMoshi
 import java.io.IOException
+import java.time.Duration
 import java.util.Optional
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
@@ -86,9 +88,17 @@ class StartDatabaseService(
 
   private fun shouldStartServer() = deployment.isTest || deployment.isLocalDevelopment
 
-  private val docker: DockerClient = DockerClientBuilder.getInstance()
-    .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+  private val defaultDockerClientConfig =
+    DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+  private val httpClient = ApacheDockerHttpClient.Builder()
+    .dockerHost(defaultDockerClientConfig.dockerHost)
+    .sslConfig(defaultDockerClientConfig.sslConfig)
+    .maxConnections(100)
+    .connectionTimeout(Duration.ofSeconds(60))
+    .responseTimeout(Duration.ofSeconds(120))
     .build()
+  private val docker: DockerClient =
+    DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
   private val moshi = defaultKotlinMoshi
 
   private fun createDatabaseServer(config: CacheKey): DatabaseServer? =

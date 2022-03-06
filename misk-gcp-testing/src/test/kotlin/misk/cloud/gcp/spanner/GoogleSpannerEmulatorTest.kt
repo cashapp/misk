@@ -1,7 +1,9 @@
 package misk.cloud.gcp.spanner
 
-import com.github.dockerjava.core.DockerClientBuilder
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
+import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientImpl
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.google.cloud.spanner.DatabaseId
 import com.google.cloud.spanner.Key
 import com.google.cloud.spanner.KeySet
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import wisp.deployment.TESTING
+import java.time.Duration
 import javax.inject.Inject
 
 @MiskTest
@@ -42,10 +45,17 @@ class GoogleSpannerEmulatorTest {
 
   @Inject lateinit var emulator: GoogleSpannerEmulator
 
-  val dockerClient = DockerClientBuilder
-    .getInstance()
-    .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+  val defaultDockerClientConfig =
+    DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+  val httpClient = ApacheDockerHttpClient.Builder()
+    .dockerHost(GoogleSpannerEmulator.defaultDockerClientConfig.dockerHost)
+    .sslConfig(GoogleSpannerEmulator.defaultDockerClientConfig.sslConfig)
+    .maxConnections(100)
+    .connectionTimeout(Duration.ofSeconds(60))
+    .responseTimeout(Duration.ofSeconds(120))
     .build()
+  val dockerClient: DockerClient =
+    DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
 
   val spannerClient: Spanner = SpannerOptions.newBuilder()
     .setProjectId(spannerConfig.project_id)
