@@ -1169,6 +1169,7 @@ public final class misk/tasks/DelayedTask : java/util/concurrent/Delayed {
 	public synthetic fun compareTo (Ljava/lang/Object;)I
 	public fun compareTo (Ljava/util/concurrent/Delayed;)I
 	public fun getDelay (Ljava/util/concurrent/TimeUnit;)J
+	public final fun getTask ()Lkotlin/jvm/functions/Function0;
 }
 
 public final class misk/tasks/RepeatedTaskQueue : com/google/common/util/concurrent/AbstractExecutionThreadService {
