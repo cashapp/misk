@@ -19,7 +19,8 @@ wire {
 }
 
 dependencies {
-  implementation(Dependencies.docker)
+  implementation(Dependencies.dockerCore)
+  implementation(Dependencies.dockerTransport)
   implementation(Dependencies.grpcNetty)
   implementation(Dependencies.grpcProtobuf)
   implementation(Dependencies.grpcStub)

@@ -23,7 +23,9 @@ public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator : com/google/com
 }
 
 public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator$Companion {
+	public final fun getDefaultDockerClientConfig ()Lcom/github/dockerjava/core/DefaultDockerClientConfig;
 	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
+	public final fun getHttpClient ()Lcom/github/dockerjava/httpclient5/ApacheDockerHttpClient;
 	public final fun getLogger ()Lmu/KLogger;
 	public final fun pullImage ()V
 }

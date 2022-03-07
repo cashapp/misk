@@ -39,10 +39,11 @@ class GoogleSpannerModuleTest {
   @Order(1)
   @Test
   fun `it creates a Spanner client and emulator to develop with`() {
-    assertTrue(spanner.instanceAdminClient
-      .getInstance(spannerConfig.instance_id)
-      .getDatabase(spannerConfig.database)
-      .exists()
+    assertTrue(
+      spanner.instanceAdminClient
+        .getInstance(spannerConfig.instance_id)
+        .getDatabase(spannerConfig.database)
+        .exists()
     )
   }
 
