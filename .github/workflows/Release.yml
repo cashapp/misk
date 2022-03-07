@@ -13,9 +13,6 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v2
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
-
       - name: Configure JDK
         uses: actions/setup-java@v1
         with:
@@ -37,4 +34,4 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
-        run: ./gradlew publishAllPublicationsToMavenCentralRepository
+        run: gradle publishAllPublicationsToMavenCentralRepository

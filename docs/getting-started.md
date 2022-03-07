@@ -10,10 +10,12 @@ contains a Misk web app with the requisite dependencies.
 
 ## Start the service
 
+If you have not done so already, install and activate hermit: https://cashapp.github.io/hermit/
+
 Run `ExemplarService#main`, or use gradle to run:
 
 ```bash
-./gradlew run
+gradle run
 ```
 
 ## Set up bindings

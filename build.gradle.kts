@@ -10,16 +10,46 @@ buildscript {
   }
 
   dependencies {
-    classpath(Dependencies.kotlinAllOpenPlugin)
-    classpath(Dependencies.kotlinGradlePlugin)
-    classpath(Dependencies.dokkaGradlePlugin)
-    classpath(Dependencies.kotlinNoArgPlugin)
-    classpath(Dependencies.junitGradlePlugin)
-    classpath(Dependencies.mavenPublishGradlePlugin)
-    classpath(Dependencies.protobufGradlePlugin)
-    classpath(Dependencies.jgit)
-    classpath(Dependencies.wireGradlePlugin)
-    classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
+    classpath(Dependencies.kotlinAllOpenPlugin) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
+    classpath(Dependencies.kotlinGradlePlugin) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
+    classpath(Dependencies.dokkaGradlePlugin) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
+    classpath(Dependencies.kotlinNoArgPlugin) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
+    classpath(Dependencies.junitGradlePlugin) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
+    classpath(Dependencies.mavenPublishGradlePlugin) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
+    classpath(Dependencies.protobufGradlePlugin) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
+    classpath(Dependencies.jgit) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
+    classpath(Dependencies.wireGradlePlugin) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
+    classpath(Dependencies.kotlinBinaryCompatibilityPlugin) {
+      exclude(group="org.apache.logging.log4", module="log4j-core")
+
+    }
   }
 }
 
@@ -145,6 +175,8 @@ subprojects {
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
       attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
     }
+
+    exclude(group="org.apache.logging.log4", module="log4j-core")
   }
 }
 
