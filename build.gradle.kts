@@ -145,8 +145,6 @@ subprojects {
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
       attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
     }
-
-    exclude(group="org.apache.logging.log4", module="log4j-core")
   }
 }
 
