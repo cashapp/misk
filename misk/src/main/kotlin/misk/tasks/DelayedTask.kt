@@ -1,5 +1,6 @@
 package misk.tasks
 
+import com.google.common.annotations.VisibleForTesting
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -10,7 +11,7 @@ import java.util.concurrent.TimeUnit
 class DelayedTask(
   internal val clock: Clock,
   internal val executionTime: Instant,
-  internal val task: () -> Result
+  @VisibleForTesting val task: () -> Result
 ) : Delayed {
   override fun compareTo(other: Delayed): Int {
     return getDelay(TimeUnit.MILLISECONDS).compareTo(other.getDelay(TimeUnit.MILLISECONDS))
