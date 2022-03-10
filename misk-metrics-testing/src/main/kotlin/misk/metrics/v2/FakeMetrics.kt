@@ -128,4 +128,7 @@ class FakeMetrics @Inject internal constructor(
         it.name == sampleName && it.labelNames == labelNames && it.labelValues == labelValues
       }
   }
+
+  fun getAllSamples(): Sequence<Sample> =
+    registry.metricFamilySamples().asSequence().flatMap { it.samples }
 }
