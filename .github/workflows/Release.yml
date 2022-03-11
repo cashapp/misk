@@ -30,7 +30,9 @@ jobs:
           miskweb ci-build -e
 
       - name: Set gradle publish version
-        run: sed --in-place -e "s/-SNAPSHOT/-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)/" gradle.properties
+        run: |
+          sed --in-place -e "s/-SNAPSHOT/-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)/" gradle.properties
+          cat gradle.properties
 
       - name: Publish the artifacts
         env:
