@@ -11,6 +11,7 @@ import misk.tasks.Status
 import misk.zookeeper.SERVICES_NODE
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.state.ConnectionStateListener
+import wisp.lease.AutoCloseableLease
 import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Duration

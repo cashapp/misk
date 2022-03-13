@@ -23,14 +23,19 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import wisp.lease.Lease
+import wisp.lease.acquireOrNull
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
+@Suppress("UsePropertyAccessSyntax")
 @MiskTest(startService = true)
 internal class ZkLeaseTest {
-  @MiskTestModule private val module = Modules.combine(MiskTestingServiceModule(), ZkLeaseTestModule())
+  @MiskTestModule private val module =
+    Modules.combine(MiskTestingServiceModule(), ZkLeaseTestModule())
 
   @Inject lateinit var cluster: FakeCluster
   @Inject lateinit var leaseManager: ZkLeaseManager
@@ -129,10 +134,10 @@ internal class ZkLeaseTest {
     cluster.resourceMapper.addMapping(leasePath, self)
 
     curator.usingNamespace(leaseNamespace.asZkNamespace)
-        .create()
-        .withMode(CreateMode.EPHEMERAL)
-        .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-        .forPath(LEASE_NAME.asZkPath, "some other process".toByteArray())
+      .create()
+      .withMode(CreateMode.EPHEMERAL)
+      .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
+      .forPath(LEASE_NAME.asZkPath, "some other process".toByteArray())
 
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isFalse()
@@ -185,8 +190,8 @@ internal class ZkLeaseTest {
     // Fake create the node and have its contents match what we expect. This ensures we're
     // testing a different path from when another process owns the node
     curator.create()
-        .withMode(CreateMode.EPHEMERAL)
-        .forPath(leasePath.asZkPath, FakeCluster.SELF_IP.toByteArray())
+      .withMode(CreateMode.EPHEMERAL)
+      .forPath(leasePath.asZkPath, FakeCluster.SELF_IP.toByteArray())
 
     // Since we don't own the lease, we won't attempt to delete the node
     lease.close()
@@ -203,9 +208,9 @@ internal class ZkLeaseTest {
     // Change the contents of the node so it is owned by another process
     curator.delete().forPath(leasePath.asZkPath)
     curator.create()
-        .withMode(CreateMode.EPHEMERAL)
-        .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-        .forPath(leasePath.asZkPath, "some other process".toByteArray())
+      .withMode(CreateMode.EPHEMERAL)
+      .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
+      .forPath(leasePath.asZkPath, "some other process".toByteArray())
 
     // Even though we own the lease, we won't attempt to delete the node since it's
     // owned by someone else
@@ -287,6 +292,28 @@ internal class ZkLeaseTest {
     })
 
     assertThat(acquireCalled.get()).isTrue()
+  }
+
+  @Test fun usableWithAutoCloseable() {
+    cluster.resourceMapper.addMapping(leasePath, self)
+    val acquireCalled = AtomicBoolean()
+    val released = AtomicBoolean()
+
+    val listener = object : Lease.StateChangeListener {
+      override fun afterAcquire(lease: Lease) = acquireCalled.set(true)
+      override fun beforeRelease(lease: Lease) = released.set(true)
+    }
+    val log = LinkedBlockingDeque<String>()
+
+    leaseManager.acquireOrNull(LEASE_NAME)?.apply {
+      addListener(listener)
+    }?.use { lease ->
+      log.add("I have the ${lease.name} lease!")
+    }
+
+    assertThat(acquireCalled.get()).isTrue()
+    assertThat(released.get()).isTrue()
+    assertThat(log).containsExactly("I have the $LEASE_NAME lease!")
   }
 
   companion object {
