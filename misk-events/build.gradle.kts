@@ -22,7 +22,9 @@ dependencies {
   implementation(Dependencies.openTracing)
   implementation(Dependencies.openTracingUtil)
   implementation(Dependencies.openTracingJdbc)
-  implementation(Dependencies.vitess)
+  implementation(Dependencies.vitess) {
+    exclude("org.apache.logging.log4j")
+  }
   implementation(project(":misk"))
   api(project(":misk-events-core"))
   implementation(project(":misk-hibernate"))

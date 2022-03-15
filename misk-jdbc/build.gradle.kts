@@ -17,7 +17,9 @@ dependencies {
   implementation(Dependencies.openTracingUtil)
   implementation(Dependencies.openTracingJdbc)
   implementation(Dependencies.postgresql)
-  implementation(Dependencies.vitess)
+  implementation(Dependencies.vitess) {
+    exclude("org.apache.logging.log4j")
+  }
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.moshiAdapters)
