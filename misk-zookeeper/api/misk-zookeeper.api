@@ -1,3 +1,16 @@
+public final class misk/clustering/zookeeper/AtomicEnum {
+	public static final field Companion Lmisk/clustering/zookeeper/AtomicEnum$Companion;
+	public synthetic fun <init> (Ljava/lang/Enum;[Ljava/lang/Enum;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun compareAndSet (Ljava/lang/Enum;Ljava/lang/Enum;)Z
+	public final fun get ()Ljava/lang/Enum;
+	public final fun getAndSet (Ljava/lang/Enum;)Ljava/lang/Enum;
+	public final fun set (Ljava/lang/Enum;)V
+}
+
+public final class misk/clustering/zookeeper/AtomicEnum$Companion {
+	public final synthetic fun of (Ljava/lang/Enum;)Lmisk/clustering/zookeeper/AtomicEnum;
+}
+
 public abstract interface annotation class misk/clustering/zookeeper/ForZkLease : java/lang/annotation/Annotation {
 }
 
@@ -6,6 +19,61 @@ public final class misk/clustering/zookeeper/ZkExtensionsKt {
 	public static final fun getAsZkPath (Ljava/lang/String;)Ljava/lang/String;
 	public static final fun isConnected (Lorg/apache/curator/framework/CuratorFramework;)Z
 	public static final fun isRunning (Lorg/apache/curator/framework/CuratorFramework;)Z
+}
+
+public final class misk/clustering/zookeeper/ZkLease : wisp/lease/Lease {
+	public static final field Companion Lmisk/clustering/zookeeper/ZkLease$Companion;
+	public fun <init> (Ljava/lang/String;Lmisk/clustering/zookeeper/ZkLeaseManager;Ljava/lang/String;Lmisk/clustering/weights/ClusterWeightProvider;Ljava/lang/String;)V
+	public fun acquire ()Z
+	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
+	public fun checkHeld ()Z
+	public final fun close ()V
+	public final fun connectionLost ()V
+	public fun getName ()Ljava/lang/String;
+	public fun release ()Z
+}
+
+public final class misk/clustering/zookeeper/ZkLease$Companion {
+}
+
+public final class misk/clustering/zookeeper/ZkLease$Status : java/lang/Enum {
+	public static final field CLOSED Lmisk/clustering/zookeeper/ZkLease$Status;
+	public static final field HELD Lmisk/clustering/zookeeper/ZkLease$Status;
+	public static final field NOT_HELD Lmisk/clustering/zookeeper/ZkLease$Status;
+	public static final field UNKNOWN Lmisk/clustering/zookeeper/ZkLease$Status;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/clustering/zookeeper/ZkLease$Status;
+	public static fun values ()[Lmisk/clustering/zookeeper/ZkLease$Status;
+}
+
+public final class misk/clustering/zookeeper/ZkLeaseCommonModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/clustering/zookeeper/ZkLeaseManager : com/google/common/util/concurrent/AbstractExecutionThreadService, wisp/lease/LeaseManager {
+	public static final field Companion Lmisk/clustering/zookeeper/ZkLeaseManager$Companion;
+	public fun <init> (Ljava/lang/String;Lmisk/tasks/RepeatedTaskQueue;Lmisk/clustering/Cluster;Lorg/apache/curator/framework/CuratorFramework;Lmisk/clustering/weights/ClusterWeightProvider;)V
+	public final fun addConnectionListener (Lkotlin/jvm/functions/Function1;)V
+	public final fun checkAllLeases$misk_zookeeper ()V
+	public final fun getClient$misk_zookeeper ()Lkotlin/Lazy;
+	public final fun getCluster$misk_zookeeper ()Lmisk/clustering/Cluster;
+	public final fun getLeaseNamespace$misk_zookeeper ()Ljava/lang/String;
+	public final fun handleConnectionStateChanged$misk_zookeeper (Z)V
+	public final fun isConnected$misk_zookeeper ()Z
+	public final fun isRunning$misk_zookeeper ()Z
+	public fun requestLease (Ljava/lang/String;)Lmisk/clustering/zookeeper/ZkLease;
+	public synthetic fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
+}
+
+public final class misk/clustering/zookeeper/ZkLeaseManager$Companion {
+}
+
+public final class misk/clustering/zookeeper/ZkLeaseManager$State : java/lang/Enum {
+	public static final field NOT_STARTED Lmisk/clustering/zookeeper/ZkLeaseManager$State;
+	public static final field RUNNING Lmisk/clustering/zookeeper/ZkLeaseManager$State;
+	public static final field STOPPED Lmisk/clustering/zookeeper/ZkLeaseManager$State;
+	public static final field STOPPING Lmisk/clustering/zookeeper/ZkLeaseManager$State;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/clustering/zookeeper/ZkLeaseManager$State;
+	public static fun values ()[Lmisk/clustering/zookeeper/ZkLeaseManager$State;
 }
 
 public final class misk/clustering/zookeeper/ZkLeaseModule : misk/inject/KAbstractModule {
@@ -41,6 +109,12 @@ public final class misk/zookeeper/CuratorFrameworkModule : misk/inject/KAbstract
 	public synthetic fun <init> (Lmisk/clustering/zookeeper/ZookeeperConfig;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
+public final class misk/zookeeper/CuratorFrameworkProvider : javax/inject/Provider {
+	public fun <init> (Lmisk/clustering/zookeeper/ZookeeperConfig;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lorg/apache/curator/framework/CuratorFramework;
+}
+
 public final class misk/zookeeper/CuratorFrameworkProviderKt {
 	public static final field DEFAULT_PERMS I
 	public static final field SERVICES_NODE Ljava/lang/String;
@@ -59,10 +133,12 @@ public final class misk/zookeeper/StaticHostModule : misk/inject/KAbstractModule
 public final class misk/zookeeper/ZkClientFactory {
 	public fun <init> (Ljava/lang/String;Lorg/apache/curator/framework/CuratorFramework;)V
 	public final fun client ()Lorg/apache/curator/framework/CuratorFramework;
+	public final fun getClient$misk_zookeeper ()Lkotlin/Lazy;
 }
 
 public final class misk/zookeeper/ZkService : com/google/common/util/concurrent/AbstractIdleService {
 	public static final field Companion Lmisk/zookeeper/ZkService$Companion;
+	public fun <init> (Lorg/apache/curator/framework/CuratorFramework;)V
 }
 
 public final class misk/zookeeper/ZkService$Companion {

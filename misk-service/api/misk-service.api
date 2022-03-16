@@ -1,10 +1,79 @@
+public final class misk/CoordinatedService : com/google/common/util/concurrent/AbstractService, misk/DelegatingService {
+	public static final field Companion Lmisk/CoordinatedService$Companion;
+	public fun <init> (Ljavax/inject/Provider;)V
+	public final fun addDependentServices ([Lmisk/CoordinatedService;)V
+	public final fun addEnhancements ([Lmisk/CoordinatedService;)V
+	public final fun findCycle (Ljava/util/Map;)Ljava/util/List;
+	public final fun getDownstreamServices ()Ljava/util/Set;
+	public fun getService ()Lcom/google/common/util/concurrent/Service;
+	public final fun getUpstreamServices ()Ljava/util/Set;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/CoordinatedService$Companion {
+}
+
+public final class misk/CoordinatedService$Companion$CycleValidity : java/lang/Enum {
+	public static final field CHECKING_FOR_CYCLES Lmisk/CoordinatedService$Companion$CycleValidity;
+	public static final field NO_CYCLES Lmisk/CoordinatedService$Companion$CycleValidity;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/CoordinatedService$Companion$CycleValidity;
+	public static fun values ()[Lmisk/CoordinatedService$Companion$CycleValidity;
+}
+
 public abstract interface class misk/DelegatingService : com/google/common/util/concurrent/Service {
 	public abstract fun getService ()Lcom/google/common/util/concurrent/Service;
+}
+
+public final class misk/DependencyEdge {
+	public fun <init> (Lcom/google/inject/Key;Lcom/google/inject/Key;)V
+	public final fun component1 ()Lcom/google/inject/Key;
+	public final fun component2 ()Lcom/google/inject/Key;
+	public final fun copy (Lcom/google/inject/Key;Lcom/google/inject/Key;)Lmisk/DependencyEdge;
+	public static synthetic fun copy$default (Lmisk/DependencyEdge;Lcom/google/inject/Key;Lcom/google/inject/Key;ILjava/lang/Object;)Lmisk/DependencyEdge;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDependent ()Lcom/google/inject/Key;
+	public final fun getDependsOn ()Lcom/google/inject/Key;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/EnhancementEdge {
+	public fun <init> (Lcom/google/inject/Key;Lcom/google/inject/Key;)V
+	public final fun component1 ()Lcom/google/inject/Key;
+	public final fun component2 ()Lcom/google/inject/Key;
+	public final fun copy (Lcom/google/inject/Key;Lcom/google/inject/Key;)Lmisk/EnhancementEdge;
+	public static synthetic fun copy$default (Lmisk/EnhancementEdge;Lcom/google/inject/Key;Lcom/google/inject/Key;ILjava/lang/Object;)Lmisk/EnhancementEdge;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnhancement ()Lcom/google/inject/Key;
+	public final fun getToBeEnhanced ()Lcom/google/inject/Key;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/ServiceEntry {
+	public fun <init> (Lcom/google/inject/Key;)V
+	public final fun component1 ()Lcom/google/inject/Key;
+	public final fun copy (Lcom/google/inject/Key;)Lmisk/ServiceEntry;
+	public static synthetic fun copy$default (Lmisk/ServiceEntry;Lcom/google/inject/Key;ILjava/lang/Object;)Lmisk/ServiceEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKey ()Lcom/google/inject/Key;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/ServiceGraphBuilder {
+	public fun <init> ()V
+	public final fun addDependency (Lcom/google/inject/Key;Lcom/google/inject/Key;)V
+	public final fun addService (Lcom/google/inject/Key;Lcom/google/common/util/concurrent/Service;)V
+	public final fun addService (Lcom/google/inject/Key;Ljavax/inject/Provider;)V
+	public final fun build ()Lcom/google/common/util/concurrent/ServiceManager;
+	public final fun enhanceService (Lcom/google/inject/Key;Lcom/google/inject/Key;)V
 }
 
 public final class misk/ServiceManagerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/ServiceManagerModule$Companion;
 	public fun <init> ()V
+	public final fun provideServiceManager$misk_service (Lcom/google/inject/Injector;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lcom/google/common/util/concurrent/ServiceManager;
 }
 
 public final class misk/ServiceManagerModule$Companion {
@@ -16,11 +85,22 @@ public final class misk/ServiceModule : misk/inject/KAbstractModule {
 	public fun <init> (Lcom/google/inject/Key;Ljava/util/List;Ljava/util/List;Lcom/google/inject/Key;)V
 	public synthetic fun <init> (Lcom/google/inject/Key;Ljava/util/List;Ljava/util/List;Lcom/google/inject/Key;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun dependsOn (Lcom/google/inject/Key;)Lmisk/ServiceModule;
+	public final synthetic fun dependsOn (Lkotlin/reflect/KClass;)Lmisk/ServiceModule;
+	public static synthetic fun dependsOn$default (Lmisk/ServiceModule;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/ServiceModule;
 	public final fun enhancedBy (Lcom/google/inject/Key;)Lmisk/ServiceModule;
+	public final synthetic fun enhancedBy (Lkotlin/reflect/KClass;)Lmisk/ServiceModule;
+	public static synthetic fun enhancedBy$default (Lmisk/ServiceModule;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/ServiceModule;
 	public final fun enhances (Lcom/google/inject/Key;)Lmisk/ServiceModule;
+	public final synthetic fun enhances (Lkotlin/reflect/KClass;)Lmisk/ServiceModule;
+	public static synthetic fun enhances$default (Lmisk/ServiceModule;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/ServiceModule;
 	public final fun getDependsOn ()Ljava/util/List;
 	public final fun getEnhancedBy ()Ljava/util/List;
 	public final fun getEnhances ()Lcom/google/inject/Key;
 	public final fun getKey ()Lcom/google/inject/Key;
+}
+
+public final class misk/ServiceModuleKt {
+	public static final synthetic fun ServiceModule (Lkotlin/reflect/KClass;)Lmisk/ServiceModule;
+	public static synthetic fun ServiceModule$default (Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/ServiceModule;
 }
 

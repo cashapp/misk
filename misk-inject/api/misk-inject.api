@@ -1,13 +1,23 @@
 public final class misk/inject/GuiceKt {
 	public static final fun asSingleton (Lcom/google/inject/binder/ScopedBindingBuilder;)V
+	public static final synthetic fun getInstance (Lcom/google/inject/Injector;Ljava/lang/annotation/Annotation;)Ljava/lang/Object;
+	public static synthetic fun getInstance$default (Lcom/google/inject/Injector;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun getSetOf (Lcom/google/inject/Injector;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Ljava/util/Set;
 	public static synthetic fun getSetOf$default (Lcom/google/inject/Injector;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)Ljava/util/Set;
+	public static final synthetic fun keyOf ()Lcom/google/inject/Key;
+	public static final synthetic fun keyOf (Ljava/lang/annotation/Annotation;)Lcom/google/inject/Key;
+	public static final synthetic fun keyOf (Lkotlin/reflect/KClass;)Lcom/google/inject/Key;
+	public static final synthetic fun listOfType ()Lcom/google/inject/TypeLiteral;
 	public static final fun listOfType (Lcom/google/inject/TypeLiteral;)Lcom/google/inject/TypeLiteral;
 	public static final fun listOfType (Lkotlin/reflect/KClass;)Lcom/google/inject/TypeLiteral;
+	public static final synthetic fun mapOfType ()Lcom/google/inject/TypeLiteral;
 	public static final fun mapOfType (Lcom/google/inject/TypeLiteral;Lcom/google/inject/TypeLiteral;)Lcom/google/inject/TypeLiteral;
 	public static final fun mapOfType (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lcom/google/inject/TypeLiteral;
+	public static final synthetic fun parameterizedType ([Ljava/lang/reflect/Type;)Ljava/lang/reflect/ParameterizedType;
+	public static final synthetic fun setOfType ()Lcom/google/inject/TypeLiteral;
 	public static final fun setOfType (Lcom/google/inject/TypeLiteral;)Lcom/google/inject/TypeLiteral;
 	public static final fun setOfType (Lkotlin/reflect/KClass;)Lcom/google/inject/TypeLiteral;
+	public static final synthetic fun subtypeOf ()Ljava/lang/reflect/WildcardType;
 	public static final fun toKey (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;)Lcom/google/inject/Key;
 	public static final fun toKey (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lcom/google/inject/Key;
 	public static synthetic fun toKey$default (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/Key;
@@ -20,17 +30,28 @@ public final class misk/inject/GuiceKt {
 
 public abstract class misk/inject/KAbstractModule : com/google/inject/AbstractModule {
 	public fun <init> ()V
+	protected final synthetic fun bind ()Lmisk/inject/KAbstractModule$KotlinAnnotatedBindingBuilder;
 	protected fun binder ()Lcom/google/inject/Binder;
+	protected final synthetic fun multibind ()Lcom/google/inject/binder/LinkedBindingBuilder;
+	protected final synthetic fun multibind (Lkotlin/reflect/KClass;)Lcom/google/inject/binder/LinkedBindingBuilder;
+	public static synthetic fun multibind$default (Lmisk/inject/KAbstractModule;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/binder/LinkedBindingBuilder;
 	protected final fun newMapBinder (Lcom/google/inject/TypeLiteral;Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/MapBinder;
+	protected final synthetic fun newMapBinder (Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/MapBinder;
 	protected final fun newMapBinder (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/MapBinder;
 	public static synthetic fun newMapBinder$default (Lmisk/inject/KAbstractModule;Lcom/google/inject/TypeLiteral;Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/multibindings/MapBinder;
+	public static synthetic fun newMapBinder$default (Lmisk/inject/KAbstractModule;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/multibindings/MapBinder;
 	public static synthetic fun newMapBinder$default (Lmisk/inject/KAbstractModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/multibindings/MapBinder;
+	protected final synthetic fun newMultibinder (Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/Multibinder;
 	protected final fun newMultibinder (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/Multibinder;
+	public static synthetic fun newMultibinder$default (Lmisk/inject/KAbstractModule;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/multibindings/Multibinder;
 	public static synthetic fun newMultibinder$default (Lmisk/inject/KAbstractModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/multibindings/Multibinder;
+	protected final synthetic fun requireBinding ()V
+	protected final synthetic fun to (Lcom/google/inject/binder/LinkedBindingBuilder;)Lcom/google/inject/binder/ScopedBindingBuilder;
 }
 
 protected final class misk/inject/KAbstractModule$KotlinAnnotatedBindingBuilder : com/google/inject/binder/AnnotatedBindingBuilder {
 	public fun <init> (Lcom/google/inject/binder/AnnotatedBindingBuilder;)V
+	public final synthetic fun annotatedWith ()Lcom/google/inject/binder/LinkedBindingBuilder;
 	public fun annotatedWith (Ljava/lang/Class;)Lcom/google/inject/binder/LinkedBindingBuilder;
 	public fun annotatedWith (Ljava/lang/annotation/Annotation;)Lcom/google/inject/binder/LinkedBindingBuilder;
 	public fun asEagerSingleton ()V
@@ -47,5 +68,13 @@ protected final class misk/inject/KAbstractModule$KotlinAnnotatedBindingBuilder 
 	public fun toProvider (Lcom/google/inject/TypeLiteral;)Lcom/google/inject/binder/ScopedBindingBuilder;
 	public fun toProvider (Ljava/lang/Class;)Lcom/google/inject/binder/ScopedBindingBuilder;
 	public fun toProvider (Ljavax/inject/Provider;)Lcom/google/inject/binder/ScopedBindingBuilder;
+}
+
+public final class misk/inject/ListProvider : javax/inject/Provider {
+	public fun <init> (Lcom/google/inject/Key;Ljavax/inject/Provider;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Ljava/util/List;
+	public fun hashCode ()I
 }
 

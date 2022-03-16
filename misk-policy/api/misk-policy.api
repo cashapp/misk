@@ -17,12 +17,18 @@ public final class misk/policy/opa/OpaConfig : misk/config/Config {
 
 public final class misk/policy/opa/OpaModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/policy/opa/OpaConfig;)V
+	public final fun opaApi$misk_policy (Lmisk/policy/opa/OpaConfig;Lmisk/client/HttpClientFactory;)Lmisk/policy/opa/OpaApi;
 	public final fun provideMoshi ()Lcom/squareup/moshi/Moshi;
 }
 
 public abstract interface class misk/policy/opa/OpaPolicyEngine {
 	public abstract fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 	public abstract fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+}
+
+public final class misk/policy/opa/OpaPolicyEngineKt {
+	public static final synthetic fun evaluate (Lmisk/policy/opa/OpaPolicyEngine;Ljava/lang/String;)Lmisk/policy/opa/OpaResponse;
+	public static final synthetic fun evaluate (Lmisk/policy/opa/OpaPolicyEngine;Ljava/lang/String;Lmisk/policy/opa/OpaRequest;)Lmisk/policy/opa/OpaResponse;
 }
 
 public abstract interface class misk/policy/opa/OpaRequest {

@@ -240,6 +240,7 @@ public final class misk/metrics/digester/FakeDigest : misk/metrics/digester/TDig
 	public fun <init> (Ljava/util/List;)V
 	public fun add (D)V
 	public fun count ()J
+	public final fun getAddedValues$misk_metrics_digester ()Ljava/util/List;
 	public fun mergeInto (Lmisk/metrics/digester/FakeDigest;)V
 	public synthetic fun mergeInto (Lmisk/metrics/digester/TDigest;)V
 	public fun proto ()Lcom/squareup/digester/protos/service/DigestData;
@@ -260,6 +261,9 @@ public final class misk/metrics/digester/SlidingWindowDigest {
 	public fun <init> (Lmisk/metrics/digester/Windower;Lkotlin/jvm/functions/Function0;Ljava/time/Clock;)V
 	public synthetic fun <init> (Lmisk/metrics/digester/Windower;Lkotlin/jvm/functions/Function0;Ljava/time/Clock;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun closedDigests (Ljava/time/ZonedDateTime;)Ljava/util/List;
+	public final fun getTDigest$misk_metrics_digester ()Lkotlin/jvm/functions/Function0;
+	public final fun getWindower$misk_metrics_digester ()Lmisk/metrics/digester/Windower;
+	public final fun getWindows$misk_metrics_digester ()Ljava/util/List;
 	public final fun mergeIn (Ljava/util/List;)V
 	public final fun observe (D)V
 	public final fun openDigests (Z)Ljava/util/List;
@@ -333,6 +337,7 @@ public final class misk/metrics/digester/WindowDigest {
 
 public final class misk/metrics/digester/Windower {
 	public fun <init> (II)V
+	public final fun getStartSecs$misk_metrics_digester ()Ljava/util/List;
 	public final fun windowsContaining (Ljava/time/ZonedDateTime;)Ljava/util/List;
 }
 

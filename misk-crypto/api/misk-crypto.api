@@ -1,4 +1,15 @@
+public final class misk/crypto/AeadEnvelopeProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public field keyManager Lmisk/crypto/AeadKeyManager;
+	public fun <init> (Ljava/lang/String;)V
+	public fun get ()Lcom/google/crypto/tink/Aead;
+	public synthetic fun get ()Ljava/lang/Object;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getKeyManager ()Lmisk/crypto/AeadKeyManager;
+	public final fun setKeyManager (Lmisk/crypto/AeadKeyManager;)V
+}
+
 public final class misk/crypto/AeadKeyManager : misk/crypto/MappedKeyManager {
+	public fun <init> (Lcom/google/inject/Injector;)V
 }
 
 public final class misk/crypto/AwsKmsClientModule : misk/inject/KAbstractModule {
@@ -88,6 +99,17 @@ public final class misk/crypto/CryptoTestModule : misk/inject/KAbstractModule {
 }
 
 public final class misk/crypto/DeterministicAeadKeyManager : misk/crypto/MappedKeyManager {
+	public fun <init> (Lcom/google/inject/Injector;)V
+}
+
+public final class misk/crypto/DeterministicAeadProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public field keyManager Lmisk/crypto/DeterministicAeadKeyManager;
+	public fun <init> (Ljava/lang/String;)V
+	public fun get ()Lcom/google/crypto/tink/DeterministicAead;
+	public synthetic fun get ()Ljava/lang/Object;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getKeyManager ()Lmisk/crypto/DeterministicAeadKeyManager;
+	public final fun setKeyManager (Lmisk/crypto/DeterministicAeadKeyManager;)V
 }
 
 public final class misk/crypto/DigitalSignature {
@@ -104,9 +126,31 @@ public final class misk/crypto/DigitalSignature {
 }
 
 public final class misk/crypto/DigitalSignatureKeyManager : misk/crypto/MappedKeyManager {
+	public fun <init> (Lcom/google/inject/Injector;)V
 	public synthetic fun getKeyInstance$misk_crypto (Ljava/lang/String;)Ljava/lang/Object;
+	public fun getKeyInstance$misk_crypto (Ljava/lang/String;)Lmisk/crypto/DigitalSignature;
 	public final fun getSigner (Ljava/lang/String;)Lcom/google/crypto/tink/PublicKeySign;
 	public final fun getVerifier (Ljava/lang/String;)Lcom/google/crypto/tink/PublicKeyVerify;
+}
+
+public final class misk/crypto/DigitalSignatureSignerProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public field keyManager Lmisk/crypto/DigitalSignatureKeyManager;
+	public fun <init> (Ljava/lang/String;)V
+	public fun get ()Lcom/google/crypto/tink/PublicKeySign;
+	public synthetic fun get ()Ljava/lang/Object;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getKeyManager ()Lmisk/crypto/DigitalSignatureKeyManager;
+	public final fun setKeyManager (Lmisk/crypto/DigitalSignatureKeyManager;)V
+}
+
+public final class misk/crypto/DigitalSignatureVerifierProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public field keyManager Lmisk/crypto/DigitalSignatureKeyManager;
+	public fun <init> (Ljava/lang/String;)V
+	public fun get ()Lcom/google/crypto/tink/PublicKeyVerify;
+	public synthetic fun get ()Ljava/lang/Object;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getKeyManager ()Lmisk/crypto/DigitalSignatureKeyManager;
+	public final fun setKeyManager (Lmisk/crypto/DigitalSignatureKeyManager;)V
 }
 
 public abstract interface annotation class misk/crypto/ExternalDataKeys : java/lang/annotation/Annotation {
@@ -130,6 +174,20 @@ public final class misk/crypto/FakeKeyResolver : misk/crypto/KeyResolver {
 	public fun getKeyByAlias (Ljava/lang/String;)Lmisk/crypto/Key;
 }
 
+public final class misk/crypto/FakeKmsClient : com/google/crypto/tink/KmsClient {
+	public fun <init> ()V
+	public fun doesSupport (Ljava/lang/String;)Z
+	public fun getAead (Ljava/lang/String;)Lcom/google/crypto/tink/Aead;
+	public fun withCredentials (Ljava/lang/String;)Lcom/google/crypto/tink/KmsClient;
+	public fun withDefaultCredentials ()Lcom/google/crypto/tink/KmsClient;
+}
+
+public final class misk/crypto/FakeMasterEncryptionKey : com/google/crypto/tink/Aead {
+	public fun <init> ()V
+	public fun decrypt ([B[B)[B
+	public fun encrypt ([B[B)[B
+}
+
 public final class misk/crypto/GcpKmsClientModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
@@ -138,9 +196,34 @@ public final class misk/crypto/GcpKmsClientModule : misk/inject/KAbstractModule 
 }
 
 public final class misk/crypto/HybridDecryptKeyManager : misk/crypto/MappedKeyManager {
+	public fun <init> (Lcom/google/inject/Injector;)V
+}
+
+public final class misk/crypto/HybridDecryptProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public field keyDecryptManager Lmisk/crypto/HybridDecryptKeyManager;
+	public field keyEncryptManager Lmisk/crypto/HybridEncryptKeyManager;
+	public fun <init> (Ljava/lang/String;)V
+	public fun get ()Lcom/google/crypto/tink/HybridDecrypt;
+	public synthetic fun get ()Ljava/lang/Object;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getKeyDecryptManager ()Lmisk/crypto/HybridDecryptKeyManager;
+	public final fun getKeyEncryptManager ()Lmisk/crypto/HybridEncryptKeyManager;
+	public final fun setKeyDecryptManager (Lmisk/crypto/HybridDecryptKeyManager;)V
+	public final fun setKeyEncryptManager (Lmisk/crypto/HybridEncryptKeyManager;)V
 }
 
 public final class misk/crypto/HybridEncryptKeyManager : misk/crypto/MappedKeyManager {
+	public fun <init> (Lcom/google/inject/Injector;)V
+}
+
+public final class misk/crypto/HybridEncryptProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public field keyManager Lmisk/crypto/HybridEncryptKeyManager;
+	public fun <init> (Ljava/lang/String;)V
+	public fun get ()Lcom/google/crypto/tink/HybridEncrypt;
+	public synthetic fun get ()Ljava/lang/Object;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getKeyManager ()Lmisk/crypto/HybridEncryptKeyManager;
+	public final fun setKeyManager (Lmisk/crypto/HybridEncryptKeyManager;)V
 }
 
 public final class misk/crypto/Key : wisp/config/Config {
@@ -189,6 +272,9 @@ public abstract interface class misk/crypto/KeyResolver {
 	public abstract fun getKeyByAlias (Ljava/lang/String;)Lmisk/crypto/Key;
 }
 
+public final class misk/crypto/KeyResolverKt {
+}
+
 public final class misk/crypto/KeyType : java/lang/Enum {
 	public static final field AEAD Lmisk/crypto/KeyType;
 	public static final field DAEAD Lmisk/crypto/KeyType;
@@ -210,12 +296,25 @@ public final class misk/crypto/LocalConfigKeyResolver : misk/crypto/KeyResolver 
 }
 
 public final class misk/crypto/MacKeyManager : misk/crypto/MappedKeyManager {
+	public fun <init> (Lcom/google/inject/Injector;)V
+}
+
+public final class misk/crypto/MacProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public field keyManager Lmisk/crypto/MacKeyManager;
+	public fun <init> (Ljava/lang/String;)V
+	public fun get ()Lcom/google/crypto/tink/Mac;
+	public synthetic fun get ()Ljava/lang/Object;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getKeyManager ()Lmisk/crypto/MacKeyManager;
+	public final fun setKeyManager (Lmisk/crypto/MacKeyManager;)V
 }
 
 public abstract class misk/crypto/MappedKeyManager {
 	public synthetic fun <init> (Lcom/google/inject/Injector;Ljava/lang/Class;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun get (Ljava/lang/String;)Ljava/lang/Object;
+	public fun getKeyInstance$misk_crypto (Ljava/lang/String;)Ljava/lang/Object;
 	protected final fun getNamedInstance (Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object;
+	public final fun set$misk_crypto (Ljava/lang/String;Ljava/lang/Object;)V
 }
 
 public abstract interface annotation class misk/crypto/MiskAWSKMS : java/lang/annotation/Annotation {
@@ -250,11 +349,94 @@ public final class misk/crypto/StreamingAeadKeyManager : misk/crypto/MappedKeyMa
 	public fun <init> (Lcom/google/inject/Injector;)V
 }
 
+public final class misk/crypto/StreamingAeadProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public field streamingAeadKeyManager Lmisk/crypto/StreamingAeadKeyManager;
+	public fun <init> (Ljava/lang/String;)V
+	public fun get ()Lcom/google/crypto/tink/StreamingAead;
+	public synthetic fun get ()Ljava/lang/Object;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getStreamingAeadKeyManager ()Lmisk/crypto/StreamingAeadKeyManager;
+	public final fun setStreamingAeadKeyManager (Lmisk/crypto/StreamingAeadKeyManager;)V
+}
+
+public final class misk/crypto/TestKeysets {
+	public static final field Companion Lmisk/crypto/TestKeysets$Companion;
+	public fun <init> ()V
+}
+
+public final class misk/crypto/TestKeysets$Companion {
+	public final fun encryptSecret (Lmisk/config/MiskConfig$RealSecret;)Lmisk/config/MiskConfig$RealSecret;
+	public final fun getAEAD ()Lmisk/config/MiskConfig$RealSecret;
+	public final fun getDAEAD ()Lmisk/config/MiskConfig$RealSecret;
+	public final fun getDIGITAL_SIGNATURE ()Lmisk/config/MiskConfig$RealSecret;
+	public final fun getHYBRID ()Lmisk/config/MiskConfig$RealSecret;
+	public final fun getMAC ()Lmisk/config/MiskConfig$RealSecret;
+	public final fun getPGP_DECRYPT ()Lmisk/config/MiskConfig$RealSecret;
+	public final fun getPGP_ENCRYPT ()Lmisk/config/MiskConfig$RealSecret;
+	public final fun getSTREAMING_AEAD ()Lmisk/config/MiskConfig$RealSecret;
+}
+
 public abstract interface class misk/crypto/pgp/PgpDecrypter {
 	public abstract fun decrypt ([B)[B
 }
 
+public final class misk/crypto/pgp/PgpDecrypterProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/crypto/pgp/PgpDecrypter;
+}
+
 public abstract interface class misk/crypto/pgp/PgpEncrypter {
 	public abstract fun encrypt ([BZ)[B
+}
+
+public final class misk/crypto/pgp/PgpEncrypterProvider : misk/crypto/KeyReader, com/google/inject/Provider {
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/crypto/pgp/PgpEncrypter;
+}
+
+public final class misk/crypto/pgp/PgpKeyJsonFile {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/crypto/pgp/PgpKeyJsonFileMetadata;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lmisk/crypto/pgp/PgpKeyJsonFileMetadata;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/crypto/pgp/PgpKeyJsonFileMetadata;Ljava/lang/String;)Lmisk/crypto/pgp/PgpKeyJsonFile;
+	public static synthetic fun copy$default (Lmisk/crypto/pgp/PgpKeyJsonFile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/crypto/pgp/PgpKeyJsonFileMetadata;Ljava/lang/String;ILjava/lang/Object;)Lmisk/crypto/pgp/PgpKeyJsonFile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAws_kms_key_id ()Ljava/lang/String;
+	public final fun getEncrypted_private_key ()Ljava/lang/String;
+	public final fun getPgp ()Lmisk/crypto/pgp/PgpKeyJsonFileMetadata;
+	public final fun getPublic_key ()Ljava/lang/String;
+	public final fun getRegion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/crypto/pgp/PgpKeyJsonFileMetadata {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/crypto/pgp/PgpKeyJsonFileMetadata;
+	public static synthetic fun copy$default (Lmisk/crypto/pgp/PgpKeyJsonFileMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/crypto/pgp/PgpKeyJsonFileMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getComment ()Ljava/lang/String;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/crypto/pgp/RealPgpDecrypter : misk/crypto/pgp/PgpDecrypter {
+	public fun <init> (Ljava/util/Map;)V
+	public fun decrypt ([B)[B
+}
+
+public final class misk/crypto/pgp/RealPgpEncrypter : misk/crypto/pgp/PgpEncrypter {
+	public fun <init> (Lorg/bouncycastle/openpgp/PGPPublicKey;)V
+	public fun encrypt ([BZ)[B
 }
 

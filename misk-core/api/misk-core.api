@@ -96,6 +96,9 @@ public final class misk/clustering/ClusterHashRing : misk/clustering/ClusterReso
 	public fun hashCode ()I
 }
 
+public final class misk/clustering/ClusterKt {
+}
+
 public abstract interface class misk/clustering/ClusterResourceMapper {
 	public abstract fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
 }
@@ -139,6 +142,7 @@ public final class misk/clustering/fake/FakeCluster : misk/clustering/Cluster, m
 	public static final field SELF_NAME Ljava/lang/String;
 	public fun <init> ()V
 	public fun <init> (Lmisk/clustering/fake/ExplicitClusterResourceMapper;)V
+	public fun <init> (Lmisk/clustering/fake/ExplicitClusterResourceMapper;Lmisk/clustering/DefaultCluster;)V
 	public fun addListener (Lcom/google/common/util/concurrent/Service$Listener;Ljava/util/concurrent/Executor;)V
 	public fun awaitRunning ()V
 	public fun awaitRunning (JLjava/util/concurrent/TimeUnit;)V
@@ -333,6 +337,7 @@ public final class misk/resources/ResourceLoader {
 	public fun <init> (Ljava/util/Map;)V
 	public final fun copyTo (Ljava/lang/String;Ljava/nio/file/Path;)V
 	public final fun exists (Ljava/lang/String;)Z
+	public final fun getDelegate$misk_core ()Lwisp/resources/ResourceLoader;
 	public final fun list (Ljava/lang/String;)Ljava/util/List;
 	public final fun open (Ljava/lang/String;)Lokio/BufferedSource;
 	public final fun put (Ljava/lang/String;Ljava/lang/String;)V
@@ -356,9 +361,11 @@ public final class misk/resources/ResourceLoaderModule : misk/inject/KAbstractMo
 
 public final class misk/resources/TestingResourceLoaderModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public final fun fakeFilesystemLoaderBackend$misk_core (Ljava/util/Map;)Lwisp/resources/ResourceLoader$Backend;
 }
 
 public final class misk/retries/RetriesKt {
+	public static final synthetic fun doNotRetry ()Lkotlin/jvm/functions/Function2;
 	public static final fun retryWithHooks (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -424,7 +431,11 @@ public final class misk/security/ssl/CertStoreConfig {
 	public final fun toWispConfig ()Lwisp/security/ssl/CertStoreConfig;
 }
 
+public final class misk/security/ssl/CertStoreKt {
+}
+
 public final class misk/security/ssl/KeystoreExtensionsKt {
+	public static final synthetic fun aliasesOfType (Ljava/security/KeyStore;)Ljava/util/List;
 	public static final fun aliasesOfType (Ljava/security/KeyStore;Ljava/lang/Class;)Ljava/util/List;
 	public static final fun getCertificateAndKey (Ljava/security/KeyStore;Ljava/lang/String;[C)Lwisp/security/ssl/CertificateAndKey;
 	public static final fun getCertificateAndKey (Ljava/security/KeyStore;[C)Lwisp/security/ssl/CertificateAndKey;
@@ -452,6 +463,7 @@ public final class misk/security/ssl/SslLoader {
 	public static final field FORMAT_JCEKS Ljava/lang/String;
 	public static final field FORMAT_JKS Ljava/lang/String;
 	public static final field FORMAT_PEM Ljava/lang/String;
+	public fun <init> (Lmisk/resources/ResourceLoader;)V
 	public final fun getDelegate ()Lwisp/security/ssl/SslLoader;
 	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
 	public final fun loadCertStore (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lwisp/security/ssl/CertStore;
@@ -482,9 +494,13 @@ public final class misk/security/ssl/TrustStoreConfig {
 	public final fun toWispConfig ()Lwisp/security/ssl/TrustStoreConfig;
 }
 
+public final class misk/security/ssl/TrustStoreKt {
+}
+
 public final class misk/tokens/FakeTokenGenerator : misk/tokens/TokenGenerator {
 	public fun <init> ()V
 	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
+	public final fun getNextByLabel$misk_core ()Ljava/util/Map;
 }
 
 public final class misk/tokens/FakeTokenGeneratorModule : misk/inject/KAbstractModule {
@@ -498,11 +514,14 @@ public final class misk/tokens/RealTokenGenerator : misk/tokens/TokenGenerator {
 
 public abstract interface class misk/tokens/TokenGenerator {
 	public static final field Companion Lmisk/tokens/TokenGenerator$Companion;
+	public static final field alphabet Ljava/lang/String;
 	public abstract fun generate (Ljava/lang/String;I)Ljava/lang/String;
 }
 
 public final class misk/tokens/TokenGenerator$Companion {
+	public static final field alphabet Ljava/lang/String;
 	public final fun canonicalize (Ljava/lang/String;)Ljava/lang/String;
+	public final fun getIndexToChar$misk_core ()[C
 }
 
 public final class misk/tokens/TokenGenerator$DefaultImpls {
@@ -589,5 +608,6 @@ public final class misk/web/mediatype/MediaTypesKt {
 	public static final fun asMediaRange (Ljava/lang/String;)Lmisk/web/mediatype/MediaRange;
 	public static final fun asMediaType (Ljava/lang/String;)Lokhttp3/MediaType;
 	public static final fun compareTo (Lokhttp3/MediaType;Lokhttp3/MediaType;)I
+	public static final fun getWildcardCount (Lokhttp3/MediaType;)I
 }
 

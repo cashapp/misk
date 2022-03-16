@@ -211,6 +211,10 @@ public final class misk/web/dashboard/DashboardHomeUrl : misk/web/dashboard/Vali
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/web/dashboard/DashboardHomeUrlKt {
+	public static final synthetic fun DashboardHomeUrl (Ljava/lang/String;)Lmisk/web/dashboard/DashboardHomeUrl;
+}
+
 public final class misk/web/dashboard/DashboardModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
@@ -230,6 +234,10 @@ public final class misk/web/dashboard/DashboardNavbarItem : misk/web/dashboard/V
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/web/dashboard/DashboardNavbarItemKt {
+	public static final synthetic fun DashboardNavbarItem (Ljava/lang/String;I)Lmisk/web/dashboard/DashboardNavbarItem;
+}
+
 public final class misk/web/dashboard/DashboardNavbarStatus : misk/web/dashboard/ValidWebEntry {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -243,12 +251,23 @@ public final class misk/web/dashboard/DashboardNavbarStatus : misk/web/dashboard
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/web/dashboard/DashboardNavbarStatusKt {
+	public static final synthetic fun DashboardNavbarStatus (Ljava/lang/String;)Lmisk/web/dashboard/DashboardNavbarStatus;
+}
+
 public final class misk/web/dashboard/DashboardTab : misk/web/dashboard/WebTab {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getCategory ()Ljava/lang/String;
 	public final fun getDashboard_slug ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/DashboardTabKt {
+	public static final synthetic fun DashboardTabProvider (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/dashboard/DashboardTabProvider;
+	public static final synthetic fun DashboardTabProvider (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)Lmisk/web/dashboard/DashboardTabProvider;
+	public static synthetic fun DashboardTabProvider$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/dashboard/DashboardTabProvider;
+	public static synthetic fun DashboardTabProvider$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)Lmisk/web/dashboard/DashboardTabProvider;
 }
 
 public final class misk/web/dashboard/DashboardTabProvider : javax/inject/Provider {
@@ -280,6 +299,10 @@ public final class misk/web/dashboard/DashboardTheme {
 	public final fun getTheme ()Lmisk/web/dashboard/MiskWebTheme;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/DashboardThemeKt {
+	public static final synthetic fun DashboardTheme (Lmisk/web/dashboard/MiskWebTheme;)Lmisk/web/dashboard/DashboardTheme;
 }
 
 public final class misk/web/dashboard/EnvironmentToColorLookup {

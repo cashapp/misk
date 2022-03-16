@@ -2,6 +2,21 @@ public final class misk/warmup/WarmupModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/lang/String;Lcom/google/inject/Key;)V
 }
 
+public final class misk/warmup/WarmupModuleKt {
+	public static final synthetic fun WarmupModule (Lkotlin/reflect/KClass;)Lmisk/warmup/WarmupModule;
+	public static synthetic fun WarmupModule$default (Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/warmup/WarmupModule;
+}
+
+public final class misk/warmup/WarmupRunner : com/google/common/util/concurrent/ServiceManager$Listener, misk/healthchecks/HealthCheck {
+	public static final field Companion Lmisk/warmup/WarmupRunner$Companion;
+	public fun <init> (Lmisk/concurrent/ExecutorServiceFactory;Ljava/util/Map;)V
+	public fun healthy ()V
+	public fun status ()Lmisk/healthchecks/HealthStatus;
+}
+
+public final class misk/warmup/WarmupRunner$Companion {
+}
+
 public abstract class misk/warmup/WarmupTask {
 	public fun <init> ()V
 	public abstract fun execute ()V
