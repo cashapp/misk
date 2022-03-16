@@ -16,6 +16,7 @@ public final class misk/concurrent/FakeScheduledExecutorService : java/util/conc
 	public fun <init> (Ljava/time/Clock;)V
 	public fun awaitTermination (JLjava/util/concurrent/TimeUnit;)Z
 	public fun execute (Ljava/lang/Runnable;)V
+	public final fun getFutures$misk_testing ()Ljava/util/concurrent/PriorityBlockingQueue;
 	public fun invokeAll (Ljava/util/Collection;)Ljava/util/List;
 	public fun invokeAll (Ljava/util/Collection;JLjava/util/concurrent/TimeUnit;)Ljava/util/List;
 	public fun invokeAny (Ljava/util/Collection;)Ljava/lang/Object;
@@ -44,6 +45,7 @@ public final class misk/concurrent/FakeScheduledExecutorService$ScheduledFutureT
 	public final fun getExecuteAt ()J
 	public final fun getTask ()Lkotlin/jvm/functions/Function0;
 	public final fun isRepeated ()Z
+	public final fun reschedule$misk_testing ()V
 	public fun runAndReset ()Z
 	public final fun setExecuteAt (J)V
 }
@@ -96,8 +98,23 @@ public final class misk/logging/LogCollectorModule : misk/inject/KAbstractModule
 public abstract interface class misk/logging/LogCollectorService : com/google/common/util/concurrent/Service {
 }
 
+public final class misk/logging/RealLogCollector : com/google/common/util/concurrent/AbstractIdleService, misk/logging/LogCollectorService, wisp/logging/LogCollector {
+	public fun <init> (Lwisp/logging/WispQueuedLogCollector;)V
+	public fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
+	public fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+	public fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/lang/String;
+	public fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/lang/String;
+	public fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
+	public fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+}
+
 public final class misk/mockito/Mockito {
 	public static final field INSTANCE Lmisk/mockito/Mockito;
+	public final synthetic fun captor ()Lorg/mockito/ArgumentCaptor;
+	public final synthetic fun mock ()Ljava/lang/Object;
+	public final synthetic fun whenever (Ljava/lang/Object;)Lorg/mockito/stubbing/OngoingStubbing;
 }
 
 public final class misk/random/FakeRandom : misk/random/Random {
@@ -159,6 +176,11 @@ public final class misk/testing/ConcurrentMockTracer : io/opentracing/mock/MockT
 }
 
 public final class misk/testing/ExtensionContextExtensionsKt {
+	public static final synthetic fun fieldsAnnotatedBy (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/Iterable;
+	public static final synthetic fun getFromStoreOrCompute (Lorg/junit/jupiter/api/extension/ExtensionContext;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun getRootRequiredTestClass (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/Class;
+	public static final fun getRootRequiredTestInstance (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/Object;
+	public static final synthetic fun retrieve (Lorg/junit/jupiter/api/extension/ExtensionContext;Ljava/lang/String;)Ljava/lang/Object;
 	public static final fun store (Lorg/junit/jupiter/api/extension/ExtensionContext;Ljava/lang/String;Ljava/lang/Object;)V
 }
 
@@ -179,6 +201,47 @@ public abstract interface annotation class misk/testing/MiskExternalDependency :
 
 public abstract interface annotation class misk/testing/MiskTest : java/lang/annotation/Annotation {
 	public abstract fun startService ()Z
+}
+
+public final class misk/testing/MiskTestExtension : org/junit/jupiter/api/extension/AfterEachCallback, org/junit/jupiter/api/extension/BeforeEachCallback {
+	public static final field Companion Lmisk/testing/MiskTestExtension$Companion;
+	public fun <init> ()V
+	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public fun beforeEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+}
+
+public final class misk/testing/MiskTestExtension$Callbacks : org/junit/jupiter/api/extension/AfterEachCallback, org/junit/jupiter/api/extension/BeforeEachCallback {
+	public fun <init> (Ljava/util/Set;Ljava/util/Set;)V
+	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public fun beforeEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+}
+
+public final class misk/testing/MiskTestExtension$Companion {
+}
+
+public final class misk/testing/MiskTestExtension$InjectUninject : org/junit/jupiter/api/extension/AfterEachCallback, org/junit/jupiter/api/extension/BeforeEachCallback {
+	public fun <init> ()V
+	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public fun beforeEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+}
+
+public final class misk/testing/MiskTestExtension$StartServicesBeforeEach : org/junit/jupiter/api/extension/BeforeEachCallback {
+	public field serviceManager Lcom/google/common/util/concurrent/ServiceManager;
+	public fun <init> ()V
+	public fun beforeEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public final fun getServiceManager ()Lcom/google/common/util/concurrent/ServiceManager;
+	public final fun setServiceManager (Lcom/google/common/util/concurrent/ServiceManager;)V
+}
+
+public final class misk/testing/MiskTestExtension$StopServicesAfterEach : org/junit/jupiter/api/extension/AfterEachCallback {
+	public field serviceManager Lcom/google/common/util/concurrent/ServiceManager;
+	public fun <init> ()V
+	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public final fun getServiceManager ()Lcom/google/common/util/concurrent/ServiceManager;
+	public final fun setServiceManager (Lcom/google/common/util/concurrent/ServiceManager;)V
+}
+
+public final class misk/testing/MiskTestExtensionKt {
 }
 
 public abstract interface annotation class misk/testing/MiskTestModule : java/lang/annotation/Annotation {
@@ -310,6 +373,7 @@ public final class misk/web/WebTestClient {
 	public fun <init> (Lcom/squareup/moshi/Moshi;Lmisk/web/jetty/JettyService;)V
 	public final fun call (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun get (Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final synthetic fun post (Ljava/lang/String;Ljava/lang/Object;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun post (Ljava/lang/String;Ljava/lang/Object;Lkotlin/reflect/KClass;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun post (Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;)Lmisk/web/WebTestClient$WebTestResponse;
 	public static synthetic fun post$default (Lmisk/web/WebTestClient;Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;ILjava/lang/Object;)Lmisk/web/WebTestClient$WebTestResponse;
@@ -323,6 +387,7 @@ public final class misk/web/WebTestClient$WebTestResponse {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getResponse ()Lokhttp3/Response;
 	public fun hashCode ()I
+	public final synthetic fun parseJson ()Ljava/lang/Object;
 	public final fun parseJson (Lkotlin/reflect/KClass;)Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
 }
@@ -340,6 +405,7 @@ public final class misk/web/WebTestingModule$Companion {
 
 public final class org/assertj/core/api/AssertExtensionsKt {
 	public static final fun assertOrdering ([Ljava/lang/Comparable;)V
+	public static final synthetic fun containsExactly (Lorg/assertj/core/api/MapAssert;[Lkotlin/Pair;)Lorg/assertj/core/api/MapAssert;
 	public static final fun isEqualToAsJson (Lorg/assertj/core/api/AbstractCharSequenceAssert;Ljava/lang/CharSequence;)Lorg/assertj/core/api/AbstractCharSequenceAssert;
 }
 
