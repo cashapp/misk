@@ -105,6 +105,7 @@ public final class misk/redis/RedisConnectionException : java/lang/RuntimeExcept
 
 public final class misk/redis/RedisModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;)V
+	public final fun provideRedisClient$misk_redis (Lmisk/redis/RedisConfig;)Lmisk/redis/Redis;
 }
 
 public final class misk/redis/RedisNodeConfig {
@@ -136,6 +137,7 @@ public final class misk/redis/RedisReplicationGroupConfig {
 }
 
 public final class misk/redis/RedisService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> (Ljavax/inject/Provider;)V
 }
 
 public final class misk/redis/RedisTestModule : misk/inject/KAbstractModule {

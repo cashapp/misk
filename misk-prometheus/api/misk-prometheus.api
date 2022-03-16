@@ -19,11 +19,38 @@ public final class misk/metrics/backends/prometheus/PrometheusConfig : wisp/conf
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/metrics/backends/prometheus/PrometheusHistogram : misk/metrics/Histogram {
+	public fun <init> (Lio/prometheus/client/Summary;)V
+	public fun count ([Ljava/lang/String;)I
+	public final fun getHistogram ()Lio/prometheus/client/Summary;
+	public fun record (D[Ljava/lang/String;)V
+	public fun timedMills ([Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
 public final class misk/metrics/backends/prometheus/PrometheusHttpService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> (Lmisk/metrics/backends/prometheus/PrometheusConfig;Lio/prometheus/client/CollectorRegistry;)V
+}
+
+public final class misk/metrics/backends/prometheus/PrometheusMetrics : misk/metrics/Metrics {
+	public static final field Companion Lmisk/metrics/backends/prometheus/PrometheusMetrics$Companion;
+	public fun <init> (Lmisk/metrics/v2/Metrics;)V
+	public fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+}
+
+public final class misk/metrics/backends/prometheus/PrometheusMetrics$Companion {
+	public final fun sanitize (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class misk/metrics/backends/prometheus/PrometheusMetricsClientModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+}
+
+public final class misk/metrics/backends/prometheus/PrometheusMetricsClientModule$CollectorRegistryProvider : javax/inject/Provider {
+	public fun <init> ()V
+	public fun get ()Lio/prometheus/client/CollectorRegistry;
+	public synthetic fun get ()Ljava/lang/Object;
 }
 
 public final class misk/metrics/backends/prometheus/PrometheusMetricsModule : misk/inject/KAbstractModule {
@@ -32,6 +59,19 @@ public final class misk/metrics/backends/prometheus/PrometheusMetricsModule : mi
 
 public final class misk/metrics/backends/prometheus/PrometheusMetricsServiceModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/metrics/backends/prometheus/PrometheusConfig;)V
+}
+
+public final class misk/metrics/backends/prometheus/v2/PrometheusMetrics : misk/metrics/v2/Metrics {
+	public static final field Companion Lmisk/metrics/backends/prometheus/v2/PrometheusMetrics$Companion;
+	public fun <init> (Lio/prometheus/client/CollectorRegistry;)V
+	public fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
+	public fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
+}
+
+public final class misk/metrics/backends/prometheus/v2/PrometheusMetrics$Companion {
+	public final fun sanitize (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class misk/metrics/backends/prometheus/v2/PrometheusMetricsClientModule : misk/inject/KAbstractModule {
