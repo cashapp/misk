@@ -3,6 +3,7 @@ public final class wisp/logging/LoggingKt {
 	public static final fun debug (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun error (Lmu/KLogger;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun error (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
+	public static final synthetic fun getLogger ()Lmu/KLogger;
 	public static final fun info (Lmu/KLogger;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun info (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun log (Lmu/KLogger;Lorg/slf4j/event/Level;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V

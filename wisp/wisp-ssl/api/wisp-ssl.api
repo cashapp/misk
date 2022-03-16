@@ -38,7 +38,19 @@ public final class wisp/security/ssl/CertificateAndKey {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class wisp/security/ssl/KeyStoreX509KeyManager : javax/net/ssl/X509ExtendedKeyManager {
+	public fun <init> ([CLjava/security/KeyStore;)V
+	public fun <init> ([CLkotlin/jvm/functions/Function0;)V
+	public fun chooseClientAlias ([Ljava/lang/String;[Ljava/security/Principal;Ljava/net/Socket;)Ljava/lang/String;
+	public fun chooseServerAlias (Ljava/lang/String;[Ljava/security/Principal;Ljava/net/Socket;)Ljava/lang/String;
+	public fun getCertificateChain (Ljava/lang/String;)[Ljava/security/cert/X509Certificate;
+	public fun getClientAliases (Ljava/lang/String;[Ljava/security/Principal;)[Ljava/lang/String;
+	public fun getPrivateKey (Ljava/lang/String;)Ljava/security/PrivateKey;
+	public fun getServerAliases (Ljava/lang/String;[Ljava/security/Principal;)[Ljava/lang/String;
+}
+
 public final class wisp/security/ssl/KeystoreExtensionsKt {
+	public static final synthetic fun aliasesOfType (Ljava/security/KeyStore;)Ljava/util/List;
 	public static final fun aliasesOfType (Ljava/security/KeyStore;Ljava/lang/Class;)Ljava/util/List;
 	public static final fun getCertificateAndKey (Ljava/security/KeyStore;Ljava/lang/String;[C)Lwisp/security/ssl/CertificateAndKey;
 	public static final fun getCertificateAndKey (Ljava/security/KeyStore;[C)Lwisp/security/ssl/CertificateAndKey;
