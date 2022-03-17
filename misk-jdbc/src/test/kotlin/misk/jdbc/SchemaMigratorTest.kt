@@ -264,10 +264,19 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
         |CREATE TABLE table_2 (name varchar(255))
         |""".trimMargin()
     )
+    resourceLoader.put(
+      "${config.migrations_resources!![0]}/v1002__other.sql", """
+        |CREATE TABLE table_3 (name varchar(255))
+        |""".trimMargin()
+    )
 
-    assertThat(assertFailsWith<IllegalArgumentException> {
+    val duplicateFailure = assertFailsWith<IllegalArgumentException> {
       schemaMigrator.requireAll()
-    }).hasMessageContaining("Duplicate migrations found")
+    }
+
+    assertThat(duplicateFailure).hasMessageContaining("Duplicate migrations found")
+    assertThat(duplicateFailure).hasMessageContaining("1001")
+    assertThat(duplicateFailure).hasMessageNotContaining("1002")
   }
 
   @Test fun healthChecks() {

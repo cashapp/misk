@@ -126,10 +126,21 @@ internal class SchemaMigrator(
         .map { NamedspacedMigration.fromResourcePath(it, migrationsResource) }
       migrations.addAll(migrationsFound)
     }
-    migrations.toSortedSet().let {
-      require(it.size == migrations.size) { "Duplicate migrations found $migrations" }
-      return it
+    val migrationMap = TreeMap<NamedspacedMigration, MutableList<NamedspacedMigration>>()
+
+    migrations.forEach {
+      val previousValue = migrationMap[it]
+
+      if (previousValue == null) {
+        migrationMap[it] = mutableListOf(it)
+      } else {
+        previousValue.add(it)
+      }
     }
+
+    val duplicates = migrationMap.values.filter { it.size > 1 }
+    require(duplicates.isEmpty()) { "Duplicate migrations found $duplicates" }
+    return migrationMap.navigableKeySet()
   }
 
   /** Creates the `schema_version` table if it does not exist. Returns the applied migrations. */
