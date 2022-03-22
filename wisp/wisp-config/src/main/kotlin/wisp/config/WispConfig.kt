@@ -1,10 +1,13 @@
 package wisp.config
 
 import com.sksamuel.hoplite.ConfigLoader
-import com.sksamuel.hoplite.InputStreamPropertySource
+import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.json.JsonPropertySource
+import com.sksamuel.hoplite.sources.InputStreamPropertySource
 import com.sksamuel.hoplite.toml.TomlPropertySource
 import com.sksamuel.hoplite.yaml.YamlPropertySource
+import wisp.config.PrefixResourceLoaderPreprocessor.Companion.CLASSPATH_PREFIX
+import wisp.config.PrefixResourceLoaderPreprocessor.Companion.FILESYSTEM_PREFIX
 import wisp.resources.ResourceLoader
 
 /**
@@ -41,7 +44,7 @@ object WispConfig {
    *
    * @return [ConfigLoader.Builder]
    */
-  fun builder(): ConfigLoader.Builder = ConfigLoader.Builder()
+  fun builder(): ConfigLoaderBuilder = ConfigLoader.builder()
 }
 
 /**
@@ -54,13 +57,13 @@ data class ConfigSource(val configLocation: String, val format: String = "yml")
  * Add the config sources in the order supplied. If the config source location does not
  * exist it is silently skipped, i.e. the config locations are optional.
  */
-fun ConfigLoader.Builder.addWispConfigSources(
+fun ConfigLoaderBuilder.addWispConfigSources(
   configSources: List<ConfigSource>,
   resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
-): ConfigLoader.Builder {
+): ConfigLoaderBuilder {
 
-  addPreprocessor(ClasspathResourceLoaderPreprocessor(resourceLoader))
-  addPreprocessor(FilesystemResourceLoaderPreprocessor(resourceLoader))
+  addPreprocessor(PrefixResourceLoaderPreprocessor(CLASSPATH_PREFIX, resourceLoader))
+  addPreprocessor(PrefixResourceLoaderPreprocessor(FILESYSTEM_PREFIX, resourceLoader))
 
   configSources
     .filter {
@@ -79,7 +82,8 @@ fun ConfigLoader.Builder.addWispConfigSources(
           this.addSource(
             InputStreamPropertySource(
               configContents.byteInputStream(Charsets.UTF_8),
-              it.format
+              it.format,
+              it.configLocation
             )
           )
       }
