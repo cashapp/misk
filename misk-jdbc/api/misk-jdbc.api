@@ -492,7 +492,7 @@ public final class misk/jdbc/SchemaMigrator {
 	public final fun appliedMigrations (Lmisk/vitess/Shard;)Ljava/util/SortedSet;
 	public final fun applyAll (Ljava/lang/String;Ljava/util/SortedSet;)Lmisk/jdbc/MigrationState;
 	public final fun availableMigrations (Lmisk/vitess/Keyspace;)Ljava/util/SortedSet;
-	public final fun getShards ()Ljava/util/function/Supplier;
+	public final fun getShards ()Lcom/google/common/base/Supplier;
 	public final fun initialize ()Ljava/util/SortedSet;
 	public final fun requireAll ()Lmisk/jdbc/MigrationState;
 	public final fun requireAll$misk_jdbc (Lmisk/vitess/Shard;)Lmisk/jdbc/ShardMigrationState;
@@ -660,7 +660,7 @@ public final class misk/vitess/ShardKt {
 }
 
 public final class misk/vitess/ShardsKt {
-	public static final fun shards (Lmisk/jdbc/DataSourceService;)Ljava/util/function/Supplier;
+	public static final fun shards (Lmisk/jdbc/DataSourceService;)Lcom/google/common/base/Supplier;
 }
 
 public final class misk/vitess/TabletType : java/lang/Enum {
