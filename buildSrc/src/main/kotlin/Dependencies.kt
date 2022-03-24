@@ -51,7 +51,7 @@ object Dependencies {
   val javaxAnnotation = "javax.annotation:javax.annotation-api:1.3.2"
   val javaxInject = "javax.inject:javax.inject:1"
   val jaxbApi = "javax.xml.bind:jaxb-api:2.3.1"
-  val jedis = "redis.clients:jedis:3.6.1"
+  val jedis = "redis.clients:jedis:4.1.1"
   val jerseyBom = "org.glassfish.jersey:jersey-bom:3.0.2"
   val jettyAlpnJava = "org.eclipse.jetty:jetty-alpn-java-server:9.4.38.v20210224"
   val jettyBom = "org.eclipse.jetty:jetty-bom:9.4.38.v20210224"
