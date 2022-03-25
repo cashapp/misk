@@ -252,6 +252,7 @@ public abstract interface class misk/Chain {
 }
 
 public final class misk/MiskApplication {
+	public fun <init> (Lcom/google/inject/Injector;)V
 	public fun <init> (Ljava/util/List;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> ([Lcom/google/inject/Module;)V
