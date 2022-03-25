@@ -5,6 +5,7 @@ import com.beust.jcommander.ParameterException
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
+import com.google.inject.Injector
 import com.google.inject.Key
 import com.google.inject.Module
 import misk.inject.KAbstractModule
@@ -13,10 +14,18 @@ import misk.web.WebConfig
 import wisp.logging.getLogger
 
 /** The entry point for misk applications */
-class MiskApplication(private val modules: List<Module>, commands: List<MiskCommand> = listOf()) {
+class MiskApplication private constructor(
+  private val injectorGenerator: () -> Injector,
+  commands: List<MiskCommand> = listOf(),
+) {
 
-  constructor(vararg modules: Module) : this(modules.toList())
-  constructor(vararg commands: MiskCommand) : this(listOf(), commands.toList())
+  constructor(vararg modules: Module) : this({ Guice.createInjector(modules.toList()) })
+  constructor(vararg commands: MiskCommand) : this({ Guice.createInjector() }, commands.toList())
+  constructor(
+    modules: List<Module>,
+    commands: List<MiskCommand> = listOf(),
+  ) : this({ Guice.createInjector(modules) }, commands)
+  constructor(injector: Injector) : this({ injector })
 
   private val commands = commands.associateBy { it.name }
   private val jc: JCommander
@@ -85,7 +94,7 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
 
   private fun startServiceAndAwaitTermination() {
     log.info { "creating application injector" }
-    val injector = Guice.createInjector(modules)
+    val injector = injectorGenerator()
     val serviceManager = injector.getInstance<ServiceManager>()
     Runtime.getRuntime().addShutdownHook(object : Thread() {
       override fun run() {
