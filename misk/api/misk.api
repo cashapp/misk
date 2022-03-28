@@ -2450,7 +2450,7 @@ public abstract interface class misk/web/interceptors/ConcurrencyLimiterFactory 
 }
 
 public final class misk/web/interceptors/ConcurrencyLimitsInterceptor : misk/web/NetworkInterceptor {
-	public fun <init> (Lmisk/web/interceptors/ConcurrencyLimitsInterceptor$Factory;Lmisk/Action;Lcom/netflix/concurrency/limits/Limiter;Ljava/time/Clock;)V
+	public fun <init> (Lmisk/web/interceptors/ConcurrencyLimitsInterceptor$Factory;Lmisk/Action;Lcom/netflix/concurrency/limits/Limiter;Ljava/time/Clock;Lorg/slf4j/event/Level;)V
 	public fun intercept (Lmisk/web/NetworkChain;)V
 }
 
