@@ -1,10 +1,18 @@
 public final class misk/feature/testing/FakeFeatureFlags : com/google/common/util/concurrent/AbstractIdleService, misk/feature/DynamicConfig, misk/feature/FeatureFlags, misk/feature/FeatureService {
 	public static final field Companion Lmisk/feature/testing/FakeFeatureFlags$Companion;
 	public static final field KEY Ljava/lang/String;
+	public fun <init> ()V
 	public fun <init> (Ljavax/inject/Provider;)V
+	public fun get (Lwisp/feature/BooleanFeatureFlag;)Z
+	public fun get (Lwisp/feature/DoubleFeatureFlag;)D
+	public fun get (Lwisp/feature/EnumFeatureFlag;)Ljava/lang/Enum;
+	public fun get (Lwisp/feature/IntFeatureFlag;)I
+	public fun get (Lwisp/feature/JsonFeatureFlag;)Ljava/lang/Object;
+	public fun get (Lwisp/feature/StringFeatureFlag;)Ljava/lang/String;
 	public fun getBoolean (Lmisk/feature/Feature;)Z
 	public fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;)Z
 	public fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Z
+	public final fun getDelegate ()Lwisp/feature/testing/FakeFeatureFlags;
 	public fun getDouble (Lmisk/feature/Feature;)D
 	public fun getDouble (Lmisk/feature/Feature;Ljava/lang/String;)D
 	public fun getDouble (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)D
@@ -17,10 +25,14 @@ public final class misk/feature/testing/FakeFeatureFlags : com/google/common/uti
 	public fun getJson (Lmisk/feature/Feature;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;)Ljava/lang/Object;
-	public final fun getMoshi ()Ljavax/inject/Provider;
 	public fun getString (Lmisk/feature/Feature;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;
+	public final synthetic fun override (DLkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlags;
+	public final synthetic fun override (ILkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlags;
+	public final synthetic fun override (Ljava/lang/Enum;Lkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlags;
+	public final synthetic fun override (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlags;
+	public final synthetic fun override (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlags;
 	public final fun override (Lmisk/feature/Feature;D)V
 	public final fun override (Lmisk/feature/Feature;I)V
 	public final fun override (Lmisk/feature/Feature;Ljava/lang/Enum;)V
@@ -28,6 +40,17 @@ public final class misk/feature/testing/FakeFeatureFlags : com/google/common/uti
 	public final fun override (Lmisk/feature/Feature;Ljava/lang/Object;Ljava/lang/Class;)V
 	public final fun override (Lmisk/feature/Feature;Ljava/lang/String;)V
 	public final fun override (Lmisk/feature/Feature;Z)V
+	public final synthetic fun override (ZLkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlags;
+	public static synthetic fun override$default (Lmisk/feature/testing/FakeFeatureFlags;DLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
+	public static synthetic fun override$default (Lmisk/feature/testing/FakeFeatureFlags;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
+	public static synthetic fun override$default (Lmisk/feature/testing/FakeFeatureFlags;Ljava/lang/Enum;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
+	public static synthetic fun override$default (Lmisk/feature/testing/FakeFeatureFlags;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
+	public static synthetic fun override$default (Lmisk/feature/testing/FakeFeatureFlags;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
+	public static synthetic fun override$default (Lmisk/feature/testing/FakeFeatureFlags;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
+	public final fun overrideAny (Ljava/lang/Class;Ljava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
+	public final fun overrideAny (Ljava/lang/Class;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlags;
+	public static synthetic fun overrideAny$default (Lmisk/feature/testing/FakeFeatureFlags;Ljava/lang/Class;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
+	public final synthetic fun overrideJson (Lmisk/feature/Feature;Ljava/lang/Object;)V
 	public final fun overrideJsonString (Lmisk/feature/Feature;Ljava/lang/String;)V
 	public final fun overrideKey (Lmisk/feature/Feature;Ljava/lang/String;D)V
 	public final fun overrideKey (Lmisk/feature/Feature;Ljava/lang/String;DLmisk/feature/Attributes;)V
@@ -49,6 +72,8 @@ public final class misk/feature/testing/FakeFeatureFlags : com/google/common/uti
 	public static synthetic fun overrideKey$default (Lmisk/feature/testing/FakeFeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/String;Lmisk/feature/Attributes;ILjava/lang/Object;)V
 	public static synthetic fun overrideKey$default (Lmisk/feature/testing/FakeFeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;ZLmisk/feature/Attributes;ILjava/lang/Object;)V
 	public final synthetic fun overrideKeyJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Object;)V
+	public final synthetic fun overrideKeyJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Object;Lmisk/feature/Attributes;)V
+	public static synthetic fun overrideKeyJson$default (Lmisk/feature/testing/FakeFeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Object;Lmisk/feature/Attributes;ILjava/lang/Object;)V
 	public final fun reset ()V
 	public fun trackBoolean (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
 	public fun trackBoolean (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
@@ -79,5 +104,15 @@ public final class misk/feature/testing/FakeFeatureFlagsModule : misk/inject/KAb
 	public fun <init> (Lkotlin/reflect/KClass;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun withOverrides (Lkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlagsModule;
+}
+
+public final class misk/feature/testing/FakeFeatureFlagsOverrideModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/feature/testing/FakeFeatureFlagsOverrideModule$FakeFeatureFlagsOverride {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final fun getOverrideLambda ()Lkotlin/jvm/functions/Function1;
 }
 

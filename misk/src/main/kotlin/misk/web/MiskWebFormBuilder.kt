@@ -133,7 +133,7 @@ class MiskWebFormBuilder {
           Int::class.simpleName!!,
           repeated
         )
-        fieldClass == Long::class.javaObjectType -> Field(
+        fieldClass == Long::class.javaObjectType || fieldClass == Long::class.javaPrimitiveType -> Field(
           fieldName,
           Long::class.simpleName!!,
           repeated

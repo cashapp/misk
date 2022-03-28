@@ -1,11 +1,11 @@
 package misk.vitess
 
+import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import misk.jdbc.DataSourceService
 import misk.jdbc.map
 import java.sql.SQLRecoverableException
 import java.util.concurrent.TimeUnit
-import java.util.function.Supplier
 
 fun shards(dataSourceService: DataSourceService): Supplier<Set<Shard>> =
   Suppliers.memoizeWithExpiration({
