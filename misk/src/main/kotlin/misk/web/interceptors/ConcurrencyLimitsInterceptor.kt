@@ -7,11 +7,6 @@ import com.netflix.concurrency.limits.Limiter
 import com.netflix.concurrency.limits.limit.VegasLimit
 import com.netflix.concurrency.limits.limiter.AbstractLimiter
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
-import java.time.Clock
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
-import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.metrics.Metrics
 import misk.web.AvailableWhenDegraded
@@ -22,8 +17,13 @@ import org.slf4j.event.Level
 import wisp.logging.getLogger
 import wisp.logging.log
 import java.net.HttpURLConnection
+import java.time.Clock
 import java.time.Duration
 import java.time.Instant
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.reflect.full.findAnnotation
 
 /**
  * Detects degraded behavior and sheds requests accordingly. Internally this uses adaptive limiting
@@ -54,7 +54,8 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   private val factory: Factory,
   private val action: Action,
   private val defaultLimiter: Limiter<String>,
-  private val clock: Clock
+  private val clock: Clock,
+  private val logLevel: Level
 ) : NetworkInterceptor {
   /**
    * When this fails, it fails a lot. Log at most one error per minute per node and let the
@@ -123,11 +124,11 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     val durationSinceLastErrorMs = nowMs - lastErrorLoggedAtMs
     if (lastErrorLoggedAtMs == -1L || durationSinceLastErrorMs >= durationBetweenErrorsMs) {
       lastErrorLoggedAtMs = nowMs
-      logger.log(level = Level.ERROR) {
+      logger.log(level = logLevel) {
         "concurrency limits interceptor shedding ${action.name}; " +
-            "Quota-Path=$quotaPath; " +
-            "inflight=${(limiter as? AbstractLimiter<*>)?.inflight}; " +
-            "limit=${(limiter as? AbstractLimiter<*>)?.limit}"
+          "Quota-Path=$quotaPath; " +
+          "inflight=${(limiter as? AbstractLimiter<*>)?.inflight}; " +
+          "limit=${(limiter as? AbstractLimiter<*>)?.limit}"
       }
     }
   }
@@ -170,7 +171,8 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
         factory = this,
         action = action,
         defaultLimiter = createLimiterForAction(action, quotaPath = null),
-        clock = clock
+        clock = clock,
+        logLevel = config.concurrency_limiter_log_level
       )
     }
 
@@ -181,13 +183,15 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
         .firstOrNull()
         ?: SimpleLimiter.Builder()
           .clock { Duration.between(Instant.EPOCH, clock.instant()).toNanos() }
-          .limit(VegasLimit.newBuilder()
-            // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints
-            // that receive the majority of traffic (power law, yay!), and those endpoints should
-            // _start up_ without triggering the concurrency limiter at the parallelism that we
-            // configured Jetty to support.
-            .initialLimit(config.jetty_max_thread_pool_size / 2)
-            .build())
+          .limit(
+            VegasLimit.newBuilder()
+              // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints
+              // that receive the majority of traffic (power law, yay!), and those endpoints should
+              // _start up_ without triggering the concurrency limiter at the parallelism that we
+              // configured Jetty to support.
+              .initialLimit(config.jetty_max_thread_pool_size / 2)
+              .build()
+          )
           .named(quotaPath ?: action.name)
           .build()
     }
