@@ -174,7 +174,7 @@ class Composer(private val name: String, private vararg val containers: Containe
     }
   }
 
-  private companion object {
+  companion object {
     private val log = getLogger<Composer>()
     private val defaultDockerClientConfig =
       DefaultDockerClientConfig.createDefaultConfigBuilder().build()
