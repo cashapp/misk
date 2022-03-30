@@ -11,6 +11,7 @@ Breaking changes:
 - Upgrade to use kotlin 1.6 ([#2323](https://github.com/cashapp/misk/pull/2323))
 - Move ActionScope and related code to :misk-action-scopes ([#2301](https://github.com/cashapp/misk/pull/2301))
 - Remove misk.flags.Flags ([#2341](https://github.com/cashapp/misk/pull/2341))
+- misk-metrics: Allow configuring max_age_in_seconds for Prometheus ([#2292](https://github.com/cashapp/misk/pull/2292))
 
 New features:
 
@@ -25,7 +26,6 @@ New features:
 - misk-feature: Make FakeFeatureFlag overrides composable with FakeFeatureFlagsOverrideModule ([#2306](https://github.com/cashapp/misk/pull/2306))
 - misk-feature, wisp-feature: Add strongly typed feature flag support ([#2293](https://github.com/cashapp/misk/pull/2293))
 - misk-feature, wisp-feature: Launch Darkly client will use system proxy settings if provided ([#2255](https://github.com/cashapp/misk/pull/2255))
-- misk-metrics: Allow configuring max_age_in_seconds for Prometheus ([#2292](https://github.com/cashapp/misk/pull/2292))
 - misk-redis: Implement Redis.hincrBy ([#2269](https://github.com/cashapp/misk/pull/2269))
 - misk-zookeeper, wisp-lease: Extend LeaseManager to support Leases as AutoCloseable resources ([#2319](https://github.com/cashapp/misk/pull/2319))
 - wisp-config: Add a filesystem preprocessor ([#2275](https://github.com/cashapp/misk/pull/2275))
