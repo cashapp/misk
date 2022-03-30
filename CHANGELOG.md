@@ -23,7 +23,7 @@ New features:
 - misk-jdbc: Default to use modern TLS in JDBC connections ([#2221](https://github.com/cashapp/misk/pull/2221))
 - misk-hibernate: add support for FlushEntity listener ([#2220](https://github.com/cashapp/misk/pull/2220))
 - misk-feature: Make FakeFeatureFlag overrides composable with FakeFeatureFlagsOverrideModule ([#2306](https://github.com/cashapp/misk/pull/2306))
-- misk-feature: Add strongly typed feature flag support ([#2293](https://github.com/cashapp/misk/pull/2293))
+- misk-feature, wisp-feature: Add strongly typed feature flag support ([#2293](https://github.com/cashapp/misk/pull/2293))
 - misk-feature, wisp-feature: Launch Darkly client will use system proxy settings if provided ([#2255](https://github.com/cashapp/misk/pull/2255))
 - misk-metrics: Allow configuring max_age_in_seconds for Prometheus ([#2292](https://github.com/cashapp/misk/pull/2292))
 - misk-redis: Implement Redis.hincrBy ([#2269](https://github.com/cashapp/misk/pull/2269))
