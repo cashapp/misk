@@ -252,6 +252,7 @@ public abstract interface class misk/Chain {
 }
 
 public final class misk/MiskApplication {
+	public fun <init> (Lcom/google/inject/Injector;)V
 	public fun <init> (Ljava/util/List;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> ([Lcom/google/inject/Module;)V
@@ -980,168 +981,6 @@ public final class misk/environment/RealEnvVarLoader : misk/environment/EnvVarLo
 
 public final class misk/environment/RealEnvVarModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
-}
-
-public abstract interface class misk/flags/Flag {
-	public abstract fun get ()Ljava/lang/Object;
-	public abstract fun getDescription ()Ljava/lang/String;
-	public abstract fun getName ()Ljava/lang/String;
-}
-
-public abstract interface class misk/flags/FlagStore {
-	public abstract fun awaitRegistrationsComplete (JLjava/util/concurrent/TimeUnit;)V
-	public abstract fun registerFlag (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;)Lmisk/flags/Flag;
-}
-
-public final class misk/flags/FlagStoreKt {
-	public static final synthetic fun registerFlag (Lmisk/flags/FlagStore;Ljava/lang/String;Ljava/lang/String;)Lmisk/flags/Flag;
-}
-
-public class misk/flags/Flags {
-	public static final field Companion Lmisk/flags/Flags$Companion;
-	public fun <init> (Ljava/lang/String;Lmisk/flags/Flags$Context;)V
-	public final synthetic fun JsonFlag (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Lmisk/flags/Flags$JsonFlagInternal;
-	public static synthetic fun JsonFlag$default (Lmisk/flags/Flags;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)Lmisk/flags/Flags$JsonFlagInternal;
-	public final fun getContext ()Lmisk/flags/Flags$Context;
-	public final fun getName ()Ljava/lang/String;
-}
-
-public final class misk/flags/Flags$BooleanFlag {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun provideDelegate (Lmisk/flags/Flags;Lkotlin/reflect/KProperty;)Lkotlin/properties/ReadOnlyProperty;
-}
-
-public final class misk/flags/Flags$Companion {
-	public final fun propertyFlagName$misk (Lmisk/flags/Flags;Ljava/lang/String;Lkotlin/reflect/KProperty;)Ljava/lang/String;
-}
-
-public final class misk/flags/Flags$Context {
-	public fun <init> (Ljava/lang/String;Lcom/squareup/moshi/Moshi;Lmisk/flags/FlagStore;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lcom/squareup/moshi/Moshi;
-	public final fun component3 ()Lmisk/flags/FlagStore;
-	public final fun copy (Ljava/lang/String;Lcom/squareup/moshi/Moshi;Lmisk/flags/FlagStore;)Lmisk/flags/Flags$Context;
-	public static synthetic fun copy$default (Lmisk/flags/Flags$Context;Ljava/lang/String;Lcom/squareup/moshi/Moshi;Lmisk/flags/FlagStore;ILjava/lang/Object;)Lmisk/flags/Flags$Context;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFlagStore ()Lmisk/flags/FlagStore;
-	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
-	public final fun getPrefix ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/flags/Flags$DoubleFlag {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;D)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;DILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun provideDelegate (Lmisk/flags/Flags;Lkotlin/reflect/KProperty;)Lkotlin/properties/ReadOnlyProperty;
-}
-
-public final class misk/flags/Flags$IntFlag {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;I)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun provideDelegate (Lmisk/flags/Flags;Lkotlin/reflect/KProperty;)Lkotlin/properties/ReadOnlyProperty;
-}
-
-public final class misk/flags/Flags$JsonFlagInternal {
-	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun provideDelegate (Lmisk/flags/Flags;Lkotlin/reflect/KProperty;)Lkotlin/properties/ReadOnlyProperty;
-}
-
-public final class misk/flags/Flags$StringFlag {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun provideDelegate (Lmisk/flags/Flags;Lkotlin/reflect/KProperty;)Lkotlin/properties/ReadOnlyProperty;
-}
-
-public abstract class misk/flags/FlagsModule : misk/inject/KAbstractModule {
-	public static final field Companion Lmisk/flags/FlagsModule$Companion;
-	public fun <init> ()V
-	public final synthetic fun bindFlag (Ljava/lang/String;Ljava/lang/String;Ljava/lang/annotation/Annotation;)V
-	public final fun bindFlag (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
-	public static synthetic fun bindFlag$default (Lmisk/flags/FlagsModule;Ljava/lang/String;Ljava/lang/String;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
-	public static synthetic fun bindFlag$default (Lmisk/flags/FlagsModule;Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
-	public final synthetic fun bindFlags (Ljava/lang/String;Ljava/lang/annotation/Annotation;)V
-	public final fun bindFlags (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/annotation/Annotation;)V
-	public static synthetic fun bindFlags$default (Lmisk/flags/FlagsModule;Ljava/lang/String;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
-	public static synthetic fun bindFlags$default (Lmisk/flags/FlagsModule;Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
-	public final synthetic fun bindJsonFlag (Ljava/lang/String;Ljava/lang/String;Ljava/lang/annotation/Annotation;)V
-	public final fun bindJsonFlag (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/annotation/Annotation;)V
-	public static synthetic fun bindJsonFlag$default (Lmisk/flags/FlagsModule;Ljava/lang/String;Ljava/lang/String;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
-	public static synthetic fun bindJsonFlag$default (Lmisk/flags/FlagsModule;Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
-	protected fun configure ()V
-	protected abstract fun configureFlags ()V
-}
-
-public final class misk/flags/FlagsModule$Companion {
-}
-
-public final class misk/flags/JsonFlag : misk/flags/Flag {
-	public fun <init> (Lmisk/flags/Flag;Lcom/squareup/moshi/JsonAdapter;)V
-	public fun get ()Ljava/lang/Object;
-	public fun getDescription ()Ljava/lang/String;
-	public fun getName ()Ljava/lang/String;
-}
-
-public final class misk/flags/memory/InMemoryBooleanFlag : misk/flags/memory/InMemoryFlag {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public fun get ()Ljava/lang/Boolean;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun getDescription ()Ljava/lang/String;
-	public fun getName ()Ljava/lang/String;
-	public synthetic fun set (Ljava/lang/Object;)V
-	public fun set (Z)V
-}
-
-public final class misk/flags/memory/InMemoryDoubleFlag : misk/flags/memory/InMemoryFlag {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public fun get ()Ljava/lang/Double;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun getDescription ()Ljava/lang/String;
-	public fun getName ()Ljava/lang/String;
-	public fun set (D)V
-	public synthetic fun set (Ljava/lang/Object;)V
-}
-
-public abstract interface class misk/flags/memory/InMemoryFlag : misk/flags/Flag {
-	public abstract fun set (Ljava/lang/Object;)V
-}
-
-public final class misk/flags/memory/InMemoryFlagStore : misk/flags/FlagStore {
-	public fun <init> ()V
-	public fun awaitRegistrationsComplete (JLjava/util/concurrent/TimeUnit;)V
-	public final fun getBooleanFlags ()Ljava/util/Map;
-	public final fun getDoubleFlags ()Ljava/util/Map;
-	public final fun getFlags ()Ljava/util/Map;
-	public final fun getIntFlags ()Ljava/util/Map;
-	public final fun getStringFlags ()Ljava/util/Map;
-	public synthetic fun registerFlag (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;)Lmisk/flags/Flag;
-	public fun registerFlag (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;)Lmisk/flags/memory/InMemoryFlag;
-}
-
-public final class misk/flags/memory/InMemoryFlagStoreModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
-public final class misk/flags/memory/InMemoryIntFlag : misk/flags/memory/InMemoryFlag {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public fun get ()Ljava/lang/Integer;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun getDescription ()Ljava/lang/String;
-	public fun getName ()Ljava/lang/String;
-	public fun set (I)V
-	public synthetic fun set (Ljava/lang/Object;)V
-}
-
-public final class misk/flags/memory/InMemoryStringFlag : misk/flags/memory/InMemoryFlag {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/lang/String;
-	public fun getDescription ()Ljava/lang/String;
-	public fun getName ()Ljava/lang/String;
-	public synthetic fun set (Ljava/lang/Object;)V
-	public fun set (Ljava/lang/String;)V
 }
 
 public abstract class misk/grpc/GrpcDecoder {
@@ -1969,8 +1808,8 @@ public final class misk/web/WebActionBinding$RealClaimer : misk/web/FeatureBindi
 }
 
 public final class misk/web/WebConfig : wisp/config/Config {
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZI)V
-	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;I)V
+	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component10 ()Ljava/lang/Integer;
 	public final fun component11 ()I
@@ -1985,7 +1824,8 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun component2 ()J
 	public final fun component20 ()Ljava/util/Map;
 	public final fun component21 ()Z
-	public final fun component22 ()I
+	public final fun component22 ()Lorg/slf4j/event/Level;
+	public final fun component23 ()I
 	public final fun component3 ()I
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lmisk/web/WebSslConfig;
@@ -1993,13 +1833,14 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun component7 ()Z
 	public final fun component8 ()Ljava/lang/Integer;
 	public final fun component9 ()Ljava/lang/Integer;
-	public final fun copy (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZI)Lmisk/web/WebConfig;
-	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZIILjava/lang/Object;)Lmisk/web/WebConfig;
+	public final fun copy (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;I)Lmisk/web/WebConfig;
+	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;IILjava/lang/Object;)Lmisk/web/WebConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptors ()Ljava/lang/Integer;
 	public final fun getAction_exception_log_level ()Lmisk/web/exceptions/ActionExceptionLogLevelConfig;
 	public final fun getClose_connection_percent ()D
 	public final fun getConcurrency_limiter_disabled ()Z
+	public final fun getConcurrency_limiter_log_level ()Lorg/slf4j/event/Level;
 	public final fun getCors ()Ljava/util/Map;
 	public final fun getEnable_thread_pool_queue_metrics ()Z
 	public final fun getGzip ()Z
@@ -2447,7 +2288,7 @@ public abstract interface class misk/web/interceptors/ConcurrencyLimiterFactory 
 }
 
 public final class misk/web/interceptors/ConcurrencyLimitsInterceptor : misk/web/NetworkInterceptor {
-	public fun <init> (Lmisk/web/interceptors/ConcurrencyLimitsInterceptor$Factory;Lmisk/Action;Lcom/netflix/concurrency/limits/Limiter;Ljava/time/Clock;)V
+	public fun <init> (Lmisk/web/interceptors/ConcurrencyLimitsInterceptor$Factory;Lmisk/Action;Lcom/netflix/concurrency/limits/Limiter;Ljava/time/Clock;Lorg/slf4j/event/Level;)V
 	public fun intercept (Lmisk/web/NetworkChain;)V
 }
 
