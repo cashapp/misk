@@ -21,7 +21,7 @@ import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
  * starts.
  *
  * Note that this may not be used alongside [DockerDynamoDbModule] and
- * `@MiskExternalResource DockerDynamoDb`. DynamoDB may execute in Docker or in-process, but never
+ * `@MiskExternalDependency DockerDynamoDb`. DynamoDB may execute in Docker or in-process, but never
  * both.
  */
 class InProcessDynamoDbModule(
