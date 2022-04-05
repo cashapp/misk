@@ -1808,6 +1808,8 @@ public final class misk/web/WebActionBinding$RealClaimer : misk/web/FeatureBindi
 }
 
 public final class misk/web/WebConfig : wisp/config/Config {
+	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZI)V
+	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;I)V
 	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
