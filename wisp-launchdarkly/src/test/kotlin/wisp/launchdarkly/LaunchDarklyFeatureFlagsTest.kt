@@ -21,6 +21,7 @@ import org.mockito.Mockito.verify
 import wisp.feature.Attributes
 import wisp.feature.Feature
 import wisp.feature.FeatureFlags
+import wisp.feature.StringFeatureFlag
 import wisp.feature.getEnum
 import wisp.feature.getJson
 import wisp.moshi.defaultKotlinMoshi

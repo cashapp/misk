@@ -108,15 +108,6 @@ public class misk/exceptions/WebActionException : java/lang/RuntimeException {
 	public final fun isServerError ()Z
 }
 
-public abstract interface class misk/scope/ActionScoped {
-	public static final field Companion Lmisk/scope/ActionScoped$Companion;
-	public abstract fun get ()Ljava/lang/Object;
-}
-
-public final class misk/scope/ActionScoped$Companion {
-	public final fun of (Ljava/lang/Object;)Lmisk/scope/ActionScoped;
-}
-
 public abstract interface annotation class misk/security/authz/Authenticated : java/lang/annotation/Annotation {
 	public abstract fun capabilities ()[Ljava/lang/String;
 	public abstract fun services ()[Ljava/lang/String;
@@ -215,9 +206,11 @@ public final class misk/web/WebActionModule : misk/inject/KAbstractModule {
 }
 
 public final class misk/web/WebActionModule$Companion {
+	public final synthetic fun create ()Lmisk/web/WebActionModule;
 	public final fun create (Ljava/lang/Class;)Lmisk/web/WebActionModule;
 	public final fun create (Lkotlin/reflect/KClass;)Lmisk/web/WebActionModule;
 	public final fun createWithPrefix (Ljava/lang/Class;Ljava/lang/String;)Lmisk/web/WebActionModule;
+	public final synthetic fun createWithPrefix (Ljava/lang/String;)Lmisk/web/WebActionModule;
 	public final fun createWithPrefix (Lkotlin/reflect/KClass;Ljava/lang/String;)Lmisk/web/WebActionModule;
 }
 
@@ -256,7 +249,11 @@ public abstract class misk/web/dashboard/ValidWebEntry {
 }
 
 public final class misk/web/dashboard/ValidWebEntry$Companion {
+	public final synthetic fun slugify ()Ljava/lang/String;
 	public final fun slugify (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/ValidWebEntryKt {
 }
 
 public abstract interface annotation class misk/web/interceptors/LogRequestResponse : java/lang/annotation/Annotation {

@@ -48,6 +48,14 @@ public final class wisp/task/RepeatedTaskManager {
 
 public final class wisp/task/RepeatedTaskMetrics {
 	public fun <init> (Lio/micrometer/core/instrument/MeterRegistry;)V
+	public final fun getFailedCount$wisp_task ()Lio/micrometer/core/instrument/Counter;
+	public final fun getNoWorkCount$wisp_task ()Lio/micrometer/core/instrument/Counter;
+	public final fun getSuccessCount$wisp_task ()Lio/micrometer/core/instrument/Counter;
+	public final fun getTaskDuration$wisp_task ()Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun setFailedCount$wisp_task (Lio/micrometer/core/instrument/Counter;)V
+	public final fun setNoWorkCount$wisp_task (Lio/micrometer/core/instrument/Counter;)V
+	public final fun setSuccessCount$wisp_task (Lio/micrometer/core/instrument/Counter;)V
+	public final fun setTaskDuration$wisp_task (Lio/micrometer/core/instrument/DistributionSummary;)V
 }
 
 public final class wisp/task/Status : java/lang/Enum {

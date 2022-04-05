@@ -3,6 +3,7 @@ package misk.web
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
+import org.slf4j.event.Level
 import wisp.config.Config
 
 data class WebConfig(
@@ -89,6 +90,9 @@ data class WebConfig(
 
   /** If true, disables automatic load shedding when degraded. */
   val concurrency_limiter_disabled: Boolean = false,
+
+  /** The level of log when concurrency shedding. */
+  val concurrency_limiter_log_level: Level = Level.ERROR,
 
   /** The number of milliseconds to sleep before commencing service shutdown. */
   val shutdown_sleep_ms: Int = 0,

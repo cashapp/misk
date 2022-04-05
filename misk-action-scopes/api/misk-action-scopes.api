@@ -1,0 +1,76 @@
+public abstract class misk/concurrent/WrappingListeningExecutorService : com/google/common/util/concurrent/ForwardingListeningExecutorService {
+	public fun <init> ()V
+	public fun execute (Ljava/lang/Runnable;)V
+	public fun invokeAll (Ljava/util/Collection;)Ljava/util/List;
+	public fun invokeAll (Ljava/util/Collection;JLjava/util/concurrent/TimeUnit;)Ljava/util/List;
+	public fun invokeAny (Ljava/util/Collection;)Ljava/lang/Object;
+	public fun invokeAny (Ljava/util/Collection;JLjava/util/concurrent/TimeUnit;)Ljava/lang/Object;
+	public fun submit (Ljava/lang/Runnable;)Lcom/google/common/util/concurrent/ListenableFuture;
+	public synthetic fun submit (Ljava/lang/Runnable;)Ljava/util/concurrent/Future;
+	public fun submit (Ljava/lang/Runnable;Ljava/lang/Object;)Lcom/google/common/util/concurrent/ListenableFuture;
+	public synthetic fun submit (Ljava/lang/Runnable;Ljava/lang/Object;)Ljava/util/concurrent/Future;
+	public fun submit (Ljava/util/concurrent/Callable;)Lcom/google/common/util/concurrent/ListenableFuture;
+	public synthetic fun submit (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Future;
+	protected abstract fun wrap (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;
+}
+
+public final class misk/scope/ActionScope : java/lang/AutoCloseable {
+	public static final field Companion Lmisk/scope/ActionScope$Companion;
+	public fun <init> (Ljava/util/Map;)V
+	public fun close ()V
+	public final fun enter (Ljava/util/Map;)Lmisk/scope/ActionScope;
+	public final fun get (Lcom/google/inject/Key;)Ljava/lang/Object;
+	public final fun inScope ()Z
+	public final fun propagate (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;
+	public final fun propagate (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
+	public final fun propagate (Lkotlin/reflect/KFunction;)Lkotlin/reflect/KFunction;
+}
+
+public final class misk/scope/ActionScope$Companion {
+}
+
+public abstract interface class misk/scope/ActionScoped {
+	public static final field Companion Lmisk/scope/ActionScoped$Companion;
+	public abstract fun get ()Ljava/lang/Object;
+}
+
+public final class misk/scope/ActionScoped$Companion {
+	public final fun of (Ljava/lang/Object;)Lmisk/scope/ActionScoped;
+}
+
+public abstract interface class misk/scope/ActionScopedProvider {
+	public abstract fun get ()Ljava/lang/Object;
+}
+
+public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/scope/ActionScopedProviderModule$Companion;
+	public fun <init> ()V
+	public final fun bindProvider (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;Ljava/lang/Class;)V
+	public final fun bindProvider (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
+	public final fun bindProvider (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Class;)V
+	public final fun bindProvider (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
+	public static synthetic fun bindProvider$default (Lmisk/scope/ActionScopedProviderModule;Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
+	public static synthetic fun bindProvider$default (Lmisk/scope/ActionScopedProviderModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
+	public final fun bindSeedData (Lkotlin/reflect/KClass;)V
+	public final fun bindSeedData (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
+	public final fun bindSeedData (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
+	protected fun configure ()V
+	public abstract fun configureProviders ()V
+}
+
+public final class misk/scope/ActionScopedProviderModule$Companion {
+}
+
+public final class misk/scope/RealActionScoped : misk/scope/ActionScoped {
+	public fun <init> (Lcom/google/inject/Key;Lmisk/scope/ActionScope;)V
+	public fun get ()Ljava/lang/Object;
+	public final fun getKey ()Lcom/google/inject/Key;
+	public final fun getScope ()Lmisk/scope/ActionScope;
+}
+
+public final class misk/scope/executor/ActionScopedExecutorService : misk/concurrent/WrappingListeningExecutorService {
+	public fun <init> (Ljava/util/concurrent/ExecutorService;Lmisk/scope/ActionScope;)V
+	public synthetic fun delegate ()Ljava/lang/Object;
+	public synthetic fun delegate ()Ljava/util/concurrent/ExecutorService;
+}
+
