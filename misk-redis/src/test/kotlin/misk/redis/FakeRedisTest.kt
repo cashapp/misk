@@ -92,6 +92,8 @@ class FakeRedisTest {
     assertThat(redis.hget(key2, field2)).isNull()
     assertThat(redis.hgetAll(key1)).isNull()
     assertThat(redis.hgetAll(key2)).isNull()
+    assertThat(redis.hmget(key1, field1)).isEmpty()
+    assertThat(redis.hmget(key2, field1)).isEmpty()
 
     redis.hset(key1, field1, valueKey1Field1)
     redis.hset(key1, field2, valueKey1Field2)
@@ -111,6 +113,14 @@ class FakeRedisTest {
     assertThat(redis.hgetAll(key2)).isEqualTo(mapOf(
       field1 to valueKey2Field1,
       field2 to valueKey2Field2
+    ))
+
+    assertThat(redis.hmget(key1, field1)).isEqualTo(listOf(
+      valueKey1Field1
+    ))
+    assertThat(redis.hmget(key2, field1, field2)).isEqualTo(listOf(
+      valueKey2Field1,
+      valueKey2Field2
     ))
   }
 
