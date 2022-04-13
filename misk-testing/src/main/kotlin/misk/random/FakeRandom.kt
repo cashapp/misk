@@ -13,6 +13,7 @@ class FakeRandom @Inject constructor() : Random() {
 
   override fun nextBoolean(): Boolean = nextBoolean ?: super.nextBoolean()
   override fun nextInt(): Int = nextInt ?: super.nextInt()
+  override fun nextInt(bound: Int): Int = nextInt?.mod(bound) ?: super.nextInt(bound)
   override fun nextLong(): Long = nextLong ?: super.nextLong()
   override fun nextFloat(): Float = nextFloat ?: super.nextFloat()
   override fun nextDouble(): Double = nextDouble ?: super.nextDouble()
