@@ -52,5 +52,13 @@ internal class FakeRandomTest {
         fakeRandom.nextInt(-1)
       }
     }
+
+    @Test
+    fun `nextInt of -1 is invalid`() {
+      fakeRandom.nextInt = -1
+      assertThrows<IllegalArgumentException> {
+        fakeRandom.nextInt(1)
+      }
+    }
   }
 }
