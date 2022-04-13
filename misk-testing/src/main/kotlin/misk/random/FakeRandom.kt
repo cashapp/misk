@@ -13,7 +13,21 @@ class FakeRandom @Inject constructor() : Random() {
 
   override fun nextBoolean(): Boolean = nextBoolean ?: super.nextBoolean()
   override fun nextInt(): Int = nextInt ?: super.nextInt()
-  override fun nextInt(bound: Int): Int = nextInt?.mod(bound) ?: super.nextInt(bound)
+  override fun nextInt(bound: Int): Int {
+    if (nextInt == null) {
+      return super.nextInt(bound)
+    }
+
+    require(bound > 0) {
+      "bound must be positive, but was $bound"
+    }
+
+    require(nextInt!! >= 0) {
+      "nextInt must be non-negative, but was $nextInt"
+    }
+
+    return nextInt!!.mod(bound)
+  }
   override fun nextLong(): Long = nextLong ?: super.nextLong()
   override fun nextFloat(): Float = nextFloat ?: super.nextFloat()
   override fun nextDouble(): Double = nextDouble ?: super.nextDouble()
