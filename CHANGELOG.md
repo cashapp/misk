@@ -1,6 +1,17 @@
 Change Log
 ==========
 
+Version 0.24.0 *(2022-04-13)*
+----------------------------
+
+Unstable public release.
+
+New features and fixes:
+
+- Fill out the Misk BOM ([#2353](https://github.com/cashapp/misk/pull/2353))
+- Restore a deleted WebConfig constructor ([#2352](https://github.com/cashapp/misk/pull/2352))
+- enable kochiku in CI ([#2351](https://github.com/cashapp/misk/pull/2351))
+
 Version 0.23.0 *(2022-03-30)*
 -----------------------------
 
