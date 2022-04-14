@@ -103,6 +103,10 @@ class FakeRedis : Redis {
     }
   }
 
+  override fun hmget(key: String, vararg fields: String): List<ByteString> {
+    return hgetAll(key)?.filter { fields.contains(it.key) }?.values?.toList() ?: emptyList()
+  }
+
   override fun hincrBy(key: String, field: String, increment: Long): Long {
     synchronized(lock) {
       val encodedValue = hget(key, field)?.utf8() ?: "0"

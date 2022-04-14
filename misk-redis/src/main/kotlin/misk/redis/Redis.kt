@@ -66,6 +66,19 @@ interface Redis {
   fun hgetAll(key: String): Map<String, ByteString>?
 
   /**
+   * Retrieve the values associated to the specified fields.
+   *
+   * If some specified fields do not exist, nil values are returned. Non-existing keys are
+   * considered like empty hashes.
+   *
+   * @param key the key
+   * @param fields the specific fields to retrieve
+   * @return a List<ByteString> of the values for the specific fields requested,
+   * in the same order of the request.
+   */
+  fun hmget(key: String, vararg fields: String): List<ByteString>
+
+  /**
    * Increments the number stored at [field] in the hash stored at [key] by [increment]. If [key]
    * does not exist, a new key holding a hash is created. If [field] does not exist the value is
    * set to 0 before the operation is performed.
