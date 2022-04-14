@@ -128,16 +128,16 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
   }
 }
 
-internal val V1Pod.asClusterMember get() = Cluster.Member(metadata!!.name!!, status!!.podIP ?: "")
+private val V1Pod.asClusterMember get() = Cluster.Member(metadata!!.name!!, status!!.podIP ?: "")
 
-internal val V1Pod.isReady: Boolean
+private val V1Pod.isReady: Boolean
   get() {
     if (status!!.containerStatuses == null) return false
     if (status!!.containerStatuses!!.any { !it.ready }) return false
     return status!!.podIP?.isNotEmpty() ?: false
   }
 
-internal val Watch.Response<V1Pod>.pod: V1Pod get() = `object`
+private val Watch.Response<V1Pod>.pod: V1Pod get() = `object`
 
 internal fun Watch.Response<V1Pod>.applyTo(cluster: DefaultCluster) {
   val memberSet = setOf(pod.asClusterMember)
