@@ -7,6 +7,7 @@ import misk.cloud.aws.AwsAccountId
 import misk.cloud.aws.AwsRegion
 import misk.jobqueue.QueueName
 import wisp.logging.getLogger
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,6 +25,7 @@ internal class QueueResolver @Inject internal constructor(
 ) {
   private val forSendingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
   private val forReceivingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
+  private val hostInternalTarget = "host.docker.internal"
 
   fun getForSending(q: QueueName): ResolvedQueue {
     return forSendingMapping.computeIfAbsent(q) { resolve(it, false) }
@@ -53,18 +55,31 @@ internal class QueueResolver @Inject internal constructor(
     checkNotNull(sqs) { "could not find SQS client for ${region.name}" }
 
     val queueUrl = try {
-      sqs.getQueueUrl(
+      val queue_url = sqs.getQueueUrl(
         GetQueueUrlRequest().apply {
           queueName = sqsQueueName.value
           queueOwnerAWSAccountId = accountId.value
         }
       ).queueUrl
+      ensureUrlWithProperTarget(queue_url)
     } catch (e: QueueDoesNotExistException) {
       log.error(e) { "SQS Queue ${sqsQueueName.value} does not exist" }
       throw e
     }
 
     return ResolvedQueue(q, sqsQueueName, queueUrl, region, accountId, sqs)
+  }
+
+  private fun isRunningInDocker() = File("/proc/1/cgroup")
+    .takeIf { it.exists() }?.useLines { lines ->
+      lines.any { it.contains("/docker") }
+    } ?: false
+
+  private fun ensureUrlWithProperTarget(url: String): String {
+    if (isRunningInDocker())
+      return url.replace("localhost", hostInternalTarget).replace("127.0.0.1", hostInternalTarget)
+    else
+      return url
   }
 
   companion object {

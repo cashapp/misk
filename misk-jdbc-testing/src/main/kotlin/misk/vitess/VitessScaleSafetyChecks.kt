@@ -16,6 +16,8 @@ import net.ttddyy.dsproxy.proxy.ProxyConfig
 import net.ttddyy.dsproxy.support.ProxyDataSource
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import wisp.containers.ContainerUtil
+import java.io.File
 import java.sql.Connection
 import java.sql.Timestamp
 import java.util.ArrayDeque
@@ -224,7 +226,7 @@ class VitessScaleSafetyChecks(
    */
   private fun extractScatterQueryCount(): Int {
     val request = Request.Builder()
-      .url("http://localhost:27000/debug/vars")
+      .url("http://${ContainerUtil.dockerTargetOrLocalHost()}:27000/debug/vars")
       .build()
     val adapter = moshi.adapter<Variables>()
     val variables = okHttpClient.newCall(request).execute().use {
