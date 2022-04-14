@@ -7,13 +7,13 @@ import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException
-import java.io.File
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
 import misk.jobqueue.sqs.DockerSqs.clientPort
 import misk.testing.ExternalDependency
 import wisp.containers.Composer
 import wisp.containers.Container
+import wisp.containers.ContainerUtil
 import wisp.logging.getLogger
 
 /**
@@ -23,6 +23,7 @@ internal object DockerSqs : ExternalDependency {
 
   private val log = getLogger<DockerSqs>()
   private const val clientPort = 4100
+  private const val hostInternalTarget = "host.docker.internal"
 
   override fun beforeEach() {
     // noop
@@ -32,7 +33,7 @@ internal object DockerSqs : ExternalDependency {
   override fun afterEach() {
     val queues = client.listQueues()
     queues.queueUrls.forEach {
-      client.deleteQueue(it)
+      client.deleteQueue(ensureUrlWithProperTarget(it))
     }
   }
 
@@ -59,20 +60,15 @@ internal object DockerSqs : ExternalDependency {
     }
   }
 
-  private fun isRunningInDocker() = File("/proc/1/cgroup")
-    .takeIf { it.exists() }?.useLines { lines ->
-      lines.any { it.contains("/docker") }
-    } ?: false
-
-  private fun getTargetHost(): String {
-    if (isRunningInDocker()) 
-      return "host.docker.internal" 
-    else 
-      return "127.0.0.1"
+  private fun ensureUrlWithProperTarget(url: String): String {
+    if (ContainerUtil.isRunningInDocker)
+      return url.replace("localhost", hostInternalTarget).replace("127.0.0.1", hostInternalTarget)
+    else
+      return url
   }
 
   val endpoint = AwsClientBuilder.EndpointConfiguration(
-    "http://${getTargetHost()}:$clientPort",
+    "http://${ContainerUtil.dockerTargetOrLocalIp()}:$clientPort",
     "us-east-1"
   )
 

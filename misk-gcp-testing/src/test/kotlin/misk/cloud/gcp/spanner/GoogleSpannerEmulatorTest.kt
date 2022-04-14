@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import wisp.containers.ContainerUtil
 import wisp.deployment.TESTING
 import java.time.Duration
 import javax.inject.Inject
@@ -33,7 +34,8 @@ class GoogleSpannerEmulatorTest {
     instance_id = "test-instance",
     database = "test-database",
     emulator = SpannerEmulatorConfig(
-      enabled = true
+      enabled = true,
+      hostname = ContainerUtil.dockerTargetOrLocalHost()
     )
   )
 

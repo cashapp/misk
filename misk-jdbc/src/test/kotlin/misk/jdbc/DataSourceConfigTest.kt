@@ -2,6 +2,7 @@ package misk.jdbc
 
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
+import wisp.containers.ContainerUtil
 import kotlin.test.assertEquals
 
 class DataSourceConfigTest {
@@ -9,7 +10,7 @@ class DataSourceConfigTest {
   fun buildVitessJDBCUrlNoSSL() {
     val config = DataSourceConfig(DataSourceType.VITESS_MYSQL)
     assertEquals(
-      "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&sslMode=PREFERRED&" +
         "enabledTLSProtocols=TLSv1.2,TLSv1.3",
@@ -25,7 +26,7 @@ class DataSourceConfigTest {
       trust_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&" +
@@ -43,7 +44,7 @@ class DataSourceConfigTest {
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "clientCertificateKeyStoreUrl=path/to/keystore&clientCertificateKeyStorePassword=" +
@@ -63,7 +64,7 @@ class DataSourceConfigTest {
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&trustCertificateKeyStorePassword=" +
@@ -84,7 +85,7 @@ class DataSourceConfigTest {
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&trustCertificateKeyStorePassword" +
@@ -105,7 +106,7 @@ class DataSourceConfigTest {
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&" +

@@ -12,6 +12,7 @@ import misk.service.CachedTestService
 import misk.zookeeper.ZkClientFactory
 import misk.zookeeper.ZookeeperDefaultModule
 import org.apache.curator.framework.CuratorFramework
+import wisp.containers.ContainerUtil
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.reflect.KClass
@@ -23,7 +24,7 @@ class ZkTestModule(
     val keystorePath = this::class.java.getResource("/zookeeper/keystore.jks").path
     val truststorePath = this::class.java.getResource("/zookeeper/truststore.jks").path
     val config = ZookeeperConfig(
-        zk_connect = "127.0.0.1:$zkPortKey",
+        zk_connect = "${ContainerUtil.dockerTargetOrLocalIp()}:$zkPortKey",
         cert_store = CertStoreConfig(keystorePath, "changeit", SslLoader.FORMAT_JKS),
         trust_store = TrustStoreConfig(truststorePath, "changeit", SslLoader.FORMAT_JKS))
 
