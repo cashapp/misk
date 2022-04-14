@@ -1,5 +1,6 @@
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
 object Dependencies {
+  val apacheCommonsLang3 = "org.apache.commons:commons-lang3:3.11"
   val assertj = "org.assertj:assertj-core:3.20.2"
   val awaitility = "org.awaitility:awaitility-kotlin:4.1.0"
   val aws2Dynamodb = "software.amazon.awssdk:dynamodb:2.17.134"
@@ -118,12 +119,12 @@ object Dependencies {
   val retrofitWire = "com.squareup.retrofit2:converter-wire:2.9.0"
   val servletApi = "javax.servlet:javax.servlet-api:3.1.0"
   val slf4jApi = "org.slf4j:slf4j-api:1.7.32"
-  val tempestTestingDocker = "app.cash.tempest:tempest-testing-docker:1.6.2"
-  val tempestTestingJvm = "app.cash.tempest:tempest-testing-jvm:1.6.2"
-  val tempestTestingInternal = "app.cash.tempest:tempest-testing-internal:1.6.2"
   val tempest2TestingDocker = "app.cash.tempest:tempest2-testing-docker:1.6.2"
-  val tempest2TestingJvm = "app.cash.tempest:tempest2-testing-jvm:1.6.2"
   val tempest2TestingInternal = "app.cash.tempest:tempest2-testing-internal:1.6.2"
+  val tempest2TestingJvm = "app.cash.tempest:tempest2-testing-jvm:1.6.2"
+  val tempestTestingDocker = "app.cash.tempest:tempest-testing-docker:1.6.2"
+  val tempestTestingInternal = "app.cash.tempest:tempest-testing-internal:1.6.2"
+  val tempestTestingJvm = "app.cash.tempest:tempest-testing-jvm:1.6.2"
   val tink = "com.google.crypto.tink:tink:1.6.1"
   val tinkAwskms = "com.google.crypto.tink:tink-awskms:1.6.1"
   val tinkGcpkms = "com.google.crypto.tink:tink-gcpkms:1.6.1"
