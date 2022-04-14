@@ -10,6 +10,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
+	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
@@ -36,6 +37,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
+	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
@@ -61,6 +63,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public abstract fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
+	public abstract fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public abstract fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
 	public abstract fun incr (Ljava/lang/String;)J
 	public abstract fun incrBy (Ljava/lang/String;J)J
