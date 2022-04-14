@@ -11,6 +11,7 @@ import com.github.dockerjava.core.DefaultDockerClientConfig
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import wisp.logging.getLogger
+import java.io.File
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -187,6 +188,27 @@ class Composer(private val name: String, private vararg val containers: Containe
       .build()
     val dockerClient: DockerClient =
       DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
+  }
+}
+
+object ContainerUtil{
+  val isRunningInDocker = File("/proc/1/cgroup")
+    .takeIf { it.exists() }?.useLines { lines ->
+      lines.any { it.contains("/docker") }
+    } ?: false
+
+  fun dockerTargetOrLocalHost(): String {
+    if (isRunningInDocker)
+      return "host.docker.internal"
+    else
+      return "localhost"
+  }
+
+  fun dockerTargetOrLocalIp(): String {
+    if (isRunningInDocker)
+      return "host.docker.internal"
+    else
+      return "127.0.0.1"
   }
 }
 

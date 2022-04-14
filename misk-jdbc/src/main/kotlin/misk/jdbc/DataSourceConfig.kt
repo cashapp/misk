@@ -2,6 +2,7 @@ package misk.jdbc
 
 import wisp.config.Config
 import wisp.deployment.Deployment
+import java.io.File
 import java.time.Duration
 
 /** Defines a type of datasource */
@@ -77,6 +78,14 @@ data class DataSourceConfig(
   val jdbc_statement_batch_size: Int? = null
 ) {
   fun withDefaults(): DataSourceConfig {
+    val isRunningInDocker = File("/proc/1/cgroup")
+      .takeIf { it.exists() }?.useLines { lines ->
+        lines.any { it.contains("/docker") }
+      } ?: false
+    val server_hostname = if (isRunningInDocker)
+        "host.docker.internal"
+      else
+        "127.0.0.1"
     return when (type) {
       DataSourceType.MYSQL -> {
         copy(
@@ -88,14 +97,14 @@ data class DataSourceConfig(
       DataSourceType.TIDB -> {
         copy(
           port = port ?: 4000,
-          host = host ?: "127.0.0.1",
+          host = host ?: server_hostname,
           database = database ?: ""
         )
       }
       DataSourceType.VITESS_MYSQL -> {
         copy(
           port = port ?: 27003,
-          host = host ?: "127.0.0.1",
+          host = host ?: server_hostname,
           database = database ?: "@master"
         )
       }
@@ -106,14 +115,14 @@ data class DataSourceConfig(
         copy(
           username = "root",
           port = port ?: 26257,
-          host = host ?: "127.0.0.1",
+          host = host ?: server_hostname,
           database = database ?: ""
         )
       }
       DataSourceType.POSTGRESQL -> {
         copy(
           port = port ?: 5432,
-          host = host ?: "127.0.0.1",
+          host = host ?: server_hostname,
           database = database ?: ""
         )
       }
