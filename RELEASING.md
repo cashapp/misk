@@ -1,7 +1,7 @@
 Releasing
 =========
 
-1. Update `CHANGELOG.md`.
+1. Checkout a new branch. Update `CHANGELOG.md`.
 
 2. Set versions:
 
@@ -21,7 +21,7 @@ Releasing
       `find . -maxdepth 2 -name "README.md"`
     ```
 
-4. Tag the release and push to GitHub. Merge PR.
+4. Tag the release and push to GitHub. Submit and merge PR.
 
     ```
     git commit -am "Prepare for release $RELEASE_VERSION."
@@ -33,7 +33,7 @@ Releasing
 
     ![Sonatype Release](/img/sonatype-release.gif)
 
-6. Prepare for the next release and push to GitHub. Merge PR.
+6. In a new branch, prepare for the next release and push to GitHub. Submit and merge PR.
 
     ```
     sed -i "" \
