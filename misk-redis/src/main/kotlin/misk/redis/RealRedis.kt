@@ -3,6 +3,8 @@ package misk.redis
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisPool
+import redis.clients.jedis.Pipeline
+import redis.clients.jedis.Transaction
 import redis.clients.jedis.params.SetParams
 import java.time.Duration
 
@@ -44,6 +46,13 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   override fun get(key: String): ByteString? {
     jedisPool.resource.use { jedis ->
       return jedis.get(key.toByteArray(charset))?.toByteString()
+    }
+  }
+
+  override fun hdel(key: String, vararg fields: String): Long {
+    jedisPool.resource.use { jedis ->
+      val fieldsAsByteArrays = fields.map { it.toByteArray(charset) }.toTypedArray()
+      return jedis.hdel(key.toByteArray(charset), *fieldsAsByteArrays)
     }
   }
 
@@ -149,6 +158,30 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
       jedis.pexpireAt(key, timestampMilliseconds)!! == 1L
+    }
+  }
+
+  override fun watch(vararg keys: String) {
+    jedisPool.resource.use { jedis ->
+      jedis.watch(*keys)
+    }
+  }
+
+  override fun unwatch(vararg keys: String) {
+    jedisPool.resource.use { jedis ->
+      jedis.unwatch()
+    }
+  }
+
+  override fun multi(): Transaction {
+    jedisPool.resource.use { jedis ->
+      return jedis.multi()
+    }
+  }
+
+  override fun pipelined(): Pipeline {
+    jedisPool.resource.use { jedis ->
+      return jedis.pipelined()
     }
   }
 
