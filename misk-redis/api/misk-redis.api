@@ -83,7 +83,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun mset ([Lokio/ByteString;)V
 	public abstract fun pExpire (Ljava/lang/String;J)Z
 	public abstract fun pExpireAt (Ljava/lang/String;J)Z
-	ublic abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public abstract fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
