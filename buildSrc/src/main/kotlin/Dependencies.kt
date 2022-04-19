@@ -19,7 +19,7 @@ object Dependencies {
   val dockerTransport = "com.github.docker-java:docker-java-transport-httpclient5:3.2.13"
   val dokkaGradlePlugin = "org.jetbrains.dokka:dokka-gradle-plugin:1.6.10"
   val gcpCloudCore = "com.google.cloud:google-cloud-core:1.95.4"
-  val gcpCloudStorage = "com.google.cloud:google-cloud-storage:1.117.1"
+  val gcpCloudStorage = "com.google.cloud:google-cloud-storage:2.6.0"
   val gcpDatastore = "com.google.cloud:google-cloud-datastore:1.107.1"
   val gcpKms = "com.google.apis:google-api-services-cloudkms:v1-rev20190626-1.30.1"
   val gcpLogback = "com.google.cloud:google-cloud-logging-logback:0.121.3-alpha"
