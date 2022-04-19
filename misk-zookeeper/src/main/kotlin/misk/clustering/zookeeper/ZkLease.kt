@@ -243,7 +243,7 @@ internal class ZkLease(
       status = Status.NOT_HELD
       log.warn { "updating status for lease $name to ${Status.NOT_HELD}; it is held by another process" }
     } else {
-      log.warn { "lease $name is held by another process; skipping acquiring" }
+      log.info { "lease $name is held by another process; skipping acquiring" }
     }
   }
 
