@@ -67,10 +67,10 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  override fun hmget(key: String, vararg fields: String): List<ByteString> {
+  override fun hmget(key: String, vararg fields: String): List<ByteString?> {
     jedisPool.resource.use { jedis ->
       val fieldsAsByteArrays = fields.map { it.toByteArray(charset) }.toTypedArray()
-      return jedis.hmget(key.toByteArray(charset), *fieldsAsByteArrays).map { it.toByteString() }
+      return jedis.hmget(key.toByteArray(charset), *fieldsAsByteArrays).map { it?.toByteString() }
     }
   }
 

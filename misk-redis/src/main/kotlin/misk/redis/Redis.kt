@@ -85,10 +85,10 @@ interface Redis {
    *
    * @param key the key
    * @param fields the specific fields to retrieve
-   * @return a List<ByteString> of the values for the specific fields requested,
-   * in the same order of the request.
+   * @return a List<ByteString?> of the values for the specific fields requested,
+   * in the same order of the request. Null for missing fields
    */
-  fun hmget(key: String, vararg fields: String): List<ByteString>
+  fun hmget(key: String, vararg fields: String): List<ByteString?>
 
   /**
    * Increments the number stored at [field] in the hash stored at [key] by [increment]. If [key]
