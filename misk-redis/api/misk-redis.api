@@ -76,11 +76,11 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
 	public abstract fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public abstract fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
-	public abstract fun multi ()Lredis/clients/jedis/Transaction;
 	public abstract fun incr (Ljava/lang/String;)J
 	public abstract fun incrBy (Ljava/lang/String;J)J
 	public abstract fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public abstract fun mset ([Lokio/ByteString;)V
+	public abstract fun multi ()Lredis/clients/jedis/Transaction;
 	public abstract fun pExpire (Ljava/lang/String;J)Z
 	public abstract fun pExpireAt (Ljava/lang/String;J)Z
 	public abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
