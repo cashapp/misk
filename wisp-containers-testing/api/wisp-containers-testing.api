@@ -24,3 +24,10 @@ public final class wisp/containers/Container {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class wisp/containers/ContainerUtil {
+	public static final field INSTANCE Lwisp/containers/ContainerUtil;
+	public final fun dockerTargetOrLocalHost ()Ljava/lang/String;
+	public final fun dockerTargetOrLocalIp ()Ljava/lang/String;
+	public final fun isRunningInDocker ()Z
+}
+
