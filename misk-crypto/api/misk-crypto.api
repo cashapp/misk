@@ -256,10 +256,6 @@ public final class misk/crypto/Key : wisp/config/Config {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/crypto/KeyAccessModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
 public final class misk/crypto/KeyNotFoundException : java/security/GeneralSecurityException {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V

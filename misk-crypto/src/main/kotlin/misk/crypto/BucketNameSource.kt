@@ -4,7 +4,6 @@ import wisp.deployment.Deployment
 
 /**
  * Bind this to an instance to control how external buckets are referenced.
- *
  */
 interface BucketNameSource {
   /**
