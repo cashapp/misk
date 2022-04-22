@@ -6,7 +6,6 @@ import wisp.deployment.Deployment
  * Bind this to an instance to control how external buckets are referenced.
  *
  */
-@Deprecated("BucketNameSource is no longer supported.")
 interface BucketNameSource {
   /**
    * Name of the bucket that stores keys
