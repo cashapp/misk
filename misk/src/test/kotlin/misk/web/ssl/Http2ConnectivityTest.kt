@@ -143,6 +143,7 @@ class Http2ConnectivityTest {
 
   /** Confirm we don't page oncall when HTTP calls fail due to connectivity problems. */
   @Test
+  @Disabled("Too flaky; sometimes returns a 499 instead")
   fun disconnectWithLargeResponse() {
     client = client.newBuilder()
       .retryOnConnectionFailure(false)
