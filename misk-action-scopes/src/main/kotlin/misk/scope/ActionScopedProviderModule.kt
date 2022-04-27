@@ -9,6 +9,7 @@ import com.squareup.moshi.Types
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.parameterizedType
+import misk.inject.toKey
 import misk.inject.typeLiteral
 import java.lang.reflect.Type
 import javax.inject.Inject
@@ -30,9 +31,25 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     bindSeedData(Key.get(kclass.java), Key.get(actionScopedType(kclass)))
   }
 
+  /** Binds an [ActionScoped] which only pulls from data seeded at the scope entry */
+  fun <T : Any> bindSeedData(type: TypeLiteral<T>) {
+    bindSeedData(
+      type.toKey(),
+      Key.get(Types.newParameterizedType(ActionScoped::class.java, type.type)) as Key<ActionScoped<T>>,
+    )
+  }
+
   /** Binds an annotation qualified [ActionScoped] which only pulls from data seeded at the scope entry */
   fun <T : Any> bindSeedData(kclass: KClass<T>, a: Annotation) {
     bindSeedData(Key.get(kclass.java, a), Key.get(actionScopedType(kclass), a))
+  }
+
+  /** Binds an annotation qualified [ActionScoped] which only pulls from data seeded at the scope entry */
+  fun <T : Any> bindSeedData(type: TypeLiteral<T>, a: Annotation) {
+    bindSeedData(
+      type.toKey(),
+      Key.get(Types.newParameterizedType(ActionScoped::class.java, type.type), a) as Key<ActionScoped<T>>,
+    )
   }
 
   /** Binds an annotation qualified [ActionScoped] which only pulls from data seeded at the scope entry */
