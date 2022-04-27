@@ -7,6 +7,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public final fun getClock ()Ljava/time/Clock;
+	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
@@ -16,13 +17,17 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
+	public fun multi ()Lredis/clients/jedis/Transaction;
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
+	public fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public final fun setClock (Ljava/time/Clock;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun setnx (Ljava/lang/String;Lokio/ByteString;)V
+	public fun unwatch ([Ljava/lang/String;)V
+	public fun watch ([Ljava/lang/String;)V
 }
 
 public final class misk/redis/RealRedis : misk/redis/Redis {
@@ -34,6 +39,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun expire (Ljava/lang/String;J)Z
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
+	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
@@ -43,12 +49,16 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
+	public fun multi ()Lredis/clients/jedis/Transaction;
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
+	public fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun setnx (Ljava/lang/String;Lokio/ByteString;)V
+	public fun unwatch ([Ljava/lang/String;)V
+	public fun watch ([Ljava/lang/String;)V
 }
 
 public final class misk/redis/RealRedis$Companion {
@@ -60,6 +70,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun expire (Ljava/lang/String;J)Z
 	public abstract fun expireAt (Ljava/lang/String;J)Z
 	public abstract fun get (Ljava/lang/String;)Lokio/ByteString;
+	public abstract fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
 	public abstract fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public abstract fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
@@ -69,12 +80,16 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun incrBy (Ljava/lang/String;J)J
 	public abstract fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public abstract fun mset ([Lokio/ByteString;)V
+	public abstract fun multi ()Lredis/clients/jedis/Transaction;
 	public abstract fun pExpire (Ljava/lang/String;J)Z
 	public abstract fun pExpireAt (Ljava/lang/String;J)Z
+	public abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public abstract fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;)V
+	public abstract fun unwatch ([Ljava/lang/String;)V
+	public abstract fun watch ([Ljava/lang/String;)V
 }
 
 public final class misk/redis/RedisConfig : java/util/LinkedHashMap, wisp/config/Config {
