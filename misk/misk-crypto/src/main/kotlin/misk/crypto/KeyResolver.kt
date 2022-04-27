@@ -17,7 +17,9 @@ class ExternalKeyManagerException(message: String) : IOException(message)
  * Optionally, callers can register a callback to be invoked when a key is updated.
  */
 interface KeyResolver {
-
+  /**
+   * All resolved key aliases and their respective KeyTypes.
+   */
   val allKeyAliases: Map<KeyAlias, KeyType>
 
   /**
@@ -25,9 +27,3 @@ interface KeyResolver {
    */
   fun getKeyByAlias(alias: KeyAlias): Key?
 }
-
-/**
- * [ExternalKeyResolver] is used to access keys stored externally from the service.
- * For example, for keys listed in [CryptoConfig.external_data_keys].
- */
-interface ExternalKeyResolver : KeyResolver

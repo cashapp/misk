@@ -10,7 +10,7 @@ import wisp.deployment.Deployment
 import wisp.logging.getLogger
 
 /**
- * [S3KeyResolver] implements an [KeyResolver] that fetches Tink keysets from an S3
+ * [S3KeySource] implements an [ExternalKeySource] that fetches Tink keysets from an S3
  * bucket. Keysets are indexed by an alias and a region, and are encrypted with a key in the KMS
  * using an envelope key encryption scheme. Each Keyset is protected by a KMS key in each service
  * region.
@@ -31,12 +31,12 @@ import wisp.logging.getLogger
  *
  *  If a requested key alias does not exist, this will raise a [ExternalKeyManagerException]
  */
-class S3KeyResolver @Inject constructor(
+class S3KeySource @Inject constructor(
   private val deployment: Deployment,
 
   private val defaultS3: AmazonS3,
 
-  @ExternalDataKeys override val allKeyAliases: Map<KeyAlias, KeyType>,
+  @ExternalDataKeys val allKeyAliases: Map<KeyAlias, KeyType>,
 
   @Inject(optional = true)
   private val bucketNameSource: BucketNameSource = object : BucketNameSource {
@@ -47,15 +47,17 @@ class S3KeyResolver @Inject constructor(
   // in; if BucketNameSource provides a non-standard bucket region, we need to create a new S3
   // client for that bucket, and to do that we need credentials again.
   private val awsCredentials: AWSCredentialsProvider,
-) : ExternalKeyResolver {
+) : ExternalKeySource {
 
   private val s3: AmazonS3 = bucketNameSource.getBucketRegion(deployment)?.let { region ->
-    logger.info("creating S3ExternalKeyManager S3 client for $region")
-    AmazonS3ClientBuilder
-      .standard()
-      .withRegion(region)
-      .withCredentials(awsCredentials)
-      .build()
+    if (region != defaultS3.regionName) {
+      logger.info("creating S3ExternalKeyManager S3 client for $region")
+      AmazonS3ClientBuilder
+        .standard()
+        .withRegion(region)
+        .withCredentials(awsCredentials)
+        .build()
+    } else null
   } ?: defaultS3
 
   // N.B. The path we're using for the object is based on _our_ region, not where the bucket lives
@@ -93,14 +95,16 @@ class S3KeyResolver @Inject constructor(
     retrievedKeys
   }
 
-  override fun getKeyByAlias(alias: KeyAlias) = keys[alias]
-
   companion object {
     private const val METADATA_KEY_KMS_ARN = "kms-key-arn"
 
     private const val METADATA_KEY_KEY_TYPE = "key-type"
 
-    private val logger = getLogger<S3KeyResolver>()
+    private val logger = getLogger<S3KeySource>()
   }
+
+  override fun keyExists(alias: KeyAlias) = keys.containsKey(alias)
+
+  override fun getKey(alias: KeyAlias) = keys[alias]
 
 }
