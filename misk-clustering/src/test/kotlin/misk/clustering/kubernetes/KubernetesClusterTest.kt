@@ -2,10 +2,10 @@ package misk.clustering.kubernetes
 
 import com.google.inject.Module
 import com.google.inject.util.Modules
-import io.kubernetes.client.models.V1ContainerStatus
-import io.kubernetes.client.models.V1ObjectMeta
-import io.kubernetes.client.models.V1Pod
-import io.kubernetes.client.models.V1PodStatus
+import io.kubernetes.client.openapi.models.V1ContainerStatus
+import io.kubernetes.client.openapi.models.V1ObjectMeta
+import io.kubernetes.client.openapi.models.V1Pod
+import io.kubernetes.client.openapi.models.V1PodStatus
 import io.kubernetes.client.util.Watches
 import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
@@ -335,16 +335,16 @@ internal class KubernetesClusterTest {
 
   private fun newPod(name: String, isReady: Boolean = false, ipAddress: String? = null): V1Pod {
     val containerStatus = V1ContainerStatus()
-    containerStatus.isReady = isReady
+    containerStatus.ready = isReady
     containerStatus.name = TEST_NAMESPACE
 
     val pod = V1Pod()
     pod.metadata = V1ObjectMeta()
-    pod.metadata.namespace = TEST_NAMESPACE
-    pod.metadata.name = name
+    pod.metadata!!.namespace = TEST_NAMESPACE
+    pod.metadata!!.name = name
     pod.status = V1PodStatus()
-    pod.status.containerStatuses = listOf(containerStatus)
-    pod.status.podIP = ipAddress
+    pod.status!!.containerStatuses = listOf(containerStatus)
+    pod.status!!.podIP = ipAddress
     return pod
   }
 

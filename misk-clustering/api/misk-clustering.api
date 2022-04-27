@@ -170,9 +170,6 @@ public final class misk/clustering/kubernetes/KubernetesClusterWatcher$Companion
 
 public final class misk/clustering/kubernetes/KubernetesClusterWatcherKt {
 	public static final fun applyTo (Lio/kubernetes/client/util/Watch$Response;Lmisk/clustering/DefaultCluster;)V
-	public static final fun getAsClusterMember (Lio/kubernetes/client/models/V1Pod;)Lmisk/clustering/Cluster$Member;
-	public static final fun getPod (Lio/kubernetes/client/util/Watch$Response;)Lio/kubernetes/client/models/V1Pod;
-	public static final fun isReady (Lio/kubernetes/client/models/V1Pod;)Z
 }
 
 public final class misk/clustering/kubernetes/KubernetesConfig : wisp/config/Config {

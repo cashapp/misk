@@ -3,8 +3,8 @@ package misk.clustering.kubernetes
 import com.google.common.base.Stopwatch
 import com.google.common.reflect.TypeToken
 import com.google.common.util.concurrent.AbstractIdleService
-import io.kubernetes.client.apis.CoreV1Api
-import io.kubernetes.client.models.V1Pod
+import io.kubernetes.client.openapi.apis.CoreV1Api
+import io.kubernetes.client.openapi.models.V1Pod
 import io.kubernetes.client.util.Config
 import io.kubernetes.client.util.Watch
 import misk.backoff.ExponentialBackoff
@@ -50,8 +50,10 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
 
   private fun watchCluster() {
     val client = Config.defaultClient()
-    client.httpClient.setReadTimeout(config.kubernetes_watch_read_timeout, TimeUnit.SECONDS)
-    client.httpClient.setConnectTimeout(config.kubernetes_connect_timeout, TimeUnit.SECONDS)
+    client.httpClient = client.httpClient.newBuilder()
+      .readTimeout(config.kubernetes_watch_read_timeout, TimeUnit.SECONDS)
+      .connectTimeout(config.kubernetes_connect_timeout, TimeUnit.SECONDS)
+      .build()
 
     val api = CoreV1Api(client)
     val connectBackoff = ExponentialBackoff(Duration.ofMillis(100), Duration.ofSeconds(5))
@@ -63,17 +65,17 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
           client,
           api.listNamespacedPodCall(
             config.my_pod_namespace, // namespace
-            null, // pretty
+            null, // pretty,
+            false, // allowWatchBookmarks
             null, // _continue
             null, // fieldSelector
-            false, // includeUninitialized
             config.clustering_pod_label_selector, // labelSelector
             null, // limit
             null, // resourceVersion
+            null, // resourceVersionMatch
             null, // timeoutSeconds
             true, // watch
-            null, // progressListener
-            null // progressRequestListener
+            null, // _callback
           ),
           podType
         )
@@ -126,16 +128,16 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
   }
 }
 
-internal val V1Pod.asClusterMember get() = Cluster.Member(metadata.name, status.podIP ?: "")
+private val V1Pod.asClusterMember get() = Cluster.Member(metadata!!.name!!, status!!.podIP ?: "")
 
-internal val V1Pod.isReady: Boolean
+private val V1Pod.isReady: Boolean
   get() {
-    if (status.containerStatuses == null) return false
-    if (status.containerStatuses.any { !it.isReady }) return false
-    return status.podIP?.isNotEmpty() ?: false
+    if (status!!.containerStatuses == null) return false
+    if (status!!.containerStatuses!!.any { !it.ready }) return false
+    return status!!.podIP?.isNotEmpty() ?: false
   }
 
-internal val Watch.Response<V1Pod>.pod: V1Pod get() = `object`
+private val Watch.Response<V1Pod>.pod: V1Pod get() = `object`
 
 internal fun Watch.Response<V1Pod>.applyTo(cluster: DefaultCluster) {
   val memberSet = setOf(pod.asClusterMember)

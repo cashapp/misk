@@ -84,7 +84,7 @@ object Dependencies {
   val kotlinStdLibJdk8 = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10"
   val kotlinTest = "org.jetbrains.kotlin:kotlin-test:1.6.10"
   val kotlinxCoroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3"
-  val kubernetesClient = "io.kubernetes:client-java:1.0.0"
+  val kubernetesClient = "io.kubernetes:client-java:14.0.0"
   val launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:5.3.0"
   val logbackClassic = "ch.qos.logback:logback-classic:1.2.3"
   val loggingApi = "io.github.microutils:kotlin-logging:2.0.10"
