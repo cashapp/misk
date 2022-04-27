@@ -51,6 +51,8 @@ public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstr
 	public final fun bindProvider (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
 	public static synthetic fun bindProvider$default (Lmisk/scope/ActionScopedProviderModule;Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
 	public static synthetic fun bindProvider$default (Lmisk/scope/ActionScopedProviderModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
+	public final fun bindSeedData (Lcom/google/inject/TypeLiteral;)V
+	public final fun bindSeedData (Lcom/google/inject/TypeLiteral;Ljava/lang/annotation/Annotation;)V
 	public final fun bindSeedData (Lkotlin/reflect/KClass;)V
 	public final fun bindSeedData (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
 	public final fun bindSeedData (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
