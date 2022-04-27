@@ -1,0 +1,38 @@
+name: Publish a released artifact
+
+on:
+  pull_request:
+  push:
+    branches:
+      - mgersh.closeandreleasetask
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Configure JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Set gradle publish version
+        run: |
+          sed --in-place -e "s/-SNAPSHOT/-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)/" gradle.properties
+          cat gradle.properties
+
+      - name: Publish the artifacts
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
+        run: ./gradlew closeAndReleaseRepository
