@@ -1,10 +1,6 @@
-name: Publish a released artifact
+name: Publish a built artifact
 
-on:
-  pull_request:
-  push:
-    branches:
-      - mgersh.closeandreleasetask
+on: workflow_dispatch
 
 env:
   GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
@@ -24,11 +20,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-
-      - name: Set gradle publish version
-        run: |
-          sed --in-place -e "s/-SNAPSHOT/-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)/" gradle.properties
-          cat gradle.properties
 
       - name: Publish the artifacts
         env:
