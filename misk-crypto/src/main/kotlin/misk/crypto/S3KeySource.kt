@@ -33,11 +33,8 @@ import wisp.logging.getLogger
  */
 class S3KeySource @Inject constructor(
   private val deployment: Deployment,
-
-  private val defaultS3: AmazonS3,
-
+  defaultS3: AmazonS3,
   @ExternalDataKeys val allKeyAliases: Map<KeyAlias, KeyType>,
-
   @Inject(optional = true)
   private val bucketNameSource: BucketNameSource = object : BucketNameSource {
     override fun getBucketName(deployment: Deployment) = deployment.mapToEnvironmentName()
@@ -65,7 +62,7 @@ class S3KeySource @Inject constructor(
     if (type === KeyType.HYBRID_ENCRYPT) {
       return "$alias/public"
     }
-    return "$alias/${defaultS3.regionName.toLowerCase()}"
+    return "$alias/${s3.regionName.toLowerCase()}"
   }
 
   private fun getRemoteKey(alias: KeyAlias, type: KeyType): Key {
