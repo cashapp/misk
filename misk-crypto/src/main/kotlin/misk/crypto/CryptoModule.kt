@@ -96,7 +96,7 @@ class CryptoModule(
       newMultibinder<ExternalKeySource>()
       multibind<ExternalKeySource>().to<S3KeySource>()
 
-      keyManagerBinder.addBinding().to<ExternalKeyResolver>()
+      keyManagerBinder.addBinding().to<ExternalKeyResolver>().asEagerSingleton()
 
       val internalAndExternal = keyNames.intersect(externalDataKeys.keys)
       check(internalAndExternal.isEmpty()) {
