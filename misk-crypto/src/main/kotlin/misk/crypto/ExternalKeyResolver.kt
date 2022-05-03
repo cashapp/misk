@@ -19,7 +19,7 @@ class ExternalKeyResolver @Inject constructor(
 
   private fun getRemoteKey(alias: KeyAlias): Key {
     for (keySource in externalKeySources) {
-      logger.info("checking ${keySource.javaClass.name} for $alias")
+      logger.info("getRemoteKey: checking ${keySource::class.qualifiedName} for $alias")
       if (keySource.keyExists(alias)) {
         keySource.getKey(alias)?.let { return it }
         logger.warn("$alias is reported to exist, but not able to retrieve; continuing")
