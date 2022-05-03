@@ -59,10 +59,11 @@ class S3KeySource @Inject constructor(
 
   // N.B. The path we're using for the object is based on _our_ region, not where the bucket lives
   private fun objectPath(alias: String): String {
-    val basename = if (allKeyAliases[alias] == KeyType.HYBRID_ENCRYPT)
+    val basename = if (allKeyAliases[alias] == KeyType.HYBRID_ENCRYPT) {
       "public"
-    else
+    } else {
       s3.regionName.lowercase()
+    }
 
     return "$alias/$basename"
   }
