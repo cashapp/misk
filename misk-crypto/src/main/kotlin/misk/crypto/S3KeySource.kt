@@ -58,15 +58,24 @@ class S3KeySource @Inject constructor(
   } ?: defaultS3
 
   // N.B. The path we're using for the object is based on _our_ region, not where the bucket lives
-  private fun objectPath(alias: String, type: KeyType): String {
-    if (type === KeyType.HYBRID_ENCRYPT) {
-      return "$alias/public"
+  private fun objectPath(alias: String): String {
+    val basename = if (allKeyAliases[alias] == KeyType.HYBRID_ENCRYPT) {
+      "public"
+    } else {
+      s3.regionName.lowercase()
     }
-    return "$alias/${s3.regionName.toLowerCase()}"
+
+    return "$alias/$basename"
   }
 
-  private fun getRemoteKey(alias: KeyAlias, type: KeyType): Key {
-    val path = objectPath(alias, type)
+  override fun keyExists(alias: KeyAlias): Boolean {
+    val path = objectPath(alias)
+    val name = bucketNameSource.getBucketName(deployment)
+    return s3.doesObjectExist(name, path)
+  }
+
+  override fun getKey(alias: KeyAlias): Key {
+    val path = objectPath(alias)
     val name = bucketNameSource.getBucketName(deployment)
     try {
       val obj = s3.getObject(name, path)
@@ -74,27 +83,13 @@ class S3KeySource @Inject constructor(
       val kmsArn = obj.objectMetadata.getUserMetaDataOf(METADATA_KEY_KMS_ARN)
       val keyTypeDescription = obj.objectMetadata.getUserMetaDataOf(METADATA_KEY_KEY_TYPE)
 
-      val keyType = KeyType.valueOf(keyTypeDescription.toUpperCase())
-      if (keyType != type) {
-        throw ExternalKeyManagerException("type provided does not match type of remote key")
-      }
+      val keyType = KeyType.valueOf(keyTypeDescription.uppercase())
 
       val keyContents = obj.objectContent.readAllBytes().toString(Charsets.UTF_8)
       return Key(alias, keyType, MiskConfig.RealSecret(keyContents), kmsArn)
     } catch (ex: AmazonS3Exception) {
       throw ExternalKeyManagerException("key alias not accessible: $alias (bucket '$name', $ex)")
     }
-  }
-
-  // Injector tests initialize key managers in non-native environments, so we delegate creation
-  // until needed.
-  private val keys: LinkedHashMap<String, Key> by lazy {
-    val retrievedKeys = linkedMapOf<String, Key>()
-    allKeyAliases.mapValues { (alias, type) ->
-      logger.info { "registering external key: $alias" }
-      getRemoteKey(alias, type)
-    }.toMap(retrievedKeys)
-    retrievedKeys
   }
 
   companion object {
@@ -104,9 +99,4 @@ class S3KeySource @Inject constructor(
 
     private val logger = getLogger<S3KeySource>()
   }
-
-  override fun keyExists(alias: KeyAlias) = keys.containsKey(alias)
-
-  override fun getKey(alias: KeyAlias) = keys[alias]
-
 }
