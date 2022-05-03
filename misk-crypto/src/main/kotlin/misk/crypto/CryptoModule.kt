@@ -24,7 +24,6 @@ import misk.crypto.pgp.PgpDecrypterProvider
 import misk.crypto.pgp.PgpEncrypter
 import misk.crypto.pgp.PgpEncrypterProvider
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.bouncycastle.jce.provider.BouncyCastleProvider
