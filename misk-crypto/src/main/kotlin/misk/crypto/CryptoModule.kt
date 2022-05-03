@@ -24,6 +24,7 @@ import misk.crypto.pgp.PgpDecrypterProvider
 import misk.crypto.pgp.PgpEncrypter
 import misk.crypto.pgp.PgpEncrypterProvider
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -96,7 +97,7 @@ class CryptoModule(
       newMultibinder<ExternalKeySource>()
       multibind<ExternalKeySource>().to<S3KeySource>()
 
-      keyManagerBinder.addBinding().to<ExternalKeyResolver>().asEagerSingleton()
+      keyManagerBinder.addBinding().to<ExternalKeyResolver>().`in`(Singleton::class.java)
 
       val internalAndExternal = keyNames.intersect(externalDataKeys.keys)
       check(internalAndExternal.isEmpty()) {

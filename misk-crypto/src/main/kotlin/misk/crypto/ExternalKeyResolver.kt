@@ -26,8 +26,6 @@ class ExternalKeyResolver @Inject constructor(
           return it
         }
         logger.warn("$alias is reported to exist, but not able to retrieve; continuing")
-      } else {
-        logger.info("getRemoteKey: ${keySource::class.qualifiedName} doesn't have the key")
       }
     }
 
