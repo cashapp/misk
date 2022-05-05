@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
+  implementation(Dependencies.prometheusClient)
   // TODO: these should be implementation("com.squareup.misk:*")
   implementation(project(":misk"))
   implementation(project(":misk-actions"))

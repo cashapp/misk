@@ -14,11 +14,17 @@ import javax.inject.Provider
  * Binds a [Metrics] implementation whose metrics don't write to a Prometheus infrastructure. For
  * that you should install [PrometheusMetricsServiceModule].
  */
-class PrometheusMetricsClientModule : KAbstractModule() {
+class PrometheusMetricsClientModule(
+    private val collectorRegistry: CollectorRegistry? = null
+) : KAbstractModule() {
   override fun configure() {
     bind<HistogramRegistry>().to<PrometheusHistogramRegistry>()
     bind<Metrics>().to<PrometheusMetrics>()
-    bind<CollectorRegistry>().toProvider(CollectorRegistryProvider::class.java).asSingleton()
+    if (collectorRegistry == null) {
+      bind<CollectorRegistry>().toProvider(CollectorRegistryProvider::class.java).asSingleton()
+    } else {
+      bind<CollectorRegistry>().toInstance(collectorRegistry)
+    }
 
     install(PrometheusMetricsClientModuleV2())
   }

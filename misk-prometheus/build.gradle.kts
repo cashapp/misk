@@ -6,6 +6,7 @@ plugins {
 dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.loggingApi)
+  implementation(Dependencies.prometheusClient)
   implementation(Dependencies.prometheusHttpserver)
   implementation(Dependencies.prometheusHotspot)
   implementation(project(":misk-core"))

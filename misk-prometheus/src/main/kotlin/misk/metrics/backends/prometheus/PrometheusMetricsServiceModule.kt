@@ -20,9 +20,12 @@ import javax.inject.Inject
  * the prometheus operator, one would generally create a k8s ClusterIP service exporting the
  * metrics port, then a prometheus ServiceMonitor selecting that service via a label.
  */
-class PrometheusMetricsServiceModule(private val config: PrometheusConfig) : KAbstractModule() {
+class PrometheusMetricsServiceModule(
+    private val config: PrometheusConfig,
+    private val collectorRegistry: CollectorRegistry? = null
+) : KAbstractModule() {
   override fun configure() {
-    install(PrometheusMetricsClientModule())
+    install(PrometheusMetricsClientModule(collectorRegistry))
 
     bind<PrometheusConfig>().toInstance(config)
     install(ServiceModule<PrometheusHttpService>())

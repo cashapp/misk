@@ -45,6 +45,8 @@ public final class misk/metrics/backends/prometheus/PrometheusMetrics$Companion 
 
 public final class misk/metrics/backends/prometheus/PrometheusMetricsClientModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Lio/prometheus/client/CollectorRegistry;)V
+	public synthetic fun <init> (Lio/prometheus/client/CollectorRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/metrics/backends/prometheus/PrometheusMetricsClientModule$CollectorRegistryProvider : javax/inject/Provider {
@@ -58,7 +60,8 @@ public final class misk/metrics/backends/prometheus/PrometheusMetricsModule : mi
 }
 
 public final class misk/metrics/backends/prometheus/PrometheusMetricsServiceModule : misk/inject/KAbstractModule {
-	public fun <init> (Lmisk/metrics/backends/prometheus/PrometheusConfig;)V
+	public fun <init> (Lmisk/metrics/backends/prometheus/PrometheusConfig;Lio/prometheus/client/CollectorRegistry;)V
+	public synthetic fun <init> (Lmisk/metrics/backends/prometheus/PrometheusConfig;Lio/prometheus/client/CollectorRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/metrics/backends/prometheus/v2/PrometheusMetrics : misk/metrics/v2/Metrics {
