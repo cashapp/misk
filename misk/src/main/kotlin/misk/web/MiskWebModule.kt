@@ -169,6 +169,8 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
       .to<RequestBodyLoggingInterceptor.Factory>()
 
+    newMultibinder<HttpActionScopeSeedDataInterceptor>()
+
     install(ExceptionMapperModule.create<WebActionException, WebActionExceptionMapper>())
     install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
     install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())

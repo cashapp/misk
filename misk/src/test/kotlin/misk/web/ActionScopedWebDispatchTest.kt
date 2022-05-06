@@ -1,7 +1,10 @@
 package misk.web
 
+import com.google.inject.Key
+import misk.Action
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.inject.keyOf
 import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
@@ -38,6 +41,20 @@ internal class ActionScopedWebDispatchTest {
     assertThat(response.body!!.string()).isEqualTo("hello Thor")
   }
 
+  @Test
+  fun actionScopeSeedDataCanBeModified() {
+    val httpClient = OkHttpClient()
+    val response = httpClient.newCall(
+      okhttp3.Request.Builder()
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/hello").build())
+        .addHeader("Principal-Seed", "Thor")
+        .build()
+    )
+      .execute()
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body!!.string()).isEqualTo("hello Thor")
+  }
+
   @Singleton
   class FakeIdentityActionScopedProvider @Inject internal constructor(
     private val httpCall: ActionScoped<HttpCall>
@@ -49,7 +66,7 @@ internal class ActionScopedWebDispatchTest {
 
   @Singleton
   class Hello @Inject internal constructor(
-    private val principal: @JvmSuppressWildcards ActionScoped<Principal>
+    private val principal: ActionScoped<Principal>
   ) : WebAction {
     @Get("/hello")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -66,6 +83,19 @@ internal class ActionScopedWebDispatchTest {
           bindProvider(Principal::class, FakeIdentityActionScopedProvider::class)
         }
       })
+      val principalSeeder = object : HttpActionScopeSeedDataInterceptor {
+        override fun intercept(
+          seedData: Map<Key<*>, Any?>,
+          pathPattern: PathPattern,
+          action: Action
+        ): Map<Key<*>, Any?> {
+          val httpCall = seedData.getValue(keyOf<HttpCall>()) as HttpCall
+          val principalSeed = httpCall.requestHeaders["Principal-Seed"] ?: return seedData
+          val principal = Principal { principalSeed }
+          return seedData + mapOf(Key.get(Principal::class.java) to principal)
+        }
+      }
+      multibind<HttpActionScopeSeedDataInterceptor>().toInstance(principalSeeder)
     }
   }
 }
