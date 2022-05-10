@@ -9,9 +9,21 @@ dependencies {
   implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)
   implementation(Dependencies.awsDynamodb)
-  implementation(Dependencies.tempestTestingJvm)
+
+  // tempest uses old log4j
+  implementation(Dependencies.tempestTestingInternal) {
+    exclude("org.apache.logging.log4j", "log4j-core")
+    exclude("org.apache.logging.log4j", "log4j-api")
+  }
+  // tempest uses old log4j
+  implementation(Dependencies.tempestTestingJvm) {
+    exclude("org.apache.logging.log4j")
+  }
   implementation(Dependencies.tempestTestingDocker)
-  implementation(Dependencies.tempestTestingInternal)
+  // for tempest...
+  implementation("org.apache.logging.log4j:log4j-core:2.17.2")
+  implementation("org.apache.logging.log4j:log4j-api:2.17.2")
+
   implementation(project(":misk-aws-dynamodb"))
   api(project(":misk"))
   api(project(":misk-aws"))

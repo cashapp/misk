@@ -67,9 +67,7 @@ abstract class KAbstractModule : AbstractModule() {
   ): Multibinder<T> {
     val setOfT = parameterizedType<Set<*>>(type.java).typeLiteral() as TypeLiteral<Set<T>>
     val mutableSetOfTKey = setOfT.toKey(annotation) as Key<MutableSet<T>>
-    val setOfOutT =
-      parameterizedType<Set<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<Set<T>>
-    val setOfOutTKey = setOfOutT.toKey(annotation)
+    // As of Guice 5.1, Set<? out T> is now bound.
     val listOfT = parameterizedType<List<*>>(type.java).typeLiteral() as TypeLiteral<List<T>>
     val listOfOutT =
       parameterizedType<List<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<List<T>>
@@ -78,7 +76,6 @@ abstract class KAbstractModule : AbstractModule() {
     bind(listOfOutTKey).toProvider(
       ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey))
     )
-    bind(setOfOutTKey).to(setOfT.toKey(annotation))
     bind(listOfTKey).to(listOfOutTKey)
 
     return when (annotation) {
@@ -103,11 +100,10 @@ abstract class KAbstractModule : AbstractModule() {
     annotation: KClass<out Annotation>? = null
   ): MapBinder<K, V> {
     val mapOfKV = mapOfType(keyType, valueType).toKey(annotation)
-    val mapOfKOutV = mapOfType<K, V>(keyType.type, valueType.subtype()).toKey(annotation)
+    // As of Guice 5.1, Map<K, ? out V> is now bound.
     val mapOfOutKV = mapOfType<K, V>(keyType.subtype(), valueType.type).toKey(annotation)
     val mapOfOutKOutV = mapOfType<K, V>(keyType.subtype(), valueType.subtype()).toKey(annotation)
 
-    bind(mapOfKOutV).to(mapOfKV)
     bind(mapOfOutKV).to(mapOfKV)
     bind(mapOfOutKOutV).to(mapOfKV)
 

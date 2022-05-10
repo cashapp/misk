@@ -1,8 +1,13 @@
 public final class wisp/containers/Composer {
+	public static final field Companion Lwisp/containers/Composer$Companion;
 	public fun <init> (Ljava/lang/String;[Lwisp/containers/Container;)V
 	public final fun getRunning ()Ljava/util/concurrent/atomic/AtomicBoolean;
 	public final fun start ()V
 	public final fun stop ()V
+}
+
+public final class wisp/containers/Composer$Companion {
+	public final fun getDockerClient ()Lcom/github/dockerjava/api/DockerClient;
 }
 
 public final class wisp/containers/Container {
@@ -17,5 +22,12 @@ public final class wisp/containers/Container {
 	public final fun getCreateCmd ()Lkotlin/jvm/functions/Function1;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class wisp/containers/ContainerUtil {
+	public static final field INSTANCE Lwisp/containers/ContainerUtil;
+	public final fun dockerTargetOrLocalHost ()Ljava/lang/String;
+	public final fun dockerTargetOrLocalIp ()Ljava/lang/String;
+	public final fun isRunningInDocker ()Z
 }
 

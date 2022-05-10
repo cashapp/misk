@@ -1,9 +1,9 @@
 package misk.eventrouter
 
 import com.google.common.reflect.TypeToken
-import io.kubernetes.client.ApiClient
-import io.kubernetes.client.apis.CoreV1Api
-import io.kubernetes.client.models.V1Pod
+import io.kubernetes.client.openapi.ApiClient
+import io.kubernetes.client.openapi.apis.CoreV1Api
+import io.kubernetes.client.openapi.models.V1Pod
 import io.kubernetes.client.util.Config
 import io.kubernetes.client.util.Watch
 import misk.clustering.kubernetes.KubernetesConfig
@@ -56,27 +56,27 @@ internal class KubernetesClusterConnector @Inject constructor() : ClusterConnect
       api.listNamespacedPodCall(
         config.my_pod_namespace, // namespace
         null, // pretty
+        false, // allowWatchBookmarks
         null, // _continue
         null, // fieldSelector
-        false, // includeUninitialized
         null, // labelSelector
         null, // limit
         null, // resourceVersion
+        null, // resourceVersionMatch
         null, // timeoutSeconds
         true, // watch
-        null, // progressListener
-        null // progressRequestListener
+        null, // _callback
       ),
       object : TypeToken<Watch.Response<V1Pod>>() {}.type
     )
 
     for (item in watch) {
       lastReceivedMessage = clock.instant()
-      val name = item.`object`.metadata.name
-      val podIP = item.`object`.status.podIP
+      val name = item.`object`.metadata!!.name!!
+      val podIP = item.`object`.status!!.podIP
       hostMapping = when (item.type) {
         "ADDED", "MODIFIED" -> {
-          val isReady = item.`object`.status.containerStatuses?.first()?.isReady ?: false
+          val isReady = item.`object`!!.status!!.containerStatuses?.first()?.ready ?: false
           if (isReady && !podIP.isNullOrBlank()) {
             hostMapping.plus(Pair(name, podIP))
           } else {
@@ -97,8 +97,10 @@ internal class KubernetesClusterConnector @Inject constructor() : ClusterConnect
 
   override fun joinCluster(topicPeer: TopicPeer) {
     val client = Config.defaultClient()
-    client.httpClient.setReadTimeout(config.kubernetes_read_timeout, TimeUnit.SECONDS)
-    client.httpClient.setConnectTimeout(config.kubernetes_connect_timeout, TimeUnit.SECONDS)
+    client.httpClient = client.httpClient.newBuilder()
+      .readTimeout(config.kubernetes_watch_read_timeout, TimeUnit.SECONDS)
+      .connectTimeout(config.kubernetes_connect_timeout, TimeUnit.SECONDS)
+      .build()
     val api = CoreV1Api(client)
 
     executor.execute({

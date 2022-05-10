@@ -1,6 +1,59 @@
 Change Log
 ==========
 
+Version 0.24.0 *(2022-04-13)*
+----------------------------
+
+Unstable public release.
+
+New features and fixes:
+
+- Fill out the Misk BOM ([#2353](https://github.com/cashapp/misk/pull/2353))
+- Restore a deleted WebConfig constructor ([#2352](https://github.com/cashapp/misk/pull/2352))
+- enable kochiku in CI ([#2351](https://github.com/cashapp/misk/pull/2351))
+
+Version 0.23.0 *(2022-03-30)*
+-----------------------------
+
+Unstable public release. Thank you to all the contributors, as always.
+
+Breaking changes:
+
+- Upgrade to use kotlin 1.6 ([#2323](https://github.com/cashapp/misk/pull/2323))
+- Move ActionScope and related code to :misk-action-scopes ([#2301](https://github.com/cashapp/misk/pull/2301))
+- Remove misk.flags.Flags ([#2341](https://github.com/cashapp/misk/pull/2341))
+- misk-metrics: Allow configuring max_age_in_seconds for Prometheus ([#2292](https://github.com/cashapp/misk/pull/2292))
+
+New features:
+
+- misk-actions: Multi-method WebActions ([#2198](https://github.com/cashapp/misk/pull/2198))
+- misk-clients: Allow binding for application interceptors in grpc and typed clients ([#2201](https://github.com/cashapp/misk/pull/2201))
+- misk-core: Support a configurable delay before shutting down services ([#2238](https://github.com/cashapp/misk/pull/2238))
+- misk-core: Allow minimum thread pool size to be configured ([#2210](https://github.com/cashapp/misk/pull/2210))
+- misk-core: Record client metrics for incomplete HTTP connections ([#2209](https://github.com/cashapp/misk/pull/2209))
+- misk-jdbc: Provide more helpful error message when duplicate migration versions present ([#2325](https://github.com/cashapp/misk/pull/2325))
+- misk-jdbc: Default to use modern TLS in JDBC connections ([#2221](https://github.com/cashapp/misk/pull/2221))
+- misk-hibernate: add support for FlushEntity listener ([#2220](https://github.com/cashapp/misk/pull/2220))
+- misk-feature: Make FakeFeatureFlag overrides composable with FakeFeatureFlagsOverrideModule ([#2306](https://github.com/cashapp/misk/pull/2306))
+- misk-feature, wisp-feature: Add strongly typed feature flag support ([#2293](https://github.com/cashapp/misk/pull/2293))
+- misk-feature, wisp-feature: Launch Darkly client will use system proxy settings if provided ([#2255](https://github.com/cashapp/misk/pull/2255))
+- misk-redis: Implement Redis.hincrBy ([#2269](https://github.com/cashapp/misk/pull/2269))
+- misk-zookeeper, wisp-lease: Extend LeaseManager to support Leases as AutoCloseable resources ([#2319](https://github.com/cashapp/misk/pull/2319))
+- wisp-config: Add a filesystem preprocessor ([#2275](https://github.com/cashapp/misk/pull/2275))
+- wisp-config: Add a classpath preprocessor ([#2268](https://github.com/cashapp/misk/pull/2268))
+
+Fixes:
+
+- misk-admin: Web Actions Tab: handle long primitive when building web forms ([#2300](https://github.com/cashapp/misk/pull/2300))
+- misk-clients: Do not require `List<Client*Interceptor>` to be bound when using TypedClientFactory stand-alone ([#2218](https://github.com/cashapp/misk/pull/2218))
+- misk-core: Improve handling timeout/reset connection when reading request ([#2279](https://github.com/cashapp/misk/pull/2279))
+- misk-core: Configure VegasLimit with higher initial limit ([#2250](https://github.com/cashapp/misk/pull/2250))
+- misk-gcp: Properly shut down Google Spanner clients ([#2203](https://github.com/cashapp/misk/pull/2203))
+- misk-hibernate: Move StartDatabaseService init code to explicit function ([#2294](https://github.com/cashapp/misk/pull/2294))
+- misk-jooq: Use appropriate SQLDialect per configuration ([#2305](https://github.com/cashapp/misk/pull/2305))
+- misk-jooq: Don't use "select * from" ([#2231](https://github.com/cashapp/misk/pull/2231))
+
+
 Version 0.22.0 *(2021-11-03)*
 ----------------------------
 

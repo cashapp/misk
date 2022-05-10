@@ -10,6 +10,7 @@ gradleEnterprise {
 }
 
 include(":misk")
+include(":misk-action-scopes")
 include(":misk-actions")
 include(":misk-admin")
 include(":misk-aws")
@@ -19,6 +20,7 @@ include(":misk-aws2-dynamodb")
 include(":misk-aws2-dynamodb-testing")
 include(":misk-bom")
 include(":misk-core")
+include(":misk-clustering")
 include(":misk-cron")
 include(":misk-crypto")
 include(":misk-datadog")

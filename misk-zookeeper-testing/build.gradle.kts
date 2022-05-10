@@ -29,7 +29,8 @@ dependencies {
     exclude(group = "org.slf4j", module = "slf4j-log4j12")
     exclude(group = "log4j", module = "log4j")
   }
-  implementation(Dependencies.docker)
+  implementation(Dependencies.dockerCore)
+  implementation(Dependencies.dockerTransport)
   implementation(Dependencies.guice)
   api(project(":misk"))
   api(project(":misk-core"))

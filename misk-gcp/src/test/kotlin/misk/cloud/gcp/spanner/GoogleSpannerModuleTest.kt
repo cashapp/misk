@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
+import wisp.containers.ContainerUtil
 import wisp.deployment.TESTING
 import javax.inject.Inject
 
@@ -21,7 +22,8 @@ class GoogleSpannerModuleTest {
     instance_id = "test-instance",
     database = "test-database",
     emulator = SpannerEmulatorConfig(
-      enabled = true
+      enabled = true,
+      hostname = ContainerUtil.dockerTargetOrLocalHost()
     )
   )
 
@@ -39,10 +41,11 @@ class GoogleSpannerModuleTest {
   @Order(1)
   @Test
   fun `it creates a Spanner client and emulator to develop with`() {
-    assertTrue(spanner.instanceAdminClient
-      .getInstance(spannerConfig.instance_id)
-      .getDatabase(spannerConfig.database)
-      .exists()
+    assertTrue(
+      spanner.instanceAdminClient
+        .getInstance(spannerConfig.instance_id)
+        .getDatabase(spannerConfig.database)
+        .exists()
     )
   }
 

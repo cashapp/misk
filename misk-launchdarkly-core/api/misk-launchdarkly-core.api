@@ -21,8 +21,13 @@ public final class misk/feature/launchdarkly/LaunchDarklyDynamicConfig$Companion
 }
 
 public final class misk/feature/launchdarkly/LaunchDarklyFeatureFlags : com/google/common/util/concurrent/AbstractIdleService, misk/feature/FeatureFlags, misk/feature/FeatureService {
-	public static final field Companion Lmisk/feature/launchdarkly/LaunchDarklyFeatureFlags$Companion;
 	public fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;)V
+	public fun get (Lwisp/feature/BooleanFeatureFlag;)Z
+	public fun get (Lwisp/feature/DoubleFeatureFlag;)D
+	public fun get (Lwisp/feature/EnumFeatureFlag;)Ljava/lang/Enum;
+	public fun get (Lwisp/feature/IntFeatureFlag;)I
+	public fun get (Lwisp/feature/JsonFeatureFlag;)Ljava/lang/Object;
+	public fun get (Lwisp/feature/StringFeatureFlag;)Ljava/lang/String;
 	public fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;)Z
 	public fun getBoolean (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Z
 	public fun getDouble (Lmisk/feature/Feature;Ljava/lang/String;)D
@@ -47,9 +52,5 @@ public final class misk/feature/launchdarkly/LaunchDarklyFeatureFlags : com/goog
 	public fun trackJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
 	public fun trackString (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
 	public fun trackString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
-}
-
-public final class misk/feature/launchdarkly/LaunchDarklyFeatureFlags$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 }
 

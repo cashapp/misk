@@ -1,7 +1,6 @@
 package misk.policy.opa
 
 import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.api.exception.DockerException
 import com.github.dockerjava.api.model.Bind
 import com.github.dockerjava.api.model.Binds
 import com.github.dockerjava.api.model.ExposedPort
@@ -10,30 +9,38 @@ import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.PortBinding
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
-import com.github.dockerjava.core.DockerClientBuilder
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.github.dockerjava.core.command.PullImageResultCallback
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.google.common.util.concurrent.AbstractIdleService
-import okio.Buffer
-import wisp.logging.getLogger
-import java.io.File
-import java.time.Duration
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okio.Buffer
+import wisp.logging.getLogger
+import java.io.File
 import java.io.IOException
-import java.net.ConnectException
+import java.time.Duration
 
 class LocalOpaService(
   private val policyPath: String,
   private val withLogging: Boolean
 ) : AbstractIdleService() {
   private var containerId: String = ""
-  private val dockerClient: DockerClient = DockerClientBuilder.getInstance()
-    .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+  private val defaultDockerClientConfig =
+    DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+  private val httpClient = ApacheDockerHttpClient.Builder()
+    .dockerHost(defaultDockerClientConfig.dockerHost)
+    .sslConfig(defaultDockerClientConfig.sslConfig)
+    .maxConnections(100)
+    .connectionTimeout(Duration.ofSeconds(60))
+    .responseTimeout(Duration.ofSeconds(120))
     .build()
+  private val dockerClient: DockerClient =
+    DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
 
   companion object {
     const val DEFAULT_POLICY_DIRECTORY = "service/src/policy"
@@ -49,7 +56,7 @@ class LocalOpaService(
 
     try {
       dockerClient.pingCmd().exec()
-    } catch(e: Exception) {
+    } catch (e: Exception) {
       throw IllegalStateException("Couldn't connect to Docker daemon", e)
     }
 
@@ -128,7 +135,7 @@ class LocalOpaService(
           .build()
 
         client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("OPA is not healthy")
+          if (!response.isSuccessful) throw IOException("OPA is not healthy")
         }
       }
     } catch (e: Exception) {

@@ -1,15 +1,18 @@
 package wisp.containers
 
 import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.async.ResultCallbackTemplate
 import com.github.dockerjava.api.command.CreateContainerCmd
+import com.github.dockerjava.api.command.PullImageResultCallback
+import com.github.dockerjava.api.command.WaitContainerResultCallback
 import com.github.dockerjava.api.exception.NotFoundException
 import com.github.dockerjava.api.model.Frame
-import com.github.dockerjava.core.DockerClientBuilder
-import com.github.dockerjava.core.async.ResultCallbackTemplate
-import com.github.dockerjava.core.command.PullImageResultCallback
-import com.github.dockerjava.core.command.WaitContainerResultCallback
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientImpl
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import wisp.logging.getLogger
+import java.io.File
+import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -66,7 +69,7 @@ class Composer(private val name: String, private vararg val containers: Containe
 
   private val network = DockerNetwork(
     "$name-net",
-    docker
+    dockerClient
   )
   private val containerIds = mutableMapOf<String, String>()
   val running = AtomicBoolean(false)
@@ -79,24 +82,24 @@ class Composer(private val name: String, private vararg val containers: Containe
 
     for (container in containers) {
       val name = container.name()
-      val create = docker.createContainerCmd("todo").apply(container.createCmd)
+      val create = dockerClient.createContainerCmd("todo").apply(container.createCmd)
       require(create.image != "todo") {
         "must provide an image for container ${create.name}"
       }
 
-      docker.listContainersCmd()
+      dockerClient.listContainersCmd()
         .withShowAll(true)
         .withLabelFilter(mapOf("name" to name))
         .exec()
         .forEach {
           log.info { "removing previous $name container with id ${it.id}" }
-          docker.removeContainerCmd(it.id).exec()
+          dockerClient.removeContainerCmd(it.id).exec()
         }
 
       log.info { "pulling ${create.image} for $name container" }
 
       val imageParts = create.image!!.split(":")
-      docker.pullImageCmd(imageParts[0])
+      dockerClient.pullImageCmd(imageParts[0])
         .withTag(imageParts.getOrElse(1) { "latest" })
         .exec(PullImageResultCallback()).awaitCompletion()
 
@@ -110,10 +113,10 @@ class Composer(private val name: String, private vararg val containers: Containe
         .id
       containerIds[name] = id
 
-      container.beforeStartHook(docker, id)
+      container.beforeStartHook(dockerClient, id)
 
-      docker.startContainerCmd(id).exec()
-      docker.logContainerCmd(id)
+      dockerClient.startContainerCmd(id).exec()
+      dockerClient.logContainerCmd(id)
         .withStdErr(true)
         .withStdOut(true)
         .withFollowStream(true)
@@ -126,7 +129,7 @@ class Composer(private val name: String, private vararg val containers: Containe
   }
 
   private fun Container.name(): String {
-    val create = docker.createContainerCmd("todo").apply(createCmd)
+    val create = dockerClient.createContainerCmd("todo").apply(createCmd)
     require(!create.name.isNullOrBlank()) {
       "must provide a name for the container"
     }
@@ -139,14 +142,9 @@ class Composer(private val name: String, private vararg val containers: Containe
     for (container in containers) {
       val name = container.name()
       containerIds[name]?.let {
-        log.info { "killing $name with container id $it" }
-        docker.removeContainerCmd(it).withForce(true).exec()
-
         try {
-          log.info { "waiting for $name to terminate" }
-          docker.waitContainerCmd(it).exec(
-            GracefulWaitContainerResultCallback()
-          ).awaitCompletion()
+          log.info { "killing $name with container id $it" }
+          dockerClient.killContainerCmd(it).exec()
         } catch (th: Throwable) {
           log.error(th) { "could not kill $name with container id $it" }
         }
@@ -177,11 +175,40 @@ class Composer(private val name: String, private vararg val containers: Containe
     }
   }
 
-  private companion object {
+  companion object {
     private val log = getLogger<Composer>()
-    private val docker: DockerClient = DockerClientBuilder.getInstance()
-      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+    private val defaultDockerClientConfig =
+      DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+    private val httpClient = ApacheDockerHttpClient.Builder()
+      .dockerHost(defaultDockerClientConfig.dockerHost)
+      .sslConfig(defaultDockerClientConfig.sslConfig)
+      .maxConnections(100)
+      .connectionTimeout(Duration.ofSeconds(60))
+      .responseTimeout(Duration.ofSeconds(120))
       .build()
+    val dockerClient: DockerClient =
+      DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
+  }
+}
+
+object ContainerUtil{
+  val isRunningInDocker = File("/proc/1/cgroup")
+    .takeIf { it.exists() }?.useLines { lines ->
+      lines.any { it.contains("/docker") }
+    } ?: false
+
+  fun dockerTargetOrLocalHost(): String {
+    if (isRunningInDocker)
+      return "host.docker.internal"
+    else
+      return "localhost"
+  }
+
+  fun dockerTargetOrLocalIp(): String {
+    if (isRunningInDocker)
+      return "host.docker.internal"
+    else
+      return "127.0.0.1"
   }
 }
 

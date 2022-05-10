@@ -13,6 +13,7 @@ import misk.jobqueue.sqs.DockerSqs.clientPort
 import misk.testing.ExternalDependency
 import wisp.containers.Composer
 import wisp.containers.Container
+import wisp.containers.ContainerUtil
 import wisp.logging.getLogger
 
 /**
@@ -22,6 +23,7 @@ internal object DockerSqs : ExternalDependency {
 
   private val log = getLogger<DockerSqs>()
   private const val clientPort = 4100
+  private const val hostInternalTarget = "host.docker.internal"
 
   override fun beforeEach() {
     // noop
@@ -31,7 +33,7 @@ internal object DockerSqs : ExternalDependency {
   override fun afterEach() {
     val queues = client.listQueues()
     queues.queueUrls.forEach {
-      client.deleteQueue(it)
+      client.deleteQueue(ensureUrlWithProperTarget(it))
     }
   }
 
@@ -58,8 +60,15 @@ internal object DockerSqs : ExternalDependency {
     }
   }
 
+  private fun ensureUrlWithProperTarget(url: String): String {
+    if (ContainerUtil.isRunningInDocker)
+      return url.replace("localhost", hostInternalTarget).replace("127.0.0.1", hostInternalTarget)
+    else
+      return url
+  }
+
   val endpoint = AwsClientBuilder.EndpointConfiguration(
-    "http://127.0.0.1:$clientPort",
+    "http://${ContainerUtil.dockerTargetOrLocalIp()}:$clientPort",
     "us-east-1"
   )
 

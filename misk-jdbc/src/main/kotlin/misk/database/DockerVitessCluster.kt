@@ -7,9 +7,10 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
-import com.github.dockerjava.core.DockerClientBuilder
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.core.async.ResultCallbackTemplate
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
@@ -25,6 +26,7 @@ import okio.buffer
 import okio.source
 import wisp.deployment.TESTING
 import wisp.moshi.defaultKotlinMoshi
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -114,13 +116,23 @@ class VitessCluster(
     )
   }
 
-  private fun mysqlConfig() =
-    DataSourceConfig(
+  private fun mysqlConfig(): DataSourceConfig {
+    val isRunningInDocker = File("/proc/1/cgroup")
+      .takeIf { it.exists() }?.useLines { lines ->
+        lines.any { it.contains("/docker") }
+      } ?: false
+    val server_hostname = if (isRunningInDocker)
+      "host.docker.internal"
+    else
+      "127.0.0.1"
+
+    return DataSourceConfig(
       type = DataSourceType.MYSQL,
-      host = "127.0.0.1",
+      host = server_hostname,
       username = "vt_dba",
       port = mysqlPort
     )
+  }
 
   private fun mysqlDataSource(): DriverDataSource {
     val config = mysqlConfig()
@@ -224,9 +236,17 @@ class DockerVitessCluster(
       /** Config for the Vitess cluster */
       config: DataSourceConfig
     ) {
-      val docker: DockerClient = DockerClientBuilder.getInstance()
-        .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+      val defaultDockerClientConfig =
+        DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+      val httpClient = ApacheDockerHttpClient.Builder()
+        .dockerHost(defaultDockerClientConfig.dockerHost)
+        .sslConfig(defaultDockerClientConfig.sslConfig)
+        .maxConnections(100)
+        .connectionTimeout(Duration.ofSeconds(60))
+        .responseTimeout(Duration.ofSeconds(120))
         .build()
+      val docker: DockerClient =
+        DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
       val moshi = defaultKotlinMoshi
       val dockerCluster =
         DockerVitessCluster(

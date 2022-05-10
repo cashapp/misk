@@ -7,6 +7,7 @@ plugins {
 
 dependencies {
   implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(Dependencies.apacheCommonsLang3)
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
@@ -27,7 +28,6 @@ dependencies {
   implementation(Dependencies.jettyServlets)
   implementation(Dependencies.jettyWebsocketServlet)
   implementation(Dependencies.jettyWebsocketServer)
-  implementation(Dependencies.kubernetesClient)
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.wireGrpcClient)
   implementation(Dependencies.wireMoshiAdapter)
@@ -54,7 +54,9 @@ dependencies {
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-proto"))
   implementation(project(":misk-service"))
+  api(project(":misk-action-scopes"))
   api(project(":misk-actions"))
+  api(project(":misk-clustering"))
   api(project(":misk-inject"))
   api(project(":wisp-client"))
   api(project(":wisp-config"))

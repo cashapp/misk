@@ -1,6 +1,8 @@
 package misk.redis
 
 import okio.ByteString
+import redis.clients.jedis.Pipeline
+import redis.clients.jedis.Transaction
 import java.time.Duration
 import java.time.Instant
 
@@ -48,6 +50,16 @@ interface Redis {
   operator fun get(key: String): ByteString?
 
   /**
+   * Delete one or more hash fields
+   *
+   * @param key the key for which to delete fields
+   * @param fields the specific fields to delete
+   * @return If the field was present in the hash it is deleted and 1 is returned, otherwise 0 is
+   * returned and no operation is performed.
+   */
+  fun hdel(key: String, vararg fields: String): Long
+
+  /**
    * Retrieves the value for the given key and field as a [ByteString].
    *
    * @param key the key
@@ -64,6 +76,30 @@ interface Redis {
    * @return a Map<String, ByteString> of the fields to their associated values
    */
   fun hgetAll(key: String): Map<String, ByteString>?
+
+  /**
+   * Retrieve the values associated to the specified fields.
+   *
+   * If some specified fields do not exist, nil values are returned. Non-existing keys are
+   * considered like empty hashes.
+   *
+   * @param key the key
+   * @param fields the specific fields to retrieve
+   * @return a List<ByteString?> of the values for the specific fields requested,
+   * in the same order of the request. Null for missing fields
+   */
+  fun hmget(key: String, vararg fields: String): List<ByteString?>
+
+  /**
+   * Increments the number stored at [field] in the hash stored at [key] by [increment]. If [key]
+   * does not exist, a new key holding a hash is created. If [field] does not exist the value is
+   * set to 0 before the operation is performed.
+   *
+   * @param key the key.
+   * @param field the field.
+   * @return the value at [field] after the increment operation.
+   */
+  fun hincrBy(key: String, field: String, increment: Long): Long
 
   /**
    * Sets the [ByteString] value for the given key.
@@ -191,4 +227,26 @@ interface Redis {
    * or operation skipped due to the provided arguments.
    */
   fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean
+
+  /**
+   * Marks the given keys to be watched for conditional execution of a transaction.
+   */
+  fun watch(vararg keys: String)
+
+  /**
+   * Flushes all the previously watched keys for a transaction.
+   * If you call EXEC or DISCARD, there's no need to manually call UNWATCH.
+   */
+  fun unwatch(vararg keys: String)
+
+  /**
+   * Marks the start of a transaction block. Subsequent commands will be queued for atomic execution
+   * using EXEC.
+   */
+  fun multi(): Transaction
+
+  /**
+   * Begin a pipeline operation to batch together several updates for optimal performance
+   */
+  fun pipelined(): Pipeline
 }
