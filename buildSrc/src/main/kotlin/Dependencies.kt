@@ -1,4 +1,3 @@
-// Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
 object Dependencies {
   val apacheCommonsLang3 = "org.apache.commons:commons-lang3:3.11"
   val assertj = "org.assertj:assertj-core:3.20.2"
@@ -139,4 +138,3 @@ object Dependencies {
   val wireSchema = "com.squareup.wire:wire-schema:4.2.0"
   val zookeeper = "org.apache.zookeeper:zookeeper:3.7.0"
 }
-// Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
