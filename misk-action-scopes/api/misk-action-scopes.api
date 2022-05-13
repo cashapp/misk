@@ -70,6 +70,10 @@ public final class misk/scope/RealActionScoped : misk/scope/ActionScoped {
 	public final fun getScope ()Lmisk/scope/ActionScope;
 }
 
+public abstract interface class misk/scope/SeedDataTransformer {
+	public abstract fun transform (Ljava/util/Map;)Ljava/util/Map;
+}
+
 public final class misk/scope/executor/ActionScopedExecutorService : misk/concurrent/WrappingListeningExecutorService {
 	public fun <init> (Ljava/util/concurrent/ExecutorService;Lmisk/scope/ActionScope;)V
 	public synthetic fun delegate ()Ljava/lang/Object;
