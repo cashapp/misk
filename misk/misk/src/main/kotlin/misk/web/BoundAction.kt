@@ -1,9 +1,11 @@
 package misk.web
 
+import com.google.inject.Key
 import misk.Action
 import misk.ApplicationInterceptor
 import misk.inject.keyOf
 import misk.scope.ActionScope
+import misk.scope.SeedDataTransformer
 import misk.security.authz.AccessInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.asChain
@@ -29,8 +31,9 @@ internal class BoundAction<A : WebAction>(
   private val networkInterceptors: List<NetworkInterceptor>,
   private val applicationInterceptors: List<ApplicationInterceptor>,
   private val webActionBinding: WebActionBinding,
+  private val seedDataTransformers: List<SeedDataTransformer>,
   val pathPattern: PathPattern,
-  val action: Action
+  val action: Action,
 ) {
 
   fun match(
@@ -103,10 +106,14 @@ internal class BoundAction<A : WebAction>(
     httpCall: HttpCall,
     pathMatcher: Matcher
   ) {
-    val seedData = mapOf(
+    val initialSeedData = mapOf<Key<*>, Any?>(
       keyOf<HttpServletRequest>() to request,
-      keyOf<HttpCall>() to httpCall
+      keyOf<HttpCall>() to httpCall,
     )
+    val seedData =
+      seedDataTransformers.fold(initialSeedData) { seedData, interceptor ->
+        interceptor.transform(seedData)
+      }
     scope.enter(seedData).use {
       handle(httpCall, pathMatcher)
     }
