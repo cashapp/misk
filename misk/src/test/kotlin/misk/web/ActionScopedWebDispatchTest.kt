@@ -8,6 +8,7 @@ import misk.inject.keyOf
 import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
+import misk.scope.SeedDataTransformer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
@@ -83,11 +84,9 @@ internal class ActionScopedWebDispatchTest {
           bindProvider(Principal::class, FakeIdentityActionScopedProvider::class)
         }
       })
-      val principalSeeder = object : HttpActionScopeSeedDataInterceptor {
-        override fun intercept(
+      val principalSeeder = object : SeedDataTransformer {
+        override fun transform(
           seedData: Map<Key<*>, Any?>,
-          pathPattern: PathPattern,
-          action: Action
         ): Map<Key<*>, Any?> {
           val httpCall = seedData.getValue(keyOf<HttpCall>()) as HttpCall
           val principalSeed = httpCall.requestHeaders["Principal-Seed"] ?: return seedData
@@ -95,7 +94,17 @@ internal class ActionScopedWebDispatchTest {
           return seedData + mapOf(Key.get(Principal::class.java) to principal)
         }
       }
-      multibind<HttpActionScopeSeedDataInterceptor>().toInstance(principalSeeder)
+
+      val principalSeederWebSeedDataTransformerFactory = object : WebActionSeedDataTransformerFactory {
+        override fun create(
+          pathPattern: PathPattern,
+          action: Action
+        ): SeedDataTransformer {
+          return principalSeeder
+        }
+      }
+
+      multibind<WebActionSeedDataTransformerFactory>().toInstance(principalSeederWebSeedDataTransformerFactory)
     }
   }
 }
