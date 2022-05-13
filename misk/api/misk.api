@@ -1452,10 +1452,6 @@ public abstract interface class misk/web/FeatureBinding$Subject {
 	public abstract fun takeReturnValue ()Ljava/lang/Object;
 }
 
-public abstract interface class misk/web/HttpActionScopeSeedDataInterceptor {
-	public abstract fun intercept (Ljava/util/Map;Lmisk/web/PathPattern;Lmisk/Action;)Ljava/util/Map;
-}
-
 public abstract interface class misk/web/HttpCall {
 	public abstract fun accepts ()Ljava/util/List;
 	public abstract fun addResponseHeaders (Lokhttp3/Headers;)V
@@ -1726,6 +1722,10 @@ public final class misk/web/WebActionBinding$RealClaimer : misk/web/FeatureBindi
 	public final fun commitClaims$misk (Lmisk/web/FeatureBinding$Factory;Lmisk/web/FeatureBinding;)V
 	public final fun getAction ()Lmisk/Action;
 	public final fun newWebActionBinder$misk ()Lmisk/web/WebActionBinding;
+}
+
+public abstract interface class misk/web/WebActionSeedDataTransformerFactory {
+	public abstract fun create (Lmisk/web/PathPattern;Lmisk/Action;)Lmisk/scope/SeedDataTransformer;
 }
 
 public final class misk/web/WebConfig : wisp/config/Config {
