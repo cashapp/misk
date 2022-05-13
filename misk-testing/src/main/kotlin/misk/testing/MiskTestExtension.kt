@@ -107,11 +107,11 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   class InjectUninject @Inject constructor() : BeforeEachCallback, AfterEachCallback {
     override fun beforeEach(context: ExtensionContext) {
       val injector = context.retrieve<Injector>("injector")
-      injector.injectMembers(context.rootRequiredTestInstance)
+      context.requiredTestInstances.allInstances.forEach { injector.injectMembers(it) }
     }
 
     override fun afterEach(context: ExtensionContext) {
-      uninject(context.rootRequiredTestInstance)
+      context.requiredTestInstances.allInstances.forEach { uninject(it) }
     }
   }
 
