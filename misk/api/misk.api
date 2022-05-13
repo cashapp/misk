@@ -1361,7 +1361,7 @@ public final class misk/tracing/interceptors/TextMultimapExtractAdapter : io/ope
 }
 
 public final class misk/web/BoundAction {
-	public fun <init> (Lmisk/scope/ActionScope;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/web/WebActionBinding;Lmisk/web/PathPattern;Lmisk/Action;)V
+	public fun <init> (Lmisk/scope/ActionScope;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/web/WebActionBinding;Ljava/util/List;Lmisk/web/PathPattern;Lmisk/Action;)V
 	public final fun getAction ()Lmisk/Action;
 	public final fun getMetadata$misk ()Lmisk/web/metadata/webaction/WebActionMetadata;
 	public final fun getPathPattern ()Lmisk/web/PathPattern;
@@ -1724,6 +1724,10 @@ public final class misk/web/WebActionBinding$RealClaimer : misk/web/FeatureBindi
 	public final fun newWebActionBinder$misk ()Lmisk/web/WebActionBinding;
 }
 
+public abstract interface class misk/web/WebActionSeedDataTransformerFactory {
+	public abstract fun create (Lmisk/web/PathPattern;Lmisk/Action;)Lmisk/scope/SeedDataTransformer;
+}
+
 public final class misk/web/WebConfig : wisp/config/Config {
 	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZI)V
 	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -1909,7 +1913,7 @@ public final class misk/web/actions/StatusAction$ServerStatus {
 
 public final class misk/web/actions/WebActionFactory {
 	public static final field Companion Lmisk/web/actions/WebActionFactory$Companion;
-	public fun <init> (Lcom/google/inject/Injector;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lmisk/web/WebActionBinding$Factory;Lmisk/scope/ActionScope;)V
+	public fun <init> (Lcom/google/inject/Injector;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lmisk/web/WebActionBinding$Factory;Lmisk/scope/ActionScope;Ljava/util/List;)V
 	public final fun newBoundAction (Lkotlin/reflect/KClass;Ljava/lang/String;)Ljava/util/List;
 	public static synthetic fun newBoundAction$default (Lmisk/web/actions/WebActionFactory;Lkotlin/reflect/KClass;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
 }
