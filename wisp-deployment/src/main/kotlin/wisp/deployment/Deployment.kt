@@ -53,7 +53,7 @@ data class Deployment(
 
   fun mapToEnvironmentName() = when {
     isProduction -> "production"
-    isStaging -> "staging"
+    isStaging -> name
     isTest -> "testing"
     else -> "development"
   }
