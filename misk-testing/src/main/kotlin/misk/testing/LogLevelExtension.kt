@@ -7,11 +7,6 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
 
-/**
- * Helps you set the log level for misk tests. It would default all test by default to Log
- * but you can override it by using the [LogLevel] annotation at the method or class level.
- *
- */
 class LogLevelExtension @Inject constructor() : BeforeEachCallback {
   override fun beforeEach(context: ExtensionContext?) {
     val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
