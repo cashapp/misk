@@ -196,6 +196,24 @@ public final class misk/testing/ExternalDependency$DefaultImpls {
 	public static fun getId (Lmisk/testing/ExternalDependency;)Ljava/lang/String;
 }
 
+public abstract interface annotation class misk/testing/LogLevel : java/lang/annotation/Annotation {
+	public abstract fun level ()Lmisk/testing/LogLevel$Level;
+}
+
+public final class misk/testing/LogLevel$Level : java/lang/Enum {
+	public static final field DEBUG Lmisk/testing/LogLevel$Level;
+	public static final field ERROR Lmisk/testing/LogLevel$Level;
+	public static final field INFO Lmisk/testing/LogLevel$Level;
+	public static final field WARN Lmisk/testing/LogLevel$Level;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/testing/LogLevel$Level;
+	public static fun values ()[Lmisk/testing/LogLevel$Level;
+}
+
+public final class misk/testing/LogLevelExtension : org/junit/jupiter/api/extension/BeforeEachCallback {
+	public fun <init> ()V
+	public fun beforeEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+}
+
 public abstract interface annotation class misk/testing/MiskExternalDependency : java/lang/annotation/Annotation {
 }
 

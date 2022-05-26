@@ -44,6 +44,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           install(module)
         }
         multibind<BeforeEachCallback>().to<InjectUninject>()
+        multibind<BeforeEachCallback>().to<LogLevelExtension>()
         multibind<AfterEachCallback>().to<InjectUninject>()
 
         // Initialize empty sets for our multibindings.
