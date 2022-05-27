@@ -122,6 +122,11 @@ class FakeRedisTest {
       valueKey2Field1,
       valueKey2Field2
     ))
+
+    redis.hdel(key2, field2)
+    assertThat(redis.hmget(key2, field1, field2)).isEqualTo(listOf(
+      valueKey2Field1
+    ))
   }
 
   @Test
