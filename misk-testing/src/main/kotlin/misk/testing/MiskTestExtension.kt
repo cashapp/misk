@@ -4,12 +4,14 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
+import com.google.inject.testing.fieldbinder.BoundFieldModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.uninject
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.mockito.MockitoAnnotations
 import wisp.logging.getLogger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
@@ -40,9 +42,14 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           multibind<BeforeEachCallback>().to<StartServicesBeforeEach>()
           multibind<AfterEachCallback>().to<StopServicesAfterEach>()
         }
+
         for (module in context.getActionTestModules()) {
           install(module)
         }
+
+        context.requiredTestInstances.allInstances.forEach { MockitoAnnotations.openMocks(it) }
+        context.requiredTestInstances.allInstances.forEach { install(BoundFieldModule.of(it)) }
+
         multibind<BeforeEachCallback>().to<InjectUninject>()
         multibind<BeforeEachCallback>().to<LogLevelExtension>()
         multibind<AfterEachCallback>().to<InjectUninject>()
@@ -54,8 +61,8 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
 
     val injector = Guice.createInjector(module)
+    injector.createChildInjector()
     context.store("injector", injector)
-
     injector.getInstance<Callbacks>().beforeEach(context)
   }
 
@@ -69,6 +76,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       dep.afterEach()
     }
   }
+
 
   class StartServicesBeforeEach @Inject constructor() : BeforeEachCallback {
     @Inject
