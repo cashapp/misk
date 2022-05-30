@@ -1,6 +1,5 @@
 public final class org/assertj/core/api/AssertExtensionsKt {
 	public static final fun assertOrdering ([Ljava/lang/Comparable;)V
-	public static final synthetic fun containsExactly (Lorg/assertj/core/api/MapAssert;[Lkotlin/Pair;)Lorg/assertj/core/api/MapAssert;
 	public static final fun isEqualToAsJson (Lorg/assertj/core/api/AbstractCharSequenceAssert;Ljava/lang/CharSequence;)Lorg/assertj/core/api/AbstractCharSequenceAssert;
 }
 
