@@ -3,7 +3,3 @@ public final class wisp/moshi/MoshiBuildKt {
 	public static final fun getDefaultKotlinMoshi ()Lcom/squareup/moshi/Moshi;
 }
 
-public final class wisp/moshi/MoshiExtensionsKt {
-	public static final synthetic fun adapter (Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
-}
-
