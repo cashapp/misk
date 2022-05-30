@@ -1,13 +1,3 @@
-public abstract interface class misk/eventrouter/ClusterConnector {
-	public abstract fun connectSocket (Ljava/lang/String;Lmisk/web/actions/WebSocketListener;)Lmisk/web/actions/WebSocket;
-	public abstract fun joinCluster (Lmisk/eventrouter/TopicPeer;)V
-	public abstract fun leaveCluster (Lmisk/eventrouter/TopicPeer;)V
-}
-
-public abstract interface class misk/eventrouter/ClusterMapper {
-	public abstract fun topicToHost (Lmisk/eventrouter/ClusterSnapshot;Ljava/lang/String;)Ljava/lang/String;
-}
-
 public final class misk/eventrouter/ClusterSnapshot {
 	public fun <init> (Ljava/util/List;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/util/List;
@@ -32,24 +22,6 @@ public abstract interface class misk/eventrouter/EventRouter {
 	public abstract fun getTopic (Ljava/lang/String;)Lmisk/eventrouter/Topic;
 }
 
-public final class misk/eventrouter/EventRouterConnectionAction : misk/web/actions/WebAction {
-	public field realEventRouter Lmisk/eventrouter/RealEventRouter;
-	public fun <init> ()V
-	public final fun eventRouter (Lmisk/web/actions/WebSocket;)Lmisk/web/actions/WebSocketListener;
-	public final fun getRealEventRouter ()Lmisk/eventrouter/RealEventRouter;
-	public final fun setRealEventRouter (Lmisk/eventrouter/RealEventRouter;)V
-}
-
-public final class misk/eventrouter/EventRouterService : com/google/common/util/concurrent/AbstractIdleService {
-	public field realEventRouter Lmisk/eventrouter/RealEventRouter;
-	public fun <init> ()V
-	public final fun getRealEventRouter ()Lmisk/eventrouter/RealEventRouter;
-	public final fun setRealEventRouter (Lmisk/eventrouter/RealEventRouter;)V
-}
-
-public final class misk/eventrouter/EventRouterServiceKt {
-}
-
 public final class misk/eventrouter/EventRouterTester {
 	public fun <init> ()V
 	public final fun processEverything ()V
@@ -57,155 +29,7 @@ public final class misk/eventrouter/EventRouterTester {
 
 public final class misk/eventrouter/EventRouterTestingModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
-	public fun <init> (Z)V
-	public final fun actionExecutor$misk_eventrouter ()Ljava/util/concurrent/ExecutorService;
-	public final fun actionQueueExecutor$misk_eventrouter ()Lmisk/eventrouter/QueueingExecutorService;
 	public final fun getDistributed ()Z
-	public final fun provideEventJsonAdapter$misk_eventrouter (Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
-	public final fun subscriberExecutor$misk_eventrouter ()Ljava/util/concurrent/ExecutorService;
-	public final fun subscriberQueueExecutor$misk_eventrouter ()Lmisk/eventrouter/QueueingExecutorService;
-}
-
-public final class misk/eventrouter/FakeClusterConnector : misk/eventrouter/ClusterConnector {
-	public fun <init> ()V
-	public fun connectSocket (Ljava/lang/String;Lmisk/web/actions/WebSocketListener;)Lmisk/web/actions/WebSocket;
-	public final fun getQueue ()Ljava/util/concurrent/LinkedBlockingQueue;
-	public fun joinCluster (Lmisk/eventrouter/TopicPeer;)V
-	public fun leaveCluster (Lmisk/eventrouter/TopicPeer;)V
-	public final fun processEverything ()I
-}
-
-public abstract class misk/eventrouter/FakeClusterConnector$Action {
-}
-
-public final class misk/eventrouter/FakeClusterConnector$Action$ConnectSocket : misk/eventrouter/FakeClusterConnector$Action {
-	public fun <init> (Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;)V
-	public final fun component1 ()Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;
-	public final fun copy (Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;)Lmisk/eventrouter/FakeClusterConnector$Action$ConnectSocket;
-	public static synthetic fun copy$default (Lmisk/eventrouter/FakeClusterConnector$Action$ConnectSocket;Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;ILjava/lang/Object;)Lmisk/eventrouter/FakeClusterConnector$Action$ConnectSocket;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getClientWebSocket ()Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/FakeClusterConnector$Action$JoinCluster : misk/eventrouter/FakeClusterConnector$Action {
-	public fun <init> (Lmisk/eventrouter/TopicPeer;Ljava/lang/String;)V
-	public final fun component1 ()Lmisk/eventrouter/TopicPeer;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Lmisk/eventrouter/TopicPeer;Ljava/lang/String;)Lmisk/eventrouter/FakeClusterConnector$Action$JoinCluster;
-	public static synthetic fun copy$default (Lmisk/eventrouter/FakeClusterConnector$Action$JoinCluster;Lmisk/eventrouter/TopicPeer;Ljava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/FakeClusterConnector$Action$JoinCluster;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getHostname ()Ljava/lang/String;
-	public final fun getTopicPeer ()Lmisk/eventrouter/TopicPeer;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/FakeClusterConnector$Action$LeaveCluster : misk/eventrouter/FakeClusterConnector$Action {
-	public fun <init> (Lmisk/eventrouter/TopicPeer;)V
-	public final fun component1 ()Lmisk/eventrouter/TopicPeer;
-	public final fun copy (Lmisk/eventrouter/TopicPeer;)Lmisk/eventrouter/FakeClusterConnector$Action$LeaveCluster;
-	public static synthetic fun copy$default (Lmisk/eventrouter/FakeClusterConnector$Action$LeaveCluster;Lmisk/eventrouter/TopicPeer;ILjava/lang/Object;)Lmisk/eventrouter/FakeClusterConnector$Action$LeaveCluster;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getTopicPeer ()Lmisk/eventrouter/TopicPeer;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/FakeClusterConnector$Action$WebSocketCancel : misk/eventrouter/FakeClusterConnector$Action {
-	public fun <init> (Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;)V
-	public final fun component1 ()Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;
-	public final fun copy (Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;)Lmisk/eventrouter/FakeClusterConnector$Action$WebSocketCancel;
-	public static synthetic fun copy$default (Lmisk/eventrouter/FakeClusterConnector$Action$WebSocketCancel;Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;ILjava/lang/Object;)Lmisk/eventrouter/FakeClusterConnector$Action$WebSocketCancel;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFakeWebSocket ()Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/FakeClusterConnector$Action$WebSocketClose : misk/eventrouter/FakeClusterConnector$Action {
-	public fun <init> (Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;ILjava/lang/String;)V
-	public final fun component1 ()Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;
-	public final fun component2 ()I
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;ILjava/lang/String;)Lmisk/eventrouter/FakeClusterConnector$Action$WebSocketClose;
-	public static synthetic fun copy$default (Lmisk/eventrouter/FakeClusterConnector$Action$WebSocketClose;Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;ILjava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/FakeClusterConnector$Action$WebSocketClose;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCode ()I
-	public final fun getFakeWebSocket ()Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;
-	public final fun getReason ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/FakeClusterConnector$Action$WebSocketSend : misk/eventrouter/FakeClusterConnector$Action {
-	public fun <init> (Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;Ljava/lang/String;)V
-	public final fun component1 ()Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;Ljava/lang/String;)Lmisk/eventrouter/FakeClusterConnector$Action$WebSocketSend;
-	public static synthetic fun copy$default (Lmisk/eventrouter/FakeClusterConnector$Action$WebSocketSend;Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;Ljava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/FakeClusterConnector$Action$WebSocketSend;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFakeWebSocket ()Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;
-	public final fun getText ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/FakeClusterConnector$FakeWebSocket : misk/web/actions/WebSocket {
-	public field listener Lmisk/web/actions/WebSocketListener;
-	public fun <init> (Lmisk/eventrouter/FakeClusterConnector;Ljava/lang/String;Z)V
-	public fun cancel ()V
-	public final fun cancelImmediately (Ljava/lang/Throwable;)V
-	public fun close (ILjava/lang/String;)Z
-	public final fun closeImmediately (ILjava/lang/String;)V
-	public final fun getListener ()Lmisk/web/actions/WebSocketListener;
-	public final fun getServer ()Z
-	public final fun getServerHostname ()Ljava/lang/String;
-	public final fun getTwin ()Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;
-	public fun queueSize ()J
-	public fun send (Ljava/lang/String;)Z
-	public fun send (Lokio/ByteString;)Z
-	public final fun setListener (Lmisk/web/actions/WebSocketListener;)V
-	public final fun setTwin (Lmisk/eventrouter/FakeClusterConnector$FakeWebSocket;)V
-}
-
-public final class misk/eventrouter/FakeClusterMapper : misk/eventrouter/ClusterMapper {
-	public fun <init> ()V
-	public final fun setOwnerForHostList (Ljava/util/List;Ljava/lang/String;)V
-	public fun topicToHost (Lmisk/eventrouter/ClusterSnapshot;Ljava/lang/String;)Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/eventrouter/ForEventRouterActions : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class misk/eventrouter/ForEventRouterSubscribers : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class misk/eventrouter/ForKubernetesWatching : java/lang/annotation/Annotation {
-}
-
-public final class misk/eventrouter/KubernetesClusterConnector : misk/eventrouter/ClusterConnector {
-	public field clock Ljava/time/Clock;
-	public field config Lmisk/clustering/kubernetes/KubernetesConfig;
-	public field executor Ljava/util/concurrent/ExecutorService;
-	public field webConfig Lmisk/web/WebConfig;
-	public fun <init> ()V
-	public fun connectSocket (Ljava/lang/String;Lmisk/web/actions/WebSocketListener;)Lmisk/web/actions/WebSocket;
-	public final fun getClock ()Ljava/time/Clock;
-	public final fun getConfig ()Lmisk/clustering/kubernetes/KubernetesConfig;
-	public final fun getExecutor ()Ljava/util/concurrent/ExecutorService;
-	public final fun getWebConfig ()Lmisk/web/WebConfig;
-	public final fun healthStatus ()Lmisk/healthchecks/HealthStatus;
-	public fun joinCluster (Lmisk/eventrouter/TopicPeer;)V
-	public fun leaveCluster (Lmisk/eventrouter/TopicPeer;)V
-	public final fun setClock (Ljava/time/Clock;)V
-	public final fun setConfig (Lmisk/clustering/kubernetes/KubernetesConfig;)V
-	public final fun setExecutor (Ljava/util/concurrent/ExecutorService;)V
-	public final fun setWebConfig (Lmisk/web/WebConfig;)V
-}
-
-public final class misk/eventrouter/KubernetesClusterConnectorKt {
 }
 
 public final class misk/eventrouter/KubernetesHealthCheck : misk/healthchecks/HealthCheck {
@@ -219,158 +43,11 @@ public abstract interface class misk/eventrouter/Listener {
 	public abstract fun onOpen (Lmisk/eventrouter/Subscription;)V
 }
 
-public final class misk/eventrouter/LocalClusterConnector : misk/eventrouter/ClusterConnector {
-	public field kubernetesConfig Lmisk/clustering/kubernetes/KubernetesConfig;
-	public fun <init> ()V
-	public fun connectSocket (Ljava/lang/String;Lmisk/web/actions/WebSocketListener;)Lmisk/web/actions/WebSocket;
-	public final fun getKubernetesConfig ()Lmisk/clustering/kubernetes/KubernetesConfig;
-	public fun joinCluster (Lmisk/eventrouter/TopicPeer;)V
-	public fun leaveCluster (Lmisk/eventrouter/TopicPeer;)V
-	public final fun setKubernetesConfig (Lmisk/clustering/kubernetes/KubernetesConfig;)V
-}
-
-public final class misk/eventrouter/LocalSubscriber : misk/eventrouter/Subscription {
-	public fun <init> (Lmisk/eventrouter/Listener;Lmisk/eventrouter/RealEventRouter;Ljava/util/concurrent/ExecutorService;Lmisk/eventrouter/Topic;)V
-	public fun cancel ()V
-	public final fun component4 ()Lmisk/eventrouter/Topic;
-	public final fun copy (Lmisk/eventrouter/Listener;Lmisk/eventrouter/RealEventRouter;Ljava/util/concurrent/ExecutorService;Lmisk/eventrouter/Topic;)Lmisk/eventrouter/LocalSubscriber;
-	public static synthetic fun copy$default (Lmisk/eventrouter/LocalSubscriber;Lmisk/eventrouter/Listener;Lmisk/eventrouter/RealEventRouter;Ljava/util/concurrent/ExecutorService;Lmisk/eventrouter/Topic;ILjava/lang/Object;)Lmisk/eventrouter/LocalSubscriber;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getTopic ()Lmisk/eventrouter/Topic;
-	public fun hashCode ()I
-	public final fun onClose ()V
-	public final fun onEvent (Ljava/lang/String;)V
-	public final fun onOpen ()V
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/QueueingExecutorService : java/util/concurrent/AbstractExecutorService {
-	public fun <init> ()V
-	public fun awaitTermination (JLjava/util/concurrent/TimeUnit;)Z
-	public fun execute (Ljava/lang/Runnable;)V
-	public final fun isProcessing ()Z
-	public fun isShutdown ()Z
-	public fun isTerminated ()Z
-	public final fun processEverything ()I
-	public fun shutdown ()V
-	public fun shutdownNow ()Ljava/util/List;
-}
-
-public final class misk/eventrouter/RealEventRouter : misk/eventrouter/EventRouter {
-	public field actionExecutor Ljava/util/concurrent/ExecutorService;
-	public field clusterConnector Lmisk/eventrouter/ClusterConnector;
-	public field clusterMapper Lmisk/eventrouter/ClusterMapper;
-	public field clusterSnapshot Lmisk/eventrouter/ClusterSnapshot;
-	public field eventJsonAdapter Lcom/squareup/moshi/JsonAdapter;
-	public field subscriberExecutor Ljava/util/concurrent/ExecutorService;
-	public fun <init> ()V
-	public final fun drainQueue$misk_eventrouter ()V
-	public final fun enqueue$misk_eventrouter (Lmisk/eventrouter/RealEventRouter$Action;)V
-	public final fun getActionExecutor ()Ljava/util/concurrent/ExecutorService;
-	public final fun getClusterConnector ()Lmisk/eventrouter/ClusterConnector;
-	public final fun getClusterMapper ()Lmisk/eventrouter/ClusterMapper;
-	public final fun getClusterSnapshot$misk_eventrouter ()Lmisk/eventrouter/ClusterSnapshot;
-	public final fun getEventJsonAdapter ()Lcom/squareup/moshi/JsonAdapter;
-	public final fun getHasClusterSnapshot$misk_eventrouter ()Ljava/util/concurrent/atomic/AtomicBoolean;
-	public final fun getSubscriberExecutor ()Ljava/util/concurrent/ExecutorService;
-	public fun getTopic (Ljava/lang/String;)Lmisk/eventrouter/Topic;
-	public final fun getWebSocketListener$misk_eventrouter ()Lmisk/web/actions/WebSocketListener;
-	public final fun joinCluster ()V
-	public final fun leaveCluster ()V
-	public final fun setActionExecutor (Ljava/util/concurrent/ExecutorService;)V
-	public final fun setClusterConnector (Lmisk/eventrouter/ClusterConnector;)V
-	public final fun setClusterMapper (Lmisk/eventrouter/ClusterMapper;)V
-	public final fun setClusterSnapshot$misk_eventrouter (Lmisk/eventrouter/ClusterSnapshot;)V
-	public final fun setEventJsonAdapter (Lcom/squareup/moshi/JsonAdapter;)V
-	public final fun setSubscriberExecutor (Ljava/util/concurrent/ExecutorService;)V
-}
-
-public abstract class misk/eventrouter/RealEventRouter$Action {
-}
-
-public final class misk/eventrouter/RealEventRouter$Action$CancelSubscription : misk/eventrouter/RealEventRouter$Action {
-	public fun <init> (Lmisk/eventrouter/LocalSubscriber;)V
-	public final fun component1 ()Lmisk/eventrouter/LocalSubscriber;
-	public final fun copy (Lmisk/eventrouter/LocalSubscriber;)Lmisk/eventrouter/RealEventRouter$Action$CancelSubscription;
-	public static synthetic fun copy$default (Lmisk/eventrouter/RealEventRouter$Action$CancelSubscription;Lmisk/eventrouter/LocalSubscriber;ILjava/lang/Object;)Lmisk/eventrouter/RealEventRouter$Action$CancelSubscription;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getLocalSubscription ()Lmisk/eventrouter/LocalSubscriber;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/RealEventRouter$Action$ClosedWebSocket : misk/eventrouter/RealEventRouter$Action {
-	public fun <init> (Lmisk/web/actions/WebSocket;)V
-	public final fun component1 ()Lmisk/web/actions/WebSocket;
-	public final fun copy (Lmisk/web/actions/WebSocket;)Lmisk/eventrouter/RealEventRouter$Action$ClosedWebSocket;
-	public static synthetic fun copy$default (Lmisk/eventrouter/RealEventRouter$Action$ClosedWebSocket;Lmisk/web/actions/WebSocket;ILjava/lang/Object;)Lmisk/eventrouter/RealEventRouter$Action$ClosedWebSocket;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getWebSocket ()Lmisk/web/actions/WebSocket;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/RealEventRouter$Action$ClusterChanged : misk/eventrouter/RealEventRouter$Action {
-	public fun <init> (Lmisk/eventrouter/ClusterSnapshot;)V
-	public final fun component1 ()Lmisk/eventrouter/ClusterSnapshot;
-	public final fun copy (Lmisk/eventrouter/ClusterSnapshot;)Lmisk/eventrouter/RealEventRouter$Action$ClusterChanged;
-	public static synthetic fun copy$default (Lmisk/eventrouter/RealEventRouter$Action$ClusterChanged;Lmisk/eventrouter/ClusterSnapshot;ILjava/lang/Object;)Lmisk/eventrouter/RealEventRouter$Action$ClusterChanged;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getNewSnapshot ()Lmisk/eventrouter/ClusterSnapshot;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/RealEventRouter$Action$LeaveCluster : misk/eventrouter/RealEventRouter$Action {
-	public static final field INSTANCE Lmisk/eventrouter/RealEventRouter$Action$LeaveCluster;
-}
-
-public final class misk/eventrouter/RealEventRouter$Action$OnMessage : misk/eventrouter/RealEventRouter$Action {
-	public fun <init> (Lmisk/web/actions/WebSocket;Ljava/lang/String;)V
-	public final fun component1 ()Lmisk/web/actions/WebSocket;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Lmisk/web/actions/WebSocket;Ljava/lang/String;)Lmisk/eventrouter/RealEventRouter$Action$OnMessage;
-	public static synthetic fun copy$default (Lmisk/eventrouter/RealEventRouter$Action$OnMessage;Lmisk/web/actions/WebSocket;Ljava/lang/String;ILjava/lang/Object;)Lmisk/eventrouter/RealEventRouter$Action$OnMessage;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getText ()Ljava/lang/String;
-	public final fun getWebSocket ()Lmisk/web/actions/WebSocket;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/RealEventRouter$Action$Publish : misk/eventrouter/RealEventRouter$Action {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Object;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/Object;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Object;)Lmisk/eventrouter/RealEventRouter$Action$Publish;
-	public static synthetic fun copy$default (Lmisk/eventrouter/RealEventRouter$Action$Publish;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)Lmisk/eventrouter/RealEventRouter$Action$Publish;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEvent ()Ljava/lang/Object;
-	public final fun getTopic ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/RealEventRouter$Action$Subscribe : misk/eventrouter/RealEventRouter$Action {
-	public fun <init> (Lmisk/eventrouter/LocalSubscriber;)V
-	public final fun component1 ()Lmisk/eventrouter/LocalSubscriber;
-	public final fun copy (Lmisk/eventrouter/LocalSubscriber;)Lmisk/eventrouter/RealEventRouter$Action$Subscribe;
-	public static synthetic fun copy$default (Lmisk/eventrouter/RealEventRouter$Action$Subscribe;Lmisk/eventrouter/LocalSubscriber;ILjava/lang/Object;)Lmisk/eventrouter/RealEventRouter$Action$Subscribe;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getLocalSubscription ()Lmisk/eventrouter/LocalSubscriber;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/eventrouter/RealEventRouterKt {
-}
-
 public final class misk/eventrouter/RealEventRouterModule : misk/inject/KAbstractModule {
 	public fun <init> (Lwisp/deployment/Deployment;)V
 	public final fun actionExecutor ()Ljava/util/concurrent/ExecutorService;
 	public final fun getDeployment ()Lwisp/deployment/Deployment;
 	public final fun kubernetesExecutor ()Ljava/util/concurrent/ExecutorService;
-	public final fun provideEventJsonAdapter$misk_eventrouter (Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
 	public final fun subscriberExecutor ()Ljava/util/concurrent/ExecutorService;
 }
 
@@ -457,10 +134,5 @@ public abstract interface class misk/eventrouter/Topic {
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun publish (Ljava/lang/Object;)V
 	public abstract fun subscribe (Lmisk/eventrouter/Listener;)Lmisk/eventrouter/Subscription;
-}
-
-public abstract interface class misk/eventrouter/TopicPeer {
-	public abstract fun acceptWebSocket (Lmisk/web/actions/WebSocket;)Lmisk/web/actions/WebSocketListener;
-	public abstract fun clusterChanged (Lmisk/eventrouter/ClusterSnapshot;)V
 }
 

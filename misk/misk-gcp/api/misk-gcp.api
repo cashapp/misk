@@ -88,14 +88,6 @@ public final class misk/cloud/gcp/security/keys/GcpKeyManagementModule : misk/in
 	public final fun providesKms (Ljava/lang/String;)Lcom/google/api/services/cloudkms/v1/CloudKMS;
 }
 
-public final class misk/cloud/gcp/security/keys/GcpKeyService : misk/security/keys/KeyService {
-	public fun <init> (Lcom/google/api/services/cloudkms/v1/CloudKMS;Lmisk/cloud/gcp/security/keys/GcpKmsConfig;)V
-	public fun decrypt (Ljava/lang/String;Lokio/ByteString;)Lokio/ByteString;
-	public fun encrypt (Ljava/lang/String;Lokio/ByteString;)Lokio/ByteString;
-	public final fun getConfig ()Lmisk/cloud/gcp/security/keys/GcpKmsConfig;
-	public final fun getCryptoKeys ()Lcom/google/api/services/cloudkms/v1/CloudKMS$Projects$Locations$KeyRings$CryptoKeys;
-}
-
 public final class misk/cloud/gcp/security/keys/GcpKmsConfig : wisp/config/Config {
 	public fun <init> (Ljava/lang/String;Ljava/util/Map;)V
 	public final fun component1 ()Ljava/lang/String;
