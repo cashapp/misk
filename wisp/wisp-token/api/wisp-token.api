@@ -3,23 +3,17 @@ public final class wisp/token/RealTokenGenerator : wisp/token/TokenGenerator {
 	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
 }
 
-public final class wisp/token/RealTokenGeneratorKt {
-}
-
 public abstract interface class wisp/token/TokenGenerator {
 	public static final field CANONICALIZE_LENGTH_MAX I
 	public static final field CANONICALIZE_LENGTH_MIN I
 	public static final field Companion Lwisp/token/TokenGenerator$Companion;
-	public static final field alphabet Ljava/lang/String;
 	public abstract fun generate (Ljava/lang/String;I)Ljava/lang/String;
 }
 
 public final class wisp/token/TokenGenerator$Companion {
 	public static final field CANONICALIZE_LENGTH_MAX I
 	public static final field CANONICALIZE_LENGTH_MIN I
-	public static final field alphabet Ljava/lang/String;
 	public final fun canonicalize (Ljava/lang/String;)Ljava/lang/String;
-	public final fun getIndexToChar$wisp_token ()[C
 }
 
 public final class wisp/token/TokenGenerator$DefaultImpls {
