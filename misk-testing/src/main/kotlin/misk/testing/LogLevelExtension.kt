@@ -9,8 +9,11 @@ import javax.inject.Inject
 
 class LogLevelExtension @Inject constructor() : BeforeEachCallback {
   override fun beforeEach(context: ExtensionContext?) {
-    val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
-    root.level =  level(context)
+    // Note that the root logger will be a org.slf4j.Logger, but may not
+    // be a ch.qos.logback.class.Logger instance. In particular, it can
+    // sometimes be a org.gradle.internal.logging.slf4j.OutputEventListenerBackedLogger
+    val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as? Logger
+    root?.let { it.level = level(context) }
   }
 
   private fun level(context: ExtensionContext?): Level {
