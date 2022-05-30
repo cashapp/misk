@@ -1,27 +1,3 @@
-public final class misk/hibernate/AeadAdapter : misk/hibernate/EncryptionAdapter {
-	public fun <init> (Lorg/hibernate/type/spi/TypeConfiguration;Ljava/lang/String;)V
-	public fun decrypt ([B[B)[B
-	public fun encrypt ([B[B)[B
-	public final fun getAead ()Lcom/google/crypto/tink/Aead;
-}
-
-public final class misk/hibernate/AggregateListener : org/hibernate/event/spi/FlushEntityEventListener, org/hibernate/event/spi/PostDeleteEventListener, org/hibernate/event/spi/PostInsertEventListener, org/hibernate/event/spi/PostLoadEventListener, org/hibernate/event/spi/PostUpdateEventListener, org/hibernate/event/spi/PreDeleteEventListener, org/hibernate/event/spi/PreInsertEventListener, org/hibernate/event/spi/PreLoadEventListener, org/hibernate/event/spi/PreUpdateEventListener, org/hibernate/event/spi/SaveOrUpdateEventListener, org/hibernate/jpa/event/spi/CallbackRegistryConsumer {
-	public fun <init> (Ljava/util/Set;)V
-	public fun injectCallbackRegistry (Lorg/hibernate/jpa/event/spi/CallbackRegistry;)V
-	public fun onFlushEntity (Lorg/hibernate/event/spi/FlushEntityEvent;)V
-	public fun onPostDelete (Lorg/hibernate/event/spi/PostDeleteEvent;)V
-	public fun onPostInsert (Lorg/hibernate/event/spi/PostInsertEvent;)V
-	public fun onPostLoad (Lorg/hibernate/event/spi/PostLoadEvent;)V
-	public fun onPostUpdate (Lorg/hibernate/event/spi/PostUpdateEvent;)V
-	public fun onPreDelete (Lorg/hibernate/event/spi/PreDeleteEvent;)Z
-	public fun onPreInsert (Lorg/hibernate/event/spi/PreInsertEvent;)Z
-	public fun onPreLoad (Lorg/hibernate/event/spi/PreLoadEvent;)V
-	public fun onPreUpdate (Lorg/hibernate/event/spi/PreUpdateEvent;)Z
-	public fun onSaveOrUpdate (Lorg/hibernate/event/spi/SaveOrUpdateEvent;)V
-	public final fun registerAll (Lorg/hibernate/event/service/spi/EventListenerRegistry;)V
-	public fun requiresPostCommitHanding (Lorg/hibernate/persister/entity/EntityPersister;)Z
-}
-
 public final class misk/hibernate/BindPolicy : java/lang/Enum {
 	public static final field APPEND Lmisk/hibernate/BindPolicy;
 	public static final field PREPEND Lmisk/hibernate/BindPolicy;
@@ -30,108 +6,9 @@ public final class misk/hibernate/BindPolicy : java/lang/Enum {
 	public static fun values ()[Lmisk/hibernate/BindPolicy;
 }
 
-public final class misk/hibernate/BoxedStringType : org/hibernate/usertype/ParameterizedType, org/hibernate/usertype/UserType {
-	public static final field Companion Lmisk/hibernate/BoxedStringType$Companion;
-	public fun <init> ()V
-	public fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun deepCopy (Ljava/lang/Object;)Ljava/lang/Object;
-	public synthetic fun disassemble (Ljava/lang/Object;)Ljava/io/Serializable;
-	public fun disassemble (Ljava/lang/Object;)Ljava/lang/String;
-	public fun equals (Ljava/lang/Object;Ljava/lang/Object;)Z
-	public fun hashCode (Ljava/lang/Object;)I
-	public fun isMutable ()Z
-	public fun nullSafeGet (Ljava/sql/ResultSet;[Ljava/lang/String;Lorg/hibernate/engine/spi/SharedSessionContractImplementor;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun nullSafeSet (Ljava/sql/PreparedStatement;Ljava/lang/Object;ILorg/hibernate/engine/spi/SharedSessionContractImplementor;)V
-	public fun replace (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun returnedClass ()Ljava/lang/Class;
-	public fun setParameterValues (Ljava/util/Properties;)V
-	public fun sqlTypes ()[I
-}
-
-public final class misk/hibernate/BoxedStringType$Boxer {
-	public fun <init> (Lkotlin/reflect/KProperty1;Lkotlin/reflect/KFunction;)V
-	public final fun box (Ljava/lang/String;)Ljava/lang/Object;
-	public final fun component1 ()Lkotlin/reflect/KProperty1;
-	public final fun component2 ()Lkotlin/reflect/KFunction;
-	public final fun copy (Lkotlin/reflect/KProperty1;Lkotlin/reflect/KFunction;)Lmisk/hibernate/BoxedStringType$Boxer;
-	public static synthetic fun copy$default (Lmisk/hibernate/BoxedStringType$Boxer;Lkotlin/reflect/KProperty1;Lkotlin/reflect/KFunction;ILjava/lang/Object;)Lmisk/hibernate/BoxedStringType$Boxer;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getConstructor ()Lkotlin/reflect/KFunction;
-	public final fun getProperty ()Lkotlin/reflect/KProperty1;
-	public final fun getReturnedClass ()Ljava/lang/Class;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun unbox (Ljava/lang/Object;)Ljava/lang/String;
-}
-
-public final class misk/hibernate/BoxedStringType$Companion {
-	public final fun isBoxedString (Lkotlin/reflect/KClass;)Z
-}
-
-public final class misk/hibernate/ByteStringType : org/hibernate/usertype/UserType {
-	public static final field INSTANCE Lmisk/hibernate/ByteStringType;
-	public synthetic fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Lokio/ByteString;
-	public fun deepCopy (Ljava/lang/Object;)Ljava/lang/Object;
-	public synthetic fun disassemble (Ljava/lang/Object;)Ljava/io/Serializable;
-	public fun disassemble (Ljava/lang/Object;)Lokio/ByteString;
-	public fun equals (Ljava/lang/Object;Ljava/lang/Object;)Z
-	public fun hashCode (Ljava/lang/Object;)I
-	public fun isMutable ()Z
-	public fun nullSafeGet (Ljava/sql/ResultSet;[Ljava/lang/String;Lorg/hibernate/engine/spi/SharedSessionContractImplementor;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun nullSafeSet (Ljava/sql/PreparedStatement;Ljava/lang/Object;ILorg/hibernate/engine/spi/SharedSessionContractImplementor;)V
-	public fun replace (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun returnedClass ()Ljava/lang/Class;
-	public fun sqlTypes ()[I
-}
-
-public final class misk/hibernate/ColumnDeclaration : misk/hibernate/Declaration {
-	public fun <init> (Ljava/lang/String;ZZ)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Z
-	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;ZZ)Lmisk/hibernate/ColumnDeclaration;
-	public static synthetic fun copy$default (Lmisk/hibernate/ColumnDeclaration;Ljava/lang/String;ZZILjava/lang/Object;)Lmisk/hibernate/ColumnDeclaration;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getHasDefaultValue ()Z
-	public fun getName ()Ljava/lang/String;
-	public final fun getNullable ()Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/ConflictExceptionResponder {
-	public static final field INSTANCE Lmisk/hibernate/ConflictExceptionResponder;
-	public final fun toResponse ()Lmisk/web/Response;
-}
-
 public abstract interface annotation class misk/hibernate/Constraint : java/lang/annotation/Annotation {
 	public abstract fun operator ()Lmisk/hibernate/Operator;
 	public abstract fun path ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/ConstraintViolationExceptionMapper : misk/web/exceptions/ExceptionMapper {
-	public fun <init> ()V
-	public fun canHandle (Ljava/lang/Throwable;)Z
-	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
-	public fun loggingLevel (Lorg/hibernate/exception/ConstraintViolationException;)Lorg/slf4j/event/Level;
-	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
-	public fun toGrpcResponse (Lorg/hibernate/exception/ConstraintViolationException;)Lmisk/web/exceptions/GrpcErrorResponse;
-	public synthetic fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
-	public fun toResponse (Lorg/hibernate/exception/ConstraintViolationException;)Lmisk/web/Response;
-}
-
-public final class misk/hibernate/DatabaseDeclaration : misk/hibernate/Declaration {
-	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lmisk/hibernate/DatabaseDeclaration;
-	public static synthetic fun copy$default (Lmisk/hibernate/DatabaseDeclaration;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/hibernate/DatabaseDeclaration;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getName ()Ljava/lang/String;
-	public final fun getTables ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class misk/hibernate/DbChild : misk/hibernate/DbSharded {
@@ -171,24 +48,6 @@ public abstract interface class misk/hibernate/DbTimestampedEntity {
 public abstract interface class misk/hibernate/DbUnsharded : misk/hibernate/DbEntity {
 }
 
-public abstract class misk/hibernate/Declaration {
-	public fun <init> ()V
-	public abstract fun getName ()Ljava/lang/String;
-	public final fun getSnakeCaseName ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/DeterministicAeadAdapter : misk/hibernate/EncryptionAdapter {
-	public fun <init> (Lorg/hibernate/type/spi/TypeConfiguration;Ljava/lang/String;)V
-	public fun decrypt ([B[B)[B
-	public fun encrypt ([B[B)[B
-	public final fun getDaead ()Lcom/google/crypto/tink/DeterministicAead;
-}
-
-public abstract interface class misk/hibernate/EncryptionAdapter {
-	public abstract fun decrypt ([B[B)[B
-	public abstract fun encrypt ([B[B)[B
-}
-
 public abstract interface annotation class misk/hibernate/Fetch : java/lang/annotation/Annotation {
 	public abstract fun joinType ()Ljavax/persistence/criteria/JoinType;
 	public abstract fun path ()Ljava/lang/String;
@@ -215,70 +74,17 @@ public final class misk/hibernate/GidGenerator : org/hibernate/id/AbstractPostIn
 	public fun getInsertGeneratedIdentifierDelegate (Lorg/hibernate/id/PostInsertIdentityPersister;Lorg/hibernate/dialect/Dialect;Z)Lorg/hibernate/id/insert/InsertGeneratedIdentifierDelegate;
 }
 
-public final class misk/hibernate/HibernateEntity {
-	public fun <init> (Lkotlin/reflect/KClass;)V
-	public final fun component1 ()Lkotlin/reflect/KClass;
-	public final fun copy (Lkotlin/reflect/KClass;)Lmisk/hibernate/HibernateEntity;
-	public static synthetic fun copy$default (Lmisk/hibernate/HibernateEntity;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/hibernate/HibernateEntity;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEntity ()Lkotlin/reflect/KClass;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;)V
 	protected final fun addEntities (Lkotlin/reflect/KClass;[Lkotlin/reflect/KClass;)V
 	protected final fun addEntities ([Lkotlin/reflect/KClass;)V
-	protected final synthetic fun addEntity ()V
 	protected final fun addEntity (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
 	public static synthetic fun addEntity$default (Lmisk/hibernate/HibernateEntityModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)V
-	protected final synthetic fun addEntityWithDynamicQuery ()V
-	protected final synthetic fun addEntityWithStaticQuery ()V
 	protected final fun bindListener (Lorg/hibernate/event/spi/EventType;Lmisk/hibernate/BindPolicy;)Lcom/google/inject/binder/LinkedBindingBuilder;
 	public static synthetic fun bindListener$default (Lmisk/hibernate/HibernateEntityModule;Lorg/hibernate/event/spi/EventType;Lmisk/hibernate/BindPolicy;ILjava/lang/Object;)Lcom/google/inject/binder/LinkedBindingBuilder;
 	protected fun configure ()V
 	public abstract fun configureHibernate ()V
 	protected final fun installHibernateAdminDashboardWebActions ()V
-}
-
-public final class misk/hibernate/HibernateEntityModuleKt {
-}
-
-public final class misk/hibernate/HibernateHealthCheck : misk/healthchecks/HealthCheck {
-	public static final field Companion Lmisk/hibernate/HibernateHealthCheck$Companion;
-	public fun <init> (Lkotlin/reflect/KClass;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljava/time/Clock;)V
-	public fun status ()Lmisk/healthchecks/HealthStatus;
-}
-
-public final class misk/hibernate/HibernateHealthCheck$Companion {
-	public final fun getCLOCK_SKEW_UNHEALTHY_THRESHOLD ()Ljava/time/Duration;
-	public final fun getCLOCK_SKEW_WARN_THRESHOLD ()Ljava/time/Duration;
-	public final fun getLogger ()Lmu/KLogger;
-}
-
-public final class misk/hibernate/HibernateInjectorAccess : org/hibernate/boot/registry/StandardServiceInitiator, org/hibernate/service/Service {
-	public field injector Lcom/google/inject/Injector;
-	public fun <init> ()V
-	public final fun getInjector ()Lcom/google/inject/Injector;
-	public fun getServiceInitiated ()Ljava/lang/Class;
-	public fun initiateService (Ljava/util/Map;Lorg/hibernate/service/spi/ServiceRegistryImplementor;)Lmisk/hibernate/HibernateInjectorAccess;
-	public synthetic fun initiateService (Ljava/util/Map;Lorg/hibernate/service/spi/ServiceRegistryImplementor;)Lorg/hibernate/service/Service;
-	public final fun setInjector (Lcom/google/inject/Injector;)V
-}
-
-public final class misk/hibernate/HibernateInjectorAccessKt {
-	public static final fun getInjector (Lorg/hibernate/service/ServiceRegistry;)Lcom/google/inject/Injector;
-}
-
-public final class misk/hibernate/HibernateKt {
-	public static final fun field (Ljava/lang/Class;Lorg/hibernate/mapping/Property;)Ljava/lang/reflect/Field;
-	public static final fun getAllProperties (Lorg/hibernate/boot/Metadata;)Lcom/google/common/collect/Multimap;
-	public static final fun getField (Ljava/util/Properties;Ljava/lang/String;)Ljava/lang/reflect/Field;
-	public static final fun setField (Ljava/util/Properties;Ljava/lang/String;Ljava/lang/reflect/Field;)V
-	public static final fun setTypeParameter (Lorg/hibernate/mapping/SimpleValue;Ljava/lang/String;Ljava/lang/Object;)V
-	public static final fun setTypeParameter (Lorg/hibernate/mapping/SimpleValue;Ljava/lang/String;Ljava/lang/String;)V
-	public static final fun setTypeParameter (Lorg/hibernate/mapping/SimpleValue;Ljava/lang/String;Ljava/lang/reflect/Field;)V
 }
 
 public final class misk/hibernate/HibernateModule : misk/inject/KAbstractModule {
@@ -291,9 +97,6 @@ public final class misk/hibernate/HibernateModule : misk/inject/KAbstractModule 
 	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
 	public final fun getDatabasePool ()Lmisk/jdbc/DatabasePool;
 	public final fun getReaderConfig ()Lmisk/jdbc/DataSourceConfig;
-}
-
-public final class misk/hibernate/HibernateModuleKt {
 }
 
 public final class misk/hibernate/Id : java/io/Serializable, java/lang/Comparable {
@@ -330,48 +133,6 @@ public final class misk/hibernate/IdType : org/hibernate/id/ResultSetIdentifierC
 public abstract interface annotation class misk/hibernate/JsonColumn : java/lang/annotation/Annotation {
 }
 
-public final class misk/hibernate/JsonColumnType : org/hibernate/type/spi/TypeConfigurationAware, org/hibernate/usertype/ParameterizedType, org/hibernate/usertype/UserType {
-	public fun <init> ()V
-	public fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Ljava/io/Serializable;
-	public synthetic fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun deepCopy (Ljava/lang/Object;)Ljava/lang/Object;
-	public fun disassemble (Ljava/lang/Object;)Ljava/io/Serializable;
-	public fun equals (Ljava/lang/Object;Ljava/lang/Object;)Z
-	public fun getTypeConfiguration ()Lorg/hibernate/type/spi/TypeConfiguration;
-	public fun hashCode (Ljava/lang/Object;)I
-	public fun isMutable ()Z
-	public fun nullSafeGet (Ljava/sql/ResultSet;[Ljava/lang/String;Lorg/hibernate/engine/spi/SharedSessionContractImplementor;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun nullSafeSet (Ljava/sql/PreparedStatement;Ljava/lang/Object;ILorg/hibernate/engine/spi/SharedSessionContractImplementor;)V
-	public fun replace (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun returnedClass ()Ljava/lang/Class;
-	public fun setParameterValues (Ljava/util/Properties;)V
-	public fun setTypeConfiguration (Lorg/hibernate/type/spi/TypeConfiguration;)V
-	public fun sqlTypes ()[I
-}
-
-public final class misk/hibernate/ListenerRegistration {
-	public fun <init> (Lorg/hibernate/event/spi/EventType;Ljavax/inject/Provider;Lmisk/hibernate/BindPolicy;)V
-	public final fun getPolicy ()Lmisk/hibernate/BindPolicy;
-	public final fun getProvider ()Ljavax/inject/Provider;
-	public final fun getType ()Lorg/hibernate/event/spi/EventType;
-}
-
-public final class misk/hibernate/Message {
-	public fun <init> (Lmisk/hibernate/Path;Ljava/lang/String;Z)V
-	public synthetic fun <init> (Lmisk/hibernate/Path;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lmisk/hibernate/Path;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Z
-	public final fun copy (Lmisk/hibernate/Path;Ljava/lang/String;Z)Lmisk/hibernate/Message;
-	public static synthetic fun copy$default (Lmisk/hibernate/Message;Lmisk/hibernate/Path;Ljava/lang/String;ZILjava/lang/Object;)Lmisk/hibernate/Message;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Z
-	public final fun getPath ()Lmisk/hibernate/Path;
-	public final fun getText ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class misk/hibernate/Operator : java/lang/Enum {
 	public static final field EQ Lmisk/hibernate/Operator;
 	public static final field EQ_OR_IS_NULL Lmisk/hibernate/Operator;
@@ -386,17 +147,6 @@ public final class misk/hibernate/Operator : java/lang/Enum {
 	public static final field NOT_IN Lmisk/hibernate/Operator;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/hibernate/Operator;
 	public static fun values ()[Lmisk/hibernate/Operator;
-}
-
-public final class misk/hibernate/OptimisticLockExceptionMapper : misk/web/exceptions/ExceptionMapper {
-	public fun <init> ()V
-	public fun canHandle (Ljava/lang/Throwable;)Z
-	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
-	public fun loggingLevel (Ljavax/persistence/OptimisticLockException;)Lorg/slf4j/event/Level;
-	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
-	public fun toGrpcResponse (Ljavax/persistence/OptimisticLockException;)Lmisk/web/exceptions/GrpcErrorResponse;
-	public synthetic fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
-	public fun toResponse (Ljavax/persistence/OptimisticLockException;)Lmisk/web/Response;
 }
 
 public abstract interface class misk/hibernate/OrBuilder {
@@ -423,12 +173,6 @@ public final class misk/hibernate/Path {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/hibernate/PersistenceMetadata {
-	public fun <init> (Lorg/hibernate/SessionFactory;)V
-	public final fun getColumnNames (Lkotlin/reflect/KClass;)Lcom/google/common/collect/ImmutableSet;
-	public final fun getTableName (Lkotlin/reflect/KClass;)Ljava/lang/String;
-}
-
 public final class misk/hibernate/PostCommitHookFailedException : java/lang/Exception {
 	public fun <init> (Ljava/lang/Throwable;)V
 }
@@ -441,23 +185,6 @@ public abstract interface annotation class misk/hibernate/Property : java/lang/a
 }
 
 public abstract interface annotation class misk/hibernate/ProtoColumn : java/lang/annotation/Annotation {
-}
-
-public final class misk/hibernate/ProtoColumnType : org/hibernate/usertype/ParameterizedType, org/hibernate/usertype/UserType {
-	public fun <init> ()V
-	public fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Ljava/io/Serializable;
-	public synthetic fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun deepCopy (Ljava/lang/Object;)Ljava/lang/Object;
-	public fun disassemble (Ljava/lang/Object;)Ljava/io/Serializable;
-	public fun equals (Ljava/lang/Object;Ljava/lang/Object;)Z
-	public fun hashCode (Ljava/lang/Object;)I
-	public fun isMutable ()Z
-	public fun nullSafeGet (Ljava/sql/ResultSet;[Ljava/lang/String;Lorg/hibernate/engine/spi/SharedSessionContractImplementor;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun nullSafeSet (Ljava/sql/PreparedStatement;Ljava/lang/Object;ILorg/hibernate/engine/spi/SharedSessionContractImplementor;)V
-	public fun replace (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun returnedClass ()Ljava/lang/Class;
-	public fun setParameterValues (Ljava/util/Properties;)V
-	public fun sqlTypes ()[I
 }
 
 public abstract interface class misk/hibernate/Query {
@@ -492,179 +219,7 @@ public abstract interface class misk/hibernate/Query$Factory {
 }
 
 public final class misk/hibernate/QueryKt {
-	public static final synthetic fun allowFullScatter (Lmisk/hibernate/Query;)Lmisk/hibernate/Query;
-	public static final synthetic fun allowTableScan (Lmisk/hibernate/Query;)Lmisk/hibernate/Query;
 	public static final fun constraint (Lmisk/hibernate/Query;Lkotlin/jvm/functions/Function2;)Lmisk/hibernate/Query;
-	public static final synthetic fun newQuery (Lmisk/hibernate/Query$Factory;)Lmisk/hibernate/Query;
-	public static final synthetic fun or (Lmisk/hibernate/Query;Lkotlin/jvm/functions/Function1;)Lmisk/hibernate/Query;
-}
-
-public final class misk/hibernate/RealTransacter : misk/hibernate/Transacter {
-	public fun <init> (Lkotlin/reflect/KClass;Lmisk/hibernate/SessionFactoryService;Lmisk/hibernate/SessionFactoryService;Lmisk/jdbc/DataSourceConfig;Lmisk/concurrent/ExecutorServiceFactory;Ljava/util/Set;)V
-	public fun allowCowrites ()Lmisk/hibernate/Transacter;
-	public fun config ()Lmisk/jdbc/DataSourceConfig;
-	public fun entities ()Ljava/util/Set;
-	public fun getInTransaction ()Z
-	public fun isCheckEnabled (Lmisk/jdbc/Check;)Z
-	public fun noRetries ()Lmisk/hibernate/Transacter;
-	public fun readOnly ()Lmisk/hibernate/Transacter;
-	public fun replicaRead (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public fun retries (I)Lmisk/hibernate/Transacter;
-	public fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-}
-
-public final class misk/hibernate/RealTransacter$RealSession : java/io/Closeable, misk/hibernate/Session {
-	public fun <init> (Lorg/hibernate/Session;ZLmisk/jdbc/DataSourceConfig;Lmisk/hibernate/RealTransacter;Ljava/util/Collection;)V
-	public fun close ()V
-	public fun delete (Lmisk/hibernate/DbEntity;)V
-	public fun disableChecks (Ljava/util/Collection;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-	public final fun getDisabledChecks ()Ljava/util/Collection;
-	public fun getHibernateSession ()Lorg/hibernate/Session;
-	public final fun getInTransaction$misk_hibernate ()Z
-	public final fun isReadOnly$misk_hibernate ()Z
-	public fun load (Lmisk/hibernate/Id;Lkotlin/reflect/KClass;)Lmisk/hibernate/DbEntity;
-	public fun loadOrNull (Lmisk/hibernate/Id;Lkotlin/reflect/KClass;)Lmisk/hibernate/DbEntity;
-	public fun loadSharded (Lmisk/hibernate/Gid;Lkotlin/reflect/KClass;)Lmisk/hibernate/DbSharded;
-	public fun onPostCommit (Lkotlin/jvm/functions/Function0;)V
-	public fun onPreCommit (Lkotlin/jvm/functions/Function0;)V
-	public fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
-	public final fun postCommit$misk_hibernate ()V
-	public final fun preCommit$misk_hibernate ()V
-	public fun save (Lmisk/hibernate/DbEntity;)Lmisk/hibernate/Id;
-	public final fun setDisabledChecks (Ljava/util/Collection;)V
-	public final fun setInTransaction$misk_hibernate (Z)V
-	public fun shards ()Ljava/util/Set;
-	public fun shards (Lmisk/vitess/Keyspace;)Ljava/util/Collection;
-	public fun target (Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-	public final fun target$misk_hibernate (Lmisk/vitess/Destination;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-	public fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public fun withoutChecks ([Lmisk/jdbc/Check;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-}
-
-public final class misk/hibernate/RealTransacter$ShardListFetcher {
-	public fun <init> ()V
-	public final fun cachedShards ()Ljava/util/Set;
-	public final fun init (Lmisk/hibernate/Transacter;Lmisk/jdbc/DataSourceConfig;Lmisk/concurrent/ExecutorServiceFactory;)V
-}
-
-public final class misk/hibernate/RealTransacter$TransacterOptions {
-	public fun <init> ()V
-	public fun <init> (ILjava/util/EnumSet;JJJZ)V
-	public synthetic fun <init> (ILjava/util/EnumSet;JJJZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()I
-	public final fun component2 ()Ljava/util/EnumSet;
-	public final fun component3 ()J
-	public final fun component4 ()J
-	public final fun component5 ()J
-	public final fun component6 ()Z
-	public final fun copy (ILjava/util/EnumSet;JJJZ)Lmisk/hibernate/RealTransacter$TransacterOptions;
-	public static synthetic fun copy$default (Lmisk/hibernate/RealTransacter$TransacterOptions;ILjava/util/EnumSet;JJJZILjava/lang/Object;)Lmisk/hibernate/RealTransacter$TransacterOptions;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDisabledChecks ()Ljava/util/EnumSet;
-	public final fun getMaxAttempts ()I
-	public final fun getMaxRetryDelayMillis ()J
-	public final fun getMinRetryDelayMillis ()J
-	public final fun getReadOnly ()Z
-	public final fun getRetryJitterMillis ()J
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/RealTransacterKt {
-}
-
-public final class misk/hibernate/ReflectionQuery : java/lang/reflect/InvocationHandler, misk/hibernate/Query {
-	public static final field Companion Lmisk/hibernate/ReflectionQuery$Companion;
-	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/util/Map;Lmisk/hibernate/ReflectionQuery$QueryLimitsConfig;Z)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/util/Map;Lmisk/hibernate/ReflectionQuery$QueryLimitsConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun addConstraint (Ljava/util/List;Lmisk/hibernate/Operator;Ljava/lang/Object;)V
-	public final fun addConstraint$misk_hibernate (Lkotlin/jvm/functions/Function2;)Lmisk/hibernate/ReflectionQuery;
-	public final fun addFetch$misk_hibernate (Lkotlin/jvm/functions/Function1;)Lmisk/hibernate/ReflectionQuery;
-	public fun addJpaConstraint (Lkotlin/jvm/functions/Function2;)V
-	public final fun addOrderBy$misk_hibernate (Lkotlin/jvm/functions/Function2;)Lmisk/hibernate/ReflectionQuery;
-	public fun clone ()Lmisk/hibernate/Query;
-	public fun count (Lmisk/hibernate/Session;)J
-	public fun delete (Lmisk/hibernate/Session;)I
-	public fun disableCheck (Lmisk/jdbc/Check;)V
-	public fun dynamicAddConstraint (Ljava/lang/String;Lmisk/hibernate/Operator;Ljava/lang/Object;)V
-	public fun dynamicAddFetch (Ljava/lang/String;Ljavax/persistence/criteria/JoinType;)V
-	public fun dynamicAddOrder (Ljava/lang/String;Z)V
-	public fun dynamicList (Lmisk/hibernate/Session;Ljava/util/List;)Ljava/util/List;
-	public fun dynamicList (Lmisk/hibernate/Session;Lkotlin/jvm/functions/Function2;)Ljava/util/List;
-	public fun dynamicUniqueResult (Lmisk/hibernate/Session;Ljava/util/List;)Ljava/util/List;
-	public fun dynamicUniqueResult (Lmisk/hibernate/Session;Lkotlin/jvm/functions/Function2;)Ljava/util/List;
-	public fun getFirstResult ()I
-	public fun getMaxRows ()I
-	public fun invoke (Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;
-	public fun list (Lmisk/hibernate/Session;)Ljava/util/List;
-	public fun newOrBuilder ()Lmisk/hibernate/OrBuilder;
-	public fun setFirstResult (I)V
-	public fun setMaxRows (I)V
-	public synthetic fun uniqueResult (Lmisk/hibernate/Session;)Ljava/lang/Object;
-	public fun uniqueResult (Lmisk/hibernate/Session;)Lmisk/hibernate/DbEntity;
-}
-
-public final class misk/hibernate/ReflectionQuery$Companion {
-}
-
-public final class misk/hibernate/ReflectionQuery$Factory : misk/hibernate/Query$Factory {
-	public fun <init> (Lmisk/hibernate/ReflectionQuery$QueryLimitsConfig;)V
-	public fun dynamicQuery (Lkotlin/reflect/KClass;)Lmisk/hibernate/Query;
-	public fun newQuery (Lkotlin/reflect/KClass;)Lmisk/hibernate/Query;
-}
-
-public final class misk/hibernate/ReflectionQuery$OrClausePredicateFactory : kotlin/jvm/functions/Function2, misk/hibernate/OrBuilder {
-	public fun <init> (Lmisk/hibernate/ReflectionQuery;)V
-	public final fun getOptions ()Ljava/util/List;
-	public synthetic fun invoke (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun invoke (Ljavax/persistence/criteria/Root;Ljavax/persistence/criteria/CriteriaBuilder;)Ljavax/persistence/criteria/Predicate;
-	public fun option (Lkotlin/jvm/functions/Function1;)V
-}
-
-public final class misk/hibernate/ReflectionQuery$QueryLimitsConfig {
-	public fun <init> (III)V
-	public final fun component1 ()I
-	public final fun component2 ()I
-	public final fun component3 ()I
-	public final fun copy (III)Lmisk/hibernate/ReflectionQuery$QueryLimitsConfig;
-	public static synthetic fun copy$default (Lmisk/hibernate/ReflectionQuery$QueryLimitsConfig;IIIILjava/lang/Object;)Lmisk/hibernate/ReflectionQuery$QueryLimitsConfig;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMaxMaxRows ()I
-	public final fun getRowCountErrorLimit ()I
-	public final fun getRowCountWarningLimit ()I
-	public fun hashCode ()I
-	public final fun setMaxMaxRows (I)V
-	public final fun setRowCountErrorLimit (I)V
-	public final fun setRowCountWarningLimit (I)V
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class misk/hibernate/ReflectionQuery$QueryMethodHandler {
-	public static final field Companion Lmisk/hibernate/ReflectionQuery$QueryMethodHandler$Companion;
-	public abstract fun invoke (Lmisk/hibernate/ReflectionQuery;[Ljava/lang/Object;)Ljava/lang/Object;
-}
-
-public final class misk/hibernate/ReflectionQuery$QueryMethodHandler$Companion {
-	public final fun create (Ljava/util/List;Lkotlin/reflect/KFunction;Ljava/util/Map;)V
-}
-
-public final class misk/hibernate/ReflectionQuery$SelectMethodHandler : misk/hibernate/ReflectionQuery$QueryMethodHandler {
-	public fun <init> (ZLkotlin/reflect/KFunction;Ljava/util/List;)V
-	public fun invoke (Lmisk/hibernate/ReflectionQuery;[Ljava/lang/Object;)Ljava/lang/Object;
-}
-
-public final class misk/hibernate/ReflectionQueryFactoryKt {
-}
-
-public final class misk/hibernate/ResourceExhaustedExceptionMapper : misk/web/exceptions/ExceptionMapper {
-	public fun <init> ()V
-	public fun canHandle (Ljava/lang/Throwable;)Z
-	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
-	public fun loggingLevel (Lorg/hibernate/exception/GenericJDBCException;)Lorg/slf4j/event/Level;
-	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
-	public fun toGrpcResponse (Lorg/hibernate/exception/GenericJDBCException;)Lmisk/web/exceptions/GrpcErrorResponse;
-	public synthetic fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
-	public fun toResponse (Lorg/hibernate/exception/GenericJDBCException;)Lmisk/web/Response;
 }
 
 public final class misk/hibernate/RetryTransactionException : java/lang/Exception {
@@ -673,66 +228,9 @@ public final class misk/hibernate/RetryTransactionException : java/lang/Exceptio
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
-public final class misk/hibernate/RetryTransactionExceptionMapper : misk/web/exceptions/ExceptionMapper {
-	public fun <init> ()V
-	public fun canHandle (Ljava/lang/Throwable;)Z
-	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
-	public fun loggingLevel (Lmisk/hibernate/RetryTransactionException;)Lorg/slf4j/event/Level;
-	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
-	public fun toGrpcResponse (Lmisk/hibernate/RetryTransactionException;)Lmisk/web/exceptions/GrpcErrorResponse;
-	public synthetic fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
-	public fun toResponse (Lmisk/hibernate/RetryTransactionException;)Lmisk/web/Response;
-}
-
-public final class misk/hibernate/SchemaValidator {
-	public fun <init> ()V
-	public final fun validate$misk_hibernate (Lmisk/hibernate/Transacter;Lorg/hibernate/boot/Metadata;)Lmisk/hibernate/ValidationReport;
-}
-
-public final class misk/hibernate/SchemaValidatorKt {
-	public static final fun toSnakeCase (Ljava/lang/String;)Ljava/lang/String;
-}
-
-public final class misk/hibernate/SchemaValidatorService : com/google/common/util/concurrent/AbstractIdleService, misk/healthchecks/HealthCheck {
-	public static final field Companion Lmisk/hibernate/SchemaValidatorService$Companion;
-	public fun <init> (Lkotlin/reflect/KClass;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public fun status ()Lmisk/healthchecks/HealthStatus;
-}
-
-public final class misk/hibernate/SchemaValidatorService$Companion {
-}
-
 public abstract interface annotation class misk/hibernate/SecretColumn : java/lang/annotation/Annotation {
 	public abstract fun indexable ()Z
 	public abstract fun keyName ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/SecretColumnType : org/hibernate/type/spi/TypeConfigurationAware, org/hibernate/usertype/ParameterizedType, org/hibernate/usertype/UserType {
-	public static final field Companion Lmisk/hibernate/SecretColumnType$Companion;
-	public static final field FIELD_ENCRYPTION_INDEXABLE Ljava/lang/String;
-	public static final field FIELD_ENCRYPTION_KEY_NAME Ljava/lang/String;
-	public fun <init> ()V
-	public synthetic fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)[B
-	public synthetic fun deepCopy (Ljava/lang/Object;)Ljava/lang/Object;
-	public fun deepCopy (Ljava/lang/Object;)[B
-	public fun disassemble (Ljava/lang/Object;)Ljava/io/Serializable;
-	public fun equals (Ljava/lang/Object;Ljava/lang/Object;)Z
-	public fun getTypeConfiguration ()Lorg/hibernate/type/spi/TypeConfiguration;
-	public fun hashCode (Ljava/lang/Object;)I
-	public fun isMutable ()Z
-	public fun nullSafeGet (Ljava/sql/ResultSet;[Ljava/lang/String;Lorg/hibernate/engine/spi/SharedSessionContractImplementor;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun nullSafeSet (Ljava/sql/PreparedStatement;Ljava/lang/Object;ILorg/hibernate/engine/spi/SharedSessionContractImplementor;)V
-	public synthetic fun replace (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun replace (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)[B
-	public fun returnedClass ()Ljava/lang/Class;
-	public fun setParameterValues (Ljava/util/Properties;)V
-	public fun setTypeConfiguration (Lorg/hibernate/type/spi/TypeConfiguration;)V
-	public fun sqlTypes ()[I
-}
-
-public final class misk/hibernate/SecretColumnType$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 }
 
 public abstract interface annotation class misk/hibernate/Select : java/lang/annotation/Annotation {
@@ -751,48 +249,6 @@ public abstract interface class misk/hibernate/Session : misk/jdbc/Session {
 	public abstract fun shards (Lmisk/vitess/Keyspace;)Ljava/util/Collection;
 	public abstract fun target (Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public abstract fun withoutChecks ([Lmisk/jdbc/Check;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-}
-
-public final class misk/hibernate/SessionFactoryService : com/google/common/util/concurrent/AbstractIdleService, javax/inject/Provider, misk/hibernate/TransacterService {
-	public field hibernateMetadata Lorg/hibernate/boot/Metadata;
-	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConnector;Ljavax/inject/Provider;Lmisk/hibernate/HibernateInjectorAccess;Ljava/util/Set;Ljava/util/Set;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConnector;Ljavax/inject/Provider;Lmisk/hibernate/HibernateInjectorAccess;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lorg/hibernate/SessionFactory;
-	public final fun getHibernateMetadata ()Lorg/hibernate/boot/Metadata;
-	public final fun getThreadInTransaction ()Ljava/lang/ThreadLocal;
-	public final fun setHibernateMetadata (Lorg/hibernate/boot/Metadata;)V
-}
-
-public final class misk/hibernate/SessionFactoryServiceKt {
-}
-
-public final class misk/hibernate/SessionKt {
-	public static final synthetic fun load (Lmisk/hibernate/Session;Lmisk/hibernate/Id;)Lmisk/hibernate/DbEntity;
-	public static final synthetic fun loadOrNull (Lmisk/hibernate/Session;Lmisk/hibernate/Id;)Lmisk/hibernate/DbEntity;
-	public static final synthetic fun loadSharded (Lmisk/hibernate/Session;Lmisk/hibernate/Gid;)Lmisk/hibernate/DbSharded;
-}
-
-public final class misk/hibernate/TableDeclaration : misk/hibernate/Declaration {
-	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lmisk/hibernate/TableDeclaration;
-	public static synthetic fun copy$default (Lmisk/hibernate/TableDeclaration;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/hibernate/TableDeclaration;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getColumns ()Ljava/util/List;
-	public fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/TimestampListener : org/hibernate/event/spi/PreInsertEventListener, org/hibernate/event/spi/PreUpdateEventListener {
-	public field clock Ljava/time/Clock;
-	public fun <init> ()V
-	public final fun getClock ()Ljava/time/Clock;
-	public fun onPreInsert (Lorg/hibernate/event/spi/PreInsertEvent;)Z
-	public fun onPreUpdate (Lorg/hibernate/event/spi/PreUpdateEvent;)Z
-	public final fun setClock (Ljava/time/Clock;)V
 }
 
 public abstract interface class misk/hibernate/Transacter {
@@ -821,43 +277,6 @@ public final class misk/hibernate/TransacterKt {
 }
 
 public abstract interface class misk/hibernate/TransacterService : com/google/common/util/concurrent/Service {
-}
-
-public final class misk/hibernate/TransformedColumnType : org/hibernate/type/spi/TypeConfigurationAware, org/hibernate/usertype/ParameterizedType, org/hibernate/usertype/UserType {
-	public static final field Companion Lmisk/hibernate/TransformedColumnType$Companion;
-	public field retClass Lkotlin/reflect/KClass;
-	public field transformer Lmisk/hibernate/Transformer;
-	public field typeConfig Lorg/hibernate/type/spi/TypeConfiguration;
-	public fun <init> ()V
-	public fun assemble (Ljava/io/Serializable;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun deepCopy (Ljava/lang/Object;)Ljava/lang/Object;
-	public fun disassemble (Ljava/lang/Object;)Ljava/io/Serializable;
-	public fun equals (Ljava/lang/Object;Ljava/lang/Object;)Z
-	public final fun getRetClass ()Lkotlin/reflect/KClass;
-	public final fun getTransformer ()Lmisk/hibernate/Transformer;
-	public final fun getTypeConfig ()Lorg/hibernate/type/spi/TypeConfiguration;
-	public fun getTypeConfiguration ()Lorg/hibernate/type/spi/TypeConfiguration;
-	public fun hashCode (Ljava/lang/Object;)I
-	public fun isMutable ()Z
-	public fun nullSafeGet (Ljava/sql/ResultSet;[Ljava/lang/String;Lorg/hibernate/engine/spi/SharedSessionContractImplementor;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun nullSafeSet (Ljava/sql/PreparedStatement;Ljava/lang/Object;ILorg/hibernate/engine/spi/SharedSessionContractImplementor;)V
-	public fun replace (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun returnedClass ()Ljava/lang/Class;
-	public fun setParameterValues (Ljava/util/Properties;)V
-	public final fun setRetClass (Lkotlin/reflect/KClass;)V
-	public final fun setTransformer (Lmisk/hibernate/Transformer;)V
-	public final fun setTypeConfig (Lorg/hibernate/type/spi/TypeConfiguration;)V
-	public fun setTypeConfiguration (Lorg/hibernate/type/spi/TypeConfiguration;)V
-	public fun sqlTypes ()[I
-}
-
-public final class misk/hibernate/TransformedColumnType$Companion {
-	public final fun getARGUMENTS ()Ljava/lang/String;
-	public final fun getCOLUMN_NAME ()Ljava/lang/String;
-	public final fun getFIELD ()Ljava/lang/String;
-	public final fun getTABLE_NAME ()Ljava/lang/String;
-	public final fun getTARGET_TYPE ()Ljava/lang/String;
-	public final fun getTRANSFORMER_CLASS ()Ljava/lang/String;
 }
 
 public final class misk/hibernate/TransformedColumnTypeKt {
@@ -917,198 +336,6 @@ public final class misk/hibernate/VitessDialect : org/hibernate/dialect/MySQL57D
 	public fun useInputStreamToInsertBlob ()Z
 }
 
-public final class misk/hibernate/actions/DatabaseQueryMetadataProvider : javax/inject/Provider {
-	public field hibernateDatabaseQueryMetadataFactory Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory;
-	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lmisk/web/metadata/database/DatabaseQueryMetadata;
-	public final fun getAccessAnnotationClass ()Lkotlin/reflect/KClass;
-	public final fun getDbEntityClass ()Lkotlin/reflect/KClass;
-	public final fun getHibernateDatabaseQueryMetadataFactory ()Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory;
-	public final fun getQueryClass ()Lkotlin/reflect/KClass;
-	public final fun setHibernateDatabaseQueryMetadataFactory (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory;)V
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryDynamicAction : misk/web/actions/WebAction {
-	public static final field Companion Lmisk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Companion;
-	public static final field HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH Ljava/lang/String;
-	public fun <init> (Lmisk/scope/ActionScoped;Ljava/util/List;Lcom/google/inject/Injector;Lmisk/hibernate/ReflectionQuery$QueryLimitsConfig;)V
-	public final fun query (Lmisk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Request;)Lmisk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Response;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Companion {
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Request {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuery;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuery;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuery;)Lmisk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Request;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Request;Ljava/lang/String;Ljava/lang/String;Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuery;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Request;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEntityClass ()Ljava/lang/String;
-	public final fun getQuery ()Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuery;
-	public final fun getQueryClass ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Response {
-	public fun <init> (Ljava/util/List;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;)Lmisk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Response;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Response;Ljava/util/List;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateDatabaseQueryDynamicAction$Response;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getResults ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryMetadataFactory {
-	public static final field Companion Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion;
-	public static final field QUERY_CONFIG_TYPE_NAME Ljava/lang/String;
-	public fun <init> (Ljava/util/List;)V
-	public final fun fromQuery (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/web/metadata/database/DatabaseQueryMetadata;
-	public static synthetic fun fromQuery$default (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/web/metadata/database/DatabaseQueryMetadata;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion {
-	public final fun makeDynamicQueryTypes (Lkotlin/reflect/KClass;)Ljava/util/List;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuery {
-	public fun <init> ()V
-	public fun <init> (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig;Ljava/util/List;Ljava/util/List;Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect;)V
-	public synthetic fun <init> (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig;Ljava/util/List;Ljava/util/List;Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig;
-	public final fun component2 ()Ljava/util/List;
-	public final fun component3 ()Ljava/util/List;
-	public final fun component4 ()Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect;
-	public final fun copy (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig;Ljava/util/List;Ljava/util/List;Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuery;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuery;Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig;Ljava/util/List;Ljava/util/List;Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuery;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getConstraints ()Ljava/util/List;
-	public final fun getOrders ()Ljava/util/List;
-	public final fun getQueryConfig ()Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig;
-	public final fun getSelect ()Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQueryConstraint {
-	public fun <init> (Ljava/lang/String;Lmisk/hibernate/Operator;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lmisk/hibernate/Operator;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Lmisk/hibernate/Operator;Ljava/lang/String;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQueryConstraint;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQueryConstraint;Ljava/lang/String;Lmisk/hibernate/Operator;Ljava/lang/String;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQueryConstraint;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getOperator ()Lmisk/hibernate/Operator;
-	public final fun getPath ()Ljava/lang/String;
-	public final fun getValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQueryOrder {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/Boolean;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQueryOrder;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQueryOrder;Ljava/lang/String;Ljava/lang/Boolean;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQueryOrder;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAscending ()Ljava/lang/Boolean;
-	public final fun getPath ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect {
-	public fun <init> ()V
-	public fun <init> (Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect;Ljava/util/List;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$DynamicQuerySelect;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getPaths ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig {
-	public fun <init> (Ljava/lang/Integer;)V
-	public final fun component1 ()Ljava/lang/Integer;
-	public final fun copy (Ljava/lang/Integer;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateDatabaseQueryMetadataFactory$Companion$QueryConfig;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMaxRows ()Ljava/lang/Integer;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryStaticAction : misk/web/actions/WebAction {
-	public static final field Companion Lmisk/hibernate/actions/HibernateDatabaseQueryStaticAction$Companion;
-	public static final field HIBERNATE_QUERY_STATIC_WEBACTION_PATH Ljava/lang/String;
-	public fun <init> (Lmisk/scope/ActionScoped;Ljava/util/List;Ljava/util/List;Lcom/google/inject/Injector;Lmisk/hibernate/ReflectionQuery$QueryLimitsConfig;)V
-	public final fun query (Lmisk/hibernate/actions/HibernateDatabaseQueryStaticAction$Request;)Lmisk/hibernate/actions/HibernateDatabaseQueryStaticAction$Response;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryStaticAction$Companion {
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryStaticAction$Request {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/Map;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lmisk/hibernate/actions/HibernateDatabaseQueryStaticAction$Request;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateDatabaseQueryStaticAction$Request;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateDatabaseQueryStaticAction$Request;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEntityClass ()Ljava/lang/String;
-	public final fun getQuery ()Ljava/util/Map;
-	public final fun getQueryClass ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryStaticAction$Response {
-	public fun <init> (Ljava/util/List;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;)Lmisk/hibernate/actions/HibernateDatabaseQueryStaticAction$Response;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateDatabaseQueryStaticAction$Response;Ljava/util/List;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateDatabaseQueryStaticAction$Response;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getResults ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryWebActionModule : misk/inject/KAbstractModule {
-	public static final field Companion Lmisk/hibernate/actions/HibernateDatabaseQueryWebActionModule$Companion;
-	public fun <init> ()V
-}
-
-public final class misk/hibernate/actions/HibernateDatabaseQueryWebActionModule$Companion {
-	public final fun checkQueryMatchesAction (Ljava/lang/String;Z)V
-	public final fun findDatabaseQueryMetadata (Ljava/util/List;Ljava/lang/String;)Lmisk/web/metadata/database/DatabaseQueryMetadata;
-	public final fun getTransacterForDatabaseQueryAction (Lcom/google/inject/Injector;Lmisk/web/metadata/database/DatabaseQueryMetadata;)Lmisk/hibernate/Transacter;
-	public final fun validateSelectPathsOrDefault (Lkotlin/reflect/KClass;Ljava/util/List;)Ljava/util/List;
-}
-
-public final class misk/hibernate/actions/HibernateQuery {
-	public fun <init> (Lkotlin/reflect/KClass;)V
-	public final fun component1 ()Lkotlin/reflect/KClass;
-	public final fun copy (Lkotlin/reflect/KClass;)Lmisk/hibernate/actions/HibernateQuery;
-	public static synthetic fun copy$default (Lmisk/hibernate/actions/HibernateQuery;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/hibernate/actions/HibernateQuery;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getQuery ()Lkotlin/reflect/KClass;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public abstract interface annotation class misk/hibernate/annotation/Keyspace : java/lang/annotation/Annotation {
 	public abstract fun value ()Ljava/lang/String;
 }
@@ -1148,7 +375,6 @@ public final class misk/hibernate/migrate/BulkShardMigrator$IncMutation : misk/h
 	public fun <init> (Ljava/lang/String;)V
 	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
 	public fun bindUpdate (Ljava/sql/PreparedStatement;I)I
-	public fun columnName$misk_hibernate ()Ljava/lang/String;
 	public fun updateSql ()Ljava/lang/String;
 }
 
@@ -1156,9 +382,7 @@ public abstract class misk/hibernate/migrate/BulkShardMigrator$Mutation {
 	public fun <init> ()V
 	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
 	public abstract fun bindUpdate (Ljava/sql/PreparedStatement;I)I
-	public abstract fun columnName$misk_hibernate ()Ljava/lang/String;
 	public fun insertSql ()Ljava/lang/String;
-	public final fun isParameterized$misk_hibernate ()Z
 	public fun updateSql ()Ljava/lang/String;
 }
 
@@ -1166,7 +390,6 @@ public final class misk/hibernate/migrate/BulkShardMigrator$NowMutation : misk/h
 	public fun <init> (Ljava/lang/String;)V
 	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
 	public fun bindUpdate (Ljava/sql/PreparedStatement;I)I
-	public fun columnName$misk_hibernate ()Ljava/lang/String;
 	public fun insertSql ()Ljava/lang/String;
 	public fun updateSql ()Ljava/lang/String;
 }
@@ -1175,21 +398,12 @@ public final class misk/hibernate/migrate/BulkShardMigrator$SetMappingMutation :
 	public fun <init> (Ljava/lang/String;Ljava/util/function/Function;)V
 	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
 	public fun bindUpdate (Ljava/sql/PreparedStatement;I)I
-	public fun columnName$misk_hibernate ()Ljava/lang/String;
 }
 
 public final class misk/hibernate/migrate/BulkShardMigrator$SetMutation : misk/hibernate/migrate/BulkShardMigrator$Mutation {
 	public fun <init> (Ljava/lang/String;Ljava/lang/Object;)V
 	public fun bindInsert (Ljava/sql/PreparedStatement;ILjava/lang/Object;)I
 	public fun bindUpdate (Ljava/sql/PreparedStatement;I)I
-	public fun columnName$misk_hibernate ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/pagination/IdPaginator : misk/hibernate/pagination/Paginator {
-	public fun <init> (Ljava/lang/String;Lmisk/hibernate/Operator;)V
-	public fun applyOffset (Lmisk/hibernate/Query;Lmisk/hibernate/pagination/Offset;)V
-	public synthetic fun getOffset (Ljava/lang/Object;)Lmisk/hibernate/pagination/Offset;
-	public fun getOffset (Lmisk/hibernate/DbEntity;)Lmisk/hibernate/pagination/Offset;
 }
 
 public final class misk/hibernate/pagination/IdPaginatorKt {
@@ -1242,12 +456,5 @@ public final class misk/hibernate/pagination/PagerKt {
 public abstract interface class misk/hibernate/pagination/Paginator {
 	public abstract fun applyOffset (Lmisk/hibernate/Query;Lmisk/hibernate/pagination/Offset;)V
 	public abstract fun getOffset (Ljava/lang/Object;)Lmisk/hibernate/pagination/Offset;
-}
-
-public final class misk/hibernate/pagination/RealPager : misk/hibernate/pagination/Pager {
-	public fun <init> (Lmisk/hibernate/Query;Lmisk/hibernate/pagination/Paginator;Lmisk/hibernate/pagination/Offset;I)V
-	public synthetic fun <init> (Lmisk/hibernate/Query;Lmisk/hibernate/pagination/Paginator;Lmisk/hibernate/pagination/Offset;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun hasNext ()Z
-	public fun nextPage (Lmisk/hibernate/Session;)Lmisk/hibernate/pagination/Page;
 }
 

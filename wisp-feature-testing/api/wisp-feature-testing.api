@@ -33,11 +33,6 @@ public final class wisp/feature/testing/FakeFeatureFlags : wisp/config/Configura
 	public fun getString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public fun getString (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/String;
 	public final fun getStrongFeatureFlags ()Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public final synthetic fun override (DLkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeFeatureFlags;
-	public final synthetic fun override (ILkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeFeatureFlags;
-	public final synthetic fun override (Ljava/lang/Enum;Lkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeFeatureFlags;
-	public final synthetic fun override (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeFeatureFlags;
-	public final synthetic fun override (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeFeatureFlags;
 	public final fun override (Lwisp/feature/Feature;D)V
 	public final fun override (Lwisp/feature/Feature;I)V
 	public final fun override (Lwisp/feature/Feature;Ljava/lang/Enum;)V
@@ -45,16 +40,8 @@ public final class wisp/feature/testing/FakeFeatureFlags : wisp/config/Configura
 	public final fun override (Lwisp/feature/Feature;Ljava/lang/Object;Ljava/lang/Class;)V
 	public final fun override (Lwisp/feature/Feature;Ljava/lang/String;)V
 	public final fun override (Lwisp/feature/Feature;Z)V
-	public final synthetic fun override (ZLkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeFeatureFlags;DLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeFeatureFlags;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeFeatureFlags;Ljava/lang/Enum;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeFeatureFlags;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeFeatureFlags;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeFeatureFlags;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeFeatureFlags;
 	public final fun overrideAny (Ljava/lang/Class;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeFeatureFlags;
 	public static synthetic fun overrideAny$default (Lwisp/feature/testing/FakeFeatureFlags;Ljava/lang/Class;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeFeatureFlags;
-	public final synthetic fun overrideJson (Lwisp/feature/Feature;Ljava/lang/Object;)V
 	public final fun overrideJsonString (Lwisp/feature/Feature;Ljava/lang/String;)V
 	public final fun overrideKey (Lwisp/feature/Feature;Ljava/lang/String;D)V
 	public final fun overrideKey (Lwisp/feature/Feature;Ljava/lang/String;DLwisp/feature/Attributes;)V
@@ -76,8 +63,6 @@ public final class wisp/feature/testing/FakeFeatureFlags : wisp/config/Configura
 	public static synthetic fun overrideKey$default (Lwisp/feature/testing/FakeFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)V
 	public static synthetic fun overrideKey$default (Lwisp/feature/testing/FakeFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;ZLwisp/feature/Attributes;ILjava/lang/Object;)V
 	public final synthetic fun overrideKeyJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Object;)V
-	public final synthetic fun overrideKeyJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Object;Lwisp/feature/Attributes;)V
-	public static synthetic fun overrideKeyJson$default (Lwisp/feature/testing/FakeFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Object;Lwisp/feature/Attributes;ILjava/lang/Object;)V
 	public final fun overrideKeyJsonString (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun overrideKeyJsonString (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/String;Lwisp/feature/Attributes;)V
 	public static synthetic fun overrideKeyJsonString$default (Lwisp/feature/testing/FakeFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)V
@@ -151,7 +136,6 @@ public final class wisp/feature/testing/FakeLegacyFeatureFlags : wisp/feature/Dy
 	public final fun override (Lwisp/feature/Feature;Ljava/lang/Object;Ljava/lang/Class;)V
 	public final fun override (Lwisp/feature/Feature;Ljava/lang/String;)V
 	public final fun override (Lwisp/feature/Feature;Z)V
-	public final synthetic fun overrideJson (Lwisp/feature/Feature;Ljava/lang/Object;)V
 	public final fun overrideJsonString (Lwisp/feature/Feature;Ljava/lang/String;)V
 	public final fun overrideKey (Lwisp/feature/Feature;Ljava/lang/String;D)V
 	public final fun overrideKey (Lwisp/feature/Feature;Ljava/lang/String;DLwisp/feature/Attributes;)V
@@ -173,8 +157,6 @@ public final class wisp/feature/testing/FakeLegacyFeatureFlags : wisp/feature/Dy
 	public static synthetic fun overrideKey$default (Lwisp/feature/testing/FakeLegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)V
 	public static synthetic fun overrideKey$default (Lwisp/feature/testing/FakeLegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;ZLwisp/feature/Attributes;ILjava/lang/Object;)V
 	public final synthetic fun overrideKeyJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Object;)V
-	public final synthetic fun overrideKeyJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Object;Lwisp/feature/Attributes;)V
-	public static synthetic fun overrideKeyJson$default (Lwisp/feature/testing/FakeLegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Object;Lwisp/feature/Attributes;ILjava/lang/Object;)V
 	public final fun overrideKeyJsonString (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun overrideKeyJsonString (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/String;Lwisp/feature/Attributes;)V
 	public static synthetic fun overrideKeyJsonString$default (Lwisp/feature/testing/FakeLegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)V
@@ -211,18 +193,6 @@ public final class wisp/feature/testing/FakeStrongFeatureFlags : wisp/feature/St
 	public fun get (Lwisp/feature/IntFeatureFlag;)I
 	public fun get (Lwisp/feature/JsonFeatureFlag;)Ljava/lang/Object;
 	public fun get (Lwisp/feature/StringFeatureFlag;)Ljava/lang/String;
-	public final synthetic fun override (DLkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public final synthetic fun override (ILkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public final synthetic fun override (Ljava/lang/Enum;Lkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public final synthetic fun override (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public final synthetic fun override (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public final synthetic fun override (ZLkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeStrongFeatureFlags;DLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeStrongFeatureFlags;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeStrongFeatureFlags;Ljava/lang/Enum;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeStrongFeatureFlags;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeStrongFeatureFlags;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeStrongFeatureFlags;
-	public static synthetic fun override$default (Lwisp/feature/testing/FakeStrongFeatureFlags;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeStrongFeatureFlags;
 	public final fun overrideAny (Ljava/lang/Class;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lwisp/feature/testing/FakeStrongFeatureFlags;
 	public static synthetic fun overrideAny$default (Lwisp/feature/testing/FakeStrongFeatureFlags;Ljava/lang/Class;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/testing/FakeStrongFeatureFlags;
 	public final fun reset ()Lwisp/feature/testing/FakeStrongFeatureFlags;

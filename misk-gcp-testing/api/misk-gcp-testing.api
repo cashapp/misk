@@ -1,7 +1,3 @@
-public final class misk/cloud/gcp/FakeGoogleCloudModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
 public final class misk/cloud/gcp/datastore/FakeDatastoreModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/cloud/gcp/datastore/FakeDatastoreModule$Companion;
 	public fun <init> ()V
@@ -38,33 +34,6 @@ public final class misk/cloud/gcp/spanner/GoogleSpannerEmulatorModule : misk/inj
 	public fun <init> (Lmisk/cloud/gcp/spanner/SpannerConfig;)V
 }
 
-public abstract class misk/cloud/gcp/storage/CustomStorageRpcTestCases {
-	public field rpc Lcom/google/cloud/storage/spi/v1/StorageRpc;
-	public field storage Lcom/google/cloud/storage/Storage;
-	public fun <init> ()V
-	public final fun buildStorage ()V
-	public final fun copy ()V
-	public final fun createEmpty ()V
-	public final fun createIfGenerationMatches ()V
-	public final fun createIfNotExists ()V
-	public final fun createUpdatesMetagenerationIfMetadataChanged ()V
-	public final fun createWithContent ()V
-	public final fun delete ()V
-	public final fun deleteIfGenerationMatch ()V
-	public final fun deleteWhenNotExists ()V
-	public final fun get ()V
-	public final fun getIfGenerationMatches ()V
-	public final fun getRpc ()Lcom/google/cloud/storage/spi/v1/StorageRpc;
-	public final fun getStorage ()Lcom/google/cloud/storage/Storage;
-	public final fun getWhenNotExists ()V
-	public final fun listFolders ()V
-	public abstract fun newStorageRpc ()Lcom/google/cloud/storage/spi/v1/StorageRpc;
-	public final fun progressiveDownload ()V
-	public final fun progressiveUpload ()V
-	public final fun setRpc (Lcom/google/cloud/storage/spi/v1/StorageRpc;)V
-	public final fun setStorage (Lcom/google/cloud/storage/Storage;)V
-}
-
 public final class misk/cloud/gcp/storage/FakeStorageModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun provideStorage ()Lcom/google/cloud/storage/Storage;
@@ -87,19 +56,6 @@ public final class misk/cloud/gcp/storage/InMemoryStorageRpcKt {
 	public static final fun check (Ljava/util/Map;Lcom/google/api/services/storage/model/StorageObject;)Lcom/google/api/services/storage/model/StorageObject;
 }
 
-public final class misk/cloud/gcp/storage/InMemoryStorageRpcTest : misk/cloud/gcp/storage/CustomStorageRpcTestCases {
-	public fun <init> ()V
-	public synthetic fun newStorageRpc ()Lcom/google/cloud/storage/spi/v1/StorageRpc;
-	public fun newStorageRpc ()Lmisk/cloud/gcp/storage/InMemoryStorageRpc;
-}
-
-public final class misk/cloud/gcp/storage/LocalStorageRpcTest : misk/cloud/gcp/storage/CustomStorageRpcTestCases {
-	public fun <init> ()V
-	public final fun getModule ()Lmisk/testing/TemporaryFolderModule;
-	public synthetic fun newStorageRpc ()Lcom/google/cloud/storage/spi/v1/StorageRpc;
-	public fun newStorageRpc ()Lmisk/cloud/gcp/storage/LocalStorageRpc;
-}
-
 public class misk/cloud/gcp/testing/Body {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
@@ -117,7 +73,6 @@ public final class misk/cloud/gcp/testing/FakeHttpRequest : com/google/api/clien
 	public final fun getStringContent ()Ljava/lang/String;
 	public final fun getUrl ()Ljava/lang/String;
 	public final fun header (Ljava/lang/String;)Ljava/lang/String;
-	public final synthetic fun jsonContent ()Ljava/lang/Object;
 }
 
 public final class misk/cloud/gcp/testing/FakeHttpResponseKt {
