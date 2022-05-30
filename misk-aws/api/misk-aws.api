@@ -52,14 +52,8 @@ public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
 	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public final synthetic fun create (Lmisk/jobqueue/QueueName;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
-	public final synthetic fun create (Lmisk/jobqueue/QueueName;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
-	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
-}
-
-public final class misk/jobqueue/sqs/AwsSqsJobHandlerSubscriptionService : com/google/common/util/concurrent/AbstractIdleService {
-	public fun <init> (Lmisk/jobqueue/sqs/AwsSqsQueueAttributeImporter;Lmisk/jobqueue/sqs/SqsJobConsumer;Ljava/util/Map;Ljava/util/Map;)V
 }
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
@@ -88,17 +82,6 @@ public final class misk/jobqueue/sqs/AwsSqsJobQueueModule$Companion {
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueModuleKt {
 	public static final fun withNoPrefetching (Lcom/amazonaws/services/sqs/buffered/QueueBufferConfig;)Lcom/amazonaws/services/sqs/buffered/QueueBufferConfig;
-}
-
-public final class misk/jobqueue/sqs/AwsSqsQueueAttributeImporter {
-	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsQueueAttributeImporter$Companion;
-	public static final field metricNamespace Ljava/lang/String;
-	public static final field metricStat Ljava/lang/String;
-	public fun <init> (Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;Lwisp/lease/LeaseManager;Lmisk/jobqueue/sqs/SqsMetrics;Lmisk/jobqueue/sqs/QueueResolver;Lmisk/tasks/RepeatedTaskQueue;)V
-	public final fun import (Lmisk/jobqueue/QueueName;)V
-}
-
-public final class misk/jobqueue/sqs/AwsSqsQueueAttributeImporter$Companion {
 }
 
 public final class misk/jobqueue/sqs/AwsSqsQueueConfig {
@@ -179,119 +162,10 @@ public final class misk/jobqueue/sqs/FlaggedBufferedSqsClient$Companion {
 	public final fun getFEATURE ()Lmisk/feature/Feature;
 }
 
-public abstract interface annotation class misk/jobqueue/sqs/ForSqsHandling : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class misk/jobqueue/sqs/ForSqsReceiving : java/lang/annotation/Annotation {
-}
-
-public final class misk/jobqueue/sqs/QueueResolver {
-	public static final field Companion Lmisk/jobqueue/sqs/QueueResolver$Companion;
-	public fun <init> (Lmisk/cloud/aws/AwsRegion;Lmisk/cloud/aws/AwsAccountId;Lcom/amazonaws/services/sqs/AmazonSQS;Ljava/util/Map;Lcom/amazonaws/services/sqs/AmazonSQS;Ljava/util/Map;Ljava/util/Map;Lmisk/jobqueue/sqs/DeadLetterQueueProvider;)V
-	public final fun getDeadLetter (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/sqs/ResolvedQueue;
-	public final fun getForReceiving (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/sqs/ResolvedQueue;
-	public final fun getForSending (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/sqs/ResolvedQueue;
-}
-
-public final class misk/jobqueue/sqs/QueueResolver$Companion {
-	public final fun getLog ()Lmu/KLogger;
-}
-
 public final class misk/jobqueue/sqs/QueueResolverKt {
-	public static final field deadLetterQueueSuffix Ljava/lang/String;
-	public static final field retryQueueSuffix Ljava/lang/String;
-	public static final fun getDeadLetterQueue (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
 	public static final fun getParentQueue (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
 	public static final fun getRetryQueue (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
-	public static final fun isDeadLetterQueue (Lmisk/jobqueue/QueueName;)Z
 	public static final fun isRetryQueue (Lmisk/jobqueue/QueueName;)Z
-}
-
-public final class misk/jobqueue/sqs/ResolvedQueue {
-	public fun <init> (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/QueueName;Ljava/lang/String;Lmisk/cloud/aws/AwsRegion;Lmisk/cloud/aws/AwsAccountId;Lcom/amazonaws/services/sqs/AmazonSQS;)V
-	public final fun call (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public final fun getAccountId ()Lmisk/cloud/aws/AwsAccountId;
-	public final fun getClient ()Lcom/amazonaws/services/sqs/AmazonSQS;
-	public final fun getName ()Lmisk/jobqueue/QueueName;
-	public final fun getQueueName ()Ljava/lang/String;
-	public final fun getRegion ()Lmisk/cloud/aws/AwsRegion;
-	public final fun getSqsQueueName ()Lmisk/jobqueue/QueueName;
-	public final fun getUrl ()Ljava/lang/String;
-}
-
-public final class misk/jobqueue/sqs/ResolvedQueue$SQSException : java/lang/RuntimeException {
-	public fun <init> (Lcom/amazonaws/AmazonClientException;Lmisk/jobqueue/sqs/ResolvedQueue;)V
-}
-
-public final class misk/jobqueue/sqs/SqsJob : misk/jobqueue/Job {
-	public static final field Companion Lmisk/jobqueue/sqs/SqsJob$Companion;
-	public static final field JOBQUEUE_METADATA_ATTR Ljava/lang/String;
-	public static final field JOBQUEUE_METADATA_IDEMPOTENCE_KEY Ljava/lang/String;
-	public static final field JOBQUEUE_METADATA_ORIGINAL_TRACE_ID Ljava/lang/String;
-	public static final field JOBQUEUE_METADATA_ORIGIN_QUEUE Ljava/lang/String;
-	public static final field ORIGINAL_TRACE_ID_ATTR Ljava/lang/String;
-	public fun <init> (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/sqs/QueueResolver;Lmisk/jobqueue/sqs/SqsMetrics;Lcom/squareup/moshi/Moshi;Lcom/amazonaws/services/sqs/model/Message;)V
-	public fun acknowledge ()V
-	public fun deadLetter ()V
-	public fun getAttributes ()Ljava/util/Map;
-	public fun getBody ()Ljava/lang/String;
-	public fun getId ()Ljava/lang/String;
-	public fun getIdempotenceKey ()Ljava/lang/String;
-	public fun getQueueName ()Lmisk/jobqueue/QueueName;
-}
-
-public final class misk/jobqueue/sqs/SqsJob$Companion {
-}
-
-public final class misk/jobqueue/sqs/SqsJobConsumer : misk/jobqueue/JobConsumer {
-	public static final field Companion Lmisk/jobqueue/sqs/SqsJobConsumer$Companion;
-	public fun <init> (Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;Lmisk/jobqueue/sqs/QueueResolver;Ljava/util/concurrent/ExecutorService;Lmisk/tasks/RepeatedTaskQueue;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;Lmisk/jobqueue/sqs/SqsMetrics;Lmisk/feature/FeatureFlags;Ljava/util/concurrent/ExecutorService;Lwisp/lease/LeaseManager;Ljavax/inject/Provider;)V
-	public final fun getReceiver$misk_aws (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/sqs/SqsJobConsumer$QueueReceiver;
-	public fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/JobHandler;)V
-}
-
-public final class misk/jobqueue/sqs/SqsJobConsumer$Companion {
-	public final fun getCONSUMERS_BATCH_SIZE$misk_aws ()Lmisk/feature/Feature;
-	public final fun getCONSUMERS_PER_QUEUE$misk_aws ()Lmisk/feature/Feature;
-	public final fun getPOD_CONSUMERS_PER_QUEUE$misk_aws ()Lmisk/feature/Feature;
-}
-
-public final class misk/jobqueue/sqs/SqsJobConsumer$QueueReceiver {
-	public fun <init> (Lmisk/jobqueue/sqs/SqsJobConsumer;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/JobHandler;)V
-	public final fun run ()Lmisk/tasks/Status;
-}
-
-public final class misk/jobqueue/sqs/SqsJobQueue : misk/jobqueue/JobQueue {
-	public fun <init> (Lmisk/jobqueue/sqs/QueueResolver;Lmisk/jobqueue/sqs/SqsMetrics;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;)V
-	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;)V
-	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
-	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
-}
-
-public final class misk/jobqueue/sqs/SqsMetrics {
-	public fun <init> (Lmisk/metrics/Metrics;)V
-	public final fun getHandlerDispatchTime ()Lmisk/metrics/Histogram;
-	public final fun getHandlerFailures ()Lio/prometheus/client/Counter;
-	public final fun getJobEnqueueFailures ()Lio/prometheus/client/Counter;
-	public final fun getJobsAcknowledged ()Lio/prometheus/client/Counter;
-	public final fun getJobsDeadLettered ()Lio/prometheus/client/Counter;
-	public final fun getJobsEnqueued ()Lio/prometheus/client/Counter;
-	public final fun getJobsReceived ()Lio/prometheus/client/Counter;
-	public final fun getSqsApproxNumberOfMessages ()Lio/prometheus/client/Gauge;
-	public final fun getSqsApproxNumberOfMessagesNotVisible ()Lio/prometheus/client/Gauge;
-	public final fun getSqsDeleteTime ()Lmisk/metrics/Histogram;
-	public final fun getSqsReceiveTime ()Lmisk/metrics/Histogram;
-	public final fun getSqsSendTime ()Lmisk/metrics/Histogram;
-}
-
-public final class misk/jobqueue/sqs/SqsTransactionalJobQueue : misk/jobqueue/TransactionalJobQueue {
-	public static final field Companion Lmisk/jobqueue/sqs/SqsTransactionalJobQueue$Companion;
-	public fun <init> (Lmisk/jobqueue/JobQueue;)V
-	public fun enqueue (Lmisk/hibernate/Session;Lmisk/hibernate/Gid;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
-	public fun enqueue (Lmisk/hibernate/Session;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
-}
-
-public final class misk/jobqueue/sqs/SqsTransactionalJobQueue$Companion {
 }
 
 public final class misk/jobqueue/sqs/StaticDeadLetterQueueProvider : misk/jobqueue/sqs/DeadLetterQueueProvider {

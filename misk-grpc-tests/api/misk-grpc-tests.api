@@ -48,12 +48,6 @@ public final class misk/grpc/protocserver/ProtocGrpcService : com/google/common/
 	public final fun setServer (Lio/grpc/Server;)V
 }
 
-public final class misk/grpc/protocserver/RouteGuideProtocService : routeguide/RouteGuideGrpc$RouteGuideImplBase {
-	public fun <init> ()V
-	public fun getFeature (Lrouteguide/RouteGuideProto$Point;Lio/grpc/stub/StreamObserver;)V
-	public fun routeChat (Lio/grpc/stub/StreamObserver;)Lio/grpc/stub/StreamObserver;
-}
-
 public final class misk/grpc/protocserver/RouteGuideProtocServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun provideServerUrl (Lmisk/grpc/protocserver/ProtocGrpcService;)Lokhttp3/HttpUrl;

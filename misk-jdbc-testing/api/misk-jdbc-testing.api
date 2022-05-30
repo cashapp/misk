@@ -1,40 +1,3 @@
-public final class misk/jdbc/Explanation {
-	public static final field Companion Lmisk/jdbc/Explanation$Companion;
-	public fun <init> ()V
-	public final fun getExtra$misk_jdbc_testing ()Ljava/lang/String;
-	public final fun getFiltered$misk_jdbc_testing ()Ljava/lang/Double;
-	public final fun getId$misk_jdbc_testing ()Ljava/math/BigInteger;
-	public final fun getKey$misk_jdbc_testing ()Ljava/lang/String;
-	public final fun getKey_len$misk_jdbc_testing ()Ljava/lang/String;
-	public final fun getPartitions$misk_jdbc_testing ()Ljava/lang/String;
-	public final fun getPossible_keys$misk_jdbc_testing ()Ljava/lang/String;
-	public final fun getRef$misk_jdbc_testing ()Ljava/lang/String;
-	public final fun getRows$misk_jdbc_testing ()Ljava/math/BigInteger;
-	public final fun getSelect_type$misk_jdbc_testing ()Ljava/lang/String;
-	public final fun getTable$misk_jdbc_testing ()Ljava/lang/String;
-	public final fun getType$misk_jdbc_testing ()Ljava/lang/String;
-	public final fun isIndexed ()Z
-	public final fun isProbablyOkay$misk_jdbc_testing (Ljava/lang/String;)Z
-	public final fun setExtra$misk_jdbc_testing (Ljava/lang/String;)V
-	public final fun setFiltered$misk_jdbc_testing (Ljava/lang/Double;)V
-	public final fun setId$misk_jdbc_testing (Ljava/math/BigInteger;)V
-	public final fun setKey$misk_jdbc_testing (Ljava/lang/String;)V
-	public final fun setKey_len$misk_jdbc_testing (Ljava/lang/String;)V
-	public final fun setPartitions$misk_jdbc_testing (Ljava/lang/String;)V
-	public final fun setPossible_keys$misk_jdbc_testing (Ljava/lang/String;)V
-	public final fun setRef$misk_jdbc_testing (Ljava/lang/String;)V
-	public final fun setRows$misk_jdbc_testing (Ljava/math/BigInteger;)V
-	public final fun setSelect_type$misk_jdbc_testing (Ljava/lang/String;)V
-	public final fun setTable$misk_jdbc_testing (Ljava/lang/String;)V
-	public final fun setType$misk_jdbc_testing (Ljava/lang/String;)V
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/jdbc/Explanation$Companion {
-	public final fun fromResultSet (Ljava/sql/ResultSet;)Lmisk/jdbc/Explanation;
-	public final fun getNO_INDEX_NEEDED_MESSAGES$misk_jdbc_testing ()Lcom/google/common/collect/ImmutableSet;
-}
-
 public class misk/jdbc/ExtendedQueryExecutionListener : net/ttddyy/dsproxy/listener/MethodExecutionListener, net/ttddyy/dsproxy/listener/QueryExecutionListener {
 	public static final field Companion Lmisk/jdbc/ExtendedQueryExecutionListener$Companion;
 	public fun <init> ()V
@@ -73,15 +36,6 @@ public final class misk/jdbc/MySqlScaleSafetyChecks$TableScanDetector : misk/jdb
 	public fun <init> (Lmisk/jdbc/MySqlScaleSafetyChecks;)V
 }
 
-public final class misk/jdbc/MySqlTestDatabasePoolBackend : misk/jdbc/TestDatabasePool$Backend {
-	public fun <init> (Lmisk/jdbc/DataSourceConfig;)V
-	public fun createDatabase (Ljava/lang/String;)V
-	public fun dropDatabase (Ljava/lang/String;)V
-	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
-	public final fun getConnection$misk_jdbc_testing ()Ljava/sql/Connection;
-	public fun showDatabases ()Ljava/util/Set;
-}
-
 public final class misk/jdbc/ScaleSafetyChecks {
 	public static final field INSTANCE Lmisk/jdbc/ScaleSafetyChecks;
 	public final fun checkQueryForTableScan (Ljava/sql/Connection;Ljava/lang/String;Ljava/lang/String;)V
@@ -96,7 +50,6 @@ public final class misk/jdbc/TestDatabasePool : misk/jdbc/DatabasePool {
 	public fun <init> (Lmisk/jdbc/TestDatabasePool$Backend;Ljava/time/Clock;)V
 	public final fun getBackend ()Lmisk/jdbc/TestDatabasePool$Backend;
 	public final fun getClock ()Ljava/time/Clock;
-	public final fun getPool$misk_jdbc_testing (Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/TestDatabasePool$ConfigSpecificPool;
 	public final fun pruneOldDatabases (Ljava/time/Duration;)V
 	public static synthetic fun pruneOldDatabases$default (Lmisk/jdbc/TestDatabasePool;Ljava/time/Duration;ILjava/lang/Object;)V
 	public fun releaseDatabase (Lmisk/jdbc/DataSourceConfig;)V
@@ -110,20 +63,6 @@ public abstract interface class misk/jdbc/TestDatabasePool$Backend {
 }
 
 public final class misk/jdbc/TestDatabasePool$Companion {
-}
-
-public final class misk/jdbc/TestDatabasePool$ConfigSpecificPool {
-	public fun <init> (Lmisk/jdbc/TestDatabasePool;Ljava/lang/String;Lmisk/jdbc/DataSourceType;)V
-	public final fun allocateDatabase ()Ljava/lang/String;
-	public final fun decode (Ljava/lang/String;)Lmisk/jdbc/TestDatabasePool$DatabaseName;
-	public final fun getDatabases ()Ljava/util/List;
-	public final fun getKey ()Ljava/lang/String;
-	public final fun getPool$misk_jdbc_testing ()Ljava/util/concurrent/LinkedBlockingDeque;
-	public final fun getType ()Lmisk/jdbc/DataSourceType;
-	public final fun pruneOldDatabases (Ljava/time/Duration;)V
-	public static synthetic fun pruneOldDatabases$default (Lmisk/jdbc/TestDatabasePool$ConfigSpecificPool;Ljava/time/Duration;ILjava/lang/Object;)V
-	public final fun releaseDatabase (Ljava/lang/String;)V
-	public final fun takeDatabase ()Ljava/lang/String;
 }
 
 public final class misk/jdbc/TestDatabasePool$DatabaseName {
@@ -148,50 +87,6 @@ public final class misk/jdbc/TestDatabasePoolKt {
 public final class misk/jdbc/TruncateTablesService : com/google/common/util/concurrent/AbstractIdleService {
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
-public final class misk/jdbc/TruncateTablesServiceKt {
-}
-
-public final class misk/vitess/Instruction {
-	public fun <init> (Ljava/lang/String;Lmisk/vitess/Instruction;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lmisk/vitess/Instruction;
-	public final fun copy (Ljava/lang/String;Lmisk/vitess/Instruction;)Lmisk/vitess/Instruction;
-	public static synthetic fun copy$default (Lmisk/vitess/Instruction;Ljava/lang/String;Lmisk/vitess/Instruction;ILjava/lang/Object;)Lmisk/vitess/Instruction;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getInput ()Lmisk/vitess/Instruction;
-	public final fun getOpcode ()Ljava/lang/String;
-	public fun hashCode ()I
-	public final fun isScatter ()Z
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/vitess/QueryPlan {
-	public fun <init> (Ljava/lang/String;Lmisk/vitess/Instruction;I)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lmisk/vitess/Instruction;
-	public final fun component3 ()I
-	public final fun copy (Ljava/lang/String;Lmisk/vitess/Instruction;I)Lmisk/vitess/QueryPlan;
-	public static synthetic fun copy$default (Lmisk/vitess/QueryPlan;Ljava/lang/String;Lmisk/vitess/Instruction;IILjava/lang/Object;)Lmisk/vitess/QueryPlan;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getExecCount ()I
-	public final fun getInstructions ()Lmisk/vitess/Instruction;
-	public final fun getOriginal ()Ljava/lang/String;
-	public fun hashCode ()I
-	public final fun isScatter ()Z
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/vitess/Variables {
-	public fun <init> (Ljava/util/Map;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/Map;)Lmisk/vitess/Variables;
-	public static synthetic fun copy$default (Lmisk/vitess/Variables;Ljava/util/Map;ILjava/lang/Object;)Lmisk/vitess/Variables;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getQueriesProcessed ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/vitess/VitessScaleSafetyChecks : misk/jdbc/DataSourceDecorator {

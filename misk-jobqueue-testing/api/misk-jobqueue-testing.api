@@ -26,8 +26,6 @@ public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/J
 	public fun getIdempotenceKey ()Ljava/lang/String;
 	public fun getQueueName ()Lmisk/jobqueue/QueueName;
 	public fun hashCode ()I
-	public final fun setAcknowledged$misk_jobqueue_testing (Z)V
-	public final fun setDeadLettered$misk_jobqueue_testing (Z)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -38,7 +36,6 @@ public final class misk/jobqueue/FakeJobHandlerModule : misk/inject/KAbstractMod
 }
 
 public final class misk/jobqueue/FakeJobHandlerModule$Companion {
-	public final synthetic fun create (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/FakeJobHandlerModule;
 	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/FakeJobHandlerModule;
 	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/jobqueue/FakeJobHandlerModule;
 }

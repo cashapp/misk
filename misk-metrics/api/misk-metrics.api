@@ -29,8 +29,6 @@ public final class misk/metrics/MetricsKt {
 }
 
 public class misk/metrics/MetricsScope {
-	public fun <init> (Lio/prometheus/client/CollectorRegistry;Ljava/util/Map;)V
-	public final fun getLabels$misk_metrics ()Ljava/util/Map;
 }
 
 public abstract interface class misk/metrics/v2/Metrics {

@@ -4,15 +4,12 @@ public final class misk/cron/CronEntryModule : misk/inject/KAbstractModule {
 }
 
 public final class misk/cron/CronEntryModule$Companion {
-	public final synthetic fun create ()Lmisk/cron/CronEntryModule;
 	public final fun create (Lkotlin/reflect/KClass;)Lmisk/cron/CronEntryModule;
 }
 
 public final class misk/cron/CronManager {
 	public static final field Companion Lmisk/cron/CronManager$Companion;
 	public fun <init> ()V
-	public final fun addCron$misk_cron (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Runnable;)V
-	public final fun removeAllCrons$misk_cron ()V
 	public final fun runReadyCrons (Ljava/time/Instant;)V
 	public final fun waitForCronsComplete ()V
 }
@@ -47,33 +44,8 @@ public abstract interface annotation class misk/cron/CronPattern : java/lang/ann
 	public abstract fun pattern ()Ljava/lang/String;
 }
 
-public final class misk/cron/CronRunnableEntry {
-	public fun <init> (Lkotlin/reflect/KClass;)V
-	public final fun getRunnableClass ()Lkotlin/reflect/KClass;
-}
-
-public final class misk/cron/CronService : com/google/common/util/concurrent/AbstractIdleService {
-	public static final field Companion Lmisk/cron/CronService$Companion;
-	public fun <init> (Lcom/google/inject/Injector;)V
-}
-
-public final class misk/cron/CronService$Companion {
-}
-
-public final class misk/cron/CronTask : com/google/common/util/concurrent/AbstractIdleService {
-	public static final field Companion Lmisk/cron/CronTask$Companion;
-	public fun <init> ()V
-}
-
-public final class misk/cron/CronTask$Companion {
-	public final fun getINTERVAL ()Ljava/time/Duration;
-}
-
 public final class misk/cron/FakeCronModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/time/ZoneId;I)V
 	public synthetic fun <init> (Ljava/time/ZoneId;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
-public abstract interface annotation class misk/cron/ForMiskCron : java/lang/annotation/Annotation {
 }
 

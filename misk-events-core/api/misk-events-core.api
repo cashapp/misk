@@ -19,7 +19,6 @@ public final class misk/events/ConsumerKt {
 public final class misk/events/Event {
 	public fun <init> (Ljava/lang/String;Lokio/ByteString;Ljava/time/Instant;Lokio/ByteString;Ljava/lang/Long;Ljava/lang/String;Lokio/ByteString;Ljava/util/Map;)V
 	public synthetic fun <init> (Ljava/lang/String;Lokio/ByteString;Ljava/time/Instant;Lokio/ByteString;Ljava/lang/Long;Ljava/lang/String;Lokio/ByteString;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final synthetic fun bodyAs ()Lcom/squareup/wire/Message;
 	public final fun bodyAs (Lcom/squareup/wire/ProtoAdapter;)Lcom/squareup/wire/Message;
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lokio/ByteString;
@@ -41,7 +40,6 @@ public final class misk/events/Event {
 	public final fun getType ()Ljava/lang/String;
 	public final fun getUpdateVersion ()Ljava/lang/Long;
 	public fun hashCode ()I
-	public final synthetic fun header (Ljava/lang/String;)Lcom/squareup/wire/Message;
 	public final fun header (Ljava/lang/String;Lcom/squareup/wire/ProtoAdapter;)Lcom/squareup/wire/Message;
 	public fun toString ()Ljava/lang/String;
 }
