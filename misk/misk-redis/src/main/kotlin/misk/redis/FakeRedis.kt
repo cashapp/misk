@@ -87,7 +87,7 @@ class FakeRedis : Redis {
 
       var countDeleted = 0L
       fields.forEach {
-        if (value.data.contains(it)) {
+        if (value.data.containsKey(it)) {
           value.data.remove(it)
           countDeleted++
         }
