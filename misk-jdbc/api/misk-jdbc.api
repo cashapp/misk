@@ -260,15 +260,18 @@ public final class misk/jdbc/DataSourceClustersConfig : java/util/LinkedHashMap,
 	public final fun containsValue (Ljava/lang/Object;)Z
 	public fun containsValue (Lmisk/jdbc/DataSourceClusterConfig;)Z
 	public final fun entrySet ()Ljava/util/Set;
+	public final synthetic fun get (Ljava/lang/Object;)Ljava/lang/Object;
 	public final fun get (Ljava/lang/Object;)Lmisk/jdbc/DataSourceClusterConfig;
 	public fun get (Ljava/lang/String;)Lmisk/jdbc/DataSourceClusterConfig;
 	public fun getEntries ()Ljava/util/Set;
 	public fun getKeys ()Ljava/util/Set;
+	public final synthetic fun getOrDefault (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 	public final fun getOrDefault (Ljava/lang/Object;Lmisk/jdbc/DataSourceClusterConfig;)Lmisk/jdbc/DataSourceClusterConfig;
 	public fun getOrDefault (Ljava/lang/String;Lmisk/jdbc/DataSourceClusterConfig;)Lmisk/jdbc/DataSourceClusterConfig;
 	public fun getSize ()I
 	public fun getValues ()Ljava/util/Collection;
 	public final fun keySet ()Ljava/util/Set;
+	public final synthetic fun remove (Ljava/lang/Object;)Ljava/lang/Object;
 	public final fun remove (Ljava/lang/Object;)Lmisk/jdbc/DataSourceClusterConfig;
 	public final fun remove (Ljava/lang/Object;Ljava/lang/Object;)Z
 	public fun remove (Ljava/lang/String;)Lmisk/jdbc/DataSourceClusterConfig;
@@ -426,48 +429,8 @@ public final class misk/jdbc/JdbcModule : misk/inject/KAbstractModule {
 	public final fun getReaderConfig ()Lmisk/jdbc/DataSourceConfig;
 }
 
-public final class misk/jdbc/MigrationState {
-	public fun <init> (Ljava/util/Map;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/Map;)Lmisk/jdbc/MigrationState;
-	public static synthetic fun copy$default (Lmisk/jdbc/MigrationState;Ljava/util/Map;ILjava/lang/Object;)Lmisk/jdbc/MigrationState;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getShards ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/jdbc/NamedspacedMigration : java/lang/Comparable {
-	public static final field Companion Lmisk/jdbc/NamedspacedMigration$Companion;
-	public fun <init> (ILjava/lang/String;)V
-	public synthetic fun <init> (ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun compareTo (Ljava/lang/Object;)I
-	public fun compareTo (Lmisk/jdbc/NamedspacedMigration;)I
-	public final fun component1 ()I
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (ILjava/lang/String;)Lmisk/jdbc/NamedspacedMigration;
-	public static synthetic fun copy$default (Lmisk/jdbc/NamedspacedMigration;ILjava/lang/String;ILjava/lang/Object;)Lmisk/jdbc/NamedspacedMigration;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getNamespace ()Ljava/lang/String;
-	public final fun getPath ()Ljava/lang/String;
-	public final fun getVersion ()I
-	public fun hashCode ()I
-	public final fun setPath (Ljava/lang/String;)V
-	public final fun toNamespacedVersion ()Ljava/lang/String;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/jdbc/NamedspacedMigration$Companion {
-	public final fun fromNamespacedVersion (Ljava/lang/String;)Lmisk/jdbc/NamedspacedMigration;
-	public final fun fromResourcePath (Ljava/lang/String;Ljava/lang/String;)Lmisk/jdbc/NamedspacedMigration;
-	public final fun getMIGRATION_PATTERN ()Ljava/util/regex/Pattern;
-}
-
 public final class misk/jdbc/PingDatabaseService : com/google/common/util/concurrent/AbstractIdleService {
 	public fun <init> (Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;)V
-}
-
-public final class misk/jdbc/PingDatabaseServiceKt {
 }
 
 public final class misk/jdbc/PostCommitHookFailedException : java/lang/Exception {
@@ -487,22 +450,7 @@ public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
 	public fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
 
-public final class misk/jdbc/SchemaMigrator {
-	public fun <init> (Lkotlin/reflect/KClass;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConnector;)V
-	public final fun appliedMigrations (Lmisk/vitess/Shard;)Ljava/util/SortedSet;
-	public final fun applyAll (Ljava/lang/String;Ljava/util/SortedSet;)Lmisk/jdbc/MigrationState;
-	public final fun availableMigrations (Lmisk/vitess/Keyspace;)Ljava/util/SortedSet;
-	public final fun getShards ()Lcom/google/common/base/Supplier;
-	public final fun initialize ()Ljava/util/SortedSet;
-	public final fun requireAll ()Lmisk/jdbc/MigrationState;
-	public final fun requireAll$misk_jdbc (Lmisk/vitess/Shard;)Lmisk/jdbc/ShardMigrationState;
-}
-
-public final class misk/jdbc/SchemaMigratorKt {
-}
-
 public final class misk/jdbc/SchemaMigratorService : com/google/common/util/concurrent/AbstractIdleService, misk/healthchecks/HealthCheck, misk/jdbc/DatabaseReadyService {
-	public fun <init> (Lkotlin/reflect/KClass;Lwisp/deployment/Deployment;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public fun status ()Lmisk/healthchecks/HealthStatus;
 }
 
@@ -511,20 +459,6 @@ public abstract interface class misk/jdbc/Session {
 	public abstract fun onPreCommit (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-}
-
-public final class misk/jdbc/ShardMigrationState {
-	public fun <init> (Ljava/util/SortedSet;Ljava/util/SortedSet;)V
-	public final fun component1 ()Ljava/util/SortedSet;
-	public final fun component2 ()Ljava/util/SortedSet;
-	public final fun copy (Ljava/util/SortedSet;Ljava/util/SortedSet;)Lmisk/jdbc/ShardMigrationState;
-	public static synthetic fun copy$default (Lmisk/jdbc/ShardMigrationState;Ljava/util/SortedSet;Ljava/util/SortedSet;ILjava/lang/Object;)Lmisk/jdbc/ShardMigrationState;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getApplied ()Ljava/util/SortedSet;
-	public final fun getAvailable ()Ljava/util/SortedSet;
-	public fun hashCode ()I
-	public final fun missingMigrations ()Ljava/util/Set;
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/jdbc/SpanInjector : misk/jdbc/DataSourceDecorator, net/ttddyy/dsproxy/transform/QueryTransformer {
@@ -669,11 +603,5 @@ public final class misk/vitess/TabletType : java/lang/Enum {
 	public final fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lmisk/vitess/TabletType;
 	public static fun values ()[Lmisk/vitess/TabletType;
-}
-
-public final class misk/vitess/VitessHash {
-	public static final field INSTANCE Lmisk/vitess/VitessHash;
-	public final fun fromKeyspaceId (Lokio/ByteString;)J
-	public final fun toKeyspaceId (J)Lokio/ByteString;
 }
 

@@ -16,7 +16,6 @@ public abstract class misk/concurrent/WrappingListeningExecutorService : com/goo
 
 public final class misk/scope/ActionScope : java/lang/AutoCloseable {
 	public static final field Companion Lmisk/scope/ActionScope$Companion;
-	public fun <init> (Ljava/util/Map;)V
 	public fun close ()V
 	public final fun enter (Ljava/util/Map;)Lmisk/scope/ActionScope;
 	public final fun get (Lcom/google/inject/Key;)Ljava/lang/Object;
@@ -61,13 +60,6 @@ public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstr
 }
 
 public final class misk/scope/ActionScopedProviderModule$Companion {
-}
-
-public final class misk/scope/RealActionScoped : misk/scope/ActionScoped {
-	public fun <init> (Lcom/google/inject/Key;Lmisk/scope/ActionScope;)V
-	public fun get ()Ljava/lang/Object;
-	public final fun getKey ()Lcom/google/inject/Key;
-	public final fun getScope ()Lmisk/scope/ActionScope;
 }
 
 public abstract interface class misk/scope/SeedDataTransformer {
