@@ -78,10 +78,15 @@ data class WebConfig(
   val close_connection_percent: Double = 0.01,
 
   /**
-   * If true responses which are larger than the minGzipSize will be compressed. Gzip compression
-   * always enabled for requests and cannot be turned off.
+   * If true responses which are larger than the minGzipSize will be compressed.
    */
   val gzip: Boolean = true,
+
+  /**
+   * If true requests which are gzipped will be inflated by the default Jetty Gzip Handler.
+   * Gzip decompression always enabled for requests unless specified.
+   */
+  val gunzip: Boolean = true,
 
   /** The minimum size in bytes before the response body will be compressed. */
   val minGzipSize: Int = 1024,
