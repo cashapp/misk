@@ -2,6 +2,8 @@ package misk.redis
 
 import okio.ByteString
 import okio.ByteString.Companion.encode
+import redis.clients.jedis.Pipeline
+import redis.clients.jedis.Transaction
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -73,6 +75,27 @@ class FakeRedis : Redis {
     }
   }
 
+  override fun hdel(key: String, vararg fields: String): Long {
+    synchronized(lock) {
+      val value = hKeyValueStore[key] ?: return 0L
+
+      // Check if the key has expired
+      if (clock.instant() >= value.expiryInstant) {
+        hKeyValueStore.remove(key)
+        return 0L
+      }
+
+      var countDeleted = 0L
+      fields.forEach {
+        if (value.data.containsKey(it)) {
+          value.data.remove(it)
+          countDeleted++
+        }
+      }
+      return countDeleted
+    }
+  }
+
   override fun hget(key: String, field: String): ByteString? {
     synchronized(lock) {
       val value = hKeyValueStore[key] ?: return null
@@ -103,7 +126,7 @@ class FakeRedis : Redis {
     }
   }
 
-  override fun hmget(key: String, vararg fields: String): List<ByteString> {
+  override fun hmget(key: String, vararg fields: String): List<ByteString?> {
     return hgetAll(key)?.filter { fields.contains(it.key) }?.values?.toList() ?: emptyList()
   }
 
@@ -215,5 +238,21 @@ class FakeRedis : Redis {
       }
       return true
     }
+  }
+
+  override fun watch(vararg keys: String) {
+    // no op
+  }
+
+  override fun unwatch(vararg keys: String) {
+    // no op
+  }
+
+  override fun multi(): Transaction {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun pipelined(): Pipeline {
+    throw NotImplementedError("Fake client not implemented for this operation")
   }
 }

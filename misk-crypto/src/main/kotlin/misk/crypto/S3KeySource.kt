@@ -10,7 +10,7 @@ import wisp.deployment.Deployment
 import wisp.logging.getLogger
 
 /**
- * [S3KeyResolver] implements an [KeyResolver] that fetches Tink keysets from an S3
+ * [S3KeySource] implements an [ExternalKeySource] that fetches Tink keysets from an S3
  * bucket. Keysets are indexed by an alias and a region, and are encrypted with a key in the KMS
  * using an envelope key encryption scheme. Each Keyset is protected by a KMS key in each service
  * region.
@@ -31,13 +31,10 @@ import wisp.logging.getLogger
  *
  *  If a requested key alias does not exist, this will raise a [ExternalKeyManagerException]
  */
-class S3KeyResolver @Inject constructor(
+class S3KeySource @Inject constructor(
   private val deployment: Deployment,
-
-  private val defaultS3: AmazonS3,
-
-  @ExternalDataKeys override val allKeyAliases: Map<KeyAlias, KeyType>,
-
+  defaultS3: AmazonS3,
+  @ExternalDataKeys val allKeyAliases: Map<KeyAlias, KeyType>,
   @Inject(optional = true)
   private val bucketNameSource: BucketNameSource = object : BucketNameSource {
     override fun getBucketName(deployment: Deployment) = deployment.mapToEnvironmentName()
@@ -47,21 +44,37 @@ class S3KeyResolver @Inject constructor(
   // in; if BucketNameSource provides a non-standard bucket region, we need to create a new S3
   // client for that bucket, and to do that we need credentials again.
   private val awsCredentials: AWSCredentialsProvider,
-) : ExternalKeyResolver {
+) : ExternalKeySource {
 
   private val s3: AmazonS3 = bucketNameSource.getBucketRegion(deployment)?.let { region ->
-    logger.info("creating S3ExternalKeyManager S3 client for $region")
-    AmazonS3ClientBuilder
-      .standard()
-      .withRegion(region)
-      .withCredentials(awsCredentials)
-      .build()
+    if (region != defaultS3.regionName) {
+      logger.info("creating S3ExternalKeyManager S3 client for $region")
+      AmazonS3ClientBuilder
+        .standard()
+        .withRegion(region)
+        .withCredentials(awsCredentials)
+        .build()
+    } else null
   } ?: defaultS3
 
   // N.B. The path we're using for the object is based on _our_ region, not where the bucket lives
-  private fun objectPath(alias: String) = "$alias/${defaultS3.regionName.toLowerCase()}"
+  private fun objectPath(alias: String): String {
+    val basename = if (allKeyAliases[alias] == KeyType.HYBRID_ENCRYPT) {
+      "public"
+    } else {
+      s3.regionName.lowercase()
+    }
 
-  private fun getRemoteKey(alias: KeyAlias, type: KeyType): Key {
+    return "$alias/$basename"
+  }
+
+  override fun keyExists(alias: KeyAlias): Boolean {
+    val path = objectPath(alias)
+    val name = bucketNameSource.getBucketName(deployment)
+    return s3.doesObjectExist(name, path)
+  }
+
+  override fun getKey(alias: KeyAlias): Key {
     val path = objectPath(alias)
     val name = bucketNameSource.getBucketName(deployment)
     try {
@@ -70,10 +83,7 @@ class S3KeyResolver @Inject constructor(
       val kmsArn = obj.objectMetadata.getUserMetaDataOf(METADATA_KEY_KMS_ARN)
       val keyTypeDescription = obj.objectMetadata.getUserMetaDataOf(METADATA_KEY_KEY_TYPE)
 
-      val keyType = KeyType.valueOf(keyTypeDescription.toUpperCase())
-      if (keyType != type) {
-        throw ExternalKeyManagerException("type provided does not match type of remote key")
-      }
+      val keyType = KeyType.valueOf(keyTypeDescription.uppercase())
 
       val keyContents = obj.objectContent.readAllBytes().toString(Charsets.UTF_8)
       return Key(alias, keyType, MiskConfig.RealSecret(keyContents), kmsArn)
@@ -82,25 +92,11 @@ class S3KeyResolver @Inject constructor(
     }
   }
 
-  // Injector tests initialize key managers in non-native environments, so we delegate creation
-  // until needed.
-  private val keys: LinkedHashMap<String, Key> by lazy {
-    val retrievedKeys = linkedMapOf<String, Key>()
-    allKeyAliases.mapValues { (alias, type) ->
-      logger.info { "registering external key: $alias" }
-      getRemoteKey(alias, type)
-    }.toMap(retrievedKeys)
-    retrievedKeys
-  }
-
-  override fun getKeyByAlias(alias: KeyAlias) = keys[alias]
-
   companion object {
     private const val METADATA_KEY_KMS_ARN = "kms-key-arn"
 
     private const val METADATA_KEY_KEY_TYPE = "key-type"
 
-    private val logger = getLogger<S3KeyResolver>()
+    private val logger = getLogger<S3KeySource>()
   }
-
 }

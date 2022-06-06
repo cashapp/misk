@@ -65,9 +65,6 @@ public final class misk/clustering/ClusterHashRing : misk/clustering/ClusterReso
 	public fun hashCode ()I
 }
 
-public final class misk/clustering/ClusterKt {
-}
-
 public abstract interface class misk/clustering/ClusterResourceMapper {
 	public abstract fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
 }
@@ -111,7 +108,6 @@ public final class misk/clustering/fake/FakeCluster : misk/clustering/Cluster, m
 	public static final field SELF_NAME Ljava/lang/String;
 	public fun <init> ()V
 	public fun <init> (Lmisk/clustering/fake/ExplicitClusterResourceMapper;)V
-	public fun <init> (Lmisk/clustering/fake/ExplicitClusterResourceMapper;Lmisk/clustering/DefaultCluster;)V
 	public fun addListener (Lcom/google/common/util/concurrent/Service$Listener;Ljava/util/concurrent/Executor;)V
 	public fun awaitRunning ()V
 	public fun awaitRunning (JLjava/util/concurrent/TimeUnit;)V
@@ -149,30 +145,6 @@ public final class misk/clustering/fake/lease/FakeLeaseModule : misk/inject/KAbs
 
 public final class misk/clustering/kubernetes/KubernetesClusterModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/clustering/kubernetes/KubernetesConfig;)V
-}
-
-public final class misk/clustering/kubernetes/KubernetesClusterProvider : javax/inject/Provider {
-	public fun <init> (Lmisk/clustering/kubernetes/KubernetesConfig;)V
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lmisk/clustering/DefaultCluster;
-}
-
-public final class misk/clustering/kubernetes/KubernetesClusterWatcher : com/google/common/util/concurrent/AbstractIdleService {
-	public static final field CHANGE_TYPE_ADDED Ljava/lang/String;
-	public static final field CHANGE_TYPE_DELETED Ljava/lang/String;
-	public static final field CHANGE_TYPE_MODIFIED Ljava/lang/String;
-	public static final field Companion Lmisk/clustering/kubernetes/KubernetesClusterWatcher$Companion;
-	public fun <init> (Lmisk/clustering/DefaultCluster;Lmisk/clustering/kubernetes/KubernetesConfig;)V
-}
-
-public final class misk/clustering/kubernetes/KubernetesClusterWatcher$Companion {
-}
-
-public final class misk/clustering/kubernetes/KubernetesClusterWatcherKt {
-	public static final fun applyTo (Lio/kubernetes/client/util/Watch$Response;Lmisk/clustering/DefaultCluster;)V
-	public static final fun getAsClusterMember (Lio/kubernetes/client/models/V1Pod;)Lmisk/clustering/Cluster$Member;
-	public static final fun getPod (Lio/kubernetes/client/util/Watch$Response;)Lio/kubernetes/client/models/V1Pod;
-	public static final fun isReady (Lio/kubernetes/client/models/V1Pod;)Z
 }
 
 public final class misk/clustering/kubernetes/KubernetesConfig : wisp/config/Config {
@@ -223,10 +195,6 @@ public final class misk/clustering/weights/FakeClusterWeight : misk/clustering/w
 }
 
 public final class misk/clustering/weights/FakeClusterWeightModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
-public final class misk/clustering/weights/NoOpClusterWeightServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
 

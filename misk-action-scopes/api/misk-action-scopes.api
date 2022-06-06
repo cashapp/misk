@@ -16,7 +16,6 @@ public abstract class misk/concurrent/WrappingListeningExecutorService : com/goo
 
 public final class misk/scope/ActionScope : java/lang/AutoCloseable {
 	public static final field Companion Lmisk/scope/ActionScope$Companion;
-	public fun <init> (Ljava/util/Map;)V
 	public fun close ()V
 	public final fun enter (Ljava/util/Map;)Lmisk/scope/ActionScope;
 	public final fun get (Lcom/google/inject/Key;)Ljava/lang/Object;
@@ -51,6 +50,8 @@ public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstr
 	public final fun bindProvider (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
 	public static synthetic fun bindProvider$default (Lmisk/scope/ActionScopedProviderModule;Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
 	public static synthetic fun bindProvider$default (Lmisk/scope/ActionScopedProviderModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
+	public final fun bindSeedData (Lcom/google/inject/TypeLiteral;)V
+	public final fun bindSeedData (Lcom/google/inject/TypeLiteral;Ljava/lang/annotation/Annotation;)V
 	public final fun bindSeedData (Lkotlin/reflect/KClass;)V
 	public final fun bindSeedData (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
 	public final fun bindSeedData (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
@@ -61,11 +62,8 @@ public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstr
 public final class misk/scope/ActionScopedProviderModule$Companion {
 }
 
-public final class misk/scope/RealActionScoped : misk/scope/ActionScoped {
-	public fun <init> (Lcom/google/inject/Key;Lmisk/scope/ActionScope;)V
-	public fun get ()Ljava/lang/Object;
-	public final fun getKey ()Lcom/google/inject/Key;
-	public final fun getScope ()Lmisk/scope/ActionScope;
+public abstract interface class misk/scope/SeedDataTransformer {
+	public abstract fun transform (Ljava/util/Map;)Ljava/util/Map;
 }
 
 public final class misk/scope/executor/ActionScopedExecutorService : misk/concurrent/WrappingListeningExecutorService {

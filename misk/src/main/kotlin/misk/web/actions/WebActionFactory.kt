@@ -13,6 +13,7 @@ import misk.web.ConnectWebSocket
 import misk.web.Delete
 import misk.web.DispatchMechanism
 import misk.web.Get
+import misk.web.WebActionSeedDataTransformerFactory
 import misk.web.NetworkInterceptor
 import misk.web.Patch
 import misk.web.PathPattern
@@ -38,7 +39,8 @@ internal class WebActionFactory @Inject constructor(
   @MiskDefault
   private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
   private val webActionBindingFactory: WebActionBinding.Factory,
-  private val scope: ActionScope
+  private val scope: ActionScope,
+  private val actionScopeSeedDataTransformerFactories: List<WebActionSeedDataTransformerFactory>,
 ) {
 
   /** Returns the bound actions for `webActionClass`. */
@@ -201,14 +203,23 @@ internal class WebActionFactory @Inject constructor(
 
     val webActionBinding = webActionBindingFactory.create(action, parsedPathPattern)
 
+    val httpActionScopeSeedDataInterceptors =
+      actionScopeSeedDataTransformerFactories.mapNotNull {
+        it.create(
+          parsedPathPattern,
+          action,
+        )
+      }
+
     return BoundAction(
       scope,
       provider,
       networkInterceptors,
       applicationInterceptors,
       webActionBinding,
+      httpActionScopeSeedDataInterceptors,
       parsedPathPattern,
-      action
+      action,
     )
   }
 

@@ -37,13 +37,6 @@ public abstract interface class wisp/feature/DynamicConfig {
 	public abstract fun trackString (Lwisp/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 }
 
-public final class wisp/feature/DynamicConfigKt {
-	public static final synthetic fun getEnum (Lwisp/feature/DynamicConfig;Lwisp/feature/Feature;)Ljava/lang/Enum;
-	public static final synthetic fun getJson (Lwisp/feature/DynamicConfig;Lwisp/feature/Feature;)Ljava/lang/Object;
-	public static final synthetic fun trackEnum (Lwisp/feature/DynamicConfig;Lwisp/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public static final synthetic fun trackJson (Lwisp/feature/DynamicConfig;Lwisp/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-}
-
 public abstract interface class wisp/feature/EnumFeatureFlag : wisp/feature/FeatureFlag {
 	public abstract fun getReturnType ()Ljava/lang/Class;
 }
@@ -83,17 +76,6 @@ public final class wisp/feature/FeatureFlags$DefaultImpls {
 	public static fun trackInt (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public static fun trackJson (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public static fun trackString (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-}
-
-public final class wisp/feature/FeatureFlagsKt {
-	public static final synthetic fun getEnum (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/Enum;
-	public static synthetic fun getEnum$default (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)Ljava/lang/Enum;
-	public static final synthetic fun getJson (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/Object;
-	public static synthetic fun getJson$default (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final synthetic fun trackEnum (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public static synthetic fun trackEnum$default (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/TrackerReference;
-	public static final synthetic fun trackJson (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public static synthetic fun trackJson$default (Lwisp/feature/FeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/TrackerReference;
 }
 
 public abstract interface class wisp/feature/IntFeatureFlag : wisp/feature/FeatureFlag {
