@@ -11,6 +11,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import retrofit2.Invocation
 import java.net.SocketTimeoutException
+import java.net.URL
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -53,6 +54,9 @@ class ClientMetricsInterceptor private constructor(
 
     val grpcMethod = chain.request().tag(GrpcMethod::class.java)
     if (grpcMethod != null) return "$clientName.${grpcMethod.path.substringAfterLast("/")}"
+
+    val url = chain.request().tag(URL::class.java)
+    if (url != null) return "$clientName.${url.path.trim('/').replace('/', '.')}"
 
     return null
   }
