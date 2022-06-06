@@ -124,6 +124,24 @@ class RealPagerTest {
     assertThat(pager.hasNext()).isTrue
   }
 
+  @Test fun `nextPage is null when there are no pages left`() {
+    val pageSize = 4
+    val pageCount = 3
+    val movieId = givenStarWarsMovie()
+    givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
+
+    val pager = queryFactory.newQuery(CharacterQuery::class)
+      .movieId(movieId)
+      .newPager(idDescPaginator(), pageSize = pageSize)
+    // Go through all the pages.
+    repeat(pageCount) {
+      transacter.transaction { session -> pager.nextPage(session) }
+    }
+
+    val nextPage = transacter.transaction { session -> pager.nextPage(session) }
+    assertThat(nextPage).isNull()
+  }
+
   @Test fun `paging does not generate duplicate constraints and order by`() {
     val pageSize = 4
     val pageCount = 3
