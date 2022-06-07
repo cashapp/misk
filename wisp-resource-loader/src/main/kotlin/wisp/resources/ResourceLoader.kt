@@ -156,9 +156,26 @@ class ResourceLoader(
     }
   }
 
+  fun watch(address: String, resourceChangedListener: (address: String) -> Unit) {
+    checkAddress(address)
+
+    val (scheme, path) = parseAddress(address)
+    val backend = backends[scheme] ?: return
+    backend.watch(path, resourceChangedListener)
+  }
+
+  fun unwatch(address: String) {
+    checkAddress(address)
+
+    val (scheme, path) = parseAddress(address)
+    val backend = backends[scheme] ?: return
+    backend.unwatch(path)
+  }
+
   private data class Address(val scheme: String, val path: String)
 
   abstract class Backend {
+
     abstract fun open(path: String): BufferedSource?
 
     abstract fun exists(path: String): Boolean
@@ -185,13 +202,22 @@ class ResourceLoader(
       }
       return Collections.unmodifiableList(result.toList())
     }
+
+    open fun watch(path: String, resourceChangedListener: (address: String) -> Unit) {
+      throw UnsupportedOperationException("${this::class} doesn't support watch")
+    }
+
+    open fun unwatch(path: String) {
+      throw UnsupportedOperationException("${this::class} doesn't support unwatch")
+    }
+
   }
 
   companion object {
     val SYSTEM = ResourceLoader(
       mapOf(
-        "classpath:" to ClasspathResourceLoaderBackend,
-        "filesystem:" to FilesystemLoaderBackend
+        ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
+        FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend
       )
     )
   }
