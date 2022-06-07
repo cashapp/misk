@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+  api(project(":wisp-logging"))
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.okio)
