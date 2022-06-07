@@ -19,6 +19,8 @@ internal class RealPager<T : DbEntity<T>, Q : Query<T>>(
   }
 
   override fun nextPage(session: Session): Page<T>? {
+    if (!hasNext) return null
+
     @Suppress("UNCHECKED_CAST")
     val query = query.clone<Q>()
     paginator.applyOffset(query, nextOffset)
