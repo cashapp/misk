@@ -1,6 +1,7 @@
 package misk.web.extractors
 
 import misk.Action
+import misk.exceptions.BadRequestException
 import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
@@ -45,7 +46,7 @@ internal class QueryParamFeatureBinding private constructor(
         return if (isList) values.map { converter(it) }
         else converter(values.first())
       } catch (e: IllegalArgumentException) {
-        throw IllegalArgumentException("Invalid format for parameter: $parameter", e)
+        throw BadRequestException("Invalid format for parameter: $name", e)
       }
     }
   }
