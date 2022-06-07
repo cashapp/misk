@@ -31,10 +31,6 @@ public final class wisp/resources/MemoryResourceLoaderBackend : wisp/resources/R
 public final class wisp/resources/MemoryResourceLoaderBackend$Companion {
 }
 
-public abstract interface class wisp/resources/ResourceChangedListener {
-	public abstract fun resourceChanged (Ljava/lang/String;)V
-}
-
 public final class wisp/resources/ResourceLoader {
 	public static final field Companion Lwisp/resources/ResourceLoader$Companion;
 	public fun <init> (Ljava/util/Map;)V
