@@ -1,5 +1,6 @@
 public final class wisp/resources/ClasspathResourceLoaderBackend : wisp/resources/ResourceLoader$Backend {
 	public static final field INSTANCE Lwisp/resources/ClasspathResourceLoaderBackend;
+	public static final field SCHEME Ljava/lang/String;
 	public fun exists (Ljava/lang/String;)Z
 	public fun list (Ljava/lang/String;)Ljava/util/List;
 	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
@@ -7,16 +8,27 @@ public final class wisp/resources/ClasspathResourceLoaderBackend : wisp/resource
 
 public final class wisp/resources/FilesystemLoaderBackend : wisp/resources/ResourceLoader$Backend {
 	public static final field INSTANCE Lwisp/resources/FilesystemLoaderBackend;
+	public static final field SCHEME Ljava/lang/String;
 	public fun exists (Ljava/lang/String;)Z
 	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
+	public fun unwatch (Ljava/lang/String;)V
+	public fun watch (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class wisp/resources/MemoryResourceLoaderBackend : wisp/resources/ResourceLoader$Backend {
+	public static final field Companion Lwisp/resources/MemoryResourceLoaderBackend$Companion;
+	public static final field SCHEME Ljava/lang/String;
 	public fun <init> ()V
 	public fun all ()Ljava/util/Set;
 	public fun exists (Ljava/lang/String;)Z
 	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
 	public fun put (Ljava/lang/String;Lokio/ByteString;)V
+	public final fun resourceChanged (Ljava/lang/String;Ljava/lang/String;)V
+	public fun unwatch (Ljava/lang/String;)V
+	public fun watch (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class wisp/resources/MemoryResourceLoaderBackend$Companion {
 }
 
 public final class wisp/resources/ResourceLoader {
@@ -29,8 +41,10 @@ public final class wisp/resources/ResourceLoader {
 	public final fun put (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun put (Ljava/lang/String;Lokio/ByteString;)V
 	public final fun requireUtf8 (Ljava/lang/String;)Ljava/lang/String;
+	public final fun unwatch (Ljava/lang/String;)V
 	public final fun utf8 (Ljava/lang/String;)Ljava/lang/String;
 	public final fun walk (Ljava/lang/String;)Ljava/util/List;
+	public final fun watch (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract class wisp/resources/ResourceLoader$Backend {
@@ -40,6 +54,8 @@ public abstract class wisp/resources/ResourceLoader$Backend {
 	public fun list (Ljava/lang/String;)Ljava/util/List;
 	public abstract fun open (Ljava/lang/String;)Lokio/BufferedSource;
 	public fun put (Ljava/lang/String;Lokio/ByteString;)V
+	public fun unwatch (Ljava/lang/String;)V
+	public fun watch (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class wisp/resources/ResourceLoader$Companion {
