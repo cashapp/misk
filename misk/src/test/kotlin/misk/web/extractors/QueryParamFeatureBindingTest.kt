@@ -1,5 +1,6 @@
 package misk.web.extractors
 
+import misk.exceptions.BadRequestException
 import misk.web.QueryParam
 import misk.web.extractors.QueryParamFeatureBinding.Factory.toQueryBinding
 import org.assertj.core.api.Assertions.assertThat
@@ -65,7 +66,7 @@ internal class QueryParamFeatureBindingTest {
   @Test
   fun invalidInt() {
     val queryStringProcessor = TestMemberStore.intParameter().toQueryBinding()!!
-    assertFailsWith<IllegalArgumentException> {
+    assertFailsWith<BadRequestException> {
       queryStringProcessor.parameterValue(listOf("forty two"))
     }
   }
