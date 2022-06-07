@@ -11,8 +11,9 @@ import java.util.TreeMap
  *
  * This uses the scheme `memory:`.
  */
-class MemoryResourceLoaderBackend() : ResourceLoader.Backend() {
+class MemoryResourceLoaderBackend : ResourceLoader.Backend() {
   private val resources = TreeMap<String, ByteString>()
+  private var resourceChangedListeners = mutableMapOf<String, (address: String) -> Unit>()
 
   override fun open(path: String): BufferedSource? {
     val resource = resources[path] ?: return null
@@ -21,9 +22,29 @@ class MemoryResourceLoaderBackend() : ResourceLoader.Backend() {
 
   override fun put(path: String, data: ByteString) {
     resources[path] = data
+    resourceChanged(SCHEME, path)
   }
 
   override fun exists(path: String) = resources[path] != null
 
   override fun all(): Set<String> = resources.keys
+
+  override fun watch(path: String, resourceChangedListener: (address: String) -> Unit) {
+    resourceChangedListeners[path] = resourceChangedListener
+  }
+
+  override fun unwatch(path: String) {
+    resourceChangedListeners.remove(path)
+  }
+
+  fun resourceChanged(scheme: String, path: String) {
+    val resourceChangedListener = resourceChangedListeners[path]
+    if (resourceChangedListener != null) {
+      resourceChangedListener(scheme + path)
+    }
+  }
+
+  companion object {
+    const val SCHEME = "memory:"
+  }
 }
