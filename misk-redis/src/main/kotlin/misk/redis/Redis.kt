@@ -146,6 +146,14 @@ interface Redis {
   fun hset(key: String, field: String, value: ByteString)
 
   /**
+   * Sets the [ByteString] values for the given key and fields
+   *
+   * @param key the key
+   * @param hash the map of fields to [ByteString] value
+   */
+  fun hset(key: String, hash: Map<String, ByteString>)
+
+  /**
    * Increments the number stored at key by one. If the key does not exist, it is set to 0 before
    * performing the operation. An error is returned if the key contains a value of the wrong type or
    * contains a string that can not be represented as integer.
