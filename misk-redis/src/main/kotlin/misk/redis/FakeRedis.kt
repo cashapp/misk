@@ -186,6 +186,12 @@ class FakeRedis : Redis {
     hKeyValueStore[key]!!.data[field] = value
   }
 
+  override fun hset(key: String, hash: Map<String, ByteString>) {
+    hash.forEach {
+      hset(key, it.key, it.value)
+    }
+  }
+
   override fun incr(key: String): Long {
     synchronized(lock) {
       return incrBy(key, 1)
