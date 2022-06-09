@@ -3,12 +3,13 @@ package misk.jobqueue.sqs
 import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
-import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
+import misk.feature.Feature
+import misk.feature.FeatureFlags
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
@@ -16,37 +17,29 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import misk.tracing.traceWithNewRootSpan
-import misk.feature.Feature
-import misk.feature.FeatureFlags
+import org.slf4j.MDC
 import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
-import java.util.function.Supplier
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
 internal class SqsJobConsumer @Inject internal constructor(
-  private val config: AwsSqsJobQueueConfig,
-  private val queues: QueueResolver,
   @ForSqsHandling private val handlingThreads: ExecutorService,
   @ForSqsHandling private val taskQueue: RepeatedTaskQueue,
-  private val moshi: Moshi,
-  private val tracer: Tracer,
-  private val metrics: SqsMetrics,
-  private val featureFlags: FeatureFlags,
   @ForSqsReceiving private val receivingThreads: ExecutorService,
+  private val featureFlags: FeatureFlags,
   private val leaseManager: LeaseManager,
-  /**
-   * [SqsJobConsumer] is itself a [Service], but it needs the [ServiceManager] in order to check
-   * that all services are running and the system is in a healthy state before it starts handling
-   * jobs. We use a provider here to avoid a dependency cycle.
-   */
-  private val serviceManagerProvider: Provider<ServiceManager>
+  private val metrics: SqsMetrics,
+  private val moshi: Moshi,
+  private val queues: QueueResolver,
+  private val serviceManagerProvider: Provider<ServiceManager>,
+  private val tracer: Tracer,
 ) : JobConsumer {
   private val subscriptions = ConcurrentHashMap<QueueName, QueueReceiver>()
 
@@ -84,7 +77,8 @@ internal class SqsJobConsumer @Inject internal constructor(
     fun run(): Status {
       // Receive messages in parallel. Default to 1 if feature flag is not defined.
       val futures = receiverIds().map {
-        CompletableFuture.supplyAsync({
+        CompletableFuture.supplyAsync(
+          {
             receive()
           },
           receivingThreads
@@ -158,7 +152,6 @@ internal class SqsJobConsumer @Inject internal constructor(
 
     private fun batchSize() = featureFlags.getInt(CONSUMERS_BATCH_SIZE, queue.queueName)
 
-
     private fun receive(): List<Status> {
       val messages = fetchMessages()
 
@@ -175,7 +168,8 @@ internal class SqsJobConsumer @Inject internal constructor(
 
     private fun handleMessages(messages: List<SqsJob>): List<CompletableFuture<Status>> {
       return messages.map { message ->
-        CompletableFuture.supplyAsync({
+        CompletableFuture.supplyAsync(
+          {
             metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc()
 
             tracer.traceWithNewRootSpan("handle-job-${queue.queueName}") { span ->
@@ -189,6 +183,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
               // Run the handler and record timing
               try {
+                MDC.put(SQS_JOB_ID_MDC, message.id)
                 val (duration, _) = timed { handler.handleJob(message) }
                 metrics.handlerDispatchTime.record(
                   duration.toMillis().toDouble(), queue.queueName,
@@ -200,6 +195,8 @@ internal class SqsJobConsumer @Inject internal constructor(
                 metrics.handlerFailures.labels(queue.queueName, queue.queueName).inc()
                 Tags.ERROR.set(span, true)
                 Status.FAILED
+              } finally {
+                MDC.remove(SQS_JOB_ID_MDC)
               }
             }
           },
@@ -215,5 +212,6 @@ internal class SqsJobConsumer @Inject internal constructor(
     internal val CONSUMERS_PER_QUEUE = Feature("jobqueue-consumers")
     internal val CONSUMERS_BATCH_SIZE = Feature("jobqueue-consumers-fetch-batch-size")
     private val ORIGINAL_TRACE_ID_TAG = StringTag("original.trace_id")
+    private const val SQS_JOB_ID_MDC = "sqs_job_id"
   }
 }
