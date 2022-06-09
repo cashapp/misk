@@ -1,29 +1,42 @@
 package misk.web.interceptors
 
 import misk.Action
+import misk.web.HttpCall
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.WebConfig
 import okio.GzipSource
 import okio.buffer
-import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Inflates a gzipped compressed request. The interceptor should be installed if the default
- * [GzipHandler] for handling such requests was opted out via [WebConfig.gunzip].
+ * Inflates a gzipped compressed request.
  */
-class GunzipRequestBodyInterceptor private constructor() : NetworkInterceptor {
+internal class GunzipRequestBodyInterceptor private constructor() : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
-    val contentEncoding = chain.httpCall.requestHeaders[CONTENT_ENCODING]
-      ?: return chain.proceed(chain.httpCall)
-    if (contentEncoding.lowercase() == GZIP || COMMA_GZIP.matches(contentEncoding)) {
-      chain.httpCall.takeRequestBody()?.let {
-        chain.httpCall.putRequestBody(GzipSource(it).buffer())
+    val httpCall = chain.httpCall
+    val contentEncoding = httpCall.requestHeaders[CONTENT_ENCODING]
+      ?: return chain.proceed(httpCall)
+    if (contentEncoding.lowercase() == GZIP) {
+      httpCall.takeRequestBody()?.let {
+        httpCall.putRequestBody(GzipSource(it).buffer())
+      }
+      modifyRequestHeaders(httpCall)
+    }
+    chain.proceed(httpCall)
+  }
+
+  private fun modifyRequestHeaders(httpCall: HttpCall) {
+    httpCall.computeRequestHeader(CONTENT_ENCODING) {
+      Pair(X_CONTENT_ENCODING, GZIP)
+    }
+    httpCall.computeRequestHeader(CONTENT_LENGTH) { value ->
+      if (value == null) {
+        null
+      } else {
+        Pair(X_CONTENT_LENGTH, value)
       }
     }
-    chain.proceed(chain.httpCall)
   }
 
   @Singleton
@@ -37,7 +50,9 @@ class GunzipRequestBodyInterceptor private constructor() : NetworkInterceptor {
 
   private companion object {
     private const val CONTENT_ENCODING = "Content-Encoding"
+    private const val CONTENT_LENGTH = "Content-Length"
+    private const val X_CONTENT_ENCODING = "X-Content-Encoding"
+    private const val X_CONTENT_LENGTH = "X-Content-Length"
     private const val GZIP = "gzip"
-    private val COMMA_GZIP = Regex(".*, *gzip")
   }
 }

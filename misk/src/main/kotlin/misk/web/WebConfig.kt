@@ -82,12 +82,6 @@ data class WebConfig(
    */
   val gzip: Boolean = true,
 
-  /**
-   * If true requests which are gzipped will be inflated by the default Jetty Gzip Handler.
-   * Gzip decompression always enabled for requests unless specified.
-   */
-  val gunzip: Boolean = true,
-
   /** The minimum size in bytes before the response body will be compressed. */
   val minGzipSize: Int = 1024,
 

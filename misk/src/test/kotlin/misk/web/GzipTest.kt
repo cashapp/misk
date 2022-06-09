@@ -1,13 +1,11 @@
 package misk.web
 
 import com.squareup.moshi.Moshi
-import misk.MiskDefault
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.interceptors.GunzipRequestBodyInterceptor
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
@@ -24,7 +22,7 @@ import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class GzipTest : AbstractGzipTest() {
-  @MiskTestModule val module = TestModule(gzip = true, installGunzipInterceptor = false)
+  @MiskTestModule val module = TestModule(gzip = true)
 
   @Test fun `GET gzip get response body`() {
     get("/miskhype/16").assertGzipEncoding(gzipped = true)
@@ -39,37 +37,7 @@ internal class GzipTest : AbstractGzipTest() {
 
 @MiskTest(startService = true)
 internal class GzipDisabledTest : AbstractGzipTest() {
-  @MiskTestModule val module = TestModule(gzip = false, installGunzipInterceptor = false)
-
-  @Test fun `GET gzip get response body`() {
-    get("/miskhype/16").assertGzipEncoding(gzipped = false)
-    get("/miskhype/8").assertGzipEncoding(gzipped = false)
-  }
-
-  @Test fun `POST gzip response body`() {
-    post("/miskhype/16").assertGzipEncoding(gzipped = false)
-    post("/miskhype/8").assertGzipEncoding(gzipped = false)
-  }
-}
-
-@MiskTest(startService = true)
-internal class GzipWithInterceptorTest : AbstractGzipTest() {
-  @MiskTestModule val module = TestModule(gzip = true, installGunzipInterceptor = true)
-
-  @Test fun `GET gzip get response body`() {
-    get("/miskhype/16").assertGzipEncoding(gzipped = true)
-    get("/miskhype/8").assertGzipEncoding(gzipped = false)
-  }
-
-  @Test fun `POST gzip response body`() {
-    post("/miskhype/16").assertGzipEncoding(gzipped = true)
-    post("/miskhype/8").assertGzipEncoding(gzipped = false)
-  }
-}
-
-@MiskTest(startService = true)
-internal class GzipDisabledWithoutInterceptorTest : AbstractGzipTest() {
-  @MiskTestModule val module = TestModule(gzip = false, installGunzipInterceptor = false)
+  @MiskTestModule val module = TestModule(gzip = false)
 
   @Test fun `GET gzip get response body`() {
     get("/miskhype/16").assertGzipEncoding(gzipped = false)
@@ -179,21 +147,16 @@ abstract class AbstractGzipTest {
     return buffer.readByteString().toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
   }
 
-  class TestModule(private val gzip: Boolean, private val installGunzipInterceptor: Boolean) : KAbstractModule() {
+  class TestModule(private val gzip: Boolean) : KAbstractModule() {
     override fun configure() {
       install(
         WebServerTestingModule(
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             gzip = gzip,
-            gunzip = !installGunzipInterceptor,
             minGzipSize = 128
           )
         )
       )
-      if (installGunzipInterceptor) {
-        multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-          .to<GunzipRequestBodyInterceptor.Factory>()
-      }
       install(MiskTestingServiceModule())
       install(WebActionModule.create<MiskHypeGetAction>())
       install(WebActionModule.create<MiskHypePostAction>())
