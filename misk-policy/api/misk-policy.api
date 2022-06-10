@@ -21,8 +21,8 @@ public final class misk/policy/opa/OpaModule : misk/inject/KAbstractModule {
 }
 
 public abstract interface class misk/policy/opa/OpaPolicyEngine {
-	public abstract fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
-	public abstract fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+	public abstract fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Boolean;)Lmisk/policy/opa/OpaResponse;
+	public abstract fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;LJava/lang/Boolean)Lmisk/policy/opa/OpaResponse;
 }
 
 public abstract interface class misk/policy/opa/OpaRequest {
@@ -37,9 +37,9 @@ public final class misk/policy/opa/PolicyEngineException : java/lang/Exception {
 }
 
 public final class misk/policy/opa/RealOpaPolicyEngine : misk/policy/opa/OpaPolicyEngine {
-	public fun <init> (Lmisk/policy/opa/OpaApi;Lcom/squareup/moshi/Moshi;)V
-	public fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
-	public fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+	public fun <init> (Lmisk/policy/opa/OpaApi;Lcom/squareup/moshi/Moshi;Ljava/lang/Boolean;)V
+	public fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Boolean;)Lmisk/policy/opa/OpaResponse;
+	public fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Boolean;)Lmisk/policy/opa/OpaResponse;
 }
 
 public final class misk/policy/opa/Request {
