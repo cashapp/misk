@@ -78,8 +78,7 @@ data class WebConfig(
   val close_connection_percent: Double = 0.01,
 
   /**
-   * If true responses which are larger than the minGzipSize will be compressed. Gzip compression
-   * always enabled for requests and cannot be turned off.
+   * If true responses which are larger than the minGzipSize will be compressed.
    */
   val gzip: Boolean = true,
 
