@@ -1546,6 +1546,9 @@ public final class misk/web/formatter/ClassNameFormatter$Companion {
 	public final fun format (Lkotlin/reflect/KClass;)Ljava/lang/String;
 }
 
+public abstract interface annotation class misk/web/interceptors/BeforeContentEncoding : java/lang/annotation/Annotation {
+}
+
 public abstract interface class misk/web/interceptors/ConcurrencyLimiterFactory {
 	public abstract fun create (Lmisk/Action;)Lcom/netflix/concurrency/limits/Limiter;
 }
