@@ -6,13 +6,13 @@ interface OpaPolicyEngine {
     input: T,
     inputType: Class<T>,
     returnType: Class<R>,
-    provenance: Boolean?
+    provenance: Boolean? = false
   ): R
 
   fun <R : OpaResponse> evaluateNoInput(
     document: String,
     returnType: Class<R>,
-    provenance: Boolean?
+    provenance: Boolean? = false
   ): R
 }
 
@@ -27,7 +27,7 @@ interface OpaPolicyEngine {
  */
 inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(
   document: String,
-  provenance: Boolean?
+  provenance: Boolean? = false
 ): R {
   return evaluateNoInput(document, R::class.java, provenance)
 }
@@ -45,7 +45,7 @@ inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(
 inline fun <reified T : OpaRequest, reified R : OpaResponse> OpaPolicyEngine.evaluate(
   document: String,
   input: T,
-  provenance: Boolean?
+  provenance: Boolean? = false
 ): R {
   return evaluateWithInput(document, input, T::class.java, R::class.java, provenance)
 }

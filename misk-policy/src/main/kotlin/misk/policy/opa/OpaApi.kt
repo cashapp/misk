@@ -14,6 +14,6 @@ interface OpaApi {
   fun queryDocument(
     @Path(value = "documentPath", encoded = true) documentPath: String,
     @Body input: String,
-    @Query("provenance") provenance: Boolean?
+    @Query("provenance") provenance: Boolean? = false
   ): Call<ResponseBody>
 }
