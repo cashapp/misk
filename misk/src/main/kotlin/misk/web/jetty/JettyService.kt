@@ -3,7 +3,6 @@ package misk.web.jetty
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import wisp.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
@@ -33,6 +32,7 @@ import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.unixsocket.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
+import wisp.logging.getLogger
 import java.net.InetAddress
 import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
@@ -259,7 +259,6 @@ class JettyService @Inject internal constructor(
       // GET is enabled by default for gzipHandler.
       gzipHandler.addExcludedMethods("GET")
     }
-    gzipHandler.inflateBufferSize = 8192
     servletContextHandler.gzipHandler = gzipHandler
 
     server.handler = statisticsHandler

@@ -19,7 +19,7 @@ internal data class ServletHttpCall(
    */
   override val linkLayerLocalAddress: SocketAddress? = null,
   override val dispatchMechanism: DispatchMechanism,
-  override val requestHeaders: Headers,
+  override var requestHeaders: Headers,
   var requestBody: BufferedSource? = null,
   val upstreamResponse: UpstreamResponse,
   var responseBody: BufferedSink? = null,

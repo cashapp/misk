@@ -49,6 +49,7 @@ import misk.web.interceptors.BeforeContentEncoding
 import misk.web.interceptors.ConcurrencyLimiterFactory
 import misk.web.interceptors.ConcurrencyLimitsInterceptor
 import misk.web.interceptors.ForContentEncoding
+import misk.web.interceptors.GunzipRequestBodyInterceptor
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RebalancingInterceptor
@@ -135,7 +136,9 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
     newMultibinder<NetworkInterceptor.Factory>(BeforeContentEncoding::class)
 
-    newMultibinder<NetworkInterceptor.Factory>(ForContentEncoding::class)
+    // Inflates a gzip compressed request
+    multibind<NetworkInterceptor.Factory>(ForContentEncoding::class)
+      .to<GunzipRequestBodyInterceptor.Factory>()
 
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
       .to<RebalancingInterceptor.Factory>()
