@@ -29,7 +29,7 @@ inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(
   document: String,
   provenance: Boolean?
 ): R {
-  return evaluateNoInput(document, R::class.java)
+  return evaluateNoInput(document, R::class.java, provenance)
 }
 
 /**

@@ -80,8 +80,8 @@ class RealOpaPolicyEngine @Inject constructor(
     returnType: Class<R>,
     provenance: Boolean?
   ): R {
-    val response = queryOpa(document)
-    return parseResponse(document, returnType, response, provenance)
+    val response = queryOpa(document, provenance)
+    return parseResponse(document, returnType, response)
   }
 
   private fun queryOpa(
