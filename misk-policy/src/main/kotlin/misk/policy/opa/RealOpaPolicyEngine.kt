@@ -32,16 +32,18 @@ class RealOpaPolicyEngine @Inject constructor(
     document: String,
     input: T,
     inputType: Class<T>,
-    returnType: Class<R>
+    returnType: Class<R>,
+    provenance: Boolean?
   ): R {
-    return evaluateInternal(document, input, inputType, returnType)
+    return evaluateInternal(document, input, inputType, returnType, provenance)
   }
 
   private fun <T : OpaRequest, R : OpaResponse> evaluateInternal(
     document: String,
     input: T,
     inputType: Class<T>,
-    returnType: Class<R>
+    returnType: Class<R>,
+    provenance: Boolean?
   ): R {
     if (document.isEmpty()) {
       throw IllegalArgumentException("Must specify document")
@@ -51,7 +53,7 @@ class RealOpaPolicyEngine @Inject constructor(
       Types.newParameterizedType(Request::class.java, inputType)
     )
     val inputString = inputAdapter.toJson(Request(input))
-    val response = queryOpa(document, inputString)
+    val response = queryOpa(document, inputString, provenance)
     return parseResponse(document, returnType, response)
   }
 
@@ -65,24 +67,33 @@ class RealOpaPolicyEngine @Inject constructor(
    * @throws IllegalArgumentException if no document path was specified.
    * @return Response shape R from OPA.
    */
-  override fun <R : OpaResponse> evaluateNoInput(document: String, returnType: Class<R>): R {
-    return evaluateInternal(document, returnType)
+  override fun <R : OpaResponse> evaluateNoInput(
+    document: String,
+    returnType: Class<R>,
+    provenance: Boolean?
+  ): R {
+    return evaluateInternal(document, returnType, provenance)
   }
 
-  private fun <R : OpaResponse> evaluateInternal(document: String, returnType: Class<R>): R {
+  private fun <R : OpaResponse> evaluateInternal(
+    document: String,
+    returnType: Class<R>,
+    provenance: Boolean?
+  ): R {
     val response = queryOpa(document)
-    return parseResponse(document, returnType, response)
+    return parseResponse(document, returnType, response, provenance)
   }
 
   private fun queryOpa(
     document: String,
-    inputString: String = ""
+    inputString: String = "",
+    provenance: Boolean?
   ): retrofit2.Response<ResponseBody> {
     if (document.isEmpty()) {
       throw IllegalArgumentException("Must specify document")
     }
 
-    val response = opaApi.queryDocument(document, inputString).execute()
+    val response = opaApi.queryDocument(document, inputString, provenance).execute()
     if (!response.isSuccessful) {
       throw PolicyEngineException("[${response.code()}]: ${response.errorBody()?.string()}")
     }

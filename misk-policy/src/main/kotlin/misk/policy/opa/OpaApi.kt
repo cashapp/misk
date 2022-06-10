@@ -12,6 +12,7 @@ interface OpaApi {
   @POST("/v1/data/{documentPath}")
   fun queryDocument(
     @Path(value = "documentPath", encoded = true) documentPath: String,
-    @Body input: String
+    @Body input: String,
+    @Query("provenance") provenance: Boolean
   ): Call<ResponseBody>
 }

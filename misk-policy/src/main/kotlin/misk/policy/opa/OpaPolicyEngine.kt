@@ -5,10 +5,15 @@ interface OpaPolicyEngine {
     document: String,
     input: T,
     inputType: Class<T>,
-    returnType: Class<R>
+    returnType: Class<R>,
+    provenance: Boolean?
   ): R
 
-  fun <R : OpaResponse> evaluateNoInput(document: String, returnType: Class<R>): R
+  fun <R : OpaResponse> evaluateNoInput(
+    document: String,
+    returnType: Class<R>,
+    provenance: Boolean?
+  ): R
 }
 
 /**
@@ -20,7 +25,10 @@ interface OpaPolicyEngine {
  * @throws IllegalArgumentException if no document path was specified.
  * @return Response shape R from OPA.
  */
-inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(document: String): R {
+inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(
+  document: String,
+  provenance: Boolean?
+): R {
   return evaluateNoInput(document, R::class.java)
 }
 
@@ -36,7 +44,8 @@ inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(document: String):
  */
 inline fun <reified T : OpaRequest, reified R : OpaResponse> OpaPolicyEngine.evaluate(
   document: String,
-  input: T
+  input: T,
+  provenance: Boolean?
 ): R {
-  return evaluateWithInput(document, input, T::class.java, R::class.java)
+  return evaluateWithInput(document, input, T::class.java, R::class.java, provenance)
 }
