@@ -6,8 +6,8 @@ public final class misk/policy/opa/FakeOpaPolicyEngine : misk/policy/opa/OpaPoli
 	public fun <init> ()V
 	public final fun addOverride (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
 	public final fun addOverrideForInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Lmisk/policy/opa/OpaResponse;)V
-	public fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
-	public fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+	public fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Boolean;)Lmisk/policy/opa/OpaResponse;
+	public fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Boolean;)Lmisk/policy/opa/OpaResponse;
 }
 
 public final class misk/policy/opa/LocalOpaService : com/google/common/util/concurrent/AbstractIdleService {
