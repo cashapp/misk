@@ -7,6 +7,7 @@ import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
+import wisp.lease.LeaseManager
 import java.time.ZoneId
 import javax.inject.Qualifier
 
@@ -16,6 +17,8 @@ class CronModule(
 ) : KAbstractModule() {
 
   override fun configure() {
+    requireBinding<LeaseManager>()
+
     install(FakeCronModule(zoneId, threadPoolSize))
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class))
     install(ServiceModule<CronTask>())

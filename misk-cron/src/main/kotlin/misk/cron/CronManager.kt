@@ -4,6 +4,7 @@ import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
 import com.cronutils.model.time.ExecutionTime
 import com.cronutils.parser.CronParser
+import com.google.common.util.concurrent.ServiceManager
 import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Instant
@@ -12,11 +13,13 @@ import java.time.ZonedDateTime
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
 class CronManager @Inject constructor() {
   @Inject private lateinit var clock: Clock
+  @Inject private lateinit var serviceManagerProvider: Provider<ServiceManager>
   @Inject @ForMiskCron private lateinit var executorService: ExecutorService
   @Inject @ForMiskCron private lateinit var zoneId: ZoneId
 
@@ -49,6 +52,11 @@ class CronManager @Inject constructor() {
   }
 
   fun runReadyCrons(lastRun: Instant) {
+    if (!serviceManagerProvider.get().isHealthy) {
+      logger.info { "Skipping running ready crons since service manager is not yet healthy" }
+      return
+    }
+
     val now = clock.instant()
     val previousTime = ZonedDateTime.ofInstant(lastRun, zoneId)
 
