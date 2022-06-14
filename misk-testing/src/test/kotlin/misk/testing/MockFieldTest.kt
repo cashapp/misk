@@ -22,31 +22,31 @@ class MockFieldTest {
   }
 
   @Inject lateinit var service: Service
-  @Mock @Bind lateinit var counterService: CountService
-
-  @Test
-  fun test() {
-    whenever(counterService.getAndInc()).thenReturn(1313)
-    assertThat(service.getName()).isEqualTo("Name 1313")
-  }
-
-  interface HelloService {
-    fun greeting(): String
-  }
 
   @Nested
-  inner class nestedTest {
-    @Mock @Bind lateinit var helloService: HelloService
-    // This was already bind by the parent class. So I'm not sure why someone would want to inject
-    // it on the inner clas, but I wanted to check if this would work.
-    @Inject lateinit var counterService2: CountService
+  inner class `Bind Using mock annotation` {
+    //
+    @Mock @Bind lateinit var counterService: CountService
 
     @Test
-    fun testNested() {
-      assertThat(helloService).isNotNull()
-      assertThat(counterService).isNotNull()
-      assertThat(counterService2).isNotNull()
+    fun test() {
+      whenever(counterService.getAndInc()).thenReturn(1313)
+      assertThat(service.getName()).isEqualTo("Name 1313")
+    }
+  }
+  @Nested
+  inner class `Bind using fakes` {
+    @Bind val counterService = object : CountService {
+      var counter = 0
+      override fun getAndInc(): Int {
+        return counter++
+      }
     }
 
+    @Test
+    fun test() {
+      whenever(counterService.getAndInc()).thenReturn(1313)
+      assertThat(service.getName()).isEqualTo("Name 1")
+    }
   }
 }
