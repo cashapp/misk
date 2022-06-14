@@ -5,14 +5,12 @@ interface OpaPolicyEngine {
     document: String,
     input: T,
     inputType: Class<T>,
-    returnType: Class<R>,
-    provenance: Boolean? = false
+    returnType: Class<R>
   ): R
 
   fun <R : OpaResponse> evaluateNoInput(
     document: String,
-    returnType: Class<R>,
-    provenance: Boolean? = false
+    returnType: Class<R>
   ): R
 }
 
@@ -26,10 +24,9 @@ interface OpaPolicyEngine {
  * @return Response shape R from OPA.
  */
 inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(
-  document: String,
-  provenance: Boolean? = false
+  document: String
 ): R {
-  return evaluateNoInput(document, R::class.java, provenance)
+  return evaluateNoInput(document, R::class.java)
 }
 
 /**
@@ -44,8 +41,7 @@ inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(
  */
 inline fun <reified T : OpaRequest, reified R : OpaResponse> OpaPolicyEngine.evaluate(
   document: String,
-  input: T,
-  provenance: Boolean? = false
+  input: T
 ): R {
-  return evaluateWithInput(document, input, T::class.java, R::class.java, provenance)
+  return evaluateWithInput(document, input, T::class.java, R::class.java)
 }

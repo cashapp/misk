@@ -9,8 +9,7 @@ class FakeOpaPolicyEngine @Inject constructor(): OpaPolicyEngine {
     document: String,
     input: T,
     inputType: Class<T>,
-    returnType: Class<R>,
-    provenance: Boolean?
+    returnType: Class<R>
   ): R {
     val opaResponse = responsesForInput[document]?.get(input)
       ?: throw IllegalStateException("No override for document '$document' and input '$input'")
@@ -21,8 +20,7 @@ class FakeOpaPolicyEngine @Inject constructor(): OpaPolicyEngine {
 
   override fun <R : OpaResponse> evaluateNoInput(
     document: String,
-    returnType: Class<R>,
-    provenance: Boolean?
+    returnType: Class<R>
   ): R {
     val opaResponse = responses[document]
       ?: throw IllegalStateException("No override for document '$document'")

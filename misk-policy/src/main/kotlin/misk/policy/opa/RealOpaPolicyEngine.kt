@@ -32,18 +32,16 @@ class RealOpaPolicyEngine @Inject constructor(
     document: String,
     input: T,
     inputType: Class<T>,
-    returnType: Class<R>,
-    provenance: Boolean?
+    returnType: Class<R>
   ): R {
-    return evaluateInternal(document, input, inputType, returnType, provenance)
+    return evaluateInternal(document, input, inputType, returnType)
   }
 
   private fun <T : OpaRequest, R : OpaResponse> evaluateInternal(
     document: String,
     input: T,
     inputType: Class<T>,
-    returnType: Class<R>,
-    provenance: Boolean?
+    returnType: Class<R>
   ): R {
     if (document.isEmpty()) {
       throw IllegalArgumentException("Must specify document")
@@ -53,7 +51,7 @@ class RealOpaPolicyEngine @Inject constructor(
       Types.newParameterizedType(Request::class.java, inputType)
     )
     val inputString = inputAdapter.toJson(Request(input))
-    val response = queryOpa(document, inputString, provenance)
+    val response = queryOpa(document, inputString)
     return parseResponse(document, returnType, response)
   }
 
@@ -69,31 +67,28 @@ class RealOpaPolicyEngine @Inject constructor(
    */
   override fun <R : OpaResponse> evaluateNoInput(
     document: String,
-    returnType: Class<R>,
-    provenance: Boolean?
+    returnType: Class<R>
   ): R {
-    return evaluateInternal(document, returnType, provenance)
+    return evaluateInternal(document, returnType)
   }
 
   private fun <R : OpaResponse> evaluateInternal(
     document: String,
-    returnType: Class<R>,
-    provenance: Boolean?
+    returnType: Class<R>
   ): R {
-    val response = queryOpa(document, "", provenance)
+    val response = queryOpa(document, "")
     return parseResponse(document, returnType, response)
   }
 
   private fun queryOpa(
     document: String,
-    inputString: String = "",
-    provenance: Boolean?
+    inputString: String = ""
   ): retrofit2.Response<ResponseBody> {
     if (document.isEmpty()) {
       throw IllegalArgumentException("Must specify document")
     }
 
-    val response = opaApi.queryDocument(document, inputString, provenance).execute()
+    val response = opaApi.queryDocument(document, inputString).execute()
     if (!response.isSuccessful) {
       throw PolicyEngineException("[${response.code()}]: ${response.errorBody()?.string()}")
     }
@@ -121,7 +116,7 @@ class RealOpaPolicyEngine @Inject constructor(
     if (extractedResponse.result == null) {
       throw PolicyEngineException("Policy document \"$document\" not found.")
     }
-
+    extractedResponse.result.provenance = extractedResponse.provenance
     return extractedResponse.result
   }
 }

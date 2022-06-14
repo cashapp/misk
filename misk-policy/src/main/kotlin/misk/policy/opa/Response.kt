@@ -6,7 +6,18 @@ package misk.policy.opa
  */
 data class Response<T>(
   val decision_id: String?,
-  val result: T?
+  val result: T?,
+  val provenance: Provenance?
 )
 
-interface OpaResponse
+data class Provenance(
+  val version: String?,
+  val build_commit: String?,
+  val build_timestamp: String?,
+  val build_hostname: String?,
+  val revision: String?
+)
+
+interface OpaResponse {
+  var provenance: Provenance?
+}

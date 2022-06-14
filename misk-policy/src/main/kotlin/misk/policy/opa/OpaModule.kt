@@ -38,7 +38,9 @@ class OpaModule @Inject constructor(
       builder.client(okHttpClient)
     }
     builder.baseUrl(config.baseUrl)
-    return builder.build().create(OpaApi::class.java)
+    val api = builder.build().create(OpaApi::class.java)
+    api.provenance = config.provenance
+    return api
   }
 
   @Provides @Singleton @Named("opa-moshi")
