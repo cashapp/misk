@@ -139,6 +139,6 @@ internal class RealOpaPolicyEngineTest {
   // Weird kotlin workaround for mockito. T must not be nullable.
   private fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
 
-  data class BasicResponse(val test: String) : OpaResponse
+  data class BasicResponse(val test: String, override var provenance: Provenance? = null) : OpaResponse
   data class BasicRequest(val someValue: Int) : OpaRequest
 }
