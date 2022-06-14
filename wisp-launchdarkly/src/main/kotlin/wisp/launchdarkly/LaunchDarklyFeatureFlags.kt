@@ -132,9 +132,7 @@ class LaunchDarklyFeatureFlags constructor(
       ldClient.jsonValueVariationDetail(name, user, LDValue.ofNull())
     }
     return moshi.adapter(clazz)
-      .fromSafeJson(result.toJsonString()) { exception ->
-        logJsonMigrationWarningOnce(feature, exception)
-      }
+      .fromJson(result.toJsonString())
       ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
 
