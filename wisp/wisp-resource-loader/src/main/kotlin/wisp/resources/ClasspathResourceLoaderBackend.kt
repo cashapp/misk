@@ -58,15 +58,15 @@ object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
   /**
    * Returns the contents of a directory inside the JAR file [file].
    *
-   * @param pathPrefix a string like `misk/resources/` that ends in a slash. This will return the
+   * @param pathPrefix a string like `wisp/resources/` that ends in a slash. This will return the
    *     simple names of the files and directories that are direct descendants of this path.
    */
   private fun jarFileChildren(file: File, pathPrefix: String): Set<String> {
-    // If we're looking for the children of `misk/resources/`, there's a few cases to cover:
+    // If we're looking for the children of `wisp/resources/`, there's a few cases to cover:
     //  * Unrelated paths like `META-INF/MANIFEST.MF`. Ignore these.
-    //  * Equal paths like `misk/resources/`. Ignore these; we're only collecting children.
-    //  * Child file paths like `misk/resources/child.txt`. We collect the `child.txt` substring.
-    //  * Child directory paths like `misk/resources/nested/child.txt`. We collect the `nexted`
+    //  * Equal paths like `wisp/resources/`. Ignore these; we're only collecting children.
+    //  * Child file paths like `wisp/resources/child.txt`. We collect the `child.txt` substring.
+    //  * Child directory paths like `wisp/resources/nested/child.txt`. We collect the `nexted`
     //    substring for the child directory.
     val result = mutableSetOf<String>()
     JarFile(file).use { jarFile ->
