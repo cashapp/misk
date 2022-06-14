@@ -3,7 +3,7 @@ package wisp.client
 import java.io.File
 
 /**
- * Envoy configuration provider per endpoint that misk clients can customize to their needs.
+ * Envoy configuration provider per endpoint that wisp clients can customize to their needs.
  */
 interface EnvoyClientEndpointProvider {
   /** Host header that will be used to route the request. */
