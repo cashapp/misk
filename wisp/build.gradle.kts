@@ -56,7 +56,6 @@ subprojects {
             // Enforce wisp-bom -- it should take priority over external BOMs.
             add("api", enforcedPlatform(project(":wisp-bom")))
             add("api", platform(Dependencies.grpcBom))
-            //add("api", platform(Dependencies.guava))
             add("api", platform(Dependencies.jacksonBom))
             add("api", platform(Dependencies.kotlinBom))
             add("api", platform(Dependencies.nettyBom))
