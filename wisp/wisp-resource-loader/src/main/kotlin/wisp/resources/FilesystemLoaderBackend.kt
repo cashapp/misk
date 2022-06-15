@@ -96,6 +96,7 @@ object FilesystemLoaderBackend : ResourceLoader.Backend() {
               event.kind() in watchedEventKinds
             }
             ?.let { event ->
+              @Suppress("UNCHECKED_CAST")
               val ev: WatchEvent<Path> = event as WatchEvent<Path>
               val fileName: Path = ev.context()
               val fullPathFile = directory.resolve(fileName)

@@ -216,6 +216,6 @@ internal class LaunchDarklyFeatureFlagsTest {
     // isEqualTo() would be more appropriate, since LDUser overrides equals(). However, failures would offer no
     // meaningful output, given that LDUser does not override toString. Doing a field-by-field comparison is overkill
     // for the test to pass but produces output that identifies the problematic attribute(s) when the test fails.
-    assertThat(user).isEqualToComparingFieldByField(expected)
+    assertThat(user).usingRecursiveComparison().isEqualTo(expected)
   }
 }

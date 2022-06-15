@@ -1,5 +1,7 @@
 package wisp.deployment
 
+import java.util.*
+
 /** Deployment describes the context in which the application is running
  */
 data class Deployment(
@@ -112,5 +114,5 @@ fun getDeploymentFromEnvironmentVariable(
   environmentVariableLoader: EnvironmentVariableLoader = EnvironmentVariableLoader.real
 ): Deployment {
   val environment = environmentVariableLoader.getEnvironmentVariableOrDefault("ENVIRONMENT", "")
-  return deployments[environment.toLowerCase()] ?: defaultDeployment
+  return deployments[environment.lowercase(Locale.getDefault())] ?: defaultDeployment
 }

@@ -91,7 +91,7 @@ class RepeatedTask(
     task: (name: String, taskConfig: TaskConfig) -> Status
   ): Status {
     return runBlocking {
-      var status = Status.OK
+      var status: Status
       retry(retryPolicy) {
         var timedResult = 0L
         try {

@@ -110,10 +110,10 @@ interface LegacyFeatureFlags {
    * @throws [IllegalStateException] if the flag is off with no default value.
    */
   fun <T : Enum<T>> getEnum(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>,
-    attributes: Attributes = Attributes()
+      feature: Feature,
+      key: String,
+      clazz: Class<T>,
+      attributes: Attributes = Attributes()
   ): T
 
   /**

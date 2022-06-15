@@ -60,6 +60,7 @@ constructor(
       "String flag $feature must be overridden with override() before use"
     )
 
+  @Suppress("UNCHECKED_CAST")
   override fun <T : Enum<T>> getEnum(
     feature: Feature,
     key: String,
@@ -353,6 +354,7 @@ constructor(
       trackers[mapKey]
         ?.filter { r -> r.attributes.text.entries.containsAll(attributes.text.entries) }
         ?.forEach { r ->
+          @Suppress("UNCHECKED_CAST")
           r.executor.execute {
             (r as TrackerMapValue<T>).tracker(value)
           }

@@ -105,7 +105,7 @@ class Composer(private val name: String, private vararg val containers: Containe
 
       log.info { "starting $name container" }
 
-      val id = create
+      @Suppress("DEPRECATION") val id = create
         .withNetworkMode(network.id())
         .withLabels(mapOf("name" to name))
         .withTty(true)
