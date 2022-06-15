@@ -28,7 +28,7 @@ interface DoubleFeatureFlag : FeatureFlag<Double>
  * A Enumeration feature flag, when evaluated returns [T]
  */
 interface EnumFeatureFlag<T : Enum<T>> : FeatureFlag<T> {
-  val returnType: Class<out T>
+  val returnType: Class<T>
 }
 
 /**

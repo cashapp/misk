@@ -6,7 +6,7 @@ import okhttp3.OkHttpClient.Builder
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-class OkHttpClientCommonConfigurator constructor() {
+class OkHttpClientCommonConfigurator {
   fun configure(builder: Builder, config: HttpClientEndpointConfig): Builder {
     configureCallTimeout(builder = builder, config = config)
     configureConnectTimeout(builder = builder, config = config)
@@ -56,8 +56,8 @@ class OkHttpClientCommonConfigurator constructor() {
 
   companion object {
     // Copied from okhttp3.ConnectionPool, as it does not provide "use default" option
-    val maxIdleConnections = 5
+    const val maxIdleConnections = 5
     // Copied from okhttp3.ConnectionPool, as it does not provide "use default" option
-    val keepAliveDuration = Duration.ofMinutes(5)
+    val keepAliveDuration: Duration = Duration.ofMinutes(5)
   }
 }

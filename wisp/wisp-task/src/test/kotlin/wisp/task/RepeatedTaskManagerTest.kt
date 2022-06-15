@@ -18,7 +18,7 @@ internal class RepeatedTaskManagerTest {
     val newTask = manager.createTask(
       name = "taskName",
       repeatedTaskConfig = repeatedTaskConfig
-    ) { name: String, taskConfig: TaskConfig ->
+    ) { _: String, _: TaskConfig ->
       Status.NO_RESCHEDULE
     }
 
@@ -32,7 +32,7 @@ internal class RepeatedTaskManagerTest {
     val newTask = manager.createTask(
       name = taskName,
       repeatedTaskConfig = repeatedTaskConfig
-    ) { name: String, taskConfig: TaskConfig ->
+    ) { _: String, _: TaskConfig ->
       Status.NO_RESCHEDULE
     }
 
@@ -46,7 +46,7 @@ internal class RepeatedTaskManagerTest {
     val repeatedTask1 = manager.createTask(
       name = "taskName",
       repeatedTaskConfig = repeatedTaskConfig
-    ) { name: String, taskConfig: TaskConfig ->
+    ) { _: String, _: TaskConfig ->
       Status.NO_RESCHEDULE
     }
     assertTrue(manager.taskExists(repeatedTask1.name))
@@ -67,14 +67,14 @@ internal class RepeatedTaskManagerTest {
     val repeatedTask1 = manager.createTask(
       name = "taskName",
       repeatedTaskConfig = repeatedTaskConfig
-    ) { name: String, taskConfig: TaskConfig ->
+    ) { _: String, _: TaskConfig ->
       Thread.sleep(100L)
       Status.OK
     }
     val repeatedTask2 = manager.createTask(
       name = "differentTask",
       repeatedTaskConfig = repeatedTaskConfig
-    ) { name: String, taskConfig: TaskConfig ->
+    ) { _: String, _: TaskConfig ->
       Thread.sleep(100L)
       Status.OK
     }

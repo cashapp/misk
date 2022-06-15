@@ -8,19 +8,9 @@ import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
-import wisp.feature.FeatureFlagValidation
 import mu.KotlinLogging
-import wisp.feature.Attributes
-import wisp.feature.Feature
-import wisp.feature.FeatureFlags
-import wisp.feature.BooleanFeatureFlag
-import wisp.feature.StringFeatureFlag
-import wisp.feature.IntFeatureFlag
-import wisp.feature.DoubleFeatureFlag
-import wisp.feature.EnumFeatureFlag
-import wisp.feature.JsonFeatureFlag
-import wisp.feature.TrackerReference
-import wisp.feature.fromSafeJson
+import wisp.feature.*
+import java.util.*
 import java.util.concurrent.Executor
 
 /**
@@ -84,8 +74,9 @@ class LaunchDarklyFeatureFlags constructor(
   override fun get(flag: DoubleFeatureFlag): Double =
     getDouble(flag.feature, flag.key, flag.attributes)
 
-  override fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T =
-    getEnum(flag.feature, flag.key, flag.returnType, flag.attributes)
+  override fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T {
+    return getEnum(flag.feature, flag.key, flag.returnType, flag.attributes)
+  }
 
   override fun <T : Any> get(flag: JsonFeatureFlag<T>): T =
     getJson(flag.feature, flag.key, flag.returnType, flag.attributes)
@@ -119,7 +110,7 @@ class LaunchDarklyFeatureFlags constructor(
     val result = get(feature, key, attributes) { name, user ->
       ldClient.stringVariationDetail(name, user, "")
     }
-    return java.lang.Enum.valueOf(clazz, result.toUpperCase())
+    return java.lang.Enum.valueOf(clazz, result.uppercase(Locale.getDefault()))
   }
 
   override fun <T> getJson(
@@ -206,7 +197,7 @@ class LaunchDarklyFeatureFlags constructor(
     feature,
     key,
     attributes,
-    { java.lang.Enum.valueOf(clazz, it.stringValue().toUpperCase()) },
+    { java.lang.Enum.valueOf(clazz, it.stringValue().uppercase(Locale.getDefault())) },
     executor,
     tracker
   )
