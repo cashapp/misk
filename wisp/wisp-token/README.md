@@ -9,7 +9,7 @@ For details on the generation used, see
 
 ```kotlin
 val tokenGenerator = RealTokenGenerator() 
-val label = ...
-val length = ... 
+val label = "some label"
+val length = 7 // 4 to 25
 val token = tokenGenerator.generate(label, length)
 ```
