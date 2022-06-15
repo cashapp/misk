@@ -6,6 +6,8 @@ import com.sksamuel.hoplite.PrimitiveNode
 import com.sksamuel.hoplite.StringNode
 import com.sksamuel.hoplite.fp.valid
 import com.sksamuel.hoplite.preprocessor.TraversingPrimitivePreprocessor
+import wisp.config.PrefixResourceLoaderPreprocessor.Companion.CLASSPATH_PREFIX
+import wisp.config.PrefixResourceLoaderPreprocessor.Companion.FILESYSTEM_PREFIX
 import wisp.resources.ResourceLoader
 import java.io.FileNotFoundException
 
@@ -17,25 +19,25 @@ import java.io.FileNotFoundException
  * [prefix] is either [CLASSPATH_PREFIX] or [FILESYSTEM_PREFIX]
  */
 class PrefixResourceLoaderPreprocessor(
-  val prefix : String,
-  val resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+    val prefix: String,
+    val resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
 ) : TraversingPrimitivePreprocessor() {
 
-  init {
-    require(prefix in listOf(CLASSPATH_PREFIX, FILESYSTEM_PREFIX))
-  }
-
-  override fun handle(node: PrimitiveNode): ConfigResult<Node> {
-    return if (node is StringNode && node.value.startsWith(prefix)) {
-      val nodeData = resourceLoader.utf8(node.value) ?: throw FileNotFoundException(node.value)
-      StringNode(nodeData, node.pos, node.path).valid()
-    } else {
-      node.valid()
+    init {
+        require(prefix in listOf(CLASSPATH_PREFIX, FILESYSTEM_PREFIX))
     }
-  }
 
-  companion object {
-    const val CLASSPATH_PREFIX = "classpath:"
-    const val FILESYSTEM_PREFIX = "filesystem:"
-  }
+    override fun handle(node: PrimitiveNode): ConfigResult<Node> {
+        return if (node is StringNode && node.value.startsWith(prefix)) {
+            val nodeData = resourceLoader.utf8(node.value) ?: throw FileNotFoundException(node.value)
+            StringNode(nodeData, node.pos, node.path).valid()
+        } else {
+            node.valid()
+        }
+    }
+
+    companion object {
+        const val CLASSPATH_PREFIX = "classpath:"
+        const val FILESYSTEM_PREFIX = "filesystem:"
+    }
 }

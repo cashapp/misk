@@ -4,8 +4,8 @@ Captures [Logback](https://logback.qos.ch/) logs to make it possible to do asser
 
 ## Usage
 
-The sample code block below assumes [AssertJ](https://joel-costigliola.github.io/assertj/), but
-this library is not tied to a particular test framework or assertions library.
+The sample code block below assumes [AssertJ](https://joel-costigliola.github.io/assertj/), but this library is not tied
+to a particular test framework or assertions library.
 
 ```kotlin
 class MyClass {

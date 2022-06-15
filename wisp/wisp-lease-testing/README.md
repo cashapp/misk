@@ -1,7 +1,9 @@
 # wisp-lease-testing
 
-Provides a [FakeLeaseManager](https://github.com/cashapp/wisp/blob/master/wisp-lease-testing/src/main/kotlin/wisp/lease/FakeLeaseManager.kt)
-as an implement of the [LeaseManager](https://github.com/cashapp/wisp/blob/master/wisp-lease/src/main/kotlin/wisp/lease/LeaseManager.kt)
+Provides
+a [FakeLeaseManager](https://github.com/cashapp/wisp/blob/master/wisp-lease-testing/src/main/kotlin/wisp/lease/FakeLeaseManager.kt)
+as an implement of
+the [LeaseManager](https://github.com/cashapp/wisp/blob/master/wisp-lease/src/main/kotlin/wisp/lease/LeaseManager.kt)
 for testing.
 
 ## Usage

@@ -4,13 +4,13 @@ package wisp.deployment
  * A Fake [EnvironmentVariableLoader] that loads from an in memory map
  */
 class FakeEnvironmentVariableLoader(val vars: MutableMap<String, String> = mutableMapOf()) :
-  EnvironmentVariableLoader {
+    EnvironmentVariableLoader {
 
-  override fun getEnvironmentVariable(name: String): String {
-    return vars[name] ?: throw IllegalStateException("$name environment variable not set")
-  }
+    override fun getEnvironmentVariable(name: String): String {
+        return vars[name] ?: throw IllegalStateException("$name environment variable not set")
+    }
 
-  override fun getEnvironmentVariableOrDefault(name: String, defaultValue: String): String {
-    return vars[name] ?: defaultValue
-  }
+    override fun getEnvironmentVariableOrDefault(name: String, defaultValue: String): String {
+        return vars[name] ?: defaultValue
+    }
 }

@@ -9,24 +9,24 @@ import wisp.deployment.EnvironmentVariableLoader
  */
 object AwsEnvironment {
 
-  fun awsRegion(
-    environmentVariableLoader: EnvironmentVariableLoader = EnvironmentVariableLoader.real,
-    environmentVariables: List<String> = listOf("REGION", "AWS_REGION"),
-    defaultAwsRegion: String = "us-west-2"
-  ): AwsRegion {
-    for (environmentVariable in environmentVariables) {
-      val region =
-        environmentVariableLoader.getEnvironmentVariableOrDefault(environmentVariable, "")
-      if (region.isNotEmpty()) {
-        return AwsRegion(region)
-      }
+    fun awsRegion(
+        environmentVariableLoader: EnvironmentVariableLoader = EnvironmentVariableLoader.real,
+        environmentVariables: List<String> = listOf("REGION", "AWS_REGION"),
+        defaultAwsRegion: String = "us-west-2"
+    ): AwsRegion {
+        for (environmentVariable in environmentVariables) {
+            val region =
+                environmentVariableLoader.getEnvironmentVariableOrDefault(environmentVariable, "")
+            if (region.isNotEmpty()) {
+                return AwsRegion(region)
+            }
+        }
+        return AwsRegion(defaultAwsRegion)
     }
-    return AwsRegion(defaultAwsRegion)
-  }
 
-  fun awsAccountId(
-    environmentVariableLoader: EnvironmentVariableLoader = EnvironmentVariableLoader.real,
-    environmentVariable: String = "ACCOUNT_ID",
-  ): AwsAccountId =
-    AwsAccountId(environmentVariableLoader.getEnvironmentVariable(environmentVariable))
+    fun awsAccountId(
+        environmentVariableLoader: EnvironmentVariableLoader = EnvironmentVariableLoader.real,
+        environmentVariable: String = "ACCOUNT_ID",
+    ): AwsAccountId =
+        AwsAccountId(environmentVariableLoader.getEnvironmentVariable(environmentVariable))
 }

@@ -1,22 +1,20 @@
 package wisp.feature
 
-import kotlin.reflect.KClass
-
 sealed interface FeatureFlag<T : Any> {
-  /**
-   * Feature name of the feature flag
-   */
-  val feature: Feature
+    /**
+     * Feature name of the feature flag
+     */
+    val feature: Feature
 
-  /**
-   * Unique primary key for the entity the flag should be evaluated against.
-   */
-  val key: String
+    /**
+     * Unique primary key for the entity the flag should be evaluated against.
+     */
+    val key: String
 
-  /**
-   * The attributes of this feature flag, provided during flag evaluation
-   */
-  val attributes: Attributes
+    /**
+     * The attributes of this feature flag, provided during flag evaluation
+     */
+    val attributes: Attributes
 }
 
 interface StringFeatureFlag : FeatureFlag<String>
@@ -28,7 +26,7 @@ interface DoubleFeatureFlag : FeatureFlag<Double>
  * A Enumeration feature flag, when evaluated returns [T]
  */
 interface EnumFeatureFlag<T : Enum<T>> : FeatureFlag<T> {
-  val returnType: Class<T>
+    val returnType: Class<T>
 }
 
 /**
@@ -61,5 +59,5 @@ interface EnumFeatureFlag<T : Enum<T>> : FeatureFlag<T> {
  * ```
  */
 interface JsonFeatureFlag<T : Any> : FeatureFlag<T> {
-  val returnType: Class<out T>
+    val returnType: Class<out T>
 }

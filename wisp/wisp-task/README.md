@@ -4,16 +4,17 @@ This module contains code to assist with running tasks.
 
 [RepeatedTask](https://github.com/cashapp/wisp/blob/master/wisp-task/src/main/kotlin/wisp/task/RepeatedTask.kt)
 runs a repeated task at the user controlled rate based on the
-[kotlin-retry library](https://github.com/michaelbull/kotlin-retry).  For convenience a
+[kotlin-retry library](https://github.com/michaelbull/kotlin-retry). For convenience a
 [RepeatedTaskManager](https://github.com/cashapp/wisp/blob/master/wisp-task/src/main/kotlin/wisp/task/RepeatedTaskManager.kt)
 is available to help manage the
 [RepeatedTasks](https://github.com/cashapp/wisp/blob/master/wisp-task/src/main/kotlin/wisp/task/RepeatedTask.kt).
 
-It's possible to specify your own retry policy for the task.  See
-[kotlin-retry library](https://github.com/michaelbull/kotlin-retry) for more details and examples.
-The default retry policy instructions are to retry on all exceptions with a Binary Exponential
-backoff delay - which itself is configured from the supplied
-[RepeatedTaskConfig](https://github.com/cashapp/wisp/blob/master/wisp-task/src/main/kotlin/wisp/task/RepeatedTaskConfig.kt).
+It's possible to specify your own retry policy for the task. See
+[kotlin-retry library](https://github.com/michaelbull/kotlin-retry) for more details and examples. The default retry
+policy instructions are to retry on all exceptions with a Binary Exponential backoff delay - which itself is configured
+from the supplied
+[RepeatedTaskConfig](https://github.com/cashapp/wisp/blob/master/wisp-task/src/main/kotlin/wisp/task/RepeatedTaskConfig.kt)
+.
 
 ## Usage
 

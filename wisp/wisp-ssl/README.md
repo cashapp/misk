@@ -2,13 +2,11 @@
 
 Loads and parses SSL certificates into
 a [`KeyStore`](https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/KeyStore.html)
-.
-See [SslLoader](https://github.com/cashapp/wisp/blob/master/wisp-ssl/src/main/kotlin/wisp/security/ssl/SslLoader.kt)
+. See [SslLoader](https://github.com/cashapp/wisp/blob/master/wisp-ssl/src/main/kotlin/wisp/security/ssl/SslLoader.kt)
 for a complete API.
 
 This library is mostly only useful for other libraries that want to
-use [ResourceLoader](https://github.com/cashapp/wisp/tree/master/wisp-resource-loader) under the
-hood.
+use [ResourceLoader](https://github.com/cashapp/wisp/tree/master/wisp-resource-loader) under the hood.
 
 ## Usage
 

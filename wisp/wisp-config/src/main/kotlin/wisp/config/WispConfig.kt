@@ -28,23 +28,23 @@ import wisp.resources.ResourceLoader
  */
 object WispConfig {
 
-  /**
-   * Get a config builder.
-   *
-   * Example use:
-   *
-   * val myConfig = WispConfig.builder()
-   *                ...
-   *                .addWispConfigSources(...)
-   *                ...
-   *                .build()
-   *                .loadConfigOrThrow<MyConfig>()
-   * Note that if you are passing configuration fragments within Wisp, MyConfig should implement
-   * [Config]
-   *
-   * @return [ConfigLoader.Builder]
-   */
-  fun builder(): ConfigLoaderBuilder = ConfigLoader.builder()
+    /**
+     * Get a config builder.
+     *
+     * Example use:
+     *
+     * val myConfig = WispConfig.builder()
+     *                ...
+     *                .addWispConfigSources(...)
+     *                ...
+     *                .build()
+     *                .loadConfigOrThrow<MyConfig>()
+     * Note that if you are passing configuration fragments within Wisp, MyConfig should implement
+     * [Config]
+     *
+     * @return [ConfigLoader.Builder]
+     */
+    fun builder(): ConfigLoaderBuilder = ConfigLoader.builder()
 }
 
 /**
@@ -58,37 +58,37 @@ data class ConfigSource(val configLocation: String, val format: String = "yml")
  * exist it is silently skipped, i.e. the config locations are optional.
  */
 fun ConfigLoaderBuilder.addWispConfigSources(
-  configSources: List<ConfigSource>,
-  resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+    configSources: List<ConfigSource>,
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
 ): ConfigLoaderBuilder {
 
-  addPreprocessor(PrefixResourceLoaderPreprocessor(CLASSPATH_PREFIX, resourceLoader))
-  addPreprocessor(PrefixResourceLoaderPreprocessor(FILESYSTEM_PREFIX, resourceLoader))
+    addPreprocessor(PrefixResourceLoaderPreprocessor(CLASSPATH_PREFIX, resourceLoader))
+    addPreprocessor(PrefixResourceLoaderPreprocessor(FILESYSTEM_PREFIX, resourceLoader))
 
-  configSources
-    .filter {
-      (resourceLoader.exists(it.configLocation))
-    }
-    .forEach {
-      val configContents = resourceLoader.utf8(it.configLocation)!!
-      when (it.format) {
-        "yml", "yaml" ->
-          this.addSource(YamlPropertySource(configContents))
-        "json" ->
-          this.addSource(JsonPropertySource(configContents))
-        "toml" ->
-          this.addSource(TomlPropertySource(configContents))
-        else ->
-          this.addSource(
-            InputStreamPropertySource(
-              configContents.byteInputStream(Charsets.UTF_8),
-              it.format,
-              it.configLocation
-            )
-          )
-      }
-    }
+    configSources
+        .filter {
+            (resourceLoader.exists(it.configLocation))
+        }
+        .forEach {
+            val configContents = resourceLoader.utf8(it.configLocation)!!
+            when (it.format) {
+                "yml", "yaml" ->
+                    this.addSource(YamlPropertySource(configContents))
+                "json" ->
+                    this.addSource(JsonPropertySource(configContents))
+                "toml" ->
+                    this.addSource(TomlPropertySource(configContents))
+                else ->
+                    this.addSource(
+                        InputStreamPropertySource(
+                            configContents.byteInputStream(Charsets.UTF_8),
+                            it.format,
+                            it.configLocation
+                        )
+                    )
+            }
+        }
 
-  return this
+    return this
 }
 
