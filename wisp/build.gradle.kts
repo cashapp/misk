@@ -11,12 +11,10 @@ buildscript {
     dependencies {
         classpath(Dependencies.kotlinAllOpenPlugin)
         classpath(Dependencies.kotlinGradlePlugin)
-        classpath(Dependencies.dokkaGradlePlugin)
         classpath(Dependencies.kotlinNoArgPlugin)
         classpath(Dependencies.junitGradlePlugin)
         classpath(Dependencies.mavenPublishGradlePlugin)
         classpath(Dependencies.protobufGradlePlugin)
-        classpath(Dependencies.jgit)
         classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
     }
 }
