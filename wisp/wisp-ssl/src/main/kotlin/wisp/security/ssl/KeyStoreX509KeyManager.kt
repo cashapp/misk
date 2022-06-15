@@ -13,41 +13,41 @@ import javax.net.ssl.X509ExtendedKeyManager
  * for periodically reloading from disk if needed
  */
 internal class KeyStoreX509KeyManager(
-  private val passphrase: CharArray,
-  private val lazyKeyStore: () -> KeyStore
+    private val passphrase: CharArray,
+    private val lazyKeyStore: () -> KeyStore
 ) : X509ExtendedKeyManager() {
 
-  constructor(passphrase: CharArray, keyStore: KeyStore) : this(passphrase, { keyStore })
+    constructor(passphrase: CharArray, keyStore: KeyStore) : this(passphrase, { keyStore })
 
-  override fun chooseServerAlias(
-    keyType: String,
-    issuers: Array<out Principal>,
-    socket: Socket
-  ) = getPrivateKeyAlias()
+    override fun chooseServerAlias(
+        keyType: String,
+        issuers: Array<out Principal>,
+        socket: Socket
+    ) = getPrivateKeyAlias()
 
-  override fun chooseClientAlias(
-    keyTypes: Array<out String>,
-    issuers: Array<out Principal>,
-    socket: Socket
-  ) = getPrivateKeyAlias()
+    override fun chooseClientAlias(
+        keyTypes: Array<out String>,
+        issuers: Array<out Principal>,
+        socket: Socket
+    ) = getPrivateKeyAlias()
 
-  override fun getClientAliases(keyType: String, issuers: Array<out Principal>): Array<String> {
-    return arrayOf(getPrivateKeyAlias())
-  }
+    override fun getClientAliases(keyType: String, issuers: Array<out Principal>): Array<String> {
+        return arrayOf(getPrivateKeyAlias())
+    }
 
-  override fun getServerAliases(keyType: String, issuers: Array<out Principal>): Array<String> {
-    return arrayOf(getPrivateKeyAlias())
-  }
+    override fun getServerAliases(keyType: String, issuers: Array<out Principal>): Array<String> {
+        return arrayOf(getPrivateKeyAlias())
+    }
 
-  override fun getCertificateChain(alias: String): Array<X509Certificate> {
-    return lazyKeyStore().getX509CertificateChain(alias)
-  }
+    override fun getCertificateChain(alias: String): Array<X509Certificate> {
+        return lazyKeyStore().getX509CertificateChain(alias)
+    }
 
-  override fun getPrivateKey(alias: String): PrivateKey {
-    return lazyKeyStore().getPrivateKey(alias, passphrase)
-  }
+    override fun getPrivateKey(alias: String): PrivateKey {
+        return lazyKeyStore().getPrivateKey(alias, passphrase)
+    }
 
-  private fun getPrivateKeyAlias(): String {
-    return lazyKeyStore().aliasesOfType<KeyStore.PrivateKeyEntry>().single()
-  }
+    private fun getPrivateKeyAlias(): String {
+        return lazyKeyStore().aliasesOfType<KeyStore.PrivateKeyEntry>().single()
+    }
 }

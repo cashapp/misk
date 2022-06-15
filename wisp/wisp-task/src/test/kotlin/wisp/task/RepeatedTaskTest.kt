@@ -1,8 +1,6 @@
 package wisp.task
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import wisp.task.exception.FailedTaskException
 import kotlin.test.assertNotNull
@@ -82,7 +80,7 @@ internal class RepeatedTaskTest {
 
     @Test
     fun `Using custom task config works`() {
-        val myClassConfig = MyTaskConfig(foo ="foo")
+        val myClassConfig = MyTaskConfig(foo = "foo")
 
         val repeatedTask = RepeatedTask(
             name = "taskName",

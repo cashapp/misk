@@ -13,9 +13,9 @@ private val logger = KotlinLogging.logger(FeatureFlags::class.qualifiedName!!)
  * This overload is needed for JVM compatibility.
  */
 fun <T> JsonAdapter<T>.toSafeJson(value: T): String = toSafeJson(value) {
-  logger.warn(it) {
-    "failed to parse JSON due to unknown fields. ignoring those fields and trying again"
-  }
+    logger.warn(it) {
+        "failed to parse JSON due to unknown fields. ignoring those fields and trying again"
+    }
 }
 
 /**
@@ -23,12 +23,12 @@ fun <T> JsonAdapter<T>.toSafeJson(value: T): String = toSafeJson(value) {
  * the unknown fields.
  */
 fun <T> JsonAdapter<T>.toSafeJson(value: T, onUnknownFields: (JsonDataException) -> Unit): String {
-  return try {
-    failOnUnknown().toJson(value)
-  } catch (e: JsonDataException) {
-    onUnknownFields(e)
-    return toJson(value)
-  }
+    return try {
+        failOnUnknown().toJson(value)
+    } catch (e: JsonDataException) {
+        onUnknownFields(e)
+        return toJson(value)
+    }
 }
 
 /**
@@ -38,9 +38,9 @@ fun <T> JsonAdapter<T>.toSafeJson(value: T, onUnknownFields: (JsonDataException)
  * This overload is needed for JVM compatibility.
  */
 fun <T> JsonAdapter<T>.fromSafeJson(value: String): T? = fromSafeJson(value) {
-  logger.warn(it) {
-    "failed to parse JSON due to unknown fields. ignoring those fields and trying again"
-  }
+    logger.warn(it) {
+        "failed to parse JSON due to unknown fields. ignoring those fields and trying again"
+    }
 }
 
 /**
@@ -48,10 +48,10 @@ fun <T> JsonAdapter<T>.fromSafeJson(value: String): T? = fromSafeJson(value) {
  * the unknown fields.
  */
 fun <T> JsonAdapter<T>.fromSafeJson(json: String, onUnknownFields: (JsonDataException) -> Unit): T? {
-  return try {
-    failOnUnknown().fromJson(json)
-  } catch (e: JsonDataException) {
-    onUnknownFields(e)
-    return fromJson(json)
-  }
+    return try {
+        failOnUnknown().fromJson(json)
+    } catch (e: JsonDataException) {
+        onUnknownFields(e)
+        return fromJson(json)
+    }
 }

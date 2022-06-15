@@ -2,11 +2,11 @@
 
 wisp-config is a wrapper for the [Hoplite config library](https://github.com/sksamuel/hoplite).
 
-Config precedence is in order of sources added for loading, so if you want an environment
-config file to override values in the default file, it has to be added first.
+Config precedence is in order of sources added for loading, so if you want an environment config file to override values
+in the default file, it has to be added first.
 
-Note that config values from Environment Variables, System Properties and User Settings are
-always loaded first, see: https://github.com/sksamuel/hoplite#property-sources for details.
+Note that config values from Environment Variables, System Properties and User Settings are always loaded first,
+see: https://github.com/sksamuel/hoplite#property-sources for details.
 
 Secrets in config are automatically handled, see: https://github.com/sksamuel/hoplite#masked-values
 
@@ -15,8 +15,7 @@ implement [Config](https://github.com/cashapp/wisp/blob/master/wisp-config/src/m
 
 ## Usage
 
-The following example will load the config in the 2 files located on the classpath into the user
-defined MyConfig class. 
+The following example will load the config in the 2 files located on the classpath into the user defined MyConfig class.
 
 ```kotlin
 data class MyConfig(
@@ -42,6 +41,7 @@ val myConfig : MyConfig = WispConfig.builder()
 ```
 
 Assume `myapp-defaults.yml` contains:
+
 ```yaml
 foo:
   enabled: true
@@ -50,6 +50,7 @@ baz: "abc"
 ```
 
 And `myapp-config.yaml` contains:
+
 ```yaml
 foo:
   enabled: false

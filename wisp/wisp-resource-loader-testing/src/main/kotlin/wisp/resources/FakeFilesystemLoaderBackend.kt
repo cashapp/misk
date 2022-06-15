@@ -13,12 +13,12 @@ import okio.ByteString.Companion.encodeUtf8
  * ```
  */
 class FakeFilesystemLoaderBackend(
-  private val files: Map<String, String>
+    private val files: Map<String, String>
 ) : ResourceLoader.Backend() {
-  override fun open(path: String): BufferedSource? {
-    val file = files[path] ?: return null
-    return Buffer().write(file.encodeUtf8())
-  }
+    override fun open(path: String): BufferedSource? {
+        val file = files[path] ?: return null
+        return Buffer().write(file.encodeUtf8())
+    }
 
-  override fun exists(path: String) = files.containsKey(path)
+    override fun exists(path: String) = files.containsKey(path)
 }

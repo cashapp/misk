@@ -1,12 +1,12 @@
 plugins {
-  kotlin("jvm")
-  `java-library`
+    kotlin("jvm")
+    `java-library`
 }
 
 dependencies {
-  implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.kotlinReflection)
+    implementation(Dependencies.kotlinStdLibJdk8)
+    implementation(Dependencies.kotlinReflection)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinTest)
+    testImplementation(Dependencies.assertj)
+    testImplementation(Dependencies.kotlinTest)
 }

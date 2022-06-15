@@ -1,12 +1,12 @@
 # wisp-lease
 
-This module contains the interfaces for leases.  A lease can be used to fence code to ensure
-it is run only in the application holding the lease.
+This module contains the interfaces for leases. A lease can be used to fence code to ensure it is run only in the
+application holding the lease.
 
 TODO: Link to real implementation of wisp-lease...
 
-See [wisp-lease-testing](https://github.com/cashapp/wisp/tree/master/wisp-lease-testing) for a Fake
-lease implementation for use in tests.
+See [wisp-lease-testing](https://github.com/cashapp/wisp/tree/master/wisp-lease-testing) for a Fake lease implementation
+for use in tests.
 
 ## Usage
 

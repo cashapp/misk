@@ -7,4 +7,4 @@ import wisp.config.Config
  *
  * Note that this extends [Config], so you can load your task's config if required.
  */
-open class TaskConfig: Config
+open class TaskConfig : Config

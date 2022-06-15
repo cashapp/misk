@@ -28,16 +28,16 @@ data class SpanAndScope(val span: Span, val scope: Scope)
  * ```
  */
 inline fun Tracer.spanned(name: String, crossinline block: SpanAndScope.() -> Unit) {
-  val span = buildSpan(name).start()
-  this.scopeManager().activate(span)
+    val span = buildSpan(name).start()
+    this.scopeManager().activate(span)
 
-  try {
-    this.scopeManager().activate(span).use { scope ->
-      block(SpanAndScope(span, scope))
+    try {
+        this.scopeManager().activate(span).use { scope ->
+            block(SpanAndScope(span, scope))
+        }
+    } finally {
+        span.finish()
     }
-  } finally {
-    span.finish()
-  }
 }
 
 /**
@@ -57,18 +57,18 @@ inline fun Tracer.spanned(name: String, crossinline block: SpanAndScope.() -> Un
  * ```
  */
 inline fun Tracer.scoped(span: Span, finishSpan: Boolean = false, crossinline block: (Scope) -> Unit) {
-  try {
-    this.scopeManager().activate(span).use(block)
-  } finally {
-    if (finishSpan) {
-      span.finish()
+    try {
+        this.scopeManager().activate(span).use(block)
+    } finally {
+        if (finishSpan) {
+            span.finish()
+        }
     }
-  }
 }
 
 /**
  * Creates a span called [name] which is a child of [parent].
  */
 fun Tracer.childSpan(name: String, parent: Span): Span =
-  this.buildSpan(name).asChildOf(parent).start()
+    this.buildSpan(name).asChildOf(parent).start()
 

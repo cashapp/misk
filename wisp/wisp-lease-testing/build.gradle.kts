@@ -1,13 +1,13 @@
 plugins {
-  kotlin("jvm")
-  `java-library`
+    kotlin("jvm")
+    `java-library`
 }
 
 dependencies {
-  api(project(":wisp-lease"))
-  implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.kotlinReflection)
+    api(project(":wisp-lease"))
+    implementation(Dependencies.kotlinStdLibJdk8)
+    implementation(Dependencies.kotlinReflection)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinTest)
+    testImplementation(Dependencies.assertj)
+    testImplementation(Dependencies.kotlinTest)
 }

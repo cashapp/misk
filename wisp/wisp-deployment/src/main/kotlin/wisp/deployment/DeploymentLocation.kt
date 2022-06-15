@@ -5,8 +5,8 @@ package wisp.deployment
  */
 interface DeploymentLocation {
 
-  /**
-   * Deployment identification, e.g. Kubernetes pod name or host name, etc.
-   */
-  val id: String
+    /**
+     * Deployment identification, e.g. Kubernetes pod name or host name, etc.
+     */
+    val id: String
 }

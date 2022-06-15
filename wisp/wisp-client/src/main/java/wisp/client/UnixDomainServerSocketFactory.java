@@ -15,6 +15,11 @@
  */
 package wisp.client;
 
+import jnr.unixsocket.UnixServerSocketChannel;
+import jnr.unixsocket.UnixSocketAddress;
+import jnr.unixsocket.UnixSocketChannel;
+
+import javax.net.ServerSocketFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -24,75 +29,80 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
-import javax.net.ServerSocketFactory;
-import jnr.unixsocket.UnixServerSocketChannel;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
 
 /**
  * Impersonate TCP-style ServerSocketFactory over UNIX domain sockets.
  */
 public final class UnixDomainServerSocketFactory extends ServerSocketFactory {
-  private final File path;
+    private final File path;
 
-  public UnixDomainServerSocketFactory(File path) {
-    this.path = path;
-  }
-
-  @Override public ServerSocket createServerSocket() throws IOException {
-    return new UnixDomainServerSocket();
-  }
-
-  @Override public ServerSocket createServerSocket(int port) throws IOException {
-    return createServerSocket();
-  }
-
-  @Override public ServerSocket createServerSocket(int port, int backlog) throws IOException {
-    return createServerSocket();
-  }
-
-  @Override public ServerSocket createServerSocket(
-      int port, int backlog, InetAddress inetAddress) throws IOException {
-    return createServerSocket();
-  }
-
-  final class UnixDomainServerSocket extends ServerSocket {
-    private UnixServerSocketChannel serverSocketChannel;
-    private InetSocketAddress endpoint;
-
-    UnixDomainServerSocket() throws IOException {
+    public UnixDomainServerSocketFactory(File path) {
+        this.path = path;
     }
 
-    @Override public void bind(SocketAddress endpoint, int backlog) throws IOException {
-      this.endpoint = (InetSocketAddress) endpoint;
-
-      UnixSocketAddress address = new UnixSocketAddress(path);
-      serverSocketChannel = UnixServerSocketChannel.open();
-      serverSocketChannel.configureBlocking(true);
-      serverSocketChannel.socket().bind(address);
+    @Override
+    public ServerSocket createServerSocket() throws IOException {
+        return new UnixDomainServerSocket();
     }
 
-    @Override public int getLocalPort() {
-      return 1; // A white lie. There is no local port.
+    @Override
+    public ServerSocket createServerSocket(int port) throws IOException {
+        return createServerSocket();
     }
 
-    @Override public SocketAddress getLocalSocketAddress() {
-      return endpoint;
+    @Override
+    public ServerSocket createServerSocket(int port, int backlog) throws IOException {
+        return createServerSocket();
     }
 
-    @Override public Socket accept() throws IOException {
-      try {
-        UnixSocketChannel channel = serverSocketChannel.accept();
-        return new TunnelingUnixSocket(path, channel, endpoint);
-      } catch (ClosedChannelException e) {
-        SocketException exception = new SocketException();
-        exception.initCause(e);
-        throw exception;
-      }
+    @Override
+    public ServerSocket createServerSocket(
+        int port, int backlog, InetAddress inetAddress) throws IOException {
+        return createServerSocket();
     }
 
-    @Override public void close() throws IOException {
-      serverSocketChannel.close();
+    final class UnixDomainServerSocket extends ServerSocket {
+        private UnixServerSocketChannel serverSocketChannel;
+        private InetSocketAddress endpoint;
+
+        UnixDomainServerSocket() throws IOException {
+        }
+
+        @Override
+        public void bind(SocketAddress endpoint, int backlog) throws IOException {
+            this.endpoint = (InetSocketAddress) endpoint;
+
+            UnixSocketAddress address = new UnixSocketAddress(path);
+            serverSocketChannel = UnixServerSocketChannel.open();
+            serverSocketChannel.configureBlocking(true);
+            serverSocketChannel.socket().bind(address);
+        }
+
+        @Override
+        public int getLocalPort() {
+            return 1; // A white lie. There is no local port.
+        }
+
+        @Override
+        public SocketAddress getLocalSocketAddress() {
+            return endpoint;
+        }
+
+        @Override
+        public Socket accept() throws IOException {
+            try {
+                UnixSocketChannel channel = serverSocketChannel.accept();
+                return new TunnelingUnixSocket(path, channel, endpoint);
+            } catch (ClosedChannelException e) {
+                SocketException exception = new SocketException();
+                exception.initCause(e);
+                throw exception;
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            serverSocketChannel.close();
+        }
     }
-  }
 }

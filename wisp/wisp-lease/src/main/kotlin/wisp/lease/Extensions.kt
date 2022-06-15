@@ -1,10 +1,10 @@
 package wisp.lease
 
 /** Converts a [lease] into an [AutoCloseable] resource. */
-class AutoCloseableLease(private val lease: Lease): Lease by lease, AutoCloseable {
-  override fun close() {
-    lease.release()
-  }
+class AutoCloseableLease(private val lease: Lease) : Lease by lease, AutoCloseable {
+    override fun close() {
+        lease.release()
+    }
 }
 
 /**
@@ -19,6 +19,6 @@ class AutoCloseableLease(private val lease: Lease): Lease by lease, AutoCloseabl
  * ```
  */
 fun LeaseManager.acquireOrNull(name: String): AutoCloseableLease? {
-  val lease = requestLease(name)
-  return if (lease.acquire()) AutoCloseableLease(lease) else null
+    val lease = requestLease(name)
+    return if (lease.acquire()) AutoCloseableLease(lease) else null
 }

@@ -19,8 +19,8 @@ composer.stop()
 assertFalse(composer.running.get())
 ```
 
-The following example composes Kafka and Zookeeper containers for testing. Kafka is exposed to the
-jUnit test via 127.0.0.1:9102. In this example, Zookeeper is not exposed to the test.
+The following example composes Kafka and Zookeeper containers for testing. Kafka is exposed to the jUnit test via
+127.0.0.1:9102. In this example, Zookeeper is not exposed to the test.
 
 ```kotlin
 val zkContainer = Container {

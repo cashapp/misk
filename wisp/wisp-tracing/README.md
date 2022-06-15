@@ -38,8 +38,7 @@ tracer.spanned("multiple-threads") {
 
 ### Finish your spans, and do not re-use finished spans
 
-The `tracer.spanned` API does not allow you use a span outside its block. This is the primary API
-to use.
+The `tracer.spanned` API does not allow you use a span outside its block. This is the primary API to use.
 
 If you need a new span, you almost always want to finish it at the end of your block:
 
@@ -89,8 +88,8 @@ tracer.spanned("tags-example") {
 }
 ```
 
-Add all your baggage at once, instead of processing and adding it one piece at a time.
-This information will be available in downstream traces.
+Add all your baggage at once, instead of processing and adding it one piece at a time. This information will be
+available in downstream traces.
 
 ```kotlin
 import wisp.tracing.spanned
