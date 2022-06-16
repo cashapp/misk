@@ -145,15 +145,17 @@ public final class misk/redis/RedisNodeConfig {
 }
 
 public final class misk/redis/RedisReplicationGroupConfig {
-	public fun <init> (Lmisk/redis/RedisNodeConfig;Lmisk/redis/RedisNodeConfig;Ljava/lang/String;)V
+	public fun <init> (Lmisk/redis/RedisNodeConfig;Lmisk/redis/RedisNodeConfig;Ljava/lang/String;I)V
 	public final fun component1 ()Lmisk/redis/RedisNodeConfig;
 	public final fun component2 ()Lmisk/redis/RedisNodeConfig;
 	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()I;
 	public final fun copy (Lmisk/redis/RedisNodeConfig;Lmisk/redis/RedisNodeConfig;Ljava/lang/String;)Lmisk/redis/RedisReplicationGroupConfig;
-	public static synthetic fun copy$default (Lmisk/redis/RedisReplicationGroupConfig;Lmisk/redis/RedisNodeConfig;Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/Object;)Lmisk/redis/RedisReplicationGroupConfig;
+	public static synthetic fun copy$default (Lmisk/redis/RedisReplicationGroupConfig;Lmisk/redis/RedisNodeConfig;Lmisk/redis/RedisNodeConfig;Ljava/lang/String;I;ILjava/lang/Object;)Lmisk/redis/RedisReplicationGroupConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getReader_endpoint ()Lmisk/redis/RedisNodeConfig;
 	public final fun getRedis_auth_password ()Ljava/lang/String;
+	public final fun getTimeout_ms ()I;
 	public final fun getWriter_endpoint ()Lmisk/redis/RedisNodeConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
