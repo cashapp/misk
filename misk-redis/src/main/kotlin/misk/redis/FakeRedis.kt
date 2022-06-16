@@ -87,7 +87,7 @@ class FakeRedis : Redis {
 
       var countDeleted = 0L
       fields.forEach {
-        if (value.data.contains(it)) {
+        if (value.data.containsKey(it)) {
           value.data.remove(it)
           countDeleted++
         }
@@ -184,6 +184,12 @@ class FakeRedis : Redis {
       )
     }
     hKeyValueStore[key]!!.data[field] = value
+  }
+
+  override fun hset(key: String, hash: Map<String, ByteString>) {
+    hash.forEach {
+      hset(key, it.key, it.value)
+    }
   }
 
   override fun incr(key: String): Long {

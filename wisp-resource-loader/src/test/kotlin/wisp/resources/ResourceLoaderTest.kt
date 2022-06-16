@@ -1,28 +1,30 @@
 package wisp.resources
 
-import java.io.File
-import java.net.URLClassLoader
-import kotlin.test.assertFailsWith
 import okio.buffer
 import okio.sink
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.File
+import java.net.URLClassLoader
 import java.nio.file.Files
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class ResourceLoaderTest {
 
-  val resourceLoader: ResourceLoader = ResourceLoader(
+  private val resourceLoader: ResourceLoader = ResourceLoader(
     mapOf(
-      "classpath:" to ClasspathResourceLoaderBackend,
-      "memory:" to MemoryResourceLoaderBackend(),
-      "filesystem:" to FilesystemLoaderBackend,
+      ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
+      MemoryResourceLoaderBackend.SCHEME to MemoryResourceLoaderBackend(),
+      FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend,
     )
   )
 
-  val tempFolderPath = Files.createTempDirectory("test-")
-  val tempFolder: TemporaryFolder = TemporaryFolder(tempFolderPath)
+  private val tempFolderPath = Files.createTempDirectory("test-")
+  private val tempFolder: TemporaryFolder = TemporaryFolder(tempFolderPath)
 
   lateinit var tempRoot: File
 
@@ -123,6 +125,21 @@ class ResourceLoaderTest {
   }
 
   @Test
+  fun memoryResourcesWatch() {
+    val data1 = "memory:/wisp/resources/data1.txt"
+
+    var wasCalled = false
+    resourceLoader.watch(data1) { address ->
+      assertEquals(data1, address)
+      wasCalled = true
+    }
+    resourceLoader.put(data1, "foo")
+
+    Thread.sleep(1000)
+    assertTrue(wasCalled)
+  }
+
+  @Test
   fun filesystemResources() {
     val resource1 = "filesystem:$tempRoot/data1.txt"
     File(tempRoot, "data1.txt").sink().buffer().use {
@@ -152,6 +169,50 @@ class ResourceLoaderTest {
     assertFailsWith<UnsupportedOperationException> {
       resourceLoader.walk("filesystem:$tempRoot")
     }
+  }
+
+  @Test
+  fun filesystemResourcesWatch() {
+    val data1 = "filesystem:$tempRoot/data1.txt"
+
+    val data1File = File(tempRoot, "data1.txt")
+    data1File.sink().buffer().use {
+      it.writeUtf8("foo")
+    }
+
+    resourceLoader.open(data1)!!.use {
+      assertThat(it.readUtf8()).isEqualTo("foo")
+    }
+
+    var wasCalled = false
+    resourceLoader.watch(data1) { address ->
+      assertEquals(data1, address)
+      wasCalled = true
+    }
+    val watchedDirectory = FilesystemLoaderBackend.watchedDirectoryThreads.entries.first().value
+    assertTrue(watchedDirectory.isAlive)
+    assertTrue(watchedDirectory.isDaemon)
+
+    data1File.sink().buffer().use {
+      it.writeUtf8("bar")
+    }
+
+    resourceLoader.open(data1)!!.use {
+      assertThat(it.readUtf8()).isEqualTo("bar")
+    }
+
+    // This will fail to join, but it does yield this thread and give the others a go
+    watchedDirectory.join(5000)
+
+    var retryCount = 0
+    while (retryCount < 10 && !wasCalled) {
+      Thread.sleep(1000)
+      retryCount++
+    }
+
+    assertTrue(wasCalled)
+
+    resourceLoader.unwatch(data1)
   }
 
   @Test

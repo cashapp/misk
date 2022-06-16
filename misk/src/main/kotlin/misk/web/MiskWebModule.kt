@@ -45,8 +45,11 @@ import misk.web.extractors.RequestHeadersFeatureBinding
 import misk.web.extractors.ResponseBodyFeatureBinding
 import misk.web.extractors.WebSocketFeatureBinding
 import misk.web.extractors.WebSocketListenerFeatureBinding
+import misk.web.interceptors.BeforeContentEncoding
 import misk.web.interceptors.ConcurrencyLimiterFactory
 import misk.web.interceptors.ConcurrencyLimitsInterceptor
+import misk.web.interceptors.ForContentEncoding
+import misk.web.interceptors.GunzipRequestBodyInterceptor
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RebalancingInterceptor
@@ -130,6 +133,12 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
+
+    newMultibinder<NetworkInterceptor.Factory>(BeforeContentEncoding::class)
+
+    // Inflates a gzip compressed request
+    multibind<NetworkInterceptor.Factory>(ForContentEncoding::class)
+      .to<GunzipRequestBodyInterceptor.Factory>()
 
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
       .to<RebalancingInterceptor.Factory>()

@@ -12,6 +12,9 @@ import okio.source
  * This uses the scheme `classpath:`.
  */
 object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
+
+  const val SCHEME = "classpath:"
+
   override fun list(path: String): List<String> {
     require(path.startsWith("/"))
     val checkPath = path.removePrefix("/").removeSuffix("/")

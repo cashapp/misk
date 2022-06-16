@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class GzipTest : AbstractGzipTest() {
-  @MiskTestModule val module = TestModule(true)
+  @MiskTestModule val module = TestModule(gzip = true)
 
   @Test fun `GET gzip get response body`() {
     get("/miskhype/16").assertGzipEncoding(gzipped = true)
@@ -37,7 +37,7 @@ internal class GzipTest : AbstractGzipTest() {
 
 @MiskTest(startService = true)
 internal class GzipDisabledTest : AbstractGzipTest() {
-  @MiskTestModule val module = TestModule(false)
+  @MiskTestModule val module = TestModule(gzip = false)
 
   @Test fun `GET gzip get response body`() {
     get("/miskhype/16").assertGzipEncoding(gzipped = false)
@@ -147,7 +147,7 @@ abstract class AbstractGzipTest {
     return buffer.readByteString().toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
   }
 
-  class TestModule(val gzip: Boolean) : KAbstractModule() {
+  class TestModule(private val gzip: Boolean) : KAbstractModule() {
     override fun configure() {
       install(
         WebServerTestingModule(

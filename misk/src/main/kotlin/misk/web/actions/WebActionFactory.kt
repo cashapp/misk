@@ -13,7 +13,6 @@ import misk.web.ConnectWebSocket
 import misk.web.Delete
 import misk.web.DispatchMechanism
 import misk.web.Get
-import misk.web.WebActionSeedDataTransformerFactory
 import misk.web.NetworkInterceptor
 import misk.web.Patch
 import misk.web.PathPattern
@@ -21,6 +20,9 @@ import misk.web.Post
 import misk.web.Put
 import misk.web.RequestBody
 import misk.web.WebActionBinding
+import misk.web.WebActionSeedDataTransformerFactory
+import misk.web.interceptors.BeforeContentEncoding
+import misk.web.interceptors.ForContentEncoding
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
@@ -33,6 +35,10 @@ import kotlin.reflect.full.functions
 @Singleton
 internal class WebActionFactory @Inject constructor(
   private val injector: Injector,
+  @BeforeContentEncoding
+  private val beforeContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
+  @ForContentEncoding
+  private val forContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   private val userProvidedApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
   private val userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
@@ -192,7 +198,9 @@ internal class WebActionFactory @Inject constructor(
   ): BoundAction<A> {
     // Ensure that default interceptors are called before any user provided interceptors
     val networkInterceptors =
-      miskNetworkInterceptorFactories.mapNotNull { it.create(action) } +
+      beforeContentEncodingNetworkInterceptorFactories.mapNotNull { it.create(action) } +
+        forContentEncodingNetworkInterceptorFactories.mapNotNull { it.create(action) } +
+        miskNetworkInterceptorFactories.mapNotNull { it.create(action) } +
         userProvidedNetworkInterceptorFactories.mapNotNull { it.create(action) }
 
     val applicationInterceptors =
