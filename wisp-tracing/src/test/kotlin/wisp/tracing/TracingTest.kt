@@ -7,7 +7,9 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -81,6 +83,44 @@ class TracingTest {
     assertTrue(spans.size == 2, "Expected exactly two spans")
   }
 
+  @Test fun `Tracer#spanned() can ignore active spans`() {
+    tracer.spanned("parent") {
+      val parentId = span.context().toTraceId()
+
+      tracer.spanned("child") {
+        val childId = this.span.context().toTraceId()
+        assertEquals(parentId, childId)
+      }
+
+      tracer.spanned("child-ignoring-span", ignoreActiveSpan = true) {
+        val childId = this.span.context().toTraceId()
+        assertNotEquals(parentId, childId)
+      }
+    }
+  }
+
+  @Test fun `Tracer#spanned() can retain previous baggage`() {
+    tracer.spanned("parent") {
+      val baggage = mapOf("parent-baggage" to "blah blah blah")
+      span.setBaggageItems(baggage)
+      val parentBaggage = span.context().baggageItems()
+
+      tracer.spanned("child", ignoreActiveSpan = true, retainBaggage = true) {
+        val childBaggage = this.span.context().baggageItems()
+        assertContainsAll(childBaggage, parentBaggage)
+        assertContainsAll(childBaggage, baggage.asIterable())
+      }
+
+      tracer.spanned("child-ignoring-span", ignoreActiveSpan = true, retainBaggage = false) {
+        val childBaggage = this.span.context().baggageItems().toList()
+        assertTrue(
+          childBaggage.isEmpty(),
+          "Expected no baggage on child span ignoring parent without baggage retention"
+        )
+      }
+    }
+  }
+
   @Test fun `Span#setBaggageItems() works`() {
     // No baggage.
     tracer.spanned("no-baggage") {
@@ -133,14 +173,16 @@ class TracingTest {
 
     // With tags.
     tracer.spanned("set-tags") {
-      span.setTags(listOf(
-        Tag("int", 9999),
-        Tag("long", Long.MAX_VALUE),
-        Tag("double", Double.MAX_VALUE),
-        Tag("float", Float.MIN_VALUE),
-        Tag("string", "string"),
-        Tag("boolean", true),
-      ))
+      span.setTags(
+        listOf(
+          Tag("int", 9999),
+          Tag("long", Long.MAX_VALUE),
+          Tag("double", Double.MAX_VALUE),
+          Tag("float", Float.MIN_VALUE),
+          Tag("string", "string"),
+          Tag("boolean", true),
+        )
+      )
     }
     spans = tracer.finishedSpans()
     assertTrue(spans.size == 1, "Expected exactly one span")
