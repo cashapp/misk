@@ -26,18 +26,37 @@ data class SpanAndScope(val span: Span, val scope: Scope)
  * ```kotlin
  * tracer.spanned("operation-name") { ... }
  * ```
+ *
+ * If you need to start a new span independent of the active span, set [ignoreActiveSpan] to true,
+ * and optionally [retainBaggage].
  */
-inline fun Tracer.spanned(name: String, crossinline block: SpanAndScope.() -> Unit) {
-    val span = buildSpan(name).start()
-    this.scopeManager().activate(span)
+inline fun Tracer.spanned(
+  name: String,
+  ignoreActiveSpan: Boolean = false,
+  retainBaggage: Boolean = false,
+  crossinline block: SpanAndScope.() -> Unit
+) {
+  val activeSpan: Span? = this.activeSpan()
+  val span = buildSpan(name)
+    .apply { if (ignoreActiveSpan) ignoreActiveSpan() }
+    .start()
 
-    try {
-        this.scopeManager().activate(span).use { scope ->
-            block(SpanAndScope(span, scope))
-        }
-    } finally {
-        span.finish()
+  if (retainBaggage && ignoreActiveSpan) {
+    val baggage = activeSpan?.context()?.baggageItems() ?: emptyList()
+    for ((k, v) in baggage) {
+      span.setBaggageItem(k, v)
     }
+  }
+
+  this.scopeManager().activate(span)
+
+  try {
+    this.scopeManager().activate(span).use { scope ->
+      block(SpanAndScope(span, scope))
+    }
+  } finally {
+    span.finish()
+  }
 }
 
 /**
@@ -51,24 +70,24 @@ inline fun Tracer.spanned(name: String, crossinline block: SpanAndScope.() -> Un
  * tracer.scoped(span) {
  *   ...
  *   thread {
- *     tracer.newScope(span, finishSpan = false) { ... }
+ *     tracer.scoped(span, finishSpan = false) { ... }
  *   }
  * }
  * ```
  */
 inline fun Tracer.scoped(span: Span, finishSpan: Boolean = false, crossinline block: (Scope) -> Unit) {
-    try {
-        this.scopeManager().activate(span).use(block)
-    } finally {
-        if (finishSpan) {
-            span.finish()
-        }
+  try {
+    this.scopeManager().activate(span).use(block)
+  } finally {
+    if (finishSpan) {
+      span.finish()
     }
+  }
 }
 
 /**
  * Creates a span called [name] which is a child of [parent].
  */
 fun Tracer.childSpan(name: String, parent: Span): Span =
-    this.buildSpan(name).asChildOf(parent).start()
+  this.buildSpan(name).asChildOf(parent).start()
 
