@@ -73,5 +73,9 @@ subprojects {
         }
     }
 
+    apply(plugin = "com.vanniktech.maven.publish")
+    apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
+    apply(from = "$rootDir/gradle-mvn-publish.gradle")
+
 }
 
