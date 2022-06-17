@@ -3,9 +3,9 @@
 For AWS information from the environment, with easy means for overrides for testing. Currently supports AWS Region and
 Account ID information.
 
-Also see [wisp-deployment-testing](https://github.com/cashapp/wisp/tree/master/wisp-deployment-testing)
+Also see [wisp-deployment-testing](https://github.com/cashapp/wisp/tree/main/wisp-deployment-testing)
 for
-the [FakeEnvironmentVariableLoader](https://github.com/cashapp/wisp/blob/master/wisp-deployment-testing/src/main/kotlin/wisp/deployment/FakeEnvironmentVariableLoader.kt)
+the [FakeEnvironmentVariableLoader](https://github.com/cashapp/wisp/blob/main/wisp-deployment-testing/src/main/kotlin/wisp/deployment/FakeEnvironmentVariableLoader.kt)
 to use in tests to set Fake environment variables.
 
 ## Usage

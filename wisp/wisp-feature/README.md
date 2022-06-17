@@ -2,10 +2,10 @@
 
 FeatureFlags ....
 
-See [wisp-launchdarkly](https://github.com/cashapp/wisp/tree/master/wisp-launchdarkly) for more an implementation of
+See [wisp-launchdarkly](https://github.com/cashapp/wisp/tree/main/wisp-launchdarkly) for more an implementation of
 FeatureFlags using [LaunchDarkly](https://launchdarkly.com/).
 
-See [wisp-feature-testing](https://github.com/cashapp/wisp/tree/master/wisp-feature-testing)
+See [wisp-feature-testing](https://github.com/cashapp/wisp/tree/main/wisp-feature-testing)
 for details on a Fake implementation for use in tests.
 
 ## Usage - Strongly Typed
