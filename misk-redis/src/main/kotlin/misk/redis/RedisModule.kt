@@ -6,7 +6,6 @@ import misk.ServiceModule
 import misk.inject.KAbstractModule
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
-import redis.clients.jedis.Protocol
 
 /**
  * Configures a JedisPool to connect to a Redis instance. The use of a JedisPool ensures thread safety.
@@ -32,7 +31,7 @@ class RedisModule(
         jedisPoolConfig,
         replicationGroup.writer_endpoint.hostname,
         replicationGroup.writer_endpoint.port,
-        Protocol.DEFAULT_TIMEOUT,
+        replicationGroup.timeout_ms,
         replicationGroup.redis_auth_password,
         true
     )
