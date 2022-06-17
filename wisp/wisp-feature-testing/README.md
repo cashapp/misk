@@ -2,11 +2,11 @@
 
 Fake implementation of FeatureFlags.
 
-See [wisp-feature](https://github.com/cashapp/wisp/tree/master/wisp-feature) for more details on feature flags.
+See [wisp-feature](https://github.com/cashapp/wisp/tree/main/wisp-feature) for more details on feature flags.
 
 ## Usage - Strongly Typed
 
-#### Step 1: Define a feature flag as described in [wisp-feature](https://github.com/cashapp/wisp/tree/master/wisp-feature)
+#### Step 1: Define a feature flag as described in [wisp-feature](https://github.com/cashapp/wisp/tree/main/wisp-feature)
 
 #### Step 2: Use the feature flag in your code:
 
