@@ -127,13 +127,13 @@ public final class wisp/client/NoOpDns : okhttp3/Dns {
 
 public final class wisp/client/OkHttpClientCommonConfigurator {
 	public static final field Companion Lwisp/client/OkHttpClientCommonConfigurator$Companion;
+	public static final field maxIdleConnections I
 	public fun <init> ()V
 	public final fun configure (Lokhttp3/OkHttpClient$Builder;Lwisp/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient$Builder;
 }
 
 public final class wisp/client/OkHttpClientCommonConfigurator$Companion {
 	public final fun getKeepAliveDuration ()Ljava/time/Duration;
-	public final fun getMaxIdleConnections ()I
 }
 
 public final class wisp/client/UnixDomainServerSocketFactory : javax/net/ServerSocketFactory {
