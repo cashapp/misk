@@ -22,7 +22,7 @@ public class TestEnumFlag implements EnumFeatureFlag<TestEnum> {
         .with("country", country.toString());
   }
 
-  @NotNull @Override public Class<? extends TestEnum> getReturnType() {
+  @NotNull @Override public Class<TestEnum> getReturnType() {
     return TestEnum.class;
   }
 }
