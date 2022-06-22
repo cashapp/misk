@@ -3,6 +3,8 @@
 Wisp is a collection of kotlin modules providing various features and utilities, including config, logging, feature
 flags and more. Modules are deliberately kept small to allow picking and choose the exact set needed.
 
+[<img src="https://img.shields.io/maven-central/v/app.cash.wisp/wisp-bom.svg?label=latest%20release"/>](http://search.maven.org/#search%7Cga%7C1%7Capp.cash.wisp)
+
 ## Modules
 
 Modules that are named ending in "Testing" are for test code and should never be used or included in production code.
