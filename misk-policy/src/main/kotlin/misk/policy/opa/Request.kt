@@ -7,4 +7,4 @@ data class Request<T>(
   val input: T
 )
 
-interface OpaRequest
+abstract class OpaRequest

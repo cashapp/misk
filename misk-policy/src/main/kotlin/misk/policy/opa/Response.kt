@@ -18,6 +18,6 @@ data class Provenance(
   val revision: String?
 )
 
-interface OpaResponse {
-  var provenance: Provenance?
+abstract class OpaResponse {
+  var provenance: Provenance? = null
 }

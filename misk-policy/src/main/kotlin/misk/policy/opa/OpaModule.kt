@@ -22,6 +22,13 @@ class OpaModule @Inject constructor(
   }
 
   @Provides
+  internal fun opaConfig(
+    config: OpaConfig
+  ): Boolean {
+    return config.provenance
+  }
+
+  @Provides
   internal fun opaApi(
     config: OpaConfig,
     httpClientFactory: HttpClientFactory,
@@ -38,9 +45,7 @@ class OpaModule @Inject constructor(
       builder.client(okHttpClient)
     }
     builder.baseUrl(config.baseUrl)
-    val api = builder.build().create(OpaApi::class.java)
-    api.provenance = config.provenance
-    return api
+    return builder.build().create(OpaApi::class.java)
   }
 
   @Provides @Singleton @Named("opa-moshi")

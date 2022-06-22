@@ -13,7 +13,8 @@ import javax.inject.Named
  */
 class RealOpaPolicyEngine @Inject constructor(
   private val opaApi: OpaApi,
-  @Named("opa-moshi") private val moshi: Moshi
+  @Named("opa-moshi") private val moshi: Moshi,
+  private val provenance: Boolean
 ) : OpaPolicyEngine {
 
   /**
@@ -88,7 +89,7 @@ class RealOpaPolicyEngine @Inject constructor(
       throw IllegalArgumentException("Must specify document")
     }
 
-    val response = opaApi.queryDocument(document, inputString).execute()
+    val response = opaApi.queryDocument(document, inputString, provenance).execute()
     if (!response.isSuccessful) {
       throw PolicyEngineException("[${response.code()}]: ${response.errorBody()?.string()}")
     }
