@@ -17,7 +17,7 @@ class BindFieldsUsingProviderTest {
   }
 
   @Test
-  fun `bind CounterService using mockito`() {
+  fun `bind CounterService using a provider`() {
     assertThat(ticketDispenser.getTicket()).isEqualTo("Your Number is 42")
   }
 }
