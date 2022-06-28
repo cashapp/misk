@@ -2,7 +2,7 @@ package misk.testing.fieldbind
 
 import com.google.inject.testing.fieldbinder.Bind
 import misk.testing.MiskTest
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Provider
@@ -18,6 +18,6 @@ class BindFieldsUsingProviderTest {
 
   @Test
   fun `bind CounterService using mockito`() {
-    Assertions.assertThat(ticketDispenser.getTicket()).isEqualTo("Your Number is 42")
+    assertThat(ticketDispenser.getTicket()).isEqualTo("Your Number is 42")
   }
 }

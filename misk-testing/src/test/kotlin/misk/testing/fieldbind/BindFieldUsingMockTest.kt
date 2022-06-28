@@ -10,7 +10,6 @@ import javax.inject.Inject
 
 @MiskTest
 class BindFieldUsingMockTest {
-  // Ticket Dispenser needs a [CountService] in the constructor.
   @Inject lateinit var ticketDispenser: TicketDispenserService
   @Bind val counterService: CountService = mock()
 
