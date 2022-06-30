@@ -1,5 +1,7 @@
 package misk.web
 
+import com.google.common.util.concurrent.Service
+import com.google.inject.Key
 import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
@@ -20,6 +22,7 @@ import misk.ServiceModule
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
 import misk.inject.KAbstractModule
+import misk.inject.toKey
 import misk.queuing.TimedBlockingQueue
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
@@ -86,12 +89,15 @@ import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.thread.ThreadPool
 
-class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
+class MiskWebModule(
+  private val config: WebConfig,
+  private val jettyDependsOn: List<Key<out Service>> = emptyList(),
+) : KAbstractModule() {
   override fun configure() {
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    install(ServiceModule<JettyService>())
+    install(ServiceModule(key = JettyService::class.toKey(), dependsOn = jettyDependsOn))
     install(ServiceModule<JettyThreadPoolMetricsCollector>())
     install(ServiceModule<JettyConnectionMetricsCollector>())
 
