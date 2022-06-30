@@ -29,9 +29,10 @@ import org.eclipse.jetty.servlet.FilterHolder
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.servlets.CrossOriginFilter
-import org.eclipse.jetty.unixsocket.UnixSocketConnector
+import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import wisp.logging.getLogger
 import java.net.InetAddress
 import java.util.EnumSet
@@ -240,6 +241,8 @@ class JettyService @Inject internal constructor(
     // TODO(mmihic): Force security handler?
     val servletContextHandler = ServletContextHandler()
     servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
+
+    JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
     server.addManaged(servletContextHandler)
 
     statisticsHandler.handler = servletContextHandler
@@ -259,7 +262,7 @@ class JettyService @Inject internal constructor(
       // GET is enabled by default for gzipHandler.
       gzipHandler.addExcludedMethods("GET")
     }
-    servletContextHandler.gzipHandler = gzipHandler
+    servletContextHandler.insertHandler(gzipHandler)
 
     server.handler = statisticsHandler
 
