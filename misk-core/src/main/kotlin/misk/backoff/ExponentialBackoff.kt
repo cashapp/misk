@@ -8,7 +8,6 @@ import java.util.concurrent.ThreadLocalRandom
  * functions, so that they can change dynamically as the system is running (e.g.
  * in response to changes in dynamic flags)
  */
-@Deprecated("Use kotlinRetry instead")
 class ExponentialBackoff(
   private val baseDelay: () -> Duration,
   private val maxDelay: () -> Duration,

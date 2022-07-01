@@ -5,7 +5,6 @@ package misk.backoff
  * between each retry. The retry function is provided with current retry count, in case this is
  * relevant
  */
-@Deprecated("Use kotlinRetry instead")
 fun <A> retry(upTo: Int, withBackoff: Backoff, f: (retryCount: Int) -> A): A {
   require(upTo > 0) { "must support at least one call" }
 
@@ -36,5 +35,4 @@ fun <A> retry(upTo: Int, withBackoff: Backoff, f: (retryCount: Int) -> A): A {
   throw lastException!!
 }
 
-@Deprecated("Use kotlinRetry and misk.retries.doNotRetry instead")
 class DontRetryException(message: String) : Exception(message)
