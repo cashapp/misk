@@ -7,6 +7,7 @@ dependencies {
   implementation(Dependencies.dockerCore)
   implementation(Dependencies.dockerTransport)
   implementation(Dependencies.guice)
+  implementation(Dependencies.guiceTestLib)
   implementation(Dependencies.junitApi)
   implementation(Dependencies.junitParams)
   implementation(Dependencies.junitEngine)
