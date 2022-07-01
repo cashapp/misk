@@ -159,3 +159,6 @@ class GoogleSpannerModuleTest {
   }
 }
 ```
+
+## Envelope Encryption (Cloud KMS)
+See [README](src/main/kotlin/misk/cloud/gcp/kms/README.md).

@@ -21,6 +21,8 @@ dependencies {
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.moshiAdapters)
+  implementation(Dependencies.tink)
+  implementation(Dependencies.tinkGcpkms)
   implementation(Dependencies.wireGrpcClient)
   implementation(Dependencies.wireRuntime)
   implementation(project(":misk"))
