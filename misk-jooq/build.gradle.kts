@@ -18,7 +18,7 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   api(project(":misk-jdbc"))
-  api(project(":wisp-logging"))
+  api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testApi(project(":misk-testing"))

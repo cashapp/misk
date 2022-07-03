@@ -13,9 +13,9 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-actions"))
-  api(project(":wisp-config"))
-  api(project(":wisp-logging"))
-  api(project(":wisp-moshi"))
+  api(Dependencies.wispConfig)
+  api(Dependencies.wispLogging)
+  api(Dependencies.wispMoshi)
 
   testImplementation(Dependencies.assertj)
   testImplementation(project(":misk-testing"))

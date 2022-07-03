@@ -1,5 +1,0 @@
-public final class wisp/moshi/MoshiBuildKt {
-	public static final fun buildMoshi (Ljava/util/List;)Lcom/squareup/moshi/Moshi;
-	public static final fun getDefaultKotlinMoshi ()Lcom/squareup/moshi/Moshi;
-}
-
