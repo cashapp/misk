@@ -19,12 +19,12 @@ dependencies {
   implementation(project(":misk"))
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
-  api(project(":wisp-config"))
-  api(project(":wisp-deployment"))
-  api(project(":wisp-logging"))
+  api(Dependencies.wispConfig)
+  api(Dependencies.wispDeployment)
+  api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.logbackClassic)
-  testImplementation(project(":wisp-logging"))
+  testImplementation(Dependencies.wispLoggingTesting)
   testImplementation(project(":misk-testing"))
 }

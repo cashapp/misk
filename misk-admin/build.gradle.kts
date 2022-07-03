@@ -10,7 +10,7 @@ dependencies {
   implementation(project(":misk"))
   implementation(project(":misk-core"))
   api(project(":misk-inject"))
-  api(project(":wisp-deployment"))
+  api(Dependencies.wispDeployment)
 
   testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.assertj)

@@ -9,11 +9,11 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
-  implementation(project(":wisp-config"))
-  implementation(project(":wisp-lease"))
+  implementation(Dependencies.wispConfig)
+  implementation(Dependencies.wispLease)
   // TODO (rmariano): misk-clustering-testing?
-  implementation(project(":wisp-lease-testing"))
-  implementation(project(":wisp-logging"))
+  implementation(Dependencies.wispLeaseTesting)
+  implementation(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)

@@ -19,11 +19,11 @@ dependencies {
   api(project(":misk-feature"))
   api(project(":misk-inject"))
   api(project(":misk-service"))
-  api(project(":wisp-feature"))
-  api(project(":wisp-feature-testing"))
+  api(Dependencies.wispFeature)
+  api(Dependencies.wispFeatureTesting)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(project(":misk-testing"))
-  testImplementation(project(":wisp-moshi"))
+  testImplementation(Dependencies.wispMoshi)
 }

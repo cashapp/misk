@@ -32,8 +32,8 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
-  api(project(":wisp-containers-testing"))
-  api(project(":wisp-logging"))
+  api(Dependencies.wispContainersTesting)
+  api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.awaitility)

@@ -18,9 +18,9 @@ dependencies {
   api(project(":misk-jdbc"))
   api(project(":misk-service"))
   api(project(":misk-testing"))
-  api(project(":wisp-logging"))
+  api(Dependencies.wispLogging)
 
-  testImplementation(project(":wisp-config"))
+  testImplementation(Dependencies.wispConfig)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.openTracingDatadog)
   testImplementation(Dependencies.assertj)

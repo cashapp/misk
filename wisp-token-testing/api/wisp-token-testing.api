@@ -1,5 +1,0 @@
-public final class wisp/token/FakeTokenGenerator : wisp/token/TokenGenerator {
-	public fun <init> ()V
-	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
-}
-

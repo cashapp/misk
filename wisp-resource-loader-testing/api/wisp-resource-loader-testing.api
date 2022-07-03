@@ -1,6 +1,0 @@
-public final class wisp/resources/FakeFilesystemLoaderBackend : wisp/resources/ResourceLoader$Backend {
-	public fun <init> (Ljava/util/Map;)V
-	public fun exists (Ljava/lang/String;)Z
-	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
-}
-
