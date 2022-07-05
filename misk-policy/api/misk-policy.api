@@ -1,11 +1,5 @@
 public abstract interface class misk/policy/opa/OpaApi {
-	public abstract fun getProvenance ()Z
 	public abstract fun queryDocument (Ljava/lang/String;Ljava/lang/String;Z)Lretrofit2/Call;
-	public abstract fun setProvenance (Z)V
-}
-
-public final class misk/policy/opa/OpaApi$DefaultImpls {
-	public static synthetic fun queryDocument$default (Lmisk/policy/opa/OpaApi;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lretrofit2/Call;
 }
 
 public final class misk/policy/opa/OpaConfig : misk/config/Config {
@@ -34,12 +28,14 @@ public abstract interface class misk/policy/opa/OpaPolicyEngine {
 	public abstract fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 }
 
-public abstract interface class misk/policy/opa/OpaRequest {
+public abstract class misk/policy/opa/OpaRequest {
+	public fun <init> ()V
 }
 
-public abstract interface class misk/policy/opa/OpaResponse {
-	public abstract fun getProvenance ()Lmisk/policy/opa/Provenance;
-	public abstract fun setProvenance (Lmisk/policy/opa/Provenance;)V
+public abstract class misk/policy/opa/OpaResponse {
+	public fun <init> ()V
+	public final fun getProvenance ()Lmisk/policy/opa/Provenance;
+	public final fun setProvenance (Lmisk/policy/opa/Provenance;)V
 }
 
 public final class misk/policy/opa/PolicyEngineException : java/lang/Exception {
@@ -67,7 +63,7 @@ public final class misk/policy/opa/Provenance {
 }
 
 public final class misk/policy/opa/RealOpaPolicyEngine : misk/policy/opa/OpaPolicyEngine {
-	public fun <init> (Lmisk/policy/opa/OpaApi;Lcom/squareup/moshi/Moshi;)V
+	public fun <init> (Lmisk/policy/opa/OpaApi;Lcom/squareup/moshi/Moshi;Z)V
 	public fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 	public fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 }
