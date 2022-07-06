@@ -52,7 +52,7 @@ internal class JettyServiceMetricsTest {
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
-    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(153.0)
+    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(141.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
 
@@ -74,7 +74,7 @@ internal class JettyServiceMetricsTest {
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(0.0)
     assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
-    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(153.0)
+    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(141.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
 
@@ -83,7 +83,7 @@ internal class JettyServiceMetricsTest {
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(0.0)
     assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
-    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(153.0)
+    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(141.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
   }
