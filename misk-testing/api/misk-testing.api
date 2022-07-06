@@ -315,6 +315,12 @@ public final class misk/web/FakeWebSocketListener : okhttp3/WebSocketListener {
 	public final fun takeMessage ()Ljava/lang/String;
 }
 
+public final class misk/web/MiskCallerExtension : org/junit/jupiter/api/extension/AfterTestExecutionCallback, org/junit/jupiter/api/extension/BeforeTestExecutionCallback {
+	public fun <init> ()V
+	public fun afterTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public fun beforeTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+}
+
 public final class misk/web/WebServerTestingModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/web/WebServerTestingModule$Companion;
 	public fun <init> ()V
@@ -356,6 +362,11 @@ public final class misk/web/WebTestingModule : misk/inject/KAbstractModule {
 
 public final class misk/web/WebTestingModule$Companion {
 	public final fun getTESTING_WEB_CONFIG ()Lmisk/web/WebConfig;
+}
+
+public abstract interface annotation class misk/web/WithMiskCaller : java/lang/annotation/Annotation {
+	public abstract fun service ()Ljava/lang/String;
+	public abstract fun user ()Ljava/lang/String;
 }
 
 public final class org/assertj/core/api/AssertExtensionsKt {
