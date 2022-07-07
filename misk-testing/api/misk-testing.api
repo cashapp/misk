@@ -266,6 +266,7 @@ public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public final fun component7 ()Lokhttp3/Headers$Builder;
 	public final fun component8 ()Z
 	public final fun component9 ()Lokhttp3/Headers$Builder;
+	public fun computeRequestHeader (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public fun contentType ()Lokhttp3/MediaType;
 	public final fun copy (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;)Lmisk/web/FakeHttpCall;
 	public static synthetic fun copy$default (Lmisk/web/FakeHttpCall;Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;ILjava/lang/Object;)Lmisk/web/FakeHttpCall;
@@ -292,6 +293,7 @@ public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public fun requireTrailers ()V
 	public fun setNetworkStatusCode (I)V
 	public final fun setRequestBody (Lokio/BufferedSource;)V
+	public fun setRequestHeaders (Lokhttp3/Headers;)V
 	public final fun setResponseBody (Lokio/BufferedSink;)V
 	public fun setResponseHeader (Ljava/lang/String;Ljava/lang/String;)V
 	public fun setResponseTrailer (Ljava/lang/String;Ljava/lang/String;)V
@@ -311,6 +313,12 @@ public final class misk/web/FakeWebSocketListener : okhttp3/WebSocketListener {
 	public final fun getMessages ()Ljava/util/concurrent/LinkedBlockingDeque;
 	public fun onMessage (Lokhttp3/WebSocket;Ljava/lang/String;)V
 	public final fun takeMessage ()Ljava/lang/String;
+}
+
+public final class misk/web/MiskCallerExtension : org/junit/jupiter/api/extension/AfterTestExecutionCallback, org/junit/jupiter/api/extension/BeforeTestExecutionCallback {
+	public fun <init> ()V
+	public fun afterTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public fun beforeTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
 public final class misk/web/WebServerTestingModule : misk/inject/KAbstractModule {
@@ -354,6 +362,11 @@ public final class misk/web/WebTestingModule : misk/inject/KAbstractModule {
 
 public final class misk/web/WebTestingModule$Companion {
 	public final fun getTESTING_WEB_CONFIG ()Lmisk/web/WebConfig;
+}
+
+public abstract interface annotation class misk/web/WithMiskCaller : java/lang/annotation/Annotation {
+	public abstract fun service ()Ljava/lang/String;
+	public abstract fun user ()Ljava/lang/String;
 }
 
 public final class org/assertj/core/api/AssertExtensionsKt {

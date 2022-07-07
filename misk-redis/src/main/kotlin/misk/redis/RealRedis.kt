@@ -123,6 +123,14 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  /** Set ByteArray values for the given key and fields. */
+  override fun hset(key: String, hash: Map<String, ByteString>) {
+    val hashBytes = hash.entries.associate { it.key.toByteArray(charset) to it.value.toByteArray() }
+    jedisPool.resource.use { jedis ->
+      jedis.hset(key.toByteArray(charset), hashBytes)
+    }
+  }
+
   /** Interpret the value at [key] as a Long and increment it by 1. */
   override fun incr(key: String): Long {
     return jedisPool.resource.use { jedis ->

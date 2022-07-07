@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
+import com.google.inject.testing.fieldbinder.BoundFieldModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.uninject
@@ -43,6 +44,9 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
         for (module in context.getActionTestModules()) {
           install(module)
         }
+
+        context.requiredTestInstances.allInstances.forEach { install(BoundFieldModule.of(it)) }
+
         multibind<BeforeEachCallback>().to<InjectUninject>()
         multibind<BeforeEachCallback>().to<LogLevelExtension>()
         multibind<AfterEachCallback>().to<InjectUninject>()
@@ -55,7 +59,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     val injector = Guice.createInjector(module)
     context.store("injector", injector)
-
     injector.getInstance<Callbacks>().beforeEach(context)
   }
 
