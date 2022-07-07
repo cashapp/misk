@@ -247,6 +247,48 @@ class MyModule : KAbstractModule() {
 }
 ```
 
+### Testing `ActionScoped`
+
+Use `@WithMiskCaller` for `ActionScoped<MiskCaller>`:
+
+```kotlin
+@MiskTest
+@WithMiskCaller
+class MyTest {
+  @MiskTestModule val module = MyModule()
+  @Inject lateinit var action: HelloWebAction
+  @Inject lateinit var miskCaller: ActionScoped<MiskCaller>
+
+  // use action...
+}
+```
+
+Otherwise, use `ActionScope` directly:
+
+```kotlin
+@MiskTest
+class MyTest {
+  @MiskTestModule val module = MyModule()
+  @Inject lateinit var actionScope: ActionScope
+  @Inject lateinit var action: HelloWebAction
+  @Inject lateinit var myScopedObject: ActionScoped<MyScopedObject>
+  
+  @BeforeEach fun setUp() {
+    actionScope.enter(
+      mapOf(
+        keyOf<MyScopedObject>() to MyScopedObject()
+      )
+    )
+  }
+  
+  @AfterEach fun tearDown() {
+    actionScope.provider.get().close()
+  }
+
+  // use action...
+}
+```
+
 ### Integration tests
 
 It's possible to perform tests terminating at the app's HTTP/gRPC interface.
