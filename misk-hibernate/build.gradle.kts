@@ -40,7 +40,7 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
   api(project(":misk-jdbc"))
-  api(project(":wisp-logging"))
+  api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.dockerCore)
   testImplementation(Dependencies.dockerTransport)
@@ -52,5 +52,5 @@ dependencies {
   testImplementation(project(":misk-metrics"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-hibernate-testing"))
-  testImplementation(project(":wisp-config"))
+  testImplementation(Dependencies.wispConfig)
 }

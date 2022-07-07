@@ -58,12 +58,12 @@ dependencies {
   api(project(":misk-actions"))
   api(project(":misk-clustering"))
   api(project(":misk-inject"))
-  api(project(":wisp-client"))
-  api(project(":wisp-config"))
-  api(project(":wisp-deployment"))
-  api(project(":wisp-deployment-testing"))  // for fake implementation
-  api(project(":wisp-logging"))
-  api(project(":wisp-moshi"))
+  api(Dependencies.wispClient)
+  api(Dependencies.wispConfig)
+  api(Dependencies.wispDeployment)
+  api(Dependencies.wispDeploymentTesting)
+  api(Dependencies.wispLogging)
+  api(Dependencies.wispMoshi)
 
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(Dependencies.mockitoCore)
