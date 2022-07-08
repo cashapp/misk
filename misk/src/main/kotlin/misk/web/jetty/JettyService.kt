@@ -11,6 +11,7 @@ import misk.web.WebSslConfig
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
+import org.eclipse.jetty.http.UriCompliance
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
 import org.eclipse.jetty.io.ConnectionStatistics
@@ -94,6 +95,7 @@ class JettyService @Inject internal constructor(
     val httpConnectionFactories = mutableListOf<ConnectionFactory>()
     val httpConfig = HttpConfiguration()
     httpConfig.customizeForGrpc()
+    httpConfig.uriCompliance = UriCompliance.RFC3986
     httpConfig.sendServerVersion = false
     if (webConfig.ssl != null) {
       httpConfig.securePort = webConfig.ssl.port
@@ -261,7 +263,7 @@ class JettyService @Inject internal constructor(
       gzipHandler.addExcludedMimeTypes(MediaTypes.APPLICATION_GRPC)
     } else {
       // GET is enabled by default for gzipHandler.
-      gzipHandler.addExcludedMethods("GET")
+      gzipHandler.addExcludedMethods("GET", "POST")
     }
     servletContextHandler.insertHandler(gzipHandler)
 
