@@ -43,6 +43,28 @@ internal class FakeOpaPolicyEngineTest {
     assertThat(evaluate).isEqualTo(TestResponse("value"))
   }
 
+  @Test
+  fun `Override document for multiple input`() {
+    fakeOpaPolicyEngine.addOverrideForInput("test", TestRequest("key"), TestResponse("value"))
+    fakeOpaPolicyEngine.addOverrideForInput("test", TestRequest("otherKey"), TestResponse("otherValue"))
+    opaPolicyEngine.evaluate<TestRequest, TestResponse>("test", TestRequest("key")).apply {
+      assertThat(this).isEqualTo(TestResponse("value"))
+    }
+    opaPolicyEngine.evaluate<TestRequest, TestResponse>("test", TestRequest("otherKey")).apply {
+      assertThat(this).isEqualTo(TestResponse("otherValue"))
+    }
+  }
+
+  @Test
+  fun `Override document for the same input`() {
+    fakeOpaPolicyEngine.addOverrideForInput("test", TestRequest("key"), TestResponse("value"))
+    fakeOpaPolicyEngine.addOverrideForInput("test", TestRequest("key"), TestResponse("otherValue"))
+    opaPolicyEngine.evaluate<TestRequest, TestResponse>("test", TestRequest("key")).apply {
+      assertThat(this).isEqualTo(TestResponse("otherValue"))
+    }
+  }
+
+
   data class TestRequest(
     val something: String
   ) : OpaRequest
