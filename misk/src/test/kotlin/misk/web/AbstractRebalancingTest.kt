@@ -88,7 +88,7 @@ abstract class AbstractRebalancingTest(
 
     val response1 = httpClient.newCall(request).execute()
     response1.use {
-      assertThat(response1.protocol).isEqualTo(protocol)
+      assertThat(it.protocol).isEqualTo(protocol)
     }
 
     // Make a request for every thread in Jetty's thread pool to defeat races. Otherwise this test
