@@ -24,7 +24,7 @@ object FilesystemLoaderBackend : ResourceLoader.Backend() {
      * So we track the watchers on directories and the file(s) we are wanting to watch in each one.
      */
 
-    private val watcher: WatchService = FileSystems.getDefault().newWatchService()
+    private val watcher: WatchService by lazy { FileSystems.getDefault().newWatchService() }
     private val threadGroup = ThreadGroup("FilesystemLoader")
 
     // for testing access
