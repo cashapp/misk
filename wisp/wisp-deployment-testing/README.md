@@ -1,11 +1,11 @@
 # wisp-deployment-testing
 
-This module provides a [FakeEnvironmentVariableLoader](https://github.com/cashapp/misk/blob/master/wisp-deployment-testing/src/main/kotlin/wisp/deployment/FakeEnvironmentVariableLoader.kt)
-as an implementation of the [EnvironmentVariableLoader](https://github.com/cashapp/misk/blob/master/wisp-deployment/src/main/kotlin/wisp/deployment/EnvironmentVariableLoader.kt)
+This module provides a [FakeEnvironmentVariableLoader](https://github.com/cashapp/wisp/blob/master/wisp-deployment-testing/src/main/kotlin/wisp/deployment/FakeEnvironmentVariableLoader.kt)
+as an implementation of the [EnvironmentVariableLoader](https://github.com/cashapp/wisp/blob/master/wisp-deployment/src/main/kotlin/wisp/deployment/EnvironmentVariableLoader.kt)
 to use in tests to set Fake environment variables. Ideally, you should not use this package in any
 production code, but for test purposes only.
 
-Also see [wisp-deployment](https://github.com/cashapp/misk/tree/master/wisp-deployment).
+Also see [wisp-deployment](https://github.com/cashapp/wisp/tree/master/wisp-deployment).
 
 ## Usage
 

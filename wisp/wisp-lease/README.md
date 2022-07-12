@@ -5,7 +5,7 @@ it is run only in the application holding the lease.
 
 TODO: Link to real implementation of wisp-lease...
 
-See [wisp-lease-testing](https://github.com/cashapp/misk/tree/master/wisp-lease-testing) for a Fake
+See [wisp-lease-testing](https://github.com/cashapp/wisp/tree/master/wisp-lease-testing) for a Fake
 lease implementation for use in tests.
 
 ## Usage
