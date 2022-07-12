@@ -11,7 +11,7 @@ always loaded first, see: https://github.com/sksamuel/hoplite#property-sources f
 Secrets in config are automatically handled, see: https://github.com/sksamuel/hoplite#masked-values
 
 Note that if you are passing configuration fragments within Wisp, your config class should
-implement [Config](https://github.com/cashapp/misk/blob/master/wisp-config/src/main/kotlin/wisp/config/Config.kt).
+implement [Config](https://github.com/cashapp/wisp/blob/master/wisp-config/src/main/kotlin/wisp/config/Config.kt).
 
 ## Usage
 

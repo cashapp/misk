@@ -2,15 +2,15 @@
 
 This module provides information about the applications deployment and environment.
 
-[Deployment](https://github.com/cashapp/misk/blob/master/wisp-deployment/src/main/kotlin/wisp/deployment/Deployment.kt)
+[Deployment](https://github.com/cashapp/wisp/blob/master/wisp-deployment/src/main/kotlin/wisp/deployment/Deployment.kt)
 contains information on where the application is deployed, that is, in Production, Staging, Testing or
 Development environments.  
 
 Deployments can be created manually, or by examining an environment variable (default environment
 variable is ENVIRONMENT).
 
-Also see [wisp-deployment-testing](https://github.com/cashapp/misk/tree/master/wisp-deployment-testing)
-for the [FakeEnvironmentVariableLoader](https://github.com/cashapp/misk/blob/master/wisp-deployment-testing/src/main/kotlin/wisp/deployment/FakeEnvironmentVariableLoader.kt)
+Also see [wisp-deployment-testing](https://github.com/cashapp/wisp/tree/master/wisp-deployment-testing)
+for the [FakeEnvironmentVariableLoader](https://github.com/cashapp/wisp/blob/master/wisp-deployment-testing/src/main/kotlin/wisp/deployment/FakeEnvironmentVariableLoader.kt)
 to use in tests to set Fake environment variables.
 
 ## Usage

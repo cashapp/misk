@@ -2,10 +2,10 @@
 
 FeatureFlags implementation using [LaunchDarkly](https://launchdarkly.com/).
 
-See [wisp-feature](https://github.com/cashapp/misk/tree/master/wisp-feature) for more details on
+See [wisp-feature](https://github.com/cashapp/wisp/tree/master/wisp-feature) for more details on
 feature flags.
 
-See [wisp-feature-testing](https://github.com/cashapp/misk/tree/master/wisp-feature-testing) 
+See [wisp-feature-testing](https://github.com/cashapp/wisp/tree/master/wisp-feature-testing) 
 for details on a Fake implementation for use in tests.
 
 ## Usage

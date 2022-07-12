@@ -1,7 +1,7 @@
 # wisp-resource-loader-testing
 
 Includes a way to fake filesystem resources loaded
-via [wisp-resource-loader](https://github.com/cashapp/misk/tree/master/wisp-resource-loader).
+via [wisp-resource-loader](https://github.com/cashapp/wisp/tree/master/wisp-resource-loader).
 
 ## Usage
 
