@@ -5,6 +5,7 @@ Version 1.0.2 *(2022-07-13)*
 ----------------------------
 
 * fix: init file system watcher lazily
+* fix: kotlin1.7 support for the build
 
 
 Version 1.0.1 *(2022-07-08)*
