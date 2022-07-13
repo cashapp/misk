@@ -3,8 +3,8 @@ plugins {
   `java-library`
   
   // Needed to generate jooq test db classes
-  id("org.flywaydb.flyway") version "7.15.0"
-  id("nu.studer.jooq") version "6.0.1"
+  id("org.flywaydb.flyway") version "8.5.13"
+  id("nu.studer.jooq") version "7.1.1"
 }
 
 dependencies {
