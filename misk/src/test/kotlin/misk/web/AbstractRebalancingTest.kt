@@ -19,10 +19,7 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import wisp.logging.getLogger
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,17 +49,6 @@ abstract class AbstractRebalancingTest(
   @Test
   fun http2() {
     test(Protocol.HTTP_2)
-  }
-
-  @AfterEach
-  fun afterEach() {
-    if (jettyService.isRunning) {
-      try {
-        jettyService.stopAsync().awaitTerminated(1, TimeUnit.SECONDS)
-      } catch (ex: Exception) {
-        getLogger<AbstractRebalancingTest>().warn("Jetty Service did not shutdown properly", ex)
-      }
-    }
   }
 
   private fun test(protocol: Protocol) {
