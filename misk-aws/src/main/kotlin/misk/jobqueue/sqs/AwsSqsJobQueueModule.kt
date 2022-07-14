@@ -2,6 +2,7 @@ package misk.jobqueue.sqs
 
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
@@ -26,9 +27,10 @@ import misk.tasks.RepeatedTaskQueueConfig
 import misk.tasks.RepeatedTaskQueueFactory
 import wisp.lease.LeaseManager
 import javax.inject.Inject
+import kotlin.reflect.KFunction1
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
-class AwsSqsJobQueueModule(
+open class AwsSqsJobQueueModule(
   private val config: AwsSqsJobQueueConfig
 ) : KAbstractModule() {
   override fun configure() {
@@ -71,7 +73,7 @@ class AwsSqsJobQueueModule(
       .distinct()
       .forEach {
         regionSpecificClientBinder.addBinding(it).toProvider(
-          AmazonSQSProvider(config, it, false)
+          AmazonSQSProvider(config, it, false, ::configureSyncClient, ::configureAsyncClient)
         )
       }
     val regionSpecificClientBinderForReceiving =
@@ -82,7 +84,7 @@ class AwsSqsJobQueueModule(
       .distinct()
       .forEach {
         regionSpecificClientBinderForReceiving.addBinding(it)
-          .toProvider(AmazonSQSProvider(config, it, true))
+          .toProvider(AmazonSQSProvider(config, it, true, ::configureSyncClient, ::configureAsyncClient))
       }
 
     // Bind the configs for external queues
@@ -99,7 +101,7 @@ class AwsSqsJobQueueModule(
     credentials: AWSCredentialsProvider,
     features: FeatureFlags
   ): AmazonSQS {
-    return buildClient(appName, config, credentials, region, features)
+    return buildClient(appName, config, credentials, region, features, ::configureAsyncClient)
   }
 
   @Provides @Singleton @ForSqsReceiving
@@ -107,8 +109,12 @@ class AwsSqsJobQueueModule(
     region: AwsRegion,
     credentials: AWSCredentialsProvider
   ): AmazonSQS {
-    return buildReceivingClient(credentials, region)
+    return buildReceivingClient(credentials, region, ::configureSyncClient)
   }
+
+  open fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
+  private fun configureSyncClient(builder: AmazonSQSClientBuilder) = configureClient(builder)
+  private fun configureAsyncClient(builder: AmazonSQSAsyncClientBuilder) = configureClient(builder)
 
   @Provides @ForSqsHandling @Singleton
   fun consumerRepeatedTaskQueue(
@@ -127,7 +133,9 @@ class AwsSqsJobQueueModule(
   private class AmazonSQSProvider(
     val config: AwsSqsJobQueueConfig,
     val region: AwsRegion,
-    val forSqsReceiving: Boolean
+    val forSqsReceiving: Boolean,
+    val configureClient: (AmazonSQSClientBuilder) -> Unit,
+    val configureAsyncClient: (AmazonSQSAsyncClientBuilder) -> Unit
   ) : Provider<AmazonSQS> {
     @Inject lateinit var credentials: AWSCredentialsProvider
     @Inject lateinit var features: FeatureFlags
@@ -135,9 +143,9 @@ class AwsSqsJobQueueModule(
 
     override fun get(): AmazonSQS {
       return if (forSqsReceiving) {
-        buildReceivingClient(credentials, region)
+        buildReceivingClient(credentials, region, configureClient)
       } else {
-        buildClient(appName, config, credentials, region, features)
+        buildClient(appName, config, credentials, region, features, configureAsyncClient)
       }
     }
   }
@@ -146,10 +154,11 @@ class AwsSqsJobQueueModule(
     /** Build an unbuffered [AmazonSQS] client for receiving messages. */
     private fun buildReceivingClient(
       credentials: AWSCredentialsProvider,
-      region: AwsRegion
+      region: AwsRegion,
+      configureClient: (AmazonSQSClientBuilder) -> Unit
     ): AmazonSQS {
       // We don't need any buffering functionality for receiving; build a regular sync client.
-      return AmazonSQSClientBuilder.standard()
+      val builder = AmazonSQSClientBuilder.standard()
         .withCredentials(credentials)
         .withRegion(region.name)
         .withClientConfiguration(
@@ -161,7 +170,8 @@ class AwsSqsJobQueueModule(
             // We only do this for receiving, as sending does not have equivalent knobs.
             .withMaxConnections(Int.MAX_VALUE)
         )
-        .build()
+      configureClient(builder)
+      return builder.build()
     }
 
     /** Build a buffered [AmazonSQS] client for sending and deleting messages (job enqueue & ack respectively). */
@@ -170,14 +180,15 @@ class AwsSqsJobQueueModule(
       config: AwsSqsJobQueueConfig,
       credentials: AWSCredentialsProvider,
       region: AwsRegion,
-      features: FeatureFlags
+      features: FeatureFlags,
+      configureAsyncClient: (AmazonSQSAsyncClientBuilder) -> Unit,
     ): AmazonSQS {
       // Use a buffered client for sending, to group enqueues and deletes into batches.
       // The trade-off is fewer network calls (which costs less $ since SQS cost is directly
       // proportional to API calls) at a slightly higher individual call duration.
       // Every call individual SendMessage and DeleteMessage request will wait up to 200ms
       // for similar requests and sent in a batch. Batches are immediately sent once full.
-      val asyncClient = AmazonSQSAsyncClientBuilder.standard()
+      val asyncClientBuilder = AmazonSQSAsyncClientBuilder.standard()
         .withCredentials(credentials)
         .withRegion(region.name)
         .withClientConfiguration(
@@ -186,7 +197,8 @@ class AwsSqsJobQueueModule(
             .withConnectionTimeout(config.sqs_sending_connect_timeout_ms)
             .withRequestTimeout(config.sqs_sending_request_timeout_ms)
         )
-        .build()
+      configureAsyncClient(asyncClientBuilder)
+      val asyncClient = asyncClientBuilder.build()
 
       // NB: It's unlikely this client will be used for receiving (i.e. to issue ReceiveMessage
       // requests) but turn off pre-fetching in any case. Without pre-fetching, receives are

@@ -69,9 +69,11 @@ public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
 	public final fun getTask_queue ()Lmisk/tasks/RepeatedTaskQueueConfig;
 }
 
-public final class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModule {
+public class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobQueueModule$Companion;
 	public fun <init> (Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)V
+	protected fun configure ()V
+	public fun configureClient (Lcom/amazonaws/client/builder/AwsClientBuilder;)V
 	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)Lmisk/tasks/RepeatedTaskQueue;
 	public final fun provideSQSClient (Ljava/lang/String;Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;Lmisk/feature/FeatureFlags;)Lcom/amazonaws/services/sqs/AmazonSQS;
 	public final fun provideSQSClientForReceiving (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/sqs/AmazonSQS;
@@ -173,8 +175,10 @@ public final class misk/jobqueue/sqs/StaticDeadLetterQueueProvider : misk/jobque
 	public fun deadLetterQueueFor (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
 }
 
-public final class misk/s3/RealS3Module : misk/inject/KAbstractModule {
+public class misk/s3/RealS3Module : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	protected fun configure ()V
+	public fun configureClient (Lcom/amazonaws/services/s3/AmazonS3ClientBuilder;)V
 	public final fun provideS3 (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/s3/AmazonS3;
 }
 

@@ -8,7 +8,7 @@ import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import javax.inject.Singleton
 
-class RealS3Module : KAbstractModule() {
+open class RealS3Module : KAbstractModule() {
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
     requireBinding<AwsRegion>()
@@ -16,10 +16,13 @@ class RealS3Module : KAbstractModule() {
 
   @Provides @Singleton
   fun provideS3(awsRegion: AwsRegion, awsCredentialsProvider: AWSCredentialsProvider): AmazonS3 {
-    return AmazonS3ClientBuilder
+    val builder = AmazonS3ClientBuilder
       .standard()
       .withRegion(awsRegion.name)
       .withCredentials(awsCredentialsProvider)
-      .build()
+    configureClient(builder)
+    return builder.build()
   }
+
+  open fun configureClient(builder: AmazonS3ClientBuilder) {}
 }
