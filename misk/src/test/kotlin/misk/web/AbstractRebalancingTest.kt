@@ -18,6 +18,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.internal.closeQuietly
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -86,6 +87,7 @@ abstract class AbstractRebalancingTest(
     }
 
     checkResponse(response1, connections)
+    connections.forEach { it.socket().closeQuietly() }
   }
 
   abstract fun checkResponse(response: Response, connections: Set<Connection>)
