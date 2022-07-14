@@ -31,7 +31,7 @@ dependencies {
 // Needed to generate jooq test db classes
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:8.5.13")
+    classpath("org.flywaydb:flyway-gradle-plugin:9.0.0")
     classpath(Dependencies.mysql)
   }
 }
