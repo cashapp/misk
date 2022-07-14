@@ -2,6 +2,7 @@ package misk.dynamodb
 
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
@@ -18,6 +19,7 @@ import misk.exceptions.dynamodb.DynamoDbExceptionMapperModule
 import misk.cloud.aws.AwsRegion
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import java.net.URI
 
 /**
  * Install this module to have access to an AmazonDynamoDB client. This can be
@@ -25,9 +27,9 @@ import misk.inject.KAbstractModule
  *
  * @param requiredTableTypes a list of mapper classes annotated [DynamoDBTable].
  */
-class RealDynamoDbModule constructor(
+open class RealDynamoDbModule constructor(
   private val clientConfig: ClientConfiguration = ClientConfiguration(),
-  vararg requiredTableTypes: KClass<*>
+  vararg requiredTableTypes: KClass<*>,
 ) : KAbstractModule() {
   private val requiredTables: List<RequiredDynamoDbTable> = requiredTableTypes.map {
     val annotation = it.findAnnotation<DynamoDBTable>()
@@ -52,26 +54,32 @@ class RealDynamoDbModule constructor(
     awsRegion: AwsRegion,
     awsCredentialsProvider: AWSCredentialsProvider
   ): AmazonDynamoDB {
-    return AmazonDynamoDBClientBuilder
+    val builder = AmazonDynamoDBClientBuilder
       .standard()
       .withRegion(awsRegion.name)
       .withCredentials(awsCredentialsProvider)
       .withClientConfiguration(clientConfig)
-      .build()
+    configureClient(builder)
+    return builder.build()
   }
+
+  open fun configureClient(builder: AmazonDynamoDBClientBuilder) {}
 
   @Provides @Singleton
   fun providesAmazonDynamoDBStreams(
     awsRegion: AwsRegion,
     awsCredentialsProvider: AWSCredentialsProvider
   ): AmazonDynamoDBStreams {
-    return AmazonDynamoDBStreamsClientBuilder
+    val builder = AmazonDynamoDBStreamsClientBuilder
       .standard()
       .withRegion(awsRegion.name)
       .withCredentials(awsCredentialsProvider)
       .withClientConfiguration(clientConfig)
-      .build()
+    configureStreamsClient(builder)
+    return builder.build()
   }
+  
+  open fun configureStreamsClient(builder: AmazonDynamoDBStreamsClientBuilder) {}
 
   /** We don't currently perform any startup work to connect to DynamoDB. */
   @Singleton
