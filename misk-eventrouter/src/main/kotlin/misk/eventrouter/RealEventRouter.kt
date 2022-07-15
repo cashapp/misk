@@ -177,6 +177,7 @@ internal class RealEventRouter @Inject constructor() : EventRouter {
       is SocketEvent.Unsubscribe -> {
         remoteSubscribers.get(socketEvent.topic).remove(action.webSocket)
       }
+      else -> Unit
     }
   }
 

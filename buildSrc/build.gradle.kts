@@ -1,9 +1,8 @@
-import org.gradle.kotlin.dsl.`kotlin-dsl`
-
 plugins {
-  `kotlin-dsl`
+  kotlin("jvm") version "1.7.0"
 }
 
 repositories {
-  jcenter()
+  maven(url = "https://plugins.gradle.org/m2/")
+  mavenCentral()
 }
