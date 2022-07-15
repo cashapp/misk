@@ -65,6 +65,7 @@ internal class AggregateListener(
         BindPolicy.PREPEND -> eventListenerRegistry.prependListeners(eventType, this)
         BindPolicy.REPLACE -> eventListenerRegistry.setListeners(eventType, this)
         BindPolicy.APPEND -> eventListenerRegistry.appendListeners(eventType, this)
+        else -> Unit
       }
     }
   }
