@@ -56,7 +56,7 @@ class StartDatabaseService(
   fun init(): StartDatabaseService {
     servers = CacheBuilder.newBuilder()
       .removalListener<CacheKey, Optional<DatabaseServer>> { entry ->
-        entry.value.ifPresent { it.stop() }
+        entry.value?.ifPresent { it.stop() }
       }
       .build(CacheLoader.from { config: CacheKey? ->
         Optional.ofNullable(config?.let {
