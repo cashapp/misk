@@ -12,6 +12,7 @@ public abstract interface class misk/aws2/dynamodb/DynamoDbService : com/google/
 }
 
 public class misk/aws2/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
 	public fun <init> (Lsoftware/amazon/awssdk/core/client/config/ClientOverrideConfiguration;Ljava/util/List;Ljava/net/URI;)V
 	public synthetic fun <init> (Lsoftware/amazon/awssdk/core/client/config/ClientOverrideConfiguration;Ljava/util/List;Ljava/net/URI;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected fun configure ()V

@@ -23,7 +23,7 @@ open class RealDynamoDbModule constructor(
   private val clientOverrideConfig: ClientOverrideConfiguration =
     ClientOverrideConfiguration.builder().build(),
   private val requiredTables: List<RequiredDynamoDbTable> = listOf(),
-  private val endpointOverride: URI?
+  private val endpointOverride: URI? = null,
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<AwsCredentialsProvider>()
