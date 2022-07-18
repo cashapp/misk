@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+Version 1.0.3 *(2022-07-19)*
+----------------------------
+
+* Drop versions from kotlin BOM-listed artifacts
+* Stop exporting the kotlinBom as an api dependency
+* Remove unused dependencies
+
 Version 1.0.2 *(2022-07-13)*
 ----------------------------
 
