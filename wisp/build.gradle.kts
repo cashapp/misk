@@ -9,9 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath(Dependencies.kotlinAllOpenPlugin)
         classpath(Dependencies.kotlinGradlePlugin)
-        classpath(Dependencies.kotlinNoArgPlugin)
         classpath(Dependencies.junitGradlePlugin)
         classpath(Dependencies.mavenPublishGradlePlugin)
         classpath(Dependencies.protobufGradlePlugin)
