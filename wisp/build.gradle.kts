@@ -9,9 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath(Dependencies.kotlinAllOpenPlugin)
         classpath(Dependencies.kotlinGradlePlugin)
-        classpath(Dependencies.kotlinNoArgPlugin)
         classpath(Dependencies.junitGradlePlugin)
         classpath(Dependencies.mavenPublishGradlePlugin)
         classpath(Dependencies.protobufGradlePlugin)
@@ -55,8 +53,17 @@ subprojects {
             add("api", enforcedPlatform(project(":wisp-bom")))
             add("api", platform(Dependencies.grpcBom))
             add("api", platform(Dependencies.jacksonBom))
-            add("api", platform(Dependencies.kotlinBom))
             add("api", platform(Dependencies.nettyBom))
+
+            // The kotlin API surface used in this library is not exposed via
+            // the external API, so we shouldn't be forcing downstream consumers
+            // to use a particular kotlin version. Doing this can cause compilation
+            // failures for downstream repositories that want to use wisp APIs
+            // in their buildscripts or plugins but still want to use an older
+            // version of the kotlin compiler. Use 'implementation' instead of 'api'
+            // so that we're not forcing downstream consumers to adopt our kotlin
+            // BOM versions.
+            add("implementation", platform(Dependencies.kotlinBom))
         }
 
         tasks.withType<GenerateModuleMetadata> {
