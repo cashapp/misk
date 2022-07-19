@@ -107,9 +107,7 @@ class RateLimiter private constructor(
     }
   }
 
-  private fun getPermitsRemaining(
-    unit: TimeUnit,
-    timeout: Long,
+  fun getPermitsRemaining(
     permitCount: Long
   ): Long {
     val allocatedUntil = atomicAllocatedUntil.get()
@@ -119,7 +117,6 @@ class RateLimiter private constructor(
     if (permitCount > maxRequestSize) return 0L
 
     val now = ticker.read()
-    val timeoutNs = unit.toNanos(timeout)
 
     // If this acquire succeeds, this is the time we're consuming permits through.
     val newAllocatedUntil = maxOf(allocatedUntil, now) +
