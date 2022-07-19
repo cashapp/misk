@@ -107,6 +107,27 @@ class RateLimiter private constructor(
     }
   }
 
+  private fun getPermitsRemaining(
+    unit: TimeUnit,
+    timeout: Long,
+    permitCount: Long
+  ): Long {
+    val allocatedUntil = atomicAllocatedUntil.get()
+    val permitsPerSecond = this.permitsPerSecond // Sample this volatile only once.
+
+    val maxRequestSize = windowSizeNs.nanosToPermits(permitsPerSecond)
+    if (permitCount > maxRequestSize) return 0L
+
+    val now = ticker.read()
+    val timeoutNs = unit.toNanos(timeout)
+
+    // If this acquire succeeds, this is the time we're consuming permits through.
+    val newAllocatedUntil = maxOf(allocatedUntil, now) +
+      permitCount.permitsToNanos(permitsPerSecond)
+
+    return newAllocatedUntil
+  }
+
   private fun Long.nanosToPermits(permitsPerSecond: Long) = this * permitsPerSecond / 1_000_000_000L
 
   private fun Long.permitsToNanos(permitsPerSecond: Long) = this * 1_000_000_000L / permitsPerSecond
