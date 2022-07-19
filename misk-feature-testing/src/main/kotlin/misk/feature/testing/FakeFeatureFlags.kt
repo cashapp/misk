@@ -1,13 +1,11 @@
 package misk.feature.testing
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.squareup.moshi.Moshi
-import misk.feature.FeatureService
 import misk.feature.Attributes
 import misk.feature.DynamicConfig
 import misk.feature.Feature
 import misk.feature.FeatureFlags
-import misk.feature.TrackerReference
+import misk.feature.FeatureService
 import misk.feature.toMisk
 import wisp.feature.BooleanFeatureFlag
 import wisp.feature.DoubleFeatureFlag
@@ -18,14 +16,13 @@ import wisp.feature.JsonFeatureFlag
 import wisp.feature.StringFeatureFlag
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
 @Singleton
-class FakeFeatureFlags private constructor(
+class FakeFeatureFlags @Inject constructor(
   val delegate: wisp.feature.testing.FakeFeatureFlags
 ) : AbstractIdleService(),
   FeatureFlags,
@@ -35,13 +32,6 @@ class FakeFeatureFlags private constructor(
     const val KEY = "fake_dynamic_flag"
     val defaultAttributes = Attributes()
   }
-
-  constructor() : this(wisp.feature.testing.FakeFeatureFlags())
-
-  @Inject
-  constructor(moshi: Provider<Moshi>) : this(
-    wisp.feature.testing.FakeFeatureFlags { moshi.get() }
-  )
 
   override fun startUp() {}
   override fun shutDown() {}
