@@ -1,8 +1,7 @@
 public final class misk/feature/testing/FakeFeatureFlags : com/google/common/util/concurrent/AbstractIdleService, misk/feature/DynamicConfig, misk/feature/FeatureFlags, misk/feature/FeatureService {
 	public static final field Companion Lmisk/feature/testing/FakeFeatureFlags$Companion;
 	public static final field KEY Ljava/lang/String;
-	public fun <init> ()V
-	public fun <init> (Ljavax/inject/Provider;)V
+	public fun <init> (Lwisp/feature/testing/FakeFeatureFlags;)V
 	public fun get (Lwisp/feature/BooleanFeatureFlag;)Z
 	public fun get (Lwisp/feature/DoubleFeatureFlag;)D
 	public fun get (Lwisp/feature/EnumFeatureFlag;)Ljava/lang/Enum;

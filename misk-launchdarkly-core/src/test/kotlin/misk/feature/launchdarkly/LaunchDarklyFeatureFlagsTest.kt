@@ -33,7 +33,8 @@ import wisp.launchdarkly.LaunchDarklyFeatureFlags as WispLaunchDarklyFeatureFlag
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
   private val moshi = defaultKotlinMoshi
-  private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(client, moshi)
+  private val wispLaunchDarklyFeatureFlags = wisp.launchdarkly.LaunchDarklyFeatureFlags(client, moshi)
+  private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(wispLaunchDarklyFeatureFlags)
   private val logCollector = WispQueuedLogCollector()
 
   @BeforeEach

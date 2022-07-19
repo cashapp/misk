@@ -5,6 +5,7 @@ import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
+import com.squareup.moshi.Moshi
 import misk.ServiceModule
 import misk.client.HttpClientSSLConfig
 import misk.feature.FeatureService
@@ -16,8 +17,10 @@ import misk.security.ssl.SslLoader
 import wisp.config.Config
 import misk.feature.DynamicConfig
 import misk.feature.FeatureFlags
+import misk.inject.asSingleton
 import java.net.URI
 import java.time.Duration
+import javax.inject.Inject
 import javax.inject.Provider
 import javax.net.ssl.X509TrustManager
 import kotlin.reflect.KClass
@@ -30,6 +33,17 @@ class LaunchDarklyModule(
   private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
   override fun configure() {
+    val wispLaunchDarklyFeatureFlagsKey = wisp.launchdarkly.LaunchDarklyFeatureFlags::class.toKey(qualifier)
+    bind(wispLaunchDarklyFeatureFlagsKey).toProvider(
+      object : Provider<wisp.launchdarkly.LaunchDarklyFeatureFlags> {
+        @Inject private lateinit var ldClient: LDClientInterface
+        @Inject private lateinit var moshi: Moshi
+        override fun get(): wisp.launchdarkly.LaunchDarklyFeatureFlags =
+          wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi)
+      }
+    ).asSingleton()
+    bind(wisp.feature.FeatureFlags::class.toKey(qualifier)).to(wispLaunchDarklyFeatureFlagsKey)
+
     val key = LaunchDarklyFeatureFlags::class.toKey(qualifier)
     bind(FeatureFlags::class.toKey(qualifier)).to(key)
     bind(FeatureService::class.toKey(qualifier)).to(key)

@@ -1,21 +1,10 @@
 package misk.feature.launchdarkly
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.launchdarkly.sdk.EvaluationDetail
-import com.launchdarkly.sdk.EvaluationReason
-import com.launchdarkly.sdk.LDUser
-import com.launchdarkly.sdk.LDValue
-import com.launchdarkly.sdk.server.interfaces.LDClientInterface
-import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
-import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.Moshi
-import wisp.feature.FeatureFlagValidation
-import misk.feature.FeatureService
-import mu.KotlinLogging
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
-import misk.feature.TrackerReference
+import misk.feature.FeatureService
 import misk.feature.toMisk
 import wisp.feature.BooleanFeatureFlag
 import wisp.feature.DoubleFeatureFlag
@@ -23,7 +12,6 @@ import wisp.feature.EnumFeatureFlag
 import wisp.feature.IntFeatureFlag
 import wisp.feature.JsonFeatureFlag
 import wisp.feature.StringFeatureFlag
-import wisp.feature.fromSafeJson
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,15 +21,9 @@ import javax.inject.Singleton
  * See https://docs.launchdarkly.com/docs/java-sdk-reference documentation.
  */
 @Singleton
-class LaunchDarklyFeatureFlags private constructor (
+class LaunchDarklyFeatureFlags @Inject constructor (
   private val delegate: wisp.launchdarkly.LaunchDarklyFeatureFlags
 ) : AbstractIdleService(), FeatureFlags, FeatureService {
-  @Inject
-  constructor(
-    ldClient: LDClientInterface,
-    moshi: Moshi
-  ) : this(wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi))
-
   override fun startUp() { delegate.startUp() }
   override fun shutDown() { delegate.shutDown() }
 

@@ -30,18 +30,30 @@ class FakeFeatureFlagsModule(
 
   override fun configure() {
     requireBinding<Moshi>()
+
+    val wispFakeFeatureFlagsKey = wisp.feature.testing.FakeFeatureFlags::class.toKey(qualifier)
+    bind(wispFakeFeatureFlagsKey).toProvider(
+      object : Provider<wisp.feature.testing.FakeFeatureFlags> {
+        @Inject private lateinit var moshi: Provider<Moshi>
+        override fun get(): wisp.feature.testing.FakeFeatureFlags =
+          wisp.feature.testing.FakeFeatureFlags(moshi.get())
+      }
+    ).asSingleton()
+    bind(wisp.feature.FeatureFlags::class.toKey(qualifier)).to(wispFakeFeatureFlagsKey)
+    val wispFakeFeatureFlags = getProvider(wispFakeFeatureFlagsKey)
+
     newMultibinder<FakeFeatureFlagsOverride>()
     overrides.forEach { install(it) }
+
     val key = FakeFeatureFlags::class.toKey(qualifier)
     val overridesType =
       parameterizedType<Set<*>>(FakeFeatureFlagsOverride::class.java).typeLiteral() as TypeLiteral<Set<FakeFeatureFlagsOverride>>
     val overrides = getProvider(overridesType.toKey(qualifier))
-    bind(key).toProvider(object : Provider<FakeFeatureFlags> {
-      @Inject private lateinit var moshi: Provider<Moshi>
-      override fun get() = FakeFeatureFlags(moshi).apply {
+    bind(key).toProvider {
+      FakeFeatureFlags(wispFakeFeatureFlags.get()).apply {
         overrides.get().forEach { it.overrideLambda(this) }
       }
-    }).asSingleton()
+    }.asSingleton()
 
     bind(FeatureFlags::class.toKey(qualifier)).to(key)
     bind(FeatureService::class.toKey(qualifier)).to(key)
