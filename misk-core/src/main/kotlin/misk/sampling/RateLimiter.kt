@@ -108,21 +108,42 @@ class RateLimiter private constructor(
   }
 
   fun getPermitsRemaining(
-    permitCount: Long
+    unit: TimeUnit,
+    permitCount: Long,
+    timeout: Long
   ): Long {
-    val allocatedUntil = atomicAllocatedUntil.get()
-    val permitsPerSecond = this.permitsPerSecond // Sample this volatile only once.
+    while (true) {
+      val allocatedUntil = atomicAllocatedUntil.get()
+      val permitsPerSecond = this.permitsPerSecond // Sample this volatile only once.
 
-    val maxRequestSize = windowSizeNs.nanosToPermits(permitsPerSecond)
-    if (permitCount > maxRequestSize) return 0L
+      val maxRequestSize = windowSizeNs.nanosToPermits(permitsPerSecond)
+      if (permitCount > maxRequestSize) return 0L
 
-    val now = ticker.read()
+      val now = ticker.read()
 
-    // If this acquire succeeds, this is the time we're consuming permits through.
-    val newAllocatedUntil = maxOf(allocatedUntil, now) +
-      permitCount.permitsToNanos(permitsPerSecond)
+      // If this acquire succeeds, this is the time we're consuming permits through.
+      val newAllocatedUntil = maxOf(allocatedUntil, now) +
+        permitCount.permitsToNanos(permitsPerSecond)
+      println(newAllocatedUntil)
 
-    return newAllocatedUntil
+      val sleepNs = newAllocatedUntil - now - windowSizeNs
+      println("windowSizeNs $windowSizeNs")
+      println("sleepNs $sleepNs")
+
+      val timeoutNs = unit.toNanos(timeout)
+
+      // We'd have to sleep too long for this number of permits. Fail fast.
+      if (sleepNs > timeoutNs) return 0L
+
+      // Try to consume permits! If atomicAllocatedUntil changed, we lost a race; loop to try again.
+      if (!atomicAllocatedUntil.compareAndSet(allocatedUntil, newAllocatedUntil)) continue
+
+      val permitsAllowed = permitCount.permitsToNanos(permitCount)
+      //The total ns + time borrowed (timeoutNs) - ns remaining are converted into permits
+      val permitsRemaining = (permitsAllowed + timeoutNs - newAllocatedUntil) / permitCount.permitsToNanos(permitsPerSecond)
+
+      return if (permitsRemaining < 0L) 0L else permitsRemaining
+    }
   }
 
   private fun Long.nanosToPermits(permitsPerSecond: Long) = this * permitsPerSecond / 1_000_000_000L

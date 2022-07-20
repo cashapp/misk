@@ -66,13 +66,13 @@ class RateLimiterTest {
   fun `consumer faster than target rate`() {
     rateLimiter.permitsPerSecond = 2L
 
-    assertThat(rateLimiter.tryAcquire(1L, 499, TimeUnit.MILLISECONDS)).isTrue()
+    assertThat(rateLimiter.tryAcquire(1L, 0, TimeUnit.MILLISECONDS)).isTrue()
     assertThat(ticker.nowMs).isEqualTo(0L)
 
-    assertThat(rateLimiter.tryAcquire(1L, 499, TimeUnit.MILLISECONDS)).isTrue()
+    assertThat(rateLimiter.tryAcquire(1L, 0, TimeUnit.MILLISECONDS)).isTrue()
     assertThat(ticker.nowMs).isEqualTo(0L)
 
-    assertThat(rateLimiter.tryAcquire(1L, 499, TimeUnit.MILLISECONDS)).isFalse()
+    assertThat(rateLimiter.tryAcquire(1L, 0, TimeUnit.MILLISECONDS)).isFalse()
     assertThat(ticker.nowMs).isEqualTo(0L)
   }
 
@@ -121,5 +121,44 @@ class RateLimiterTest {
 
     assertThat(rateLimiter.tryAcquire(3L, 2_000, TimeUnit.MILLISECONDS)).isFalse()
     assertThat(ticker.nowMs).isEqualTo(0L)
+  }
+
+  @Test
+  fun `get permits remaining at target rate`() {
+    rateLimiter.permitsPerSecond = 2L
+
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 500)).isEqualTo(2L)
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 500)).isEqualTo(1L)
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 500)).isEqualTo(0L)
+
+    //Exhausted
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 500)).isEqualTo(0L)
+  }
+
+  @Test
+  fun `get permits remaining faster than target rate`() {
+    rateLimiter.permitsPerSecond = 2L
+
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 0)).isEqualTo(1L)
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 0)).isEqualTo(0L)
+
+    //Exhausted
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 0)).isEqualTo(0L)
+  }
+
+  @Test
+  fun `get permits remaining as rate limit increases`() {
+    rateLimiter.permitsPerSecond = 2L
+
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 100)).isEqualTo(1L)
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 100)).isEqualTo(0L)
+
+    //Exhausted
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 100)).isEqualTo(0L)
+
+    rateLimiter.permitsPerSecond = 20L
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 100)).isEqualTo(1L)
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 1L, 0)).isEqualTo(0L)
+
   }
 }
