@@ -1,23 +1,22 @@
-import React, { useState } from "react"
+import React, {useState} from "react"
 import {
   Button,
-  Card,
   Collapse,
   HTMLSelect,
-  Tooltip,
   Icon,
   InputGroup,
-  NumericInput
+  NumericInput,
+  Tooltip
 } from "@blueprintjs/core"
 import _ from "lodash"
-import { ProtoField, WebActionMetadata } from "./types"
-import { IOptionProps } from "@blueprintjs/core/lib/esm/common/props"
+import {ProtoField, WebActionMetadata} from "./types"
+import {IOptionProps} from "@blueprintjs/core/lib/esm/common/props"
 
 export type FormComponentProps<T> = {
   webActionMetadata: WebActionMetadata
   field: ProtoField
   value: T
-  onChange: (value: T, remove?) => void
+  onChange: (value: T) => void
 }
 
 export function FormComponent(props: FormComponentProps<any>) {
