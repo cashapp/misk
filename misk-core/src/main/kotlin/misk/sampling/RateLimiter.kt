@@ -124,11 +124,8 @@ class RateLimiter private constructor(
       // If this acquire succeeds, this is the time we're consuming permits through.
       val newAllocatedUntil = maxOf(allocatedUntil, now) +
         permitCount.permitsToNanos(permitsPerSecond)
-      println(newAllocatedUntil)
 
       val sleepNs = newAllocatedUntil - now - windowSizeNs
-      println("windowSizeNs $windowSizeNs")
-      println("sleepNs $sleepNs")
 
       val timeoutNs = unit.toNanos(timeout)
 
