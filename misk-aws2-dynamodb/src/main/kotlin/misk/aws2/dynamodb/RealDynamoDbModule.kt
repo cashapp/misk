@@ -13,14 +13,17 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder
+import java.net.URI
 
 /**
  * Install this module to have access to a DynamoDbClient.
  */
-class RealDynamoDbModule constructor(
+open class RealDynamoDbModule constructor(
   private val clientOverrideConfig: ClientOverrideConfiguration =
     ClientOverrideConfiguration.builder().build(),
-  private val requiredTables: List<RequiredDynamoDbTable> = listOf()
+  private val requiredTables: List<RequiredDynamoDbTable> = listOf(),
+  private val endpointOverride: URI? = null,
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<AwsCredentialsProvider>()
@@ -36,12 +39,18 @@ class RealDynamoDbModule constructor(
     awsRegion: AwsRegion,
     awsCredentialsProvider: AwsCredentialsProvider
   ): DynamoDbClient {
-    return DynamoDbClient.builder()
+    val builder = DynamoDbClient.builder()
       .region(Region.of(awsRegion.name))
       .credentialsProvider(awsCredentialsProvider)
       .overrideConfiguration(clientOverrideConfig)
-      .build()
+      if (endpointOverride != null) {
+        builder.endpointOverride(endpointOverride)
+      }
+    configureClient(builder)
+    return builder.build()
   }
+
+  open fun configureClient(builder: DynamoDbClientBuilder) {}
 
   @Provides @Singleton
   fun provideRequiredTables(): List<RequiredDynamoDbTable> = requiredTables

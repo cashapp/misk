@@ -23,9 +23,12 @@ public final class misk/dynamodb/DynamoDbHealthCheck$Companion {
 public abstract interface class misk/dynamodb/DynamoDbService : com/google/common/util/concurrent/Service {
 }
 
-public final class misk/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule {
+public class misk/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule {
 	public fun <init> (Lcom/amazonaws/ClientConfiguration;[Lkotlin/reflect/KClass;)V
 	public synthetic fun <init> (Lcom/amazonaws/ClientConfiguration;[Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	protected fun configure ()V
+	public fun configureClient (Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBClientBuilder;)V
+	public fun configureStreamsClient (Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBStreamsClientBuilder;)V
 	public final fun provideRequiredTables ()Ljava/util/List;
 	public final fun providesAmazonDynamoDB (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;
 	public final fun providesAmazonDynamoDBStreams (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBStreams;
