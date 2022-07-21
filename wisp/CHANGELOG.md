@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+Version 1.0.5 *(2022-07-21)*
+----------------------------
+
+* Gradle 7.5
+* Revert io.micrometer:micrometer-registry-prometheus to 1.8.4
+
+
 Version 1.0.4 *(2022-07-21)*
 ----------------------------
 
