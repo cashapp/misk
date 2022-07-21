@@ -1,14 +1,8 @@
-import React, { useState } from "react"
-import {
-  Button,
-  FormGroup,
-  InputGroup,
-  H5,
-  HTMLSelect,
-  NumericInput
-} from "@blueprintjs/core"
+import React, {useEffect, useState} from "react"
 import _ from "lodash"
-import { WebActionMetadata, ProtoField } from "./types"
+import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core"
+import { WebActionMetadata } from "./types"
+import { FormComponent } from "./WebActionSendRequestFormComponents"
 import axios from "axios"
 import { AppToaster } from "./Toaster"
 
@@ -17,18 +11,32 @@ interface Props {
 }
 
 export default function WebActionSendRequest({ webActionMetadata }: Props) {
-  const [request, setRequest] = useState<any>({})
+  const [requestInput, setRequestInput] = useState<any>(null)   // request view model
+  const [requestRaw, setRequestRaw] = useState<any>({})         // request raw data
   const [loading, setLoading] = useState(false)
   const [response, setResponse] = useState("")
   const [url, setUrl] = useState(webActionMetadata.pathPattern)
-  const requestType = webActionMetadata.types[webActionMetadata.requestType]
+
+  useEffect(() => {
+    const requestInputAsString = JSON.stringify(requestInput, (key, val) => {
+      // filter out nulls
+      if (_.isNull(val)) return
+      if (Array.isArray(val)) return _.reject(val, _.isNull)
+      return val
+    }, 2)
+    if (_.isEmpty(requestInputAsString)) {
+      setRequestRaw({})
+    } else {
+      setRequestRaw(JSON.parse(requestInputAsString))
+    }
+  }, [requestInput])
 
   const handleSubmit = () => {
     setLoading(true)
     let axiosRequest
 
     if (webActionMetadata.httpMethod === "POST") {
-      axiosRequest = axios.post(url, request)
+      axiosRequest = axios.post(url, requestRaw)
     } else if (webActionMetadata.httpMethod === "GET") {
       axiosRequest = axios.get(url)
     } else {
@@ -44,107 +52,31 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
         setResponse(JSON.stringify(response.data, null, 2))
       })
       .catch(e => {
-        setResponse(e.message)
+        if (e.response) {
+          setResponse(JSON.stringify(_.pick(e.response, "data", "status", "statusText"), null, 2))
+        } else {
+          setResponse(e.message)
+        }
       })
       .finally(() => {
         setLoading(false)
       })
   }
 
-  const handleOnChange = (path: string[], value: any) => {
-    setRequest((currentValue: any) => {
-      const copyOfState = _.clone(currentValue)
-      _.set(copyOfState, path, value)
-      return copyOfState
-    })
-  }
-
-  const toFormElement = (field: ProtoField, path: string[]) => {
-    if (field.repeated) {
-      return (
-        <p style={{ color: "red" }}>
-          Repeated fields aren't supported currently.
-        </p>
-      )
-    }
-
-    if (field.type === "String" || field.type === "ByteString") {
-      return (
-        <FormGroup label={`${field.name} (${field.type})`}>
-          <InputGroup
-            placeholder={field.type}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleOnChange(path.concat(field.name), e.currentTarget.value)
-            }
-          />
-        </FormGroup>
-      )
-    }
-
-    if (field.type === "Int" || field.type === "Long") {
-      return (
-        <FormGroup label={`${field.name} (${field.type})`}>
-          <NumericInput
-            buttonPosition="none"
-            placeholder={field.type}
-            onValueChange={(e: number) =>
-              handleOnChange(path.concat(field.name), e)
-            }
-          />
-        </FormGroup>
-      )
-    }
-
-    if (field.type === "Boolean") {
-      return (
-        <FormGroup label={`${field.name} (${field.type})`}>
-          <HTMLSelect
-            options={["", "True", "False"]}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              handleOnChange(
-                path.concat(field.name),
-                e.currentTarget.value === "True"
-              )
-            }
-          />
-        </FormGroup>
-      )
-    }
-
-    if (field.type.startsWith("Enum")) {
-      // Looks like Enum<com.squareup.protos.cash.loanstar.data.AutoPay,ENABLED,DISABLED>.
-      const enumValues = field.type
-        .replace(">", "")
-        .substring(5)
-        .split(",")
-      const protoName = enumValues.shift()
-      enumValues.unshift("") // Add a blank value to use to not include in the request.
-      return (
-        <FormGroup label={`${field.name} (${protoName})`}>
-          <HTMLSelect
-            options={enumValues}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              handleOnChange(path.concat(field.name), e.currentTarget.value)
-            }
-          />
-        </FormGroup>
-      )
-    }
-
-    const complexType = webActionMetadata.types[field.type]
-    if (!complexType) {
-      return (
-        <p style={{ color: "red" }}>Unsupported field type {field.type}.</p>
-      )
-    }
+  const requestBodyForm = () => {
     return (
-      <FormGroup label={`${field.name} (${field.type})`}>
-        <div style={{ marginLeft: "8px" }}>
-          {complexType.fields.map(subField =>
-            toFormElement(subField, path.concat(field.name))
-          )}
-        </div>
-      </FormGroup>
+      <FormComponent
+        webActionMetadata={webActionMetadata}
+        field={{
+          name: "request",
+          type: webActionMetadata.requestType,
+          repeated: false
+        }}
+        onChange={value => {
+          setRequestInput(value)
+        }}
+        value={requestInput}
+      />
     )
   }
 
@@ -157,9 +89,8 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
       }}
     >
       <div>
-        <H5>Request</H5>
-        {requestType ? (
-          requestType.fields.map(field => toFormElement(field, []))
+        {webActionMetadata.types[webActionMetadata.requestType] ? (
+          requestBodyForm()
         ) : (
           <p>No request fields found.</p>
         )}
@@ -181,6 +112,7 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
           style={{
             display: "flex",
             alignItems: "center",
+            flexWrap: "wrap",
             justifyContent: "space-between"
           }}
         >
@@ -191,7 +123,7 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
               small={true}
               minimal={true}
               style={{ margin: 0 }}
-              onClick={() => setRequest({})}
+              onClick={() => setRequestInput({})}
             >
               Clear Request
             </Button>
@@ -207,10 +139,9 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
             </Button>
           </div>
         </div>
-        <pre>{JSON.stringify(request, null, 2)}</pre>
-
+        <pre style={{whiteSpace:"pre-wrap"}}>{JSON.stringify(requestRaw, null, 2)}</pre>
         <H5>Response</H5>
-        <pre>{response}</pre>
+        <pre style={{whiteSpace:"pre-wrap"}}>{response}</pre>
       </div>
     </div>
   )
