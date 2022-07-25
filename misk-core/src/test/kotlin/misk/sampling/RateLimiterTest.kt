@@ -156,8 +156,10 @@ class RateLimiterTest {
   fun `permit count exceeds window size`() {
     rateLimiter.permitsPerSecond = 2L
 
-    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 2_000)).isEqualTo(0L)
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 2_000)).isEqualTo(2L)
     assertThat(rateLimiter.tryAcquire(3L, 2_000, TimeUnit.MILLISECONDS)).isFalse()
     assertThat(ticker.nowMs).isEqualTo(0L)
+
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 2_000)).isEqualTo(2L)
   }
 }

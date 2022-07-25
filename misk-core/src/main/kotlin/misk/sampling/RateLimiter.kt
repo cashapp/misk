@@ -86,7 +86,6 @@ class RateLimiter private constructor(
 
       val maxRequestSize = windowSizeNs.nanosToPermits(permitsPerSecond)
       if (permitCount > maxRequestSize) return null
-
       val now = ticker.read()
 
       val timeoutNs = unit.toNanos(timeout)
@@ -118,8 +117,6 @@ class RateLimiter private constructor(
     unit: TimeUnit,
     timeout: Long
   ): Long {
-    require(unit.toNanos(timeout) <= windowSizeNs) { return 0L }
-
     val allocatedUntil = atomicAllocatedUntil.get()
     println("getPermitsRemaining.allocatedUntil: $allocatedUntil")
 
