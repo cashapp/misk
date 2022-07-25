@@ -6,6 +6,8 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /**
  * A deterministic testable rate limiter that uses two variables:
@@ -39,7 +41,7 @@ class RateLimiter private constructor(
   private val atomicAllocatedUntil = AtomicLong(ticker.read())
 
   /** The size of our window where we can borrow bytes from the future. */
-  private var windowSizeNs = TimeUnit.SECONDS.toNanos(1L)
+  private val windowSizeNs = TimeUnit.SECONDS.toNanos(1L)
 
   /**
    * Attempt to acquire [permitCount] permits, sleeping up to [timeout] if necessary for them to
@@ -81,20 +83,30 @@ class RateLimiter private constructor(
   ): Duration? {
     while (true) {
       val allocatedUntil = atomicAllocatedUntil.get()
+
       val permitsPerSecond = this.permitsPerSecond // Sample this volatile only once.
 
       val maxRequestSize = windowSizeNs.nanosToPermits(permitsPerSecond)
+      println(maxRequestSize)
       if (permitCount > maxRequestSize) return null
 
       val now = ticker.read()
+
       val timeoutNs = unit.toNanos(timeout)
 
       // If this acquire succeeds, this is the time we're consuming permits through.
       val newAllocatedUntil = maxOf(allocatedUntil, now) +
         permitCount.permitsToNanos(permitsPerSecond)
+      val permits = permitCount.permitsToNanos(permitsPerSecond)
+      println("now $now")
+      println("allocatedUntil $allocatedUntil")
+      println("permits $permits")
+      println("newAllocatedUntil $newAllocatedUntil")
 
       // We only sleep for permits until the beginning of our window.
       val sleepNs = newAllocatedUntil - now - windowSizeNs
+      println("sleepNs $sleepNs")
+      println("timeoutNs $timeoutNs")
 
       // We'd have to sleep too long for this number of permits. Fail fast.
       if (sleepNs > timeoutNs) return null
@@ -107,40 +119,50 @@ class RateLimiter private constructor(
     }
   }
 
+  /**
+   * Returns the permits remaining, given a permitCount and timeout, after tryAcquire() has been invoked.
+   *
+   * @return the permits remaining.
+   */
   fun getPermitsRemaining(
     unit: TimeUnit,
-    permitCount: Long,
     timeout: Long
   ): Long {
-    while (true) {
-      val allocatedUntil = atomicAllocatedUntil.get()
-      val permitsPerSecond = this.permitsPerSecond // Sample this volatile only once.
 
-      val maxRequestSize = windowSizeNs.nanosToPermits(permitsPerSecond)
-      if (permitCount > maxRequestSize) return 0L
 
-      val now = ticker.read()
+    val allocatedUntil = atomicAllocatedUntil.get()
+    println("getPermitsRemaining.allocatedUntil: $allocatedUntil")
 
-      // If this acquire succeeds, this is the time we're consuming permits through.
-      val newAllocatedUntil = maxOf(allocatedUntil, now) +
-        permitCount.permitsToNanos(permitsPerSecond)
-
-      val sleepNs = newAllocatedUntil - now - windowSizeNs
-
-      val timeoutNs = unit.toNanos(timeout)
-
-      // We'd have to sleep too long for this number of permits. Fail fast.
-      if (sleepNs > timeoutNs) return 0L
-
-      // Try to consume permits! If atomicAllocatedUntil changed, we lost a race; loop to try again.
-      if (!atomicAllocatedUntil.compareAndSet(allocatedUntil, newAllocatedUntil)) continue
-
-      val permitsAllowed = permitCount.permitsToNanos(permitCount)
-      //The total ns + time borrowed (timeoutNs) - ns remaining are converted into permits
-      val permitsRemaining = (permitsAllowed + timeoutNs - newAllocatedUntil) / permitCount.permitsToNanos(permitsPerSecond)
-
-      return if (permitsRemaining < 0L) 0L else permitsRemaining
+    fun Long.getBucket() : Long {
+      return (floor(this / 1000000000.0).toLong() * 1000000000) + 1000000000
     }
+
+    // case 1: allocatedUntil == 123123523895723895:5,450, now == 123123523895723895:6,450
+    // 123123523895723895:5,450.round() --> 123123523895723895:6,000
+    // Therefore, all permits are available
+
+    // case 2: allocatedUntil == 123123523895723895:6,250, now == 123123523895723895:6,450
+    //    NOT THIS: 123123523895723895:6,250.round() --> 123123523895723895:7,000
+    //    123123523895723895:6,450.round() --> 123123523895723895:7,000
+    // 123123523895723895:7,000 - 123123523895723895:6,450 == 550
+
+    // case 2b: allocatedUntil == 123123523895723895:7,250, now == 123123523895723895:6,450
+    //    // 123123523895723895:6,450.round() --> 123123523895723895:7,000
+    // 123123523895723895:7,000 - 123123523895723895:7,250 == -250
+
+    val nowNanos = ticker.read()
+    val timeoutNanos = unit.toNanos(timeout)
+    val currentBucket = (nowNanos + timeoutNanos).getBucket()
+    val timeLeftInBucket = (currentBucket - allocatedUntil).coerceIn(0, 1000000000)
+    val timesliceSize = (windowSizeNs / permitsPerSecond)
+    val permitsLeft = timeLeftInBucket / timesliceSize
+
+    println("nowNanos $nowNanos timeoutNanos $timeoutNanos")
+    println("getPermitsRemaining.currentBucket: $currentBucket")
+    println("getPermitsRemaining.timeLeftInBucket: $timeLeftInBucket")
+    println("getPermitsRemaining.timesliceSize: $timesliceSize")
+    println("permits left: $permitsLeft")
+    return permitsLeft
   }
 
   private fun Long.nanosToPermits(permitsPerSecond: Long) = this * permitsPerSecond / 1_000_000_000L
