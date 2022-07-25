@@ -6,8 +6,6 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
-import kotlin.math.ceil
-import kotlin.math.floor
 
 /**
  * A deterministic testable rate limiter that uses two variables:
@@ -94,7 +92,8 @@ class RateLimiter private constructor(
       val timeoutNs = unit.toNanos(timeout)
 
       // If this acquire succeeds, this is the time we're consuming permits through.
-      val newAllocatedUntil = maxOf(allocatedUntil, now) + permitCount.permitsToNanos(permitsPerSecond)
+      val newAllocatedUntil =
+        maxOf(allocatedUntil, now) + permitCount.permitsToNanos(permitsPerSecond)
 
       // We only sleep for permits until the beginning of our window.
       val sleepNs = newAllocatedUntil - now - windowSizeNs
@@ -131,7 +130,8 @@ class RateLimiter private constructor(
     //   1. The end of the current [windowSizeNs] bucket minus how much time has already been allocated
     //   2. How long you're willing to wait for more permits to arrive
     // Capped to 1 [windowSizeMs] worth of permits
-    val allocatableTime = (nowNanos + windowSizeNs - allocatedUntil + timeoutNanos).coerceIn(0, windowSizeNs)
+    val allocatableTime =
+      (nowNanos + windowSizeNs - allocatedUntil + timeoutNanos).coerceIn(0, windowSizeNs)
     val timesliceSize = (windowSizeNs / permitsPerSecond)
     val permitsLeft = allocatableTime / timesliceSize
 
