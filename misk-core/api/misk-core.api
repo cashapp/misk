@@ -237,6 +237,7 @@ public final class misk/sampling/PercentSampler : misk/sampling/Sampler {
 public final class misk/sampling/RateLimiter {
 	public synthetic fun <init> (Lcom/google/common/base/Ticker;Lmisk/concurrent/Sleeper;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getPermitsPerSecond ()J
+	public final fun getPermitsRemaining (Ljava/util/concurrent/TimeUnit;J)J
 	public final fun setPermitsPerSecond (J)V
 	public final fun tryAcquire (JJLjava/util/concurrent/TimeUnit;)Z
 }
