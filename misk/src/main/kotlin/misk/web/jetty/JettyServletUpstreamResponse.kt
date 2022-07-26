@@ -38,7 +38,7 @@ internal class JettyServletUpstreamResponse(
 
     // Set the callback that'll return trailers at the end of the response body.
     response.trailers = Supplier<HttpFields> {
-      val httpFields = HttpFields()
+      val httpFields = HttpFields.build()
       for (i in 0 until trailers.size) {
         httpFields.add(trailers.name(i), trailers.value(i))
       }

@@ -11,15 +11,16 @@ import misk.web.WebSslConfig
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
+import org.eclipse.jetty.http.UriCompliance
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
+import org.eclipse.jetty.io.ConnectionStatistics
 import org.eclipse.jetty.server.ConnectionFactory
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.SecureRequestCustomizer
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.ServerConnectionStatistics
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.ContextHandler
@@ -29,10 +30,11 @@ import org.eclipse.jetty.servlet.FilterHolder
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.servlets.CrossOriginFilter
-import org.eclipse.jetty.unixsocket.UnixSocketConnector
+import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import wisp.logging.getLogger
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import java.net.InetAddress
 import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
@@ -93,6 +95,7 @@ class JettyService @Inject internal constructor(
     val httpConnectionFactories = mutableListOf<ConnectionFactory>()
     val httpConfig = HttpConfiguration()
     httpConfig.customizeForGrpc()
+    httpConfig.uriCompliance = UriCompliance.RFC3986
     httpConfig.sendServerVersion = false
     if (webConfig.ssl != null) {
       httpConfig.securePort = webConfig.ssl.port
@@ -240,6 +243,8 @@ class JettyService @Inject internal constructor(
     // TODO(mmihic): Force security handler?
     val servletContextHandler = ServletContextHandler()
     servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
+
+    JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
     server.addManaged(servletContextHandler)
 
     statisticsHandler.handler = servletContextHandler
@@ -248,7 +253,8 @@ class JettyService @Inject internal constructor(
     server.stopAtShutdown = true
     // Kubernetes sends a SIG_TERM and gives us 30 seconds to stop gracefully.
     server.stopTimeout = 25_000
-    ServerConnectionStatistics.addToAllConnectors(server)
+    val serverStats = ConnectionStatistics()
+    server.addBean(serverStats)
 
     gzipHandler.server = server
     if (webConfig.gzip) {
@@ -257,9 +263,9 @@ class JettyService @Inject internal constructor(
       gzipHandler.addExcludedMimeTypes(MediaTypes.APPLICATION_GRPC)
     } else {
       // GET is enabled by default for gzipHandler.
-      gzipHandler.addExcludedMethods("GET")
+      gzipHandler.addExcludedMethods("GET", "POST")
     }
-    servletContextHandler.gzipHandler = gzipHandler
+    servletContextHandler.insertHandler(gzipHandler)
 
     server.handler = statisticsHandler
 

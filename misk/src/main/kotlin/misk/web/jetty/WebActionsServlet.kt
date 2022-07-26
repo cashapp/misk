@@ -22,10 +22,10 @@ import org.eclipse.jetty.http2.HTTP2Connection
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.server.ServerConnector
-import org.eclipse.jetty.unixsocket.UnixSocketConnector
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
+import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
+import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
+import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
+import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
 import wisp.logging.getLogger
 import java.net.HttpURLConnection
 import java.net.ProtocolException
@@ -39,7 +39,7 @@ internal class WebActionsServlet @Inject constructor(
   webActionFactory: WebActionFactory,
   webActionEntries: List<WebActionEntry>,
   config: WebConfig,
-) : WebSocketServlet() {
+) : JettyWebSocketServlet() {
 
   companion object {
     val log = getLogger<WebActionsServlet>()
@@ -170,14 +170,14 @@ internal class WebActionsServlet @Inject constructor(
     }
   }
 
-  override fun configure(factory: WebSocketServletFactory) {
-    factory.creator = JettyWebSocket.Creator(boundActions)
+  override fun configure(factory: JettyWebSocketServletFactory) {
+    factory.setCreator(JettyWebSocket.Creator(boundActions))
   }
 }
 
 internal fun HttpServletRequest.contentType() = contentType?.toMediaTypeOrNull()
 
-internal fun ServletUpgradeResponse.headers(): Headers {
+internal fun JettyServerUpgradeResponse.headers(): Headers {
   val result = Headers.Builder()
   for (name in headerNames) {
     for (value in getHeaders(name)) {
@@ -208,10 +208,11 @@ internal fun HttpServletResponse.headers(): Headers {
 }
 
 internal fun HttpServletRequest.httpUrl(): HttpUrl {
+  val rUrl = requestURL.replaceFirst(Regex("^ws://"), "http://")
   return if (queryString == null) {
-    "$requestURL".toHttpUrl()
+    rUrl.toHttpUrl()
   } else {
-    "$requestURL?$queryString".toHttpUrl()
+    "$rUrl?$queryString".toHttpUrl()
   }
 }
 
