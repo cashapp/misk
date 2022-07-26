@@ -750,8 +750,9 @@ public final class misk/config/MiskConfig {
 	public static final field INSTANCE Lmisk/config/MiskConfig;
 	public static final fun filesInDir (Ljava/lang/String;Ljava/io/FilenameFilter;)Ljava/util/List;
 	public static synthetic fun filesInDir$default (Ljava/lang/String;Ljava/io/FilenameFilter;ILjava/lang/Object;)Ljava/util/List;
-	public final fun flattenYamlMap (Ljava/util/Map;)Lcom/fasterxml/jackson/databind/JsonNode;
+	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;)Lwisp/config/Config;
 	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;)Lwisp/config/Config;
+	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lwisp/config/Config;
 	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lwisp/config/Config;
 	public final fun loadConfigYamlMap (Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;)Ljava/util/Map;
 	public static synthetic fun loadConfigYamlMap$default (Lmisk/config/MiskConfig;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Ljava/util/Map;

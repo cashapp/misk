@@ -1,5 +1,6 @@
 package misk.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.util.Modules
 import misk.environment.DeploymentModule
 import misk.logging.LogCollectorModule
@@ -169,6 +170,53 @@ class MiskConfigTest {
   }
 
   @Test
+  fun mergesResources() {
+    val overrides = listOf(
+      "classpath:/overrides/override-test-app1.yaml",
+      "classpath:/overrides/override-test-app2.yaml"
+    )
+    val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrides)
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 122))
+  }
+
+  @Test
+  fun mergesResourcesAndFiles() {
+    val file = MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml")!!.file
+    val overrides = listOf(
+      "filesystem:${file}",
+      "classpath:/overrides/override-test-app2.yaml"
+    )
+    val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrides)
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 122))
+  }
+
+  @Test
+  fun mergesJsonNode() {
+    val overrideString = """{ "consumer_a": { "min_items": "12", "max_items": 86 }}"""
+    val overrideValue = ObjectMapper().readTree(overrideString)
+    val config = MiskConfig.load<TestConfig>("test_app", TESTING, listOf(), overrideValue)
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(12, 86))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(1, 2))
+  }
+
+  @Test
+  fun mergesResourcesAndJsonNode() {
+    val overrideString = """{ "consumer_a": { "min_items": "12", "max_items": 86 }}"""
+    val overrideValue = ObjectMapper().readTree(overrideString)
+
+    val file = MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml")!!.file
+    val overrideResources = listOf(
+      "filesystem:${file}",
+      "classpath:/overrides/override-test-app2.yaml"
+    )
+    val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrideResources, overrideValue)
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(12, 86))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 122))
+  }
+
+  @Test
   fun findsFilesInDir() {
     val dir = MiskConfigTest::class.java.getResource("/overrides").file
     val filesInDir = MiskConfig.filesInDir(dir).map { it.absolutePath }
@@ -195,7 +243,7 @@ class MiskConfigTest {
   @Test
   fun handlesNonExistentExternalFile() {
     // A common config does not exist, but the testing config does, loading the config should not fail
-    val config = MiskConfig.load<DurationConfig>("no_common_config_app", TESTING, listOf())
+    val config = MiskConfig.load<DurationConfig>("no_common_config_app", TESTING, listOf<File>())
     assertThat(config.interval).isEqualTo(Duration.ofSeconds(23))
   }
 }
