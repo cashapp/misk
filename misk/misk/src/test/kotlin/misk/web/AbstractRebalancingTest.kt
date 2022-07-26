@@ -18,11 +18,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.internal.closeQuietly
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import wisp.logging.getLogger
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -54,17 +52,6 @@ abstract class AbstractRebalancingTest(
     test(Protocol.HTTP_2)
   }
 
-  @AfterEach
-  fun afterEach() {
-    if (jettyService.isRunning) {
-      try {
-        jettyService.stopAsync().awaitTerminated(1, TimeUnit.SECONDS)
-      } catch (ex: Exception) {
-        getLogger<AbstractRebalancingTest>().warn("Jetty Service did not shutdown properly", ex)
-      }
-    }
-  }
-
   private fun test(protocol: Protocol) {
     val connections = mutableSetOf<Connection>()
 
@@ -88,7 +75,7 @@ abstract class AbstractRebalancingTest(
 
     val response1 = httpClient.newCall(request).execute()
     response1.use {
-      assertThat(response1.protocol).isEqualTo(protocol)
+      assertThat(it.protocol).isEqualTo(protocol)
     }
 
     // Make a request for every thread in Jetty's thread pool to defeat races. Otherwise this test
@@ -100,6 +87,7 @@ abstract class AbstractRebalancingTest(
     }
 
     checkResponse(response1, connections)
+    connections.forEach { it.socket().closeQuietly() }
   }
 
   abstract fun checkResponse(response: Response, connections: Set<Connection>)

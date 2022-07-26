@@ -13,16 +13,16 @@ import okio.utf8Size
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
 import org.eclipse.jetty.websocket.api.WriteCallback
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator
+import org.eclipse.jetty.websocket.server.JettyServerUpgradeRequest
+import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
+import org.eclipse.jetty.websocket.server.JettyWebSocketCreator
 import java.util.ArrayDeque
 
 private const val MAX_QUEUE_SIZE = 16 * 1024 * 1024
 
 internal class JettyWebSocket(
-  val request: ServletUpgradeRequest,
-  val response: ServletUpgradeResponse
+  val request: JettyServerUpgradeRequest,
+  val response: JettyServerUpgradeResponse
 ) : WebSocket {
 
   /** Total size of messages enqueued and not yet transmitted by Jetty. */
@@ -149,10 +149,10 @@ internal class JettyWebSocket(
 
   internal class Creator(
     private val boundActions: Set<BoundAction<out WebAction>>
-  ) : WebSocketCreator {
+  ) : JettyWebSocketCreator {
     override fun createWebSocket(
-      request: ServletUpgradeRequest,
-      response: ServletUpgradeResponse
+      request: JettyServerUpgradeRequest,
+      response: JettyServerUpgradeResponse
     ): WebSocketAdapter? {
       val realWebSocket = JettyWebSocket(request, response)
 
