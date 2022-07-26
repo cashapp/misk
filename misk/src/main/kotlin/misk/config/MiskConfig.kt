@@ -42,11 +42,36 @@ object MiskConfig {
   }
 
   @JvmStatic
+  inline fun <reified T : Config> load(
+    appName: String,
+    deployment: Deployment,
+    overrideResources: List<String> = listOf(),
+    overrideValues: JsonNode? = null,
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+  ): T {
+    return load(T::class.java, appName, deployment, overrideResources, overrideValues, resourceLoader)
+  }
+
+  @JvmStatic
   fun <T : Config> load(
     configClass: Class<out Config>,
     appName: String,
     deployment: Deployment,
     overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+  ): T {
+    val overrideFileUrls = overrideFiles.map { "filesystem:${it.absoluteFile}" }
+      .filter { resourceLoader.exists(it) }
+    return load(configClass, appName, deployment, overrideFileUrls, null, resourceLoader)
+  }
+
+  @JvmStatic
+  fun <T : Config> load(
+    configClass: Class<out Config>,
+    appName: String,
+    deployment: Deployment,
+    overrideResources: List<String> = listOf(),
+    overrideValues: JsonNode? = null,
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
     check(!Secret::class.java.isAssignableFrom(configClass)) {
@@ -55,12 +80,12 @@ object MiskConfig {
 
     val mapper = newObjectMapper(resourceLoader)
 
-    val configYamls = loadConfigYamlMap(appName, deployment, overrideFiles, resourceLoader)
+    val configYamls = loadConfigYamlMap(appName, deployment, overrideResources, resourceLoader)
     check(configYamls.values.any { it != null }) {
       "could not find configuration files - checked ${configYamls.keys}"
     }
 
-    val jsonNode = flattenYamlMap(configYamls)
+    val jsonNode = flattenYamlMap(configYamls, overrideValues)
     val configEnvironmentName = deployment.mapToEnvironmentName()
 
     val configFile = "$appName-${configEnvironmentName.toLowerCase(Locale.US)}.yaml"
@@ -194,7 +219,7 @@ object MiskConfig {
    * Returns a JsonNode that combines the YAMLs in `configYamls`. If two nodes define the
    * same value the last one wins.
    */
-  fun flattenYamlMap(configYamls: Map<String, String?>): JsonNode {
+  private fun flattenYamlMap(configYamls: Map<String, String?>, overrideValues: JsonNode?): JsonNode {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), JavaTimeModule())
     var result = mapper.createObjectNode()
 
@@ -205,6 +230,9 @@ object MiskConfig {
       } catch (e: Exception) {
         throw IllegalStateException("could not parse $key: ${e.message}", e)
       }
+    }
+    if (overrideValues != null) {
+      result = mapper.readerForUpdating(result).readValue(overrideValues)
     }
     return result
   }
@@ -217,7 +245,7 @@ object MiskConfig {
   fun loadConfigYamlMap(
     appName: String,
     deployment: Deployment,
-    overrideFiles: List<File>,
+    overrideResources: List<String>,
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): Map<String, String?> {
 
@@ -225,12 +253,8 @@ object MiskConfig {
     val embeddedConfigUrls = embeddedConfigFileNames(appName, deployment)
       .map { "classpath:/$it" }
 
-    // Load from override files second, in the order specified, only if they exist
-    val overrideFileUrls = overrideFiles.map { "filesystem:${it.absoluteFile}" }
-      .filter { resourceLoader.exists(it) }
-
     // Produce a combined map of all of the results
-    return (embeddedConfigUrls + overrideFileUrls)
+    return (embeddedConfigUrls + overrideResources)
       .map { it to resourceLoader.utf8(it) }
       .toMap()
   }
