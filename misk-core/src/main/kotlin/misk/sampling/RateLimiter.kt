@@ -109,7 +109,9 @@ class RateLimiter private constructor(
   }
 
   /**
-   * Returns the permits remaining, given a time unit and timeout, after tryAcquire() has been invoked.
+   * Returns the maximum number of permits that could have
+   * been acquired by a call to [tryAcquire], assuming the caller
+   * passed the same [timeout] and [unit].
    *
    * @return the permits remaining.
    */
