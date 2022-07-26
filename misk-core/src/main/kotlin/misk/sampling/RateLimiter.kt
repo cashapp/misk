@@ -91,8 +91,8 @@ class RateLimiter private constructor(
       val timeoutNs = unit.toNanos(timeout)
 
       // If this acquire succeeds, this is the time we're consuming permits through.
-      val newAllocatedUntil =
-        maxOf(allocatedUntil, now) + permitCount.permitsToNanos(permitsPerSecond)
+      val newAllocatedUntil = maxOf(allocatedUntil, now) +
+        permitCount.permitsToNanos(permitsPerSecond)
 
       // We only sleep for permits until the beginning of our window.
       val sleepNs = newAllocatedUntil - now - windowSizeNs
@@ -113,14 +113,12 @@ class RateLimiter private constructor(
    * been acquired by a call to [tryAcquire], assuming the caller
    * passed the same [timeout] and [unit].
    *
-   * @return the permits remaining.
    */
   fun getPermitsRemaining(
     unit: TimeUnit,
     timeout: Long
   ): Long {
     val allocatedUntil = atomicAllocatedUntil.get()
-    println("getPermitsRemaining.allocatedUntil: $allocatedUntil")
 
     val nowNanos = ticker.read()
     val timeoutNanos = unit.toNanos(timeout)
