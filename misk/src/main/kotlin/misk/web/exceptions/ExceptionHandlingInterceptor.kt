@@ -172,7 +172,7 @@ fun toGrpcStatus(statusCode: Int): GrpcStatus {
     400 -> GrpcStatus.INTERNAL
     401 -> GrpcStatus.UNAUTHENTICATED
     403 -> GrpcStatus.PERMISSION_DENIED
-    404 -> GrpcStatus.UNIMPLEMENTED
+    404 -> GrpcStatus.NOT_FOUND
     409 -> GrpcStatus.ALREADY_EXISTS
     429 -> GrpcStatus.UNAVAILABLE
     502 -> GrpcStatus.UNAVAILABLE
