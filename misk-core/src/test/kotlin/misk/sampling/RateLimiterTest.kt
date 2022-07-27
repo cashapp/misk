@@ -152,8 +152,7 @@ class RateLimiterTest {
     assertThat(ticker.nowMs).isEqualTo(200L)
   }
 
-  @Test
-  fun `permit count exceeds window size`() {
+  @Test fun `permit count exceeds window size`() {
     rateLimiter.permitsPerSecond = 2L
 
     assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 2_000)).isEqualTo(2L)
@@ -161,5 +160,19 @@ class RateLimiterTest {
     assertThat(ticker.nowMs).isEqualTo(0L)
 
     assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 2_000)).isEqualTo(2L)
+  }
+
+  @Test fun `QPS is set to 0`(){
+    rateLimiter.permitsPerSecond = 0L
+
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 500)).isEqualTo(0L)
+    assertThat(rateLimiter.tryAcquire(1L, 500, TimeUnit.MILLISECONDS)).isFalse()
+  }
+
+  @Test fun `QPS is set to a negative value`(){
+    rateLimiter.permitsPerSecond = -1L
+
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 500)).isEqualTo(0L)
+    assertThat(rateLimiter.tryAcquire(1L, 500, TimeUnit.MILLISECONDS)).isFalse()
   }
 }
