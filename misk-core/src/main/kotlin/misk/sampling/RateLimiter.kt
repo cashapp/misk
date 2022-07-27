@@ -118,7 +118,7 @@ class RateLimiter private constructor(
     unit: TimeUnit,
     timeout: Long
   ): Long {
-    if (permitsPerSecond == 0L) return 0L
+    if (permitsPerSecond <= 0L) return 0L
     val allocatedUntil = atomicAllocatedUntil.get()
 
     val nowNanos = ticker.read()

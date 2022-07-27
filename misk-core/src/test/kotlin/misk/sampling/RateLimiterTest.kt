@@ -165,7 +165,14 @@ class RateLimiterTest {
   @Test fun `QPS is set to 0`(){
     rateLimiter.permitsPerSecond = 0L
 
-    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 2_000)).isEqualTo(0L)
-    assertThat(rateLimiter.tryAcquire(1L, 0, TimeUnit.MILLISECONDS)).isFalse()
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 500)).isEqualTo(0L)
+    assertThat(rateLimiter.tryAcquire(1L, 500, TimeUnit.MILLISECONDS)).isFalse()
+  }
+
+  @Test fun `QPS is set to a negative value`(){
+    rateLimiter.permitsPerSecond = -1L
+
+    assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 500)).isEqualTo(0L)
+    assertThat(rateLimiter.tryAcquire(1L, 500, TimeUnit.MILLISECONDS)).isFalse()
   }
 }
