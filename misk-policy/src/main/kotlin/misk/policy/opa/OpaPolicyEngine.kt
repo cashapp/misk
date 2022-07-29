@@ -8,7 +8,10 @@ interface OpaPolicyEngine {
     returnType: Class<R>
   ): R
 
-  fun <R : OpaResponse> evaluateNoInput(document: String, returnType: Class<R>): R
+  fun <R : OpaResponse> evaluateNoInput(
+    document: String,
+    returnType: Class<R>
+  ): R
 }
 
 /**
@@ -20,7 +23,9 @@ interface OpaPolicyEngine {
  * @throws IllegalArgumentException if no document path was specified.
  * @return Response shape R from OPA.
  */
-inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(document: String): R {
+inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(
+  document: String
+): R {
   return evaluateNoInput(document, R::class.java)
 }
 
