@@ -22,6 +22,13 @@ class OpaModule @Inject constructor(
   }
 
   @Provides
+  internal fun opaConfig(
+    config: OpaConfig
+  ): Boolean {
+    return config.provenance
+  }
+
+  @Provides
   internal fun opaApi(
     config: OpaConfig,
     httpClientFactory: HttpClientFactory,

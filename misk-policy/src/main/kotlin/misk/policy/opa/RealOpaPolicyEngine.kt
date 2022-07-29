@@ -13,7 +13,8 @@ import javax.inject.Named
  */
 class RealOpaPolicyEngine @Inject constructor(
   private val opaApi: OpaApi,
-  @Named("opa-moshi") private val moshi: Moshi
+  @Named("opa-moshi") private val moshi: Moshi,
+  private val provenance: Boolean
 ) : OpaPolicyEngine {
 
   /**
@@ -65,12 +66,18 @@ class RealOpaPolicyEngine @Inject constructor(
    * @throws IllegalArgumentException if no document path was specified.
    * @return Response shape R from OPA.
    */
-  override fun <R : OpaResponse> evaluateNoInput(document: String, returnType: Class<R>): R {
+  override fun <R : OpaResponse> evaluateNoInput(
+    document: String,
+    returnType: Class<R>
+  ): R {
     return evaluateInternal(document, returnType)
   }
 
-  private fun <R : OpaResponse> evaluateInternal(document: String, returnType: Class<R>): R {
-    val response = queryOpa(document)
+  private fun <R : OpaResponse> evaluateInternal(
+    document: String,
+    returnType: Class<R>
+  ): R {
+    val response = queryOpa(document, "")
     return parseResponse(document, returnType, response)
   }
 
@@ -82,7 +89,7 @@ class RealOpaPolicyEngine @Inject constructor(
       throw IllegalArgumentException("Must specify document")
     }
 
-    val response = opaApi.queryDocument(document, inputString).execute()
+    val response = opaApi.queryDocument(document, inputString, provenance).execute()
     if (!response.isSuccessful) {
       throw PolicyEngineException("[${response.code()}]: ${response.errorBody()?.string()}")
     }
@@ -110,7 +117,7 @@ class RealOpaPolicyEngine @Inject constructor(
     if (extractedResponse.result == null) {
       throw PolicyEngineException("Policy document \"$document\" not found.")
     }
-
+    extractedResponse.result.provenance = extractedResponse.provenance
     return extractedResponse.result
   }
 }
