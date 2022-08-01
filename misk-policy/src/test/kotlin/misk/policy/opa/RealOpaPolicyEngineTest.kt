@@ -146,14 +146,16 @@ internal class RealOpaPolicyEngineTest {
       Calls.response(
         ResponseBody.create(
           APPLICATION_JSON.asMediaType(),
-          "{\"provenance\":{\"version\":\"0.30.1\",\"build_commit\":\"03b0b1f\",\"revision\"" +
-            ":\"revision123\"}, \"decision_id\": \"decisionIdString\"," +
+          "{\"provenance\":{\"version\":\"0.30.1\",\"build_commit\":\"03b0b1f\",\"bundles\"" +
+            ":{\"revision\": \"revision123\"}}, \"decision_id\": \"decisionIdString\"," +
             "\"result\": {\"test\": \"a\"}}"
         )
       )
     )
     val evaluate: BasicResponse = opaPolicyEngine.evaluate("test", BasicRequest(1))
     assertThat(evaluate).isEqualTo(BasicResponse("a"))
+    assertThat(evaluate.provenance?.bundles).isNotNull
+    assertThat(evaluate.provenance?.bundles?.get("revision") ?: "").isEqualTo("revision123")
   }
 
   // Weird kotlin workaround for mockito. T must not be nullable.

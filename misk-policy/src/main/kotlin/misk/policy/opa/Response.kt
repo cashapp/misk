@@ -15,7 +15,8 @@ data class Provenance(
   val build_commit: String?,
   val build_timestamp: String?,
   val build_hostname: String?,
-  val revision: String?
+  val revision: String?,
+  val bundles: Map<String, String>?
 )
 
 abstract class OpaResponse {
