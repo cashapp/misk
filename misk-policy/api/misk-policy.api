@@ -44,18 +44,20 @@ public final class misk/policy/opa/PolicyEngineException : java/lang/Exception {
 }
 
 public final class misk/policy/opa/Provenance {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/policy/opa/Provenance;
-	public static synthetic fun copy$default (Lmisk/policy/opa/Provenance;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/policy/opa/Provenance;
+	public final fun component6 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lmisk/policy/opa/Provenance;
+	public static synthetic fun copy$default (Lmisk/policy/opa/Provenance;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lmisk/policy/opa/Provenance;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBuild_commit ()Ljava/lang/String;
 	public final fun getBuild_hostname ()Ljava/lang/String;
 	public final fun getBuild_timestamp ()Ljava/lang/String;
+	public final fun getBundles ()Ljava/util/Map;
 	public final fun getRevision ()Ljava/lang/String;
 	public final fun getVersion ()Ljava/lang/String;
 	public fun hashCode ()I
