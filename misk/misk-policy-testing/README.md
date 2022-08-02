@@ -53,11 +53,11 @@ internal class FakeOpaPolicyEngineTest {
 
   data class TestRequest(
     val something: String
-  ) : OpaRequest
+  ) : OpaRequest()
 
   data class TestResponse(
     val something: String
-  ) : OpaResponse
+  ) : OpaResponse()
 ```
 
 ## Local development

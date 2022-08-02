@@ -15,6 +15,11 @@ data class Provenance(
   val build_commit: String?,
   val build_timestamp: String?,
   val build_hostname: String?,
+  val revision: String?,
+  val bundles: Map<String, ProvenanceBundle>?
+)
+
+data class ProvenanceBundle(
   val revision: String?
 )
 
