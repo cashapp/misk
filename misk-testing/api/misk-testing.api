@@ -248,8 +248,8 @@ public final class misk/time/FakeTickerModule : misk/inject/KAbstractModule {
 
 public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public fun <init> ()V
-	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;)V
-	public synthetic fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;)V
+	public synthetic fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun accepts ()Ljava/util/List;
 	public fun addResponseHeaders (Lokhttp3/Headers;)V
 	public fun asOkHttpRequest ()Lokhttp3/Request;
@@ -258,6 +258,7 @@ public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public final fun component11 ()Lokio/BufferedSink;
 	public final fun component12 ()Lmisk/web/actions/WebSocket;
 	public final fun component13 ()Lmisk/web/actions/WebSocketListener;
+	public final fun component14 ()Ljava/util/List;
 	public final fun component2 ()Lmisk/web/SocketAddress;
 	public final fun component3 ()Lmisk/web/DispatchMechanism;
 	public final fun component4 ()Lokhttp3/Headers;
@@ -268,9 +269,10 @@ public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public final fun component9 ()Lokhttp3/Headers$Builder;
 	public fun computeRequestHeader (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public fun contentType ()Lokhttp3/MediaType;
-	public final fun copy (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;)Lmisk/web/FakeHttpCall;
-	public static synthetic fun copy$default (Lmisk/web/FakeHttpCall;Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;ILjava/lang/Object;)Lmisk/web/FakeHttpCall;
+	public final fun copy (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;)Lmisk/web/FakeHttpCall;
+	public static synthetic fun copy$default (Lmisk/web/FakeHttpCall;Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/FakeHttpCall;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getCookies ()Ljava/util/List;
 	public fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
 	public final fun getHeadersBuilder ()Lokhttp3/Headers$Builder;
 	public fun getLinkLayerLocalAddress ()Lmisk/web/SocketAddress;
@@ -291,6 +293,7 @@ public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public fun putResponseBody (Lokio/BufferedSink;)V
 	public fun putWebSocket (Lmisk/web/actions/WebSocket;)V
 	public fun requireTrailers ()V
+	public fun setCookies (Ljava/util/List;)V
 	public fun setNetworkStatusCode (I)V
 	public final fun setRequestBody (Lokio/BufferedSource;)V
 	public fun setRequestHeaders (Lokhttp3/Headers;)V

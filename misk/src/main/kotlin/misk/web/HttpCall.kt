@@ -11,6 +11,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import okio.BufferedSource
+import javax.servlet.http.Cookie
 
 /**
  * Information about the socket on which a HTTP call arrived.
@@ -32,6 +33,9 @@ interface HttpCall {
 
   /** HTTP request headers that may be modified via interception. */
   var requestHeaders: Headers
+
+  /** Cookies derived from request's "Cookie" header, if any */
+  var cookies: List<Cookie>
 
   /** Meaningful HTTP status about what actually happened. Not sent over the wire in the case
    * of gRPC, which always returns HTTP 200 even for errors. */

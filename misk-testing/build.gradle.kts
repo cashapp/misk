@@ -28,6 +28,7 @@ dependencies {
     exclude(group = "junit")
   }
   implementation(Dependencies.javaxInject)
+  api(Dependencies.servletApi)
   api(Dependencies.wispContainersTesting)
   api(Dependencies.wispLogging)
   api(Dependencies.wispLoggingTesting)
