@@ -141,7 +141,7 @@ internal class RealOpaPolicyEngineTest {
   }
 
   @Test
-  fun returnsProvenanceIfSpecified() {
+  fun returnsProvenanceBundleIfSpecified() {
     Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean())).thenReturn(
       Calls.response(
         ResponseBody.create(
@@ -156,6 +156,24 @@ internal class RealOpaPolicyEngineTest {
     assertThat(evaluate).isEqualTo(BasicResponse("a"))
     assertThat(evaluate.provenance?.bundles).isNotNull
     assertThat(evaluate.provenance?.bundles?.get("xyz")?.revision ?: "").isEqualTo("revision123")
+  }
+
+  @Test
+  fun returnsProvenanceRevisionIfSpecified() {
+    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean())).thenReturn(
+      Calls.response(
+        ResponseBody.create(
+          APPLICATION_JSON.asMediaType(),
+          "{\"provenance\":{\"version\":\"0.30.1\",\"build_commit\":\"03b0b1f\",\"revision\":" +
+            " \"revision123\"}, \"decision_id\": \"decisionIdString\"," +
+            "\"result\": {\"test\": \"a\"}}"
+        )
+      )
+    )
+    val evaluate: BasicResponse = opaPolicyEngine.evaluate("test", BasicRequest(1))
+    assertThat(evaluate).isEqualTo(BasicResponse("a"))
+    assertThat(evaluate.provenance?.bundles).isNull()
+    assertThat(evaluate.provenance?.revision ?: "").isEqualTo("revision123")
   }
 
   // Weird kotlin workaround for mockito. T must not be nullable.
