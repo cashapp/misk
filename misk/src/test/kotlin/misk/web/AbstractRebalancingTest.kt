@@ -20,6 +20,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.closeQuietly
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,7 +48,7 @@ abstract class AbstractRebalancingTest(
     test(Protocol.HTTP_1_1)
   }
 
-  @Test
+  @Test @Disabled
   fun http2() {
     test(Protocol.HTTP_2)
   }
