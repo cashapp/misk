@@ -129,6 +129,13 @@ class LaunchDarklyFeatureFlags constructor(
             ?: throw IllegalArgumentException("null value deserialized from $feature")
     }
 
+    override fun getJsonString(feature: Feature, key: String, attributes: Attributes): String {
+        val result = get(feature, key, attributes) { name, user ->
+            ldClient.jsonValueVariationDetail(name, user, LDValue.ofNull())
+        }
+        return result.toJsonString()
+    }
+
     private fun <T> track(
         feature: Feature,
         key: String,

@@ -140,6 +140,30 @@ internal class LaunchDarklyFeatureFlagsTest {
     }
 
     @Test
+    fun getJsonString() {
+      val json = """{
+        "value" : "dino"
+      }
+      """.trimIndent()
+
+      Mockito
+        .`when`(
+          client.jsonValueVariationDetail(
+            anyString(), any(LDUser::class.java),
+            any(LDValue::class.java)
+          )
+        )
+        .thenReturn(
+          EvaluationDetail.fromValue(
+            LDValue.parse(json), 1, EvaluationReason.targetMatch()
+          )
+        )
+      val feature = featureFlags.getJsonString(Feature("which-dinosaur"), "abcd")
+
+      assertThat(feature).isEqualTo("""{"value":"dino"}""")
+    }
+
+    @Test
     fun invalidKeys() {
         assertThrows<IllegalArgumentException> {
             featureFlags.getEnum<Dinosaur>(Feature("which-dinosaur"), "")

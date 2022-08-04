@@ -81,6 +81,13 @@ constructor(
             ?: throw IllegalArgumentException("null value deserialized from $feature")
     }
 
+    override fun getJsonString(feature: Feature, key: String, attributes: Attributes): String {
+        val jsonFn = get(feature, key, attributes) as? Function0<*> ?: throw IllegalArgumentException(
+            "JSON flag $feature must be overridden with override() before use: ${get(feature, key)}"
+        )
+        return jsonFn.invoke() as String
+    }
+
     override fun getBoolean(feature: Feature) = getBoolean(feature, KEY)
     override fun getDouble(feature: Feature) = getDouble(feature, KEY)
     override fun getInt(feature: Feature) = getInt(feature, KEY)
