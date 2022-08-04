@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.0.6 *(2022-08-05)*
+----------------------------
+
+* Return JSON string without converting into an object from LD client
+
+
 Version 1.0.5 *(2022-07-21)*
 ----------------------------
 
