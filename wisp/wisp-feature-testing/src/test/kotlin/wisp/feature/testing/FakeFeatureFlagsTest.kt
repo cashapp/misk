@@ -218,6 +218,27 @@ internal class FakeFeatureFlagsTest {
     }
 
     @Test
+    fun getJsonString() {
+        // Default throws.
+        assertThrows<RuntimeException> { subject.getJsonString(FEATURE, TOKEN) }
+
+        // Can be overridden
+        subject.overrideJsonString(FEATURE, """{ "value": "test" }""")
+        subject.overrideJsonString(OTHER_FEATURE, """{ "value": "other" }""")
+        assertThat(subject.getJsonString(FEATURE, TOKEN)).isEqualTo("""{ "value": "test" }""")
+        assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature(value = "test"))
+        assertThat(subject.getJsonString(OTHER_FEATURE, TOKEN)).isEqualTo("""{ "value": "other" }""")
+        assertThat(subject.getJson<JsonFeature>(OTHER_FEATURE, TOKEN)).isEqualTo(JsonFeature("other"))
+
+        // Can override with specific keys
+        subject.overrideKeyJsonString(FEATURE, "joker", """{ "value": "joker" }""")
+        assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
+        assertThat(subject.getJsonString(FEATURE, TOKEN)).isEqualTo("""{ "value": "test" }""")
+        assertThat(subject.getJson<JsonFeature>(FEATURE, "joker")).isEqualTo(JsonFeature("joker"))
+        assertThat(subject.getJsonString(FEATURE, "joker")).isEqualTo("""{ "value": "joker" }""")
+    }
+
+    @Test
     fun getString() {
         // Default returns false and not throw as the other variants.
         assertThrows<RuntimeException> { subject.getString(FEATURE, TOKEN) }
