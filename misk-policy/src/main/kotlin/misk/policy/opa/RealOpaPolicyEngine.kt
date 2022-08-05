@@ -89,11 +89,18 @@ class RealOpaPolicyEngine @Inject constructor(
       throw IllegalArgumentException("Must specify document")
     }
 
-    val response = opaApi.queryDocument(document, inputString, provenance).execute()
-    if (!response.isSuccessful) {
-      throw PolicyEngineException("[${response.code()}]: ${response.errorBody()?.string()}")
+    try {
+      val response = opaApi.queryDocument(document, inputString, provenance).execute()
+      if (!response.isSuccessful) {
+        throw PolicyEngineException("[${response.code()}]: ${response.errorBody()?.string()}")
+      }
+      return response
+    } catch (e: java.io.IOException) {
+      throw PolicyEngineException(
+        "Underlying IOException, this may indicate an invalid document path",
+        e
+      )
     }
-    return response
   }
 
   private fun <R : OpaResponse> parseResponse(
