@@ -99,6 +99,7 @@ constructor(
     )
 
     override fun <T> getJson(feature: Feature, clazz: Class<T>): T = getJson(feature, KEY, clazz)
+    override fun getJsonString(feature: Feature): String = getJsonString(feature, KEY)
 
     private fun get(
         feature: Feature,

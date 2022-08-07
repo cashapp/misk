@@ -38,6 +38,11 @@ interface DynamicConfig {
     fun <T> getJson(feature: Feature, clazz: Class<T>): T
 
     /**
+     * Returns the value of a JSON string value of the dynamic flag.
+     */
+    fun getJsonString(feature: Feature): String
+
+    /**
      * Registers a boolean dynamic config tracker which will be invoked whenever the boolean
      * dynamic config changes value.
      *
