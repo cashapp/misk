@@ -27,6 +27,10 @@ class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : Dynami
     override fun <T> getJson(feature: Feature, clazz: Class<T>) =
         featureFlags.getJson(feature, KEY, clazz, ATTRIBUTES)
 
+    override fun getJsonString(feature: Feature): String {
+        return featureFlags.getJsonString(feature, KEY, ATTRIBUTES)
+    }
+
     override fun trackBoolean(feature: Feature, executor: Executor, tracker: (Boolean) -> Unit) =
         featureFlags.trackBoolean(feature, KEY, ATTRIBUTES, executor, tracker)
 
