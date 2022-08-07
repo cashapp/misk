@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.0.7 *(2022-08-08)*
+----------------------------
+
+* Add getJsonString to DynamicConfig as well
+
+
 Version 1.0.6 *(2022-08-05)*
 ----------------------------
 
