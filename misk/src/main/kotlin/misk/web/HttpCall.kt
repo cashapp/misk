@@ -11,6 +11,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import okio.BufferedSource
+import javax.servlet.http.Cookie
 
 /**
  * Information about the socket on which a HTTP call arrived.
@@ -29,7 +30,12 @@ interface HttpCall {
   val url: HttpUrl
   val linkLayerLocalAddress: SocketAddress?
   val dispatchMechanism: DispatchMechanism
-  val requestHeaders: Headers
+
+  /** HTTP request headers that may be modified via interception. */
+  var requestHeaders: Headers
+
+  /** Cookies derived from request's "Cookie" header, if any */
+  var cookies: List<Cookie>
 
   /** Meaningful HTTP status about what actually happened. Not sent over the wire in the case
    * of gRPC, which always returns HTTP 200 even for errors. */
@@ -114,6 +120,19 @@ interface HttpCall {
   fun contentType(): MediaType? {
     val contentType = requestHeaders["Content-Type"] ?: return null
     return contentType.toMediaTypeOrNull()
+  }
+
+  /**
+   * Set or replaces an existing HTTP request header.
+   */
+  fun computeRequestHeader(name: String, computeFn: (String?) -> Pair<String, String>?) {
+    val newHeader = computeFn(requestHeaders[name])
+    val builder = requestHeaders.newBuilder().removeAll(name)
+    requestHeaders = if (newHeader == null) {
+      builder.build()
+    } else {
+      builder.add(newHeader.first, newHeader.second).build()
+    }
   }
 
   fun accepts(): List<MediaRange> {

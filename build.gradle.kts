@@ -82,6 +82,7 @@ subprojects {
       add("api", platform(Dependencies.jettyBom))
       add("api", platform(Dependencies.kotlinBom))
       add("api", platform(Dependencies.nettyBom))
+      add("api", platform(Dependencies.wispBom))
     }
 
     tasks.withType<GenerateModuleMetadata> {

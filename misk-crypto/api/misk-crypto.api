@@ -116,7 +116,19 @@ public final class misk/crypto/ExternalKeyManagerException : java/io/IOException
 	public fun <init> (Ljava/lang/String;)V
 }
 
-public abstract interface class misk/crypto/ExternalKeyResolver : misk/crypto/KeyResolver {
+public final class misk/crypto/ExternalKeyResolver : misk/crypto/KeyResolver {
+	public static final field Companion Lmisk/crypto/ExternalKeyResolver$Companion;
+	public fun <init> (Ljava/util/Map;Ljava/util/Set;)V
+	public fun getAllKeyAliases ()Ljava/util/Map;
+	public fun getKeyByAlias (Ljava/lang/String;)Lmisk/crypto/Key;
+}
+
+public final class misk/crypto/ExternalKeyResolver$Companion {
+}
+
+public abstract interface class misk/crypto/ExternalKeySource {
+	public abstract fun getKey (Ljava/lang/String;)Lmisk/crypto/Key;
+	public abstract fun keyExists (Ljava/lang/String;)Z
 }
 
 public final class misk/crypto/FakeExternalKeyManagerModule : misk/inject/KAbstractModule {
@@ -232,15 +244,16 @@ public final class misk/crypto/PgpEncrypterManager : misk/crypto/MappedKeyManage
 	public fun <init> (Lcom/google/inject/Injector;)V
 }
 
-public final class misk/crypto/S3KeyResolver : misk/crypto/ExternalKeyResolver {
-	public static final field Companion Lmisk/crypto/S3KeyResolver$Companion;
+public final class misk/crypto/S3KeySource : misk/crypto/ExternalKeySource {
+	public static final field Companion Lmisk/crypto/S3KeySource$Companion;
 	public fun <init> (Lwisp/deployment/Deployment;Lcom/amazonaws/services/s3/AmazonS3;Ljava/util/Map;Lmisk/crypto/BucketNameSource;Lcom/amazonaws/auth/AWSCredentialsProvider;)V
 	public synthetic fun <init> (Lwisp/deployment/Deployment;Lcom/amazonaws/services/s3/AmazonS3;Ljava/util/Map;Lmisk/crypto/BucketNameSource;Lcom/amazonaws/auth/AWSCredentialsProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getAllKeyAliases ()Ljava/util/Map;
-	public fun getKeyByAlias (Ljava/lang/String;)Lmisk/crypto/Key;
+	public final fun getAllKeyAliases ()Ljava/util/Map;
+	public fun getKey (Ljava/lang/String;)Lmisk/crypto/Key;
+	public fun keyExists (Ljava/lang/String;)Z
 }
 
-public final class misk/crypto/S3KeyResolver$Companion {
+public final class misk/crypto/S3KeySource$Companion {
 }
 
 public abstract interface annotation class misk/crypto/ServiceKeys : java/lang/annotation/Annotation {

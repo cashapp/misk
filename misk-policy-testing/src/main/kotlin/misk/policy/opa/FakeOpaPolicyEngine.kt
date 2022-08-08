@@ -18,7 +18,10 @@ class FakeOpaPolicyEngine @Inject constructor(): OpaPolicyEngine {
     return opaResponse as R
   }
 
-  override fun <R : OpaResponse> evaluateNoInput(document: String, returnType: Class<R>): R {
+  override fun <R : OpaResponse> evaluateNoInput(
+    document: String,
+    returnType: Class<R>
+  ): R {
     val opaResponse = responses[document]
       ?: throw IllegalStateException("No override for document '$document'")
 
@@ -33,7 +36,9 @@ class FakeOpaPolicyEngine @Inject constructor(): OpaPolicyEngine {
 
   private val responsesForInput = mutableMapOf<String, MutableMap<OpaRequest,OpaResponse>>()
   fun addOverrideForInput(document: String, key: OpaRequest, obj: OpaResponse) {
-    responsesForInput[document]?.put(key,obj) ?: run {
+    if(responsesForInput.containsKey(document)) {
+      responsesForInput[document]?.put(key,obj)
+    } else {
       responsesForInput[document] = mutableMapOf(Pair(key, obj))
     }
   }

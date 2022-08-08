@@ -42,9 +42,12 @@ class NestedTestsTest {
   @Nested
   inner class FirstNested {
 
+    // We can inject things here too.
+    @Inject lateinit var store2: Bookstore
     @Test
     fun `nested can access to injected fields`() {
       assertThat(store.count()).isEqualTo("Bookstore 1")
+      assertThat(store2.count()).isEqualTo("Bookstore 2")
       // The BoringService is stateless across tests AND always starts before the test method.
       assertThat(boringService.localStartUps).isOne()
       assertThat(startUps - shutDowns).isOne()
@@ -52,9 +55,12 @@ class NestedTestsTest {
 
     @Nested
     inner class SecondNested {
+      @Inject lateinit var store3: Bookstore
       @Test
       fun `multiple nested levels access injected fields`() {
         assertThat(store.count()).isEqualTo("Bookstore 1")
+        assertThat(store2.count()).isEqualTo("Bookstore 2")
+        assertThat(store3.count()).isEqualTo("Bookstore 3")
         // The BoringService is stateless across tests AND always starts before the test method.
         assertThat(boringService.localStartUps).isOne()
         assertThat(startUps - shutDowns).isOne()

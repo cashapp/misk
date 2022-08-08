@@ -3,6 +3,7 @@ package misk.web
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
+import org.slf4j.event.Level
 import wisp.config.Config
 
 data class WebConfig(
@@ -77,8 +78,7 @@ data class WebConfig(
   val close_connection_percent: Double = 0.01,
 
   /**
-   * If true responses which are larger than the minGzipSize will be compressed. Gzip compression
-   * always enabled for requests and cannot be turned off.
+   * If true responses which are larger than the minGzipSize will be compressed.
    */
   val gzip: Boolean = true,
 
@@ -90,9 +90,65 @@ data class WebConfig(
   /** If true, disables automatic load shedding when degraded. */
   val concurrency_limiter_disabled: Boolean = false,
 
+  /** The level of log when concurrency shedding. */
+  val concurrency_limiter_log_level: Level = Level.ERROR,
+
   /** The number of milliseconds to sleep before commencing service shutdown. */
   val shutdown_sleep_ms: Int = 0,
-) : Config
+) : Config {
+  @Deprecated(
+    message = "obsolete; for binary-compatibility only",
+    level = DeprecationLevel.HIDDEN,
+  )
+  constructor(
+    port: Int,
+    idle_timeout: Long = 0,
+    health_port: Int = -1,
+    host: String? = null,
+    ssl: WebSslConfig? = null,
+    unix_domain_socket: WebUnixDomainSocketConfig? = null,
+    http2: Boolean = false,
+    selectors: Int? = null,
+    acceptors: Int? = null,
+    queue_size: Int? = null,
+    jetty_max_thread_pool_size: Int = 200,
+    jetty_min_thread_pool_size: Int = 8,
+    jetty_max_thread_pool_queue_size: Int = 300,
+    enable_thread_pool_queue_metrics: Boolean = false,
+    action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
+    jetty_max_concurrent_streams: Int? = null,
+    close_connection_percent: Double = 0.01,
+    gzip: Boolean = true,
+    minGzipSize: Int = 1024,
+    cors: Map<String, CorsConfig> = mapOf(),
+    concurrency_limiter_disabled: Boolean = false,
+    shutdown_sleep_ms: Int = 0,
+  ) : this(
+    port = port,
+    idle_timeout = idle_timeout,
+    health_port = health_port,
+    host = host,
+    ssl = ssl,
+    unix_domain_socket = unix_domain_socket,
+    http2 = http2,
+    selectors = selectors,
+    acceptors = acceptors,
+    queue_size = queue_size,
+    jetty_max_thread_pool_size = jetty_max_thread_pool_size,
+    jetty_min_thread_pool_size = jetty_min_thread_pool_size,
+    jetty_max_thread_pool_queue_size = jetty_max_thread_pool_queue_size,
+    enable_thread_pool_queue_metrics = enable_thread_pool_queue_metrics,
+    action_exception_log_level = action_exception_log_level,
+    jetty_max_concurrent_streams = jetty_max_concurrent_streams,
+    close_connection_percent = close_connection_percent,
+    gzip = gzip,
+    minGzipSize = minGzipSize,
+    cors = cors,
+    concurrency_limiter_disabled = concurrency_limiter_disabled,
+    concurrency_limiter_log_level = Level.ERROR,
+    shutdown_sleep_ms = shutdown_sleep_ms,
+  )
+}
 
 data class WebSslConfig(
   /** HTTPS port to listen on, or 0 for any available port. */

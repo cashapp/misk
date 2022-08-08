@@ -3,6 +3,8 @@ package misk.redis
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisPool
+import redis.clients.jedis.Pipeline
+import redis.clients.jedis.Transaction
 import redis.clients.jedis.params.SetParams
 import java.time.Duration
 
@@ -47,6 +49,13 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  override fun hdel(key: String, vararg fields: String): Long {
+    jedisPool.resource.use { jedis ->
+      val fieldsAsByteArrays = fields.map { it.toByteArray(charset) }.toTypedArray()
+      return jedis.hdel(key.toByteArray(charset), *fieldsAsByteArrays)
+    }
+  }
+
   /** Get a map of field -> value pairs for the given key. */
   override fun hgetAll(key: String): Map<String, ByteString>? {
     jedisPool.resource.use { jedis ->
@@ -55,6 +64,13 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
       }?.mapValues {
         it.value.toByteString()
       }
+    }
+  }
+
+  override fun hmget(key: String, vararg fields: String): List<ByteString?> {
+    jedisPool.resource.use { jedis ->
+      val fieldsAsByteArrays = fields.map { it.toByteArray(charset) }.toTypedArray()
+      return jedis.hmget(key.toByteArray(charset), *fieldsAsByteArrays).map { it?.toByteString() }
     }
   }
 
@@ -107,6 +123,14 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  /** Set ByteArray values for the given key and fields. */
+  override fun hset(key: String, hash: Map<String, ByteString>) {
+    val hashBytes = hash.entries.associate { it.key.toByteArray(charset) to it.value.toByteArray() }
+    jedisPool.resource.use { jedis ->
+      jedis.hset(key.toByteArray(charset), hashBytes)
+    }
+  }
+
   /** Interpret the value at [key] as a Long and increment it by 1. */
   override fun incr(key: String): Long {
     return jedisPool.resource.use { jedis ->
@@ -142,6 +166,30 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
       jedis.pexpireAt(key, timestampMilliseconds)!! == 1L
+    }
+  }
+
+  override fun watch(vararg keys: String) {
+    jedisPool.resource.use { jedis ->
+      jedis.watch(*keys)
+    }
+  }
+
+  override fun unwatch(vararg keys: String) {
+    jedisPool.resource.use { jedis ->
+      jedis.unwatch()
+    }
+  }
+
+  override fun multi(): Transaction {
+    jedisPool.resource.use { jedis ->
+      return jedis.multi()
+    }
+  }
+
+  override fun pipelined(): Pipeline {
+    jedisPool.resource.use { jedis ->
+      return jedis.pipelined()
     }
   }
 

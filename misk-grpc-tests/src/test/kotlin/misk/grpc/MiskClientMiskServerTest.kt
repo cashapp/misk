@@ -153,7 +153,7 @@ class MiskClientMiskServerTest {
         routeGuide.GetFeature().execute(point)
       }
       assertThat(e.grpcMessage).isEqualTo("unexpected latitude error!")
-      assertThat(e.grpcStatus).isEqualTo(GrpcStatus.UNIMPLEMENTED)
+      assertThat(e.grpcStatus).isEqualTo(GrpcStatus.NOT_FOUND)
         .withFailMessage("wrong gRPC status ${e.grpcStatus.name}")
 
       // Assert that _metrics_ counted a 404 and no 200s, even though an HTTP 200 was returned

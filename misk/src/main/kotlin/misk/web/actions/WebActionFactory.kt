@@ -20,6 +20,9 @@ import misk.web.Post
 import misk.web.Put
 import misk.web.RequestBody
 import misk.web.WebActionBinding
+import misk.web.WebActionSeedDataTransformerFactory
+import misk.web.interceptors.BeforeContentEncoding
+import misk.web.interceptors.ForContentEncoding
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
@@ -32,13 +35,18 @@ import kotlin.reflect.full.functions
 @Singleton
 internal class WebActionFactory @Inject constructor(
   private val injector: Injector,
+  @BeforeContentEncoding
+  private val beforeContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
+  @ForContentEncoding
+  private val forContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   private val userProvidedApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
   private val userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault
   private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
   private val webActionBindingFactory: WebActionBinding.Factory,
-  private val scope: ActionScope
+  private val scope: ActionScope,
+  private val actionScopeSeedDataTransformerFactories: List<WebActionSeedDataTransformerFactory>,
 ) {
 
   /** Returns the bound actions for `webActionClass`. */
@@ -190,7 +198,9 @@ internal class WebActionFactory @Inject constructor(
   ): BoundAction<A> {
     // Ensure that default interceptors are called before any user provided interceptors
     val networkInterceptors =
-      miskNetworkInterceptorFactories.mapNotNull { it.create(action) } +
+      beforeContentEncodingNetworkInterceptorFactories.mapNotNull { it.create(action) } +
+        forContentEncodingNetworkInterceptorFactories.mapNotNull { it.create(action) } +
+        miskNetworkInterceptorFactories.mapNotNull { it.create(action) } +
         userProvidedNetworkInterceptorFactories.mapNotNull { it.create(action) }
 
     val applicationInterceptors =
@@ -201,14 +211,23 @@ internal class WebActionFactory @Inject constructor(
 
     val webActionBinding = webActionBindingFactory.create(action, parsedPathPattern)
 
+    val httpActionScopeSeedDataInterceptors =
+      actionScopeSeedDataTransformerFactories.mapNotNull {
+        it.create(
+          parsedPathPattern,
+          action,
+        )
+      }
+
     return BoundAction(
       scope,
       provider,
       networkInterceptors,
       applicationInterceptors,
       webActionBinding,
+      httpActionScopeSeedDataInterceptors,
       parsedPathPattern,
-      action
+      action,
     )
   }
 

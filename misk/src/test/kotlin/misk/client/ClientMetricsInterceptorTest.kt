@@ -16,6 +16,8 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.mediatype.MediaTypes
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
@@ -25,10 +27,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.Invocation
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import java.net.URL
 
 @MiskTest
 internal class ClientMetricsInterceptorTest {
@@ -79,6 +83,22 @@ internal class ClientMetricsInterceptorTest {
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.last().toInt()).isEqualTo(1)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.last().toInt()).isEqualTo(1)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "503").get().buckets.last().toInt()).isEqualTo(1)
+    }
+  }
+
+  @Test
+  fun urlAsAction() {
+    val interceptor = factory.create("urlTestClient")
+
+    mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("{}"))
+    val okHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).build()
+
+    val targetUrl = mockWebServer.url("/path/to/test///?some&get=params") // leading/trailing slashes and GET params will be dropped in the interceptor
+    val request = Request.Builder().url(targetUrl).tag(URL::class.java, targetUrl.toUrl()).build()
+
+    okHttpClient.newCall(request).execute().use {
+      assertThat(requestDurationSummary.labels("urlTestClient.path.to.test", "200").get().count.toInt()).isEqualTo(1)
+      assertThat(requestDurationHistogram.labels("urlTestClient.path.to.test", "200").get().buckets.last().toInt()).isEqualTo(1)
     }
   }
 

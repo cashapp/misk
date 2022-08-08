@@ -9,12 +9,13 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.Buffer
 import okio.BufferedSink
 import okio.BufferedSource
+import javax.servlet.http.Cookie
 
 data class FakeHttpCall(
   override val url: HttpUrl = "https://example.com/".toHttpUrl(),
   override val linkLayerLocalAddress: SocketAddress = SocketAddress.Network("1.2.3.4", 56789),
   override val dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,
-  override val requestHeaders: Headers = headersOf(),
+  override var requestHeaders: Headers = headersOf(),
   override var statusCode: Int = 200,
   override var networkStatusCode: Int = 200,
   val headersBuilder: Headers.Builder = Headers.Builder(),
@@ -23,7 +24,8 @@ data class FakeHttpCall(
   var requestBody: BufferedSource? = Buffer(),
   var responseBody: BufferedSink? = Buffer(),
   var webSocket: WebSocket? = null,
-  var webSocketListener: WebSocketListener? = null
+  var webSocketListener: WebSocketListener? = null,
+  override var cookies: List<Cookie> = listOf(),
 ) : HttpCall {
 
   override val responseHeaders: Headers

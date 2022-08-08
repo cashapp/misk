@@ -4,13 +4,13 @@ plugins {
 }
 
 dependencies {
-  api(project(":wisp-config"))
-  api(project(":wisp-lease"))
-  api(project(":wisp-lease-testing"))
-  api(project(":wisp-logging"))
-  api(project(":wisp-resource-loader"))
-  api(project(":wisp-resource-loader-testing"))
-  api(project(":wisp-ssl"))
+  api(Dependencies.wispConfig)
+  api(Dependencies.wispLease)
+  api(Dependencies.wispLeaseTesting)
+  api(Dependencies.wispLogging)
+  api(Dependencies.wispResourceLoader)
+  api(Dependencies.wispResourceLoaderTesting)
+  api(Dependencies.wispSsl)
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinStdLibJdk8)
@@ -29,5 +29,5 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(project(":misk-testing"))
-  testImplementation(project(":wisp-logging-testing"))
+  testImplementation(Dependencies.wispLoggingTesting)
 }

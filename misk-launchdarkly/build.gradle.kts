@@ -14,7 +14,9 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-launchdarkly-core"))
   implementation(project(":misk-service"))
-  api(project(":wisp-config"))
+  api(Dependencies.wispConfig)
+  implementation(Dependencies.wispFeature)
+  implementation(Dependencies.wispLaunchDarkly)
 
   testImplementation(project(":misk-testing"))
 }

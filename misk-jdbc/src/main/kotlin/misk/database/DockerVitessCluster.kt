@@ -26,6 +26,7 @@ import okio.buffer
 import okio.source
 import wisp.deployment.TESTING
 import wisp.moshi.defaultKotlinMoshi
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -115,13 +116,23 @@ class VitessCluster(
     )
   }
 
-  private fun mysqlConfig() =
-    DataSourceConfig(
+  private fun mysqlConfig(): DataSourceConfig {
+    val isRunningInDocker = File("/proc/1/cgroup")
+      .takeIf { it.exists() }?.useLines { lines ->
+        lines.any { it.contains("/docker") }
+      } ?: false
+    val server_hostname = if (isRunningInDocker)
+      "host.docker.internal"
+    else
+      "127.0.0.1"
+
+    return DataSourceConfig(
       type = DataSourceType.MYSQL,
-      host = "127.0.0.1",
+      host = server_hostname,
       username = "vt_dba",
       port = mysqlPort
     )
+  }
 
   private fun mysqlDataSource(): DriverDataSource {
     val config = mysqlConfig()

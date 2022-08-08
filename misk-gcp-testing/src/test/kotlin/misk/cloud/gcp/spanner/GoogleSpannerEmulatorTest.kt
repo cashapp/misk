@@ -19,21 +19,25 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import wisp.containers.ContainerUtil
 import wisp.deployment.TESTING
 import java.time.Duration
 import javax.inject.Inject
 
 @MiskTest
+@Disabled("Flaky test")
 class GoogleSpannerEmulatorTest {
   val spannerConfig = SpannerConfig(
     project_id = "test-project",
     instance_id = "test-instance",
     database = "test-database",
     emulator = SpannerEmulatorConfig(
-      enabled = true
+      enabled = true,
+      hostname = ContainerUtil.dockerTargetOrLocalHost()
     )
   )
 

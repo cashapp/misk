@@ -9,9 +9,21 @@ dependencies {
   implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)
   implementation(Dependencies.awsDynamodb)
-  implementation(Dependencies.tempestTestingJvm)
+
+  // tempest uses old log4j
+  implementation(Dependencies.tempestTestingInternal) {
+    exclude("org.apache.logging.log4j", "log4j-core")
+    exclude("org.apache.logging.log4j", "log4j-api")
+  }
+  // tempest uses old log4j
+  implementation(Dependencies.tempestTestingJvm) {
+    exclude("org.apache.logging.log4j")
+  }
   implementation(Dependencies.tempestTestingDocker)
-  implementation(Dependencies.tempestTestingInternal)
+  // for tempest...
+  implementation("org.apache.logging.log4j:log4j-core:2.18.0")
+  implementation("org.apache.logging.log4j:log4j-api:2.18.0")
+
   implementation(project(":misk-aws-dynamodb"))
   api(project(":misk"))
   api(project(":misk-aws"))
@@ -19,8 +31,8 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-service"))
   api(project(":misk-testing"))
-  api(project(":wisp-containers-testing"))
-  api(project(":wisp-logging"))
+  api(Dependencies.wispContainersTesting)
+  api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)

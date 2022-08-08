@@ -260,15 +260,18 @@ public final class misk/jdbc/DataSourceClustersConfig : java/util/LinkedHashMap,
 	public final fun containsValue (Ljava/lang/Object;)Z
 	public fun containsValue (Lmisk/jdbc/DataSourceClusterConfig;)Z
 	public final fun entrySet ()Ljava/util/Set;
+	public final synthetic fun get (Ljava/lang/Object;)Ljava/lang/Object;
 	public final fun get (Ljava/lang/Object;)Lmisk/jdbc/DataSourceClusterConfig;
 	public fun get (Ljava/lang/String;)Lmisk/jdbc/DataSourceClusterConfig;
 	public fun getEntries ()Ljava/util/Set;
 	public fun getKeys ()Ljava/util/Set;
+	public final synthetic fun getOrDefault (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 	public final fun getOrDefault (Ljava/lang/Object;Lmisk/jdbc/DataSourceClusterConfig;)Lmisk/jdbc/DataSourceClusterConfig;
 	public fun getOrDefault (Ljava/lang/String;Lmisk/jdbc/DataSourceClusterConfig;)Lmisk/jdbc/DataSourceClusterConfig;
 	public fun getSize ()I
 	public fun getValues ()Ljava/util/Collection;
 	public final fun keySet ()Ljava/util/Set;
+	public final synthetic fun remove (Ljava/lang/Object;)Ljava/lang/Object;
 	public final fun remove (Ljava/lang/Object;)Lmisk/jdbc/DataSourceClusterConfig;
 	public final fun remove (Ljava/lang/Object;Ljava/lang/Object;)Z
 	public fun remove (Ljava/lang/String;)Lmisk/jdbc/DataSourceClusterConfig;
@@ -591,7 +594,7 @@ public final class misk/vitess/ShardKt {
 }
 
 public final class misk/vitess/ShardsKt {
-	public static final fun shards (Lmisk/jdbc/DataSourceService;)Ljava/util/function/Supplier;
+	public static final fun shards (Lmisk/jdbc/DataSourceService;)Lcom/google/common/base/Supplier;
 }
 
 public final class misk/vitess/TabletType : java/lang/Enum {

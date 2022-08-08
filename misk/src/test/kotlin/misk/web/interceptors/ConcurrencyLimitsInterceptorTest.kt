@@ -13,7 +13,6 @@ import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import misk.web.AvailableWhenDegraded
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
@@ -63,7 +62,8 @@ class ConcurrencyLimitsInterceptorTest {
     val limitZero = SimpleLimiter.Builder()
       .limit(SettableLimit(0))
       .build<String>()
-    val interceptor = ConcurrencyLimitsInterceptor(factory, action, limitZero, clock)
+    val interceptor =
+      ConcurrencyLimitsInterceptor(factory, action, limitZero, clock, org.slf4j.event.Level.ERROR)
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
   }
@@ -98,12 +98,15 @@ class ConcurrencyLimitsInterceptorTest {
     val limitZero = SimpleLimiter.Builder()
       .limit(SettableLimit(0))
       .build<String>()
-    val interceptor = ConcurrencyLimitsInterceptor(factory, action, limitZero, clock)
+    val interceptor =
+      ConcurrencyLimitsInterceptor(factory, action, limitZero, clock, org.slf4j.event.Level.ERROR)
     // First call logs an error.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
-      .containsExactly("concurrency limits interceptor shedding HelloAction; " +
-          "Quota-Path=null; inflight=0; limit=0")
+      .containsExactly(
+        "concurrency limits interceptor shedding HelloAction; " +
+          "Quota-Path=null; inflight=0; limit=0"
+      )
 
     // Subsequent calls don't.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
@@ -113,8 +116,10 @@ class ConcurrencyLimitsInterceptorTest {
     clock.setNow(clock.instant().plus(1, ChronoUnit.MINUTES))
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
-      .containsExactly("concurrency limits interceptor shedding HelloAction; " +
-          "Quota-Path=null; inflight=0; limit=0")
+      .containsExactly(
+        "concurrency limits interceptor shedding HelloAction; " +
+          "Quota-Path=null; inflight=0; limit=0"
+      )
   }
 
   @Test
@@ -155,7 +160,8 @@ class ConcurrencyLimitsInterceptorTest {
   fun limiterResolutionExceedsMicroseconds() {
     val action = HelloAction::call.asAction(DispatchMechanism.GET)
     val limiter = factory.createLimiterForAction(action, null)
-    val interceptor = ConcurrencyLimitsInterceptor(factory, action, limiter, clock)
+    val interceptor =
+      ConcurrencyLimitsInterceptor(factory, action, limiter, clock, org.slf4j.event.Level.ERROR)
 
     // load up some inflight requests so we get past "Prevent upward drift if not close to the limit"
     repeat(10) {
@@ -225,9 +231,11 @@ class ConcurrencyLimitsInterceptorTest {
         }
       }))
 
-      bind<WebConfig>().toInstance(WebConfig(
-        port = 0,
-      ))
+      bind<WebConfig>().toInstance(
+        WebConfig(
+          port = 0,
+        )
+      )
 
       multibind<ConcurrencyLimiterFactory>().to<CustomLimiterFactory>()
     }

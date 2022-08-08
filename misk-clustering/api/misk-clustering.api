@@ -1,0 +1,200 @@
+public abstract interface class misk/clustering/Cluster {
+	public abstract fun getSnapshot ()Lmisk/clustering/Cluster$Snapshot;
+	public abstract fun newResourceMapper (Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
+	public abstract fun watch (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class misk/clustering/Cluster$Changes {
+	public fun <init> (Lmisk/clustering/Cluster$Snapshot;Ljava/util/Set;Ljava/util/Set;)V
+	public synthetic fun <init> (Lmisk/clustering/Cluster$Snapshot;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lmisk/clustering/Cluster$Snapshot;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun copy (Lmisk/clustering/Cluster$Snapshot;Ljava/util/Set;Ljava/util/Set;)Lmisk/clustering/Cluster$Changes;
+	public static synthetic fun copy$default (Lmisk/clustering/Cluster$Changes;Lmisk/clustering/Cluster$Snapshot;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)Lmisk/clustering/Cluster$Changes;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdded ()Ljava/util/Set;
+	public final fun getHasDiffs ()Z
+	public final fun getRemoved ()Ljava/util/Set;
+	public final fun getSnapshot ()Lmisk/clustering/Cluster$Snapshot;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/clustering/Cluster$DefaultImpls {
+	public static fun newResourceMapper (Lmisk/clustering/Cluster;Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
+}
+
+public final class misk/clustering/Cluster$Member {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
+	public static synthetic fun copy$default (Lmisk/clustering/Cluster$Member;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/clustering/Cluster$Member;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIpAddress ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/clustering/Cluster$Snapshot {
+	public fun <init> (Lmisk/clustering/Cluster$Member;Ljava/util/Set;ZLmisk/clustering/ClusterResourceMapper;)V
+	public synthetic fun <init> (Lmisk/clustering/Cluster$Member;Ljava/util/Set;ZLmisk/clustering/ClusterResourceMapper;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lmisk/clustering/Cluster$Member;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun component3 ()Z
+	public final fun component4 ()Lmisk/clustering/ClusterResourceMapper;
+	public final fun copy (Lmisk/clustering/Cluster$Member;Ljava/util/Set;ZLmisk/clustering/ClusterResourceMapper;)Lmisk/clustering/Cluster$Snapshot;
+	public static synthetic fun copy$default (Lmisk/clustering/Cluster$Snapshot;Lmisk/clustering/Cluster$Member;Ljava/util/Set;ZLmisk/clustering/ClusterResourceMapper;ILjava/lang/Object;)Lmisk/clustering/Cluster$Snapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReadyMembers ()Ljava/util/Set;
+	public final fun getReadyPeers ()Ljava/util/Set;
+	public final fun getResourceMapper ()Lmisk/clustering/ClusterResourceMapper;
+	public final fun getSelf ()Lmisk/clustering/Cluster$Member;
+	public final fun getSelfReady ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/clustering/ClusterHashRing : misk/clustering/ClusterResourceMapper {
+	public fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;I)V
+	public synthetic fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
+	public fun hashCode ()I
+}
+
+public abstract interface class misk/clustering/ClusterResourceMapper {
+	public abstract fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
+}
+
+public abstract interface class misk/clustering/ClusterService : com/google/common/util/concurrent/Service {
+}
+
+public final class misk/clustering/DefaultCluster : com/google/common/util/concurrent/AbstractExecutionThreadService, misk/clustering/Cluster, misk/clustering/ClusterService {
+	public static final field Companion Lmisk/clustering/DefaultCluster$Companion;
+	public fun <init> (Lmisk/clustering/Cluster$Member;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lmisk/clustering/Cluster$Member;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clusterChanged (Ljava/util/Set;Ljava/util/Set;)V
+	public static synthetic fun clusterChanged$default (Lmisk/clustering/DefaultCluster;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)V
+	public fun getSnapshot ()Lmisk/clustering/Cluster$Snapshot;
+	public fun newResourceMapper (Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
+	public final fun syncPoint (Lkotlin/jvm/functions/Function0;)V
+	public fun watch (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class misk/clustering/DefaultCluster$Companion {
+	public final fun getLog ()Lmu/KLogger;
+}
+
+public final class misk/clustering/NoMembersAvailableException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getResourceId ()Ljava/lang/String;
+}
+
+public final class misk/clustering/fake/ExplicitClusterResourceMapper : misk/clustering/ClusterResourceMapper {
+	public fun <init> ()V
+	public final fun addMapping (Ljava/lang/String;Lmisk/clustering/Cluster$Member;)V
+	public final fun clearDefaultMapping ()V
+	public fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
+	public final fun removeMapping (Ljava/lang/String;)V
+	public final fun setDefaultMapping (Lmisk/clustering/Cluster$Member;)V
+}
+
+public final class misk/clustering/fake/FakeCluster : misk/clustering/Cluster, misk/clustering/ClusterService {
+	public static final field Companion Lmisk/clustering/fake/FakeCluster$Companion;
+	public static final field SELF_IP Ljava/lang/String;
+	public static final field SELF_NAME Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Lmisk/clustering/fake/ExplicitClusterResourceMapper;)V
+	public fun addListener (Lcom/google/common/util/concurrent/Service$Listener;Ljava/util/concurrent/Executor;)V
+	public fun awaitRunning ()V
+	public fun awaitRunning (JLjava/util/concurrent/TimeUnit;)V
+	public fun awaitTerminated ()V
+	public fun awaitTerminated (JLjava/util/concurrent/TimeUnit;)V
+	public final fun clusterChanged (Ljava/util/Set;Ljava/util/Set;)V
+	public static synthetic fun clusterChanged$default (Lmisk/clustering/fake/FakeCluster;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)V
+	public fun failureCause ()Ljava/lang/Throwable;
+	public final fun getResourceMapper ()Lmisk/clustering/fake/ExplicitClusterResourceMapper;
+	public static final fun getSelf ()Lmisk/clustering/Cluster$Member;
+	public fun getSnapshot ()Lmisk/clustering/Cluster$Snapshot;
+	public fun isRunning ()Z
+	public fun newResourceMapper (Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
+	public fun startAsync ()Lcom/google/common/util/concurrent/Service;
+	public fun state ()Lcom/google/common/util/concurrent/Service$State;
+	public fun stopAsync ()Lcom/google/common/util/concurrent/Service;
+	public fun watch (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class misk/clustering/fake/FakeCluster$Companion {
+	public final fun getSelf ()Lmisk/clustering/Cluster$Member;
+}
+
+public final class misk/clustering/fake/FakeClusterModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/clustering/fake/lease/FakeLeaseManager : wisp/lease/FakeLeaseManager {
+	public fun <init> ()V
+}
+
+public final class misk/clustering/fake/lease/FakeLeaseModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/clustering/kubernetes/KubernetesClusterModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/clustering/kubernetes/KubernetesConfig;)V
+}
+
+public final class misk/clustering/kubernetes/KubernetesConfig : wisp/config/Config {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJJ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()J
+	public final fun component6 ()J
+	public final fun component7 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJJ)Lmisk/clustering/kubernetes/KubernetesConfig;
+	public static synthetic fun copy$default (Lmisk/clustering/kubernetes/KubernetesConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJJILjava/lang/Object;)Lmisk/clustering/kubernetes/KubernetesConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClustering_pod_label_selector ()Ljava/lang/String;
+	public final fun getKubernetes_connect_timeout ()J
+	public final fun getKubernetes_read_timeout ()J
+	public final fun getKubernetes_watch_read_timeout ()J
+	public final fun getMy_pod_ip ()Ljava/lang/String;
+	public final fun getMy_pod_name ()Ljava/lang/String;
+	public final fun getMy_pod_namespace ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/clustering/weights/ActiveClusterWeight : misk/clustering/weights/ClusterWeightProvider {
+	public fun <init> ()V
+	public fun get ()I
+}
+
+public final class misk/clustering/weights/ActiveClusterWeightModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public abstract interface class misk/clustering/weights/ClusterWeightProvider {
+	public abstract fun get ()I
+}
+
+public abstract interface class misk/clustering/weights/ClusterWeightService : com/google/common/util/concurrent/Service {
+}
+
+public final class misk/clustering/weights/FakeClusterWeight : misk/clustering/weights/ClusterWeightProvider {
+	public fun <init> ()V
+	public fun get ()I
+	public final fun setClusterWeight (I)V
+}
+
+public final class misk/clustering/weights/FakeClusterWeightModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+

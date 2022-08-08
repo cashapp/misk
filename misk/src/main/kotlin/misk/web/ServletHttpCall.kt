@@ -8,6 +8,7 @@ import okhttp3.Headers
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
 internal data class ServletHttpCall(
@@ -19,11 +20,12 @@ internal data class ServletHttpCall(
    */
   override val linkLayerLocalAddress: SocketAddress? = null,
   override val dispatchMechanism: DispatchMechanism,
-  override val requestHeaders: Headers,
+  override var requestHeaders: Headers,
   var requestBody: BufferedSource? = null,
   val upstreamResponse: UpstreamResponse,
   var responseBody: BufferedSink? = null,
-  var webSocket: WebSocket? = null
+  var webSocket: WebSocket? = null,
+  override var cookies: List<Cookie> = listOf(),
 ) : HttpCall {
   private var _actualStatusCode: Int? = null
 
@@ -131,7 +133,8 @@ internal data class ServletHttpCall(
         upstreamResponse = upstreamResponse,
         requestBody = requestBody,
         responseBody = responseBody,
-        webSocket = webSocket
+        webSocket = webSocket,
+        cookies = request.cookies?.toList() ?: listOf(),
       )
     }
   }

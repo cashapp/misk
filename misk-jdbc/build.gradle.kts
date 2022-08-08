@@ -17,7 +17,9 @@ dependencies {
   implementation(Dependencies.openTracingUtil)
   implementation(Dependencies.openTracingJdbc)
   implementation(Dependencies.postgresql)
-  implementation(Dependencies.vitess)
+  implementation(Dependencies.vitess) {
+    exclude("org.apache.logging.log4j")
+  }
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.moshiAdapters)
@@ -26,10 +28,10 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
-  api(project(":wisp-config"))
-  api(project(":wisp-deployment"))
-  api(project(":wisp-logging"))
-  api(project(":wisp-moshi"))
+  api(Dependencies.wispConfig)
+  api(Dependencies.wispDeployment)
+  api(Dependencies.wispLogging)
+  api(Dependencies.wispMoshi)
 
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-jdbc-testing"))

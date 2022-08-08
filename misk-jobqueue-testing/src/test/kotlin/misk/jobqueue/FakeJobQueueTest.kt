@@ -516,6 +516,7 @@ private class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobH
       ExampleJobHint.THROW_ONCE -> if (!jobExecutedBefore) {
         throw ColorException()
       }
+      else -> Unit
     }
 
     job.acknowledge()
