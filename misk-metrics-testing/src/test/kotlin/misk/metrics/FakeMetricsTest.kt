@@ -1,5 +1,6 @@
 package misk.metrics
 
+import io.prometheus.client.Collector.MetricFamilySamples.Sample
 import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -113,5 +114,22 @@ class FakeMetricsTest {
     histogram.record(600.0)
     assertThat(metrics.histogramP50("call_times")).isEqualTo(450.0)
     assertThat(metrics.histogramP99("call_times")).isEqualTo(550.0)
+  }
+
+  @Test
+  internal fun `get all samples`() {
+    metrics.counter("counter", "-", listOf("foo")).labels("bar").inc()
+    metrics.gauge("gauge", "-", listOf("foo")).labels("bar").inc()
+    val quantiles = mapOf(0.5 to 0.5, 0.99 to 0.99)
+    metrics.histogram("histogram", "-", listOf("foo"), quantiles).record(1.0, "bar")
+
+    assertThat(metrics.getAllSamples().toList()).containsExactlyInAnyOrder(
+      Sample("counter", listOf("foo"), listOf("bar"), 1.0),
+      Sample("gauge", listOf("foo"), listOf("bar"), 1.0),
+      Sample("histogram", listOf("foo", "quantile"), listOf("bar", "0.5"), 1.0),
+      Sample("histogram", listOf("foo", "quantile"), listOf("bar", "0.99"), 1.0),
+      Sample("histogram_count", listOf("foo"), listOf("bar"), 1.0),
+      Sample("histogram_sum", listOf("foo"), listOf("bar"), 1.0),
+    )
   }
 }
