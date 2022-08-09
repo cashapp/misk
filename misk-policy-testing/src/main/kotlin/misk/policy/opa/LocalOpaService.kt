@@ -27,7 +27,8 @@ import java.time.Duration
 
 class LocalOpaService(
   private val policyPath: String,
-  private val withLogging: Boolean
+  private val withLogging: Boolean,
+  private val preferredImageVersion: String
 ) : AbstractIdleService() {
   private var containerId: String = ""
   private val defaultDockerClientConfig =
@@ -44,7 +45,7 @@ class LocalOpaService(
 
   companion object {
     const val DEFAULT_POLICY_DIRECTORY = "service/src/policy"
-    const val OPA_DOCKER_IMAGE = "openpolicyagent/opa:latest-debug"
+    const val OPA_DOCKER_IMAGE_BASE = "openpolicyagent/opa:"
     const val OPA_CONTAINER_NAME = "opa_development"
     const val OPA_EXPOSED_PORT = 8181
 
@@ -61,7 +62,8 @@ class LocalOpaService(
     }
 
     // Pull the image to the local docker registry.
-    dockerClient.pullImageCmd(OPA_DOCKER_IMAGE).exec(PullImageResultCallback())
+    val imagePath = OPA_DOCKER_IMAGE_BASE + preferredImageVersion
+    dockerClient.pullImageCmd(imagePath).exec(PullImageResultCallback())
       .awaitCompletion()
     // Remove any stale test container.
     dockerClient.listContainersCmd()
@@ -73,7 +75,7 @@ class LocalOpaService(
       }
 
     // Create a new test container.
-    containerId = dockerClient.createContainerCmd(OPA_DOCKER_IMAGE)
+    containerId = dockerClient.createContainerCmd(imagePath)
       .withCmd(listOf("run", "-b", "-s", "-w", "/repo"))
       .withHostConfig(
         HostConfig.newHostConfig()

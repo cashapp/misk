@@ -18,7 +18,7 @@ This module should be used alongside the `OpaModule` in the misk-policy package.
 ```kotlin
 install(OpaDevelopmentModule())
 //or
-install(OpaDevelopmentModule(policyDirectory = "some path", withLogging = true))
+install(OpaDevelopmentModule(policyDirectory = "some path", withLogging = true, preferredImageVersion = "0.40.0"))
 ```
 
 The default policy directory is `service/src/policy` and the recommended location to keep policies accessible for local testing.
