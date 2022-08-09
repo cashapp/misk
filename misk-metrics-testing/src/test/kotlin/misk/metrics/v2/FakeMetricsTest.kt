@@ -1,5 +1,6 @@
 package misk.metrics.v2
 
+import io.prometheus.client.Collector.MetricFamilySamples.Sample
 import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -113,5 +114,22 @@ class FakeMetricsTest {
     summary.observe(600.0)
     assertThat(metrics.summaryP50("call_times")).isEqualTo(450.0)
     assertThat(metrics.summaryP99("call_times")).isEqualTo(550.0)
+  }
+
+  @Test
+  internal fun `get all samples`() {
+    metrics.counter("counter", "-", listOf("foo")).labels("bar").inc()
+    metrics.gauge("gauge", "-", listOf("foo")).labels("bar").inc()
+    metrics.histogram("histogram", "-", listOf("foo"), listOf(1.0, 2.0)).labels("bar").observe(1.0)
+
+    assertThat(metrics.getAllSamples().toList()).containsExactlyInAnyOrder(
+      Sample("counter", listOf("foo"), listOf("bar"), 1.0),
+      Sample("gauge", listOf("foo"), listOf("bar"), 1.0),
+      Sample("histogram_bucket", listOf("foo", "le"), listOf("bar", "1.0"), 1.0),
+      Sample("histogram_bucket", listOf("foo", "le"), listOf("bar", "2.0"), 1.0),
+      Sample("histogram_bucket", listOf("foo", "le"), listOf("bar", "+Inf"), 1.0),
+      Sample("histogram_count", listOf("foo"), listOf("bar"), 1.0),
+      Sample("histogram_sum", listOf("foo"), listOf("bar"), 1.0),
+    )
   }
 }
