@@ -1,6 +1,6 @@
 object Dependencies {
   val apacheCommonsLang3 = "org.apache.commons:commons-lang3:3.11"
-  val assertj = "org.assertj:assertj-core:3.20.2"
+  val assertj = "org.assertj:assertj-core:3.23.1"
   val awaitility = "org.awaitility:awaitility-kotlin:4.1.0"
   val aws2Dynamodb = "software.amazon.awssdk:dynamodb:2.17.198"
   val aws2DynamodbEnhanced = "software.amazon.awssdk:dynamodb-enhanced:2.17.198"
