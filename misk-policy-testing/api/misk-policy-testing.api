@@ -30,6 +30,8 @@ public final class misk/policy/opa/LocalOpaService$Companion {
 
 public final class misk/policy/opa/OpaDevelopmentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;ZLjava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
