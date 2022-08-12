@@ -28,6 +28,9 @@ public final class wisp/feature/testing/FakeFeatureFlags : wisp/config/Configura
 	public fun getJson (Lwisp/feature/Feature;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;)Ljava/lang/Object;
+	public fun getJsonString (Lwisp/feature/Feature;)Ljava/lang/String;
+	public fun getJsonString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public fun getJsonString (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/String;
 	public final fun getLegacyFeatureFlags ()Lwisp/feature/testing/FakeLegacyFeatureFlags;
 	public fun getString (Lwisp/feature/Feature;)Ljava/lang/String;
 	public fun getString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
@@ -125,6 +128,9 @@ public final class wisp/feature/testing/FakeLegacyFeatureFlags : wisp/feature/Dy
 	public fun getJson (Lwisp/feature/Feature;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;)Ljava/lang/Object;
+	public fun getJsonString (Lwisp/feature/Feature;)Ljava/lang/String;
+	public fun getJsonString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public fun getJsonString (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/String;
 	public final fun getMoshi ()Lkotlin/jvm/functions/Function0;
 	public fun getString (Lwisp/feature/Feature;)Ljava/lang/String;
 	public fun getString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
