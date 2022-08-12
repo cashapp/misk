@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
@@ -11,6 +10,6 @@ dependencies {
     implementation(project(":wisp-config"))
     implementation(project(":wisp-logging"))
 
-    testImplementation(Dependencies.assertj)
+    testImplementation(testLibs.assertj)
     testImplementation(Dependencies.kotlinTest)
 }

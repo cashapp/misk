@@ -1,13 +1,10 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
 dependencies {
 
-    testImplementation(Dependencies.kotestJunitRunnerJvm)
-    testImplementation(Dependencies.kotestAssertions)
-    testImplementation(Dependencies.kotestProperty)
-    testImplementation(Dependencies.assertj)
+    testImplementation(testLibs.bundles.kotest)
+    testImplementation(testLibs.assertj)
     testRuntimeOnly(Dependencies.junitEngine)
 }

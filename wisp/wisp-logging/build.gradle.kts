@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
@@ -10,7 +9,7 @@ dependencies {
     implementation(Dependencies.slf4jApi)
 
     testImplementation(Dependencies.logbackClassic)
-    testImplementation(Dependencies.assertj)
+    testImplementation(testLibs.assertj)
     testImplementation(Dependencies.kotlinTest)
     testImplementation(Dependencies.kotlinxCoroutines)
     testImplementation(project(":wisp-logging-testing"))

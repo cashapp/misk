@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
@@ -20,7 +19,6 @@ dependencies {
     api(project(":wisp-moshi"))
     api(project(":wisp-resource-loader"))
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.kotlinTest)
-    testImplementation(Dependencies.kotestAssertions)
+    testImplementation(testLibs.assertj)
+    testImplementation(testLibs.bundles.kotest)
 }

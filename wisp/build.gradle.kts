@@ -2,18 +2,21 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+plugins {
+    alias(libs.plugins.kotlinGradlePlugin) apply false
+    alias(libs.plugins.kotlinBinaryCompatibilityPlugin) apply false
+    alias(libs.plugins.protobufGradlePlugin) apply false
+}
+
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+}
+
 buildscript {
     repositories {
         mavenCentral()
-        maven(url = "https://plugins.gradle.org/m2/")
-    }
-
-    dependencies {
-        classpath(Dependencies.kotlinGradlePlugin)
-        classpath(Dependencies.junitGradlePlugin)
-        classpath(Dependencies.mavenPublishGradlePlugin)
-        classpath(Dependencies.protobufGradlePlugin)
-        classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
+        gradlePluginPortal()
     }
 }
 
@@ -21,6 +24,7 @@ subprojects {
     buildscript {
         repositories {
             mavenCentral()
+            gradlePluginPortal()
         }
     }
 
@@ -28,6 +32,13 @@ subprojects {
         mavenCentral()
         maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
     }
+
+    if (!path.startsWith(":wisp-bom")) {
+        apply(plugin = "kotlin")
+        apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
+        apply(plugin = "com.google.protobuf")
+    }
+    apply(plugin = "maven-publish")
 
     // Only apply if the project has the kotlin plugin added:
     plugins.withType<KotlinPluginWrapper> {
@@ -80,9 +91,8 @@ subprojects {
         }
     }
 
-    apply(plugin = "com.vanniktech.maven.publish")
-    apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
-    apply(from = "$rootDir/gradle-mvn-publish.gradle")
+    //apply(plugin = "com.vanniktech.maven.publish")
+    //apply(from = "$rootDir/gradle-mvn-publish.gradle")
 
 }
 

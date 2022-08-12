@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
@@ -14,7 +13,7 @@ dependencies {
     implementation(project(":wisp-ssl"))
     api(project(":wisp-config"))
 
-    testImplementation(Dependencies.assertj)
+    testImplementation(testLibs.assertj)
     testImplementation(Dependencies.kotlinTest)
     testImplementation(Dependencies.mockitoCore)
     testImplementation(Dependencies.moshiKotlin)
