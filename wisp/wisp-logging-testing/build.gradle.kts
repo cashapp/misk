@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
@@ -9,7 +8,7 @@ dependencies {
     api(Dependencies.loggingApi)
     api(Dependencies.logbackClassic)
     implementation(Dependencies.slf4jApi)
-    implementation(Dependencies.assertj)
+    implementation(testLibs.assertj)
 
     testImplementation(Dependencies.kotlinTest)
     testImplementation(Dependencies.kotlinxCoroutines)
