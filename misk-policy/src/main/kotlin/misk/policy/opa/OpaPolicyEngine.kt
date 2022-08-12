@@ -54,7 +54,7 @@ inline fun <reified T : OpaRequest, reified R : OpaResponse> OpaPolicyEngine.eva
 /**
  * Evaluate / Query a document with given input of raw JSON.
  * This will connect to OPA via a retrofit interface and perform a /v1/data/{document} POST.
- * This consumes raw JSON for corner cases where developers need to do queries the automatic
+ * This consumes raw JSON for corner cases where developers need to do queries that the automatic
  * JSON serialization doesn't support.
  *
  * @param document Name or Path of the OPA document to query.

@@ -78,6 +78,7 @@ internal class RealOpaPolicyEngineTest {
     assertThat(evaluate).isEqualTo(BasicResponse("a"))
     assertThat(requestCaptor.value).isEqualTo("{\"input\":{\"someValue\":1}}")
   }
+
   @Test
   fun rawJsonInputQuery() {
     val requestCaptor = Mockito.captor<String>()
