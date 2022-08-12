@@ -30,6 +30,7 @@ public final class wisp/launchdarkly/LaunchDarklyDynamicConfig : wisp/feature/Dy
 	public fun getEnum (Lwisp/feature/Feature;Ljava/lang/Class;)Ljava/lang/Enum;
 	public fun getInt (Lwisp/feature/Feature;)I
 	public fun getJson (Lwisp/feature/Feature;Ljava/lang/Class;)Ljava/lang/Object;
+	public fun getJsonString (Lwisp/feature/Feature;)Ljava/lang/String;
 	public fun getString (Lwisp/feature/Feature;)Ljava/lang/String;
 	public fun trackBoolean (Lwisp/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public fun trackDouble (Lwisp/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
@@ -62,6 +63,8 @@ public final class wisp/launchdarkly/LaunchDarklyFeatureFlags : wisp/feature/Fea
 	public fun getInt (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)I
 	public fun getJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;)Ljava/lang/Object;
+	public fun getJsonString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public fun getJsonString (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/String;
 	public fun getString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public fun getString (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/String;
 	public final fun shutDown ()V
