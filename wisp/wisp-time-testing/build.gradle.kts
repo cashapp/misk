@@ -3,5 +3,4 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinStdLibJdk8)
 }

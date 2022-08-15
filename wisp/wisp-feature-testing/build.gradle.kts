@@ -9,8 +9,6 @@ sourceSets {
 }
 
 dependencies {
-    implementation(libs.kotlinStdLibJdk8)
-    implementation(libs.kotlinReflection)
     implementation(libs.moshiCore)
     implementation(libs.moshiKotlin)
     implementation(libs.moshiAdapters)

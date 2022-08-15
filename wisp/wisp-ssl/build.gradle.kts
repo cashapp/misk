@@ -5,7 +5,6 @@ plugins {
 dependencies {
     api(project(":wisp-resource-loader"))
     implementation(libs.bouncycastle)
-    implementation(libs.kotlinStdLibJdk8)
     implementation(libs.okio)
 
     testImplementation(libs.assertj)
