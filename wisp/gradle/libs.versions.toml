@@ -1,9 +1,9 @@
 [versions]
-aws2 = "2.17.234"
+aws2 = "2.17.252"
 docker = "3.2.13"
-hoplite = "2.3.3"
-junit = "5.8.2"
-kotest = "5.3.2"
+hoplite = "2.5.2"
+junit = "5.9.0"
+kotest = "5.4.2"
 kotlin = "1.7.10"
 moshi = "1.13.0"
 openTracing = "0.33.0"
@@ -14,7 +14,7 @@ aws2Regions = { module = "software.amazon.awssdk:regions", version.ref = "aws2" 
 bouncycastle = "org.bouncycastle:bcprov-jdk15on:1.70"
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
 dockerTransport = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
-grpcBom = "io.grpc:grpc-bom:1.47.0"
+grpcBom = "io.grpc:grpc-bom:1.48.1"
 hopliteCore = { module = "com.sksamuel.hoplite:hoplite-core", version.ref = "hoplite" }
 hopliteHocon = { module = "com.sksamuel.hoplite:hoplite-hocon", version.ref = "hoplite" }
 hopliteJson = { module = "com.sksamuel.hoplite:hoplite-json", version.ref = "hoplite" }
@@ -37,7 +37,7 @@ launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:5.8.1"
 logbackClassic = "ch.qos.logback:logback-classic:1.2.11"
 loggingApi = "io.github.microutils:kotlin-logging:2.1.23"
 micrometerPrometheus = "io.micrometer:micrometer-registry-prometheus:1.8.4"
-mockitoCore = "org.mockito:mockito-core:4.6.1"
+mockitoCore = "org.mockito:mockito-core:4.7.0"
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
 moshiCore = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
