@@ -67,3 +67,5 @@ kotlinBinaryCompatibilityPlugin = "org.jetbrains.kotlinx.binary-compatibility-va
 kotlinGradlePlugin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 mavenPublishGradlePlugin = "maven-publish:0.18.0"
 protobufGradlePlugin = "com.google.protobuf:0.8.19"
+versionCatalogUpdateGradlePlugin = "nl.littlerobots.version-catalog-update:0.5.3"
+versionsGradlePlugin = "com.github.ben-manes.versions:0.42.0"
