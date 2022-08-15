@@ -18,6 +18,18 @@ class FakeOpaPolicyEngine @Inject constructor(): OpaPolicyEngine {
     return opaResponse as R
   }
 
+  override fun <R: OpaResponse> evaluateRawJsonInput(
+    document: String,
+    input: String,
+    returnType: Class<R>
+  ): R {
+    val opaResponse = responsesForJsonInput[document]?.get(input)
+      ?: throw IllegalStateException("No override for document '$document' and input '$input'")
+
+    @Suppress("UNCHECKED_CAST")
+    return opaResponse as R
+  }
+
   override fun <R : OpaResponse> evaluateNoInput(
     document: String,
     returnType: Class<R>
@@ -32,6 +44,15 @@ class FakeOpaPolicyEngine @Inject constructor(): OpaPolicyEngine {
   private val responses = mutableMapOf<String, OpaResponse>()
   fun addOverride(document: String, obj: OpaResponse) {
     responses[document] = obj
+  }
+
+  private val responsesForJsonInput = mutableMapOf<String, MutableMap<String,OpaResponse>>()
+  fun addOverrideForInput(document: String, key: String, obj: OpaResponse) {
+    if (responsesForJsonInput.containsKey(document)) {
+      responsesForJsonInput[document]?.put(key,obj)
+    } else {
+      responsesForJsonInput[document] = mutableMapOf(Pair(key, obj))
+    }
   }
 
   private val responsesForInput = mutableMapOf<String, MutableMap<OpaRequest,OpaResponse>>()
