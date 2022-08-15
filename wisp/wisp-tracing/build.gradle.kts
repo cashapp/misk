@@ -3,12 +3,12 @@ plugins {
 }
 
 dependencies {
-    implementation(Dependencies.kotlinStdLibJdk8)
-    implementation(Dependencies.openTracing)
+    implementation(libs.kotlinStdLibJdk8)
+    implementation(libs.openTracing)
 
-    testImplementation(testLibs.assertj)
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.junitEngine)
-    testImplementation(Dependencies.kotlinTest)
-    testImplementation(Dependencies.openTracingMock)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.junitEngine)
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.openTracingMock)
 }

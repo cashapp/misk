@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation(Dependencies.kotlinStdLibJdk8)
+    implementation(libs.kotlinStdLibJdk8)
     api(project(":wisp-deployment"))
 
-    testImplementation(testLibs.assertj)
-    testImplementation(Dependencies.kotlinTest)
+    testImplementation(libs.assertj)
+    testImplementation(libs.kotlinTest)
 }

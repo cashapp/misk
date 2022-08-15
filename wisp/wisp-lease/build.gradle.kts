@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation(Dependencies.kotlinStdLibJdk8)
-    implementation(Dependencies.kotlinReflection)
+    implementation(libs.kotlinStdLibJdk8)
+    implementation(libs.kotlinReflection)
 
-    testImplementation(testLibs.assertj)
-    testImplementation(Dependencies.kotlinTest)
+    testImplementation(libs.assertj)
+    testImplementation(libs.kotlinTest)
 }

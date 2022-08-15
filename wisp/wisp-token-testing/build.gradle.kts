@@ -6,7 +6,7 @@ plugins {
 dependencies {
     api(project(":wisp-token"))
 
-    testImplementation(testLibs.bundles.kotest)
-    testImplementation(testLibs.assertj)
-    testRuntimeOnly(Dependencies.junitEngine)
+    testImplementation(libs.bundles.kotest)
+    testImplementation(libs.assertj)
+    testRuntimeOnly(libs.junitEngine)
 }
