@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinStdLibJdk8)
     implementation(libs.aws2Regions)
     api(project(":wisp-deployment"))
 

@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinStdLibJdk8)
     implementation(libs.openTracing)
 
     testImplementation(libs.assertj)

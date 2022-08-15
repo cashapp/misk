@@ -3,8 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinStdLibJdk8)
-    implementation(libs.kotlinReflection)
     api(libs.launchDarkly)
     api(libs.moshiKotlin)
     implementation(project(":wisp-client"))

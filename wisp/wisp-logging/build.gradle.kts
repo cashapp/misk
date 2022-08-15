@@ -3,8 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinStdLibJdk8)
-    implementation(libs.kotlinReflection)
     api(libs.loggingApi)
     implementation(libs.slf4jApi)
 
