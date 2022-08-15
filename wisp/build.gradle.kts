@@ -99,3 +99,34 @@ subprojects {
 
 }
 
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
+
+tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+    resolutionStrategy {
+        componentSelection {
+            all {
+                if (isNonStable(candidate.version) && !isNonStable(currentVersion)) {
+                    reject("Release candidate")
+                }
+            }
+        }
+    }
+}
+versionCatalogUpdate {
+  sortByKey.set(true)
+
+  pin {
+    versions.add("kotlin")
+      libraries.add(libs.launchDarkly)
+      libraries.add(libs.micrometerPrometheus)
+      libraries.add(libs.prometheusClient)
+  }
+  keep {
+      plugins.add(libs.plugins.mavenPublishGradlePlugin)
+  }
+}
