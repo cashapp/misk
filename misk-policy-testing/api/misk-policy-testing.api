@@ -5,8 +5,10 @@ public final class misk/policy/opa/FakeOpaModule : misk/inject/KAbstractModule {
 public final class misk/policy/opa/FakeOpaPolicyEngine : misk/policy/opa/OpaPolicyEngine {
 	public fun <init> ()V
 	public final fun addOverride (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
+	public final fun addOverrideForInput (Ljava/lang/String;Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
 	public final fun addOverrideForInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Lmisk/policy/opa/OpaResponse;)V
 	public fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+	public fun evaluateRawJsonInput (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 	public fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 }
 
