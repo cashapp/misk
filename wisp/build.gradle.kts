@@ -6,8 +6,8 @@ plugins {
     alias(libs.plugins.kotlinGradlePlugin) apply false
     alias(libs.plugins.kotlinBinaryCompatibilityPlugin) apply false
     alias(libs.plugins.protobufGradlePlugin) apply false
-    id("com.github.ben-manes.versions") version "0.42.0"
-    id("nl.littlerobots.version-catalog-update") version "0.5.3"
+    alias(libs.plugins.versionsGradlePlugin)
+    alias(libs.plugins.versionCatalogUpdateGradlePlugin)
 }
 
 repositories {
