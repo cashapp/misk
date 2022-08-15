@@ -1,3 +1,4 @@
+import nl.littlerobots.vcu.plugin.VersionCatalogUpdateTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -97,6 +98,20 @@ subprojects {
     //apply(plugin = "com.vanniktech.maven.publish")
     //apply(from = "$rootDir/gradle-mvn-publish.gradle")
 
+    apply(plugin = "com.github.ben-manes.versions")
+
+    tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+        revision = "release"
+        resolutionStrategy {
+            componentSelection {
+                all {
+                    if (isNonStable(candidate.version) && !isNonStable(currentVersion)) {
+                        reject("Release candidate")
+                    }
+                }
+            }
+        }
+    }
 }
 
 fun isNonStable(version: String): Boolean {
@@ -106,7 +121,9 @@ fun isNonStable(version: String): Boolean {
     return isStable.not()
 }
 
+// this needs to be defined here for the versionCatalogUpdate
 tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+    revision = "release"
     resolutionStrategy {
         componentSelection {
             all {
@@ -117,16 +134,17 @@ tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
         }
     }
 }
-versionCatalogUpdate {
-  sortByKey.set(true)
 
-  pin {
-    versions.add("kotlin")
-      libraries.add(libs.launchDarkly)
-      libraries.add(libs.micrometerPrometheus)
-      libraries.add(libs.prometheusClient)
-  }
-  keep {
-      plugins.add(libs.plugins.mavenPublishGradlePlugin)
-  }
+versionCatalogUpdate {
+    sortByKey.set(true)
+
+    pin {
+        versions.add("kotlin")
+        libraries.add(libs.launchDarkly)
+        libraries.add(libs.micrometerPrometheus)
+        libraries.add(libs.prometheusClient)
+    }
+    keep {
+        plugins.add(libs.plugins.mavenPublishGradlePlugin)
+    }
 }
