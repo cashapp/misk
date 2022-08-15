@@ -80,6 +80,24 @@ internal class RealOpaPolicyEngineTest {
   }
 
   @Test
+  fun rawJsonInputQuery() {
+    val requestCaptor = Mockito.captor<String>()
+    Mockito.whenever(opaApi.queryDocument(anyString(), capture(requestCaptor), anyBoolean())).thenReturn(
+      Calls.response(
+        ResponseBody.create(
+          APPLICATION_JSON.asMediaType(),
+          "{\"decision_id\": \"decisionIdString\", \"result\": {\"test\": \"a\"}}"
+        )
+      )
+    )
+
+    val evaluate: BasicResponse = opaPolicyEngine.evaluate("test", "{\"input\":\"someValue\"}")
+
+    assertThat(evaluate).isEqualTo(BasicResponse("a"))
+    assertThat(requestCaptor.value).isEqualTo("{\"input\":\"someValue\"}")
+  }
+
+  @Test
   fun responseIsNotOk() {
     Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean())).thenReturn(
       Calls.response(
