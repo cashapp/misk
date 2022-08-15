@@ -25,6 +25,7 @@ public final class misk/policy/opa/OpaModule : misk/inject/KAbstractModule {
 
 public abstract interface class misk/policy/opa/OpaPolicyEngine {
 	public abstract fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+	public abstract fun evaluateRawJsonInput (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 	public abstract fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 }
 
@@ -78,6 +79,7 @@ public final class misk/policy/opa/ProvenanceBundle {
 public final class misk/policy/opa/RealOpaPolicyEngine : misk/policy/opa/OpaPolicyEngine {
 	public fun <init> (Lmisk/policy/opa/OpaApi;Lcom/squareup/moshi/Moshi;Z)V
 	public fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+	public fun evaluateRawJsonInput (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 	public fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 }
 
