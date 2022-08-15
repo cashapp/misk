@@ -3,8 +3,8 @@ aws2 = "2.17.234"
 docker = "3.2.13"
 hoplite = "2.3.3"
 junit = "5.8.2"
-kotlin = "1.7.10"
 kotest = "5.3.2"
+kotlin = "1.7.10"
 moshi = "1.13.0"
 openTracing = "0.33.0"
 
@@ -24,15 +24,15 @@ jacksonBom = "com.fasterxml.jackson:jackson-bom:2.13.3"
 jnrUnixsocket = "com.github.jnr:jnr-unixsocket:0.38.17"
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
-kotlinRetry = "com.michael-bull.kotlin-retry:kotlin-retry:1.0.9"
-kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
-kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
-kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
-kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlinxCoroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotestProperty = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlinRetry = "com.michael-bull.kotlin-retry:kotlin-retry:1.0.9"
+kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinxCoroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:5.8.1"
 logbackClassic = "ch.qos.logback:logback-classic:1.2.11"
 loggingApi = "io.github.microutils:kotlin-logging:2.1.23"
@@ -51,11 +51,21 @@ prometheusClient = "io.prometheus:simpleclient:0.9.0"
 slf4jApi = "org.slf4j:slf4j-api:1.7.36"
 
 [bundles]
-hoplite = [ "hopliteCore", "hopliteHocon", "hopliteJson", "hopliteToml", "hopliteYaml" ]
-kotest = [ "kotestAssertions", "kotestJunitRunnerJvm", "kotestProperty" ]
+hoplite = [
+    "hopliteCore",
+    "hopliteHocon",
+    "hopliteJson",
+    "hopliteToml",
+    "hopliteYaml",
+]
+kotest = [
+    "kotestAssertions",
+    "kotestJunitRunnerJvm",
+    "kotestProperty",
+]
 
 [plugins]
+kotlinBinaryCompatibilityPlugin = "org.jetbrains.kotlinx.binary-compatibility-validator:0.11.0"
 kotlinGradlePlugin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlinBinaryCompatibilityPlugin = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.11.0" }
-mavenPublishGradlePlugin = { id = "maven-publish", version = "0.18.0" }
-protobufGradlePlugin = { id = "com.google.protobuf", version = "0.8.19" }
+mavenPublishGradlePlugin = "maven-publish:0.18.0"
+protobufGradlePlugin = "com.google.protobuf:0.8.19"
