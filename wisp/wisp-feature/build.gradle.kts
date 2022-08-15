@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(Dependencies.kotlinStdLibJdk8)
-    implementation(Dependencies.moshiKotlin)
-    implementation(Dependencies.loggingApi)
+    implementation(libs.kotlinStdLibJdk8)
+    implementation(libs.moshiKotlin)
+    implementation(libs.loggingApi)
 }

@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation(Dependencies.kotlinStdLibJdk8)
+    implementation(libs.kotlinStdLibJdk8)
     api(libs.bundles.hoplite)
     api(project(":wisp-resource-loader"))
 
-    testImplementation(testLibs.assertj)
-    testImplementation(Dependencies.kotlinTest)
+    testImplementation(libs.assertj)
+    testImplementation(libs.kotlinTest)
 }

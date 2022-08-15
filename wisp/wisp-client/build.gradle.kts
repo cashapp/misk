@@ -11,9 +11,9 @@ sourceSets {
 dependencies {
     api(project(":wisp-ssl"))
     api(project(":wisp-logging"))
-    implementation(Dependencies.jnrUnixsocket)
-    implementation(Dependencies.okHttp)
-    implementation(Dependencies.okio)
-    implementation(Dependencies.openTracing)
-    implementation(Dependencies.openTracingOkHttp)
+    implementation(libs.jnrUnixsocket)
+    implementation(libs.okHttp)
+    implementation(libs.okio)
+    implementation(libs.openTracing)
+    implementation(libs.openTracingOkHttp)
 }

@@ -1,16 +1,58 @@
 [versions]
+aws2 = "2.17.234"
+docker = "3.2.13"
 hoplite = "2.3.3"
+junit = "5.8.2"
 kotlin = "1.7.10"
+kotest = "5.3.2"
+moshi = "1.13.0"
+openTracing = "0.33.0"
 
 [libraries]
+assertj = "org.assertj:assertj-core:3.23.1"
+aws2Regions = { module = "software.amazon.awssdk:regions", version.ref = "aws2" }
+bouncycastle = "org.bouncycastle:bcprov-jdk15on:1.70"
+dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
+dockerTransport = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
+grpcBom = "io.grpc:grpc-bom:1.47.0"
 hopliteCore = { module = "com.sksamuel.hoplite:hoplite-core", version.ref = "hoplite" }
 hopliteHocon = { module = "com.sksamuel.hoplite:hoplite-hocon", version.ref = "hoplite" }
 hopliteJson = { module = "com.sksamuel.hoplite:hoplite-json", version.ref = "hoplite" }
 hopliteToml = { module = "com.sksamuel.hoplite:hoplite-toml", version.ref = "hoplite" }
 hopliteYaml = { module = "com.sksamuel.hoplite:hoplite-yaml", version.ref = "hoplite" }
+jacksonBom = "com.fasterxml.jackson:jackson-bom:2.13.3"
+jnrUnixsocket = "com.github.jnr:jnr-unixsocket:0.38.17"
+junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+kotlinRetry = "com.michael-bull.kotlin-retry:kotlin-retry:1.0.9"
+kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinxCoroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+kotestAssertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
+kotestProperty = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:5.8.1"
+logbackClassic = "ch.qos.logback:logback-classic:1.2.11"
+loggingApi = "io.github.microutils:kotlin-logging:2.1.23"
+micrometerPrometheus = "io.micrometer:micrometer-registry-prometheus:1.8.4"
+mockitoCore = "org.mockito:mockito-core:4.6.1"
+moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
+moshiCore = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
+moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
+nettyBom = "io.netty:netty-bom:4.1.79.Final"
+okHttp = "com.squareup.okhttp3:okhttp:4.10.0"
+okio = "com.squareup.okio:okio:3.2.0"
+openTracing = { module = "io.opentracing:opentracing-api", version.ref = "openTracing" }
+openTracingMock = { module = "io.opentracing:opentracing-mock", version.ref = "openTracing" }
+openTracingOkHttp = "io.opentracing.contrib:opentracing-okhttp3:3.0.0"
+prometheusClient = "io.prometheus:simpleclient:0.9.0"
+slf4jApi = "org.slf4j:slf4j-api:1.7.36"
 
 [bundles]
 hoplite = [ "hopliteCore", "hopliteHocon", "hopliteJson", "hopliteToml", "hopliteYaml" ]
+kotest = [ "kotestAssertions", "kotestJunitRunnerJvm", "kotestProperty" ]
 
 [plugins]
 kotlinGradlePlugin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

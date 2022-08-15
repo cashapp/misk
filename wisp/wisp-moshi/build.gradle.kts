@@ -4,10 +4,10 @@ plugins {
 
 dependencies {
 
-    api(Dependencies.moshiCore)
-    api(Dependencies.moshiKotlin)
+    api(libs.moshiCore)
+    api(libs.moshiKotlin)
 
-    testImplementation(testLibs.bundles.kotest)
-    testImplementation(testLibs.assertj)
-    testRuntimeOnly(Dependencies.junitEngine)
+    testImplementation(libs.bundles.kotest)
+    testImplementation(libs.assertj)
+    testRuntimeOnly(libs.junitEngine)
 }

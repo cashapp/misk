@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlinGradlePlugin) apply false
     alias(libs.plugins.kotlinBinaryCompatibilityPlugin) apply false
     alias(libs.plugins.protobufGradlePlugin) apply false
+    id("com.github.ben-manes.versions") version "0.42.0"
+    id("nl.littlerobots.version-catalog-update") version "0.5.3"
 }
 
 repositories {
@@ -39,6 +41,7 @@ subprojects {
         apply(plugin = "com.google.protobuf")
     }
     apply(plugin = "maven-publish")
+    apply(plugin = "version-catalog")
 
     // Only apply if the project has the kotlin plugin added:
     plugins.withType<KotlinPluginWrapper> {
@@ -56,15 +59,15 @@ subprojects {
         }
 
         dependencies {
-            add("testImplementation", Dependencies.junitApi)
-            add("testRuntimeOnly", Dependencies.junitEngine)
+            add("testImplementation", project.rootProject.libs.junitApi)
+            add("testRuntimeOnly", project.rootProject.libs.junitEngine)
 
             // Platform/BOM dependencies constrain versions only.
             // Enforce wisp-bom -- it should take priority over external BOMs.
             add("api", enforcedPlatform(project(":wisp-bom")))
-            add("api", platform(Dependencies.grpcBom))
-            add("api", platform(Dependencies.jacksonBom))
-            add("api", platform(Dependencies.nettyBom))
+            add("api", platform(project.rootProject.libs.grpcBom))
+            add("api", platform(project.rootProject.libs.jacksonBom))
+            add("api", platform(project.rootProject.libs.nettyBom))
 
             // The kotlin API surface used in this library is not exposed via
             // the external API, so we shouldn't be forcing downstream consumers
@@ -74,7 +77,7 @@ subprojects {
             // version of the kotlin compiler. Use 'implementation' instead of 'api'
             // so that we're not forcing downstream consumers to adopt our kotlin
             // BOM versions.
-            add("implementation", platform(Dependencies.kotlinBom))
+            add("implementation", platform(project.rootProject.libs.kotlinBom))
         }
 
         tasks.withType<GenerateModuleMetadata> {
