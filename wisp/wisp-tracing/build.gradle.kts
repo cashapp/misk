@@ -1,15 +1,13 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
 dependencies {
-    implementation(Dependencies.kotlinStdLibJdk8)
-    implementation(Dependencies.openTracing)
+    implementation(libs.openTracing)
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.junitEngine)
-    testImplementation(Dependencies.kotlinTest)
-    testImplementation(Dependencies.openTracingMock)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.junitEngine)
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.openTracingMock)
 }

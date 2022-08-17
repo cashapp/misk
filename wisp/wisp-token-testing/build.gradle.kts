@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
@@ -7,8 +6,7 @@ plugins {
 dependencies {
     api(project(":wisp-token"))
 
-    testImplementation(Dependencies.kotestJunitRunnerJvm)
-    testImplementation(Dependencies.kotestAssertions)
-    testImplementation(Dependencies.assertj)
-    testRuntimeOnly(Dependencies.junitEngine)
+    testImplementation(libs.bundles.kotest)
+    testImplementation(libs.assertj)
+    testRuntimeOnly(libs.junitEngine)
 }

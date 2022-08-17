@@ -1,15 +1,13 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
 dependencies {
 
-    api(Dependencies.moshiCore)
-    api(Dependencies.moshiKotlin)
+    api(libs.moshiCore)
+    api(libs.moshiKotlin)
 
-    testImplementation(Dependencies.kotestJunitRunnerJvm)
-    testImplementation(Dependencies.kotestAssertions)
-    testImplementation(Dependencies.assertj)
-    testRuntimeOnly(Dependencies.junitEngine)
+    testImplementation(libs.bundles.kotest)
+    testImplementation(libs.assertj)
+    testRuntimeOnly(libs.junitEngine)
 }

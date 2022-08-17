@@ -1,16 +1,14 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
 dependencies {
-    implementation(Dependencies.kotlinxCoroutines)
-    implementation(Dependencies.kotlinStdLibJdk8)
-    api(Dependencies.kotlinRetry)
-    api(Dependencies.micrometerPrometheus)
+    implementation(libs.kotlinxCoroutines)
+    api(libs.kotlinRetry)
+    api(libs.micrometerPrometheus)
     implementation(project(":wisp-config"))
     implementation(project(":wisp-logging"))
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.kotlinTest)
+    testImplementation(libs.assertj)
+    testImplementation(libs.kotlinTest)
 }

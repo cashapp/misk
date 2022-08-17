@@ -1,16 +1,14 @@
 plugins {
-    kotlin("jvm")
     `java-library`
 }
 
 dependencies {
     api(project(":wisp-resource-loader"))
-    implementation(Dependencies.bouncycastle)
-    implementation(Dependencies.kotlinStdLibJdk8)
-    implementation(Dependencies.okio)
+    implementation(libs.bouncycastle)
+    implementation(libs.okio)
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.junitEngine)
-    testImplementation(Dependencies.kotlinTest)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.junitEngine)
+    testImplementation(libs.kotlinTest)
 }
