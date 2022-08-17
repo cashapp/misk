@@ -135,15 +135,8 @@ tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 }
 
 versionCatalogUpdate {
+    /**
+     * Use @pin and @keep in gradle/lib.versions.toml instead of defining here
+     */
     sortByKey.set(true)
-
-    pin {
-        versions.add("kotlin")
-        libraries.add(libs.launchDarkly)
-        libraries.add(libs.micrometerPrometheus)
-        libraries.add(libs.prometheusClient)
-    }
-    keep {
-        plugins.add(libs.plugins.mavenPublishGradlePlugin)
-    }
 }
