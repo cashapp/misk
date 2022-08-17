@@ -36,15 +36,14 @@ subprojects {
         maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
     }
 
-    apply(plugin = "com.vanniktech.maven.publish")
-
     if (!path.startsWith(":wisp-bom")) {
         apply(plugin = "kotlin")
         apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
         apply(plugin = "com.google.protobuf")
-    } else {
-        apply(from = "$rootDir/gradle-mvn-publish.gradle")
     }
+
+    apply(plugin = "com.vanniktech.maven.publish")
+    apply(from = "$rootDir/gradle-mvn-publish.gradle")
     apply(plugin = "version-catalog")
 
     // Only apply if the project has the kotlin plugin added:
