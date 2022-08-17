@@ -1,11 +1,14 @@
 [versions]
 aws2 = "2.17.252"
 docker = "3.2.13"
+grpc = "1.48.1"
 hoplite = "2.5.2"
+jackson = "2.13.3"
 junit = "5.9.0"
 kotest = "5.4.2"
 kotlin = "1.7.10"
 moshi = "1.13.0"
+netty = "4.1.79.Final"
 openTracing = "0.33.0"
 
 [libraries]
@@ -14,13 +17,13 @@ aws2Regions = { module = "software.amazon.awssdk:regions", version.ref = "aws2" 
 bouncycastle = "org.bouncycastle:bcprov-jdk15on:1.70"
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
 dockerTransport = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
-grpcBom = "io.grpc:grpc-bom:1.48.1"
+grpcBom = { module = "io.grpc:grpc-bom", version.ref = "grpc" }
 hopliteCore = { module = "com.sksamuel.hoplite:hoplite-core", version.ref = "hoplite" }
 hopliteHocon = { module = "com.sksamuel.hoplite:hoplite-hocon", version.ref = "hoplite" }
 hopliteJson = { module = "com.sksamuel.hoplite:hoplite-json", version.ref = "hoplite" }
 hopliteToml = { module = "com.sksamuel.hoplite:hoplite-toml", version.ref = "hoplite" }
 hopliteYaml = { module = "com.sksamuel.hoplite:hoplite-yaml", version.ref = "hoplite" }
-jacksonBom = "com.fasterxml.jackson:jackson-bom:2.13.3"
+jacksonBom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
 jnrUnixsocket = "com.github.jnr:jnr-unixsocket:0.38.17"
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
@@ -39,7 +42,7 @@ mockitoCore = "org.mockito:mockito-core:4.7.0"
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
 moshiCore = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
-nettyBom = "io.netty:netty-bom:4.1.79.Final"
+nettyBom = { module = "io.netty:netty-bom", version.ref = "netty" }
 okHttp = "com.squareup.okhttp3:okhttp:4.10.0"
 okio = "com.squareup.okio:okio:3.2.0"
 openTracing = { module = "io.opentracing:opentracing-api", version.ref = "openTracing" }
