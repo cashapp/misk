@@ -1,4 +1,3 @@
-import nl.littlerobots.vcu.plugin.VersionCatalogUpdateTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -7,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlinGradlePlugin) apply false
     alias(libs.plugins.kotlinBinaryCompatibilityPlugin) apply false
     alias(libs.plugins.protobufGradlePlugin) apply false
+    alias(libs.plugins.mavenPublishGradlePlugin) apply false
     alias(libs.plugins.versionsGradlePlugin)
     alias(libs.plugins.versionCatalogUpdateGradlePlugin)
 }
@@ -36,12 +36,15 @@ subprojects {
         maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
     }
 
+    apply(plugin = "com.vanniktech.maven.publish")
+
     if (!path.startsWith(":wisp-bom")) {
         apply(plugin = "kotlin")
         apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
         apply(plugin = "com.google.protobuf")
+    } else {
+        apply(from = "$rootDir/gradle-mvn-publish.gradle")
     }
-    apply(plugin = "maven-publish")
     apply(plugin = "version-catalog")
 
     // Only apply if the project has the kotlin plugin added:
@@ -94,9 +97,6 @@ subprojects {
             showStandardStreams = false
         }
     }
-
-    //apply(plugin = "com.vanniktech.maven.publish")
-    //apply(from = "$rootDir/gradle-mvn-publish.gradle")
 
     apply(plugin = "com.github.ben-manes.versions")
 
