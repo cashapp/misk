@@ -1,6 +1,22 @@
 Change Log
 ==========
 
+Version 1.0.7 *(2022-08-18)*
+----------------------------
+
+* Use gradle catalog for dependency versions
+* Add gradle plugins for dependency updates checking and applying changes 
+* Dependency clean up in various modules
+
+Dependency changes:
+
+* aws: 2.17.234 -> 2.17.254
+* hoplite: 2.3.3 -> 2.5.2
+* junit: 5.8.2 -> 5.9.0
+* kotest: 5.3.2 -> 5.4.2
+* mockito: 4.6.1 -> 4.7.0
+       
+
 Version 1.0.7 *(2022-08-08)*
 ----------------------------
 
