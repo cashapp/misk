@@ -1279,10 +1279,10 @@ public abstract interface class misk/web/WebActionSeedDataTransformerFactory {
 }
 
 public final class misk/web/WebConfig : wisp/config/Config {
-	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZI)V
-	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;I)V
-	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZILjava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZILjava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;ILjava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;ILjava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component10 ()Ljava/lang/Integer;
 	public final fun component11 ()I
@@ -1299,6 +1299,8 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun component21 ()Z
 	public final fun component22 ()Lorg/slf4j/event/Level;
 	public final fun component23 ()I
+	public final fun component24 ()Ljava/lang/Integer;
+	public final fun component25 ()Ljava/lang/Integer;
 	public final fun component3 ()I
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lmisk/web/WebSslConfig;
@@ -1306,8 +1308,8 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun component7 ()Z
 	public final fun component8 ()Ljava/lang/Integer;
 	public final fun component9 ()Ljava/lang/Integer;
-	public final fun copy (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;I)Lmisk/web/WebConfig;
-	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;IILjava/lang/Object;)Lmisk/web/WebConfig;
+	public final fun copy (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;ILjava/lang/Integer;Ljava/lang/Integer;)Lmisk/web/WebConfig;
+	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;ILjava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/web/WebConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptors ()Ljava/lang/Integer;
 	public final fun getAction_exception_log_level ()Lmisk/web/exceptions/ActionExceptionLogLevelConfig;
@@ -1320,6 +1322,8 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun getHealth_port ()I
 	public final fun getHost ()Ljava/lang/String;
 	public final fun getHttp2 ()Z
+	public final fun getHttp_header_cache_size ()Ljava/lang/Integer;
+	public final fun getHttp_request_header_size ()Ljava/lang/Integer;
 	public final fun getIdle_timeout ()J
 	public final fun getJetty_max_concurrent_streams ()Ljava/lang/Integer;
 	public final fun getJetty_max_thread_pool_queue_size ()I
