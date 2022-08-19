@@ -43,15 +43,24 @@ internal data class ServletHttpCall(
     get() = upstreamResponse.headers
 
   override fun setStatusCodes(statusCode: Int, networkStatusCode: Int) {
+    checkResponseBodyNotSent()
     _actualStatusCode = statusCode
     upstreamResponse.statusCode = networkStatusCode
   }
 
   override fun setResponseHeader(name: String, value: String) {
+    checkResponseBodyNotSent()
     upstreamResponse.setHeader(name, value)
   }
 
+  private fun checkResponseBodyNotSent() {
+    check(responseBody != null || webSocket != null) {
+      "cannot set response headers after sending the response body"
+    }
+  }
+
   override fun addResponseHeaders(headers: Headers) {
+    checkResponseBodyNotSent()
     upstreamResponse.addHeaders(headers)
   }
 

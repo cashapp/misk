@@ -77,6 +77,17 @@ class WebActionsServletTest {
           )
           .build()
       )
+
+      chain.proceed(chain.httpCall)
+
+      chain.httpCall.addResponseHeaders(
+        Headers.Builder()
+          .set(
+            "ThisShouldFailButItDoesNot",
+            "UnlessYouAddABreakpoint"
+          )
+          .build()
+      )
     }
 
     class Factory : NetworkInterceptor.Factory {
