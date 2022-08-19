@@ -100,6 +100,12 @@ class JettyService @Inject internal constructor(
     if (webConfig.ssl != null) {
       httpConfig.securePort = webConfig.ssl.port
     }
+    if (webConfig.http_request_header_size != null) {
+      httpConfig.requestHeaderSize = webConfig.http_request_header_size
+    }
+    if (webConfig.http_header_cache_size != null) {
+      httpConfig.headerCacheSize = webConfig.http_header_cache_size
+    }
     httpConnectionFactories += HttpConnectionFactory(httpConfig)
     if (webConfig.http2) {
       val http2 = HTTP2ServerConnectionFactory(httpConfig)
