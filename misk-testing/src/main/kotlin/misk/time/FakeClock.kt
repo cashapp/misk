@@ -3,6 +3,7 @@ package misk.time
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
+import java.time.Period
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
@@ -21,6 +22,10 @@ class FakeClock(
   override fun instant(): Instant = Instant.ofEpochMilli(millis.get()).atZone(zone).toInstant()
 
   fun add(d: Duration) = millis.addAndGet(d.toMillis())
+
+  fun add(p: Period) = millis.getAndUpdate { millis ->
+    Instant.ofEpochMilli(millis).atZone(zone).plus(p).toInstant().toEpochMilli()
+  }
 
   fun add(n: Long, unit: TimeUnit) = millis.addAndGet(TimeUnit.MILLISECONDS.convert(n, unit))
 

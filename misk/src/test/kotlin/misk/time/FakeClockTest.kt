@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.Instant
+import java.time.Period
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
@@ -28,6 +29,9 @@ internal class FakeClockTest {
 
     clock.add(45, TimeUnit.HOURS)
     assertThat(clock.millis()).isEqualTo(162020000L)
+
+    clock.add(Period.ofMonths(2))
+    assertThat(clock.instant()).isEqualTo(Instant.parse("1970-03-02T21:00:20Z"))
   }
 
   @Test
