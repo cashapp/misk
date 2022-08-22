@@ -204,6 +204,15 @@ public final class misk/database/VitessCluster {
 	public final fun openVtgateConnection ()Ljava/sql/Connection;
 }
 
+public abstract class misk/jdbc/AbstractSchemaMigratorService : com/google/common/util/concurrent/AbstractIdleService, misk/healthchecks/HealthCheck, misk/jdbc/DatabaseReadyService {
+	protected fun shutDown ()V
+	protected fun startUp ()V
+	public fun status ()Lmisk/healthchecks/HealthStatus;
+}
+
+public final class misk/jdbc/AlwaysRunSchemaMigratorService : misk/jdbc/AbstractSchemaMigratorService {
+}
+
 public final class misk/jdbc/Check : java/lang/Enum {
 	public static final field COWRITE Lmisk/jdbc/Check;
 	public static final field FULL_SCATTER Lmisk/jdbc/Check;
@@ -450,8 +459,7 @@ public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
 	public fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
 
-public final class misk/jdbc/SchemaMigratorService : com/google/common/util/concurrent/AbstractIdleService, misk/healthchecks/HealthCheck, misk/jdbc/DatabaseReadyService {
-	public fun status ()Lmisk/healthchecks/HealthStatus;
+public final class misk/jdbc/SchemaMigratorService : misk/jdbc/AbstractSchemaMigratorService {
 }
 
 public abstract interface class misk/jdbc/Session {

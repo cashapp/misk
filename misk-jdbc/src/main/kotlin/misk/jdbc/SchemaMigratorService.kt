@@ -8,18 +8,19 @@ import wisp.deployment.Deployment
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
-class SchemaMigratorService internal constructor(
+abstract class AbstractSchemaMigratorService internal constructor(
   private val qualifier: KClass<out Annotation>,
   private val deployment: Deployment,
   private val schemaMigratorProvider: Provider<SchemaMigrator>, // Lazy!
-  private val connectorProvider: Provider<DataSourceConnector>
+  private val connectorProvider: Provider<DataSourceConnector>,
+  private val runInAllDeployments: Boolean
 ) : AbstractIdleService(), HealthCheck, DatabaseReadyService {
   private lateinit var migrationState: MigrationState
 
   override fun startUp() {
     val schemaMigrator = schemaMigratorProvider.get()
     val connector = connectorProvider.get()
-    if (deployment.isTest || deployment.isLocalDevelopment) {
+    if (runInAllDeployments || (deployment.isTest || deployment.isLocalDevelopment)) {
       val type = connector.config().type
       if (type != DataSourceType.VITESS_MYSQL) {
         val appliedMigrations = schemaMigrator.initialize()
@@ -47,3 +48,17 @@ class SchemaMigratorService internal constructor(
     )
   }
 }
+
+class SchemaMigratorService internal constructor(
+  qualifier: KClass<out Annotation>,
+  deployment: Deployment,
+  schemaMigratorProvider: Provider<SchemaMigrator>, // Lazy!
+  connectorProvider: Provider<DataSourceConnector>,
+) : AbstractSchemaMigratorService(qualifier, deployment, schemaMigratorProvider, connectorProvider, false)
+
+class AlwaysRunSchemaMigratorService internal constructor(
+  qualifier: KClass<out Annotation>,
+  deployment: Deployment,
+  schemaMigratorProvider: Provider<SchemaMigrator>, // Lazy!
+  connectorProvider: Provider<DataSourceConnector>,
+) : AbstractSchemaMigratorService(qualifier, deployment, schemaMigratorProvider, connectorProvider, true)
