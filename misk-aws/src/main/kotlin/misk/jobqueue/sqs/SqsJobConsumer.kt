@@ -33,6 +33,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   @ForSqsHandling private val handlingThreads: ExecutorService,
   @ForSqsHandling private val taskQueue: RepeatedTaskQueue,
   @ForSqsReceiving private val receivingThreads: ExecutorService,
+  private val sqsConsumerAllocator: SqsConsumerAllocator,
   private val featureFlags: FeatureFlags,
   private val leaseManager: LeaseManager,
   private val metrics: SqsMetrics,
@@ -40,7 +41,10 @@ internal class SqsJobConsumer @Inject internal constructor(
   private val queues: QueueResolver,
   private val serviceManagerProvider: Provider<ServiceManager>,
   private val tracer: Tracer,
+  awsSqsJobQueueConfig: AwsSqsJobQueueConfig
 ) : JobConsumer {
+  private val receiverPolicy = awsSqsJobQueueConfig.aws_sqs_job_receiver_policy
+
   private val subscriptions = ConcurrentHashMap<QueueName, QueueReceiver>()
 
   override fun subscribe(queueName: QueueName, handler: JobHandler) {
@@ -75,14 +79,9 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val queue = queues.getForReceiving(queueName)
 
     fun run(): Status {
-      // Receive messages in parallel. Default to 1 if feature flag is not defined.
-      val futures = receiverIds().map {
-        CompletableFuture.supplyAsync(
-          {
-            receive()
-          },
-          receivingThreads
-        )
+      val size = sqsConsumerAllocator.computeSqsConsumersForPod(queue.name, receiverPolicy)
+      val futures = List(size) {
+        CompletableFuture.supplyAsync({ receive() }, receivingThreads)
       }
 
       // Either all messages are consumed and processed successfully, or we signal failure.
@@ -99,34 +98,6 @@ internal class SqsJobConsumer @Inject internal constructor(
             }
           }
       }.join()
-    }
-
-    /**
-     * List containing arbitrary numbers. The size of the list is the number of receivers to use.
-     */
-    private fun receiverIds(): List<Int> {
-      val numReceiversPerPodForQueue = receiversPerPodForQueue()
-      val shouldUsePerPodConfig = numReceiversPerPodForQueue >= 0
-      if (shouldUsePerPodConfig) {
-        return (1..numReceiversPerPodForQueue).toList()
-      }
-      return (1..receiversForQueue())
-        .filter { num ->
-          val lease = leaseManager.requestLease("sqs-job-consumer-${queue.name.value}-$num")
-          if (!lease.checkHeld()) {
-            lease.acquire()
-          } else {
-            true
-          }
-        }
-    }
-
-    private fun receiversPerPodForQueue(): Int {
-      return featureFlags.getInt(POD_CONSUMERS_PER_QUEUE, queue.queueName)
-    }
-
-    private fun receiversForQueue(): Int {
-      return featureFlags.getInt(CONSUMERS_PER_QUEUE, queue.queueName)
     }
 
     private fun fetchMessages(): List<SqsJob> {
@@ -209,9 +180,11 @@ internal class SqsJobConsumer @Inject internal constructor(
   companion object {
     private val log = getLogger<SqsJobConsumer>()
     internal val POD_CONSUMERS_PER_QUEUE = Feature("pod-jobqueue-consumers")
+    internal val POD_MAX_JOBQUEUE_CONSUMERS = Feature("pod-max-jobqueue-consumers")
     internal val CONSUMERS_PER_QUEUE = Feature("jobqueue-consumers")
     internal val CONSUMERS_BATCH_SIZE = Feature("jobqueue-consumers-fetch-batch-size")
     private val ORIGINAL_TRACE_ID_TAG = StringTag("original.trace_id")
     private const val SQS_JOB_ID_MDC = "sqs_job_id"
   }
+
 }
