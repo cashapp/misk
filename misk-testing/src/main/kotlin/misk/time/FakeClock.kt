@@ -23,6 +23,11 @@ class FakeClock(
 
   fun add(d: Duration) = millis.addAndGet(d.toMillis())
 
+  /**
+   * Note that unlike adding a [Duration] the exact amount that is added to the clock will depend on
+   * its current value and timezone. Not all days, months or years have the same length. See the
+   * documentation for [Period].
+   */
   fun add(p: Period) = millis.getAndUpdate { millis ->
     Instant.ofEpochMilli(millis).atZone(zone).plus(p).toInstant().toEpochMilli()
   }
