@@ -1,5 +1,6 @@
 package misk.scope
 
+import com.google.common.util.concurrent.MoreExecutors
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.name.Named
@@ -20,7 +21,29 @@ internal class ActionScopePropagationTest {
     fun fooValue(): String = foo.get()
   }
 
-  private val executor = Executors.newSingleThreadExecutor()
+  private val singleThreadExecutor = Executors.newSingleThreadExecutor()
+  private val directExecutor = MoreExecutors.newDirectExecutorService()
+
+  @Test
+  fun propagatesScopeOnSameThreadForCallable() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    val scope = injector.getInstance(ActionScope::class.java)
+    val tester = injector.getInstance(Tester::class.java)
+
+    val seedData: Map<Key<*>, Any> = mapOf(
+      keyOf<String>(Names.named("from-seed")) to "my seed data"
+    )
+
+    val callable = scope.enter(seedData).use {
+      scope.propagate(Callable { tester.fooValue() })
+    }
+
+    scope.enter(seedData).use {
+      // Submit to same thread after we've already entered the scope
+      val result = directExecutor.submit(callable).get()
+      assertThat(result).isEqualTo("my seed data and bar and foo!")
+    }
+  }
 
   @Test
   fun propagatesScopeOnNewThreadForCallable() {
@@ -37,8 +60,35 @@ internal class ActionScopePropagationTest {
     }
 
     // Submit to other thread after we've exited the scope
-    val result = executor.submit(callable).get()
+    val result = singleThreadExecutor.submit(callable).get()
     assertThat(result).isEqualTo("my seed data and bar and foo!")
+  }
+
+  @Test
+  fun propagatesScopeOnSameThreadForKFunction() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    val scope = injector.getInstance(ActionScope::class.java)
+    val tester = injector.getInstance(Tester::class.java)
+
+    val seedData: Map<Key<*>, Any> = mapOf(
+      keyOf<String>(Names.named("from-seed")) to "my seed data"
+    )
+
+    // Propagate on the the KCallable directly
+    val f: KFunction<String> = tester::fooValue
+    val callable = scope.enter(seedData).use {
+      scope.propagate(f)
+    }
+
+    scope.enter(seedData).use {
+      // Submit to same thread after we've already entered the scope
+      val result = directExecutor.submit(
+        Callable {
+          callable.call()
+        }
+      ).get()
+      assertThat(result).isEqualTo("my seed data and bar and foo!")
+    }
   }
 
   @Test
@@ -58,12 +108,34 @@ internal class ActionScopePropagationTest {
     }
 
     // Submit to other thread after we've exited the scope
-    val result = executor.submit(
+    val result = singleThreadExecutor.submit(
       Callable {
         callable.call()
       }
     ).get()
     assertThat(result).isEqualTo("my seed data and bar and foo!")
+  }
+
+  @Test
+  fun propagatesScopeOnSameThreadForLambda() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    val scope = injector.getInstance(ActionScope::class.java)
+    val tester = injector.getInstance(Tester::class.java)
+
+    val seedData: Map<Key<*>, Any> = mapOf(
+      keyOf<String>(Names.named("from-seed")) to "my seed data"
+    )
+
+    // Propagate on a lambda directly
+    val function = scope.enter(seedData).use {
+      scope.propagate { tester.fooValue() }
+    }
+
+    scope.enter(seedData).use {
+      // Submit to same thread after we've already entered the scope
+      val result = directExecutor.submit(Callable { function() }).get()
+      assertThat(result).isEqualTo("my seed data and bar and foo!")
+    }
   }
 
   @Test
@@ -78,11 +150,11 @@ internal class ActionScopePropagationTest {
 
     // Propagate on a lambda directly
     val function = scope.enter(seedData).use {
-      scope.propagate({ tester.fooValue() })
+      scope.propagate { tester.fooValue() }
     }
 
     // Submit to other thread after we've exited the scope
-    val result = executor.submit(Callable { function() }).get()
+    val result = singleThreadExecutor.submit(Callable { function() }).get()
     assertThat(result).isEqualTo("my seed data and bar and foo!")
   }
 }
