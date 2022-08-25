@@ -81,7 +81,9 @@ class DataSourceService(
     }
 
     if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS_MYSQL || config.type == DataSourceType.TIDB) {
-      hikariConfig.minimumIdle = 5
+      if (!config.use_fixed_pool_size) {
+        hikariConfig.minimumIdle = 5
+      }
       if (config.type == DataSourceType.MYSQL) {
         hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
       }
