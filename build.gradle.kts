@@ -18,6 +18,7 @@ buildscript {
     classpath(Dependencies.mavenPublishGradlePlugin)
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
+    classpath(Dependencies.sqldelightGradle)
     classpath(Dependencies.wireGradlePlugin)
     classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
   }

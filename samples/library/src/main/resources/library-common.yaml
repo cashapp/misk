@@ -1,0 +1,15 @@
+web:
+  port: 8080
+  idle_timeout: 30000
+
+prometheus:
+  http_port: 8081
+
+data_source_clusters:
+  library-001:
+    writer:
+      type: MYSQL
+      database: sample_libary_db
+      username: root
+      password: ""
+      migrations_resource: classpath:/db-migrations

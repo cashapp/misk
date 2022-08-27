@@ -1,0 +1,14 @@
+import com.squareup.library.persistence.BookId;
+import java.time.Instant;
+
+CREATE TABLE books (
+  `id` bigint AS BookId NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp AS Instant NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp AS Instant NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `token` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `isbn_code` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_token` (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
