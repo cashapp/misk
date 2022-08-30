@@ -28,7 +28,7 @@ public final class wisp/config/PrefixResourceLoaderPreprocessor : com/sksamuel/h
 	public synthetic fun <init> (Ljava/lang/String;Lwisp/resources/ResourceLoader;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getPrefix ()Ljava/lang/String;
 	public final fun getResourceLoader ()Lwisp/resources/ResourceLoader;
-	public fun handle (Lcom/sksamuel/hoplite/PrimitiveNode;)Lcom/sksamuel/hoplite/fp/Validated;
+	public fun handle (Lcom/sksamuel/hoplite/PrimitiveNode;Lcom/sksamuel/hoplite/DecoderContext;)Lcom/sksamuel/hoplite/fp/Validated;
 }
 
 public final class wisp/config/PrefixResourceLoaderPreprocessor$Companion {
