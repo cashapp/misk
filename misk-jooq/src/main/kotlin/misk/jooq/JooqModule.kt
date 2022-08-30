@@ -140,6 +140,7 @@ class JooqModule(
     DataSourceType.HSQLDB -> SQLDialect.HSQLDB
     DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
     DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
+    DataSourceType.TIDB -> SQLDialect.MYSQL
     else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
   }
 }
