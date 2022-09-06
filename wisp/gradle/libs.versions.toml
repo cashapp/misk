@@ -39,7 +39,8 @@ versionsGradlePlugin = "0.42.0"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
-aws2Regions = { module = "software.amazon.awssdk:regions", version.ref = "aws2" }
+aws2Bom = { module = "software.amazon.awssdk:bom", version.ref = "aws2" }
+aws2Regions = { module = "software.amazon.awssdk:regions" } # omit the version so attempts to use this dep without the BOM fail
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bouncycastle" }
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
 dockerTransport = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
