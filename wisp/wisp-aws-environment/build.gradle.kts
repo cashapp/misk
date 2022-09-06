@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation(platform(libs.aws2Bom))
     implementation(libs.aws2Regions)
     api(project(":wisp-deployment"))
 
