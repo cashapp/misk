@@ -101,14 +101,14 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  /** Set a ByteArray value if it doesn't already exist. Returns 1 if set and 0, otherwise */
+  /** Set a ByteArray value if it doesn't already exist. Returns true if set and false, otherwise */
   override fun setnx(key: String, value: ByteString): Boolean {
     return jedisPool.resource.use { jedis ->
       jedis.setnx(key.toByteArray(charset), value.toByteArray()) == 1L
     }
   }
 
-  /** Set a ByteArray value if it doesn't already exist with an expiration. Returns 1 if set and 0, otherwise  */
+  /** Set a ByteArray value if it doesn't already exist with an expiration. Returns true if set and false, otherwise  */
   override fun setnx(key: String, expiryDuration: Duration, value: ByteString): Boolean {
     return jedisPool.resource.use { jedis ->
       jedis.setnx(key.toByteArray(charset), value.toByteArray())
