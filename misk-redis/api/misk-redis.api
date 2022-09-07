@@ -25,8 +25,8 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public final fun setClock (Ljava/time/Clock;)V
-	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
-	public fun setnx (Ljava/lang/String;Lokio/ByteString;)V
+	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
+	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 }
@@ -57,8 +57,8 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
-	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
-	public fun setnx (Ljava/lang/String;Lokio/ByteString;)V
+	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
+	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 }
@@ -89,8 +89,8 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public abstract fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;)V
-	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
-	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;)V
+	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
+	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public abstract fun unwatch ([Ljava/lang/String;)V
 	public abstract fun watch ([Ljava/lang/String;)V
 }
