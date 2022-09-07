@@ -167,11 +167,11 @@ class FakeRedisTest {
     val value2 = "value2".encodeUtf8()
 
     // Sets value because key does not exist
-    redis.setnx(key, value)
+    assertTrue(redis.setnx(key, value))
     assertEquals(value, redis[key])
 
     // Does not set value because key already exists
-    redis.setnx(key, value2)
+    assertFalse(redis.setnx(key, value2))
     assertEquals(value, redis[key])
   }
 
@@ -182,11 +182,11 @@ class FakeRedisTest {
     val expirySec = 5L
 
     // Sets value because key does not exist
-    redis.setnx(key, Duration.ofSeconds(expirySec), value)
+    assertTrue(redis.setnx(key, Duration.ofSeconds(expirySec), value))
     assertEquals(value, redis[key])
 
     // Does not set value because key already exists
-    redis.setnx(key, Duration.ofSeconds(expirySec), value2)
+    assertFalse(redis.setnx(key, Duration.ofSeconds(expirySec), value2))
     assertEquals(value, redis[key])
 
     // Key should still be there

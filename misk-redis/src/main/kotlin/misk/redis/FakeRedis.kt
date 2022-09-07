@@ -158,21 +158,21 @@ class FakeRedis : Redis {
     }
   }
 
-  override fun setnx(key: String, value: ByteString) {
-    synchronized(lock) {
+  override fun setnx(key: String, value: ByteString): Boolean {
+    return synchronized(lock) {
       keyValueStore.putIfAbsent(key, Value(
         data = value,
         expiryInstant = Instant.MAX
-      ))
+      )) == null
     }
   }
 
-  override fun setnx(key: String, expiryDuration: Duration, value: ByteString) {
-    synchronized(lock) {
+  override fun setnx(key: String, expiryDuration: Duration, value: ByteString): Boolean {
+    return synchronized(lock) {
       keyValueStore.putIfAbsent(key, Value(
         data = value,
         expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds)
-      ))
+      )) == null
     }
   }
 
