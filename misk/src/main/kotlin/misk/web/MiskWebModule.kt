@@ -27,6 +27,7 @@ import misk.queuing.TimedBlockingQueue
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
 import misk.security.authz.MiskCallerAuthenticator
+import misk.security.csp.CspInterceptor
 import misk.security.ssl.CertificatesModule
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
@@ -179,6 +180,10 @@ class MiskWebModule(
     // Optionally log request and response details
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
       .to<RequestLoggingInterceptor.Factory>()
+
+    // Adds CSP Interceptor
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
+      .to<CspInterceptor.Factory>()
 
     // Optionally log request and response body
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
