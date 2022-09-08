@@ -943,17 +943,17 @@ public final class misk/security/cert/X509CertificateExtensionsKt {
 	public static final fun isSignedBy (Ljava/security/cert/X509Certificate;Ljava/security/cert/Certificate;)Z
 }
 
-public abstract interface annotation class misk/security/csp/Csp : java/lang/annotation/Annotation {
+public abstract interface annotation class misk/security/csp/ContentSecurityPolicy : java/lang/annotation/Annotation {
 	public abstract fun rules ()[Ljava/lang/String;
 }
 
-public final class misk/security/csp/CspInterceptor : misk/web/NetworkInterceptor {
+public final class misk/security/csp/ContentSecurityPolicyInterceptor : misk/web/NetworkInterceptor {
 	public fun <init> (Ljava/util/List;)V
 	public final fun getRules ()Ljava/util/List;
 	public fun intercept (Lmisk/web/NetworkChain;)V
 }
 
-public final class misk/security/csp/CspInterceptor$Factory : misk/web/NetworkInterceptor$Factory {
+public final class misk/security/csp/ContentSecurityPolicyInterceptor$Factory : misk/web/NetworkInterceptor$Factory {
 	public fun <init> ()V
 	public fun create (Lmisk/Action;)Lmisk/web/NetworkInterceptor;
 }

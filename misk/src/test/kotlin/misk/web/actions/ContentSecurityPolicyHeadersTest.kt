@@ -5,7 +5,7 @@ import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
 import misk.inject.KAbstractModule
 import misk.security.authz.Unauthenticated
-import misk.security.csp.Csp
+import misk.security.csp.ContentSecurityPolicy
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
@@ -22,7 +22,7 @@ import javax.inject.Inject
 import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
-class CspHeadersTest {
+class ContentSecurityPolicyHeadersTest {
   @MiskTestModule
   val module = Modules.combine(TestWebActionModule(), TestModule())
   @Inject private lateinit var httpClientFactory: HttpClientFactory
@@ -63,7 +63,7 @@ class CspHeadersTest {
 
 
   class CspWebAction @Inject constructor() : WebAction {
-    @Csp(["rule1", "rule2"])
+    @ContentSecurityPolicy(["rule1", "rule2"])
     @Get("/csp")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @Unauthenticated
