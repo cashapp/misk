@@ -10,6 +10,7 @@ import misk.jobqueue.QueueName
 import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_BATCH_SIZE
 import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_PER_QUEUE
 import misk.jobqueue.sqs.SqsJobConsumer.Companion.POD_CONSUMERS_PER_QUEUE
+import misk.jobqueue.sqs.SqsJobConsumer.Companion.POD_MAX_JOBQUEUE_CONSUMERS
 import misk.jobqueue.subscribe
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
@@ -18,9 +19,11 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.lang.annotation.ElementType
 import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -46,6 +49,36 @@ internal class SqsJobQueueTest {
   private lateinit var queueName: QueueName
   private lateinit var deadLetterQueueName: QueueName
 
+  /**
+   * Make sure all tests pass regardless of the receiver policy.
+   *
+   * This needs to be used in place of the usual @Test annotation.
+   */
+  @ParameterizedTest(name = "{0}")
+  @ValueSource(strings = ["perPodConsumers", "perQueueConsumers", "balancedMax"])
+  @Target(AnnotationTarget.FUNCTION)
+  private annotation class TestAllReceiverPolicies
+
+  private fun setupReceiverPolicy(receiverPolicy: String) {
+    when (receiverPolicy) {
+      "perPodConsumers" -> {
+        fakeFeatureFlags.override(CONSUMERS_PER_QUEUE, -1)
+        fakeFeatureFlags.override(POD_CONSUMERS_PER_QUEUE, 5)
+        fakeFeatureFlags.override(POD_MAX_JOBQUEUE_CONSUMERS, 0)
+      }
+      "perQueueConsumers" -> {
+        fakeFeatureFlags.override(CONSUMERS_PER_QUEUE, 5)
+        fakeFeatureFlags.override(POD_CONSUMERS_PER_QUEUE, -1)
+        fakeFeatureFlags.override(POD_MAX_JOBQUEUE_CONSUMERS, 0)
+      }
+      "balancedMax" -> {
+        fakeFeatureFlags.override(CONSUMERS_PER_QUEUE, 5)
+        fakeFeatureFlags.override(POD_CONSUMERS_PER_QUEUE, -1)
+        fakeFeatureFlags.override(POD_MAX_JOBQUEUE_CONSUMERS, 5)
+      }
+    }
+  }
+
   @BeforeEach fun createQueues() {
     // Ensure that each test case runs on a unique queue
     queueName = QueueName("sqs_job_queue_test")
@@ -64,14 +97,9 @@ internal class SqsJobQueueTest {
     fakeFeatureFlags.override(CONSUMERS_BATCH_SIZE, 10)
   }
 
-  @ParameterizedTest
-  @ValueSource(booleans = [true, false])
-  fun enqueueAndHandle(perPodConsumers: Boolean) {
-    if (perPodConsumers) {
-      enablePerPodConsumers()
-    } else {
-      enablePerQueueConsumers()
-    }
+  @TestAllReceiverPolicies
+  fun enqueueAndHandle(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
 
     val handledJobs = CopyOnWriteArrayList<Job>()
     val allJobsComplete = CountDownLatch(10)
@@ -156,7 +184,9 @@ internal class SqsJobQueueTest {
     )
   }
 
-  @Test fun retriesIfNotAcknowledged() {
+  @TestAllReceiverPolicies
+  fun retriesIfNotAcknowledged(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
     val handledJobs = CopyOnWriteArrayList<Job>()
 
     queue.enqueue(queueName, "this is my job")
@@ -203,7 +233,9 @@ internal class SqsJobQueueTest {
     )
   }
 
-  @Test fun movesToDeadLetterQueueIfRequested() {
+  @TestAllReceiverPolicies
+  fun movesToDeadLetterQueueIfRequested(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
     val handledJobs = CopyOnWriteArrayList<Job>()
     val allJobsCompleted = CountDownLatch(2)
     consumer.subscribe(queueName) {
@@ -311,7 +343,9 @@ internal class SqsJobQueueTest {
     )
   }
 
-  @Test fun stopsDeliveryAfterClose() {
+  @TestAllReceiverPolicies
+  fun stopsDeliveryAfterClose(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
     val handledJobs = CopyOnWriteArrayList<Job>()
     consumer.subscribe(queueName) {
       handledJobs.add(it)
@@ -331,7 +365,9 @@ internal class SqsJobQueueTest {
     assertThat(handledJobs).isEmpty()
   }
 
-  @Test fun gracefullyRecoversFromHandlerFailure() {
+  @TestAllReceiverPolicies
+  fun gracefullyRecoversFromHandlerFailure(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
     val handledJobs = CopyOnWriteArrayList<Job>()
     val deliveryAttempts = AtomicInteger(0)
     val allJobsCompleted = CountDownLatch(1)
@@ -380,7 +416,9 @@ internal class SqsJobQueueTest {
     )
   }
 
-  @Test fun waitsForDispatchedTasksToFail() {
+  @TestAllReceiverPolicies
+  fun waitsForDispatchedTasksToFail(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
     turnOffTaskQueue()
     consumer.subscribe(queueName) {
       throw IllegalStateException("boom!")
@@ -390,7 +428,9 @@ internal class SqsJobQueueTest {
     assertThat(receiver.run()).isEqualTo(Status.FAILED)
   }
 
-  @Test fun noWork() {
+  @TestAllReceiverPolicies
+  fun noWork(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
     turnOffTaskQueue()
     consumer.subscribe(queueName) {
       throw IllegalStateException("boom!")
@@ -399,7 +439,9 @@ internal class SqsJobQueueTest {
     assertThat(receiver.run()).isEqualTo(Status.NO_WORK)
   }
 
-  @Test fun okIfAtLeastMessageWasConsumed() {
+  @TestAllReceiverPolicies
+  fun okIfAtLeastMessageWasConsumed(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
     turnOffTaskQueue()
     consumer.subscribe(queueName) {
       it.acknowledge()
@@ -425,14 +467,9 @@ internal class SqsJobQueueTest {
     assertThat(receiver.run()).isEqualTo(Status.NO_WORK)
   }
 
-  @ParameterizedTest
-  @ValueSource(booleans = [true, false])
-  fun batchEnqueueAndHandle(perPodConsumers: Boolean) {
-    if (perPodConsumers) {
-      enablePerPodConsumers()
-    } else {
-      enablePerQueueConsumers()
-    }
+  @TestAllReceiverPolicies
+  fun batchEnqueueAndHandle(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
 
     val handledJobs = CopyOnWriteArrayList<Job>()
     val allJobsComplete = CountDownLatch(10)
@@ -523,8 +560,8 @@ internal class SqsJobQueueTest {
     )
   }
 
-  @Test
-  fun batchEnqueueBatchLimit() {
+  @TestAllReceiverPolicies
+  fun batchEnqueueBatchLimit(receiverPolicy: String) {
     val handledJobs = CopyOnWriteArrayList<Job>()
     val allJobsComplete = CountDownLatch(10)
     consumer.subscribe(queueName) {

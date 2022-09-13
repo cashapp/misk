@@ -76,7 +76,7 @@ object Dependencies {
   val kotlinTest = "org.jetbrains.kotlin:kotlin-test:1.7.0"
   val kotlinxCoroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3"
   val kubernetesClient = "io.kubernetes:client-java:14.0.0"
-  val launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:5.8.1"
+  val launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:5.10.0"
   val logbackClassic = "ch.qos.logback:logback-classic:1.2.3"
   val loggingApi = "io.github.microutils:kotlin-logging:2.1.23"
   val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.18.0"

@@ -75,7 +75,8 @@ data class DataSourceConfig(
   val enabledTlsProtocols: List<String> = listOf("TLSv1.2", "TLSv1.3"),
   val show_sql: String? = "false",
   // Consider using this if you want Hibernate to automagically batch inserts/updates when it can.
-  val jdbc_statement_batch_size: Int? = null
+  val jdbc_statement_batch_size: Int? = null,
+  val use_fixed_pool_size: Boolean = false
 ) {
   fun withDefaults(): DataSourceConfig {
     val isRunningInDocker = File("/proc/1/cgroup")

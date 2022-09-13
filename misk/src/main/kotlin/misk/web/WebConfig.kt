@@ -95,6 +95,12 @@ data class WebConfig(
 
   /** The number of milliseconds to sleep before commencing service shutdown. */
   val shutdown_sleep_ms: Int = 0,
+
+  /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
+  val http_request_header_size: Int? = null,
+
+  /** The size of Jetty's header field cache, in terms of unique character branches. */
+  val http_header_cache_size: Int? = null,
 ) : Config {
   @Deprecated(
     message = "obsolete; for binary-compatibility only",
@@ -123,6 +129,8 @@ data class WebConfig(
     cors: Map<String, CorsConfig> = mapOf(),
     concurrency_limiter_disabled: Boolean = false,
     shutdown_sleep_ms: Int = 0,
+    http_request_header_size: Int? = null,
+    http_header_cache_size: Int? = null,
   ) : this(
     port = port,
     idle_timeout = idle_timeout,
@@ -147,6 +155,8 @@ data class WebConfig(
     concurrency_limiter_disabled = concurrency_limiter_disabled,
     concurrency_limiter_log_level = Level.ERROR,
     shutdown_sleep_ms = shutdown_sleep_ms,
+    http_request_header_size = http_request_header_size,
+    http_header_cache_size = http_header_cache_size,
   )
 }
 
