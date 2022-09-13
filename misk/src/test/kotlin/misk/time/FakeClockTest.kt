@@ -4,8 +4,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.Instant
+import java.time.Period
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 internal class FakeClockTest {
@@ -40,5 +42,21 @@ internal class FakeClockTest {
     val newClock = clock.withZone(ZoneId.of("America/New_York"))
     assertThat(newClock.zone.id).isEqualTo("America/New_York")
     assertThat(newClock.instant()).isEqualTo(Instant.ofEpochMilli(162000000L))
+  }
+
+  @Test
+  fun addPeriod() {
+    val clock = FakeClock(epochMillis = 0L, zone = ZoneId.of("America/Los_Angeles"))
+
+    // Just prior to winding clock forward
+    val startInstant = Instant.parse("1970-04-26T00:00:00Z")
+    clock.setNow(startInstant)
+
+    // This day is only 23 hours long because of the DST transition
+    clock.add(Period.ofDays(1))
+    assertThat(clock.instant()).isEqualTo(startInstant.plus(23L, ChronoUnit.HOURS))
+
+    clock.add(Period.ofMonths(2))
+    assertThat(clock.instant()).isEqualTo(Instant.parse("1970-06-26T23:00:00Z"))
   }
 }
