@@ -30,12 +30,12 @@ data class SpanAndScope(val span: Span, val scope: Scope)
  * If you need to start a new span independent of the active span, set [ignoreActiveSpan] to true,
  * and optionally [retainBaggage].
  */
-inline fun Tracer.spanned(
+inline fun <T: Any?> Tracer.spanned(
   name: String,
   ignoreActiveSpan: Boolean = false,
   retainBaggage: Boolean = false,
-  crossinline block: SpanAndScope.() -> Unit
-) {
+  crossinline block: SpanAndScope.() -> T
+): T {
   val activeSpan: Span? = this.activeSpan()
   val span = buildSpan(name)
     .apply { if (ignoreActiveSpan) ignoreActiveSpan() }
@@ -50,7 +50,7 @@ inline fun Tracer.spanned(
 
   this.scopeManager().activate(span)
 
-  try {
+  return try {
     this.scopeManager().activate(span).use { scope ->
       block(SpanAndScope(span, scope))
     }
@@ -75,8 +75,12 @@ inline fun Tracer.spanned(
  * }
  * ```
  */
-inline fun Tracer.scoped(span: Span, finishSpan: Boolean = false, crossinline block: (Scope) -> Unit) {
-  try {
+inline fun <T: Any?> Tracer.scoped(
+  span: Span,
+  finishSpan: Boolean = false,
+  crossinline block: (Scope) -> T
+): T {
+  return try {
     this.scopeManager().activate(span).use(block)
   } finally {
     if (finishSpan) {
