@@ -4,8 +4,6 @@ import com.google.inject.BindingAnnotation
 import com.google.inject.Provides
 import misk.inject.KAbstractModule
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import javax.inject.Inject
 
 @MiskTest
 internal class InjectingParameterResolverTest {
@@ -18,7 +16,7 @@ internal class InjectingParameterResolverTest {
   @BindingAnnotation
   annotation class TestAnnotation
 
-  @Test @Inject fun `retrieves all parameters if the method is annotated`(
+  @InjectTest fun `retrieves all parameters if the method is annotated`(
     myString: String,
     @TestAnnotation myList: List<String>
   ) {
