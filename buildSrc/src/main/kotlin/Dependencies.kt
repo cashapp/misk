@@ -145,7 +145,5 @@ object Dependencies {
   val wispResourceLoader = "app.cash.wisp:wisp-resource-loader:1.0.7"
   val wispResourceLoaderTesting = "app.cash.wisp:wisp-resource-loader-testing:1.0.7"
   val wispSsl = "app.cash.wisp:wisp-ssl:1.0.7"
-  val wispTokenTesting = "app.cash.wisp:wisp-token-testing:1.0.7"
-  val wispTracing = "app.cash.wisp:wisp-tracing:1.0.7"
   val zookeeper = "org.apache.zookeeper:zookeeper:3.7.0"
 }
