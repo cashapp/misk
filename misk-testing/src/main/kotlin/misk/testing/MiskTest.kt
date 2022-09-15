@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @Target(AnnotationTarget.CLASS)
 @ExtendWith(MiskTestExtension::class)
+@ExtendWith(InjectingParameterResolver::class)
 
 /**
  * Annotate your test classes with `@MiskTest` to have fields annotated with `@Inject` initialized.
