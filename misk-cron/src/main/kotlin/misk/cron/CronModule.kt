@@ -23,7 +23,7 @@ class CronModule(
     install(FakeCronModule(zoneId, threadPoolSize, dependencies))
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class))
     install(ServiceModule<CronTask>().apply {
-      dependsOn(RepeatedTaskQueue::class.toKey())
+      dependsOn(keyOf<RepeatedTaskQueue>(ForMiskCron::class))
       for (dep in dependencies) {
         dependsOn(dep)
       }
