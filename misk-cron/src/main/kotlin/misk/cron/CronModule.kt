@@ -22,7 +22,12 @@ class CronModule(
   override fun configure() {
     install(FakeCronModule(zoneId, threadPoolSize, dependencies))
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class))
-    install(ServiceModule<CronTask>())
+    install(ServiceModule<CronTask>().apply {
+      dependsOn(RepeatedTaskQueue::class.toKey())
+      for (dep in dependencies) {
+        dependsOn(dep)
+      }
+    })
   }
 
   @Provides
