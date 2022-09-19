@@ -7,6 +7,7 @@ import com.google.inject.Singleton
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
+import misk.inject.keyOf
 import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
