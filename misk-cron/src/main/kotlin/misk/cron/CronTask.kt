@@ -23,7 +23,7 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
     var lastRun = clock.instant()
     taskQueue.scheduleWithBackoff(INTERVAL) {
       if (clusterWeight.get() > 0) {
-        Status.OK
+        return@scheduleWithBackoff Status.OK
       }
       val lease = leaseManager.requestLease(CRON_CLUSTER_LEASE_NAME)
 
