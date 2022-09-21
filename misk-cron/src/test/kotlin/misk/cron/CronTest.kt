@@ -1,6 +1,11 @@
 package misk.cron
 
+import misk.backoff.FlatBackoff
+import misk.backoff.retry
+import misk.clustering.weights.FakeClusterWeight
+import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.inject.KAbstractModule
+import misk.tasks.DelayedTask
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -29,6 +34,8 @@ class CronTest {
 
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var clock: FakeClock
+  @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
+  @Inject lateinit var fakeClusterWeight: FakeClusterWeight
 
   @Inject private lateinit var minuteCron: MinuteCron
   @Inject private lateinit var hourCron: HourCron
@@ -61,6 +68,26 @@ class CronTest {
     assertThat(throwsExceptionCron.counter).isEqualTo(4)
     assertThat(hourCron.counter).isEqualTo(1)
   }
+
+  @Test
+  fun leaseDenied() {
+    assertThat(minuteCron.counter).isEqualTo(0)
+    // Cluster weight is 100 by default, so the cron will run.
+    clock.add(Duration.ofMinutes(1))
+    waitForNextPendingTask().task()
+    assertThat(minuteCron.counter).isEqualTo(1)
+
+    // Cluster weight is set to 0, so now the cron will not run.
+    fakeClusterWeight.setClusterWeight(0)
+    clock.add(Duration.ofMinutes(1))
+    waitForNextPendingTask().task()
+    assertThat(minuteCron.counter).isEqualTo(1)
+  }
+
+  private fun waitForNextPendingTask(): DelayedTask =
+    retry(5, FlatBackoff(Duration.ofMillis(200))) {
+      pendingTasks.peekPending()!!
+    }
 }
 
 @Singleton
