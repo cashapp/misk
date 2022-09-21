@@ -20,14 +20,14 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
   @Inject private lateinit var clusterWeight: ClusterWeightProvider
 
   override fun startUp() {
+    logger.info { "Starting CronTask" }
     var lastRun = clock.instant()
     taskQueue.scheduleWithBackoff(INTERVAL) {
-      if (clusterWeight.get() > 0) {
+      if (clusterWeight.get() == 0) {
+        logger.info { "CronTask is running on a passive node. Skipping." }
         return@scheduleWithBackoff Status.OK
       }
       val lease = leaseManager.requestLease(CRON_CLUSTER_LEASE_NAME)
-
-      logger.info { "Starting CronTask" }
 
       val now = clock.instant()
       var leaseHeld = lease.checkHeld()
