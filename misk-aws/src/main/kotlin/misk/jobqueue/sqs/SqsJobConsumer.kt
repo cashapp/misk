@@ -18,7 +18,6 @@ import misk.tasks.Status
 import misk.time.timed
 import misk.tracing.traceWithNewRootSpan
 import org.slf4j.MDC
-import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
@@ -35,7 +34,6 @@ internal class SqsJobConsumer @Inject internal constructor(
   @ForSqsReceiving private val receivingThreads: ExecutorService,
   private val sqsConsumerAllocator: SqsConsumerAllocator,
   private val featureFlags: FeatureFlags,
-  private val leaseManager: LeaseManager,
   private val metrics: SqsMetrics,
   private val moshi: Moshi,
   private val queues: QueueResolver,

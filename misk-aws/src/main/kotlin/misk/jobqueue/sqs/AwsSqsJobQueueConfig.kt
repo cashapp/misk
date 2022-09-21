@@ -57,7 +57,13 @@ class AwsSqsJobQueueConfig(
    */
   val sqs_sending_request_timeout_ms: Int = 5000,
 
-  val aws_sqs_job_receiver_policy: AwsSqsJobReceiverPolicy = AwsSqsJobReceiverPolicy.ONE_FLAG_ONLY
+  val aws_sqs_job_receiver_policy: AwsSqsJobReceiverPolicy = AwsSqsJobReceiverPolicy.ONE_FLAG_ONLY,
+
+  /**
+   * Ignore leases when consuming jobs from SQS. This means that there will be no maximum number
+   * of consumers per pod/cluster, etc.
+   */
+  val ignore_leases: Boolean = false,
 ) : Config
 
 

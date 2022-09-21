@@ -21,7 +21,7 @@ interface Job {
   /** context attributes associated with the job */
   val attributes: Map<String, String>
 
-  /**
+  /**sqs
    * Acknowledges the job and deletes it from the underlying queue. May perform an RPC, and thus
    * should not be called while holding database transactions or other resources
    */
