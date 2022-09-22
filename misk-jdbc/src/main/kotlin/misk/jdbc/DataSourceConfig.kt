@@ -79,6 +79,7 @@ data class DataSourceConfig(
   val use_fixed_pool_size: Boolean = false,
   // MySQL 8+ by default requires authentication via RSA keys if TLS is unavailable.
   // Within secured subnets, overriding to true can be acceptable.
+  // See https://mysqlconnector.net/troubleshooting/retrieval-public-key/
   val allow_public_key_retrieval: Boolean = false
 ) {
   fun withDefaults(): DataSourceConfig {
