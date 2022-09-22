@@ -26,6 +26,7 @@ import wisp.logging.log
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
+import java.net.URLEncoder
 import java.util.Base64
 import javax.inject.Inject
 
@@ -92,7 +93,9 @@ class ExceptionHandlingInterceptor(
       response.status.code.toString()
     )
     httpCall.setResponseTrailer("grpc-status-details-bin", response.toEncodedStatusProto)
-    httpCall.setResponseTrailer("grpc-message", response.message ?: response.status.name)
+    val message = response.message ?: response.status.name
+    val encoded = message.replace("\n", "%0A")
+    httpCall.setResponseTrailer("grpc-message", encoded)
     httpCall.takeResponseBody()?.use { responseBody: BufferedSink ->
       GrpcMessageSink(responseBody, ProtoAdapter.BYTES, grpcEncoding = "identity")
         .use { messageSink ->
