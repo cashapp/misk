@@ -12,7 +12,8 @@ data class GrpcErrorResponse(
   constructor(status: GrpcStatus, message: String?) : this(status, message, listOf())
 
   companion object {
-    val INTERNAL_SERVER_ERROR = GrpcErrorResponse(GrpcStatus.UNKNOWN, "internal server error")
+    fun internalServerError(th: Throwable) =
+      GrpcErrorResponse(GrpcStatus.UNKNOWN, "$th\n${th.stackTraceToString()}")
   }
 
   // backward compatibility

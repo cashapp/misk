@@ -134,7 +134,7 @@ class ExceptionHandlingInterceptor(
       } else {
         grpcResponse
       }
-    } ?: GrpcErrorResponse.INTERNAL_SERVER_ERROR
+    } ?: GrpcErrorResponse.internalServerError(th)
   }
 
   private fun toInternalServerError(th: Throwable): Response<*> {
