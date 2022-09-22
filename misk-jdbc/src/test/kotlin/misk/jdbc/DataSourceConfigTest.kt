@@ -186,6 +186,17 @@ class DataSourceConfigTest {
   }
 
   @Test
+  fun buildMysqlJDBCUrlWithNoTlsAllowPublicKeyRetrieval() {
+    val config = DataSourceConfig(DataSourceType.MYSQL, allow_public_key_retrieval = true)
+    assertEquals(
+      "jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
+        "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&sslMode=PREFERRED&" +
+        "enabledTLSProtocols=TLSv1.2,TLSv1.3&allowPublicKeyRetrieval=true",
+      config.buildJdbcUrl(TESTING)
+    )
+  }
+
+  @Test
   fun buildMysqlJDBCUrlWithEnabledTlsProtocols() {
     val config = DataSourceConfig(
       DataSourceType.MYSQL,
