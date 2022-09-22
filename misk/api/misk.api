@@ -1537,7 +1537,7 @@ public final class misk/web/exceptions/GrpcErrorResponse {
 }
 
 public final class misk/web/exceptions/GrpcErrorResponse$Companion {
-	public final fun getINTERNAL_SERVER_ERROR ()Lmisk/web/exceptions/GrpcErrorResponse;
+	public final fun internalServerError (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
 }
 
 public final class misk/web/exceptions/RequestBodyExceptionMapper : misk/web/exceptions/ExceptionMapper {
