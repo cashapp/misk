@@ -47,6 +47,14 @@ class ResourceLoaderTest {
     }
 
     @Test
+    fun loadResourceWithSystemClassLoader() {
+        withContextClassLoader(null) {
+          val resource = resourceLoader.utf8("classpath:/wisp/resources/ResourceLoaderTest.txt")!!
+          assertThat(resource).isEqualTo("69e0753934d2838d1953602ca7722444\n")
+        }
+    }
+
+    @Test
     fun absentResource() {
         assertThat(resourceLoader.utf8("classpath:/wisp/resources/NoSuchResource.txt")).isNull()
     }
@@ -311,7 +319,7 @@ class ResourceLoaderTest {
             .isFalse()
     }
 
-    private fun <T> withContextClassLoader(classLoader: ClassLoader, block: () -> T): T {
+    private fun <T> withContextClassLoader(classLoader: ClassLoader?, block: () -> T): T {
         val previousContextClassLoader = Thread.currentThread().contextClassLoader
         Thread.currentThread().contextClassLoader = classLoader
         try {
