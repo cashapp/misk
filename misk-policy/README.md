@@ -18,7 +18,7 @@ install(OpaModule(serviceBuilder.config.opa))
 
 Ensure that your configuration sets up the required baseURL.
 Optionally, you may also use unix domain sockets to communicate with OPA. The
-unix socket may cause failures when doing locally development, especially as
+unix socket may cause failures when doing local development, especially as
 developers use different laptop environments, so you may want to set up the
 unixSocket option for staging and prod only.
 
