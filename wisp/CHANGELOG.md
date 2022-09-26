@@ -1,6 +1,24 @@
 Change Log
 ==========
 
+Version 1.0.10 *(2022-09-26)*
+-----------------------------
+
+* Fix potential NPE in wisp-resource-loader
+* Allow all tracer extensions to return values
+* Apply the AWS BOM to prevent AWS lib version mismatches
+
+Dependency changes:
+
+* grpc: 1.48.1 -> 1.49.0
+* hoplite: 2.5.2 -> 2.6.2
+* logback: 1.2.11 -> 1.4.0
+* micrometer: 1.8.4 -> 1.8.9
+* netty: 4.1.79.Final -> 4.1.80.Final
+* slf4j: 1.7.36 -> 2.0.0
+* versionCatalogUpdateGradlePlugin: 0.5.3 -> 0.6.1
+
+
 Version 1.0.9 *(2022-08-29)*
 ----------------------------
 
