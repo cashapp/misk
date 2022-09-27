@@ -10,6 +10,7 @@ import misk.web.HttpCall
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.interceptors.LogRateLimiter.LogBucketId
+import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import wisp.logging.info
 import java.util.concurrent.TimeUnit
@@ -41,10 +42,14 @@ class RequestLoggingInterceptor internal constructor(
     private val ticker: Ticker,
     private val random: ThreadLocalRandom,
     private val bodyCapture: RequestResponseCapture,
-    private val logRateLimiter: LogRateLimiter
+    private val logRateLimiter: LogRateLimiter,
+    private val deployment: Deployment,
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
       val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
+      if (logRequestResponse.disabledEnvironments.contains(deployment.name)) {
+        return null
+      }
       require(logRequestResponse.ratePerSecond >= 0L) {
         "${action.name} @LogRequestResponse ratePerSecond must be >= 0"
       }

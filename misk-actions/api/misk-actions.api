@@ -252,6 +252,7 @@ public final class misk/web/dashboard/ValidWebEntry$Companion {
 
 public abstract interface annotation class misk/web/interceptors/LogRequestResponse : java/lang/annotation/Annotation {
 	public abstract fun bodySampling ()D
+	public abstract fun disabledEnvironments ()[Ljava/lang/String;
 	public abstract fun errorBodySampling ()D
 	public abstract fun errorRatePerSecond ()J
 	public abstract fun ratePerSecond ()J

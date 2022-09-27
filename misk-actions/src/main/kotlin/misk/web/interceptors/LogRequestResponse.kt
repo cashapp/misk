@@ -17,6 +17,9 @@ package misk.web.interceptors
  * Percentage sampling is used to sample request and response bodies, with 0.0 for none and 1.0 for all.
  * Valid values are in the range [0.0, 1.0].
  *
+ * You can disable logging in particular environments by using the all-lowercase names of the environments.
+ * See the wisp-deployment module for details of supported environment names.
+ *
  * If arguments and responses may include sensitive information, it is expected that the toString()
  * methods of these objects will redact it.
  */
@@ -28,5 +31,7 @@ annotation class LogRequestResponse(
   val errorRatePerSecond: Long = 0,
   /** By default do not log request and response bodies **/
   val bodySampling: Double = 0.0,
-  val errorBodySampling: Double = 0.0
+  val errorBodySampling: Double = 0.0,
+  /** which deploy environments will not have request/response logging enabled **/
+  val disabledEnvironments: Array<String> = [],
 )
