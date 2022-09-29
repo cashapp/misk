@@ -95,7 +95,7 @@ class EchoWebSocket @Inject constructor() : WebAction {
   @LogRequestResponse(
     bodySampling = 1.0,
     errorBodySampling = 1.0,
-    disabledEnvironments = ["testing"]
+    excludedEnvironments = ["testing"]
   )
   fun echoLoggingDisabledByEnv(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
     return object : WebSocketListener() {

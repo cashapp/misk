@@ -47,7 +47,7 @@ class RequestLoggingInterceptor internal constructor(
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
       val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
-      if (logRequestResponse.disabledEnvironments.contains(deployment.name)) {
+      if (logRequestResponse.excludedEnvironments.contains(deployment.name)) {
         return null
       }
       require(logRequestResponse.ratePerSecond >= 0L) {
