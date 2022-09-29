@@ -50,6 +50,23 @@ internal class WebSocketsTest {
     )
   }
 
+  @Test
+  fun loggingDisabledByEnv() {
+    val client = OkHttpClient()
+
+    val request = Request.Builder()
+      .url(jettyService.httpServerUrl.resolve("/echo-logging-disabled-by-env")!!)
+      .build()
+
+    val webSocket = client.newWebSocket(request, listener)
+
+    webSocket.send("hello")
+    assertEquals("ACK hello", listener.takeMessage())
+
+    // Confirm request logging interceptor was not invoked.
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebServerTestingModule())
@@ -65,6 +82,22 @@ class EchoWebSocket @Inject constructor() : WebAction {
   @ConnectWebSocket("/echo")
   @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
   fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
+    return object : WebSocketListener() {
+      override fun onMessage(webSocket: WebSocket, text: String) {
+        webSocket.send("ACK $text")
+      }
+
+      override fun toString() = "EchoListener"
+    }
+  }
+
+  @ConnectWebSocket("/echo-logging-disabled-by-env")
+  @LogRequestResponse(
+    bodySampling = 1.0,
+    errorBodySampling = 1.0,
+    excludedEnvironments = ["testing"]
+  )
+  fun echoLoggingDisabledByEnv(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
     return object : WebSocketListener() {
       override fun onMessage(webSocket: WebSocket, text: String) {
         webSocket.send("ACK $text")

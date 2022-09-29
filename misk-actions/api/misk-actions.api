@@ -254,6 +254,7 @@ public abstract interface annotation class misk/web/interceptors/LogRequestRespo
 	public abstract fun bodySampling ()D
 	public abstract fun errorBodySampling ()D
 	public abstract fun errorRatePerSecond ()J
+	public abstract fun excludedEnvironments ()[Ljava/lang/String;
 	public abstract fun ratePerSecond ()J
 }
 
