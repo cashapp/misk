@@ -49,3 +49,9 @@ protected final class misk/inject/KAbstractModule$KotlinAnnotatedBindingBuilder 
 	public fun toProvider (Ljavax/inject/Provider;)Lcom/google/inject/binder/ScopedBindingBuilder;
 }
 
+public abstract class misk/inject/KInstallOnceModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun equals (Ljava/lang/Object;)Z
+	public final fun hashCode ()I
+}
+
