@@ -1,9 +1,9 @@
 package misk.time
 
-import misk.inject.KAbstractModule
+import misk.inject.KInstallOnceModule
 import java.time.Clock
 
-class FakeClockModule : KAbstractModule() {
+class FakeClockModule : KInstallOnceModule() {
   override fun configure() {
     bind<Clock>().to<FakeClock>()
     bind<FakeClock>().toInstance(FakeClock())
