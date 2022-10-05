@@ -248,7 +248,7 @@ public final class misk/time/FakeClock : java/time/Clock {
 	public fun withZone (Ljava/time/ZoneId;)Ljava/time/Clock;
 }
 
-public final class misk/time/FakeClockModule : misk/inject/KAbstractModule {
+public final class misk/time/FakeClockModule : misk/inject/KInstallOnceModule {
 	public fun <init> ()V
 }
 
