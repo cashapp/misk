@@ -80,6 +80,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     if (copy.firstResult != 0) {
       copy.firstResult = this.firstResult
     }
+    copy.hints.addAll(this.hints)
     copy.constraints.addAll(this.constraints)
     copy.orderFactories.addAll(this.orderFactories)
     copy.disabledChecks.addAll(this.disabledChecks)
