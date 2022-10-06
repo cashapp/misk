@@ -189,6 +189,7 @@ public abstract interface annotation class misk/hibernate/ProtoColumn : java/lan
 
 public abstract interface class misk/hibernate/Query {
 	public abstract fun addJpaConstraint (Lkotlin/jvm/functions/Function2;)V
+	public abstract fun addQueryHint (Ljava/lang/String;)V
 	public abstract fun clone ()Lmisk/hibernate/Query;
 	public abstract fun count (Lmisk/hibernate/Session;)J
 	public abstract fun delete (Lmisk/hibernate/Session;)I
@@ -220,6 +221,7 @@ public abstract interface class misk/hibernate/Query$Factory {
 
 public final class misk/hibernate/QueryKt {
 	public static final fun constraint (Lmisk/hibernate/Query;Lkotlin/jvm/functions/Function2;)Lmisk/hibernate/Query;
+	public static final fun queryHint (Lmisk/hibernate/Query;Ljava/lang/String;)Lmisk/hibernate/Query;
 }
 
 public final class misk/hibernate/RetryTransactionException : java/lang/Exception {

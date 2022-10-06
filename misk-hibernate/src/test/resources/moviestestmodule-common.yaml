@@ -9,6 +9,8 @@ mysql_data_source:
   username: root
   password: ""
   migrations_resource: classpath:/misk/hibernate/moviestestmodule-schema
+  jdbc_url_query_parameters:
+    serverTimezone: UTC
 cockroachdb_data_source:
   type: COCKROACHDB
   database: movies

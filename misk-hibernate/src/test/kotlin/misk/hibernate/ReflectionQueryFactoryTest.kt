@@ -6,6 +6,7 @@ import misk.hibernate.Operator.LT
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
+import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.LazyInitializationException
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -1154,5 +1155,49 @@ class ReflectionQueryFactoryTest {
         clone.count(session)
       }
     ).isEqualTo(1)
+  }
+
+  @Test
+  fun queryHint() {
+    withSqlLogging {
+      transacter.transaction { session ->
+        session.save(DbMovie("Rocky 1", LocalDate.of(2018, 1, 1)))
+      }
+
+      // Clean out any previously logged statements
+      logCollector.takeMessages(null, Level.DEBUG, Regex("/* select"))
+
+      transacter.transaction { session ->
+        assertThat(
+          queryFactory.newQuery<OperatorsMovieQuery>()
+            .queryHint("unq_name")
+            .name("Rocky 1")
+            .uniqueName(session)
+        )
+          .isEqualTo("Rocky 1")
+        assertThat(logCollector.takeMessage(null, Level.DEBUG, Regex("/* select.*from movies")))
+          .contains("use index (unq_name)")
+
+        assertThat(
+          queryFactory.newQuery<OperatorsMovieQuery>()
+            .queryHint("unq_name")
+            .list(session)
+        )
+        assertThat(logCollector.takeMessage(null, Level.DEBUG, Regex("/* select.*from movies")))
+          .contains("use index (unq_name)")
+      }
+    }
+  }
+}
+
+inline fun withSqlLogging(work: () -> Unit) {
+  val logger =
+    KotlinLogging.logger("org.hibernate.SQL").underlyingLogger as ch.qos.logback.classic.Logger
+  val level = logger.level
+  try {
+    logger.level = Level.ALL
+    work()
+  } finally {
+    logger.level = level
   }
 }
