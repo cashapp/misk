@@ -27,6 +27,11 @@ interface Query<T> {
   /** Fetch the given path as a join, using the given joinType */
   fun dynamicAddFetch(path: String, joinType: JoinType)
 
+  /**
+   * Adds a SQL hint to the query.
+   */
+  fun addQueryHint(hint: String)
+
   fun disableCheck(check: Check)
 
   /** Asserts that there is either zero or one results. */
@@ -131,6 +136,14 @@ fun <T, Q : Query<T>> Q.constraint(
   addJpaConstraint { root, criteriaBuilder ->
     criteriaBuilder.block(root)
   }
+  return this
+}
+
+/**
+ * Adds query hint to the query. (Chainable version of [Query.addQueryHint].)
+ */
+fun <T, Q : Query<T>> Q.queryHint(hint: String): Q {
+  addQueryHint(hint)
   return this
 }
 

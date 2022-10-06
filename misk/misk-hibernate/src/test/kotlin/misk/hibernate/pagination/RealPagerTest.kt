@@ -1,5 +1,6 @@
 package misk.hibernate.pagination
 
+import ch.qos.logback.classic.Level
 import misk.hibernate.CharacterQuery
 import misk.hibernate.DbCharacter
 import misk.hibernate.DbMovie
@@ -7,9 +8,11 @@ import misk.hibernate.Id
 import misk.hibernate.Movies
 import misk.hibernate.MoviesTestModule
 import misk.hibernate.Query
+import misk.hibernate.queryHint
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.hibernate.or
+import misk.hibernate.withSqlLogging
 import misk.jdbc.DataSourceType
 import misk.jdbc.ScaleSafetyChecks
 import misk.testing.MiskTest
@@ -17,6 +20,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
@@ -31,6 +35,7 @@ class RealPagerTest {
   @Inject @Movies private lateinit var transacter: Transacter
   @Inject @Movies lateinit var sessionFactory: SessionFactory
   @Inject lateinit var queryFactory: Query.Factory
+  @Inject lateinit var logCollector: LogCollector
 
   @Test fun idAscPagination() {
     val movieId = givenStarWarsMovie()
@@ -86,6 +91,36 @@ class RealPagerTest {
       .newPager(CharacterNameDescIdAscPaginator, pageSize = 5)
       .listAll(transacter) { it.name }
     assertThat(actualCharacterNames).containsExactlyElementsOf(expectedCharacterNames)
+  }
+
+  @Test fun customPaginationWithQueryHint() {
+    val movieId = givenStarWarsMovie()
+    givenStormtrooperCharacters(movieId, initialOperatingNumber = 1, count = 50)
+    // The first page is split between rows with the same character name.
+    givenStormtrooperCharacters(movieId, initialOperatingNumber = 4, count = 20)
+    // More rows with duplicate names.
+    givenStormtrooperCharacters(movieId, initialOperatingNumber = 24, count = 20)
+    val expectedCharacterNames = transacter.transaction { session ->
+      queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .nameDesc()
+        .idAsc()
+        .list(session)
+        .map { it.name }
+    }
+    withSqlLogging {
+      logCollector.takeMessages(null, Level.DEBUG, Regex("/* select.*from characters"))
+      val actualCharacterNames = queryFactory.newQuery(CharacterQuery::class)
+        .queryHint("movie_id_idx")
+        .movieId(movieId)
+        .newPager(CharacterNameDescIdAscPaginator, pageSize = 5)
+        .listAll(transacter) { it.name }
+
+      assertThat(logCollector.takeMessage(null, Level.DEBUG, Regex("/* select.*from characters")))
+        .contains("use index (movie_id_idx)")
+
+      assertThat(actualCharacterNames).containsExactlyElementsOf(expectedCharacterNames)
+    }
   }
 
   @Test fun `hasNext always true on first page`() {
