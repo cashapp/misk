@@ -111,9 +111,11 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   /** Set a ByteArray value if it doesn't already exist with an expiration. Returns true if set and false, otherwise  */
   override fun setnx(key: String, expiryDuration: Duration, value: ByteString): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.setnx(key.toByteArray(charset), value.toByteArray())
-        .also { setResult -> if (setResult == 1L) jedis.expire(key, expiryDuration.seconds) } == 1L
-
+      jedis.set(
+        key.toByteArray(charset),
+        value.toByteArray(),
+        SetParams().nx().px(expiryDuration.toMillis())
+      ) == "OK"
     }
   }
 
