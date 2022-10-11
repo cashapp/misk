@@ -1188,11 +1188,46 @@ class ReflectionQueryFactoryTest {
       }
     }
   }
+
+  @Test
+  fun queryStats() {
+    withStatsLogging {
+      transacter.transaction { session ->
+        session.save(DbMovie("Rocky 1", LocalDate.of(2018, 1, 1)))
+      }
+
+      // Clean out any previous logs
+      logCollector.takeMessages(null, Level.DEBUG, Regex(".*"))
+
+      transacter.transaction { session ->
+        assertThat(
+          queryFactory.newQuery<OperatorsMovieQuery>()
+            .name("Rocky 1")
+            .uniqueName(session)
+        )
+          .isEqualTo("Rocky 1")
+        assertThat(logCollector.takeMessage(null, Level.DEBUG, Regex("HQL")))
+          .contains("time:")
+      }
+    }
+  }
 }
 
 inline fun withSqlLogging(work: () -> Unit) {
   val logger =
     KotlinLogging.logger("org.hibernate.SQL").underlyingLogger as ch.qos.logback.classic.Logger
+  val level = logger.level
+  try {
+    logger.level = Level.ALL
+    work()
+  } finally {
+    logger.level = level
+  }
+}
+
+inline fun withStatsLogging(work: () -> Unit) {
+  val logger =
+    KotlinLogging.logger("org.hibernate.stat").underlyingLogger as ch.qos.logback.classic.Logger
   val level = logger.level
   try {
     logger.level = Level.ALL

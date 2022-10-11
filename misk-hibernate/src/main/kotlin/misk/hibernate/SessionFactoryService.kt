@@ -90,6 +90,7 @@ internal class SessionFactoryService(
       applySetting(AvailableSettings.DATASOURCE, dataSource.get())
       applySetting(AvailableSettings.DIALECT, config.type.hibernateDialect)
       applySetting(AvailableSettings.SHOW_SQL, config.show_sql)
+      applySetting(AvailableSettings.GENERATE_STATISTICS, config.generate_hibernate_stats)
       applySetting(AvailableSettings.USE_SQL_COMMENTS, "true")
       applySetting(AvailableSettings.USE_GET_GENERATED_KEYS, "true")
       applySetting(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "false")

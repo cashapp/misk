@@ -74,6 +74,10 @@ data class DataSourceConfig(
   val verify_server_identity: Boolean = false,
   val enabledTlsProtocols: List<String> = listOf("TLSv1.2", "TLSv1.3"),
   val show_sql: String? = "false",
+  // Don't enable statistics unless we really need to.
+  // See http://tech.puredanger.com/2009/05/13/hibernate-concurrency-bugs/
+  // for an explanation of the drawbacks to Hibernate's StatisticsImpl.
+  val generate_hibernate_stats: String? = "false",
   // Consider using this if you want Hibernate to automagically batch inserts/updates when it can.
   val jdbc_statement_batch_size: Int? = null,
   val use_fixed_pool_size: Boolean = false,
@@ -291,6 +295,7 @@ data class DataSourceConfig(
       this.verify_server_identity,
       this.enabledTlsProtocols,
       this.show_sql,
+      this.generate_hibernate_stats,
     )
   }
 
