@@ -91,14 +91,14 @@ subprojects {
   }
 
   tasks.withType<DokkaTask>().configureEach {
-    val dokkaTask = this
+    if (name == "dokkaGfm") {
+      outputDirectory.set(project.file("$rootDir/docs/0.x/${project.name}"))
+    }
+
     dokkaSourceSets.configureEach {
       reportUndocumented.set(false)
       skipDeprecated.set(true)
       jdkVersion.set(8)
-      if (dokkaTask.name == "dokkaGfm") {
-        outputDirectory.set(project.file("$rootDir/docs/0.x"))
-      }
     }
   }
 
