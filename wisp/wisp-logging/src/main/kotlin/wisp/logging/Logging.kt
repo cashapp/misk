@@ -53,6 +53,7 @@ fun KLogger.error(vararg tags: Tag, message: () -> Any?) =
 
 fun KLogger.debug(vararg tags: Tag, message: () -> Any?) =
     log(Level.DEBUG, message = message, tags = tags)
+
 fun KLogger.trace(vararg tags: Tag, message: () -> Any?) =
     log(Level.TRACE, message = message, tags = tags)
 
