@@ -9,18 +9,16 @@ import org.junit.jupiter.api.Test
 import org.slf4j.MDC
 
 class LoggingTest {
-    var wispQueuedLogCollector = WispQueuedLogCollector()
-
-    private var logCollector: LogCollector = wispQueuedLogCollector
+    private val logCollector = WispQueuedLogCollector()
 
     @BeforeEach
     fun beforeEach() {
-        wispQueuedLogCollector.startUp()
+        logCollector.startUp()
     }
 
     @AfterEach
     fun afterEach() {
-        wispQueuedLogCollector.shutDown()
+        logCollector.shutDown()
     }
 
     private val logger = getLogger<LoggingTest>()

@@ -4,11 +4,16 @@ import mu.KLogger
 import mu.KotlinLogging
 import org.slf4j.MDC
 import org.slf4j.event.Level
+import wisp.sampling.Sampler
 
 typealias Tag = Pair<String, Any?>
 
 inline fun <reified T> getLogger(): KLogger {
     return KotlinLogging.logger(T::class.qualifiedName!!)
+}
+
+fun KLogger.sampled(sampler: Sampler = Sampler.rateLimiting(100L)): KLogger {
+    return SampledLogger(this, sampler)
 }
 
 fun KLogger.info(vararg tags: Tag, message: () -> Any?) =
@@ -22,6 +27,8 @@ fun KLogger.error(vararg tags: Tag, message: () -> Any?) =
 
 fun KLogger.debug(vararg tags: Tag, message: () -> Any?) =
     log(Level.DEBUG, message = message, tags = tags)
+fun KLogger.trace(vararg tags: Tag, message: () -> Any?) =
+    log(Level.TRACE, message = message, tags = tags)
 
 fun KLogger.info(th: Throwable, vararg tags: Tag, message: () -> Any?) =
     log(Level.INFO, th, message = message, tags = tags)
@@ -34,6 +41,9 @@ fun KLogger.error(th: Throwable, vararg tags: Tag, message: () -> Any?) =
 
 fun KLogger.debug(th: Throwable, vararg tags: Tag, message: () -> Any?) =
     log(Level.DEBUG, th, message = message, tags = tags)
+
+fun KLogger.trace(th: Throwable, vararg tags: Tag, message: () -> Any?) =
+    log(Level.TRACE, th, message = message, tags = tags)
 
 fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
     withTags(*tags) {
