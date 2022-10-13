@@ -1,6 +1,29 @@
 Change Log
 ==========
 
+Version 1.1.0 *(2022-10-14)*
+-----------------------------
+
+* Add wisp.sampling module
+* SampledLogger for wisp.logging
+
+Dependency changes:
+
+* aws2: "2.17.224" -> "2.17.267"
+* grpc: "1.49.0" -> "1.49.2"
+* hoplite: "2.6.2" -> "2.6.4"
+* jackson: "2.13.3" -> "2.13.4"
+* junit: "5.9.0" -> "5.9.1"
+* kotest: "5.4.2" -> "5.5.0"
+* kotlinBinaryCompatibilityPlugin: "0.11.0" -> "0.11.1"
+* kotlinLogging: "2.1.23" -> "3.0.0"
+* logback: "1.4.0" -> "1.4.3"
+* mockito: "4.7.0" -> "4.8.0"
+* moshi: "1.13.0" -> "1.14.0"
+* netty: "4.1.80.Final" -> "4.1.82.Final"
+* slf4j = "2.0.0" -> "2.0.3"
+
+
 Version 1.0.10 *(2022-09-26)*
 -----------------------------
 
