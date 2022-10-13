@@ -32,7 +32,7 @@ private val logger = getLogger<LoggingTest>().sampled()
 ```
 
 By default, this will logger will be rate limited to 100 logs per second, but a custom
-[`Sampler`](../wisp-sampling) can be provided if a different rate or policy is required:
+[`Sampler`](../wisp-sampling/README.md) can be provided if a different rate or policy is required:
 
 ```kotlin
 private val logger = getLogger<LoggingTest>().sampled(Sampler.rateLimiting(500L))

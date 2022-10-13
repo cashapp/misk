@@ -41,6 +41,8 @@ Modules that are named ending in "Testing" are for test code and should never be
 
 ### [Resource Loader Testing](wisp-resource-loader-testing/README.md)
 
+### [Sampling](wisp-sampling/README.md)
+
 ### [SSL](wisp-ssl/README.md)
 
 ### [Tasks](wisp-task/README.md)
