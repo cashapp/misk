@@ -38,7 +38,7 @@ inline fun <reified T> getLogger(): KLogger {
  *
  * @return wrapped logger instance
  */
-fun KLogger.sampled(sampler: Sampler = Sampler.rateLimiting(100L)): KLogger {
+fun KLogger.sampled(sampler: Sampler = Sampler.rateLimiting(1L)): KLogger {
     return SampledLogger(this, sampler)
 }
 
