@@ -31,7 +31,7 @@ Use this library to sample down the volume of logs produced the logger:
 private val logger = getLogger<LoggingTest>().sampled()
 ```
 
-By default, this will logger will be rate limited to 100 logs per second, but a custom
+By default, this will logger will be rate limited to 1 log per second, but a custom
 [`Sampler`](../wisp-sampling/README.md) can be provided if a different rate or policy is required:
 
 ```kotlin

@@ -16,7 +16,7 @@ inline fun <reified T> getLogger(): KLogger {
  * Returns a logger that samples logs. This logger MUST be instantiated statically,
  * in a companion object or as a Singleton.
  *
- * To use default sampler (rate limited to 100 logs per second):
+ * To use default sampler (rate limited to 1 log per second):
  *
  * ```kotlin
  *   val logger = getLogger<MyClass>().sampled()
