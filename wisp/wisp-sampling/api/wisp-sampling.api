@@ -1,0 +1,11 @@
+public abstract interface class wisp/sampling/Sampler {
+	public static final field Companion Lwisp/sampling/Sampler$Companion;
+	public abstract fun sample ()Z
+}
+
+public final class wisp/sampling/Sampler$Companion {
+	public final fun always ()Lwisp/sampling/Sampler;
+	public final fun percentage (I)Lwisp/sampling/Sampler;
+	public final fun rateLimiting (J)Lwisp/sampling/Sampler;
+}
+

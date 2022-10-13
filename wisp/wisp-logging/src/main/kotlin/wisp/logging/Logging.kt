@@ -4,11 +4,42 @@ import mu.KLogger
 import mu.KotlinLogging
 import org.slf4j.MDC
 import org.slf4j.event.Level
+import wisp.sampling.Sampler
 
 typealias Tag = Pair<String, Any?>
 
 inline fun <reified T> getLogger(): KLogger {
     return KotlinLogging.logger(T::class.qualifiedName!!)
+}
+
+/**
+ * Returns a logger that samples logs. This logger MUST be instantiated statically,
+ * in a companion object or as a Singleton.
+ *
+ * To use default sampler (rate limited to 1 log per second):
+ *
+ * ```kotlin
+ *   val logger = getLogger<MyClass>().sampled()
+ * ```
+ *
+ * To get a rate limited logger:
+ *
+ * ```kotlin
+ *   val logger = getLogger<MyClass>().sampled((Sampler.rateLimiting(RATE_PER_SECOND))
+ * ```
+ *
+ * To get a probabilistic sampler
+ *
+ * ```kotlin
+ *   val logger = getLogger<MyClass>().sampled(Sampler.percentage(PERCENTAGE_TO_ALLOW))
+ * ```
+ *
+ * @param sampler [Sampler] to use to sample logs
+ *
+ * @return wrapped logger instance
+ */
+fun KLogger.sampled(sampler: Sampler = Sampler.rateLimiting(1L)): KLogger {
+    return SampledLogger(this, sampler)
 }
 
 fun KLogger.info(vararg tags: Tag, message: () -> Any?) =
@@ -23,6 +54,9 @@ fun KLogger.error(vararg tags: Tag, message: () -> Any?) =
 fun KLogger.debug(vararg tags: Tag, message: () -> Any?) =
     log(Level.DEBUG, message = message, tags = tags)
 
+fun KLogger.trace(vararg tags: Tag, message: () -> Any?) =
+    log(Level.TRACE, message = message, tags = tags)
+
 fun KLogger.info(th: Throwable, vararg tags: Tag, message: () -> Any?) =
     log(Level.INFO, th, message = message, tags = tags)
 
@@ -34,6 +68,9 @@ fun KLogger.error(th: Throwable, vararg tags: Tag, message: () -> Any?) =
 
 fun KLogger.debug(th: Throwable, vararg tags: Tag, message: () -> Any?) =
     log(Level.DEBUG, th, message = message, tags = tags)
+
+fun KLogger.trace(th: Throwable, vararg tags: Tag, message: () -> Any?) =
+    log(Level.TRACE, th, message = message, tags = tags)
 
 fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
     withTags(*tags) {
