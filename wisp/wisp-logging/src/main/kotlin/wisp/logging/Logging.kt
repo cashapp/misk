@@ -12,6 +12,32 @@ inline fun <reified T> getLogger(): KLogger {
     return KotlinLogging.logger(T::class.qualifiedName!!)
 }
 
+/**
+ * Returns a logger that samples logs. This logger MUST be instantiated statically,
+ * in a companion object or as a Singleton.
+ *
+ * To use default sampler (rate limited to 100 logs per second):
+ *
+ * ```kotlin
+ *   val logger = getLogger<MyClass>().sampled()
+ * ```
+ *
+ * To get a rate limited logger:
+ *
+ * ```kotlin
+ *   val logger = getLogger<MyClass>().sampled((Sampler.rateLimiting(RATE_PER_SECOND))
+ * ```
+ *
+ * To get a probabilistic sampler
+ *
+ * ```kotlin
+ *   val logger = getLogger<MyClass>().sampled(Sampler.percentage(PERCENTAGE_TO_ALLOW))
+ * ```
+ *
+ * @param sampler [Sampler] to use to sample logs
+ *
+ * @return wrapped logger instance
+ */
 fun KLogger.sampled(sampler: Sampler = Sampler.rateLimiting(100L)): KLogger {
     return SampledLogger(this, sampler)
 }
