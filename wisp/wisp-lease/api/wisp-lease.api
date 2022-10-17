@@ -29,3 +29,30 @@ public abstract interface class wisp/lease/LeaseManager {
 	public abstract fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
 }
 
+public final class wisp/lease/pool/PoolLease : wisp/lease/Lease {
+	public fun <init> (Lwisp/lease/Lease;Lwisp/lease/pool/PoolLeaseManager;)V
+	public fun acquire ()Z
+	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
+	public fun checkHeld ()Z
+	public fun getName ()Ljava/lang/String;
+	public fun release ()Z
+}
+
+public final class wisp/lease/pool/PoolLeaseConfig {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lwisp/lease/pool/PoolLeaseConfig;
+	public static synthetic fun copy$default (Lwisp/lease/pool/PoolLeaseConfig;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lwisp/lease/pool/PoolLeaseConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLeaseNames ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class wisp/lease/pool/PoolLeaseManager : wisp/lease/LeaseManager {
+	public fun <init> (Lwisp/lease/LeaseManager;Lwisp/deployment/Deployment;Ljava/util/List;)V
+	public fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
+}
+
