@@ -5,9 +5,7 @@ import wisp.lease.Lease
 class PoolLease(
   private val delegateLease: Lease,
   private val poolLeaseManager: PoolLeaseManager,
-) : Lease {
-  override val name: String
-    get() = delegateLease.name
+) : Lease by delegateLease {
 
   /**
    * Can always use the delegate's result
@@ -47,7 +45,4 @@ class PoolLease(
     return true
   }
 
-  override fun addListener(listener: Lease.StateChangeListener) {
-    delegateLease.addListener(listener)
-  }
 }
