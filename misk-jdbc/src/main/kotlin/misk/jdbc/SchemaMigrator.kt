@@ -122,9 +122,7 @@ internal class SchemaMigrator(
   fun availableMigrations(keyspace: Keyspace): SortedSet<NamedspacedMigration> {
     val migrations = mutableListOf<NamedspacedMigration>()
     for (migrationsResource in getMigrationsResources(keyspace)) {
-      val migrationsFound = resourceLoader.walk(migrationsResource)
-        .filter { it.endsWith(".sql") }
-        .filter { NamedspacedMigration.MIGRATION_PATTERN.matcher(it).matches() }
+      val migrationsFound = resourceLoader.walk(migrationsResource).filter { it.endsWith(".sql") }
         .map { NamedspacedMigration.fromResourcePath(it, migrationsResource) }
       migrations.addAll(migrationsFound)
     }
