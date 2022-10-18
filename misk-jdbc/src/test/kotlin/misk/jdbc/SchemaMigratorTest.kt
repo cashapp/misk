@@ -119,15 +119,20 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
         |CREATE TABLE library_table (name varchar(255))
         |""".trimMargin()
     )
+    resourceLoader.put(
+      "$librarySource/all-migrations.sql", """
+        |CREATE TABLE all_migrations (name varchar(255))
+        |""".trimIndent()
+    )
 
     // Initially the schema_version table is absent.
-    assertThat(tableExists("schema_version")).isFalse()
-    assertThat(tableExists("table_1")).isFalse()
-    assertThat(tableExists("table_2")).isFalse()
-    assertThat(tableExists("table_3")).isFalse()
-    assertThat(tableExists("table_4")).isFalse()
-    assertThat(tableExists("library_table")).isFalse()
-    assertThat(tableExists("merged_library_table")).isFalse()
+    assertThat(tableExists("schema_version")).isFalse
+    assertThat(tableExists("table_1")).isFalse
+    assertThat(tableExists("table_2")).isFalse
+    assertThat(tableExists("table_3")).isFalse
+    assertThat(tableExists("table_4")).isFalse
+    assertThat(tableExists("library_table")).isFalse
+    assertThat(tableExists("merged_library_table")).isFalse
     assertFailsWith<SQLException> {
       schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)
     }
@@ -135,13 +140,13 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     // Once we initialize, that table is present but empty.
     schemaMigrator.initialize()
     assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).isEmpty()
-    assertThat(tableExists("schema_version")).isTrue()
-    assertThat(tableExists("table_1")).isFalse()
-    assertThat(tableExists("table_2")).isFalse()
-    assertThat(tableExists("table_3")).isFalse()
-    assertThat(tableExists("table_4")).isFalse()
-    assertThat(tableExists("library_table")).isFalse()
-    assertThat(tableExists("merged_library_table")).isFalse()
+    assertThat(tableExists("schema_version")).isTrue
+    assertThat(tableExists("table_1")).isFalse
+    assertThat(tableExists("table_2")).isFalse
+    assertThat(tableExists("table_3")).isFalse
+    assertThat(tableExists("table_4")).isFalse
+    assertThat(tableExists("library_table")).isFalse
+    assertThat(tableExists("merged_library_table")).isFalse
 
     // When we apply migrations, the table is present and contains the applied migrations.
     schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
@@ -150,13 +155,14 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
       NamedspacedMigration(1002),
       NamedspacedMigration(1001, "name/space/")
     )
-    assertThat(tableExists("schema_version")).isTrue()
-    assertThat(tableExists("table_1")).isTrue()
-    assertThat(tableExists("table_2")).isTrue()
-    assertThat(tableExists("library_table")).isTrue()
-    assertThat(tableExists("table_3")).isFalse()
-    assertThat(tableExists("table_4")).isFalse()
-    assertThat(tableExists("merged_library_table")).isFalse()
+    assertThat(tableExists("schema_version")).isTrue
+    assertThat(tableExists("table_1")).isTrue
+    assertThat(tableExists("table_2")).isTrue
+    assertThat(tableExists("library_table")).isTrue
+    assertThat(tableExists("table_3")).isFalse
+    assertThat(tableExists("table_4")).isFalse
+    assertThat(tableExists("merged_library_table")).isFalse
+    assertThat(tableExists("all_migrations")).isFalse
     schemaMigrator.requireAll()
 
     // When new migrations are added they can be applied.
@@ -190,13 +196,14 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
       NamedspacedMigration(1001, "name/space/"),
       NamedspacedMigration(1001, "namespace/")
     )
-    assertThat(tableExists("schema_version")).isTrue()
-    assertThat(tableExists("table_1")).isTrue()
-    assertThat(tableExists("table_2")).isTrue()
-    assertThat(tableExists("table_3")).isTrue()
-    assertThat(tableExists("table_4")).isTrue()
-    assertThat(tableExists("library_table")).isTrue()
-    assertThat(tableExists("merged_library_table")).isTrue()
+    assertThat(tableExists("schema_version")).isTrue
+    assertThat(tableExists("table_1")).isTrue
+    assertThat(tableExists("table_2")).isTrue
+    assertThat(tableExists("table_3")).isTrue
+    assertThat(tableExists("table_4")).isTrue
+    assertThat(tableExists("library_table")).isTrue
+    assertThat(tableExists("merged_library_table")).isTrue
+    assertThat(tableExists("all_migrations")).isFalse
     schemaMigrator.requireAll()
   }
 
