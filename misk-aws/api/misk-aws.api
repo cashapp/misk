@@ -58,8 +58,9 @@ public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
 	public fun <init> ()V
-	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIII)V
-	public synthetic fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;)V
+	public synthetic fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAws_sqs_job_receiver_policy ()Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
 	public final fun getExternal_queues ()Ljava/util/Map;
 	public final fun getMessage_batch_size ()I
 	public final fun getQueue_attribute_importer_frequency_ms ()J
@@ -69,9 +70,11 @@ public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
 	public final fun getTask_queue ()Lmisk/tasks/RepeatedTaskQueueConfig;
 }
 
-public final class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModule {
+public class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobQueueModule$Companion;
 	public fun <init> (Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)V
+	protected fun configure ()V
+	public fun configureClient (Lcom/amazonaws/client/builder/AwsClientBuilder;)V
 	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)Lmisk/tasks/RepeatedTaskQueue;
 	public final fun provideSQSClient (Ljava/lang/String;Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;Lmisk/feature/FeatureFlags;)Lcom/amazonaws/services/sqs/AmazonSQS;
 	public final fun provideSQSClientForReceiving (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/sqs/AmazonSQS;
@@ -82,6 +85,13 @@ public final class misk/jobqueue/sqs/AwsSqsJobQueueModule$Companion {
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueModuleKt {
 	public static final fun withNoPrefetching (Lcom/amazonaws/services/sqs/buffered/QueueBufferConfig;)Lcom/amazonaws/services/sqs/buffered/QueueBufferConfig;
+}
+
+public final class misk/jobqueue/sqs/AwsSqsJobReceiverPolicy : java/lang/Enum {
+	public static final field BALANCED_MAX Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
+	public static final field ONE_FLAG_ONLY Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
+	public static fun values ()[Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsQueueConfig {
@@ -168,13 +178,25 @@ public final class misk/jobqueue/sqs/QueueResolverKt {
 	public static final fun isRetryQueue (Lmisk/jobqueue/QueueName;)Z
 }
 
+public final class misk/jobqueue/sqs/SqsConsumerAllocator {
+	public static final field Companion Lmisk/jobqueue/sqs/SqsConsumerAllocator$Companion;
+	public fun <init> (Lwisp/lease/LeaseManager;Lmisk/feature/FeatureFlags;)V
+	public final fun computeSqsConsumersForPod (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;)I
+}
+
+public final class misk/jobqueue/sqs/SqsConsumerAllocator$Companion {
+	public final fun leaseName (Lmisk/jobqueue/QueueName;I)Ljava/lang/String;
+}
+
 public final class misk/jobqueue/sqs/StaticDeadLetterQueueProvider : misk/jobqueue/sqs/DeadLetterQueueProvider {
 	public fun <init> (Ljava/lang/String;)V
 	public fun deadLetterQueueFor (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
 }
 
-public final class misk/s3/RealS3Module : misk/inject/KAbstractModule {
+public class misk/s3/RealS3Module : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	protected fun configure ()V
+	public fun configureClient (Lcom/amazonaws/services/s3/AmazonS3ClientBuilder;)V
 	public final fun provideS3 (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/s3/AmazonS3;
 }
 

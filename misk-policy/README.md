@@ -17,7 +17,10 @@ install(OpaModule(serviceBuilder.config.opa))
 ```
 
 Ensure that your configuration sets up the required baseURL.
-Optionally, you may also use unix domain sockets to communicate with OPA.
+Optionally, you may also use unix domain sockets to communicate with OPA. The
+unix socket may cause failures when doing local development, especially as
+developers use different laptop environments, so you may want to set up the
+unixSocket option for staging and prod only.
 
 ```yaml
 opa:
@@ -37,8 +40,8 @@ In kotlin, this will take the shape of data classes.
 Here is an example:
 
 ```kotlin
-data class BasicResponse(val test: String) : OpaResponse
-data class BasicRequest(val someValue: Int) : OpaRequest
+data class BasicResponse(val test: String) : OpaResponse()
+data class BasicRequest(val someValue: Int) : OpaRequest()
 ```
 
 This defines an input document, which has a single integer value, called someValue in the matching policy.
@@ -66,4 +69,15 @@ Finally to actually perform a query from misk, all we need is to use the extensi
 
 ```kotlin
 val evaluate: BasicResponse = opaPolicyEngine.evaluate("abc", BasicRequest(1))
+```
+
+### Provenance
+
+`misk-policy` is also able to return [provenance information](https://www.openpolicyagent.org/docs/latest/rest-api/#provenance) for each query made to OPA.
+In order to receive provenance information, set the following value in your `yaml` file:
+```yaml
+opa:
+  baseUrl: "http://localhost:8181/"
+  unixSocket: "\u0000authz.sock"
+  provenance: true
 ```

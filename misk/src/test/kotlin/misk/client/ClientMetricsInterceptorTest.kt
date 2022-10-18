@@ -64,25 +64,34 @@ internal class ClientMetricsInterceptorTest {
     mockWebServer.enqueue(MockResponse().setResponseCode(403).setBody("{}"))
     mockWebServer.enqueue(MockResponse().setResponseCode(404).setBody("{}"))
     mockWebServer.enqueue(MockResponse().setResponseCode(503).setBody("{}"))
+    mockWebServer.enqueue(
+      MockResponse()
+        .setHeader("grpc-status", "9") // FAILED_PRECONDITION, maps to HTTP 400
+        .setResponseCode(200)
+        .setBody("{}")
+    )
     assertThat(client.ping(AppRequest(200)).execute().code()).isEqualTo(200)
     assertThat(client.ping(AppRequest(200)).execute().code()).isEqualTo(200)
     assertThat(client.ping(AppRequest(202)).execute().code()).isEqualTo(202)
     assertThat(client.ping(AppRequest(403)).execute().code()).isEqualTo(403)
     assertThat(client.ping(AppRequest(404)).execute().code()).isEqualTo(404)
     assertThat(client.ping(AppRequest(503)).execute().code()).isEqualTo(503)
+    assertThat(client.ping(AppRequest(200)).execute().code()).isEqualTo(200)
 
     SoftAssertions.assertSoftly { softly ->
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "200").get().count.toInt()).isEqualTo(2)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "202").get().count.toInt()).isEqualTo(1)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "404").get().count.toInt()).isEqualTo(1)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "403").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "403").get().count.toInt()).isEqualTo(1)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "503").get().count.toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "400").get().count.toInt()).isEqualTo(1)
 
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "200").get().buckets.last().toInt()).isEqualTo(2)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "202").get().buckets.last().toInt()).isEqualTo(1)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "404").get().buckets.last().toInt()).isEqualTo(1)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.last().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.last().toInt()).isEqualTo(1)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "503").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "400").get().buckets.last().toInt()).isEqualTo(1)
     }
   }
 

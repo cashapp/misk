@@ -13,7 +13,8 @@ import javax.inject.Named
  */
 class RealOpaPolicyEngine @Inject constructor(
   private val opaApi: OpaApi,
-  @Named("opa-moshi") private val moshi: Moshi
+  @Named("opa-moshi") private val moshi: Moshi,
+  private val provenance: Boolean
 ) : OpaPolicyEngine {
 
   /**
@@ -56,6 +57,31 @@ class RealOpaPolicyEngine @Inject constructor(
   }
 
   /**
+   * Evaluate / Query a document with given input of raw JSON.
+   * This will connect to OPA via a retrofit interface and perform a /v1/data/{document} POST.
+   * This consumes raw JSON for corner cases where developers need to do queries the automatic
+   * JSON serialization doesn't support.
+   *
+   * @param document Name or Path of the OPA document to query.
+   * @param input Input data to be supplied to OPA at evaluation time. Must be valid JSON.
+   * @param returnType Return shape to be JSONified from OPA.
+   * @throws PolicyEngineException if the request to OPA failed or the response shape didn't match R.
+   * @throws IllegalArgumentException if no document path was specified.
+   * @return Response shape R from OPA.
+   */
+  override fun <R: OpaResponse> evaluateRawJsonInput(
+    document: String,
+    input: String,
+    returnType: Class<R>
+  ): R {
+    if (document.isEmpty()) {
+      throw IllegalArgumentException("Must specify document")
+    }
+    val response = queryOpa(document, input)
+    return parseResponse(document, returnType, response)
+  }
+
+  /**
    * Evaluate / Query a document with no additional input.
    * This will connect to OPA via a retrofit interface and perform a /v1/data/{document} POST.
    *
@@ -65,12 +91,18 @@ class RealOpaPolicyEngine @Inject constructor(
    * @throws IllegalArgumentException if no document path was specified.
    * @return Response shape R from OPA.
    */
-  override fun <R : OpaResponse> evaluateNoInput(document: String, returnType: Class<R>): R {
+  override fun <R : OpaResponse> evaluateNoInput(
+    document: String,
+    returnType: Class<R>
+  ): R {
     return evaluateInternal(document, returnType)
   }
 
-  private fun <R : OpaResponse> evaluateInternal(document: String, returnType: Class<R>): R {
-    val response = queryOpa(document)
+  private fun <R : OpaResponse> evaluateInternal(
+    document: String,
+    returnType: Class<R>
+  ): R {
+    val response = queryOpa(document, "")
     return parseResponse(document, returnType, response)
   }
 
@@ -82,7 +114,7 @@ class RealOpaPolicyEngine @Inject constructor(
       throw IllegalArgumentException("Must specify document")
     }
 
-    val response = opaApi.queryDocument(document, inputString).execute()
+    val response = opaApi.queryDocument(document, inputString, provenance).execute()
     if (!response.isSuccessful) {
       throw PolicyEngineException("[${response.code()}]: ${response.errorBody()?.string()}")
     }
@@ -110,7 +142,7 @@ class RealOpaPolicyEngine @Inject constructor(
     if (extractedResponse.result == null) {
       throw PolicyEngineException("Policy document \"$document\" not found.")
     }
-
+    extractedResponse.result.provenance = extractedResponse.provenance
     return extractedResponse.result
   }
 }

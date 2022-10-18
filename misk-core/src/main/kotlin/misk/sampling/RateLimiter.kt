@@ -39,7 +39,7 @@ class RateLimiter private constructor(
   private val atomicAllocatedUntil = AtomicLong(ticker.read())
 
   /** The size of our window where we can borrow bytes from the future. */
-  private var windowSizeNs = TimeUnit.SECONDS.toNanos(1L)
+  private val windowSizeNs = TimeUnit.SECONDS.toNanos(1L)
 
   /**
    * Attempt to acquire [permitCount] permits, sleeping up to [timeout] if necessary for them to
@@ -81,12 +81,13 @@ class RateLimiter private constructor(
   ): Duration? {
     while (true) {
       val allocatedUntil = atomicAllocatedUntil.get()
+
       val permitsPerSecond = this.permitsPerSecond // Sample this volatile only once.
 
       val maxRequestSize = windowSizeNs.nanosToPermits(permitsPerSecond)
       if (permitCount > maxRequestSize) return null
-
       val now = ticker.read()
+
       val timeoutNs = unit.toNanos(timeout)
 
       // If this acquire succeeds, this is the time we're consuming permits through.
@@ -105,6 +106,34 @@ class RateLimiter private constructor(
       // Permits were consumed. Return how long to wait before these permits can be used.
       return if (sleepNs < 0) Duration.ZERO else Duration.ofNanos(sleepNs)
     }
+  }
+
+  /**
+   * Returns the maximum number of permits that could have
+   * been acquired by a call to [tryAcquire], assuming the caller
+   * passed the same [timeout] and [unit].
+   *
+   */
+  fun getPermitsRemaining(
+    unit: TimeUnit,
+    timeout: Long
+  ): Long {
+    if (permitsPerSecond <= 0L) return 0L
+    val allocatedUntil = atomicAllocatedUntil.get()
+
+    val nowNanos = ticker.read()
+    val timeoutNanos = unit.toNanos(timeout)
+
+    // The amount of time you can allocate is equal to the sum of:
+    //   1. The end of the current [windowSizeNs] bucket minus how much time has already been allocated
+    //   2. How long you're willing to wait for more permits to arrive
+    // Capped to 1 [windowSizeMs] worth of permits
+    val allocatableTime =
+      (nowNanos + windowSizeNs - allocatedUntil + timeoutNanos).coerceIn(0, windowSizeNs)
+    val timesliceSize = (windowSizeNs / permitsPerSecond)
+    val permitsLeft = allocatableTime / timesliceSize
+
+    return permitsLeft
   }
 
   private fun Long.nanosToPermits(permitsPerSecond: Long) = this * permitsPerSecond / 1_000_000_000L

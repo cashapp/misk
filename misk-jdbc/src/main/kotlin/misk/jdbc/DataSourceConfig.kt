@@ -74,8 +74,19 @@ data class DataSourceConfig(
   val verify_server_identity: Boolean = false,
   val enabledTlsProtocols: List<String> = listOf("TLSv1.2", "TLSv1.3"),
   val show_sql: String? = "false",
+  // Don't enable statistics unless we really need to.
+  // See http://tech.puredanger.com/2009/05/13/hibernate-concurrency-bugs/
+  // for an explanation of the drawbacks to Hibernate's StatisticsImpl.
+  val generate_hibernate_stats: String? = "false",
   // Consider using this if you want Hibernate to automagically batch inserts/updates when it can.
-  val jdbc_statement_batch_size: Int? = null
+  val jdbc_statement_batch_size: Int? = null,
+  val use_fixed_pool_size: Boolean = false,
+  // MySQL 8+ by default requires authentication via RSA keys if TLS is unavailable.
+  // Within secured subnets, overriding to true can be acceptable.
+  // See https://mysqlconnector.net/troubleshooting/retrieval-public-key/
+  val allow_public_key_retrieval: Boolean = false,
+  // Allow setting additional JDBC url parameters for advanced configuration
+  val jdbc_url_query_parameters: Map<String, Any> = mapOf()
 ) {
   fun withDefaults(): DataSourceConfig {
     val isRunningInDocker = File("/proc/1/cgroup")
@@ -216,6 +227,14 @@ data class DataSourceConfig(
           queryParams += "&enabledTLSProtocols=${enabledTlsProtocols.joinToString(",")}"
         }
 
+        if (allow_public_key_retrieval) {
+          queryParams += "&allowPublicKeyRetrieval=true"
+        }
+
+        jdbc_url_query_parameters.entries.forEach { (key, value) ->
+          queryParams += "&$key=$value"
+        }
+
         "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
       }
       DataSourceType.HSQLDB -> {
@@ -276,6 +295,7 @@ data class DataSourceConfig(
       this.verify_server_identity,
       this.enabledTlsProtocols,
       this.show_sql,
+      this.generate_hibernate_stats,
     )
   }
 

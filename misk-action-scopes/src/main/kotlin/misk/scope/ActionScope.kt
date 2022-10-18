@@ -2,6 +2,7 @@ package misk.scope
 
 import com.google.inject.Key
 import com.google.inject.Provider
+import java.util.UUID
 import java.util.concurrent.Callable
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,37 +21,58 @@ class ActionScope @Inject internal constructor(
   private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
 ) : AutoCloseable {
   companion object {
-    private val tls = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
+    private val threadLocalScope = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
+    private val threadLocalUUID = ThreadLocal<UUID>()
   }
 
   /** Starts the scope on a thread with the provided seed data */
   fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
-    check(tls.get() == null) {
+    check(!inScope()) {
       "cannot begin an ActionScope on a thread that is already running in an action scope"
     }
 
-    tls.set(LinkedHashMap(seedData))
+    threadLocalScope.set(LinkedHashMap(seedData))
+
+    // If an action scope had previously been entered on the thread, re-use its UUID.
+    // Otherwise, generate a new one.
+    if (threadLocalUUID.get() == null) {
+      threadLocalUUID.set(UUID.randomUUID())
+    }
+
     return this
   }
 
   override fun close() {
-    tls.remove()
+    threadLocalScope.remove()
+
+    // Explicitly NOT removing threadLocalUUID because we want to retain the thread's UUID if
+    // the action scope is re-entered on the same thread.
+    // The only way in which threadLocalUUID is removed is through garbage collection, which occurs
+    // when the thread is no longer alive.
   }
 
   /** Returns true if currently in the scope */
-  fun inScope(): Boolean = tls.get() != null
+  fun inScope(): Boolean = threadLocalScope.get() != null
 
   /**
    * Wraps a [Callable] that will be called on another thread, propagating the current
    * scoped data onto that thread
    */
   fun <T> propagate(c: Callable<T>): Callable<T> {
-    check(tls.get() != null) { "not running within an ActionScope" }
+    check(inScope()) { "not running within an ActionScope" }
 
-    val currentScopedData = tls.get().toMap()
+    val currentScopedData = threadLocalScope.get().toMap()
+    val currentThreadUUID = threadLocalUUID.get()
+
     return Callable {
-      enter(currentScopedData).use {
+      // If the original thread is the same as the thread that calls the Callable and we are already
+      // in scope, then there is no need to re-enter the scope.
+      if (inScope() && currentThreadUUID == threadLocalUUID.get()) {
         c.call()
+      } else {
+        enter(currentScopedData).use {
+          c.call()
+        }
       }
     }
   }
@@ -60,10 +82,11 @@ class ActionScope @Inject internal constructor(
    * scoped data onto that thread
    */
   fun <T> propagate(f: KFunction<T>): KFunction<T> {
-    check(tls.get() != null) { "not running within an ActionScope" }
+    check(inScope()) { "not running within an ActionScope" }
 
-    val currentScopedData = tls.get().toMap()
-    return WrappedKFunction(currentScopedData, this, f)
+    val currentScopedData = threadLocalScope.get().toMap()
+    val currentThreadUUID = threadLocalUUID.get()
+    return WrappedKFunction(currentScopedData, this, f, currentThreadUUID)
   }
 
   /**
@@ -71,25 +94,33 @@ class ActionScope @Inject internal constructor(
    * scoped data onto that thread
    */
   fun <T> propagate(f: () -> T): () -> T {
-    check(tls.get() != null) { "not running within an ActionScope" }
+    check(inScope()) { "not running within an ActionScope" }
 
-    val currentScopedData = tls.get().toMap()
+    val currentScopedData = threadLocalScope.get().toMap()
+    val currentThreadUUID = threadLocalUUID.get()
+
     return {
-      enter(currentScopedData).use {
+      // If the original thread is the same as the thread that calls the KFunction and we are already
+      // in scope, then there is no need to re-enter the scope.
+      if (inScope() && currentThreadUUID == threadLocalUUID.get()) {
         f.invoke()
+      } else {
+        enter(currentScopedData).use {
+          f.invoke()
+        }
       }
     }
   }
 
   /** Returns the action scoped value for the given key */
   fun <T> get(key: Key<T>): T {
-    check(tls.get() != null) { "not running within an ActionScope" }
+    check(inScope()) { "not running within an ActionScope" }
 
     // NB(mmihic): We don't use computeIfAbsent because computing the value of this
     // key might require computing the values of keys on which we depend, which would
     // cause recursive calls to computeIfAbsent which is unsupported (and explicitly
     // detected in JDK 9+)
-    val threadState = tls.get()
+    val threadState = threadLocalScope.get()
     val cachedValue = threadState[key]
     if (cachedValue != null) {
       @Suppress("UNCHECKED_CAST")
@@ -113,14 +144,31 @@ class ActionScope @Inject internal constructor(
   private class WrappedKFunction<T>(
     val seedData: Map<Key<*>, Any?>,
     val scope: ActionScope,
-    val wrapped: KFunction<T>
+    val wrapped: KFunction<T>,
+    val threadUUID: UUID
   ) : KFunction<T> {
-    override fun call(vararg args: Any?): T = scope.enter(seedData).use {
-      wrapped.call(*args)
+    override fun call(vararg args: Any?): T {
+      // If the original thread is the same as the thread that calls the KFunction and we are already
+      // in scope, then there is no need to re-enter the scope.
+      return if (scope.inScope() && threadUUID == threadLocalUUID.get()) {
+        wrapped.call(*args)
+      } else {
+        scope.enter(seedData).use {
+          wrapped.call(*args)
+        }
+      }
     }
 
-    override fun callBy(args: Map<KParameter, Any?>): T = scope.enter(seedData).use {
-      wrapped.callBy(args)
+    override fun callBy(args: Map<KParameter, Any?>): T {
+      // If the original thread is the same as the thread that calls the KFunction and we are already
+      // in scope, then there is no need to re-enter the scope.
+      return if (scope.inScope() && threadUUID == threadLocalUUID.get()) {
+       wrapped.callBy(args)
+      } else {
+        scope.enter(seedData).use {
+          wrapped.callBy(args)
+        }
+      }
     }
 
     override val annotations: List<Annotation> = wrapped.annotations

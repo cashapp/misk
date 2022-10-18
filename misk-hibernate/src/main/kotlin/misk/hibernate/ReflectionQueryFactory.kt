@@ -59,6 +59,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private val constraints = mutableListOf<PredicateFactory>()
   private val orderFactories = mutableListOf<OrderFactory>()
   private val fetchFactories = mutableListOf<FetchFactory>()
+  private val hints = mutableListOf<String>()
 
   private val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java)
 
@@ -79,6 +80,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     if (copy.firstResult != 0) {
       copy.firstResult = this.firstResult
     }
+    copy.hints.addAll(this.hints)
     copy.constraints.addAll(this.constraints)
     copy.orderFactories.addAll(this.orderFactories)
     copy.disabledChecks.addAll(this.disabledChecks)
@@ -91,6 +93,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   override fun dynamicAddConstraint(path: String, operator: Operator, value: Any?) {
     val pathList = path.split('.')
     addConstraint(pathList, operator, value)
+  }
+
+  override fun addQueryHint(hint: String) {
+    hints.add(hint)
   }
 
   @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
@@ -205,7 +211,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     val query = session.hibernateSession
       .createQuery(criteria)
-
+    hints.forEach { query.addQueryHint(it) }
     return session.disableChecks(disabledChecks) {
       query.executeUpdate()
     }
@@ -265,6 +271,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.firstResult = firstResult
     typedQuery.maxResults = effectiveMaxRows(returnList)
+    hints.forEach { typedQuery.addQueryHint(it) }
     val rows = session.disableChecks(disabledChecks) {
       typedQuery.list()
     }
@@ -295,6 +302,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.firstResult = firstResult
     typedQuery.maxResults = effectiveMaxRows(returnList)
+    hints.forEach { typedQuery.addQueryHint(it) }
     val rows = session.disableChecks(disabledChecks) {
       typedQuery.list()
     }
@@ -319,6 +327,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     query.select(criteriaBuilder.count(queryRoot))
 
     val typedQuery = session.hibernateSession.createQuery(query)
+    hints.forEach { typedQuery.addQueryHint(it) }
     return session.disableChecks(disabledChecks) {
       typedQuery.singleResult
     }
@@ -478,6 +487,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       reflectionQuery.fetchFactories.forEach { it(root) }
 
       val typedQuery = session.hibernateSession.createQuery(query)
+      reflectionQuery.hints.forEach { typedQuery.addQueryHint(it) }
       typedQuery.firstResult = reflectionQuery.firstResult
       typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
       val rows = session.disableChecks(reflectionQuery.disabledChecks) {
@@ -510,7 +520,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       fun create(
         errors: MutableList<String>,
         function: KFunction<*>,
-        result: MutableMap<Method, QueryMethodHandler>
+        result: MutableMap<Method, QueryMethodHandler>,
       ) {
         val constraint = function.findAnnotation<Constraint>()
         val select = function.findAnnotation<Select>()
@@ -880,7 +890,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return orderFactories.map { it(root, criteriaBuilder) }
   }
 
-  internal fun addFetch(fetchFactory: FetchFactory): ReflectionQuery<T>{
+  internal fun addFetch(fetchFactory: FetchFactory): ReflectionQuery<T> {
     fetchFactories.add(fetchFactory)
     return this
   }

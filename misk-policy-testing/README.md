@@ -13,12 +13,12 @@ install(FakeOpaModule())
 ```
 
 For an improved local development experience, use the `OpaDevelopmentModule`.
-This module is mutually exclusive with `OpaModule` in the misk-policy package.
+This module should be used alongside the `OpaModule` in the misk-policy package.
 
 ```kotlin
 install(OpaDevelopmentModule())
 //or
-install(OpaDevelopmentModule(policyDirectory = "some path", withLogging = true))
+install(OpaDevelopmentModule(policyDirectory = "some path", withLogging = true, preferredImageVersion = "0.40.0"))
 ```
 
 The default policy directory is `service/src/policy` and the recommended location to keep policies accessible for local testing.
@@ -53,11 +53,11 @@ internal class FakeOpaPolicyEngineTest {
 
   data class TestRequest(
     val something: String
-  ) : OpaRequest
+  ) : OpaRequest()
 
   data class TestResponse(
     val something: String
-  ) : OpaResponse
+  ) : OpaResponse()
 ```
 
 ## Local development

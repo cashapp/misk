@@ -109,6 +109,7 @@ internal class BoundAction<A : WebAction>(
     val initialSeedData = mapOf<Key<*>, Any?>(
       keyOf<HttpServletRequest>() to request,
       keyOf<HttpCall>() to httpCall,
+      keyOf<Action>() to action,
     )
     val seedData =
       seedDataTransformers.fold(initialSeedData) { seedData, interceptor ->

@@ -43,11 +43,67 @@ internal class FakeOpaPolicyEngineTest {
     assertThat(evaluate).isEqualTo(TestResponse("value"))
   }
 
+  @Test
+  fun `Override document for multiple input`() {
+    fakeOpaPolicyEngine.addOverrideForInput("test", TestRequest("key"), TestResponse("value"))
+    fakeOpaPolicyEngine.addOverrideForInput("test", TestRequest("otherKey"), TestResponse("otherValue"))
+    opaPolicyEngine.evaluate<TestRequest, TestResponse>("test", TestRequest("key")).apply {
+      assertThat(this).isEqualTo(TestResponse("value"))
+    }
+    opaPolicyEngine.evaluate<TestRequest, TestResponse>("test", TestRequest("otherKey")).apply {
+      assertThat(this).isEqualTo(TestResponse("otherValue"))
+    }
+  }
+
+  @Test
+  fun `Override document for the same input`() {
+    fakeOpaPolicyEngine.addOverrideForInput("test", TestRequest("key"), TestResponse("value"))
+    fakeOpaPolicyEngine.addOverrideForInput("test", TestRequest("key"), TestResponse("otherValue"))
+    opaPolicyEngine.evaluate<TestRequest, TestResponse>("test", TestRequest("key")).apply {
+      assertThat(this).isEqualTo(TestResponse("otherValue"))
+    }
+  }
+
+  @Test
+  fun `Override document with JSON input`() {
+    val jsonInput = "{\"input\":\"foo\"}"
+    fakeOpaPolicyEngine.addOverrideForInput("test", jsonInput, TestResponse("value"))
+    opaPolicyEngine.evaluate<TestResponse>("test", jsonInput).apply {
+      assertThat(this).isEqualTo(TestResponse("value"))
+    }
+  }
+
+  @Test
+  fun `Override document with multiple JSON input`() {
+    val jsonInput = "{\"input\":\"foo\"}"
+    fakeOpaPolicyEngine.addOverrideForInput("test", jsonInput, TestResponse("value"))
+
+    val jsonInput2 = "{\"input\":\"bar\"}"
+    fakeOpaPolicyEngine.addOverrideForInput("test", jsonInput2, TestResponse("otherValue"))
+
+    opaPolicyEngine.evaluate<TestResponse>("test", jsonInput).apply {
+      assertThat(this).isEqualTo(TestResponse("value"))
+    }
+    opaPolicyEngine.evaluate<TestResponse>("test", jsonInput2).apply {
+      assertThat(this).isEqualTo(TestResponse("otherValue"))
+    }
+  }
+
+  @Test
+  fun `Override document with same JSON input`() {
+    val jsonInput = "{\"input\":\"foo\"}"
+    fakeOpaPolicyEngine.addOverrideForInput("test", jsonInput, TestResponse("value"))
+    fakeOpaPolicyEngine.addOverrideForInput("test", jsonInput, TestResponse("otherValue"))
+    opaPolicyEngine.evaluate<TestResponse>("test", jsonInput).apply {
+      assertThat(this).isEqualTo(TestResponse("otherValue"))
+    }
+  }
+
   data class TestRequest(
     val something: String
-  ) : OpaRequest
+  ) : OpaRequest()
 
   data class TestResponse(
     val something: String
-  ) : OpaResponse
+  ) : OpaResponse()
 }

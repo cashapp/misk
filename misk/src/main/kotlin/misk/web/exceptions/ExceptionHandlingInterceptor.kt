@@ -47,11 +47,14 @@ class ExceptionHandlingInterceptor(
     try {
       chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
-      val response = toResponse(th)
       try {
         if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
+          // This response object is only used for determining the status code. toGrpcResponse
+          // will provide a more useful log instead.
+          val response = toResponse(th, suppressLog = true)
           sendGrpcFailure(chain.httpCall, response.statusCode, toGrpcResponse(th))
         } else {
+          val response = toResponse(th, suppressLog = false)
           chain.httpCall.statusCode = response.statusCode
           sendHttpFailure(chain.httpCall, response)
         }
@@ -104,13 +107,15 @@ class ExceptionHandlingInterceptor(
     return buffer.readUtf8()
   }
 
-  private fun toResponse(th: Throwable): Response<*> = when (th) {
+  private fun toResponse(th: Throwable, suppressLog: Boolean): Response<*> = when (th) {
     is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
     is UnauthorizedException -> UNAUTHORIZED_RESPONSE
-    is InvocationTargetException -> toResponse(th.targetException)
-    is UncheckedExecutionException -> toResponse(th.cause!!)
+    is InvocationTargetException -> toResponse(th.targetException, suppressLog = suppressLog)
+    is UncheckedExecutionException -> toResponse(th.cause!!, suppressLog = suppressLog)
     else -> mapperResolver.mapperFor(th)?.let {
-      log.log(it.loggingLevel(th), th) { "exception dispatching to $actionName" }
+      if (!suppressLog) {
+        log.log(it.loggingLevel(th), th) { "exception dispatching to $actionName" }
+      }
       it.toResponse(th)
     } ?: toInternalServerError(th)
   }
@@ -124,7 +129,7 @@ class ExceptionHandlingInterceptor(
       log.log(it.loggingLevel(th), th) { "exception dispatching to $actionName" }
       val grpcResponse = it.toGrpcResponse(th)
       if (grpcResponse == null) {
-        val httpResponse = toResponse(th)
+        val httpResponse = toResponse(th, suppressLog = true)
         GrpcErrorResponse(toGrpcStatus(httpResponse.statusCode), grpcMessage(httpResponse))
       } else {
         grpcResponse
@@ -172,7 +177,7 @@ fun toGrpcStatus(statusCode: Int): GrpcStatus {
     400 -> GrpcStatus.INTERNAL
     401 -> GrpcStatus.UNAUTHENTICATED
     403 -> GrpcStatus.PERMISSION_DENIED
-    404 -> GrpcStatus.UNIMPLEMENTED
+    404 -> GrpcStatus.NOT_FOUND
     409 -> GrpcStatus.ALREADY_EXISTS
     429 -> GrpcStatus.UNAVAILABLE
     502 -> GrpcStatus.UNAVAILABLE
