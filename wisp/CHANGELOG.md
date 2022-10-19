@@ -1,6 +1,22 @@
 Change Log
 ==========
 
+Version 1.2.1 *(2022-10-19)*
+-----------------------------
+
+* Upgrade dependencies
+
+Dependency changes:
+
+* grpc: "1.49.2" -> "1.50.0"
+* hoplite: "2.6.4" -> "2.6.5"
+* kotest: "5.5.0" -> "5.5.1"
+* kotlin: "1.7.10" -> "1.7.20"
+* kotlinLogging: "3.0.0" -> "3.0.2"
+* logback: "1.4.3" -> "1.4.4"
+* versionCatalogUpdateGradlePlugin: "0.6.1" -> "0.7.0"
+* versionsGradlePlugin: "0.42.0" -> "0.43.0"
+
 Version 1.2.0 *(2022-10-18)*
 -----------------------------
 
