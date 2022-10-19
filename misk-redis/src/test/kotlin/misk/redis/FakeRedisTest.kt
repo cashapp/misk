@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import redis.clients.jedis.args.ListDirection
 import java.time.Duration
 import javax.inject.Inject
 import kotlin.IllegalArgumentException
@@ -452,5 +453,188 @@ class FakeRedisTest {
     assertFalse {
       redis.expire("foo", 1)
     }
+  }
+
+  @Test fun lmoveOnSeparateKeys() {
+    // Setup
+    val sourceKey = "foo"
+    val sourceElements = listOf("bar", "bat").map { it.encodeUtf8() }
+    val destinationKey = "oof"
+    val destinationElements = listOf("baz".encodeUtf8())
+
+    redis.lpush(sourceKey, *sourceElements.toTypedArray())
+    redis.lpush(destinationKey, *destinationElements.toTypedArray())
+
+    // Exercise
+    val result = redis.lmove(
+      sourceKey = sourceKey,
+      destinationKey = destinationKey,
+      from = ListDirection.RIGHT,
+      to = ListDirection.LEFT,
+    )
+
+    // Verify
+    assertEquals("bat".encodeUtf8(), result)
+    assertEquals(listOf("bar".encodeUtf8()), redis.lrange(sourceKey, 0, -1))
+    assertEquals(
+      listOf("bat".encodeUtf8(), "baz".encodeUtf8()),
+      redis.lrange(destinationKey, 0, -1)
+    )
+  }
+
+  @Test fun lmoveOnSameKey() {
+    // Setup
+    val sourceKey = "foo"
+    val sourceElements = listOf("bar", "bat", "baz").map { it.encodeUtf8() }
+
+    redis.lpush(sourceKey, *sourceElements.toTypedArray())
+    assertEquals(sourceElements, redis.lrange(sourceKey, 0, -1))
+
+    // Exercise
+    val result = redis.lmove(
+      sourceKey = sourceKey,
+      destinationKey = sourceKey,
+      from = ListDirection.RIGHT,
+      to = ListDirection.LEFT,
+    )
+
+    // Verify
+    assertEquals("baz".encodeUtf8(), result)
+    assertEquals(
+      listOf("baz".encodeUtf8(), "bar".encodeUtf8(), "bat".encodeUtf8()),
+      redis.lrange(sourceKey, 0, -1)
+    )
+  }
+
+  @Test fun lpushCreatesList() {
+    // Setup
+    val key = "foo"
+
+    // Exercise
+    val result = redis.lpush(key, "bar".encodeUtf8(), "bat".encodeUtf8())
+
+    assertEquals(2L, result)
+    assertEquals(
+      listOf("bar".encodeUtf8(), "bat".encodeUtf8()),
+      redis.lrange(key, 0, -1)
+    )
+  }
+
+  @Test fun lpushCreatesNewList() {
+    // Setup
+    val key = "foo"
+    val elements = listOf("bar".encodeUtf8())
+
+    // Exercise
+    val result = redis.lpush(key, *elements.toTypedArray())
+
+    assertEquals(1L, result)
+    assertEquals(elements, redis.lrange(key, 0, -1))
+  }
+
+  @Test fun lrangeOnEntireRange() {
+    // Setup
+    val key = "foo"
+    val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
+    redis.lpush(key, *elements.toTypedArray())
+
+    // Exercise
+    val result = redis.lrange(key, 0, -1)
+
+    // Verify
+    assertEquals(elements, result)
+  }
+
+  @Test fun lrangeOnKeyThatDoesNotExist() {
+    // Exercise
+    val result = redis.lrange("foo", 0, -1)
+
+    // Verify
+    assertEquals(emptyList(), result)
+  }
+
+  @Test fun lrangeOnStartBeyondSize() {
+    // Setup
+    val key = "foo"
+    val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
+    redis.lpush(key, *elements.toTypedArray())
+
+    // Exercise
+    val result = redis.lrange(key, 10, 5)
+
+    // Verify
+    assertEquals(emptyList(), result)
+  }
+
+  @Test fun lrangeOnInvalidStop() {
+    // Setup
+    val key = "foo"
+    val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
+    redis.lpush(key, *elements.toTypedArray())
+
+    // Exercise
+    val result = redis.lrange(key, 3, 10)
+
+    // Verify
+    assertEquals(listOf("baz".encodeUtf8()), result)
+  }
+
+  @Test fun lremOnMultipleKeys() {
+    // Setup
+    val key = "foo"
+    val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
+    redis.lpush(key, *elements.toTypedArray())
+
+    // Exercise
+    val result = redis.lrem(key, 2, "bar".encodeUtf8())
+
+    // Verify
+    assertEquals(2L, result)
+    assertEquals(
+      listOf("bat".encodeUtf8(), "baz".encodeUtf8()),
+      redis.lrange(key, 0, -1)
+    )
+  }
+
+  @Test fun lremOnExtraMultipleKeys() {
+    // Setup
+    val key = "foo"
+    val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
+    redis.lpush(key, *elements.toTypedArray())
+
+    // Exercise
+    val result = redis.lrem(key, 1, "bar".encodeUtf8())
+
+    // Verify
+    assertEquals(1L, result)
+    assertEquals(
+      listOf("bat".encodeUtf8(), "bar".encodeUtf8(), "baz".encodeUtf8()),
+      redis.lrange(key, 0, -1)
+    )
+  }
+
+  @Test fun lremReverseWithExtraMultipleKeys() {
+    // Setup
+    val key = "foo"
+    val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
+    redis.lpush(key, *elements.toTypedArray())
+
+    // Exercise
+    val result = redis.lrem(key, -1, "bar".encodeUtf8())
+
+    // Verify
+    assertEquals(1L, result)
+    assertEquals(
+      listOf("bar".encodeUtf8(), "bat".encodeUtf8(), "baz".encodeUtf8()),
+      redis.lrange(key, 0, -1)
+    )
+  }
+
+  @Test fun lremOnKeyThatDoesNotExist() {
+    // Exercise
+    val result = redis.lrem("foo", 0, "bar".encodeUtf8())
+
+    // Verify
+    assertEquals(0L, result)
   }
 }

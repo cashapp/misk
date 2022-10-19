@@ -4,11 +4,15 @@ import okio.ByteString
 import okio.ByteString.Companion.encode
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
+import redis.clients.jedis.args.ListDirection
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 /** Mimics a Redis instance for testing. */
 class FakeRedis : Redis {
@@ -27,6 +31,8 @@ class FakeRedis : Redis {
   /** A nested hash map for the hget and hset operations. */
   private val hKeyValueStore =
     ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
+  /** A hash map for the l* list operations. */
+  private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
 
   override fun del(key: String): Boolean {
     synchronized(lock) {
@@ -204,6 +210,105 @@ class FakeRedis : Redis {
       val value = encodedValue.toLong() + increment
       set(key, value.toString().encode(Charsets.UTF_8))
       return value
+    }
+  }
+
+  override fun blmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection,
+    timeoutSeconds: Double
+  ): ByteString? {
+    // Not implements as blocking to prevent deadlocks.
+    return lmove(sourceKey, destinationKey, from, to)
+  }
+
+  override fun lmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection
+  ): ByteString? {
+    synchronized(lock) {
+      val sourceList = lKeyValueStore[sourceKey]?.data?.toMutableList() ?: return null
+      val sourceValue = when (from) {
+        ListDirection.LEFT -> sourceList.removeFirst()
+        ListDirection.RIGHT -> sourceList.removeLast()
+      }
+      lKeyValueStore[sourceKey] = Value(
+        data = sourceList,
+        expiryInstant = Instant.MAX,
+      )
+
+      val destinationList = lKeyValueStore[destinationKey]?.data?.toMutableList() ?: mutableListOf()
+      when (to) {
+        ListDirection.LEFT -> destinationList.add(index = 0, element = sourceValue)
+        ListDirection.RIGHT -> destinationList.add(element = sourceValue)
+      }
+      lKeyValueStore[destinationKey] = Value(
+        data = destinationList,
+        expiryInstant = Instant.MAX,
+      )
+      return sourceValue
+    }
+  }
+
+  override fun lpush(key: String, vararg elements: ByteString): Long {
+    synchronized(lock) {
+      val updated = elements.toMutableList().also {
+        lKeyValueStore[key]?.data?.let { old -> it.addAll(old) }
+      }
+      lKeyValueStore[key] = Value(
+        data = updated,
+        expiryInstant = Instant.MAX,
+      )
+      return updated.size.toLong()
+    }
+  }
+
+  override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
+    synchronized(lock) {
+      val list = lKeyValueStore[key]?.data ?: return emptyList()
+      if (start >= list.size) return emptyList()
+
+      // Redis allows negative values starting from the end of the list.
+      val first = if (start < 0) list.size + start else start
+      val last = if (stop < 0) list.size + stop else stop
+
+      // Redis is inclusive on both sides; Kotlin only on start.
+      return list.subList(max(0, first.toInt()), min(last.toInt() + 1, list.size))
+    }
+  }
+
+  override fun lrem(key: String, count: Long, element: ByteString): Long {
+    synchronized(lock) {
+      val value = lKeyValueStore[key] ?: return 0L
+      if (clock.instant() >= value.expiryInstant) {
+        lKeyValueStore.remove(key)
+        return 0L
+      }
+
+      val list = value.data.toMutableList()
+      var totalCount = count
+      val iterList = if (count < 0) {
+        totalCount = -totalCount
+        list.asReversed()
+      } else {
+        list
+      }
+
+      var deleteCount = 0L
+      while ((count == 0L || deleteCount < totalCount) && iterList.contains(element)) {
+        iterList.remove(element)
+        deleteCount += 1
+      }
+      lKeyValueStore[key] = Value(
+        data = list,
+        expiryInstant = Instant.MAX,
+      )
+
+      return deleteCount
     }
   }
 

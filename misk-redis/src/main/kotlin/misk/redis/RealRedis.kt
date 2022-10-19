@@ -5,6 +5,7 @@ import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
+import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.SetParams
 import java.time.Duration
 
@@ -145,6 +146,58 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   override fun incrBy(key: String, increment: Long): Long {
     return jedisPool.resource.use { jedis ->
       jedis.incrBy(key.toByteArray(charset), increment)!!
+    }
+  }
+
+  override fun blmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection,
+    timeoutSeconds: Double
+  ): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.blmove(
+        sourceKey.toByteArray(charset),
+        destinationKey.toByteArray(charset),
+        from,
+        to,
+        timeoutSeconds
+      )?.toByteString()
+    }
+  }
+
+  override fun lmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection
+  ): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.lmove(
+        sourceKey.toByteArray(charset),
+        destinationKey.toByteArray(charset),
+        from,
+        to
+      ).toByteString()
+    }
+  }
+
+  override fun lpush(key: String, vararg elements: ByteString): Long {
+    return jedisPool.resource.use { jedis ->
+      jedis.lpush(key.toByteArray(charset), *elements.map { it.toByteArray() }.toTypedArray())
+    }
+  }
+
+  override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
+    return jedisPool.resource.use { jedis ->
+      jedis.lrange(key.toByteArray(charset), start, stop).map { it?.toByteString() }
+    }
+  }
+
+  override fun lrem(key: String, count: Long, element: ByteString): Long {
+    return jedisPool.resource.use { jedis ->
+      jedis.lrem(key.toByteArray(charset), count, element.toByteArray())
     }
   }
 
