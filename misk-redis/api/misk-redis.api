@@ -1,6 +1,7 @@
 public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public field clock Ljava/time/Clock;
 	public fun <init> ()V
+	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
 	public fun expire (Ljava/lang/String;J)Z
@@ -16,6 +17,10 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun hset (Ljava/lang/String;Ljava/util/Map;)V
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
+	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
+	public fun lrem (Ljava/lang/String;JLokio/ByteString;)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
 	public fun multi ()Lredis/clients/jedis/Transaction;
@@ -34,6 +39,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 public final class misk/redis/RealRedis : misk/redis/Redis {
 	public static final field Companion Lmisk/redis/RealRedis$Companion;
 	public fun <init> (Lredis/clients/jedis/JedisPool;)V
+	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public final fun close ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
@@ -49,6 +55,10 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun hset (Ljava/lang/String;Ljava/util/Map;)V
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
+	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
+	public fun lrem (Ljava/lang/String;JLokio/ByteString;)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
 	public fun multi ()Lredis/clients/jedis/Transaction;
@@ -67,6 +77,7 @@ public final class misk/redis/RealRedis$Companion {
 }
 
 public abstract interface class misk/redis/Redis {
+	public abstract fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public abstract fun del (Ljava/lang/String;)Z
 	public abstract fun del ([Ljava/lang/String;)I
 	public abstract fun expire (Ljava/lang/String;J)Z
@@ -81,6 +92,10 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun hset (Ljava/lang/String;Ljava/util/Map;)V
 	public abstract fun incr (Ljava/lang/String;)J
 	public abstract fun incrBy (Ljava/lang/String;J)J
+	public abstract fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public abstract fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public abstract fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
+	public abstract fun lrem (Ljava/lang/String;JLokio/ByteString;)J
 	public abstract fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public abstract fun mset ([Lokio/ByteString;)V
 	public abstract fun multi ()Lredis/clients/jedis/Transaction;
