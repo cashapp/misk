@@ -596,6 +596,64 @@ public final class misk/web/metadata/database/DatabaseQueryMetadataAction$Respon
 public abstract interface annotation class misk/web/metadata/database/NoAdminDashboardDatabaseAccess : java/lang/annotation/Annotation {
 }
 
+public final class misk/web/metadata/jvm/JvmMetadataAction : misk/web/actions/WebAction {
+	public fun <init> (Ljava/lang/management/RuntimeMXBean;Lcom/squareup/moshi/Moshi;)V
+	public final fun getRuntime ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse {
+	public static final field Companion Lmisk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse$Companion;
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;Ljava/lang/Long;Ljava/util/Map;)V
+	public final fun component1 ()Ljava/lang/Long;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component11 ()Ljava/lang/String;
+	public final fun component12 ()Ljava/lang/Boolean;
+	public final fun component13 ()Ljava/lang/String;
+	public final fun component14 ()Ljava/util/List;
+	public final fun component15 ()Ljava/lang/Long;
+	public final fun component16 ()Ljava/lang/Long;
+	public final fun component17 ()Ljava/util/Map;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;Ljava/lang/Long;Ljava/util/Map;)Lmisk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse;
+	public static synthetic fun copy$default (Lmisk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;Ljava/lang/Long;Ljava/util/Map;ILjava/lang/Object;)Lmisk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBoot_class_path ()Ljava/lang/String;
+	public final fun getClass_path ()Ljava/lang/String;
+	public final fun getInput_arguments ()Ljava/util/List;
+	public final fun getLibrary_path ()Ljava/lang/String;
+	public final fun getManagement_spec_version ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPid ()Ljava/lang/Long;
+	public final fun getSpec_name ()Ljava/lang/String;
+	public final fun getSpec_vendor ()Ljava/lang/String;
+	public final fun getSpec_version ()Ljava/lang/String;
+	public final fun getStart_time_millis ()Ljava/lang/Long;
+	public final fun getSystem_properties ()Ljava/util/Map;
+	public final fun getUptime_millis ()Ljava/lang/Long;
+	public final fun getVm_name ()Ljava/lang/String;
+	public final fun getVm_vendor ()Ljava/lang/String;
+	public final fun getVm_version ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun is_boot_class_path_supported ()Ljava/lang/Boolean;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse$Companion {
+	public final fun create (Ljava/lang/management/RuntimeMXBean;)Lmisk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse;
+}
+
+public final class misk/web/metadata/jvm/JvmMetadataModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun provideRuntimeMxBean ()Ljava/lang/management/RuntimeMXBean;
+}
+
 public final class misk/web/metadata/webaction/WebActionMetadataAction : misk/web/actions/WebAction {
 	public fun <init> (Lmisk/web/metadata/webaction/WebActionMetadataList;)V
 	public final fun getAll ()Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;
