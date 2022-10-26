@@ -637,4 +637,51 @@ class FakeRedisTest {
     // Verify
     assertEquals(0L, result)
   }
+
+  @Test fun rpoplpushOnSeparateKeys() {
+    // Setup
+    val sourceKey = "foo"
+    val sourceElements = listOf("bar", "bat").map { it.encodeUtf8() }
+    val destinationKey = "oof"
+    val destinationElements = listOf("baz".encodeUtf8())
+
+    redis.lpush(sourceKey, *sourceElements.toTypedArray())
+    redis.lpush(destinationKey, *destinationElements.toTypedArray())
+
+    // Exercise
+    val result = redis.rpoplpush(
+      sourceKey = sourceKey,
+      destinationKey = destinationKey,
+    )
+
+    // Verify
+    assertEquals("bat".encodeUtf8(), result)
+    assertEquals(listOf("bar".encodeUtf8()), redis.lrange(sourceKey, 0, -1))
+    assertEquals(
+      listOf("bat".encodeUtf8(), "baz".encodeUtf8()),
+      redis.lrange(destinationKey, 0, -1)
+    )
+  }
+
+  @Test fun rpoplpushOnSameKey() {
+    // Setup
+    val sourceKey = "foo"
+    val sourceElements = listOf("bar", "bat", "baz").map { it.encodeUtf8() }
+
+    redis.lpush(sourceKey, *sourceElements.toTypedArray())
+    assertEquals(sourceElements, redis.lrange(sourceKey, 0, -1))
+
+    // Exercise
+    val result = redis.rpoplpush(
+      sourceKey = sourceKey,
+      destinationKey = sourceKey,
+    )
+
+    // Verify
+    assertEquals("baz".encodeUtf8(), result)
+    assertEquals(
+      listOf("baz".encodeUtf8(), "bar".encodeUtf8(), "bat".encodeUtf8()),
+      redis.lrange(sourceKey, 0, -1)
+    )
+  }
 }
