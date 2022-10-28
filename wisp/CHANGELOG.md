@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 1.2.2 *(2022-10-28)*
+-----------------------------
+
+* Remove dependency constraint on io.prometheus:simpleclient that forced version 0.9.0 on consumers
+
 Version 1.2.1 *(2022-10-19)*
 -----------------------------
 
