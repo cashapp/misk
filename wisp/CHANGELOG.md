@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.2.3 *(2022-11-03)*
+-----------------------------
+
+* Fix: Pooled lease release needs to call the delegate lease release.
+
+
 Version 1.2.2 *(2022-10-28)*
 -----------------------------
 
