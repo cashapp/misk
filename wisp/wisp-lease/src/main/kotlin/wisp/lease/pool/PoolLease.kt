@@ -42,7 +42,7 @@ class PoolLease(
 
   override fun release(): Boolean {
     poolLeaseManager.clearPoolLeaseMapEntry(name)
-    return true
+    return delegateLease.release()
   }
 
 }
