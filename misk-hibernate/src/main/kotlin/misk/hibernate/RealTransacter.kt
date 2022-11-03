@@ -17,6 +17,7 @@ import misk.vitess.TabletType
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
+import org.hibernate.StaleStateException
 import org.hibernate.exception.ConstraintViolationException
 import org.hibernate.exception.LockAcquisitionException
 import wisp.logging.getLogger
@@ -350,6 +351,7 @@ internal class RealTransacter private constructor(
     return when (th) {
       is RetryTransactionException,
       is StaleObjectStateException,
+      is StaleStateException,
       is LockAcquisitionException,
       is SQLRecoverableException,
       is SQLTransientException,
