@@ -194,6 +194,10 @@ public final class misk/web/dashboard/AdminDashboardTestingModule : misk/inject/
 	public fun <init> ()V
 }
 
+public final class misk/web/dashboard/BaseDashboardModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
+}
+
 public final class misk/web/dashboard/ConfigDashboardTabModule : misk/inject/KAbstractModule {
 	public fun <init> (Z)V
 }
@@ -282,6 +286,10 @@ public final class misk/web/dashboard/DashboardTheme {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/web/dashboard/DatabaseDashboardTabModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
+}
+
 public final class misk/web/dashboard/EnvironmentToColorLookup {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -356,6 +364,14 @@ public final class misk/web/dashboard/MiskWebTheme {
 
 public final class misk/web/dashboard/MiskWebTheme$Companion {
 	public final fun getDEFAULT_THEME ()Lmisk/web/dashboard/MiskWebTheme;
+}
+
+public final class misk/web/dashboard/WebActionsDashboardTabModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
+}
+
+public final class misk/web/dashboard/WebActionsOldDashboardTabModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
 }
 
 public abstract class misk/web/dashboard/WebTab : misk/web/dashboard/ValidWebEntry {

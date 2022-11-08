@@ -5,12 +5,11 @@ import misk.web.WebActionModule
 import misk.web.metadata.config.ConfigMetadataAction
 
 /**
- * Installs Config tab for the Misk Admin Dashboard
- *
- * The Config tab shows the raw config inputs and the merged runtime config for a given service
+ * Installs Config dashboard tab which shows the raw config inputs
+ * and the merged runtime config for your Misk service.
  *
  * If you have config parameters that include secrets, you should NOT install this tab because the
- *    secrets will be visible at runtime in the admin dashboard.
+ *    Misk secrets will be visible at runtime in the admin dashboard.
  * TODO There is insufficient secrets redaction that doesn't allow flexibility in secret names when
  *    redaction is run
  */
