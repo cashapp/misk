@@ -45,6 +45,8 @@ interface Metrics {
   /**
    * histogram creates and registers a new `Summary` prometheus type.
    *
+   * Deprecated: if you really need a summary metric, use [misk.metrics.v2.Metrics.summary] instead.
+   *
    * For legacy reasons, this function is called `histogram(...)` but it's not backed
    * by a histogram which is confusing.
    *
@@ -58,6 +60,7 @@ interface Metrics {
    *  for the metric. The key of the map is the quantile as a ratio (e.g. 0.99 represents p99) and
    *  the value is the "tolerable error" of the computed quantile.
    */
+  @Deprecated("Use misk.metrics.v2.Metrics.summary instead")
   fun histogram(
     name: String,
     help: String = "",
