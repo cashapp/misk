@@ -77,9 +77,6 @@ interface Metrics {
   /**
    * summary creates and registers a new `Summary` prometheus type.
    *
-   * This function used to be called `histogram(...)` but was updated because it's not backed
-   * by a histogram which is confusing.
-   *
    * See https://prometheus.github.io/client_java/io/prometheus/client/Summary.html for more info.
    *
    * @param name the name of the metric which will be supplied to prometheus.
