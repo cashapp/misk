@@ -10,21 +10,21 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
+import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.config.Config
 import wisp.deployment.Deployment
 import javax.inject.Singleton
 
 @Singleton
 class ConfigMetadataAction @Inject constructor(
-  @AppName val appName: String,
-  val deployment: Deployment,
-  val config: Config
+  @AppName appName: String,
+  deployment: Deployment,
+  config: Config,
+  private val jvmMetadataAction: JvmMetadataAction,
+  private val mode: ConfigTabMode,
 ) : WebAction {
-  val resources: Map<String, String?> =
-    generateConfigResources(
-      appName, deployment,
-      config
-    )
+  private val resources: Map<String, String?> =
+    generateConfigResources(appName, deployment, config)
 
   @Get("/api/config/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -41,6 +41,26 @@ class ConfigMetadataAction @Inject constructor(
     )
   }
 
+  private fun generateConfigResources(
+    appName: String,
+    deployment: Deployment,
+    config: Config
+  ): Map<String, String?> {
+    val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())
+    val yamlFiles = linkedMapOf<String, String?>()
+    when (mode) {
+      ConfigTabMode.SAFE -> {
+        yamlFiles.put("JVM", jvmMetadataAction.getRuntime())
+      }
+      ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS -> {
+        yamlFiles.put("Effective Config", MiskConfig.toYaml(config, ResourceLoader.SYSTEM))
+        rawYamlFiles.map { yamlFiles.put(it.key, it.value) }
+        yamlFiles.put("JVM", jvmMetadataAction.getRuntime())
+      }
+    }
+    return yamlFiles
+  }
+
   data class Response(val resources: Map<String, String?>)
 
   companion object {
@@ -51,20 +71,10 @@ class ConfigMetadataAction @Inject constructor(
 
     fun redact(output: String, regex: Regex) =
       output.replace(regex, "████████")
+  }
 
-    fun generateConfigResources(
-      appName: String,
-      deployment: Deployment,
-      config: Config
-    ): Map<String, String?> {
-      val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())
-      val yamlFiles = linkedMapOf<String, String?>(
-        "Effective Config" to MiskConfig.toYaml(
-          config, ResourceLoader.SYSTEM
-        )
-      )
-      rawYamlFiles.map { yamlFiles.put(it.key, it.value) }
-      return yamlFiles
-    }
+  enum class ConfigTabMode {
+    SAFE, // Only show safe content which will not leak Misk secrets
+    UNSAFE_LEAK_MISK_SECRETS
   }
 }

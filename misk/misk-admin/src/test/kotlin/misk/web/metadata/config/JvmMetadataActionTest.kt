@@ -27,7 +27,7 @@ class JvmMetadataActionTest {
     val rawResponse = jvmMetadataAction.getRuntime();
     val response = moshi.adapter<JvmRuntimeResponse>().fromJson(rawResponse)!!
     assertThat(response.vm_name).isEqualTo("FakeRuntimeMxBean - VM Name")
-    assertThat(response).isEqualTo(JvmMetadataAction.JvmRuntimeResponse.create(FakeRuntimeMxBean()))
+    assertThat(response).isEqualTo(JvmRuntimeResponse.create(FakeRuntimeMxBean()))
   }
 
   class JvmMetadataTestingModule : KAbstractModule() {
