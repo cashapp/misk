@@ -20,6 +20,7 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
 
   override fun configure() {
     install(BaseDashboardModule(isDevelopment))
+    install(ConfigDashboardTabModule(isDevelopment))
     install(DatabaseDashboardTabModule(isDevelopment))
     install(WebActionsDashboardTabModule(isDevelopment))
     install(WebActionsOldDashboardTabModule(isDevelopment))

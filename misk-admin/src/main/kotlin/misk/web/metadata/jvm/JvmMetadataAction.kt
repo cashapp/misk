@@ -17,15 +17,15 @@ import javax.inject.Singleton
  * Conveys information about the current JVM
  */
 @Singleton
-class JvmMetadataAction : WebAction {
-
-  private val runtimeMxBean: RuntimeMXBean
+class JvmMetadataAction @Inject constructor(
+  private val runtimeMxBean: RuntimeMXBean,
+  moshi: Moshi
+) : WebAction {
   private val moshiAdapter: JsonAdapter<JvmRuntimeResponse>
 
-  @Inject constructor(runtimeMxBean: RuntimeMXBean, moshi: Moshi) {
-    this.runtimeMxBean = runtimeMxBean
+  init {
     // Indent to make the output more readable since the response can be quite large!
-    this.moshiAdapter = moshi.adapter<JvmRuntimeResponse>().indent("  ")
+    moshiAdapter = moshi.adapter<JvmRuntimeResponse>().indent("  ")
   }
 
   @Get("/api/config/jvm/runtime")
@@ -73,13 +73,11 @@ class JvmMetadataAction : WebAction {
           class_path = runtimeMxBean.classPath,
           library_path = runtimeMxBean.libraryPath,
           is_boot_class_path_supported = runtimeMxBean.isBootClassPathSupported,
-          boot_class_path = {
-            if (runtimeMxBean.isBootClassPathSupported) {
-              runtimeMxBean.bootClassPath
-            } else {
-              null
-            }
-          }(),
+          boot_class_path = if (runtimeMxBean.isBootClassPathSupported) {
+            runtimeMxBean.bootClassPath
+          } else {
+            null
+          },
           input_arguments = runtimeMxBean.inputArguments,
           uptime_millis = runtimeMxBean.uptime,
           start_time_millis = runtimeMxBean.startTime,

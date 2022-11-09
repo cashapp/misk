@@ -199,7 +199,8 @@ public final class misk/web/dashboard/BaseDashboardModule : misk/inject/KAbstrac
 }
 
 public final class misk/web/dashboard/ConfigDashboardTabModule : misk/inject/KAbstractModule {
-	public fun <init> (Z)V
+	public fun <init> (ZLmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;)V
+	public synthetic fun <init> (ZLmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/web/dashboard/DashboardHomeUrl : misk/web/dashboard/ValidWebEntry {
@@ -472,18 +473,20 @@ public final class misk/web/metadata/ServiceMetadataAction$ServiceMetadata {
 
 public final class misk/web/metadata/config/ConfigMetadataAction : misk/web/actions/WebAction {
 	public static final field Companion Lmisk/web/metadata/config/ConfigMetadataAction$Companion;
-	public fun <init> (Ljava/lang/String;Lwisp/deployment/Deployment;Lwisp/config/Config;)V
+	public fun <init> (Ljava/lang/String;Lwisp/deployment/Deployment;Lwisp/config/Config;Lmisk/web/metadata/jvm/JvmMetadataAction;Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;)V
 	public final fun getAll ()Lmisk/web/metadata/config/ConfigMetadataAction$Response;
-	public final fun getAppName ()Ljava/lang/String;
-	public final fun getConfig ()Lwisp/config/Config;
-	public final fun getDeployment ()Lwisp/deployment/Deployment;
-	public final fun getResources ()Ljava/util/Map;
 }
 
 public final class misk/web/metadata/config/ConfigMetadataAction$Companion {
-	public final fun generateConfigResources (Ljava/lang/String;Lwisp/deployment/Deployment;Lwisp/config/Config;)Ljava/util/Map;
 	public final fun redact (Ljava/lang/String;Lkotlin/text/Regex;)Ljava/lang/String;
 	public final fun redact (Ljava/util/Map;Lkotlin/text/Regex;)Ljava/util/Map;
+}
+
+public final class misk/web/metadata/config/ConfigMetadataAction$ConfigTabMode : java/lang/Enum {
+	public static final field SAFE Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
+	public static final field UNSAFE_LEAK_MISK_SECRETS Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
+	public static fun values ()[Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
 }
 
 public final class misk/web/metadata/config/ConfigMetadataAction$Response {

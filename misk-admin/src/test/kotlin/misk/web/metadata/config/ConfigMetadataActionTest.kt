@@ -3,11 +3,13 @@ package misk.web.metadata.config
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.metadata.MetadataTestingModule
+import misk.web.metadata.jvm.JvmMetadataAction
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
+import javax.inject.Inject
 
 @MiskTest(startService = true)
 class ConfigMetadataActionTest {
@@ -20,13 +22,16 @@ class ConfigMetadataActionTest {
     RedactedConfig("pass1", "phrase2")
   )
 
+  @Inject lateinit var jvmMetadataAction: JvmMetadataAction
   lateinit var configMetadataAction: ConfigMetadataAction
 
   @BeforeEach fun beforeEach() {
     configMetadataAction = ConfigMetadataAction(
-      "admin_dashboard_app",
-      TESTING,
-      testConfig
+      appName = "admin_dashboard_app",
+      deployment = TESTING,
+      config = testConfig,
+      jvmMetadataAction = jvmMetadataAction,
+      mode = ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS
     )
   }
 
@@ -62,6 +67,29 @@ class ConfigMetadataActionTest {
 
     assertThat(commonConfig).doesNotContain("phrase123")
     assertThat(effectiveConfig).doesNotContain("pass1", "phrase2")
+  }
+
+  @Test fun passesAlongJvmConfig() {
+    val response = configMetadataAction.getAll()
+    assertThat(response.resources).containsKey("JVM")
+    val jvmConfig = jvmMetadataAction.getRuntime()
+    assertThat(response.resources.get("JVM")).contains("Java Virtual Machine Specification")
+  }
+
+  @Test fun secureModeDoesNotIncludeYamlFiles() {
+    configMetadataAction = ConfigMetadataAction(
+      appName = "admin_dashboard_app",
+      deployment = TESTING,
+      config = testConfig,
+      jvmMetadataAction = jvmMetadataAction,
+      mode = ConfigMetadataAction.ConfigTabMode.SAFE
+    )
+
+    val response = configMetadataAction.getAll()
+    assertThat(response.resources).doesNotContainKey("Effective Config")
+    assertThat(response.resources).doesNotContainKey("classpath:/admin_dashboard_app-common.yaml")
+    assertThat(response.resources).doesNotContainKey("classpath:/admin_dashboard_app-testing.yaml")
+    assertThat(response.resources).containsKey("JVM")
   }
 
   data class TestConfig(

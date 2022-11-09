@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, { useState } from "react"
 import {
   Button,
   Collapse,
@@ -9,8 +9,8 @@ import {
   Tooltip
 } from "@blueprintjs/core"
 import _ from "lodash"
-import {ProtoField, WebActionMetadata} from "./types"
-import {IOptionProps} from "@blueprintjs/core/lib/esm/common/props"
+import { ProtoField, WebActionMetadata } from "./types"
+import { IOptionProps } from "@blueprintjs/core/lib/esm/common/props"
 
 export type FormComponentProps<T> = {
   webActionMetadata: WebActionMetadata
