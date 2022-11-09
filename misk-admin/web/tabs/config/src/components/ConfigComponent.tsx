@@ -52,6 +52,8 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
           <CodePreContainer>{<Spinner />}</CodePreContainer>
           <H3 css={cssH3}>{"classpath://staging.yaml"}</H3>
           <CodePreContainer>{<Spinner />}</CodePreContainer>
+          <H3 css={cssH3}>{"JVM"}</H3>
+          <CodePreContainer>{<Spinner />}</CodePreContainer>
         </div>
       )
     }

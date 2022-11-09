@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react"
+import React, { useEffect, useState } from "react"
 import _ from "lodash"
 import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core"
 import { WebActionMetadata } from "./types"
@@ -11,19 +11,23 @@ interface Props {
 }
 
 export default function WebActionSendRequest({ webActionMetadata }: Props) {
-  const [requestInput, setRequestInput] = useState<any>(null)   // request view model
-  const [requestRaw, setRequestRaw] = useState<any>({})         // request raw data
+  const [requestInput, setRequestInput] = useState<any>(null) // request view model
+  const [requestRaw, setRequestRaw] = useState<any>({}) // request raw data
   const [loading, setLoading] = useState(false)
   const [response, setResponse] = useState("")
   const [url, setUrl] = useState(webActionMetadata.pathPattern)
 
   useEffect(() => {
-    const requestInputAsString = JSON.stringify(requestInput, (key, val) => {
-      // filter out nulls
-      if (_.isNull(val)) return
-      if (Array.isArray(val)) return _.reject(val, _.isNull)
-      return val
-    }, 2)
+    const requestInputAsString = JSON.stringify(
+      requestInput,
+      (key, val) => {
+        // filter out nulls
+        if (_.isNull(val)) return
+        if (Array.isArray(val)) return _.reject(val, _.isNull)
+        return val
+      },
+      2
+    )
     if (_.isEmpty(requestInputAsString)) {
       setRequestRaw({})
     } else {
@@ -53,7 +57,13 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
       })
       .catch(e => {
         if (e.response) {
-          setResponse(JSON.stringify(_.pick(e.response, "data", "status", "statusText"), null, 2))
+          setResponse(
+            JSON.stringify(
+              _.pick(e.response, "data", "status", "statusText"),
+              null,
+              2
+            )
+          )
         } else {
           setResponse(e.message)
         }
@@ -139,9 +149,11 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
             </Button>
           </div>
         </div>
-        <pre style={{whiteSpace:"pre-wrap"}}>{JSON.stringify(requestRaw, null, 2)}</pre>
+        <pre style={{ whiteSpace: "pre-wrap" }}>
+          {JSON.stringify(requestRaw, null, 2)}
+        </pre>
         <H5>Response</H5>
-        <pre style={{whiteSpace:"pre-wrap"}}>{response}</pre>
+        <pre style={{ whiteSpace: "pre-wrap" }}>{response}</pre>
       </div>
     </div>
   )
