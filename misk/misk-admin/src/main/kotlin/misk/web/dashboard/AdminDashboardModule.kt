@@ -23,7 +23,6 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
     install(ConfigDashboardTabModule(isDevelopment))
     install(DatabaseDashboardTabModule(isDevelopment))
     install(WebActionsDashboardTabModule(isDevelopment))
-    install(WebActionsOldDashboardTabModule(isDevelopment))
 
     // Default Menu
     multibind<DashboardNavbarItem>().toInstance(
@@ -36,12 +35,6 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
       DashboardNavbarItem<AdminDashboard>(
         item = "<a href=\"/_admin/web-actions/\">Web Actions</a>",
         order = 101
-      )
-    )
-    multibind<DashboardNavbarItem>().toInstance(
-      DashboardNavbarItem<AdminDashboard>(
-        item = "<a href=\"/_admin/web-actions-old/\">Web Actions Old</a>",
-        order = 102
       )
     )
   }
