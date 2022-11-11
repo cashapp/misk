@@ -29,7 +29,7 @@ Releasing
     git push && git push --tags
     ``` 
 
-5. Trigger the "Publish a release" action manually. Wait until it completes, then visit [Sonatype Nexus][sonatype_nexus] to promote (close then release) the artifact. Or drop it if there is a problem!
+5. Trigger the [`Publish a release` action](https://github.com/cashapp/misk/actions/workflows/Release.yml) manually. Wait until it completes, then visit [Sonatype Nexus][sonatype_nexus] to promote (close then release in `Staging Repositories`) the artifact. Or drop it if there is a problem!
 
     ![Sonatype Release](/img/sonatype-release.gif)
 
@@ -45,8 +45,20 @@ Releasing
 
 7. Draft a new [release](https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository) of `A.B.C` to trigger the "Publish the mkdocs to gh-pages" action.
 
+## Snapshots
+
+For a non-semvar snapshot release, use the following simpler steps.
+
+1. Trigger the [`Publish a release` action](https://github.com/cashapp/misk/actions/workflows/Release.yml) manually. Wait until it completes, then visit [Sonatype Nexus][sonatype_nexus] to promote (close then release in `Staging Repositories`) the artifact. Or drop it if there is a problem!
+
+    ![Sonatype Release](/img/sonatype-release.gif)
+    
+2. Update your usages to the new snapshot version, it will have a format like `0.25.0-20221109.1931-857c333`. Get your snapshot version in the `Set gradle publish version` section of the [`Publish a release` action](https://github.com/cashapp/misk/actions/workflows/Release.yml) logs.
+
 ## Troubleshooting
 
 If the github action fails, drop the artifacts from Sonatype and re run the job. You might need to delete the plugin off the JetBrains plugin portal first if the ubuntu job which publishes it already succeeded.
 
-[sonatype_nexus]: https://oss.sonatype.org/
+For full Sonatype instructions, [see their docs](https://central.sonatype.org/publish/release/#releasing-deployment-from-ossrh-to-the-central-repository-introduction).
+
+[sonatype_nexus]: https://s01.oss.sonatype.org/#welcome
