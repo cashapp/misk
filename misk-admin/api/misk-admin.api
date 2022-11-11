@@ -371,10 +371,6 @@ public final class misk/web/dashboard/WebActionsDashboardTabModule : misk/inject
 	public fun <init> (Z)V
 }
 
-public final class misk/web/dashboard/WebActionsOldDashboardTabModule : misk/inject/KAbstractModule {
-	public fun <init> (Z)V
-}
-
 public abstract class misk/web/dashboard/WebTab : misk/web/dashboard/ValidWebEntry {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
