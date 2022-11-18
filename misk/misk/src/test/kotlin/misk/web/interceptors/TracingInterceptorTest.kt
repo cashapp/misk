@@ -142,6 +142,33 @@ class TracingInterceptorTest {
   }
 
   @Test
+  fun failedTraceWithParentSpan() {
+    val tracingInterceptor = tracingInterceptorFactory.create(
+      TracingTestAction::call.asAction(DispatchMechanism.GET)
+    )!!
+    val httpCall = FakeHttpCall(url = "http://foo.bar".toHttpUrl())
+    val chain = RealNetworkChain(
+      TracingTestAction::call.asAction(DispatchMechanism.GET),
+      tracingTestAction, httpCall,
+      listOf(
+        object : NetworkInterceptor {
+          override fun intercept(chain: NetworkChain) {
+            tracer.traceWithSpan("parent-span") {
+              chain.proceed(chain.httpCall)
+            }
+          }
+        },
+        tracingInterceptor, TerminalInterceptor(500)
+      )
+    )
+
+    chain.proceed(chain.httpCall)
+
+    val span = tracer.take("parent-span")
+    assertThat(span.tags().get(Tags.ERROR.key)).isEqualTo(true)
+  }
+
+  @Test
   fun nothingIfNotInstalled() {
     val injector = Guice.createInjector()
 
