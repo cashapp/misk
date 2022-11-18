@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 1.2.4 *(2022-11-18)*
+----------------------------
+
+* Add ability to increment the `FakeClock` by a `java.time.Period`
+
 Version 1.2.3 *(2022-11-03)*
 -----------------------------
 
