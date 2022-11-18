@@ -71,6 +71,11 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
       Tags.HTTP_STATUS.set(span, chain.httpCall.statusCode)
       if (chain.httpCall.statusCode > 399) {
         Tags.ERROR.set(span, true)
+        // In case of gRPC errors, [HttpCall.networkStatusCode] is always 200, in which case the
+        // parent (likely the root) span won't be able to know about the error.
+        if (parentSpan != null) {
+          Tags.ERROR.set(parentSpan, true)
+        }
       }
     } catch (t: Throwable) {
       Tags.ERROR.set(span, true)
