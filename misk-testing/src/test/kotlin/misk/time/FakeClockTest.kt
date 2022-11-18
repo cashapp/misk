@@ -25,10 +25,10 @@ internal class FakeClockTest {
     val clock = FakeClock(epochMillis = 0L)
     assertThat(clock.millis()).isEqualTo(0L)
 
-    clock.add(Duration.ofSeconds(20))
+    assertThat(clock.add(Duration.ofSeconds(20))).isEqualTo(20000L)
     assertThat(clock.millis()).isEqualTo(20000L)
 
-    clock.add(45, TimeUnit.HOURS)
+    assertThat(clock.add(45, TimeUnit.HOURS)).isEqualTo(162020000L)
     assertThat(clock.millis()).isEqualTo(162020000L)
   }
 
@@ -53,10 +53,10 @@ internal class FakeClockTest {
     clock.setNow(startInstant)
 
     // This day is only 23 hours long because of the DST transition
-    clock.add(Period.ofDays(1))
+    assertThat(clock.add(Period.ofDays(1))).isEqualTo(startInstant.plus(23L, ChronoUnit.HOURS).toEpochMilli())
     assertThat(clock.instant()).isEqualTo(startInstant.plus(23L, ChronoUnit.HOURS))
 
-    clock.add(Period.ofMonths(2))
+    assertThat(clock.add(Period.ofMonths(2))).isEqualTo(Instant.parse("1970-06-26T23:00:00Z").toEpochMilli())
     assertThat(clock.instant()).isEqualTo(Instant.parse("1970-06-26T23:00:00Z"))
   }
 }
