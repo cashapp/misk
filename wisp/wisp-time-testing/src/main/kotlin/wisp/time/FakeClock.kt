@@ -3,6 +3,7 @@ package wisp.time
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
+import java.time.Period
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
@@ -22,6 +23,16 @@ class FakeClock(
 
     /** Advance the clock by specified [Duration]. */
     fun add(d: Duration) = millis.addAndGet(d.toMillis())
+
+    /**
+     * Advance the clock by the specified [Period].
+     * Note that unlike adding a [Duration] the exact amount that is added to the clock will depend on
+     * its current time and timezone. Not all days, months or years have the same length. See the
+     * documentation for [Period].
+     */
+    fun add(p: Period) = millis.getAndUpdate { millis ->
+        Instant.ofEpochMilli(millis).atZone(zone).plus(p).toInstant().toEpochMilli()
+    }
 
     /** Advance the clock by specified amount `n` of [TimeUnit]. */
     fun add(n: Long, unit: TimeUnit) = millis.addAndGet(TimeUnit.MILLISECONDS.convert(n, unit))
