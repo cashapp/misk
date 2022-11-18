@@ -28,7 +28,7 @@ class FakeClock(
    * its current time and timezone. Not all days, months or years have the same length. See the
    * documentation for [Period].
    */
-  fun add(p: Period) = millis.getAndUpdate { millis ->
+  fun add(p: Period) = millis.updateAndGet { millis ->
     Instant.ofEpochMilli(millis).atZone(zone).plus(p).toInstant().toEpochMilli()
   }
 
