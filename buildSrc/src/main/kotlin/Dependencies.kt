@@ -128,7 +128,7 @@ object Dependencies {
   val wireRuntime = "com.squareup.wire:wire-runtime:4.4.0"
   val wireSchema = "com.squareup.wire:wire-schema:4.4.0"
   val wispAwsEnvironment = "app.cash.wisp:wisp-aws-environment"
-  val wispBom = "app.cash.wisp:wisp-bom:1.2.2"
+  val wispBom = "app.cash.wisp:wisp-bom:1.2.4"
   val wispClient = "app.cash.wisp:wisp-client"
   val wispConfig = "app.cash.wisp:wisp-config"
   val wispContainersTesting = "app.cash.wisp:wisp-containers-testing"
@@ -145,5 +145,6 @@ object Dependencies {
   val wispResourceLoader = "app.cash.wisp:wisp-resource-loader"
   val wispResourceLoaderTesting = "app.cash.wisp:wisp-resource-loader-testing"
   val wispSsl = "app.cash.wisp:wisp-ssl"
+  val wispTimeTesting = "app.cash.wisp:wisp-time-testing"
   val zookeeper = "org.apache.zookeeper:zookeeper:3.7.0"
 }

@@ -2,10 +2,8 @@ package misk.redis
 
 import com.google.inject.Module
 import com.google.inject.util.Modules
-import com.squareup.wire.durationOfSeconds
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import misk.time.FakeClockModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
@@ -13,9 +11,9 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.args.ListDirection
+import wisp.time.FakeClock
 import java.time.Duration
 import javax.inject.Inject
-import kotlin.IllegalArgumentException
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
