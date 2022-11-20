@@ -37,4 +37,5 @@ dependencies {
   testImplementation(project(":misk-feature-testing"))
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.wispFeatureTesting)
+  testImplementation(Dependencies.wispTimeTesting)
 }

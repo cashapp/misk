@@ -7,12 +7,12 @@ import misk.mockito.Mockito.whenever
 import misk.services.FakeService
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.HibernateException
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import wisp.time.FakeClock
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider

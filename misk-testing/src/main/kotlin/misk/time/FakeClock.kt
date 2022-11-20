@@ -6,33 +6,32 @@ import java.time.Instant
 import java.time.Period
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicLong
+import wisp.time.FakeClock as WispFakeClock
 
 class FakeClock(
-  epochMillis: Long = Instant.parse("2018-01-01T00:00:00Z").toEpochMilli(),
-  private val zone: ZoneId = ZoneId.of("UTC")
+  private val wispFakeClock: WispFakeClock = WispFakeClock()
 ) : Clock() {
+  constructor(
+    epochMillis: Long = Instant.parse("2018-01-01T00:00:00Z").toEpochMilli(),
+    zone: ZoneId = ZoneId.of("UTC")
+  ) : this(WispFakeClock(epochMillis = epochMillis, zone = zone))
 
-  private val millis: AtomicLong = AtomicLong(epochMillis)
+  override fun getZone(): ZoneId = wispFakeClock.zone
 
-  override fun getZone(): ZoneId = zone
+  override fun withZone(zone: ZoneId): Clock = wispFakeClock.withZone(zone = zone)
 
-  override fun withZone(zone: ZoneId): Clock = FakeClock(millis.get(), zone)
+  override fun instant(): Instant = wispFakeClock.instant()
 
-  override fun instant(): Instant = Instant.ofEpochMilli(millis.get()).atZone(zone).toInstant()
-
-  fun add(d: Duration) = millis.addAndGet(d.toMillis())
+  fun add(d: Duration) = wispFakeClock.add(d = d)
 
   /**
    * Note that unlike adding a [Duration] the exact amount that is added to the clock will depend on
    * its current time and timezone. Not all days, months or years have the same length. See the
    * documentation for [Period].
    */
-  fun add(p: Period) = millis.getAndUpdate { millis ->
-    Instant.ofEpochMilli(millis).atZone(zone).plus(p).toInstant().toEpochMilli()
-  }
+  fun add(p: Period) = wispFakeClock.add(p = p)
 
-  fun add(n: Long, unit: TimeUnit) = millis.addAndGet(TimeUnit.MILLISECONDS.convert(n, unit))
+  fun add(n: Long, unit: TimeUnit) = wispFakeClock.add(n = n, unit = unit)
 
-  fun setNow(instant: Instant) = millis.set(instant.toEpochMilli())
+  fun setNow(instant: Instant) = wispFakeClock.setNow(instant = instant)
 }

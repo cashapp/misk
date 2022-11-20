@@ -17,7 +17,7 @@ dependencies {
   implementation(Dependencies.moshiAdapters)
   implementation(project(":misk"))
 
-  testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
+  testImplementation(Dependencies.wispTimeTesting)
 }

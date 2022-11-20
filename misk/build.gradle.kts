@@ -78,6 +78,7 @@ dependencies {
   }
   testImplementation(Dependencies.openTracingMock)
   testImplementation(Dependencies.guavaTestLib)
+  testImplementation(Dependencies.wispTimeTesting)
 }
 
 val generatedSourceDir = "$buildDir/generated/source/wire-test"

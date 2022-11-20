@@ -8,9 +8,9 @@ import misk.inject.KAbstractModule
 import misk.tasks.DelayedTask
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.time.FakeClock
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant

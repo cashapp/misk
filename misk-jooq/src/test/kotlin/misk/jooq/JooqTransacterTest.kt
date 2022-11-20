@@ -11,13 +11,13 @@ import misk.jooq.model.Genre
 import misk.jooq.testgen.tables.references.MOVIE
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.jooq.exception.DataAccessException
 import org.junit.jupiter.api.Test
+import wisp.time.FakeClock
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

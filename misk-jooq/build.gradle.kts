@@ -21,6 +21,7 @@ dependencies {
   api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.wispTimeTesting)
   testApi(project(":misk-testing"))
   testApi(project(":misk-jdbc-testing"))
 
