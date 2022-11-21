@@ -239,8 +239,6 @@ public final class misk/time/FakeClock : java/time/Clock {
 	public fun <init> ()V
 	public fun <init> (JLjava/time/ZoneId;)V
 	public synthetic fun <init> (JLjava/time/ZoneId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lwisp/time/FakeClock;)V
-	public synthetic fun <init> (Lwisp/time/FakeClock;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun add (JLjava/util/concurrent/TimeUnit;)J
 	public final fun add (Ljava/time/Duration;)J
 	public final fun add (Ljava/time/Period;)J
