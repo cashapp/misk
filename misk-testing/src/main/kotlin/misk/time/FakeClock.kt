@@ -9,12 +9,10 @@ import java.util.concurrent.TimeUnit
 import wisp.time.FakeClock as WispFakeClock
 
 class FakeClock(
-  private val wispFakeClock: WispFakeClock = WispFakeClock()
+  epochMillis: Long = Instant.parse("2018-01-01T00:00:00Z").toEpochMilli(),
+  zone: ZoneId = ZoneId.of("UTC")
 ) : Clock() {
-  constructor(
-    epochMillis: Long = Instant.parse("2018-01-01T00:00:00Z").toEpochMilli(),
-    zone: ZoneId = ZoneId.of("UTC")
-  ) : this(WispFakeClock(epochMillis = epochMillis, zone = zone))
+  internal val wispFakeClock = WispFakeClock(epochMillis = epochMillis, zone = zone)
 
   override fun getZone(): ZoneId = wispFakeClock.zone
 
