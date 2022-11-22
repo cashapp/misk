@@ -12,19 +12,15 @@ import kotlin.reflect.full.superclasses
 class ExceptionMapperResolver @Inject internal constructor(
   private val mappers: @JvmSuppressWildcards Map<KClass<*>, ExceptionMapper<*>>
 ) {
-
   private val cache: ConcurrentMap<KClass<*>, ExceptionMapper<Throwable>> = ConcurrentHashMap()
 
   @Suppress("UNCHECKED_CAST")
   fun mapperFor(th: Throwable): ExceptionMapper<Throwable>? {
     // The resolved Mapper is always the same, so cache it
-    return cache.getOrPut(
-      th::class,
-      {
-        val mappedException = getSuperclasses(th::class).firstOrNull { mappers.containsKey(it) }
-        return mappers[mappedException] as ExceptionMapper<Throwable>?
-      }
-    )
+    return cache.getOrPut(th::class) {
+      val mappedException = getSuperclasses(th::class).firstOrNull { mappers.containsKey(it) }
+      return mappers[mappedException] as ExceptionMapper<Throwable>?
+    }
   }
 
   private fun getSuperclasses(kClass: KClass<*>): List<KClass<*>> {
@@ -40,7 +36,7 @@ class ExceptionMapperResolver @Inject internal constructor(
       result.add(node)
       node.superclasses
         .filter { it.isSubclassOf(Throwable::class) }
-        .forEach({ doDFS(it) })
+        .forEach { doDFS(it) }
     }
   }
 }
