@@ -20,9 +20,9 @@ internal class RequestBodyFeatureBinding(
   private val unmarshallerFactories: List<Unmarshaller.Factory>
 ) : FeatureBinding {
   override fun beforeCall(subject: Subject) {
-    val mediaType = subject.httpCall.requestHeaders["Content-Type"]?.let { it.toMediaTypeOrNull() }
+    val mediaType = subject.httpCall.requestHeaders["Content-Type"]?.toMediaTypeOrNull()
     val unmarshaller = mediaType?.let { type ->
-      unmarshallerFactories.mapNotNull { it.create(type, parameter.type) }.firstOrNull()
+      unmarshallerFactories.firstNotNullOfOrNull { it.create(type, parameter.type) }
     } ?: GenericUnmarshallers.into(parameter)
       ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
 
