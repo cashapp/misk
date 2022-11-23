@@ -116,6 +116,14 @@ class ServiceModule constructor(
     key, dependsOn + upstream, enhancedBy
   )
 
+  /**
+   * Returns the [ServiceModule] with added the upstream dependency if condition is met otherwise
+   * it returns the original [ServiceModule] without changes.
+   */
+  fun dependsOn(upstream: Key<out Service>, condition: Boolean) = if (condition) ServiceModule(
+    key, dependsOn + upstream, enhancedBy
+  ) else this
+
   fun enhancedBy(enhancement: Key<out Service>) =
     ServiceModule(key, dependsOn, enhancedBy + enhancement)
 
@@ -124,6 +132,11 @@ class ServiceModule constructor(
 
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
     dependsOn(T::class.toKey(qualifier))
+
+  inline fun <reified T : Service> dependsOn(
+    qualifier: KClass<out Annotation>? = null,
+    condition: Boolean,
+  ) = dependsOn(upstream = T::class.toKey(qualifier), condition = condition)
 
   inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
     enhancedBy(T::class.toKey(qualifier))

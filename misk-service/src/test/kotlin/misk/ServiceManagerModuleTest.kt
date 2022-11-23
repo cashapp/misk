@@ -233,4 +233,41 @@ internal class ServiceManagerModuleTest {
       |AnotherUpstreamService.shutDown
       |""".trimMargin())
   }
+
+  @Test fun serviceNotProvidedUntilAllEligibleDependenciesCreated() {
+    val log = StringBuilder()
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          install(ServiceModule<ProducerService>())
+          install(ServiceModule<ConsumerService>()
+            .dependsOn<ProducerService>()
+            .dependsOn<AnotherUpstreamService>(condition = false))
+          install(ServiceModule<AnotherUpstreamService>())
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    log.append("healthy\n")
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    assertThat(log.toString()).isEqualTo("""
+      |ProducerService.init
+      |ProducerService.startUp
+      |ConsumerService.init
+      |ConsumerService.startUp
+      |AnotherUpstreamService.init
+      |AnotherUpstreamService.startUp
+      |healthy
+      |ConsumerService.shutDown
+      |ProducerService.shutDown
+      |AnotherUpstreamService.shutDown
+      |""".trimMargin())
+  }
 }
