@@ -7,7 +7,6 @@ import com.google.inject.Singleton
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
-import misk.inject.keyOf
 import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
@@ -19,16 +18,15 @@ class CronModule(
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
-
   override fun configure() {
     install(FakeCronModule(zoneId, threadPoolSize, dependencies))
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class))
-    install(ServiceModule<CronTask>().apply {
-      dependsOn(keyOf<RepeatedTaskQueue>(ForMiskCron::class))
-      for (dep in dependencies) {
-        dependsOn(dep)
-      }
-    })
+    install(
+      ServiceModule(
+        key = CronTask::class.toKey(),
+        dependsOn = dependencies,
+      )
+    )
   }
 
   @Provides

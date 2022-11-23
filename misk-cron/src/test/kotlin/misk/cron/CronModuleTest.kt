@@ -9,7 +9,6 @@ import misk.inject.toKey
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
