@@ -125,20 +125,29 @@ class TracingInterceptorTest {
 
   @Test
   fun failedTrace() {
-    get("/failed_trace")
+    get("/client_failed_trace")
 
     val span = tracer.take("http.action")
-    assertThat(span.tags().get(Tags.ERROR.key)).isEqualTo(true)
+    assertThat(span.tags().get(Tags.ERROR.key)).isNull()
     assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(400)
   }
 
   @Test
   fun failedTraceWithException() {
-    get("/exception_trace")
+    get("/client_exception_trace")
+
+    val span = tracer.take("http.action")
+    assertThat(span.tags().get(Tags.ERROR.key)).isNull()
+    assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(420)
+  }
+
+  @Test
+  fun failedTraceWithServerException() {
+    get("/server_exception_trace")
 
     val span = tracer.take("http.action")
     assertThat(span.tags().get(Tags.ERROR.key)).isEqualTo(true)
-    assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(420)
+    assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(500)
   }
 
   @Test
@@ -199,16 +208,23 @@ class TracingInterceptorTest {
   }
 
   internal class FailedTracingTestAction @Inject constructor() : WebAction {
-    @Get("/failed_trace")
+    @Get("/client_failed_trace")
     fun call(): Response<String> {
       return Response("no good", statusCode = HttpURLConnection.HTTP_BAD_REQUEST)
     }
   }
 
-  internal class ExceptionThrowingTracingTestAction @Inject constructor() : WebAction {
-    @Get("/exception_trace")
+  internal class WebExceptionThrowingTracingTestAction @Inject constructor() : WebAction {
+    @Get("/client_exception_trace")
     fun call(): Response<String> {
       throw WebActionException(420, "Chill, man", "chiiiilll")
+    }
+  }
+
+  internal class ExceptionThrowingTracingTestAction @Inject constructor() : WebAction {
+    @Get("/server_exception_trace")
+    fun call(): Response<String> {
+      throw IllegalStateException("oops")
     }
   }
 
@@ -225,6 +241,7 @@ class TracingInterceptorTest {
       install(MockTracingBackendModule())
       install(WebActionModule.create<TracingTestAction>())
       install(WebActionModule.create<FailedTracingTestAction>())
+      install(WebActionModule.create<WebExceptionThrowingTracingTestAction>())
       install(WebActionModule.create<ExceptionThrowingTracingTestAction>())
 
       bind<TracingInterceptor.Factory>()
