@@ -1500,6 +1500,7 @@ public abstract interface class misk/web/exceptions/ExceptionMapper {
 }
 
 public final class misk/web/exceptions/ExceptionMapper$DefaultImpls {
+	public static fun canHandle (Lmisk/web/exceptions/ExceptionMapper;Ljava/lang/Throwable;)Z
 	public static fun loggingLevel (Lmisk/web/exceptions/ExceptionMapper;Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
 	public static fun toGrpcResponse (Lmisk/web/exceptions/ExceptionMapper;Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
 }

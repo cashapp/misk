@@ -14,9 +14,6 @@ import javax.inject.Inject
 /** Maps ClientExecutionTimeoutException to 503 responses because the exception is concurrency related */
 class ClientExecutionTimeoutExceptionMapper @Inject constructor() :
   ExceptionMapper<ClientExecutionTimeoutException> {
-  override fun canHandle(th: Throwable): Boolean =
-    th is ClientExecutionTimeoutException
-
   override fun toResponse(th: ClientExecutionTimeoutException): Response<ResponseBody> = Response(
     body = "DynamoDB Resource Contention Exception: $th".toResponseBody(),
     headers = HEADERS,

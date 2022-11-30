@@ -15,8 +15,6 @@ import javax.inject.Inject
 internal class IOExceptionMapper @Inject internal constructor() : ExceptionMapper<IOException> {
   override fun toResponse(th: IOException) = INTERNAL_SERVER_ERROR_RESPONSE
 
-  override fun canHandle(th: Throwable): Boolean = th is IOException
-
   override fun loggingLevel(th: IOException): Level = Level.WARN
 
   companion object {

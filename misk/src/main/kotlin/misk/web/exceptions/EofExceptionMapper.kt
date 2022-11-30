@@ -12,8 +12,6 @@ import javax.inject.Inject
 internal class EofExceptionMapper @Inject internal constructor() : ExceptionMapper<EofException> {
   override fun toResponse(th: EofException) = CLIENT_CLOSED_REQUEST
 
-  override fun canHandle(th: Throwable): Boolean = th is EofException
-
   override fun loggingLevel(th: EofException): Level = Level.INFO
 
   companion object {

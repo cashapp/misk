@@ -10,8 +10,6 @@ import org.slf4j.event.Level
 import javax.inject.Inject
 
 class RequestBodyExceptionMapper @Inject internal constructor() : ExceptionMapper<RequestBodyException> {
-  override fun canHandle(th: Throwable) = th is RequestBodyException
-
   override fun loggingLevel(th: RequestBodyException) = Level.INFO
 
   override fun toResponse(th: RequestBodyException) = CLIENT_CLOSED_REQUEST
