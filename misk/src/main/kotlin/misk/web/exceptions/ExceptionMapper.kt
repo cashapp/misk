@@ -6,12 +6,6 @@ import org.slf4j.event.Level
 
 /** Maps an exception to a [Response] */
 interface ExceptionMapper<in T : Throwable> {
-  /** @return true if the [ExceptionMapper] can handle the given exception */
-  fun canHandle(th: Throwable): Boolean {
-    // Here to avoid breaking changes while I clean up downstream dependencies
-    error("This is unused!")
-  }
-
   /** @return the [Response] corresponding to the exception. */
   // TODO(mmihic): Allow control of marshalling based on content type. Ideally we could
   // return a Response<*> and then content negotiation would control how that * gets mapped.
