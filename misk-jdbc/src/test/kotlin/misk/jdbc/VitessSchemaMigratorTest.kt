@@ -103,6 +103,10 @@ internal class VitessSchemaMigratorTest {
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class Movies
 
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+internal annotation class Movies2
+
 internal data class MoviesConfig(
   val data_source: DataSourceConfig,
 ) : Config
