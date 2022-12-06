@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-  api(project(":wisp-backoff"))
+  api(project(":misk-backoff"))
   api(Dependencies.wispConfig)
   api(Dependencies.wispLease)
   api(Dependencies.wispLeaseTesting)

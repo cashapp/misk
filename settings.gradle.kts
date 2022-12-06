@@ -18,6 +18,7 @@ include(":misk-aws-dynamodb")
 include(":misk-aws-dynamodb-testing")
 include(":misk-aws2-dynamodb")
 include(":misk-aws2-dynamodb-testing")
+include(":misk-backoff")
 include(":misk-bom")
 include(":misk-core")
 include(":misk-clustering")
@@ -63,5 +64,3 @@ include(":misk-zookeeper-testing")
 include(":samples:exemplar")
 include(":samples:exemplarchat")
 
-// TODO migrate to wisp repo
-include(":wisp-backoff")
