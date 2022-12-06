@@ -44,13 +44,13 @@ internal data class NamedspacedMigration(
      *   The namespace is the subdirectory structure in which the migration was found.
      */
     fun fromNamespacedVersion(namespacedVersion: String): NamedspacedMigration {
-      if (namespacedVersion.toIntOrNull() != null) {
-        return NamedspacedMigration(namespacedVersion.toInt())
+      return if (namespacedVersion.toIntOrNull() != null) {
+        NamedspacedMigration(namespacedVersion.toInt())
       } else {
-        val items = namespacedVersion.split("/")
+        val items = namespacedVersion.split(NAMESPACE_SEPARATOR)
         val version = items.last().toInt()
-        val namespace = items.dropLast(1).joinToString("/") + "/"
-        return NamedspacedMigration(version, namespace)
+        val namespace = items.dropLast(1).joinToString(NAMESPACE_SEPARATOR) + NAMESPACE_SEPARATOR
+        NamedspacedMigration(version, namespace)
       }
     }
 
@@ -59,8 +59,12 @@ internal data class NamedspacedMigration(
      *  - classpath:/migrations/v1_table.sql becomes "1"
      *  - classpath:/migrations/com/example/library/v1_table.sql becomes "com/example/library/1"
      */
-    fun fromResourcePath(resource: String, migrationsResource: String): NamedspacedMigration {
-      val matcher = MIGRATION_PATTERN.matcher(resource)
+    fun fromResourcePath(
+      resource: String,
+      migrationsResource: String,
+      migrationPattern: String
+    ): NamedspacedMigration {
+      val matcher = Pattern.compile(migrationPattern).matcher(resource)
       require(matcher.matches()) { "unexpected resource: $resource" }
       val cleanNamespace = matcher.group(1).removePrefix(migrationsResource).removePrefix("/")
       val namedspacedMigration = NamedspacedMigration(matcher.group(2).toInt(), cleanNamespace)
@@ -68,8 +72,7 @@ internal data class NamedspacedMigration(
       return namedspacedMigration
     }
 
-    /** Matches file names like `exemplar/migrations/v100__exemplar.sql`. */
-    val MIGRATION_PATTERN = Pattern.compile("(^|.*/)v(\\d+)__[^/]+\\.sql")!!
+    private const val NAMESPACE_SEPARATOR = "/"
   }
 }
 
@@ -122,8 +125,14 @@ internal class SchemaMigrator(
   fun availableMigrations(keyspace: Keyspace): SortedSet<NamedspacedMigration> {
     val migrations = mutableListOf<NamedspacedMigration>()
     for (migrationsResource in getMigrationsResources(keyspace)) {
-      val migrationsFound = resourceLoader.walk(migrationsResource).filter { it.endsWith(".sql") }
-        .map { NamedspacedMigration.fromResourcePath(it, migrationsResource) }
+      val migrationsFound = resourceLoader.walk(migrationsResource)
+        .filter { resource ->
+          connector.config().migrations_resources_exclusion?.none { excludedResource ->
+            resource.contains(excludedResource)
+          } ?: true
+        }.map {
+          NamedspacedMigration.fromResourcePath(it, migrationsResource, connector.config().migrations_resources_regex)
+        }
       migrations.addAll(migrationsFound)
     }
     val migrationMap = TreeMap<NamedspacedMigration, MutableList<NamedspacedMigration>>()

@@ -11,6 +11,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.vitess.Shard
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -121,13 +122,13 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     )
 
     // Initially the schema_version table is absent.
-    assertThat(tableExists("schema_version")).isFalse()
-    assertThat(tableExists("table_1")).isFalse()
-    assertThat(tableExists("table_2")).isFalse()
-    assertThat(tableExists("table_3")).isFalse()
-    assertThat(tableExists("table_4")).isFalse()
-    assertThat(tableExists("library_table")).isFalse()
-    assertThat(tableExists("merged_library_table")).isFalse()
+    assertThat(tableExists("schema_version")).isFalse
+    assertThat(tableExists("table_1")).isFalse
+    assertThat(tableExists("table_2")).isFalse
+    assertThat(tableExists("table_3")).isFalse
+    assertThat(tableExists("table_4")).isFalse
+    assertThat(tableExists("library_table")).isFalse
+    assertThat(tableExists("merged_library_table")).isFalse
     assertFailsWith<SQLException> {
       schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)
     }
@@ -135,13 +136,13 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     // Once we initialize, that table is present but empty.
     schemaMigrator.initialize()
     assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).isEmpty()
-    assertThat(tableExists("schema_version")).isTrue()
-    assertThat(tableExists("table_1")).isFalse()
-    assertThat(tableExists("table_2")).isFalse()
-    assertThat(tableExists("table_3")).isFalse()
-    assertThat(tableExists("table_4")).isFalse()
-    assertThat(tableExists("library_table")).isFalse()
-    assertThat(tableExists("merged_library_table")).isFalse()
+    assertThat(tableExists("schema_version")).isTrue
+    assertThat(tableExists("table_1")).isFalse
+    assertThat(tableExists("table_2")).isFalse
+    assertThat(tableExists("table_3")).isFalse
+    assertThat(tableExists("table_4")).isFalse
+    assertThat(tableExists("library_table")).isFalse
+    assertThat(tableExists("merged_library_table")).isFalse
 
     // When we apply migrations, the table is present and contains the applied migrations.
     schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
@@ -150,13 +151,13 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
       NamedspacedMigration(1002),
       NamedspacedMigration(1001, "name/space/")
     )
-    assertThat(tableExists("schema_version")).isTrue()
-    assertThat(tableExists("table_1")).isTrue()
-    assertThat(tableExists("table_2")).isTrue()
-    assertThat(tableExists("library_table")).isTrue()
-    assertThat(tableExists("table_3")).isFalse()
-    assertThat(tableExists("table_4")).isFalse()
-    assertThat(tableExists("merged_library_table")).isFalse()
+    assertThat(tableExists("schema_version")).isTrue
+    assertThat(tableExists("table_1")).isTrue
+    assertThat(tableExists("table_2")).isTrue
+    assertThat(tableExists("library_table")).isTrue
+    assertThat(tableExists("table_3")).isFalse
+    assertThat(tableExists("table_4")).isFalse
+    assertThat(tableExists("merged_library_table")).isFalse
     schemaMigrator.requireAll()
 
     // When new migrations are added they can be applied.
@@ -190,14 +191,14 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
       NamedspacedMigration(1001, "name/space/"),
       NamedspacedMigration(1001, "namespace/")
     )
-    assertThat(tableExists("schema_version")).isTrue()
-    assertThat(tableExists("table_1")).isTrue()
-    assertThat(tableExists("table_2")).isTrue()
-    assertThat(tableExists("table_3")).isTrue()
-    assertThat(tableExists("table_4")).isTrue()
-    assertThat(tableExists("library_table")).isTrue()
-    assertThat(tableExists("merged_library_table")).isTrue()
-    schemaMigrator.requireAll()
+    assertThat(tableExists("schema_version")).isTrue
+    assertThat(tableExists("table_1")).isTrue
+    assertThat(tableExists("table_2")).isTrue
+    assertThat(tableExists("table_3")).isTrue
+    assertThat(tableExists("table_4")).isTrue
+    assertThat(tableExists("library_table")).isTrue
+    assertThat(tableExists("merged_library_table")).isTrue
+    assertThatCode { schemaMigrator.requireAll() }.doesNotThrowAnyException()
   }
 
   @Test fun requireAllWithMissingMigrations() {
@@ -300,6 +301,30 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     )
   }
 
+  @Test fun skipsExcludedMigrations() {
+    val mainSource = config.migrations_resources!![0]
+
+    resourceLoader.put(
+      "$mainSource/v1001__movies.sql", """
+        |CREATE TABLE table_1 (name varchar(255))
+        |""".trimMargin()
+    )
+    resourceLoader.put(
+      "$mainSource/all-migrations.sql", """
+        |CREATE TABLE table_2 (name varchar(255))
+        |""".trimMargin()
+    )
+
+    schemaMigrator.initialize()
+    schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
+
+    assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
+      NamedspacedMigration(1001)
+    )
+    assertThat(tableExists("table_1")).isTrue
+    assertThat(tableExists("table_2")).isFalse
+  }
+
   private fun tableExists(table: String): Boolean {
     try {
       dataSourceService.get().connection.use { connection ->
@@ -343,11 +368,19 @@ internal class NamedspacedMigrationTest {
     assertThat(namespacedMigrationOrNull("foo/luv1__franklin.sql")).isNull()
   }
 
+  @Test fun filterResourceRegex() {
+    assertThatCode { NamedspacedMigration.fromResourcePath(
+      "foo/migrations/vNotANumber__bar.sql",
+      "",
+      "(^|.*/)v(\\d+)__[^/]+\\.sql")
+    }.isNotNull
+  }
+
   private fun namespacedMigrationOrNull(resource: String): NamedspacedMigration? {
-    try {
-      return NamedspacedMigration.fromResourcePath(resource, "")
+    return try {
+      NamedspacedMigration.fromResourcePath(resource, "", "(^|.*/)v(\\d+)__[^/]+\\.sql")
     } catch (expected: IllegalArgumentException) {
-      return null
+      null
     }
   }
 }
