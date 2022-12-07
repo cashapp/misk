@@ -126,6 +126,7 @@ internal class SchemaMigrator(
     val migrations = mutableListOf<NamedspacedMigration>()
     for (migrationsResource in getMigrationsResources(keyspace)) {
       val migrationsFound = resourceLoader.walk(migrationsResource)
+        .filter { it.endsWith(".sql") }
         .filter { resource ->
           connector.config().migrations_resources_exclusion?.none { excludedResource ->
             resource.contains(excludedResource)
