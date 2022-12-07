@@ -3,8 +3,6 @@ package misk.jdbc
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
-import misk.backoff.FlatBackoff
-import misk.backoff.retry
 import misk.resources.ResourceLoader
 import misk.vitess.Keyspace
 import misk.vitess.Shard
@@ -13,7 +11,6 @@ import misk.vitess.target
 import wisp.logging.getLogger
 import java.sql.Connection
 import java.sql.SQLException
-import java.time.Duration
 import java.util.SortedSet
 import java.util.TreeMap
 import java.util.TreeSet
@@ -148,46 +145,39 @@ internal class SchemaMigrator(
     return migrationMap.navigableKeySet()
   }
 
-  /**
-   * Creates the `schema_version` table if it does not exist. Returns the applied migrations.
-   *
-   * Retry wrapped to handle multiple JDBC modules racing to create the `schema_version` table.
-   */
+  /** Creates the `schema_version` table if it does not exist. Returns the applied migrations. */
   fun initialize(): SortedSet<NamedspacedMigration> {
-    return retry(10, FlatBackoff(Duration.ofMillis(100))) {
-      val noMigrations =
-        shards.get().all { shard -> getMigrationsResources(shard.keyspace).isEmpty() }
-      if (noMigrations) {
-        sortedSetOf()
-      } else {
-        shards.get().flatMapTo(TreeSet()) { shard ->
-          try {
-            val result = appliedMigrations(shard)
-            logger.info {
-              "${qualifier.simpleName} has ${result.size} migrations applied;" +
-                " latest is ${result.lastOrNull()}"
-            }
-            result
-          } catch (e: SQLException) {
-            dataSource.get().connection.use {
-              it.target(shard) { c ->
-                c.createStatement().use { statement ->
-                  statement.execute(
-                    """
+    val noMigrations =
+      shards.get().all { shard -> getMigrationsResources(shard.keyspace).isEmpty() }
+    if (noMigrations) {
+      return sortedSetOf()
+    }
+    return shards.get().flatMapTo(TreeSet()) { shard ->
+      try {
+        val result = appliedMigrations(shard)
+        logger.info {
+          "${qualifier.simpleName} has ${result.size} migrations applied;" +
+            " latest is ${result.lastOrNull()}"
+        }
+        return result
+      } catch (e: SQLException) {
+        dataSource.get().connection.use {
+          it.target(shard) { c ->
+            c.createStatement().use { statement ->
+              statement.execute(
+                """
                 |CREATE TABLE schema_version (
                 |  version varchar(50) PRIMARY KEY,
                 |  installed_by varchar(30) DEFAULT NULL
                 |);
                 |""".trimMargin()
-                  )
-                }
-                c.createStatement().use { statement ->
-                  statement.execute("COMMIT")
-                }
-              }
-              sortedSetOf<NamedspacedMigration>()
+              )
+            }
+            c.createStatement().use { statement ->
+              statement.execute("COMMIT")
             }
           }
+          sortedSetOf<NamedspacedMigration>()
         }
       }
     }

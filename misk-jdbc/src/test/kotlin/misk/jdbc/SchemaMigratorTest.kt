@@ -42,8 +42,7 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
   val module = Modules.combine(
     deploymentModule,
     MiskTestingServiceModule(),
-    JdbcModule(Movies::class, config),
-    JdbcModule(Movies2::class, config),
+    JdbcModule(Movies::class, config)
   )
 
   private fun selectDataSourceConfig(config: RootConfig): DataSourceConfig {
@@ -59,39 +58,28 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
 
   @Inject lateinit var resourceLoader: ResourceLoader
   @Inject @Movies lateinit var dataSourceService: DataSourceService
-  @Inject @Movies2 lateinit var dataSourceService2: DataSourceService
   @Inject @Movies lateinit var schemaMigrator: SchemaMigrator
   @Inject @Movies lateinit var schemaMigratorService: SchemaMigratorService
-  @Inject @Movies2 lateinit var schemaMigratorService2: SchemaMigratorService
   @Inject @Movies lateinit var startDatabaseService: StartDatabaseService
-  @Inject @Movies2 lateinit var startDatabaseService2: StartDatabaseService
 
   @AfterEach
   internal fun tearDown() {
     if (dataSourceService.isRunning) {
       dropTables()
       dataSourceService.stopAsync()
-      dataSourceService2.stopAsync()
       dataSourceService.awaitTerminated()
-      dataSourceService2.awaitTerminated()
     }
     if (startDatabaseService.isRunning) {
       startDatabaseService.stopAsync()
-      startDatabaseService2.stopAsync()
       startDatabaseService.awaitTerminated()
-      startDatabaseService2.awaitTerminated()
     }
   }
 
   @BeforeEach internal fun setUp() {
     startDatabaseService.startAsync()
-    startDatabaseService2.startAsync()
     startDatabaseService.awaitRunning()
-    startDatabaseService2.awaitRunning()
     dataSourceService.startAsync()
-    dataSourceService2.startAsync()
     dataSourceService.awaitRunning()
-    dataSourceService2.awaitRunning()
 
     dropTables()
   }
@@ -109,13 +97,6 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
       statement.executeBatch()
       connection.commit()
     }
-  }
-
-  @Test fun initializeOnMultipleTables() {
-    schemaMigratorService.startAsync()
-    schemaMigratorService2.startAsync()
-    schemaMigratorService.awaitRunning()
-    schemaMigratorService2.awaitRunning()
   }
 
   @Test fun initializeAndMigrate() {
