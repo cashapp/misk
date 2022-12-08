@@ -1,41 +1,39 @@
 [versions]
 assertj = "3.23.1"
 # @pin
-aws2 = "2.17.267"
+aws2 = "2.18.4"
 bouncycastle = "1.70"
-docker = "3.2.13"
-grpc = "1.50.0"
-hoplite = "2.6.5"
-jackson = "2.13.4"
-jnrUnixsocket = "0.38.17"
+docker = "3.2.14"
+grpc = "1.51.0"
+hoplite = "2.7.0"
+jackson = "2.14.1"
+jnrUnixsocket = "0.38.19"
 junit = "5.9.1"
-kotest = "5.5.1"
+kotest = "5.5.4"
 # @pin
-kotlin = "1.7.20"
-kotlinBinaryCompatibilityPlugin = "0.11.1"
-kotlinLogging = "3.0.2"
+kotlin = "1.7.22"
+kotlinBinaryCompatibilityPlugin = "0.12.1"
+kotlinLogging = "3.0.4"
 kotlinRetry = "1.0.9"
 kotlinx = "1.6.4"
 # @pin
 launchDarkly = "5.8.1"
-logback = "1.4.4"
+logback = "1.4.5"
 # @pin
 mavenPublishGradlePlugin = "0.18.0"
 # @pin
 micrometer = "1.8.9"
-mockito = "4.8.0"
+mockito = "4.9.0"
 moshi = "1.14.0"
-netty = "4.1.82.Final"
+netty = "4.1.85.Final"
 okHttp = "4.10.0"
 okio = "3.2.0"
 openTracing = "0.33.0"
 openTracingOkHttp = "3.0.0"
-# @pin
-prometheus = "0.9.0"
-protobufGradlePlugin = "0.8.19"
-slf4j = "2.0.3"
+protobufGradlePlugin = "0.9.1"
+slf4j = "2.0.5"
 versionCatalogUpdateGradlePlugin = "0.7.0"
-versionsGradlePlugin = "0.43.0"
+versionsGradlePlugin = "0.44.0"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
@@ -75,7 +73,6 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 openTracing = { module = "io.opentracing:opentracing-api", version.ref = "openTracing" }
 openTracingMock = { module = "io.opentracing:opentracing-mock", version.ref = "openTracing" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version.ref = "openTracingOkHttp" }
-prometheusClient = { module = "io.prometheus:simpleclient", version.ref = "prometheus" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [bundles]
