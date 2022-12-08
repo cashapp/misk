@@ -11,7 +11,9 @@ import misk.vitess.target
 import wisp.logging.getLogger
 import java.sql.Connection
 import java.sql.SQLException
-import java.util.*
+import java.util.SortedSet
+import java.util.TreeMap
+import java.util.TreeSet
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
 
