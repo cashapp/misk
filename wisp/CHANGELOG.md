@@ -1,10 +1,37 @@
 Change Log
 ==========
 
+Version 1.2.5 *()*
+----------------------------
+
+* Typo fix
+
+Dependency changes:
+
+* aws2: "2.17.267" ->"2.18.4"
+* docker: "3.2.13" -> "3.2.14"
+* grpc: "1.50.0" -> "1.51.0"
+* hoplite: "2.6.5" -> "2.7.0"
+* jackson: "2.13.4" ->"2.14.1"
+* jnrUnixsocket: "0.38.17" -> "0.38.19"
+* kotest: "5.5.1" ->"5.5.4"
+* kotlin: "1.7.20" -> "1.7.22"
+* kotlinBinaryCompatibilityPlugin: "0.11.1" -> "0.12.1"
+* kotlinLogging: "3.0.2"-> "3.0.4"
+* logback: "1.4.4" -> "1.4.5"
+* mockito: "4.8.0" ->"4.9.0"
+* netty: "4.1.82.Final" ->"4.1.85.Final"
+* prometheus: REMOVED prometheusClient
+* protobufGradlePlugin: "0.8.19" -> "0.9.1"
+* slf4j: "2.0.3" -> "2.0.5"
+* versionsGradlePlugin: "0.43.0" -> "0.44.0"
+
+
 Version 1.2.4 *(2022-11-18)*
 ----------------------------
 
 * Add ability to increment the `FakeClock` by a `java.time.Period`
+
 
 Version 1.2.3 *(2022-11-03)*
 -----------------------------
