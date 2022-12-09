@@ -5,11 +5,11 @@ plugins {
 
 dependencies {
   api(project(":misk-inject"))
+  implementation(Dependencies.guava)
   implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.guava)
-  implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.kotlinxCoroutines)
+  implementation(Dependencies.moshiKotlin)
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
