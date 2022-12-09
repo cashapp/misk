@@ -2,7 +2,6 @@ package misk.hibernate
 
 import ch.qos.logback.classic.Level
 import com.google.common.collect.Iterables.getOnlyElement
-import misk.hibernate.DbMovie.Companion.Language
 import misk.hibernate.Operator.LT
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -1115,25 +1114,6 @@ class ReflectionQueryFactoryTest {
         .count(session)
     }
     assertThat(jurassicCount).isEqualTo(2)
-  }
-
-  @Test
-  fun customConstraintOnBoxedStringType() {
-    transacter.allowCowrites().transaction { session ->
-      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9), Language("en-us")))
-      session.save(DbMovie("The Castle", LocalDate.of(1997, 4, 10), Language("en-au")))
-      session.save(DbMovie("The Yacoubian Building", LocalDate.of(2006, 6, 21), Language("ar-eg")))
-    }
-
-    val englishCount = transacter.transaction { session ->
-      queryFactory.newQuery<OperatorsMovieQuery>()
-        .allowFullScatter()
-        .allowTableScan()
-        .constraint { root -> like(root.get("language"), "en%") }
-        .count(session)
-    }
-
-    assertThat(englishCount).isEqualTo(2)
   }
 
   @Test
