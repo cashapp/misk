@@ -40,6 +40,9 @@ class DbMovie() : DbRoot<DbMovie>, DbTimestampedEntity {
     this.language = language
   }
 
+  companion object {
+    data class Language(val tag: String)
+  }
+
 }
 
-data class Language(val tag: String)

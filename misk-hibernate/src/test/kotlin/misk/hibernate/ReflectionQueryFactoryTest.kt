@@ -2,6 +2,7 @@ package misk.hibernate
 
 import ch.qos.logback.classic.Level
 import com.google.common.collect.Iterables.getOnlyElement
+import misk.hibernate.DbMovie.Companion.Language
 import misk.hibernate.Operator.LT
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
