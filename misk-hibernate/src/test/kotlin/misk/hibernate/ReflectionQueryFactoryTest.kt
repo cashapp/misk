@@ -1118,7 +1118,7 @@ class ReflectionQueryFactoryTest {
   }
 
   @Test
-  fun customConstraintOnBoxedField() { // TODO check name
+  fun customConstraintOnBoxedStringType() {
     transacter.allowCowrites().transaction { session ->
       session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9), Language("en-us")))
       session.save(DbMovie("The Castle", LocalDate.of(1997, 4, 10), Language("en-au")))
