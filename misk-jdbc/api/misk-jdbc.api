@@ -281,8 +281,8 @@ public final class misk/jdbc/DataSourceClustersConfig : java/util/LinkedHashMap,
 }
 
 public final class misk/jdbc/DataSourceConfig {
-	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;)V
-	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun asReplica ()Lmisk/jdbc/DataSourceConfig;
 	public final fun buildJdbcUrl (Lwisp/deployment/Deployment;)Ljava/lang/String;
 	public final fun canRecoverOnReplica ()Z
@@ -291,7 +291,7 @@ public final class misk/jdbc/DataSourceConfig {
 	public final fun component11 ()Ljava/time/Duration;
 	public final fun component12 ()Ljava/lang/String;
 	public final fun component13 ()Ljava/util/List;
-	public final fun component14 ()Ljava/lang/String;
+	public final fun component14 ()Ljava/util/List;
 	public final fun component15 ()Ljava/lang/String;
 	public final fun component16 ()Ljava/lang/String;
 	public final fun component17 ()Ljava/lang/String;
@@ -299,23 +299,25 @@ public final class misk/jdbc/DataSourceConfig {
 	public final fun component19 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component20 ()Ljava/lang/String;
-	public final fun component21 ()Z
-	public final fun component22 ()Ljava/util/List;
-	public final fun component23 ()Ljava/lang/String;
-	public final fun component24 ()Ljava/lang/String;
-	public final fun component25 ()Ljava/lang/Integer;
-	public final fun component26 ()Z
-	public final fun component27 ()Z
-	public final fun component28 ()Ljava/util/Map;
+	public final fun component21 ()Ljava/lang/String;
+	public final fun component22 ()Ljava/lang/String;
+	public final fun component23 ()Z
+	public final fun component24 ()Ljava/util/List;
+	public final fun component25 ()Ljava/lang/String;
+	public final fun component26 ()Ljava/lang/String;
+	public final fun component27 ()Ljava/lang/Integer;
+	public final fun component28 ()Z
+	public final fun component29 ()Z
 	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component30 ()Ljava/util/Map;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()I
 	public final fun component8 ()Ljava/time/Duration;
 	public final fun component9 ()Ljava/time/Duration;
-	public final fun copy (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;)Lmisk/jdbc/DataSourceConfig;
-	public static synthetic fun copy$default (Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ILjava/lang/Object;)Lmisk/jdbc/DataSourceConfig;
+	public final fun copy (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;)Lmisk/jdbc/DataSourceConfig;
+	public static synthetic fun copy$default (Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ILjava/lang/Object;)Lmisk/jdbc/DataSourceConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllow_public_key_retrieval ()Z
 	public final fun getClient_certificate_key_store_password ()Ljava/lang/String;
@@ -332,6 +334,8 @@ public final class misk/jdbc/DataSourceConfig {
 	public final fun getJdbc_url_query_parameters ()Ljava/util/Map;
 	public final fun getMigrations_resource ()Ljava/lang/String;
 	public final fun getMigrations_resources ()Ljava/util/List;
+	public final fun getMigrations_resources_exclusion ()Ljava/util/List;
+	public final fun getMigrations_resources_regex ()Ljava/lang/String;
 	public final fun getPassword ()Ljava/lang/String;
 	public final fun getPort ()Ljava/lang/Integer;
 	public final fun getQuery_timeout ()Ljava/time/Duration;

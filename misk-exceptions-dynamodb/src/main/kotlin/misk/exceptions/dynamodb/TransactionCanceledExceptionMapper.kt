@@ -32,9 +32,6 @@ class TransactionCanceledExceptionMapper @Inject constructor() :
     resourceContentionCancellationReasonCodes.contains(it.code)
   }
 
-  override fun canHandle(th: Throwable): Boolean =
-    th is TransactionCanceledException
-
   override fun toResponse(th: TransactionCanceledException): Response<ResponseBody> = if (
     th.isFromResourceContention()
   ) {

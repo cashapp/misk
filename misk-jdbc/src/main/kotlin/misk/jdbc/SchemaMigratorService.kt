@@ -2,9 +2,12 @@ package misk.jdbc
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
+import misk.backoff.ExponentialBackoff
+import misk.backoff.retry
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import wisp.deployment.Deployment
+import java.time.Duration
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
@@ -22,7 +25,11 @@ class SchemaMigratorService internal constructor(
     if (deployment.isTest || deployment.isLocalDevelopment) {
       val type = connector.config().type
       if (type != DataSourceType.VITESS_MYSQL) {
-        val appliedMigrations = schemaMigrator.initialize()
+        // Retry wrapped to handle multiple JDBC modules racing to create the `schema_version` table.
+        val appliedMigrations = retry(
+          10,
+          ExponentialBackoff(Duration.ofMillis(100), Duration.ofSeconds(5))
+        ) { schemaMigrator.initialize() }
         migrationState = schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
       } else {
         // vttestserver automatically applies migrations
