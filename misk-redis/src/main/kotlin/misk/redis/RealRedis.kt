@@ -167,6 +167,20 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  override fun brpoplpush(
+    sourceKey: String,
+    destinationKey: String,
+    timeoutSeconds: Int
+  ): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.brpoplpush(
+        sourceKey.toByteArray(charset),
+        destinationKey.toByteArray(charset),
+        timeoutSeconds,
+      )?.toByteString()
+    }
+  }
+
   override fun lmove(
     sourceKey: String,
     destinationKey: String,
@@ -198,6 +212,13 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   override fun lrem(key: String, count: Long, element: ByteString): Long {
     return jedisPool.resource.use { jedis ->
       jedis.lrem(key.toByteArray(charset), count, element.toByteArray())
+    }
+  }
+
+  override fun rpoplpush(sourceKey: String, destinationKey: String): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.rpoplpush(sourceKey.toByteArray(charset), destinationKey.toByteArray(charset))
+        ?.toByteString()
     }
   }
 

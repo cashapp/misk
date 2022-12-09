@@ -4,6 +4,7 @@ import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.metadata.DashboardMetadataAction
 import misk.web.metadata.ServiceMetadataAction
+import misk.web.metadata.jvm.JvmMetadataModule
 
 /** Support Misk-Web Dashboards including the Misk [AdminDashboard] and service specific front end apps */
 class DashboardModule : KAbstractModule() {
@@ -18,5 +19,6 @@ class DashboardModule : KAbstractModule() {
     // Add metadata actions to support dashboards
     install(WebActionModule.create<DashboardMetadataAction>())
     install(WebActionModule.create<ServiceMetadataAction>())
+    install(JvmMetadataModule())
   }
 }

@@ -9,10 +9,10 @@ import misk.jobqueue.QueueName
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import wisp.time.FakeClock
 import javax.inject.Inject
 
 @MiskTest(startService = true)

@@ -224,6 +224,15 @@ class FakeRedis : Redis {
     return lmove(sourceKey, destinationKey, from, to)
   }
 
+  override fun brpoplpush(sourceKey: String, destinationKey: String, timeoutSeconds: Int) =
+    blmove(
+      sourceKey = sourceKey,
+      destinationKey = destinationKey,
+      from = ListDirection.RIGHT,
+      to = ListDirection.LEFT,
+      timeoutSeconds = timeoutSeconds.toDouble(),
+    )
+
   override fun lmove(
     sourceKey: String,
     destinationKey: String,
@@ -311,6 +320,13 @@ class FakeRedis : Redis {
       return deleteCount
     }
   }
+
+  override fun rpoplpush(sourceKey: String, destinationKey: String) = lmove(
+    sourceKey = sourceKey,
+    destinationKey = destinationKey,
+    from = ListDirection.RIGHT,
+    to = ListDirection.LEFT
+  )
 
   override fun expire(key: String, seconds: Long): Boolean {
     synchronized(lock) {

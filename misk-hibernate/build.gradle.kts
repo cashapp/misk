@@ -53,4 +53,5 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-hibernate-testing"))
   testImplementation(Dependencies.wispConfig)
+  testImplementation(Dependencies.wispTimeTesting)
 }

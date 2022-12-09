@@ -3,19 +3,24 @@ package misk.web.dashboard
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.metadata.config.ConfigMetadataAction
+import misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode.SAFE
 
 /**
- * Installs Config tab for the Misk Admin Dashboard
+ * Installs Config dashboard tab which shows the raw config inputs
+ * and the merged runtime config for your Misk service.
  *
- * The Config tab shows the raw config inputs and the merged runtime config for a given service
+ * [mode] If you have config parameters that include secrets, you should only install this tab
+ *    in [SAFE] mode because the Misk secrets will be visible at runtime in the admin dashboard.
  *
- * If you have config parameters that include secrets, you should NOT install this tab because the
- *    secrets will be visible at runtime in the admin dashboard.
- * TODO There is insufficient secrets redaction that doesn't allow flexibility in secret names when
- *    redaction is run
+ * TODO fix Misk.Secrets redaction in config, maybe with !secret yaml parser
  */
-class ConfigDashboardTabModule(private val isDevelopment: Boolean) : KAbstractModule() {
+class ConfigDashboardTabModule(
+  private val isDevelopment: Boolean,
+  /** DO NOT change default of [SAFE] until redaction of Misk.Secrets and other YAML is added. */
+  private val mode: ConfigMetadataAction.ConfigTabMode = SAFE,
+) : KAbstractModule() {
   override fun configure() {
+    bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
     install(WebActionModule.create<ConfigMetadataAction>())
     multibind<DashboardTab>().toProvider(
       DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(

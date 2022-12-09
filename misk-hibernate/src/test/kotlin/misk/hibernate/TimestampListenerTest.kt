@@ -3,9 +3,9 @@ package misk.hibernate
 import misk.jdbc.DataSourceType
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.time.FakeClock
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

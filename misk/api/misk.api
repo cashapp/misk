@@ -1493,7 +1493,6 @@ public final class misk/web/exceptions/ExceptionHandlingInterceptorKt {
 }
 
 public abstract interface class misk/web/exceptions/ExceptionMapper {
-	public abstract fun canHandle (Ljava/lang/Throwable;)Z
 	public abstract fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
 	public abstract fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
 	public abstract fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
@@ -1542,7 +1541,6 @@ public final class misk/web/exceptions/GrpcErrorResponse$Companion {
 
 public final class misk/web/exceptions/RequestBodyExceptionMapper : misk/web/exceptions/ExceptionMapper {
 	public static final field Companion Lmisk/web/exceptions/RequestBodyExceptionMapper$Companion;
-	public fun canHandle (Ljava/lang/Throwable;)Z
 	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
 	public fun loggingLevel (Lmisk/web/extractors/RequestBodyException;)Lorg/slf4j/event/Level;
 	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
