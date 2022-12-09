@@ -5,6 +5,7 @@ import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
+import kotlinx.coroutines.runBlocking
 import misk.inject.keyOf
 import misk.inject.toKey
 import misk.inject.uninject
@@ -133,6 +134,32 @@ internal class ActionScopedTest {
         keyOf<String>(Names.named("from-seed")) to "illegal-state"
       )
       scope.enter(seedData).use { zed.get() }
+    }
+  }
+
+  @Test
+  fun `propagate action scope to coroutines scope`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(
+      keyOf<String>(Names.named("from-seed")) to "seed-value"
+
+    )
+    scope.enter(seedData).use { actionScope ->
+      runBlocking(actionScope.asContextElement()) {
+        assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+      }
+    }
+  }
+
+  @Test
+  fun `throws if asContextElement is not call within a scope`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    assertFailsWith<IllegalStateException> {
+      scope.asContextElement()
     }
   }
 }
