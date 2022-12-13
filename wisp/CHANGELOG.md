@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.2.6 *(2022-12-13)*
+----------------------------
+
+* Version 1.2.5 did not release properly - missing modules
+
+
 Version 1.2.5 *(2022-12-08)*
 ----------------------------
 
