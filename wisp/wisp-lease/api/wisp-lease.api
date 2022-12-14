@@ -26,7 +26,12 @@ public abstract interface class wisp/lease/Lease$StateChangeListener {
 }
 
 public abstract interface class wisp/lease/LeaseManager {
+	public abstract fun releaseAll ()V
 	public abstract fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
+}
+
+public final class wisp/lease/LeaseManager$DefaultImpls {
+	public static fun releaseAll (Lwisp/lease/LeaseManager;)V
 }
 
 public final class wisp/lease/pool/PoolLease : wisp/lease/Lease {
@@ -53,6 +58,7 @@ public final class wisp/lease/pool/PoolLeaseConfig {
 
 public final class wisp/lease/pool/PoolLeaseManager : wisp/lease/LeaseManager {
 	public fun <init> (Lwisp/lease/LeaseManager;Lwisp/deployment/Deployment;Ljava/util/List;)V
+	public fun releaseAll ()V
 	public fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
 }
 

@@ -3,6 +3,7 @@ package wisp.lease.pool
 import wisp.deployment.Deployment
 import wisp.lease.Lease
 import wisp.lease.LeaseManager
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * A [LeaseManager] that ensures that leases that are in the same lease pool are acquired on
@@ -15,21 +16,20 @@ class PoolLeaseManager(
   private val deployment: Deployment,
   poolConfig: List<PoolLeaseConfig>,
 ) : LeaseManager {
-
   /**
    * Keep track of the leases that have been requested
    */
-  private val leases = mutableMapOf<String, PoolLease>()
+  private val leases = ConcurrentHashMap<String, PoolLease>()
 
   /**
    * Map of the lease names to their pool name for look up.
    */
-  private val leaseToPoolNameMap = mutableMapOf<String, String>()
+  private val leaseToPoolNameMap = ConcurrentHashMap<String, String>()
 
   /**
    * Track the lease acquired for a pool
    */
-  private val poolLeaseAcquiredMap = mutableMapOf<String, String>()
+  private val poolLeaseAcquiredMap = ConcurrentHashMap<String, String>()
 
   init {
     poolConfig.forEach { config ->
@@ -81,10 +81,14 @@ class PoolLeaseManager(
   }
 
   override fun requestLease(name: String): Lease {
-    val poolLease = leases.getOrPut(name) {
+    return leases.computeIfAbsent(name) {
       PoolLease(delegateLeaseManager.requestLease(name), this)
     }
-    return poolLease
+  }
+
+  override fun releaseAll() {
+    leases.forEachValue(1) {
+      it.release()
+    }
   }
 }
-
