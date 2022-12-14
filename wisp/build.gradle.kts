@@ -38,11 +38,11 @@ subprojects {
 
     if (!path.startsWith(":wisp-bom")) {
         apply(plugin = "kotlin")
-        apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
-        apply(plugin = "com.google.protobuf")
+        apply(plugin = rootProject.project.libs.plugins.kotlinBinaryCompatibilityPlugin.get().pluginId)
+        apply(plugin = rootProject.project.libs.plugins.protobufGradlePlugin.get().pluginId)
     }
 
-    apply(plugin = "com.vanniktech.maven.publish")
+    apply(plugin = rootProject.project.libs.plugins.mavenPublishGradlePlugin.get().pluginId)
     apply(from = "$rootDir/gradle-mvn-publish.gradle")
     apply(plugin = "version-catalog")
 
