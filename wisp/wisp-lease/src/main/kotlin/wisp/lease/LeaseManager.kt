@@ -11,4 +11,6 @@ interface LeaseManager {
      * they think they should own based on some consistent hashing system
      */
     fun requestLease(name: String): Lease
+
+    fun releaseAll() {}
 }
