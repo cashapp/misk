@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.2.7 *(2022-12-15)*
+----------------------------
+
+* Add releaseAll to LeaseManager interface
+
+
 Version 1.2.6 *(2022-12-13)*
 ----------------------------
 
