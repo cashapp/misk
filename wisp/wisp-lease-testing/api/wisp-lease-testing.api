@@ -14,6 +14,7 @@ public class wisp/lease/FakeLeaseManager : wisp/lease/LeaseManager {
 	public final fun isLeaseHeld (Ljava/lang/String;)Z
 	public final fun markLeaseHeld (Ljava/lang/String;)V
 	public final fun markLeaseHeldElsewhere (Ljava/lang/String;)V
+	public fun releaseAll ()V
 	public fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
 }
 
