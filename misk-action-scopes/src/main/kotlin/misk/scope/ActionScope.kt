@@ -2,10 +2,12 @@ package misk.scope
 
 import com.google.inject.Key
 import com.google.inject.Provider
+import kotlinx.coroutines.asContextElement
 import java.util.UUID
 import java.util.concurrent.Callable
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -23,6 +25,30 @@ class ActionScope @Inject internal constructor(
   companion object {
     private val threadLocalScope = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
     private val threadLocalUUID = ThreadLocal<UUID>()
+  }
+
+  /**
+   * Converts the action scope into a [CoroutineContext.Element] to maintain the given ActionScope context
+   * for coroutines regardless of the actual thread they run on.
+   *
+   * Example usage:
+   * ```
+   *  scope.enter(seedData).use {
+        runBlocking(scope.asContextElement()) {
+          async(Dispatchers.IO) {
+            tester.fooValue()
+          }.await()
+        }
+      }
+   * ```
+   *
+   */
+  fun asContextElement(): CoroutineContext.Element {
+    check(inScope()) { "not running within an ActionScope" }
+
+    val currentScopedData = threadLocalScope.get()
+
+    return threadLocalScope.asContextElement(currentScopedData)
   }
 
   /** Starts the scope on a thread with the provided seed data */
