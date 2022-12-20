@@ -151,6 +151,7 @@ internal class SchemaMigrator(
       return sortedSetOf()
     }
     return shards.get().flatMapTo(TreeSet()) { shard ->
+      withRetries
       try {
         val result = appliedMigrations(shard)
         logger.info {

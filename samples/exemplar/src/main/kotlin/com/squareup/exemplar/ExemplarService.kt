@@ -7,7 +7,6 @@ import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.metrics.backends.prometheus.PrometheusMetricsServiceModule
 import misk.web.MiskWebModule
-import misk.web.dashboard.ConfigDashboardTabModule
 import wisp.deployment.Deployment
 
 fun main(args: Array<String>) {
@@ -21,6 +20,6 @@ fun main(args: Array<String>) {
     ConfigModule.create("exemplar", config),
     DeploymentModule(deployment),
     PrometheusMetricsServiceModule(config.prometheus),
-    DashboardModule(),
+    ExemplarDashboardModule(),
   ).run(args)
 }
