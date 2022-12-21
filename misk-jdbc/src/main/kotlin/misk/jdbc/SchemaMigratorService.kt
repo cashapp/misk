@@ -26,11 +26,13 @@ class SchemaMigratorService internal constructor(
       val type = connector.config().type
       if (type != DataSourceType.VITESS_MYSQL) {
         // Retry wrapped to handle multiple JDBC modules racing to create the `schema_version` table.
-        val appliedMigrations = retry(
+        retry(
           10,
           ExponentialBackoff(Duration.ofMillis(100), Duration.ofSeconds(5))
-        ) { schemaMigrator.initialize() }
-        migrationState = schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
+        ) {
+          val appliedMigrations = schemaMigrator.initialize()
+          migrationState = schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
+        }
       } else {
         // vttestserver automatically applies migrations
         migrationState = MigrationState(emptyMap())
