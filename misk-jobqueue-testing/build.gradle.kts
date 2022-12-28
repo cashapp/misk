@@ -17,13 +17,14 @@ dependencies {
   api(project(":misk-jobqueue"))
   api(project(":misk-transactional-jobqueue"))
 
-  testImplementation(Dependencies.wispConfig)
   testImplementation(project(":misk-hibernate"))
   testImplementation(project(":misk-hibernate-testing"))
-  testImplementation(Dependencies.wispLogging)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.loggingApi)
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.loggingApi)
+  testImplementation(Dependencies.wispConfig)
+  testImplementation(Dependencies.wispLogging)
+  testImplementation(Dependencies.wispTimeTesting)
 }

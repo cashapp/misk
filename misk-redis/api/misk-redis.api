@@ -1,6 +1,8 @@
 public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public field clock Ljava/time/Clock;
 	public fun <init> ()V
+	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
+	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
 	public fun expire (Ljava/lang/String;J)Z
@@ -16,17 +18,22 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun hset (Ljava/lang/String;Ljava/util/Map;)V
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
+	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
+	public fun lrem (Ljava/lang/String;JLokio/ByteString;)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
 	public fun multi ()Lredis/clients/jedis/Transaction;
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public final fun setClock (Ljava/time/Clock;)V
-	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
-	public fun setnx (Ljava/lang/String;Lokio/ByteString;)V
+	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
+	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 }
@@ -34,6 +41,8 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 public final class misk/redis/RealRedis : misk/redis/Redis {
 	public static final field Companion Lmisk/redis/RealRedis$Companion;
 	public fun <init> (Lredis/clients/jedis/JedisPool;)V
+	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
+	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public final fun close ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
@@ -49,16 +58,21 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun hset (Ljava/lang/String;Ljava/util/Map;)V
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
+	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
+	public fun lrem (Ljava/lang/String;JLokio/ByteString;)J
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
 	public fun multi ()Lredis/clients/jedis/Transaction;
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
-	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
-	public fun setnx (Ljava/lang/String;Lokio/ByteString;)V
+	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
+	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 }
@@ -67,6 +81,8 @@ public final class misk/redis/RealRedis$Companion {
 }
 
 public abstract interface class misk/redis/Redis {
+	public abstract fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
+	public abstract fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public abstract fun del (Ljava/lang/String;)Z
 	public abstract fun del ([Ljava/lang/String;)I
 	public abstract fun expire (Ljava/lang/String;J)Z
@@ -81,16 +97,21 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun hset (Ljava/lang/String;Ljava/util/Map;)V
 	public abstract fun incr (Ljava/lang/String;)J
 	public abstract fun incrBy (Ljava/lang/String;J)J
+	public abstract fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public abstract fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public abstract fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
+	public abstract fun lrem (Ljava/lang/String;JLokio/ByteString;)J
 	public abstract fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public abstract fun mset ([Lokio/ByteString;)V
 	public abstract fun multi ()Lredis/clients/jedis/Transaction;
 	public abstract fun pExpire (Ljava/lang/String;J)Z
 	public abstract fun pExpireAt (Ljava/lang/String;J)Z
 	public abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public abstract fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;)V
-	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
-	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;)V
+	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
+	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public abstract fun unwatch ([Ljava/lang/String;)V
 	public abstract fun watch ([Ljava/lang/String;)V
 }

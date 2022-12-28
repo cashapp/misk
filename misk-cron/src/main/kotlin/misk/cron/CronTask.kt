@@ -1,6 +1,7 @@
 package misk.cron
 
 import com.google.common.util.concurrent.AbstractIdleService
+import misk.clustering.weights.ClusterWeightProvider
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import wisp.lease.LeaseManager
@@ -16,14 +17,18 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var leaseManager: LeaseManager
   @Inject @ForMiskCron private lateinit var taskQueue: RepeatedTaskQueue
+  @Inject private lateinit var clusterWeight: ClusterWeightProvider
 
   override fun startUp() {
-    val lease = leaseManager.requestLease(CRON_CLUSTER_LEASE_NAME)
-    var lastRun = clock.instant()
-
     logger.info { "Starting CronTask" }
-
+    var lastRun = clock.instant()
     taskQueue.scheduleWithBackoff(INTERVAL) {
+      if (clusterWeight.get() == 0) {
+        logger.info { "CronTask is running on a passive node. Skipping." }
+        return@scheduleWithBackoff Status.OK
+      }
+      val lease = leaseManager.requestLease(CRON_CLUSTER_LEASE_NAME)
+
       val now = clock.instant()
       var leaseHeld = lease.checkHeld()
       if (!leaseHeld) {

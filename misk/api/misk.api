@@ -943,6 +943,21 @@ public final class misk/security/cert/X509CertificateExtensionsKt {
 	public static final fun isSignedBy (Ljava/security/cert/X509Certificate;Ljava/security/cert/Certificate;)Z
 }
 
+public abstract interface annotation class misk/security/csp/ContentSecurityPolicy : java/lang/annotation/Annotation {
+	public abstract fun rules ()[Ljava/lang/String;
+}
+
+public final class misk/security/csp/ContentSecurityPolicyInterceptor : misk/web/NetworkInterceptor {
+	public fun <init> (Ljava/util/List;)V
+	public final fun getRules ()Ljava/util/List;
+	public fun intercept (Lmisk/web/NetworkChain;)V
+}
+
+public final class misk/security/csp/ContentSecurityPolicyInterceptor$Factory : misk/web/NetworkInterceptor$Factory {
+	public fun <init> ()V
+	public fun create (Lmisk/Action;)Lmisk/web/NetworkInterceptor;
+}
+
 public abstract interface class misk/security/keys/KeyService {
 	public abstract fun decrypt (Ljava/lang/String;Lokio/ByteString;)Lokio/ByteString;
 	public abstract fun encrypt (Ljava/lang/String;Lokio/ByteString;)Lokio/ByteString;
@@ -1478,7 +1493,6 @@ public final class misk/web/exceptions/ExceptionHandlingInterceptorKt {
 }
 
 public abstract interface class misk/web/exceptions/ExceptionMapper {
-	public abstract fun canHandle (Ljava/lang/Throwable;)Z
 	public abstract fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
 	public abstract fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
 	public abstract fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
@@ -1527,7 +1541,6 @@ public final class misk/web/exceptions/GrpcErrorResponse$Companion {
 
 public final class misk/web/exceptions/RequestBodyExceptionMapper : misk/web/exceptions/ExceptionMapper {
 	public static final field Companion Lmisk/web/exceptions/RequestBodyExceptionMapper$Companion;
-	public fun canHandle (Ljava/lang/Throwable;)Z
 	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
 	public fun loggingLevel (Lmisk/web/extractors/RequestBodyException;)Lorg/slf4j/event/Level;
 	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;

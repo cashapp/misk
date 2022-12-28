@@ -2,13 +2,6 @@ package misk.web.dashboard
 
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
-import misk.web.NetworkInterceptor
-import misk.web.WebActionModule
-import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
-import misk.web.metadata.database.DatabaseQueryMetadata
-import misk.web.metadata.database.DatabaseQueryMetadataAction
-import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
-import misk.web.metadata.webaction.WebActionMetadataAction
 import javax.inject.Qualifier
 
 /**
@@ -26,118 +19,21 @@ import javax.inject.Qualifier
 class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule() {
 
   override fun configure() {
-    // Install base dashboard support
-    install(DashboardModule())
+    install(BaseDashboardModule(isDevelopment))
+    install(ConfigDashboardTabModule(isDevelopment))
+    install(DatabaseDashboardTabModule(isDevelopment))
+    install(WebActionsDashboardTabModule(isDevelopment))
 
-    // Adds open CORS headers in development to allow through API calls from webpack servers
-    multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
-
-    // Admin Dashboard Tab
-    multibind<DashboardHomeUrl>().toInstance(
-      DashboardHomeUrl<AdminDashboard>("/_admin/")
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "admin-dashboard",
-        web_proxy_url = "http://localhost:3100/"
-      )
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "admin-dashboard",
-        web_proxy_url = "http://localhost:3100/",
-        url_path_prefix = "/_admin/",
-        resourcePath = "classpath:/web/_tab/admin-dashboard/"
-      )
-    )
-
-    // @misk packages
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "@misk",
-        web_proxy_url = "http://localhost:3100/",
-        url_path_prefix = "/@misk/",
-        resourcePath = "classpath:/web/_tab/admin-dashboard/@misk/"
-      )
-    )
-
-    // Database Query
-    newMultibinder<DatabaseQueryMetadata>()
-    install(WebActionModule.create<DatabaseQueryMetadataAction>())
-    multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-        slug = "database",
-        url_path_prefix = "/_admin/database/",
-        name = "Database",
-        category = "Container Admin"
-      )
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "database",
-        web_proxy_url = "http://localhost:3202/"
-      )
-    )
-    // Default access that doesn't allow any queries for unconfigured DbEntities
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<NoAdminDashboardDatabaseAccess>(
-        capabilities = listOf("no_admin_dashboard_database_access")
-      )
-    )
+    // Default Menu
     multibind<DashboardNavbarItem>().toInstance(
       DashboardNavbarItem<AdminDashboard>(
         item = "<a href=\"/_admin/database/\">Database</a>",
         order = 100
       )
     )
-
-    // Web Actions
-    install(WebActionModule.create<WebActionMetadataAction>())
-    multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-        slug = "web-actions",
-        url_path_prefix = "/_admin/web-actions/",
-        name = "Web Actions",
-        category = "Container Admin"
-      )
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "web-actions",
-        web_proxy_url = "http://localhost:3201/"
-      )
-    )
     multibind<DashboardNavbarItem>().toInstance(
       DashboardNavbarItem<AdminDashboard>(
         item = "<a href=\"/_admin/web-actions/\">Web Actions</a>",
-        order = 101
-      )
-    )
-
-    // Web Actions Old
-    multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-        slug = "web-actions-old",
-        url_path_prefix = "/_admin/web-actions-old/",
-        name = "Web Actions Old",
-        category = "Container Admin"
-      )
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "web-actions-old",
-        web_proxy_url = "http://localhost:3201/"
-      )
-    )
-    multibind<DashboardNavbarItem>().toInstance(
-      DashboardNavbarItem<AdminDashboard>(
-        item = "<a href=\"/_admin/web-actions-old/\">Web Actions Old</a>",
         order = 101
       )
     )

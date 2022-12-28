@@ -174,6 +174,15 @@ public final class misk/testing/ExternalDependency$DefaultImpls {
 	public static fun getId (Lmisk/testing/ExternalDependency;)Ljava/lang/String;
 }
 
+public abstract interface annotation class misk/testing/InjectTest : java/lang/annotation/Annotation {
+}
+
+public final class misk/testing/InjectingParameterResolver : org/junit/jupiter/api/extension/ParameterResolver {
+	public fun <init> ()V
+	public fun resolveParameter (Lorg/junit/jupiter/api/extension/ParameterContext;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/Object;
+	public fun supportsParameter (Lorg/junit/jupiter/api/extension/ParameterContext;Lorg/junit/jupiter/api/extension/ExtensionContext;)Z
+}
+
 public abstract interface annotation class misk/testing/LogLevel : java/lang/annotation/Annotation {
 	public abstract fun level ()Lmisk/testing/LogLevel$Level;
 }
@@ -232,13 +241,14 @@ public final class misk/time/FakeClock : java/time/Clock {
 	public synthetic fun <init> (JLjava/time/ZoneId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun add (JLjava/util/concurrent/TimeUnit;)J
 	public final fun add (Ljava/time/Duration;)J
+	public final fun add (Ljava/time/Period;)J
 	public fun getZone ()Ljava/time/ZoneId;
 	public fun instant ()Ljava/time/Instant;
 	public final fun setNow (Ljava/time/Instant;)V
 	public fun withZone (Ljava/time/ZoneId;)Ljava/time/Clock;
 }
 
-public final class misk/time/FakeClockModule : misk/inject/KAbstractModule {
+public final class misk/time/FakeClockModule : misk/inject/KInstallOnceModule {
 	public fun <init> ()V
 }
 

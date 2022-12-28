@@ -5,6 +5,7 @@ import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
+import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.SetParams
 import java.time.Duration
 
@@ -101,18 +102,21 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  /** Set a ByteArray value if it doesn't already exist. */
-  override fun setnx(key: String, value: ByteString) {
-    jedisPool.resource.use { jedis ->
-      jedis.setnx(key.toByteArray(charset), value.toByteArray())
+  /** Set a ByteArray value if it doesn't already exist. Returns true if set and false, otherwise */
+  override fun setnx(key: String, value: ByteString): Boolean {
+    return jedisPool.resource.use { jedis ->
+      jedis.setnx(key.toByteArray(charset), value.toByteArray()) == 1L
     }
   }
 
-  /** Set a ByteArray value if it doesn't already exist with an expiration. */
-  override fun setnx(key: String, expiryDuration: Duration, value: ByteString) {
-    val setParams = SetParams.setParams().ex(expiryDuration.seconds).nx()
-    jedisPool.resource.use { jedis ->
-      jedis.set(key.toByteArray(charset), value.toByteArray(), setParams)
+  /** Set a ByteArray value if it doesn't already exist with an expiration. Returns true if set and false, otherwise  */
+  override fun setnx(key: String, expiryDuration: Duration, value: ByteString): Boolean {
+    return jedisPool.resource.use { jedis ->
+      jedis.set(
+        key.toByteArray(charset),
+        value.toByteArray(),
+        SetParams().nx().px(expiryDuration.toMillis())
+      ) == "OK"
     }
   }
 
@@ -142,6 +146,79 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   override fun incrBy(key: String, increment: Long): Long {
     return jedisPool.resource.use { jedis ->
       jedis.incrBy(key.toByteArray(charset), increment)!!
+    }
+  }
+
+  override fun blmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection,
+    timeoutSeconds: Double
+  ): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.blmove(
+        sourceKey.toByteArray(charset),
+        destinationKey.toByteArray(charset),
+        from,
+        to,
+        timeoutSeconds
+      )?.toByteString()
+    }
+  }
+
+  override fun brpoplpush(
+    sourceKey: String,
+    destinationKey: String,
+    timeoutSeconds: Int
+  ): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.brpoplpush(
+        sourceKey.toByteArray(charset),
+        destinationKey.toByteArray(charset),
+        timeoutSeconds,
+      )?.toByteString()
+    }
+  }
+
+  override fun lmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection
+  ): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.lmove(
+        sourceKey.toByteArray(charset),
+        destinationKey.toByteArray(charset),
+        from,
+        to
+      ).toByteString()
+    }
+  }
+
+  override fun lpush(key: String, vararg elements: ByteString): Long {
+    return jedisPool.resource.use { jedis ->
+      jedis.lpush(key.toByteArray(charset), *elements.map { it.toByteArray() }.toTypedArray())
+    }
+  }
+
+  override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
+    return jedisPool.resource.use { jedis ->
+      jedis.lrange(key.toByteArray(charset), start, stop).map { it?.toByteString() }
+    }
+  }
+
+  override fun lrem(key: String, count: Long, element: ByteString): Long {
+    return jedisPool.resource.use { jedis ->
+      jedis.lrem(key.toByteArray(charset), count, element.toByteArray())
+    }
+  }
+
+  override fun rpoplpush(sourceKey: String, destinationKey: String): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.rpoplpush(sourceKey.toByteArray(charset), destinationKey.toByteArray(charset))
+        ?.toByteString()
     }
   }
 

@@ -3,8 +3,8 @@ package misk.redis
 import okio.ByteString
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
+import redis.clients.jedis.args.ListDirection
 import java.time.Duration
-import java.time.Instant
 
 /** A Redis client. */
 interface Redis {
@@ -118,14 +118,13 @@ interface Redis {
    */
   operator fun set(key: String, expiryDuration: Duration, value: ByteString)
 
-
   /**
    * Sets the [ByteString] value for the given key if it does not already exist.
    *
    * @param key the key to set
    * @param value the value to set
    */
-  fun setnx(key: String, value: ByteString)
+  fun setnx(key: String, value: ByteString): Boolean
 
   /**
    * Sets the [ByteString] value for the given key if it does not already exist.
@@ -134,7 +133,7 @@ interface Redis {
    * @param expiryDuration the amount of time before the key expires
    * @param value the value to set
    */
-  fun setnx(key: String, expiryDuration: Duration, value: ByteString)
+  fun setnx(key: String, expiryDuration: Duration, value: ByteString): Boolean
 
   /**
    * Sets the [ByteString] value for the given key and field
@@ -175,6 +174,122 @@ interface Redis {
    * See [incr] for extra information.
    */
   fun incrBy(key: String, increment: Long): Long
+
+  /**
+   * [blmove] is the blocking variant of [lmove]. When source contains elements, this command
+   * behaves exactly like [lmove]. When used inside a MULTI/EXEC block, this command behaves exactly
+   * like [lmove]. When source is empty, Redis will block the connection until another client pushes
+   * to it or until timeout (a double value specifying the maximum number of seconds to block) is
+   * reached. A timeout of zero can be used to block indefinitely.
+   *
+   * This command comes in place of the now deprecated [brpoplpush]. Doing BLMOVE RIGHT LEFT is
+   * equivalent.
+   *
+   * See [lmove] for more information.
+   */
+  fun blmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection,
+    timeoutSeconds: Double
+  ): ByteString?
+
+  /**
+   * [brpoplpush] is the blocking variant of [rpoplpush]. When source contains elements, this
+   * command behaves exactly like [rpoplpush]. When used inside a MULTI/EXEC block, this command
+   * behaves exactly like [rpoplpush]. When source is empty, Redis will block the connection until
+   * another client pushes to it or until timeout is reached. A timeout of zero can be used to block
+   * indefinitely.
+   *
+   * See [rpoplpush] for more information.
+   *
+   * As of Redis version 6.2.0, this command is regarded as deprecated.
+   *
+   * It can be replaced by [blmove] with the RIGHT and LEFT arguments when migrating or writing new
+   * code.
+   */
+  fun brpoplpush(sourceKey: String, destinationKey: String, timeoutSeconds: Int): ByteString?
+
+  /**
+   * Atomically returns and removes the first/last element (head/tail depending on the wherefrom
+   * argument) of the list stored at source, and pushes the element at the first/last element
+   * (head/tail depending on the whereto argument) of the list stored at destination.
+   *
+   * For example: consider source holding the list a,b,c, and destination holding the list x,y,z.
+   * Executing LMOVE source destination RIGHT LEFT results in source holding a,b and destination
+   * holding c,x,y,z.
+   *
+   * If source does not exist, the value nil is returned and no operation is performed. If source
+   * and destination are the same, the operation is equivalent to removing the first/last element
+   * from the list and pushing it as first/last element of the list, so it can be considered as a
+   * list rotation command (or a no-op if wherefrom is the same as whereto).
+   *
+   * This command comes in place of the now deprecated RPOPLPUSH. Doing LMOVE RIGHT LEFT is
+   * equivalent.
+   */
+  fun lmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection
+  ): ByteString?
+
+  /**
+   * Insert all the specified values at the head of the list stored at key. If key does not exist,
+   * it is created as empty list before performing the push operations. When key holds a value that
+   * is not a list, an error is returned.
+   *
+   * It is possible to push multiple elements using a single command call just specifying multiple
+   * arguments at the end of the command. Elements are inserted one after the other to the head of
+   * the list, from the leftmost element to the rightmost element. So for instance the command LPUSH
+   * mylist a b c will result into a list containing c as first element, b as second element and a
+   * as third element.
+   */
+  fun lpush(key: String, vararg elements: ByteString): Long
+
+  /**
+   * Returns the specified elements of the list stored at key. The offsets start and stop are
+   * zero-based indexes, with 0 being the first element of the list (the head of the list), 1 being
+   * the next element and so on.
+   *
+   * These offsets can also be negative numbers indicating offsets starting at the end of the list.
+   * For example, -1 is the last element of the list, -2 the penultimate, and so on.
+   */
+  fun lrange(key: String, start: Long, stop: Long): List<ByteString?>
+
+  /**
+   * Removes the first count occurrences of elements equal to element from the list stored at key.
+   * The count argument influences the operation in the following ways:
+   *  count > 0: Remove elements equal to element moving from head to tail.
+   *  count < 0: Remove elements equal to element moving from tail to head.
+   *  count = 0: Remove all elements equal to element.
+   * For example, LREM list -2 "hello" will remove the last two occurrences of "hello" in the list
+   * stored at list.
+   *
+   * Note that non-existing keys are treated like empty lists, so when key does not exist, the
+   * command will always return 0.
+   */
+  fun lrem(key: String, count: Long, element: ByteString): Long
+
+  /**
+   * Atomically returns and removes the last element (tail) of the list stored at source, and pushes
+   * the element at the first element (head) of the list stored at destination.
+   *
+   * For example: consider source holding the list a,b,c, and destination holding the list x,y,z.
+   * Executing [rpoplpush] results in source holding a,b and destination holding c,x,y,z.
+   *
+   * If source does not exist, the value nil is returned and no operation is performed. If source
+   * and destination are the same, the operation is equivalent to removing the last element from the
+   * list and pushing it as first element of the list, so it can be considered as a list rotation
+   * command.
+   *
+   * As of Redis version 6.2.0, this command is regarded as deprecated.
+   *
+   * It can be replaced by [lmove] with the RIGHT and LEFT arguments when migrating or writing new
+   * code.
+   */
+  fun rpoplpush(sourceKey: String, destinationKey: String): ByteString?
 
   /**
    * Set a timeout on key. After the timeout has expired, the key will automatically be deleted. A

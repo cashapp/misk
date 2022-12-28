@@ -58,6 +58,16 @@ data class DataSourceConfig(
   val query_timeout: Duration? = Duration.ofMinutes(1),
   val migrations_resource: String? = null,
   val migrations_resources: List<String>? = null,
+  /**
+   * List of filenames to exclude from being processed in database schema migrations
+   */
+  val migrations_resources_exclusion: List<String>? = null,
+  /**
+   * Regular expression migration files names should match.
+   * Any migration filename that doesn't match the given regular expression will cause an exception,
+   * unless it was explicitly mentioned in [migrations_resources_exclusion].
+   */
+  val migrations_resources_regex: String = "(^|.*/)v(\\d+)__[^/]+\\.sql",
   val vitess_schema_resource_root: String? = null,
   /*
      See https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html for
@@ -74,9 +84,19 @@ data class DataSourceConfig(
   val verify_server_identity: Boolean = false,
   val enabledTlsProtocols: List<String> = listOf("TLSv1.2", "TLSv1.3"),
   val show_sql: String? = "false",
+  // Don't enable statistics unless we really need to.
+  // See http://tech.puredanger.com/2009/05/13/hibernate-concurrency-bugs/
+  // for an explanation of the drawbacks to Hibernate's StatisticsImpl.
+  val generate_hibernate_stats: String? = "false",
   // Consider using this if you want Hibernate to automagically batch inserts/updates when it can.
   val jdbc_statement_batch_size: Int? = null,
-  val use_fixed_pool_size: Boolean = false
+  val use_fixed_pool_size: Boolean = false,
+  // MySQL 8+ by default requires authentication via RSA keys if TLS is unavailable.
+  // Within secured subnets, overriding to true can be acceptable.
+  // See https://mysqlconnector.net/troubleshooting/retrieval-public-key/
+  val allow_public_key_retrieval: Boolean = false,
+  // Allow setting additional JDBC url parameters for advanced configuration
+  val jdbc_url_query_parameters: Map<String, Any> = mapOf()
 ) {
   fun withDefaults(): DataSourceConfig {
     val isRunningInDocker = File("/proc/1/cgroup")
@@ -217,6 +237,14 @@ data class DataSourceConfig(
           queryParams += "&enabledTLSProtocols=${enabledTlsProtocols.joinToString(",")}"
         }
 
+        if (allow_public_key_retrieval) {
+          queryParams += "&allowPublicKeyRetrieval=true"
+        }
+
+        jdbc_url_query_parameters.entries.forEach { (key, value) ->
+          queryParams += "&$key=$value"
+        }
+
         "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
       }
       DataSourceType.HSQLDB -> {
@@ -267,6 +295,8 @@ data class DataSourceConfig(
       this.query_timeout,
       this.migrations_resource,
       this.migrations_resources,
+      this.migrations_resources_exclusion,
+      this.migrations_resources_regex,
       this.vitess_schema_resource_root,
       this.trust_certificate_key_store_url,
       this.trust_certificate_key_store_password,
@@ -277,6 +307,7 @@ data class DataSourceConfig(
       this.verify_server_identity,
       this.enabledTlsProtocols,
       this.show_sql,
+      this.generate_hibernate_stats,
     )
   }
 

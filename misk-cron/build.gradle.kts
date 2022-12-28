@@ -17,5 +17,6 @@ dependencies {
   api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.wispTimeTesting)
   testImplementation(project(":misk-testing"))
 }

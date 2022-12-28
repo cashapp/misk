@@ -3,12 +3,15 @@ vitess_mysql_data_source:
   username: vt_app
   password: whatever
   vitess_schema_resource_root: classpath:/misk/hibernate/moviestestmodule-schema
+  generate_hibernate_stats: "true"
 mysql_data_source:
   type: MYSQL
   database: movies
   username: root
   password: ""
   migrations_resource: classpath:/misk/hibernate/moviestestmodule-schema
+  jdbc_url_query_parameters:
+    serverTimezone: UTC
 cockroachdb_data_source:
   type: COCKROACHDB
   database: movies

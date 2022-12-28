@@ -18,11 +18,15 @@ class CronModule(
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
-
   override fun configure() {
     install(FakeCronModule(zoneId, threadPoolSize, dependencies))
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class))
-    install(ServiceModule<CronTask>())
+    install(
+      ServiceModule(
+        key = CronTask::class.toKey(),
+        dependsOn = dependencies,
+      )
+    )
   }
 
   @Provides

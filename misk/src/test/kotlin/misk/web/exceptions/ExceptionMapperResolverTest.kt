@@ -9,9 +9,8 @@ import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
 
 internal class ExceptionMapperResolverTest {
-
-  val mappers = mutableMapOf<KClass<*>, ExceptionMapper<*>>()
-  val resolver = ExceptionMapperResolver(mappers)
+  private val mappers = mutableMapOf<KClass<*>, ExceptionMapper<*>>()
+  private val resolver = ExceptionMapperResolver(mappers)
 
   @Test
   fun resolvesToSpecificMapper() {
@@ -32,8 +31,7 @@ internal class ExceptionMapperResolverTest {
 
   @Test
   fun noMapperFound() {
-    assertThat(resolver.mapperFor(NotFoundException()))
-      .isNull()
+    assertThat(resolver.mapperFor(NotFoundException())).isNull()
   }
 
   @Test
@@ -50,10 +48,6 @@ internal class ExceptionMapperResolverTest {
 
   open class BaseExceptionMapper<in T : Throwable> : ExceptionMapper<T> {
     override fun toResponse(th: T): Response<ResponseBody> {
-      TODO("")
-    }
-
-    override fun canHandle(th: Throwable): Boolean {
       TODO("")
     }
   }
