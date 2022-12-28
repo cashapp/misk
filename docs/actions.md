@@ -7,6 +7,10 @@ Actions are Misk's unit for an endpoint. Misk lets you make HTTP actions, and gR
 
 Below are some example Web action declarations. Note that many of the annotations are optional.
 
+Calls are authenticated at the service-level (service is listed in the @Authenticated annotation)
+or at the user-level (user has at least one of the capabilities listed in the @Authenticated
+annotation).
+
 GET:
 
 ```kotlin
