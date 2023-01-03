@@ -21,7 +21,7 @@ class HttpClientFactory constructor(
     fun create(config: HttpClientEndpointConfig): OkHttpClient {
         // TODO(mmihic): Cache, proxy, etc
         val builder = unconfiguredClient.newBuilder()
-        builder.retryOnConnectionFailure(config.clientConfig.retryOnConnectFailure ?: false)
+        builder.retryOnConnectionFailure(config.clientConfig.retryOnConnectionFailure ?: false)
         okHttpClientCommonConfigurator.configure(builder = builder, config = config)
         config.clientConfig.ssl?.let {
             val trustStore = sslLoader.loadTrustStore(it.trust_store)!!

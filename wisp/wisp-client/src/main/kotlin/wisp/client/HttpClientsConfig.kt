@@ -102,7 +102,7 @@ data class HttpClientConfig(
     val ssl: HttpClientSSLConfig? = null,
     val unixSocketFile: String? = null,
     val protocols: List<String>? = null,
-    val retryOnConnectFailure: Boolean? = null
+    val retryOnConnectionFailure: Boolean? = null
 )
 
 fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
@@ -119,7 +119,7 @@ fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
         ssl = this.ssl ?: other.ssl,
         unixSocketFile = this.unixSocketFile ?: other.unixSocketFile,
         protocols = this.protocols ?: other.protocols,
-        retryOnConnectFailure = this.retryOnConnectFailure ?: other.retryOnConnectFailure
+        retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure
     )
 
 data class HttpClientEndpointConfig(
