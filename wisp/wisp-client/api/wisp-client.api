@@ -32,7 +32,7 @@ public final class wisp/client/HttpClientConfig {
 	public final fun getPingInterval ()Ljava/time/Duration;
 	public final fun getProtocols ()Ljava/util/List;
 	public final fun getReadTimeout ()Ljava/time/Duration;
-	public final fun getRetryOnConnectFailure ()Ljava/lang/Boolean;
+	public final fun getRetryOnConnectionFailure ()Ljava/lang/Boolean;
 	public final fun getSsl ()Lwisp/client/HttpClientSSLConfig;
 	public final fun getUnixSocketFile ()Ljava/lang/String;
 	public final fun getWriteTimeout ()Ljava/time/Duration;
