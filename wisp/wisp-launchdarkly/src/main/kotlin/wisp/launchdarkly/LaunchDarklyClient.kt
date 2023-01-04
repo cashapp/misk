@@ -27,8 +27,11 @@ object LaunchDarklyClient {
             .offline(config.offline)
             // Set wait to 0 to not block here. Block in service initialization instead.
             .startWait(Duration.ofMillis(0))
-            .dataSource(Components.streamingDataSource().baseURI(baseUri))
-            .events(Components.sendEvents().baseURI(baseUri))
+            .serviceEndpoints(
+                Components.serviceEndpoints()
+                    .streaming(baseUri)
+                    .events(baseUri)
+            )
 
         config.ssl?.let {
             val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
