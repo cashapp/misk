@@ -60,12 +60,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Configure JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: 11.0.3
-
       - name: Test
         run: ${{ matrix.cmd }}
 
