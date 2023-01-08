@@ -5,12 +5,13 @@ public abstract interface class wisp/client/EnvoyClientEndpointProvider {
 
 public final class wisp/client/HttpClientConfig {
 	public fun <init> ()V
-	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lwisp/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lwisp/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lwisp/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lwisp/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/time/Duration;
 	public final fun component10 ()Lwisp/client/HttpClientSSLConfig;
 	public final fun component11 ()Ljava/lang/String;
 	public final fun component12 ()Ljava/util/List;
+	public final fun component13 ()Ljava/lang/Boolean;
 	public final fun component2 ()Ljava/time/Duration;
 	public final fun component3 ()Ljava/time/Duration;
 	public final fun component4 ()Ljava/time/Duration;
@@ -19,8 +20,8 @@ public final class wisp/client/HttpClientConfig {
 	public final fun component7 ()Ljava/lang/Integer;
 	public final fun component8 ()Ljava/lang/Integer;
 	public final fun component9 ()Ljava/time/Duration;
-	public final fun copy (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lwisp/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;)Lwisp/client/HttpClientConfig;
-	public static synthetic fun copy$default (Lwisp/client/HttpClientConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lwisp/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lwisp/client/HttpClientConfig;
+	public final fun copy (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lwisp/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;)Lwisp/client/HttpClientConfig;
+	public static synthetic fun copy$default (Lwisp/client/HttpClientConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lwisp/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;ILjava/lang/Object;)Lwisp/client/HttpClientConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallTimeout ()Ljava/time/Duration;
 	public final fun getConnectTimeout ()Ljava/time/Duration;
@@ -31,6 +32,7 @@ public final class wisp/client/HttpClientConfig {
 	public final fun getPingInterval ()Ljava/time/Duration;
 	public final fun getProtocols ()Ljava/util/List;
 	public final fun getReadTimeout ()Ljava/time/Duration;
+	public final fun getRetryOnConnectionFailure ()Ljava/lang/Boolean;
 	public final fun getSsl ()Lwisp/client/HttpClientSSLConfig;
 	public final fun getUnixSocketFile ()Ljava/lang/String;
 	public final fun getWriteTimeout ()Ljava/time/Duration;
