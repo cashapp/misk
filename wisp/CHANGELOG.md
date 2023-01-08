@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 1.2.8 *(2023-01-09)*
+----------------------------
+
+* Add retryOnConnectionFailure config option for HttpClientFactory 
+
 Version 1.2.7 *(2022-12-15)*
 ----------------------------
 
