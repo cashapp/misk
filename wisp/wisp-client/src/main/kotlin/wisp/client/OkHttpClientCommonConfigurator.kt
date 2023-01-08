@@ -15,6 +15,7 @@ class OkHttpClientCommonConfigurator {
         configurePingInterval(builder = builder, config = config)
         configureReadTimeout(builder = builder, config = config)
         configureWriteTimeout(builder = builder, config = config)
+        configureRetryOnConnectionFailure(builder = builder, config = config)
         return builder
     }
 
@@ -54,11 +55,23 @@ class OkHttpClientCommonConfigurator {
         config.clientConfig.writeTimeout?.let { builder.writeTimeout(it) }
     }
 
+    private fun configureRetryOnConnectionFailure(
+        builder: Builder,
+        config: HttpClientEndpointConfig,
+    ) {
+        builder.retryOnConnectionFailure(
+          config.clientConfig.retryOnConnectionFailure ?: retryOnConnectionFailure
+        )
+    }
+
     companion object {
         // Copied from okhttp3.ConnectionPool, as it does not provide "use default" option
         const val maxIdleConnections = 5
 
         // Copied from okhttp3.ConnectionPool, as it does not provide "use default" option
         val keepAliveDuration: Duration = Duration.ofMinutes(5)
+
+        // For backwards-compat with previous behavior of always setting this to false
+        const val retryOnConnectionFailure = false
     }
 }
