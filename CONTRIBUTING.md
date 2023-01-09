@@ -11,10 +11,12 @@ Before your code can be accepted into the project you must also sign the
 
 ## Building Misk locally
 
+Install and activate hermit: https://cashapp.github.io/hermit/
+
 Use gradle to run all Kotlin tests locally:
 
 ```shell
-./gradlew build
+gradle build
 ```
 
 misk-hibernate tests expect a mysql server running on `localhost:3306` with no password set on

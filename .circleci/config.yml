@@ -22,7 +22,7 @@ jobs:
       - run:
           name: "Compile"
           command: |
-            ./gradlew testClasses --parallel --build-cache
+            bin/gradle testClasses --parallel --build-cache
       - save_cache:
           paths:
             - ~/.gradle/caches
@@ -74,9 +74,9 @@ jobs:
           name: "Build and test"
           command: |
             if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
-              ./gradlew testShardHibernate -i --scan
+              bin/gradle testShardHibernate -i --scan
             else
-              ./gradlew testShardNonHibernate -i --scan --parallel
+              bin/gradle testShardNonHibernate -i --scan --parallel
             fi
       - run:
           name: Collect test results
