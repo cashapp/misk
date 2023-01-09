@@ -91,7 +91,7 @@ class RepeatedTask(
         task: (name: String, taskConfig: TaskConfig) -> Status
     ): Status {
         return runBlocking {
-            var status: Status
+            var status = Status.OK
             retry(retryPolicy) {
                 var timedResult = 0L
                 try {
@@ -100,12 +100,16 @@ class RepeatedTask(
                     }
                 } catch (nwfte: NoWorkForTaskException) {
                     repeatedTaskMetrics.noWorkCount.increment()
+                    status = Status.NO_WORK
                     throw nwfte
                 } catch (e: Exception) {
                     repeatedTaskMetrics.failedCount.increment()
+                    status = Status.FAILED
                     throw e
                 } finally {
-                    repeatedTaskMetrics.taskDuration.record(timedResult.toDouble())
+                    repeatedTaskMetrics
+                      .taskDuration(meterRegistry, name, status.toLabel())
+                      .record(timedResult.toDouble())
                 }
                 when (status) {
                     Status.NO_WORK -> {
@@ -123,6 +127,12 @@ class RepeatedTask(
                 status
             }
         }
+    }
+
+    private fun Status.toLabel() = when (this) {
+        Status.NO_WORK -> "no_work"
+        Status.FAILED -> "failed"
+        else -> "success"
     }
 
     companion object {
