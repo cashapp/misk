@@ -1,15 +1,23 @@
 Change Log
 ==========
 
+Version 1.3.1 *(2023-01-10)*
+----------------------------
+
+* Record metric labels for repeated tasks.
+
+
 Version 1.3.0 *(2023-01-09)*
 ----------------------------
 
 * launchDarkly: "5.8.1" ->"5.10.6"
 
+
 Version 1.2.8 *(2023-01-09)*
 ----------------------------
 
 * Add retryOnConnectionFailure config option for HttpClientFactory 
+
 
 Version 1.2.7 *(2022-12-15)*
 ----------------------------
