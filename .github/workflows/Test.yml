@@ -53,21 +53,12 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         cmd:
-          - ./gradlew testShardHibernate -i --scan
-          - ./gradlew testShardNonHibernate -i --scan --parallel
+          - bin/gradle testShardHibernate -i --scan
+          - bin/gradle testShardNonHibernate -i --scan --parallel
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
-
-      - name: Configure JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: 11.0.3
 
       - name: Test
         run: ${{ matrix.cmd }}
