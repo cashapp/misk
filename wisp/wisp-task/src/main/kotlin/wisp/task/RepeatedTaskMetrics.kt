@@ -14,24 +14,36 @@ import io.micrometer.core.instrument.MeterRegistry
  */
 class RepeatedTaskMetrics(meterRegistry: MeterRegistry) {
 
-    internal var taskDuration: DistributionSummary =
+    internal fun taskDuration(
+        meterRegistry: MeterRegistry,
+        name: String,
+        result: String,
+    ): DistributionSummary =
         DistributionSummary.builder("repeated.task")
             .description("count and duration in ms of periodic tasks")
-            .tag("name", "result")
+            .tag("name", name)
+            .tag("result", result)
             .percentilePrecision(4)
             .publishPercentiles(0.5, 0.75, 0.95, 0.99, 0.999)
             .publishPercentileHistogram()
             .register(meterRegistry)
 
-    internal var successCount: Counter = Counter.builder("repeated.task.success")
+    internal val successCount: Counter = Counter.builder(SUCCESS_COUNTER_NAME)
         .description("count of successful repeated tasks")
         .register(meterRegistry)
 
-    internal var failedCount: Counter = Counter.builder("repeated.task.failed")
+    internal val failedCount: Counter = Counter.builder(FAILED_COUNTER_NAME)
         .description("count of repeated tasks failures")
         .register(meterRegistry)
 
-    internal var noWorkCount: Counter = Counter.builder("repeated.task.no.work")
+    internal val noWorkCount: Counter = Counter.builder(NO_WORK_COUNTER_NAME)
         .description("count of repeated tasks invocations with no work to do")
         .register(meterRegistry)
+
+    companion object {
+        const val DURATION_SUMMARY_NAME = "repeated.task"
+        const val SUCCESS_COUNTER_NAME = "repeated.task.success"
+        const val FAILED_COUNTER_NAME = "repeated.task.failed"
+        const val NO_WORK_COUNTER_NAME = "repeated.task.no.work"
+    }
 }
