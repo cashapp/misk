@@ -40,4 +40,10 @@ dependencies {
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.junitParams)
+
+  testImplementation("org.antlr:antlr4-runtime")  {
+    version {
+      strictly("4.9.3")
+    }
+  }
 }
