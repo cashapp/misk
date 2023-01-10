@@ -14,6 +14,7 @@ import redis.clients.jedis.args.ListDirection
 import wisp.time.FakeClock
 import java.time.Duration
 import javax.inject.Inject
+import kotlin.random.Random
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -24,7 +25,10 @@ import kotlin.test.assertTrue
 class FakeRedisTest {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = Modules.combine(FakeClockModule(), RedisTestModule())
+  val module: Module = Modules.combine(
+    FakeClockModule(),
+    RedisTestModule(Random(1977)), // Hardcoded random seed for hrandfield* test determinism.
+  )
 
   @Inject lateinit var clock: FakeClock
   @Inject lateinit var redis: Redis
@@ -365,6 +369,61 @@ class FakeRedisTest {
     // Verify
     assertEquals("3", redis.hget("foo", "baz")?.utf8())
     assertEquals("2", redis.hget("foo", "bar")?.utf8())
+  }
+
+  @Test fun hrandField() {
+    // Setup.
+    val map = mapOf(
+      "Luke Skywalker" to "Mark Hamill".encodeUtf8(),
+      "Princess Leah" to "Carrie Fisher".encodeUtf8(),
+      "Han Solo" to "Harrison Ford".encodeUtf8(),
+      "R2-D2" to "Kenny Baker".encodeUtf8()
+    )
+    redis.hset("star wars characters", map)
+
+    // Test hrandfield key [count] with values.
+    assertThat(redis.hrandFieldWithValues("star wars characters", 1))
+      .containsExactlyEntriesOf(mapOf("Luke Skywalker" to "Mark Hamill".encodeUtf8()))
+
+    assertThat(redis.hrandFieldWithValues("star wars characters", 20))
+      .containsExactlyInAnyOrderEntriesOf(map)
+
+    // Test hrandfield key [count].
+    assertThat(redis.hrandField("star wars characters", 1))
+      .containsExactly("Han Solo")
+
+    assertThat(redis.hrandField("star wars characters", 20))
+      .containsExactlyInAnyOrder(*map.keys.toTypedArray())
+  }
+
+  @Test fun hrandFieldUnsupportedCount() {
+    // The Redis HRANDFIELD specification dictates different behaviour when count is negative.
+    // This behaviour cannot be adhered to by our implementation until Jedis fixes this bug:
+    // https://github.com/redis/jedis/issues/3017
+    // We must throw on a negative count in order to avoid surprising behaviour.
+    val ex1 = assertThrows<IllegalArgumentException> {
+      redis.hrandField("doesn't matter", -1)
+    }
+    val ex2 = assertThrows<IllegalArgumentException> {
+      redis.hrandFieldWithValues("doesn't matter", -1)
+    }
+    for (ex in listOf(ex1, ex2)) {
+      assertThat(ex)
+        .hasMessage("This Redis client does not support negative field counts for HRANDFIELD.")
+    }
+
+    // And it doesn't make sense to allow count=0.
+    val z1 = assertThrows<IllegalArgumentException> {
+      redis.hrandField("doesn't matter", 0)
+    }
+    val z2 = assertThrows<IllegalArgumentException> {
+      redis.hrandFieldWithValues("doesn't matter", 0)
+    }
+
+    for (ex in listOf(z1, z2)) {
+      assertThat(ex)
+        .hasMessage("You must request at least 1 field.")
+    }
   }
 
   @Test fun expireImmediately() {

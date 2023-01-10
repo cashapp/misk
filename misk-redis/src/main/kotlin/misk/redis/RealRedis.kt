@@ -88,6 +88,33 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  /**
+   * Throws if [count] is negative.
+   *
+   * See [misk.redis.Redis.hrandFieldWithValues].
+   */
+  override fun hrandFieldWithValues(key: String, count: Long): Map<String, ByteString>? {
+    checkHrandFieldCount(count)
+    return jedisPool.resource.use { jedis ->
+      jedis.hrandfieldWithValues(key.toByteArray(charset), count)
+        ?.mapKeys { (key, _) -> key.toString(charset) }
+        ?.mapValues { (_, value) -> value.toByteString() }
+    }
+  }
+
+  /**
+   * Throws if [count] is negative.
+   *
+   * See [misk.redis.Redis.hrandField].
+   */
+  override fun hrandField(key: String, count: Long): List<String> {
+    checkHrandFieldCount(count)
+    return jedisPool.resource.use { jedis ->
+      jedis.hrandfield(key.toByteArray(charset), count)
+        .map { it.toString(charset) }
+    }
+  }
+
   /** Set a ByteArray value. */
   override fun set(key: String, value: ByteString) {
     jedisPool.resource.use { jedis ->
