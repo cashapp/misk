@@ -13,11 +13,11 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
+      - name: Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
       - name: install misk-web
         run: |
-          mkdir ~/.npm-global
-          npm config set prefix '~/.npm-global'
-          PATH=~/.npm-global/bin:$PATH
           npm install -g @misk/cli
           miskweb ci-build -e
 
@@ -31,4 +31,4 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
-        run: bin/gradle publishAllPublicationsToMavenCentralRepository
+        run: gradle publishAllPublicationsToMavenCentralRepository
