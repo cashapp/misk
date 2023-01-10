@@ -22,18 +22,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node: [14]
         cmd:
-          - sudo npm install -g @misk/cli && miskweb ci-build -e
+          - npm install -g @misk/cli && miskweb ci-build -e
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Configure Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
+      - name: Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Test
         run: ${{ matrix.cmd }}
@@ -53,21 +50,15 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         cmd:
-          - ./gradlew testShardHibernate -i --scan
-          - ./gradlew testShardNonHibernate -i --scan --parallel
+          - gradle testShardHibernate -i --scan
+          - gradle testShardNonHibernate -i --scan --parallel
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
-
-      - name: Configure JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: 11.0.3
+      - name: Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Test
         run: ${{ matrix.cmd }}
