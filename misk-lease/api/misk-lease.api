@@ -1,0 +1,8 @@
+public final class misk/lease/LeaseService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/lease/LeaseService$Companion;
+	public fun <init> (Lwisp/lease/LeaseManager;)V
+}
+
+public final class misk/lease/LeaseService$Companion {
+}
+
