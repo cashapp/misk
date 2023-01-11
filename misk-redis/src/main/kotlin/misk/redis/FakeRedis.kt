@@ -10,13 +10,14 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.random.Random
 
 /** Mimics a Redis instance for testing. */
 class FakeRedis : Redis {
   @Inject lateinit var clock: Clock
+  @Inject @ForFakeRedis lateinit var random: Random
 
   private val lock = Any()
 
@@ -143,6 +144,23 @@ class FakeRedis : Redis {
       hset(key, field, value.toString().encode(Charsets.UTF_8))
       return value
     }
+  }
+
+  override fun hrandFieldWithValues(key: String, count: Long): Map<String, ByteString>? {
+    synchronized(lock) {
+      return randomFields(key, count)?.toMap()
+    }
+  }
+
+  override fun hrandField(key: String, count: Long): List<String> {
+    synchronized(lock) {
+      return randomFields(key, count)?.map { it.first } ?: emptyList()
+    }
+  }
+
+  private fun randomFields(key: String, count: Long): List<Pair<String, ByteString>>? {
+    checkHrandFieldCount(count)
+    return hgetAll(key)?.toList()?.shuffled(random)?.take(count.toInt())
   }
 
   override fun set(key: String, value: ByteString) {

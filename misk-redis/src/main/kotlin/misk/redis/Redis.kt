@@ -102,6 +102,20 @@ interface Redis {
   fun hincrBy(key: String, field: String, increment: Long): Long
 
   /**
+   * Randomly selects [count] fields and values from the hash stored at [key].
+   *
+   * NB: Implementations using Jedis 4 or seeking to emulate Jedis should use [checkHrandFieldCount]
+   * to avoid surprising behaviour like retrieving a result map which is smaller than requested by a
+   * completely random factor.
+   */
+  fun hrandFieldWithValues(key: String, count: Long): Map<String, ByteString>?
+
+  /**
+   * Like [hrandFieldWithValues] but only returns the fields of the hash stored at [key].
+   */
+  fun hrandField(key: String, count: Long): List<String>
+
+  /**
    * Sets the [ByteString] value for the given key.
    *
    * @param key the key to set
@@ -372,4 +386,23 @@ interface Redis {
    * Begin a pipeline operation to batch together several updates for optimal performance
    */
   fun pipelined(): Pipeline
+}
+
+/**
+ * Validates [count] is positive and non-zero.
+ * This is to avoid unexpected behaviour due to limitations in Jedis:
+ * https://github.com/redis/jedis/issues/3017
+ *
+ * This check can be removed when Jedis v5.x is released with full support for the behaviours
+ * for negative counts that are specified by Redis.
+ *
+ * https://redis.io/commands/hrandfield/#specification-of-the-behavior-when-count-is-passed
+ */
+internal inline fun checkHrandFieldCount(count: Long) {
+  require(count > -1) {
+    "This Redis client does not support negative field counts for HRANDFIELD."
+  }
+  require(count > 0) {
+    "You must request at least 1 field."
+  }
 }
