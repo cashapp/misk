@@ -15,6 +15,7 @@ dependencies {
   }
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
+  implementation(project(":misk-lease"))
   implementation(project(":misk-service"))
   implementation(Dependencies.wispConfig)
   implementation(Dependencies.wispLease)
