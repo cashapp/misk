@@ -207,15 +207,13 @@ class FakeRedis : Redis {
         expiryInstant = Instant.MAX
       )
     }
-    val newFieldCount = if (hKeyValueStore[key]!!.data[field] != null) { 0L } else 1L
+    val newFieldCount = if (hKeyValueStore[key]!!.data[field] != null) 0L else 1L
     hKeyValueStore[key]!!.data[field] = value
     return newFieldCount
   }
 
   override fun hset(key: String, hash: Map<String, ByteString>): Long {
-    return hash.toList().fold(0L) { newFieldCount, (field, value) ->
-      newFieldCount + hset(key, field, value)
-    }
+    return hash.entries.sumOf { (field, value) -> hset(key, field, value) }
   }
 
   override fun incr(key: String): Long {
