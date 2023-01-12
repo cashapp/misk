@@ -47,7 +47,15 @@ public final class wisp/task/RepeatedTaskManager {
 }
 
 public final class wisp/task/RepeatedTaskMetrics {
+	public static final field Companion Lwisp/task/RepeatedTaskMetrics$Companion;
+	public static final field DURATION_SUMMARY_NAME Ljava/lang/String;
+	public static final field FAILED_COUNTER_NAME Ljava/lang/String;
+	public static final field NO_WORK_COUNTER_NAME Ljava/lang/String;
+	public static final field SUCCESS_COUNTER_NAME Ljava/lang/String;
 	public fun <init> (Lio/micrometer/core/instrument/MeterRegistry;)V
+}
+
+public final class wisp/task/RepeatedTaskMetrics$Companion {
 }
 
 public final class wisp/task/Status : java/lang/Enum {
