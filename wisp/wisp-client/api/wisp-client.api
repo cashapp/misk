@@ -130,6 +130,7 @@ public final class wisp/client/NoOpDns : okhttp3/Dns {
 public final class wisp/client/OkHttpClientCommonConfigurator {
 	public static final field Companion Lwisp/client/OkHttpClientCommonConfigurator$Companion;
 	public static final field maxIdleConnections I
+	public static final field retryOnConnectionFailure Z
 	public fun <init> ()V
 	public final fun configure (Lokhttp3/OkHttpClient$Builder;Lwisp/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient$Builder;
 }
