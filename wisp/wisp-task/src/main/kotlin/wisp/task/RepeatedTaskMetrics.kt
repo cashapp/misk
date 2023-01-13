@@ -19,7 +19,7 @@ class RepeatedTaskMetrics(meterRegistry: MeterRegistry) {
         name: String,
         result: String,
     ): DistributionSummary =
-        DistributionSummary.builder("repeated.task")
+        DistributionSummary.builder(DURATION_SUMMARY_NAME)
             .description("count and duration in ms of periodic tasks")
             .tag("name", name)
             .tag("result", result)
@@ -41,7 +41,7 @@ class RepeatedTaskMetrics(meterRegistry: MeterRegistry) {
         .register(meterRegistry)
 
     companion object {
-        const val DURATION_SUMMARY_NAME = "repeated.task"
+        const val DURATION_SUMMARY_NAME = "repeated.task.duration"
         const val SUCCESS_COUNTER_NAME = "repeated.task.success"
         const val FAILED_COUNTER_NAME = "repeated.task.failed"
         const val NO_WORK_COUNTER_NAME = "repeated.task.no.work"
