@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.3.2 *(2023-01-13)*
+----------------------------
+
+* Rename the duration summary metric to be more meaningful
+
+
 Version 1.3.1 *(2023-01-10)*
 ----------------------------
 
