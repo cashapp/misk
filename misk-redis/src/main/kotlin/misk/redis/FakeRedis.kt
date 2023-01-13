@@ -200,20 +200,20 @@ class FakeRedis : Redis {
     }
   }
 
-  override fun hset(key: String, field: String, value: ByteString) {
+  override fun hset(key: String, field: String, value: ByteString): Long {
     if (!hKeyValueStore.containsKey(key)) {
       hKeyValueStore[key] = Value(
         data = ConcurrentHashMap(),
         expiryInstant = Instant.MAX
       )
     }
+    val newFieldCount = if (hKeyValueStore[key]!!.data[field] != null) 0L else 1L
     hKeyValueStore[key]!!.data[field] = value
+    return newFieldCount
   }
 
-  override fun hset(key: String, hash: Map<String, ByteString>) {
-    hash.forEach {
-      hset(key, it.key, it.value)
-    }
+  override fun hset(key: String, hash: Map<String, ByteString>): Long {
+    return hash.entries.sumOf { (field, value) -> hset(key, field, value) }
   }
 
   override fun incr(key: String): Long {

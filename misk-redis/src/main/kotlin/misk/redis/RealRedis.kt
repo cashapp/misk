@@ -148,16 +148,16 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   }
 
   /** Set a ByteArray value for the given key and field. */
-  override fun hset(key: String, field: String, value: ByteString) {
-    jedisPool.resource.use { jedis ->
+  override fun hset(key: String, field: String, value: ByteString): Long {
+    return jedisPool.resource.use { jedis ->
       jedis.hset(key.toByteArray(charset), field.toByteArray(charset), value.toByteArray())
     }
   }
 
   /** Set ByteArray values for the given key and fields. */
-  override fun hset(key: String, hash: Map<String, ByteString>) {
+  override fun hset(key: String, hash: Map<String, ByteString>): Long {
     val hashBytes = hash.entries.associate { it.key.toByteArray(charset) to it.value.toByteArray() }
-    jedisPool.resource.use { jedis ->
+    return jedisPool.resource.use { jedis ->
       jedis.hset(key.toByteArray(charset), hashBytes)
     }
   }
