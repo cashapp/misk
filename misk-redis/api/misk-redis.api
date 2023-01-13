@@ -18,8 +18,8 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public fun hrandField (Ljava/lang/String;J)Ljava/util/List;
 	public fun hrandFieldWithValues (Ljava/lang/String;J)Ljava/util/Map;
-	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
-	public fun hset (Ljava/lang/String;Ljava/util/Map;)V
+	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)J
+	public fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
@@ -64,8 +64,8 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public fun hrandField (Ljava/lang/String;J)Ljava/util/List;
 	public fun hrandFieldWithValues (Ljava/lang/String;J)Ljava/util/Map;
-	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
-	public fun hset (Ljava/lang/String;Ljava/util/Map;)V
+	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)J
+	public fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
@@ -105,8 +105,8 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public abstract fun hrandField (Ljava/lang/String;J)Ljava/util/List;
 	public abstract fun hrandFieldWithValues (Ljava/lang/String;J)Ljava/util/Map;
-	public abstract fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
-	public abstract fun hset (Ljava/lang/String;Ljava/util/Map;)V
+	public abstract fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)J
+	public abstract fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public abstract fun incr (Ljava/lang/String;)J
 	public abstract fun incrBy (Ljava/lang/String;J)J
 	public abstract fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;

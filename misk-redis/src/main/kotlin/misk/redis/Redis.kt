@@ -155,16 +155,20 @@ interface Redis {
    * @param key the key
    * @param field the field
    * @param value the value to set
+   * @return The number of fields that were added.
+   *         Returns 0 if all fields had their values overwritten.
    */
-  fun hset(key: String, field: String, value: ByteString)
+  fun hset(key: String, field: String, value: ByteString): Long
 
   /**
    * Sets the [ByteString] values for the given key and fields
    *
    * @param key the key
    * @param hash the map of fields to [ByteString] value
+   * @return The number of fields that were added.
+   *         Returns 0 if all fields had their values overwritten.
    */
-  fun hset(key: String, hash: Map<String, ByteString>)
+  fun hset(key: String, hash: Map<String, ByteString>): Long
 
   /**
    * Increments the number stored at key by one. If the key does not exist, it is set to 0 before
