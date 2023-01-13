@@ -8,7 +8,7 @@ grpc = "1.51.0"
 hoplite = "2.7.0"
 jackson = "2.14.1"
 jnrUnixsocket = "0.38.19"
-junit = "5.9.1"
+junit = "5.9.2"
 kotest = "5.5.4"
 # @pin
 kotlin = "1.7.22"
