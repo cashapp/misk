@@ -78,6 +78,31 @@ class FakeRedisTest {
     assertThat(redis[unknownKey]).isNull()
   }
 
+  @Test fun hsetReturnsCorrectValues() {
+    val key = "prehistoric_life"
+    // Add one get one.
+    assertThat(redis.hset(key, "Triassic", """["archosaurs"]""".encodeUtf8()))
+      .isEqualTo(1L)
+    // Add several get several.
+    assertThat(redis.hset(key, mapOf(
+      "Jurassic" to """["dinosaurs"]""".encodeUtf8(),
+      "Cretaceous" to """["feathered birds"]""".encodeUtf8(),
+    )))
+      .isEqualTo(2L)
+    // Replace all, add none.
+    assertThat(redis.hset(key, mapOf(
+      "Jurassic" to """["dinosaurs", "feathered dinosaurs"]""".encodeUtf8(),
+      "Cretaceous" to """["feathered birds", "fish"]""".encodeUtf8(),
+    )))
+      .isEqualTo(0L)
+    // Replace some and add some.
+    assertThat(redis.hset(key, mapOf(
+      "Triassic" to """["archosaurs", "corals"]""".encodeUtf8(), // replaced
+      "Paleogene" to """["primates"]""".encodeUtf8(), // added
+    )))
+      .isEqualTo(1L)
+  }
+
   @Test
   fun hgetAndHset() {
     val key1 = "key1"
