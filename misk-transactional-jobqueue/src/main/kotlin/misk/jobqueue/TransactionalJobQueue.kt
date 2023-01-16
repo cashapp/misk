@@ -12,7 +12,7 @@ import java.util.UUID
  * then forwards the messages asynchronously to the actual queueing system. Two variants
  * of the [enqueue] operation exist - one which writes to the application's main shard, and
  * another which writes to the shard on which a given entity group exists. Applications
- * will typically use tbe second variant, writing jobs to the local shard in the context
+ * will typically use the second variant, writing jobs to the local shard in the context
  * of a transaction that modifies the contents of an entity group.
  */
 @Deprecated(
