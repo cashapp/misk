@@ -25,7 +25,6 @@ class RepeatedTaskMetrics(meterRegistry: MeterRegistry) {
             .tag("result", result)
             .percentilePrecision(4)
             .publishPercentiles(0.5, 0.75, 0.95, 0.99, 0.999)
-            .publishPercentileHistogram()
             .register(meterRegistry)
 
     internal val successCount: Counter = Counter.builder(SUCCESS_COUNTER_NAME)
