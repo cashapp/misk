@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.3.3 *(2023-01-16)*
+----------------------------
+
+* Remove the percentile histogram setting and keep as a summary (repeated task metrics)
+
+
 Version 1.3.2 *(2023-01-13)*
 ----------------------------
 
