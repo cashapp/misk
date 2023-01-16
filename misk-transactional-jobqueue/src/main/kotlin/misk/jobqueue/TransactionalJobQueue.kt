@@ -15,6 +15,15 @@ import java.util.UUID
  * will typically use tbe second variant, writing jobs to the local shard in the context
  * of a transaction that modifies the contents of an entity group.
  */
+@Deprecated(
+  message = "This implementation is not strictly transactional since jobs are enqueued in a DB "
+    + "post commit hook. If the enqueueing operation fails, the DB record exists but no job is enqueued. "
+    + "Instead, replace with a standard JobQueue and pass an idempotency key to the enqueue() function, "
+    + "persist this value inside the job handler and check if it exists before running the handler.",
+  level = DeprecationLevel.WARNING,
+  replaceWith = ReplaceWith("JobQueue",
+    "misk.jobqueue.JobQueue")
+)
 interface TransactionalJobQueue {
   /**
    * Enqueues a job to the database shard associated with the given entity group. Will
