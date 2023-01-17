@@ -13,3 +13,25 @@ dependencies {
         }
     }
 }
+
+
+plugins.withId("com.vanniktech.maven.publish.base") {
+    val publishingExtension = extensions.getByType(PublishingExtension::class.java)
+    configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
+        pomFromGradleProperties()
+        publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, false)
+        signAllPublications()
+    }
+    if (path.startsWith(":wisp-bom")) {
+        publishingExtension.publications.create<MavenPublication>("maven") {
+            from(components["javaPlatform"])
+        }
+        // JavaLibrary(
+        //   javadocJar = JavadocJar.Javadoc(),
+        //   sourcesJar = true,
+        // )
+    } else {
+        // JavaPlatform()
+    }
+
+}
