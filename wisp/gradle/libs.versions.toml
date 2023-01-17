@@ -20,7 +20,7 @@ kotlinx = "1.6.4"
 launchDarkly = "5.10.6"
 logback = "1.4.5"
 # @pin
-mavenPublishGradlePlugin = "0.23.0"
+mavenPublishGradlePlugin = "0.23.1"
 # @pin
 micrometer = "1.8.9"
 mockito = "4.9.0"
@@ -92,7 +92,7 @@ kotest = [
 [plugins]
 kotlinBinaryCompatibilityPlugin = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompatibilityPlugin" }
 kotlinGradlePlugin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-mavenPublishGradlePlugin = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublishGradlePlugin" }
+mavenPublishGradlePlugin = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublishGradlePlugin" }
 protobufGradlePlugin = { id = "com.google.protobuf", version.ref = "protobufGradlePlugin" }
 versionCatalogUpdateGradlePlugin = { id = "nl.littlerobots.version-catalog-update", version.ref = "versionCatalogUpdateGradlePlugin" }
 versionsGradlePlugin = { id = "com.github.ben-manes.versions", version.ref = "versionsGradlePlugin" }
