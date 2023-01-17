@@ -42,13 +42,19 @@ subprojects {
     apply(plugin = rootProject.project.libs.plugins.protobufGradlePlugin.get().pluginId)
     apply(plugin = rootProject.project.libs.plugins.mavenPublishGradlePlugin.get().pluginId)
 
+
     plugins.withId("com.vanniktech.maven.publish.base") {
+      val publishingExtension = extensions.getByType(PublishingExtension::class.java)
       configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
         pomFromGradleProperties()
         publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, false)
         signAllPublications()
       }
+      publishingExtension.publications.create<MavenPublication>("maven") {
+        from(components["java"])
+      }
     }
+
   }
 
   apply(plugin = "version-catalog")
