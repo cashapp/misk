@@ -41,6 +41,8 @@ subprojects {
     apply(plugin = "kotlin")
     apply(plugin = rootProject.project.libs.plugins.kotlinBinaryCompatibilityPlugin.get().pluginId)
     apply(plugin = rootProject.project.libs.plugins.protobufGradlePlugin.get().pluginId)
+    apply(plugin = rootProject.project.libs.plugins.mavenPublishGradlePlugin.get().pluginId)
+    apply(plugin = "org.jetbrains.dokka")
 
     plugins.withId("com.vanniktech.maven.publish.base") {
       val publishingExtension = extensions.getByType(PublishingExtension::class.java)
