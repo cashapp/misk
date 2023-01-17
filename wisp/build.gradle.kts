@@ -9,6 +9,7 @@ plugins {
   alias(libs.plugins.mavenPublishGradlePlugin) apply false
   alias(libs.plugins.versionsGradlePlugin)
   alias(libs.plugins.versionCatalogUpdateGradlePlugin)
+  id("org.jetbrains.dokka") version "1.7.20"
 }
 
 repositories {
@@ -40,8 +41,6 @@ subprojects {
     apply(plugin = "kotlin")
     apply(plugin = rootProject.project.libs.plugins.kotlinBinaryCompatibilityPlugin.get().pluginId)
     apply(plugin = rootProject.project.libs.plugins.protobufGradlePlugin.get().pluginId)
-    apply(plugin = rootProject.project.libs.plugins.mavenPublishGradlePlugin.get().pluginId)
-
 
     plugins.withId("com.vanniktech.maven.publish.base") {
       val publishingExtension = extensions.getByType(PublishingExtension::class.java)
@@ -50,8 +49,18 @@ subprojects {
         publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, false)
         signAllPublications()
       }
+
+      val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+
+      val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+        dependsOn(dokkaHtml)
+        archiveClassifier.set("javadoc")
+        from(dokkaHtml.outputDirectory)
+      }
+
       publishingExtension.publications.create<MavenPublication>("maven") {
         from(components["java"])
+        artifact(javadocJar)
       }
     }
 
