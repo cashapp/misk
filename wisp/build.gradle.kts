@@ -43,7 +43,7 @@ subprojects {
     }
 
     apply(plugin = rootProject.project.libs.plugins.mavenPublishGradlePlugin.get().pluginId)
-    apply(from = "$rootDir/gradle-mvn-publish.gradle")
+    //apply(from = "$rootDir/gradle-mvn-publish.gradle")
     apply(plugin = "version-catalog")
 
     // Only apply if the project has the kotlin plugin added:
