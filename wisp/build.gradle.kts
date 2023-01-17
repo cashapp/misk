@@ -41,6 +41,14 @@ subprojects {
     apply(plugin = rootProject.project.libs.plugins.kotlinBinaryCompatibilityPlugin.get().pluginId)
     apply(plugin = rootProject.project.libs.plugins.protobufGradlePlugin.get().pluginId)
     apply(plugin = rootProject.project.libs.plugins.mavenPublishGradlePlugin.get().pluginId)
+
+    plugins.withId("com.vanniktech.maven.publish.base") {
+      configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
+        pomFromGradleProperties()
+        publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, false)
+        signAllPublications()
+      }
+    }
   }
 
   apply(plugin = "version-catalog")
