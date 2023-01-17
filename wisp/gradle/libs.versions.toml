@@ -20,7 +20,7 @@ kotlinx = "1.6.4"
 launchDarkly = "5.10.6"
 logback = "1.4.5"
 # @pin
-mavenPublishGradlePlugin = "0.18.0"
+mavenPublishGradlePlugin = "0.23.0"
 # @pin
 micrometer = "1.8.9"
 mockito = "4.9.0"
