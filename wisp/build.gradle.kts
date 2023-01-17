@@ -6,7 +6,7 @@ plugins {
   alias(libs.plugins.kotlinGradlePlugin) apply false
   alias(libs.plugins.kotlinBinaryCompatibilityPlugin) apply false
   alias(libs.plugins.protobufGradlePlugin) apply false
-  alias(libs.plugins.mavenPublishGradlePlugin)
+  alias(libs.plugins.mavenPublishGradlePlugin) apply false
   alias(libs.plugins.versionsGradlePlugin)
   alias(libs.plugins.versionCatalogUpdateGradlePlugin)
 }
@@ -40,6 +40,7 @@ subprojects {
     apply(plugin = "kotlin")
     apply(plugin = rootProject.project.libs.plugins.kotlinBinaryCompatibilityPlugin.get().pluginId)
     apply(plugin = rootProject.project.libs.plugins.protobufGradlePlugin.get().pluginId)
+    apply(plugin = rootProject.project.libs.plugins.mavenPublishGradlePlugin.get().pluginId)
   }
 
   apply(plugin = "version-catalog")
@@ -109,6 +110,7 @@ subprojects {
       }
     }
   }
+
 }
 
 fun isNonStable(version: String): Boolean {
@@ -137,10 +139,4 @@ versionCatalogUpdate {
    * Use @pin and @keep in gradle/lib.versions.toml instead of defining here
    */
   sortByKey.set(true)
-}
-
-mavenPublishing {
-  publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, false)
-  signAllPublications()
-  pomFromGradleProperties()
 }
