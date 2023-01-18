@@ -1,6 +1,17 @@
 Change Log
 ==========
 
+Version 1.3.4 *(2023-01-18)*
+----------------------------
+
+* Upgraded publishing plugin, fixed and improved publishing process
+
+Dependency changes:
+
+* grpc: "1.51.0" -> "1.52.1"
+* netty: "4.1.85.Final" ->"4.1.87.Final"
+
+
 Version 1.3.3 *(2023-01-16)*
 ----------------------------
 
