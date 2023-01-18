@@ -38,11 +38,17 @@ subprojects {
   }
 
   if (!path.startsWith(":wisp-bom")) {
+    apply(plugin = "java")
     apply(plugin = "kotlin")
     apply(plugin = rootProject.project.libs.plugins.kotlinBinaryCompatibilityPlugin.get().pluginId)
     apply(plugin = rootProject.project.libs.plugins.protobufGradlePlugin.get().pluginId)
     apply(plugin = rootProject.project.libs.plugins.mavenPublishGradlePlugin.get().pluginId)
-    apply(plugin = "org.jetbrains.dokka")
+    //apply(plugin = "org.jetbrains.dokka")
+
+    configure<JavaPluginExtension> {
+      withSourcesJar()
+      withJavadocJar()
+    }
 
     plugins.withId("com.vanniktech.maven.publish.base") {
       val publishingExtension = extensions.getByType(PublishingExtension::class.java)
@@ -51,28 +57,28 @@ subprojects {
         publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, false)
         signAllPublications()
       }
-
-      val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
-
-      val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
-        dependsOn(dokkaHtml)
-        archiveClassifier.set("javadoc")
-        from(dokkaHtml.outputDirectory)
-      }
-
-      val sourcesJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
-        archiveClassifier.set("sources")
-        from(source)
-      }
-
-      publishingExtension.publications.create<MavenPublication>("maven") {
-        from(components["java"])
-
-        artifacts {
-          javadocJar
-          sourcesJar
-        }
-      }
+      //
+      // val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+      //
+      // val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+      //   dependsOn(dokkaHtml)
+      //   archiveClassifier.set("javadoc")
+      //   from(dokkaHtml.outputDirectory)
+      // }
+      //
+      // val sourcesJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+      //   archiveClassifier.set("sources")
+      //   from(components["java"])
+      // }
+      //
+      // publishingExtension.publications.create<MavenPublication>("maven") {
+      //   from(components["java"])
+      //
+      //   artifacts {
+      //     javadocJar
+      //     sourcesJar
+      //   }
+      // }
     }
 
   }
