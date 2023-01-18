@@ -14,7 +14,7 @@ dependencies {
   }
 }
 
-
+// This requires a separate publish block because it's a javaPlatform, not a source library.
 plugins.withId("com.vanniktech.maven.publish.base") {
   val publishingExtension = extensions.getByType(PublishingExtension::class.java)
   configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
