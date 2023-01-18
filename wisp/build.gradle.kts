@@ -52,7 +52,7 @@ subprojects {
       val publishingExtension = extensions.getByType(PublishingExtension::class.java)
       configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
         pomFromGradleProperties()
-        publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, false)
+        publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, true)
         signAllPublications()
       }
 
