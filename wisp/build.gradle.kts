@@ -60,9 +60,18 @@ subprojects {
         from(dokkaHtml.outputDirectory)
       }
 
+      val sourcesJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+        archiveClassifier.set("sources")
+        from(source)
+      }
+
       publishingExtension.publications.create<MavenPublication>("maven") {
         from(components["java"])
-        artifact(javadocJar)
+
+        artifacts {
+          javadocJar
+          sourcesJar
+        }
       }
     }
 
