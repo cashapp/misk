@@ -19,7 +19,7 @@ plugins.withId("com.vanniktech.maven.publish.base") {
   val publishingExtension = extensions.getByType(PublishingExtension::class.java)
   configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
     pomFromGradleProperties()
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, false)
+    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, true)
     signAllPublications()
   }
   publishingExtension.publications.create<MavenPublication>("maven") {
