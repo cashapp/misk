@@ -71,14 +71,9 @@ subprojects {
       //   from(components["java"])
       // }
       //
-      // publishingExtension.publications.create<MavenPublication>("maven") {
-      //   from(components["java"])
-      //
-      //   artifacts {
-      //     javadocJar
-      //     sourcesJar
-      //   }
-      // }
+      publishingExtension.publications.create<MavenPublication>("maven") {
+        from(components["java"])
+      }
     }
 
   }
