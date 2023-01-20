@@ -1,5 +1,6 @@
 public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public field clock Ljava/time/Clock;
+	public field random Lkotlin/random/Random;
 	public fun <init> ()V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
@@ -9,13 +10,16 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public final fun getClock ()Ljava/time/Clock;
+	public final fun getRandom ()Lkotlin/random/Random;
 	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
 	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
-	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
-	public fun hset (Ljava/lang/String;Ljava/util/Map;)V
+	public fun hrandField (Ljava/lang/String;J)Ljava/util/List;
+	public fun hrandFieldWithValues (Ljava/lang/String;J)Ljava/util/Map;
+	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)J
+	public fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
@@ -32,10 +36,14 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public final fun setClock (Ljava/time/Clock;)V
+	public final fun setRandom (Lkotlin/random/Random;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
 	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
+}
+
+public abstract interface annotation class misk/redis/ForFakeRedis : java/lang/annotation/Annotation {
 }
 
 public final class misk/redis/RealRedis : misk/redis/Redis {
@@ -54,8 +62,10 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
 	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
-	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
-	public fun hset (Ljava/lang/String;Ljava/util/Map;)V
+	public fun hrandField (Ljava/lang/String;J)Ljava/util/List;
+	public fun hrandFieldWithValues (Ljava/lang/String;J)Ljava/util/Map;
+	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)J
+	public fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
@@ -93,8 +103,10 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public abstract fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
 	public abstract fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
-	public abstract fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
-	public abstract fun hset (Ljava/lang/String;Ljava/util/Map;)V
+	public abstract fun hrandField (Ljava/lang/String;J)Ljava/util/List;
+	public abstract fun hrandFieldWithValues (Ljava/lang/String;J)Ljava/util/Map;
+	public abstract fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)J
+	public abstract fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public abstract fun incr (Ljava/lang/String;)J
 	public abstract fun incrBy (Ljava/lang/String;J)J
 	public abstract fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
@@ -188,5 +200,7 @@ public final class misk/redis/RedisService : com/google/common/util/concurrent/A
 
 public final class misk/redis/RedisTestModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Lkotlin/random/Random;)V
+	public synthetic fun <init> (Lkotlin/random/Random;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
