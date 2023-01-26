@@ -70,4 +70,8 @@ data class SpannerEmulatorConfig(
    * this port "+ 10" as the REST / HTTP port for Docker to bind to.
    */
   val port: Int = 9010,
+
+  // Version of the emulate configuration which will be used. When null will
+  // default to the latest
+  val version: String? = null
 )
