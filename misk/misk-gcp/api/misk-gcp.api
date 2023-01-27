@@ -136,17 +136,19 @@ public final class misk/cloud/gcp/spanner/SpannerConfig : wisp/config/Config {
 
 public final class misk/cloud/gcp/spanner/SpannerEmulatorConfig {
 	public fun <init> ()V
-	public fun <init> (ZLjava/lang/String;I)V
-	public synthetic fun <init> (ZLjava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;ILjava/lang/String;)V
+	public synthetic fun <init> (ZLjava/lang/String;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()I
-	public final fun copy (ZLjava/lang/String;I)Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;
-	public static synthetic fun copy$default (Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;ZLjava/lang/String;IILjava/lang/Object;)Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (ZLjava/lang/String;ILjava/lang/String;)Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;
+	public static synthetic fun copy$default (Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;ZLjava/lang/String;ILjava/lang/String;ILjava/lang/Object;)Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getEnabled ()Z
 	public final fun getHostname ()Ljava/lang/String;
 	public final fun getPort ()I
+	public final fun getVersion ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
