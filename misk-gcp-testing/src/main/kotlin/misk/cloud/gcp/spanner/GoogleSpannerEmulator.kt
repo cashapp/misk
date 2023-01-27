@@ -126,12 +126,16 @@ class GoogleSpannerEmulator @Inject constructor(
    * Pulls a Docker container containing the Google Spanner emulator.
    */
   fun pullImage(imageVersion: String? = null) {
-    setImageVersion(imageVersion)
+    image = fullImageName(imageVersion)
     Companion.pullImage()
   }
 
   private fun doStart(imageVersion: String? = null) {
-    setImageVersion(imageVersion)
+    val image = if (imageVersion != null) {
+      fullImageName(imageVersion)
+    } else {
+      image
+    }
     val spannerGrpcPort = ExposedPort.tcp(server.config.emulator.port)
     val spannerHttpPort = ExposedPort.tcp(server.config.emulator.port + 10)
     val ports = Ports()
@@ -269,8 +273,8 @@ class GoogleSpannerEmulator @Inject constructor(
     }
   }
 
-  private fun setImageVersion(imageVersion: String?) {
-    image = "$IMAGE_NAME:${imageVersion ?: "latest"}"
+  private fun fullImageName(imageVersion: String?): String {
+    return "$IMAGE_NAME:${imageVersion ?: "latest"}"
   }
 
   private class SpannerServer(
