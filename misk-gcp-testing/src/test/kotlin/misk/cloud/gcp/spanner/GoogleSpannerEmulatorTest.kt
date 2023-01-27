@@ -137,7 +137,23 @@ class GoogleSpannerEmulatorTest {
       // Throws a NotFoundError if the image isn't present locally.
       assertDoesNotThrow {
         imageId = dockerClient.inspectImageCmd(
-          GoogleSpannerEmulator.IMAGE
+          GoogleSpannerEmulator.IMAGE_NAME
+        ).exec().id
+      }
+
+      // ID of the image should be present if it's local.
+      assertNotNull(imageId)
+    }
+
+    @Test fun `pulls a Docker image of the emulator with specified version`() {
+      var imageId: String? = null
+
+      emulator.pullImage("1.4.9")
+
+      // Throws a NotFoundError if the image isn't present locally.
+      assertDoesNotThrow {
+        imageId = dockerClient.inspectImageCmd(
+          GoogleSpannerEmulator.IMAGE_NAME
         ).exec().id
       }
 
