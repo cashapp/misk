@@ -16,7 +16,7 @@ import com.google.inject.Injector
 import com.google.inject.Module
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.config.RealSecret
 import misk.config.Secret
 import misk.environment.DeploymentModule
 import misk.logging.LogCollectorModule
@@ -344,7 +344,7 @@ class CryptoModuleTest {
   @Test // Currently disabled since the env check is as well
   fun testRaisesInWrongEnv() {
     val injector = getInjector(emptyList())
-    val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
+    val plainKey = Key("name", KeyType.AEAD, RealSecret(""))
     val kr = injector.getInstance(KeyReader::class.java)
 
     assertThatThrownBy {

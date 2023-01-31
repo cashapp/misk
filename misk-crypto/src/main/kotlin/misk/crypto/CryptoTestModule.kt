@@ -17,7 +17,8 @@ import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
-import misk.config.MiskConfig
+import misk.config.RealSecret
+import misk.config.Secret
 import misk.crypto.pgp.PgpDecrypter
 import misk.crypto.pgp.PgpDecrypterProvider
 import misk.crypto.pgp.PgpEncrypter
@@ -66,7 +67,7 @@ class CryptoTestModule(
 
     if (externalDataKeys.isNotEmpty()) {
       externalDataKeys.entries.forEach { entry ->
-        val fakeFake = Key(entry.key, entry.value, MiskConfig.RealSecret(""))
+        val fakeFake = Key(entry.key, entry.value, RealSecret(""))
         keys.add(fakeFake)
       }
     }

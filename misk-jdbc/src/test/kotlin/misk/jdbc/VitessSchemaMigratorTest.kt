@@ -2,7 +2,7 @@ package misk.jdbc
 
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.client.HttpClientsConfig
 import misk.database.DockerVitessCluster
 import misk.database.StartDatabaseService
 import misk.environment.DeploymentModule
@@ -15,6 +15,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import java.sql.Connection
 import javax.inject.Inject
@@ -23,8 +26,11 @@ import javax.inject.Qualifier
 @MiskTest(startService = true)
 internal class VitessSchemaMigratorTest {
   val deploymentModule = DeploymentModule(TESTING)
-  val config =
-    MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", TESTING)
+  val config = WispConfig.builder().addWispConfigSources(
+    listOf(
+      ConfigSource("classpath:/test_schemamigrator_vitess_app-testing.yaml"),
+    )
+  ).build().loadConfigOrThrow<MoviesConfig>()
 
   @MiskTestModule
   val module = Modules.combine(

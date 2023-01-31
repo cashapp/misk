@@ -2,7 +2,6 @@ package misk.web.metadata.config
 
 import com.google.inject.Inject
 import misk.config.AppName
-import misk.config.MiskConfig
 import misk.resources.ResourceLoader
 import misk.web.Get
 import misk.web.RequestContentType
@@ -12,6 +11,9 @@ import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.Deployment
 import javax.inject.Singleton
 
@@ -46,15 +48,16 @@ class ConfigMetadataAction @Inject constructor(
     deployment: Deployment,
     config: Config
   ): Map<String, String?> {
-    val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())
+    WispConfig.builder()
+//    val rawYamlFiles = WispConfig.loadConfigYamlMap(appName, deployment, listOf())
     val yamlFiles = linkedMapOf<String, String?>()
     when (mode) {
       ConfigTabMode.SAFE -> {
         yamlFiles.put("JVM", jvmMetadataAction.getRuntime())
       }
       ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS -> {
-        yamlFiles.put("Effective Config", MiskConfig.toYaml(config, ResourceLoader.SYSTEM))
-        rawYamlFiles.map { yamlFiles.put(it.key, it.value) }
+//        yamlFiles.put("Effective Config", WispConfig.toYaml(config, ResourceLoader.SYSTEM))
+//        rawYamlFiles.map { yamlFiles.put(it.key, it.value) }
         yamlFiles.put("JVM", jvmMetadataAction.getRuntime())
       }
     }

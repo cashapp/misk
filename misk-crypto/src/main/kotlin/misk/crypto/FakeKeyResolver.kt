@@ -1,6 +1,6 @@
 package misk.crypto
 
-import misk.config.MiskConfig
+import misk.config.RealSecret
 import java.lang.UnsupportedOperationException
 
 class FakeKeyResolver : KeyResolver {
@@ -43,7 +43,7 @@ class FakeKeyResolver : KeyResolver {
     }
   }
 
-  private fun keyTypeToSecret(type: KeyType): MiskConfig.RealSecret<String> {
+  private fun keyTypeToSecret(type: KeyType): RealSecret<String> {
     return when (type) {
       KeyType.AEAD -> TestKeysets.AEAD
       KeyType.DAEAD -> TestKeysets.DAEAD

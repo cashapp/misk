@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.client.HttpClientsConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
@@ -13,6 +13,9 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -99,7 +102,11 @@ class ByteStringColumnTest {
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
 
-      val config = MiskConfig.load<RootConfig>("bytestringcolumn", TESTING)
+      val config = WispConfig.builder().addWispConfigSources(
+        listOf(
+          ConfigSource("classpath:/bytestringcolumn-testing.yaml"),
+        )
+      ).build().loadConfigOrThrow<RootConfig>()
       install(HibernateTestingModule(ByteStringColumn::class, config.data_source))
       install(HibernateModule(ByteStringColumn::class, config.data_source))
       install(object : HibernateEntityModule(ByteStringColumn::class) {

@@ -1,7 +1,7 @@
 package misk.slack
 
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.config.RealSecret
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -94,7 +94,7 @@ class SlackClientTest {
         SlackModule(
           config = SlackConfig(
             baseUrl = mockWebServer.url("/").toString(),
-            webhook_path = MiskConfig.RealSecret("secret_webhook_path"),
+            webhook_path = RealSecret("secret_webhook_path"),
             default_channel = "#default-channel"
           )
         )

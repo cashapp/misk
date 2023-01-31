@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.client.HttpClientsConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
@@ -10,6 +10,9 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -137,7 +140,11 @@ class BoxedStringColumnTest {
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
 
-      val config = MiskConfig.load<RootConfig>("boxedstring", TESTING)
+      val config = WispConfig.builder().addWispConfigSources(
+        listOf(
+          ConfigSource("classpath:/boxedstring-testing.yaml"),
+        )
+      ).build().loadConfigOrThrow<RootConfig>()
       install(HibernateTestingModule(TokenColumn::class, config.data_source))
       install(HibernateModule(TokenColumn::class, config.data_source))
       install(object : HibernateEntityModule(TokenColumn::class) {

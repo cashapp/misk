@@ -2,7 +2,7 @@ package misk.jdbc
 
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.client.HttpClientsConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -13,6 +13,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import java.sql.Connection
 import java.time.LocalDate
@@ -308,7 +311,11 @@ abstract class RealTransacterTest {
         )
       )
       install(DeploymentModule(TESTING))
-      val config = MiskConfig.load<RootConfig>("test_transacter", TESTING)
+      val config = WispConfig.builder().addWispConfigSources(
+        listOf(
+          ConfigSource("classpath:/test_transacter-testing.yaml"),
+        )
+      ).build().loadConfigOrThrow<RootConfig>()
       val dataSourceConfig = selectDataSourceConfig(config)
       install(JdbcTestingModule(Movies::class))
       install(

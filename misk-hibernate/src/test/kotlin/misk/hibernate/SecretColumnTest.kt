@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.client.HttpClientsConfig
 import misk.crypto.CryptoConfig
 import misk.crypto.CryptoTestModule
 import misk.environment.DeploymentModule
@@ -13,6 +13,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import java.util.Arrays
 import java.util.Objects
@@ -349,7 +352,11 @@ class SecretColumnTest {
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
 
-      val config = MiskConfig.load<AppConfig>("encryptedcolumn", TESTING)
+      val config = WispConfig.builder().addWispConfigSources(
+        listOf(
+          ConfigSource("classpath:/encryptedcolumn-testing.yaml"),
+        )
+      ).build().loadConfigOrThrow<AppConfig>()
       install(CryptoTestModule(config.crypto))
       install(HibernateTestingModule(JerryGarciaDb::class, config.data_source))
       install(HibernateModule(JerryGarciaDb::class, config.data_source))

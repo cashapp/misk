@@ -2,7 +2,7 @@ package misk.jdbc
 
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.client.HttpClientsConfig
 import misk.database.StartDatabaseService
 import misk.environment.DeploymentModule
 import misk.testing.MiskTest
@@ -12,6 +12,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import javax.inject.Inject
 
@@ -30,8 +33,11 @@ internal class TidbSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSou
 
 internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
   val deploymentModule = DeploymentModule(TESTING)
-
-  val appConfig = MiskConfig.load<RootConfig>("test_schemamigrator_app", TESTING)
+  val appConfig = WispConfig.builder().addWispConfigSources(
+    listOf(
+      ConfigSource("classpath:/test_schemamigrator_app-testing.yaml"),
+    )
+  ).build().loadConfigOrThrow<RootConfig>()
   val config = selectDataSourceConfig(appConfig)
 
   @MiskTestModule

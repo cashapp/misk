@@ -4,7 +4,6 @@ import com.google.inject.Injector
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
-import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
@@ -25,6 +24,9 @@ import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import java.time.Instant
 import javax.inject.Inject
@@ -41,7 +43,11 @@ import kotlin.test.assertTrue
 internal class SchemaValidatorTest {
   @MiskTestModule
   val module = TestModule()
-  val config = MiskConfig.load<RootConfig>("schemavalidation", TESTING)
+  val config = WispConfig.builder().addWispConfigSources(
+    listOf(
+      ConfigSource("classpath:/schemavalidation-testing.yaml"),
+    )
+  ).build().loadConfigOrThrow<RootConfig>()
 
   @Inject @ValidationDb lateinit var transacter: Transacter
   @Inject @ValidationDb lateinit var sessionFactoryService: Provider<SessionFactoryService>

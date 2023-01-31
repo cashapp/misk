@@ -7,14 +7,20 @@ import misk.client.HttpClientsConfig
 import misk.client.applyDefaults
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import java.time.Duration
 
 class HttpClientsConfigBackwardsCompatibilityTest {
   @Test
   fun `can parse old configuration format`() {
-    val config =
-      MiskConfig.load<HttpClientsConfig>("http_clients_config_old", TESTING)
+    val config = WispConfig.builder().addWispConfigSources(
+        listOf(
+          ConfigSource("classpath:/http_clients_config_old-testing.yaml"),
+        )
+      ).build().loadConfigOrThrow<HttpClientsConfig>()
 
     assertThat(config["test_client_url"])
       .isEqualTo(
@@ -45,8 +51,11 @@ class HttpClientsConfigBackwardsCompatibilityTest {
 
   @Test
   fun `can parse new configuration format`() {
-    val config =
-      MiskConfig.load<HttpClientsConfig>("http_clients_config_new", TESTING)
+    val config = WispConfig.builder().addWispConfigSources(
+      listOf(
+        ConfigSource("classpath:/http_clients_config_new-testing.yaml"),
+      )
+    ).build().loadConfigOrThrow<HttpClientsConfig>()
 
     assertThat(config["test_client_url"])
       .isEqualTo(

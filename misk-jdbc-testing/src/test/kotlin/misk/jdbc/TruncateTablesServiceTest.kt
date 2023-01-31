@@ -2,7 +2,7 @@ package misk.jdbc
 
 import com.google.inject.util.Providers
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.client.HttpClientsConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -11,6 +11,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -104,7 +107,12 @@ internal class TruncateTablesServiceTest {
       install(DeploymentModule(TESTING))
       install(MiskTestingServiceModule())
 
-      val config = MiskConfig.load<TestConfig>("test_truncatetables_app", TESTING)
+      WispConfig.builder()
+      val config = WispConfig.builder().addWispConfigSources(
+        listOf(
+          ConfigSource("classpath:/test_truncatetables_app-testing.yaml"),
+        )
+      ).build().loadConfigOrThrow<TestConfig>()
       install(JdbcModule(TestDatasource::class, config.data_source))
     }
   }

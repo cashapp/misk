@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.client.HttpClientsConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
@@ -10,6 +10,9 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -56,8 +59,15 @@ class ExternalColumnTest {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
-
-      val config = MiskConfig.load<RootConfig>("externalcolumn", TESTING)
+      val config = WispConfig.builder().addWispConfigSources(
+        listOf(
+          ConfigSource("classpath:/    val config = WispConfig.builder().addWispConfigSources(\n" +
+            "        listOf(\n" +
+            "          ConfigSource(\"classpath:/http_clients_config_old.yaml\"),\n" +
+            "        )\n" +
+            "      ).build().loadConfigOrThrow<HttpClientsConfig>()-testing.yaml"),
+        )
+      ).build().loadConfigOrThrow<RootConfig>()
       install(HibernateTestingModule(ExternalColumnDb::class, config.data_source))
       install(HibernateModule(ExternalColumnDb::class, config.data_source))
       install(object : HibernateEntityModule(ExternalColumnDb::class) {

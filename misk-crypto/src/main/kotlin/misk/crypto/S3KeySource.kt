@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.google.inject.Inject
-import misk.config.MiskConfig
+import misk.config.RealSecret
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 
@@ -86,7 +86,7 @@ class S3KeySource @Inject constructor(
       val keyType = KeyType.valueOf(keyTypeDescription.uppercase())
 
       val keyContents = obj.objectContent.readAllBytes().toString(Charsets.UTF_8)
-      return Key(alias, keyType, MiskConfig.RealSecret(keyContents), kmsArn)
+      return Key(alias, keyType, RealSecret(keyContents), kmsArn)
     } catch (ex: AmazonS3Exception) {
       throw ExternalKeyManagerException("key alias not accessible: $alias (bucket '$name', $ex)")
     }

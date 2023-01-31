@@ -41,3 +41,5 @@ package misk.config
 interface Secret<T> {
   val value: T
 }
+
+class RealSecret<T>(override val value: T) : Secret<T>

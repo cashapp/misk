@@ -4,7 +4,7 @@ import com.google.crypto.tink.CleartextKeysetHandle
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.aead.KmsEnvelopeAead
-import misk.config.MiskConfig
+import misk.config.RealSecret
 import java.io.ByteArrayOutputStream
 
 /**
@@ -13,18 +13,18 @@ import java.io.ByteArrayOutputStream
  */
 internal class TestKeysets {
   companion object {
-    fun encryptSecret(key: MiskConfig.RealSecret<String>): MiskConfig.RealSecret<String> {
+    fun encryptSecret(key: RealSecret<String>): RealSecret<String> {
       val kek = KmsEnvelopeAead(KeyReader.KEK_TEMPLATE, FakeMasterEncryptionKey())
       val keyOutput = ByteArrayOutputStream()
       val plaintextKey = CleartextKeysetHandle.read(JsonKeysetReader.withString(key.value))
       plaintextKey.write(JsonKeysetWriter.withOutputStream(keyOutput), kek)
-      return MiskConfig.RealSecret(keyOutput.toString())
+      return RealSecret(keyOutput.toString())
     }
     /**
      * Created with tikney:
      * `tinkey create-keyset --key-template AES256_GCM`
      */
-    val AEAD = MiskConfig.RealSecret(
+    val AEAD = RealSecret(
       """{
     "primaryKeyId": 287541552,
     "key": [{
@@ -44,7 +44,7 @@ internal class TestKeysets {
      * Created with tikney:
      * `tinkey create-keyset --key-template AES256_SIV`
      */
-    val DAEAD = MiskConfig.RealSecret(
+    val DAEAD = RealSecret(
       """{
     "primaryKeyId": 1677617234,
     "key": [{
@@ -64,7 +64,7 @@ internal class TestKeysets {
      * Created with tikney:
      * `tinkey create-keyset --key-template ECDSA_P256`
      */
-    val DIGITAL_SIGNATURE = MiskConfig.RealSecret(
+    val DIGITAL_SIGNATURE = RealSecret(
       """{
     "primaryKeyId": 1279591183,
     "key": [{
@@ -84,7 +84,7 @@ internal class TestKeysets {
      * Created with tikney:
      * `tinkey create-keyset --key-template ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256`
      */
-    val HYBRID = MiskConfig.RealSecret(
+    val HYBRID = RealSecret(
       """{
     "primaryKeyId": 1026740700,
     "key": [{
@@ -104,7 +104,7 @@ internal class TestKeysets {
      * Created with tikney:
      * `tinkey create-keyset --key-template HMAC_SHA256_256BITTAG`
      */
-    val MAC = MiskConfig.RealSecret(
+    val MAC = RealSecret(
       """{
     "primaryKeyId": 1113231046,
     "key": [{
@@ -124,7 +124,7 @@ internal class TestKeysets {
      * Created with tikney:
      * `tinkey create-keyset --key-template AES256_GCM_HKDF_4KB`
      */
-    val STREAMING_AEAD = MiskConfig.RealSecret(
+    val STREAMING_AEAD = RealSecret(
       """{
     "primaryKeyId": 1557709997,
     "key": [{
@@ -140,7 +140,7 @@ internal class TestKeysets {
 }"""
     )
 
-    val PGP_DECRYPT = MiskConfig.RealSecret(
+    val PGP_DECRYPT = RealSecret(
       """{
   "region": "",
   "encrypted_private_key": "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",
@@ -154,7 +154,7 @@ internal class TestKeysets {
 }"""
     )
 
-    val PGP_ENCRYPT = MiskConfig.RealSecret(
+    val PGP_ENCRYPT = RealSecret(
       """-----BEGIN PGP PUBLIC KEY BLOCK-----
 
 xsFNBF9uPTIBEACt2DsM1a5/BkcfTPLgUAijt3D16sHB+wqCNMWG+eS8eNKxzum9

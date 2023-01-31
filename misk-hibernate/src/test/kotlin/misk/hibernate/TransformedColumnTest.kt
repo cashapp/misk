@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
+import misk.client.HttpClientsConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
@@ -11,6 +11,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Percentage
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.config.ConfigSource
+import wisp.config.WispConfig
+import wisp.config.addWispConfigSources
 import wisp.deployment.TESTING
 import java.io.Serializable
 import java.util.Objects
@@ -477,8 +480,11 @@ class TransformedColumnTest {
         ): Serializable = swappableTransformer?.disassemble(ctx, value)!!
       })
 
-      val conf =
-        MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", TESTING)
+      val conf = WispConfig.builder().addWispConfigSources(
+        listOf(
+          ConfigSource("classpath:/transformedcolumn-testing.yaml"),
+        )
+      ).build().loadConfigOrThrow<TransformedColumnTestConfig>()
       install(HibernateTestingModule(TransformedColumnTestDb::class, conf.data_source))
       install(HibernateModule(TransformedColumnTestDb::class, conf.data_source))
       install(object : HibernateEntityModule(TransformedColumnTestDb::class) {
