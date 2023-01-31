@@ -35,6 +35,7 @@ import java.security.Security
  * but **will not** use the key material specified in the configuration.
  * Instead, it'll generate a random keyset handle for each named key.
  */
+@Deprecated("Use misk-crypto-testing instead")
 class CryptoTestModule(
   private val config: CryptoConfig? = null
 ) : KAbstractModule() {

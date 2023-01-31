@@ -3,6 +3,7 @@ package misk.crypto
 import misk.inject.KAbstractModule
 import wisp.deployment.Deployment
 
+@Deprecated("Use misk-crypto-testing instead")
 class FakeExternalKeyManagerModule(private val config: CryptoConfig) : KAbstractModule() {
 
   override fun configure() {

@@ -3,6 +3,7 @@ package misk.crypto
 import com.google.crypto.tink.Aead
 import java.util.Base64
 
+@Deprecated("Use misk-crypto-testing instead")
 internal class FakeMasterEncryptionKey : Aead {
 
   override fun encrypt(plaintext: ByteArray?, associatedData: ByteArray?): ByteArray {
