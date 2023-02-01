@@ -96,7 +96,7 @@ fun KLogger.log(level: Level, th: Throwable, vararg tags: Tag, message: () -> An
     }
 }
 
-private fun withTags(vararg tags: Tag, f: () -> Unit) {
+fun withTags(vararg tags: Tag, f: () -> Unit) {
     // Establish MDC, saving prior MDC
     val priorMDC = tags.map { (k, v) ->
         val priorValue = MDC.get(k)
