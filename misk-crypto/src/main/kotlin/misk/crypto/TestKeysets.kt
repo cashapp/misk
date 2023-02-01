@@ -11,7 +11,8 @@ import java.io.ByteArrayOutputStream
  * These test keys are used by the [FakeKeyResolver] class.
  * *DO NOT USE IN ANY OTHER SITUATION*
  */
-@Deprecated("Use misk-crypto-testing instead")
+@Deprecated("Use misk-crypto-testing instead",
+  replaceWith = ReplaceWith("TestKeysets", imports = ["misk.crypto.testing"]))
 internal class TestKeysets {
   companion object {
     fun encryptSecret(key: MiskConfig.RealSecret<String>): MiskConfig.RealSecret<String> {

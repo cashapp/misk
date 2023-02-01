@@ -1,4 +1,4 @@
-package misk.crypto
+package misk.crypto.testing
 
 import com.google.crypto.tink.Aead
 import java.util.Base64

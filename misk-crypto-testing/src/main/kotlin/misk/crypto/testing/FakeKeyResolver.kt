@@ -1,6 +1,10 @@
-package misk.crypto
+package misk.crypto.testing
 
 import misk.config.MiskConfig
+import misk.crypto.Key
+import misk.crypto.KeyAlias
+import misk.crypto.KeyResolver
+import misk.crypto.KeyType
 import java.lang.UnsupportedOperationException
 
 class FakeKeyResolver : KeyResolver {

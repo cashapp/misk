@@ -9,6 +9,7 @@ import com.squareup.moshi.Moshi
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig.RealSecret
 import misk.crypto.pgp.internal.PgpKeyJsonFile
+import misk.crypto.testing.CryptoTestModule
 import misk.environment.DeploymentModule
 import misk.logging.LogCollectorModule
 import misk.moshi.adapter

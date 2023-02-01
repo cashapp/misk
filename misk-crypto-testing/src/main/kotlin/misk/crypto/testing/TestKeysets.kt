@@ -1,10 +1,11 @@
-package misk.crypto
+package misk.crypto.testing
 
 import com.google.crypto.tink.CleartextKeysetHandle
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import misk.config.MiskConfig
+import misk.crypto.KeyReader
 import java.io.ByteArrayOutputStream
 
 /**

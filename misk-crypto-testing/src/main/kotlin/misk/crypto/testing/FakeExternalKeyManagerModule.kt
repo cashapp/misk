@@ -1,5 +1,7 @@
-package misk.crypto
+package misk.crypto.testing
 
+import misk.crypto.CryptoConfig
+import misk.crypto.KeyResolver
 import misk.inject.KAbstractModule
 import wisp.deployment.Deployment
 
