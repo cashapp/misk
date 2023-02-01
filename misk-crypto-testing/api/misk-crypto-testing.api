@@ -1,14 +1,14 @@
-public final class misk/crypto/CryptoTestModule : misk/inject/KAbstractModule {
+public final class misk/crypto/testing/CryptoTestModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Lmisk/crypto/CryptoConfig;)V
 	public synthetic fun <init> (Lmisk/crypto/CryptoConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
-public final class misk/crypto/FakeExternalKeyManagerModule : misk/inject/KAbstractModule {
+public final class misk/crypto/testing/FakeExternalKeyManagerModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/crypto/CryptoConfig;)V
 }
 
-public final class misk/crypto/FakeKeyResolver : misk/crypto/KeyResolver {
+public final class misk/crypto/testing/FakeKeyResolver : misk/crypto/KeyResolver {
 	public fun <init> (Ljava/util/List;)V
 	public fun <init> (Ljava/util/Map;)V
 	public fun getAllKeyAliases ()Ljava/util/Map;
