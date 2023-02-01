@@ -13,5 +13,6 @@ public final class wisp/logging/LoggingKt {
 	public static final fun trace (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun warn (Lmu/KLogger;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun warn (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
+	public static final fun withTags ([Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 }
 
