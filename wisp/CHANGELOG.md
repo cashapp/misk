@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.3.5 *(2023-02-02)*
+----------------------------
+
+* Make withTags logging function public
+
+
 Version 1.3.4 *(2023-01-18)*
 ----------------------------
 
