@@ -841,4 +841,16 @@ class FakeRedisTest {
     clock.add(Duration.ofSeconds(1))
     assertThat(redis.rpop("droids", 1)).isEmpty()
   }
+
+  @Test fun lpushAndRpushAreOrderedCorrectly() {
+    // This test is pulled directly from the Redis documentation for LPUSH and RPUSH.
+    val elements = listOf("a", "b", "c").map { it.encodeUtf8() }
+
+    redis.lpush("l", *elements.toTypedArray())
+    assertThat(redis.lrange("l", 0, -1))
+      .containsExactly(*elements.toList().asReversed().toTypedArray())
+
+    redis.rpush("r", *elements.toTypedArray())
+    assertThat(redis.lrange("r", 0, -1)).containsExactly(*elements.toTypedArray())
+  }
 }
