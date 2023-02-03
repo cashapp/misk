@@ -538,8 +538,8 @@ class FakeRedisTest {
     val destinationKey = "oof"
     val destinationElements = listOf("baz".encodeUtf8())
 
-    redis.lpush(sourceKey, *sourceElements.toTypedArray())
-    redis.lpush(destinationKey, *destinationElements.toTypedArray())
+    redis.rpush(sourceKey, *sourceElements.toTypedArray())
+    redis.rpush(destinationKey, *destinationElements.toTypedArray())
 
     // Exercise
     val result = redis.lmove(
@@ -563,7 +563,7 @@ class FakeRedisTest {
     val sourceKey = "foo"
     val sourceElements = listOf("bar", "bat", "baz").map { it.encodeUtf8() }
 
-    redis.lpush(sourceKey, *sourceElements.toTypedArray())
+    redis.rpush(sourceKey, *sourceElements.toTypedArray())
     assertEquals(sourceElements, redis.lrange(sourceKey, 0, -1))
 
     // Exercise
@@ -585,13 +585,14 @@ class FakeRedisTest {
   @Test fun lpushCreatesList() {
     // Setup
     val key = "foo"
+    val elements = listOf("bar", "bat").map { it.encodeUtf8() }
 
     // Exercise
-    val result = redis.lpush(key, "bar".encodeUtf8(), "bat".encodeUtf8())
+    val result = redis.lpush(key, *elements.toTypedArray())
 
     assertEquals(2L, result)
     assertEquals(
-      listOf("bar".encodeUtf8(), "bat".encodeUtf8()),
+      elements.asReversed(),
       redis.lrange(key, 0, -1)
     )
   }
@@ -612,7 +613,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrange(key, 0, -1)
@@ -646,7 +647,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrange(key, 3, 10)
@@ -659,7 +660,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrem(key, 2, "bar".encodeUtf8())
@@ -676,7 +677,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrem(key, 1, "bar".encodeUtf8())
@@ -693,7 +694,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrem(key, -1, "bar".encodeUtf8())
@@ -721,8 +722,8 @@ class FakeRedisTest {
     val destinationKey = "oof"
     val destinationElements = listOf("baz".encodeUtf8())
 
-    redis.lpush(sourceKey, *sourceElements.toTypedArray())
-    redis.lpush(destinationKey, *destinationElements.toTypedArray())
+    redis.rpush(sourceKey, *sourceElements.toTypedArray())
+    redis.rpush(destinationKey, *destinationElements.toTypedArray())
 
     // Exercise
     val result = redis.rpoplpush(
@@ -744,7 +745,7 @@ class FakeRedisTest {
     val sourceKey = "foo"
     val sourceElements = listOf("bar", "bat", "baz").map { it.encodeUtf8() }
 
-    redis.lpush(sourceKey, *sourceElements.toTypedArray())
+    redis.rpush(sourceKey, *sourceElements.toTypedArray())
     assertEquals(sourceElements, redis.lrange(sourceKey, 0, -1))
 
     // Exercise
@@ -759,5 +760,97 @@ class FakeRedisTest {
       listOf("baz".encodeUtf8(), "bar".encodeUtf8(), "bat".encodeUtf8()),
       redis.lrange(sourceKey, 0, -1)
     )
+  }
+
+  @Test fun lpushAndLpop() {
+    val droids = listOf("4-LOM", "BB-8", "BD-1", "C-3PO", "IG-11", "IG-88B", "K-2SO", "R2-D2")
+      .map { it.encodeUtf8() }
+    redis.lpush("droids", *droids.toTypedArray())
+
+    // Non-expired keys.
+    assertThat(redis.lpop("droids", 1)).containsExactly("R2-D2".encodeUtf8())
+    assertThat(redis.lpop("droids", 3)).containsExactlyElementsOf(
+      listOf("K-2SO", "IG-88B", "IG-11").map { it.encodeUtf8() })
+    assertThat(redis.lpop("droids", 99)).containsExactlyElementsOf(
+      listOf("C-3PO", "BD-1", "BB-8", "4-LOM").map { it.encodeUtf8() })
+    assertThat(redis.lpop("droids", 1)).isEmpty()
+
+    // Expired key.
+    redis.lpush("droids", *droids.toTypedArray())
+    redis.pExpireAt("droids", clock.instant().toEpochMilli())
+    clock.add(Duration.ofSeconds(1))
+    assertThat(redis.lpop("droids", 1)).isEmpty()
+  }
+
+  @Test fun lpushAndRpop() {
+    val droids = listOf("4-LOM", "BB-8", "BD-1", "C-3PO", "IG-11", "IG-88B", "K-2SO", "R2-D2")
+      .map { it.encodeUtf8() }
+    redis.lpush("droids", *droids.toTypedArray())
+
+    // Non-expired keys.
+    assertThat(redis.rpop("droids", 1)).containsExactly("4-LOM".encodeUtf8())
+    assertThat(redis.rpop("droids", 3)).containsExactlyElementsOf(
+      listOf("BB-8", "BD-1", "C-3PO").map { it.encodeUtf8() })
+    assertThat(redis.rpop("droids", 99)).containsExactlyElementsOf(
+      listOf("IG-11", "IG-88B", "K-2SO", "R2-D2").map { it.encodeUtf8() })
+    assertThat(redis.rpop("droids", 1)).isEmpty()
+
+    // Expired key.
+    redis.lpush("droids", *droids.toTypedArray())
+    redis.pExpireAt("droids", clock.instant().toEpochMilli())
+    clock.add(Duration.ofSeconds(1))
+    assertThat(redis.rpop("droids", 1)).isEmpty()
+  }
+
+  @Test fun rpushAndLpop() {
+    val droids = listOf("4-LOM", "BB-8", "BD-1", "C-3PO", "IG-11", "IG-88B", "K-2SO", "R2-D2")
+      .map { it.encodeUtf8() }
+    redis.rpush("droids", *droids.toTypedArray())
+
+    // Non-expired keys.
+    assertThat(redis.lpop("droids", 1)).containsExactly("4-LOM".encodeUtf8())
+    assertThat(redis.lpop("droids", 3)).containsExactlyElementsOf(
+      listOf("BB-8", "BD-1", "C-3PO").map { it.encodeUtf8() })
+    assertThat(redis.lpop("droids", 99)).containsExactlyElementsOf(
+      listOf("IG-11", "IG-88B", "K-2SO", "R2-D2").map { it.encodeUtf8() })
+    assertThat(redis.lpop("droids", 1)).isEmpty()
+
+    // Expired key.
+    redis.rpush("droids", *droids.toTypedArray())
+    redis.pExpireAt("droids", clock.instant().toEpochMilli())
+    clock.add(Duration.ofSeconds(1))
+    assertThat(redis.lpop("droids", 1)).isEmpty()
+  }
+
+  @Test fun rpushAndRpop() {
+    val droids = listOf("4-LOM", "BB-8", "BD-1", "C-3PO", "IG-11", "IG-88B", "K-2SO", "R2-D2")
+      .map { it.encodeUtf8() }
+    redis.rpush("droids", *droids.toTypedArray())
+
+    // Non-expired keys.
+    assertThat(redis.rpop("droids", 1)).containsExactly("R2-D2".encodeUtf8())
+    assertThat(redis.rpop("droids", 3)).containsExactlyElementsOf(
+      listOf("K-2SO", "IG-88B", "IG-11").map { it.encodeUtf8() })
+    assertThat(redis.rpop("droids", 99)).containsExactlyElementsOf(
+      listOf("C-3PO", "BD-1", "BB-8", "4-LOM").map { it.encodeUtf8() })
+    assertThat(redis.rpop("droids", 1)).isEmpty()
+
+    // Expired key.
+    redis.rpush("droids", *droids.toTypedArray())
+    redis.pExpireAt("droids", clock.instant().toEpochMilli())
+    clock.add(Duration.ofSeconds(1))
+    assertThat(redis.rpop("droids", 1)).isEmpty()
+  }
+
+  @Test fun lpushAndRpushAreOrderedCorrectly() {
+    // This test is pulled directly from the Redis documentation for LPUSH and RPUSH.
+    val elements = listOf("a", "b", "c").map { it.encodeUtf8() }
+
+    redis.lpush("l", *elements.toTypedArray())
+    assertThat(redis.lrange("l", 0, -1))
+      .containsExactly(*elements.toList().asReversed().toTypedArray())
+
+    redis.rpush("r", *elements.toTypedArray())
+    assertThat(redis.lrange("r", 0, -1)).containsExactly(*elements.toTypedArray())
   }
 }
