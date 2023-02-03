@@ -56,7 +56,7 @@ class GoogleSpannerEmulator @Inject constructor(
     if (shouldStartServer()) {
       // We need to do this outside of the service start up because this takes a really long time
       // the first time you do it and can cause service manager to time out.
-      pullImage()
+      pullImage(config.emulator.version)
     }
   }
 
@@ -92,8 +92,9 @@ class GoogleSpannerEmulator @Inject constructor(
       .build()
     val docker: DockerClient =
       DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
-    const val IMAGE = "gcr.io/cloud-spanner-emulator/emulator"
+    const val IMAGE_NAME = "gcr.io/cloud-spanner-emulator/emulator"
     const val CONTAINER_NAME = "misk-spanner-testing"
+    var image: String = "$IMAGE_NAME:latest"
 
     fun pullImage() {
       if (imagePulled.get()) {
@@ -102,7 +103,7 @@ class GoogleSpannerEmulator @Inject constructor(
       synchronized(this) {
         if (imagePulled.get()) return
 
-        val process = ProcessBuilder("bash", "-c", "docker pull $IMAGE")
+        val process = ProcessBuilder("bash", "-c", "docker pull $image")
           .redirectOutput(ProcessBuilder.Redirect.INHERIT)
           .redirectError(ProcessBuilder.Redirect.INHERIT)
           .start()
@@ -124,11 +125,17 @@ class GoogleSpannerEmulator @Inject constructor(
   /**
    * Pulls a Docker container containing the Google Spanner emulator.
    */
-  fun pullImage() {
+  fun pullImage(imageVersion: String? = null) {
+    image = fullImageName(imageVersion)
     Companion.pullImage()
   }
 
-  private fun doStart() {
+  private fun doStart(imageVersion: String? = null) {
+    val image = if (imageVersion != null) {
+      fullImageName(imageVersion)
+    } else {
+      image
+    }
     val spannerGrpcPort = ExposedPort.tcp(server.config.emulator.port)
     val spannerHttpPort = ExposedPort.tcp(server.config.emulator.port + 10)
     val ports = Ports()
@@ -148,6 +155,9 @@ class GoogleSpannerEmulator @Inject constructor(
             "state ${runningContainer.state}, force removing and restarting"
         )
         docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
+      } else if (runningContainer.image != image) {
+        logger.info("Docker image does not match expected image. Force removing and restarting Docker container")
+        docker.killContainerCmd(runningContainer.id)
       } else {
         logger.info("Using existing Spanner container named $containerName")
         stopContainerOnExit = false
@@ -157,7 +167,7 @@ class GoogleSpannerEmulator @Inject constructor(
 
     if (containerId == null) {
       logger.info("Starting Spanner with command")
-      containerId = docker.createContainerCmd(IMAGE)
+      containerId = docker.createContainerCmd(image)
         .withExposedPorts(spannerGrpcPort)
         .withExposedPorts(spannerHttpPort)
         .withHostConfig(
@@ -261,6 +271,10 @@ class GoogleSpannerEmulator @Inject constructor(
         }
       )
     }
+  }
+
+  private fun fullImageName(imageVersion: String?): String {
+    return "$IMAGE_NAME:${imageVersion ?: "latest"}"
   }
 
   private class SpannerServer(
