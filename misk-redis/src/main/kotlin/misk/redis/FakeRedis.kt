@@ -29,10 +29,10 @@ class FakeRedis : Redis {
 
   /** Acts as the Redis key-value store. */
   private val keyValueStore = ConcurrentHashMap<String, Value<ByteString>>()
-  /** A nested hash map for the hget and hset operations. */
+  /** A nested hash map for hash operations. */
   private val hKeyValueStore =
     ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
-  /** A hash map for the l* list operations. */
+  /** A hash map for list operations. */
   private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
 
   override fun del(key: String): Boolean {
@@ -283,8 +283,9 @@ class FakeRedis : Redis {
 
   override fun lpush(key: String, vararg elements: ByteString): Long {
     synchronized(lock) {
-      val updated = elements.toMutableList().also {
-        lKeyValueStore[key]?.data?.let { old -> it.addAll(old) }
+      val updated = lKeyValueStore[key]?.data?.toMutableList() ?: mutableListOf()
+      for (element in elements) {
+        updated.add(0, element)
       }
       lKeyValueStore[key] = Value(
         data = updated,

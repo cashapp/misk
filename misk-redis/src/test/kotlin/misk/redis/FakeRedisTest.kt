@@ -538,8 +538,8 @@ class FakeRedisTest {
     val destinationKey = "oof"
     val destinationElements = listOf("baz".encodeUtf8())
 
-    redis.lpush(sourceKey, *sourceElements.toTypedArray())
-    redis.lpush(destinationKey, *destinationElements.toTypedArray())
+    redis.rpush(sourceKey, *sourceElements.toTypedArray())
+    redis.rpush(destinationKey, *destinationElements.toTypedArray())
 
     // Exercise
     val result = redis.lmove(
@@ -563,7 +563,7 @@ class FakeRedisTest {
     val sourceKey = "foo"
     val sourceElements = listOf("bar", "bat", "baz").map { it.encodeUtf8() }
 
-    redis.lpush(sourceKey, *sourceElements.toTypedArray())
+    redis.rpush(sourceKey, *sourceElements.toTypedArray())
     assertEquals(sourceElements, redis.lrange(sourceKey, 0, -1))
 
     // Exercise
@@ -613,7 +613,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrange(key, 0, -1)
@@ -647,7 +647,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrange(key, 3, 10)
@@ -660,7 +660,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrem(key, 2, "bar".encodeUtf8())
@@ -677,7 +677,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrem(key, 1, "bar".encodeUtf8())
@@ -694,7 +694,7 @@ class FakeRedisTest {
     // Setup
     val key = "foo"
     val elements = listOf("bar", "bat", "bar", "baz").map { it.encodeUtf8() }
-    redis.lpush(key, *elements.toTypedArray())
+    redis.rpush(key, *elements.toTypedArray())
 
     // Exercise
     val result = redis.lrem(key, -1, "bar".encodeUtf8())
@@ -722,8 +722,8 @@ class FakeRedisTest {
     val destinationKey = "oof"
     val destinationElements = listOf("baz".encodeUtf8())
 
-    redis.lpush(sourceKey, *sourceElements.toTypedArray())
-    redis.lpush(destinationKey, *destinationElements.toTypedArray())
+    redis.rpush(sourceKey, *sourceElements.toTypedArray())
+    redis.rpush(destinationKey, *destinationElements.toTypedArray())
 
     // Exercise
     val result = redis.rpoplpush(
@@ -745,7 +745,7 @@ class FakeRedisTest {
     val sourceKey = "foo"
     val sourceElements = listOf("bar", "bat", "baz").map { it.encodeUtf8() }
 
-    redis.lpush(sourceKey, *sourceElements.toTypedArray())
+    redis.rpush(sourceKey, *sourceElements.toTypedArray())
     assertEquals(sourceElements, redis.lrange(sourceKey, 0, -1))
 
     // Exercise
@@ -755,9 +755,9 @@ class FakeRedisTest {
     )
 
     // Verify
-    assertEquals("bar".encodeUtf8(), result)
+    assertEquals("baz".encodeUtf8(), result)
     assertEquals(
-      listOf("bar".encodeUtf8(), "baz".encodeUtf8(), "bat".encodeUtf8()),
+      listOf("baz".encodeUtf8(), "bar".encodeUtf8(), "bat".encodeUtf8()),
       redis.lrange(sourceKey, 0, -1)
     )
   }
