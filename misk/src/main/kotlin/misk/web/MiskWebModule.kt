@@ -50,7 +50,8 @@ import misk.web.extractors.ResponseBodyFeatureBinding
 import misk.web.extractors.WebSocketFeatureBinding
 import misk.web.extractors.WebSocketListenerFeatureBinding
 import misk.web.interceptors.BeforeContentEncoding
-import misk.web.interceptors.ConcurrencyLimiterFactory
+import misk.web.concurrencylimits.ConcurrencyLimiterFactory
+import misk.web.concurrencylimits.ConcurrencyLimitsModule
 import misk.web.interceptors.ConcurrencyLimitsInterceptor
 import misk.web.interceptors.ForContentEncoding
 import misk.web.interceptors.GunzipRequestBodyInterceptor
@@ -164,6 +165,8 @@ class MiskWebModule(
 
     newMultibinder<ConcurrencyLimiterFactory>()
     if (!config.concurrency_limiter_disabled) {
+      install(ConcurrencyLimitsModule(config))
+
       // Shed calls when we're degraded.
       multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<ConcurrencyLimitsInterceptor.Factory>()

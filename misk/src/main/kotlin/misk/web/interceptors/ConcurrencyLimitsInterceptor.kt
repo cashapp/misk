@@ -13,6 +13,7 @@ import misk.web.AvailableWhenDegraded
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.WebConfig
+import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import org.slf4j.event.Level
 import wisp.logging.getLogger
 import wisp.logging.log

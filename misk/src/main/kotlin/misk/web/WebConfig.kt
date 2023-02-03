@@ -2,6 +2,7 @@ package misk.web
 
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
+import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.slf4j.event.Level
 import wisp.config.Config
@@ -89,6 +90,21 @@ data class WebConfig(
 
   /** If true, disables automatic load shedding when degraded. */
   val concurrency_limiter_disabled: Boolean = false,
+
+  /** The algorithm to use for determining concurrency limits. */
+  val concurrency_limiter_strategy: ConcurrencyLimiterStrategy = ConcurrencyLimiterStrategy.VEGAS,
+
+  /** Maximum allowed concurrency limit providing an upper bound failsafe */
+  val concurrency_limiter_max_concurrency: Int? = null,
+
+  /**
+   * Initial limit used by the concurrency limiter
+   *
+   * 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints that receive
+   * the majority of traffic (power law, yay!), and those endpoints should _start up_ without
+   * triggering the concurrency limiter at the parallelism that we configured Jetty to support.
+   */
+  val concurrency_limiter_initial_limit: Int = jetty_max_thread_pool_size / 2,
 
   /** The level of log when concurrency shedding. */
   val concurrency_limiter_log_level: Level = Level.ERROR,
