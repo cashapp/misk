@@ -230,6 +230,18 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  override fun lpop(key: String, count: Int): List<ByteString?> {
+    return jedisPool.resource.use { jedis ->
+      jedis.lpop(key.toByteArray(charset), count).map { it?.toByteString() }
+    }
+  }
+
+  override fun rpop(key: String, count: Int): List<ByteString?> {
+    return jedisPool.resource.use { jedis ->
+      jedis.rpop(key.toByteArray(charset), count).map { it?.toByteString() }
+    }
+  }
+
   override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
     return jedisPool.resource.use { jedis ->
       jedis.lrange(key.toByteArray(charset), start, stop).map { it?.toByteString() }

@@ -294,6 +294,34 @@ class FakeRedis : Redis {
     }
   }
 
+  override fun lpop(key: String, count: Int): List<ByteString?> {
+    synchronized(lock) {
+      val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
+      if (clock.instant() >= value.expiryInstant) {
+        return emptyList()
+      }
+      val result = with(value) {
+        data.subList(0, min(data.size, count)).toList()
+      }
+      lKeyValueStore[key] = value.copy(data = value.data.drop(count))
+      return result
+    }
+  }
+
+  override fun rpop(key: String, count: Int): List<ByteString?> {
+    synchronized(lock) {
+      val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
+      if (clock.instant() >= value.expiryInstant) {
+        return emptyList()
+      }
+      val result = with(value) {
+        data.takeLast(min(data.size, count)).asReversed()
+      }
+      lKeyValueStore[key] = value.copy(data = value.data.dropLast(count))
+      return result
+    }
+  }
+
   override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
     synchronized(lock) {
       val list = lKeyValueStore[key]?.data ?: return emptyList()
@@ -370,6 +398,7 @@ class FakeRedis : Redis {
     synchronized(lock) {
       val value = keyValueStore[key]
       val hValue = hKeyValueStore[key]
+      val lValue = lKeyValueStore[key]
       val expiresAt = Instant.ofEpochMilli(timestampMilliseconds)
 
       when {
@@ -378,6 +407,9 @@ class FakeRedis : Redis {
         }
         hValue != null -> {
           hValue.expiryInstant = expiresAt
+        }
+        lValue != null -> {
+          lValue.expiryInstant = expiresAt
         }
         else -> return false
       }

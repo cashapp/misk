@@ -267,6 +267,16 @@ interface Redis {
   fun lpush(key: String, vararg elements: ByteString): Long
 
   /**
+   * Removes and returns the first [count] elements of the list stored at [key].
+   */
+  fun lpop(key: String, count: Int): List<ByteString?>
+
+  /**
+   * Removes and returns the last [count] elements of the list stored at [key].
+   */
+  fun rpop(key: String, count: Int): List<ByteString?>
+
+  /**
    * Returns the specified elements of the list stored at key. The offsets start and stop are
    * zero-based indexes, with 0 being the first element of the list (the head of the list), 1 being
    * the next element and so on.

@@ -754,10 +754,50 @@ class FakeRedisTest {
     )
 
     // Verify
-    assertEquals("baz".encodeUtf8(), result)
+    assertEquals("bar".encodeUtf8(), result)
     assertEquals(
-      listOf("baz".encodeUtf8(), "bar".encodeUtf8(), "bat".encodeUtf8()),
+      listOf("bar".encodeUtf8(), "baz".encodeUtf8(), "bat".encodeUtf8()),
       redis.lrange(sourceKey, 0, -1)
     )
+  }
+
+  @Test fun lpushAndLpop() {
+    val droids = listOf("4-LOM", "BB-8", "BD-1", "C-3PO", "IG-11", "IG-88B", "K-2SO", "R2-D2")
+      .map { it.encodeUtf8() }
+    redis.lpush("droids", *droids.toTypedArray())
+
+    // Non-expired keys.
+    assertThat(redis.lpop("droids", 1)).containsExactly("R2-D2".encodeUtf8())
+    assertThat(redis.lpop("droids", 3)).containsExactlyElementsOf(
+      listOf("K-2SO", "IG-88B", "IG-11").map { it.encodeUtf8() })
+    assertThat(redis.lpop("droids", 99)).containsExactlyElementsOf(
+      listOf("C-3PO", "BD-1", "BB-8", "4-LOM").map { it.encodeUtf8() })
+    assertThat(redis.lpop("droids", 1)).isEmpty()
+
+    // Expired key.
+    redis.lpush("droids", *droids.toTypedArray())
+    redis.pExpireAt("droids", clock.instant().toEpochMilli())
+    clock.add(Duration.ofSeconds(1))
+    assertThat(redis.lpop("droids", 1)).isEmpty()
+  }
+
+  @Test fun lpushAndRpop() {
+    val droids = listOf("4-LOM", "BB-8", "BD-1", "C-3PO", "IG-11", "IG-88B", "K-2SO", "R2-D2")
+      .map { it.encodeUtf8() }
+    redis.lpush("droids", *droids.toTypedArray())
+
+    // Non-expired keys.
+    assertThat(redis.rpop("droids", 1)).containsExactly("4-LOM".encodeUtf8())
+    assertThat(redis.rpop("droids", 3)).containsExactlyElementsOf(
+      listOf("BB-8", "BD-1", "C-3PO").map { it.encodeUtf8() })
+    assertThat(redis.rpop("droids", 99)).containsExactlyElementsOf(
+      listOf("IG-11", "IG-88B", "K-2SO", "R2-D2").map { it.encodeUtf8() })
+    assertThat(redis.rpop("droids", 1)).isEmpty()
+
+    // Expired key.
+    redis.lpush("droids", *droids.toTypedArray())
+    redis.pExpireAt("droids", clock.instant().toEpochMilli())
+    clock.add(Duration.ofSeconds(1))
+    assertThat(redis.rpop("droids", 1)).isEmpty()
   }
 }
