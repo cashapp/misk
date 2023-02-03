@@ -254,17 +254,30 @@ interface Redis {
   ): ByteString?
 
   /**
-   * Insert all the specified values at the head of the list stored at key. If key does not exist,
-   * it is created as empty list before performing the push operations. When key holds a value that
-   * is not a list, an error is returned.
+   * Insert all the specified [elements] at the head of the list stored at [key].
+   * If [key] does not exist, it is created as empty list before performing the push operations.
+   * When [key] holds a value that is not a list, an error is returned.
    *
    * It is possible to push multiple elements using a single command call just specifying multiple
    * arguments at the end of the command. Elements are inserted one after the other to the head of
-   * the list, from the leftmost element to the rightmost element. So for instance the command LPUSH
-   * mylist a b c will result into a list containing c as first element, b as second element and a
-   * as third element.
+   * the list, from the leftmost element to the rightmost element.
+   * So for instance the command `LPUSH mylist a b c` will result into a list containing `c` as
+   * first element, `b` as second element and `a` as third element.
    */
   fun lpush(key: String, vararg elements: ByteString): Long
+
+  /**
+   * Insert all the specified [elements] at the tail of the list stored at [key].
+   * If [key] does not exist, it is created as empty list before performing the push operations.
+   * When [key] holds a value that is not a list, an error is returned.
+   *
+   * It is possible to push multiple elements using a single command call just specifying multiple
+   * arguments at the end of the command. Elements are inserted one after the other to the tail of
+   * the list, from the leftmost element to the rightmost element.
+   * So for instance the command `RPUSH mylist a b c` will result into a list containing `a` as
+   * first element, `b` as second element and `c` as third element.
+   */
+  fun rpush(key: String, vararg elements: ByteString): Long
 
   /**
    * Removes and returns the first [count] elements of the list stored at [key].

@@ -294,6 +294,18 @@ class FakeRedis : Redis {
     }
   }
 
+  override fun rpush(key: String, vararg elements: ByteString): Long {
+    synchronized(lock) {
+      val updated = lKeyValueStore[key]?.data?.toMutableList() ?: mutableListOf()
+      updated.addAll(elements)
+      lKeyValueStore[key] = Value(
+        data = updated,
+        expiryInstant = Instant.MAX,
+      )
+      return updated.size.toLong()
+    }
+  }
+
   override fun lpop(key: String, count: Int): List<ByteString?> {
     synchronized(lock) {
       val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
