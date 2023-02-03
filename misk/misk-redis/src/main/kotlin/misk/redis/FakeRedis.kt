@@ -29,10 +29,10 @@ class FakeRedis : Redis {
 
   /** Acts as the Redis key-value store. */
   private val keyValueStore = ConcurrentHashMap<String, Value<ByteString>>()
-  /** A nested hash map for the hget and hset operations. */
+  /** A nested hash map for hash operations. */
   private val hKeyValueStore =
     ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
-  /** A hash map for the l* list operations. */
+  /** A hash map for list operations. */
   private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
 
   override fun del(key: String): Boolean {
@@ -283,14 +283,55 @@ class FakeRedis : Redis {
 
   override fun lpush(key: String, vararg elements: ByteString): Long {
     synchronized(lock) {
-      val updated = elements.toMutableList().also {
-        lKeyValueStore[key]?.data?.let { old -> it.addAll(old) }
+      val updated = lKeyValueStore[key]?.data?.toMutableList() ?: mutableListOf()
+      for (element in elements) {
+        updated.add(0, element)
       }
       lKeyValueStore[key] = Value(
         data = updated,
         expiryInstant = Instant.MAX,
       )
       return updated.size.toLong()
+    }
+  }
+
+  override fun rpush(key: String, vararg elements: ByteString): Long {
+    synchronized(lock) {
+      val updated = lKeyValueStore[key]?.data?.toMutableList() ?: mutableListOf()
+      updated.addAll(elements)
+      lKeyValueStore[key] = Value(
+        data = updated,
+        expiryInstant = Instant.MAX,
+      )
+      return updated.size.toLong()
+    }
+  }
+
+  override fun lpop(key: String, count: Int): List<ByteString?> {
+    synchronized(lock) {
+      val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
+      if (clock.instant() >= value.expiryInstant) {
+        return emptyList()
+      }
+      val result = with(value) {
+        data.subList(0, min(data.size, count)).toList()
+      }
+      lKeyValueStore[key] = value.copy(data = value.data.drop(count))
+      return result
+    }
+  }
+
+  override fun rpop(key: String, count: Int): List<ByteString?> {
+    synchronized(lock) {
+      val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
+      if (clock.instant() >= value.expiryInstant) {
+        return emptyList()
+      }
+      val result = with(value) {
+        data.takeLast(min(data.size, count)).asReversed()
+      }
+      lKeyValueStore[key] = value.copy(data = value.data.dropLast(count))
+      return result
     }
   }
 
@@ -370,6 +411,7 @@ class FakeRedis : Redis {
     synchronized(lock) {
       val value = keyValueStore[key]
       val hValue = hKeyValueStore[key]
+      val lValue = lKeyValueStore[key]
       val expiresAt = Instant.ofEpochMilli(timestampMilliseconds)
 
       when {
@@ -378,6 +420,9 @@ class FakeRedis : Redis {
         }
         hValue != null -> {
           hValue.expiryInstant = expiresAt
+        }
+        lValue != null -> {
+          lValue.expiryInstant = expiresAt
         }
         else -> return false
       }
