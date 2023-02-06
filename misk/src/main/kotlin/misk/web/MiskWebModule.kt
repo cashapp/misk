@@ -164,12 +164,23 @@ class MiskWebModule(
       .to<MetricsInterceptor.Factory>()
 
     newMultibinder<ConcurrencyLimiterFactory>()
-    if (!config.concurrency_limiter_disabled) {
-      install(ConcurrencyLimitsModule(config))
-
+    if (!config.concurrency_limiter_disabled && config.concurrency_limiter?.enabled != false) {
       // Shed calls when we're degraded.
       multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<ConcurrencyLimitsInterceptor.Factory>()
+
+      // Configure custom concurrency limiting configuration. Use the defaults from the web config
+      // if not set in the limiter config.
+      val concurrencyLimiterConfig = config.concurrency_limiter?.copy(
+        // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints that
+        // receive the majority of traffic (power law, yay!), and those endpoints should _start up_
+        // without triggering the concurrency limiter at the parallelism that we configured Jetty
+        // to support.
+        initial_limit = config.concurrency_limiter.initial_limit
+          ?: (config.jetty_max_thread_pool_size / 2),
+        log_level = config.concurrency_limiter.log_level ?: config.concurrency_limiter_log_level,
+      )
+      concurrencyLimiterConfig?.let { install(ConcurrencyLimitsModule(it)) }
     }
 
     // Traces requests as they work their way through the system.

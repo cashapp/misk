@@ -13,13 +13,14 @@ import com.netflix.concurrency.limits.limit.VegasLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import misk.Action
 import misk.inject.KAbstractModule
+import misk.web.ConcurrencyLimiterConfig
 import misk.web.WebConfig
 import java.time.Clock
 import javax.inject.Provider
 import javax.inject.Singleton
 
 class ConcurrencyLimitsModule(
-  private val webConfig: WebConfig
+  private val config: ConcurrencyLimiterConfig
 ) : KAbstractModule() {
   @ProvidesIntoSet
   @Singleton
@@ -39,30 +40,39 @@ class ConcurrencyLimitsModule(
         .build()
     }
 
-  private fun limit() = when (webConfig.concurrency_limiter_strategy) {
+  @Provides
+  private fun limit() : Limit = when (config.strategy) {
     ConcurrencyLimiterStrategy.VEGAS ->
       VegasLimit.newBuilder().apply {
-        webConfig.concurrency_limiter_max_concurrency?.let { maxConcurrency(it) }
+        config.initial_limit?.let { initialLimit(it) }
+        config.max_concurrency?.let { maxConcurrency(it) }
       }.build()
+
     ConcurrencyLimiterStrategy.GRADIENT ->
       GradientLimit.newBuilder().apply {
-        webConfig.concurrency_limiter_max_concurrency?.let { maxConcurrency(it) }
+        config.initial_limit?.let { initialLimit(it) }
+        config.max_concurrency?.let { maxConcurrency(it) }
       }.build()
+
     ConcurrencyLimiterStrategy.GRADIENT2 ->
       Gradient2Limit.newBuilder().apply {
-        webConfig.concurrency_limiter_max_concurrency?.let { maxConcurrency(it) }
+        config.initial_limit?.let { initialLimit(it) }
+        config.max_concurrency?.let { maxConcurrency(it) }
       }.build()
+
     ConcurrencyLimiterStrategy.AIMD ->
       AIMDLimit.newBuilder().apply {
-        initialLimit(webConfig.concurrency_limiter_initial_limit)
-        webConfig.concurrency_limiter_max_concurrency?.let { maxLimit(it) }
+        config.initial_limit?.let { initialLimit(it) }
+        config.max_concurrency?.let { maxLimit(it) }
       }.build()
+
     ConcurrencyLimiterStrategy.SETTABLE ->
-      webConfig.concurrency_limiter_max_concurrency
+      config.max_concurrency
         ?.let { SettableLimit.startingAt(it) }
         ?: throw IllegalStateException("SettableLimit algorithm requires 'maxConcurrency'")
+
     ConcurrencyLimiterStrategy.FIXED ->
-      webConfig.concurrency_limiter_max_concurrency
+      config.max_concurrency
         ?.let { FixedLimit.of(it) }
         ?: throw IllegalStateException("FixedLimitx algorithm requires 'maxConcurrency'")
   }
