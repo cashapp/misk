@@ -48,13 +48,12 @@ interface Metrics {
    * Deprecated: if you really need a summary metric, use [misk.metrics.v2.Metrics.summary] instead.
    *
    * For legacy reasons, this function is called `histogram(...)` but it's not backed
-   * by a histogram cause constraints in our previous Metrics vendor which is confusing.
+   * by a histogram cause constraints in previous time series database.
    *
    * If you're using this metric type, you likely want a real Histogram instead of a Summary.
    * To change to histogram type, you need to create a different metric (with another name) as the
    * data structure used by the time series database is incompatible and can break existing dashboards
-   * and monitors. [MetricsInterceptor](misk/web/interceptors/MetricsInterceptor.kt) is an example
-   * of migrating to v2.Histogram.
+   * and monitors.
    *
    * See https://prometheus.github.io/client_java/io/prometheus/client/Summary.html or
    * https://prometheus.github.io/client_java/io/prometheus/client/Histogram.html for more info.
