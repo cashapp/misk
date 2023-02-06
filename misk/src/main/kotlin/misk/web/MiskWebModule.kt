@@ -178,7 +178,6 @@ class MiskWebModule(
         // to support.
         initial_limit = config.concurrency_limiter.initial_limit
           ?: (config.jetty_max_thread_pool_size / 2),
-        log_level = config.concurrency_limiter.log_level ?: config.concurrency_limiter_log_level,
       )
       concurrencyLimiterConfig?.let { install(ConcurrencyLimitsModule(it)) }
     }

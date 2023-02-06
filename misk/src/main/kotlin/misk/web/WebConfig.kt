@@ -235,14 +235,9 @@ data class ConcurrencyLimiterConfig(
   /** The algorithm to use for determining concurrency limits. */
   val strategy: ConcurrencyLimiterStrategy = ConcurrencyLimiterStrategy.VEGAS,
 
-  /** Maximum allowed concurrency limit providing an upper bound failsafe */
+  /** Maximum allowed concurrency limit providing an upper bound failsafe. */
   val max_concurrency: Int? = null,
 
-  /**
-   * Initial limit used by the concurrency limiter
-   */
+  /** Initial limit used by the concurrency limiter. */
   val initial_limit: Int? = null,
-
-  /** The level of log when concurrency shedding. */
-  val log_level: Level? = null,
 )
