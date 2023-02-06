@@ -2,9 +2,7 @@ package misk.web.interceptors
 
 import ch.qos.logback.classic.Level
 import com.google.inject.util.Modules
-import com.netflix.concurrency.limits.Limit
 import com.netflix.concurrency.limits.Limiter
-import com.netflix.concurrency.limits.limit.GradientLimit
 import com.netflix.concurrency.limits.limit.SettableLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import io.prometheus.client.CollectorRegistry
@@ -16,7 +14,6 @@ import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.AvailableWhenDegraded
-import misk.web.ConcurrencyLimiterConfig
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
@@ -28,12 +25,9 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
 import misk.web.actions.WebAction
-import misk.web.concurrencylimits.ConcurrencyLimiterFactory
-import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import java.time.Clock
@@ -227,9 +221,7 @@ class ConcurrencyLimitsInterceptorTest {
     )
   }
 
-  class TestModule(
-    private val concurrencyLimiterStrategy: ConcurrencyLimiterStrategy? = null,
-  ) : KAbstractModule() {
+  class TestModule : KAbstractModule() {
     override fun configure() {
       install(LogCollectorModule())
       install(Modules.override(MiskTestingServiceModule()).with(object : KAbstractModule() {
@@ -242,39 +234,12 @@ class ConcurrencyLimitsInterceptorTest {
       bind<WebConfig>().toInstance(
         WebConfig(
           port = 0,
-          concurrency_limiter = concurrencyLimiterStrategy?.let {
-            ConcurrencyLimiterConfig(
-              strategy = it
-            )
-          }
         )
       )
 
       multibind<ConcurrencyLimiterFactory>().to<CustomLimiterFactory>()
     }
   }
-
-//  @Nested
-//  inner class GradientStrategyTest {
-//    @MiskTestModule
-//    val module = TestModule(ConcurrencyLimiterStrategy.GRADIENT)
-//
-//    @Inject private lateinit var limiterFactories: List<ConcurrencyLimiterFactory>
-//
-//    @Test
-//    fun `limiter factory is bound`() {
-//      assertThat(limiterFactories).hasSize(1)
-//      assertThat(limit).isInstanceOf(GradientLimit::class.java)
-//
-//      val limiter: Limiter<String>? = limiterFactories
-//        .first()
-//        .create(HelloAction::call.asAction(DispatchMechanism.POST))
-//
-//      assertThat(limiter).isNotNull()
-//      assertThat(limiter).isInstanceOf(SimpleLimiter::class.java)
-//    }
-//
-//  }
 
   @Singleton
   class CustomLimiterFactory @Inject constructor() : ConcurrencyLimiterFactory {
