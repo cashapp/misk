@@ -5,6 +5,7 @@ import com.google.inject.multibindings.ProvidesIntoSet
 import com.netflix.concurrency.limits.Limit
 import com.netflix.concurrency.limits.Limiter
 import com.netflix.concurrency.limits.limit.AIMDLimit
+import com.netflix.concurrency.limits.limit.FixedLimit
 import com.netflix.concurrency.limits.limit.Gradient2Limit
 import com.netflix.concurrency.limits.limit.GradientLimit
 import com.netflix.concurrency.limits.limit.SettableLimit
@@ -53,12 +54,16 @@ class ConcurrencyLimitsModule(
       }.build()
     ConcurrencyLimiterStrategy.AIMD ->
       AIMDLimit.newBuilder().apply {
-        webConfig.concurrency_limiter_initial_limit?.let { initialLimit(it) }
+        initialLimit(webConfig.concurrency_limiter_initial_limit)
         webConfig.concurrency_limiter_max_concurrency?.let { maxLimit(it) }
       }.build()
     ConcurrencyLimiterStrategy.SETTABLE ->
       webConfig.concurrency_limiter_max_concurrency
         ?.let { SettableLimit.startingAt(it) }
         ?: throw IllegalStateException("SettableLimit algorithm requires 'maxConcurrency'")
+    ConcurrencyLimiterStrategy.FIXED ->
+      webConfig.concurrency_limiter_max_concurrency
+        ?.let { FixedLimit.of(it) }
+        ?: throw IllegalStateException("FixedLimitx algorithm requires 'maxConcurrency'")
   }
 }
