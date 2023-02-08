@@ -1428,7 +1428,6 @@ public final class misk/web/actions/LivenessCheckAction : misk/web/actions/WebAc
 
 public final class misk/web/actions/NotFoundAction : misk/web/actions/WebAction {
 	public static final field Companion Lmisk/web/actions/NotFoundAction$Companion;
-	public fun <init> (Lmisk/scope/ActionScoped;)V
 	public final fun notFound (Ljava/lang/String;)Lmisk/web/Response;
 }
 

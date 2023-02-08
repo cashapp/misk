@@ -17,7 +17,6 @@ import net.ttddyy.dsproxy.support.ProxyDataSource
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import wisp.containers.ContainerUtil
-import java.io.File
 import java.sql.Connection
 import java.sql.Timestamp
 import java.util.ArrayDeque
