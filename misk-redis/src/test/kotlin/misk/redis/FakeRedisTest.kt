@@ -156,6 +156,24 @@ class FakeRedisTest {
   }
 
   @Test
+  fun hdelReturnsTheRightNumbers() {
+    redis.hset(
+      key = "movie_years",
+      hash = mapOf(
+        "Star Wars" to "1977".encodeUtf8(),
+        "Rogue One" to "2016".encodeUtf8(),
+        "Jurassic Park" to "1993".encodeUtf8(),
+        "Jurassic World" to "2015".encodeUtf8()
+      )
+    )
+
+    assertThat(redis.hdel("dne", "dne")).isEqualTo(0L)
+    assertThat(redis.hdel("movie_years", "dne")).isEqualTo(0L)
+    assertThat(redis.hdel("movie_years", "Star Wars")).isEqualTo(1L)
+    assertThat(redis.hdel("movie_years", "Rogue One", "Jurassic World", "dne")).isEqualTo(2)
+  }
+
+  @Test
   fun badArgumentsToBatchSet() {
     assertThatThrownBy {
       redis.mset("key".encodeUtf8())
