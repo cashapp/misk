@@ -121,18 +121,10 @@ Misk-Web powers the Misk Admin Dashboard with modular Typescript + React powered
 [miskweb]: https://cashapp.github.io/misk-web/
 [snap]: https://oss.sonatype.org/content/repositories/snapshots/
 
-## What are the wisp* modules?
+## Looking for Wisp?
 
-The wisp* modules contain no Dependency Injection based code (i.e. no Guice, etc).  These modules 
-should never refer to misk* modules, although misk* modules can (and should) use wisp* modules.
+The wisp* modules contain no Dependency Injection based code (i.e. no Guice, etc) and back many misk* module implementations.  
 
-Also, modules that are wisp*-testing will only be used in test scope in other wisp modules, never 
-in the api/implementation scope. 
+Wisp used to live inside Misk. It now has its [own project](https://github.com/cashapp/wisp).
 
-If you are refactoring code from misk into the wisp modules, you must not break any external Misk dependencies
-or apis.  It is ok to deprecate items in misk to encourage eventual migration to wisp directly if desired. If
-your refactoring does not fit one of the existing wisp modules, create a new module.  For now, it is preferred
-to have many small modules rather than larger conglomerate modules requiring many different dependencies.
-
-It should be considered that wisp will be volatile for sometime with the potential for a lot of changes, additions, etc.
 Misk apps should use wisp modules directly with caution as breaking changes might be required.
