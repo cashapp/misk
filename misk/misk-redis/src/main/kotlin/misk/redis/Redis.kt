@@ -50,12 +50,11 @@ interface Redis {
   operator fun get(key: String): ByteString?
 
   /**
-   * Delete one or more hash fields
+   * Delete one or more hash [fields] stored at [key].
+   * Specified fields that do not exist are ignored.
    *
-   * @param key the key for which to delete fields
-   * @param fields the specific fields to delete
-   * @return If the field was present in the hash it is deleted and 1 is returned, otherwise 0 is
-   * returned and no operation is performed.
+   * @return The number of fields that were removed from the hash. If the key does not exist,
+   *         it is treated as an empty hash and 0 is returned.
    */
   fun hdel(key: String, vararg fields: String): Long
 
