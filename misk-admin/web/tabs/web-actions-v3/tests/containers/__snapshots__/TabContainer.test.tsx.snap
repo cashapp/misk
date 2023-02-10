@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TabContainer TabContainer can render with redux 1`] = `
+<DocumentFragment>
+  <div>
+    <div>
+      <h1
+        class="bp3-heading"
+      >
+        Feature
+      </h1>
+      <div>
+        <turbo-frame
+          id="tab-root"
+          src="/misk.db.feature.web/TabContainer?"
+        />
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

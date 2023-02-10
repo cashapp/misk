@@ -1,0 +1,231 @@
+export const stateWithData = {
+  simpleRedux: {
+    success: false,
+    "LoadData::dataRange": {
+      data: 5,
+      error: null as any,
+      loading: false,
+      success: true,
+      tag: "LoadData::dataRange"
+    },
+    "LoadData::dataKey": {
+      data: "cars",
+      error: null as any,
+      loading: false,
+      success: true,
+      tag: "LoadData::dataKey"
+    },
+    simpleTag: "simpleRedux",
+    error: null as any,
+    data: [] as any[],
+    "LoadData::dataRequest": {
+      error: null as any,
+      loading: false,
+      success: true,
+      tag: "LoadData::dataRequest",
+      url: "https://cashapp.github.io/misk-web/examples/data/demo/cars.json",
+      data: {
+        data: {
+          cars: [
+            {
+              id: "26f7ab1f-4060-497c-9a7e-a772c2bc1e50",
+              make: "Buick",
+              model: "LaCrosse",
+              model_year: 2011,
+              quantity: 41,
+              price: "€21530,26",
+              slogan: "Integrated even-keeled array",
+              latitude: 41.3006835,
+              longitude: -8.4787949,
+              manufactured_date: "4/17/2018",
+              created_at: "3:19:26.000",
+              updated_at: "6:44:28.000"
+            },
+            {
+              id: "2545bae7-dcf7-4082-ad9c-9e68a68d579a",
+              make: "Oldsmobile",
+              model: "Silhouette",
+              model_year: 2003,
+              quantity: 18,
+              price: "$25266.44",
+              slogan: "Horizontal exuding framework",
+              latitude: 46.1854516,
+              longitude: 30.3414908,
+              manufactured_date: "3/21/2018",
+              created_at: "15:11:57.000",
+              updated_at: "13:07:56.000"
+            },
+            {
+              id: "2f0909dd-1298-4469-ac86-e96269009ee8",
+              make: "Mercedes-Benz",
+              model: "Sprinter 3500",
+              model_year: 2011,
+              quantity: 88,
+              price: "¥36824.84",
+              slogan: "Ameliorated human-resource neural-net",
+              latitude: 14.5975238,
+              longitude: -91.7270911,
+              manufactured_date: "4/15/2018",
+              created_at: "9:55:18.000",
+              updated_at: "2:45:01.000"
+            },
+            {
+              id: "e76594d6-e59c-4cec-ae98-560a41b7066e",
+              make: "Ford",
+              model: "Mustang",
+              model_year: 2007,
+              quantity: 65,
+              price: "$24100.94",
+              slogan: "Seamless needs-based policy",
+              latitude: 31.129098,
+              longitude: 120.839842,
+              manufactured_date: "4/4/2018",
+              created_at: "5:22:24.000",
+              updated_at: "14:04:49.000"
+            },
+            {
+              id: "a4145f72-a953-4c1d-8cdd-1b4dd9fc7e1a",
+              make: "Lexus",
+              model: "GX",
+              model_year: 2008,
+              quantity: 73,
+              price: "$8585.63",
+              slogan: "User-centric 24/7 attitude",
+              latitude: -20.5360441,
+              longitude: 29.2814687,
+              manufactured_date: "11/11/2018",
+              created_at: "4:55:37.000",
+              updated_at: "5:22:04.000"
+            },
+            {
+              id: "90688155-b258-408b-b5af-d1631101a119",
+              make: "Audi",
+              model: "RS 4",
+              model_year: 2008,
+              quantity: 3,
+              price: "$19244.95",
+              slogan: "Open-source methodical knowledge user",
+              latitude: -8.6852273,
+              longitude: 120.409835,
+              manufactured_date: "5/29/2018",
+              created_at: "11:54:06.000",
+              updated_at: "20:53:58.000"
+            },
+            {
+              id: "6faa8d74-ef65-4e9b-bcf3-410ec10da3ac",
+              make: "Lexus",
+              model: "RX",
+              model_year: 2009,
+              quantity: 53,
+              price: "$2814.21",
+              slogan: "Upgradable composite algorithm",
+              latitude: -7.7018672,
+              longitude: 112.548349,
+              manufactured_date: "1/6/2018",
+              created_at: "12:56:58.000",
+              updated_at: "21:59:14.000"
+            },
+            {
+              id: "4d833b1c-dc83-4063-ba80-7aacf0cde31a",
+              make: "Lexus",
+              model: "LX",
+              model_year: 2007,
+              quantity: 31,
+              price: "€14548,97",
+              slogan: "Managed 4th generation contingency",
+              latitude: 36.5072263,
+              longitude: 8.7756556,
+              manufactured_date: "2/21/2018",
+              created_at: "20:19:37.000",
+              updated_at: "2:32:30.000"
+            },
+            {
+              id: "639dbc68-9d99-4670-a6ac-8154b1b8f502",
+              make: "Mercedes-Benz",
+              model: "CL-Class",
+              model_year: 2002,
+              quantity: 37,
+              price: "$5261.36",
+              slogan: "Business-focused clear-thinking adapter",
+              latitude: 51.2250373,
+              longitude: 22.7850797,
+              manufactured_date: "3/10/2018",
+              created_at: "19:02:30.000",
+              updated_at: "3:21:01.000"
+            },
+            {
+              id: "e1373313-621c-4802-861a-2a31866aa558",
+              make: "Land Rover",
+              model: "LR2",
+              model_year: 2008,
+              quantity: 24,
+              price: "€22533,33",
+              slogan: "Future-proofed multi-tasking implementation",
+              latitude: 32.51,
+              longitude: -93.75,
+              manufactured_date: "10/6/2018",
+              created_at: "4:16:15.000",
+              updated_at: "20:45:56.000"
+            },
+            {
+              id: "c1c223fd-f94d-40b8-bb2f-8c5353c0dcad",
+              make: "Maserati",
+              model: "Biturbo",
+              model_year: 1986,
+              quantity: 82,
+              price: "£28339.94",
+              slogan: "Organized full-range neural-net",
+              latitude: 54.1439356,
+              longitude: 39.7408655,
+              manufactured_date: "9/17/2018",
+              created_at: "13:19:14.000",
+              updated_at: "15:36:30.000"
+            },
+            {
+              id: "993d4d22-aef6-4ec7-95f2-951e7f5fb92d",
+              make: "Kia",
+              model: "Sorento",
+              model_year: 2005,
+              quantity: 71,
+              price: "£14042.57",
+              slogan: "Exclusive 4th generation instruction set",
+              latitude: "49.44998",
+              longitude: "-112.65185",
+              manufactured_date: "6/26/2018",
+              created_at: "21:27:54.000",
+              updated_at: "12:55:31.000"
+            },
+            {
+              id: "4593210b-7227-4f01-be44-0e8ea068d5bb",
+              make: "Toyota",
+              model: "Venza",
+              model_year: 2010,
+              quantity: 17,
+              price: "£36747.51",
+              slogan: "Synchronised global functionalities",
+              latitude: 49.5962241,
+              longitude: 19.1332531,
+              manufactured_date: "4/13/2018",
+              created_at: "12:37:15.000",
+              updated_at: "5:07:23.000"
+            },
+            {
+              id: "14595c44-5b06-4d89-9298-690c48f250ae",
+              make: "Hyundai",
+              model: "Sonata",
+              model_year: 1995,
+              quantity: 60,
+              price: "£28214.33",
+              slogan: "Decentralized modular data-warehouse",
+              latitude: 44.889488,
+              longitude: 117.470597,
+              manufactured_date: "5/9/2018",
+              created_at: "1:07:05.000",
+              updated_at: "19:40:37.000"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

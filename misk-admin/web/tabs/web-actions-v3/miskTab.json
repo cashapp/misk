@@ -1,0 +1,18 @@
+{
+  "name": "Feature",
+  "output_path": "lib/web/_tab/web-actions-v3",
+  "port": "3160",
+  "rawGitginore": "",
+  "rawIndex": false,
+  "rawPackageJson": {},
+  "rawTsconfig": {},
+  "rawTslint": {},
+  "rawWebpackConfig": {},
+  "relative_path_prefix": "",
+  "slug": "web-actions-v3",
+  "useWebpackBundleAnalyzer": false,
+  "useWebpackExternals": true,
+  "version": "0.4.0",
+  "zipOnBuild": false,
+  "___DeprecatedKeys": "Any keys below this point in your miskTab.json are deprecated and can be safely removed."
+}
