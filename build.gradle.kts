@@ -49,6 +49,11 @@ subprojects {
     maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
   }
 
+  tasks.withType<JavaCompile> {
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
+  }
+
   // Only apply if the project has the kotlin plugin added:
   plugins.withType<KotlinPluginWrapper> {
     val compileKotlin by tasks.getting(KotlinCompile::class) {
