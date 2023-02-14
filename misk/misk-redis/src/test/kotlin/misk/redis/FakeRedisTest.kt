@@ -174,6 +174,22 @@ class FakeRedisTest {
   }
 
   @Test
+  fun hlen() {
+    redis.hset(
+      key = "movie_years",
+      hash = mapOf(
+        "Star Wars" to "1977".encodeUtf8(),
+        "Rogue One" to "2016".encodeUtf8(),
+        "Jurassic Park" to "1993".encodeUtf8(),
+        "Jurassic World" to "2015".encodeUtf8()
+      )
+    )
+
+    assertThat(redis.hlen("movie_years")).isEqualTo(4L)
+    assertThat(redis.hlen("dne")).isEqualTo(0L)
+  }
+
+  @Test
   fun badArgumentsToBatchSet() {
     assertThatThrownBy {
       redis.mset("key".encodeUtf8())

@@ -77,6 +77,11 @@ interface Redis {
   fun hgetAll(key: String): Map<String, ByteString>?
 
   /**
+   * Returns the number of fields contained in the hash stored at [key].
+   */
+  fun hlen(key: String): Long
+
+  /**
    * Retrieve the values associated to the specified fields.
    *
    * If some specified fields do not exist, nil values are returned. Non-existing keys are
