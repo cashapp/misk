@@ -14,6 +14,8 @@ import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.AvailableWhenDegraded
+import misk.web.ConcurrencyLimiterAlgorithm
+import misk.web.ConcurrencyLimiterConfig
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
@@ -52,7 +54,7 @@ class ConcurrencyLimitsInterceptorTest {
     val interceptor = factory.create(action)!!
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
-    assertThat(logCollector.takeMessages()).isEmpty()
+    assertThat(logCollector.takeMessages()).containsExactly("Using VegasLimit concurrency limiter")
     assertThat(callSuccessCount("HelloAction")).isEqualTo(1.0)
   }
 
@@ -105,7 +107,7 @@ class ConcurrencyLimitsInterceptorTest {
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
       .containsExactly(
         "concurrency limits interceptor shedding HelloAction; " +
-          "Quota-Path=null; inflight=0; limit=0"
+          "Quota-Path=null; inflight=0; limit=0; rejected=1"
       )
 
     // Subsequent calls don't.
@@ -118,7 +120,7 @@ class ConcurrencyLimitsInterceptorTest {
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
       .containsExactly(
         "concurrency limits interceptor shedding HelloAction; " +
-          "Quota-Path=null; inflight=0; limit=0"
+          "Quota-Path=null; inflight=0; limit=0; rejected=2"
       )
   }
 

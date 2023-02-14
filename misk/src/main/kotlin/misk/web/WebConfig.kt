@@ -90,6 +90,9 @@ data class WebConfig(
   /** If true, disables automatic load shedding when degraded. */
   val concurrency_limiter_disabled: Boolean = false,
 
+  /** Configuration for the concurrency limiter. */
+  val concurrency_limiter_config: ConcurrencyLimiterConfig? = null,
+
   /** The level of log when concurrency shedding. */
   val concurrency_limiter_log_level: Level = Level.ERROR,
 
@@ -128,6 +131,7 @@ data class WebConfig(
     minGzipSize: Int = 1024,
     cors: Map<String, CorsConfig> = mapOf(),
     concurrency_limiter_disabled: Boolean = false,
+    concurrency_limiter_config: ConcurrencyLimiterConfig? = null,
     shutdown_sleep_ms: Int = 0,
     http_request_header_size: Int? = null,
     http_header_cache_size: Int? = null,
@@ -153,6 +157,7 @@ data class WebConfig(
     minGzipSize = minGzipSize,
     cors = cors,
     concurrency_limiter_disabled = concurrency_limiter_disabled,
+    concurrency_limiter_config = concurrency_limiter_config,
     concurrency_limiter_log_level = Level.ERROR,
     shutdown_sleep_ms = shutdown_sleep_ms,
     http_request_header_size = http_request_header_size,
@@ -223,3 +228,48 @@ data class CorsConfig(
   /** A comma separated list of HTTP headers that are allowed to be exposed on the client. */
   val exposedHeaders: Array<String> = arrayOf()
 )
+
+data class ConcurrencyLimiterConfig(
+
+  /** Which algorithm to use for concurrency limiting. For historical reasons, the default is VEGAS,
+   * but GRADIENT2 is probably better for most apps.
+   */
+  val algorithm: ConcurrencyLimiterAlgorithm = ConcurrencyLimiterAlgorithm.VEGAS,
+
+  /**
+   * Minimum concurrency the limiter will allow. This is not supported when using the VEGAS algorithm,
+   * which has no lower limit.
+   *
+   * See the source code linked in ConcurrencyLimitAlgorithm for your chosen algorithm for defaults.
+   */
+  val minConcurrency: Int? = null,
+
+  /**
+   * Maximum concurrency the limiter will allow.
+   *
+   * See the source code linked in ConcurrencyLimitAlgorithm for your chosen algorithm for defaults.
+   */
+  val maxConcurrency: Int? = null,
+  /**
+   * Smoothing factor to limit how aggressively the estimated limit can shrink when queuing has been detected.
+   * A value between 0 and 1, where 1 is more aggressive.
+   *
+   * See the source code linked in ConcurrencyLimitAlgorithm for your chosen algorithm for defaults.
+   */
+  val smoothing: Double? = null,
+)
+
+enum class ConcurrencyLimiterAlgorithm {
+  /**
+   * Use the VegasLimit algorithm. This is the default for historical reasons, but GRADIENT2_LIMIT is probably better for most applications.
+   * @see https://docs.google.com/document/d/1ujaLVYCbPG-AXspTBAtZA2zN_NF_f-ezac8k_GHUSU4/edit?usp=sharing
+   * @see https://github.com/Netflix/concurrency-limits/blob/master/concurrency-limits-core/src/main/java/com/netflix/concurrency/limits/limit/VegasLimit.java
+   */
+  VEGAS,
+  /**
+   * Use the Gradient2Limit algorithm. This is probably best for most applications.
+   * @see https://docs.google.com/document/d/1ujaLVYCbPG-AXspTBAtZA2zN_NF_f-ezac8k_GHUSU4/edit?usp=sharing
+   * @see https://github.com/Netflix/concurrency-limits/blob/master/concurrency-limits-core/src/main/java/com/netflix/concurrency/limits/limit/Gradient2Limit.java
+   */
+  GRADIENT2
+}
