@@ -133,6 +133,12 @@ class FakeRedis : Redis {
     }
   }
 
+  override fun hlen(key: String): Long {
+    synchronized(lock) {
+      return hKeyValueStore[key]?.data?.size?.toLong() ?: 0L
+    }
+  }
+
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
     return hgetAll(key)?.filter { fields.contains(it.key) }?.values?.toList() ?: emptyList()
   }
