@@ -230,12 +230,15 @@ data class CorsConfig(
 
 data class ConcurrencyLimiterConfig(
   /** If true, disables automatic load shedding when degraded. */
-  val enabled: Boolean = true,
+  val disabled: Boolean = false,
 
   /** The algorithm to use for determining concurrency limits. */
   val strategy: ConcurrencyLimiterStrategy = ConcurrencyLimiterStrategy.VEGAS,
 
-  /** Maximum allowed concurrency limit providing an upper bound failsafe. */
+  /**
+   * Maximum allowed concurrency limit providing an upper bound failsafe. At runtime, this will
+   * default to half of the jetty_max_thread_pool_size if not set.
+   */
   val max_concurrency: Int? = null,
 
   /** Initial limit used by the concurrency limiter. */

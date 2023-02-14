@@ -74,6 +74,6 @@ class ConcurrencyLimitsModule(
     ConcurrencyLimiterStrategy.FIXED ->
       config.max_concurrency
         ?.let { FixedLimit.of(it) }
-        ?: throw IllegalStateException("FixedLimitx algorithm requires 'maxConcurrency'")
+        ?: throw IllegalStateException("FixedLimit algorithm requires 'maxConcurrency'")
   }
 }

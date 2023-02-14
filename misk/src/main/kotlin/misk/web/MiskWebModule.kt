@@ -164,7 +164,7 @@ class MiskWebModule(
       .to<MetricsInterceptor.Factory>()
 
     newMultibinder<ConcurrencyLimiterFactory>()
-    if (!config.concurrency_limiter_disabled && config.concurrency_limiter?.enabled != false) {
+    if (!config.concurrency_limiter_disabled && config.concurrency_limiter?.disabled != true) {
       // Shed calls when we're degraded.
       multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<ConcurrencyLimitsInterceptor.Factory>()
