@@ -8,9 +8,7 @@ import wisp.logging.getLogger
  * A scope listener that updates the MDC with the trace and span reference anytime a new scope is
  * activated or closed.
  */
-// Generic exceptions are caught here to avoid crashing the critical path when setting MDC fails.
-@Suppress("TooGenericExceptionCaught")
-internal class MDCScopeListener {
+class MDCScopeListener {
   companion object {
     val log = getLogger<MDCScopeListener>()
     const val MDC_TRACE_ID = "trace_id"
