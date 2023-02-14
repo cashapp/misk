@@ -1,8 +1,8 @@
 package misk.jdbc
 
 import datadog.opentracing.DDTracer
-import datadog.trace.common.writer.Writer
-import datadog.trace.core.DDSpan
+import ddtrot.dd.trace.common.writer.Writer
+import ddtrot.dd.trace.core.DDSpan
 import io.opentracing.mock.MockTracer
 import net.ttddyy.dsproxy.transform.TransformInfo
 import org.assertj.core.api.Assertions.assertThat
