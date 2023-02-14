@@ -16,7 +16,8 @@ class DatadogTracingBackendModule : KAbstractModule() {
     // See https://github.com/DataDog/dd-trace-java/tree/v0.65.0/dd-smoke-tests/opentracing/src/main/java/datadog/smoketest/opentracing
     bind<Tracer>().toInstance(io.opentracing.util.GlobalTracer.get())
     getInternalTracer()?.apply {
-      addScopeListener(MDCScopeListener.Activated(), MDCScopeListener.Closed())
+      val mdcScopeListener = MDCScopeListener()
+      addScopeListener(mdcScopeListener::afterScopeActivated, mdcScopeListener::afterScopeClosed)
     }
   }
 
