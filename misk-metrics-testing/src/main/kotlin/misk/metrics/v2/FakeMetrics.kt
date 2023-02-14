@@ -37,6 +37,11 @@ class FakeMetrics @Inject internal constructor(
       .labelNames(*labelNames.toTypedArray())
       .register(registry)
 
+  override fun peakGauge(name: String, help: String, labelNames: List<String>): PeakGauge =
+    PeakGauge.builder(name, help)
+      .labelNames(*labelNames.toTypedArray())
+      .register(registry)
+
   override fun histogram(
     name: String,
     help: String,
