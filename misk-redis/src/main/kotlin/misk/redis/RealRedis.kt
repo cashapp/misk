@@ -232,13 +232,13 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
 
   override fun lpop(key: String, count: Int): List<ByteString?> {
     return jedisPool.resource.use { jedis ->
-      jedis.lpop(key.toByteArray(charset), count).map { it?.toByteString() }
+      jedis.lpop(key.toByteArray(charset), count)?.map { it?.toByteString() } ?: emptyList()
     }
   }
 
   override fun rpop(key: String, count: Int): List<ByteString?> {
     return jedisPool.resource.use { jedis ->
-      jedis.rpop(key.toByteArray(charset), count).map { it?.toByteString() }
+      jedis.rpop(key.toByteArray(charset), count)?.map { it?.toByteString() } ?: emptyList()
     }
   }
 
