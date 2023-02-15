@@ -24,6 +24,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public fun lpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun lpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
 	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
@@ -34,6 +35,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun rpush (Ljava/lang/String;[Lokio/ByteString;)J
@@ -74,6 +76,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public fun lpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun lpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
 	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
@@ -84,6 +87,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun rpush (Ljava/lang/String;[Lokio/ByteString;)J
@@ -119,6 +123,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun incr (Ljava/lang/String;)J
 	public abstract fun incrBy (Ljava/lang/String;J)J
 	public abstract fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public abstract fun lpop (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun lpop (Ljava/lang/String;I)Ljava/util/List;
 	public abstract fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
 	public abstract fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
@@ -129,6 +134,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun pExpire (Ljava/lang/String;J)Z
 	public abstract fun pExpireAt (Ljava/lang/String;J)Z
 	public abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public abstract fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public abstract fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun rpush (Ljava/lang/String;[Lokio/ByteString;)J
