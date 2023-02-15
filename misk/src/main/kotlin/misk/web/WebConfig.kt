@@ -95,7 +95,17 @@ data class WebConfig(
   val concurrency_limiter_log_level: Level = Level.ERROR,
 
   /* Custom configuration for calculating concurrency limits */
-  val concurrency_limiter: ConcurrencyLimiterConfig? = null,
+  val concurrency_limiter: ConcurrencyLimiterConfig? = ConcurrencyLimiterConfig(
+    disabled = concurrency_limiter_disabled,
+    strategy = ConcurrencyLimiterStrategy.VEGAS,
+    max_concurrency = null,
+    // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints that
+    // receive the majority of traffic (power law, yay!), and those endpoints should _start up_
+    // without triggering the concurrency limiter at the parallelism that we configured Jetty
+    // to support.
+    initial_limit = jetty_max_thread_pool_size / 2,
+    log_level = concurrency_limiter_log_level,
+  ),
 
   /** The number of milliseconds to sleep before commencing service shutdown. */
   val shutdown_sleep_ms: Int = 0,
@@ -236,11 +246,16 @@ data class ConcurrencyLimiterConfig(
   val strategy: ConcurrencyLimiterStrategy = ConcurrencyLimiterStrategy.VEGAS,
 
   /**
-   * Maximum allowed concurrency limit providing an upper bound failsafe. At runtime, this will
-   * default to half of the jetty_max_thread_pool_size if not set.
+   * Maximum allowed concurrency limit providing an upper bound failsafe.
    */
   val max_concurrency: Int? = null,
 
   /** Initial limit used by the concurrency limiter. */
   val initial_limit: Int? = null,
+
+  /**
+   * The level of log when concurrency shedding. Same as concurrency_limiter_log_level default for
+   * backwards compatibility.
+   */
+  val log_level: Level = Level.ERROR,
 )

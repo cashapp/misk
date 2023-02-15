@@ -173,7 +173,8 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
         action = action,
         defaultLimiter = createLimiterForAction(action, quotaPath = null),
         clock = clock,
-        logLevel = config.concurrency_limiter_log_level
+        logLevel = config.concurrency_limiter?.log_level
+          ?: config.concurrency_limiter_log_level
       )
     }
 
