@@ -9,23 +9,23 @@ import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.SetParams
 import java.time.Duration
 
-/** For each command, a Jedis instance is retrieved from the pool and returned once the command has been issued. */
+/**
+ * For each command, a Jedis instance is retrieved from the pool and returned once the command has
+ * been issued.
+ */
 class RealRedis(private val jedisPool: JedisPool) : Redis {
-  /** Delete key. */
   override fun del(key: String): Boolean {
     jedisPool.resource.use { jedis ->
       return (jedis.del(key) == 1L)
     }
   }
 
-  /** Delete multiple keys. */
   override fun del(vararg keys: String): Int {
     jedisPool.resource.use { jedis ->
       return jedis.del(*keys).toInt()
     }
   }
 
-  /** Get multiple key values. */
   override fun mget(vararg keys: String): List<ByteString?> {
     val byteArrays = keys.map { it.toByteArray(charset) }.toTypedArray()
     jedisPool.resource.use { jedis ->
@@ -33,7 +33,6 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  /** Set multiple key values. */
   override fun mset(vararg keyValues: ByteString) {
     require(keyValues.size % 2 == 0) { "Wrong number of arguments to mset" }
 
@@ -43,7 +42,6 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  /** Get a ByteString value. */
   override fun get(key: String): ByteString? {
     jedisPool.resource.use { jedis ->
       return jedis.get(key.toByteArray(charset))?.toByteString()
@@ -57,7 +55,6 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  /** Get a map of field -> value pairs for the given key. */
   override fun hgetAll(key: String): Map<String, ByteString>? {
     jedisPool.resource.use { jedis ->
       return jedis.hgetAll(key.toByteArray(charset))?.mapKeys {
@@ -81,7 +78,6 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  /** Get a ByteString value for the given key and field. */
   override fun hget(key: String, field: String): ByteString? {
     jedisPool.resource.use { jedis ->
       return jedis.hget(key.toByteArray(charset), field.toByteArray(charset))?.toByteString()
@@ -121,28 +117,24 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  /** Set a ByteArray value. */
   override fun set(key: String, value: ByteString) {
     jedisPool.resource.use { jedis ->
       jedis.set(key.toByteArray(charset), value.toByteArray())
     }
   }
 
-  /** Set a ByteArray value with an expiration. */
   override fun set(key: String, expiryDuration: Duration, value: ByteString) {
     jedisPool.resource.use { jedis ->
       jedis.setex(key.toByteArray(charset), expiryDuration.seconds, value.toByteArray())
     }
   }
 
-  /** Set a ByteArray value if it doesn't already exist. Returns true if set and false, otherwise */
   override fun setnx(key: String, value: ByteString): Boolean {
     return jedisPool.resource.use { jedis ->
       jedis.setnx(key.toByteArray(charset), value.toByteArray()) == 1L
     }
   }
 
-  /** Set a ByteArray value if it doesn't already exist with an expiration. Returns true if set and false, otherwise  */
   override fun setnx(key: String, expiryDuration: Duration, value: ByteString): Boolean {
     return jedisPool.resource.use { jedis ->
       jedis.set(
@@ -153,14 +145,12 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  /** Set a ByteArray value for the given key and field. */
   override fun hset(key: String, field: String, value: ByteString): Long {
     return jedisPool.resource.use { jedis ->
       jedis.hset(key.toByteArray(charset), field.toByteArray(charset), value.toByteArray())
     }
   }
 
-  /** Set ByteArray values for the given key and fields. */
   override fun hset(key: String, hash: Map<String, ByteString>): Long {
     val hashBytes = hash.entries.associate { it.key.toByteArray(charset) to it.value.toByteArray() }
     return jedisPool.resource.use { jedis ->
@@ -168,17 +158,15 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
-  /** Interpret the value at [key] as a Long and increment it by 1. */
   override fun incr(key: String): Long {
     return jedisPool.resource.use { jedis ->
-      jedis.incr(key.toByteArray(charset))!!
+      jedis.incr(key.toByteArray(charset))
     }
   }
 
-  /** Interpret the value at [key] as a Long and increment it by [increment]. */
   override fun incrBy(key: String, increment: Long): Long {
     return jedisPool.resource.use { jedis ->
-      jedis.incrBy(key.toByteArray(charset), increment)!!
+      jedis.incrBy(key.toByteArray(charset), increment)
     }
   }
 
@@ -226,7 +214,7 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
         destinationKey.toByteArray(charset),
         from,
         to
-      ).toByteString()
+      )?.toByteString()
     }
   }
 
@@ -244,13 +232,25 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
 
   override fun lpop(key: String, count: Int): List<ByteString?> {
     return jedisPool.resource.use { jedis ->
-      jedis.lpop(key.toByteArray(charset), count).map { it?.toByteString() }
+      jedis.lpop(key.toByteArray(charset), count)?.map { it?.toByteString() } ?: emptyList()
+    }
+  }
+
+  override fun lpop(key: String): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.lpop(key.toByteArray(charset))?.toByteString()
     }
   }
 
   override fun rpop(key: String, count: Int): List<ByteString?> {
     return jedisPool.resource.use { jedis ->
-      jedis.rpop(key.toByteArray(charset), count).map { it?.toByteString() }
+      jedis.rpop(key.toByteArray(charset), count)?.map { it?.toByteString() } ?: emptyList()
+    }
+  }
+
+  override fun rpop(key: String): ByteString? {
+    return jedisPool.resource.use { jedis ->
+      jedis.rpop(key.toByteArray(charset))?.toByteString()
     }
   }
 
@@ -275,25 +275,25 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
 
   override fun expire(key: String, seconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.expire(key, seconds)!! == 1L
+      jedis.expire(key, seconds) == 1L
     }
   }
 
   override fun expireAt(key: String, timestampSeconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.expireAt(key, timestampSeconds)!! == 1L
+      jedis.expireAt(key, timestampSeconds) == 1L
     }
   }
 
   override fun pExpire(key: String, milliseconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.pexpire(key, milliseconds)!! == 1L
+      jedis.pexpire(key, milliseconds) == 1L
     }
   }
 
   override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
     return jedisPool.resource.use { jedis ->
-      jedis.pexpireAt(key, timestampMilliseconds)!! == 1L
+      jedis.pexpireAt(key, timestampMilliseconds) == 1L
     }
   }
 
