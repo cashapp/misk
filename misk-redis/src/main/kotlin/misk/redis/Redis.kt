@@ -285,13 +285,29 @@ interface Redis {
 
   /**
    * Removes and returns the first [count] elements of the list stored at [key].
+   *
+   * Only available on Redis 6.2.0 and higher.
+   * Throws if Redis is too low of a version.
    */
   fun lpop(key: String, count: Int): List<ByteString?>
 
   /**
+   * Removes and returns the first element of the list stored at [key].
+   */
+  fun lpop(key: String): ByteString?
+
+  /**
    * Removes and returns the last [count] elements of the list stored at [key].
+   *
+   * Only available on Redis 6.2.0 and higher.
+   * Throws if Redis is too low of a version.
    */
   fun rpop(key: String, count: Int): List<ByteString?>
+
+  /**
+   * Removes and returns the last element of the list stored at [key].
+   */
+  fun rpop(key: String): ByteString?
 
   /**
    * Returns the specified elements of the list stored at key. The offsets start and stop are
