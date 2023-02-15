@@ -268,6 +268,9 @@ class FakeRedis : Redis {
   }
 
   @Synchronized
+  override fun lpop(key: String): ByteString? = lpop(key, count = 1).firstOrNull()
+
+  @Synchronized
   override fun rpop(key: String, count: Int): List<ByteString?> {
     val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
     if (clock.instant() >= value.expiryInstant) {
@@ -279,6 +282,9 @@ class FakeRedis : Redis {
     lKeyValueStore[key] = value.copy(data = value.data.dropLast(count))
     return result
   }
+
+  @Synchronized
+  override fun rpop(key: String): ByteString? = rpop(key, count = 1).firstOrNull()
 
   @Synchronized
   override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
