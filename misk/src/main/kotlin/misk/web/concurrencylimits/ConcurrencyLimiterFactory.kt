@@ -1,4 +1,4 @@
-package misk.web.interceptors
+package misk.web.concurrencylimits
 
 import com.netflix.concurrency.limits.Limiter
 import misk.Action
