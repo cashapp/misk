@@ -245,6 +245,9 @@ data class ConcurrencyLimiterConfig(
   /** The algorithm to use for determining concurrency limits. */
   val strategy: ConcurrencyLimiterStrategy = ConcurrencyLimiterStrategy.VEGAS,
 
+  /** Minimum concurrency limit allowed. */
+  val min_limit: Int? = null,
+
   /**
    * Maximum allowed concurrency limit providing an upper bound failsafe.
    */

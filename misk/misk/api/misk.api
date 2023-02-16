@@ -1078,20 +1078,22 @@ public final class misk/tracing/TracerExtKt {
 
 public final class misk/web/ConcurrencyLimiterConfig {
 	public fun <init> ()V
-	public fun <init> (ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;)V
-	public synthetic fun <init> (ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;)V
+	public synthetic fun <init> (ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 	public final fun component3 ()Ljava/lang/Integer;
 	public final fun component4 ()Ljava/lang/Integer;
-	public final fun component5 ()Lorg/slf4j/event/Level;
-	public final fun copy (ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;)Lmisk/web/ConcurrencyLimiterConfig;
-	public static synthetic fun copy$default (Lmisk/web/ConcurrencyLimiterConfig;ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;ILjava/lang/Object;)Lmisk/web/ConcurrencyLimiterConfig;
+	public final fun component5 ()Ljava/lang/Integer;
+	public final fun component6 ()Lorg/slf4j/event/Level;
+	public final fun copy (ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;)Lmisk/web/ConcurrencyLimiterConfig;
+	public static synthetic fun copy$default (Lmisk/web/ConcurrencyLimiterConfig;ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;ILjava/lang/Object;)Lmisk/web/ConcurrencyLimiterConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDisabled ()Z
 	public final fun getInitial_limit ()Ljava/lang/Integer;
 	public final fun getLog_level ()Lorg/slf4j/event/Level;
 	public final fun getMax_concurrency ()Ljava/lang/Integer;
+	public final fun getMin_limit ()Ljava/lang/Integer;
 	public final fun getStrategy ()Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
