@@ -25,6 +25,7 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
 import misk.web.actions.WebAction
+import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
