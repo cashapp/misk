@@ -14,7 +14,6 @@ import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import misk.Action
 import misk.inject.KAbstractModule
 import misk.web.ConcurrencyLimiterConfig
-import misk.web.WebConfig
 import java.time.Clock
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -52,18 +51,21 @@ class ConcurrencyLimitsModule(
       GradientLimit.newBuilder().apply {
         config.initial_limit?.let { initialLimit(it) }
         config.max_concurrency?.let { maxConcurrency(it) }
+        config.min_limit?.let { minLimit(it) }
       }.build()
 
     ConcurrencyLimiterStrategy.GRADIENT2 ->
       Gradient2Limit.newBuilder().apply {
         config.initial_limit?.let { initialLimit(it) }
         config.max_concurrency?.let { maxConcurrency(it) }
+        config.min_limit?.let { minLimit(it) }
       }.build()
 
     ConcurrencyLimiterStrategy.AIMD ->
       AIMDLimit.newBuilder().apply {
         config.initial_limit?.let { initialLimit(it) }
         config.max_concurrency?.let { maxLimit(it) }
+        config.min_limit?.let { minLimit(it) }
       }.build()
 
     ConcurrencyLimiterStrategy.SETTABLE ->
