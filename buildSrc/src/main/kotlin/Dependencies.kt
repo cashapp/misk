@@ -96,6 +96,7 @@ object Dependencies {
   val openTracingOkHttp = "io.opentracing.contrib:opentracing-okhttp3:3.0.0"
   val openTracingUtil = "io.opentracing:opentracing-util:0.33.0"
   val postgresql = "org.postgresql:postgresql:42.2.23"
+  val prometheusClientBom = "io.prometheus:simpleclient_bom:0.15.0"
   val prometheusClient = "io.prometheus:simpleclient:0.15.0"
   val prometheusHotspot = "io.prometheus:simpleclient_hotspot:0.15.0"
   val prometheusHttpserver = "io.prometheus:simpleclient_httpserver:0.15.0"

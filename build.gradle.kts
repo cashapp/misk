@@ -83,6 +83,7 @@ subprojects {
       add("api", platform(Dependencies.kotlinBom))
       add("api", platform(Dependencies.nettyBom))
       add("api", platform(Dependencies.wispBom))
+      add("api", platform(Dependencies.prometheusClientBom))
     }
 
     tasks.withType<GenerateModuleMetadata> {
