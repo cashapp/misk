@@ -1,9 +1,7 @@
 package misk.web.metadata.jvm
 
 import com.google.inject.Provides
-import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
-import misk.moshi.adapter
 import misk.web.WebActionModule
 import java.lang.management.ManagementFactory
 import java.lang.management.RuntimeMXBean
