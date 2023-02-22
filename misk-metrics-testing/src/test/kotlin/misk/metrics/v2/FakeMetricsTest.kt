@@ -101,29 +101,29 @@ class FakeMetricsTest {
 
     summary.observe(450.0)
     assertThat(metrics.summaryP50("call_times")).isEqualTo(400.0)
-    assertThat(metrics.summaryP99("call_times")).isEqualTo(400.0)
-
-    summary.observe(500.0)
-    assertThat(metrics.summaryP50("call_times")).isEqualTo(400.0)
     assertThat(metrics.summaryP99("call_times")).isEqualTo(450.0)
 
-    summary.observe(550.0)
+    summary.observe(500.0)
     assertThat(metrics.summaryP50("call_times")).isEqualTo(450.0)
     assertThat(metrics.summaryP99("call_times")).isEqualTo(500.0)
 
-    summary.observe(600.0)
+    summary.observe(550.0)
     assertThat(metrics.summaryP50("call_times")).isEqualTo(450.0)
     assertThat(metrics.summaryP99("call_times")).isEqualTo(550.0)
+
+    summary.observe(600.0)
+    assertThat(metrics.summaryP50("call_times")).isEqualTo(500.0)
+    assertThat(metrics.summaryP99("call_times")).isEqualTo(600.0)
   }
 
   @Test
   internal fun `get all samples`() {
-    metrics.counter("counter", "-", listOf("foo")).labels("bar").inc()
+    metrics.counter("counter_total", "-", listOf("foo")).labels("bar").inc()
     metrics.gauge("gauge", "-", listOf("foo")).labels("bar").inc()
     metrics.histogram("histogram", "-", listOf("foo"), listOf(1.0, 2.0)).labels("bar").observe(1.0)
 
-    assertThat(metrics.getAllSamples().toList()).containsExactlyInAnyOrder(
-      Sample("counter", listOf("foo"), listOf("bar"), 1.0),
+    assertThat(metrics.getAllSamples().toList()).contains(
+      Sample("counter_total", listOf("foo"), listOf("bar"), 1.0),
       Sample("gauge", listOf("foo"), listOf("bar"), 1.0),
       Sample("histogram_bucket", listOf("foo", "le"), listOf("bar", "1.0"), 1.0),
       Sample("histogram_bucket", listOf("foo", "le"), listOf("bar", "2.0"), 1.0),

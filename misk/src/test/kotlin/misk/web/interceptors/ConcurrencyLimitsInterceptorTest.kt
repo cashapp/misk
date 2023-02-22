@@ -216,7 +216,7 @@ class ConcurrencyLimitsInterceptorTest {
 
   private fun callSuccessCount(id: String): Double {
     return prometheusRegistry.getSampleValue(
-      "concurrency_limits_outcomes",
+      "concurrency_limits_outcomes_total",
       arrayOf("quota_path", "outcome"),
       arrayOf(id, "success")
     )
