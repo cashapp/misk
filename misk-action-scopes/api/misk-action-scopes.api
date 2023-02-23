@@ -45,6 +45,10 @@ public abstract interface class misk/scope/ActionScopedProvider {
 public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/scope/ActionScopedProviderModule$Companion;
 	public fun <init> ()V
+	public final fun bindConstant (Lcom/google/inject/TypeLiteral;Ljava/lang/Object;Ljava/lang/annotation/Annotation;)V
+	public final fun bindConstant (Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/annotation/Annotation;)V
+	public static synthetic fun bindConstant$default (Lmisk/scope/ActionScopedProviderModule;Lcom/google/inject/TypeLiteral;Ljava/lang/Object;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
+	public static synthetic fun bindConstant$default (Lmisk/scope/ActionScopedProviderModule;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
 	public final fun bindProvider (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;Ljava/lang/Class;)V
 	public final fun bindProvider (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
 	public final fun bindProvider (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Class;)V
