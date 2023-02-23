@@ -35,7 +35,12 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   fun <T : Any> bindSeedData(type: TypeLiteral<T>) {
     bindSeedData(
       type.toKey(),
-      Key.get(Types.newParameterizedType(ActionScoped::class.java, type.type)) as Key<ActionScoped<T>>,
+      Key.get(
+        Types.newParameterizedType(
+          ActionScoped::class.java,
+          type.type
+        )
+      ) as Key<ActionScoped<T>>,
     )
   }
 
@@ -48,7 +53,10 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   fun <T : Any> bindSeedData(type: TypeLiteral<T>, a: Annotation) {
     bindSeedData(
       type.toKey(),
-      Key.get(Types.newParameterizedType(ActionScoped::class.java, type.type), a) as Key<ActionScoped<T>>,
+      Key.get(
+        Types.newParameterizedType(ActionScoped::class.java, type.type),
+        a
+      ) as Key<ActionScoped<T>>,
     )
   }
 
@@ -64,6 +72,51 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
         SeedDataActionScopedProvider(key)
       }
     )
+  }
+
+  /** Binds a provider that returns a constant value on every invocation. */
+  fun <T : Any> bindConstant(
+    kclass: KClass<T>,
+    providedValue: T,
+    annotatedBy: Annotation? = null,
+  ) {
+    val typeKey =
+      if (annotatedBy == null) Key.get(kclass.java)
+      else Key.get(kclass.java, annotatedBy)
+
+    val actionScopedType = actionScopedType(kclass.java)
+    val actionScopedKey =
+      if (annotatedBy == null) Key.get(actionScopedType)
+      else Key.get(actionScopedType, annotatedBy)
+
+    bindProvider(typeKey, actionScopedKey) {
+      object : ActionScopedProvider<T> {
+        override fun get(): T = providedValue
+      }
+    }
+  }
+
+  /** Binds a provider that returns a constant value on every invocation. */
+  fun <T : Any> bindConstant(
+    type: TypeLiteral<T>,
+    providedValue: T,
+    annotatedBy: Annotation? = null,
+  ) {
+    val typeKey =
+      if (annotatedBy == null) Key.get(type)
+      else Key.get(type, annotatedBy)
+
+    @Suppress("UNCHECKED_CAST")
+    val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
+    val actionScopedKey =
+      if (annotatedBy == null) Key.get(actionScopedType)
+      else Key.get(actionScopedType, annotatedBy)
+
+    bindProvider(typeKey, actionScopedKey) {
+      object : ActionScopedProvider<T> {
+        override fun get(): T = providedValue
+      }
+    }
   }
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
