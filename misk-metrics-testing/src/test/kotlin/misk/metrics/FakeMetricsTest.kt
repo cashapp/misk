@@ -76,6 +76,8 @@ class FakeMetricsTest {
   internal fun `different names`() {
     assertThat(metrics.get("gets")).isNull()
     assertThat(metrics.get("puts")).isNull()
+    assertThat(metrics.get("gets_total")).isNull()
+    assertThat(metrics.get("puts_total")).isNull()
 
     val getsCounter = metrics.counter("gets", "-")
     val putsCounter = metrics.counter("puts", "-")
@@ -89,6 +91,8 @@ class FakeMetricsTest {
     putsCounter.inc(20.0)
     assertThat(metrics.get("gets")).isEqualTo(17.0)
     assertThat(metrics.get("puts")).isEqualTo(29.0)
+    assertThat(metrics.get("gets_total")).isEqualTo(17.0)
+    assertThat(metrics.get("puts_total")).isEqualTo(29.0)
   }
 
   @Test
