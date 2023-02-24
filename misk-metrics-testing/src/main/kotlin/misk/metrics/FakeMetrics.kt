@@ -1,11 +1,7 @@
 package misk.metrics
 
-import io.prometheus.client.Collector
+import io.prometheus.client.*
 import io.prometheus.client.Collector.MetricFamilySamples.Sample
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.Counter
-import io.prometheus.client.Gauge
-import io.prometheus.client.Summary
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -108,11 +104,17 @@ class FakeMetrics @Inject internal constructor(
   ): Sample? {
     val metricFamilySamples = registry.metricFamilySamples()
       .asSequence()
-      .firstOrNull { it.name == name }
+      .firstOrNull {
+        it.name == name || (it.type == Collector.Type.COUNTER && "${it.name}_total" == name)
+      }
       ?: return null
 
     val familySampleName = sampleName
-      ?: if (metricFamilySamples.type == Collector.Type.COUNTER) "${name}_total" else name
+      ?: if (metricFamilySamples.type == Collector.Type.COUNTER && !name.endsWith("_total")) {
+        "${name}_total"
+      } else {
+        name
+      }
 
     val labelNames = labels.map { it.first }
     val labelValues = labels.map { it.second }
