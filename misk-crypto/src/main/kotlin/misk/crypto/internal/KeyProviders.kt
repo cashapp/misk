@@ -8,13 +8,6 @@ import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
 import com.google.crypto.tink.StreamingAead
-import com.google.crypto.tink.daead.DeterministicAeadFactory
-import com.google.crypto.tink.hybrid.HybridDecryptFactory
-import com.google.crypto.tink.hybrid.HybridEncryptFactory
-import com.google.crypto.tink.mac.MacFactory
-import com.google.crypto.tink.signature.PublicKeySignFactory
-import com.google.crypto.tink.signature.PublicKeyVerifyFactory
-import com.google.crypto.tink.streamingaead.StreamingAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
 import misk.crypto.AeadKeyManager
@@ -39,9 +32,11 @@ class AeadEnvelopeProvider(
 
   override fun get(): Aead {
     val keysetHandle = readKey(key)
-    val aeadKey = keysetHandle.getPrimitive(Aead::class.java)
-
-    return aeadKey.also { keyManager[key] = it }
+    return misk.crypto.internal.Aead(
+      getRawKey(key), keysetHandle.getPrimitive(Aead::class.java), metrics
+    ).also {
+      keyManager[key] = it
+    }
   }
 }
 
@@ -52,9 +47,11 @@ class DeterministicAeadProvider(
 
   override fun get(): DeterministicAead {
     val keysetHandle = readKey(key)
-    val daeadKey = DeterministicAeadFactory.getPrimitive(keysetHandle)
-
-    return daeadKey.also { keyManager[key] = it }
+    return misk.crypto.internal.DeterministicAead(
+      getRawKey(key), keysetHandle.getPrimitive(DeterministicAead::class.java), metrics
+    ).also {
+      keyManager[key] = it
+    }
   }
 }
 
@@ -65,7 +62,11 @@ class MacProvider(
 
   override fun get(): Mac {
     val keysetHandle = readKey(key)
-    return MacFactory.getPrimitive(keysetHandle)
+    return misk.crypto.internal.Mac(
+      getRawKey(key),
+      keysetHandle.getPrimitive(Mac::class.java),
+      metrics
+    )
       .also { keyManager[key] = it }
   }
 }
@@ -77,8 +78,17 @@ class DigitalSignatureSignerProvider(
 
   override fun get(): PublicKeySign {
     val keysetHandle = readKey(key)
-    val signer = PublicKeySignFactory.getPrimitive(keysetHandle)
-    val verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle.publicKeysetHandle)
+    val rawKey = getRawKey(key)
+    val signer = misk.crypto.internal.PublicKeySign(
+      rawKey,
+      keysetHandle.getPrimitive(PublicKeySign::class.java),
+      metrics
+    )
+    val verifier = misk.crypto.internal.PublicKeyVerify(
+      rawKey,
+      keysetHandle.publicKeysetHandle.getPrimitive(PublicKeyVerify::class.java),
+      metrics
+    )
     keyManager[key] = DigitalSignature(signer, verifier)
     return signer
   }
@@ -91,8 +101,17 @@ class DigitalSignatureVerifierProvider(
 
   override fun get(): PublicKeyVerify {
     val keysetHandle = readKey(key)
-    val signer = PublicKeySignFactory.getPrimitive(keysetHandle)
-    val verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle.publicKeysetHandle)
+    val rawKey = getRawKey(key)
+    val signer = misk.crypto.internal.PublicKeySign(
+      rawKey,
+      keysetHandle.getPrimitive(PublicKeySign::class.java),
+      metrics
+    )
+    val verifier = misk.crypto.internal.PublicKeyVerify(
+      rawKey,
+      keysetHandle.publicKeysetHandle.getPrimitive(PublicKeyVerify::class.java),
+      metrics
+    )
     keyManager[key] = DigitalSignature(signer, verifier)
     return verifier
   }
@@ -110,7 +129,11 @@ class HybridEncryptProvider(
     } catch (e: GeneralSecurityException) {
       keysetHandle
     }
-    return HybridEncryptFactory.getPrimitive(publicKeysetHandle)
+    return misk.crypto.internal.HybridEncrypt(
+      getRawKey(key),
+      publicKeysetHandle.getPrimitive(HybridEncrypt::class.java),
+      metrics
+    )
       .also { keyManager[key] = it }
   }
 }
@@ -123,9 +146,18 @@ class HybridDecryptProvider(
 
   override fun get(): HybridDecrypt {
     val keysetHandle = readKey(key)
+    val rawKey = getRawKey(key)
     keyEncryptManager[key] =
-      HybridEncryptFactory.getPrimitive(keysetHandle.publicKeysetHandle)
-    return HybridDecryptFactory.getPrimitive(keysetHandle)
+      misk.crypto.internal.HybridEncrypt(
+        rawKey,
+        keysetHandle.publicKeysetHandle.getPrimitive(HybridEncrypt::class.java),
+        metrics
+      )
+    return misk.crypto.internal.HybridDecrypt(
+      rawKey,
+      keysetHandle.getPrimitive(HybridDecrypt::class.java),
+      metrics
+    )
       .also { keyDecryptManager[key] = it }
   }
 }
@@ -137,7 +169,9 @@ class StreamingAeadProvider(
 
   override fun get(): StreamingAead {
     val keysetHandle = readKey(key)
-    return StreamingAeadFactory.getPrimitive(keysetHandle)
+    return misk.crypto.internal.StreamingAead(
+      getRawKey(key), keysetHandle.getPrimitive(StreamingAead::class.java), metrics
+    )
       .also { streamingAeadKeyManager[key] = it }
   }
 }

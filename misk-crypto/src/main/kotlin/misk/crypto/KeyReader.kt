@@ -8,6 +8,8 @@ import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.proto.KeyTemplate
 import com.google.inject.Inject
+import misk.crypto.internal.KeyMetrics
+import misk.metrics.Metrics
 import wisp.logging.getLogger
 import java.security.GeneralSecurityException
 
@@ -17,7 +19,7 @@ open class KeyReader {
   }
 
   @Inject lateinit var kmsClient: KmsClient
-
+  @Inject lateinit var metrics: KeyMetrics
   @Inject lateinit var keySources: Set<KeyResolver>
 
   private val logger = getLogger<KeyReader>()
@@ -27,7 +29,9 @@ open class KeyReader {
     // an injected Environment will fail if a test explicitly creates a staging/prod environment.
     logger.warn { "reading a plaintext key!" }
     val reader = JsonKeysetReader.withString(key.encrypted_key!!.value)
-    return CleartextKeysetHandle.read(reader)
+    return CleartextKeysetHandle.read(reader).also {
+      metrics.loaded(key, true)
+    }
   }
 
   private fun readEncryptedKey(key: Key): KeysetHandle {
@@ -35,11 +39,15 @@ open class KeyReader {
     return try {
       val kek = KmsEnvelopeAead(KEK_TEMPLATE, masterKey)
       val reader = JsonKeysetReader.withString(key.encrypted_key!!.value)
-      KeysetHandle.read(reader, kek)
+      KeysetHandle.read(reader, kek).also {
+        metrics.loaded(key, false)
+      }
     } catch (ex: GeneralSecurityException) {
       logger.warn { "using obsolete key format, rotate your keys when possible" }
       val reader = JsonKeysetReader.withString(key.encrypted_key!!.value)
-      KeysetHandle.read(reader, masterKey)
+      KeysetHandle.read(reader, masterKey).also {
+        metrics.loaded(key, false)
+      }
     }
   }
 

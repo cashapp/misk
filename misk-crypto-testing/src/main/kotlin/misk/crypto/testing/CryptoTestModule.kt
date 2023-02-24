@@ -1,5 +1,6 @@
 package misk.crypto.testing
 
+import com.google.common.util.concurrent.AbstractService
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.HybridDecrypt
@@ -15,8 +16,11 @@ import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
+import misk.ServiceModule
 import misk.config.MiskConfig
 import misk.crypto.CryptoConfig
 import misk.crypto.ExternalDataKeys
@@ -31,6 +35,8 @@ import misk.crypto.internal.DigitalSignatureSignerProvider
 import misk.crypto.internal.DigitalSignatureVerifierProvider
 import misk.crypto.internal.HybridDecryptProvider
 import misk.crypto.internal.HybridEncryptProvider
+import misk.crypto.internal.KeyMetrics
+import misk.crypto.internal.KeyMetricsProvider
 import misk.crypto.internal.MacProvider
 import misk.crypto.internal.StreamingAeadProvider
 import misk.crypto.pgp.PgpDecrypter
@@ -38,6 +44,7 @@ import misk.crypto.pgp.PgpEncrypter
 import misk.crypto.pgp.internal.PgpDecrypterProvider
 import misk.crypto.pgp.internal.PgpEncrypterProvider
 import misk.inject.KAbstractModule
+import misk.metrics.v2.Metrics
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
@@ -57,6 +64,11 @@ class CryptoTestModule(
   override fun configure() {
 
     bind<KmsClient>().toInstance(FakeKmsClient())
+    requireBinding<Metrics>()
+    bind<KeyMetrics>()
+      .toProvider(KeyMetricsProvider(config))
+      .`in`(Singleton::class.java)
+    install(ServiceModule<FakeCryptoService>())
 
     AeadConfig.register()
     DeterministicAeadConfig.register()
@@ -160,5 +172,15 @@ class CryptoTestModule(
         }
       }
     }
+  }
+
+  /**
+   * Here to appease serviceManager
+   */
+  @Singleton
+  private class FakeCryptoService @Inject constructor(): AbstractService(), CryptoService {
+    override fun doStart() = notifyStarted()
+
+    override fun doStop() = notifyStopped()
   }
 }

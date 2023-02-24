@@ -19,6 +19,7 @@ dependencies {
   implementation(project(":misk"))
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
+  implementation(project(":misk-metrics"))
   api(Dependencies.wispConfig)
   api(Dependencies.wispDeployment)
   api(Dependencies.wispLogging)

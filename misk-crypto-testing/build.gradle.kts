@@ -13,6 +13,7 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-crypto"))
+  implementation(project(":misk-metrics"))
   implementation(project(":misk-testing"))
   api(Dependencies.wispContainersTesting)
   api(Dependencies.wispLogging)
@@ -22,5 +23,6 @@ dependencies {
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.junitParams)
+  testImplementation(project(":misk-metrics-testing"))
 
 }

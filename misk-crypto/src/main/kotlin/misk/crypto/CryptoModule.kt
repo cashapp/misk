@@ -25,6 +25,8 @@ import misk.crypto.internal.DigitalSignatureSignerProvider
 import misk.crypto.internal.DigitalSignatureVerifierProvider
 import misk.crypto.internal.HybridDecryptProvider
 import misk.crypto.internal.HybridEncryptProvider
+import misk.crypto.internal.KeyMetrics
+import misk.crypto.internal.KeyMetricsProvider
 import misk.crypto.internal.MacProvider
 import misk.crypto.internal.StreamingAeadProvider
 import misk.crypto.pgp.PgpDecrypter
@@ -32,6 +34,7 @@ import misk.crypto.pgp.PgpEncrypter
 import misk.crypto.pgp.internal.PgpDecrypterProvider
 import misk.crypto.pgp.internal.PgpEncrypterProvider
 import misk.inject.KAbstractModule
+import misk.metrics.v2.Metrics
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -48,7 +51,12 @@ class CryptoModule(
 ) : KAbstractModule() {
 
   override fun configure() {
+
     requireBinding<KmsClient>()
+    requireBinding<Metrics>()
+    bind<KeyMetrics>()
+      .toProvider(KeyMetricsProvider(config))
+      .`in`(Singleton::class.java)
 
     AeadConfig.register()
     DeterministicAeadConfig.register()
