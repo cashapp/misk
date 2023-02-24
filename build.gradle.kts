@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
@@ -51,21 +52,14 @@ subprojects {
 
   // Only apply if the project has the kotlin plugin added:
   plugins.withType<KotlinPluginWrapper> {
-    val compileKotlin by tasks.getting(KotlinCompile::class) {
+    tasks.withType<KotlinCompile> {
       kotlinOptions {
         jvmTarget = "11"
-
-        // TODO(alec): Enable again once Environment enum is deleted
-        allWarningsAsErrors = false
       }
     }
-    val compileTestKotlin by tasks.getting(KotlinCompile::class) {
-      kotlinOptions {
-        jvmTarget = "11"
-
-        // TODO(alec): Enable again once Environment enum is deleted
-        allWarningsAsErrors = false
-      }
+    tasks.withType<JavaCompile> {
+      sourceCompatibility = "11"
+      targetCompatibility = "11"
     }
 
     dependencies {
