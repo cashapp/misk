@@ -2,6 +2,7 @@ package misk.web
 
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
+import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.slf4j.event.Level
 import wisp.config.Config
@@ -92,6 +93,19 @@ data class WebConfig(
 
   /** The level of log when concurrency shedding. */
   val concurrency_limiter_log_level: Level = Level.ERROR,
+
+  /* Custom configuration for calculating concurrency limits */
+  val concurrency_limiter: ConcurrencyLimiterConfig? = ConcurrencyLimiterConfig(
+    disabled = concurrency_limiter_disabled,
+    strategy = ConcurrencyLimiterStrategy.VEGAS,
+    max_concurrency = null,
+    // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints that
+    // receive the majority of traffic (power law, yay!), and those endpoints should _start up_
+    // without triggering the concurrency limiter at the parallelism that we configured Jetty
+    // to support.
+    initial_limit = jetty_max_thread_pool_size / 2,
+    log_level = concurrency_limiter_log_level,
+  ),
 
   /** The number of milliseconds to sleep before commencing service shutdown. */
   val shutdown_sleep_ms: Int = 0,
@@ -222,4 +236,29 @@ data class CorsConfig(
   val chainPreflight: Boolean = true,
   /** A comma separated list of HTTP headers that are allowed to be exposed on the client. */
   val exposedHeaders: Array<String> = arrayOf()
+)
+
+data class ConcurrencyLimiterConfig(
+  /** If true, disables automatic load shedding when degraded. */
+  val disabled: Boolean = false,
+
+  /** The algorithm to use for determining concurrency limits. */
+  val strategy: ConcurrencyLimiterStrategy = ConcurrencyLimiterStrategy.VEGAS,
+
+  /** Minimum concurrency limit allowed. */
+  val min_limit: Int? = null,
+
+  /**
+   * Maximum allowed concurrency limit providing an upper bound failsafe.
+   */
+  val max_concurrency: Int? = null,
+
+  /** Initial limit used by the concurrency limiter. */
+  val initial_limit: Int? = null,
+
+  /**
+   * The level of log when concurrency shedding. Same as concurrency_limiter_log_level default for
+   * backwards compatibility.
+   */
+  val log_level: Level = Level.ERROR,
 )

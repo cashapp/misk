@@ -50,12 +50,11 @@ interface Redis {
   operator fun get(key: String): ByteString?
 
   /**
-   * Delete one or more hash fields
+   * Delete one or more hash [fields] stored at [key].
+   * Specified fields that do not exist are ignored.
    *
-   * @param key the key for which to delete fields
-   * @param fields the specific fields to delete
-   * @return If the field was present in the hash it is deleted and 1 is returned, otherwise 0 is
-   * returned and no operation is performed.
+   * @return The number of fields that were removed from the hash. If the key does not exist,
+   *         it is treated as an empty hash and 0 is returned.
    */
   fun hdel(key: String, vararg fields: String): Long
 
@@ -76,6 +75,11 @@ interface Redis {
    * @return a Map<String, ByteString> of the fields to their associated values
    */
   fun hgetAll(key: String): Map<String, ByteString>?
+
+  /**
+   * Returns the number of fields contained in the hash stored at [key].
+   */
+  fun hlen(key: String): Long
 
   /**
    * Retrieve the values associated to the specified fields.
@@ -254,17 +258,56 @@ interface Redis {
   ): ByteString?
 
   /**
-   * Insert all the specified values at the head of the list stored at key. If key does not exist,
-   * it is created as empty list before performing the push operations. When key holds a value that
-   * is not a list, an error is returned.
+   * Insert all the specified [elements] at the head of the list stored at [key].
+   * If [key] does not exist, it is created as empty list before performing the push operations.
+   * When [key] holds a value that is not a list, an error is returned.
    *
    * It is possible to push multiple elements using a single command call just specifying multiple
    * arguments at the end of the command. Elements are inserted one after the other to the head of
-   * the list, from the leftmost element to the rightmost element. So for instance the command LPUSH
-   * mylist a b c will result into a list containing c as first element, b as second element and a
-   * as third element.
+   * the list, from the leftmost element to the rightmost element.
+   * So for instance the command `LPUSH mylist a b c` will result into a list containing `c` as
+   * first element, `b` as second element and `a` as third element.
    */
   fun lpush(key: String, vararg elements: ByteString): Long
+
+  /**
+   * Insert all the specified [elements] at the tail of the list stored at [key].
+   * If [key] does not exist, it is created as empty list before performing the push operations.
+   * When [key] holds a value that is not a list, an error is returned.
+   *
+   * It is possible to push multiple elements using a single command call just specifying multiple
+   * arguments at the end of the command. Elements are inserted one after the other to the tail of
+   * the list, from the leftmost element to the rightmost element.
+   * So for instance the command `RPUSH mylist a b c` will result into a list containing `a` as
+   * first element, `b` as second element and `c` as third element.
+   */
+  fun rpush(key: String, vararg elements: ByteString): Long
+
+  /**
+   * Removes and returns the first [count] elements of the list stored at [key].
+   *
+   * Only available on Redis 6.2.0 and higher.
+   * Throws if Redis is too low of a version.
+   */
+  fun lpop(key: String, count: Int): List<ByteString?>
+
+  /**
+   * Removes and returns the first element of the list stored at [key].
+   */
+  fun lpop(key: String): ByteString?
+
+  /**
+   * Removes and returns the last [count] elements of the list stored at [key].
+   *
+   * Only available on Redis 6.2.0 and higher.
+   * Throws if Redis is too low of a version.
+   */
+  fun rpop(key: String, count: Int): List<ByteString?>
+
+  /**
+   * Removes and returns the last element of the list stored at [key].
+   */
+  fun rpop(key: String): ByteString?
 
   /**
    * Returns the specified elements of the list stored at key. The offsets start and stop are
