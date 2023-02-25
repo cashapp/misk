@@ -36,7 +36,6 @@ class StaticResourceAction @Inject constructor(
   private val resourceLoader: ResourceLoader,
   private val resourceEntryFinder: ResourceEntryFinder
 ) : WebAction {
-
   @Get("/{path:.*}")
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)
@@ -48,12 +47,10 @@ class StaticResourceAction @Inject constructor(
   }
 
   fun getResponse(httpCall: HttpCall): Response<ResponseBody> {
-    val entry =
-      (
-        resourceEntryFinder.staticResource(httpCall.url) as StaticResourceEntry?
-          ?: return NotFoundAction.response(httpCall.url.encodedPath.drop(1))
-        )
-    return MatchedResource(entry).getResponse(httpCall)
+    val staticResourceEntry =
+      resourceEntryFinder.staticResource(httpCall.url) as StaticResourceEntry?
+        ?: return NotFoundAction.response(httpCall.url.encodedPath.drop(1))
+    return MatchedResource(staticResourceEntry).getResponse(httpCall)
   }
 
   private enum class Kind {
@@ -72,8 +69,10 @@ class StaticResourceAction @Inject constructor(
           urlPath.endsWith("/") -> resourceResponse(
             normalizePath(matchedEntry.url_path_prefix)
           )
+
           else -> null
         }
+
         Kind.RESOURCE -> resourceResponse(urlPath)
         Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(httpCall.url))
       } ?: NotFoundAction.response(httpCall.url.encodedPath.drop(1))
@@ -133,6 +132,7 @@ class StaticResourceAction @Inject constructor(
             )
           )
         }
+
         else -> null
       }
     }
