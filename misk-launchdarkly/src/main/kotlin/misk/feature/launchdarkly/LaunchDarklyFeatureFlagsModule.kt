@@ -1,6 +1,7 @@
 package misk.feature.launchdarkly
 
 import com.google.inject.Provides
+import com.launchdarkly.logging.LDLogLevel
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
@@ -75,6 +76,7 @@ class LaunchDarklyModule(
       ldConfig.http(
         Components.httpConfiguration().sslSocketFactory(sslContext.socketFactory, x509TrustManager)
       )
+      ldConfig.logging(Components.logging().level(LDLogLevel.DEBUG))
     }
 
     return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
