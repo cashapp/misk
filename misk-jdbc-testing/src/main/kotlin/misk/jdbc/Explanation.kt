@@ -143,7 +143,7 @@ internal class Explanation {
       }
     }
 
-    return "PRIMARY" == key && query.contains(" limit ")
+    return "PRIMARY" == key
   }
 
   override fun toString(): String = buildString {

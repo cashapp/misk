@@ -12,7 +12,7 @@ import java.time.Duration
 object ScaleSafetyChecks {
   private val logger = KotlinLogging.logger {}
   private val COMMENT_PATTERN = "/\\*+[^*]*\\*+(?:[^/*][^*]*\\*+)*/".toRegex()
-  private val DML = setOf("insert", "delete", "update")
+  private val IGNORE = setOf("insert", "delete", "update", "create", "set", "show")
 
   fun getLastLoggedCommand(connection: Connection): Timestamp? {
     return connection.createStatement().use { session ->
@@ -23,7 +23,7 @@ object ScaleSafetyChecks {
   }
 
   fun checkQueryForTableScan(connection: Connection, database: String?, query: String) {
-    if (isDml(query) || query.startsWith("EXPLAIN", true)) return
+    if (shouldIgnore(query) || query.startsWith("EXPLAIN", true)) return
 
     val explanations = connection.createStatement().use { statement ->
       try {
@@ -57,13 +57,19 @@ object ScaleSafetyChecks {
     }
   }
 
-  fun isDml(query: String): Boolean {
+  /**
+   * We're ignoring some statement that can't be explained.
+   *
+   * TODO(frojas): MySQL let you explain insert/update statement. We should consider to add these.
+   *
+   */
+  fun shouldIgnore(query: String): Boolean {
     val first = query
       .replace(COMMENT_PATTERN, "")
       .trimStart()
       .toLowerCase()
       .takeWhile { !it.isWhitespace() }
-    return DML.contains(first)
+    return IGNORE.contains(first)
   }
 
   /**
