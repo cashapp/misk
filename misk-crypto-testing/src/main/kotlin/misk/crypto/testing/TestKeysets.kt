@@ -1,18 +1,17 @@
-package misk.crypto
+package misk.crypto.testing
 
 import com.google.crypto.tink.CleartextKeysetHandle
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import misk.config.MiskConfig
+import misk.crypto.KeyReader
 import java.io.ByteArrayOutputStream
 
 /**
  * These test keys are used by the [FakeKeyResolver] class.
  * *DO NOT USE IN ANY OTHER SITUATION*
  */
-@Deprecated("Use misk-crypto-testing instead",
-  replaceWith = ReplaceWith("TestKeysets", imports = ["misk.crypto.testing"]))
 internal class TestKeysets {
   companion object {
     fun encryptSecret(key: MiskConfig.RealSecret<String>): MiskConfig.RealSecret<String> {

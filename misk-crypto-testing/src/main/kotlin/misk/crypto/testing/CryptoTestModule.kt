@@ -1,4 +1,4 @@
-package misk.crypto
+package misk.crypto.testing
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
@@ -18,6 +18,13 @@ import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import misk.config.MiskConfig
+import misk.crypto.CryptoConfig
+import misk.crypto.ExternalDataKeys
+import misk.crypto.Key
+import misk.crypto.KeyAlias
+import misk.crypto.KeyResolver
+import misk.crypto.KeyType
+import misk.crypto.ServiceKeys
 import misk.crypto.internal.AeadEnvelopeProvider
 import misk.crypto.internal.DeterministicAeadProvider
 import misk.crypto.internal.DigitalSignatureSignerProvider
@@ -43,8 +50,6 @@ import java.security.Security
  * but **will not** use the key material specified in the configuration.
  * Instead, it'll generate a random keyset handle for each named key.
  */
-@Deprecated("Use misk-crypto-testing instead",
-  replaceWith = ReplaceWith("CryptoTestModule", imports = ["misk.crypto.testing"]))
 class CryptoTestModule(
   private val config: CryptoConfig? = null
 ) : KAbstractModule() {
@@ -81,10 +86,7 @@ class CryptoTestModule(
       }
     }
 
-    val serviceKeys = mutableMapOf<KeyAlias, KeyType>()
-    keys.forEach {
-      serviceKeys[it.key_name] = it.key_type
-    }
+    val serviceKeys = keys.associate { it.key_name to it.key_type }
     bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
       .annotatedWith(ServiceKeys::class.java)
       .toInstance(serviceKeys.toMap())

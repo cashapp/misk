@@ -1,82 +1,38 @@
-package misk.crypto
+package misk.crypto.internal
 
 import com.google.crypto.tink.Aead
-import com.google.crypto.tink.CleartextKeysetHandle
 import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.HybridDecrypt
 import com.google.crypto.tink.HybridEncrypt
-import com.google.crypto.tink.JsonKeysetReader
-import com.google.crypto.tink.KeysetHandle
-import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
 import com.google.crypto.tink.StreamingAead
-import com.google.crypto.tink.aead.AeadKeyTemplates
-import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.daead.DeterministicAeadFactory
 import com.google.crypto.tink.hybrid.HybridDecryptFactory
 import com.google.crypto.tink.hybrid.HybridEncryptFactory
 import com.google.crypto.tink.mac.MacFactory
-import com.google.crypto.tink.proto.KeyTemplate
 import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.streamingaead.StreamingAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
-import wisp.logging.getLogger
+import misk.crypto.AeadKeyManager
+import misk.crypto.DeterministicAeadKeyManager
+import misk.crypto.DigitalSignature
+import misk.crypto.DigitalSignatureKeyManager
+import misk.crypto.HybridDecryptKeyManager
+import misk.crypto.HybridEncryptKeyManager
+import misk.crypto.KeyAlias
+import misk.crypto.KeyReader
+import misk.crypto.MacKeyManager
+import misk.crypto.StreamingAeadKeyManager
 import java.security.GeneralSecurityException
-
-open class KeyReader {
-  companion object {
-    val KEK_TEMPLATE: KeyTemplate = AeadKeyTemplates.AES256_GCM
-  }
-
-  @Inject lateinit var kmsClient: KmsClient
-
-  @Inject lateinit var keySources: Set<KeyResolver>
-
-  private val logger = getLogger<KeyReader>()
-
-  private fun readCleartextKey(key: Key): KeysetHandle {
-    // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for
-    // an injected Environment will fail if a test explicitly creates a staging/prod environment.
-    logger.warn { "reading a plaintext key!" }
-    val reader = JsonKeysetReader.withString(key.encrypted_key!!.value)
-    return CleartextKeysetHandle.read(reader)
-  }
-
-  private fun readEncryptedKey(key: Key): KeysetHandle {
-    val masterKey = kmsClient.getAead(key.kms_uri)
-    return try {
-      val kek = KmsEnvelopeAead(KEK_TEMPLATE, masterKey)
-      val reader = JsonKeysetReader.withString(key.encrypted_key!!.value)
-      KeysetHandle.read(reader, kek)
-    } catch (ex: GeneralSecurityException) {
-      logger.warn { "using obsolete key format, rotate your keys when possible" }
-      val reader = JsonKeysetReader.withString(key.encrypted_key!!.value)
-      KeysetHandle.read(reader, masterKey)
-    }
-  }
-
-  fun readKey(alias: KeyAlias): KeysetHandle {
-    val key = getRawKey(alias)
-    return if (key.kms_uri != null) {
-      readEncryptedKey(key)
-    } else {
-      readCleartextKey(key)
-    }
-  }
-
-  protected fun getRawKey(alias: KeyAlias): Key {
-    return keySources.mapNotNull { it.getKeyByAlias(alias) }.first()
-  }
-}
 
 /**
  * We only support AEAD keys via envelope encryption.
  */
-internal class AeadEnvelopeProvider(
+class AeadEnvelopeProvider(
   val key: KeyAlias,
 ) : Provider<Aead>, KeyReader() {
   @Inject lateinit var keyManager: AeadKeyManager
@@ -89,7 +45,7 @@ internal class AeadEnvelopeProvider(
   }
 }
 
-internal class DeterministicAeadProvider(
+class DeterministicAeadProvider(
   val key: KeyAlias,
 ) : Provider<DeterministicAead>, KeyReader() {
   @Inject lateinit var keyManager: DeterministicAeadKeyManager
@@ -102,7 +58,7 @@ internal class DeterministicAeadProvider(
   }
 }
 
-internal class MacProvider(
+class MacProvider(
   val key: KeyAlias,
 ) : Provider<Mac>, KeyReader() {
   @Inject lateinit var keyManager: MacKeyManager
@@ -114,7 +70,7 @@ internal class MacProvider(
   }
 }
 
-internal class DigitalSignatureSignerProvider(
+class DigitalSignatureSignerProvider(
   val key: KeyAlias,
 ) : Provider<PublicKeySign>, KeyReader() {
   @Inject lateinit var keyManager: DigitalSignatureKeyManager
@@ -128,7 +84,7 @@ internal class DigitalSignatureSignerProvider(
   }
 }
 
-internal class DigitalSignatureVerifierProvider(
+class DigitalSignatureVerifierProvider(
   val key: KeyAlias,
 ) : Provider<PublicKeyVerify>, KeyReader() {
   @Inject lateinit var keyManager: DigitalSignatureKeyManager
@@ -142,7 +98,7 @@ internal class DigitalSignatureVerifierProvider(
   }
 }
 
-internal class HybridEncryptProvider(
+class HybridEncryptProvider(
   val key: KeyAlias,
 ) : Provider<HybridEncrypt>, KeyReader() {
   @Inject lateinit var keyManager: HybridEncryptKeyManager
@@ -159,7 +115,7 @@ internal class HybridEncryptProvider(
   }
 }
 
-internal class HybridDecryptProvider(
+class HybridDecryptProvider(
   val key: KeyAlias,
 ) : Provider<HybridDecrypt>, KeyReader() {
   @Inject lateinit var keyDecryptManager: HybridDecryptKeyManager
@@ -174,7 +130,7 @@ internal class HybridDecryptProvider(
   }
 }
 
-internal class StreamingAeadProvider(
+class StreamingAeadProvider(
   val key: KeyAlias,
 ) : Provider<StreamingAead>, KeyReader() {
   @Inject lateinit var streamingAeadKeyManager: StreamingAeadKeyManager

@@ -1,4 +1,4 @@
-package misk.crypto.pgp
+package misk.crypto.pgp.internal
 
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.inject.Inject
@@ -7,6 +7,8 @@ import com.squareup.moshi.Moshi
 import misk.crypto.KeyAlias
 import misk.crypto.KeyReader
 import misk.crypto.PgpDecrypterManager
+import misk.crypto.pgp.PgpDecrypter
+import misk.crypto.pgp.RealPgpDecrypter
 import misk.moshi.adapter
 import org.bouncycastle.openpgp.PGPPrivateKey
 import org.bouncycastle.openpgp.PGPSecretKeyRingCollection
@@ -15,7 +17,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder
 import java.util.Base64
 
-internal class PgpDecrypterProvider(
+class PgpDecrypterProvider(
   private val alias: KeyAlias,
 ) : Provider<PgpDecrypter>, KeyReader() {
   @Inject private lateinit var moshi: Moshi

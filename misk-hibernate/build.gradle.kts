@@ -49,6 +49,7 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.logbackClassic)
+  testImplementation(project(":misk-crypto-testing"))
   testImplementation(project(":misk-metrics"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-hibernate-testing"))
