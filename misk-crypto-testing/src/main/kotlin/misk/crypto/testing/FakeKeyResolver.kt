@@ -1,10 +1,12 @@
-package misk.crypto
+package misk.crypto.testing
 
 import misk.config.MiskConfig
+import misk.crypto.Key
+import misk.crypto.KeyAlias
+import misk.crypto.KeyResolver
+import misk.crypto.KeyType
 import java.lang.UnsupportedOperationException
 
-@Deprecated("Use misk-crypto-testing instead",
-  replaceWith = ReplaceWith("FakeKeyResolver", imports = ["misk.crypto.testing"]))
 class FakeKeyResolver : KeyResolver {
   private var returnedKeysets: MutableMap<KeyAlias, Key> = mutableMapOf()
 
