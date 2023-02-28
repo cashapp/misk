@@ -1,5 +1,5 @@
 [versions]
-assertj = "3.23.1"
+assertj = "3.24.2"
 # @pin
 aws2 = "2.18.4"
 bouncycastle = "1.70"
