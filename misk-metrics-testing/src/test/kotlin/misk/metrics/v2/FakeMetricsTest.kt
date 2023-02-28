@@ -36,6 +36,23 @@ class FakeMetricsTest {
   }
 
   @Test
+  internal fun `peakGauge happy path`() {
+    assertThat(metrics.get("thread_count", "state" to "running")).isNull()
+    val peakGauge = metrics.peakGauge("thread_count", "-", labelNames = listOf("state"))
+      .labels("running")
+    peakGauge.record(10.0)
+    peakGauge.record(20.0)
+    assertThat(metrics.get("thread_count", "state" to "running")).isEqualTo(20.0)
+    // Another get without a set should result in seeing the initial value (0)
+    assertThat(metrics.get("thread_count", "state" to "running")).isEqualTo(0.0)
+    peakGauge.record(30.0)
+    peakGauge.record(20.0)
+    assertThat(metrics.get("thread_count", "state" to "running")).isEqualTo(30.0)
+    // Another get without a set should result in seeing the initial value (0)
+    assertThat(metrics.get("thread_count", "state" to "running")).isEqualTo(0.0)
+  }
+
+  @Test
   internal fun `summary happy path`() {
     assertThat(metrics.get("call_times", "status" to "200")).isNull()
     val summary = metrics.summary("call_times", "-", labelNames = listOf("status"))

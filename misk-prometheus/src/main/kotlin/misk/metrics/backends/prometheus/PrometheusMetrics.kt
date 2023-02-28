@@ -5,6 +5,7 @@ import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import misk.metrics.Histogram
 import misk.metrics.Metrics
+import misk.metrics.v2.PeakGauge
 import misk.metrics.v2.Metrics as MetricsV2
 import javax.inject.Inject
 import javax.inject.Singleton
