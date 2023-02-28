@@ -6,6 +6,7 @@ import io.prometheus.client.Histogram
 import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
 import misk.metrics.v2.Metrics
+import misk.metrics.v2.PeakGauge
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,6 +32,14 @@ internal class PrometheusMetrics @Inject internal constructor(
     labelNames: List<String>
   ): Gauge = Gauge
     .build(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .register(registry)
+
+  override fun peakGauge(name: String,
+    help: String,
+    labelNames: List<String>
+  ): PeakGauge = PeakGauge
+    .builder(name, help)
     .labelNames(*labelNames.toTypedArray())
     .register(registry)
 
