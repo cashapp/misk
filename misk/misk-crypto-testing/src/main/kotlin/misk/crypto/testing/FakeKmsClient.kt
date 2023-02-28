@@ -1,4 +1,4 @@
-package misk.crypto
+package misk.crypto.testing
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KmsClient
@@ -10,8 +10,6 @@ import com.google.crypto.tink.KmsClient
  * When calling `getAead`, it'll provide a fake [Aead] object that **performs no encryption**.
  * Instead, it only does Base64 encoding/decoding so developers could debug their apps.
  */
-@Deprecated("Use misk-crypto-testing instead",
-  replaceWith = ReplaceWith("FakeKmsClient", imports = ["misk.crypto.testing"]))
 internal class FakeKmsClient : KmsClient {
   override fun getAead(keyUri: String?): Aead {
     return FakeMasterEncryptionKey()
