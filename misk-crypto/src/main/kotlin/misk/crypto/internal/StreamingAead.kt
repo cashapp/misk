@@ -59,16 +59,4 @@ class StreamingAead(
     )
   }
 
-  //  override fun encrypt(plaintext: ByteArray?, associatedData: ByteArray?): ByteArray {
-//    return aead.encrypt(plaintext, associatedData).also {
-//      metrics.encrypt(key, plaintext?.size ?: 0)
-//    }
-//  }
-//
-//  override fun decrypt(ciphertext: ByteArray?, associatedData: ByteArray?): ByteArray {
-//    return aead.decrypt(ciphertext, associatedData).also {
-//      metrics.decrypt(key, it.size)
-//    }
-//  }
-
 }
