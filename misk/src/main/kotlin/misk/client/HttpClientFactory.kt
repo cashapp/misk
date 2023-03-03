@@ -1,10 +1,10 @@
 package misk.client
 
+import misk.security.ssl.SslContextFactory
+import misk.security.ssl.SslLoader
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import wisp.client.EnvoyClientEndpointProvider
-import misk.security.ssl.SslContextFactory
-import misk.security.ssl.SslLoader
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -31,7 +31,8 @@ class HttpClientFactory @Inject constructor(
       okhttpInterceptors?.get()
     )
 
-    return delegate.create(config.toWispConfig())
+    val okHttpClient = delegate.create(config.toWispConfig())
+    return okHttpClient
   }
 
   companion object {
