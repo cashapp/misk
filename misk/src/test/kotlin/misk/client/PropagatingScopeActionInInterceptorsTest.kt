@@ -2,7 +2,6 @@ package misk.client
 
 import com.google.inject.Guice
 import com.google.inject.Key
-import com.google.inject.name.Named
 import com.google.inject.name.Names
 import com.squareup.wire.GrpcCall
 import com.squareup.wire.GrpcClient
@@ -54,6 +53,10 @@ class PropagatingScopeActionInInterceptorsTest {
   private lateinit var suspendClient: TypedHttpClientTest.ReturnADinosaurNonBlocking
   private lateinit var dinoService: DinoService
 
+  private val seedData: Map<Key<*>, Any> = mapOf(
+    keyOf<String>(Names.named("language-preference")) to "es-US"
+  )
+
   @BeforeEach
   fun createClient() {
     val clientInjector = Guice.createInjector(ClientModule(jetty))
@@ -65,10 +68,7 @@ class PropagatingScopeActionInInterceptorsTest {
   }
 
   @Test
-  fun happyPath() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-      keyOf<String>(Names.named("language-preference")) to "es-US"
-    )
+  fun `propagate action scoped using typed http client`() {
     val response = scope.enter(seedData).use {
       client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
     }
@@ -76,12 +76,8 @@ class PropagatingScopeActionInInterceptorsTest {
   }
 
   @Test
-  fun coroutines() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-      keyOf<String>(Names.named("language-preference")) to "es-US"
-    )
+  fun `propagate action scoped using typed http client with suspended calls`() {
     val response = scope.enter(seedData).use {
-
       runBlocking(Dispatchers.IO + it.asContextElement()) {
         client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
       }
@@ -90,10 +86,7 @@ class PropagatingScopeActionInInterceptorsTest {
   }
 
   @Test
-  fun grpc() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-      keyOf<String>(Names.named("language-preference")) to "es-US"
-    )
+  fun `propagate action scoped using gRPC client`() {
     val response = scope.enter(seedData).use {
       dinoService.GetDinosour().executeBlocking(Dinosaur.Builder().name("trex").build())
     }
@@ -101,10 +94,7 @@ class PropagatingScopeActionInInterceptorsTest {
   }
 
   @Test
-  fun grpcSuspended() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-      keyOf<String>(Names.named("language-preference")) to "es-US"
-    )
+  fun `propagate action scoped using gRPC client with suspended calls`() {
     val response = scope.enter(seedData).use {
       runBlocking(Dispatchers.IO +  it.asContextElement()) {
         dinoService.GetDinosour().execute(Dinosaur.Builder().name("trex").build())
@@ -140,11 +130,13 @@ class PropagatingScopeActionInInterceptorsTest {
     override fun wrap(action: ClientAction, delegate: Call.Factory): Call.Factory? {
        return Call.Factory { request ->
           if (!actionScope.inScope()) {
-            delegate.newCall(request)
+            return@Factory delegate.newCall(request)
           }
 
          val language = actionScope.get(Key.get(String::class.java, Names.named("language-preference")))
-         val newRequest = request.newBuilder().tag(LanguageContainer(language)).build()
+         val newRequest = request.newBuilder()
+           .tag(LanguageContainer::class.java, LanguageContainer(language))
+           .build()
          delegate.newCall(newRequest)
        }
     }
@@ -154,7 +146,7 @@ class PropagatingScopeActionInInterceptorsTest {
 
   class ClientScopeActionHeaderInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-      val language = chain.request().tag() as? LanguageContainer
+      val language = chain.request().tag(LanguageContainer::class.java)
       return chain.proceed(
         chain.request().newBuilder()
           .addHeader("Content-Language", language?.language ?: "en-US")
@@ -162,9 +154,7 @@ class PropagatingScopeActionInInterceptorsTest {
       )
     }
 
-    class Factory @Inject constructor(
-      @Named("language-preference") private val languagePreference: ActionScoped<String>
-    ): ClientApplicationInterceptorFactory {
+    class Factory @Inject constructor(): ClientApplicationInterceptorFactory {
       override fun create(action: ClientAction) = ClientScopeActionHeaderInterceptor()
     }
   }
