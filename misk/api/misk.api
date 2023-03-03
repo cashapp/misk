@@ -351,6 +351,10 @@ public abstract interface class misk/client/BeginClientCallChain {
 	public abstract fun proceed (Ljava/util/List;)Lretrofit2/Call;
 }
 
+public abstract interface class misk/client/CallFactoryWrapper {
+	public abstract fun wrap (Lmisk/client/ClientAction;Lokhttp3/Call$Factory;)Lokhttp3/Call$Factory;
+}
+
 public final class misk/client/ClientAction {
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KFunction;Ljava/util/List;Lkotlin/reflect/KType;)V
 	public final fun component1 ()Ljava/lang/String;
