@@ -1080,6 +1080,29 @@ public final class misk/tracing/TracerExtKt {
 	public static synthetic fun traceWithSpan$default (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
+public final class misk/web/ConcurrencyLimiterConfig {
+	public fun <init> ()V
+	public fun <init> (ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;)V
+	public synthetic fun <init> (ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun component5 ()Ljava/lang/Integer;
+	public final fun component6 ()Lorg/slf4j/event/Level;
+	public final fun copy (ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;)Lmisk/web/ConcurrencyLimiterConfig;
+	public static synthetic fun copy$default (Lmisk/web/ConcurrencyLimiterConfig;ZLmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lorg/slf4j/event/Level;ILjava/lang/Object;)Lmisk/web/ConcurrencyLimiterConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDisabled ()Z
+	public final fun getInitial_limit ()Ljava/lang/Integer;
+	public final fun getLog_level ()Lorg/slf4j/event/Level;
+	public final fun getMax_concurrency ()Ljava/lang/Integer;
+	public final fun getMin_limit ()Ljava/lang/Integer;
+	public final fun getStrategy ()Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/CorsConfig {
 	public fun <init> ()V
 	public fun <init> ([Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;ZLjava/lang/String;Z[Ljava/lang/String;)V
@@ -1302,8 +1325,8 @@ public abstract interface class misk/web/WebActionSeedDataTransformerFactory {
 public final class misk/web/WebConfig : wisp/config/Config {
 	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZILjava/lang/Integer;Ljava/lang/Integer;)V
 	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZILjava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;ILjava/lang/Integer;Ljava/lang/Integer;)V
-	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;ILjava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component10 ()Ljava/lang/Integer;
 	public final fun component11 ()I
@@ -1319,9 +1342,10 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun component20 ()Ljava/util/Map;
 	public final fun component21 ()Z
 	public final fun component22 ()Lorg/slf4j/event/Level;
-	public final fun component23 ()I
-	public final fun component24 ()Ljava/lang/Integer;
+	public final fun component23 ()Lmisk/web/ConcurrencyLimiterConfig;
+	public final fun component24 ()I
 	public final fun component25 ()Ljava/lang/Integer;
+	public final fun component26 ()Ljava/lang/Integer;
 	public final fun component3 ()I
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lmisk/web/WebSslConfig;
@@ -1329,12 +1353,13 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun component7 ()Z
 	public final fun component8 ()Ljava/lang/Integer;
 	public final fun component9 ()Ljava/lang/Integer;
-	public final fun copy (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;ILjava/lang/Integer;Ljava/lang/Integer;)Lmisk/web/WebConfig;
-	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;ILjava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/web/WebConfig;
+	public final fun copy (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;)Lmisk/web/WebConfig;
+	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/web/WebConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptors ()Ljava/lang/Integer;
 	public final fun getAction_exception_log_level ()Lmisk/web/exceptions/ActionExceptionLogLevelConfig;
 	public final fun getClose_connection_percent ()D
+	public final fun getConcurrency_limiter ()Lmisk/web/ConcurrencyLimiterConfig;
 	public final fun getConcurrency_limiter_disabled ()Z
 	public final fun getConcurrency_limiter_log_level ()Lorg/slf4j/event/Level;
 	public final fun getCors ()Ljava/util/Map;
@@ -1432,7 +1457,6 @@ public final class misk/web/actions/LivenessCheckAction : misk/web/actions/WebAc
 
 public final class misk/web/actions/NotFoundAction : misk/web/actions/WebAction {
 	public static final field Companion Lmisk/web/actions/NotFoundAction$Companion;
-	public fun <init> (Lmisk/scope/ActionScoped;)V
 	public final fun notFound (Ljava/lang/String;)Lmisk/web/Response;
 }
 
@@ -1467,6 +1491,26 @@ public final class misk/web/actions/StatusAction$ServerStatus {
 
 public final class misk/web/actions/WebActionsKt {
 	public static final fun asChain (Lmisk/web/actions/WebAction;Lkotlin/reflect/KFunction;Ljava/util/List;Ljava/util/List;Lmisk/web/HttpCall;)Lmisk/Chain;
+}
+
+public abstract interface class misk/web/concurrencylimits/ConcurrencyLimiterFactory {
+	public abstract fun create (Lmisk/Action;)Lcom/netflix/concurrency/limits/Limiter;
+}
+
+public final class misk/web/concurrencylimits/ConcurrencyLimiterStrategy : java/lang/Enum {
+	public static final field AIMD Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public static final field FIXED Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public static final field GRADIENT Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public static final field GRADIENT2 Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public static final field SETTABLE Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public static final field VEGAS Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public static fun values ()[Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+}
+
+public final class misk/web/concurrencylimits/ConcurrencyLimitsModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/web/ConcurrencyLimiterConfig;)V
+	public final fun concurrencyLimiterFactory (Ljavax/inject/Provider;Ljava/time/Clock;)Lmisk/web/concurrencylimits/ConcurrencyLimiterFactory;
 }
 
 public final class misk/web/exceptions/ActionExceptionLogLevelConfig : wisp/config/Config {
@@ -1577,10 +1621,6 @@ public final class misk/web/formatter/ClassNameFormatter$Companion {
 }
 
 public abstract interface annotation class misk/web/interceptors/BeforeContentEncoding : java/lang/annotation/Annotation {
-}
-
-public abstract interface class misk/web/interceptors/ConcurrencyLimiterFactory {
-	public abstract fun create (Lmisk/Action;)Lcom/netflix/concurrency/limits/Limiter;
 }
 
 public final class misk/web/interceptors/InternalErrorInterceptorFactory : misk/web/NetworkInterceptor$Factory {
