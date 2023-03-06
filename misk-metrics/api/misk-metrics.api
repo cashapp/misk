@@ -60,6 +60,7 @@ public final class misk/metrics/v2/PeakGauge : io/prometheus/client/SimpleCollec
 	public fun <init> (Lmisk/metrics/v2/PeakGauge$Builder;)V
 	public fun collect ()Ljava/util/List;
 	public synthetic fun newChild ()Ljava/lang/Object;
+	public final fun record (D)V
 }
 
 public final class misk/metrics/v2/PeakGauge$Builder : io/prometheus/client/SimpleCollector$Builder {
