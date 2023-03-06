@@ -22,6 +22,11 @@ class PeakGauge  : SimpleCollector<PeakGauge.Child> {
     }
   }
 
+  /** Convenience method for recording values without labels */
+  fun record(newValue: Double) {
+    noLabelsChild.record(newValue)
+  }
+
   class Child {
     // For simplicity, using an atomic double with an initial value of 0 here.
     //
@@ -32,8 +37,6 @@ class PeakGauge  : SimpleCollector<PeakGauge.Child> {
 
     /**
      * Updates the stored value if the new value is greater.
-     *
-     *
      */
     fun record(newValue: Double) {
       while (true) {
