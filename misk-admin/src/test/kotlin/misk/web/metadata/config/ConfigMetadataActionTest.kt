@@ -71,6 +71,7 @@ class ConfigMetadataActionTest {
 
   @Test fun passesAlongJvmConfig() {
     val response = configMetadataAction.getAll()
+    assertThat(response.resources).containsKey("Effective Config")
     assertThat(response.resources).containsKey("JVM")
     val jvmConfig = jvmMetadataAction.getRuntime()
     assertThat(response.resources.get("JVM")).contains("Java Virtual Machine Specification")
@@ -86,7 +87,6 @@ class ConfigMetadataActionTest {
     )
 
     val response = configMetadataAction.getAll()
-    assertThat(response.resources).doesNotContainKey("Effective Config")
     assertThat(response.resources).doesNotContainKey("classpath:/admin_dashboard_app-common.yaml")
     assertThat(response.resources).doesNotContainKey("classpath:/admin_dashboard_app-testing.yaml")
     assertThat(response.resources).containsKey("JVM")

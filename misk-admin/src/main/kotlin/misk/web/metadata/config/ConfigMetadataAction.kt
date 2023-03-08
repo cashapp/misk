@@ -31,6 +31,7 @@ class ConfigMetadataAction @Inject constructor(
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
   fun getAll(): Response {
+    // TODO move this redacting to happen on class initialization
     // TODO(mmihic): Need to figure out how to get the overrides.
     // TODO make this config variable specific redaction with an annotation, not just password/passphrase
     // Regex to match on password values for password redaction in output
@@ -47,18 +48,19 @@ class ConfigMetadataAction @Inject constructor(
     config: Config
   ): Map<String, String?> {
     val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())
-    val yamlFiles = linkedMapOf<String, String?>()
+    val configFileContents = linkedMapOf<String, String?>()
     when (mode) {
       ConfigTabMode.SAFE -> {
-        yamlFiles.put("JVM", jvmMetadataAction.getRuntime())
+        configFileContents.put("Effective Config", MiskConfig.toRedactedYaml(config, ResourceLoader.SYSTEM))
+        configFileContents.put("JVM", jvmMetadataAction.getRuntime())
       }
       ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS -> {
-        yamlFiles.put("Effective Config", MiskConfig.toYaml(config, ResourceLoader.SYSTEM))
-        rawYamlFiles.map { yamlFiles.put(it.key, it.value) }
-        yamlFiles.put("JVM", jvmMetadataAction.getRuntime())
+        configFileContents.put("Effective Config", MiskConfig.toRedactedYaml(config, ResourceLoader.SYSTEM))
+        rawYamlFiles.map { configFileContents.put(it.key, it.value) }
+        configFileContents.put("JVM", jvmMetadataAction.getRuntime())
       }
     }
-    return yamlFiles
+    return configFileContents
   }
 
   data class Response(val resources: Map<String, String?>)

@@ -4,3 +4,5 @@ web:
 
 prometheus:
   http_port: 8081
+
+apiKey: "classpath:/secrets/api_key.txt"

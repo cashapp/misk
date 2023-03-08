@@ -3,10 +3,15 @@ package com.squareup.exemplar
 import misk.inject.KAbstractModule
 import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.AdminDashboardModule
+import misk.web.dashboard.BaseDashboardModule
+import misk.web.dashboard.ConfigDashboardTabModule
 import misk.web.dashboard.DashboardTheme
+import misk.web.dashboard.DatabaseDashboardTabModule
 import misk.web.dashboard.EnvironmentToColorLookup
 import misk.web.dashboard.MiskWebColor
 import misk.web.dashboard.MiskWebTheme
+import misk.web.dashboard.WebActionsDashboardTabModule
+import misk.web.metadata.config.ConfigMetadataAction
 
 class DashboardModule : KAbstractModule() {
   override fun configure() {
@@ -31,6 +36,11 @@ class DashboardModule : KAbstractModule() {
         )
       )
     )
-    install(AdminDashboardModule(isDevelopment = true))
+    val isDevelopment = true
+//    install(AdminDashboardModule(isDevelopment = true))
+    install(BaseDashboardModule(isDevelopment))
+    install(ConfigDashboardTabModule(isDevelopment, ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS))
+    install(DatabaseDashboardTabModule(isDevelopment))
+    install(WebActionsDashboardTabModule(isDevelopment))
   }
 }

@@ -1,5 +1,6 @@
 package misk.config
 
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.BeanProperty
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -8,12 +9,15 @@ import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.ser.ContextualSerializer
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -78,7 +82,7 @@ object MiskConfig {
       "Top level service config cannot be a Secret<*>"
     }
 
-    val mapper = newObjectMapper(resourceLoader)
+    val mapper = newObjectMapper(resourceLoader, false)
 
     val configYamls = loadConfigYamlMap(appName, deployment, overrideResources, resourceLoader)
     check(configYamls.values.any { it != null }) {
@@ -185,11 +189,11 @@ object MiskConfig {
     StringUtils.getLevenshteinDistance(it, needle) <= 2
   }
 
-  fun <T : Config> toYaml(config: T, resourceLoader: ResourceLoader): String {
-    return newObjectMapper(resourceLoader).writeValueAsString(config)
+  fun <T : Config> toRedactedYaml(config: T, resourceLoader: ResourceLoader): String {
+    return newObjectMapper(resourceLoader, true).writeValueAsString(config)
   }
 
-  private fun newObjectMapper(resourceLoader: ResourceLoader): ObjectMapper {
+  private fun newObjectMapper(resourceLoader: ResourceLoader, redactSecrets: Boolean): ObjectMapper {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(
       KotlinModule(),
       JavaTimeModule()
@@ -198,9 +202,13 @@ object MiskConfig {
     // Fail on null ints/doubles.
     mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
 
-    // The SecretDeserializer supports deserializing json, so bind last so it can use previous
-    // mappings.
-    mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
+    if (redactSecrets) {
+      mapper.registerModule(RedactSecretJacksonModule(resourceLoader, mapper))
+    } else {
+      // The SecretDeserializer supports deserializing json, so bind last so it can use previous
+      // mappings.
+      mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
+    }
     return mapper
   }
 
@@ -293,7 +301,7 @@ object MiskConfig {
       deserializationContext: DeserializationContext
     ): Secret<*>? {
       if (type == null) {
-        // This only happens if ObjectMapper does not call createContextual fo this property.
+        // This only happens if ObjectMapper does not call createContextual for this property.
         throw JsonMappingException.from(
           jsonParser,
           "Attempting to deserialize an object with no type"
@@ -337,5 +345,36 @@ object MiskConfig {
     }
   }
 
-  class RealSecret<T>(override val value: T) : Secret<T>
+  class RedactSecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
+    SimpleModule() {
+    override fun setupModule(context: SetupContext?) {
+      addSerializer(Secret::class.java, RedactSecretSerializer(resourceLoader, mapper))
+      super.setupModule(context)
+    }
+  }
+
+  private class RedactSecretSerializer(
+    val resourceLoader: ResourceLoader,
+    val mapper: ObjectMapper,
+    val type: JavaType? = null
+  ): JsonSerializer<Secret<*>>(), ContextualSerializer {
+    override fun serialize(
+      value: Secret<*>,
+      gen: JsonGenerator,
+      serializers: SerializerProvider?
+    ) {
+      gen.writeString("████████")
+    }
+
+    override fun createContextual(
+      prov: SerializerProvider?,
+      property: BeanProperty
+    ): JsonSerializer<*> {
+      return RedactSecretSerializer(resourceLoader, mapper, property.type.bindings.getBoundType(0))
+    }
+  }
+
+  class RealSecret<T>(override val value: T) : Secret<T> {
+    override fun toString(): String = "RealSecret(████████)"
+  }
 }
