@@ -1,5 +1,7 @@
 package misk.web.metadata.config
 
+import misk.config.MiskConfig
+import misk.config.Secret
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.metadata.MetadataTestingModule
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import javax.inject.Inject
+import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
 class ConfigMetadataActionTest {
@@ -19,7 +22,8 @@ class ConfigMetadataActionTest {
   val testConfig = TestConfig(
     IncludedConfig("foo"),
     OverriddenConfig("bar"),
-    RedactedConfig("pass1", "phrase2")
+    RedactedConfig("pass1", "phrase2", "custom3"),
+    SecretConfig(MiskConfig.RealSecret("value"))
   )
 
   @Inject lateinit var jvmMetadataAction: JvmMetadataAction
@@ -31,17 +35,31 @@ class ConfigMetadataActionTest {
       deployment = TESTING,
       config = testConfig,
       jvmMetadataAction = jvmMetadataAction,
-      mode = ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS
+      mode = ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS,
+      keysToRedact = listOf("password", "passphrase")
     )
   }
 
-  @Test fun passesAlongEffectiveConfig() {
+  @Test fun passesAlongEffectiveConfigWithRedaction() {
     val response = configMetadataAction.getAll()
     assertThat(response.resources).containsKey("Effective Config")
 
     val effectiveConfig = response.resources.get("Effective Config")
 
-    assertThat(effectiveConfig).contains("foo", "bar")
+    assertEquals("""
+      |---
+      |includedConfig:
+      |  key: "foo"
+      |overriddenConfig:
+      |  key: "bar"
+      |redactedConfig:
+      |  password: ████████
+      |  passphrase: ████████
+      |  custom: "custom3"
+      |secretConfig:
+      |  secretKey: "████████"
+      |
+    """.trimMargin(), effectiveConfig)
   }
 
   @Test fun passesAlongFullUnderlyingConfigResources() {
@@ -73,8 +91,12 @@ class ConfigMetadataActionTest {
     val response = configMetadataAction.getAll()
     assertThat(response.resources).containsKey("Effective Config")
     assertThat(response.resources).containsKey("JVM")
-    val jvmConfig = jvmMetadataAction.getRuntime()
+    val jvmRuntime = jvmMetadataAction.getRuntime()
     assertThat(response.resources.get("JVM")).contains("Java Virtual Machine Specification")
+    assertThat(response.resources.get("JVM")).contains("pid")
+    assertThat(response.resources.get("JVM")).contains("\"vm_name\": \"OpenJDK 64-Bit Server VM\",")
+    assertThat(response.resources.get("JVM")).contains("\"vm_vendor\": \"AdoptOpenJDK\",")
+    assertThat(response.resources.get("JVM")).contains("class_path")
   }
 
   @Test fun secureModeDoesNotIncludeYamlFiles() {
@@ -83,7 +105,8 @@ class ConfigMetadataActionTest {
       deployment = TESTING,
       config = testConfig,
       jvmMetadataAction = jvmMetadataAction,
-      mode = ConfigMetadataAction.ConfigTabMode.SAFE
+      mode = ConfigMetadataAction.ConfigTabMode.SAFE,
+      keysToRedact = listOf("password", "passphrase")
     )
 
     val response = configMetadataAction.getAll()
@@ -92,13 +115,45 @@ class ConfigMetadataActionTest {
     assertThat(response.resources).containsKey("JVM")
   }
 
+  @Test fun customKeyToRedact() {
+    configMetadataAction = ConfigMetadataAction(
+      appName = "admin_dashboard_app",
+      deployment = TESTING,
+      config = testConfig,
+      jvmMetadataAction = jvmMetadataAction,
+      mode = ConfigMetadataAction.ConfigTabMode.SAFE,
+      keysToRedact = listOf("custom", "password", "passphrase")
+    )
+
+    val response = configMetadataAction.getAll()
+
+    val effectiveConfig = response.resources.get("Effective Config")
+
+    assertEquals("""
+      |---
+      |includedConfig:
+      |  key: "foo"
+      |overriddenConfig:
+      |  key: "bar"
+      |redactedConfig:
+      |  password: ████████
+      |  passphrase: ████████
+      |  custom: ████████
+      |secretConfig:
+      |  secretKey: "████████"
+      |
+    """.trimMargin(), effectiveConfig)
+  }
+
   data class TestConfig(
     val includedConfig: IncludedConfig,
     val overriddenConfig: OverriddenConfig,
-    val redactedConfig: RedactedConfig
+    val redactedConfig: RedactedConfig,
+    val secretConfig: SecretConfig
   ) : Config
 
   data class IncludedConfig(val key: String) : Config
   data class OverriddenConfig(val key: String) : Config
-  data class RedactedConfig(val password: String, val passphrase: String) : Config
+  data class RedactedConfig(val password: String, val passphrase: String, val custom: String) : Config
+  data class SecretConfig(val secretKey: Secret<String>) : Config
 }

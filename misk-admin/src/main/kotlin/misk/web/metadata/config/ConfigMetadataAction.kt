@@ -13,6 +13,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.config.Config
 import wisp.deployment.Deployment
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Singleton
@@ -22,24 +23,26 @@ class ConfigMetadataAction @Inject constructor(
   config: Config,
   private val jvmMetadataAction: JvmMetadataAction,
   private val mode: ConfigTabMode,
+  @ConfigRedactKey keysToRedact: List<String>
 ) : WebAction {
+  private fun redact(
+    mapOfOutputs: Map<String, String?>,
+    regex: Regex
+  ) = mapOfOutputs
+    .mapValues { it.value?.replace(regex, "████████") }
+
+  // TODO make this config variable specific redaction with an annotation on config field, not just multibound list of keys
+  // Regex to match on redacted keys for redaction in output
+  private val yamlFilesRegex = Regex("(?<=(${keysToRedact.joinToString("|")}): )([^\n]*)")
   private val resources: Map<String, String?> =
-    generateConfigResources(appName, deployment, config)
+    redact(generateConfigResources(appName, deployment, config), yamlFilesRegex)
 
   @Get("/api/config/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
   fun getAll(): Response {
-    // TODO move this redacting to happen on class initialization
-    // TODO(mmihic): Need to figure out how to get the overrides.
-    // TODO make this config variable specific redaction with an annotation, not just password/passphrase
-    // Regex to match on password values for password redaction in output
-    val yamlFilesRegex = Regex("(?<=(password|passphrase): )([^\n]*)")
-
-    return Response(
-      resources = redact(resources, yamlFilesRegex)
-    )
+    return Response(resources = resources)
   }
 
   private fun generateConfigResources(
@@ -56,7 +59,7 @@ class ConfigMetadataAction @Inject constructor(
       }
       ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS -> {
         configFileContents.put("Effective Config", MiskConfig.toRedactedYaml(config, ResourceLoader.SYSTEM))
-        rawYamlFiles.map { configFileContents.put(it.key, it.value) }
+        rawYamlFiles.forEach { configFileContents.put(it.key, it.value) }
         configFileContents.put("JVM", jvmMetadataAction.getRuntime())
       }
     }
@@ -65,18 +68,19 @@ class ConfigMetadataAction @Inject constructor(
 
   data class Response(val resources: Map<String, String?>)
 
-  companion object {
-    fun redact(
-      mapOfOutputs: Map<String, String?>,
-      regex: Regex
-    ) = mapOfOutputs.mapValues { it.value?.replace(regex, "████████") }
-
-    fun redact(output: String, regex: Regex) =
-      output.replace(regex, "████████")
-  }
-
   enum class ConfigTabMode {
     SAFE, // Only show safe content which will not leak Misk secrets
     UNSAFE_LEAK_MISK_SECRETS
   }
 }
+
+/**
+ * Used to identify an injected list of string keys that should be redacted in Config tab.
+ *
+ * ```
+ * multibind<String, ConfigRedactKey>().toInstance("customKeyToRedact")
+ * ```
+ */
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+annotation class ConfigRedactKey

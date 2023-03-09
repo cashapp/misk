@@ -202,11 +202,11 @@ object MiskConfig {
     // Fail on null ints/doubles.
     mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
 
+    // The SecretDeserializer supports deserializing json, so bind last so it can use previous
+    // mappings.
     if (redactSecrets) {
       mapper.registerModule(RedactSecretJacksonModule(resourceLoader, mapper))
     } else {
-      // The SecretDeserializer supports deserializing json, so bind last so it can use previous
-      // mappings.
       mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
     }
     return mapper
@@ -375,6 +375,6 @@ object MiskConfig {
   }
 
   class RealSecret<T>(override val value: T) : Secret<T> {
-    override fun toString(): String = "RealSecret(████████)"
+    override fun toString(): String = "RealSecret(value=████████)"
   }
 }

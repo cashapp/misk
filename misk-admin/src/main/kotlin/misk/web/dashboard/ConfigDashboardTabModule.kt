@@ -4,6 +4,7 @@ import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode.SAFE
+import misk.web.metadata.config.ConfigRedactKey
 
 /**
  * Installs Config dashboard tab which shows the raw config inputs
@@ -21,6 +22,12 @@ class ConfigDashboardTabModule(
 ) : KAbstractModule() {
   override fun configure() {
     bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
+
+    // Redaction configuration
+    newMultibinder<String, ConfigRedactKey>()
+    multibind<String, ConfigRedactKey>().toInstance("password")
+    multibind<String, ConfigRedactKey>().toInstance("passphrase")
+
     install(WebActionModule.create<ConfigMetadataAction>())
     multibind<DashboardTab>().toProvider(
       DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
