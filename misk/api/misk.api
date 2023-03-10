@@ -351,6 +351,10 @@ public abstract interface class misk/client/BeginClientCallChain {
 	public abstract fun proceed (Ljava/util/List;)Lretrofit2/Call;
 }
 
+public abstract interface class misk/client/CallFactoryWrapper {
+	public abstract fun wrap (Lmisk/client/ClientAction;Lokhttp3/Call$Factory;)Lokhttp3/Call$Factory;
+}
+
 public final class misk/client/ClientAction {
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KFunction;Ljava/util/List;Lkotlin/reflect/KType;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -856,6 +860,34 @@ public final class misk/okio/OkioExtensionsKt {
 	public static final fun forEachBlock (Lokio/BufferedSource;ILkotlin/jvm/functions/Function2;)V
 	public static final fun forEachBlock (Lokio/BufferedSource;[BLkotlin/jvm/functions/Function2;)V
 	public static final fun split (Lokio/BufferedSource;Lokio/ByteString;)Lkotlin/sequences/Sequence;
+}
+
+public final class misk/perf/PauseDetectorConfig {
+	public fun <init> ()V
+	public fun <init> (JJJJJ)V
+	public synthetic fun <init> (JJJJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun component3 ()J
+	public final fun component4 ()J
+	public final fun component5 ()J
+	public final fun copy (JJJJJ)Lmisk/perf/PauseDetectorConfig;
+	public static synthetic fun copy$default (Lmisk/perf/PauseDetectorConfig;JJJJJILjava/lang/Object;)Lmisk/perf/PauseDetectorConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLogErrorMillis ()J
+	public final fun getLogInfoMillis ()J
+	public final fun getLogWarnMillis ()J
+	public final fun getMetricsUpdateFloor ()J
+	public final fun getResolutionMillis ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/perf/PauseDetectorModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public fun <init> (Lmisk/perf/PauseDetectorConfig;)V
+	public synthetic fun <init> (Lmisk/perf/PauseDetectorConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getPauseDetectorConfig ()Lmisk/perf/PauseDetectorConfig;
 }
 
 public final class misk/security/authz/AccessAnnotationEntry {
