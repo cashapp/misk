@@ -15,9 +15,11 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.ser.ContextualSerializer
+import com.fasterxml.jackson.databind.ser.std.JsonValueSerializer
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -31,6 +33,7 @@ import wisp.logging.getLogger
 import java.io.File
 import java.io.FilenameFilter
 import java.util.Locale
+import javax.naming.Context
 
 object MiskConfig {
   private val logger = getLogger<MiskConfig>()
@@ -53,7 +56,14 @@ object MiskConfig {
     overrideValues: JsonNode? = null,
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
-    return load(T::class.java, appName, deployment, overrideResources, overrideValues, resourceLoader)
+    return load(
+      T::class.java,
+      appName,
+      deployment,
+      overrideResources,
+      overrideValues,
+      resourceLoader
+    )
   }
 
   @JvmStatic
@@ -193,7 +203,10 @@ object MiskConfig {
     return newObjectMapper(resourceLoader, true).writeValueAsString(config)
   }
 
-  private fun newObjectMapper(resourceLoader: ResourceLoader, redactSecrets: Boolean): ObjectMapper {
+  private fun newObjectMapper(
+    resourceLoader: ResourceLoader,
+    redactSecrets: Boolean
+  ): ObjectMapper {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(
       KotlinModule(),
       JavaTimeModule()
@@ -206,6 +219,7 @@ object MiskConfig {
     // mappings.
     if (redactSecrets) {
       mapper.registerModule(RedactSecretJacksonModule(resourceLoader, mapper))
+      mapper.setAnnotationIntrospector(RedactSecretJacksonAnnotationIntrospector())
     } else {
       mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
     }
@@ -227,7 +241,10 @@ object MiskConfig {
    * Returns a JsonNode that combines the YAMLs in `configYamls`. If two nodes define the
    * same value the last one wins.
    */
-  private fun flattenYamlMap(configYamls: Map<String, String?>, overrideValues: JsonNode?): JsonNode {
+  private fun flattenYamlMap(
+    configYamls: Map<String, String?>,
+    overrideValues: JsonNode?
+  ): JsonNode {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), JavaTimeModule())
     var result = mapper.createObjectNode()
 
@@ -320,12 +337,14 @@ object MiskConfig {
         "yaml" -> {
           mapper.readValue(source, type) as Any
         }
+
         "txt" -> {
           check(type.rawClass.isAssignableFrom(String::class.java)) {
             "Secrets with the .txt extension map to Secret<String> fields in Config classes."
           }
           source
         }
+
         else -> {
           // Ignore extension if we're requesting a string or a bytearray
           if (type.rawClass == String::class.java) {
@@ -345,6 +364,36 @@ object MiskConfig {
     }
   }
 
+  // https://github.com/bsideup/blog-custom-Jackson-annotations
+  class RedactSecretJacksonAnnotationIntrospector : JacksonAnnotationIntrospector() {
+    override fun findSerializer(a: com.fasterxml.jackson.databind.introspect.Annotated): Any? {
+      val shouldRedact = a.getAnnotation(RedactInDashboard::class.java) != null
+      return if (shouldRedact) {
+        RedactSecretJsonSerializer::class.java
+      } else {
+        super.findSerializer(a)
+      }
+    }
+  }
+
+  class RedactSecretJsonSerializer : JsonSerializer<Any>(), ContextualSerializer {
+    override fun serialize(value: Any, gen: JsonGenerator, serializers: SerializerProvider) {
+      gen.writeString("████████")
+    }
+
+    override fun createContextual(
+      prov: SerializerProvider,
+      property: BeanProperty
+    ): JsonSerializer<*>? {
+      val shouldRedact = property.getAnnotation(RedactInDashboard::class.java) != null
+      return if (shouldRedact) {
+        RedactSecretJsonSerializer()
+      } else {
+        null
+      }
+    }
+  }
+
   class RedactSecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
     SimpleModule() {
     override fun setupModule(context: SetupContext?) {
@@ -357,7 +406,7 @@ object MiskConfig {
     val resourceLoader: ResourceLoader,
     val mapper: ObjectMapper,
     val type: JavaType? = null
-  ): JsonSerializer<Secret<*>>(), ContextualSerializer {
+  ) : JsonSerializer<Secret<*>>(), ContextualSerializer {
     override fun serialize(
       value: Secret<*>,
       gen: JsonGenerator,
@@ -378,3 +427,26 @@ object MiskConfig {
     override fun toString(): String = "RealSecret(value=████████)"
   }
 }
+
+/**
+ * Field will be redacted in dashboard.
+ *
+ * ```
+ * import misk.config.RedactInDashboard
+ *
+ * data class CustomConfig(
+ *   @RedactInDashboard
+ *   val secretSubconfig: Subconfig
+ * )
+ * ```
+ */
+@Retention(AnnotationRetention.RUNTIME)
+@Target(
+  AnnotationTarget.CLASS,
+  AnnotationTarget.FIELD,
+  AnnotationTarget.FUNCTION,
+  AnnotationTarget.PROPERTY,
+  AnnotationTarget.VALUE_PARAMETER,
+)
+annotation class RedactInDashboard
+

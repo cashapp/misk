@@ -1,6 +1,7 @@
 package misk.web.metadata.config
 
 import misk.config.MiskConfig
+import misk.config.RedactInDashboard
 import misk.config.Secret
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -22,8 +23,9 @@ class ConfigMetadataActionTest {
   val testConfig = TestConfig(
     IncludedConfig("foo"),
     OverriddenConfig("bar"),
-    RedactedConfig("pass1", "phrase2", "custom3"),
-    SecretConfig(MiskConfig.RealSecret("value"))
+    PasswordConfig("pass1", "phrase2", "custom3"),
+    SecretConfig(MiskConfig.RealSecret("value")),
+    RedactedConfig("baz")
   )
 
   @Inject lateinit var jvmMetadataAction: JvmMetadataAction
@@ -46,7 +48,8 @@ class ConfigMetadataActionTest {
 
     val effectiveConfig = response.resources.get("Effective Config")
 
-    assertEquals("""
+    assertEquals(
+      """
       |---
       |includedConfig:
       |  key: "foo"
@@ -59,7 +62,8 @@ class ConfigMetadataActionTest {
       |secretConfig:
       |  secretKey: "████████"
       |
-    """.trimMargin(), effectiveConfig)
+    """.trimMargin(), effectiveConfig
+    )
   }
 
   @Test fun passesAlongFullUnderlyingConfigResources() {
@@ -129,7 +133,8 @@ class ConfigMetadataActionTest {
 
     val effectiveConfig = response.resources.get("Effective Config")
 
-    assertEquals("""
+    assertEquals(
+      """
       |---
       |includedConfig:
       |  key: "foo"
@@ -142,18 +147,32 @@ class ConfigMetadataActionTest {
       |secretConfig:
       |  secretKey: "████████"
       |
-    """.trimMargin(), effectiveConfig)
+    """.trimMargin(), effectiveConfig
+    )
   }
 
   data class TestConfig(
     val includedConfig: IncludedConfig,
     val overriddenConfig: OverriddenConfig,
-    val redactedConfig: RedactedConfig,
-    val secretConfig: SecretConfig
+    val passwordConfig: PasswordConfig,
+    val secretConfig: SecretConfig,
+    val redactedConfig: RedactedConfig
   ) : Config
 
   data class IncludedConfig(val key: String) : Config
   data class OverriddenConfig(val key: String) : Config
-  data class RedactedConfig(val password: String, val passphrase: String, val custom: String) : Config
+
+  data class PasswordConfig(
+    val password: String,
+    val passphrase: String,
+    @RedactInDashboard
+    val custom: String
+  ) : Config
+
+  @RedactInDashboard
+  data class RedactedConfig(
+    val key: String
+  )
+
   data class SecretConfig(val secretKey: Secret<String>) : Config
 }
