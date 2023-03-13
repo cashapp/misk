@@ -12,15 +12,19 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationConfig
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
+import com.fasterxml.jackson.databind.introspect.Annotated
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.ser.ContextualSerializer
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -208,7 +212,7 @@ object MiskConfig {
     redactSecrets: Boolean
   ): ObjectMapper {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(
-      KotlinModule(),
+      KotlinModule.Builder().build(),
       JavaTimeModule()
     )
 
@@ -218,8 +222,8 @@ object MiskConfig {
     // The SecretDeserializer supports deserializing json, so bind last so it can use previous
     // mappings.
     if (redactSecrets) {
+//      mapper.setAnnotationIntrospector(RedactSecretJacksonAnnotationIntrospector())
       mapper.registerModule(RedactSecretJacksonModule())
-      mapper.setAnnotationIntrospector(RedactSecretJacksonAnnotationIntrospector())
     } else {
       mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
     }
@@ -366,13 +370,24 @@ object MiskConfig {
 
   // https://github.com/bsideup/blog-custom-Jackson-annotations
   class RedactSecretJacksonAnnotationIntrospector : JacksonAnnotationIntrospector() {
-    override fun findSerializer(a: com.fasterxml.jackson.databind.introspect.Annotated): Any? {
+    override fun findSerializer(a: Annotated): Any? {
       val shouldRedact = a.getAnnotation(RedactInDashboard::class.java) != null
       return if (shouldRedact) {
-        RedactSecretJsonSerializer::class.java
+        RedactSecretJsonSerializer()
       } else {
         super.findSerializer(a)
       }
+    }
+
+    // Hardcode any redacted types as Secret so it pulls the redacting serializer
+    override fun findSerializationType(a: Annotated?): Class<*> {
+      val shouldRedact = a?.getAnnotation(RedactInDashboard::class.java) != null
+      return if (shouldRedact) Secret::class.java else super.findSerializationType(a)
+    }
+
+    override fun hasIgnoreMarker(m: AnnotatedMember?): Boolean {
+      val shouldRedact = m?.getAnnotation(RedactInDashboard::class.java) != null
+      return shouldRedact || super.hasIgnoreMarker(m)
     }
 
     override fun isAnnotationBundle(ann: Annotation?): Boolean {
@@ -450,13 +465,7 @@ object MiskConfig {
  */
 @JacksonAnnotationsInside
 @JsonSerialize(using = MiskConfig.RedactSecretJsonSerializer::class)
+//@JsonSerialize(using = MiskConfig.RedactSecretJsonSerializer::class, `as` = Any::class)
 @Retention(AnnotationRetention.RUNTIME)
-@Target(
-  AnnotationTarget.CLASS,
-  AnnotationTarget.FIELD,
-  AnnotationTarget.FUNCTION,
-  AnnotationTarget.PROPERTY,
-  AnnotationTarget.VALUE_PARAMETER,
-)
 annotation class RedactInDashboard
 

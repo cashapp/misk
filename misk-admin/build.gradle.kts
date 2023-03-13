@@ -12,7 +12,6 @@ dependencies {
   api(project(":misk-inject"))
   api(Dependencies.wispDeployment)
 
-  testImplementation("com.fasterxml.jackson.core:jackson-annotations:2.14.2")
   testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)

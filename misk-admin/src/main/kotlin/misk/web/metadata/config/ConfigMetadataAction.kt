@@ -13,7 +13,6 @@ import misk.web.mediatype.MediaTypes
 import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.config.Config
 import wisp.deployment.Deployment
-import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Singleton
@@ -22,20 +21,9 @@ class ConfigMetadataAction @Inject constructor(
   deployment: Deployment,
   config: Config,
   private val jvmMetadataAction: JvmMetadataAction,
-  private val mode: ConfigTabMode,
-  @ConfigRedactKey keysToRedact: List<String>
+  private val mode: ConfigTabMode
 ) : WebAction {
-  private fun redact(
-    mapOfOutputs: Map<String, String?>,
-    regex: Regex
-  ) = mapOfOutputs
-    .mapValues { it.value?.replace(regex, "████████") }
-
-  // TODO make this config variable specific redaction with an annotation on config field, not just multibound list of keys
-  // Regex to match on redacted keys for redaction in output
-  private val yamlFilesRegex = Regex("(?<=(${keysToRedact.joinToString("|")}): )([^\n]*)")
-  private val resources: Map<String, String?> =
-    redact(generateConfigResources(appName, deployment, config), yamlFilesRegex)
+  private val resources: Map<String, String?> = generateConfigResources(appName, deployment, config)
 
   @Get("/api/config/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -73,14 +61,3 @@ class ConfigMetadataAction @Inject constructor(
     UNSAFE_LEAK_MISK_SECRETS
   }
 }
-
-/**
- * Used to identify an injected list of string keys that should be redacted in Config tab.
- *
- * ```
- * multibind<String, ConfigRedactKey>().toInstance("customKeyToRedact")
- * ```
- */
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
-annotation class ConfigRedactKey
