@@ -222,7 +222,6 @@ object MiskConfig {
     // The SecretDeserializer supports deserializing json, so bind last so it can use previous
     // mappings.
     if (redactSecrets) {
-//      mapper.setAnnotationIntrospector(RedactSecretJacksonAnnotationIntrospector())
       mapper.registerModule(RedactSecretJacksonModule())
     } else {
       mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
@@ -364,37 +363,6 @@ object MiskConfig {
             "Unknown file extension \"$referenceFileExtension\" for secret [$reference]."
           )
         }
-      }
-    }
-  }
-
-  // https://github.com/bsideup/blog-custom-Jackson-annotations
-  class RedactSecretJacksonAnnotationIntrospector : JacksonAnnotationIntrospector() {
-    override fun findSerializer(a: Annotated): Any? {
-      val shouldRedact = a.getAnnotation(RedactInDashboard::class.java) != null
-      return if (shouldRedact) {
-        RedactSecretJsonSerializer()
-      } else {
-        super.findSerializer(a)
-      }
-    }
-
-    // Hardcode any redacted types as Secret so it pulls the redacting serializer
-    override fun findSerializationType(a: Annotated?): Class<*> {
-      val shouldRedact = a?.getAnnotation(RedactInDashboard::class.java) != null
-      return if (shouldRedact) Secret::class.java else super.findSerializationType(a)
-    }
-
-    override fun hasIgnoreMarker(m: AnnotatedMember?): Boolean {
-      val shouldRedact = m?.getAnnotation(RedactInDashboard::class.java) != null
-      return shouldRedact || super.hasIgnoreMarker(m)
-    }
-
-    override fun isAnnotationBundle(ann: Annotation?): Boolean {
-      return if (ann?.annotationClass == RedactInDashboard::class) {
-        true
-      } else {
-        super.isAnnotationBundle(ann)
       }
     }
   }
