@@ -1,5 +1,6 @@
 package misk.config
 
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.BeanProperty
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
@@ -19,7 +21,6 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.ser.ContextualSerializer
-import com.fasterxml.jackson.databind.ser.std.JsonValueSerializer
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -33,7 +34,6 @@ import wisp.logging.getLogger
 import java.io.File
 import java.io.FilenameFilter
 import java.util.Locale
-import javax.naming.Context
 
 object MiskConfig {
   private val logger = getLogger<MiskConfig>()
@@ -218,7 +218,7 @@ object MiskConfig {
     // The SecretDeserializer supports deserializing json, so bind last so it can use previous
     // mappings.
     if (redactSecrets) {
-      mapper.registerModule(RedactSecretJacksonModule(resourceLoader, mapper))
+      mapper.registerModule(RedactSecretJacksonModule())
       mapper.setAnnotationIntrospector(RedactSecretJacksonAnnotationIntrospector())
     } else {
       mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
@@ -374,6 +374,14 @@ object MiskConfig {
         super.findSerializer(a)
       }
     }
+
+    override fun isAnnotationBundle(ann: Annotation?): Boolean {
+      return if (ann?.annotationClass == RedactInDashboard::class) {
+        true
+      } else {
+        super.isAnnotationBundle(ann)
+      }
+    }
   }
 
   class RedactSecretJsonSerializer : JsonSerializer<Any>(), ContextualSerializer {
@@ -384,29 +392,19 @@ object MiskConfig {
     override fun createContextual(
       prov: SerializerProvider,
       property: BeanProperty
-    ): JsonSerializer<*>? {
-      val shouldRedact = property.getAnnotation(RedactInDashboard::class.java) != null
-      return if (shouldRedact) {
-        RedactSecretJsonSerializer()
-      } else {
-        null
-      }
+    ): JsonSerializer<*> {
+      return RedactSecretJsonSerializer()
     }
   }
 
-  class RedactSecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
-    SimpleModule() {
+  class RedactSecretJacksonModule : SimpleModule() {
     override fun setupModule(context: SetupContext?) {
-      addSerializer(Secret::class.java, RedactSecretSerializer(resourceLoader, mapper))
+      addSerializer(Secret::class.java, RedactSecretSerializer())
       super.setupModule(context)
     }
   }
 
-  private class RedactSecretSerializer(
-    val resourceLoader: ResourceLoader,
-    val mapper: ObjectMapper,
-    val type: JavaType? = null
-  ) : JsonSerializer<Secret<*>>(), ContextualSerializer {
+  private class RedactSecretSerializer : JsonSerializer<Secret<*>>(), ContextualSerializer {
     override fun serialize(
       value: Secret<*>,
       gen: JsonGenerator,
@@ -419,7 +417,7 @@ object MiskConfig {
       prov: SerializerProvider?,
       property: BeanProperty
     ): JsonSerializer<*> {
-      return RedactSecretSerializer(resourceLoader, mapper, property.type.bindings.getBoundType(0))
+      return RedactSecretSerializer()
     }
   }
 
@@ -434,12 +432,24 @@ object MiskConfig {
  * ```
  * import misk.config.RedactInDashboard
  *
+ * data class MyServiceConfig(
+ *   val customConfig: CustomConfig,
+ *   val secretConfig: SecretConfig
+ * )
+ *
  * data class CustomConfig(
  *   @RedactInDashboard
  *   val secretSubconfig: Subconfig
  * )
+ *
+ * @RedactInDashboard
+ * data class SecretConfig(
+ *   val key: String
+ * )
  * ```
  */
+@JacksonAnnotationsInside
+@JsonSerialize(using = MiskConfig.RedactSecretJsonSerializer::class)
 @Retention(AnnotationRetention.RUNTIME)
 @Target(
   AnnotationTarget.CLASS,

@@ -55,12 +55,13 @@ class ConfigMetadataActionTest {
       |  key: "foo"
       |overriddenConfig:
       |  key: "bar"
-      |redactedConfig:
+      |passwordConfig:
       |  password: ████████
       |  passphrase: ████████
-      |  custom: "custom3"
+      |  custom: "████████"
       |secretConfig:
       |  secretKey: "████████"
+      |redactedConfig: "████████"
       |
     """.trimMargin(), effectiveConfig
     )
