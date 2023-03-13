@@ -39,18 +39,14 @@ class ConfigMetadataAction @Inject constructor(
     config: Config
   ): Map<String, String?> {
     val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())
+
     val configFileContents = linkedMapOf<String, String?>()
-    when (mode) {
-      ConfigTabMode.SAFE -> {
-        configFileContents.put("Effective Config", MiskConfig.toRedactedYaml(config, ResourceLoader.SYSTEM))
-        configFileContents.put("JVM", jvmMetadataAction.getRuntime())
-      }
-      ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS -> {
-        configFileContents.put("Effective Config", MiskConfig.toRedactedYaml(config, ResourceLoader.SYSTEM))
-        rawYamlFiles.forEach { configFileContents.put(it.key, it.value) }
-        configFileContents.put("JVM", jvmMetadataAction.getRuntime())
-      }
+    configFileContents.put("Effective Config", MiskConfig.toRedactedYaml(config, ResourceLoader.SYSTEM))
+    if (mode == ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS) {
+      rawYamlFiles.forEach { configFileContents.put(it.key, it.value) }
     }
+    configFileContents.put("JVM", jvmMetadataAction.getRuntime())
+
     return configFileContents
   }
 

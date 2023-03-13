@@ -36,11 +36,6 @@ class DashboardModule : KAbstractModule() {
         )
       )
     )
-    val isDevelopment = true
-//    install(AdminDashboardModule(isDevelopment = true))
-    install(BaseDashboardModule(isDevelopment))
-    install(ConfigDashboardTabModule(isDevelopment, ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS))
-    install(DatabaseDashboardTabModule(isDevelopment))
-    install(WebActionsDashboardTabModule(isDevelopment))
+    install(AdminDashboardModule(isDevelopment = true))
   }
 }
