@@ -410,7 +410,7 @@ object MiskConfig {
 }
 
 /**
- * Field will be redacted in dashboard.
+ * Field or class will be redacted in dashboard output.
  *
  * ```
  * import misk.config.RedactInDashboard
@@ -433,7 +433,7 @@ object MiskConfig {
  */
 @JacksonAnnotationsInside
 @JsonSerialize(using = MiskConfig.RedactSecretJsonSerializer::class)
-//@JsonSerialize(using = MiskConfig.RedactSecretJsonSerializer::class, `as` = Any::class)
 @Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 annotation class RedactInDashboard
 

@@ -771,14 +771,6 @@ public final class misk/config/MiskConfig$RealSecret : misk/config/Secret {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/config/MiskConfig$RedactSecretJacksonAnnotationIntrospector : com/fasterxml/jackson/databind/introspect/JacksonAnnotationIntrospector {
-	public fun <init> ()V
-	public fun findSerializationType (Lcom/fasterxml/jackson/databind/introspect/Annotated;)Ljava/lang/Class;
-	public fun findSerializer (Lcom/fasterxml/jackson/databind/introspect/Annotated;)Ljava/lang/Object;
-	public fun hasIgnoreMarker (Lcom/fasterxml/jackson/databind/introspect/AnnotatedMember;)Z
-	public fun isAnnotationBundle (Ljava/lang/annotation/Annotation;)Z
-}
-
 public final class misk/config/MiskConfig$RedactSecretJacksonModule : com/fasterxml/jackson/databind/module/SimpleModule {
 	public fun <init> ()V
 	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
