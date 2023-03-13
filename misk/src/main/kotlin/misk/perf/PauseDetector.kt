@@ -46,6 +46,8 @@ internal class PauseDetector @Inject constructor(
   private val pauseSummary: Summary =
     metrics.summary("jvm_pause_time_summary_ms", "Summary in ms of pause time", listOf())
 
+  private val pauseSum = metrics.gauge("jvm_pause_time_sum", "Sum of pause time in ms", listOf())
+
   /** Tracks peak pause time. */
   private val pausePeak: PeakGauge =
     metrics.peakGauge("jvm_pause_time_peak_ms", "Peak gauge of pause time", listOf())
@@ -105,6 +107,7 @@ internal class PauseDetector @Inject constructor(
     if (pauseMillis >= config.metricsUpdateFloor) {
       val pauseMillisDouble = pauseMillis.toDouble()
       pauseSummary.observe(pauseMillisDouble)
+      pauseSum.inc(pauseMillisDouble)
       pausePeak.record(pauseMillisDouble)
     }
 
