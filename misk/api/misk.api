@@ -762,12 +762,32 @@ public final class misk/config/MiskConfig {
 	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lwisp/config/Config;
 	public final fun loadConfigYamlMap (Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;)Ljava/util/Map;
 	public static synthetic fun loadConfigYamlMap$default (Lmisk/config/MiskConfig;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Ljava/util/Map;
-	public final fun toYaml (Lwisp/config/Config;Lmisk/resources/ResourceLoader;)Ljava/lang/String;
+	public final fun toRedactedYaml (Lwisp/config/Config;Lmisk/resources/ResourceLoader;)Ljava/lang/String;
 }
 
 public final class misk/config/MiskConfig$RealSecret : misk/config/Secret {
 	public fun <init> (Ljava/lang/Object;)V
 	public fun getValue ()Ljava/lang/Object;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/config/MiskConfig$RedactSecretJacksonAnnotationIntrospector : com/fasterxml/jackson/databind/introspect/JacksonAnnotationIntrospector {
+	public fun <init> ()V
+	public fun findSerializationType (Lcom/fasterxml/jackson/databind/introspect/Annotated;)Ljava/lang/Class;
+	public fun findSerializer (Lcom/fasterxml/jackson/databind/introspect/Annotated;)Ljava/lang/Object;
+	public fun hasIgnoreMarker (Lcom/fasterxml/jackson/databind/introspect/AnnotatedMember;)Z
+	public fun isAnnotationBundle (Ljava/lang/annotation/Annotation;)Z
+}
+
+public final class misk/config/MiskConfig$RedactSecretJacksonModule : com/fasterxml/jackson/databind/module/SimpleModule {
+	public fun <init> ()V
+	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
+}
+
+public final class misk/config/MiskConfig$RedactSecretJsonSerializer : com/fasterxml/jackson/databind/JsonSerializer, com/fasterxml/jackson/databind/ser/ContextualSerializer {
+	public fun <init> ()V
+	public fun createContextual (Lcom/fasterxml/jackson/databind/SerializerProvider;Lcom/fasterxml/jackson/databind/BeanProperty;)Lcom/fasterxml/jackson/databind/JsonSerializer;
+	public fun serialize (Ljava/lang/Object;Lcom/fasterxml/jackson/core/JsonGenerator;Lcom/fasterxml/jackson/databind/SerializerProvider;)V
 }
 
 public final class misk/config/MiskConfig$SecretJacksonModule : com/fasterxml/jackson/databind/module/SimpleModule {
@@ -775,6 +795,9 @@ public final class misk/config/MiskConfig$SecretJacksonModule : com/fasterxml/ja
 	public final fun getMapper ()Lcom/fasterxml/jackson/databind/ObjectMapper;
 	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
 	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
+}
+
+public abstract interface annotation class misk/config/RedactInDashboard : java/lang/annotation/Annotation {
 }
 
 public abstract interface class misk/config/Secret {

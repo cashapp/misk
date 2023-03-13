@@ -88,7 +88,7 @@ class ConfigMetadataActionTest {
     val effectiveConfig = response.resources.get("Effective Config")
 
     assertThat(commonConfig).contains("phrase123")
-    assertThat(effectiveConfig).contains("pass1", "phrase2")
+    assertThat(effectiveConfig).doesNotContain("pass1", "phrase2")
   }
 
   @Test fun passesAlongJvmConfig() {
