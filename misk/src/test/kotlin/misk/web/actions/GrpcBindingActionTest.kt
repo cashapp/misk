@@ -7,7 +7,6 @@ import com.squareup.protos.test.grpc.GrpcGreeterClient
 import misk.MiskTestingServiceModule
 import misk.client.GrpcClientModule
 import misk.client.HttpClientEndpointConfig
-import misk.client.HttpClientFactory
 import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -27,7 +26,6 @@ class GrpcBindingActionTest {
   val module = TestWebActionModule()
 
   @Inject private lateinit var jetty: JettyService
-  @Inject private lateinit var httpClientFactory: HttpClientFactory
 
   private lateinit var grpcClient: GreeterClient
 
@@ -59,11 +57,8 @@ class GrpcBindingActionTest {
   }
 
   @Test
-  fun boom() {
+  fun `allows actions with empty requests`() {
     val response = grpcClient.Greet().executeBlocking(Unit)
-    assertThat(response.message).isEqualTo("asdsadas")
+    assertThat(response.message).isEqualTo("Hola")
   }
-
-
-
 }
