@@ -41,6 +41,17 @@ class ConfigMetadataActionTest {
     )
   }
 
+  @Test fun configSecretsStillAccessibleInCode() {
+    val config = MiskConfig.load<TestConfig>("admin_dashboard_app", TESTING)
+
+    assertEquals("testing", config.included.key)
+    assertEquals("abc123", config.password.password)
+    assertEquals("abc123", config.password.passphrase)
+    assertEquals("abc123", config.password.custom)
+    assertEquals("abc123", config.secret.secret_key.value)
+    assertEquals("abc123", config.redacted.key)
+  }
+
   @Test fun passesAlongEffectiveConfigWithRedaction() {
     val response = configMetadataAction.getAll()
     assertThat(response.resources).containsKey("Effective Config")
@@ -125,11 +136,11 @@ class ConfigMetadataActionTest {
   }
 
   data class TestConfig(
-    val includedConfig: IncludedConfig,
-    val overriddenConfig: OverriddenConfig,
-    val passwordConfig: PasswordConfig,
-    val secretConfig: SecretConfig,
-    val redactedConfig: RedactedConfig
+    val included: IncludedConfig,
+    val overridden: OverriddenConfig,
+    val password: PasswordConfig,
+    val secret: SecretConfig,
+    val redacted: RedactedConfig
   ) : Config
 
   data class IncludedConfig(val key: String) : Config
@@ -149,5 +160,5 @@ class ConfigMetadataActionTest {
     val key: String
   )
 
-  data class SecretConfig(val secretKey: Secret<String>) : Config
+  data class SecretConfig(val secret_key: Secret<String>) : Config
 }
