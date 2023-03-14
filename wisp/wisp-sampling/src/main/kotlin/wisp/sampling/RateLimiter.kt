@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong
  * by application code using the rate limiter. It also has very predictable behavior because its
  * internal mechanisms are simpler than Guava's.
  */
-internal class RateLimiter (
+class RateLimiter (
     @field:Volatile var permitsPerSecond: Long,
     private val ticker: Ticker = Ticker.DEFAULT,
     private val sleeper: Sleeper = Sleeper.DEFAULT,

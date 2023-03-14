@@ -1,3 +1,27 @@
+public final class wisp/sampling/AlwaysSampler : wisp/sampling/Sampler {
+	public fun <init> ()V
+	public fun sample ()Z
+}
+
+public final class wisp/sampling/PercentageSampler : wisp/sampling/Sampler {
+	public fun <init> (ILkotlin/jvm/functions/Function0;)V
+	public fun sample ()Z
+}
+
+public final class wisp/sampling/RateLimiter {
+	public fun <init> (JLwisp/sampling/Ticker;Lwisp/sampling/Sleeper;)V
+	public synthetic fun <init> (JLwisp/sampling/Ticker;Lwisp/sampling/Sleeper;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getPermitsPerSecond ()J
+	public final fun getPermitsRemaining (Ljava/util/concurrent/TimeUnit;J)J
+	public final fun setPermitsPerSecond (J)V
+	public final fun tryAcquire (JJLjava/util/concurrent/TimeUnit;)Z
+}
+
+public final class wisp/sampling/RateLimitingSampler : wisp/sampling/Sampler {
+	public fun <init> (Lwisp/sampling/RateLimiter;)V
+	public fun sample ()Z
+}
+
 public abstract interface class wisp/sampling/Sampler {
 	public static final field Companion Lwisp/sampling/Sampler$Companion;
 	public abstract fun sample ()Z
@@ -7,5 +31,23 @@ public final class wisp/sampling/Sampler$Companion {
 	public final fun always ()Lwisp/sampling/Sampler;
 	public final fun percentage (I)Lwisp/sampling/Sampler;
 	public final fun rateLimiting (J)Lwisp/sampling/Sampler;
+}
+
+public abstract interface class wisp/sampling/Sleeper {
+	public static final field Companion Lwisp/sampling/Sleeper$Companion;
+	public abstract fun sleep (Ljava/time/Duration;)V
+}
+
+public final class wisp/sampling/Sleeper$Companion {
+	public final fun getDEFAULT ()Lwisp/sampling/Sleeper;
+}
+
+public abstract interface class wisp/sampling/Ticker {
+	public static final field Companion Lwisp/sampling/Ticker$Companion;
+	public abstract fun read ()J
+}
+
+public final class wisp/sampling/Ticker$Companion {
+	public final fun getDEFAULT ()Lwisp/sampling/Ticker;
 }
 

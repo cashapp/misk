@@ -57,16 +57,16 @@ interface Sampler {
     }
 }
 
-internal class PercentageSampler(private val samplePercentage: Int, private val random: () -> Int) : Sampler {
+class PercentageSampler(private val samplePercentage: Int, private val random: () -> Int) : Sampler {
     override fun sample(): Boolean = random() < samplePercentage
 }
 
-internal class RateLimitingSampler(private val rateLimiter: RateLimiter) : Sampler {
+class RateLimitingSampler(private val rateLimiter: RateLimiter) : Sampler {
     override fun sample(): Boolean {
         return rateLimiter.tryAcquire(1L, 0, TimeUnit.SECONDS)
     }
 }
 
-internal class AlwaysSampler : Sampler {
+class AlwaysSampler : Sampler {
     override fun sample(): Boolean = true
 }
