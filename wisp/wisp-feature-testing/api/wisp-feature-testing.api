@@ -1,4 +1,4 @@
-public final class wisp/feature/testing/FakeFeatureFlags : wisp/config/Configurable, wisp/feature/DynamicConfig, wisp/feature/FeatureFlags, wisp/feature/LegacyFeatureFlags, wisp/feature/StrongFeatureFlags {
+public class wisp/feature/testing/FakeFeatureFlags : wisp/config/Configurable, wisp/feature/DynamicConfig, wisp/feature/FeatureFlags, wisp/feature/LegacyFeatureFlags, wisp/feature/StrongFeatureFlags {
 	public static final field Companion Lwisp/feature/testing/FakeFeatureFlags$Companion;
 	public static final field KEY Ljava/lang/String;
 	public fun <init> (Lcom/squareup/moshi/Moshi;)V

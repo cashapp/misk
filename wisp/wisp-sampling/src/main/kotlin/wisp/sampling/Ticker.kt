@@ -3,7 +3,7 @@ package wisp.sampling
 /**
  * Abstraction for `System.nanoTime()` that allows for testing.
  */
-internal interface Ticker {
+interface Ticker {
     fun read(): Long
 
     companion object {

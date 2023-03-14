@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
-class FakeFeatureFlags private constructor(
+open class FakeFeatureFlags private constructor(
     val legacyFeatureFlags: FakeLegacyFeatureFlags,
     val strongFeatureFlags: FakeStrongFeatureFlags
 ) : FeatureFlags,
