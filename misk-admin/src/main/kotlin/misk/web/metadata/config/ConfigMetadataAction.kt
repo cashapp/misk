@@ -38,7 +38,7 @@ class ConfigMetadataAction @Inject constructor(
     deployment: Deployment,
     config: Config
   ): Map<String, String?> {
-    // TODO(mmihic): Need to figure out how to get the overrides (ie. k8s /etc/secrets, database override...).
+    // TODO: Need to figure out how to get the overrides (ie. k8s /etc/secrets, database override...).
     val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())
 
     val configFileContents = linkedMapOf<String, String?>()

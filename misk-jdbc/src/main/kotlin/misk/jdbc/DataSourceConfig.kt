@@ -1,6 +1,6 @@
 package misk.jdbc
 
-import misk.config.RedactInDashboard
+import misk.config.Redact
 import wisp.config.Config
 import wisp.deployment.Deployment
 import java.io.File
@@ -51,7 +51,7 @@ data class DataSourceConfig(
   val port: Int? = null,
   val database: String? = null,
   val username: String? = null,
-  @RedactInDashboard
+  @Redact
   val password: String? = null,
   val fixed_pool_size: Int = 10,
   val connection_timeout: Duration = Duration.ofSeconds(10),
@@ -76,10 +76,10 @@ data class DataSourceConfig(
      trust_certificate_key_store_* details.
    */
   val trust_certificate_key_store_url: String? = null,
-  @RedactInDashboard
+  @Redact
   val trust_certificate_key_store_password: String? = null,
   val client_certificate_key_store_url: String? = null,
-  @RedactInDashboard
+  @Redact
   val client_certificate_key_store_password: String? = null,
   // Vitess driver doesn't support passing in URLs so support paths and prefer this for Vitess
   // going forward

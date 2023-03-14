@@ -766,7 +766,8 @@ public final class misk/config/MiskConfig {
 }
 
 public final class misk/config/MiskConfig$RealSecret : misk/config/Secret {
-	public fun <init> (Ljava/lang/Object;)V
+	public fun <init> (Ljava/lang/Object;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getValue ()Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
 }
@@ -776,12 +777,6 @@ public final class misk/config/MiskConfig$RedactSecretJacksonModule : com/faster
 	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
 }
 
-public final class misk/config/MiskConfig$RedactSecretJsonSerializer : com/fasterxml/jackson/databind/JsonSerializer, com/fasterxml/jackson/databind/ser/ContextualSerializer {
-	public fun <init> ()V
-	public fun createContextual (Lcom/fasterxml/jackson/databind/SerializerProvider;Lcom/fasterxml/jackson/databind/BeanProperty;)Lcom/fasterxml/jackson/databind/JsonSerializer;
-	public fun serialize (Ljava/lang/Object;Lcom/fasterxml/jackson/core/JsonGenerator;Lcom/fasterxml/jackson/databind/SerializerProvider;)V
-}
-
 public final class misk/config/MiskConfig$SecretJacksonModule : com/fasterxml/jackson/databind/module/SimpleModule {
 	public fun <init> (Lmisk/resources/ResourceLoader;Lcom/fasterxml/jackson/databind/ObjectMapper;)V
 	public final fun getMapper ()Lcom/fasterxml/jackson/databind/ObjectMapper;
@@ -789,7 +784,7 @@ public final class misk/config/MiskConfig$SecretJacksonModule : com/fasterxml/ja
 	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
 }
 
-public abstract interface annotation class misk/config/RedactInDashboard : java/lang/annotation/Annotation {
+public abstract interface annotation class misk/config/Redact : java/lang/annotation/Annotation {
 }
 
 public abstract interface class misk/config/Secret {

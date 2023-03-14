@@ -323,7 +323,7 @@ object MiskConfig {
         )
       }
       val reference = deserializationContext.readValue(jsonParser, String::class.java) as String
-      return RealSecret(loadSecret(reference, type))
+      return RealSecret(loadSecret(reference, type), reference)
     }
 
     private fun loadSecret(reference: String, type: JavaType): Any {
@@ -388,7 +388,12 @@ object MiskConfig {
       gen: JsonGenerator,
       serializers: SerializerProvider?
     ) {
-      gen.writeString("████████")
+      if ((value as? RealSecret<*>)?.reference?.isNotBlank() == true) {
+        gen.writeString("${value.reference} -> ████████")
+
+      } else {
+        gen.writeString("████████")
+      }
     }
 
     override fun createContextual(
@@ -399,8 +404,8 @@ object MiskConfig {
     }
   }
 
-  class RealSecret<T>(override val value: T) : Secret<T> {
-    override fun toString(): String = "RealSecret(value=████████)"
+  class RealSecret<T>(override val value: T, internal val reference: String = "") : Secret<T> {
+    override fun toString(): String = "RealSecret(value=████████, reference=$reference)"
   }
 }
 
@@ -408,7 +413,7 @@ object MiskConfig {
  * Field or class will be redacted in dashboard output.
  *
  * ```
- * import misk.config.RedactInDashboard
+ * import misk.config.Redact
  *
  * data class MyServiceConfig(
  *   val customConfig: CustomConfig,
@@ -416,11 +421,11 @@ object MiskConfig {
  * )
  *
  * data class CustomConfig(
- *   @RedactInDashboard
+ *   @Redact
  *   val secretSubconfig: Subconfig
  * )
  *
- * @RedactInDashboard
+ * @Redact
  * data class SecretConfig(
  *   val key: String
  * )
@@ -430,5 +435,5 @@ object MiskConfig {
 @JsonSerialize(using = MiskConfig.RedactSecretJsonSerializer::class)
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
-annotation class RedactInDashboard
+annotation class Redact
 

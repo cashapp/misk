@@ -1,6 +1,6 @@
 package misk.redis
 
-import misk.config.RedactInDashboard
+import misk.config.Redact
 import redis.clients.jedis.Protocol
 import wisp.config.Config
 
@@ -12,7 +12,7 @@ class RedisConfig : java.util.LinkedHashMap<String, RedisReplicationGroupConfig>
 data class RedisReplicationGroupConfig(
   val writer_endpoint: RedisNodeConfig,
   val reader_endpoint: RedisNodeConfig,
-  @RedactInDashboard
+  @Redact
   val redis_auth_password: String,
   val timeout_ms: Int = Protocol.DEFAULT_TIMEOUT
 )

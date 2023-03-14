@@ -1,7 +1,7 @@
 package misk.web.metadata.config
 
 import misk.config.MiskConfig
-import misk.config.RedactInDashboard
+import misk.config.Redact
 import misk.config.Secret
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -24,7 +24,7 @@ class ConfigMetadataActionTest {
     IncludedConfig("foo"),
     OverriddenConfig("bar"),
     PasswordConfig("pass1", "phrase2", "custom3"),
-    SecretConfig(MiskConfig.RealSecret("value")),
+    SecretConfig(MiskConfig.RealSecret("value", "reference")),
     RedactedConfig("baz")
   )
 
@@ -61,17 +61,17 @@ class ConfigMetadataActionTest {
     assertEquals(
       """
       |---
-      |includedConfig:
+      |included:
       |  key: "foo"
-      |overriddenConfig:
+      |overridden:
       |  key: "bar"
-      |passwordConfig:
+      |password:
       |  password: "████████"
       |  passphrase: "████████"
       |  custom: "████████"
-      |secretConfig:
-      |  secretKey: "████████"
-      |redactedConfig: "████████"
+      |secret:
+      |  secret_key: "reference -> ████████"
+      |redacted: "████████"
       |
     """.trimMargin(), effectiveConfig
     )
@@ -98,7 +98,7 @@ class ConfigMetadataActionTest {
     val commonConfig = response.resources.get("classpath:/admin_dashboard_app-common.yaml")
     val effectiveConfig = response.resources.get("Effective Config")
 
-    assertThat(commonConfig).contains("phrase123")
+    assertThat(commonConfig).contains("common123")
     assertThat(effectiveConfig).doesNotContain("pass1", "phrase2")
   }
 
@@ -147,15 +147,15 @@ class ConfigMetadataActionTest {
   data class OverriddenConfig(val key: String) : Config
 
   data class PasswordConfig(
-    @RedactInDashboard
+    @Redact
     val password: String,
-    @RedactInDashboard
+    @Redact
     val passphrase: String,
-    @RedactInDashboard
+    @Redact
     val custom: String
   ) : Config
 
-  @RedactInDashboard
+  @Redact
   data class RedactedConfig(
     val key: String
   )
