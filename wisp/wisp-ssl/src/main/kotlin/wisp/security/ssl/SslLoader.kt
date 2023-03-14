@@ -10,8 +10,8 @@ import java.security.cert.CertificateException
 import java.security.spec.PKCS8EncodedKeySpec
 
 /** Loads keys and certificates from the file system. */
-class SslLoader constructor(
-    val resourceLoader: ResourceLoader
+open class SslLoader constructor(
+    private val resourceLoader: ResourceLoader
 ) {
     fun loadTrustStore(
         path: String,
