@@ -126,7 +126,11 @@ data class HttpClientEndpointConfig(
     val url: String? = null,
     val envoy: HttpClientEnvoyConfig? = null,
     val clientConfig: HttpClientConfig = HttpClientConfig()
-)
+) {
+    init {
+        require(url == null || envoy == null) { "Cannot set both url and envoy configs" }
+    }
+}
 
 data class HttpClientEnvoyConfig(
     val app: String,
