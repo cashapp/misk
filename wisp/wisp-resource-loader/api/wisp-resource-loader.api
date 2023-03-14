@@ -31,7 +31,7 @@ public final class wisp/resources/MemoryResourceLoaderBackend : wisp/resources/R
 public final class wisp/resources/MemoryResourceLoaderBackend$Companion {
 }
 
-public final class wisp/resources/ResourceLoader {
+public class wisp/resources/ResourceLoader {
 	public static final field Companion Lwisp/resources/ResourceLoader$Companion;
 	public fun <init> (Ljava/util/Map;)V
 	public final fun copyTo (Ljava/lang/String;Ljava/nio/file/Path;)V

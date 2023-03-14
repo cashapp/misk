@@ -77,7 +77,7 @@ public final class wisp/security/ssl/PemComboFile$Companion {
 	public static synthetic fun parse$default (Lwisp/security/ssl/PemComboFile$Companion;Lokio/BufferedSource;Ljava/lang/String;ILjava/lang/Object;)Lwisp/security/ssl/PemComboFile;
 }
 
-public final class wisp/security/ssl/SslContextFactory {
+public class wisp/security/ssl/SslContextFactory {
 	public fun <init> (Lwisp/security/ssl/SslLoader;)V
 	public final fun create (Lwisp/security/ssl/CertStore;[CLwisp/security/ssl/TrustStore;)Ljavax/net/ssl/SSLContext;
 	public final fun create (Lwisp/security/ssl/CertStoreConfig;Lwisp/security/ssl/TrustStoreConfig;)Ljavax/net/ssl/SSLContext;
@@ -86,14 +86,13 @@ public final class wisp/security/ssl/SslContextFactory {
 	public final fun loadTrustManagers (Ljava/security/KeyStore;)[Ljavax/net/ssl/TrustManager;
 }
 
-public final class wisp/security/ssl/SslLoader {
+public class wisp/security/ssl/SslLoader {
 	public static final field Companion Lwisp/security/ssl/SslLoader$Companion;
 	public static final field FORMAT_JCEKS Ljava/lang/String;
 	public static final field FORMAT_JKS Ljava/lang/String;
 	public static final field FORMAT_PEM Ljava/lang/String;
 	public static final field FORMAT_PKCS12 Ljava/lang/String;
 	public fun <init> (Lwisp/resources/ResourceLoader;)V
-	public final fun getResourceLoader ()Lwisp/resources/ResourceLoader;
 	public final fun loadCertStore (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lwisp/security/ssl/CertStore;
 	public final fun loadCertStore (Lwisp/security/ssl/CertStoreConfig;)Lwisp/security/ssl/CertStore;
 	public static synthetic fun loadCertStore$default (Lwisp/security/ssl/SslLoader;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lwisp/security/ssl/CertStore;

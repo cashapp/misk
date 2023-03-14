@@ -31,7 +31,7 @@ import java.util.*
  * Other backends are permitted. They should be registered with a `MapBinder` with the backend
  * scheme like `classpath:` as the key.
  */
-class ResourceLoader(
+open class ResourceLoader(
     private val backends: Map<String, Backend>
 ) {
     init {
