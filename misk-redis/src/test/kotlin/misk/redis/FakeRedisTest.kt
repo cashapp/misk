@@ -156,6 +156,40 @@ class FakeRedisTest {
   }
 
   @Test
+  fun hdelReturnsTheRightNumbers() {
+    redis.hset(
+      key = "movie_years",
+      hash = mapOf(
+        "Star Wars" to "1977".encodeUtf8(),
+        "Rogue One" to "2016".encodeUtf8(),
+        "Jurassic Park" to "1993".encodeUtf8(),
+        "Jurassic World" to "2015".encodeUtf8()
+      )
+    )
+
+    assertThat(redis.hdel("dne", "dne")).isEqualTo(0L)
+    assertThat(redis.hdel("movie_years", "dne")).isEqualTo(0L)
+    assertThat(redis.hdel("movie_years", "Star Wars")).isEqualTo(1L)
+    assertThat(redis.hdel("movie_years", "Rogue One", "Jurassic World", "dne")).isEqualTo(2)
+  }
+
+  @Test
+  fun hlen() {
+    redis.hset(
+      key = "movie_years",
+      hash = mapOf(
+        "Star Wars" to "1977".encodeUtf8(),
+        "Rogue One" to "2016".encodeUtf8(),
+        "Jurassic Park" to "1993".encodeUtf8(),
+        "Jurassic World" to "2015".encodeUtf8()
+      )
+    )
+
+    assertThat(redis.hlen("movie_years")).isEqualTo(4L)
+    assertThat(redis.hlen("dne")).isEqualTo(0L)
+  }
+
+  @Test
   fun badArgumentsToBatchSet() {
     assertThatThrownBy {
       redis.mset("key".encodeUtf8())
@@ -768,12 +802,13 @@ class FakeRedisTest {
     redis.lpush("droids", *droids.toTypedArray())
 
     // Non-expired keys.
-    assertThat(redis.lpop("droids", 1)).containsExactly("R2-D2".encodeUtf8())
+    assertThat(redis.lpop("droids")).isEqualTo("R2-D2".encodeUtf8())
     assertThat(redis.lpop("droids", 3)).containsExactlyElementsOf(
       listOf("K-2SO", "IG-88B", "IG-11").map { it.encodeUtf8() })
     assertThat(redis.lpop("droids", 99)).containsExactlyElementsOf(
       listOf("C-3PO", "BD-1", "BB-8", "4-LOM").map { it.encodeUtf8() })
     assertThat(redis.lpop("droids", 1)).isEmpty()
+    assertThat(redis.lpop("droids")).isNull()
 
     // Expired key.
     redis.lpush("droids", *droids.toTypedArray())
@@ -788,12 +823,14 @@ class FakeRedisTest {
     redis.lpush("droids", *droids.toTypedArray())
 
     // Non-expired keys.
-    assertThat(redis.rpop("droids", 1)).containsExactly("4-LOM".encodeUtf8())
+    assertThat(redis.rpop("droids")).isEqualTo("4-LOM".encodeUtf8())
     assertThat(redis.rpop("droids", 3)).containsExactlyElementsOf(
       listOf("BB-8", "BD-1", "C-3PO").map { it.encodeUtf8() })
     assertThat(redis.rpop("droids", 99)).containsExactlyElementsOf(
       listOf("IG-11", "IG-88B", "K-2SO", "R2-D2").map { it.encodeUtf8() })
     assertThat(redis.rpop("droids", 1)).isEmpty()
+    assertThat(redis.rpop("droids")).isNull()
+
 
     // Expired key.
     redis.lpush("droids", *droids.toTypedArray())
@@ -808,12 +845,13 @@ class FakeRedisTest {
     redis.rpush("droids", *droids.toTypedArray())
 
     // Non-expired keys.
-    assertThat(redis.lpop("droids", 1)).containsExactly("4-LOM".encodeUtf8())
+    assertThat(redis.lpop("droids")).isEqualTo("4-LOM".encodeUtf8())
     assertThat(redis.lpop("droids", 3)).containsExactlyElementsOf(
       listOf("BB-8", "BD-1", "C-3PO").map { it.encodeUtf8() })
     assertThat(redis.lpop("droids", 99)).containsExactlyElementsOf(
       listOf("IG-11", "IG-88B", "K-2SO", "R2-D2").map { it.encodeUtf8() })
     assertThat(redis.lpop("droids", 1)).isEmpty()
+    assertThat(redis.lpop("droids")).isNull()
 
     // Expired key.
     redis.rpush("droids", *droids.toTypedArray())
@@ -828,12 +866,13 @@ class FakeRedisTest {
     redis.rpush("droids", *droids.toTypedArray())
 
     // Non-expired keys.
-    assertThat(redis.rpop("droids", 1)).containsExactly("R2-D2".encodeUtf8())
+    assertThat(redis.rpop("droids")).isEqualTo("R2-D2".encodeUtf8())
     assertThat(redis.rpop("droids", 3)).containsExactlyElementsOf(
       listOf("K-2SO", "IG-88B", "IG-11").map { it.encodeUtf8() })
     assertThat(redis.rpop("droids", 99)).containsExactlyElementsOf(
       listOf("C-3PO", "BD-1", "BB-8", "4-LOM").map { it.encodeUtf8() })
     assertThat(redis.rpop("droids", 1)).isEmpty()
+    assertThat(redis.rpop("droids")).isNull()
 
     // Expired key.
     redis.rpush("droids", *droids.toTypedArray())

@@ -3,7 +3,7 @@ package misk.hibernate
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.crypto.CryptoConfig
-import misk.crypto.CryptoTestModule
+import misk.crypto.testing.CryptoTestModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig

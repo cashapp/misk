@@ -174,7 +174,7 @@ class MyServiceModule : KAbstractModule() {
 }
 ```
 
-Notice that in this examplewe use
+Notice that in this example we use
 [`KAbstractModule()`](https://github.com/square/misk/blob/master/misk/src/main/kotlin/misk/inject/KAbstractModule.kt),
 Misk’s Kotlin wrapper for
 [`AbstractModule`](https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/AbstractModule.html),
