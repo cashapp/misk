@@ -5,7 +5,7 @@ import java.time.Duration
 /**
  * Abstraction for `Thread.sleep()` that allows for testing.
  */
-internal interface Sleeper {
+interface Sleeper {
     fun sleep(duration: Duration)
 
     companion object {
