@@ -339,7 +339,7 @@ public final class misk/security/ssl/TrustStoreConfig {
 	public final fun toWispConfig ()Lwisp/security/ssl/TrustStoreConfig;
 }
 
-public final class misk/tokens/FakeTokenGenerator : misk/tokens/TokenGenerator {
+public final class misk/tokens/FakeTokenGenerator : wisp/token/TokenGenerator {
 	public fun <init> ()V
 	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
 }
@@ -348,22 +348,9 @@ public final class misk/tokens/FakeTokenGeneratorModule : misk/inject/KAbstractM
 	public fun <init> ()V
 }
 
-public final class misk/tokens/RealTokenGenerator : misk/tokens/TokenGenerator {
+public final class misk/tokens/RealTokenGenerator : wisp/token/TokenGenerator {
 	public fun <init> ()V
 	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
-}
-
-public abstract interface class misk/tokens/TokenGenerator {
-	public static final field Companion Lmisk/tokens/TokenGenerator$Companion;
-	public abstract fun generate (Ljava/lang/String;I)Ljava/lang/String;
-}
-
-public final class misk/tokens/TokenGenerator$Companion {
-	public final fun canonicalize (Ljava/lang/String;)Ljava/lang/String;
-}
-
-public final class misk/tokens/TokenGenerator$DefaultImpls {
-	public static synthetic fun generate$default (Lmisk/tokens/TokenGenerator;Ljava/lang/String;IILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class misk/tokens/TokenGeneratorModule : misk/inject/KAbstractModule {
