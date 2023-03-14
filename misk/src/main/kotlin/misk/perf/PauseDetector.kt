@@ -9,6 +9,7 @@ import misk.metrics.v2.PeakGauge
 import org.slf4j.event.Level
 import wisp.logging.getLogger
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.NANOSECONDS
 import javax.inject.Inject
@@ -61,6 +62,9 @@ internal class PauseDetector @Inject constructor(
   private var shortestObservedDeltaTimeNsec = Long.MAX_VALUE
   /** Tracks the start time of the last invocation to [sleep] */
   private var startTime: Long = 0
+  private var lastSecond: Long = 0
+  private var invocationsSinceLastSecond: Int = 0
+  private var lastPauseSum: Double = 0.0
 
   override fun run() {
     while (isRunning) {
@@ -92,6 +96,24 @@ internal class PauseDetector @Inject constructor(
   internal fun check(): PauseResults {
     val stopTime: Long = ticker.read()
     val deltaTimeNsec: Long = (stopTime - startTime)
+
+    val stopSecond = NANOSECONDS.toSeconds(stopTime)
+    if (stopSecond > lastSecond) {
+      val currentSum = pauseSum.get()
+      val observedPause = currentSum - lastPauseSum
+      val shortestBounding =
+        TimeUnit.NANOSECONDS.toMillis(
+          invocationsSinceLastSecond * (shortestObservedDeltaTimeNsec - TimeUnit.MILLISECONDS.toNanos(
+            1
+          ))
+        )
+      val unaccounted = 1000 - observedPause - invocationsSinceLastSecond - shortestBounding
+      logger.info("invocations=$invocationsSinceLastSecond, pause=$observedPause ms (${(observedPause / 10)}%), shortestNsecs=$shortestObservedDeltaTimeNsec, shortestBounding=$shortestBounding ms, unaccounted=$unaccounted ms")
+      invocationsSinceLastSecond = 0
+      lastSecond = stopSecond
+      lastPauseSum = currentSum
+    }
+    invocationsSinceLastSecond++
 
     // We expect a monotonic ticker that should measure at least the resolution time between
     // invocations. Guard against a non-monotonic or otherwise "fast" ticker from polluting results.

@@ -7,6 +7,8 @@ import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.metrics.backends.prometheus.PrometheusMetricsServiceModule
 import misk.tokens.TokenGeneratorModule
+import misk.perf.PauseDetectorConfig
+import misk.perf.PauseDetectorModule
 import misk.web.MiskWebModule
 import wisp.deployment.Deployment
 
@@ -23,5 +25,6 @@ fun main(args: Array<String>) {
     MiskWebModule(config.web),
     PrometheusMetricsServiceModule(config.prometheus),
     TokenGeneratorModule(),
+    PauseDetectorModule(PauseDetectorConfig(logInfoMillis = 100))
   ).run(args)
 }
