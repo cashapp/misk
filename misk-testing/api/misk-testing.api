@@ -235,6 +235,10 @@ public final class misk/testing/TemporaryFolderModule$DeleteTempFolder : org/jun
 	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
+public final class misk/time/FakeClock : wisp/time/FakeClock {
+	public fun <init> ()V
+}
+
 public final class misk/time/FakeClockModule : misk/inject/KInstallOnceModule {
 	public fun <init> ()V
 }
