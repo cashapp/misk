@@ -3,14 +3,10 @@ package com.squareup.exemplar
 import misk.inject.KAbstractModule
 import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.AdminDashboardModule
-import misk.web.dashboard.BaseDashboardModule
-import misk.web.dashboard.ConfigDashboardTabModule
 import misk.web.dashboard.DashboardTheme
-import misk.web.dashboard.DatabaseDashboardTabModule
 import misk.web.dashboard.EnvironmentToColorLookup
 import misk.web.dashboard.MiskWebColor
 import misk.web.dashboard.MiskWebTheme
-import misk.web.dashboard.WebActionsDashboardTabModule
 import misk.web.metadata.config.ConfigMetadataAction
 
 class DashboardModule : KAbstractModule() {
@@ -36,6 +32,11 @@ class DashboardModule : KAbstractModule() {
         )
       )
     )
-    install(AdminDashboardModule(isDevelopment = true))
+    install(
+      AdminDashboardModule(
+        isDevelopment = true,
+        configTabMode = ConfigMetadataAction.ConfigTabMode.SHOW_REDACTED_EFFECTIVE_CONFIG
+      )
+    )
   }
 }

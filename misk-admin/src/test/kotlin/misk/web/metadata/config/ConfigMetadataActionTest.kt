@@ -120,7 +120,7 @@ class ConfigMetadataActionTest {
     assertThat(configJvm).contains("class_path")
   }
 
-  @Test fun secureModeDoesNotIncludeRawYamlFiles() {
+  @Test fun secureModeDoesNotIncludeEffectiveConfigOrRawYamlFiles() {
     configMetadataAction = ConfigMetadataAction(
       appName = "admin_dashboard_app",
       deployment = TESTING,
@@ -130,6 +130,23 @@ class ConfigMetadataActionTest {
     )
 
     val response = configMetadataAction.getAll()
+    assertThat(response.resources).doesNotContainKey("Effective Config")
+    assertThat(response.resources).doesNotContainKey("classpath:/admin_dashboard_app-common.yaml")
+    assertThat(response.resources).doesNotContainKey("classpath:/admin_dashboard_app-testing.yaml")
+    assertThat(response.resources).containsKey("JVM")
+  }
+
+  @Test fun showEffectiveConfigModeDoesNotIncludeRawYamlFiles() {
+    configMetadataAction = ConfigMetadataAction(
+      appName = "admin_dashboard_app",
+      deployment = TESTING,
+      config = testConfig,
+      jvmMetadataAction = jvmMetadataAction,
+      mode = ConfigMetadataAction.ConfigTabMode.SHOW_REDACTED_EFFECTIVE_CONFIG
+    )
+
+    val response = configMetadataAction.getAll()
+    assertThat(response.resources).containsKey("Effective Config")
     assertThat(response.resources).doesNotContainKey("classpath:/admin_dashboard_app-common.yaml")
     assertThat(response.resources).doesNotContainKey("classpath:/admin_dashboard_app-testing.yaml")
     assertThat(response.resources).containsKey("JVM")

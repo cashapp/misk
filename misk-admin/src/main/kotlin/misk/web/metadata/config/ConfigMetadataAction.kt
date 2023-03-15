@@ -42,7 +42,9 @@ class ConfigMetadataAction @Inject constructor(
     val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())
 
     val configFileContents = linkedMapOf<String, String?>()
-    configFileContents.put("Effective Config", MiskConfig.toRedactedYaml(config, ResourceLoader.SYSTEM))
+    if (mode != ConfigTabMode.SAFE) {
+      configFileContents.put("Effective Config", MiskConfig.toRedactedYaml(config, ResourceLoader.SYSTEM))
+    }
     if (mode == ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS) {
       rawYamlFiles.forEach { configFileContents.put(it.key, it.value) }
     }
@@ -54,7 +56,13 @@ class ConfigMetadataAction @Inject constructor(
   data class Response(val resources: Map<String, String?>)
 
   enum class ConfigTabMode {
-    SAFE, // Only show safe content which will not leak Misk secrets
+    /** Only show safe content which will not leak Misk secrets */
+    SAFE,
+    /**
+     * Show redacted effective config loaded into application, risk of leak if sensitive
+     * non-Secret fields don't have @misk.config.Redact annotation manually added.
+     */
+    SHOW_REDACTED_EFFECTIVE_CONFIG,
     UNSAFE_LEAK_MISK_SECRETS
   }
 }
