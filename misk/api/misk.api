@@ -1,3 +1,43 @@
+public final class com/squareup/protos/test/grpc/GreetResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_MESSAGE Ljava/lang/String;
+	public final field message Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lcom/squareup/protos/test/grpc/GreetResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/protos/test/grpc/GreetResponse$Builder : com/squareup/wire/Message$Builder {
+	public field message Ljava/lang/String;
+	public fun <init> ()V
+	public fun build ()Lcom/squareup/protos/test/grpc/GreetResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun message (Ljava/lang/String;)Lcom/squareup/protos/test/grpc/GreetResponse$Builder;
+}
+
+public abstract interface class com/squareup/protos/test/grpc/GreeterClient : com/squareup/wire/Service {
+	public abstract fun Greet ()Lcom/squareup/wire/GrpcCall;
+	public abstract fun SayHello ()Lcom/squareup/wire/GrpcCall;
+}
+
+public abstract interface class com/squareup/protos/test/grpc/GreeterGreetBlockingServer : com/squareup/wire/Service {
+	public abstract fun Greet (Lkotlin/Unit;)Lcom/squareup/protos/test/grpc/GreetResponse;
+}
+
+public abstract interface class com/squareup/protos/test/grpc/GreeterSayHelloBlockingServer : com/squareup/wire/Service {
+	public abstract fun SayHello (Lcom/squareup/protos/test/grpc/HelloRequest;)Lcom/squareup/protos/test/grpc/HelloReply;
+}
+
+public final class com/squareup/protos/test/grpc/GrpcGreeterClient : com/squareup/protos/test/grpc/GreeterClient {
+	public fun <init> (Lcom/squareup/wire/GrpcClient;)V
+	public fun Greet ()Lcom/squareup/wire/GrpcCall;
+	public fun SayHello ()Lcom/squareup/wire/GrpcCall;
+}
+
 public final class com/squareup/protos/test/grpc/HelloReply : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field DEFAULT_MESSAGE Ljava/lang/String;

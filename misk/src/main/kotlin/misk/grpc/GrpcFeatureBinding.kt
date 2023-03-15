@@ -1,17 +1,18 @@
 package misk.grpc
 
 import com.squareup.wire.ProtoAdapter
+import com.squareup.wire.WireRpc
 import misk.Action
 import misk.web.DispatchMechanism
 import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
 import misk.web.PathPattern
+import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaTypes
 import java.lang.reflect.Type
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.reflect.jvm.javaType
 
 internal class GrpcFeatureBinding(
   private val requestAdapter: ProtoAdapter<Any>,
@@ -82,6 +83,11 @@ internal class GrpcFeatureBinding(
         "@Grpc functions must have either 1 or 2 parameters: $action"
       }
 
+      val wireAnnotation = action.function.findAnnotationWithOverrides<WireRpc>()
+      requireNotNull(wireAnnotation) {
+        "@Grpc function must have @WireRpc annotations"
+      }
+
       claimer.claimParameter(0)
       claimer.claimRequestBody()
       val streamingRequestType = action.parameters[0].type.streamElementType()
@@ -98,7 +104,7 @@ internal class GrpcFeatureBinding(
       } else {
         claimer.claimReturnValue()
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
-        ProtoAdapter.get(action.returnType.javaType as Class<Any>)
+        ProtoAdapter.get(wireAnnotation.responseAdapter) as ProtoAdapter<Any>
       }
 
       return if (streamingRequestType != null) {
@@ -112,7 +118,7 @@ internal class GrpcFeatureBinding(
       } else {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         GrpcFeatureBinding(
-          requestAdapter = ProtoAdapter.get(action.parameters[0].type.javaType as Class<Any>),
+          requestAdapter = ProtoAdapter.get(wireAnnotation.requestAdapter) as ProtoAdapter<Any>,
           responseAdapter = responseAdapter,
           streamingRequest = false,
           streamingResponse = streamingResponse
