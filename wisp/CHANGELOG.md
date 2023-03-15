@@ -1,6 +1,20 @@
 Change Log
 ==========
 
+Version 1.3.9 *(2023-03-15)*
+----------------------------
+
+* Make RateLimiter, PercentageSampler, RateLimitingSampler, AlwaysSampler, Sleeper, and Ticker public
+* Make FakeFeatureFlags open
+* Make ResourceLoader and SslLoader open
+* Disallow setting both url and envoy client configs
+* Make SampledLogger and FakeClock open
+
+Dependency changes:
+
+* gradle: "7.6" -> "7.6.1"
+* assertj: "3.23.1" -> "3.24.2"
+
 Version 1.3.8 *(2023-02-23)*
 ----------------------------
 
