@@ -4,7 +4,7 @@ import mu.KLogger
 import mu.Marker
 import wisp.sampling.Sampler
 
-internal class SampledLogger constructor(
+open class SampledLogger constructor(
     override val underlyingLogger: KLogger,
     private val sampler: Sampler
 ) : KLogger by underlyingLogger {
