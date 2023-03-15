@@ -20,7 +20,7 @@ import okhttp3.Call
  * This interface is used with Guice multibindings. Register instances by calling `multibind()`
  * in a `KAbstractModule`:
  * ```
- * multibind<ClientNetworkInterceptor.Factory>().to<MyFactory>()
+ * multibind<CallFactoryWrapper>().to<MyFactoryWrapper>()
  * ```
  *
  */
