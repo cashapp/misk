@@ -16,4 +16,6 @@ dependencies {
     implementation(libs.okio)
     implementation(libs.openTracing)
     implementation(libs.openTracingOkHttp)
+
+    testImplementation(libs.assertj)
 }
