@@ -1,4 +1,4 @@
-public final class wisp/time/FakeClock : java/time/Clock {
+public class wisp/time/FakeClock : java/time/Clock {
 	public fun <init> ()V
 	public fun <init> (JLjava/time/ZoneId;)V
 	public synthetic fun <init> (JLjava/time/ZoneId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
