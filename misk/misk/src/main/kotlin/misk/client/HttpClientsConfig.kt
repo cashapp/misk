@@ -154,6 +154,10 @@ data class HttpClientEndpointConfig(
   val envoy: HttpClientEnvoyConfig? = null,
   val clientConfig: HttpClientConfig = HttpClientConfig()
 ) {
+  init {
+    require(url == null || envoy == null) { "Cannot set both url and envoy configs" }
+  }
+  
   @Deprecated(
     "Use clientConfig property",
     replaceWith = ReplaceWith("clientConfig.connectTimeout")
