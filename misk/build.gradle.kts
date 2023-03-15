@@ -89,6 +89,28 @@ wire {
   }
   java {
     out = generatedSourceDir
+    exclusive = false
+  }
+
+  kotlin {
+    out = generatedSourceDir
+    rpcRole = "client"
+    rpcCallStyle = "blocking"
+    exclusive = false
+    includes = listOf(
+      "helloworld.Greeter"
+    )
+  }
+
+  kotlin {
+    out = generatedSourceDir
+    rpcRole = "server"
+    rpcCallStyle = "blocking"
+    exclusive = false
+    singleMethodServices = true
+    includes = listOf(
+      "helloworld.Greeter"
+    )
   }
 }
 

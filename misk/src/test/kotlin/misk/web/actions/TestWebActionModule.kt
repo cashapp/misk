@@ -1,5 +1,7 @@
 package misk.web.actions
 
+import com.squareup.protos.test.grpc.GreetResponse
+import com.squareup.protos.test.grpc.GreeterGreetBlockingServer
 import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
 import com.squareup.wire.Service
@@ -20,6 +22,7 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
+import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import javax.inject.Inject
@@ -35,6 +38,7 @@ class TestWebActionModule : KAbstractModule() {
     install(WebActionModule.create<CustomCapabilityAccessAction>())
     install(WebActionModule.create<RequestTypeAction>())
     install(WebActionModule.create<GrpcAction>())
+    install(WebActionModule.create<GreetServiceWebAction>())
 
     multibind<AccessAnnotationEntry>().toInstance(
       AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments"))
@@ -106,6 +110,16 @@ class RequestTypeAction @Inject constructor() : WebAction {
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
   @Unauthenticated
   fun shipment(@RequestBody requestType: Shipment) = "request: $requestType".toResponseBody()
+}
+
+class GreetServiceWebAction @Inject constructor() : WebAction, GreeterGreetBlockingServer {
+  @Unauthenticated
+  @LogRequestResponse
+  override fun Greet(request: Unit): GreetResponse {
+    return GreetResponse.Builder()
+      .message("Hola")
+      .build()
+  }
 }
 
 class GrpcAction @Inject constructor() :
