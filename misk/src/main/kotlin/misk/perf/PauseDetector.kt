@@ -8,6 +8,7 @@ import misk.metrics.v2.Metrics
 import misk.metrics.v2.PeakGauge
 import org.slf4j.event.Level
 import wisp.logging.getLogger
+import wisp.logging.info
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -47,7 +48,14 @@ internal class PauseDetector @Inject constructor(
   private val pauseSummary: Summary =
     metrics.summary("jvm_pause_time_summary_ms", "Summary in ms of pause time", listOf())
 
+  // TODO: delete me
   private val pauseSum = metrics.gauge("jvm_pause_time_sum", "Sum of pause time in ms", listOf())
+
+  private val pauseCounter = metrics.counter(
+    "jvm_pause_detector_count",
+    "Counter tracking the number of pause detection iterations",
+    listOf()
+  )
 
   /** Tracks peak pause time. */
   private val pausePeak: PeakGauge =
@@ -97,6 +105,15 @@ internal class PauseDetector @Inject constructor(
     val stopTime: Long = ticker.read()
     val deltaTimeNsec: Long = (stopTime - startTime)
 
+    // We expect a monotonic ticker that should measure at least the resolution time between
+    // invocations. Guard against a non-monotonic or otherwise "fast" ticker from polluting results.
+    if (deltaTimeNsec < MILLISECONDS.toNanos(config.resolutionMillis)) {
+      val decreaseMs = config.resolutionMillis - NANOSECONDS.toMillis(deltaTimeNsec)
+      logger.info("Observed a negative pause time of ${decreaseMs}ms. Non-monotonic ticker?")
+    } else if (deltaTimeNsec < shortestObservedDeltaTimeNsec) {
+      shortestObservedDeltaTimeNsec = deltaTimeNsec
+    }
+
     val stopSecond = NANOSECONDS.toSeconds(stopTime)
     if (stopSecond > lastSecond) {
       val currentSum = pauseSum.get()
@@ -108,21 +125,18 @@ internal class PauseDetector @Inject constructor(
           ))
         )
       val unaccounted = 1000 - observedPause - invocationsSinceLastSecond - shortestBounding
-      logger.info("invocations=$invocationsSinceLastSecond, pause=$observedPause ms (${(observedPause / 10)}%), shortestNsecs=$shortestObservedDeltaTimeNsec, shortestBounding=$shortestBounding ms, unaccounted=$unaccounted ms")
+      logger.info(
+        "pauseDetectionsLastSecond" to invocationsSinceLastSecond,
+        "pauseMillis" to observedPause,
+        "pauseSum" to currentSum,
+      ) { "pause=$observedPause ms (${(observedPause / 10)}%), pauseSum=$currentSum," +
+          " invocations=$invocationsSinceLastSecond, shortestNsecs=$shortestObservedDeltaTimeNsec," +
+          " shortestBounding=$shortestBounding ms, unaccounted=$unaccounted ms" }
       invocationsSinceLastSecond = 0
       lastSecond = stopSecond
       lastPauseSum = currentSum
     }
     invocationsSinceLastSecond++
-
-    // We expect a monotonic ticker that should measure at least the resolution time between
-    // invocations. Guard against a non-monotonic or otherwise "fast" ticker from polluting results.
-    if (deltaTimeNsec < MILLISECONDS.toNanos(config.resolutionMillis)) {
-      val decreaseMs = config.resolutionMillis - NANOSECONDS.toMillis(deltaTimeNsec)
-      logger.info("Observed a negative pause time of ${decreaseMs}ms. Non-monotonic ticker?")
-    } else if (deltaTimeNsec < shortestObservedDeltaTimeNsec) {
-      shortestObservedDeltaTimeNsec = deltaTimeNsec
-    }
 
     val pauseTimeNsec = deltaTimeNsec - shortestObservedDeltaTimeNsec
     val pauseMillis = NANOSECONDS.toMillis(pauseTimeNsec)
@@ -132,6 +146,9 @@ internal class PauseDetector @Inject constructor(
       pauseSum.inc(pauseMillisDouble)
       pausePeak.record(pauseMillisDouble)
     }
+
+    // Always increment the counter regardless of the detected pause time.
+    pauseCounter.inc()
 
     val level = getLoggingLevel(pauseMillis)
     if (level != null) {
