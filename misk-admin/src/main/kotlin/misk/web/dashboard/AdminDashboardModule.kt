@@ -2,6 +2,7 @@ package misk.web.dashboard
 
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
+import misk.web.metadata.config.ConfigMetadataAction
 import javax.inject.Qualifier
 
 /**
@@ -16,11 +17,14 @@ import javax.inject.Qualifier
  *   Dashboard Annotation [AdminDashboard]. Tabs are then included in the admin dashboard menu
  *   grouping according to the [DashboardTab].category field and sorting by [DashboardTab].name
  */
-class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule() {
+class AdminDashboardModule(
+  private val isDevelopment: Boolean,
+  private val configTabMode: ConfigMetadataAction.ConfigTabMode = ConfigMetadataAction.ConfigTabMode.SAFE,
+) : KAbstractModule() {
 
   override fun configure() {
     install(BaseDashboardModule(isDevelopment))
-    install(ConfigDashboardTabModule(isDevelopment))
+    install(ConfigDashboardTabModule(isDevelopment, configTabMode))
     install(DatabaseDashboardTabModule(isDevelopment))
     install(WebActionsDashboardTabModule(isDevelopment))
 
