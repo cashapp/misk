@@ -17,7 +17,7 @@ kotlinLogging = "3.0.5"
 kotlinRetry = "1.0.9"
 kotlinx = "1.6.4"
 # @pin
-launchDarkly = "5.10.6"
+launchDarkly = "5.10.7"
 logback = "1.4.5"
 # @pin
 mavenPublishGradlePlugin = "0.23.2"
