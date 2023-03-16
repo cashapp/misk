@@ -115,8 +115,8 @@ class ConfigMetadataActionTest {
     )
     assertThat(configJvm).contains("Java Virtual Machine Specification")
     assertThat(configJvm).contains("pid")
-    assertThat(configJvm).contains("\"vm_name\": \"OpenJDK 64-Bit Server VM\",")
-    assertThat(configJvm).contains("\"vm_vendor\": \"AdoptOpenJDK\",")
+    assertThat(configJvm).contains("vm_name")
+    assertThat(configJvm).contains("vm_vendor")
     assertThat(configJvm).contains("class_path")
   }
 

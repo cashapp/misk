@@ -49,11 +49,12 @@ Releasing
 
 For a non-semvar snapshot release, use the following simpler steps.
 
-1. Trigger the [`Publish a release` action](https://github.com/cashapp/misk/actions/workflows/Release.yml) manually. Wait until it completes, then visit [Sonatype Nexus][sonatype_nexus] to promote (close then release in `Staging Repositories`) the artifact. Or drop it if there is a problem!
+1. Trigger the [`Publish a release` action](https://github.com/cashapp/misk/actions/workflows/Release.yml) manually. 
+2. Wait until it completes, then visit [Sonatype Nexus][sonatype_nexus] to promote (close then release in `Staging Repositories`) the artifact. Or drop it if there is a problem!
 
     ![Sonatype Release](/img/sonatype-release.gif)
     
-2. Update your usages to the new snapshot version, it will have a format like `0.25.0-20221109.1931-857c333`. Get your snapshot version in the `Set gradle publish version` section of the [`Publish a release` action](https://github.com/cashapp/misk/actions/workflows/Release.yml) logs.
+3. Update your usages to the new snapshot version, it will have a format like `0.25.0-20221109.1931-857c333`. Get your snapshot version in the `Set gradle publish version` section of the [`Publish a release` action](https://github.com/cashapp/misk/actions/workflows/Release.yml) logs.
 
 ## Troubleshooting
 
