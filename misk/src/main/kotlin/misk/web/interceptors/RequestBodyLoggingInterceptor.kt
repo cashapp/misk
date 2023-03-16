@@ -85,7 +85,7 @@ internal data class HeadersCapture(
   )
 }
 
-internal class RequestResponseCapture @Inject constructor() {
+class RequestResponseCapture @Inject constructor() {
   companion object {
     private val capture = ThreadLocal<RequestResponseBody>()
   }
@@ -101,4 +101,4 @@ internal class RequestResponseCapture @Inject constructor() {
   }
 }
 
-internal data class RequestResponseBody(val request: Any?, val response: Any?)
+data class RequestResponseBody(val request: Any?, val response: Any?)

@@ -1736,12 +1736,37 @@ public final class misk/web/interceptors/RequestBodyLoggingInterceptor$Factory :
 }
 
 public final class misk/web/interceptors/RequestLoggingInterceptor : misk/web/NetworkInterceptor {
+	public fun <init> (Lmisk/Action;Lmisk/scope/ActionScoped;Lcom/google/common/base/Ticker;Lmisk/random/ThreadLocalRandom;Lmisk/web/interceptors/LogRateLimiter;JJDDLmisk/web/interceptors/RequestResponseCapture;)V
 	public fun intercept (Lmisk/web/NetworkChain;)V
 	public final fun maybeLog (Lmisk/web/HttpCall;Lcom/google/common/base/Stopwatch;Ljava/lang/Throwable;)V
 }
 
 public final class misk/web/interceptors/RequestLoggingInterceptor$Factory : misk/web/NetworkInterceptor$Factory {
 	public fun create (Lmisk/Action;)Lmisk/web/NetworkInterceptor;
+}
+
+public final class misk/web/interceptors/RequestResponseBody {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lmisk/web/interceptors/RequestResponseBody;
+	public static synthetic fun copy$default (Lmisk/web/interceptors/RequestResponseBody;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lmisk/web/interceptors/RequestResponseBody;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRequest ()Ljava/lang/Object;
+	public final fun getResponse ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/interceptors/RequestResponseCapture {
+	public static final field Companion Lmisk/web/interceptors/RequestResponseCapture$Companion;
+	public fun <init> ()V
+	public final fun clear ()V
+	public final fun get ()Lmisk/web/interceptors/RequestResponseBody;
+	public final fun set (Lmisk/web/interceptors/RequestResponseBody;)V
+}
+
+public final class misk/web/interceptors/RequestResponseCapture$Companion {
 }
 
 public final class misk/web/interceptors/ResponseBodyMarshallerFactory {

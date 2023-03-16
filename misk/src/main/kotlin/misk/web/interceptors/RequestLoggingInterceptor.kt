@@ -24,7 +24,7 @@ private val logger = getLogger<RequestLoggingInterceptor>()
  * Logs request and response information for an action.
  * Timing information doesn't count time writing the response to the remote client.
  */
-class RequestLoggingInterceptor internal constructor(
+class RequestLoggingInterceptor(
   private val action: Action,
   private val caller: ActionScoped<MiskCaller?>,
   private val ticker: Ticker,
