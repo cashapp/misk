@@ -1,5 +1,6 @@
 package misk.metrics.backends.prometheus.v2
 
+import ComputedGauge
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
@@ -42,6 +43,15 @@ internal class PrometheusMetrics @Inject internal constructor(
     .builder(name, help)
     .labelNames(*labelNames.toTypedArray())
     .register(registry)
+
+  override fun computedGauge(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    valueSupplier: ComputedGauge.ValueSupplier
+  ): ComputedGauge =
+    ComputedGauge.builder(name, help, valueSupplier).labelNames(*labelNames.toTypedArray())
+      .register(registry)
 
   override fun histogram(
     name: String,

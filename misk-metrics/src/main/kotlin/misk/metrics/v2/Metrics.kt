@@ -1,5 +1,6 @@
 package misk.metrics.v2
 
+import ComputedGauge
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
@@ -64,6 +65,13 @@ interface Metrics {
     help: String = "",
     labelNames: List<String> = listOf()
   ): PeakGauge
+
+  fun computedGauge(
+    name: String,
+    help: String = "",
+    labelNames: List<String> = listOf(),
+    valueSupplier: ComputedGauge.ValueSupplier,
+  ) : ComputedGauge
 
   /**
    * histogram creates a new `Histogram` prometheus type with the supplied parameters.

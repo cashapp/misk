@@ -13,7 +13,7 @@ import javax.annotation.concurrent.ThreadSafe
  * typically covers multiple metric collections.
  */
 @ThreadSafe
-class PeakGauge  : SimpleCollector<PeakGauge.Child> {
+class PeakGauge : SimpleCollector<PeakGauge.Child> {
   constructor(builder: Builder) : super(builder)
 
   class Builder : SimpleCollector.Builder<Builder, PeakGauge>() {
