@@ -7,6 +7,7 @@ import misk.web.dashboard.DashboardTheme
 import misk.web.dashboard.EnvironmentToColorLookup
 import misk.web.dashboard.MiskWebColor
 import misk.web.dashboard.MiskWebTheme
+import misk.web.metadata.config.ConfigMetadataAction
 
 class DashboardModule : KAbstractModule() {
   override fun configure() {
@@ -31,6 +32,11 @@ class DashboardModule : KAbstractModule() {
         )
       )
     )
-    install(AdminDashboardModule(isDevelopment = true))
+    install(
+      AdminDashboardModule(
+        isDevelopment = true,
+        configTabMode = ConfigMetadataAction.ConfigTabMode.SHOW_REDACTED_EFFECTIVE_CONFIG
+      )
+    )
   }
 }
