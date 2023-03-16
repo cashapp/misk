@@ -1735,6 +1735,43 @@ public final class misk/web/interceptors/RequestBodyLoggingInterceptor$Factory :
 	public fun create (Lmisk/Action;)Lmisk/ApplicationInterceptor;
 }
 
+public final class misk/web/interceptors/RequestLoggingConfig {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lmisk/web/interceptors/RequestLoggingConfig;
+	public static synthetic fun copy$default (Lmisk/web/interceptors/RequestLoggingConfig;Ljava/util/Map;ILjava/lang/Object;)Lmisk/web/interceptors/RequestLoggingConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActions ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/interceptors/RequestLoggingConfig$Item {
+	public static final field Companion Lmisk/web/interceptors/RequestLoggingConfig$Item$Companion;
+	public fun <init> ()V
+	public fun <init> (JJDDLjava/util/List;)V
+	public synthetic fun <init> (JJDDLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (JJDDLjava/util/List;)Lmisk/web/interceptors/RequestLoggingConfig$Item;
+	public static synthetic fun copy$default (Lmisk/web/interceptors/RequestLoggingConfig$Item;JJDDLjava/util/List;ILjava/lang/Object;)Lmisk/web/interceptors/RequestLoggingConfig$Item;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBodySampling ()D
+	public final fun getErrorBodySampling ()D
+	public final fun getErrorRatePerSecond ()J
+	public final fun getExcludedEnvironments ()Ljava/util/List;
+	public final fun getRatePerSecond ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/interceptors/RequestLoggingConfig$Item$Companion {
+	public final fun fromAnnotation (Lmisk/web/interceptors/LogRequestResponse;)Lmisk/web/interceptors/RequestLoggingConfig$Item;
+}
+
 public final class misk/web/interceptors/RequestLoggingInterceptor : misk/web/NetworkInterceptor {
 	public fun intercept (Lmisk/web/NetworkChain;)V
 	public final fun maybeLog (Lmisk/web/HttpCall;Lcom/google/common/base/Stopwatch;Ljava/lang/Throwable;)V
