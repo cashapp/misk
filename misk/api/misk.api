@@ -1714,6 +1714,7 @@ public final class misk/web/interceptors/ActionLoggingConfig {
 
 public final class misk/web/interceptors/ActionLoggingConfig$Companion {
 	public final fun fromAnnotation (Lmisk/web/interceptors/LogRequestResponse;)Lmisk/web/interceptors/ActionLoggingConfig;
+	public final fun fromConfigMapOrAnnotation (Lmisk/Action;Ljava/util/Set;Lmisk/web/interceptors/LogRequestResponse;)Lmisk/web/interceptors/ActionLoggingConfig;
 }
 
 public abstract interface annotation class misk/web/interceptors/BeforeContentEncoding : java/lang/annotation/Annotation {

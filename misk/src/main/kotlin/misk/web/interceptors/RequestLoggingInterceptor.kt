@@ -49,15 +49,7 @@ class RequestLoggingInterceptor internal constructor(
     override fun create(action: Action): NetworkInterceptor? {
       // Only bother with endpoints that have the annotation
       val annotation = action.function.findAnnotation<LogRequestResponse>() ?: return null
-      
-      // Look for any configs that may have been provided from somewhere other than the annotation itself
-      val endpointConfigs = configs.mapNotNull { it.actions[action.name] }.distinct()
-      if (endpointConfigs.size > 1) {
-        throw IllegalArgumentException("Found multiple conflicting configs for action [${action.name}]: $endpointConfigs")
-      }
-      
-      // Fall back to using the annotation's config if no other configs were found
-      val config = endpointConfigs.singleOrNull() ?: ActionLoggingConfig.fromAnnotation(annotation)
+      val config = ActionLoggingConfig.fromConfigMapOrAnnotation(action, configs, annotation)
 
       if (config.excludedEnvironments.contains(deployment.name)) {
         return null
@@ -181,5 +173,20 @@ data class ActionLoggingConfig(
       errorBodySampling = logRequestResponse.errorBodySampling,
       excludedEnvironments = logRequestResponse.excludedEnvironments.toList(),
     )
+
+    fun fromConfigMapOrAnnotation(
+      action: Action,
+      configs: Set<RequestLoggingConfig>,
+      annotation: LogRequestResponse
+    ): ActionLoggingConfig {
+      // Look for any configs that may have been provided from somewhere other than the annotation itself
+      val endpointConfigs = configs.mapNotNull { it.actions[action.name] }.distinct()
+      if (endpointConfigs.size > 1) {
+        throw IllegalArgumentException("Found multiple conflicting configs for action [${action.name}]: $endpointConfigs")
+      }
+
+      // Fall back to using the annotation's config if no other configs were found
+      return endpointConfigs.singleOrNull() ?: fromAnnotation(annotation)
+    }
   }
 }
