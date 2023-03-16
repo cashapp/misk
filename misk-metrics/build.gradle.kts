@@ -5,12 +5,10 @@ plugins {
 
 dependencies {
   api(Dependencies.prometheusClient)
+  implementation(Dependencies.prometheusHotspot)
+  implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.prometheusHotspot)
-  api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)

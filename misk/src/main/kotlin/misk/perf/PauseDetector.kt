@@ -10,7 +10,6 @@ import org.slf4j.event.Level
 import wisp.logging.getLogger
 import wisp.logging.info
 import java.time.Duration
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.NANOSECONDS
 import javax.inject.Inject
@@ -61,6 +60,12 @@ internal class PauseDetector @Inject constructor(
   private val pausePeak: PeakGauge =
     metrics.peakGauge("jvm_pause_time_peak_ms", "Peak gauge of pause time", listOf())
 
+  private val pauseDetectionTime = metrics.gauge(
+    name = "jvm_pause_detection_time",
+    "Time in milliseconds of the last pause detection",
+    listOf()
+  )
+
   // No synchronization is necessary for these variables: they are only ever accessed by the
   // detector thread itself OR by a test harness thread.
   //
@@ -69,7 +74,7 @@ internal class PauseDetector @Inject constructor(
   /** Used to prevent generating early noise (for example in the first few seconds of startup) */
   private var shortestObservedDeltaTimeNsec = Long.MAX_VALUE
   /** Tracks the start time of the last invocation to [sleep] */
-  private var startTime: Long = 0
+  private var startTimeNsec: Long = 0
   private var lastSecond: Long = 0
   private var invocationsSinceLastSecond: Int = 0
   private var lastPauseSum: Double = 0.0
@@ -89,7 +94,7 @@ internal class PauseDetector @Inject constructor(
    * NB: [sleep] and [check] must always be invoked from the same thread.
    */
   internal fun sleep() {
-    startTime = ticker.read()
+    startTimeNsec = ticker.read()
     if (config.resolutionMillis != 0L) {
       sleeper.sleep(Duration.ofMillis(config.resolutionMillis))
     }
@@ -102,8 +107,8 @@ internal class PauseDetector @Inject constructor(
    * NB: [sleep] and [check] must always be invoked from the same thread.
    */
   internal fun check(): PauseResults {
-    val stopTime: Long = ticker.read()
-    val deltaTimeNsec: Long = (stopTime - startTime)
+    val stopTimeNsec: Long = ticker.read()
+    val deltaTimeNsec: Long = (stopTimeNsec - startTimeNsec)
 
     // We expect a monotonic ticker that should measure at least the resolution time between
     // invocations. Guard against a non-monotonic or otherwise "fast" ticker from polluting results.
@@ -114,13 +119,13 @@ internal class PauseDetector @Inject constructor(
       shortestObservedDeltaTimeNsec = deltaTimeNsec
     }
 
-    val stopSecond = NANOSECONDS.toSeconds(stopTime)
+    val stopSecond = NANOSECONDS.toSeconds(stopTimeNsec)
     if (stopSecond > lastSecond) {
       val currentSum = pauseSum.get()
       val observedPause = currentSum - lastPauseSum
       val shortestBounding =
-        TimeUnit.NANOSECONDS.toMillis(
-          invocationsSinceLastSecond * (shortestObservedDeltaTimeNsec - TimeUnit.MILLISECONDS.toNanos(
+        NANOSECONDS.toMillis(
+          invocationsSinceLastSecond * (shortestObservedDeltaTimeNsec - MILLISECONDS.toNanos(
             1
           ))
         )
@@ -147,8 +152,9 @@ internal class PauseDetector @Inject constructor(
       pausePeak.record(pauseMillisDouble)
     }
 
-    // Always increment the counter regardless of the detected pause time.
+    // Always increment the counter and detection time regardless of the detected pause time.
     pauseCounter.inc()
+    pauseDetectionTime.set(NANOSECONDS.toMillis(stopTimeNsec).toDouble())
 
     val level = getLoggingLevel(pauseMillis)
     if (level != null) {
