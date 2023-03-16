@@ -57,8 +57,7 @@ class RequestLoggingInterceptor internal constructor(
       }
       
       // Fall back to using the annotation's config if no other configs were found
-      val config = endpointConfigs.singleOrNull()
-        ?: RequestLoggingConfig.Item.fromAnnotation(annotation)
+      val config = endpointConfigs.singleOrNull() ?: ActionLoggingConfig.fromAnnotation(annotation)
 
       if (config.excludedEnvironments.contains(deployment.name)) {
         return null
@@ -161,26 +160,26 @@ class RequestLoggingInterceptor internal constructor(
 /**
  * A set of per-action logging config overrides.
  */
-data class RequestLoggingConfig(val actions: Map<String, Item>) {
+data class RequestLoggingConfig(val actions: Map<String, ActionLoggingConfig>) {
+}
 
-  /**
-   * This class should have all the same config options as [LogRequestResponse]. See that class for details.
-   */
-  data class Item(
-    val ratePerSecond: Long = 10,
-    val errorRatePerSecond: Long = 0,
-    val bodySampling: Double = 0.0,
-    val errorBodySampling: Double = 0.0,
-    val excludedEnvironments: List<String> = listOf(),
-  ) {
-    companion object {
-      fun fromAnnotation(logRequestResponse: LogRequestResponse): Item = Item(
-        ratePerSecond = logRequestResponse.ratePerSecond,
-        errorRatePerSecond = logRequestResponse.errorRatePerSecond,
-        bodySampling = logRequestResponse.bodySampling,
-        errorBodySampling = logRequestResponse.errorBodySampling,
-        excludedEnvironments = logRequestResponse.excludedEnvironments.toList(),
-      )
-    }
+/**
+ * This class should have all the same config options as [LogRequestResponse]. See that class for details.
+ */
+data class ActionLoggingConfig(
+  val ratePerSecond: Long = 10,
+  val errorRatePerSecond: Long = 0,
+  val bodySampling: Double = 0.0,
+  val errorBodySampling: Double = 0.0,
+  val excludedEnvironments: List<String> = listOf(),
+) {
+  companion object {
+    fun fromAnnotation(logRequestResponse: LogRequestResponse): ActionLoggingConfig = ActionLoggingConfig(
+      ratePerSecond = logRequestResponse.ratePerSecond,
+      errorRatePerSecond = logRequestResponse.errorRatePerSecond,
+      bodySampling = logRequestResponse.bodySampling,
+      errorBodySampling = logRequestResponse.errorBodySampling,
+      excludedEnvironments = logRequestResponse.excludedEnvironments.toList(),
+    )
   }
 }
