@@ -56,7 +56,13 @@ class AdminDashboardTestingModule : KAbstractModule() {
         )
       )
     )
-    install(AdminDashboardModule(true))
+    // Provide maximum information in development as real secrets won't be present
+    install(
+      AdminDashboardModule(
+        isDevelopment = true,
+        configTabMode = ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS
+      )
+    )
   }
 }
 
