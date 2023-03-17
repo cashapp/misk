@@ -6,7 +6,6 @@ import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.metrics.backends.prometheus.PrometheusMetricsServiceModule
-import misk.tokens.TokenGeneratorModule
 import misk.web.MiskWebModule
 import wisp.deployment.Deployment
 
@@ -21,7 +20,6 @@ fun main(args: Array<String>) {
     ExemplarWebActionsModule(),
     MiskRealServiceModule(),
     MiskWebModule(config.web),
-    PrometheusMetricsServiceModule(config.prometheus),
-    TokenGeneratorModule(),
+    PrometheusMetricsServiceModule(config.prometheus)
   ).run(args)
 }
