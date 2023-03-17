@@ -66,6 +66,11 @@ internal class PauseDetector @Inject constructor(
     listOf()
   )
 
+  private val pauseDetectionSelfNsecs = metrics.counter(
+    "jvm_pause_detector_self_nsecs",
+    "Sum of recorded self-time of the pause detector (nanoseconds)"
+  )
+
   // No synchronization is necessary for these variables: they are only ever accessed by the
   // detector thread itself OR by a test harness thread.
   //
@@ -77,6 +82,7 @@ internal class PauseDetector @Inject constructor(
   private var startTimeNsec: Long = 0
   private var lastSecond: Long = 0
   private var invocationsSinceLastSecond: Int = 0
+  private var lastSelfTimeNsecs: Double = 0.0
   private var lastPauseSum: Double = 0.0
 
   override fun run() {
@@ -129,17 +135,24 @@ internal class PauseDetector @Inject constructor(
             1
           ))
         )
-      val unaccounted = 1000 - observedPause - invocationsSinceLastSecond - shortestBounding
+      val currentSelfTimeNsecs = pauseDetectionSelfNsecs.get()
+      val observedSelfTimeMillis =
+        NANOSECONDS.toMillis((currentSelfTimeNsecs - lastSelfTimeNsecs).toLong())
+      val unaccounted =
+        1000 - observedPause - observedSelfTimeMillis - invocationsSinceLastSecond - shortestBounding
+
       logger.info(
         "pauseDetectionsLastSecond" to invocationsSinceLastSecond,
         "pauseMillis" to observedPause,
-        "pauseSum" to currentSum,
+        "pauseSelf" to observedSelfTimeMillis,
       ) { "pause=$observedPause ms (${(observedPause / 10)}%), pauseSum=$currentSum," +
-          " invocations=$invocationsSinceLastSecond, shortestNsecs=$shortestObservedDeltaTimeNsec," +
+          " invocations=$invocationsSinceLastSecond, pauseSelfTime=$currentSelfTimeNsecs," +
+          " shortestNsecs=$shortestObservedDeltaTimeNsec," +
           " shortestBounding=$shortestBounding ms, unaccounted=$unaccounted ms" }
       invocationsSinceLastSecond = 0
       lastSecond = stopSecond
       lastPauseSum = currentSum
+      lastSelfTimeNsecs = currentSelfTimeNsecs
     }
     invocationsSinceLastSecond++
 
@@ -151,10 +164,6 @@ internal class PauseDetector @Inject constructor(
       pauseSum.inc(pauseMillisDouble)
       pausePeak.record(pauseMillisDouble)
     }
-
-    // Always increment the counter and detection time regardless of the detected pause time.
-    pauseCounter.inc()
-    pauseDetectionTime.set(NANOSECONDS.toMillis(stopTimeNsec).toDouble())
 
     val level = getLoggingLevel(pauseMillis)
     if (level != null) {
@@ -168,10 +177,18 @@ internal class PauseDetector @Inject constructor(
       }
     }
 
-    return PauseResults(
+    val pauseResults = PauseResults(
       pauseTimeMillis = pauseMillis,
       shortestObservedDeltaNsec = shortestObservedDeltaTimeNsec
     )
+
+    // Always increment the counter and detection time regardless of the detected pause time.
+    pauseCounter.inc()
+    pauseDetectionTime.set(NANOSECONDS.toMillis(stopTimeNsec).toDouble())
+    val selfTime = (ticker.read() - stopTimeNsec).coerceAtLeast(0)
+    pauseDetectionSelfNsecs.inc(selfTime.toDouble())
+
+    return pauseResults
   }
 
   private fun getLoggingLevel(pauseMillis: Long) : Level? {
