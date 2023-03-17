@@ -344,11 +344,21 @@ public final class misk/tokens/FakeTokenGenerator : misk/tokens/TokenGenerator {
 	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
 }
 
+public final class misk/tokens/FakeTokenGenerator2 : misk/tokens/TokenGenerator2 {
+	public fun <init> ()V
+	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
+}
+
 public final class misk/tokens/FakeTokenGeneratorModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
 
 public final class misk/tokens/RealTokenGenerator : misk/tokens/TokenGenerator {
+	public fun <init> ()V
+	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
+}
+
+public final class misk/tokens/RealTokenGenerator2 : misk/tokens/TokenGenerator2 {
 	public fun <init> ()V
 	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
 }
@@ -364,6 +374,19 @@ public final class misk/tokens/TokenGenerator$Companion {
 
 public final class misk/tokens/TokenGenerator$DefaultImpls {
 	public static synthetic fun generate$default (Lmisk/tokens/TokenGenerator;Ljava/lang/String;IILjava/lang/Object;)Ljava/lang/String;
+}
+
+public abstract interface class misk/tokens/TokenGenerator2 {
+	public static final field Companion Lmisk/tokens/TokenGenerator2$Companion;
+	public abstract fun generate (Ljava/lang/String;I)Ljava/lang/String;
+}
+
+public final class misk/tokens/TokenGenerator2$Companion {
+	public final fun canonicalize (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/tokens/TokenGenerator2$DefaultImpls {
+	public static synthetic fun generate$default (Lmisk/tokens/TokenGenerator2;Ljava/lang/String;IILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class misk/tokens/TokenGeneratorModule : misk/inject/KAbstractModule {

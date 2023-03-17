@@ -11,3 +11,12 @@ class FakeTokenGenerator @Inject constructor() : TokenGenerator {
     return tokenGenerator.generate(label, length)
   }
 }
+
+@Singleton
+class FakeTokenGenerator2 @Inject constructor() : TokenGenerator2 {
+  private val tokenGenerator = wisp.token.FakeTokenGenerator()
+
+  override fun generate(label: String?, length: Int): String {
+    return tokenGenerator.generate(label, length)
+  }
+}

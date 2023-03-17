@@ -5,7 +5,7 @@ import misk.inject.KAbstractModule
 class TokenGeneratorModule : KAbstractModule() {
   override fun configure() {
     bind<TokenGenerator>().to<RealTokenGenerator>()
-    // TODO: Remove. Only here to allow breaking cycles.
+    bind<TokenGenerator2>().to<RealTokenGenerator2>()
     bind<wisp.token.TokenGenerator>().toInstance(wisp.token.RealTokenGenerator())
   }
 }
