@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
 import com.google.common.base.Ticker
 import misk.ServiceManagerModule
+import misk.concurrent.FakeSleeper
 import misk.concurrent.FakeTicker
 import misk.concurrent.Sleeper
 import misk.inject.KAbstractModule
@@ -11,6 +12,7 @@ import misk.logging.LogCollectorModule
 import misk.metrics.v2.FakeMetricsModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.time.FakeClockModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,6 +27,7 @@ class PauseDetectorTest {
   @Inject lateinit var fakeTicker: FakeTicker
   @Inject internal lateinit var detector: PauseDetector
   @Inject lateinit var logCollector: LogCollector
+  @Inject lateinit var fakeSleeper: FakeSleeper
 
   @BeforeEach fun setup() {
     // We'll drive the detector from the test thread rather than running a detector thread.
@@ -118,6 +121,7 @@ class PauseDetectorTest {
       // And its dependencies with test fakes
       install(ServiceManagerModule())
       install(FakeMetricsModule())
+      install(FakeClockModule())
       bind<Ticker>().to<FakeTicker>()
       bind<Sleeper>().to<FakeTicker>()
 

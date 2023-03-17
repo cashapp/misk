@@ -7,6 +7,9 @@ data class PauseDetectorConfig(
   /** The delay between detector runs. If 0, the detector runs in a spin loop. */
   val resolutionMillis: Long = 1,
 
+  /** The maximum number of invocations to [Thread.sleep] to await the configured resolution */
+  val maxSleepIterations: Int = 5,
+
   /** The minimum number of millis paused before logging at info. -1 for never. */
   val logInfoMillis: Long = 1000,
 

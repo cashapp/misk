@@ -66,6 +66,10 @@ internal class PauseDetector @Inject constructor(
     listOf()
   )
 
+  private val pauseDetectionSleeps = metrics.histogram("jvm_pause_detector_sleeps",
+    "Histogram showing the observed sleep time and frequency of the detector", listOf()
+  )
+
   private val pauseDetectionSelfNsecs = metrics.counter(
     "jvm_pause_detector_self_nsecs",
     "Sum of recorded self-time of the pause detector (nanoseconds)"
@@ -102,7 +106,25 @@ internal class PauseDetector @Inject constructor(
   internal fun sleep() {
     startTimeNsec = ticker.read()
     if (config.resolutionMillis != 0L) {
-      sleeper.sleep(Duration.ofMillis(config.resolutionMillis))
+      val sleepUntilNsec = startTimeNsec + MILLISECONDS.toNanos(config.resolutionMillis)
+      var i = 0
+      var nowNsec = startTimeNsec
+      for (i in 1..config.maxSleepIterations) {
+        val sleepDuration = sleepUntilNsec - nowNsec
+        sleeper.sleep(Duration.ofNanos(sleepDuration))
+        val afterSleepNsec = ticker.read()
+        pauseDetectionSleeps.observe((afterSleepNsec - nowNsec).toDouble())
+        nowNsec = afterSleepNsec
+
+        if (nowNsec >= sleepUntilNsec) {
+          break
+        }
+      }
+
+      if (i > 1 && i == config.maxSleepIterations) {
+        val sleepDelta = sleepUntilNsec - ticker.read()
+        logger.info("Slept $i iterations with a delta of $sleepDelta ns")
+      }
     }
   }
 
@@ -156,7 +178,7 @@ internal class PauseDetector @Inject constructor(
     }
     invocationsSinceLastSecond++
 
-    val pauseTimeNsec = deltaTimeNsec - shortestObservedDeltaTimeNsec
+    val pauseTimeNsec = (deltaTimeNsec - shortestObservedDeltaTimeNsec).coerceAtLeast(0)
     val pauseMillis = NANOSECONDS.toMillis(pauseTimeNsec)
     if (pauseMillis >= config.metricsUpdateFloor) {
       val pauseMillisDouble = pauseMillis.toDouble()

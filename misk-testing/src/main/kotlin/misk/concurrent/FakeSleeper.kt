@@ -19,6 +19,10 @@ class FakeSleeper @Inject constructor(private val clock: Clock) : Sleeper {
   private val wakeCondition = lock.newCondition()
   private val waitForThreads = lock.newCondition()
   private var numSleepingThreads = 0
+  var sleepMulitplier = 1.0 // Multiplier to use against the requested sleep
+    set(value) {
+      lock.withLock { field = value }
+    }
 
   /**
    * Check the current time and triggers any sleeping threads that are due to be awoken.
@@ -42,7 +46,7 @@ class FakeSleeper @Inject constructor(private val clock: Clock) : Sleeper {
   }
 
   override fun sleep(duration: Duration) {
-    val sleepUntil = clock.millis() + duration.toMillis()
+    val sleepUntil = clock.millis() + (duration.toMillis() * sleepMulitplier)
     lock.withLock {
       count++
       lastDuration = duration
