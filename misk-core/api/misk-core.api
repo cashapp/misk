@@ -46,9 +46,6 @@ public final class misk/concurrent/Sleeper$Companion {
 	public final fun getDEFAULT ()Lmisk/concurrent/Sleeper;
 }
 
-public abstract interface class misk/config/Config : wisp/config/Config {
-}
-
 public abstract interface class misk/healthchecks/HealthCheck {
 	public abstract fun status ()Lmisk/healthchecks/HealthStatus;
 }
@@ -175,43 +172,6 @@ public class misk/random/Random : java/util/Random {
 public class misk/random/ThreadLocalRandom {
 	public fun <init> ()V
 	public fun current ()Ljava/util/Random;
-}
-
-public final class misk/resources/FakeFilesModule : misk/inject/KAbstractModule {
-	public fun <init> (Ljava/util/Map;)V
-}
-
-public abstract interface annotation class misk/resources/ForFakeFiles : java/lang/annotation/Annotation {
-}
-
-public final class misk/resources/ResourceLoader {
-	public static final field Companion Lmisk/resources/ResourceLoader$Companion;
-	public fun <init> (Ljava/util/Map;)V
-	public final fun copyTo (Ljava/lang/String;Ljava/nio/file/Path;)V
-	public final fun exists (Ljava/lang/String;)Z
-	public final fun list (Ljava/lang/String;)Ljava/util/List;
-	public final fun open (Ljava/lang/String;)Lokio/BufferedSource;
-	public final fun put (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun put (Ljava/lang/String;Lokio/ByteString;)V
-	public final fun requireUtf8 (Ljava/lang/String;)Ljava/lang/String;
-	public final fun utf8 (Ljava/lang/String;)Ljava/lang/String;
-	public final fun walk (Ljava/lang/String;)Ljava/util/List;
-}
-
-public abstract class misk/resources/ResourceLoader$Backend : wisp/resources/ResourceLoader$Backend {
-	public fun <init> ()V
-}
-
-public final class misk/resources/ResourceLoader$Companion {
-	public final fun getSYSTEM ()Lmisk/resources/ResourceLoader;
-}
-
-public final class misk/resources/ResourceLoaderModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
-public final class misk/resources/TestingResourceLoaderModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
 }
 
 public final class misk/retries/RetriesKt {

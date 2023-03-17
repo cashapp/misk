@@ -1,7 +1,6 @@
 package misk.web.metadata.config
 
 import misk.config.MiskConfig
-import misk.config.Redact
 import misk.config.Secret
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule

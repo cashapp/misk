@@ -20,6 +20,7 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
     return (
       <div>
         <br />
+{/*          Install instructions, see a secret? Add redact annotation or change your mode*/}
         <H3 css={css({ fontFamily: "Fira Code, Menlo" })}>{resource.name}</H3>
         <CodePreContainer>{resource.file}</CodePreContainer>
       </div>
