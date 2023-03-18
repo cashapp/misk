@@ -116,17 +116,17 @@ abstract class AbstractRedisTest {
     assertThat(redis.hget(key1, field2)).isNull()
     assertThat(redis.hget(key2, field1)).isNull()
     assertThat(redis.hget(key2, field2)).isNull()
-    assertThat(redis.hgetAll(key1)).isNull()
-    assertThat(redis.hgetAll(key2)).isNull()
-    assertThat(redis.hmget(key1, field1)).isEmpty()
-    assertThat(redis.hmget(key2, field1)).isEmpty()
+    assertThat(redis.hgetAll(key1)).isEmpty()
+    assertThat(redis.hgetAll(key2)).isEmpty()
+    assertThat(redis.hmget(key1, field1)).containsExactly(null)
+    assertThat(redis.hmget(key2, field1, field2)).containsExactly(null, null)
 
     // use both single field set and batch field set
     redis.hset(key1, field1, valueKey1Field1)
     redis.hset(key1, field2, valueKey1Field2)
     redis.hset(
-      key2,
-      mapOf(
+      key = key2,
+      hash = mapOf(
         field1 to valueKey2Field1,
         field2 to valueKey2Field2,
       )
@@ -150,7 +150,7 @@ abstract class AbstractRedisTest {
 
     redis.hdel(key2, field2)
     assertThat(redis.hmget(key2, field1, field2))
-      .isEqualTo(listOf(valueKey2Field1))
+      .isEqualTo(listOf(valueKey2Field1, null))
   }
 
   @Test
