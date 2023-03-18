@@ -118,7 +118,12 @@ class FakeRedis : Redis {
 
   @Synchronized
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
-    return hgetAll(key)?.filter { fields.contains(it.key) }?.values?.toList() ?: emptyList()
+    val hash: Map<String, ByteString> = hKeyValueStore[key]?.data ?: emptyMap()
+    return buildList {
+      for (field in fields) {
+        add(hash[field])
+      }
+    }
   }
 
   @Synchronized
