@@ -380,14 +380,13 @@ class FakeRedisTest {
   @Test fun hIncrBySupportsExpiry() {
     // Setup
     redis.hset("foo", "bar", "1".encodeUtf8())
-    redis.expire("foo", 1)
 
     // Assert that the expiry hasn't taken affect yet
     redis.hincrBy("foo", "bar", 2)
     assertEquals("3", redis.hget("foo", "bar")?.utf8())
 
     // Exercise
-    clock.add(Duration.ofSeconds(1))
+    redis.expireAt("foo", -1)
     redis.hincrBy("foo", "bar", 4)
 
     // Verify
@@ -812,8 +811,7 @@ class FakeRedisTest {
 
     // Expired key.
     redis.lpush("droids", *droids.toTypedArray())
-    redis.pExpireAt("droids", clock.instant().toEpochMilli())
-    clock.add(Duration.ofSeconds(1))
+    redis.expire("droids", -1)
     assertThat(redis.lpop("droids", 1)).isEmpty()
   }
 
@@ -834,8 +832,7 @@ class FakeRedisTest {
 
     // Expired key.
     redis.lpush("droids", *droids.toTypedArray())
-    redis.pExpireAt("droids", clock.instant().toEpochMilli())
-    clock.add(Duration.ofSeconds(1))
+    redis.expire("droids", -1)
     assertThat(redis.rpop("droids", 1)).isEmpty()
   }
 
@@ -855,8 +852,7 @@ class FakeRedisTest {
 
     // Expired key.
     redis.rpush("droids", *droids.toTypedArray())
-    redis.pExpireAt("droids", clock.instant().toEpochMilli())
-    clock.add(Duration.ofSeconds(1))
+    redis.expire("droids", -1)
     assertThat(redis.lpop("droids", 1)).isEmpty()
   }
 
@@ -876,8 +872,7 @@ class FakeRedisTest {
 
     // Expired key.
     redis.rpush("droids", *droids.toTypedArray())
-    redis.pExpireAt("droids", clock.instant().toEpochMilli())
-    clock.add(Duration.ofSeconds(1))
+    redis.expire("droids", -1)
     assertThat(redis.rpop("droids", 1)).isEmpty()
   }
 
