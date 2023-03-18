@@ -25,8 +25,7 @@ dependencies {
   implementation(project(":misk-service"))
   api(Dependencies.wispConfig)
 
-  testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.wispTimeTesting)
+  testImplementation(project(":misk-redis-testing"))
+  testImplementation(project(":misk-testing"))
 }
