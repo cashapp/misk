@@ -1,17 +1,6 @@
-import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
-
 plugins {
   kotlin("jvm")
   `java-library`
-}
-
-apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
-apply(plugin = "kotlin-jpa")
-
-configure<AllOpenExtension> {
-  annotation("javax.persistence.Entity")
-  annotation("javax.persistence.Embeddable")
-  annotation("javax.persistence.MappedSuperclass")
 }
 
 dependencies {
