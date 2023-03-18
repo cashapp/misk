@@ -13,7 +13,8 @@ import redis.clients.jedis.JedisPoolConfig
  */
 class RedisModule(
   private val redisConfig: RedisConfig,
-  private val jedisPoolConfig: JedisPoolConfig
+  private val jedisPoolConfig: JedisPoolConfig,
+  private val useSsl: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
     bind<RedisConfig>().toInstance(redisConfig)
@@ -22,7 +23,7 @@ class RedisModule(
 
   @Provides @Singleton
   internal fun provideRedisClient(config: RedisConfig): Redis {
-    // Get the first replication group, we only support 1 replication group per service
+    // Get the first replication group, we only support 1 replication group per service.
     val replicationGroup = config[config.keys.first()]
         ?: throw RuntimeException("At least 1 replication group must be specified")
 
@@ -33,7 +34,7 @@ class RedisModule(
         replicationGroup.writer_endpoint.port,
         replicationGroup.timeout_ms,
         replicationGroup.redis_auth_password,
-        true
+        useSsl,
     )
 
     return RealRedis(jedisPool)

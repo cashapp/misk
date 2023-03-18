@@ -1,5 +1,7 @@
-package misk.redis
+package misk.redis.testing
 
+import misk.redis.Redis
+import misk.redis.checkHrandFieldCount
 import okio.ByteString
 import okio.ByteString.Companion.encode
 import redis.clients.jedis.Pipeline
@@ -15,7 +17,6 @@ import kotlin.math.min
 import kotlin.random.Random
 
 /** Mimics a Redis instance for testing. */
-@Deprecated("Moved to misk-redis-testing.", ReplaceWith("misk.redis.testing.FakeRedis"))
 class FakeRedis : Redis {
   @Inject lateinit var clock: Clock
   @Inject @ForFakeRedis lateinit var random: Random
@@ -101,13 +102,13 @@ class FakeRedis : Redis {
   }
 
   @Synchronized
-  override fun hgetAll(key: String): Map<String, ByteString>? {
-    val value = hKeyValueStore[key] ?: return null
+  override fun hgetAll(key: String): Map<String, ByteString> {
+    val value = hKeyValueStore[key] ?: return emptyMap()
 
     // Check if the key has expired
     if (clock.instant() >= value.expiryInstant) {
       hKeyValueStore.remove(key)
-      return null
+      return emptyMap()
     }
     return value.data.mapValues { it.value }
   }
@@ -384,6 +385,6 @@ class FakeRedis : Redis {
   }
 
   override fun close() {
-    // No-op.
+    // no op
   }
 }
