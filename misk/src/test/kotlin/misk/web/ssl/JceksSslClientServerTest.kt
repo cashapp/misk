@@ -75,8 +75,7 @@ internal class JceksSslClientServerTest {
   }
 
   @Test
-  fun
-    failsIfServerIsUntrusted() {
+  fun failsIfServerIsUntrusted() {
     assertFailsWith<SSLHandshakeException> {
       noTrustClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     }

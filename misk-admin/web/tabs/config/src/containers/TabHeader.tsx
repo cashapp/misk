@@ -64,7 +64,7 @@ fun main(args: Array<String>) {
           </Callout>
           <Callout
             title={
-              "2. Seeing sensitive information that should be redacted? Use misk.config.Secret or add @Redact."
+              "2. Seeing sensitive information that should be redacted? Use Secret<*> or add @Redact."
             }
           >
             <CodePreContainer>

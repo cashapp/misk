@@ -20,6 +20,6 @@ fun main(args: Array<String>) {
     ExemplarWebActionsModule(),
     MiskRealServiceModule(),
     MiskWebModule(config.web),
-    PrometheusMetricsServiceModule(config.prometheus)
+    PrometheusMetricsServiceModule(config.prometheus),
   ).run(args)
 }

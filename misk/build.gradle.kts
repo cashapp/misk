@@ -7,7 +7,6 @@ plugins {
 
 dependencies {
   implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.apacheCommonsLang3)
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
@@ -33,9 +32,6 @@ dependencies {
   implementation(Dependencies.wireMoshiAdapter)
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.jacksonDatabind)
-  implementation(Dependencies.jacksonDataformatYaml)
-  implementation(Dependencies.jacksonKotlin)
-  implementation(Dependencies.jacksonJsr310)
   implementation(Dependencies.jCommander)
   implementation(Dependencies.openTracing)
   implementation(Dependencies.openTracingUtil)
