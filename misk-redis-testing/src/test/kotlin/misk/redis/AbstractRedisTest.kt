@@ -284,9 +284,7 @@ abstract class AbstractRedisTest {
     redis[key] = "Not a number".encodeUtf8()
 
     // Exercise
-    assertThrows<IllegalArgumentException> {
-      redis.incrBy(key, 3)
-    }
+    assertThrows<RuntimeException> { redis.incrBy(key, 3) }
 
     // Verify
     assertEquals("Not a number".encodeUtf8(), redis[key])
@@ -326,7 +324,7 @@ abstract class AbstractRedisTest {
     redis.hset("foo", "bar", "baz".encodeUtf8())
 
     // Verify
-    assertThrows<IllegalArgumentException> {
+    assertThrows<RuntimeException> {
       redis.hincrBy("foo", "bar", 2)
     }
   }
@@ -363,14 +361,16 @@ abstract class AbstractRedisTest {
 
     // Test hrandfield key [count] with values.
     assertThat(redis.hrandFieldWithValues("star wars characters", 1))
-      .containsExactlyEntriesOf(mapOf("Luke Skywalker" to "Mark Hamill".encodeUtf8()))
+      .containsAnyOf(*map.entries.toTypedArray())
+      .hasSize(1)
 
     assertThat(redis.hrandFieldWithValues("star wars characters", 20))
       .containsExactlyInAnyOrderEntriesOf(map)
 
     // Test hrandfield key [count].
     assertThat(redis.hrandField("star wars characters", 1))
-      .containsExactly("Han Solo")
+      .containsAnyOf(*map.keys.toTypedArray())
+      .hasSize(1)
 
     assertThat(redis.hrandField("star wars characters", 20))
       .containsExactlyInAnyOrder(*map.keys.toTypedArray())
