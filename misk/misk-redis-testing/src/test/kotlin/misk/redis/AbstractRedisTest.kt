@@ -1,37 +1,18 @@
 package misk.redis
 
-import com.google.inject.Module
-import com.google.inject.util.Modules
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
-import misk.time.FakeClockModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.args.ListDirection
-import wisp.time.FakeClock
-import java.time.Duration
-import javax.inject.Inject
-import kotlin.random.Random
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@MiskTest
-class FakeRedisTest {
-  @Suppress("unused")
-  @MiskTestModule
-  val module: Module = Modules.combine(
-    FakeClockModule(),
-    RedisTestModule(Random(1977)), // Hardcoded random seed for hrandfield* test determinism.
-  )
-
-  @Inject lateinit var clock: FakeClock
-  @Inject lateinit var redis: Redis
+abstract class AbstractRedisTest {
+  abstract var redis: Redis
 
   @Test
   fun simpleStringSetGet() {
@@ -71,7 +52,8 @@ class FakeRedisTest {
     assertThat(redis.mget(key)).isEqualTo(listOf(value))
     assertThat(redis.mget(key, key2)).isEqualTo(listOf(value, value2))
     assertThat(redis.mget(key2, key)).isEqualTo(listOf(value2, value))
-    assertThat(redis.mget(key, unknownKey, key2, key)).isEqualTo(listOf(value, null, value2, value))
+    assertThat(redis.mget(key, unknownKey, key2, key))
+      .isEqualTo(listOf(value, null, value2, value))
 
     assertThat(redis[key]).isEqualTo(value)
     assertThat(redis[key2]).isEqualTo(value2)
@@ -81,26 +63,37 @@ class FakeRedisTest {
   @Test fun hsetReturnsCorrectValues() {
     val key = "prehistoric_life"
     // Add one get one.
-    assertThat(redis.hset(key, "Triassic", """["archosaurs"]""".encodeUtf8()))
-      .isEqualTo(1L)
+    assertThat(redis.hset(key, "Triassic", """["archosaurs"]""".encodeUtf8())).isEqualTo(1L)
     // Add several get several.
-    assertThat(redis.hset(key, mapOf(
-      "Jurassic" to """["dinosaurs"]""".encodeUtf8(),
-      "Cretaceous" to """["feathered birds"]""".encodeUtf8(),
-    )))
-      .isEqualTo(2L)
+    assertThat(
+      redis.hset(
+        key = key,
+        hash = mapOf(
+          "Jurassic" to """["dinosaurs"]""".encodeUtf8(),
+          "Cretaceous" to """["feathered birds"]""".encodeUtf8(),
+        )
+      )
+    ).isEqualTo(2L)
     // Replace all, add none.
-    assertThat(redis.hset(key, mapOf(
-      "Jurassic" to """["dinosaurs", "feathered dinosaurs"]""".encodeUtf8(),
-      "Cretaceous" to """["feathered birds", "fish"]""".encodeUtf8(),
-    )))
-      .isEqualTo(0L)
+    assertThat(
+      redis.hset(
+        key = key,
+        hash = mapOf(
+          "Jurassic" to """["dinosaurs", "feathered dinosaurs"]""".encodeUtf8(),
+          "Cretaceous" to """["feathered birds", "fish"]""".encodeUtf8(),
+        )
+      )
+    ).isEqualTo(0L)
     // Replace some and add some.
-    assertThat(redis.hset(key, mapOf(
-      "Triassic" to """["archosaurs", "corals"]""".encodeUtf8(), // replaced
-      "Paleogene" to """["primates"]""".encodeUtf8(), // added
-    )))
-      .isEqualTo(1L)
+    assertThat(
+      redis.hset(
+        key = key,
+        hash = mapOf(
+          "Triassic" to """["archosaurs", "corals"]""".encodeUtf8(), // replaced
+          "Paleogene" to """["primates"]""".encodeUtf8(), // added
+        )
+      )
+    ).isEqualTo(1L)
   }
 
   @Test
@@ -118,17 +111,17 @@ class FakeRedisTest {
     assertThat(redis.hget(key1, field2)).isNull()
     assertThat(redis.hget(key2, field1)).isNull()
     assertThat(redis.hget(key2, field2)).isNull()
-    assertThat(redis.hgetAll(key1)).isNull()
-    assertThat(redis.hgetAll(key2)).isNull()
-    assertThat(redis.hmget(key1, field1)).isEmpty()
-    assertThat(redis.hmget(key2, field1)).isEmpty()
+    assertThat(redis.hgetAll(key1)).isEmpty()
+    assertThat(redis.hgetAll(key2)).isEmpty()
+    assertThat(redis.hmget(key1, field1)).containsExactly(null)
+    assertThat(redis.hmget(key2, field1, field2)).containsExactly(null, null)
 
     // use both single field set and batch field set
     redis.hset(key1, field1, valueKey1Field1)
     redis.hset(key1, field2, valueKey1Field2)
     redis.hset(
-      key2,
-      mapOf(
+      key = key2,
+      hash = mapOf(
         field1 to valueKey2Field1,
         field2 to valueKey2Field2,
       )
@@ -152,7 +145,7 @@ class FakeRedisTest {
 
     redis.hdel(key2, field2)
     assertThat(redis.hmget(key2, field1, field2))
-      .isEqualTo(listOf(valueKey2Field1))
+      .isEqualTo(listOf(valueKey2Field1, null))
   }
 
   @Test
@@ -170,7 +163,8 @@ class FakeRedisTest {
     assertThat(redis.hdel("dne", "dne")).isEqualTo(0L)
     assertThat(redis.hdel("movie_years", "dne")).isEqualTo(0L)
     assertThat(redis.hdel("movie_years", "Star Wars")).isEqualTo(1L)
-    assertThat(redis.hdel("movie_years", "Rogue One", "Jurassic World", "dne")).isEqualTo(2)
+    assertThat(redis.hdel("movie_years", "Rogue One", "Jurassic World", "dne"))
+      .isEqualTo(2)
   }
 
   @Test
@@ -191,31 +185,8 @@ class FakeRedisTest {
 
   @Test
   fun badArgumentsToBatchSet() {
-    assertThatThrownBy {
-      redis.mset("key".encodeUtf8())
-    }.isInstanceOf(IllegalArgumentException::class.java)
-  }
-
-  @Test fun setWithExpiry() {
-    val key = "key"
-    val value = "value".encodeUtf8()
-    val expirySec = 5L
-
-    // Set keys that expire
-    redis[key, Duration.ofSeconds(expirySec)] = value
-    assertEquals(value, redis[key])
-
-    // Key should still be there
-    clock.add(Duration.ofSeconds(4))
-    assertEquals(value, redis[key])
-
-    // Key should now be expired
-    clock.add(Duration.ofSeconds(1))
-    assertNull(redis[key], "Key should be expired")
-
-    // Key should remain expired
-    clock.add(Duration.ofSeconds(1))
-    assertNull(redis[key], "Key should be expired")
+    assertThatThrownBy { redis.mset("key".encodeUtf8()) }
+      .isInstanceOf(IllegalArgumentException::class.java)
   }
 
   @Test fun setIfNotExists() {
@@ -230,54 +201,6 @@ class FakeRedisTest {
     // Does not set value because key already exists
     assertFalse(redis.setnx(key, value2))
     assertEquals(value, redis[key])
-  }
-
-  @Test fun setIfNotExistsWithExpiry() {
-    val key = "key"
-    val value = "value".encodeUtf8()
-    val value2 = "value2".encodeUtf8()
-    val expirySec = 5L
-
-    // Sets value because key does not exist
-    assertTrue(redis.setnx(key, Duration.ofSeconds(expirySec), value))
-    assertEquals(value, redis[key])
-
-    // Does not set value because key already exists
-    assertFalse(redis.setnx(key, Duration.ofSeconds(expirySec), value2))
-    assertEquals(value, redis[key])
-
-    // Key should still be there
-    clock.add(Duration.ofSeconds(4))
-    assertEquals(value, redis[key])
-
-    // Key should now be expired
-    clock.add(Duration.ofSeconds(1))
-    assertNull(redis[key], "Key should be expired")
-
-    // Key should remain expired
-    clock.add(Duration.ofSeconds(1))
-    assertNull(redis[key], "Key should be expired")
-  }
-
-  @Test fun overridingResetsExpiry() {
-    val key = "key"
-    val value = "value".encodeUtf8()
-    val expirySec = 5L
-
-    // Set a key that expires
-    redis[key, Duration.ofSeconds(expirySec)] = value
-
-    // Right before the key expires, override it with a new expiry time
-    clock.add(Duration.ofSeconds(4))
-    redis[key, Duration.ofSeconds(expirySec)] = value
-
-    // Key should not be expired
-    clock.add(Duration.ofSeconds(4))
-    assertNotNull(redis[key], "Key should be expired")
-
-    // Key should now be expired
-    clock.add(Duration.ofSeconds(1))
-    assertNull(redis[key], "Key did not expire")
   }
 
   @Test fun deleteKey() {
@@ -356,9 +279,7 @@ class FakeRedisTest {
     redis[key] = "Not a number".encodeUtf8()
 
     // Exercise
-    assertThrows<IllegalArgumentException> {
-      redis.incrBy(key, 3)
-    }
+    assertThrows<RuntimeException> { redis.incrBy(key, 3) }
 
     // Verify
     assertEquals("Not a number".encodeUtf8(), redis[key])
@@ -380,14 +301,13 @@ class FakeRedisTest {
   @Test fun hIncrBySupportsExpiry() {
     // Setup
     redis.hset("foo", "bar", "1".encodeUtf8())
-    redis.expire("foo", 1)
 
     // Assert that the expiry hasn't taken affect yet
     redis.hincrBy("foo", "bar", 2)
     assertEquals("3", redis.hget("foo", "bar")?.utf8())
 
     // Exercise
-    clock.add(Duration.ofSeconds(1))
+    redis.expire("foo", -1)
     redis.hincrBy("foo", "bar", 4)
 
     // Verify
@@ -399,7 +319,7 @@ class FakeRedisTest {
     redis.hset("foo", "bar", "baz".encodeUtf8())
 
     // Verify
-    assertThrows<IllegalArgumentException> {
+    assertThrows<RuntimeException> {
       redis.hincrBy("foo", "bar", 2)
     }
   }
@@ -436,14 +356,16 @@ class FakeRedisTest {
 
     // Test hrandfield key [count] with values.
     assertThat(redis.hrandFieldWithValues("star wars characters", 1))
-      .containsExactlyEntriesOf(mapOf("Luke Skywalker" to "Mark Hamill".encodeUtf8()))
+      .containsAnyOf(*map.entries.toTypedArray())
+      .hasSize(1)
 
     assertThat(redis.hrandFieldWithValues("star wars characters", 20))
       .containsExactlyInAnyOrderEntriesOf(map)
 
     // Test hrandfield key [count].
     assertThat(redis.hrandField("star wars characters", 1))
-      .containsExactly("Han Solo")
+      .containsAnyOf(*map.keys.toTypedArray())
+      .hasSize(1)
 
     assertThat(redis.hrandField("star wars characters", 20))
       .containsExactlyInAnyOrder(*map.keys.toTypedArray())
@@ -474,94 +396,7 @@ class FakeRedisTest {
     }
 
     for (ex in listOf(z1, z2)) {
-      assertThat(ex)
-        .hasMessage("You must request at least 1 field.")
-    }
-  }
-
-  @Test fun expireImmediately() {
-    // Setup
-    redis["foo"] = "baz".encodeUtf8()
-
-    // Exercise
-    // Expire immediately
-    redis.expire("foo", -1)
-
-    // Verify
-    assertNull(redis.hget("foo", "bar"))
-    assertNull(redis["foo"])
-  }
-
-  @Test fun expireInOneSecond() {
-    // Setup
-    redis["foo"] = "baz".encodeUtf8()
-
-    // Exercise
-    // Expire in one second
-    redis.expire("foo", 1)
-
-    // Verify
-    assertEquals("baz".encodeUtf8(), redis["foo"])
-    clock.add(Duration.ofSeconds(1))
-    assertNull(redis["foo"])
-  }
-
-  @Test fun expireInOneSecondTimestamp() {
-    // Setup
-    redis["foo"] = "baz".encodeUtf8()
-
-    // Exercise
-    // Expire in one second
-    redis.expireAt("foo", clock.instant().plusSeconds(1).epochSecond)
-
-    // Verify
-    assertEquals("baz".encodeUtf8(), redis["foo"])
-    clock.add(Duration.ofSeconds(1))
-    assertNull(redis["foo"])
-  }
-
-  @Test fun pExpireInOneMilliSecond() {
-    // Setup
-    redis["foo"] = "baz".encodeUtf8()
-
-    // Exercise
-    // Expire in one milli
-    redis.pExpire("foo", 1)
-
-    // Verify
-    assertEquals("baz".encodeUtf8(), redis["foo"])
-    clock.add(Duration.ofMillis(1))
-    assertNull(redis["foo"])
-  }
-
-  @Test fun pExpireInOneMilliTimestamp() {
-    // Setup
-    redis["foo"] = "baz".encodeUtf8()
-
-    // Exercise
-    // Expire in one milli
-    redis.pExpireAt("foo", clock.instant().plusMillis(1).toEpochMilli())
-
-    // Verify
-    assertEquals("baz".encodeUtf8(), redis["foo"])
-    clock.add(Duration.ofMillis(1))
-    assertNull(redis["foo"])
-  }
-
-  @Test fun expireOnKeyThatExists() {
-    // Setup
-    redis["foo"] = "bar".encodeUtf8()
-
-    // Exercise
-    assertTrue {
-      redis.expire("foo", 1)
-    }
-  }
-
-  @Test fun expireOnKeyThatDoesNotExist() {
-    // Exercise
-    assertFalse {
-      redis.expire("foo", 1)
+      assertThat(ex).hasMessage("You must request at least 1 field.")
     }
   }
 
@@ -812,8 +647,7 @@ class FakeRedisTest {
 
     // Expired key.
     redis.lpush("droids", *droids.toTypedArray())
-    redis.pExpireAt("droids", clock.instant().toEpochMilli())
-    clock.add(Duration.ofSeconds(1))
+    redis.expire("droids", -1)
     assertThat(redis.lpop("droids", 1)).isEmpty()
   }
 
@@ -831,11 +665,9 @@ class FakeRedisTest {
     assertThat(redis.rpop("droids", 1)).isEmpty()
     assertThat(redis.rpop("droids")).isNull()
 
-
     // Expired key.
     redis.lpush("droids", *droids.toTypedArray())
-    redis.pExpireAt("droids", clock.instant().toEpochMilli())
-    clock.add(Duration.ofSeconds(1))
+    redis.expire("droids", -1)
     assertThat(redis.rpop("droids", 1)).isEmpty()
   }
 
@@ -855,8 +687,7 @@ class FakeRedisTest {
 
     // Expired key.
     redis.rpush("droids", *droids.toTypedArray())
-    redis.pExpireAt("droids", clock.instant().toEpochMilli())
-    clock.add(Duration.ofSeconds(1))
+    redis.expire("droids", -1)
     assertThat(redis.lpop("droids", 1)).isEmpty()
   }
 
@@ -876,8 +707,7 @@ class FakeRedisTest {
 
     // Expired key.
     redis.rpush("droids", *droids.toTypedArray())
-    redis.pExpireAt("droids", clock.instant().toEpochMilli())
-    clock.add(Duration.ofSeconds(1))
+    redis.expire("droids", -1)
     assertThat(redis.rpop("droids", 1)).isEmpty()
   }
 
@@ -891,5 +721,33 @@ class FakeRedisTest {
 
     redis.rpush("r", *elements.toTypedArray())
     assertThat(redis.lrange("r", 0, -1)).containsExactly(*elements.toTypedArray())
+  }
+
+  @Test fun expireOnKeyThatExists() {
+    // Setup
+    redis["foo"] = "bar".encodeUtf8()
+
+    // Exercise
+    assertTrue {
+      redis.expire("foo", 1)
+    }
+  }
+
+  @Test fun expireOnKeyThatDoesNotExist() {
+    // Exercise
+    assertFalse { redis.expire("foo", 1) }
+  }
+
+  @Test fun expireImmediately() {
+    // Setup
+    redis["foo"] = "baz".encodeUtf8()
+
+    // Exercise
+    // Expire immediately
+    redis.expire("foo", -1)
+
+    // Verify
+    assertNull(redis.hget("foo", "bar"))
+    assertNull(redis["foo"])
   }
 }
