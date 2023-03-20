@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { H1, H3, Spinner } from "@blueprintjs/core"
+import { H3, Spinner } from "@blueprintjs/core"
 import { css, jsx } from "@emotion/core"
 import { CodePreContainer } from "@misk/core"
 import * as React from "react"
@@ -31,7 +31,6 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
     if (resources) {
       return (
         <div>
-          <H1>Config</H1>
           {resources &&
             Object.entries(resources).map(([name, file]) =>
               this.renderConfig({ name, file })
@@ -41,7 +40,6 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
     } else {
       return (
         <div>
-          <H1>Config</H1>
           <br />
           <H3 css={cssH3}>{"Effective Config"}</H3>
           <CodePreContainer>{<Spinner />}</CodePreContainer>

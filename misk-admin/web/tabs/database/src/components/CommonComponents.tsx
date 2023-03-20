@@ -37,7 +37,8 @@ export const cssCodeTag = css`
 `
 
 export const cssHeader = css`
-  display: inline-block;
+  display: flex;
+  justify-content: space-between;
 `
 
 export const cssColumn = css`

@@ -5,7 +5,6 @@ import misk.inject.KAbstractModule
 /**
  * Adds the provided fake files to the map used by [FilesystemLoaderBackend].
  */
-@Deprecated("Use from misk-config instead")
 class FakeFilesModule(private val fakeFiles: Map<String, String>) : KAbstractModule() {
   override fun configure() {
     fakeFiles.forEach {

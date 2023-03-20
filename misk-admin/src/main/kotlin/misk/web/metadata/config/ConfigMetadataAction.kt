@@ -63,6 +63,7 @@ class ConfigMetadataAction @Inject constructor(
      * non-Secret fields don't have @misk.config.Redact annotation manually added.
      */
     SHOW_REDACTED_EFFECTIVE_CONFIG,
+    /** Shows all possible resources, YAML files are not redacted */
     UNSAFE_LEAK_MISK_SECRETS
   }
 }

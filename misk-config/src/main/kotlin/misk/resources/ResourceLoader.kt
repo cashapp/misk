@@ -30,7 +30,6 @@ import wisp.resources.ResourceLoader as WispResourceLoader
  * Other backends are permitted. They should be registered with a `MapBinder` with the backend
  * scheme like `classpath:` as the key.
  */
-@Deprecated("Use from misk-config instead")
 @Singleton
 class ResourceLoader @Inject constructor(
   @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
