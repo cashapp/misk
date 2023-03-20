@@ -60,6 +60,7 @@ import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RebalancingInterceptor
 import misk.web.interceptors.RequestBodyLoggingInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
+import misk.web.interceptors.RequestLoggingConfig
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
@@ -191,6 +192,7 @@ class MiskWebModule(
       .to<ExceptionHandlingInterceptor.Factory>()
 
     // Optionally log request and response details
+    newMultibinder<RequestLoggingConfig>()
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
       .to<RequestLoggingInterceptor.Factory>()
 
