@@ -322,7 +322,7 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   }
 
   /** Closes the connection to Redis. */
-  fun close() {
+  override fun close() {
     return jedisPool.close()
   }
 
