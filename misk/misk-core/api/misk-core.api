@@ -189,6 +189,7 @@ public final class misk/resources/ResourceLoader {
 	public fun <init> (Ljava/util/Map;)V
 	public final fun copyTo (Ljava/lang/String;Ljava/nio/file/Path;)V
 	public final fun exists (Ljava/lang/String;)Z
+	public final fun getDelegate ()Lwisp/resources/ResourceLoader;
 	public final fun list (Ljava/lang/String;)Ljava/util/List;
 	public final fun open (Ljava/lang/String;)Lokio/BufferedSource;
 	public final fun put (Ljava/lang/String;Ljava/lang/String;)V

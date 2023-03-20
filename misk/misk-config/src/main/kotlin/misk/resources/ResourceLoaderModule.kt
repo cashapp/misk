@@ -12,7 +12,6 @@ import javax.inject.Qualifier
 import javax.inject.Singleton
 import wisp.resources.ResourceLoader as WispResourceLoader
 
-@Deprecated("Use from misk-config instead")
 class ResourceLoaderModule : KAbstractModule() {
   override fun configure() {
     val mapBinder = MapBinder.newMapBinder(
@@ -28,7 +27,6 @@ class ResourceLoaderModule : KAbstractModule() {
  * Can be used instead of [ResourceLoaderModule] in tests to load filesystem: resources using
  * [FakeFilesystemLoaderBackend]
  */
-@Deprecated("Use from misk-config instead")
 class TestingResourceLoaderModule : KAbstractModule() {
   override fun configure() {
     val mapBinder = MapBinder.newMapBinder(
@@ -49,6 +47,5 @@ class TestingResourceLoaderModule : KAbstractModule() {
   ): WispResourceLoader.Backend = FakeFilesystemLoaderBackend(fakeFiles)
 }
 
-@Deprecated("Use from misk-config instead")
 @Qualifier
 annotation class ForFakeFiles
