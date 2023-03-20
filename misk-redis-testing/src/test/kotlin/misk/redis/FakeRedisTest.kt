@@ -24,7 +24,8 @@ class FakeRedisTest: AbstractRedisTest() {
   private val module = object: KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      install(RedisTestModule(Random(1977))) // Hardcoded random seed for hrandfield* test determinism.
+      // Hardcoded random seed for hrandfield* test determinism.
+      install(RedisTestModule(Random(1977)))
     }
   }
 

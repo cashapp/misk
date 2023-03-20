@@ -16,11 +16,21 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-/** Mimics a Redis instance for testing. */
-class FakeRedis : Redis {
-  @Inject lateinit var clock: Clock
-  @Inject @ForFakeRedis lateinit var random: Random
-
+/**
+ * An in-memory key-value store which closely mimics [misk.redis.RealRedis].
+ *
+ * This should be used if:
+ *  - It is undesirable to start an actual Redis instance via [DockerRedis] in test.
+ *  - You need fine-grained control over randomness in tests
+ *  - You need fine-grained control over key-expiry in tests
+ *
+ * Caveats:
+ *  - FakeRedis does not currently support [Redis.pipelined] requests or [Redis.multi] transactions
+ */
+class FakeRedis @Inject constructor(
+  private val clock: Clock,
+  @ForFakeRedis private val random: Random,
+) : Redis {
   /** The value type stored in our key-value store. */
   private data class Value<T>(val data: T, var expiryInstant: Instant)
 
