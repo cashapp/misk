@@ -23,6 +23,7 @@ dependencies {
   implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)
   implementation(Dependencies.slf4jApi)
+  api(project(":misk-config"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
 

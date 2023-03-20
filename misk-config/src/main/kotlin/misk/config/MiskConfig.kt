@@ -34,7 +34,6 @@ import java.io.File
 import java.io.FilenameFilter
 import java.util.Locale
 
-@Deprecated("Use from misk-config instead")
 object MiskConfig {
   private val logger = getLogger<MiskConfig>()
 
