@@ -1,8 +1,6 @@
 package misk.redis
 
-import com.google.inject.Module
 import okio.ByteString.Companion.encodeUtf8
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -14,9 +12,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 abstract class AbstractRedisTest {
-  @Suppress("unused")
-  abstract val module: Module
-
   abstract var redis: Redis
 
   @Test

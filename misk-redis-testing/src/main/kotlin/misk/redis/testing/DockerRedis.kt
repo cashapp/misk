@@ -22,7 +22,8 @@ import java.time.Duration
  *
  * To use this in tests:
  *
- * 1. Install a `RedisModule` instead of a `FakeRedisModule`. Make sure to supply the [DockerRedis.config] as the [RedisConfig].
+ * 1. Install a `RedisModule` instead of a `FakeRedisModule`.
+ *    Make sure to supply the [DockerRedis.config] as the [RedisConfig].
  * 2. Add `@MiskExternalDependency private val dockerRedis: DockerRedis` to your test class.
  */
 object DockerRedis : ExternalDependency {
@@ -37,6 +38,11 @@ object DockerRedis : ExternalDependency {
   private val groupConfig = RedisReplicationGroupConfig(
     writer_endpoint = redisNodeConfig,
     reader_endpoint = redisNodeConfig,
+    // NB: Docker redis images won't accept a start-up password via Container->withCmd.
+    // The supported mechanism for setting a password is by mounting a custom Redis config,
+    // but we aren't in the business of maintaining a redis image just for our tests, and mounting
+    // a volume with test-specific configs is more complicated than it's worth.
+    // Hence, we supply a blank password, which will only be accepted in Fake environments.
     redis_auth_password = "",
     timeout_ms = 1_000, // 1 second.
   )
@@ -58,8 +64,13 @@ object DockerRedis : ExternalDependency {
   )
 
   override fun startup() {
-    composer.start()
+    try {
+      composer.start()
+    } catch (tr: Throwable) {
+      throw IllegalStateException("Could not start Docker client. Is Docker running?", tr)
+    }
     val stopwatch = Stopwatch.createStarted()
+
     while (true) {
       try {
         val pong = client.resource.use { jedis -> jedis.ping() }
@@ -70,7 +81,7 @@ object DockerRedis : ExternalDependency {
         sleep(100)
       }
       if (stopwatch.elapsed() > Duration.ofSeconds(30)) {
-        error("Docker Redis did not start within 30 seconds. Is Docker running?")
+        error("Could not get a reply from Redis within 30 seconds. Is the Redis container running?")
       }
     }
     logger.info { "Redis v$redisVersion is ready!" }

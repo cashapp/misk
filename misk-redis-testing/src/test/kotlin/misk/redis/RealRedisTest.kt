@@ -16,7 +16,7 @@ import javax.inject.Inject
 class RealRedisTest : AbstractRedisTest() {
   @Suppress("unused")
   @MiskTestModule
-  override val module: Module = object: KAbstractModule() {
+  private val module: Module = object: KAbstractModule() {
     override fun configure() {
       install(RedisModule(DockerRedis.config, JedisPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())

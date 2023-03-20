@@ -1,11 +1,10 @@
 package misk.redis
 
-import com.google.inject.Module
-import com.google.inject.util.Modules
+import misk.MiskTestingServiceModule
+import misk.inject.KAbstractModule
 import misk.redis.testing.RedisTestModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClockModule
 import okio.ByteString.Companion.encodeUtf8
 import org.junit.jupiter.api.Test
 import wisp.time.FakeClock
@@ -22,10 +21,12 @@ import kotlin.test.assertTrue
 class FakeRedisTest: AbstractRedisTest() {
   @Suppress("unused")
   @MiskTestModule
-  override val module: Module = Modules.combine(
-    FakeClockModule(),
-    RedisTestModule(Random(1977)), // Hardcoded random seed for hrandfield* test determinism.
-  )
+  private val module = object: KAbstractModule() {
+    override fun configure() {
+      install(MiskTestingServiceModule())
+      install(RedisTestModule(Random(1977))) // Hardcoded random seed for hrandfield* test determinism.
+    }
+  }
 
   @Inject lateinit var clock: FakeClock
   @Inject override lateinit var redis: Redis

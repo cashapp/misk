@@ -9,6 +9,7 @@ import misk.inject.keyOf
 import misk.redis.testing.DockerRedis
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
+import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -28,6 +29,8 @@ class RedisAuthPasswordEnvTest {
     val injector = createInjector(fakeEnv, realRedisModule)
     val redis = injector.getInstance(keyOf<RedisConsumer>()).redis
     assertThat(redis).isInstanceOf(RealRedis::class.java)
+    redis["hello"] = "world".encodeUtf8()
+    assertThat(redis["hello"]?.utf8()).isEqualTo("world")
   }
 
   @Test fun `injection fails with password-less config in real environments`() {
