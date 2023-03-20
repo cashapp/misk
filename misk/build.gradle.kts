@@ -7,6 +7,7 @@ plugins {
 
 dependencies {
   implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(Dependencies.apacheCommonsLang3) // Remove after deprecated config/resources
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
@@ -32,6 +33,9 @@ dependencies {
   implementation(Dependencies.wireMoshiAdapter)
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.jacksonDatabind)
+  implementation(Dependencies.jacksonDataformatYaml) // Remove after deprecated config/resources
+  implementation(Dependencies.jacksonKotlin) // Remove after deprecated config/resources
+  implementation(Dependencies.jacksonJsr310) // Remove after deprecated config/resources
   implementation(Dependencies.jCommander)
   implementation(Dependencies.openTracing)
   implementation(Dependencies.openTracingUtil)
