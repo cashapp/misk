@@ -6,7 +6,8 @@ import wisp.time.FakeClock as WispFakeClock
 
 class FakeClockModule : KInstallOnceModule() {
   override fun configure() {
-    bind<Clock>().to<FakeClock>()
-    bind<WispFakeClock>().to<FakeClock>()
+    val fakeClock = FakeClock()
+    bind<Clock>().toInstance(fakeClock)
+    bind<WispFakeClock>().toInstance(fakeClock)
   }
 }

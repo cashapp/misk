@@ -237,6 +237,9 @@ public final class misk/testing/TemporaryFolderModule$DeleteTempFolder : org/jun
 
 public final class misk/time/FakeClock : wisp/time/FakeClock {
 	public fun <init> ()V
+	public fun <init> (J)V
+	public fun <init> (JLjava/time/ZoneId;)V
+	public synthetic fun <init> (JLjava/time/ZoneId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/time/FakeClockModule : misk/inject/KInstallOnceModule {
