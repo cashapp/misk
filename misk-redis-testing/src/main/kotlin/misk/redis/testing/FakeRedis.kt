@@ -1,5 +1,7 @@
-package misk.redis
+package misk.redis.testing
 
+import misk.redis.Redis
+import misk.redis.checkHrandFieldCount
 import okio.ByteString
 import okio.ByteString.Companion.encode
 import redis.clients.jedis.Pipeline
@@ -14,15 +16,21 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-/** Mimics a Redis instance for testing. */
-@Deprecated(
-  message = "Moved to misk-redis-testing. This Fake does not emulate redis correctly.",
-  replaceWith = ReplaceWith("misk.redis.testing.FakeRedis")
-)
-class FakeRedis : Redis {
-  @Inject lateinit var clock: Clock
-  @Inject @ForFakeRedis lateinit var random: Random
-
+/**
+ * An in-memory key-value store which closely mimics [misk.redis.RealRedis].
+ *
+ * This should be used if:
+ *  - It is undesirable to start an actual Redis instance via [DockerRedis] in test.
+ *  - You need fine-grained control over randomness in tests
+ *  - You need fine-grained control over key-expiry in tests
+ *
+ * Caveats:
+ *  - FakeRedis does not currently support [Redis.pipelined] requests or [Redis.multi] transactions
+ */
+class FakeRedis @Inject constructor(
+  private val clock: Clock,
+  @ForFakeRedis private val random: Random,
+) : Redis {
   /** The value type stored in our key-value store. */
   private data class Value<T>(val data: T, var expiryInstant: Instant)
 
@@ -104,13 +112,13 @@ class FakeRedis : Redis {
   }
 
   @Synchronized
-  override fun hgetAll(key: String): Map<String, ByteString>? {
-    val value = hKeyValueStore[key] ?: return null
+  override fun hgetAll(key: String): Map<String, ByteString> {
+    val value = hKeyValueStore[key] ?: return emptyMap()
 
     // Check if the key has expired
     if (clock.instant() >= value.expiryInstant) {
       hKeyValueStore.remove(key)
-      return null
+      return emptyMap()
     }
     return value.data.mapValues { it.value }
   }
@@ -120,7 +128,12 @@ class FakeRedis : Redis {
 
   @Synchronized
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
-    return hgetAll(key)?.filter { fields.contains(it.key) }?.values?.toList() ?: emptyList()
+    val hash: Map<String, ByteString> = hKeyValueStore[key]?.data ?: emptyMap()
+    return buildList {
+      for (field in fields) {
+        add(hash[field])
+      }
+    }
   }
 
   @Synchronized
@@ -387,6 +400,6 @@ class FakeRedis : Redis {
   }
 
   override fun close() {
-    // No-op.
+    // no op
   }
 }
