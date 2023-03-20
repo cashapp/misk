@@ -28,17 +28,21 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
   @Singleton
   class Factory @Inject internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-    private val bodyCapture: RequestResponseCapture
+    private val bodyCapture: RequestResponseCapture,
+    private val configs: Set<RequestLoggingConfig>,
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
-      val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
-      require(logRequestResponse.bodySampling in 0.0..1.0) {
+      // Only bother with endpoints that have the annotation
+      val annotation = action.function.findAnnotation<LogRequestResponse>() ?: return null
+      val config = ActionLoggingConfig.fromConfigMapOrAnnotation(action, configs, annotation)
+
+      require(config.bodySampling in 0.0..1.0) {
         "${action.name} @LogRequestResponse bodySampling must be in the range (0.0, 1.0]"
       }
-      require(logRequestResponse.errorBodySampling in 0.0..1.0) {
+      require(config.errorBodySampling in 0.0..1.0) {
         "${action.name} @LogRequestResponse errorBodySampling must be in the range (0.0, 1.0]"
       }
-      if (logRequestResponse.bodySampling == 0.0 && logRequestResponse.errorBodySampling == 0.0) {
+      if (config.bodySampling == 0.0 && config.errorBodySampling == 0.0) {
         return null
       }
 
