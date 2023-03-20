@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+  implementation(Dependencies.dockerCore)
+  implementation(Dependencies.dockerTransport)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
   implementation(Dependencies.jedis)
@@ -11,10 +13,10 @@ dependencies {
   implementation(project(":misk"))
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
-  implementation(project(":misk-service"))
-  api(Dependencies.wispConfig)
+  implementation(project(":misk-redis"))
+  implementation(project(":misk-testing"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(project(":misk-redis-testing"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(Dependencies.kotlinTest)
+  testImplementation(Dependencies.wispTimeTesting)
 }

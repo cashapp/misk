@@ -6,6 +6,7 @@ import misk.ServiceModule
 import misk.inject.KAbstractModule
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
+import wisp.deployment.Deployment
 
 /**
  * Configures a JedisPool to connect to a Redis instance. The use of a JedisPool ensures thread safety.
@@ -13,7 +14,8 @@ import redis.clients.jedis.JedisPoolConfig
  */
 class RedisModule(
   private val redisConfig: RedisConfig,
-  private val jedisPoolConfig: JedisPoolConfig
+  private val jedisPoolConfig: JedisPoolConfig,
+  private val useSsl: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
     bind<RedisConfig>().toInstance(redisConfig)
@@ -21,19 +23,22 @@ class RedisModule(
   }
 
   @Provides @Singleton
-  internal fun provideRedisClient(config: RedisConfig): Redis {
-    // Get the first replication group, we only support 1 replication group per service
+  internal fun provideRedisClient(config: RedisConfig, deployment: Deployment): Redis {
+    // Get the first replication group, we only support 1 replication group per service.
     val replicationGroup = config[config.keys.first()]
-        ?: throw RuntimeException("At least 1 replication group must be specified")
+      ?: throw RuntimeException("At least 1 replication group must be specified")
 
     // Create our jedis pool
     val jedisPool = JedisPool(
-        jedisPoolConfig,
-        replicationGroup.writer_endpoint.hostname,
-        replicationGroup.writer_endpoint.port,
-        replicationGroup.timeout_ms,
-        replicationGroup.redis_auth_password,
-        true
+      jedisPoolConfig,
+      replicationGroup.writer_endpoint.hostname,
+      replicationGroup.writer_endpoint.port,
+      replicationGroup.timeout_ms,
+      replicationGroup.redis_auth_password.ifEmpty {
+        check(deployment.isFake) { "Redis auth password cannot be empty in a real environment!" }
+        null
+      },
+      useSsl,
     )
 
     return RealRedis(jedisPool)
