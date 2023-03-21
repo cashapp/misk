@@ -64,6 +64,33 @@ class RedisClientMetricsTest {
     assertThat(collectorRegistry[DESTROYED_CONNECTIONS_TOTAL]).isEqualTo(1.0)
   }
 
+  @Test fun `operations are timed`() {
+    redis["hello"] = "world".encodeUtf8()
+    assertThat(redis["hello"]?.utf8()).isEqualTo("world")
+
+    // No metric for commands that aren't executed.
+    assertThat(collectorRegistry.getHistoCount(OPERATION_TIME, listOf("command" to "lolwut")))
+      .isNull()
+
+    // A histogram bucket is recorded for the commands that were run.
+    assertThat(collectorRegistry.getHistoCount(OPERATION_TIME, listOf("command" to "get")))
+      .isOne()
+
+    assertThat(collectorRegistry.getHistoCount(OPERATION_TIME, listOf("command" to "set")))
+      .isOne()
+  }
+
   private operator fun CollectorRegistry.get(metric: String): Double? =
     getSampleValue(metric)
+
+  private fun CollectorRegistry.getHistoCount(
+    metric: String,
+    labels: List<Pair<String, String>>
+  ): Double? {
+    return getSampleValue(
+      "${metric}_count",
+      arrayOf(*labels.map { it.first }.toTypedArray()),
+      arrayOf(*labels.map { it.second }.toTypedArray()),
+    )
+  }
 }

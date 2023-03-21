@@ -273,16 +273,27 @@ class RealRedis(
     jedisPool.resource.use { jedis -> jedis.unwatch() }
   }
 
-  override fun multi(): Transaction = jedisPool.resource.use { multi() }
+  // Transactions do not get client histogram metrics right now.
+  // multi() returns the jedis to the pool, despite returning a Transaction that holds a reference.
+  // This is a bug, and will be fixed in a follow-up.
+  override fun multi(): Transaction {
+    return jedisPool.resource.use { jedis -> jedis.multi() }
+  }
 
-  override fun pipelined(): Pipeline = jedisPool.resource.use { pipelined() }
-
+  // Pipelined requests do not get client histogram metrics right now.
+  // pipelined() returns the jedis to the pool, despite returning a Pipeline that holds a reference
+  // to the borrowed jedis connection.
+  // This is a bug, and will be fixed in a follow-up.
+  override fun pipelined(): Pipeline {
+    return jedisPool.resource.use { jedis -> jedis.pipelined() }
+  }
 
   /** Closes the connection to Redis. */
   override fun close() {
     return jedisPool.close()
   }
 
+  // Gets a Jedis instance from the pool, and times the requested method invocations.
   private fun <T> jedis(op: JedisBinaryCommands.() -> T): T {
     return jedisPool.resource.use { jedisResource ->
       val invocationHandler = JedisTimedInvocationHandler(jedisResource, clientMetrics)
@@ -301,9 +312,9 @@ class RealRedis(
     private val jedis: JedisBinaryCommands,
     private val clientMetrics: RedisClientMetrics,
   ) : InvocationHandler {
-    override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any =
+    override fun invoke(proxy: Any, method: Method, args: Array<out Any?>?): Any? =
       clientMetrics.timed(method.name) {
-        method.invoke(jedis, *args ?: arrayOf())
+        method.invoke(jedis, *(args ?: arrayOf()))
       }
   }
 
