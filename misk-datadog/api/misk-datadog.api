@@ -1,17 +1,19 @@
-public final class misk/tracing/backends/datadog/DatadogTracingBackendModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
-public final class misk/tracing/backends/datadog/MDCScopeListener : datadog/trace/context/ScopeListener {
-	public static final field Companion Lmisk/tracing/backends/datadog/MDCScopeListener$Companion;
+public final class com/squareup/cash/tracing/datadog/MDCScopeListener {
+	public static final field Companion Lcom/squareup/cash/tracing/datadog/MDCScopeListener$Companion;
+	public static final field MDC_DD_SPAN_ID Ljava/lang/String;
+	public static final field MDC_DD_TRACE_ID Ljava/lang/String;
 	public static final field MDC_SPAN_ID Ljava/lang/String;
 	public static final field MDC_TRACE_ID Ljava/lang/String;
 	public fun <init> ()V
-	public fun afterScopeActivated ()V
-	public fun afterScopeClosed ()V
+	public final fun afterScopeActivated ()V
+	public final fun afterScopeClosed ()V
 }
 
-public final class misk/tracing/backends/datadog/MDCScopeListener$Companion {
+public final class com/squareup/cash/tracing/datadog/MDCScopeListener$Companion {
 	public final fun getLog ()Lmu/KLogger;
+}
+
+public final class misk/tracing/backends/datadog/DatadogTracingBackendModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
 }
 

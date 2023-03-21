@@ -5,7 +5,7 @@ import com.amazonaws.services.sqs.model.SendMessageBatchRequest
 import com.amazonaws.services.sqs.model.SendMessageBatchRequestEntry
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.squareup.moshi.Moshi
-import datadog.trace.core.DDSpan
+import ddtrot.dd.trace.core.DDSpan
 import io.opentracing.Span
 import io.opentracing.Tracer
 import misk.jobqueue.JobQueue
@@ -14,7 +14,6 @@ import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
 import misk.tracing.traceWithSpan
-import wisp.logging.getLogger
 import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
