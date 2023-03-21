@@ -53,14 +53,15 @@ class RedisModule(
       ?: throw RuntimeException("At least 1 replication group must be specified")
 
     // Create our jedis pool with client-side metrics.
+    val clientMetrics = RedisClientMetrics(metrics)
     val jedisPoolWithMetrics = JedisPoolWithMetrics(
-      metrics = RedisClientMetrics(metrics),
+      metrics = clientMetrics,
       poolConfig = jedisPoolConfig,
       replicationGroupConfig = replicationGroup,
       ssl = useSsl,
       requiresPassword = deployment.isReal
     )
 
-    return RealRedis(jedisPoolWithMetrics)
+    return RealRedis(jedisPoolWithMetrics, clientMetrics)
   }
 }
