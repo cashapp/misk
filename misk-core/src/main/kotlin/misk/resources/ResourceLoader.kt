@@ -30,13 +30,14 @@ import wisp.resources.ResourceLoader as WispResourceLoader
  * Other backends are permitted. They should be registered with a `MapBinder` with the backend
  * scheme like `classpath:` as the key.
  */
+@Deprecated("Use from misk-config instead")
 @Singleton
 class ResourceLoader @Inject constructor(
   @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
   backends: java.util.Map<String, WispResourceLoader.Backend>
 ) {
   @Suppress("UNCHECKED_CAST")
-  internal val delegate =
+  val delegate =
     WispResourceLoader(backends as Map<String, wisp.resources.ResourceLoader.Backend>)
 
   /** Return a buffered source for `address`, or null if no such resource exists. */

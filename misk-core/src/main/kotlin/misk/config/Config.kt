@@ -8,4 +8,5 @@ package misk.config
 //    "wisp.config.Config"
 //  )
 // )
+@Deprecated("Use from misk-config instead")
 interface Config : wisp.config.Config

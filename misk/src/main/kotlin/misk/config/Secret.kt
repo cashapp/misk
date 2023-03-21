@@ -37,7 +37,7 @@ package misk.config
  * superSecretConfig.secret_information.value.answer_to_universe
  * ```
  */
-
+@Deprecated("Use from misk-config instead")
 interface Secret<T> {
   val value: T
 }

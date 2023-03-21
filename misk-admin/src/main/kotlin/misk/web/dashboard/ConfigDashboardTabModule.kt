@@ -11,8 +11,6 @@ import misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode.SAFE
  *
  * [mode] If you have config parameters that include secrets, you should only install this tab
  *    in [SAFE] mode because the Misk secrets will be visible at runtime in the admin dashboard.
- *
- * TODO fix Misk.Secrets redaction in config, maybe with !secret yaml parser
  */
 class ConfigDashboardTabModule(
   private val isDevelopment: Boolean,

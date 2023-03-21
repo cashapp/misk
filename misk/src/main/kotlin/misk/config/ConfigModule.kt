@@ -2,6 +2,7 @@ package misk.config
 
 import misk.inject.KAbstractModule
 
+@Deprecated("Use from misk-config instead")
 class ConfigModule<T : wisp.config.Config>(
   private val configClass: Class<T>,
   private val appName: String,

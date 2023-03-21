@@ -32,6 +32,12 @@ internal class ActionScopedTest {
   @Inject @Named("nullable-based-on-foo")
   private lateinit var nullableBasedOnFoo: ActionScoped<String?>
 
+  @Inject @Named("constant")
+  private lateinit var constantString: ActionScoped<String>
+
+  @Inject @Named("constant")
+  private lateinit var optionalConstantString: ActionScoped<Optional<String>>
+
   @Inject private lateinit var scope: ActionScope
 
   @BeforeEach
@@ -90,6 +96,21 @@ internal class ActionScopedTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "null")
     val result = scope.enter(seedData).use { nullableFoo.get() }
     assertThat(result).isNull()
+  }
+
+  @Test
+  fun supportsReturningConstants() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    scope.enter(mapOf()).use {
+      assertThat(constantString.get()).isEqualTo("constant-value")
+      assertThat(optionalConstantString.get()).isEqualTo(Optional.of("constant-value"))
+
+      // Make sure the same object is returned
+      assertThat(constantString.get()).isSameAs(constantString.get())
+      assertThat(optionalConstantString.get()).isSameAs(optionalConstantString.get())
+    }
   }
 
   @Test

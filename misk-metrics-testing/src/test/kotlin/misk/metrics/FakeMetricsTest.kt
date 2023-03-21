@@ -76,6 +76,8 @@ class FakeMetricsTest {
   internal fun `different names`() {
     assertThat(metrics.get("gets")).isNull()
     assertThat(metrics.get("puts")).isNull()
+    assertThat(metrics.get("gets_total")).isNull()
+    assertThat(metrics.get("puts_total")).isNull()
 
     val getsCounter = metrics.counter("gets", "-")
     val putsCounter = metrics.counter("puts", "-")
@@ -89,6 +91,8 @@ class FakeMetricsTest {
     putsCounter.inc(20.0)
     assertThat(metrics.get("gets")).isEqualTo(17.0)
     assertThat(metrics.get("puts")).isEqualTo(29.0)
+    assertThat(metrics.get("gets_total")).isEqualTo(17.0)
+    assertThat(metrics.get("puts_total")).isEqualTo(29.0)
   }
 
   @Test
@@ -101,30 +105,30 @@ class FakeMetricsTest {
 
     histogram.record(450.0)
     assertThat(metrics.histogramP50("call_times")).isEqualTo(400.0)
-    assertThat(metrics.histogramP99("call_times")).isEqualTo(400.0)
-
-    histogram.record(500.0)
-    assertThat(metrics.histogramP50("call_times")).isEqualTo(400.0)
     assertThat(metrics.histogramP99("call_times")).isEqualTo(450.0)
 
-    histogram.record(550.0)
+    histogram.record(500.0)
     assertThat(metrics.histogramP50("call_times")).isEqualTo(450.0)
     assertThat(metrics.histogramP99("call_times")).isEqualTo(500.0)
 
-    histogram.record(600.0)
+    histogram.record(550.0)
     assertThat(metrics.histogramP50("call_times")).isEqualTo(450.0)
     assertThat(metrics.histogramP99("call_times")).isEqualTo(550.0)
+
+    histogram.record(600.0)
+    assertThat(metrics.histogramP50("call_times")).isEqualTo(500.0)
+    assertThat(metrics.histogramP99("call_times")).isEqualTo(600.0)
   }
 
   @Test
   internal fun `get all samples`() {
-    metrics.counter("counter", "-", listOf("foo")).labels("bar").inc()
+    metrics.counter("counter_total", "-", listOf("foo")).labels("bar").inc()
     metrics.gauge("gauge", "-", listOf("foo")).labels("bar").inc()
     val quantiles = mapOf(0.5 to 0.5, 0.99 to 0.99)
     metrics.histogram("histogram", "-", listOf("foo"), quantiles).record(1.0, "bar")
 
-    assertThat(metrics.getAllSamples().toList()).containsExactlyInAnyOrder(
-      Sample("counter", listOf("foo"), listOf("bar"), 1.0),
+    assertThat(metrics.getAllSamples().toList()).contains(
+      Sample("counter_total", listOf("foo"), listOf("bar"), 1.0),
       Sample("gauge", listOf("foo"), listOf("bar"), 1.0),
       Sample("histogram", listOf("foo", "quantile"), listOf("bar", "0.5"), 1.0),
       Sample("histogram", listOf("foo", "quantile"), listOf("bar", "0.99"), 1.0),

@@ -7,20 +7,19 @@ import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.metrics.backends.prometheus.PrometheusMetricsServiceModule
 import misk.web.MiskWebModule
-import misk.web.dashboard.ConfigDashboardTabModule
 import wisp.deployment.Deployment
 
 fun main(args: Array<String>) {
   val deployment = Deployment(name = "exemplar", isLocalDevelopment = true)
   val config = MiskConfig.load<ExemplarConfig>("exemplar", deployment)
   MiskApplication(
-    MiskRealServiceModule(),
-    MiskWebModule(config.web),
+    ConfigModule.create("exemplar", config),
+    DashboardModule(),
+    DeploymentModule(deployment),
     ExemplarAccessModule(),
     ExemplarWebActionsModule(),
-    ConfigModule.create("exemplar", config),
-    DeploymentModule(deployment),
+    MiskRealServiceModule(),
+    MiskWebModule(config.web),
     PrometheusMetricsServiceModule(config.prometheus),
-    DashboardModule(),
   ).run(args)
 }

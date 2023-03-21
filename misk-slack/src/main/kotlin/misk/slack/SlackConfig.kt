@@ -7,7 +7,6 @@ data class SlackConfig(
 
   /**
    * The full webhook path, i.e. /services/...
-   * Ideally this is not stored plaintext in the config file, but in a secret.
    */
   val webhook_path: Secret<String>,
 

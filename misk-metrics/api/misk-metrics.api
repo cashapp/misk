@@ -35,6 +35,7 @@ public abstract interface class misk/metrics/v2/Metrics {
 	public abstract fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
 	public abstract fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
 	public abstract fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
+	public abstract fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
 	public abstract fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
 }
 
@@ -42,6 +43,7 @@ public final class misk/metrics/v2/Metrics$DefaultImpls {
 	public static synthetic fun counter$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Counter;
 	public static synthetic fun gauge$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Gauge;
 	public static synthetic fun histogram$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Histogram;
+	public static synthetic fun peakGauge$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v2/PeakGauge;
 	public static synthetic fun summary$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lio/prometheus/client/Summary;
 }
 
@@ -51,5 +53,29 @@ public final class misk/metrics/v2/MetricsKt {
 	public static final fun getDefaultQuantiles ()Ljava/util/Map;
 	public static final fun getDefaultSparseBuckets ()Ljava/util/List;
 	public static final fun linearBuckets (DDI)Ljava/util/List;
+}
+
+public final class misk/metrics/v2/PeakGauge : io/prometheus/client/SimpleCollector {
+	public static final field Companion Lmisk/metrics/v2/PeakGauge$Companion;
+	public fun <init> (Lmisk/metrics/v2/PeakGauge$Builder;)V
+	public fun collect ()Ljava/util/List;
+	public synthetic fun newChild ()Ljava/lang/Object;
+	public final fun record (D)V
+}
+
+public final class misk/metrics/v2/PeakGauge$Builder : io/prometheus/client/SimpleCollector$Builder {
+	public fun <init> ()V
+	public synthetic fun create ()Lio/prometheus/client/SimpleCollector;
+	public fun create ()Lmisk/metrics/v2/PeakGauge;
+}
+
+public final class misk/metrics/v2/PeakGauge$Child {
+	public fun <init> ()V
+	public final fun getAndClear ()D
+	public final fun record (D)V
+}
+
+public final class misk/metrics/v2/PeakGauge$Companion {
+	public final fun builder (Ljava/lang/String;Ljava/lang/String;)Lmisk/metrics/v2/PeakGauge$Builder;
 }
 

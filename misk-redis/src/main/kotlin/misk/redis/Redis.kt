@@ -77,6 +77,11 @@ interface Redis {
   fun hgetAll(key: String): Map<String, ByteString>?
 
   /**
+   * Returns the number of fields contained in the hash stored at [key].
+   */
+  fun hlen(key: String): Long
+
+  /**
    * Retrieve the values associated to the specified fields.
    *
    * If some specified fields do not exist, nil values are returned. Non-existing keys are
@@ -280,13 +285,29 @@ interface Redis {
 
   /**
    * Removes and returns the first [count] elements of the list stored at [key].
+   *
+   * Only available on Redis 6.2.0 and higher.
+   * Throws if Redis is too low of a version.
    */
   fun lpop(key: String, count: Int): List<ByteString?>
 
   /**
+   * Removes and returns the first element of the list stored at [key].
+   */
+  fun lpop(key: String): ByteString?
+
+  /**
    * Removes and returns the last [count] elements of the list stored at [key].
+   *
+   * Only available on Redis 6.2.0 and higher.
+   * Throws if Redis is too low of a version.
    */
   fun rpop(key: String, count: Int): List<ByteString?>
+
+  /**
+   * Removes and returns the last element of the list stored at [key].
+   */
+  fun rpop(key: String): ByteString?
 
   /**
    * Returns the specified elements of the list stored at key. The offsets start and stop are
@@ -412,6 +433,11 @@ interface Redis {
    * Begin a pipeline operation to batch together several updates for optimal performance
    */
   fun pipelined(): Pipeline
+
+  /**
+   * Closes the client, so it may not be used further.
+   */
+  fun close()
 }
 
 /**
@@ -424,7 +450,7 @@ interface Redis {
  *
  * https://redis.io/commands/hrandfield/#specification-of-the-behavior-when-count-is-passed
  */
-internal inline fun checkHrandFieldCount(count: Long) {
+inline fun checkHrandFieldCount(count: Long) {
   require(count > -1) {
     "This Redis client does not support negative field counts for HRANDFIELD."
   }
