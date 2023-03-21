@@ -20,12 +20,30 @@ internal class JedisPoolWithMetrics(
   init {
     metrics.maxTotalConnectionsGauge.set(this.maxTotal.toDouble())
     metrics.maxIdleConnectionsGauge.set(this.maxIdle.toDouble())
+    setActiveIdleConnectionMetrics()
   }
 
   override fun getResource(): Jedis {
+    return super.getResource().also {
+      setActiveIdleConnectionMetrics()
+    }
+  }
+
+  override fun returnBrokenResource(resource: Jedis?) {
+    super.returnBrokenResource(resource).also {
+      setActiveIdleConnectionMetrics()
+    }
+  }
+
+  override fun returnResource(resource: Jedis?) {
+    super.returnResource(resource).also {
+      setActiveIdleConnectionMetrics()
+    }
+  }
+
+  private fun setActiveIdleConnectionMetrics() {
     metrics.activeConnectionsGauge.set(this.numActive.toDouble())
     metrics.idleConnectionsGauge.set(this.numIdle.toDouble())
-    return super.getResource()
   }
 
   private class JedisFactoryWithMetrics(

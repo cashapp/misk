@@ -17,6 +17,7 @@ dependencies {
   implementation(project(":misk-service"))
 
   testImplementation(Dependencies.assertj)
+  testImplementation(project(":misk-metrics-testing"))
   testImplementation(project(":misk-redis-testing"))
   testImplementation(project(":misk-testing"))
 }
