@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.wispConfig)
+
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
   implementation(Dependencies.jedis)
@@ -11,10 +13,11 @@ dependencies {
   implementation(project(":misk"))
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
+  implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
-  api(Dependencies.wispConfig)
 
   testImplementation(Dependencies.assertj)
+  testImplementation(project(":misk-metrics-testing"))
   testImplementation(project(":misk-redis-testing"))
   testImplementation(project(":misk-testing"))
 }

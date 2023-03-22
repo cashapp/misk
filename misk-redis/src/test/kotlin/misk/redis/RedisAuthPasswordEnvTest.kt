@@ -38,7 +38,8 @@ class RedisAuthPasswordEnvTest {
     val injector = createInjector(realEnv, realRedisModule)
     val ex = assertThrows<ProvisionException> { injector.getInstance(keyOf<RedisConsumer>()) }
     assertThat(ex).hasCauseInstanceOf(IllegalStateException::class.java)
-    assertThat(ex.cause).hasMessage("Redis auth password cannot be empty in a real environment!")
+    assertThat(ex.cause)
+      .hasMessage("This Redis client is configured to require an auth password, but none was provided!")
   }
 
   private class RedisConsumer @Inject constructor(val redis: Redis)
