@@ -55,7 +55,7 @@ public abstract interface annotation class misk/redis/ForFakeRedis : java/lang/a
 
 public final class misk/redis/RealRedis : misk/redis/Redis {
 	public static final field Companion Lmisk/redis/RealRedis$Companion;
-	public fun <init> (Lredis/clients/jedis/JedisPool;)V
+	public fun <init> (Lredis/clients/jedis/JedisPool;Lmisk/redis/RedisClientMetrics;)V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public fun close ()V
@@ -146,6 +146,14 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public abstract fun unwatch ([Ljava/lang/String;)V
 	public abstract fun watch ([Ljava/lang/String;)V
+}
+
+public final class misk/redis/RedisClientMetrics {
+	public static final field Companion Lmisk/redis/RedisClientMetrics$Companion;
+	public fun <init> (Lmisk/metrics/v2/Metrics;)V
+}
+
+public final class misk/redis/RedisClientMetrics$Companion {
 }
 
 public final class misk/redis/RedisConfig : java/util/LinkedHashMap, wisp/config/Config {
