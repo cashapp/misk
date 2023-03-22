@@ -39,6 +39,7 @@ interface Redis {
    *
    * @param keyValues the list of keys and values in alternating order.
    */
+  // Consider deprecating in favour of a list of pairs?
   fun mset(vararg keyValues: ByteString)
 
   /**
