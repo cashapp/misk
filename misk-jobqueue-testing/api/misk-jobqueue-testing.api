@@ -41,7 +41,7 @@ public final class misk/jobqueue/FakeJobHandlerModule$Companion {
 }
 
 public final class misk/jobqueue/FakeJobQueue : misk/jobqueue/JobQueue, misk/jobqueue/TransactionalJobQueue {
-	public fun <init> (Ljava/time/Clock;Ljavax/inject/Provider;Lmisk/tokens/TokenGenerator;)V
+	public fun <init> (Ljava/time/Clock;Ljavax/inject/Provider;Lwisp/token/TokenGenerator;)V
 	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;)V
 	public fun enqueue (Lmisk/hibernate/Session;Lmisk/hibernate/Gid;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 	public fun enqueue (Lmisk/hibernate/Session;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
