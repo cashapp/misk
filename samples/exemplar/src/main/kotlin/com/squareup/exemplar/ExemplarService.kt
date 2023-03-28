@@ -6,6 +6,7 @@ import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.metrics.backends.prometheus.PrometheusMetricsServiceModule
+import misk.monitoring.MonitoringModule
 import misk.web.MiskWebModule
 import wisp.deployment.Deployment
 
@@ -21,5 +22,6 @@ fun main(args: Array<String>) {
     MiskRealServiceModule(),
     MiskWebModule(config.web),
     PrometheusMetricsServiceModule(config.prometheus),
+    MonitoringModule(),
   ).run(args)
 }
