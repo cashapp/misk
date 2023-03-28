@@ -437,24 +437,24 @@ private class TestModule : KAbstractModule() {
   }
 }
 
-private val RED_QUEUE = QueueName("red_queue")
-private val GREEN_QUEUE = QueueName("green_queue")
-private val ENQUEUER_QUEUE = QueueName("first_step_queue")
+internal val RED_QUEUE = QueueName("red_queue")
+internal val GREEN_QUEUE = QueueName("green_queue")
+internal val ENQUEUER_QUEUE = QueueName("first_step_queue")
 
-private enum class Color {
+internal enum class Color {
   RED,
   GREEN
 }
 
-private class ColorException : Throwable()
+internal class ColorException : Throwable()
 
-private data class ExampleJob(
+internal data class ExampleJob(
   val color: Color,
   val message: String,
   val hint: ExampleJobHint? = null
 )
 
-private enum class ExampleJobHint {
+internal enum class ExampleJobHint {
   DONT_ACK,
   THROW,
   THROW_ONCE,
@@ -462,7 +462,7 @@ private enum class ExampleJobHint {
   DEAD_LETTER_ONCE
 }
 
-private class ExampleJobEnqueuer @Inject private constructor(
+internal class ExampleJobEnqueuer @Inject private constructor(
   private val jobQueue: JobQueue,
   moshi: Moshi
 ) {
@@ -484,13 +484,23 @@ private class ExampleJobEnqueuer @Inject private constructor(
     )
   }
 
+  fun batchEnqueueRed(messages: List<String>, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
+    jobQueue.batchEnqueue(RED_QUEUE, messages.map {
+      JobQueue.JobRequest(
+        body = jobAdapter.toJson(ExampleJob(Color.RED, it, hint)),
+        deliveryDelay = deliveryDelay,
+        attributes = mapOf("key" to "value")
+      )
+    })
+  }
+
   fun enqueueEnqueuer() {
     jobQueue.enqueue(ENQUEUER_QUEUE, body = "")
   }
 }
 
 @Singleton
-private class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobHandler {
+internal class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobHandler {
   private val jobAdapter = moshi.adapter<ExampleJob>()
   private val jobsExecutedOnce = ConcurrentHashMap<String, Boolean>()
 
@@ -527,7 +537,7 @@ private class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobH
   }
 }
 
-private class EnqueuerJobHandler @Inject private constructor(
+internal class EnqueuerJobHandler @Inject private constructor(
   private val jobQueue: JobQueue,
   moshi: Moshi
 ) : JobHandler {
