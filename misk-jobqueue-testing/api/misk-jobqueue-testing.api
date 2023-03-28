@@ -1,3 +1,8 @@
+public final class misk/jobqueue/DevelopmentJobProcessorModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
+}
+
 public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/Job {
 	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)V
 	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
