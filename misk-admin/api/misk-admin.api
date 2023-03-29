@@ -662,7 +662,6 @@ public final class misk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse$Co
 
 public final class misk/web/metadata/jvm/JvmMetadataModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
-	public final fun provideRuntimeMxBean ()Ljava/lang/management/RuntimeMXBean;
 }
 
 public final class misk/web/metadata/webaction/WebActionMetadataAction : misk/web/actions/WebAction {
