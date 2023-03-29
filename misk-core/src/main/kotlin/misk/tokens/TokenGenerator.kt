@@ -2,39 +2,12 @@ package misk.tokens
 
 import java.util.Arrays
 
-/**
- * Generates an secure, unguessable, alphanumeric token for use as a universally unique ID. Tokens
- * are encoded with a [Crockford Base32 alphabet][https://www.crockford.com/wrmg/base32.html]. This
- * alphabet contains a mix of lowercase characters and digits and is resistant to decoding errors;
- * for example `0`, `o`, and 'O' are equivalent.
- *
- * For strength similar to a [random UUID][java.util.UUID.randomUUID] (122 bits of entropy), most
- * callers should use the default length of 25 characters (125 bits). Using fewer characters risks
- * collision, which may be acceptable for some use-cases. There is no practical benefit to using
- * more than 25 characters.
- *
- * In production, staging, and development environments tokens are always created using
- * [SecureRandom][java.security.SecureRandom]. These are some sample production tokens:
- *
- * ```
- * 75dsma7kscyvbgz7ea1yy3qe8
- * 3zg6svk9hcpvqyhej41tdkaa0
- * gv7s8nkevt9d7aw2eb06g640e
- * a17f7h6t853kzdqpc29qa8mnw
- * ```
- *
- * In tests tokens are sequential and predictable. They are prefixed with an optional label that
- * appears in the returned string and can be used as a namespace. It is okay to hardcode expected
- * tokens in test cases! These are some sample testing tokens:
- *
- * ```
- * cst0mer000000000000000035
- * payment000000000000000034
- * cst0mer000000000000000036
- * payment000000000000000035
- * ```
- */
-interface TokenGenerator {
+// TODO: Replace all TokenGenerator references with TokenGenerator2 then replace TokenGenerator
+//  with typealias then replace all TokenGenerator2 with TokenGenerator again. Yay dependencies.
+
+typealias TokenGenerator = wisp.token.TokenGenerator
+
+interface TokenGenerator2 {
   fun generate(label: String? = null, length: Int = 25): String
 
   companion object {

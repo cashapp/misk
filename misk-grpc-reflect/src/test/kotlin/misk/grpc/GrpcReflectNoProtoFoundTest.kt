@@ -60,9 +60,9 @@ class GrpcReflectNoProtoFoundTest {
   /** Synthesize a gRPC method with no source code. This could have been generated, but it's not. */
   interface FakeGetFeatureBlockingServer : Service {
     @WireRpc(
-      path = "/fakerouteguide.RouteGuide/GetFeature",
-      requestAdapter = "fakerouteguide.Point#ADAPTER",
-      responseAdapter = "fakerouteguide.Feature#ADAPTER",
+      path = "/routeguide.RouteGuide/GetFeature",
+      requestAdapter = "routeguide.Point#ADAPTER",
+      responseAdapter = "routeguide.Feature#ADAPTER",
       sourceFile = "fakerouteguide/RouteGuideProto.proto"
     )
     fun GetFeature(request: Point): Feature

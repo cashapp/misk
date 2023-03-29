@@ -1,8 +1,16 @@
-included_config:
+included:
   key: common
 
-ignored_config:
+overridden:
   key: ignored
 
-redacted_config:
-  passphrase: phrase123
+password:
+  password: abc123
+  passphrase: abc123
+  custom: abc123
+
+secret:
+  secret_key: "classpath:/secrets/api_key.txt"
+
+redacted:
+  key: common123

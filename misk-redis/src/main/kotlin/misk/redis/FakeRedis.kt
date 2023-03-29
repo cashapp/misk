@@ -15,6 +15,10 @@ import kotlin.math.min
 import kotlin.random.Random
 
 /** Mimics a Redis instance for testing. */
+@Deprecated(
+  message = "Moved to misk-redis-testing. This Fake does not emulate redis correctly.",
+  replaceWith = ReplaceWith("misk.redis.testing.FakeRedis")
+)
 class FakeRedis : Redis {
   @Inject lateinit var clock: Clock
   @Inject @ForFakeRedis lateinit var random: Random
@@ -380,5 +384,9 @@ class FakeRedis : Redis {
 
   override fun pipelined(): Pipeline {
     throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun close() {
+    // No-op.
   }
 }

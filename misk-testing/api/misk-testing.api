@@ -235,17 +235,8 @@ public final class misk/testing/TemporaryFolderModule$DeleteTempFolder : org/jun
 	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
-public final class misk/time/FakeClock : java/time/Clock {
+public final class misk/time/FakeClock : wisp/time/FakeClock {
 	public fun <init> ()V
-	public fun <init> (JLjava/time/ZoneId;)V
-	public synthetic fun <init> (JLjava/time/ZoneId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun add (JLjava/util/concurrent/TimeUnit;)J
-	public final fun add (Ljava/time/Duration;)J
-	public final fun add (Ljava/time/Period;)J
-	public fun getZone ()Ljava/time/ZoneId;
-	public fun instant ()Ljava/time/Instant;
-	public final fun setNow (Ljava/time/Instant;)V
-	public fun withZone (Ljava/time/ZoneId;)Ljava/time/Clock;
 }
 
 public final class misk/time/FakeClockModule : misk/inject/KInstallOnceModule {

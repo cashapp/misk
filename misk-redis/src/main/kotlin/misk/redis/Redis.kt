@@ -39,6 +39,7 @@ interface Redis {
    *
    * @param keyValues the list of keys and values in alternating order.
    */
+  // Consider deprecating in favour of a list of pairs?
   fun mset(vararg keyValues: ByteString)
 
   /**
@@ -433,6 +434,11 @@ interface Redis {
    * Begin a pipeline operation to batch together several updates for optimal performance
    */
   fun pipelined(): Pipeline
+
+  /**
+   * Closes the client, so it may not be used further.
+   */
+  fun close()
 }
 
 /**
@@ -445,7 +451,7 @@ interface Redis {
  *
  * https://redis.io/commands/hrandfield/#specification-of-the-behavior-when-count-is-passed
  */
-internal inline fun checkHrandFieldCount(count: Long) {
+inline fun checkHrandFieldCount(count: Long) {
   require(count > -1) {
     "This Redis client does not support negative field counts for HRANDFIELD."
   }

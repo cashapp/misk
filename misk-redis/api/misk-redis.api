@@ -4,6 +4,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun <init> ()V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
+	public fun close ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
 	public fun expire (Ljava/lang/String;J)Z
@@ -54,10 +55,10 @@ public abstract interface annotation class misk/redis/ForFakeRedis : java/lang/a
 
 public final class misk/redis/RealRedis : misk/redis/Redis {
 	public static final field Companion Lmisk/redis/RealRedis$Companion;
-	public fun <init> (Lredis/clients/jedis/JedisPool;)V
+	public fun <init> (Lredis/clients/jedis/JedisPool;Lmisk/redis/RedisClientMetrics;)V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
-	public final fun close ()V
+	public fun close ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
 	public fun expire (Ljava/lang/String;J)Z
@@ -105,6 +106,7 @@ public final class misk/redis/RealRedis$Companion {
 public abstract interface class misk/redis/Redis {
 	public abstract fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public abstract fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
+	public abstract fun close ()V
 	public abstract fun del (Ljava/lang/String;)Z
 	public abstract fun del ([Ljava/lang/String;)I
 	public abstract fun expire (Ljava/lang/String;J)Z
@@ -146,6 +148,14 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun watch ([Ljava/lang/String;)V
 }
 
+public final class misk/redis/RedisClientMetrics {
+	public static final field Companion Lmisk/redis/RedisClientMetrics$Companion;
+	public fun <init> (Lmisk/metrics/v2/Metrics;)V
+}
+
+public final class misk/redis/RedisClientMetrics$Companion {
+}
+
 public final class misk/redis/RedisConfig : java/util/LinkedHashMap, wisp/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/Map;)V
@@ -178,8 +188,13 @@ public final class misk/redis/RedisConnectionException : java/lang/RuntimeExcept
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 }
 
+public final class misk/redis/RedisKt {
+	public static final fun checkHrandFieldCount (J)V
+}
+
 public final class misk/redis/RedisModule : misk/inject/KAbstractModule {
-	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;)V
+	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;Z)V
+	public synthetic fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/redis/RedisNodeConfig {

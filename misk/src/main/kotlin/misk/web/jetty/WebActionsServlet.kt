@@ -14,6 +14,7 @@ import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okio.BufferedSink
 import okio.buffer
 import okio.sink
 import okio.source
@@ -69,11 +70,15 @@ internal class WebActionsServlet @Inject constructor(
     // Check http2 is enabled if any gRPC actions are bound.
     if (boundActions.any { it.action.dispatchMechanism == DispatchMechanism.GRPC }) {
       if (!config.http2) {
-        log.warn { "HTTP/2 must be enabled if any gRPC actions are bound. " +
-          "This will cause an error in the future. Check these actions: " +
-          "${boundActions
-            .filter { it.action.dispatchMechanism == DispatchMechanism.GRPC  }
-            .map { it.action.name }}" }
+        log.warn {
+          "HTTP/2 must be enabled if any gRPC actions are bound. " +
+            "This will cause an error in the future. Check these actions: " +
+            "${
+              boundActions
+                .filter { it.action.dispatchMechanism == DispatchMechanism.GRPC }
+                .map { it.action.name }
+            }"
+        }
       }
     }
   }
@@ -94,7 +99,7 @@ internal class WebActionsServlet @Inject constructor(
     handleCall(request, response)
   }
 
-  fun doPatch(request: HttpServletRequest, response: HttpServletResponse) {
+  private fun doPatch(request: HttpServletRequest, response: HttpServletResponse) {
     handleCall(request, response)
   }
 
@@ -108,6 +113,10 @@ internal class WebActionsServlet @Inject constructor(
 
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
+      val responseBody = response.outputStream.sink().buffer()
+      val dispatchMechanism =
+        request.dispatchMechanism() ?: return sendNotFound(request, response, responseBody)
+
       val httpCall = ServletHttpCall.create(
         request = request,
         linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
@@ -115,17 +124,19 @@ internal class WebActionsServlet @Inject constructor(
             is UnixSocketConnector -> SocketAddress.Unix(
               (this.connector as UnixSocketConnector).unixSocket
             )
+
             is ServerConnector -> SocketAddress.Network(
               this.endPoint.remoteAddress.address.hostAddress,
               (this.connector as ServerConnector).localPort
             )
+
             else -> throw IllegalStateException("Unknown socket connector.")
           }
         },
-        dispatchMechanism = request.dispatchMechanism(),
+        dispatchMechanism = dispatchMechanism,
         upstreamResponse = JettyServletUpstreamResponse(response as Response),
         requestBody = request.inputStream.source().buffer(),
-        responseBody = response.outputStream.sink().buffer()
+        responseBody = responseBody
       )
 
       val requestContentType = httpCall.contentType()
@@ -141,8 +152,10 @@ internal class WebActionsServlet @Inject constructor(
         response.handleHttp2ConnectionClose()
         return
       }
-    } catch (_: ProtocolException) {
-      // Probably an unexpected HTTP method. Send a 404 below.
+
+      // We didn't match with an action, so it's a 404. We hit this for things other than get/post
+      // which are covered by the NotFoundAction.
+      sendNotFound(request, response, responseBody)
     } catch (e: Throwable) {
       log.error(e) { "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}" }
 
@@ -152,11 +165,17 @@ internal class WebActionsServlet @Inject constructor(
 
       return
     }
+  }
 
+  private fun sendNotFound(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    responseBody: BufferedSink
+  ) {
     response.status = HttpURLConnection.HTTP_NOT_FOUND
     response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-    response.writer.print("Nothing found at ${request.httpUrl()}")
-    response.writer.close()
+    responseBody.writeUtf8("Nothing found at ${request.method} ${request.httpUrl()}")
+    responseBody.close()
   }
 
   /**
@@ -217,16 +236,17 @@ internal fun HttpServletRequest.httpUrl(): HttpUrl {
 }
 
 /** @throws ProtocolException on unexpected methods. */
-internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism {
+internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
   return when (method) {
     HttpMethod.GET.name -> DispatchMechanism.GET
     HttpMethod.POST.name -> when (contentType()) {
       MediaTypes.APPLICATION_GRPC_MEDIA_TYPE -> DispatchMechanism.GRPC
       else -> DispatchMechanism.POST
     }
-    "PATCH" -> DispatchMechanism.PATCH
+
+    HttpMethod.PATCH.name -> DispatchMechanism.PATCH
     HttpMethod.PUT.name -> DispatchMechanism.PUT
     HttpMethod.DELETE.name -> DispatchMechanism.DELETE
-    else -> throw ProtocolException("unexpected method: $method")
+    else -> null
   }
 }

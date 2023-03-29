@@ -21,24 +21,16 @@ class ConfigMetadataAction @Inject constructor(
   deployment: Deployment,
   config: Config,
   private val jvmMetadataAction: JvmMetadataAction,
-  private val mode: ConfigTabMode,
+  private val mode: ConfigTabMode
 ) : WebAction {
-  private val resources: Map<String, String?> =
-    generateConfigResources(appName, deployment, config)
+  private val resources: Map<String, String?> = generateConfigResources(appName, deployment, config)
 
   @Get("/api/config/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
   fun getAll(): Response {
-    // TODO(mmihic): Need to figure out how to get the overrides.
-    // TODO make this config variable specific redaction with an annotation, not just password/passphrase
-    // Regex to match on password values for password redaction in output
-    val yamlFilesRegex = Regex("(?<=(password|passphrase): )([^\n]*)")
-
-    return Response(
-      resources = redact(resources, yamlFilesRegex)
-    )
+    return Response(resources = resources)
   }
 
   private fun generateConfigResources(
@@ -46,35 +38,32 @@ class ConfigMetadataAction @Inject constructor(
     deployment: Deployment,
     config: Config
   ): Map<String, String?> {
+    // TODO: Need to figure out how to get the overrides (ie. k8s /etc/secrets, database override...).
     val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())
-    val yamlFiles = linkedMapOf<String, String?>()
-    when (mode) {
-      ConfigTabMode.SAFE -> {
-        yamlFiles.put("JVM", jvmMetadataAction.getRuntime())
-      }
-      ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS -> {
-        yamlFiles.put("Effective Config", MiskConfig.toYaml(config, ResourceLoader.SYSTEM))
-        rawYamlFiles.map { yamlFiles.put(it.key, it.value) }
-        yamlFiles.put("JVM", jvmMetadataAction.getRuntime())
-      }
+
+    val configFileContents = linkedMapOf<String, String?>()
+    if (mode != ConfigTabMode.SAFE) {
+      configFileContents.put("Effective Config", MiskConfig.toRedactedYaml(config, ResourceLoader.SYSTEM))
     }
-    return yamlFiles
+    if (mode == ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS) {
+      rawYamlFiles.forEach { configFileContents.put(it.key, it.value) }
+    }
+    configFileContents.put("JVM", jvmMetadataAction.getRuntime())
+
+    return configFileContents
   }
 
   data class Response(val resources: Map<String, String?>)
 
-  companion object {
-    fun redact(
-      mapOfOutputs: Map<String, String?>,
-      regex: Regex
-    ) = mapOfOutputs.mapValues { it.value?.replace(regex, "████████") }
-
-    fun redact(output: String, regex: Regex) =
-      output.replace(regex, "████████")
-  }
-
   enum class ConfigTabMode {
-    SAFE, // Only show safe content which will not leak Misk secrets
+    /** Only show safe content which will not leak Misk secrets */
+    SAFE,
+    /**
+     * Show redacted effective config loaded into application, risk of leak if sensitive
+     * non-Secret fields don't have @misk.config.Redact annotation manually added.
+     */
+    SHOW_REDACTED_EFFECTIVE_CONFIG,
+    /** Shows all possible resources, YAML files are not redacted */
     UNSAFE_LEAK_MISK_SECRETS
   }
 }
