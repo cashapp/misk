@@ -5,6 +5,7 @@ import misk.concurrent.SleeperModule
 import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import misk.jvm.JvmManagementFactoryModule
 import misk.metrics.backends.prometheus.PrometheusMetricsClientModule
 import misk.moshi.MoshiModule
 import misk.resources.ResourceLoaderModule
@@ -42,7 +43,7 @@ class MiskCommonServiceModule : KAbstractModule() {
     install(ServiceManagerModule())
     install(PrometheusMetricsClientModule())
     install(MoshiModule(useWireToRead = true, useWireToWrite = true))
-
+    install(JvmManagementFactoryModule())
     // Initialize empty sets for our multibindings.
     newMultibinder<HealthCheck>()
   }
