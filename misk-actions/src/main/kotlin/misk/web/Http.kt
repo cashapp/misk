@@ -43,7 +43,7 @@ annotation class RequestBody
 annotation class RequestContentType(vararg val value: String)
 
 @Target(AnnotationTarget.FUNCTION)
-annotation class ResponseContentType(val value: String)
+annotation class ResponseContentType(vararg val value: String)
 
 /**
  * When the service is overloaded Misk will intervene and reject calls by returning "HTTP 503

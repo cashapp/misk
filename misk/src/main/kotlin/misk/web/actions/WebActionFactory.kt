@@ -19,17 +19,20 @@ import misk.web.PathPattern
 import misk.web.Post
 import misk.web.Put
 import misk.web.RequestBody
+import misk.web.ResponseContentType
 import misk.web.WebActionBinding
 import misk.web.WebActionSeedDataTransformerFactory
 import misk.web.interceptors.BeforeContentEncoding
 import misk.web.interceptors.ForContentEncoding
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
+import okhttp3.MediaType.Companion.toMediaType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
 
 @Singleton
@@ -148,17 +151,27 @@ internal class WebActionFactory @Inject constructor(
     pathPattern: String,
     dispatchMechanism: DispatchMechanism
   ) {
-    // NB: The response media type may be omitted; in this case only generic return types (String,
-    // ByteString, ResponseBody, etc) are supported
-    val action = function.asAction(dispatchMechanism)
-    result += newBoundAction(provider, pathPattern, action)
+    val responseContentTypes = function.findAnnotation<ResponseContentType>()
+      ?.value
+      ?.toList()
+      ?: listOf(null)
 
-    // If we can create a synthetic action with a different media type, do it. This means all
-    // protobuf actions are also published as JSON actions.
-    val jsonVariant = transformActionIntoJson(action)
-    if (jsonVariant != null) {
-      result += newBoundAction(provider, pathPattern, jsonVariant)
+    val actions = responseContentTypes.flatMap { responseContentType ->
+      // NB: The response media type may be omitted; in this case only generic return types (String,
+      // ByteString, ResponseBody, etc) are supported
+      val action = function.asAction(dispatchMechanism, responseContentType?.toMediaType())
+
+      // If we can create a synthetic action with a different media type, do it. This means all
+      // protobuf actions are also published as JSON actions.
+      val jsonVariant = transformActionIntoJson(action)
+
+      listOfNotNull(
+        newBoundAction(provider, pathPattern, action),
+        jsonVariant?.let { newBoundAction(provider, pathPattern, jsonVariant) },
+      )
     }
+
+    result += actions.distinctBy { it.action }
   }
 
   /**
