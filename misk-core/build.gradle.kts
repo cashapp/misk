@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.kotlinRetry)
+  api(Dependencies.loggingApi)
   api(Dependencies.wispConfig)
   api(Dependencies.wispLease)
   api(Dependencies.wispLeaseTesting)
@@ -11,17 +13,17 @@ dependencies {
   api(Dependencies.wispResourceLoader)
   api(Dependencies.wispResourceLoaderTesting)
   api(Dependencies.wispSsl)
+  api(Dependencies.wispToken)
+  api(Dependencies.wispTokenTesting)
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.guice)
-  implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.kotlinReflection)
-  api(Dependencies.kotlinRetry)
-  api(Dependencies.loggingApi)
+  implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.logbackClassic)
-  implementation(Dependencies.okio)
   implementation(Dependencies.okHttp)
+  implementation(Dependencies.okio)
   implementation(Dependencies.slf4jApi)
-
+  api(project(":misk-config"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
 

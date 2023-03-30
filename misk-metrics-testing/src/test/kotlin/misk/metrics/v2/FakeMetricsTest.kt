@@ -36,6 +36,23 @@ class FakeMetricsTest {
   }
 
   @Test
+  internal fun `peakGauge happy path`() {
+    assertThat(metrics.get("thread_count", "state" to "running")).isNull()
+    val peakGauge = metrics.peakGauge("thread_count", "-", labelNames = listOf("state"))
+      .labels("running")
+    peakGauge.record(10.0)
+    peakGauge.record(20.0)
+    assertThat(metrics.get("thread_count", "state" to "running")).isEqualTo(20.0)
+    // Another get without a set should result in seeing the initial value (0)
+    assertThat(metrics.get("thread_count", "state" to "running")).isEqualTo(0.0)
+    peakGauge.record(30.0)
+    peakGauge.record(20.0)
+    assertThat(metrics.get("thread_count", "state" to "running")).isEqualTo(30.0)
+    // Another get without a set should result in seeing the initial value (0)
+    assertThat(metrics.get("thread_count", "state" to "running")).isEqualTo(0.0)
+  }
+
+  @Test
   internal fun `summary happy path`() {
     assertThat(metrics.get("call_times", "status" to "200")).isNull()
     val summary = metrics.summary("call_times", "-", labelNames = listOf("status"))
@@ -76,6 +93,8 @@ class FakeMetricsTest {
   internal fun `different names`() {
     assertThat(metrics.get("gets")).isNull()
     assertThat(metrics.get("puts")).isNull()
+    assertThat(metrics.get("gets_total")).isNull()
+    assertThat(metrics.get("puts_total")).isNull()
 
     val getsCounter = metrics.counter("gets", "-")
     val putsCounter = metrics.counter("puts", "-")
@@ -89,6 +108,8 @@ class FakeMetricsTest {
     putsCounter.inc(20.0)
     assertThat(metrics.get("gets")).isEqualTo(17.0)
     assertThat(metrics.get("puts")).isEqualTo(29.0)
+    assertThat(metrics.get("gets_total")).isEqualTo(17.0)
+    assertThat(metrics.get("puts_total")).isEqualTo(29.0)
   }
 
   @Test
@@ -101,29 +122,29 @@ class FakeMetricsTest {
 
     summary.observe(450.0)
     assertThat(metrics.summaryP50("call_times")).isEqualTo(400.0)
-    assertThat(metrics.summaryP99("call_times")).isEqualTo(400.0)
-
-    summary.observe(500.0)
-    assertThat(metrics.summaryP50("call_times")).isEqualTo(400.0)
     assertThat(metrics.summaryP99("call_times")).isEqualTo(450.0)
 
-    summary.observe(550.0)
+    summary.observe(500.0)
     assertThat(metrics.summaryP50("call_times")).isEqualTo(450.0)
     assertThat(metrics.summaryP99("call_times")).isEqualTo(500.0)
 
-    summary.observe(600.0)
+    summary.observe(550.0)
     assertThat(metrics.summaryP50("call_times")).isEqualTo(450.0)
     assertThat(metrics.summaryP99("call_times")).isEqualTo(550.0)
+
+    summary.observe(600.0)
+    assertThat(metrics.summaryP50("call_times")).isEqualTo(500.0)
+    assertThat(metrics.summaryP99("call_times")).isEqualTo(600.0)
   }
 
   @Test
   internal fun `get all samples`() {
-    metrics.counter("counter", "-", listOf("foo")).labels("bar").inc()
+    metrics.counter("counter_total", "-", listOf("foo")).labels("bar").inc()
     metrics.gauge("gauge", "-", listOf("foo")).labels("bar").inc()
     metrics.histogram("histogram", "-", listOf("foo"), listOf(1.0, 2.0)).labels("bar").observe(1.0)
 
-    assertThat(metrics.getAllSamples().toList()).containsExactlyInAnyOrder(
-      Sample("counter", listOf("foo"), listOf("bar"), 1.0),
+    assertThat(metrics.getAllSamples().toList()).contains(
+      Sample("counter_total", listOf("foo"), listOf("bar"), 1.0),
       Sample("gauge", listOf("foo"), listOf("bar"), 1.0),
       Sample("histogram_bucket", listOf("foo", "le"), listOf("bar", "1.0"), 1.0),
       Sample("histogram_bucket", listOf("foo", "le"), listOf("bar", "2.0"), 1.0),

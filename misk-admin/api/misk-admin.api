@@ -187,7 +187,8 @@ public abstract interface annotation class misk/web/dashboard/AdminDashboardAcce
 }
 
 public final class misk/web/dashboard/AdminDashboardModule : misk/inject/KAbstractModule {
-	public fun <init> (Z)V
+	public fun <init> (ZLmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;)V
+	public synthetic fun <init> (ZLmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/web/dashboard/AdminDashboardTestingModule : misk/inject/KAbstractModule {
@@ -468,18 +469,13 @@ public final class misk/web/metadata/ServiceMetadataAction$ServiceMetadata {
 }
 
 public final class misk/web/metadata/config/ConfigMetadataAction : misk/web/actions/WebAction {
-	public static final field Companion Lmisk/web/metadata/config/ConfigMetadataAction$Companion;
 	public fun <init> (Ljava/lang/String;Lwisp/deployment/Deployment;Lwisp/config/Config;Lmisk/web/metadata/jvm/JvmMetadataAction;Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;)V
 	public final fun getAll ()Lmisk/web/metadata/config/ConfigMetadataAction$Response;
 }
 
-public final class misk/web/metadata/config/ConfigMetadataAction$Companion {
-	public final fun redact (Ljava/lang/String;Lkotlin/text/Regex;)Ljava/lang/String;
-	public final fun redact (Ljava/util/Map;Lkotlin/text/Regex;)Ljava/util/Map;
-}
-
 public final class misk/web/metadata/config/ConfigMetadataAction$ConfigTabMode : java/lang/Enum {
 	public static final field SAFE Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
+	public static final field SHOW_REDACTED_EFFECTIVE_CONFIG Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
 	public static final field UNSAFE_LEAK_MISK_SECRETS Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
 	public static fun values ()[Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
@@ -666,7 +662,6 @@ public final class misk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse$Co
 
 public final class misk/web/metadata/jvm/JvmMetadataModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
-	public final fun provideRuntimeMxBean ()Ljava/lang/management/RuntimeMXBean;
 }
 
 public final class misk/web/metadata/webaction/WebActionMetadataAction : misk/web/actions/WebAction {

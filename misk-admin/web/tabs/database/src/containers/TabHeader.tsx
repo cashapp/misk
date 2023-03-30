@@ -15,16 +15,15 @@ export const TabHeader = () => {
       </span>
       <Button
         active={isOpenInstructions}
-        css={cssFloatLeft}
         onClick={() => setIsOpenInstructions(!isOpenInstructions)}
       >
-        {"Install Instructions"}
+        {"Documentation"}
       </Button>
       <Drawer
         isOpen={isOpenInstructions}
         onClose={() => setIsOpenInstructions(false)}
         size={Drawer.SIZE_LARGE}
-        title={"Install Instructions"}
+        title={"Documentation"}
       >
         <div css={cssTableScroll}>
           <Callout

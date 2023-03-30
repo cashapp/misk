@@ -13,16 +13,12 @@ import misk.web.ResponseContentType
 import misk.web.actions.NotFoundAction
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import misk.web.mediatype.asMediaType
 import misk.web.resources.ResourceEntryFinder
 import misk.web.resources.StaticResourceAction
 import misk.web.toMisk
-import misk.web.toResponseBody
-import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
-import java.net.HttpURLConnection
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -52,7 +48,6 @@ class WebProxyAction @Inject constructor(
   private val staticResourceAction: StaticResourceAction,
   private val resourceEntryFinder: ResourceEntryFinder
 ) : WebAction {
-
   @Get("/{path:.*}")
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)
@@ -79,24 +74,16 @@ class WebProxyAction @Inject constructor(
     }
   }
 
-  private fun fetchFailResponse(clientRequestUrl: HttpUrl): Response<ResponseBody> {
-    return Response(
-      "Failed to fetch upstream URL $clientRequestUrl".toResponseBody(),
-      headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8.asMediaType().toString()),
-      HttpURLConnection.HTTP_UNAVAILABLE
-    )
-  }
-
   private fun okhttp3.Request.forwardedWithUrl(newUrl: HttpUrl): okhttp3.Request {
     // TODO(adrw) include the client URL/IP as the for= field for Forwarded
     return newBuilder()
       .addHeader(
         "Forwarded",
         "for=; by=${
-        HttpUrl.Builder()
-          .scheme(this.url.scheme)
-          .host(this.url.host)
-          .port(this.url.port)
+          HttpUrl.Builder()
+            .scheme(this.url.scheme)
+            .host(this.url.host)
+            .port(this.url.port)
         }"
       )
       .url(newUrl)

@@ -40,6 +40,7 @@ class GrpcClientModule<T : Service, G : T>(
     // Initialize empty sets for our multibindings.
     newMultibinder<ClientApplicationInterceptorFactory>()
     newMultibinder<ClientNetworkInterceptor.Factory>()
+    newMultibinder<CallFactoryWrapper>()
   }
 
   companion object {
