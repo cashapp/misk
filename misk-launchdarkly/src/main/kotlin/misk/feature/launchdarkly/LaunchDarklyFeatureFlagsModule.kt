@@ -8,6 +8,7 @@ import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import misk.ServiceModule
 import misk.client.HttpClientSSLConfig
+import misk.config.Redact
 import misk.feature.FeatureService
 import misk.inject.KAbstractModule
 import misk.inject.toKey
@@ -82,6 +83,7 @@ class LaunchDarklyModule(
 }
 
 data class LaunchDarklyConfig(
+  @Redact
   val sdk_key: String,
   val base_uri: String,
   val ssl: HttpClientSSLConfig? = null
