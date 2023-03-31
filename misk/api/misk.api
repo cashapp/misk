@@ -867,6 +867,19 @@ public final class misk/io/PathExtensionsKt {
 	public static synthetic fun listRecursively$default (Ljava/nio/file/Path;ZILjava/lang/Object;)Ljava/util/List;
 }
 
+public final class misk/jvm/JvmManagementFactoryModule : misk/inject/KInstallOnceModule {
+	public fun <init> ()V
+	public final fun provideRuntimeMxBean ()Ljava/lang/management/RuntimeMXBean;
+}
+
+public final class misk/monitoring/JvmMetrics {
+	public fun <init> (Ljava/lang/management/RuntimeMXBean;Lmisk/metrics/v2/Metrics;)V
+}
+
+public final class misk/monitoring/MonitoringModule : misk/inject/KInstallOnceModule {
+	public fun <init> ()V
+}
+
 public final class misk/moshi/MoshiAdapterModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/moshi/MoshiAdapterModule$Companion;
 	public fun <init> (Ljava/lang/Object;)V
