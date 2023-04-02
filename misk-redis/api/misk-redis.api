@@ -36,6 +36,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
 	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
@@ -46,6 +47,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public final fun setRandom (Lkotlin/random/Random;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
 	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
+	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 }
@@ -88,6 +90,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
 	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
@@ -96,6 +99,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
 	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
+	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 }
@@ -136,6 +140,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun pExpire (Ljava/lang/String;J)Z
 	public abstract fun pExpireAt (Ljava/lang/String;J)Z
 	public abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public abstract fun publish (Ljava/lang/String;Ljava/lang/String;)V
 	public abstract fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public abstract fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
@@ -144,6 +149,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
 	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
+	public abstract fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
 	public abstract fun unwatch ([Ljava/lang/String;)V
 	public abstract fun watch ([Ljava/lang/String;)V
 }

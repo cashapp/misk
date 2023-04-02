@@ -1516,16 +1516,6 @@ public final class misk/web/WebUnixDomainSocketConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/actions/FakeWebSocket : misk/web/actions/WebSocket {
-	public fun <init> ()V
-	public fun cancel ()V
-	public fun close (ILjava/lang/String;)Z
-	public fun queueSize ()J
-	public fun send (Ljava/lang/String;)Z
-	public fun send (Lokio/ByteString;)Z
-	public final fun takeLog ()Ljava/util/List;
-}
-
 public final class misk/web/actions/InternalErrorAction : misk/web/actions/WebAction {
 	public fun <init> ()V
 	public final fun error ()Ljava/lang/Void;

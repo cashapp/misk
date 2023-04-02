@@ -4,6 +4,7 @@ import misk.redis.Redis
 import misk.redis.checkHrandFieldCount
 import okio.ByteString
 import okio.ByteString.Companion.encode
+import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.args.ListDirection
@@ -401,5 +402,13 @@ class FakeRedis @Inject constructor(
 
   override fun close() {
     // no op
+  }
+
+  override fun subscribe(jedisPubSub: JedisPubSub, channel: String) {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun publish(channel: String, message: String) {
+    throw NotImplementedError("Fake client not implemented for this operation")
   }
 }
