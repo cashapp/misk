@@ -5,10 +5,10 @@ plugins {
 
 dependencies {
   api(Dependencies.wispConfig)
+  api(Dependencies.jedis)
 
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.jedis)
   implementation(Dependencies.okio)
   implementation(project(":misk"))
   implementation(project(":misk-core"))
