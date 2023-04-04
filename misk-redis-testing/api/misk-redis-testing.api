@@ -47,6 +47,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
 	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
@@ -55,6 +56,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
 	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
+	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 }

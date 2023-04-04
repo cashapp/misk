@@ -3,6 +3,7 @@ package misk.redis
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisPool
+import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.args.ListDirection
@@ -291,6 +292,14 @@ class RealRedis(
   /** Closes the connection to Redis. */
   override fun close() {
     return jedisPool.close()
+  }
+
+  override fun subscribe(jedisPubSub: JedisPubSub, channel: String) {
+    jedisPool.resource.use { jedis -> jedis.subscribe(jedisPubSub, channel) }
+  }
+
+  override fun publish(channel: String, message: String) {
+    jedisPool.resource.use { jedis -> jedis.publish(channel, message) }
   }
 
   // Gets a Jedis instance from the pool, and times the requested method invocations.

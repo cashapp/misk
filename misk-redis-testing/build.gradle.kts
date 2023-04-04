@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+  api(project(":misk-testing"))
   implementation(Dependencies.dockerCore)
   implementation(Dependencies.dockerTransport)
   implementation(Dependencies.guava)
@@ -14,7 +15,6 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-redis"))
-  implementation(project(":misk-testing"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
