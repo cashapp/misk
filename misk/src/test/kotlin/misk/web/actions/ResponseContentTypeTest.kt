@@ -46,7 +46,8 @@ class ResponseContentTypeTest {
 
   @Test
   fun `the Accept header does not allow unsupported types to be returned`() {
-    // Make sure if we don't specify an Accept header, that it defaults to JSON
+    // Make sure if we don't specify an Accept header, that it defaults to only specified response
+    // content type, which in this case is JSON.
     val headerlessRequest = get("/hello-json/jeff")
     val headerlessResponse = httpClient.newCall(headerlessRequest).execute()
     assertThat(headerlessResponse.code).isEqualTo(200)
@@ -60,6 +61,16 @@ class ResponseContentTypeTest {
     val requestForProto = get("/hello-json/jeff", MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
     val protoResponse = httpClient.newCall(requestForProto).execute()
     assertThat(protoResponse.code).isEqualTo(415)
+  }
+
+  @Test
+  fun `if no Accept header is specified the first supported content type is preferred`() {
+    // Since we don't specify an Accept header, the first supported content type is used which is
+    // JSON for this particular endpoint.
+    val headerlessRequest = get("/hello/jeff")
+    val headerlessResponse = httpClient.newCall(headerlessRequest).execute()
+    assertThat(headerlessResponse.code).isEqualTo(200)
+    assertThat(headerlessResponse.body!!.string()).isEqualTo("""{"message":"howdy, jeff"}""")
   }
 
   class TestModule : KAbstractModule() {

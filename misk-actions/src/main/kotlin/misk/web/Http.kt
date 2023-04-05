@@ -42,6 +42,13 @@ annotation class RequestBody
 @Target(AnnotationTarget.FUNCTION)
 annotation class RequestContentType(vararg val value: String)
 
+/**
+ * Indicates what response content types the action can produce.
+ *
+ * Clients can specify what content type they prefer by setting the `Accept` header. If the action
+ * supports multiple content types but no `Accept` header is specified, the first content type is
+ * used.
+ */
 @Target(AnnotationTarget.FUNCTION)
 annotation class ResponseContentType(vararg val value: String)
 

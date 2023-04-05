@@ -154,6 +154,7 @@ internal class WebActionFactory @Inject constructor(
     val responseContentTypes = function.findAnnotation<ResponseContentType>()
       ?.value
       ?.toList()
+      // We have to have an element in the list to be able to flatMap over it below.
       ?: listOf(null)
 
     val actions = responseContentTypes.flatMap { responseContentType ->
@@ -171,6 +172,9 @@ internal class WebActionFactory @Inject constructor(
       )
     }
 
+    // Because we create a synthetic JSON action for each protobuf action, we need to dedupe the
+    // actions for the case where a user explicitly annotates an endpoint to service both JSON and
+    // Protobuf, to avoid having the synthetic JSON action and the "real" one from the annotation.
     result += actions.distinctBy { it.action }
   }
 
