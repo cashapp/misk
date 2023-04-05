@@ -5,13 +5,13 @@ plugins {
 }
 
 dependencies {
-  // TODO: these should be implementation("com.squareup.misk:*")
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-core"))
-  implementation(project(":misk-eventrouter"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-prometheus"))
+  implementation(project(":misk-redis"))
+  implementation(project(":misk-redis-testing"))
 
   testImplementation(project(":misk-testing"))
   testImplementation("org.assertj:assertj-core:3.24.2")

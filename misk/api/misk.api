@@ -271,7 +271,8 @@ public final class misk/Action {
 }
 
 public final class misk/ActionsKt {
-	public static final fun asAction (Lkotlin/reflect/KFunction;Lmisk/web/DispatchMechanism;)Lmisk/Action;
+	public static final fun asAction (Lkotlin/reflect/KFunction;Lmisk/web/DispatchMechanism;Lokhttp3/MediaType;)Lmisk/Action;
+	public static synthetic fun asAction$default (Lkotlin/reflect/KFunction;Lmisk/web/DispatchMechanism;Lokhttp3/MediaType;ILjava/lang/Object;)Lmisk/Action;
 }
 
 public abstract interface class misk/ApplicationInterceptor {
@@ -1527,16 +1528,6 @@ public final class misk/web/WebUnixDomainSocketConfig {
 	public final fun getPath ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/web/actions/FakeWebSocket : misk/web/actions/WebSocket {
-	public fun <init> ()V
-	public fun cancel ()V
-	public fun close (ILjava/lang/String;)Z
-	public fun queueSize ()J
-	public fun send (Ljava/lang/String;)Z
-	public fun send (Lokio/ByteString;)Z
-	public final fun takeLog ()Ljava/util/List;
 }
 
 public final class misk/web/actions/InternalErrorAction : misk/web/actions/WebAction {

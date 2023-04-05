@@ -3,39 +3,54 @@ package com.squareup.chat
 import com.google.inject.util.Modules
 import com.squareup.chat.actions.ChatWebSocketAction
 import misk.MiskTestingServiceModule
-import misk.eventrouter.EventRouterTester
-import misk.eventrouter.EventRouterTestingModule
+import misk.environment.DeploymentModule
+import misk.redis.RedisModule
+import misk.redis.testing.DockerRedis
+import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.FakeWebSocket
 import misk.web.WebActionModule
-import misk.web.actions.FakeWebSocket
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import redis.clients.jedis.JedisPoolConfig
+import wisp.deployment.TESTING
 import javax.inject.Inject
 
 @MiskTest(startService = true)
 class ChatWebSocketActionTest {
+  @Suppress("unused")
   @MiskTestModule
-  val module = Modules.combine(
-      MiskTestingServiceModule(),
-      EventRouterTestingModule(),
-      WebActionModule.create<ChatWebSocketAction>()
+  private val module = Modules.combine(
+    MiskTestingServiceModule(),
+    DeploymentModule(TESTING),
+    RedisModule(DockerRedis.config, JedisPoolConfig(), useSsl = false),
+    WebActionModule.create<ChatWebSocketAction>()
   )
 
+  @Suppress("unused")
+  @MiskExternalDependency
+  private val dockerRedis = DockerRedis
+
   @Inject lateinit var chatWebSocketAction: ChatWebSocketAction
-  @Inject lateinit var eventRouterTester: EventRouterTester
 
   @Test fun happyPath() {
     val sandyWebSocket = FakeWebSocket()
     val randyWebSocket = FakeWebSocket()
     val sandyListener = chatWebSocketAction.chat("discuss", sandyWebSocket)
-    chatWebSocketAction.chat("discuss", randyWebSocket)
+    val randyListener = chatWebSocketAction.chat("discuss", randyWebSocket)
 
-    assertThat(randyWebSocket.takeLog()).containsExactly("send: Welcome to discuss!")
-    assertThat(sandyWebSocket.takeLog()).containsExactly("send: Welcome to discuss!")
+    assertThat(sandyWebSocket.poll()).isEqualTo("send: Welcome to discuss!")
+    assertThat(sandyWebSocket.poll()).isEqualTo("send: Subscribed to discuss")
+    assertThat(randyWebSocket.poll()).isEqualTo("send: Welcome to discuss!")
+    assertThat(randyWebSocket.poll()).isEqualTo("send: Subscribed to discuss")
+
     sandyListener.onMessage(sandyWebSocket, "hello from sandy")
+    randyListener.onMessage(sandyWebSocket, "hello from randy")
 
-    eventRouterTester.processEverything()
-    assertThat(randyWebSocket.takeLog()).containsExactly("send: hello from sandy")
+    assertThat(sandyWebSocket.poll()).isEqualTo("send: hello from sandy")
+    assertThat(sandyWebSocket.poll()).isEqualTo("send: hello from randy")
+    assertThat(randyWebSocket.poll()).isEqualTo("send: hello from sandy")
+    assertThat(randyWebSocket.poll()).isEqualTo("send: hello from randy")
   }
 }

@@ -5,6 +5,7 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -12,7 +13,8 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.instanceParameter
 
 fun KFunction<*>.asAction(
-  dispatchMechanism: DispatchMechanism
+  dispatchMechanism: DispatchMechanism,
+  responseContentType: MediaType? = singleOrNullResponseMediaType(),
 ): Action {
   val instanceParameter = instanceParameter
     ?: throw IllegalArgumentException("only methods may be actions")
@@ -35,29 +37,31 @@ fun KFunction<*>.asAction(
         }
         listOf(MediaRange.parse(MediaTypes.APPLICATION_GRPC))
       }
+
       else -> findAnnotation<RequestContentType>()?.value?.flatMap {
         MediaRange.parseRanges(it)
       }?.toList() ?: listOf(MediaRange.ALL_MEDIA)
-    }
-
-  val responseContentType =
-    when (dispatchMechanism) {
-      DispatchMechanism.GRPC -> {
-        require(findAnnotation<ResponseContentType>() == null) {
-          "@Grpc cannot be used with @ResponseContentType on $this"
-        }
-        MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
-      }
-      else -> findAnnotation<ResponseContentType>()?.value?.toMediaTypeOrNull()
     }
 
   return Action(
     name = actionName,
     function = this,
     acceptedMediaRanges = acceptedMediaRange,
-    responseContentType = responseContentType,
+    responseContentType = when (dispatchMechanism) {
+      DispatchMechanism.GRPC -> {
+        require(findAnnotation<ResponseContentType>() == null) {
+          "@Grpc cannot be used with @ResponseContentType on $this"
+        }
+        MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
+      }
+
+      else -> responseContentType
+    },
     parameters = actualParameters,
     returnType = returnType,
     dispatchMechanism = dispatchMechanism
   )
 }
+
+private fun KFunction<*>.singleOrNullResponseMediaType() =
+  findAnnotation<ResponseContentType>()?.value?.singleOrNull()?.toMediaTypeOrNull()
