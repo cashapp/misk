@@ -25,8 +25,8 @@ import javax.inject.Singleton
 @Singleton
 internal class PauseDetector @Inject constructor(
   private val config: PauseDetectorConfig,
-  private val ticker: Ticker,
-  private val sleeper: Sleeper,
+  @ForPauseDetector private val ticker: Ticker,
+  @ForPauseDetector private val sleeper: Sleeper,
   val metrics: Metrics,
 ) : AbstractExecutionThreadService() {
 
@@ -95,7 +95,10 @@ internal class PauseDetector @Inject constructor(
     // invocations. Guard against a non-monotonic or otherwise "fast" ticker from polluting results.
     if (deltaTimeNsec < MILLISECONDS.toNanos(config.resolutionMillis)) {
       val decreaseMs = config.resolutionMillis - NANOSECONDS.toMillis(deltaTimeNsec)
-      logger.info("Observed a negative pause time of ${decreaseMs}ms. Non-monotonic ticker?")
+      // Squelch non-monotonic logging for test clocks that are pegged at 0.
+      if (stopTime > 0) {
+        logger.info("Observed a negative pause time of ${decreaseMs}ms. Non-monotonic ticker?")
+      }
     } else if (deltaTimeNsec < shortestObservedDeltaTimeNsec) {
       shortestObservedDeltaTimeNsec = deltaTimeNsec
     }
