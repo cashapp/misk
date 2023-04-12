@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     api(project(":wisp-lease"))
+
     testImplementation(libs.assertj)
-    testImplementation(libs.kotlinTest)
+    testImplementation(libs.junitApi)
 }

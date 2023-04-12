@@ -4,12 +4,11 @@ plugins {
 
 dependencies {
     api(libs.loggingApi)
-    implementation(libs.slf4jApi)
-    implementation(project(":wisp-sampling"))
+    api(libs.slf4jApi)
+    api(project(":wisp-sampling"))
 
-    testImplementation(libs.logbackClassic)
     testImplementation(libs.assertj)
-    testImplementation(libs.kotlinTest)
-    testImplementation(libs.kotlinxCoroutines)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.logbackClassic)
     testImplementation(project(":wisp-logging-testing"))
 }

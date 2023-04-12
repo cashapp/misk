@@ -3,12 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.bouncycastle)
-    implementation(libs.okio)
     api(project(":wisp-resource-loader"))
+    implementation(libs.okio)
+    runtimeOnly(libs.bouncycastle)
 
     testImplementation(libs.assertj)
     testImplementation(libs.junitApi)
-    testImplementation(libs.junitEngine)
-    testImplementation(libs.kotlinTest)
 }

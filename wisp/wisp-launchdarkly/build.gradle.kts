@@ -4,18 +4,16 @@ plugins {
 
 dependencies {
     api(libs.launchDarkly)
-    api(libs.moshiKotlin)
-    implementation(project(":wisp-client"))
-    implementation(project(":wisp-feature"))
-    implementation(project(":wisp-logging"))
-    implementation(project(":wisp-ssl"))
+    api(libs.loggingApi)
+    api(libs.moshiCore)
+    api(project(":wisp-client"))
     api(project(":wisp-config"))
+    api(project(":wisp-feature"))
+    api(project(":wisp-resource-loader"))
+    api(project(":wisp-ssl"))
 
     testImplementation(libs.assertj)
-    testImplementation(libs.kotlinTest)
+    testImplementation(libs.junitApi)
     testImplementation(libs.mockitoCore)
-    testImplementation(libs.moshiKotlin)
-    testImplementation(libs.moshiAdapters)
     testImplementation(project(":wisp-moshi"))
-
 }
