@@ -9,6 +9,4 @@ dependencies {
 
     testImplementation(libs.assertj)
     testImplementation(libs.junitApi)
-    testImplementation(libs.junitEngine)
-    testImplementation(libs.kotlinTest)
 }

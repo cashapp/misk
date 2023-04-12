@@ -3,8 +3,10 @@ plugins {
 }
 
 dependencies {
-
-    testImplementation(libs.bundles.kotest)
-    testImplementation(libs.assertj)
+    testImplementation(libs.kotestAssertions)
+    testImplementation(libs.kotestAssertionsShared)
+    testImplementation(libs.kotestCommon)
+    testImplementation(libs.kotestFrameworkApi)
     testRuntimeOnly(libs.junitEngine)
+    testRuntimeOnly(libs.kotestJunitRunnerJvm)
 }

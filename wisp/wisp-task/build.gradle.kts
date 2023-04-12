@@ -3,12 +3,16 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinxCoroutines)
     api(libs.kotlinRetry)
-    api(libs.micrometerPrometheus)
-    implementation(project(":wisp-config"))
+    api(libs.micrometerCore)
+    api(project(":wisp-config"))
+    implementation(libs.kotlinxCoroutines)
+    implementation(libs.loggingApi)
     implementation(project(":wisp-logging"))
 
-    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
     testImplementation(libs.kotlinTest)
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.micrometerPrometheus)
+    testImplementation(libs.prometheusClient)
 }

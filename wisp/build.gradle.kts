@@ -9,6 +9,23 @@ plugins {
   alias(libs.plugins.mavenPublishGradlePlugin) apply false
   alias(libs.plugins.versionsGradlePlugin)
   alias(libs.plugins.versionCatalogUpdateGradlePlugin)
+  alias(libs.plugins.dependencyAnalysisPlugin)
+}
+
+dependencyAnalysis {
+  issues {
+    all {
+      onAny {
+        severity("fail")
+      }
+    }
+    project(":wisp-logging-testing") {
+      onUnusedDependencies {
+        // False positive.
+        exclude(":wisp-logging")
+      }
+    }
+  }
 }
 
 repositories {
@@ -60,7 +77,6 @@ subprojects {
         from(components["java"])
       }
     }
-
   }
 
   apply(plugin = "version-catalog")
@@ -81,7 +97,6 @@ subprojects {
     }
 
     dependencies {
-      add("testImplementation", project.rootProject.libs.junitApi)
       add("testRuntimeOnly", project.rootProject.libs.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.

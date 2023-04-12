@@ -9,13 +9,11 @@ sourceSets {
 }
 
 dependencies {
+    api(libs.okHttp)
     api(project(":wisp-ssl"))
-    api(project(":wisp-logging"))
     implementation(libs.jnrUnixsocket)
-    implementation(libs.okHttp)
-    implementation(libs.okio)
-    implementation(libs.openTracing)
-    implementation(libs.openTracingOkHttp)
+    implementation(project(":wisp-resource-loader"))
 
     testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
 }
