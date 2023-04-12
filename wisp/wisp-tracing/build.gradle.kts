@@ -3,11 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.openTracing)
+    api(libs.openTracing)
 
     testImplementation(libs.assertj)
     testImplementation(libs.junitApi)
-    testImplementation(libs.junitEngine)
     testImplementation(libs.kotlinTest)
     testImplementation(libs.openTracingMock)
 }
