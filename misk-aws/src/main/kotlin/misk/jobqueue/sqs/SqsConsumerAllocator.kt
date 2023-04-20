@@ -13,8 +13,9 @@ import javax.inject.Singleton
  */
 @Singleton
 class SqsConsumerAllocator @Inject constructor(
+  private val config: AwsSqsJobQueueConfig,
   private val leaseManager: LeaseManager,
-  private val featureFlags: FeatureFlags
+  private val featureFlags: FeatureFlags,
 ) {
   fun computeSqsConsumersForPod(
     queueName: QueueName,
@@ -56,6 +57,9 @@ class SqsConsumerAllocator @Inject constructor(
 
   /** Returns true if the lease was acquired false otherwise. */
   private fun maybeAcquireConsumerLease(queueName: QueueName, candidate: Int): Boolean {
+    if (config.ignore_leases) {
+      return false
+    }
     val lease = leaseManager.requestLease(leaseName(queueName, candidate))
     if (lease.checkHeld()) return true
 
