@@ -121,6 +121,10 @@ subprojects {
       suppressedValidationErrors.add("enforced-platform")
     }
   }
+  tasks.withType<JavaCompile> {
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
+  }
 
   tasks.withType<Test> {
     useJUnitPlatform()
