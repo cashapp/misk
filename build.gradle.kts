@@ -19,12 +19,12 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
-    classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
   }
 }
 
 plugins {
   id("com.autonomousapps.dependency-analysis") version Dependencies.dependencyAnalysisPluginVersion
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version Dependencies.kotlinBinaryCompatibilityPluginVersion
 }
 
 dependencyAnalysis {
@@ -60,13 +60,18 @@ dependencyAnalysis {
   }
 }
 
-val testShardNonHibernate by tasks.creating() {
+apiValidation {
+  ignoredProjects.addAll(listOf("exemplar", "exemplarchat"))
+  additionalSourceSets.addAll(listOf("testFixtures"))
+}
+
+val testShardNonHibernate by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that don't depend on misk-hibernate. " +
     "This target is intended for manually sharding tests to make CI faster."
 }
 
-val testShardHibernate by tasks.creating() {
+val testShardHibernate by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that depend on misk-hibernate. " +
     "This target is intended for manually sharding tests to make CI faster."
@@ -167,7 +172,6 @@ subprojects {
 
   if (!path.startsWith(":samples")) {
     apply(plugin = "com.vanniktech.maven.publish")
-    apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
     apply(from = "$rootDir/gradle-mvn-publish.gradle")
   }
 

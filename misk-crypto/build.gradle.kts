@@ -1,6 +1,7 @@
 plugins {
   kotlin("jvm")
   `java-library`
+  `java-test-fixtures`
 }
 
 dependencies {
@@ -22,4 +23,21 @@ dependencies {
   implementation(Dependencies.okio)
   implementation(Dependencies.wispLogging)
   implementation(project(":misk"))
+
+  testImplementation("com.squareup.okio:okio:3.0.0")
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(project(":misk-testing"))
+
+  testFixturesApi(project(":misk-crypto"))
+  testFixturesApi(project(":misk-inject"))
+  testFixturesImplementation(Dependencies.bouncycastle)
+  testFixturesImplementation(Dependencies.guice)
+  testFixturesImplementation(Dependencies.tink)
+  testFixturesImplementation(Dependencies.tinkAwskms)
+  testFixturesImplementation(Dependencies.tinkGcpkms)
+  testFixturesImplementation(Dependencies.wispDeployment)
+  testFixturesImplementation(project(":misk-config"))
 }
