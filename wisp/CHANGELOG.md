@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.3.12 *(2023-04-20)*
+----------------------------
+
+* Ensure published modules are targeting java 11
+
+
 Version 1.3.11 *(2023-04-20)*
 ----------------------------
 
