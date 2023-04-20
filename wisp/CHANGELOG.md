@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.3.11 *(2023-04-20)*
+----------------------------
+
+* Add the dependencyAnalysisPlugin to help make our build.gradle files better
+
+
 Version 1.3.10 *(2023-04-12)*
 ----------------------------
 
