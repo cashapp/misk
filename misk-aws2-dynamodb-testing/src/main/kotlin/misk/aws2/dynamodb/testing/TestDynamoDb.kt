@@ -10,5 +10,14 @@ import com.google.inject.Singleton
  */
 @Singleton
 class TestDynamoDb @Inject constructor(
+  private val _service: TestDynamoDbService
+) : Service by _service {
   val service: TestDynamoDbService
-) : Service by service
+    get() {
+      // This helps propagating errors instead of
+      if (_service.state() == Service.State.FAILED) {
+        throw _service.failureCause()
+      }
+      return _service
+    }
+}
