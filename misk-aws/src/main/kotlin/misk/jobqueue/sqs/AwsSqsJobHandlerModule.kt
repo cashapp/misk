@@ -80,5 +80,9 @@ internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
     externalQueues.forEach { attributeImporter.import(it.key) }
   }
 
-  override fun shutDown() {}
+  override fun shutDown() {
+    consumerMapping.forEach { consumer.unsubscribe(it.key) }
+    attributeImporter.shutdown()
+    consumer.shutdown()
+  }
 }

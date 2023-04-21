@@ -8,6 +8,7 @@ import misk.tasks.Status
 import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Duration
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 internal class AwsSqsQueueAttributeImporter @Inject constructor(
@@ -17,6 +18,8 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
   private val queues: QueueResolver,
   @ForSqsHandling private val taskQueue: RepeatedTaskQueue
 ) {
+
+  val running = AtomicBoolean(true)
 
   /**
    * Spawn a new thread that will consume the [queueName] SQS attributes and record them as metrics
@@ -29,6 +32,9 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
     val frequency = Duration.ofMillis(config.queue_attribute_importer_frequency_ms)
 
     taskQueue.scheduleWithBackoff(frequency) {
+      if (!running.get()) {
+        return@scheduleWithBackoff Status.NO_RESCHEDULE
+      }
       val queue = queues.getForSending(queueName)
       val lease = leaseManager.requestLease("sqs-queue-attributes-${queue.queueName}")
       var leaseHeld = lease.checkHeld()
@@ -74,6 +80,10 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
       }
       Status.OK
     }
+  }
+
+  fun shutdown() {
+    running.set(false)
   }
 
   companion object {
