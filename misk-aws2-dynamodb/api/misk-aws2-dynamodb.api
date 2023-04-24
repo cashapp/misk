@@ -17,8 +17,10 @@ public class misk/aws2/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule
 	public synthetic fun <init> (Lsoftware/amazon/awssdk/core/client/config/ClientOverrideConfiguration;Ljava/util/List;Ljava/net/URI;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected fun configure ()V
 	public fun configureClient (Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClientBuilder;)V
+	public fun configureClient (Lsoftware/amazon/awssdk/services/dynamodb/streams/DynamoDbStreamsClientBuilder;)V
 	public final fun provideRequiredTables ()Ljava/util/List;
 	public final fun providesDynamoDbClient (Lmisk/cloud/aws/AwsRegion;Lsoftware/amazon/awssdk/auth/credentials/AwsCredentialsProvider;)Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;
+	public final fun providesDynamoDbStreamsClient (Lmisk/cloud/aws/AwsRegion;Lsoftware/amazon/awssdk/auth/credentials/AwsCredentialsProvider;)Lsoftware/amazon/awssdk/services/dynamodb/streams/DynamoDbStreamsClient;
 }
 
 public final class misk/aws2/dynamodb/RequiredDynamoDbTable {
