@@ -14,6 +14,8 @@ import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder
+import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
+import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClientBuilder
 import java.net.URI
 
 /**
@@ -50,7 +52,25 @@ open class RealDynamoDbModule constructor(
     return builder.build()
   }
 
+  @Provides @Singleton
+  fun providesDynamoDbStreamsClient(
+    awsRegion: AwsRegion,
+    awsCredentialsProvider: AwsCredentialsProvider
+  ): DynamoDbStreamsClient {
+    val builder = DynamoDbStreamsClient.builder()
+      .region(Region.of(awsRegion.name))
+      .credentialsProvider(awsCredentialsProvider)
+      .overrideConfiguration(clientOverrideConfig)
+    if (endpointOverride != null) {
+      builder.endpointOverride(endpointOverride)
+    }
+    configureClient(builder)
+    return builder.build()
+  }
+
+
   open fun configureClient(builder: DynamoDbClientBuilder) {}
+  open fun configureClient(builder: DynamoDbStreamsClientBuilder) {}
 
   @Provides @Singleton
   fun provideRequiredTables(): List<RequiredDynamoDbTable> = requiredTables
