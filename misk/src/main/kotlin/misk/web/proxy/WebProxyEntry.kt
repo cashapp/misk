@@ -37,6 +37,5 @@ fun WebProxyEntry(
   url_path_prefix: String = "/",
   web_proxy_url: String
 ): WebProxyEntry {
-//  TODO(adrw) update all HTTPUrl.parse -> get (no bang bang required) https://github.com/square/misk/issues/419
   return WebProxyEntry(url_path_prefix, web_proxy_url.toHttpUrlOrNull()!!)
 }

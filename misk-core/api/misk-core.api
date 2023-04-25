@@ -401,6 +401,7 @@ public final class misk/web/mediatype/MediaTypes {
 	public static final field TEXT_CSS Ljava/lang/String;
 	public static final field TEXT_HTML Ljava/lang/String;
 	public static final field TEXT_PLAIN_UTF8 Ljava/lang/String;
+	public static final field TURBO_STREAM Ljava/lang/String;
 	public final fun fromFileExtension (Ljava/lang/String;)Lokhttp3/MediaType;
 	public final fun getALL_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getAPPLICATION_GRPC_MEDIA_TYPE ()Lokhttp3/MediaType;
@@ -413,6 +414,7 @@ public final class misk/web/mediatype/MediaTypes {
 	public final fun getTEXT_CSS_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getTEXT_HTML_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getTEXT_PLAIN_UTF8_MEDIA_TYPE ()Lokhttp3/MediaType;
+	public final fun getTURBO_STREAM_MEDIA_TYPE ()Lokhttp3/MediaType;
 }
 
 public final class misk/web/mediatype/MediaTypesKt {

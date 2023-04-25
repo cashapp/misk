@@ -2,6 +2,7 @@ package misk.web.dashboard
 
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
+import misk.web.v2.BaseDashboardV2Module
 import misk.web.metadata.config.ConfigMetadataAction
 import javax.inject.Qualifier
 
@@ -23,10 +24,16 @@ class AdminDashboardModule(
 ) : KAbstractModule() {
 
   override fun configure() {
+    // v1 Dashboard
     install(BaseDashboardModule(isDevelopment))
+
+    // Default container admin tabs
     install(ConfigDashboardTabModule(isDevelopment, configTabMode))
     install(DatabaseDashboardTabModule(isDevelopment))
     install(WebActionsDashboardTabModule(isDevelopment))
+
+    // v2 Dashboard
+    install(BaseDashboardV2Module())
 
     // Default Menu
     multibind<DashboardNavbarItem>().toInstance(
@@ -56,6 +63,7 @@ class AdminDashboardTestingModule : KAbstractModule() {
         )
       )
     )
+
     // Provide maximum information in development as real secrets won't be present
     install(
       AdminDashboardModule(

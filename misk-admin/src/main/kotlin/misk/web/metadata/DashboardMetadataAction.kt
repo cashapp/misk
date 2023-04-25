@@ -63,10 +63,15 @@ class DashboardMetadataAction @Inject constructor(
     val homeUrl = allHomeUrls
       .find { it.dashboard_slug == dashboardSlug }?.url ?: ""
 
-    val navbarItems = allNavbarItems
+    val deprecatedNavbarItems = allNavbarItems
       .filter { it.dashboard_slug == dashboardSlug }
       .sortedBy { it.order }
       .map { it.item }
+    val navbarItems = deprecatedNavbarItems + authorizedDashboardTabs
+      .filterNot { deprecatedNavbarItems.map { item -> item.contains(it.slug) }.any() }
+      .map {
+        "<a href=\"${it.menuUrl}\">${it.menuLabel}</a>"
+      }
 
     val navbarStatus = allNavbarStatus
       .find { it.dashboard_slug == dashboardSlug }?.status ?: ""
@@ -76,6 +81,7 @@ class DashboardMetadataAction @Inject constructor(
 
     return DashboardMetadata(
       home_url = homeUrl,
+      // TODO To handle deprecation, add installed tabs here so that old (particularly custom with disabled menus) dashboards still have links at the top
       navbar_items = navbarItems,
       navbar_status = navbarStatus,
       tabs = authorizedDashboardTabs.map { it.toMetadata() },

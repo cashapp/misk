@@ -3,7 +3,7 @@ package com.squareup.exemplar.dashboard.frontend
 import kotlinx.html.h1
 import kotlinx.html.p
 import misk.config.AppName
-import misk.turbo.buildHtml
+import misk.hotwire.buildHtml
 import misk.turbo.turbo_frame
 import misk.web.Get
 import misk.web.ResponseContentType
