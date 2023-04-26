@@ -35,7 +35,7 @@ object Dependencies {
   val guiceTestLib = "com.google.inject.extensions:guice-testlib:5.1.0"
   val hibernateCore = "org.hibernate:hibernate-core:5.5.3.Final"
   val hikariCp = "com.zaxxer:HikariCP:4.0.3"
-  val hsqldb = "org.hsqldb:hsqldb:2.6.0"
+  val hsqldb = "org.hsqldb:hsqldb:2.6.1"
   val httpComponentsCore5 = "org.apache.httpcomponents.core5:httpcore5:5.1.1"
   val jCommander = "com.beust:jcommander:1.72"
   val jacksonBom = "com.fasterxml.jackson:jackson-bom:2.14.2"
