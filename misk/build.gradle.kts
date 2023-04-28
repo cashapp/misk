@@ -38,6 +38,7 @@ dependencies {
   implementation(Dependencies.jacksonJsr310) // Remove after deprecated config/resources
   implementation(Dependencies.jCommander)
   implementation(Dependencies.openTracing)
+  implementation(Dependencies.openTracingDatadog)
   implementation(Dependencies.openTracingUtil)
   implementation(Dependencies.openTracingOkHttp)
   implementation(Dependencies.retrofit)

@@ -8,4 +8,6 @@ dependencies {
   implementation(Dependencies.openTracingDatadog)
   implementation(project(":misk-inject"))
   api(Dependencies.wispLogging)
+
+  testImplementation(Dependencies.logbackClassic)
 }

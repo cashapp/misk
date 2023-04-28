@@ -17,12 +17,19 @@ class MDCScopeListener {
     const val MDC_DD_SPAN_ID = "dd.span_id"
   }
 
+  private val contextStack = ArrayDeque<Map<String, String>>()
+
   fun afterScopeActivated() {
     try {
-      MDC.put(MDC_TRACE_ID, CorrelationIdentifier.getTraceId())
-      MDC.put(MDC_SPAN_ID, CorrelationIdentifier.getSpanId())
-      MDC.put(MDC_DD_TRACE_ID, CorrelationIdentifier.getTraceId())
-      MDC.put(MDC_DD_SPAN_ID, CorrelationIdentifier.getSpanId())
+      captureCurrentMDC()
+
+      val traceId = CorrelationIdentifier.getTraceId()
+      val spanId = CorrelationIdentifier.getSpanId()
+
+      MDC.put(MDC_TRACE_ID, traceId)
+      MDC.put(MDC_SPAN_ID, spanId)
+      MDC.put(MDC_DD_TRACE_ID, traceId)
+      MDC.put(MDC_DD_SPAN_ID, spanId)
     } catch (e: Exception) {
       log.debug("Exception setting log context context", e)
     }
@@ -30,12 +37,19 @@ class MDCScopeListener {
 
   fun afterScopeClosed() {
     try {
-      MDC.remove(MDC_TRACE_ID)
-      MDC.remove(MDC_SPAN_ID)
-      MDC.remove(MDC_DD_TRACE_ID)
-      MDC.remove(MDC_DD_SPAN_ID)
+      restorePreviousMDC()
     } catch (e: Exception) {
       log.debug("Exception removing log context context", e)
     }
+  }
+
+  private fun captureCurrentMDC() {
+    val currentContext = MDC.getCopyOfContextMap() ?: emptyMap()
+    contextStack.addLast(currentContext)
+  }
+
+  private fun restorePreviousMDC() {
+    val previousContext = contextStack.removeLast()
+    MDC.setContextMap(previousContext)
   }
 }

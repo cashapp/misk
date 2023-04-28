@@ -2,6 +2,7 @@ package misk.web.interceptors
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import datadog.trace.context.TraceScope
 import io.opentracing.Span
 import io.opentracing.SpanContext
 import io.opentracing.Tracer
@@ -63,6 +64,11 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
 
     val span = spanBuilder.start()
     val scope = tracer.scopeManager().activate(span)
+
+    if (scope is TraceScope) {
+      scope.setAsyncPropagation(true)
+    }
+
     // This is a datadog convention. Must be set after span is created because otherwise it would
     // be overwritten by the method/url
     span.setTag("resource.name", chain.webAction.javaClass.name)
