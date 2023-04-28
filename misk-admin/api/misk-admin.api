@@ -391,11 +391,8 @@ public final class misk/web/dashboard/WebTabResourceModule : misk/inject/KAbstra
 }
 
 public final class misk/web/metadata/DashboardMetadataAction : misk/web/actions/WebAction {
-	public field callerProvider Lmisk/scope/ActionScoped;
-	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lmisk/scope/ActionScoped;)V
 	public final fun getAll (Ljava/lang/String;)Lmisk/web/metadata/DashboardMetadataAction$Response;
-	public final fun getCallerProvider ()Lmisk/scope/ActionScoped;
-	public final fun setCallerProvider (Lmisk/scope/ActionScoped;)V
 }
 
 public final class misk/web/metadata/DashboardMetadataAction$DashboardMetadata {
