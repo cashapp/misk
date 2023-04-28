@@ -31,14 +31,14 @@ import javax.inject.Singleton
  *   the requested dashboard.
  */
 @Singleton
-class DashboardMetadataAction @Inject constructor() : WebAction {
-  @Inject private lateinit var allTabs: List<DashboardTab>
-  @Inject private lateinit var allNavbarItems: List<DashboardNavbarItem>
-  @Inject private lateinit var allNavbarStatus: List<DashboardNavbarStatus>
-  @Inject private lateinit var allHomeUrls: List<DashboardHomeUrl>
-  @Inject private lateinit var allThemes: List<DashboardTheme>
-  @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
-
+class DashboardMetadataAction @Inject constructor(
+  private val allTabs: List<DashboardTab>,
+  private val allNavbarItems: List<DashboardNavbarItem>,
+  private val allNavbarStatus: List<DashboardNavbarStatus>,
+  private val allHomeUrls: List<DashboardHomeUrl>,
+  private val allThemes: List<DashboardTheme>,
+  private val callerProvider: ActionScoped<MiskCaller?>
+) : WebAction {
   @Get("/api/dashboard/{dashboard_slug}/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
