@@ -1,14 +1,9 @@
-import com.google.protobuf.gradle.generateProtoTasks
-import com.google.protobuf.gradle.id
-import com.google.protobuf.gradle.ofSourceSet
-import com.google.protobuf.gradle.plugins
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
+import com.google.protobuf.gradle.*
 
 plugins {
   kotlin("jvm")
   `java-library`
-  
+
   id("com.google.protobuf")
   id("com.squareup.wire")
 }
@@ -64,28 +59,35 @@ sourceSets {
 }
 
 dependencies {
-  implementation(Dependencies.assertj)
-  implementation(Dependencies.awaitility)
-  implementation(Dependencies.javaxAnnotation)
-  implementation(Dependencies.junitApi)
-  implementation(Dependencies.kotlinTest)
-  implementation(Dependencies.dockerCore)
-  implementation(Dependencies.dockerTransport)
-  implementation(Dependencies.guice)
+  api(Dependencies.grpcApi)
+  api(Dependencies.grpcStub)
+  api(Dependencies.guice)
+  api(Dependencies.javaxInject)
+  api(Dependencies.okHttp)
+  api(Dependencies.okio)
+  api(Dependencies.protobufJava)
+  api(project(":misk"))
+  api(project(":misk-actions"))
+  api(project(":misk-config"))
+  api(project(":misk-inject"))
   implementation(Dependencies.grpcNetty)
   implementation(Dependencies.grpcProtobuf)
-  implementation(Dependencies.grpcStub)
+  implementation(Dependencies.javaxAnnotation)
   implementation(Dependencies.kotlinxCoroutines)
+  implementation(Dependencies.nettyHandler)
   implementation(Dependencies.wireGrpcClient)
   implementation(Dependencies.wireRuntime)
-  implementation(project(":misk"))
-  implementation(project(":misk-actions"))
   implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-metrics"))
   implementation(project(":misk-metrics-testing"))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
 
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.awaitility)
+  testImplementation(Dependencies.awaitilityKotlin)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.protoGoogleCommon)
+  testImplementation(Dependencies.wispLoggingTesting)
 }

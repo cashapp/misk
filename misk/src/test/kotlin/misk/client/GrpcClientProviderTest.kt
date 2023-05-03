@@ -49,7 +49,7 @@ internal class GrpcClientProviderTest {
   val log = LinkedBlockingDeque<String>()
 
   @BeforeEach
-  private fun beforeEach() {
+  fun beforeEach() {
     val clientInjector = Guice.createInjector(ClientModule(jetty))
     clientMetricsInterceptorFactory = clientInjector.getInstance()
     robotLocator = clientInjector.getInstance()

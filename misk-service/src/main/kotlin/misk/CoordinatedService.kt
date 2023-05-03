@@ -5,10 +5,9 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.Listener
 import com.google.common.util.concurrent.Service.State
-import javax.inject.Provider
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Provider
 
-@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class CoordinatedService(
   private val serviceProvider: Provider<out Service>
 ) : AbstractService(), DelegatingService {

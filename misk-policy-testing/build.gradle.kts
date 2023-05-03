@@ -4,19 +4,22 @@ plugins {
 }
 
 dependencies {
-  implementation(Dependencies.guice)
-  implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.dockerCore)
-  implementation(Dependencies.dockerTransport)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.okHttp)
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
+  api(Dependencies.dockerApi)
+  api(Dependencies.dockerCore)
+  api(Dependencies.javaxInject)
+  api(project(":misk-inject"))
   api(project(":misk-policy"))
-  api(project(":misk-service"))
+  implementation(Dependencies.dockerTransport)
+  implementation(Dependencies.dockerTransportHttpClient)
+  implementation(Dependencies.guice)
+  implementation(Dependencies.kotlinLogging)
+  implementation(Dependencies.okHttp)
+  implementation(Dependencies.okio)
+  implementation(Dependencies.wispLogging)
+  implementation(project(":misk-core"))
+  implementation(project(":misk-service"))
 
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
   testImplementation(project(":misk-testing"))
-  testImplementation(Dependencies.mockitoCore)
 }
