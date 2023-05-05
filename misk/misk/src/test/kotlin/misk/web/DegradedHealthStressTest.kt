@@ -9,7 +9,9 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.ClockModule
 import misk.time.FakeResourcePool
+import misk.web.WebServerTestingModule.Companion.TESTING_WEB_CONFIG
 import misk.web.actions.WebAction
+import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.jetty.JettyService
 import okhttp3.Call
 import okhttp3.Callback
@@ -134,7 +136,18 @@ internal class DegradedHealthStressTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(Modules.override(MiskTestingServiceModule()).with(ClockModule()))
-      install(WebServerTestingModule())
+      install(
+        WebServerTestingModule(
+          TESTING_WEB_CONFIG.copy(
+            concurrency_limiter = ConcurrencyLimiterConfig(
+              // We use VEGAS here to make testing easier (VEGAS cares about errors, GRADIENT2
+              // doesn't). The main purpose of this test is to make sure we have everything wired
+              // up correctly not to test the specific strategy.
+              strategy = ConcurrencyLimiterStrategy.VEGAS
+            )
+          )
+        )
+      )
       install(WebActionModule.create<UseConstrainedResourceAction>())
       bind<FakeResourcePool>().asSingleton()
     }
