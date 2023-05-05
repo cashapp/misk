@@ -97,7 +97,7 @@ data class WebConfig(
   /* Custom configuration for calculating concurrency limits */
   val concurrency_limiter: ConcurrencyLimiterConfig? = ConcurrencyLimiterConfig(
     disabled = concurrency_limiter_disabled,
-    strategy = ConcurrencyLimiterStrategy.VEGAS,
+    strategy = ConcurrencyLimiterStrategy.GRADIENT2,
     max_concurrency = null,
     // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints that
     // receive the majority of traffic (power law, yay!), and those endpoints should _start up_
@@ -254,7 +254,7 @@ data class ConcurrencyLimiterConfig(
   val disabled: Boolean = false,
 
   /** The algorithm to use for determining concurrency limits. */
-  val strategy: ConcurrencyLimiterStrategy = ConcurrencyLimiterStrategy.VEGAS,
+  val strategy: ConcurrencyLimiterStrategy = ConcurrencyLimiterStrategy.GRADIENT2,
 
   /** Minimum concurrency limit allowed. */
   val min_limit: Int? = null,
