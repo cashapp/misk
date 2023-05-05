@@ -49,17 +49,19 @@ public final class misk/crypto/CiphertextFormat$UnexpectedEncryptionContextExcep
 }
 
 public final class misk/crypto/CryptoConfig : wisp/config/Config {
-	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/Map;)V
-	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Long;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/util/Map;)Lmisk/crypto/CryptoConfig;
-	public static synthetic fun copy$default (Lmisk/crypto/CryptoConfig;Ljava/util/List;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lmisk/crypto/CryptoConfig;
+	public final fun component4 ()Ljava/lang/Long;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Long;)Lmisk/crypto/CryptoConfig;
+	public static synthetic fun copy$default (Lmisk/crypto/CryptoConfig;Ljava/util/List;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lmisk/crypto/CryptoConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getExternal_data_keys ()Ljava/util/Map;
 	public final fun getKeys ()Ljava/util/List;
 	public final fun getKms_uri ()Ljava/lang/String;
+	public final fun getLn_metric_age_in_seconds ()Ljava/lang/Long;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -183,13 +185,16 @@ public class misk/crypto/KeyReader {
 	public static final field Companion Lmisk/crypto/KeyReader$Companion;
 	public field keySources Ljava/util/Set;
 	public field kmsClient Lcom/google/crypto/tink/KmsClient;
+	public field metrics Lmisk/crypto/internal/KeyMetrics;
 	public fun <init> ()V
 	public final fun getKeySources ()Ljava/util/Set;
 	public final fun getKmsClient ()Lcom/google/crypto/tink/KmsClient;
+	public final fun getMetrics ()Lmisk/crypto/internal/KeyMetrics;
 	protected final fun getRawKey (Ljava/lang/String;)Lmisk/crypto/Key;
 	public final fun readKey (Ljava/lang/String;)Lcom/google/crypto/tink/KeysetHandle;
 	public final fun setKeySources (Ljava/util/Set;)V
 	public final fun setKmsClient (Lcom/google/crypto/tink/KmsClient;)V
+	public final fun setMetrics (Lmisk/crypto/internal/KeyMetrics;)V
 }
 
 public final class misk/crypto/KeyReader$Companion {
@@ -263,6 +268,12 @@ public final class misk/crypto/StreamingAeadKeyManager : misk/crypto/MappedKeyMa
 	public fun <init> (Lcom/google/inject/Injector;)V
 }
 
+public final class misk/crypto/internal/Aead : com/google/crypto/tink/Aead {
+	public fun <init> (Lmisk/crypto/Key;Lcom/google/crypto/tink/Aead;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun decrypt ([B[B)[B
+	public fun encrypt ([B[B)[B
+}
+
 public final class misk/crypto/internal/AeadEnvelopeProvider : misk/crypto/KeyReader, com/google/inject/Provider {
 	public field keyManager Lmisk/crypto/AeadKeyManager;
 	public fun <init> (Ljava/lang/String;)V
@@ -271,6 +282,12 @@ public final class misk/crypto/internal/AeadEnvelopeProvider : misk/crypto/KeyRe
 	public final fun getKey ()Ljava/lang/String;
 	public final fun getKeyManager ()Lmisk/crypto/AeadKeyManager;
 	public final fun setKeyManager (Lmisk/crypto/AeadKeyManager;)V
+}
+
+public final class misk/crypto/internal/DeterministicAead : com/google/crypto/tink/DeterministicAead {
+	public fun <init> (Lmisk/crypto/Key;Lcom/google/crypto/tink/DeterministicAead;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun decryptDeterministically ([B[B)[B
+	public fun encryptDeterministically ([B[B)[B
 }
 
 public final class misk/crypto/internal/DeterministicAeadProvider : misk/crypto/KeyReader, com/google/inject/Provider {
@@ -303,6 +320,11 @@ public final class misk/crypto/internal/DigitalSignatureVerifierProvider : misk/
 	public final fun setKeyManager (Lmisk/crypto/DigitalSignatureKeyManager;)V
 }
 
+public final class misk/crypto/internal/HybridDecrypt : com/google/crypto/tink/HybridDecrypt {
+	public fun <init> (Lmisk/crypto/Key;Lcom/google/crypto/tink/HybridDecrypt;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun decrypt ([B[B)[B
+}
+
 public final class misk/crypto/internal/HybridDecryptProvider : misk/crypto/KeyReader, com/google/inject/Provider {
 	public field keyDecryptManager Lmisk/crypto/HybridDecryptKeyManager;
 	public field keyEncryptManager Lmisk/crypto/HybridEncryptKeyManager;
@@ -316,6 +338,11 @@ public final class misk/crypto/internal/HybridDecryptProvider : misk/crypto/KeyR
 	public final fun setKeyEncryptManager (Lmisk/crypto/HybridEncryptKeyManager;)V
 }
 
+public final class misk/crypto/internal/HybridEncrypt : com/google/crypto/tink/HybridEncrypt {
+	public fun <init> (Lmisk/crypto/Key;Lcom/google/crypto/tink/HybridEncrypt;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun encrypt ([B[B)[B
+}
+
 public final class misk/crypto/internal/HybridEncryptProvider : misk/crypto/KeyReader, com/google/inject/Provider {
 	public field keyManager Lmisk/crypto/HybridEncryptKeyManager;
 	public fun <init> (Ljava/lang/String;)V
@@ -326,6 +353,51 @@ public final class misk/crypto/internal/HybridEncryptProvider : misk/crypto/KeyR
 	public final fun setKeyManager (Lmisk/crypto/HybridEncryptKeyManager;)V
 }
 
+public final class misk/crypto/internal/KeyMetricOp : java/lang/Enum {
+	public static final field decrypted Lmisk/crypto/internal/KeyMetricOp;
+	public static final field encrypted Lmisk/crypto/internal/KeyMetricOp;
+	public static final field signed Lmisk/crypto/internal/KeyMetricOp;
+	public static final field verified Lmisk/crypto/internal/KeyMetricOp;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/crypto/internal/KeyMetricOp;
+	public static fun values ()[Lmisk/crypto/internal/KeyMetricOp;
+}
+
+public final class misk/crypto/internal/KeyMetricType : java/lang/Enum {
+	public static final field crypto_key_loaded_total Lmisk/crypto/internal/KeyMetricType;
+	public static final field crypto_key_op_bytes Lmisk/crypto/internal/KeyMetricType;
+	public static final field crypto_key_op_total Lmisk/crypto/internal/KeyMetricType;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/crypto/internal/KeyMetricType;
+	public static fun values ()[Lmisk/crypto/internal/KeyMetricType;
+}
+
+public final class misk/crypto/internal/KeyMetrics {
+	public fun <init> (Lmisk/metrics/v2/Metrics;Lmisk/crypto/CryptoConfig;)V
+	public final fun decrypted (Lmisk/crypto/Key;I)V
+	public final fun encrypted (Lmisk/crypto/Key;I)V
+	public final fun getConfig ()Lmisk/crypto/CryptoConfig;
+	public final fun getMetrics ()Lmisk/metrics/v2/Metrics;
+	public final fun loaded (Lmisk/crypto/Key;Z)V
+	public final fun op (Lmisk/crypto/Key;ILmisk/crypto/internal/KeyMetricOp;)V
+	public final fun signed (Lmisk/crypto/Key;I)V
+	public final fun verified (Lmisk/crypto/Key;I)V
+}
+
+public final class misk/crypto/internal/KeyMetricsProvider : com/google/inject/Provider {
+	public field metrics Lmisk/metrics/v2/Metrics;
+	public fun <init> (Lmisk/crypto/CryptoConfig;)V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/crypto/internal/KeyMetrics;
+	public final fun getConfig ()Lmisk/crypto/CryptoConfig;
+	public final fun getMetrics ()Lmisk/metrics/v2/Metrics;
+	public final fun setMetrics (Lmisk/metrics/v2/Metrics;)V
+}
+
+public final class misk/crypto/internal/Mac : com/google/crypto/tink/Mac {
+	public fun <init> (Lmisk/crypto/Key;Lcom/google/crypto/tink/Mac;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun computeMac ([B)[B
+	public fun verifyMac ([B[B)V
+}
+
 public final class misk/crypto/internal/MacProvider : misk/crypto/KeyReader, com/google/inject/Provider {
 	public field keyManager Lmisk/crypto/MacKeyManager;
 	public fun <init> (Ljava/lang/String;)V
@@ -334,6 +406,57 @@ public final class misk/crypto/internal/MacProvider : misk/crypto/KeyReader, com
 	public final fun getKey ()Ljava/lang/String;
 	public final fun getKeyManager ()Lmisk/crypto/MacKeyManager;
 	public final fun setKeyManager (Lmisk/crypto/MacKeyManager;)V
+}
+
+public final class misk/crypto/internal/MeasuredInputStream : java/io/InputStream {
+	public fun <init> (Lmisk/crypto/Key;Ljava/io/InputStream;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun available ()I
+	public fun close ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun mark (I)V
+	public fun markSupported ()Z
+	public fun read ()I
+	public fun read ([B)I
+	public fun read ([BII)I
+	public fun readAllBytes ()[B
+	public fun readNBytes (I)[B
+	public fun readNBytes ([BII)I
+	public fun reset ()V
+	public fun skip (J)J
+	public fun toString ()Ljava/lang/String;
+	public fun transferTo (Ljava/io/OutputStream;)J
+}
+
+public final class misk/crypto/internal/MeasuredOutputStream : java/io/OutputStream {
+	public fun <init> (Lmisk/crypto/Key;Ljava/io/OutputStream;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun close ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun flush ()V
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun write (I)V
+	public fun write ([B)V
+	public fun write ([BII)V
+}
+
+public final class misk/crypto/internal/PublicKeySign : com/google/crypto/tink/PublicKeySign {
+	public fun <init> (Lmisk/crypto/Key;Lcom/google/crypto/tink/PublicKeySign;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun sign ([B)[B
+}
+
+public final class misk/crypto/internal/PublicKeyVerify : com/google/crypto/tink/PublicKeyVerify {
+	public fun <init> (Lmisk/crypto/Key;Lcom/google/crypto/tink/PublicKeyVerify;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun verify ([B[B)V
+}
+
+public final class misk/crypto/internal/StreamingAead : com/google/crypto/tink/StreamingAead {
+	public fun <init> (Lmisk/crypto/Key;Lcom/google/crypto/tink/StreamingAead;Lmisk/crypto/internal/KeyMetrics;)V
+	public fun newDecryptingChannel (Ljava/nio/channels/ReadableByteChannel;[B)Ljava/nio/channels/ReadableByteChannel;
+	public fun newDecryptingStream (Ljava/io/InputStream;[B)Ljava/io/InputStream;
+	public fun newEncryptingChannel (Ljava/nio/channels/WritableByteChannel;[B)Ljava/nio/channels/WritableByteChannel;
+	public fun newEncryptingStream (Ljava/io/OutputStream;[B)Ljava/io/OutputStream;
+	public fun newSeekableDecryptingChannel (Ljava/nio/channels/SeekableByteChannel;[B)Ljava/nio/channels/SeekableByteChannel;
 }
 
 public final class misk/crypto/internal/StreamingAeadProvider : misk/crypto/KeyReader, com/google/inject/Provider {

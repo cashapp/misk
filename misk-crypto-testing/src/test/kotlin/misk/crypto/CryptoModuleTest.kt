@@ -18,11 +18,16 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.config.Secret
+import misk.crypto.internal.KeyMetricOp
+import misk.crypto.internal.KeyMetricType
 import misk.crypto.testing.CryptoTestModule
 import misk.crypto.testing.FakeMasterEncryptionKey
 import misk.environment.DeploymentModule
 import misk.logging.LogCollectorModule
 import misk.logging.LogCollectorService
+import misk.metrics.v2.FakeMetrics
+import misk.metrics.v2.Metrics
+import misk.metrics.v2.FakeMetricsModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.toByteString
@@ -53,6 +58,16 @@ class CryptoModuleTest {
     val injector = getInjector(listOf(Pair("test", keyHandle)))
     val testKey = injector.getInstance(AeadKeyManager::class.java)["test"]
     assertThat(testKey).isNotNull
+
+    var metrics = injector.getInstance(Metrics::class.java) as FakeMetrics
+    assertThat(
+      metrics.get(
+        KeyMetricType.crypto_key_loaded_total.name,
+        "type" to KeyType.AEAD.name,
+        "alias" to "test",
+        "clear_text" to "false"
+      )
+    ).isEqualTo(1.0)
   }
 
   @Test
@@ -75,6 +90,25 @@ class CryptoModuleTest {
     val signature = signer.sign(data)
     assertThatCode { verifier.verify(signature, data) }
       .doesNotThrowAnyException()
+
+    var metrics = injector.getInstance(Metrics::class.java) as FakeMetrics
+    assertThat(
+      metrics.get(
+        KeyMetricType.crypto_key_loaded_total.name,
+        "type" to KeyType.DIGITAL_SIGNATURE.name,
+        "alias" to "test-ds",
+        "clear_text" to "false"
+      )
+    ).isEqualTo(2.0)
+    assertThat(
+      metrics.summarySum(
+        KeyMetricType.crypto_key_op_bytes.name,
+        "type" to KeyType.DIGITAL_SIGNATURE.name,
+        "alias" to "test-ds",
+        "op" to KeyMetricOp.signed.name
+      )
+    ).isEqualTo(data.size.toDouble())
+
   }
 
   @Test
@@ -97,6 +131,34 @@ class CryptoModuleTest {
     val decrypted = decrypter.decrypt(ciphertext, null)
 
     assertThat(plaintext).isEqualTo(decrypted)
+
+    var metrics = injector.getInstance(Metrics::class.java) as FakeMetrics
+    assertThat(
+      metrics.get(
+        KeyMetricType.crypto_key_loaded_total.name,
+        "type" to KeyType.HYBRID_ENCRYPT_DECRYPT.name,
+        "alias" to "test-hybrid",
+        "clear_text" to "false"
+      )
+    ).isEqualTo(2.0)
+    assertThat(
+      metrics.summarySum(
+        KeyMetricType.crypto_key_op_bytes.name,
+        "type" to KeyType.HYBRID_ENCRYPT_DECRYPT.name,
+        "alias" to "test-hybrid",
+        "op" to KeyMetricOp.encrypted.name
+      )
+    ).isEqualTo(plaintext.size.toDouble())
+    assertThat(
+      metrics.summarySum(
+        KeyMetricType.crypto_key_op_bytes.name,
+        "type" to KeyType.HYBRID_ENCRYPT_DECRYPT.name,
+        "alias" to "test-hybrid",
+        "op" to KeyMetricOp.decrypted.name
+      )
+    ).isEqualTo(decrypted.size.toDouble())
+
+
   }
 
   @Test
@@ -128,7 +190,8 @@ class CryptoModuleTest {
     val config = CryptoConfig(listOf(key), "test_master_key")
     val deploymentModule = DeploymentModule(TESTING)
 
-    val injector = Guice.createInjector(CryptoTestModule(config), deploymentModule)
+    val injector =
+      Guice.createInjector(FakeMetricsModule(), CryptoTestModule(config), deploymentModule)
     val externalKeyManager = LocalConfigKeyResolver(config.keys!!, config.kms_uri)
     val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
     assertThat(externalKeyManager.getKeyByAlias("test-hybrid"))
@@ -145,6 +208,25 @@ class CryptoModuleTest {
     val injector = getInjector(listOf(Pair("aead", aeadHandle), Pair("mac", macHandle)))
     assertThat(injector.getInstance(AeadKeyManager::class.java)["aead"]).isNotNull
     assertThat(injector.getInstance(MacKeyManager::class.java)["mac"]).isNotNull
+
+    var metrics = injector.getInstance(Metrics::class.java) as FakeMetrics
+    assertThat(
+      metrics.get(
+        "crypto_key_loaded_total",
+        "type" to KeyType.AEAD.name,
+        "alias" to "aead",
+        "clear_text" to "false"
+      )
+    ).isEqualTo(1.0)
+    assertThat(
+      metrics.get(
+        "crypto_key_loaded_total",
+        "type" to KeyType.MAC.name,
+        "alias" to "mac",
+        "clear_text" to "false"
+      )
+    ).isEqualTo(1.0)
+
   }
 
   @Test
@@ -163,6 +245,14 @@ class CryptoModuleTest {
       .isInstanceOf(KeyNotFoundException::class.java)
     assertThatThrownBy { injector.getInstance(AeadKeyManager::class.java)["not there either"] }
       .isInstanceOf(KeyNotFoundException::class.java)
+
+    var metrics = injector.getInstance(Metrics::class.java) as FakeMetrics
+    assertThat(
+      metrics.getAllSamples().firstOrNull {
+        it.name == KeyMetricType.crypto_key_loaded_total.name
+      }
+    ).isNull()
+
   }
 
   @Test
@@ -227,19 +317,40 @@ class CryptoModuleTest {
     val plaintext = "plaintext".toByteArray(Charsets.UTF_8)
     // with encryption context
     var encryptionContext: ByteArray? = byteArrayOf(1, 2, 3, 4)
-    var ciphertext = daead.encryptDeterministically(plaintext, encryptionContext)
-    assertThat(daead.decryptDeterministically(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThatThrownBy { daead.decryptDeterministically(ciphertext, byteArrayOf()) }
+    var ciphertextWcontext = daead.encryptDeterministically(plaintext, encryptionContext)
+    assertThat(daead.decryptDeterministically(ciphertextWcontext, encryptionContext)).isEqualTo(plaintext)
+    assertThatThrownBy { daead.decryptDeterministically(ciphertextWcontext, byteArrayOf()) }
       .hasMessage("decryption failed")
-    assertThatThrownBy { daead.decryptDeterministically(ciphertext, byteArrayOf(4, 3, 2, 1)) }
+    assertThatThrownBy { daead.decryptDeterministically(ciphertextWcontext, byteArrayOf(4, 3, 2, 1)) }
       .hasMessage("decryption failed")
 
     // test with empty encryption context
     encryptionContext = byteArrayOf()
-    ciphertext = daead.encryptDeterministically(plaintext, encryptionContext)
-    assertThat(daead.decryptDeterministically(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThatThrownBy { daead.decryptDeterministically(ciphertext, byteArrayOf(4, 3, 2, 1)) }
+    var ciphertextWoContext = daead.encryptDeterministically(plaintext, encryptionContext)
+    assertThat(daead.decryptDeterministically(ciphertextWoContext, encryptionContext)).isEqualTo(plaintext)
+    assertThatThrownBy { daead.decryptDeterministically(ciphertextWoContext, byteArrayOf(4, 3, 2, 1)) }
       .hasMessage("decryption failed")
+
+    var metrics = injector.getInstance(Metrics::class.java) as FakeMetrics
+    assertThat(metrics.get(
+      KeyMetricType.crypto_key_loaded_total.name,
+      "type" to KeyType.DAEAD.name,
+      "alias" to "test",
+      "clear_text" to "false"
+    )).isEqualTo(1.0)
+    listOf(KeyMetricOp.decrypted,KeyMetricOp.encrypted).forEach {
+      assertThat(metrics.get(
+        KeyMetricType.crypto_key_op_total.name,
+        "type" to KeyType.DAEAD.name,
+        "alias" to "test",
+        "op" to it.name
+      )).isEqualTo(2.0)
+    }
+    assertThat(metrics.summarySum(
+      KeyMetricType.crypto_key_op_bytes.name,
+      "type" to KeyType.DAEAD.name,
+      "alias" to "test",
+      "op" to KeyMetricOp.encrypted.name)).isEqualTo((plaintext.size * 2).toDouble())
   }
 
   @Test
@@ -291,24 +402,63 @@ class CryptoModuleTest {
     assertThatThrownBy {
       hmac.verifyMac(Base64.getEncoder().encodeToString("wrong tag!".toByteArray()), message)
     }.hasMessage("invalid MAC")
+
+    var metrics = injector.getInstance(Metrics::class.java) as FakeMetrics
+    assertThat(metrics.get(
+      KeyMetricType.crypto_key_op_total.name,
+      "type" to KeyType.MAC.name,
+      "alias" to "test",
+      "op" to KeyMetricOp.encrypted.name
+    )).isEqualTo(1.0)
+    assertThat(metrics.summarySum(
+      KeyMetricType.crypto_key_op_bytes.name,
+      "type" to KeyType.MAC.name,
+      "alias" to "test",
+      "op" to KeyMetricOp.encrypted.name
+    )).isEqualTo(message.length.toDouble())
+    assertThat(metrics.get(
+      KeyMetricType.crypto_key_op_total.name,
+      "type" to KeyType.MAC.name,
+      "alias" to "test",
+      "op" to KeyMetricOp.verified.name
+    )).isEqualTo(1.0)
+    assertThat(metrics.summarySum(
+      KeyMetricType.crypto_key_op_bytes.name,
+      "type" to KeyType.MAC.name,
+      "alias" to "test",
+      "op" to KeyMetricOp.verified.name
+    )).isEqualTo(message.length.toDouble())
+
   }
 
   @Test
   fun testStreamingAead() {
     val keysetHandle = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB)
     val injector = getInjector(listOf(Pair("test", keysetHandle)))
+    var metrics = injector.getInstance(Metrics::class.java) as FakeMetrics
+
     val streamingAead = injector.getInstance(StreamingAeadKeyManager::class.java)["test"]
     val aad = byteArrayOf(1, 2, 3, 4)
 
     val encryptedBytesOutput = ByteArrayOutputStream()
     val ciphertextOutput = streamingAead.newEncryptingStream(encryptedBytesOutput, aad)
-    ciphertextOutput.write("this is a very ".toByteArray(Charsets.UTF_8))
-    ciphertextOutput.write("very very very ".toByteArray(Charsets.UTF_8))
-    ciphertextOutput.write("long message".toByteArray(Charsets.UTF_8))
+    val segment1 = "this is a very ".toByteArray(Charsets.UTF_8)
+    val segment2 = "very very very ".toByteArray(Charsets.UTF_8)
+    val segment3 = "long message".toByteArray(Charsets.UTF_8)
+    ciphertextOutput.write(segment1)
+    ciphertextOutput.write(segment2)
+    ciphertextOutput.write(segment3)
     ciphertextOutput.close()
     val ciphertext = encryptedBytesOutput.toByteArray()
     assertThat(ciphertext).isNotEmpty
     assertThat(ciphertext.toByteString().utf8()).doesNotContain("long message")
+
+    assertThat(metrics.summarySum(
+      KeyMetricType.crypto_key_op_bytes.name,
+      "type" to KeyType.STREAMING_AEAD.name,
+      "alias" to "test",
+      "op" to KeyMetricOp.encrypted.name
+    )).isEqualTo((segment1.size + segment2.size + segment3.size).toDouble())
 
     var decrypted = byteArrayOf()
     val decryptionByteArray = ByteArrayInputStream(ciphertext)
@@ -323,6 +473,14 @@ class CryptoModuleTest {
     decryptionStream.close()
     assertThat(decrypted).isNotEmpty
     assertThat(decrypted.toByteString().utf8()).contains("long message")
+
+    assertThat(metrics.summarySum(
+      KeyMetricType.crypto_key_op_bytes.name,
+      "type" to KeyType.STREAMING_AEAD.name,
+      "alias" to "test",
+      "op" to KeyMetricOp.decrypted.name
+    )).isEqualTo((decrypted.size).toDouble())
+
   }
 
   @Test
@@ -360,6 +518,10 @@ class CryptoModuleTest {
     }.isInstanceOf(GeneralSecurityException::class.java)
   }
 
+  /**
+   * Creates a local test-specific injector that hardwires the configuration, outside the scope of
+   * the {@link MiskTestModule} context above.
+   */
   private fun getInjector(
     keyMap: List<Pair<String, KeysetHandle>>,
     external: Map<KeyAlias, KeyType>? = null
@@ -382,17 +544,24 @@ class CryptoModuleTest {
       }
       Key(it.first, keyType, generateEncryptedKey(it.second), "aws-kms://uri")
     }
-    val config = CryptoConfig(keys, "test_master_key", external.orEmpty())
-    val deploymentModule = DeploymentModule(TESTING)
 
-    return Guice.createInjector(deploymentModule, CryptoTestModule(config))
+    val config = CryptoConfig(keys, "test_master_key", external.orEmpty())
+    return Guice.createInjector(
+      FakeMetricsModule(),
+      DeploymentModule(TESTING),
+      CryptoTestModule(config)
+    )
   }
 
+  /**
+   * Creates a local test-specific injector that hardwires the configuration, outside the scope of
+   * the {@link MiskTestModule} context above.
+   */
   private fun getInjectorWithKeys(keys: List<Key>): Injector {
     val config = CryptoConfig(keys, "test_master_key", mapOf())
-    val deploymentModule = DeploymentModule(TESTING)
     return Guice.createInjector(
-      deploymentModule, CryptoTestModule(config),
+      FakeMetricsModule(),
+      DeploymentModule(TESTING), CryptoTestModule(config),
       LogCollectorModule()
     )
   }

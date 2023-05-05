@@ -20,8 +20,14 @@ data class CryptoConfig(
    * The key references (map of alias to type) of keys we want to use that are loaded from an
    * external key source, such as an S3 bucket.
    */
-  val external_data_keys: Map<KeyAlias, KeyType>? = null
-) : Config
+  val external_data_keys: Map<KeyAlias, KeyType>? = null,
+
+  /**
+   * How long length metrics are kept before they are discarded. Default is 10 minutes
+   */
+  val ln_metric_age_in_seconds: Long? = 600,
+
+  ) : Config
 
 /**
  * Describes a specific key
