@@ -6,17 +6,26 @@ plugins {
 }
 
 dependencies {
-  implementation(Dependencies.kotlinReflection)
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
-  api(project(":misk-inject"))
+  api(Dependencies.guice)
+  api(Dependencies.javaxInject)
+  api(Dependencies.moshi)
+  api(Dependencies.okio)
+  api(Dependencies.wispConfig)
   api(Dependencies.wispDeployment)
+  api(project(":misk"))
+  api(project(":misk-action-scopes"))
+  api(project(":misk-actions"))
+  api(project(":misk-config"))
+  api(project(":misk-inject"))
+  implementation(project(":misk-core"))
 
-  testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.kotlinReflect)
   testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.moshiKotlin)
+  testImplementation(Dependencies.okHttp)
   testImplementation(Dependencies.wireRuntime)
+  testImplementation(project(":misk-testing"))
 }
 
 sourceSets {

@@ -4,8 +4,7 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.guava)
+  api(Dependencies.javaxInject)
   api(Dependencies.wispLease)
-  implementation(Dependencies.guice)
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-service"))
 }

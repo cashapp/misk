@@ -4,19 +4,23 @@ plugins {
 }
 
 dependencies {
-  implementation(Dependencies.cronUtils)
+  api(Dependencies.cronUtils)
+  api(Dependencies.guice)
+  api(Dependencies.javaxInject)
+  api(project(":misk"))
+  api(project(":misk-inject"))
   implementation(Dependencies.guava)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.kotlinReflection)
-  implementation(Dependencies.moshiAdapters)
-  implementation(project(":misk"))
+  implementation(Dependencies.kotlinLogging)
+  implementation(Dependencies.wispLease)
+  implementation(Dependencies.wispLogging)
+  implementation(project(":misk-clustering"))
   implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
-  api(Dependencies.wispLease)
-  api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.wispLoggingTesting)
   testImplementation(Dependencies.wispTimeTesting)
   testImplementation(project(":misk-testing"))
 }
