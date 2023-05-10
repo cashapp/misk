@@ -34,19 +34,6 @@ dependencyAnalysis {
         severity("fail")
       }
     }
-    // TODO: Delete this package
-    project(":misk-zookeeper") {
-      onAny {
-        severity("ignore")
-      }
-    }
-    // TODO: Delete this package
-    project(":misk-zookeeper-testing") {
-      onAny {
-        severity("ignore")
-      }
-    }
-
     // False positives.
     project(":misk-aws2-dynamodb-testing") {
       onAny {
