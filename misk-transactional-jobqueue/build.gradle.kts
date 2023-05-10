@@ -4,9 +4,6 @@ plugins {
 }
 
 dependencies {
-  implementation(project(":misk-core"))
-  implementation(project(":misk-jobqueue"))
-  implementation(project(":misk-hibernate"))
-
-  testImplementation(project(":misk-testing"))
+  api(project(":misk-hibernate"))
+  api(project(":misk-jobqueue"))
 }

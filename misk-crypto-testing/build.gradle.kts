@@ -4,23 +4,24 @@ plugins {
 }
 
 dependencies {
+  api(project(":misk-crypto"))
+  api(project(":misk-inject"))
+  implementation(Dependencies.bouncycastle)
   implementation(Dependencies.guice)
-  implementation(Dependencies.loggingApi)
   implementation(Dependencies.tink)
-  implementation(Dependencies.bouncycastlePgp)
+  implementation(Dependencies.tinkAwskms)
+  implementation(Dependencies.tinkGcpkms)
+  implementation(Dependencies.wispDeployment)
+  implementation(project(":misk-config"))
 
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-crypto"))
-  implementation(project(":misk-testing"))
-  api(Dependencies.wispContainersTesting)
-  api(Dependencies.wispLogging)
-
+  testImplementation("com.squareup.okio:okio:3.0.0")
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.awaitility)
+  testImplementation(Dependencies.bouncycastlePgp)
+  testImplementation(Dependencies.javaxInject)
   testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.junitEngine)
-  testImplementation(Dependencies.junitParams)
-
+  testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.moshi)
+  testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(project(":misk"))
+  testImplementation(project(":misk-testing"))
 }
