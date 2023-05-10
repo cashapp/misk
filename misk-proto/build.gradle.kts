@@ -14,3 +14,7 @@ wire {
     javaInterop = true
   }
 }
+
+dependencies {
+  api(Dependencies.okio)
+}

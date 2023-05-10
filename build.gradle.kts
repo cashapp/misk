@@ -1,4 +1,3 @@
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
@@ -24,16 +23,69 @@ buildscript {
   }
 }
 
+plugins {
+  id("com.autonomousapps.dependency-analysis") version Dependencies.dependencyAnalysisPluginVersion
+}
+
+dependencyAnalysis {
+  issues {
+    all {
+      onAny {
+        severity("fail")
+      }
+    }
+    // TODO: Delete this package
+    project(":misk-zookeeper") {
+      onAny {
+        severity("ignore")
+      }
+    }
+    // TODO: Delete this package
+    project(":misk-zookeeper-testing") {
+      onAny {
+        severity("ignore")
+      }
+    }
+
+    // False positives.
+    project(":misk-aws2-dynamodb-testing") {
+      onAny {
+        exclude("org.antlr:antlr4-runtime")
+      }
+    }
+    project(":misk-gcp") {
+      onUsedTransitiveDependencies {
+        // Can be removed once dd-trace-ot uses 0.33.0 of open tracing.
+        exclude("io.opentracing:opentracing-util:0.32.0")
+        exclude("io.opentracing:opentracing-noop:0.33.0")
+      }
+      onRuntimeOnly {
+        exclude("com.datadoghq:dd-trace-ot:1.12.1")
+      }
+    }
+    project(":misk-grpc-tests") {
+      onUnusedDependencies {
+        exclude("javax.annotation:javax.annotation-api:1.3.2")
+      }
+    }
+    project(":misk-jooq") {
+      onIncorrectConfiguration {
+        exclude("org.jooq:jooq:3.15.0")
+      }
+    }
+  }
+}
+
 val testShardNonHibernate by tasks.creating() {
   group = "Continuous integration"
   description = "Runs all tests that don't depend on misk-hibernate. " +
-          "This target is intended for manually sharding tests to make CI faster."
+    "This target is intended for manually sharding tests to make CI faster."
 }
 
 val testShardHibernate by tasks.creating() {
   group = "Continuous integration"
   description = "Runs all tests that depend on misk-hibernate. " +
-          "This target is intended for manually sharding tests to make CI faster."
+    "This target is intended for manually sharding tests to make CI faster."
 }
 
 subprojects {
@@ -63,7 +115,6 @@ subprojects {
     }
 
     dependencies {
-      add("testImplementation", Dependencies.junitApi)
       add("testRuntimeOnly", Dependencies.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.
@@ -139,8 +190,10 @@ subprojects {
   // https://github.com/square/okio/issues/647
   configurations.all {
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
-      attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
+      attributes.attribute(
+        Usage.USAGE_ATTRIBUTE,
+        this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
+      )
     }
   }
 }
-

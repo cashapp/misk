@@ -5,16 +5,25 @@ plugins {
 }
 
 dependencies {
-  implementation(project(":misk"))
-  implementation(project(":misk-actions"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-prometheus"))
-  implementation(project(":misk-redis"))
+  api(Dependencies.javaxInject)
+  api(Dependencies.wispConfig)
+  api(project(":misk"))
+  api(project(":misk-actions"))
+  api(project(":misk-clustering"))
+  api(project(":misk-core"))
+  api(project(":misk-inject"))
+  api(project(":misk-prometheus"))
+  api(project(":misk-redis"))
+  implementation(Dependencies.guice)
+  implementation(Dependencies.jedis)
+  implementation(Dependencies.okHttp)
+  implementation(Dependencies.wispDeployment)
+  implementation(project(":misk-config"))
   implementation(project(":misk-redis-testing"))
 
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
   testImplementation(project(":misk-testing"))
-  testImplementation("org.assertj:assertj-core:3.24.2")
 }
 
 val jar by tasks.getting(Jar::class) {

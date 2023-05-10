@@ -8,22 +8,25 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.javaxInject)
+  api(Dependencies.jooq)
+  api(Dependencies.kotlinLogging)
+  api(project(":misk-core"))
+  api(project(":misk-inject"))
+  api(project(":misk-jdbc"))
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.javaxInject)
-  implementation(Dependencies.jooq)
+  implementation(Dependencies.kotlinRetry)
   implementation(Dependencies.kotlinxCoroutines)
-  api(Dependencies.kotlinRetry)
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  api(project(":misk-jdbc"))
-  api(Dependencies.wispLogging)
+  implementation(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.wispDeployment)
   testImplementation(Dependencies.wispTimeTesting)
-  testApi(project(":misk-testing"))
-  testApi(project(":misk-jdbc-testing"))
+  testImplementation(project(":misk"))
+  testImplementation(project(":misk-jdbc-testing"))
+  testImplementation(project(":misk-testing"))
 
   // Needed to generate jooq test db classes
   jooqGenerator(Dependencies.mysql)
@@ -48,7 +51,7 @@ flyway {
 }
 // Needed to generate jooq test db classes
 jooq {
-  version.set("3.14.8")
+  version.set("3.15.0")
   edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
 
   configurations {

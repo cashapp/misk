@@ -21,11 +21,11 @@ configure<AllOpenExtension> {
 }
 
 dependencies {
-  implementation(Dependencies.curatorFramework) {
+  implementation("org.apache.curator:curator-framework:5.1.0") {
     exclude(group = "org.slf4j", module = "slf4j-log4j12")
     exclude(group = "log4j", module = "log4j")
   }
-  implementation(Dependencies.zookeeper) {
+  implementation("org.apache.zookeeper:zookeeper:3.7.0") {
     exclude(group = "org.slf4j", module = "slf4j-log4j12")
     exclude(group = "log4j", module = "log4j")
   }

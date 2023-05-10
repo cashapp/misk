@@ -16,12 +16,12 @@ configure<AllOpenExtension> {
 
 dependencies {
   implementation(Dependencies.guice)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.curatorFramework) {
+  implementation(Dependencies.kotlinLogging)
+  implementation("org.apache.curator:curator-framework:5.1.0") {
     exclude(group = "org.slf4j", module = "slf4j-log4j12")
     exclude(group = "log4j", module = "log4j")
   }
-  implementation(Dependencies.zookeeper) {
+  implementation("org.apache.zookeeper:zookeeper:3.7.0") {
     exclude(group = "org.slf4j", module = "slf4j-log4j12")
     exclude(group = "log4j", module = "log4j")
   }
@@ -37,7 +37,7 @@ dependencies {
   testImplementation(Dependencies.dockerCore)
   testImplementation(Dependencies.dockerTransport)
   testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.zookeeper) {
+  testImplementation("org.apache.zookeeper:zookeeper:3.7.0") {
     exclude(group = "org.slf4j", module = "slf4j-log4j12")
     exclude(group = "log4j", module = "log4j")
   }

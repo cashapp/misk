@@ -4,5 +4,6 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.okio)
   implementation(Dependencies.wireRuntime)
 }

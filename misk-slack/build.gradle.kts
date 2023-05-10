@@ -4,27 +4,24 @@ plugins {
 }
 
 dependencies {
-  implementation(Dependencies.guice)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.retrofit)
+  api(Dependencies.guice)
+  api(Dependencies.javaxInject)
+  api(Dependencies.moshi)
+  api(Dependencies.retrofit)
+  api(project(":misk"))
+  api(project(":misk-config"))
+  api(project(":misk-inject"))
+  implementation(Dependencies.kotlinLogging)
+  implementation(Dependencies.okHttp)
   implementation(Dependencies.retrofitMoshi)
-  implementation(Dependencies.retrofitProtobuf)
-  implementation(Dependencies.retrofitWire)
-  implementation(Dependencies.moshiKotlin)
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  api(Dependencies.wispLogging)
-  api(Dependencies.wispMoshi)
+  implementation(Dependencies.wispLogging)
+  implementation(Dependencies.wispMoshi)
 
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junit4Api)
   testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.junitParams)
+  testImplementation(Dependencies.okHttpMockWebServer)
+  testImplementation("com.squareup.okio:okio:3.0.0")
+  testImplementation(Dependencies.wispDeployment)
   testImplementation(project(":misk-testing"))
-  testImplementation(project(":misk-gcp-testing"))
-  testImplementation(Dependencies.okHttpMockWebServer) {
-    exclude(group = "junit")
-  }
 }

@@ -3,21 +3,11 @@ plugins {
   `java-library`
 }
 
-sourceSets {
-  val main by getting {
-    java.srcDir("src/main/kotlin/")
-  }
-}
-
 dependencies {
-  implementation(Dependencies.wireGrpcClient)
+  api(Dependencies.okio)
   implementation(Dependencies.wireRuntime)
-  implementation(Dependencies.moshiCore)
-  implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.moshiAdapters)
-  implementation(project(":misk"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinTest)
+  testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.wispTimeTesting)
 }

@@ -4,19 +4,23 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.javaxInject)
+  api(Dependencies.jedis)
+  api(project(":misk-inject"))
+  api(project(":misk-redis"))
   api(project(":misk-testing"))
-  implementation(Dependencies.dockerCore)
-  implementation(Dependencies.dockerTransport)
+  implementation(Dependencies.dockerApi)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.jedis)
+  implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.okio)
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-redis"))
+  implementation(Dependencies.wispContainersTesting)
+  implementation(Dependencies.wispLogging)
 
+  testImplementation(Dependencies.wispDeployment)
+  testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.wispTimeTesting)
+  testImplementation(project(":misk"))
 }
