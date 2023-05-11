@@ -32,6 +32,8 @@ dependencyAnalysis {
     all {
       onAny {
         severity("fail")
+        // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
+        exclude("() -> java.io.File?")
       }
     }
     // False positives.
@@ -114,8 +116,9 @@ subprojects {
       add("api", platform(Dependencies.jettyBom))
       add("api", platform(Dependencies.kotlinBom))
       add("api", platform(Dependencies.nettyBom))
-      add("api", platform(Dependencies.wispBom))
       add("api", platform(Dependencies.prometheusClientBom))
+      add("api", platform(Dependencies.wireBom))
+      add("api", platform(Dependencies.wispBom))
     }
 
     tasks.withType<GenerateModuleMetadata> {
