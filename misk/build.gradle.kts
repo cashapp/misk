@@ -70,7 +70,7 @@ dependencies {
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.kotlinTest)
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0")
   testImplementation(Dependencies.logbackClassic)
   testImplementation(Dependencies.okHttpMockWebServer)
   testImplementation(Dependencies.openTracingMock)
