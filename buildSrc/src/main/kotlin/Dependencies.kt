@@ -150,7 +150,7 @@ object Dependencies {
   val tinkAwskms = "com.google.crypto.tink:tink-awskms:1.6.1"
   val tinkGcpkms = "com.google.crypto.tink:tink-gcpkms:1.6.1"
   val tracingDatadog = "com.datadoghq:dd-trace-api:1.12.1"
-  val wireBom = "com.squareup.wire:wire-bom:4.6.0"
+  val wireBom = "com.squareup.wire:wire-bom:4.6.2"
   val wireGradlePlugin = "com.squareup.wire:wire-gradle-plugin:4.6.0"
   val wireGrpcClient = "com.squareup.wire:wire-grpc-client:4.6.0"
   val wireMoshiAdapter = "com.squareup.wire:wire-moshi-adapter:4.6.0"
