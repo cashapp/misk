@@ -1,6 +1,32 @@
 Change Log
 ==========
 
+Version 1.4.0 *(2023-05-11)*
+----------------------------
+
+Dependency changes:
+
+* aws2: "2.18.4" -> "2.19.33"
+* dependencyAnalysisPlugin: "1.19.0" -> "1.20.0"
+* grpc: "1.54.0" -> "1.55.1"
+* hoplite: "2.7.1" -> "2.7.4"
+* jackson: "2.14.2" -> "2.15.0"
+* junit: "5.9.2" -> "5.9.3"
+* kotest: "5.5.5" -> "5.6.2"
+* kotlin: "1.7.22" -> "1.8.21"
+* kotlinBinaryCompatibilityPlugin: "0.13.0" -> "0.13.1"
+* kotlinx: "1.6.4" -> "1.7.0"
+* logback: "1.4.5" -> "1.4.7"
+* micrometer: "1.10.4" -> "1.11.0"
+* mockito: "4.9.0" -> "5.3.1"
+* netty: "4.1.91.Final" -> "4.1.92.Final"
+* okHttp: "4.10.0" -> "4.11.0"
+* protobufGradlePlugin: "0.9.2" -> "0.9.3"
+* slf4j: "2.0.6" -> "2.0.7"
+* versionCatalogUpdateGradlePlugin: "0.7.0" -> "0.8.0"
+* versionsGradlePlugin: "0.45.0" -> "0.46.0"
+
+
 Version 1.3.12 *(2023-04-20)*
 ----------------------------
 
