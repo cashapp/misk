@@ -1,45 +1,43 @@
 [versions]
 assertj = "3.24.2"
 # @pin
-aws2 = "2.18.4"
+aws2 = "2.19.33"
 bouncycastle = "1.70"
-dependencyAnalysisPlugin = "1.19.0"
+dependencyAnalysisPlugin = "1.20.0"
 docker = "3.3.0"
-grpc = "1.54.0"
-hoplite = "2.7.1"
-jackson = "2.14.2"
+grpc = "1.55.1"
+hoplite = "2.7.4"
+jackson = "2.15.0"
 jnrUnixsocket = "0.38.19"
-junit = "5.9.2"
-kotest = "5.5.5"
+junit = "5.9.3"
+kotest = "5.6.2"
 # @pin
-kotlin = "1.7.22"
-kotlinBinaryCompatibilityPlugin = "0.13.0"
+kotlin = "1.8.21"
+kotlinBinaryCompatibilityPlugin = "0.13.1"
 kotlinLogging = "3.0.5"
 kotlinRetry = "1.0.9"
-kotlinx = "1.6.4"
+kotlinx = "1.7.0"
 # @pin
 launchDarkly = "5.10.7"
-logback = "1.4.5"
+logback = "1.4.7"
 # @pin
 mavenPublishGradlePlugin = "0.23.2"
-micrometer = "1.10.4"
-mockito = "4.9.0"
+micrometer = "1.11.0"
+mockito = "5.3.1"
 moshi = "1.14.0"
-netty = "4.1.91.Final"
-okHttp = "4.10.0"
+netty = "4.1.92.Final"
+okHttp = "4.11.0"
 okio = "3.3.0"
 openTracing = "0.33.0"
-openTracingOkHttp = "3.0.0"
 prometheus = "0.16.0"
-protobufGradlePlugin = "0.9.2"
-slf4j = "2.0.6"
-versionCatalogUpdateGradlePlugin = "0.7.0"
-versionsGradlePlugin = "0.45.0"
+protobufGradlePlugin = "0.9.3"
+slf4j = "2.0.7"
+versionCatalogUpdateGradlePlugin = "0.8.0"
+versionsGradlePlugin = "0.46.0"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 aws2Bom = { module = "software.amazon.awssdk:bom", version.ref = "aws2" }
-aws2Regions = { module = "software.amazon.awssdk:regions" } # omit the version so attempts to use this dep without the BOM fail
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bouncycastle" }
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
 dockerJavaApi = { module = "com.github.docker-java:docker-java-api", version.ref = "docker" }
@@ -60,7 +58,6 @@ kotestAssertionsShared = { module = "io.kotest:kotest-assertions-shared", versio
 kotestCommon = { module = "io.kotest:kotest-common", version.ref = "kotest" }
 kotestFrameworkApi = { module = "io.kotest:kotest-framework-api", version.ref = "kotest" }
 kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
-kotestProperty = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 kotlinRetry = { module = "com.michael-bull.kotlin-retry:kotlin-retry", version.ref = "kotlinRetry" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -72,7 +69,6 @@ loggingApi = { module = "io.github.microutils:kotlin-logging", version.ref = "ko
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 mockitoCore = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
 moshiCore = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
 nettyBom = { module = "io.netty:netty-bom", version.ref = "netty" }
@@ -80,15 +76,14 @@ okHttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okHttp" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 openTracing = { module = "io.opentracing:opentracing-api", version.ref = "openTracing" }
 openTracingMock = { module = "io.opentracing:opentracing-mock", version.ref = "openTracing" }
-openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version.ref = "openTracingOkHttp" }
 prometheusClient = { module = "io.prometheus:simpleclient", version.ref = "prometheus" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [plugins]
+dependencyAnalysisPlugin = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
 kotlinBinaryCompatibilityPlugin = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompatibilityPlugin" }
 kotlinGradlePlugin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 mavenPublishGradlePlugin = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublishGradlePlugin" }
 protobufGradlePlugin = { id = "com.google.protobuf", version.ref = "protobufGradlePlugin" }
 versionCatalogUpdateGradlePlugin = { id = "nl.littlerobots.version-catalog-update", version.ref = "versionCatalogUpdateGradlePlugin" }
 versionsGradlePlugin = { id = "com.github.ben-manes.versions", version.ref = "versionsGradlePlugin" }
-dependencyAnalysisPlugin = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
