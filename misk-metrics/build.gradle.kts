@@ -4,10 +4,10 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.prometheusClient)
-  implementation(Dependencies.guava)
-  implementation(Dependencies.kotlinStdLibJdk8)
+  api(libs.prometheusClient)
+  implementation(libs.guava)
+  implementation(libs.kotlinStdLibJdk8)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
 }

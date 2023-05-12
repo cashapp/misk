@@ -4,18 +4,18 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.aws2Dynamodb)
-  api(Dependencies.awsAuth)
-  api(Dependencies.awsSdkCore)
-  api(Dependencies.guice)
-  api(Dependencies.javaxInject)
-  api(Dependencies.kotlinLogging)
+  api(libs.aws2Dynamodb)
+  api(libs.awsAuth)
+  api(libs.awsSdkCore)
+  api(libs.guice)
+  api(libs.javaxInject)
+  api(libs.kotlinLogging)
   api(project(":misk-aws"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
-  implementation(Dependencies.awsCore)
-  implementation(Dependencies.awsRegions)
-  implementation(Dependencies.wispLogging)
+  implementation(libs.awsCore)
+  implementation(libs.awsRegions)
+  implementation(libs.wispLogging)
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
 }

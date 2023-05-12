@@ -1,22 +1,27 @@
+import com.autonomousapps.internal.utils.toPrettyString
 import com.google.protobuf.gradle.*
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   kotlin("jvm")
   `java-library`
 
-  id("com.google.protobuf")
-  id("com.squareup.wire")
+  alias(libs.plugins.protobufGradlePlugin)
+  alias(libs.plugins.wireGradlePlugin)
 }
 
 protobuf {
   plugins {
     id("grpc") {
-      artifact = Dependencies.grpcGenJava
+      artifacts
+      val grpcGenJava = libs.grpcGenJava.get()
+      artifact = "${grpcGenJava.group}:${grpcGenJava.name}:${grpcGenJava.version}"
     }
   }
 
   protoc {
-    artifact = Dependencies.protoc
+    val protoc = libs.protoc.get()
+    artifact = "${protoc.group}:${protoc.name}:${protoc.version}"
   }
 
   generateProtoTasks {
@@ -59,35 +64,35 @@ sourceSets {
 }
 
 dependencies {
-  api(Dependencies.grpcApi)
-  api(Dependencies.grpcStub)
-  api(Dependencies.guice)
-  api(Dependencies.javaxInject)
-  api(Dependencies.okHttp)
-  api(Dependencies.okio)
-  api(Dependencies.protobufJava)
+  api(libs.grpcApi)
+  api(libs.grpcStub)
+  api(libs.guice)
+  api(libs.javaxInject)
+  api(libs.okHttp)
+  api(libs.okio)
+  api(libs.protobufJava)
   api(project(":misk"))
   api(project(":misk-actions"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
-  implementation(Dependencies.grpcNetty)
-  implementation(Dependencies.grpcProtobuf)
-  implementation(Dependencies.javaxAnnotation)
-  implementation(Dependencies.kotlinxCoroutines)
-  implementation(Dependencies.nettyHandler)
-  implementation(Dependencies.wireGrpcClient)
-  implementation(Dependencies.wireRuntime)
+  implementation(libs.grpcNetty)
+  implementation(libs.grpcProtobuf)
+  implementation(libs.javaxAnnotation)
+  implementation(libs.kotlinxCoroutines)
+  implementation(libs.nettyHandler)
+  implementation(libs.wireGrpcClient)
+  implementation(libs.wireRuntime)
   implementation(project(":misk-core"))
   implementation(project(":misk-metrics-testing"))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.awaitility)
-  testImplementation(Dependencies.awaitilityKotlin)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.logbackClassic)
-  testImplementation(Dependencies.protoGoogleCommon)
-  testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(libs.assertj)
+  testImplementation(libs.awaitility)
+  testImplementation(libs.awaitilityKotlin)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
+  testImplementation(libs.logbackClassic)
+  testImplementation(libs.protoGoogleCommon)
+  testImplementation(libs.wispLoggingTesting)
 }

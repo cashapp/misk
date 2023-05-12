@@ -4,12 +4,12 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guice)
-  api(Dependencies.javaxInject)
-  implementation(Dependencies.kotlinReflect)
-  implementation(Dependencies.kotlinStdLibJdk8)
+  api(libs.guice)
+  api(libs.javaxInject)
+  implementation(libs.kotlinReflect)
+  implementation(libs.kotlinStdLibJdk8)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":misk-testing"))
 }

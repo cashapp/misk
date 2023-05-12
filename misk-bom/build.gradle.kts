@@ -1,6 +1,7 @@
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   `java-platform`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.mavenPublishGradlePlugin)
 }
 
 dependencies {

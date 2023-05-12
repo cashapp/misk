@@ -6,5 +6,5 @@ plugins {
 dependencies {
   api(project(":misk-events-core"))
   api(project(":misk-hibernate"))
-  implementation(Dependencies.guava)
+  implementation(libs.guava)
 }

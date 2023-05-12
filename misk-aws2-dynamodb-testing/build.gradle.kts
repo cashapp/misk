@@ -4,23 +4,23 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.aws2Dynamodb)
-  api(Dependencies.aws2DynamodbEnhanced)
-  api(Dependencies.guice)
-  api(Dependencies.javaxInject)
-  api(Dependencies.tempest2TestingInternal)
+  api(libs.aws2Dynamodb)
+  api(libs.aws2DynamodbEnhanced)
+  api(libs.guice)
+  api(libs.javaxInject)
+  api(libs.tempest2TestingInternal)
   api(project(":misk-aws2-dynamodb"))
   api(project(":misk-inject"))
   api(project(":misk-testing"))
-  implementation(Dependencies.tempest2Testing)
-  implementation(Dependencies.tempest2TestingDocker)
-  implementation(Dependencies.tempest2TestingJvm)
+  implementation(libs.tempest2Testing)
+  implementation(libs.tempest2TestingDocker)
+  implementation(libs.tempest2TestingJvm)
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.awsSdkCore)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.awsSdkCore)
+  testImplementation(libs.junitApi)
 
   // Have to clamp until DynamoDBLocal supports later versions (dependency from tempest).
   testImplementation("org.antlr:antlr4-runtime")  {

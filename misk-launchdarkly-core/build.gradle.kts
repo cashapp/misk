@@ -4,19 +4,19 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
-  api(Dependencies.wispFeature)
-  api(Dependencies.wispLaunchDarkly)
+  api(libs.javaxInject)
+  api(libs.wispFeature)
+  api(libs.wispLaunchDarkly)
   api(project(":misk-feature"))
-  implementation(Dependencies.guava)
-  implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(libs.guava)
+  implementation(libs.kotlinStdLibJdk8)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.launchDarkly)
-  testImplementation(Dependencies.logbackClassic)
-  testImplementation(Dependencies.mockitoCore)
-  testImplementation(Dependencies.moshi)
-  testImplementation(Dependencies.wispLoggingTesting)
-  testImplementation(Dependencies.wispMoshi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.launchDarkly)
+  testImplementation(libs.logbackClassic)
+  testImplementation(libs.mockitoCore)
+  testImplementation(libs.moshi)
+  testImplementation(libs.wispLoggingTesting)
+  testImplementation(libs.wispMoshi)
 }

@@ -23,7 +23,7 @@ a. Add the below lines to your build.gradle.kts
 buildscript {
   dependencies {
     classpath("org.flywaydb:flyway-gradle-plugin:7.15.0")
-    classpath(Dependencies.mysql)
+    classpath(libs.mysql)
   }
 }
 plugins {

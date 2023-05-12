@@ -4,9 +4,9 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guice)
-  api(Dependencies.javaxInject)
-  api(Dependencies.wispToken)
+  api(libs.guice)
+  api(libs.javaxInject)
+  api(libs.wispToken)
   api(project(":misk"))
   api(project(":misk-hibernate"))
   api(project(":misk-inject"))
@@ -15,14 +15,14 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinLogging)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.logbackClassic)
-  testImplementation(Dependencies.moshi)
-  testImplementation(Dependencies.wispLogging)
-  testImplementation(Dependencies.wispLoggingTesting)
-  testImplementation(Dependencies.wispTimeTesting)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinLogging)
+  testImplementation(libs.kotlinTest)
+  testImplementation(libs.logbackClassic)
+  testImplementation(libs.moshi)
+  testImplementation(libs.wispLogging)
+  testImplementation(libs.wispLoggingTesting)
+  testImplementation(libs.wispTimeTesting)
   testImplementation(project(":misk-testing"))
 }

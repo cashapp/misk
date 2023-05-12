@@ -4,19 +4,19 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
-  api(Dependencies.wispFeature)
-  api(Dependencies.wispFeatureTesting)
+  api(libs.javaxInject)
+  api(libs.wispFeature)
+  api(libs.wispFeatureTesting)
   api(project(":misk-feature"))
   api(project(":misk-inject"))
-  implementation(Dependencies.guice)
-  implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.moshi)
+  implementation(libs.guice)
+  implementation(libs.kotlinStdLibJdk8)
+  implementation(libs.moshi)
   implementation(project(":misk-service"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.wispMoshi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
+  testImplementation(libs.wispMoshi)
   testImplementation(project(":misk-testing"))
 }

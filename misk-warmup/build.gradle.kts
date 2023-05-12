@@ -4,18 +4,18 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guice)
+  api(libs.guice)
   api(project(":misk-inject"))
-  implementation(Dependencies.guava)
-  implementation(Dependencies.javaxInject)
-  implementation(Dependencies.kotlinLogging)
-  implementation(Dependencies.wispLogging)
+  implementation(libs.guava)
+  implementation(libs.javaxInject)
+  implementation(libs.kotlinLogging)
+  implementation(libs.wispLogging)
   implementation(project(":misk-core"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.logbackClassic)
-  testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.logbackClassic)
+  testImplementation(libs.wispLoggingTesting)
   testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
 }

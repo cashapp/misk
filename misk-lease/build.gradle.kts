@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guava)
-  api(Dependencies.javaxInject)
-  api(Dependencies.wispLease)
+  api(libs.guava)
+  api(libs.javaxInject)
+  api(libs.wispLease)
 }

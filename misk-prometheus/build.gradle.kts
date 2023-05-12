@@ -4,15 +4,15 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
-  api(Dependencies.prometheusClient)
-  api(Dependencies.wispConfig)
+  api(libs.javaxInject)
+  api(libs.prometheusClient)
+  api(libs.wispConfig)
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
-  implementation(Dependencies.guice)
-  implementation(Dependencies.kotlinLogging)
-  implementation(Dependencies.prometheusHotspot)
-  implementation(Dependencies.prometheusHttpserver)
-  implementation(Dependencies.wispLogging)
+  implementation(libs.guice)
+  implementation(libs.kotlinLogging)
+  implementation(libs.prometheusHotspot)
+  implementation(libs.prometheusHttpserver)
+  implementation(libs.wispLogging)
   implementation(project(":misk-service"))
 }

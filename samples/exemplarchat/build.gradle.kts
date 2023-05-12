@@ -5,8 +5,8 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
-  api(Dependencies.wispConfig)
+  api(libs.javaxInject)
+  api(libs.wispConfig)
   api(project(":misk"))
   api(project(":misk-actions"))
   api(project(":misk-clustering"))
@@ -14,15 +14,15 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-prometheus"))
   api(project(":misk-redis"))
-  implementation(Dependencies.guice)
-  implementation(Dependencies.jedis)
-  implementation(Dependencies.okHttp)
-  implementation(Dependencies.wispDeployment)
+  implementation(libs.guice)
+  implementation(libs.jedis)
+  implementation(libs.okHttp)
+  implementation(libs.wispDeployment)
   implementation(project(":misk-config"))
   implementation(project(":misk-redis-testing"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":misk-testing"))
 }
 

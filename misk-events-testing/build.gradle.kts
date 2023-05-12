@@ -4,14 +4,14 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
+  api(libs.javaxInject)
   api(project(":misk-events-core"))
   api(project(":misk-inject"))
-  implementation(Dependencies.guice)
+  implementation(libs.guice)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.okio)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
+  testImplementation(libs.okio)
   testImplementation(project(":misk-testing"))
 }

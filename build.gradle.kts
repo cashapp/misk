@@ -6,25 +6,23 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 buildscript {
   repositories {
     mavenCentral()
-    maven(url = "https://plugins.gradle.org/m2/")
-  }
-
-  dependencies {
-    classpath(Dependencies.kotlinAllOpenPlugin)
-    classpath(Dependencies.kotlinGradlePlugin)
-    classpath(Dependencies.dokkaGradlePlugin)
-    classpath(Dependencies.kotlinNoArgPlugin)
-    classpath(Dependencies.junitGradlePlugin)
-    classpath(Dependencies.mavenPublishGradlePlugin)
-    classpath(Dependencies.protobufGradlePlugin)
-    classpath(Dependencies.jgit)
-    classpath(Dependencies.wireGradlePlugin)
-    classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
+    gradlePluginPortal()
   }
 }
 
+// Can be removed once gradle is 8.1
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-  id("com.autonomousapps.dependency-analysis") version Dependencies.dependencyAnalysisPluginVersion
+  alias(libs.plugins.dependencyAnalysisPlugin)
+  alias(libs.plugins.dokkaGradlePlugin)
+  alias(libs.plugins.kotlinAllOpenPlugin) apply false
+  alias(libs.plugins.kotlinBinaryCompatibilityPlugin) apply false
+  alias(libs.plugins.kotlinGradlePlugin) apply false
+  alias(libs.plugins.kotlinJpaPlugin) apply false
+  alias(libs.plugins.kotlinNoArgPlugin) apply false
+  alias(libs.plugins.mavenPublishGradlePlugin) apply false
+  alias(libs.plugins.protobufGradlePlugin) apply false
+  alias(libs.plugins.wireGradlePlugin) apply false
 }
 
 dependencyAnalysis {
@@ -35,8 +33,11 @@ dependencyAnalysis {
         // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
         exclude("() -> java.io.File?")
       }
+      onUnusedDependencies {
+        // Can likely be removed once wire is using 1.7
+        exclude("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+      }
     }
-    // False positives.
     project(":misk-aws2-dynamodb-testing") {
       onAny {
         exclude("org.antlr:antlr4-runtime")
@@ -65,21 +66,19 @@ dependencyAnalysis {
   }
 }
 
-val testShardNonHibernate by tasks.creating() {
+val testShardNonHibernate: Task by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that don't depend on misk-hibernate. " +
     "This target is intended for manually sharding tests to make CI faster."
 }
 
-val testShardHibernate by tasks.creating() {
+val testShardHibernate: Task by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that depend on misk-hibernate. " +
     "This target is intended for manually sharding tests to make CI faster."
 }
 
 subprojects {
-  apply(plugin = "org.jetbrains.dokka")
-
   buildscript {
     repositories {
       mavenCentral()
@@ -104,21 +103,21 @@ subprojects {
     }
 
     dependencies {
-      add("testRuntimeOnly", Dependencies.junitEngine)
+      add("testRuntimeOnly", libs.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.
       // Enforce misk-bom -- it should take priority over external BOMs.
       add("api", enforcedPlatform(project(":misk-bom")))
-      add("api", platform(Dependencies.grpcBom))
-      add("api", platform(Dependencies.guava))
-      add("api", platform(Dependencies.jacksonBom))
-      add("api", platform(Dependencies.jerseyBom))
-      add("api", platform(Dependencies.jettyBom))
-      add("api", platform(Dependencies.kotlinBom))
-      add("api", platform(Dependencies.nettyBom))
-      add("api", platform(Dependencies.prometheusClientBom))
-      add("api", platform(Dependencies.wireBom))
-      add("api", platform(Dependencies.wispBom))
+      add("api", platform(libs.grpcBom))
+      add("api", platform(libs.guava))
+      add("api", platform(libs.jacksonBom))
+      add("api", platform(libs.jerseyBom))
+      add("api", platform(libs.jettyBom))
+      add("api", platform(libs.kotlinBom))
+      add("api", platform(libs.nettyBom))
+      add("api", platform(libs.prometheusClientBom))
+      add("api", platform(libs.wireBom))
+      add("api", platform(libs.wispBom))
     }
 
     tasks.withType<GenerateModuleMetadata> {

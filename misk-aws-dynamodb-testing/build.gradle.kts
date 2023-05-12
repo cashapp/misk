@@ -4,20 +4,20 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.awsDynamodb)
-  api(Dependencies.guice)
-  api(Dependencies.javaxInject)
-  api(Dependencies.tempestTestingInternal)
+  api(libs.awsDynamodb)
+  api(libs.guice)
+  api(libs.javaxInject)
+  api(libs.tempestTestingInternal)
   api(project(":misk-aws-dynamodb"))
   api(project(":misk-inject"))
   api(project(":misk-testing"))
-  implementation(Dependencies.kotlinReflect)
-  implementation(Dependencies.tempestTesting)
-  implementation(Dependencies.tempestTestingDocker)
-  implementation(Dependencies.tempestTestingJvm)
+  implementation(libs.kotlinReflect)
+  implementation(libs.tempestTesting)
+  implementation(libs.tempestTestingDocker)
+  implementation(libs.tempestTestingJvm)
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
 }

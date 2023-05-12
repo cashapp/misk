@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.wispFeature)
-  implementation(Dependencies.guava)
-  implementation(Dependencies.kotlinStdLibJdk8)
+  api(libs.wispFeature)
+  implementation(libs.guava)
+  implementation(libs.kotlinStdLibJdk8)
 }

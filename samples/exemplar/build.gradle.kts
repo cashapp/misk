@@ -1,26 +1,27 @@
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   kotlin("jvm")
-  id("com.squareup.wire")
+  alias(libs.plugins.wireGradlePlugin)
 }
 
 dependencies {
-  api(Dependencies.guice)
-  api(Dependencies.javaxInject)
-  api(Dependencies.okHttp)
-  api(Dependencies.okio)
-  api(Dependencies.wispConfig)
-  api(Dependencies.wispToken)
+  api(libs.guice)
+  api(libs.javaxInject)
+  api(libs.okHttp)
+  api(libs.okio)
+  api(libs.wispConfig)
+  api(libs.wispToken)
   api(project(":misk"))
   api(project(":misk-actions"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-prometheus"))
-  implementation(Dependencies.wispDeployment)
+  implementation(libs.wispDeployment)
   implementation(project(":misk-admin"))
   implementation(project(":misk-core"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":misk-testing"))
 }
 

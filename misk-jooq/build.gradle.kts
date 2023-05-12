@@ -1,43 +1,36 @@
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   kotlin("jvm")
   `java-library`
   
   // Needed to generate jooq test db classes
-  id("org.flywaydb.flyway") version "9.14.1"
-  id("nu.studer.jooq") version "7.1.1"
+  alias(libs.plugins.flywayPlugin)
+  alias(libs.plugins.jooqPlugin)
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
-  api(Dependencies.jooq)
-  api(Dependencies.kotlinLogging)
+  api(libs.javaxInject)
+  api(libs.jooq)
+  api(libs.kotlinLogging)
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
-  implementation(Dependencies.guava)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.kotlinRetry)
-  implementation(Dependencies.kotlinxCoroutines)
-  implementation(Dependencies.wispLogging)
+  implementation(libs.guava)
+  implementation(libs.guice)
+  implementation(libs.kotlinRetry)
+  implementation(libs.kotlinxCoroutines)
+  implementation(libs.wispLogging)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.wispDeployment)
-  testImplementation(Dependencies.wispTimeTesting)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.wispDeployment)
+  testImplementation(libs.wispTimeTesting)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-jdbc-testing"))
   testImplementation(project(":misk-testing"))
 
   // Needed to generate jooq test db classes
-  jooqGenerator(Dependencies.mysql)
-}
-
-// Needed to generate jooq test db classes
-buildscript {
-  dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:9.14.1")
-    classpath(Dependencies.mysql)
-  }
+  jooqGenerator(libs.mysql)
 }
 
 // Needed to generate jooq test db classes
@@ -49,9 +42,10 @@ flyway {
   locations = arrayOf("filesystem:${project.projectDir}/src/test/resources/db-migrations")
   sqlMigrationPrefix = "v"
 }
+
 // Needed to generate jooq test db classes
 jooq {
-  version.set("3.15.0")
+  version.set(libs.jooq.get().version)
   edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
 
   configurations {
@@ -86,6 +80,7 @@ jooq {
     }
   }
 }
+
 // Needed to generate jooq test db classes
 val generateJooq by project.tasks
 generateJooq.dependsOn("flywayMigrate")

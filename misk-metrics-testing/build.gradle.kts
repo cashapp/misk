@@ -4,15 +4,15 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
-  api(Dependencies.prometheusClient)
+  api(libs.javaxInject)
+  api(libs.prometheusClient)
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
-  implementation(Dependencies.guava)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(libs.guava)
+  implementation(libs.guice)
+  implementation(libs.kotlinStdLibJdk8)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":misk-testing"))
 }

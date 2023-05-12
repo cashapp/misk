@@ -4,10 +4,10 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.okio)
-  implementation(Dependencies.wireRuntime)
+  api(libs.okio)
+  implementation(libs.wireRuntime)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.wispTimeTesting)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.wispTimeTesting)
 }

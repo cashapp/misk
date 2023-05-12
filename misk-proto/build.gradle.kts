@@ -1,8 +1,9 @@
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   kotlin("jvm")
   `java-library`
   
-  id("com.squareup.wire")
+  alias(libs.plugins.wireGradlePlugin)
 }
 
 wire {
@@ -16,5 +17,5 @@ wire {
 }
 
 dependencies {
-  api(Dependencies.okio)
+  api(libs.okio)
 }
