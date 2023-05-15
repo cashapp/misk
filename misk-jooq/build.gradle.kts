@@ -4,7 +4,7 @@ plugins {
   
   // Needed to generate jooq test db classes
   id("org.flywaydb.flyway") version "9.14.1"
-  id("nu.studer.jooq") version "7.1.1"
+  id("nu.studer.jooq") version "8.2"
 }
 
 dependencies {
@@ -51,7 +51,7 @@ flyway {
 }
 // Needed to generate jooq test db classes
 jooq {
-  version.set("3.15.0")
+  version.set("3.18.2")
   edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
 
   configurations {
