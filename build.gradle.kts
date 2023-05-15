@@ -57,11 +57,6 @@ dependencyAnalysis {
         exclude("javax.annotation:javax.annotation-api:1.3.2")
       }
     }
-    project(":misk-jooq") {
-      onIncorrectConfiguration {
-        exclude("org.jooq:jooq:3.15.0")
-      }
-    }
   }
 }
 
