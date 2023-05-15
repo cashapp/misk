@@ -158,8 +158,10 @@ public class misk/jooq/testgen/tables/Movie : org/jooq/impl/TableImpl {
 	public fun <init> (Lorg/jooq/Name;Lorg/jooq/Table;Lorg/jooq/ForeignKey;Lorg/jooq/Table;[Lorg/jooq/Field;)V
 	public fun <init> (Lorg/jooq/Table;Lorg/jooq/ForeignKey;)V
 	public fun as (Ljava/lang/String;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/SelectField;
 	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/Table;
 	public fun as (Lorg/jooq/Name;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/SelectField;
 	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/Table;
 	public fun fieldsRow ()Lorg/jooq/Row6;
 	public synthetic fun fieldsRow ()Lorg/jooq/Row;
