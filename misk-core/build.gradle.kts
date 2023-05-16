@@ -26,5 +26,6 @@ dependencies {
   testImplementation(Dependencies.logbackClassic)
   testImplementation(Dependencies.wispLogging)
   testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(project(":misk-core"))
   testImplementation(project(":misk-testing"))
 }

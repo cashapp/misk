@@ -29,5 +29,6 @@ dependencies {
   testImplementation(Dependencies.slf4jApi)
   testImplementation(Dependencies.wispLoggingTesting)
   testImplementation(project(":misk"))
+  testImplementation(project(":misk-config"))
   testImplementation(project(":misk-testing"))
 }

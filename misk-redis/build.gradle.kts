@@ -21,6 +21,7 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(project(":misk"))
+  testImplementation(project(":misk-redis"))
   testImplementation(project(":misk-redis-testing"))
   testImplementation(project(":misk-testing"))
 }
