@@ -30,10 +30,12 @@ plugins {
 dependencyAnalysis {
   issues {
     all {
+      ignoreSourceSet("testFixtures")
       onAny {
         severity("fail")
         // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
         exclude("() -> java.io.File?")
+        exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
       }
     }
     // False positives.
@@ -57,6 +59,11 @@ dependencyAnalysis {
         exclude("javax.annotation:javax.annotation-api:1.3.2")
       }
     }
+//    project(":misk-jooq") {
+//      onIncorrectConfiguration {
+//        exclude("org.jooq:jooq:3.18.2")
+//      }
+//    }
   }
 }
 

@@ -29,6 +29,7 @@ dependencies {
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.logbackClassic)
   testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(project(":misk-crypto"))
   testImplementation(project(":misk-testing"))
 
   testFixturesApi(project(":misk-crypto"))
