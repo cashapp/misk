@@ -38,6 +38,7 @@ dependencies {
   testImplementation(Dependencies.openTracingDatadog)
   testImplementation(Dependencies.openTracingMock)
   testImplementation(Dependencies.wispContainersTesting)
+  testImplementation(project(":misk-jdbc"))
   testImplementation(project(":misk-jdbc-testing"))
   testImplementation(project(":misk-testing"))
 }

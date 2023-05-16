@@ -5,9 +5,7 @@ import misk.crypto.Key
 import misk.crypto.KeyAlias
 import misk.crypto.KeyResolver
 import misk.crypto.KeyType
-import java.lang.UnsupportedOperationException
 
-@Deprecated("Replace your dependency on misk-crypto-testing with `testImplementation(testFixtures(Dependencies.miskCrypto))`")
 class FakeKeyResolver : KeyResolver {
   private var returnedKeysets: MutableMap<KeyAlias, Key> = mutableMapOf()
 
@@ -57,6 +55,7 @@ class FakeKeyResolver : KeyResolver {
       KeyType.DIGITAL_SIGNATURE -> TestKeysets.DIGITAL_SIGNATURE
       KeyType.HYBRID_ENCRYPT, KeyType.HYBRID_ENCRYPT_DECRYPT ->
         TestKeysets.HYBRID
+
       KeyType.PGP_ENCRYPT -> TestKeysets.PGP_ENCRYPT
       KeyType.PGP_DECRYPT -> TestKeysets.PGP_DECRYPT
     }

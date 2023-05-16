@@ -62,4 +62,5 @@ dependencies {
   testImplementation(project(":misk-jdbc-testing"))
   testImplementation(project(":misk-metrics"))
   testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-crypto")))
 }

@@ -11,5 +11,6 @@ dependencies {
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
+  testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-testing"))
 }

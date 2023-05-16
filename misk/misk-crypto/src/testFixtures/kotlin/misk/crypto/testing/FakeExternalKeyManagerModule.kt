@@ -5,9 +5,7 @@ import misk.crypto.KeyResolver
 import misk.inject.KAbstractModule
 import wisp.deployment.Deployment
 
-@Deprecated("Replace your dependency on misk-crypto-testing with `testImplementation(testFixtures(Dependencies.miskCrypto))`")
 class FakeExternalKeyManagerModule(private val config: CryptoConfig) : KAbstractModule() {
-
   override fun configure() {
     requireBinding(Deployment::class.java)
     bind<KeyResolver>().toInstance(
