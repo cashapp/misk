@@ -19,21 +19,23 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
-    classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
   }
 }
 
 plugins {
   id("com.autonomousapps.dependency-analysis") version Dependencies.dependencyAnalysisPluginVersion
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version Dependencies.kotlinBinaryCompatibilityPluginVersion
 }
 
 dependencyAnalysis {
   issues {
     all {
+      ignoreSourceSet("testFixtures")
       onAny {
         severity("fail")
         // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
         exclude("() -> java.io.File?")
+        exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
       }
     }
     // False positives.
@@ -57,16 +59,26 @@ dependencyAnalysis {
         exclude("javax.annotation:javax.annotation-api:1.3.2")
       }
     }
+    project(":misk-jooq") {
+      onIncorrectConfiguration {
+        exclude("org.jooq:jooq:3.18.2")
+      }
+    }
   }
 }
 
-val testShardNonHibernate by tasks.creating() {
+apiValidation {
+  ignoredProjects.addAll(listOf("exemplar", "exemplarchat"))
+  additionalSourceSets.addAll(listOf("testFixtures"))
+}
+
+val testShardNonHibernate by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that don't depend on misk-hibernate. " +
     "This target is intended for manually sharding tests to make CI faster."
 }
 
-val testShardHibernate by tasks.creating() {
+val testShardHibernate by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that depend on misk-hibernate. " +
     "This target is intended for manually sharding tests to make CI faster."
@@ -167,7 +179,6 @@ subprojects {
 
   if (!path.startsWith(":samples")) {
     apply(plugin = "com.vanniktech.maven.publish")
-    apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
     apply(from = "$rootDir/gradle-mvn-publish.gradle")
   }
 

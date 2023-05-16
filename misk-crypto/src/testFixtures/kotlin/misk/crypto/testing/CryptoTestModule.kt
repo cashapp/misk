@@ -50,13 +50,10 @@ import java.security.Security
  * but **will not** use the key material specified in the configuration.
  * Instead, it'll generate a random keyset handle for each named key.
  */
-@Deprecated("Replace your dependency on misk-crypto-testing with `testImplementation(testFixtures(Dependencies.miskCrypto))`")
 class CryptoTestModule(
   private val config: CryptoConfig? = null
 ) : KAbstractModule() {
-
   override fun configure() {
-
     bind<KmsClient>().toInstance(FakeKmsClient())
 
     AeadConfig.register()
