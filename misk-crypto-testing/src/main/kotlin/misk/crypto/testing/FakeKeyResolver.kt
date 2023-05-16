@@ -7,6 +7,7 @@ import misk.crypto.KeyResolver
 import misk.crypto.KeyType
 import java.lang.UnsupportedOperationException
 
+@Deprecated("Replace your dependency on misk-crypto-testing with `testImplementation(testFixtures(Dependencies.miskCrypto))`")
 class FakeKeyResolver : KeyResolver {
   private var returnedKeysets: MutableMap<KeyAlias, Key> = mutableMapOf()
 

@@ -50,6 +50,7 @@ import java.security.Security
  * but **will not** use the key material specified in the configuration.
  * Instead, it'll generate a random keyset handle for each named key.
  */
+@Deprecated("Replace your dependency on misk-crypto-testing with `testImplementation(testFixtures(Dependencies.miskCrypto))`")
 class CryptoTestModule(
   private val config: CryptoConfig? = null
 ) : KAbstractModule() {
@@ -99,18 +100,21 @@ class CryptoTestModule(
             .toProvider(AeadEnvelopeProvider(key.key_name))
             .asEagerSingleton()
         }
+
         KeyType.DAEAD -> {
           bind<DeterministicAead>()
             .annotatedWith(Names.named(key.key_name))
             .toProvider(DeterministicAeadProvider(key.key_name))
             .asEagerSingleton()
         }
+
         KeyType.MAC -> {
           bind<Mac>()
             .annotatedWith(Names.named(key.key_name))
             .toProvider(MacProvider(key.key_name))
             .asEagerSingleton()
         }
+
         KeyType.DIGITAL_SIGNATURE -> {
           bind<PublicKeySign>()
             .annotatedWith(Names.named(key.key_name))
@@ -121,12 +125,14 @@ class CryptoTestModule(
             .toProvider(DigitalSignatureVerifierProvider(key.key_name))
             .asEagerSingleton()
         }
+
         KeyType.HYBRID_ENCRYPT -> {
           bind<HybridEncrypt>()
             .annotatedWith(Names.named(key.key_name))
             .toProvider(HybridEncryptProvider(key.key_name))
             .asEagerSingleton()
         }
+
         KeyType.HYBRID_ENCRYPT_DECRYPT -> {
           bind<HybridDecrypt>()
             .annotatedWith(Names.named(key.key_name))
@@ -137,18 +143,21 @@ class CryptoTestModule(
             .toProvider(HybridEncryptProvider(key.key_name))
             .asEagerSingleton()
         }
+
         KeyType.STREAMING_AEAD -> {
           bind<StreamingAead>()
             .annotatedWith(Names.named(key.key_name))
             .toProvider(StreamingAeadProvider(key.key_name))
             .asEagerSingleton()
         }
+
         KeyType.PGP_DECRYPT -> {
           bind<PgpDecrypter>()
             .annotatedWith(Names.named(key.key_name))
             .toProvider(PgpDecrypterProvider(key.key_name))
             .asEagerSingleton()
         }
+
         KeyType.PGP_ENCRYPT -> {
           bind<PgpEncrypter>()
             .annotatedWith(Names.named(key.key_name))

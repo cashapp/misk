@@ -22,7 +22,6 @@ import javax.inject.Singleton
  * all executors when the service shuts down.
  */
 @Singleton
-@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class RealExecutorServiceFactory @Inject constructor(
   private val clock: Clock
 ) : AbstractService(), ExecutorServiceFactory {

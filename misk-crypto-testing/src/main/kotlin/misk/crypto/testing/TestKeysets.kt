@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream
  * These test keys are used by the [FakeKeyResolver] class.
  * *DO NOT USE IN ANY OTHER SITUATION*
  */
+@Deprecated("Replace your dependency on misk-crypto-testing with `testImplementation(testFixtures(Dependencies.miskCrypto))`")
 internal class TestKeysets {
   companion object {
     fun encryptSecret(key: MiskConfig.RealSecret<String>): MiskConfig.RealSecret<String> {

@@ -17,9 +17,11 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import misk.tracing.traceWithNewRootSpan
+import okhttp3.internal.toLongOrDefault
 import org.slf4j.MDC
 import wisp.lease.LeaseManager
 import wisp.logging.getLogger
+import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -43,6 +45,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   private val queues: QueueResolver,
   private val serviceManagerProvider: Provider<ServiceManager>,
   private val tracer: Tracer,
+  private val clock: Clock,
   awsSqsJobQueueConfig: AwsSqsJobQueueConfig
 ) : JobConsumer {
   private val receiverPolicy = awsSqsJobQueueConfig.aws_sqs_job_receiver_policy
@@ -138,6 +141,25 @@ internal class SqsJobConsumer @Inject internal constructor(
         emptyList<Message>()
       }
 
+      for(message in messages) {
+        try {
+          val sentTimestamp = message.attributes[SQS_ATTRIBUTE_SENT_TIMESTAMP]!!.toLong()
+          val receiveCount = message.attributes[SQS_ATTRIBUTE_APPROX_RECEIVE_COUNT]!!.toLong()
+
+          if (receiveCount <= 1) {
+            // Calculate miliseconds between received time and when job was sent.
+            val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli()
+            metrics.queueProcessingLag.record(processingLag.toDouble(), queue.queueName, queue.queueName);
+          }
+
+
+        } catch (e: NumberFormatException) {
+          log.warn("Message ${message.messageId} had invalid SentTimestamp format")
+        } catch (e: NullPointerException) {
+          log.warn("Message ${message.messageId} was missing SentTimestamp or ApproximateReceiveCount")
+        }
+      }
+
       return messages.map { SqsJob(queue.name, queues, metrics, moshi, it) }
     }
 
@@ -205,6 +227,8 @@ internal class SqsJobConsumer @Inject internal constructor(
     internal val CONSUMERS_BATCH_SIZE = Feature("jobqueue-consumers-fetch-batch-size")
     private val ORIGINAL_TRACE_ID_TAG = StringTag("original.trace_id")
     private const val SQS_JOB_ID_MDC = "sqs_job_id"
+    private const val SQS_ATTRIBUTE_SENT_TIMESTAMP = "SentTimestamp"
+    private const val SQS_ATTRIBUTE_APPROX_RECEIVE_COUNT = "ApproximateReceiveCount"
   }
 
 }

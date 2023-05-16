@@ -4,20 +4,24 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.wispConfig)
+  api(Dependencies.javaxInject)
   api(Dependencies.jedis)
-
+  api(Dependencies.wispConfig)
+  api(project(":misk-config"))
+  api(project(":misk-inject"))
+  api(project(":misk-metrics"))
+  implementation(Dependencies.apacheCommonsPool2)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
   implementation(Dependencies.okio)
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-metrics"))
+  implementation(Dependencies.prometheusClient)
+  implementation(Dependencies.wispDeployment)
   implementation(project(":misk-service"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(project(":misk-metrics-testing"))
+  testImplementation(Dependencies.junitApi)
+  testImplementation(project(":misk"))
+  testImplementation(project(":misk-redis"))
   testImplementation(project(":misk-redis-testing"))
   testImplementation(project(":misk-testing"))
 }

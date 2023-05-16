@@ -4,19 +4,20 @@ plugins {
 }
 
 dependencies {
-  implementation(Dependencies.guice)
-  implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.kotlinReflection)
-  implementation(Dependencies.launchDarkly)
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-feature"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-launchdarkly-core"))
-  implementation(project(":misk-service"))
+  api(Dependencies.guice)
+  api(Dependencies.launchDarkly)
   api(Dependencies.wispConfig)
+  api(project(":misk"))
+  api(project(":misk-config"))
+  api(project(":misk-core"))
+  api(project(":misk-inject"))
+  implementation(Dependencies.javaxInject)
+  implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(Dependencies.moshi)
   implementation(Dependencies.wispFeature)
   implementation(Dependencies.wispLaunchDarkly)
-
-  testImplementation(project(":misk-testing"))
+  implementation(Dependencies.wispSsl)
+  implementation(project(":misk-feature"))
+  implementation(project(":misk-launchdarkly-core"))
+  implementation(project(":misk-service"))
 }

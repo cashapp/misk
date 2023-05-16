@@ -21,7 +21,6 @@ import redis.clients.jedis.JedisPoolConfig
 import wisp.deployment.TESTING
 import javax.inject.Inject
 
-@Suppress("UsePropertyAccessSyntax")
 @MiskTest
 class RedisClientMetricsTest {
   @Suppress("unused")

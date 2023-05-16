@@ -1,4 +1,3 @@
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
@@ -20,20 +19,69 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
-    classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
   }
 }
 
-val testShardNonHibernate by tasks.creating() {
-  group = "Continuous integration"
-  description = "Runs all tests that don't depend on misk-hibernate. " +
-          "This target is intended for manually sharding tests to make CI faster."
+plugins {
+  id("com.autonomousapps.dependency-analysis") version Dependencies.dependencyAnalysisPluginVersion
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version Dependencies.kotlinBinaryCompatibilityPluginVersion
 }
 
-val testShardHibernate by tasks.creating() {
+dependencyAnalysis {
+  issues {
+    all {
+      ignoreSourceSet("testFixtures")
+      onAny {
+        severity("fail")
+        // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
+        exclude("() -> java.io.File?")
+        exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
+      }
+    }
+    // False positives.
+    project(":misk-aws2-dynamodb-testing") {
+      onAny {
+        exclude("org.antlr:antlr4-runtime")
+      }
+    }
+    project(":misk-gcp") {
+      onUsedTransitiveDependencies {
+        // Can be removed once dd-trace-ot uses 0.33.0 of open tracing.
+        exclude("io.opentracing:opentracing-util:0.32.0")
+        exclude("io.opentracing:opentracing-noop:0.33.0")
+      }
+      onRuntimeOnly {
+        exclude("com.datadoghq:dd-trace-ot:1.12.1")
+      }
+    }
+    project(":misk-grpc-tests") {
+      onUnusedDependencies {
+        exclude("javax.annotation:javax.annotation-api:1.3.2")
+      }
+    }
+    project(":misk-jooq") {
+      onIncorrectConfiguration {
+        exclude("org.jooq:jooq:3.18.2")
+      }
+    }
+  }
+}
+
+apiValidation {
+  ignoredProjects.addAll(listOf("exemplar", "exemplarchat"))
+  additionalSourceSets.addAll(listOf("testFixtures"))
+}
+
+val testShardNonHibernate by tasks.creating {
+  group = "Continuous integration"
+  description = "Runs all tests that don't depend on misk-hibernate. " +
+    "This target is intended for manually sharding tests to make CI faster."
+}
+
+val testShardHibernate by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that depend on misk-hibernate. " +
-          "This target is intended for manually sharding tests to make CI faster."
+    "This target is intended for manually sharding tests to make CI faster."
 }
 
 subprojects {
@@ -63,7 +111,6 @@ subprojects {
     }
 
     dependencies {
-      add("testImplementation", Dependencies.junitApi)
       add("testRuntimeOnly", Dependencies.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.
@@ -76,8 +123,9 @@ subprojects {
       add("api", platform(Dependencies.jettyBom))
       add("api", platform(Dependencies.kotlinBom))
       add("api", platform(Dependencies.nettyBom))
-      add("api", platform(Dependencies.wispBom))
       add("api", platform(Dependencies.prometheusClientBom))
+      add("api", platform(Dependencies.wireBom))
+      add("api", platform(Dependencies.wispBom))
     }
 
     tasks.withType<GenerateModuleMetadata> {
@@ -131,7 +179,6 @@ subprojects {
 
   if (!path.startsWith(":samples")) {
     apply(plugin = "com.vanniktech.maven.publish")
-    apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
     apply(from = "$rootDir/gradle-mvn-publish.gradle")
   }
 
@@ -139,8 +186,10 @@ subprojects {
   // https://github.com/square/okio/issues/647
   configurations.all {
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
-      attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
+      attributes.attribute(
+        Usage.USAGE_ATTRIBUTE,
+        this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
+      )
     }
   }
 }
-

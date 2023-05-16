@@ -156,7 +156,8 @@ public abstract interface class misk/redis/Redis {
 
 public final class misk/redis/RedisClientMetrics {
 	public static final field Companion Lmisk/redis/RedisClientMetrics$Companion;
-	public fun <init> (Lmisk/metrics/v2/Metrics;)V
+	public fun <init> (Lcom/google/common/base/Ticker;Lmisk/metrics/v2/Metrics;)V
+	public final fun timed (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
 public final class misk/redis/RedisClientMetrics$Companion {
