@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.4.1 *(2023-05-17)*
+----------------------------
+
+* Fix accidental inclusion of kotest runner in runtime dependencies.
+
+
 Version 1.4.0 *(2023-05-11)*
 ----------------------------
 
