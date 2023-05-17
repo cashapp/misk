@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import {
   Button,
+  Checkbox,
   Collapse,
   HTMLSelect,
   Icon,
@@ -220,27 +221,38 @@ function FormObjectComponent({
       protoType={field.type}
     >
       <div style={{ marginLeft: "12px" }}>
-        {complexType.fields.map(subField => {
-          return (
-            <FormComponent
-              webActionMetadata={webActionMetadata}
-              field={subField}
-              onChange={newChildVal => {
-                const newValue = _(_.clone(value) || {})
-                  .set(subField.name, newChildVal)
-                  .omitBy(_.isNull)
-                  .value()
+        {complexType.fields.length > 0 ? (
+          complexType.fields.map(subField => {
+            return (
+              <FormComponent
+                webActionMetadata={webActionMetadata}
+                field={subField}
+                onChange={newChildVal => {
+                  const newValue = _(_.clone(value) || {})
+                    .set(subField.name, newChildVal)
+                    .omitBy(_.isNull)
+                    .value()
 
-                if (_.isEmpty(newValue)) {
-                  onChange(null)
-                } else {
-                  onChange(newValue)
-                }
-              }}
-              value={_.get(value, subField.name, null)}
-            />
-          )
-        })}
+                  if (_.isEmpty(newValue)) {
+                    onChange(null)
+                  } else {
+                    onChange(newValue)
+                  }
+                }}
+                value={_.get(value, subField.name, null)}
+              />
+            )
+          })
+        ) : (
+          <Checkbox
+            onChange={e => {
+              const value = e.currentTarget.checked
+              onChange(value ? {} : undefined)
+            }}
+          >
+            Add as an empty object
+          </Checkbox>
+        )}
       </div>
     </FormComponentWrapper>
   )
