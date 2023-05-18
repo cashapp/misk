@@ -240,7 +240,7 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
   return when (method) {
     HttpMethod.GET.name -> DispatchMechanism.GET
     HttpMethod.POST.name -> when (contentType()) {
-      MediaTypes.APPLICATION_GRPC_MEDIA_TYPE -> DispatchMechanism.GRPC
+      MediaTypes.APPLICATION_GRPC_MEDIA_TYPE, MediaTypes.APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE -> DispatchMechanism.GRPC
       else -> DispatchMechanism.POST
     }
 
