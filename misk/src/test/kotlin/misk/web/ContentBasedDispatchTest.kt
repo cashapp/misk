@@ -12,7 +12,11 @@ import misk.web.mediatype.asMediaType
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okio.BufferedSink
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -28,6 +32,7 @@ internal class ContentBasedDispatchTest {
 
   private val jsonMediaType = MediaTypes.APPLICATION_JSON.asMediaType()
   private val plainTextMediaType = MediaTypes.TEXT_PLAIN_UTF8.asMediaType()
+  private val grpcMediaType = MediaTypes.APPLICATION_GRPC.asMediaType()
   private val weirdTextMediaType = "text/weird".asMediaType()
   private val weirdMediaType = "weird/weird".asMediaType()
 
@@ -94,8 +99,37 @@ internal class ContentBasedDispatchTest {
   }
 
   @Test
+  fun postGrpcExpectResponse() {
+    val responseContent = postHello(
+      grpcMediaType,
+      null,
+      grpcMediaType,
+      "/hello-bytes",
+      "Test".toByteArray().toByteString().toRequestBody()
+    ).source()
+    val strResp = String(responseContent.readByteString().toByteArray())
+    assertThat(strResp).isEqualTo("Test")
+  }
+
+  @Test
+  fun postGrpcExpect404Response() {
+    val request = newRequest(
+      "/doesnt-exist",
+      grpcMediaType,
+      "Test".toByteArray().toByteString().toRequestBody(),
+      grpcMediaType.toString()
+    )
+    val response = httpClient.newCall(request)
+      .execute()
+    assertThat(response.code).isEqualTo(404)
+    assertThat(response.message).isEqualTo("Not Found")
+    assertThat(response.headers["Content-Type"]).isEqualTo("text/plain;charset=utf-8")
+    assertThat(response.body!!.string()).startsWith("Nothing found at /doesnt-exist.")
+  }
+
+  @Test
   fun doesntThrowOnInvalidMediaType() {
-    val request = newRequest("/hello", plainTextMediaType, "hello", "Totally Invalid Media Type")
+    val request = newRequest("/hello", plainTextMediaType, "hello".toRequestBody(), "Totally Invalid Media Type")
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
   }
@@ -112,6 +146,7 @@ internal class ContentBasedDispatchTest {
       install(WebActionModule.create<PostJsonReturnPlainText>())
       install(WebActionModule.create<PostAnythingReturnJson>())
       install(WebActionModule.create<PostAnythingReturnAnything>())
+      install(WebActionModule.create<PostAnythingReturnResponseBody>())
     }
   }
 
@@ -168,12 +203,21 @@ internal class ContentBasedDispatchTest {
     fun hello(@misk.web.RequestBody message: String) = "*->* $message"
   }
 
+  class PostAnythingReturnResponseBody @Inject constructor() : WebAction {
+    @Post("/hello-bytes")
+    fun hello(@misk.web.RequestBody message: ByteString): Response<ResponseBody> {
+      return Response(message.toResponseBody())
+    }
+  }
+
   private fun postHello(
     contentType: MediaType,
-    content: String,
-    acceptedMediaType: MediaType? = null
+    content: String?,
+    acceptedMediaType: MediaType? = null,
+    path: String = "/hello",
+    requestBody: RequestBody = content!!.toRequestBody(contentType)
   ): okhttp3.ResponseBody {
-    val request = newRequest("/hello", contentType, content, acceptedMediaType.toString())
+    val request = newRequest(path, contentType, requestBody, acceptedMediaType.toString())
     val response = httpClient.newCall(request)
       .execute()
     assertThat(response.code).isEqualTo(200)
@@ -183,11 +227,11 @@ internal class ContentBasedDispatchTest {
   private fun newRequest(
     path: String,
     contentType: MediaType,
-    content: String,
+    requestBody: RequestBody,
     acceptedMediaType: String? = null
   ): Request {
     val request = Request.Builder()
-      .post(content.toRequestBody(contentType))
+      .post(requestBody)
       .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
 
     if (acceptedMediaType != null) {

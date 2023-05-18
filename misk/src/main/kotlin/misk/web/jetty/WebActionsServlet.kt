@@ -1,6 +1,7 @@
 package misk.web.jetty
 
 import misk.web.BoundAction
+import misk.web.BoundActionMatch
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
 import misk.web.SocketAddress
@@ -8,11 +9,13 @@ import misk.web.WebConfig
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
+import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.webaction.WebActionMetadata
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okio.BufferedSink
 import okio.buffer
@@ -142,10 +145,12 @@ internal class WebActionsServlet @Inject constructor(
       val requestContentType = httpCall.contentType()
       val requestAccepts = httpCall.accepts()
 
-      val candidateActions = boundActions.mapNotNull {
-        it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
+      var bestAction = findBestAction(httpCall.dispatchMechanism, httpCall.url, requestContentType, requestAccepts)
+
+      // If no actions were found, allow POST actions to be considered for handling grpc requests
+      if (bestAction == null && httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
+        bestAction = findBestAction(DispatchMechanism.POST, httpCall.url, requestContentType, requestAccepts)
       }
-      val bestAction = candidateActions.minOrNull()
 
       if (bestAction != null) {
         bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
@@ -165,6 +170,18 @@ internal class WebActionsServlet @Inject constructor(
 
       return
     }
+  }
+
+  private fun findBestAction(
+    dispatchMechanism: DispatchMechanism,
+    url: HttpUrl,
+    requestContentType: MediaType?,
+    requestAccepts: List<MediaRange>
+  ): BoundActionMatch? {
+    val candidateActions = boundActions.mapNotNull {
+      it.match(dispatchMechanism, requestContentType, requestAccepts, url)
+    }
+    return candidateActions.minOrNull()
   }
 
   private fun sendNotFound(
