@@ -24,14 +24,6 @@ dependencies {
   implementation(Dependencies.wispLogging)
   implementation(project(":misk"))
 
-  testImplementation("com.squareup.okio:okio:3.0.0")
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.logbackClassic)
-  testImplementation(Dependencies.wispLoggingTesting)
-  testImplementation(project(":misk-crypto"))
-  testImplementation(project(":misk-testing"))
-
   testFixturesApi(project(":misk-crypto"))
   testFixturesApi(project(":misk-inject"))
   testFixturesImplementation(Dependencies.bouncycastle)
@@ -41,4 +33,13 @@ dependencies {
   testFixturesImplementation(Dependencies.tinkGcpkms)
   testFixturesImplementation(Dependencies.wispDeployment)
   testFixturesImplementation(project(":misk-config"))
+
+  testImplementation("com.squareup.okio:okio:3.0.0")
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(project(":misk-crypto"))
+  testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-crypto")))
 }

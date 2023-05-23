@@ -81,12 +81,6 @@ public final class misk/crypto/CryptoModuleKt {
 	public static final fun verifyMac (Lcom/google/crypto/tink/Mac;Ljava/lang/String;Ljava/lang/String;)V
 }
 
-public final class misk/crypto/CryptoTestModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-	public fun <init> (Lmisk/crypto/CryptoConfig;)V
-	public synthetic fun <init> (Lmisk/crypto/CryptoConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
 public final class misk/crypto/DeterministicAeadKeyManager : misk/crypto/MappedKeyManager {
 }
 
@@ -129,17 +123,6 @@ public final class misk/crypto/ExternalKeyResolver$Companion {
 public abstract interface class misk/crypto/ExternalKeySource {
 	public abstract fun getKey (Ljava/lang/String;)Lmisk/crypto/Key;
 	public abstract fun keyExists (Ljava/lang/String;)Z
-}
-
-public final class misk/crypto/FakeExternalKeyManagerModule : misk/inject/KAbstractModule {
-	public fun <init> (Lmisk/crypto/CryptoConfig;)V
-}
-
-public final class misk/crypto/FakeKeyResolver : misk/crypto/KeyResolver {
-	public fun <init> (Ljava/util/List;)V
-	public fun <init> (Ljava/util/Map;)V
-	public fun getAllKeyAliases ()Ljava/util/Map;
-	public fun getKeyByAlias (Ljava/lang/String;)Lmisk/crypto/Key;
 }
 
 public final class misk/crypto/GcpKmsClientModule : misk/inject/KAbstractModule {
@@ -415,5 +398,11 @@ public final class misk/crypto/testing/FakeKeyResolver : misk/crypto/KeyResolver
 	public fun <init> (Ljava/util/Map;)V
 	public fun getAllKeyAliases ()Ljava/util/Map;
 	public fun getKeyByAlias (Ljava/lang/String;)Lmisk/crypto/Key;
+}
+
+public final class misk/crypto/testing/FakeMasterEncryptionKey : com/google/crypto/tink/Aead {
+	public fun <init> ()V
+	public fun decrypt ([B[B)[B
+	public fun encrypt ([B[B)[B
 }
 
