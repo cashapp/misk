@@ -51,6 +51,11 @@ class ActionScope @Inject internal constructor(
     return threadLocalScope.asContextElement(currentScopedData)
   }
 
+  fun snapshotActionScope(): Map<Key<*>, Any?> {
+    check(inScope()) { "not running within an ActionScope" }
+    return threadLocalScope.get().toMap()
+  }
+
   /** Starts the scope on a thread with the provided seed data */
   fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
     check(!inScope()) {
