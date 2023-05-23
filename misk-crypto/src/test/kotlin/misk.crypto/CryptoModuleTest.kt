@@ -18,6 +18,7 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.config.Secret
 import misk.crypto.testing.CryptoTestModule
+import misk.crypto.testing.FakeMasterEncryptionKey
 import misk.environment.DeploymentModule
 import misk.logging.LogCollectorModule
 import misk.logging.LogCollectorService

@@ -57,7 +57,6 @@ dependencies {
   testImplementation(Dependencies.wispLoggingTesting)
   testImplementation(Dependencies.wispTimeTesting)
   testImplementation(project(":misk-config"))
-  testImplementation(project(":misk-crypto-testing"))
   testImplementation(project(":misk-hibernate-testing"))
   testImplementation(project(":misk-jdbc-testing"))
   testImplementation(project(":misk-metrics"))
