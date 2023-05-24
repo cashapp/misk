@@ -313,6 +313,14 @@ public final class misk/cloud/gcp/storage/StorageExtensionsKt {
 	public static final fun toList (Lcom/google/api/gax/paging/Page;)Ljava/util/List;
 }
 
+public final class misk/cloud/gcp/testing/Body {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun setMessage (Ljava/lang/String;)V
+}
+
 public final class misk/cloud/gcp/testing/FakeHttpRequest : com/google/api/client/http/LowLevelHttpRequest {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public fun addHeader (Ljava/lang/String;Ljava/lang/String;)V
