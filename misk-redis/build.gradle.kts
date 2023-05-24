@@ -35,7 +35,6 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.wispDeployment)
   testImplementation(Dependencies.wispTimeTesting)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-redis"))

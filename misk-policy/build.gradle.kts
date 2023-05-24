@@ -35,5 +35,6 @@ dependencies {
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.retrofitMock)
+  testImplementation(project(":misk-policy"))
   testImplementation(project(":misk-testing"))
 }

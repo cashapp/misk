@@ -3,7 +3,6 @@ package misk.aws.dynamodb.testing
 import com.amazonaws.services.dynamodbv2.model.BillingMode
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 

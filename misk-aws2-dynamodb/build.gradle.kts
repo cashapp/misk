@@ -34,14 +34,15 @@ dependencies {
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.awsSdkCore)
-  testImplementation(Dependencies.junitApi)
-
   // Have to clamp until DynamoDBLocal supports later versions (dependency from tempest).
-  testImplementation("org.antlr:antlr4-runtime")  {
+  testFixturesImplementation("org.antlr:antlr4-runtime")  {
     version {
       strictly("4.9.3")
     }
   }
+
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.aws2DynamodbEnhanced)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(project(":misk-aws2-dynamodb"))
 }

@@ -43,7 +43,4 @@ dependencies {
   implementation(Dependencies.wispMoshi)
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
-
-  testImplementation(Dependencies.wispDeployment)
-  testImplementation(project(":misk"))
 }

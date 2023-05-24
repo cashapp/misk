@@ -20,8 +20,14 @@ dependencies {
   testFixturesImplementation(project(":misk-service"))
 
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.guice)
+  testImplementation(Dependencies.javaxInject)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
+  testImplementation(Dependencies.moshi)
+  testImplementation(Dependencies.wispFeatureTesting)
   testImplementation(Dependencies.wispMoshi)
+  testImplementation(project(":misk-feature"))
+  testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-testing"))
 }
