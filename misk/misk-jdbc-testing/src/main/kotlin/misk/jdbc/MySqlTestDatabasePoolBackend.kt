@@ -12,6 +12,7 @@ import javax.sql.DataSource
 /**
  * Implementation of [TestDatabasePool.Backend] for SQL databases.
  */
+@Deprecated("Replace the dependency on misk-jdcb-testing with testFixtures(misk-jdbc)")
 @Singleton
 internal class MySqlTestDatabasePoolBackend @Inject constructor(
   val config: DataSourceConfig

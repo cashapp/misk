@@ -16,11 +16,4 @@ dependencies {
   implementation(Dependencies.okio)
   implementation(Dependencies.wispContainersTesting)
   implementation(Dependencies.wispLogging)
-
-  testImplementation(Dependencies.wispDeployment)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.wispTimeTesting)
-  testImplementation(project(":misk"))
 }

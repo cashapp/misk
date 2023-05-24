@@ -1,3 +1,53 @@
+public final class misk/aws/dynamodb/testing/DockerDynamoDbModule : misk/inject/KAbstractModule {
+	public fun <init> (Ljava/util/List;)V
+	public fun <init> ([Lkotlin/reflect/KClass;)V
+	public fun <init> ([Lmisk/aws/dynamodb/testing/DynamoDbTable;)V
+	public final fun provideRequiredTables ()Ljava/util/List;
+	public final fun providesAmazonDynamoDB (Lmisk/aws/dynamodb/testing/TestDynamoDb;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;
+	public final fun providesAmazonDynamoDBStreams (Lmisk/aws/dynamodb/testing/TestDynamoDb;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBStreams;
+	public final fun providesTestDynamoDb ()Lmisk/aws/dynamodb/testing/TestDynamoDb;
+}
+
+public final class misk/aws/dynamodb/testing/DynamoDbTable {
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/reflect/KClass;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)Lmisk/aws/dynamodb/testing/DynamoDbTable;
+	public static synthetic fun copy$default (Lmisk/aws/dynamodb/testing/DynamoDbTable;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/aws/dynamodb/testing/DynamoDbTable;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConfigureTable ()Lkotlin/jvm/functions/Function1;
+	public final fun getTableClass ()Lkotlin/reflect/KClass;
+	public final fun getTableName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/aws/dynamodb/testing/InProcessDynamoDbModule : misk/inject/KAbstractModule {
+	public fun <init> (Ljava/util/List;)V
+	public fun <init> ([Lkotlin/reflect/KClass;)V
+	public fun <init> ([Lmisk/aws/dynamodb/testing/DynamoDbTable;)V
+	public final fun provideRequiredTables ()Ljava/util/List;
+	public final fun providesAmazonDynamoDB (Lmisk/aws/dynamodb/testing/TestDynamoDb;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;
+	public final fun providesAmazonDynamoDBStreams (Lmisk/aws/dynamodb/testing/TestDynamoDb;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBStreams;
+	public final fun providesDynamoDbServiceWrapper ()Lmisk/aws/dynamodb/testing/TestDynamoDb;
+}
+
+public final class misk/aws/dynamodb/testing/TestDynamoDb : com/google/common/util/concurrent/Service {
+	public fun <init> (Lapp/cash/tempest/testing/internal/TestDynamoDbService;)V
+	public fun addListener (Lcom/google/common/util/concurrent/Service$Listener;Ljava/util/concurrent/Executor;)V
+	public fun awaitRunning ()V
+	public fun awaitRunning (JLjava/util/concurrent/TimeUnit;)V
+	public fun awaitTerminated ()V
+	public fun awaitTerminated (JLjava/util/concurrent/TimeUnit;)V
+	public fun failureCause ()Ljava/lang/Throwable;
+	public final fun getService ()Lapp/cash/tempest/testing/internal/TestDynamoDbService;
+	public fun isRunning ()Z
+	public fun startAsync ()Lcom/google/common/util/concurrent/Service;
+	public fun state ()Lcom/google/common/util/concurrent/Service$State;
+	public fun stopAsync ()Lcom/google/common/util/concurrent/Service;
+}
+
 public abstract interface class misk/dynamodb/DyTimestampedEntity {
 	public abstract fun getCreated_at ()Ljava/util/Date;
 	public abstract fun getUpdated_at ()Ljava/util/Date;

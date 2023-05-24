@@ -3,6 +3,7 @@ package misk.policy.opa
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Deprecated("Replace the dependency on misk-policy-testing with testFixtures(misk-policy)")
 @Singleton
 class FakeOpaPolicyEngine @Inject constructor(): OpaPolicyEngine {
   override fun <T : OpaRequest, R : OpaResponse> evaluateWithInput(

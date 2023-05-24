@@ -5,6 +5,7 @@ import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.policy.opa.LocalOpaService.Companion.DEFAULT_POLICY_DIRECTORY
 
+@Deprecated("Replace the dependency on misk-policy-testing with testFixtures(misk-policy)")
 class OpaDevelopmentModule(
   private val policyDirectory: String = DEFAULT_POLICY_DIRECTORY,
   private val withLogging: Boolean = false,

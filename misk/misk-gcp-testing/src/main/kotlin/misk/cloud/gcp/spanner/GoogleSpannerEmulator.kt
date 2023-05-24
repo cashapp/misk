@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Deprecated("Replace the dependency on misk-gcp-testing with testFixtures(misk-gcp)")
 @Singleton
 class GoogleSpannerEmulator @Inject constructor(
   val config: SpannerConfig,
