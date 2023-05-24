@@ -7,6 +7,7 @@ import misk.time.FakeClock
 import javax.inject.Qualifier
 import kotlin.random.Random
 
+@Deprecated("Replace the dependency on misk-redis-testing with testFixtures(misk-redis)")
 class RedisTestModule(private val random: Random = Random.Default) : KAbstractModule() {
   override fun configure() {
     requireBinding<FakeClock>()

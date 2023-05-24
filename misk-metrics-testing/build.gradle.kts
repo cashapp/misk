@@ -11,8 +11,4 @@ dependencies {
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinStdLibJdk8)
-
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-testing"))
 }

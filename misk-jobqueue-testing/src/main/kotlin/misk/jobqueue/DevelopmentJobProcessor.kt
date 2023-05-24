@@ -9,6 +9,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
+@Deprecated("Replace the dependency on misk-jobqueue-testing with testFixtures(misk-jobqueue)")
 @Singleton
 internal class DevelopmentJobProcessor @Inject constructor(
   @ForDevelopmentHandling private val taskQueue: RepeatedTaskQueue,

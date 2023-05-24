@@ -5,6 +5,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
+@Deprecated("Replace the dependency on misk-gcp-testing with testFixtures(misk-gcp)")
 class FakeHttpRequest constructor(
   val method: String,
   val url: String,
