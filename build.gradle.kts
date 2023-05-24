@@ -36,14 +36,10 @@ dependencyAnalysis {
         // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
         exclude("() -> java.io.File?")
         exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
+        exclude(":misk-testing")
       }
     }
     // False positives.
-    project(":misk-aws2-dynamodb-testing") {
-      onAny {
-        exclude("org.antlr:antlr4-runtime")
-      }
-    }
     project(":misk-gcp") {
       onUsedTransitiveDependencies {
         // Can be removed once dd-trace-ot uses 0.33.0 of open tracing.

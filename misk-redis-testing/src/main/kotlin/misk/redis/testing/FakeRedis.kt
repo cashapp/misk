@@ -28,6 +28,7 @@ import kotlin.random.Random
  * Caveats:
  *  - FakeRedis does not currently support [Redis.pipelined] requests or [Redis.multi] transactions
  */
+@Deprecated("Replace the dependency on misk-redis-testing with testFixtures(misk-redis)")
 class FakeRedis @Inject constructor(
   private val clock: Clock,
   @ForFakeRedis private val random: Random,

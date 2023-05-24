@@ -15,6 +15,7 @@ import java.util.regex.Pattern
  * A [DatabasePool] that is used in tests to get a unique database for each test suite.
  *
  * See [misk.hibernate.HibernateTestingModule] for usage instructions. */
+@Deprecated("Replace the dependency on misk-jdcb-testing with testFixtures(misk-jdbc)")
 val SHARED_TEST_DATABASE_POOL = TestDatabasePool(
   MySqlTestDatabasePoolBackend(
     DataSourceConfig(type = DataSourceType.MYSQL, username = "root").withDefaults()
@@ -32,6 +33,7 @@ val SHARED_TEST_DATABASE_POOL = TestDatabasePool(
  *
  * Thread-safe.
  */
+@Deprecated("Replace the dependency on misk-jdcb-testing with testFixtures(misk-jdbc)")
 class TestDatabasePool(
   val backend: Backend,
   val clock: Clock

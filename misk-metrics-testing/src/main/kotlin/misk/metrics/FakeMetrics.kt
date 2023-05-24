@@ -10,6 +10,7 @@ import javax.inject.Singleton
  *
  * The only way to create an instance of this is with [FakeMetricsModule].
  */
+@Deprecated("Replace the dependency on misk-metrics-testing with testFixtures(misk-metrics)")
 @Singleton
 class FakeMetrics @Inject internal constructor(
   private val registry: CollectorRegistry

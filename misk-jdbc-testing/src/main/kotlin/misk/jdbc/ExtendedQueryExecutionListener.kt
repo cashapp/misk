@@ -8,6 +8,7 @@ import net.ttddyy.dsproxy.listener.MethodExecutionListener
 import net.ttddyy.dsproxy.listener.QueryExecutionListener
 import java.util.Locale
 
+@Deprecated("Replace the dependency on misk-jdcb-testing with testFixtures(misk-jdbc)")
 open class ExtendedQueryExecutionListener : QueryExecutionListener, MethodExecutionListener {
   override fun beforeMethod(executionContext: MethodExecutionContext) {
     if (isStartTransaction(executionContext)) {

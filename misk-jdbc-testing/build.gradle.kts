@@ -21,10 +21,4 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
   runtimeOnly(Dependencies.hsqldb)
-
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.wispConfig)
-  testImplementation(project(":misk-config"))
-  testImplementation(project(":misk-testing"))
 }

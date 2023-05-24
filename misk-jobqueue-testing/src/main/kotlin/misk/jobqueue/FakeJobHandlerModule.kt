@@ -3,6 +3,7 @@ package misk.jobqueue
 import misk.inject.KAbstractModule
 import kotlin.reflect.KClass
 
+@Deprecated("Replace the dependency on misk-jobqueue-testing with testFixtures(misk-jobqueue)")
 class FakeJobHandlerModule<T : JobHandler> private constructor(
   private val queueName: QueueName,
   private val handler: KClass<T>
