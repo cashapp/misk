@@ -18,8 +18,4 @@ dependencies {
   implementation(Dependencies.wispLogging)
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
-
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-testing"))
 }

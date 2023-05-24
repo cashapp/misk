@@ -26,6 +26,7 @@ import java.time.Duration
  *    Make sure to supply the [DockerRedis.config] as the [RedisConfig].
  * 2. Add `@MiskExternalDependency private val dockerRedis: DockerRedis` to your test class.
  */
+@Deprecated("Replace the dependency on misk-redis-testing with testFixtures(misk-redis)")
 object DockerRedis : ExternalDependency {
   private const val port = 6379
   private val hostname = if (isRunningInDocker) "host.docker.internal" else "localhost"

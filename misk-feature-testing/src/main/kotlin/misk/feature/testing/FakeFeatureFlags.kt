@@ -21,6 +21,7 @@ import javax.inject.Singleton
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
+@Deprecated("Replace the dependency on misk-feature-testing with testFixtures(misk-feature)")
 @Singleton
 class FakeFeatureFlags @Inject constructor(
   val delegate: wisp.feature.testing.FakeFeatureFlags

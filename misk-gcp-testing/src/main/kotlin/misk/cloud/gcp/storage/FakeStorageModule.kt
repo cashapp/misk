@@ -8,6 +8,7 @@ import com.google.inject.Singleton
 import misk.inject.KAbstractModule
 
 /** Installs an embeddable version of [Storage] that works in-memory */
+@Deprecated("Replace the dependency on misk-gcp-testing with testFixtures(misk-gcp)")
 class FakeStorageModule : KAbstractModule() {
   override fun configure() {}
 

@@ -1,6 +1,7 @@
 plugins {
   kotlin("jvm")
   `java-library`
+  `java-test-fixtures`
 }
 
 dependencies {
@@ -43,12 +44,48 @@ dependencies {
   implementation(project(":misk"))
   implementation(project(":misk-service"))
 
+  testFixturesApi(Dependencies.dockerApi)
+  testFixturesApi(Dependencies.dockerCore)
+  testFixturesApi(Dependencies.dockerTransportHttpClient)
+  testFixturesApi(Dependencies.findBugs)
+  testFixturesApi(Dependencies.gcpCloudCore)
+  testFixturesApi(Dependencies.gcpCloudStorage)
+  testFixturesApi(Dependencies.gcpDatastore) {
+    exclude(group = "com.google.protobuf")
+    exclude(group = "com.google.api.grpc")
+    exclude(group = "io.grpc")
+  }
+  testFixturesApi(Dependencies.googleApiServicesStorage)
+  testFixturesApi(Dependencies.googleHttpClient)
+  testFixturesApi(Dependencies.guice)
+  testFixturesApi(Dependencies.javaxInject)
+  testFixturesApi(Dependencies.kotlinLogging)
+  testFixturesApi(project(":misk-gcp"))
+  testFixturesApi(project(":misk-inject"))
+  testFixturesImplementation(Dependencies.assertj)
+  testFixturesImplementation(Dependencies.dockerTransport)
+  testFixturesImplementation(Dependencies.gax)
+  testFixturesImplementation(Dependencies.gcpSpanner)
+  testFixturesImplementation(Dependencies.googleAuthLibraryCredentials)
+  testFixturesImplementation(Dependencies.googleHttpClientJackson)
+  testFixturesImplementation(Dependencies.junitApi)
+  testFixturesImplementation(Dependencies.kotlinRetry)
+  testFixturesImplementation(Dependencies.kotlinTest)
+  testFixturesImplementation(Dependencies.kotlinxCoroutines)
+  testFixturesImplementation(Dependencies.moshi)
+  testFixturesImplementation(Dependencies.wispContainersTesting)
+  testFixturesImplementation(Dependencies.wispMoshi)
+  testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":misk-testing"))
+
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.openTracingDatadog)
   testImplementation(Dependencies.wispContainersTesting)
+  testImplementation(Dependencies.wispDeployment)
+  testImplementation(project(":misk"))
   testImplementation(project(":misk-gcp"))
-  testImplementation(project(":misk-gcp-testing"))
   testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-gcp")))
 }

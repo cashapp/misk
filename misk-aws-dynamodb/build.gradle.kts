@@ -1,19 +1,37 @@
 plugins {
   kotlin("jvm")
   `java-library`
+  `java-test-fixtures`
 }
 
 dependencies {
-  api("com.amazonaws:aws-java-sdk-core:1.11.960")
-  api(Dependencies.kotlinLogging)
-  api(Dependencies.javaxInject)
   api(Dependencies.awsDynamodb)
+  api(Dependencies.awsJavaSdkCore)
   api(Dependencies.guice)
+  api(Dependencies.javaxInject)
+  api(Dependencies.kotlinLogging)
   api(project(":misk-aws"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
+  implementation(Dependencies.kotlinReflect)
   implementation(Dependencies.wispLogging)
-  implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.0")
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
+
+  testFixturesApi(Dependencies.awsDynamodb)
+  testFixturesApi(Dependencies.guice)
+  testFixturesApi(Dependencies.javaxInject)
+  testFixturesApi(Dependencies.tempestTestingInternal)
+  testFixturesApi(project(":misk-aws-dynamodb"))
+  testFixturesApi(project(":misk-inject"))
+  testFixturesApi(project(":misk-testing"))
+  testFixturesImplementation(Dependencies.kotlinReflect)
+  testFixturesImplementation(Dependencies.tempestTesting)
+  testFixturesImplementation(Dependencies.tempestTestingDocker)
+  testFixturesImplementation(Dependencies.tempestTestingJvm)
+  testFixturesImplementation(project(":misk-core"))
+  testFixturesImplementation(project(":misk-service"))
+
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
 }

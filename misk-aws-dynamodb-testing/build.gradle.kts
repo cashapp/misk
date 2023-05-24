@@ -17,7 +17,4 @@ dependencies {
   implementation(Dependencies.tempestTestingJvm)
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
-
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
 }
