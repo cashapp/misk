@@ -43,6 +43,20 @@ public final class misk/cloud/gcp/datastore/DatastoreExtensionsKt {
 	public static final fun toByteString (Lcom/google/cloud/datastore/Blob;)Lokio/ByteString;
 }
 
+public final class misk/cloud/gcp/datastore/FakeDatastoreModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/cloud/gcp/datastore/FakeDatastoreModule$Companion;
+	public fun <init> ()V
+	public final fun provideDatastore (Lcom/google/cloud/datastore/testing/LocalDatastoreHelper;)Lcom/google/cloud/datastore/Datastore;
+	public final fun provideDatastoreHelper ()Lcom/google/cloud/datastore/testing/LocalDatastoreHelper;
+}
+
+public final class misk/cloud/gcp/datastore/FakeDatastoreModule$Companion {
+}
+
+public final class misk/cloud/gcp/datastore/FakeDatastoreModule$FakeDatastoreService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> (Lcom/google/cloud/datastore/testing/LocalDatastoreHelper;)V
+}
+
 public final class misk/cloud/gcp/datastore/Keys {
 	public static final field INSTANCE Lmisk/cloud/gcp/datastore/Keys;
 	public final fun newKey (Ljava/lang/String;Ljava/lang/String;J)Lcom/google/cloud/datastore/Key;
@@ -99,6 +113,31 @@ public final class misk/cloud/gcp/security/keys/GcpKmsConfig : wisp/config/Confi
 	public final fun getProject_id ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field CONTAINER_NAME Ljava/lang/String;
+	public static final field Companion Lmisk/cloud/gcp/spanner/GoogleSpannerEmulator$Companion;
+	public static final field IMAGE_NAME Ljava/lang/String;
+	public fun <init> (Lmisk/cloud/gcp/spanner/SpannerConfig;)V
+	public final fun clearTables ()V
+	public final fun getConfig ()Lmisk/cloud/gcp/spanner/SpannerConfig;
+	public final fun pullImage (Ljava/lang/String;)V
+	public static synthetic fun pullImage$default (Lmisk/cloud/gcp/spanner/GoogleSpannerEmulator;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator$Companion {
+	public final fun getDefaultDockerClientConfig ()Lcom/github/dockerjava/core/DefaultDockerClientConfig;
+	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
+	public final fun getHttpClient ()Lcom/github/dockerjava/httpclient5/ApacheDockerHttpClient;
+	public final fun getImage ()Ljava/lang/String;
+	public final fun getLogger ()Lmu/KLogger;
+	public final fun pullImage ()V
+	public final fun setImage (Ljava/lang/String;)V
+}
+
+public final class misk/cloud/gcp/spanner/GoogleSpannerEmulatorModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/cloud/gcp/spanner/SpannerConfig;)V
 }
 
 public final class misk/cloud/gcp/spanner/GoogleSpannerModule : misk/inject/KAbstractModule {
@@ -198,6 +237,28 @@ public abstract class misk/cloud/gcp/storage/BaseCustomStorageRpc : com/google/c
 	public fun writeWithResponse (Ljava/lang/String;[BIJIZ)Lcom/google/api/services/storage/model/StorageObject;
 }
 
+public final class misk/cloud/gcp/storage/FakeStorageModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun provideStorage ()Lcom/google/cloud/storage/Storage;
+}
+
+public final class misk/cloud/gcp/storage/InMemoryStorageRpc : misk/cloud/gcp/storage/BaseCustomStorageRpc {
+	public fun <init> ()V
+	public fun create (Lcom/google/api/services/storage/model/StorageObject;Ljava/io/InputStream;Ljava/util/Map;)Lcom/google/api/services/storage/model/StorageObject;
+	public fun delete (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;)Z
+	public fun get (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;)Lcom/google/api/services/storage/model/StorageObject;
+	public fun list (Ljava/lang/String;Ljava/util/Map;)Lcom/google/cloud/Tuple;
+	public fun load (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;)[B
+	public fun open (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;)Ljava/lang/String;
+	public fun openRewrite (Lcom/google/cloud/storage/spi/v1/StorageRpc$RewriteRequest;)Lcom/google/cloud/storage/spi/v1/StorageRpc$RewriteResponse;
+	public fun read (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;JLjava/io/OutputStream;)J
+	public fun write (Ljava/lang/String;[BIJIZ)V
+}
+
+public final class misk/cloud/gcp/storage/InMemoryStorageRpcKt {
+	public static final fun check (Ljava/util/Map;Lcom/google/api/services/storage/model/StorageObject;)Lcom/google/api/services/storage/model/StorageObject;
+}
+
 public final class misk/cloud/gcp/storage/LocalStorageConfig {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -250,6 +311,36 @@ public final class misk/cloud/gcp/storage/StorageExtensionsKt {
 	public static final fun forEachChunk (Lcom/google/cloud/ReadChannel;Ljava/nio/ByteBuffer;Lkotlin/jvm/functions/Function2;)V
 	public static final fun getBlobIds (Lcom/google/api/gax/paging/Page;)Ljava/util/List;
 	public static final fun toList (Lcom/google/api/gax/paging/Page;)Ljava/util/List;
+}
+
+public final class misk/cloud/gcp/testing/FakeHttpRequest : com/google/api/client/http/LowLevelHttpRequest {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun addHeader (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun execute ()Lcom/google/api/client/http/LowLevelHttpResponse;
+	public fun execute ()Lcom/google/api/client/testing/http/MockLowLevelHttpResponse;
+	public final fun getContent ()[B
+	public final fun getMethod ()Ljava/lang/String;
+	public final fun getStringContent ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun header (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/cloud/gcp/testing/FakeHttpResponseKt {
+	public static final fun setJsonContent (Lcom/google/api/client/testing/http/MockLowLevelHttpResponse;Ljava/lang/Object;)Lcom/google/api/client/testing/http/MockLowLevelHttpResponse;
+}
+
+public final class misk/cloud/gcp/testing/FakeHttpRouter : com/google/api/client/http/HttpTransport {
+	public static final field Companion Lmisk/cloud/gcp/testing/FakeHttpRouter$Companion;
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun buildRequest (Ljava/lang/String;Ljava/lang/String;)Lcom/google/api/client/http/LowLevelHttpRequest;
+	public final fun getRouter ()Lkotlin/jvm/functions/Function1;
+}
+
+public final class misk/cloud/gcp/testing/FakeHttpRouter$Companion {
+	public final fun respondWithError (I)Lcom/google/api/client/testing/http/MockLowLevelHttpResponse;
+	public final fun respondWithJson (Ljava/lang/Object;)Lcom/google/api/client/testing/http/MockLowLevelHttpResponse;
+	public final fun respondWithText (ILjava/lang/String;)Lcom/google/api/client/testing/http/MockLowLevelHttpResponse;
+	public final fun respondWithText (Ljava/lang/String;)Lcom/google/api/client/testing/http/MockLowLevelHttpResponse;
 }
 
 public final class misk/cloud/gcp/tracing/TracingLoggingEnhancer : com/google/cloud/logging/LoggingEnhancer {
