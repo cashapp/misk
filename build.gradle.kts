@@ -173,9 +173,8 @@ subprojects {
     apply(from = file("$rootDir/hooks.gradle"))
   }
 
-  if (!path.startsWith(":samples")) {
+  if (!path.startsWith(":samples") && !path.startsWith(":misk-bom")) {
     apply(plugin = "com.vanniktech.maven.publish")
-    apply(from = "$rootDir/gradle-mvn-publish.gradle")
   }
 
   // Workaround the Gradle bug resolving multiplatform dependencies.
