@@ -1,6 +1,11 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
@@ -18,4 +23,10 @@ dependencies {
   testImplementation(Dependencies.wispLoggingTesting)
   testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }
