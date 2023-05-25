@@ -39,7 +39,7 @@ dependencies {
   testFixturesImplementation(Dependencies.wispDeployment)
   testFixturesImplementation(project(":misk-config"))
 
-  testImplementation("com.squareup.okio:okio:3.0.0")
+  testImplementation("com.squareup.okio:okio:3.3.0")
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.logbackClassic)
