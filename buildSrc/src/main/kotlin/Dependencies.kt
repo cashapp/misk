@@ -104,7 +104,7 @@ object Dependencies {
   val launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:5.10.7"
   val logbackClassic = "ch.qos.logback:logback-classic:1.4.7"
   val logbackCore = "ch.qos.logback:logback-core:1.4.7"
-  val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.18.0"
+  val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.25.2"
   val mockitoCore = "org.mockito:mockito-core:5.3.1"
   val moshi = "com.squareup.moshi:moshi:1.14.0"
   val moshiAdapters = "com.squareup.moshi:moshi-adapters:1.14.0"
