@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
@@ -25,6 +27,13 @@ buildscript {
 plugins {
   id("com.autonomousapps.dependency-analysis") version Dependencies.dependencyAnalysisPluginVersion
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version Dependencies.kotlinBinaryCompatibilityPluginVersion
+}
+
+apply(plugin = "com.vanniktech.maven.publish.base")
+
+allprojects {
+  group = project.property("GROUP") as String
+  version = project.property("VERSION_NAME") as String
 }
 
 dependencyAnalysis {
@@ -169,14 +178,6 @@ subprojects {
     }
   }
 
-  if (file("$rootDir/hooks.gradle").exists()) {
-    apply(from = file("$rootDir/hooks.gradle"))
-  }
-
-  if (!path.startsWith(":samples") && !path.startsWith(":misk-bom")) {
-    apply(plugin = "com.vanniktech.maven.publish")
-  }
-
   // Workaround the Gradle bug resolving multiplatform dependencies.
   // https://github.com/square/okio/issues/647
   configurations.all {
@@ -185,6 +186,38 @@ subprojects {
         Usage.USAGE_ATTRIBUTE,
         this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
       )
+    }
+  }
+}
+
+allprojects {
+  plugins.withId("com.vanniktech.maven.publish.base") {
+    configure<MavenPublishBaseExtension> {
+      publishToMavenCentral(SonatypeHost.DEFAULT, automaticRelease = true)
+      signAllPublications()
+      pom {
+        description.set("Open source application container in Kotlin")
+        name.set(project.name)
+        url.set("https://github.com/cashapp/misk/")
+        licenses {
+          license {
+            name.set("The Apache Software License, Version 2.0")
+            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            distribution.set("repo")
+          }
+        }
+        scm {
+          url.set("https://github.com/cashapp/misk/")
+          connection.set("scm:git:git://github.com/misk/tempest.git")
+          developerConnection.set("scm:git:ssh://git@github.com/cashapp/misk.git")
+        }
+        developers {
+          developer {
+            id.set("square")
+            name.set("Square, Inc.")
+          }
+        }
+      }
     }
   }
 }
