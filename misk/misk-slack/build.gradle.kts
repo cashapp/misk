@@ -26,7 +26,7 @@ dependencies {
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.okHttpMockWebServer)
-  testImplementation("com.squareup.okio:okio:3.0.0")
+  testImplementation("com.squareup.okio:okio:3.3.0")
   testImplementation(Dependencies.wispDeployment)
   testImplementation(project(":misk-testing"))
 }
