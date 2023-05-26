@@ -2,6 +2,15 @@
 
 Convenience functions on top of [opentracing Java APIs](https://opentracing.io/guides/java/).
 
+## Testing
+
+This module provides a concurrency-safe `io.opentracing.mock.MockTracer` as a testFixture.
+Use it with:
+
+```kotlin
+testImplementation(testFixtures("app.cash.wisp:wisp-tracing:$version"))
+```
+
 ## Usage
 
 Use this library to easily set up and manipulate traces.
