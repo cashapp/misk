@@ -9,4 +9,5 @@ dependencies {
     testImplementation(libs.junitApi)
     testImplementation(libs.kotlinTest)
     testImplementation(libs.openTracingMock)
+    testImplementation(project(":wisp-tracing-testing"))
 }
