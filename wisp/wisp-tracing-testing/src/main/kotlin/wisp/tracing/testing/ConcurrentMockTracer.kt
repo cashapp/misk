@@ -1,4 +1,4 @@
-package wisp.tracing
+package wisp.tracing.testing
 
 import io.opentracing.mock.MockSpan
 import io.opentracing.mock.MockTracer

@@ -4,6 +4,7 @@ import io.opentracing.mock.MockSpan
 import io.opentracing.tag.Tags
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.tracing.testing.ConcurrentMockTracer
 import kotlin.test.assertFailsWith
 
 class TracerExtTest {
