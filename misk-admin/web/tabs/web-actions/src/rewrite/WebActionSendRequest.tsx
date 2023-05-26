@@ -3,7 +3,9 @@ import _ from "lodash"
 import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core"
 import { WebActionMetadata } from "./types"
 import { FormComponent } from "./WebActionSendRequestFormComponents"
-import axios from "axios"
+import axios, { AxiosResponse } from "axios"
+import fileDownload from "js-file-download"
+import contentDisposition from "content-disposition"
 import { AppToaster } from "./Toaster"
 
 interface Props {
@@ -54,6 +56,7 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
     axiosRequest
       .then(response => {
         setResponse(JSON.stringify(response.data, null, 2))
+        maybeDownloadFile(response)
       })
       .catch(e => {
         if (e.response) {
@@ -157,4 +160,29 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
       </div>
     </div>
   )
+}
+
+function maybeDownloadFile(response: AxiosResponse<any>) {
+  // Download the response to a file if `Content-Disposition` header is
+  //   `attachment; filename="<name>"`
+  try {
+    const filename = getAttachmentFilename(response.headers)
+    if (filename) {
+      const contentType = response.headers?.["Content-Type"] as
+        | string
+        | undefined
+      fileDownload(response.data, filename!, contentType)
+    }
+  } catch (e) {
+    console.log((e as Error).message)
+  }
+}
+
+function getAttachmentFilename(
+  headers?: Record<string, any>
+): string | undefined {
+  const dispositionHeader = headers?.["content-disposition"] as string
+  return dispositionHeader
+    ? contentDisposition.parse(dispositionHeader)?.parameters.filename
+    : undefined
 }
