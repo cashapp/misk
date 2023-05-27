@@ -244,3 +244,75 @@ public final class misk/redis/RedisTestModule : misk/inject/KAbstractModule {
 	public synthetic fun <init> (Lkotlin/random/Random;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
+public final class misk/redis/testing/DockerRedis : misk/testing/ExternalDependency {
+	public static final field INSTANCE Lmisk/redis/testing/DockerRedis;
+	public fun afterEach ()V
+	public fun beforeEach ()V
+	public final fun getConfig ()Lmisk/redis/RedisConfig;
+	public fun getId ()Ljava/lang/String;
+	public fun shutdown ()V
+	public fun startup ()V
+}
+
+public final class misk/redis/testing/DockerRedisKt {
+	public static final fun main ()V
+	public static synthetic fun main ([Ljava/lang/String;)V
+}
+
+public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
+	public fun <init> (Ljava/time/Clock;Lkotlin/random/Random;)V
+	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
+	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
+	public fun close ()V
+	public fun del (Ljava/lang/String;)Z
+	public fun del ([Ljava/lang/String;)I
+	public fun expire (Ljava/lang/String;J)Z
+	public fun expireAt (Ljava/lang/String;J)Z
+	public fun get (Ljava/lang/String;)Lokio/ByteString;
+	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
+	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
+	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
+	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
+	public fun hlen (Ljava/lang/String;)J
+	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
+	public fun hrandField (Ljava/lang/String;J)Ljava/util/List;
+	public fun hrandFieldWithValues (Ljava/lang/String;J)Ljava/util/Map;
+	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)J
+	public fun hset (Ljava/lang/String;Ljava/util/Map;)J
+	public fun incr (Ljava/lang/String;)J
+	public fun incrBy (Ljava/lang/String;J)J
+	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
+	public fun lpop (Ljava/lang/String;)Lokio/ByteString;
+	public fun lpop (Ljava/lang/String;I)Ljava/util/List;
+	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
+	public fun lrem (Ljava/lang/String;JLokio/ByteString;)J
+	public fun mget ([Ljava/lang/String;)Ljava/util/List;
+	public fun mset ([Lokio/ByteString;)V
+	public fun multi ()Lredis/clients/jedis/Transaction;
+	public fun pExpire (Ljava/lang/String;J)Z
+	public fun pExpireAt (Ljava/lang/String;J)Z
+	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
+	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
+	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
+	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
+	public fun rpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
+	public fun set (Ljava/lang/String;Lokio/ByteString;)V
+	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
+	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
+	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
+	public fun unwatch ([Ljava/lang/String;)V
+	public fun watch ([Ljava/lang/String;)V
+}
+
+public abstract interface annotation class misk/redis/testing/ForFakeRedis : java/lang/annotation/Annotation {
+}
+
+public final class misk/redis/testing/RedisTestModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public fun <init> (Lkotlin/random/Random;)V
+	public synthetic fun <init> (Lkotlin/random/Random;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+

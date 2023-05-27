@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
@@ -27,6 +29,13 @@ plugins {
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version Dependencies.kotlinBinaryCompatibilityPluginVersion
 }
 
+apply(plugin = "com.vanniktech.maven.publish.base")
+
+allprojects {
+  group = project.property("GROUP") as String
+  version = project.findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
+}
+
 dependencyAnalysis {
   issues {
     all {
@@ -36,14 +45,10 @@ dependencyAnalysis {
         // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
         exclude("() -> java.io.File?")
         exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
+        exclude(":misk-testing")
       }
     }
     // False positives.
-    project(":misk-aws2-dynamodb-testing") {
-      onAny {
-        exclude("org.antlr:antlr4-runtime")
-      }
-    }
     project(":misk-gcp") {
       onUsedTransitiveDependencies {
         // Can be removed once dd-trace-ot uses 0.33.0 of open tracing.
@@ -173,15 +178,6 @@ subprojects {
     }
   }
 
-  if (file("$rootDir/hooks.gradle").exists()) {
-    apply(from = file("$rootDir/hooks.gradle"))
-  }
-
-  if (!path.startsWith(":samples")) {
-    apply(plugin = "com.vanniktech.maven.publish")
-    apply(from = "$rootDir/gradle-mvn-publish.gradle")
-  }
-
   // Workaround the Gradle bug resolving multiplatform dependencies.
   // https://github.com/square/okio/issues/647
   configurations.all {
@@ -190,6 +186,38 @@ subprojects {
         Usage.USAGE_ATTRIBUTE,
         this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
       )
+    }
+  }
+}
+
+allprojects {
+  plugins.withId("com.vanniktech.maven.publish.base") {
+    configure<MavenPublishBaseExtension> {
+      publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+      signAllPublications()
+      pom {
+        description.set("Open source application container in Kotlin")
+        name.set(project.name)
+        url.set("https://github.com/cashapp/misk/")
+        licenses {
+          license {
+            name.set("The Apache Software License, Version 2.0")
+            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            distribution.set("repo")
+          }
+        }
+        scm {
+          url.set("https://github.com/cashapp/misk/")
+          connection.set("scm:git:git://github.com/misk/tempest.git")
+          developerConnection.set("scm:git:ssh://git@github.com/cashapp/misk.git")
+        }
+        developers {
+          developer {
+            id.set("square")
+            name.set("Square, Inc.")
+          }
+        }
+      }
     }
   }
 }

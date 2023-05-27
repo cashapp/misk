@@ -1,8 +1,12 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
 }
 
 apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
@@ -57,10 +61,15 @@ dependencies {
   testImplementation(Dependencies.wispLoggingTesting)
   testImplementation(Dependencies.wispTimeTesting)
   testImplementation(project(":misk-config"))
-  testImplementation(project(":misk-crypto-testing"))
   testImplementation(project(":misk-hibernate-testing"))
   testImplementation(project(":misk-jdbc-testing"))
   testImplementation(project(":misk-metrics"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-crypto")))
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

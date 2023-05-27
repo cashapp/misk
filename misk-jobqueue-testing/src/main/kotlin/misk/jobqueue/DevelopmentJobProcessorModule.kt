@@ -9,6 +9,7 @@ import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 
+@Deprecated("Replace the dependency on misk-jobqueue-testing with testFixtures(misk-jobqueue)")
 class DevelopmentJobProcessorModule : KAbstractModule() {
   override fun configure() {
     install(ServiceModule<DevelopmentJobProcessor>())

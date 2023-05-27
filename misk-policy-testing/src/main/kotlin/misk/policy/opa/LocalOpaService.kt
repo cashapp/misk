@@ -25,6 +25,7 @@ import java.io.File
 import java.io.IOException
 import java.time.Duration
 
+@Deprecated("Replace the dependency on misk-policy-testing with testFixtures(misk-policy)")
 class LocalOpaService(
   private val policyPath: String,
   private val withLogging: Boolean,
