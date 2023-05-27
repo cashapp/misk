@@ -1,3 +1,35 @@
+public final class misk/policy/opa/FakeOpaModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/policy/opa/FakeOpaPolicyEngine : misk/policy/opa/OpaPolicyEngine {
+	public fun <init> ()V
+	public final fun addOverride (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
+	public final fun addOverrideForInput (Ljava/lang/String;Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
+	public final fun addOverrideForInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Lmisk/policy/opa/OpaResponse;)V
+	public fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+	public fun evaluateRawJsonInput (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+	public fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
+}
+
+public final class misk/policy/opa/LocalOpaService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/policy/opa/LocalOpaService$Companion;
+	public static final field DEFAULT_POLICY_DIRECTORY Ljava/lang/String;
+	public static final field OPA_CONTAINER_NAME Ljava/lang/String;
+	public static final field OPA_DOCKER_IMAGE_BASE Ljava/lang/String;
+	public static final field OPA_EXPOSED_PORT I
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;)V
+}
+
+public final class misk/policy/opa/LocalOpaService$Callback : com/github/dockerjava/core/async/ResultCallbackTemplate {
+	public fun <init> ()V
+	public fun onNext (Lcom/github/dockerjava/api/model/Frame;)V
+	public synthetic fun onNext (Ljava/lang/Object;)V
+}
+
+public final class misk/policy/opa/LocalOpaService$Companion {
+}
+
 public abstract interface class misk/policy/opa/OpaApi {
 	public abstract fun queryDocument (Ljava/lang/String;Ljava/lang/String;Z)Lretrofit2/Call;
 }
@@ -16,6 +48,14 @@ public final class misk/policy/opa/OpaConfig : misk/config/Config {
 	public final fun getUnixSocket ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/policy/opa/OpaDevelopmentModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/policy/opa/OpaModule : misk/inject/KAbstractModule {
