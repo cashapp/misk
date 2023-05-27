@@ -17,6 +17,7 @@ env:
 
 jobs:
   binaryCompatibility:
+    name: Binary Compatibility
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +31,7 @@ jobs:
         run: gradle apiCheck
 
   dependencyAnalysis:
+    name: Dependency Analysis
     runs-on: ubuntu-latest
 
     steps:
