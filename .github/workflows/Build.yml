@@ -1,4 +1,4 @@
-name: Test
+name: Build
 
 on:
   pull_request:
@@ -14,9 +14,12 @@ env:
   JVM_OPTS: -Xmx1024M
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=3 -Xmx4096m -Dorg.gradle.configureondemand=true -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
   TERM: dumb
+  ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+  ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+  ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
 
 jobs:
-  js:
+  test-js:
     runs-on: [ubuntu-latest]
 
     steps:
@@ -29,7 +32,7 @@ jobs:
       - name: Test
         run: npm install -g @misk/cli && miskweb ci-build -e
 
-  jvm:
+  test-jvm:
     runs-on: [ubuntu-latest]
 
     services:
@@ -66,21 +69,26 @@ jobs:
 
   publish:
     if: ${{ github.ref == 'refs/heads/master' && github.repository == 'cashapp/misk' }}
-    runs-on: [ubuntu-latest]
     needs: [js, jvm]
-    env:
-      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
+    runs-on: [ubuntu-latest]
+
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
       - name: Build Misk Web
         run: |
           npm install -g @misk/cli
           miskweb ci-build -e
+
       - name: Assign a version
         run: |
           # set a version name like "2023.05.26.091805-c1fcb3a"
           echo "VERSION_NAME=$(git log -n1 --pretty='format:%cd' --date=format:'%Y.%m.%d.%H%M%S')-$(git rev-parse --short=7 HEAD)" >> gradle.properties
+
       - name: Publish the artifacts
         run: |
           gradle clean publish --stacktrace
