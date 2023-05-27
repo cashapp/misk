@@ -52,7 +52,7 @@ dependencyAnalysis {
     project(":misk-gcp") {
       onUsedTransitiveDependencies {
         // Can be removed once dd-trace-ot uses 0.33.0 of open tracing.
-        exclude("io.opentracing:opentracing-util:0.32.0")
+        exclude("io.opentracing:opentracing-util:0.33.0")
         exclude("io.opentracing:opentracing-noop:0.33.0")
       }
       onRuntimeOnly {
