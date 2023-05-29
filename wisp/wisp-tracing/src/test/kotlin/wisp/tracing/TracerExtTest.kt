@@ -1,11 +1,13 @@
 package wisp.tracing
 
+import io.opentracing.Span
 import io.opentracing.mock.MockSpan
 import io.opentracing.tag.Tags
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.tracing.testing.ConcurrentMockTracer
-import kotlin.test.assertFailsWith
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.test.*
 
 class TracerExtTest {
 
@@ -75,5 +77,44 @@ class TracerExtTest {
         val childContext = childSpan.context() as MockSpan.MockContext
         assertThat(childContext.traceId()).isNotEqualTo(parentContext.traceId())
         assertThat((childSpan as MockSpan).parentId()).isNotEqualTo(parentContext.spanId())
+    }
+
+    @Test
+    fun `traceWithNewRootSpan can retain previous baggage`() {
+        tracer.traceWithSpan("parent") { span ->
+            val baggage = mapOf("parent-baggage" to "blah blah blah")
+            span.setBaggageItems(baggage)
+            val parentBaggage = span.context().baggageItems()
+
+            tracer.traceWithNewRootSpan("new-root", retainBaggage = true) { span ->
+                val newRootBaggage = span.context().baggageItems()
+                assertContainsAll(newRootBaggage, parentBaggage)
+                assertContainsAll(newRootBaggage, baggage.asIterable())
+            }
+
+            tracer.traceWithNewRootSpan("new-root-no-baggage", retainBaggage = false) { span ->
+                val noBaggage = span.context().baggageItems().toList()
+                assertTrue(
+                        noBaggage.isEmpty(),
+                        "Expected no baggage on new span ignoring parent without baggage retention"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `can create and use new scopes in a single span`() {
+        val spanRef = AtomicReference<Span>()
+        tracer.traceWithSpan("test-scoped") { span ->
+            spanRef.set(span)
+            tracer.withNewScope(span) {
+                assertNotFinished(span)
+            }
+        }
+        assertFinished(spanRef.get())
+
+        val spans = tracer.finishedSpans()
+        assertTrue(spans.size == 1, "Expected exactly one span")
+        assertContains(spans.map { it.operationName() }, "test-scoped")
     }
 }
