@@ -5,19 +5,31 @@ import io.opentracing.Span
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 
-/** [trace] traces the given function with the specific span name and optional tags */
+/**
+ * Traces a function [f], using a span called [spanName], which is automatically finished when the
+ * function completes execution.
+ *
+ * If a span is already active, the new span is made a child of the existing one.
+ * If you want to manipulate the [Span] (e.g. to attach baggage), use [traceWithSpan] instead.
+ *
+ * If you want a new independent span, use [traceWithNewRootSpan].
+ */
 fun <T : Any?> Tracer.trace(spanName: String, tags: Map<String, String> = mapOf(), f: () -> T): T =
     traceWithSpan(spanName, tags) { f() }
 
-/** [traceWithSpan] traces the given function, passing the span into the function.
- *  If a span is already active, the new span is made a child of the existing. */
+/**
+ * Like [trace], but exposes the new active [Span] to [f].
+ */
 fun <T : Any?> Tracer.traceWithSpan(
     spanName: String,
     tags: Map<String, String> = mapOf(),
     f: (Span) -> T
 ): T = traceWithSpanInternal(spanName, tags, asChild = true, retainBaggage = false, f)
 
-/** [traceWithNewRootSpan] traces the given function, always starting a new root span */
+/**
+ * Like [traceWithSpan], but always starts a new independent (root) span.
+ * If you'd like to continue propagating baggage that was set on the previous active span, set [retainBaggage] to true.
+ */
 fun <T : Any?> Tracer.traceWithNewRootSpan(
     spanName: String,
     tags: Map<String, String> = mapOf(),
