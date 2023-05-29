@@ -1,5 +1,6 @@
 package wisp.tracing
 
+import io.opentracing.Scope
 import io.opentracing.Span
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
@@ -14,25 +15,25 @@ fun <T : Any?> Tracer.traceWithSpan(
     spanName: String,
     tags: Map<String, String> = mapOf(),
     f: (Span) -> T
-): T {
-    return traceWithSpanInternal(spanName, tags, true, f)
-}
+): T = traceWithSpanInternal(spanName, tags, asChild = true, retainBaggage = false, f)
 
 /** [traceWithNewRootSpan] traces the given function, always starting a new root span */
 fun <T : Any?> Tracer.traceWithNewRootSpan(
     spanName: String,
     tags: Map<String, String> = mapOf(),
+    retainBaggage: Boolean = false,
     f: (Span) -> T
-): T {
-    return traceWithSpanInternal(spanName, tags, false, f)
-}
+): T = traceWithSpanInternal(spanName, tags, asChild = false, retainBaggage = retainBaggage, f)
 
 private fun <T : Any?> Tracer.traceWithSpanInternal(
     spanName: String,
     tags: Map<String, String> = mapOf(),
     asChild: Boolean,
+    retainBaggage: Boolean = false,
     f: (Span) -> T
 ): T {
+    val activeSpan: Span? = this.activeSpan()
+
     var spanBuilder = buildSpan(spanName)
     tags.forEach { (k, v) -> spanBuilder.withTag(k, v) }
 
@@ -41,6 +42,14 @@ private fun <T : Any?> Tracer.traceWithSpanInternal(
     }
 
     val span = spanBuilder.start()
+
+    if (retainBaggage && !asChild) {
+        val baggage = activeSpan?.context()?.baggageItems() ?: emptyList()
+        for ((k, v) in baggage) {
+            span.setBaggageItem(k, v)
+        }
+    }
+
     val scope = scopeManager().activate(span)
     return try {
         f(span)
@@ -52,3 +61,22 @@ private fun <T : Any?> Tracer.traceWithSpanInternal(
         span.finish()
     }
 }
+
+/**
+ * Instruments a function [f] with a new scope.
+ * This is helpful if you need to create a new [Scope] for an existing [Span],
+ * for example, if you are switching threads (since Scopes are not thread-safe).
+ *
+ * ```kotlin
+ * tracer.traceWithSpan("thread-switching-span") {
+ *   ...
+ *   thread {
+ *     tracer.withNewScope(span) { ... }
+ *   }
+ * }
+ * ```
+ */
+inline fun <T: Any?> Tracer.withNewScope(
+    span: Span,
+    crossinline f: () -> T
+): T = scopeManager().activate(span).use { f() }
