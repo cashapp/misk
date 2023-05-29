@@ -2,6 +2,20 @@
 
 Convenience functions on top of [opentracing Java APIs](https://opentracing.io/guides/java/).
 
+## Usage
+
+Use this library to easily set up and manipulate traces.
+
+```kotlin
+import wisp.tracing.trace
+
+tracer.trace("span-name") {
+  // This block is instrumented with a scope and span.
+  doSomething()
+  // They are automatically closed and finished at the end.
+}
+```
+
 ## Testing
 
 This module provides a concurrency-safe `io.opentracing.mock.MockTracer` as a testFixture.
@@ -11,20 +25,6 @@ Use it with:
 testImplementation(testFixtures("app.cash.wisp:wisp-tracing:$version"))
 ```
 
-## Usage
-
-Use this library to easily set up and manipulate traces.
-
-```kotlin
-import wisp.tracing.spanned
-
-tracer.spanned("span-name") {
-  // A scope and span are available in this block.
-  doSomething()
-  // They are automatically closed and finished at the end.
-}
-```
-
 ## Best practises
 
 ### Use a new scope when you change threads.
@@ -32,79 +32,85 @@ tracer.spanned("span-name") {
 Scopes are not thread-safe, so you need to set up a new scope before switching threads.
 
 ```kotlin
-import wisp.tracing.scoped
-import wisp.tracing.spanned
+import wisp.tracing.traceWithSpan
+import wisp.tracing.withNewScope
 
-tracer.spanned("multiple-threads") {
-  thread {
-   // scoped() gives you a new Scope with the same span, and by default does not finish the span.
-   tracer.scoped(span) {
-     doSomething()
-   } 
+tracer.traceWithSpan("multiple-threads") { span ->
+  thread { 
+    // withNewScope() gives you a new Scope with the same span.
+    // the scope is closed at the end of the block. 
+    tracer.withNewScope(span) {
+      doSomething()
+    } 
   }
 }
 ```
 
-### Finish your spans, and do not re-use finished spans
-
-The `tracer.spanned` API does not allow you use a span outside its block. This is the primary API to use.
-
-If you need a new span, you almost always want to finish it at the end of your block:
-
-```kotlin
-import wisp.tracing.scoped
-import wisp.tracing.spanned
-
-tracer.spanned("multiple-spans") {
-   tracer.scoped(tracer.buildSpan("new-span").start(), finishSpan = true) {
-     doSomething()
-   } 
-}
-```
 
 ### Use child spans
 
-Easily create child spans.
+Easily create child spans. Nested calls to trace/traceWithSpan implicitly create parent-child span relationships.
 
 ```kotlin
-import wisp.tracing.childSpan
-import wisp.tracing.scoped
-import wisp.tracing.spanned
+import wisp.tracing.trace
 
-tracer.spanned("parent-span") {
+tracer.trace("parent-span") {
   // Create a new child span and finish it as soon as block finishes.
-  tracer.scoped(tracer.childSpan("child-span", span), finishSpan = true) {
+  tracer.trace("child-span") {
     doSomething()
   }
 }
 ```
 
-### Add baggage and tags
+### Isolate interesting spans
 
-Add all your tags at once, instead of processing and adding them one tag at a time.
+New root spans can be created from inside parent spans. These will show up independent of the parent context.
 
 ```kotlin
-import wisp.tracing.spanned
+import wisp.tracing.trace
+import wisp.tracing.traceWithNewRootSpan
+
+tracer.trace("universe") {
+  tracer.traceWithNewRootSpan("root") {
+    // Not a child.
+  }
+}
+```
+
+### Use baggage and tags
+
+Add all your tags at once, instead of processing and adding them one tag at a time.
+All primitive type tags are supported.
+
+```kotlin
+import wisp.tracing.traceWithSpan
 import wisp.tracing.setTags
 import wisp.tracing.Tag
 
-tracer.spanned("tags-example") {
+// Use typed tags.
+tracer.traceWithSpan("tags-example") {
   span.setTags(listOf(
     Tag("string-tag", "string-value"),
     Tag("int-tag", 9999),
     Tag("bool-tag", true)
   ))
 }
+
+// Or just use string tags.
+tracer.trace("tags-example", tags = mapOf("a" to "b")) {
+  doSomething()
+}
 ```
 
-Add all your baggage at once, instead of processing and adding it one piece at a time. This information will be
-available in downstream traces.
+Add all your baggage at once, instead of processing and adding it one piece at a time. 
+This information will be available in downstream traces.
+Baggage can be anything, but will always be converted to a String.
 
 ```kotlin
-import wisp.tracing.spanned
 import wisp.tracing.setBaggageItems
+import wisp.tracing.traceWithSpan
 
-tracer.spanned("baggage-example") {
+tracer.traceWithSpan("baggage-example") { span ->
   span.setBaggageItems(
     mapOf(
       "string-baggage" to "foo",
@@ -114,5 +120,20 @@ tracer.spanned("baggage-example") {
   )
   
   doSomething()
+}
+```
+
+Sometimes you may want to retain baggage from a parent context on smaller, independent traces.
+
+```kotlin
+import wisp.tracing.setBaggageItems
+import wisp.tracing.traceWithSpan
+import wisp.tracing.traceWithNewRootSpan
+
+tracer.traceWithSpan("has-baggage-context") { span ->
+  span.setBaggageItems(mapOf("string-baggage" to "foo"))
+  tracer.traceWithNewRootSpan("new-root-span", retainBaggage = true) { newSpan ->
+    assert(span.context().baggageItems().first() == newSpan.context().baggageItems().first())
+  }
 }
 ```
