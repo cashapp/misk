@@ -30,6 +30,9 @@ data class SpanAndScope(val span: Span, val scope: Scope)
  * If you need to start a new span independent of the active span, set [ignoreActiveSpan] to true,
  * and optionally [retainBaggage].
  */
+@Deprecated(
+  message = "Use tracer.traceWithSpan or tracer.traceWithNewRootSpan instead",
+)
 inline fun <T: Any?> Tracer.spanned(
   name: String,
   ignoreActiveSpan: Boolean = false,
@@ -75,6 +78,10 @@ inline fun <T: Any?> Tracer.spanned(
  * }
  * ```
  */
+@Deprecated(
+  message = "Use Tracer.withNewScope instead",
+  replaceWith = ReplaceWith("this.withNewScope(span, block)", imports = ["wisp.tracing.withNewScope"])
+)
 inline fun <T: Any?> Tracer.scoped(
   span: Span,
   finishSpan: Boolean = false,
@@ -92,6 +99,7 @@ inline fun <T: Any?> Tracer.scoped(
 /**
  * Creates a span called [name] which is a child of [parent].
  */
+@Deprecated("Don't create new spans this way, instead call Tracer.trace or Tracer.traceWithSpan")
 fun Tracer.childSpan(name: String, parent: Span): Span =
   this.buildSpan(name).asChildOf(parent).start()
 
