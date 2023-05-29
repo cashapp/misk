@@ -1,4 +1,4 @@
-package wisp.tracing
+package wisp.tracing.testing
 
 import io.opentracing.mock.MockSpan
 import io.opentracing.mock.MockTracer
@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
  * Extends [MockTracer] for use in concurrent environments, such as a web server and test client.
  * Prefer this wherever you'd otherwise use [MockTracer].
  */
-class ConcurrentMockTracer : MockTracer() {
+open class ConcurrentMockTracer : MockTracer() {
     private val queue = LinkedBlockingDeque<MockSpan>()
 
     /** Awaits a span, removes it, and returns it. */
