@@ -3,6 +3,7 @@ package wisp.tracing
 import io.opentracing.Scope
 import io.opentracing.Span
 import io.opentracing.Tracer
+import io.opentracing.Tracer.SpanBuilder
 import io.opentracing.tag.Tags
 
 /**
@@ -24,7 +25,7 @@ fun <T : Any?> Tracer.traceWithSpan(
     spanName: String,
     tags: Map<String, String> = mapOf(),
     f: (Span) -> T
-): T = traceWithSpanInternal(spanName, tags, asChild = true, retainBaggage = false, f)
+): T = traceWithSpanInternal(buildChildSpan(spanName, tags), f)
 
 /**
  * Like [traceWithSpan], but always starts a new independent (root) span.
@@ -35,36 +36,37 @@ fun <T : Any?> Tracer.traceWithNewRootSpan(
     tags: Map<String, String> = mapOf(),
     retainBaggage: Boolean = false,
     f: (Span) -> T
-): T = traceWithSpanInternal(spanName, tags, asChild = false, retainBaggage = retainBaggage, f)
+): T = traceWithSpanInternal(buildRootSpan(spanName, tags, retainBaggage = retainBaggage), f)
 
-private fun <T : Any?> Tracer.traceWithSpanInternal(
+private fun Tracer.buildChildSpan(
     spanName: String,
     tags: Map<String, String> = mapOf(),
-    asChild: Boolean,
+): Span = buildSpan(spanName).addAllTags(tags).start()
+
+private fun Tracer.buildRootSpan(
+    spanName: String,
+    tags: Map<String, String> = mapOf(),
     retainBaggage: Boolean = false,
-    f: (Span) -> T
-): T {
+): Span {
     val activeSpan: Span? = this.activeSpan()
 
-    var spanBuilder = buildSpan(spanName)
-    tags.forEach { (k, v) -> spanBuilder.withTag(k, v) }
-
-    if (!asChild) {
-        spanBuilder = spanBuilder.ignoreActiveSpan()
-    }
-
+    var spanBuilder = buildSpan(spanName).addAllTags(tags)
+    spanBuilder = spanBuilder.ignoreActiveSpan()
     val span = spanBuilder.start()
 
-    if (retainBaggage && !asChild) {
+    if (retainBaggage) {
         val baggage = activeSpan?.context()?.baggageItems() ?: emptyList()
         for ((k, v) in baggage) {
             span.setBaggageItem(k, v)
         }
     }
+    return span
+}
 
+private fun <T : Any?> Tracer.traceWithSpanInternal(span: Span, block: (Span) -> T): T {
     val scope = scopeManager().activate(span)
     return try {
-        f(span)
+        block(span)
     } catch (t: Throwable) {
         Tags.ERROR.set(span, true)
         throw t
@@ -72,6 +74,11 @@ private fun <T : Any?> Tracer.traceWithSpanInternal(
         scope.close()
         span.finish()
     }
+}
+
+private fun SpanBuilder.addAllTags(tags: Map<String, String>): SpanBuilder {
+    tags.forEach { (k, v) -> this.withTag(k, v) }
+    return this
 }
 
 /**
