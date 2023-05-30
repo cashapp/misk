@@ -1,19 +1,18 @@
 package wisp.tracing
 
 import io.opentracing.Span
-import io.opentracing.mock.MockSpan
 import io.opentracing.mock.MockTracer
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+// TODO(keefer): Remove along with Tracing.kt.
 class TracingTest {
   private lateinit var tracer: MockTracer
 
@@ -121,100 +120,4 @@ class TracingTest {
     }
   }
 
-  @Test fun `Span#setBaggageItems() works`() {
-    // No baggage.
-    tracer.spanned("no-baggage") {
-      span.setBaggageItems(mapOf())
-    }
-    var spans = tracer.finishedSpans()
-    assertTrue(spans.size == 1, "Expected exactly one span")
-    assertTrue(
-      spans.map { it.context().baggageItems() }.first().toList().isEmpty(),
-      "Expected no baggage"
-    )
-
-    tracer.reset()
-
-    // With baggage.
-    tracer.spanned("set-baggage") {
-      span.setBaggageItems(
-        mapOf(
-          "movie" to "star wars",
-          "release-year" to 1977,
-          "producer" to Person("George Lucas")
-        )
-      )
-    }
-    spans = tracer.finishedSpans()
-    assertTrue(spans.size == 1, "Expected exactly one span")
-
-    assertContainsAll(
-      spans.map { it.context().baggageItems() }.first(),
-      mapOf(
-        "movie" to "star wars",
-        "release-year" to "1977",
-        "producer" to Person("George Lucas").toString()
-      ).entries
-    )
-  }
-
-  @Test fun `Span#setTags() works`() {
-    // No tags.
-    tracer.spanned("no-tags") {
-      span.setTags(listOf())
-    }
-    var spans = tracer.finishedSpans()
-    assertTrue(spans.size == 1, "Expected exactly one span")
-    assertTrue(
-      spans.map { it.tags() }.first().toList().isEmpty(),
-      "Expected no tags"
-    )
-    tracer.reset()
-
-    // With tags.
-    tracer.spanned("set-tags") {
-      span.setTags(
-        listOf(
-          Tag("int", 9999),
-          Tag("long", Long.MAX_VALUE),
-          Tag("double", Double.MAX_VALUE),
-          Tag("float", Float.MIN_VALUE),
-          Tag("string", "string"),
-          Tag("boolean", true),
-        )
-      )
-    }
-    spans = tracer.finishedSpans()
-    assertTrue(spans.size == 1, "Expected exactly one span")
-
-    assertContainsAll(
-      spans.map { it.tags() }.first().entries,
-      mapOf(
-        "int" to 9999,
-        "long" to Long.MAX_VALUE,
-        "double" to Double.MAX_VALUE,
-        "float" to Float.MIN_VALUE,
-        "string" to "string",
-        "boolean" to true
-      ).entries
-    )
-  }
-
-  private data class Person(val name: String)
-
-  private fun assertFinished(span: Span) {
-    span as? MockSpan ?: throw AssertionError("Expected MockSpan")
-    assertTrue(span.finishMicros() > 0, "Expected span to be finished.")
-  }
-
-  private fun assertNotFinished(span: Span) {
-    span as? MockSpan ?: throw AssertionError("Expected MockSpan")
-    assertFailsWith<AssertionError> { span.finishMicros() }
-  }
-
-  private fun <T> assertContainsAll(iterable: Iterable<T>, iterable2: Iterable<T>) {
-    for (item in iterable2) {
-      assertContains(iterable, item, "Expected $iterable to contain $item")
-    }
-  }
 }
