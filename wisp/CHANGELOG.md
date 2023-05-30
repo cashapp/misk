@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+Version 1.4.3 *(2023-05-30)*
+----------------------------
+
+* Deprecate wisp-tracing extensions: `Tracer.spanned`, `Tracer.scoped`, and `Tracer.childSpan`.
+* Update wisp-tracing extensions to better support multithreaded traces, and to support optional baggage retention on independent traces.
+* Update wisp-tracing documentation.
+* Version 1.4.2 was a skipped release.
+
 Version 1.4.1 *(2023-05-17)*
 ----------------------------
 
