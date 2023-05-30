@@ -99,7 +99,7 @@ inline fun <T: Any?> Tracer.scoped(
 /**
  * Creates a span called [name] which is a child of [parent].
  */
-@Deprecated("Don't create new spans this way, instead call Tracer.trace or Tracer.traceWithSpan")
+@Deprecated("Use Tracer.trace or Tracer.traceWithSpan instead")
 fun Tracer.childSpan(name: String, parent: Span): Span =
   this.buildSpan(name).asChildOf(parent).start()
 
