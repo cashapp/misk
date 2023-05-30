@@ -15,21 +15,16 @@ class DatabaseDashboardTabModule(private val isDevelopment: Boolean): KAbstractM
     // Database Query
     newMultibinder<DatabaseQueryMetadata>()
     install(WebActionModule.create<DatabaseQueryMetadataAction>())
-    multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-        slug = "database",
-        url_path_prefix = "/_admin/database/",
-        name = "Database",
-        category = "Container Admin"
-      )
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "database",
-        web_proxy_url = "http://localhost:3202/"
-      )
-    )
+
+    install(DashboardTabModule.createMiskWeb<AdminDashboard, AdminDashboardAccess>(
+      isDevelopment = isDevelopment,
+      slug = "database",
+      urlPathPrefix = "/_admin/database/",
+      developmentWebProxyUrl = "http://localhost:3202/",
+      name = "Database",
+      category = "Container Admin"
+    ))
+
     // Default access that doesn't allow any queries for unconfigured DbEntities
     multibind<AccessAnnotationEntry>().toInstance(
       AccessAnnotationEntry<NoAdminDashboardDatabaseAccess>(

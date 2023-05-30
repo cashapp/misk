@@ -4,19 +4,19 @@ import com.google.common.base.CharMatcher
 
 private val BlockedUrlPathPrefixes = listOf("/api/")
 
-abstract class ValidWebEntry(val slug: String = "", val url_path_prefix: String = "/") {
+open class ValidWebEntry(val valid_slug: String = "", val valid_url_path_prefix: String = "/") {
   init {
     // internal link url_path_prefix must start and end with '/'
-    require(url_path_prefix.startsWith("http") || url_path_prefix.matches(Regex("(/[^/]+)*/"))) {
-      "Invalid or unexpected url path prefix: '$url_path_prefix'. " +
+    require(valid_url_path_prefix.startsWith("http") || valid_url_path_prefix.matches(Regex("(/[^/]+)*/"))) {
+      "Invalid or unexpected url path prefix: '$valid_url_path_prefix'. " +
         "Must start with 'http' OR start and end with '/'."
     }
 
     // url_path_prefix must not be in the blocked list of prefixes to prevent forwarding conflicts with webactions
-    require(BlockedUrlPathPrefixes.all { !url_path_prefix.startsWith(it) }) {
+    require(BlockedUrlPathPrefixes.all { !valid_url_path_prefix.startsWith(it) }) {
       "Url path prefix begins with a blocked prefix: ${
       BlockedUrlPathPrefixes.filter {
-        url_path_prefix.startsWith(
+        valid_url_path_prefix.startsWith(
           it
         )
       }
@@ -27,7 +27,7 @@ abstract class ValidWebEntry(val slug: String = "", val url_path_prefix: String 
     require(
       CharMatcher.inRange('a', 'z').or(CharMatcher.inRange('0', '9')).or(
         CharMatcher.`is`('-')
-      ).matchesAllOf(slug)
+      ).matchesAllOf(valid_slug)
     ) {
       "Slug contains invalid characters. Can only contain characters in ranges [a-z], [0-9] or '-'."
     }
