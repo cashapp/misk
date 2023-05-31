@@ -5,12 +5,12 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.ServiceModule
 import misk.inject.KAbstractModule
+import misk.inject.toKey
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
-import misk.inject.toKey
 
 /**
  * Install this module to register a handler for an SQS queue,
@@ -73,7 +73,8 @@ internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
   private val attributeImporter: AwsSqsQueueAttributeImporter,
   private val consumer: SqsJobConsumer,
   private val consumerMapping: Map<QueueName, JobHandler>,
-  private val externalQueues: Map<QueueName, AwsSqsQueueConfig>
+  private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
+  private val config: AwsSqsJobQueueConfig
 ) : AbstractIdleService() {
   override fun startUp() {
     consumerMapping.forEach { consumer.subscribe(it.key, it.value) }
@@ -81,8 +82,10 @@ internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
   }
 
   override fun shutDown() {
-    consumerMapping.forEach { consumer.unsubscribe(it.key) }
-    attributeImporter.shutdown()
-    consumer.shutdown()
+    if (config.safe_shutdown) {
+      consumerMapping.forEach { consumer.unsubscribe(it.key) }
+      attributeImporter.shutDown()
+      consumer.shutDown()
+    }
   }
 }

@@ -82,7 +82,7 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
     }
   }
 
-  fun shutdown() {
+  fun shutDown() {
     running.set(false)
   }
 

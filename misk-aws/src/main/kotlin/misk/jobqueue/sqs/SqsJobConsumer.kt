@@ -81,7 +81,7 @@ internal class SqsJobConsumer @Inject internal constructor(
     return subscriptions[queueName]!!
   }
 
-  fun shutdown() {
+  fun shutDown() {
     receivingThreads.shutdown()
     handlingThreads.shutdown()
     // Giving it some time to the handlers to finish.
