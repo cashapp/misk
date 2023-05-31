@@ -21,7 +21,9 @@ dependencies {
   api(project(":misk-actions"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
+  implementation(Dependencies.kotlinxHtml)
   implementation(project(":misk-core"))
+  implementation(project(":misk-hotwire"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
