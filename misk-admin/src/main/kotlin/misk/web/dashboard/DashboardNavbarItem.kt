@@ -11,7 +11,7 @@ data class DashboardNavbarItem(
   val dashboard_slug: String,
   val item: String,
   val order: Int
-) : ValidWebEntry(slug = dashboard_slug)
+) : ValidWebEntry(valid_slug = dashboard_slug)
 
 inline fun <reified DA : Annotation> DashboardNavbarItem(
   item: String,

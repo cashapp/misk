@@ -9,7 +9,7 @@ import misk.web.dashboard.ValidWebEntry.Companion.slugify
 data class DashboardNavbarStatus(
   val dashboard_slug: String,
   val status: String
-) : ValidWebEntry(slug = dashboard_slug)
+) : ValidWebEntry(valid_slug = dashboard_slug)
 
 inline fun <reified DA : Annotation> DashboardNavbarStatus(
   status: String

@@ -217,7 +217,15 @@ public abstract interface class misk/web/actions/WebAction {
 
 public final class misk/web/actions/WebActionEntry : misk/web/dashboard/ValidWebEntry {
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;)V
+	public final fun component1 ()Lkotlin/reflect/KClass;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lkotlin/reflect/KClass;Ljava/lang/String;)Lmisk/web/actions/WebActionEntry;
+	public static synthetic fun copy$default (Lmisk/web/actions/WebActionEntry;Lkotlin/reflect/KClass;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/actions/WebActionEntry;
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getActionClass ()Lkotlin/reflect/KClass;
+	public final fun getUrl_path_prefix ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class misk/web/actions/WebSocket {
@@ -237,13 +245,13 @@ public class misk/web/actions/WebSocketListener {
 	public fun onMessage (Lmisk/web/actions/WebSocket;Lokio/ByteString;)V
 }
 
-public abstract class misk/web/dashboard/ValidWebEntry {
+public class misk/web/dashboard/ValidWebEntry {
 	public static final field Companion Lmisk/web/dashboard/ValidWebEntry$Companion;
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getSlug ()Ljava/lang/String;
-	public final fun getUrl_path_prefix ()Ljava/lang/String;
+	public final fun getValid_slug ()Ljava/lang/String;
+	public final fun getValid_url_path_prefix ()Ljava/lang/String;
 }
 
 public final class misk/web/dashboard/ValidWebEntry$Companion {
