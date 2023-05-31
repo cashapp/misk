@@ -366,6 +366,16 @@ public final class misk/web/dashboard/MiskWebColor : java/lang/Enum {
 	public static fun values ()[Lmisk/web/dashboard/MiskWebColor;
 }
 
+public final class misk/web/dashboard/MiskWebTabIndexAction : misk/web/actions/WebAction {
+	public static final field Companion Lmisk/web/dashboard/MiskWebTabIndexAction$Companion;
+	public static final field PATH Ljava/lang/String;
+	public fun <init> (Ljava/util/List;)V
+	public final fun get (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/web/dashboard/MiskWebTabIndexAction$Companion {
+}
+
 public final class misk/web/dashboard/MiskWebTheme {
 	public static final field Companion Lmisk/web/dashboard/MiskWebTheme$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/web/dashboard/EnvironmentToColorLookup;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
