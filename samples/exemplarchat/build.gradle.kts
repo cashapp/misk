@@ -2,18 +2,24 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
+  application
+}
+
+val applicationMainClass = "com.squareup.chat.ChatServiceKt"
+application {
+  mainClass.set(applicationMainClass)
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
-  api(Dependencies.wispConfig)
-  api(project(":misk"))
-  api(project(":misk-actions"))
-  api(project(":misk-clustering"))
-  api(project(":misk-core"))
-  api(project(":misk-inject"))
-  api(project(":misk-prometheus"))
-  api(project(":misk-redis"))
+  implementation(Dependencies.javaxInject)
+  implementation(Dependencies.wispConfig)
+  implementation(project(":misk"))
+  implementation(project(":misk-actions"))
+  implementation(project(":misk-clustering"))
+  implementation(project(":misk-core"))
+  implementation(project(":misk-inject"))
+  implementation(project(":misk-prometheus"))
+  implementation(project(":misk-redis"))
   implementation(Dependencies.guice)
   implementation(Dependencies.jedis)
   implementation(Dependencies.okHttp)

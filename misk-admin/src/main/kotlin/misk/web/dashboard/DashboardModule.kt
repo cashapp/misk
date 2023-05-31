@@ -18,6 +18,7 @@ class DashboardModule : KAbstractModule() {
 
     // Add metadata actions to support dashboards
     install(WebActionModule.create<DashboardMetadataAction>())
+    install(WebActionModule.create<MiskWebTabIndexAction>())
     install(WebActionModule.create<ServiceMetadataAction>())
     install(JvmMetadataModule())
   }
