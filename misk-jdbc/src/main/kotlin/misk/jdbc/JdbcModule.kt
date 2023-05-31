@@ -28,7 +28,7 @@ import kotlin.reflect.KClass
  * This also registers services to connect to the database ([DataSourceService]) and to verify
  * that the schema is up-to-date ([SchemaMigratorService]).
  */
-class JdbcModule(
+class JdbcModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   config: DataSourceConfig,
   private val readerQualifier: KClass<out Annotation>?,
