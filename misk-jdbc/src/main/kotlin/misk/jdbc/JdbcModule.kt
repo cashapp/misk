@@ -33,7 +33,8 @@ class JdbcModule(
   config: DataSourceConfig,
   private val readerQualifier: KClass<out Annotation>?,
   readerConfig: DataSourceConfig?,
-  val databasePool: DatabasePool = RealDatabasePool
+  val databasePool: DatabasePool = RealDatabasePool,
+  val installHealthCheck: Boolean = true
 ) : KAbstractModule() {
   val config = config.withDefaults()
   val readerConfig = readerConfig?.withDefaults()
@@ -103,7 +104,9 @@ class JdbcModule(
         .dependsOn<DataSourceService>(qualifier)
     )
 
-    multibind<HealthCheck>().to(schemaMigratorServiceKey)
+    if (installHealthCheck) {
+      multibind<HealthCheck>().to(schemaMigratorServiceKey)
+    }
   }
 
   private fun bindDataSource(
