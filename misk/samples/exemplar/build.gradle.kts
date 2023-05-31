@@ -1,20 +1,26 @@
 plugins {
   kotlin("jvm")
+  application
   id("com.squareup.wire")
 }
 
+val applicationMainClass = "com.squareup.exemplar.ExemplarServiceKt"
+application {
+  mainClass.set(applicationMainClass)
+}
+
 dependencies {
-  api(Dependencies.guice)
-  api(Dependencies.javaxInject)
-  api(Dependencies.okHttp)
-  api(Dependencies.okio)
-  api(Dependencies.wispConfig)
-  api(Dependencies.wispToken)
-  api(project(":misk"))
-  api(project(":misk-actions"))
-  api(project(":misk-config"))
-  api(project(":misk-inject"))
-  api(project(":misk-prometheus"))
+  implementation(Dependencies.guice)
+  implementation(Dependencies.javaxInject)
+  implementation(Dependencies.okHttp)
+  implementation(Dependencies.okio)
+  implementation(Dependencies.wispConfig)
+  implementation(Dependencies.wispToken)
+  implementation(project(":misk"))
+  implementation(project(":misk-actions"))
+  implementation(project(":misk-config"))
+  implementation(project(":misk-inject"))
+  implementation(project(":misk-prometheus"))
   implementation(Dependencies.wispDeployment)
   implementation(project(":misk-admin"))
   implementation(project(":misk-core"))

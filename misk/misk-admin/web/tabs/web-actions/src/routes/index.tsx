@@ -7,7 +7,17 @@ const routes = (
   <div>
     <Switch>
       <Route path="/_admin/web-actions/" component={TabContainer} />
+      <Route
+        path="/api/dashboard/tab/misk-web/web-actions/"
+        component={TabContainer}
+      />
+
       <Route path="/_admin/web-actions-v1/" component={TabContainerV1} />
+      <Route
+        path="/api/dashboard/tab/misk-web/web-actions-v1/"
+        component={TabContainerV1}
+      />
+
       {/* Do not include a Route without a path or it will display during on all tabs */}
     </Switch>
   </div>
