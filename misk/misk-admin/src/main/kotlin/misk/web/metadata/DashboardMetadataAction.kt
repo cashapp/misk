@@ -15,6 +15,7 @@ import misk.web.dashboard.DashboardTab
 import misk.web.dashboard.DashboardTheme
 import misk.web.dashboard.MiskWebTheme
 import misk.web.mediatype.MediaTypes
+import misk.web.metadata.DashboardMetadataAction.DashboardTabMetadata.Companion.toMetadata
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,43 +47,69 @@ class DashboardMetadataAction @Inject constructor(
   fun getAll(
     @PathParam dashboard_slug: String
   ): Response {
-    val caller = callerProvider.get() ?: return Response()
+    return Response(getDashboardMetadata(callerProvider.get(), dashboard_slug))
+  }
+
+  fun getDashboardMetadata(
+    caller: MiskCaller?,
+    dashboardSlug: String
+  ): DashboardMetadata {
+    if (caller == null) return DashboardMetadata()
 
     val authorizedDashboardTabs = allTabs
-      .filter { it.dashboard_slug == dashboard_slug }
+      .filter { it.dashboard_slug == dashboardSlug }
       .filter { caller.isAllowed(it.capabilities, it.services) }
 
     val homeUrl = allHomeUrls
-      .find { it.dashboard_slug == dashboard_slug }?.url ?: ""
+      .find { it.dashboard_slug == dashboardSlug }?.url ?: ""
 
     val navbarItems = allNavbarItems
-      .filter { it.dashboard_slug == dashboard_slug }
+      .filter { it.dashboard_slug == dashboardSlug }
       .sortedBy { it.order }
       .map { it.item }
 
     val navbarStatus = allNavbarStatus
-      .find { it.dashboard_slug == dashboard_slug }?.status ?: ""
+      .find { it.dashboard_slug == dashboardSlug }?.status ?: ""
 
     val theme = allThemes
-      .find { it.dashboard_slug == dashboard_slug }?.theme
+      .find { it.dashboard_slug == dashboardSlug }?.theme
 
-    val dashboardMetadata = DashboardMetadata(
+    return DashboardMetadata(
       home_url = homeUrl,
       navbar_items = navbarItems,
       navbar_status = navbarStatus,
-      tabs = authorizedDashboardTabs,
+      tabs = authorizedDashboardTabs.map { it.toMetadata() },
       theme = theme,
     )
-    return Response(
-      dashboardMetadata = dashboardMetadata
-    )
+  }
+
+  data class DashboardTabMetadata(
+    val slug: String,
+    val url_path_prefix: String,
+    val dashboard_slug: String,
+    val name: String,
+    val category: String = "",
+    val capabilities: Set<String> = setOf(),
+    val services: Set<String> = setOf(),
+  ) {
+    companion object {
+      fun DashboardTab.toMetadata() = DashboardTabMetadata(
+        slug = slug,
+        url_path_prefix = url_path_prefix,
+        dashboard_slug = dashboard_slug,
+        name = name,
+        category = category,
+        capabilities = capabilities,
+        services = services
+      )
+    }
   }
 
   data class DashboardMetadata(
     val home_url: String = "",
     val navbar_items: List<String> = listOf(),
     val navbar_status: String = "",
-    val tabs: List<DashboardTab> = listOf(),
+    val tabs: List<DashboardTabMetadata> = listOf(),
     /** If null, uses default theme that ships with Misk-Web */
     val theme: MiskWebTheme? = null,
   )

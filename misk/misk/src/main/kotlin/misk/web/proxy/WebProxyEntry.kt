@@ -21,10 +21,10 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
  * multibind<WebProxyEntry>().toInstance(WebProxyEntry(...))
  * ```
  */
-class WebProxyEntry(
-  url_path_prefix: String = "/",
+data class WebProxyEntry(
+  val url_path_prefix: String = "/",
   val web_proxy_url: HttpUrl
-) : ValidWebEntry(url_path_prefix = url_path_prefix) {
+) : ValidWebEntry(valid_url_path_prefix = url_path_prefix) {
   init {
     require(
       web_proxy_url.encodedPath.endsWith("/") &&
