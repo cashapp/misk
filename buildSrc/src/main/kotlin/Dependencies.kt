@@ -99,6 +99,7 @@ object Dependencies {
   val kotlinStdLibJdk8 = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21"
   val kotlinTest = "org.jetbrains.kotlin:kotlin-test:1.8.21"
   val kotlinxCoroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0"
+  val kotlinxHtml = "org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1"
   val kubernetesClient = "io.kubernetes:client-java:14.0.0"
   val kubernetesClientApi = "io.kubernetes:client-java-api:14.0.0"
   val launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:5.10.7"

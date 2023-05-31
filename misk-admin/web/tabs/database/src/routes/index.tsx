@@ -6,6 +6,10 @@ const routes = (
   <div>
     <Switch>
       <Route path="/_admin/database/" component={TabContainer} />
+      <Route
+        path="/api/dashboard/tab/misk-web/database/"
+        component={TabContainer}
+      />
       {/* Do not include a Route without a path or it will display during on all tabs */}
     </Switch>
   </div>
