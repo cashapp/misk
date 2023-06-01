@@ -5,6 +5,7 @@ plugins {
 dependencies {
     api(libs.launchDarkly)
     api(libs.loggingApi)
+    api(libs.micrometerCore)
     api(libs.moshiCore)
     api(project(":wisp-client"))
     api(project(":wisp-config"))

@@ -8,10 +8,13 @@ import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Metrics
 import mu.KotlinLogging
 import wisp.feature.*
 import java.util.*
 import java.util.concurrent.Executor
+import kotlin.system.measureTimeMillis
 
 /**
  * Implementation of [FeatureFlags] using LaunchDarkly's Java SDK.
@@ -19,25 +22,36 @@ import java.util.concurrent.Executor
  */
 class LaunchDarklyFeatureFlags constructor(
     private val ldClient: LDClientInterface,
-    private val moshi: Moshi
+    private val moshi: Moshi,
+    private val meterRegistry: MeterRegistry = Metrics.globalRegistry,
 ) : FeatureFlags {
 
     private var featuresWithMigrationWarnings: MutableList<Feature> = mutableListOf()
+    private val launchDarklyClientMetrics = LaunchDarklyClientMetrics(meterRegistry)
 
     fun startUp(): LaunchDarklyFeatureFlags {
-        var attempts = 300
-        val intervalMillis = 100L
+        var timedResult = measureTimeMillis {
+            var attempts = 300
+            val intervalMillis = 100L
 
-        // LaunchDarkly has its own threads for initialization. We just need to keep checking until
-        // it's done. Unfortunately there's no latch or event to wait on.
-        while (!ldClient.isInitialized && attempts > 0) {
-            Thread.sleep(intervalMillis)
-            attempts--
-        }
+            // LaunchDarkly has its own threads for initialization. We just need to keep checking until
+            // it's done. Unfortunately there's no latch or event to wait on.
+            while (!ldClient.isInitialized && attempts > 0) {
+                Thread.sleep(intervalMillis)
+                attempts--
+            }
 
-        if (attempts == 0 && !ldClient.isInitialized) {
-            throw Exception("LaunchDarkly did not initialize in 30 seconds")
+            if (attempts == 0 && !ldClient.isInitialized) {
+                launchDarklyClientMetrics.failedCount.increment()
+                throw Exception("LaunchDarkly did not initialize in 30 seconds")
+            }
+
+            // ldClient successfully initialized
+            launchDarklyClientMetrics.successCount.increment()
         }
+        launchDarklyClientMetrics
+            .initializationDuration(meterRegistry)
+            .record(timedResult.toDouble())
 
         return this
     }
