@@ -82,6 +82,7 @@ public abstract interface class misk/jobqueue/Job {
 
 public abstract interface class misk/jobqueue/JobConsumer {
 	public abstract fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/JobHandler;)V
+	public abstract fun unsubscribe (Lmisk/jobqueue/QueueName;)V
 }
 
 public final class misk/jobqueue/JobConsumerKt {

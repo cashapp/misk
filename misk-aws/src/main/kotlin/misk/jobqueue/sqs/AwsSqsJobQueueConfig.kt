@@ -57,7 +57,13 @@ class AwsSqsJobQueueConfig(
    */
   val sqs_sending_request_timeout_ms: Int = 5000,
 
-  val aws_sqs_job_receiver_policy: AwsSqsJobReceiverPolicy = AwsSqsJobReceiverPolicy.ONE_FLAG_ONLY
+  val aws_sqs_job_receiver_policy: AwsSqsJobReceiverPolicy = AwsSqsJobReceiverPolicy.ONE_FLAG_ONLY,
+
+  /**
+   * Temporary flag to test new shutdown behavior. This flag will eventually be removed and
+   * incorporated as the default behavior of the library.
+   */
+  val safe_shutdown: Boolean = false,
 ) : Config
 
 
