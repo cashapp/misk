@@ -26,6 +26,8 @@ import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -71,8 +73,19 @@ internal class SqsJobConsumer @Inject internal constructor(
     }
   }
 
+  override fun unsubscribe(queueName: QueueName) {
+    subscriptions.get(queueName)?.stop()
+  }
+
   internal fun getReceiver(queueName: QueueName): QueueReceiver {
     return subscriptions[queueName]!!
+  }
+
+  fun shutDown() {
+    receivingThreads.shutdown()
+    handlingThreads.shutdown()
+    // Giving it some time to the handlers to finish.
+    handlingThreads.awaitTermination(10, TimeUnit.SECONDS)
   }
 
   internal inner class QueueReceiver(
@@ -80,8 +93,15 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val handler: JobHandler
   ) {
     private val queue = queues.getForReceiving(queueName)
+    private val shouldKeepRunning = AtomicBoolean(false)
+    fun stop() {
+      shouldKeepRunning.set(false)
+    }
 
     fun run(): Status {
+      if (!shouldKeepRunning.get()) {
+        Status.NO_RESCHEDULE
+      }
       val size = sqsConsumerAllocator.computeSqsConsumersForPod(queue.name, receiverPolicy)
       val futures = List(size) {
         CompletableFuture.supplyAsync({ receive() }, receivingThreads)
