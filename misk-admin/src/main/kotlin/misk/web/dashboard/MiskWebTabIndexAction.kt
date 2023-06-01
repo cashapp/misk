@@ -30,21 +30,19 @@ class MiskWebTabIndexAction @Inject constructor(
   @AdminDashboardAccess
   fun get(@PathParam slug: String?): String {
     val dashboardTab = dashboardTabs.firstOrNull { slug == it.slug }
+      ?: throw NotFoundException("No tab found for slug: $slug")
+    // TODO remove this hack when new Web Actions tab lands and old ones removed, v1 and v2 are in the same web-actions tab
+    val normalizedSlug = if (dashboardTab.slug == "web-actions-v1") "web-actions" else dashboardTab.slug
     return buildHtml {
       html {
         head {
-          dashboardTab?.let {
-            link {
-              rel = "stylesheet"
-              type = "text/css"
-              href = "/@misk/common/styles.css"
-            }
+          link {
+            rel = "stylesheet"
+            type = "text/css"
+            href = "/@misk/common/styles.css"
           }
         }
         body {
-          // TODO remove this hack when new Web Actions tab lands and old ones removed, v1 and v2 are in the same web-actions tab
-          val normalizedSlug = if (slug == "web-actions-v1") "web-actions" else slug ?: "null"
-
           div {
             style = "padding: 2rem; margin-bottom: 6rem;"
 
@@ -52,10 +50,6 @@ class MiskWebTabIndexAction @Inject constructor(
             div {
               id = normalizedSlug
             }
-
-            // 404
-            dashboardTab
-              ?: throw NotFoundException("No tab found for slug: $normalizedSlug")
           }
 
           // Common resources
