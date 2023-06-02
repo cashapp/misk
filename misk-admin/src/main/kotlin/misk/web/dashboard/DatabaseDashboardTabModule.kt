@@ -16,7 +16,7 @@ class DatabaseDashboardTabModule(private val isDevelopment: Boolean): KAbstractM
     newMultibinder<DatabaseQueryMetadata>()
     install(WebActionModule.create<DatabaseQueryMetadataAction>())
 
-    install(DashboardTabModule.createMiskWeb<AdminDashboard, AdminDashboardAccess>(
+    install(DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
       isDevelopment = isDevelopment,
       slug = "database",
       urlPathPrefix = "/_admin/database/",
