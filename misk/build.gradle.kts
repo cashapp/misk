@@ -64,6 +64,7 @@ dependencies {
   implementation(Dependencies.wispLogging)
   implementation(Dependencies.wispMoshi)
   implementation(Dependencies.wispSsl)
+  implementation(Dependencies.wispTracing)
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-proto"))
   implementation(project(":misk-service"))

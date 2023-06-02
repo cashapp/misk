@@ -13,7 +13,7 @@ import misk.jobqueue.JobQueue.Companion.SQS_MAX_BATCH_ENQUEUE_JOB_SIZE
 import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
-import misk.tracing.traceWithSpan
+import wisp.tracing.traceWithSpan
 import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -163,9 +163,9 @@ internal class SqsJobQueue @Inject internal constructor(
           queueName.value,
           queueName.value
         )
-      }
-      catch (batchEnqueueException: JobQueue.BatchEnqueueException) {
-        metrics.jobEnqueueFailures.labels(queueName.value, queueName.value).inc(batchEnqueueException.failed.size.toDouble())
+      } catch (batchEnqueueException: JobQueue.BatchEnqueueException) {
+        metrics.jobEnqueueFailures.labels(queueName.value, queueName.value)
+          .inc(batchEnqueueException.failed.size.toDouble())
         throw batchEnqueueException
       } catch (th: Throwable) {
         metrics.jobEnqueueFailures.labels(queueName.value, queueName.value).inc()

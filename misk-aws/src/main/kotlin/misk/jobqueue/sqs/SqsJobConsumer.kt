@@ -16,11 +16,10 @@ import misk.jobqueue.QueueName
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
-import misk.tracing.traceWithNewRootSpan
-import okhttp3.internal.toLongOrDefault
 import org.slf4j.MDC
 import wisp.lease.LeaseManager
 import wisp.logging.getLogger
+import wisp.tracing.traceWithNewRootSpan
 import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.CompletableFuture

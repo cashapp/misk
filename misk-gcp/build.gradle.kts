@@ -92,6 +92,7 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.openTracingDatadog)
   testImplementation(Dependencies.wispContainersTesting)
+  testImplementation(Dependencies.wispTracing)
   testImplementation(project(":misk-gcp"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-gcp")))
