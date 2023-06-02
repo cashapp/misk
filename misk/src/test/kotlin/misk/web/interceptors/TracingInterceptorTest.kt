@@ -10,7 +10,6 @@ import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
-import misk.tracing.traceWithSpan
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
@@ -25,6 +24,7 @@ import misk.web.jetty.JettyService
 import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
+import wisp.tracing.traceWithSpan
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.HttpURLConnection
