@@ -31,6 +31,7 @@ dependencies {
   implementation(Dependencies.tracingDatadog)
   implementation(Dependencies.wispDeployment)
   implementation(Dependencies.wispLogging)
+  implementation(Dependencies.wispTracing)
   implementation(project(":misk-core"))
   implementation(project(":misk-hibernate"))
   implementation(project(":misk-metrics"))

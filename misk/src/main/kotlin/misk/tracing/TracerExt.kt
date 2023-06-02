@@ -2,53 +2,43 @@ package misk.tracing
 
 import io.opentracing.Span
 import io.opentracing.Tracer
-import io.opentracing.tag.Tags
 
-/** [trace] traces the given function with the specific span name and optional tags */
+import wisp.tracing.trace as wispTrace
+import wisp.tracing.traceWithNewRootSpan as wispTraceWithNewRootSpan
+import wisp.tracing.traceWithSpan as wispTraceWithSpan
+
+@Deprecated(
+  message = "Prefer wisp-tracing.",
+  replaceWith = ReplaceWith(
+    expression = "this.trace(spanName, tags, f)",
+    imports = ["wisp.tracing.trace"]
+  )
+)
 fun <T : Any?> Tracer.trace(spanName: String, tags: Map<String, String> = mapOf(), f: () -> T): T =
-  traceWithSpan(spanName, tags) { f() }
+  wispTrace(spanName, tags, f)
 
-/** [traceWithSpan] traces the given function, passing the span into the function.
- *  If a span is already active, the new span is made a child of the existing. */
+@Deprecated(
+  message = "Prefer wisp-tracing.",
+  replaceWith = ReplaceWith(
+    expression = "this.traceWithSpan(spanName, tags, f)",
+    imports = ["wisp.tracing.traceWithSpan"]
+  )
+)
 fun <T : Any?> Tracer.traceWithSpan(
   spanName: String,
   tags: Map<String, String> = mapOf(),
   f: (Span) -> T
-): T {
-  return traceWithSpanInternal(spanName, tags, true, f)
-}
+): T = wispTraceWithSpan(spanName, tags, f)
 
-/** [traceWithNewRootSpan] traces the given function, always starting a new root span */
+@Deprecated(
+  message = "Prefer wisp-tracing.",
+  replaceWith = ReplaceWith(
+    expression = "this.traceWithNewRootSpan(spanName, tags, false, f)",
+    imports = ["wisp.tracing.traceWithNewRootSpan"]
+  )
+)
 fun <T : Any?> Tracer.traceWithNewRootSpan(
   spanName: String,
   tags: Map<String, String> = mapOf(),
   f: (Span) -> T
-): T {
-  return traceWithSpanInternal(spanName, tags, false, f)
-}
-
-private fun <T : Any?> Tracer.traceWithSpanInternal(
-  spanName: String,
-  tags: Map<String, String> = mapOf(),
-  asChild: Boolean,
-  f: (Span) -> T
-): T {
-  var spanBuilder = buildSpan(spanName)
-  tags.forEach { (k, v) -> spanBuilder.withTag(k, v) }
-
-  if (!asChild) {
-    spanBuilder = spanBuilder.ignoreActiveSpan()
-  }
-
-  val span = spanBuilder.start()
-  val scope = scopeManager().activate(span)
-  return try {
-    f(span)
-  } catch (t: Throwable) {
-    Tags.ERROR.set(span, true)
-    throw t
-  } finally {
-    scope.close()
-    span.finish()
-  }
-}
+): T = wispTraceWithNewRootSpan(spanName, tags, retainBaggage = false, f)

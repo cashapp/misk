@@ -7,7 +7,7 @@ import ddtrot.dd.trace.common.writer.Writer
 import ddtrot.dd.trace.core.DDSpan
 import io.opentracing.noop.NoopTracerFactory
 import misk.testing.MiskTest
-import misk.tracing.traceWithSpan
+import wisp.tracing.traceWithSpan
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

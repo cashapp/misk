@@ -46,6 +46,7 @@ dependencies {
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.wispLogging)
   implementation(Dependencies.wispMoshi)
+  implementation(Dependencies.wispTracing)
   implementation(project(":misk"))
   implementation(project(":misk-service"))
 
