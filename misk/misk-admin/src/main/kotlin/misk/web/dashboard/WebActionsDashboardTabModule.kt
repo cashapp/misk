@@ -15,7 +15,7 @@ class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstrac
     install(WebActionModule.create<WebActionMetadataAction>())
 
     // Web Actions v2
-    install(DashboardTabModule.createMiskWeb<AdminDashboard, AdminDashboardAccess>(
+    install(DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
       isDevelopment = isDevelopment,
       slug = "web-actions",
       urlPathPrefix = "/_admin/web-actions/",
@@ -25,7 +25,7 @@ class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstrac
     ))
 
     // Web Actions v1
-    install(DashboardTabModule.createMiskWeb<AdminDashboard, AdminDashboardAccess>(
+    install(DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
       isDevelopment = isDevelopment,
       slug = "web-actions-v1",
       urlPathPrefix = "/_admin/web-actions-v1/",

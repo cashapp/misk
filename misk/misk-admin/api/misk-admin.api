@@ -218,7 +218,12 @@ public final class misk/web/dashboard/DashboardHomeUrl : misk/web/dashboard/Vali
 }
 
 public final class misk/web/dashboard/DashboardModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
+	public static final field Companion Lmisk/web/dashboard/DashboardModule$Companion;
+	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/WebTabResourceModule;)V
+	public synthetic fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/WebTabResourceModule;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/web/dashboard/DashboardModule$Companion {
 }
 
 public final class misk/web/dashboard/DashboardNavbarItem : misk/web/dashboard/ValidWebEntry {
@@ -275,15 +280,6 @@ public final class misk/web/dashboard/DashboardTab : misk/web/dashboard/WebTab {
 	public fun getUrl_path_prefix ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/web/dashboard/DashboardTabModule : misk/inject/KAbstractModule {
-	public static final field Companion Lmisk/web/dashboard/DashboardTabModule$Companion;
-	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/WebTabResourceModule;)V
-	public synthetic fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/WebTabResourceModule;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
-public final class misk/web/dashboard/DashboardTabModule$Companion {
 }
 
 public final class misk/web/dashboard/DashboardTabProvider : javax/inject/Provider {

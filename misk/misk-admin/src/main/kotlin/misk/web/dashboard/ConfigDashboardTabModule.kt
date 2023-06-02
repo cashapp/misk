@@ -21,7 +21,7 @@ class ConfigDashboardTabModule(
     bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
     install(WebActionModule.create<ConfigMetadataAction>())
 
-    install(DashboardTabModule.createMiskWeb<AdminDashboard, AdminDashboardAccess>(
+    install(DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
       isDevelopment = isDevelopment,
       slug = "config",
       urlPathPrefix = "/_admin/config/",

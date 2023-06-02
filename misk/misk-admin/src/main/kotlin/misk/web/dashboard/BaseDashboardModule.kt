@@ -2,7 +2,11 @@ package misk.web.dashboard
 
 import misk.inject.KAbstractModule
 import misk.web.NetworkInterceptor
+import misk.web.WebActionModule
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
+import misk.web.metadata.DashboardMetadataAction
+import misk.web.metadata.ServiceMetadataAction
+import misk.web.metadata.jvm.JvmMetadataModule
 
 /**
  * Installs base functionality for the Admin Dashboard including:
@@ -14,8 +18,18 @@ class BaseDashboardModule(
   private val isDevelopment: Boolean
 ): KAbstractModule() {
   override fun configure() {
-    // Install base dashboard support
-    install(DashboardModule())
+    // Setup multibindings for dashboard related components
+    newMultibinder<DashboardTab>()
+    newMultibinder<DashboardHomeUrl>()
+    newMultibinder<DashboardNavbarItem>()
+    newMultibinder<DashboardNavbarStatus>()
+    newMultibinder<DashboardTheme>()
+
+    // Add metadata actions to support dashboards
+    install(WebActionModule.create<DashboardMetadataAction>())
+    install(WebActionModule.create<MiskWebTabIndexAction>())
+    install(WebActionModule.create<ServiceMetadataAction>())
+    install(JvmMetadataModule())
 
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
