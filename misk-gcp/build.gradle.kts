@@ -46,7 +46,6 @@ dependencies {
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.wispLogging)
   implementation(Dependencies.wispMoshi)
-  implementation(Dependencies.wispTracing)
   implementation(project(":misk"))
   implementation(project(":misk-service"))
 
@@ -93,6 +92,7 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.openTracingDatadog)
   testImplementation(Dependencies.wispContainersTesting)
+  testImplementation(Dependencies.wispTracing)
   testImplementation(project(":misk-gcp"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-gcp")))
