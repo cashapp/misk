@@ -3,6 +3,17 @@ public final class wisp/launchdarkly/LaunchDarklyClient {
 	public final fun createLaunchDarklyClient (Lwisp/launchdarkly/LaunchDarklyConfig;Lwisp/security/ssl/SslLoader;Lwisp/security/ssl/SslContextFactory;Lwisp/resources/ResourceLoader;)Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;
 }
 
+public final class wisp/launchdarkly/LaunchDarklyClientMetrics {
+	public static final field Companion Lwisp/launchdarkly/LaunchDarklyClientMetrics$Companion;
+	public static final field FAILED_COUNTER_NAME Ljava/lang/String;
+	public static final field HISTO_DURATION_NAME Ljava/lang/String;
+	public static final field SUCCESS_COUNTER_NAME Ljava/lang/String;
+	public fun <init> (Lio/micrometer/core/instrument/MeterRegistry;)V
+}
+
+public final class wisp/launchdarkly/LaunchDarklyClientMetrics$Companion {
+}
+
 public final class wisp/launchdarkly/LaunchDarklyConfig : wisp/config/Config {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;Z)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lwisp/client/HttpClientSSLConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -46,7 +57,8 @@ public final class wisp/launchdarkly/LaunchDarklyDynamicConfig$Companion {
 
 public final class wisp/launchdarkly/LaunchDarklyFeatureFlags : wisp/feature/FeatureFlags {
 	public static final field Companion Lwisp/launchdarkly/LaunchDarklyFeatureFlags$Companion;
-	public fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;)V
+	public fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;)V
+	public synthetic fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun get (Lwisp/feature/BooleanFeatureFlag;)Z
 	public fun get (Lwisp/feature/DoubleFeatureFlag;)D
 	public fun get (Lwisp/feature/EnumFeatureFlag;)Ljava/lang/Enum;
