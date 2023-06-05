@@ -20,6 +20,7 @@ dependencies {
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.launchDarkly)
   testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.micrometerCore)
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.moshi)
   testImplementation(Dependencies.wispLoggingTesting)
