@@ -18,6 +18,7 @@ dependencies {
   api(project(":misk-inject"))
   implementation(Dependencies.javaxInject)
   implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(Dependencies.micrometerCore)
   implementation(Dependencies.moshi)
   implementation(Dependencies.wispFeature)
   implementation(Dependencies.wispLaunchDarkly)
