@@ -97,8 +97,8 @@ class DashboardMetadataAction @Inject constructor(
         slug = slug,
         url_path_prefix = url_path_prefix,
         dashboard_slug = dashboard_slug,
-        name = name,
-        category = category,
+        name = menuLabel,
+        category = menuCategory,
         capabilities = capabilities,
         services = services
       )
