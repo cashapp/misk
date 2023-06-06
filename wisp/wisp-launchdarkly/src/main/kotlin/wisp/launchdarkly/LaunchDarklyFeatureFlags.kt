@@ -20,7 +20,7 @@ import kotlin.system.measureTimeMillis
  * Implementation of [FeatureFlags] using LaunchDarkly's Java SDK.
  * See https://docs.launchdarkly.com/docs/java-sdk-reference documentation.
  */
-class LaunchDarklyFeatureFlags constructor(
+class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     private val ldClient: LDClientInterface,
     private val moshi: Moshi,
     private val meterRegistry: MeterRegistry = Metrics.globalRegistry,
