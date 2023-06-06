@@ -25,10 +25,10 @@ import javax.inject.Singleton
 class MiskWebTabIndexAction @Inject constructor(
   @AdminDashboard private val dashboardTabs: List<DashboardTab>,
 ) : WebAction {
-  @Get("$PATH/{slug}")
+  @Get("$PATH/{slug}/{rest:.*}")
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess
-  fun get(@PathParam slug: String?): String {
+  fun get(@PathParam slug: String?, @PathParam rest: String?): String {
     val dashboardTab = dashboardTabs.firstOrNull { slug == it.slug }
       ?: throw NotFoundException("No tab found for slug: $slug")
     // TODO remove this hack when new Web Actions tab lands and old ones removed, v1 and v2 are in the same web-actions tab

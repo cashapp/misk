@@ -26,8 +26,8 @@ class ConfigDashboardTabModule(
       slug = "config",
       urlPathPrefix = "/_admin/config/",
       developmentWebProxyUrl = "http://localhost:3200/",
-      name = "Config",
-      category = "Container Admin"
+      menuLabel = "Config",
+      menuCategory = "Container Admin"
     ))
   }
 }
