@@ -208,7 +208,7 @@ allprojects {
         }
         scm {
           url.set("https://github.com/cashapp/misk/")
-          connection.set("scm:git:git://github.com/misk/tempest.git")
+          connection.set("scm:git:git://github.com/cashapp/misk.git")
           developerConnection.set("scm:git:ssh://git@github.com/cashapp/misk.git")
         }
         developers {
