@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
   val config = MiskConfig.load<ExemplarConfig>("exemplar", deployment)
   MiskApplication(
     ConfigModule.create("exemplar", config),
-    DashboardModule(),
+    ExemplarDashboardModule(),
     DeploymentModule(deployment),
     ExemplarAccessModule(),
     ExemplarWebActionsModule(),

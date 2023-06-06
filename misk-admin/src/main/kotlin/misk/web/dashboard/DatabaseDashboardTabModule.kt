@@ -21,8 +21,8 @@ class DatabaseDashboardTabModule(private val isDevelopment: Boolean): KAbstractM
       slug = "database",
       urlPathPrefix = "/_admin/database/",
       developmentWebProxyUrl = "http://localhost:3202/",
-      name = "Database",
-      category = "Container Admin"
+      menuLabel = "Database",
+      menuCategory = "Container Admin"
     ))
 
     // Default access that doesn't allow any queries for unconfigured DbEntities
