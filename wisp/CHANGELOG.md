@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 1.4.5 *(2023-06-06)*
+----------------------------
+
+* Fix ABI incompatibility for Launch Darkly Client
+
 Version 1.4.4 *(2023-06-06)*
 ----------------------------
 
