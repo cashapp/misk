@@ -27,8 +27,9 @@ class DashboardModule(
       val dashboardTabProvider = DashboardTabProvider(
         slug = "menu-link-$url",
         url_path_prefix = url,
-        name = label,
-        category = category,
+        menuLabel = label,
+        menuUrl = url,
+        menuCategory = category,
         dashboard_slug = ValidWebEntry.slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
@@ -44,7 +45,7 @@ class DashboardModule(
      * In local development – when [isDevelopment] is true, the [developmentWebProxyUrl] is used
      * to resolve requests to [resourcePathPrefix]. In real environments,
      * the [classpathResourcePathPrefix] is used to resolve resource requests to files in classpath.
-     * The tab is included in the dashboard navbar menu with [name] and in the menu group [category].
+     * The tab is included in the dashboard navbar menu with [menuLabel] and in the menu group [menuCategory].
      */
     inline fun <reified DA : Annotation, reified AA : Annotation> createMiskWebTab(
       isDevelopment: Boolean,
@@ -53,14 +54,16 @@ class DashboardModule(
       developmentWebProxyUrl: String,
       resourcePathPrefix: String = "/_tab/$slug/",
       classpathResourcePathPrefix: String = "classpath:/web$resourcePathPrefix",
-      name: String,
-      category: String = "Admin",
+      menuLabel: String,
+      menuUrl: String = urlPathPrefix,
+      menuCategory: String = "Admin",
     ): DashboardModule {
       val dashboardTabProvider = DashboardTabProvider(
         slug = slug,
         url_path_prefix = urlPathPrefix,
-        name = name,
-        category = category,
+        menuLabel = menuLabel,
+        menuUrl = menuUrl,
+        menuCategory = menuCategory,
         dashboard_slug = ValidWebEntry.slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,

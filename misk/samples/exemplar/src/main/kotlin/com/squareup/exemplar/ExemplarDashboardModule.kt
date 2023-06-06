@@ -9,7 +9,7 @@ import misk.web.dashboard.MiskWebColor
 import misk.web.dashboard.MiskWebTheme
 import misk.web.metadata.config.ConfigMetadataAction
 
-class DashboardModule : KAbstractModule() {
+class ExemplarDashboardModule : KAbstractModule() {
   override fun configure() {
     bind<DashboardTheme>().toInstance(
       DashboardTheme<AdminDashboard>(
