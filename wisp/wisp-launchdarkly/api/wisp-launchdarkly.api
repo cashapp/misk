@@ -57,6 +57,7 @@ public final class wisp/launchdarkly/LaunchDarklyDynamicConfig$Companion {
 
 public final class wisp/launchdarkly/LaunchDarklyFeatureFlags : wisp/feature/FeatureFlags {
 	public static final field Companion Lwisp/launchdarkly/LaunchDarklyFeatureFlags$Companion;
+	public fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;)V
 	public fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;)V
 	public synthetic fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun get (Lwisp/feature/BooleanFeatureFlag;)Z
