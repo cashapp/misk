@@ -95,7 +95,7 @@ class DashboardMetadataAction @Inject constructor(
     companion object {
       fun DashboardTab.toMetadata() = DashboardTabMetadata(
         slug = slug,
-        url_path_prefix = url_path_prefix,
+        url_path_prefix = menuUrl,
         dashboard_slug = dashboard_slug,
         name = menuLabel,
         category = menuCategory,
