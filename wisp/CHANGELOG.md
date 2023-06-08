@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.4.7 *(2023-06-09)*
+----------------------------
+
+* Remove unused api/platform dependencies (netty, grpc, jackson)
+
+
 Version 1.4.6 *(2023-06-08)*
 ----------------------------
 
