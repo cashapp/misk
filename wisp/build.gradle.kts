@@ -102,9 +102,6 @@ subprojects {
       // Platform/BOM dependencies constrain versions only.
       // Enforce wisp-bom -- it should take priority over external BOMs.
       add("api", enforcedPlatform(project(":wisp-bom")))
-      add("api", platform(project.rootProject.libs.grpcBom))
-      add("api", platform(project.rootProject.libs.jacksonBom))
-      add("api", platform(project.rootProject.libs.nettyBom))
 
       // The kotlin API surface used in this library is not exposed via
       // the external API, so we shouldn't be forcing downstream consumers
