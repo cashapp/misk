@@ -1,10 +1,19 @@
 Change Log
 ==========
 
+Version 1.4.6 *(2023-06-08)*
+----------------------------
+
+Dependency changes:
+
+* netty: "4.1.92.Final" -> "4.1.93.Final"
+
+
 Version 1.4.5 *(2023-06-06)*
 ----------------------------
 
 * Fix ABI incompatibility for Launch Darkly Client
+
 
 Version 1.4.4 *(2023-06-06)*
 ----------------------------
