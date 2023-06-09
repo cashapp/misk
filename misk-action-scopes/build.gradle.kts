@@ -12,6 +12,7 @@ dependencies {
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(project(":misk-inject"))
+  api(project(":misk-api"))
   implementation(Dependencies.guava)
   implementation(Dependencies.kotlinReflect)
   implementation(Dependencies.kotlinStdLibJdk8)

@@ -21,7 +21,7 @@ class ActionScope @Inject internal constructor(
   // this circular dependency by injecting a map of Provider<ActionScopedProvider>
   // rather than the map of ActionScopedProvider directly
   private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
-) : AutoCloseable {
+) : AutoCloseable, misk.api.scope.ActionScope {
   companion object {
     private val threadLocalScope = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
     private val threadLocalUUID = ThreadLocal<UUID>()
@@ -83,7 +83,7 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Returns true if currently in the scope */
-  fun inScope(): Boolean = threadLocalScope.get() != null
+  override fun inScope(): Boolean = threadLocalScope.get() != null
 
   /**
    * Wraps a [Callable] that will be called on another thread, propagating the current
@@ -163,6 +163,14 @@ class ActionScope @Inject internal constructor(
 
     @Suppress("UNCHECKED_CAST")
     return value as T
+  }
+
+  override fun <T> get(type: Class<T>): T? {
+    if (!inScope()) {
+      return null
+    }
+
+    return get(Key.get(type))
   }
 
   @Suppress("UNCHECKED_CAST")
