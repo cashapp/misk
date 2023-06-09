@@ -4,10 +4,13 @@ package misk.scope
 interface ActionScoped<out T> {
   fun get(): T
 
+  fun inScope(): Boolean
+
   companion object {
     /** @return an [ActionScoped] hard-coded to a specific value, useful for tests */
     fun <T> of(value: T) = object : ActionScoped<T> {
       override fun get() = value
+      override fun inScope(): Boolean = true
     }
   }
 }
