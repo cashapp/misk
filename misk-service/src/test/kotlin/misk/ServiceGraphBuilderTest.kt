@@ -213,7 +213,12 @@ class ServiceGraphBuilderTest {
       enhanceService(toBeEnhanced = keyA, enhancement = keyB)
       enhanceService(toBeEnhanced = keyC, enhancement = keyB)
     }
-    assertThat(failure).hasMessage("Enhancement $keyB cannot be applied more than once")
+    assertThat(failure).hasMessage(
+      "Enhancement Key[type=com.google.common.util.concurrent.Service, " +
+        "annotation=@com.google.inject.name.Named(\"Service B\")] cannot be applied more than" +
+        " once to Key[type=com.google.common.util.concurrent.Service," +
+        " annotation=@com.google.inject.name.Named(\"Service C\")]"
+    )
   }
 
   @Test fun dependingServiceHasEnhancements() {
