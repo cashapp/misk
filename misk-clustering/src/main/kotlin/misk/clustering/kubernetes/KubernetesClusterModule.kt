@@ -20,6 +20,6 @@ class KubernetesClusterModule(private val config: KubernetesConfig) : KAbstractM
         .dependsOn<ClusterService>()
         .enhancedBy<ReadyService>()
     )
-    install(ServiceModule<ClusterService>().enhancedBy<ReadyService>())
+    install(ServiceModule<ClusterService>())
   }
 }
