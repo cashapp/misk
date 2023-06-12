@@ -17,11 +17,11 @@ import javax.inject.Singleton
 @Singleton
 class ReadyService @Inject constructor() : AbstractIdleService() {
   override fun startUp() {
-    logger.info { "Starting up" }
+    logger.info { "Starting ready service" }
   }
 
   override fun shutDown() {
-    logger.info { "Shutting down" }
+    logger.info { "Stopping ready service" }
   }
 
   companion object {

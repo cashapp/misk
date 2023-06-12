@@ -18,7 +18,6 @@ import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Suppress("UsePropertyAccessSyntax")
 @MiskTest(startService = true)
 class CronModuleTest {
   @Suppress("unused")
@@ -43,8 +42,13 @@ class CronModuleTest {
   @Inject private lateinit var logCollector: LogCollector
 
   @Test fun dependentServicesStartUpBeforeCron() {
-    assertThat(logCollector.takeMessages()).containsExactly(
+    val messages = logCollector.takeMessages()
+    // Can happen in any order since the relationship isn't specified between the two.
+    assertThat(messages.subList(0, 2)).contains(
+      "Starting ready service",
       "DependentService started",
+    )
+    assertThat(messages.subList(2, 4)).containsExactly(
       "CronService started",
       "Adding cron entry misk.cron.MinuteCron, crontab=* * * * *",
     )
