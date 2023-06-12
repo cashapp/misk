@@ -56,7 +56,7 @@ internal class ServiceGraphBuilder {
    */
   fun enhanceService(toBeEnhanced: Key<*>, enhancement: Key<*>) {
     check(enhancementMap[enhancement] == null) {
-      "Enhancement $enhancement cannot be applied more than once"
+      "Enhancement $enhancement cannot be applied more than once to $toBeEnhanced"
     }
     enhancementMap[enhancement] = toBeEnhanced
   }

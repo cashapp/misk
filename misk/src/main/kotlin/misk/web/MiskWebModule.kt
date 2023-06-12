@@ -6,18 +6,10 @@ import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
-import java.io.IOException
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
-import javax.servlet.http.HttpServletRequest
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
+import misk.ReadyService
 import misk.ServiceModule
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
@@ -33,6 +25,8 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
+import misk.web.concurrencylimits.ConcurrencyLimiterFactory
+import misk.web.concurrencylimits.ConcurrencyLimitsModule
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
@@ -50,8 +44,6 @@ import misk.web.extractors.ResponseBodyFeatureBinding
 import misk.web.extractors.WebSocketFeatureBinding
 import misk.web.extractors.WebSocketListenerFeatureBinding
 import misk.web.interceptors.BeforeContentEncoding
-import misk.web.concurrencylimits.ConcurrencyLimiterFactory
-import misk.web.concurrencylimits.ConcurrencyLimitsModule
 import misk.web.interceptors.ConcurrencyLimitsInterceptor
 import misk.web.interceptors.ForContentEncoding
 import misk.web.interceptors.GunzipRequestBodyInterceptor
@@ -91,6 +83,15 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.thread.ThreadPool
+import java.io.IOException
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import javax.servlet.http.HttpServletRequest
 
 class MiskWebModule(
   private val config: WebConfig,
@@ -100,7 +101,12 @@ class MiskWebModule(
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    install(ServiceModule(key = JettyService::class.toKey(), dependsOn = jettyDependsOn))
+    install(
+      ServiceModule(
+        key = JettyService::class.toKey(),
+        dependsOn = jettyDependsOn
+      ).dependsOn<ReadyService>()
+    )
     install(ServiceModule<JettyThreadPoolMetricsCollector>())
     install(ServiceModule<JettyConnectionMetricsCollector>())
 
@@ -271,14 +277,14 @@ class MiskWebModule(
 
   private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>):
     BlockingQueue<Runnable> {
-      return if (config.enable_thread_pool_queue_metrics) {
-        TimedBlockingQueue(
-          config.jetty_max_thread_pool_queue_size
-        ) { d -> metrics.get().recordQueueLatency(d) }
-      } else {
-        ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
-      }
+    return if (config.enable_thread_pool_queue_metrics) {
+      TimedBlockingQueue(
+        config.jetty_max_thread_pool_queue_size
+      ) { d -> metrics.get().recordQueueLatency(d) }
+    } else {
+      ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
     }
+  }
 
   class MiskCallerProvider @Inject constructor(
     private val authenticators: List<MiskCallerAuthenticator>

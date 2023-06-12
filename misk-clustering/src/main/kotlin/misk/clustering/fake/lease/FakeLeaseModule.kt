@@ -1,5 +1,6 @@
 package misk.clustering.fake.lease
 
+import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.lease.LeaseService
@@ -9,6 +10,6 @@ import wisp.lease.LeaseManager
 class FakeLeaseModule : KAbstractModule() {
   override fun configure() {
     bind<LeaseManager>().to<FakeLeaseManager>()
-    install(ServiceModule<LeaseService>())
+    install(ServiceModule<LeaseService>().enhancedBy<ReadyService>())
   }
 }

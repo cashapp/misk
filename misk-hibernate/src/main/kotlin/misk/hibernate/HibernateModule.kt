@@ -1,6 +1,7 @@
 package misk.hibernate
 
 import com.google.inject.Injector
+import misk.ReadyService
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.healthchecks.HealthCheck
@@ -219,6 +220,7 @@ class HibernateModule(
       install(
         ServiceModule<TransacterService>(qualifier)
           .enhancedBy<SchemaMigratorService>(qualifier)
+          .enhancedBy<ReadyService>()
           .dependsOn<DataSourceService>(qualifier)
       )
     } else {
