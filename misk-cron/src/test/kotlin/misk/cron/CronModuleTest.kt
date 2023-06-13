@@ -2,6 +2,7 @@ package misk.cron
 
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.MiskTestingServiceModule
+import misk.ReadyService
 import misk.ServiceModule
 import misk.clustering.fake.lease.FakeLeaseModule
 import misk.inject.KAbstractModule
@@ -28,7 +29,7 @@ class CronModuleTest {
       install(MiskTestingServiceModule())
       install(LogCollectorModule())
 
-      install(ServiceModule<DependentService>())
+      install(ServiceModule<DependentService>().enhancedBy<ReadyService>())
       install(
         FakeCronModule(
           ZoneId.of("America/Toronto"),
@@ -42,13 +43,9 @@ class CronModuleTest {
   @Inject private lateinit var logCollector: LogCollector
 
   @Test fun dependentServicesStartUpBeforeCron() {
-    val messages = logCollector.takeMessages()
-    // Can happen in any order since the relationship isn't specified between the two.
-    assertThat(messages.subList(0, 2)).contains(
-      "Starting ready service",
+    assertThat(logCollector.takeMessages()).containsExactly(
       "DependentService started",
-    )
-    assertThat(messages.subList(2, 4)).containsExactly(
+      "Starting ready service",
       "CronService started",
       "Adding cron entry misk.cron.MinuteCron, crontab=* * * * *",
     )
