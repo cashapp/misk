@@ -90,8 +90,10 @@ class LogCollectorTest {
       .containsExactly("A thing happened")
     assertThat(logCollector.takeMessages(LogCollectorModule::class, consumeUnmatchedLogs = false))
       .containsExactly("Another thing happened")
-    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
-      .containsExactly("Starting ready service")
+    // Ready service can start before or after logCollector, so it's inconsistent without this.
+    val withoutReadyService = logCollector.takeMessages(consumeUnmatchedLogs = false)
+      .filterNot { it == "Starting ready service" }
+    assertThat(withoutReadyService).isEmpty()
 
     // We can collect messages of different error levels.
     logger.info { "this is a log message!" }
