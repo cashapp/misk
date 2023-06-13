@@ -27,7 +27,7 @@ class LogLevelExtensionTest {
   @Test fun test() {
     logMessages()
     assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly(
-      "this is INFO.", "this is WARN.", "this is ERROR."
+      "Starting ready service", "this is INFO.", "this is WARN.", "this is ERROR."
     )
 
   }
@@ -36,7 +36,7 @@ class LogLevelExtensionTest {
   @Test fun levelDebug() {
     logMessages()
     assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly(
-      "this is DEBUG.", "this is INFO.", "this is WARN.", "this is ERROR."
+      "Starting ready service", "this is DEBUG.", "this is INFO.", "this is WARN.", "this is ERROR."
     )
   }
 
@@ -44,7 +44,7 @@ class LogLevelExtensionTest {
   @Test fun levelInfo() {
     logMessages()
     assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly(
-      "this is INFO.", "this is WARN.", "this is ERROR."
+      "Starting ready service", "this is INFO.", "this is WARN.", "this is ERROR."
     )
   }
 
@@ -63,7 +63,6 @@ class LogLevelExtensionTest {
       "this is ERROR."
     )
   }
-
 
   @LogLevel(level = LogLevel.Level.ERROR)
   @Nested

@@ -29,7 +29,10 @@ class LogCollectorTest {
     val logger = getLogger<LogCollectorTest>()
 
     logger.info("this is a log message!")
-    assertThat(logCollector.takeMessages()).containsExactly("this is a log message!")
+    assertThat(logCollector.takeMessages()).containsExactly(
+      "Starting ready service",
+      "this is a log message!"
+    )
 
     logger.info("another log message")
     logger.info("and a third!")
@@ -44,7 +47,7 @@ class LogCollectorTest {
     logger.info("this is INFO.")
     logger.warn("this is WARN!")
     assertThat(logCollector.takeMessages(minLevel = Level.INFO))
-      .containsExactly("this is INFO.", "this is WARN!")
+      .containsExactly("Starting ready service", "this is INFO.", "this is WARN!")
   }
 
   @Test
@@ -114,6 +117,7 @@ class LogCollectorTest {
 
   @Test
   fun takeTimeout() {
+    logCollector.takeEvent()
     val exception = assertFailsWith<IllegalArgumentException> {
       logCollector.takeEvent()
     }
@@ -131,6 +135,7 @@ class LogCollectorTest {
         logger.info("this is a log message!")
       }
     }
+    logCollector.takeMessage()
     thread.start()
 
     assertThat(logCollector.takeMessage()).isEqualTo("this is a log message!")
