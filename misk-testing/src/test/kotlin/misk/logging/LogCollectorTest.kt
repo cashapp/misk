@@ -90,7 +90,8 @@ class LogCollectorTest {
       .containsExactly("A thing happened")
     assertThat(logCollector.takeMessages(LogCollectorModule::class, consumeUnmatchedLogs = false))
       .containsExactly("Another thing happened")
-    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false)).isEmpty()
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
+      .containsExactly("Starting ready service")
 
     // We can collect messages of different error levels.
     logger.info { "this is a log message!" }
@@ -102,7 +103,7 @@ class LogCollectorTest {
 
     // We can collect messages matching certain patterns.
     logger.info { "hit by pattern match" }
-    logger.info { "missed by pattern match"}
+    logger.info { "missed by pattern match" }
     assertThat(logCollector.takeMessages(pattern = Regex("hit.*"), consumeUnmatchedLogs = false))
       .containsExactly("hit by pattern match")
     assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
