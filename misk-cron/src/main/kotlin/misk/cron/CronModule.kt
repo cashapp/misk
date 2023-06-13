@@ -51,7 +51,12 @@ class FakeCronModule(
         threadPoolSize
       )
     )
-    install(ServiceModule(key = CronService::class.toKey(), dependsOn = dependencies))
+    install(
+      ServiceModule(
+        key = CronService::class.toKey(),
+        dependsOn = dependencies
+      ).dependsOn<ReadyService>()
+    )
   }
 }
 

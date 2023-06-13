@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
 import misk.CoordinatedService.Companion.CycleValidity
+import wisp.logging.getLogger
 import javax.inject.Provider
 
 /**
@@ -14,7 +15,6 @@ import javax.inject.Provider
 internal class ServiceGraphBuilder {
   private var serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
-  private val enhancementMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
 
   /**
    * Registers a [service] with this [ServiceGraphBuilder]
@@ -55,7 +55,7 @@ internal class ServiceGraphBuilder {
    * @throws IllegalStateException if the enhancement has already been applied to another service.
    */
   fun enhanceService(toBeEnhanced: Key<*>, enhancement: Key<*>) {
-    enhancementMap.put(toBeEnhanced, enhancement)
+    dependencyMap.put(toBeEnhanced, enhancement)
   }
 
   /**
@@ -78,8 +78,6 @@ internal class ServiceGraphBuilder {
     for ((key, service) in serviceMap) {
       val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
       service.addDependentServices(*dependencies.toTypedArray())
-      val enhancements = enhancementMap[key]?.map { serviceMap[it]!! } ?: listOf()
-      service.addEnhancements(*enhancements.toTypedArray())
     }
   }
 
@@ -109,5 +107,9 @@ internal class ServiceGraphBuilder {
         "$stringBuilder requires $service but no such service was registered with the builder"
       }
     }
+  }
+
+  companion object {
+    private val logger = getLogger<ServiceGraphBuilder>()
   }
 }

@@ -17,8 +17,6 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.logging.getLogger
 import java.io.IOException
@@ -33,26 +31,16 @@ internal class GracefulShutdownTest {
   @MiskTestModule
   val module = TestModule()
 
+  @Inject lateinit var helloAction: HelloAction
   @Inject lateinit var jettyService: JettyService
   @Inject lateinit var serviceManager: ServiceManager
 
-  private lateinit var finishedLatch: CountDownLatch
-  private lateinit var httpClient: OkHttpClient
-
-  @BeforeEach
-  internal fun setUp() {
-    httpClient = OkHttpClient().newBuilder()
-      .readTimeout(Duration.ofSeconds(30))
-      .connectTimeout(Duration.ofSeconds(30))
-      .writeTimeout(Duration.ofSeconds(30))
-      .build()
-    finishedLatch = CountDownLatch(1)
-  }
-
-  @AfterEach
-  fun tearDown() {
-    httpClient.dispatcher.executorService.shutdown()
-  }
+  private val finishedLatch = CountDownLatch(1)
+  private val httpClient = OkHttpClient().newBuilder()
+    .readTimeout(Duration.ofSeconds(30))
+    .connectTimeout(Duration.ofSeconds(30))
+    .writeTimeout(Duration.ofSeconds(30))
+    .build()
 
   /**
    * This test initiates a long-running HTTP call and makes sure that even if we start the
@@ -64,7 +52,7 @@ internal class GracefulShutdownTest {
   @Test
   fun basic() {
     makeHttpCall()
-    Thread.sleep(1000)
+    helloAction.startedLatch.await(15, TimeUnit.SECONDS)
     serviceManager.stopAsync()
     finishedLatch.await(15, TimeUnit.SECONDS)
   }
@@ -97,8 +85,11 @@ internal class GracefulShutdownTest {
 
 @Singleton
 internal class HelloAction @Inject constructor(private val fakeService: FakeService) : WebAction {
+  val startedLatch = CountDownLatch(1)
+
   @Get("/hello")
   fun get(): String {
+    startedLatch.countDown()
     Thread.sleep(Duration.ofSeconds(5).toMillis())
     fakeService.doWork()
     return "success"

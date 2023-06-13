@@ -49,8 +49,8 @@ class ServiceGraphBuilderTest {
     assertThat(script).isEqualTo(
       """
         |starting Service A
-        |starting Enhancement A
         |starting Service C
+        |starting Enhancement A
         |healthy
         |stopping Service C
         |stopping Enhancement A
@@ -153,6 +153,7 @@ class ServiceGraphBuilderTest {
       enhanceService(toBeEnhanced = keyA, enhancement = keyB)
       enhanceService(toBeEnhanced = keyB, enhancement = keyC)
       addDependency(dependsOn = keyA, dependent = keyD)
+      addDependency(dependsOn = keyC, dependent = keyD)
     }
     assertThat(script).isEqualTo(
       """
@@ -208,16 +209,22 @@ class ServiceGraphBuilderTest {
     )
   }
 
-  @Test fun enhancementCannotHaveMultipleTargets() {
-    val failure = buildAndExpectFailure(listOf(keyA, keyB, keyC)) {
+  @Test fun enhancementMultipleTargets() {
+    val script = startUpAndShutDown(listOf(keyA, keyB, keyC)) {
       enhanceService(toBeEnhanced = keyA, enhancement = keyB)
       enhanceService(toBeEnhanced = keyC, enhancement = keyB)
     }
-    assertThat(failure).hasMessage(
-      "Enhancement Key[type=com.google.common.util.concurrent.Service, " +
-        "annotation=@com.google.inject.name.Named(\"Service B\")] cannot be applied more than" +
-        " once to Key[type=com.google.common.util.concurrent.Service," +
-        " annotation=@com.google.inject.name.Named(\"Service C\")]"
+
+    assertThat(script).isEqualTo(
+      """
+        |starting Service A
+        |starting Service C
+        |starting Service B
+        |healthy
+        |stopping Service B
+        |stopping Service A
+        |stopping Service C
+        |""".trimMargin()
     )
   }
 
@@ -325,9 +332,6 @@ class ServiceGraphBuilderTest {
     // This loop is probably the only sane way to obtain services from a ServiceManager?
     for (service in serviceManager.servicesByState().values()) {
       assertFailsWith<IllegalStateException> {
-        (service as CoordinatedService).addEnhancements(badEnhancer)
-      }
-      assertFailsWith<IllegalStateException> {
         (service as CoordinatedService).addDependentServices(badDependency)
       }
     }
@@ -357,9 +361,9 @@ class ServiceGraphBuilderTest {
         |starting Service C
         |starting Service D
         |healthy
-        |stopping Service D
         |stopping Service C
         |stopping Service B
+        |stopping Service D
         |stopping Service A
         |""".trimMargin()
     )
@@ -435,6 +439,6 @@ class ServiceGraphBuilderTest {
   /** A `Key<Service>` named [name]. */
   private fun key(name: String) = Key.get(Service::class.java, Names.named(name))
 
-  val Key<*>.name: String
+  private val Key<*>.name: String
     get() = (this.annotation as Named).value
 }

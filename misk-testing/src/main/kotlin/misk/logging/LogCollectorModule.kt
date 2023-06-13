@@ -12,6 +12,6 @@ class LogCollectorModule : KAbstractModule() {
     bind<LogCollector>().to<RealLogCollector>()
     bind<LogCollectorService>().to<RealLogCollector>()
     bind<WispQueuedLogCollector>().toProvider(Provider { WispQueuedLogCollector() })
-    install(ServiceModule<LogCollectorService>().dependsOn<ReadyService>())
+    install(ServiceModule<LogCollectorService>().enhancedBy<ReadyService>())
   }
 }
