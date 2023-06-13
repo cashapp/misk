@@ -56,10 +56,10 @@ class ServiceManagerModule : KAbstractModule() {
       builder.addService(entry.key, injector.getProvider(entry.key))
     }
     for (edge in dependencies) {
-      builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
+      builder.addDependency(service = edge.dependent, dependency = edge.dependsOn)
     }
     for (edge in enhancements) {
-      builder.enhanceService(toBeEnhanced = edge.toBeEnhanced, enhancement = edge.enhancement)
+      builder.enhanceService(service = edge.toBeEnhanced, enhancement = edge.enhancement)
     }
 
     // Confirm all services have been registered as singleton. If they aren't singletons,

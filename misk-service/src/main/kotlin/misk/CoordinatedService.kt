@@ -39,10 +39,10 @@ internal class CoordinatedService(
       }
   }
 
-  /** Services that start before this aka enhancements or services who depend on this. */
+  /** Services this starts before aka enhancements or services who depend on this. */
   private val upstreamServices = mutableSetOf<CoordinatedService>()
 
-  /** Services this starts before aka dependencies. */
+  /** Services this starts after aka dependencies. */
   private val downstreamServices = mutableSetOf<CoordinatedService>()
 
   /**
@@ -51,7 +51,10 @@ internal class CoordinatedService(
    * */
   private val innerServiceStarted = AtomicBoolean(false)
 
-  /** Adds [services] as dependents downstream. */
+  /**
+   * Marks [services] as dependencies (downstreamServices) and marks itself as upstream services
+   * on each one.
+   * */
   fun addDependentServices(vararg services: CoordinatedService) {
     // Check that this service and all dependent services are new before modifying the graph.
     this.checkNew()

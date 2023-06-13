@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
 import misk.CoordinatedService.Companion.CycleValidity
-import wisp.logging.getLogger
 import javax.inject.Provider
 
 /**
@@ -34,7 +33,7 @@ internal class ServiceGraphBuilder {
   }
 
   /**
-   * Registers a dependency pair with the service graph. Specifies that the [dependent] service must
+   * Registers a dependency pair in the service graph. Specifies that the [dependent] must
    * start after [dependsOn], and conversely that [dependent] must stop before [dependsOn].
    */
   fun addDependency(dependent: Key<*>, dependsOn: Key<*>) {
@@ -42,17 +41,10 @@ internal class ServiceGraphBuilder {
   }
 
   /**
-   * Adds a [enhancement] to the service [toBeEnhanced]. The service [toBeEnhanced] depends on its
-   * enhancements.
-   *
-   * Service [enhancement]s will be started after the service [toBeEnhanced] is started, but before
-   * any of its dependents can start. Conversely, the dependents of the service [toBeEnhanced] will
-   * be shut down, followed by all of its [enhancement]s, and finally the service [toBeEnhanced]
-   * itself.
-   *
-   * @param toBeEnhanced The identifier for the service to be enhanced by [enhancement].
-   * @param enhancement The identifier for the service that depends on [toBeEnhanced].
-   * @throws IllegalStateException if the enhancement has already been applied to another service.
+   * This is the opposite of addDependency in that we're specifying that [toBeEnhanced] is a
+   * dependency of [enhancement]. The purpose of this is to avoid having to intertwine
+   * dependencies. For example, misk-service has no dependencies on other misk services but
+   * in the service graph ReadyService depends on many things by using enhancements.
    */
   fun enhanceService(toBeEnhanced: Key<*>, enhancement: Key<*>) {
     dependencyMap.put(toBeEnhanced, enhancement)
@@ -107,9 +99,5 @@ internal class ServiceGraphBuilder {
         "$stringBuilder requires $service but no such service was registered with the builder"
       }
     }
-  }
-
-  companion object {
-    private val logger = getLogger<ServiceGraphBuilder>()
   }
 }
