@@ -4,15 +4,14 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
 import com.google.common.base.Ticker
 import com.google.inject.Key
-import misk.ServiceManagerModule
+import misk.MiskTestingServiceModule
 import misk.concurrent.FakeTicker
 import misk.concurrent.Sleeper
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import misk.logging.LogCollectorModule
-import misk.metrics.v2.FakeMetricsModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebServerTestingModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,7 +29,7 @@ class PauseDetectorTest {
 
   @BeforeEach fun setup() {
     // We'll drive the detector from the test thread rather than running a detector thread.
-    assertThat(detector.isRunning()).isFalse()
+    assertThat(detector.isRunning).isFalse()
 
     // Do one cycle to calibrate shortestObservedDeltaTimeNsec
     detector.sleep()
@@ -127,8 +126,8 @@ class PauseDetectorTest {
         .to(Key.get(FakeTicker::class.java, ForPauseDetector::class.java))
 
       // And its dependencies with test fakes
-      install(ServiceManagerModule())
-      install(FakeMetricsModule())
+      install(MiskTestingServiceModule())
+      install(WebServerTestingModule())
 
       // Test support
       install(LogCollectorModule())
