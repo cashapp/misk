@@ -46,5 +46,6 @@ class MiskCommonServiceModule : KAbstractModule() {
     install(JvmManagementFactoryModule())
     // Initialize empty sets for our multibindings.
     newMultibinder<HealthCheck>()
+    install(ServiceModule<ReadyService>())
   }
 }

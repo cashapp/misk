@@ -2,6 +2,14 @@ public abstract interface class misk/DelegatingService : com/google/common/util/
 	public abstract fun getService ()Lcom/google/common/util/concurrent/Service;
 }
 
+public final class misk/ReadyService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/ReadyService$Companion;
+	public fun <init> ()V
+}
+
+public final class misk/ReadyService$Companion {
+}
+
 public final class misk/ServiceManagerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/ServiceManagerModule$Companion;
 	public fun <init> ()V

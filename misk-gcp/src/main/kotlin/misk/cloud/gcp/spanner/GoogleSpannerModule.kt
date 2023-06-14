@@ -8,6 +8,7 @@ import com.google.cloud.spanner.SpannerOptions
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import wisp.logging.getLogger
@@ -23,7 +24,7 @@ class GoogleSpannerModule(
 ) : KAbstractModule() {
   override fun configure() {
     bind<SpannerConfig>().toInstance(spannerConfig)
-    install(ServiceModule<GoogleSpannerService>())
+    install(ServiceModule<GoogleSpannerService>().enhancedBy<ReadyService>())
   }
 
   @Provides
