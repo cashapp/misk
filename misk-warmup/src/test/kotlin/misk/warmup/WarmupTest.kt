@@ -45,6 +45,8 @@ internal class WarmupTest {
     )
 
     assertThat(logCollector.takeMessage(minLevel = Level.INFO))
+      .isEqualTo("Starting ready service")
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
       .isEqualTo("Running warmup tasks: [LoggingWarmupTask]")
     assertThat(logCollector.takeMessage(minLevel = Level.INFO))
       .startsWith("Warmup task LoggingWarmupTask completed")
@@ -65,6 +67,8 @@ internal class WarmupTest {
       "LoggingService shutDown",
     )
 
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
+      .isEqualTo("Starting ready service")
     assertThat(logCollector.takeMessage(minLevel = Level.INFO))
       .isEqualTo("Running warmup tasks: [ThrowingWarmupTask]")
     assertThat(logCollector.takeMessage(minLevel = Level.ERROR))

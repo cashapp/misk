@@ -10,9 +10,9 @@ plugins {
 
 dependencies {
   api(Dependencies.guice)
+  api(Dependencies.javaxInject)
   api(project(":misk-inject"))
   implementation(Dependencies.guava)
-  implementation(Dependencies.javaxInject)
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.wispLogging)

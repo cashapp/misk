@@ -1,5 +1,6 @@
 package misk.clustering.kubernetes
 
+import misk.ReadyService
 import misk.ServiceModule
 import misk.clustering.Cluster
 import misk.clustering.ClusterService
@@ -17,6 +18,7 @@ class KubernetesClusterModule(private val config: KubernetesConfig) : KAbstractM
     install(
       ServiceModule<KubernetesClusterWatcher>()
         .dependsOn<ClusterService>()
+        .enhancedBy<ReadyService>()
     )
     install(ServiceModule<ClusterService>())
   }
