@@ -122,7 +122,6 @@ subprojects {
       // Enforce misk-bom -- it should take priority over external BOMs.
       add("api", enforcedPlatform(project(":misk-bom")))
       add("api", platform(Dependencies.grpcBom))
-      add("api", platform(Dependencies.guava))
       add("api", platform(Dependencies.jacksonBom))
       add("api", platform(Dependencies.jerseyBom))
       add("api", platform(Dependencies.jettyBom))
