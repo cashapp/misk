@@ -22,12 +22,12 @@ internal class CoordinatedService(
 
             override fun running() {
               outerService.notifyStarted()
-              downstreamServices.forEach { it.startIfReady() }
+              dependencies.forEach { it.startIfReady() }
             }
 
             override fun terminated(from: State) {
               outerService.notifyStopped()
-              upstreamServices.forEach { it.stopIfReady() }
+              directDependsOn.forEach { it.stopIfReady() }
             }
 
             override fun failed(from: State, failure: Throwable) {
@@ -40,10 +40,10 @@ internal class CoordinatedService(
   }
 
   /** Services this starts before aka enhancements or services who depend on this. */
-  private val upstreamServices = mutableSetOf<CoordinatedService>()
+  private val directDependsOn = mutableSetOf<CoordinatedService>()
 
   /** Services this starts after aka dependencies. */
-  private val downstreamServices = mutableSetOf<CoordinatedService>()
+  private val dependencies = mutableSetOf<CoordinatedService>()
 
   /**
    * Used to track internally if this [CoordinatedService] has invoked [startAsync] on the inner
@@ -52,16 +52,15 @@ internal class CoordinatedService(
   private val innerServiceStarted = AtomicBoolean(false)
 
   /**
-   * Marks [services] as dependencies (downstreamServices) and marks itself as upstream services
-   * on each one.
+   * Marks every [services] as a dependency and marks itself as directDependsOn on each service.
    * */
   fun addDependentServices(vararg services: CoordinatedService) {
     // Check that this service and all dependent services are new before modifying the graph.
     this.checkNew()
     for (service in services) {
       service.checkNew()
-      downstreamServices += service
-      service.upstreamServices += this
+      dependencies += service
+      service.directDependsOn += this
     }
   }
 
@@ -74,7 +73,7 @@ internal class CoordinatedService(
   }
 
   private fun startIfReady() {
-    val canStartInner = state() == State.STARTING && upstreamServices.all { it.isRunning }
+    val canStartInner = state() == State.STARTING && directDependsOn.all { it.isRunning }
 
     // startAsync must be called exactly once
     if (canStartInner) {
@@ -91,7 +90,7 @@ internal class CoordinatedService(
 
   private fun stopIfReady() {
     val canStopInner =
-      state() == State.STOPPING && downstreamServices.all { it.isTerminated() }
+      state() == State.STOPPING && dependencies.all { it.isTerminated() }
 
     // stopAsync can be called multiple times, with subsequent calls being ignored
     if (canStopInner) {
@@ -115,7 +114,7 @@ internal class CoordinatedService(
       CycleValidity.CHECKING_FOR_CYCLES -> return mutableListOf(this) // We found a cycle!
       else -> {
         validityMap[this] = CycleValidity.CHECKING_FOR_CYCLES
-        for (dependency in downstreamServices) {
+        for (dependency in dependencies) {
           val cycle = dependency.findCycle(validityMap)
           if (cycle != null) {
             cycle.add(this)
