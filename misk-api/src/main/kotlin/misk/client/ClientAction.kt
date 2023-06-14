@@ -17,7 +17,7 @@ data class ClientAction(
   /** The return type fo the action */
   val returnType: KType
 ) {
-  internal constructor(clientName: String, method: KFunction<*>) :
+  constructor(clientName: String, method: KFunction<*>) :
     this(
       "$clientName.${method.name}",
       method,
