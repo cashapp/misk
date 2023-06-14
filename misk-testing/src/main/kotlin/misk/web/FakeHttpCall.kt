@@ -25,7 +25,7 @@ data class FakeHttpCall(
   var responseBody: BufferedSink? = Buffer(),
   var webSocket: WebSocket? = null,
   var webSocketListener: WebSocketListener? = null,
-  override var cookies: List<Cookie> = listOf(),
+  //override var cookies: List<Cookie> = listOf(),
 ) : HttpCall {
 
   override val responseHeaders: Headers

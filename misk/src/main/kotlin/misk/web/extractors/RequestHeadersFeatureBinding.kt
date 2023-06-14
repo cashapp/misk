@@ -5,8 +5,10 @@ import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
 import misk.web.PathPattern
+import misk.web.RequestBody
 import misk.web.RequestHeaders
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.findAnnotation
 
 /** Binds parameters annotated [RequestHeaders] to request headers. */
 internal class RequestHeadersFeatureBinding(
@@ -22,7 +24,7 @@ internal class RequestHeadersFeatureBinding(
       pathPattern: PathPattern,
       claimer: Claimer
     ): FeatureBinding? {
-      val parameter = action.parameterAnnotatedOrNull<RequestHeaders>() ?: return null
+      val parameter = action.parameters.firstOrNull { it.findAnnotation<RequestHeaders>() != null } ?: return null
       claimer.claimParameter(parameter)
       return RequestHeadersFeatureBinding(parameter)
     }

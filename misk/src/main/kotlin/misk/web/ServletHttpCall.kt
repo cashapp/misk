@@ -25,7 +25,7 @@ internal data class ServletHttpCall(
   val upstreamResponse: UpstreamResponse,
   var responseBody: BufferedSink? = null,
   var webSocket: WebSocket? = null,
-  override var cookies: List<Cookie> = listOf(),
+  //override var cookies: List<Cookie> = listOf(),
 ) : HttpCall {
   private var _actualStatusCode: Int? = null
 
@@ -134,7 +134,7 @@ internal data class ServletHttpCall(
         requestBody = requestBody,
         responseBody = responseBody,
         webSocket = webSocket,
-        cookies = request.cookies?.toList() ?: listOf(),
+        //cookies = request.cookies?.toList() ?: listOf(),
       )
     }
   }

@@ -14,6 +14,7 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.findAnnotation
 
 /** Binds parameters annotated [RequestBody] to the unmarshalled request body. */
 internal class RequestBodyFeatureBinding(
@@ -55,7 +56,7 @@ internal class RequestBodyFeatureBinding(
       pathPattern: PathPattern,
       claimer: Claimer
     ): FeatureBinding? {
-      val parameter = action.parameterAnnotatedOrNull<RequestBody>() ?: return null
+      val parameter = action.parameters.firstOrNull { it.findAnnotation<RequestBody>() != null } ?: return null
       claimer.claimParameter(parameter)
       claimer.claimRequestBody()
       return RequestBodyFeatureBinding(parameter, unmarshallerFactories)

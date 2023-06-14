@@ -8,6 +8,7 @@ import misk.web.FormValue
 import misk.web.PathPattern
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.findAnnotation
 
 /** Binds parameters annotated [FormValue] to the request body using form encoding. */
 internal class FormValueFeatureBinding<T : Any>(
@@ -26,7 +27,7 @@ internal class FormValueFeatureBinding<T : Any>(
       pathPattern: PathPattern,
       claimer: Claimer
     ): FeatureBinding? {
-      val parameter = action.parameterAnnotatedOrNull<FormValue>() ?: return null
+      val parameter = action.parameters.firstOrNull { it.findAnnotation<FormValue>() != null } ?: return null
       if (parameter.type.classifier !is KClass<*>) return null
 
       val kClass = parameter.type.classifier as KClass<*>
