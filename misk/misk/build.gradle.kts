@@ -82,7 +82,6 @@ dependencies {
   testImplementation(Dependencies.wispLoggingTesting)
   testImplementation(Dependencies.wispTimeTesting)
   testImplementation(project(":misk"))
-  testImplementation(project(":misk-metrics-testing"))
   testImplementation(project(":misk-testing"))
 }
 

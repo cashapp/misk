@@ -3,6 +3,7 @@ package misk.jobqueue.sqs
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
@@ -29,10 +30,12 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
     }
 
-    install(ServiceModule(
-      key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
-      dependsOn = dependsOn
-    ))
+    install(
+      ServiceModule(
+        key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
+        dependsOn = dependsOn
+      ).dependsOn<ReadyService>()
+    )
   }
 
   companion object {
