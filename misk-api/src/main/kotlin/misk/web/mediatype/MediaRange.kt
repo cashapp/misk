@@ -1,6 +1,5 @@
 package misk.web.mediatype
 
-import okhttp3.MediaType
 import java.nio.charset.Charset
 
 /** An RFC-2616 media range */
@@ -34,27 +33,28 @@ data class MediaRange(
     else -> 0
   }
 
-  fun matcher(mediaType: MediaType): Matcher? {
-    val typeMatches = type == mediaType.type || type == WILDCARD || mediaType.type == WILDCARD
-    val subtypeMatches =
-      subtype == mediaType.subtype || subtype == WILDCARD || mediaType.subtype == WILDCARD
-    if (!typeMatches || !subtypeMatches) {
-      return null
-    }
-
-    if (charset == null || mediaType.charset() == null) {
-      // The media type matches, but we can't compare charsets because either the range
-      // or the media type lacks a specified charset
-      return Matcher(this)
-    }
-
-    if (charset != mediaType.charset()) {
-      // Both specify a charset but they don't match, so we don't match
-      return null
-    }
-
-    return Matcher(this, true)
-  }
+  // TODO: juho: Migrate matcher
+//  fun matcher(mediaType: MediaType): Matcher? {
+//    val typeMatches = type == mediaType.type || type == WILDCARD || mediaType.type == WILDCARD
+//    val subtypeMatches =
+//      subtype == mediaType.subtype || subtype == WILDCARD || mediaType.subtype == WILDCARD
+//    if (!typeMatches || !subtypeMatches) {
+//      return null
+//    }
+//
+//    if (charset == null || mediaType.charset() == null) {
+//      // The media type matches, but we can't compare charsets because either the range
+//      // or the media type lacks a specified charset
+//      return Matcher(this)
+//    }
+//
+//    if (charset != mediaType.charset()) {
+//      // Both specify a charset but they don't match, so we don't match
+//      return null
+//    }
+//
+//    return Matcher(this, true)
+//  }
 
   class Matcher(
     val mediaRange: MediaRange,

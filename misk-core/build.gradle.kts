@@ -19,6 +19,7 @@ dependencies {
   api(Dependencies.wispToken)
   api(project(":misk-config"))
   api(project(":misk-inject"))
+  api(project(":misk-api"))
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.wispResourceLoader)

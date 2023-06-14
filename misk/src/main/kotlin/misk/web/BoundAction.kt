@@ -226,8 +226,31 @@ internal class BoundActionMatch(
   responseContentType: MediaType
 ) : RequestMatch(action.pathPattern, acceptedMediaRange, requestCharsetMatch, responseContentType)
 
+  // TODO: juho: Migrate matcher
+  fun matcher(range: MediaRange, mediaType: MediaType): MediaRange.Matcher? {
+    val typeMatches = range.type == mediaType.type || range.type == MediaRange.WILDCARD || mediaType.type == MediaRange.WILDCARD
+    val subtypeMatches =
+      range.subtype == mediaType.subtype || range.subtype == MediaRange.WILDCARD || mediaType.subtype == MediaRange.WILDCARD
+    if (!typeMatches || !subtypeMatches) {
+      return null
+    }
+
+    if (range.charset == null || mediaType.charset() == null) {
+      // The media type matches, but we can't compare charsets because either the range
+      // or the media type lacks a specified charset
+      return MediaRange.Matcher(range)
+    }
+
+    if (range.charset != mediaType.charset()) {
+      // Both specify a charset but they don't match, so we don't match
+      return null
+    }
+
+    return MediaRange.Matcher(range, true)
+  }
+
 private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
-  ranges.mapNotNull { it.matcher(this) }.sorted().firstOrNull()
+  ranges.mapNotNull { matcher(it, this) }.sorted().firstOrNull()
 
 /**
  * Acts as the bridge between network interceptors and application interceptors.
