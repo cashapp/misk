@@ -63,7 +63,7 @@ class AwsSqsJobQueueConfig(
    * Temporary flag to test new shutdown behavior. This flag will eventually be removed and
    * incorporated as the default behavior of the library.
    */
-  val safe_shutdown: Boolean = false,
+  val safe_shutdown: Boolean = true,
 ) : Config
 
 
