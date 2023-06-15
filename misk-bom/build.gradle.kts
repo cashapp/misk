@@ -8,6 +8,7 @@ dependencies {
     project.rootProject.subprojects.forEach { subproject ->
       if (subproject.name != "misk-bom") {
         api(subproject)
+        api(testFixtures(subproject))
       }
     }
   }
