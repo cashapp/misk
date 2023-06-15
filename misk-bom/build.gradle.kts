@@ -1,5 +1,6 @@
 plugins {
   `java-platform`
+  `java-test-fixtures`
   id("com.vanniktech.maven.publish.base")
 }
 
@@ -8,7 +9,7 @@ dependencies {
     project.rootProject.subprojects.forEach { subproject ->
       if (subproject.name != "misk-bom") {
         api(subproject)
-        api(testFixtures(subproject))
+        testFixturesApi(testFixtures(subproject))
       }
     }
   }
