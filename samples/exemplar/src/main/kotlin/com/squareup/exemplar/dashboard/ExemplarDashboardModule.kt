@@ -1,6 +1,8 @@
-package com.squareup.exemplar
+package com.squareup.exemplar.dashboard
 
+import com.squareup.exemplar.dashboard.frontend.FrontendIndexAction
 import misk.inject.KAbstractModule
+import misk.web.WebActionModule
 import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.AdminDashboardModule
 import misk.web.dashboard.DashboardTheme
@@ -11,6 +13,10 @@ import misk.web.metadata.config.ConfigMetadataAction
 
 class ExemplarDashboardModule : KAbstractModule() {
   override fun configure() {
+    // Custom Frontend at /app/
+    install(WebActionModule.create<FrontendIndexAction>())
+
+    // Admin Dashboard Setup
     bind<DashboardTheme>().toInstance(
       DashboardTheme<AdminDashboard>(
         MiskWebTheme(
