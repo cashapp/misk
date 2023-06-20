@@ -119,7 +119,7 @@ Misk-Web powers the Misk Admin Dashboard with modular Typescript + React powered
 [changelog]: http://cashapp.github.io/misk/changelog/
 [misk]: https://cashapp.github.io/misk/
 [miskweb]: https://cashapp.github.io/misk-web/
-[snap]: https://oss.sonatype.org/content/repositories/snapshots/
+[snap]: https://mvnrepository.com/artifact/com.squareup.misk/misk
 
 ## Looking for Wisp?
 
