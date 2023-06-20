@@ -2,6 +2,7 @@ package misk.jdbc
 
 import io.opentracing.Tracer
 import io.prometheus.client.CollectorRegistry
+import misk.ReadyService
 import misk.ServiceModule
 import misk.database.StartDatabaseService
 import misk.healthchecks.HealthCheck
@@ -161,6 +162,7 @@ class JdbcModule @JvmOverloads constructor(
     install(
       ServiceModule<DataSourceService>(qualifier)
         .dependsOn<PingDatabaseService>(qualifier)
+        .enhancedBy<ReadyService>()
     )
     bind(keyOf<Transacter>(qualifier))
       .toProvider(Provider<Transacter> { RealTransacter(dataSourceProvider.get()) })
