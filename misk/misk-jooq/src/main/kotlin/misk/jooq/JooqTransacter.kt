@@ -16,7 +16,7 @@ import wisp.logging.getLogger
 import kotlin.coroutines.coroutineContext
 
 class JooqTransacter(
-  private val dslContext: DSLContext
+  private val dslContext: Lazy<DSLContext>
 ) {
 
   fun <RETURN_TYPE> transaction(
@@ -64,7 +64,7 @@ class JooqTransacter(
   ): RETURN_TYPE {
     var jooqSession: JooqSession? = null
     return try {
-      dslContext.transactionResult { configuration ->
+      dslContext.value.transactionResult { configuration ->
         jooqSession = JooqSession(DSL.using(configuration))
         callback(jooqSession!!).also { jooqSession!!.executePreCommitHooks() }
       }.also {
@@ -81,10 +81,12 @@ class JooqTransacter(
   )
 
   companion object {
-    val log = getLogger<JooqTransacter>()
+    private val log = getLogger<JooqTransacter>()
+
     private val retryJooqExceptionsAlone: RetryPolicy<Throwable> = {
       if (reason is DataAccessException) ContinueRetrying else StopRetrying
     }
+
     val noRetriesOptions: TransacterOptions
       get() = TransacterOptions().copy(maxAttempts = 1)
   }

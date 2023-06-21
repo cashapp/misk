@@ -25,7 +25,6 @@ import org.jooq.conf.Settings
 import org.jooq.impl.DSL
 import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
-import java.lang.IllegalArgumentException
 import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Provider
@@ -54,7 +53,7 @@ class JooqModule(
     )
 
     bindTransacter(qualifier, dataSourceClusterConfig.writer)
-    if(readerQualifier != null && dataSourceClusterConfig.reader != null) {
+    if (readerQualifier != null && dataSourceClusterConfig.reader != null) {
       bindTransacter(readerQualifier, dataSourceClusterConfig.reader!!)
     }
 
@@ -89,7 +88,7 @@ class JooqModule(
       lateinit var clock: Clock
       override fun get(): JooqTransacter {
         return JooqTransacter(
-          dslContext = dslContext(dataSourceServiceProvider.get(), clock, datasourceConfig)
+          dslContext = lazy { dslContext(dataSourceServiceProvider.get(), clock, datasourceConfig) }
         )
       }
     }).asSingleton()
@@ -109,33 +108,36 @@ class JooqModule(
             .withOutput(datasourceConfig.database)
         )
       )
-    return DSL.using(dataSourceService.get(), datasourceConfig.type.toSqlDialect(), settings).apply {
-      configuration().set(
-        DefaultTransactionProvider(
-          configuration().connectionProvider(),
-          false
-        )
-      ).apply {
-        val executeListeners = mutableListOf(
-          DefaultExecuteListenerProvider(AvoidUsingSelectStarListener())
-        )
-        if ("true" == datasourceConfig.show_sql) {
-          executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
-        }
-        set(*executeListeners.toTypedArray())
+    return DSL.using(dataSourceService.get(), datasourceConfig.type.toSqlDialect(), settings)
+      .apply {
+        configuration().set(
+          DefaultTransactionProvider(
+            configuration().connectionProvider(),
+            false
+          )
+        ).apply {
+          val executeListeners = mutableListOf(
+            DefaultExecuteListenerProvider(AvoidUsingSelectStarListener())
+          )
+          if ("true" == datasourceConfig.show_sql) {
+            executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
+          }
+          set(*executeListeners.toTypedArray())
 
-        if(jooqTimestampRecordListenerOptions.install) {
-          set(JooqTimestampRecordListener(
-            clock = clock,
-            createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
-            updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
-          ))
-        }
-      }.apply(jooqConfigExtension)
-    }
+          if (jooqTimestampRecordListenerOptions.install) {
+            set(
+              JooqTimestampRecordListener(
+                clock = clock,
+                createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
+                updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
+              )
+            )
+          }
+        }.apply(jooqConfigExtension)
+      }
   }
 
-  private fun DataSourceType.toSqlDialect() = when(this) {
+  private fun DataSourceType.toSqlDialect() = when (this) {
     DataSourceType.MYSQL -> SQLDialect.MYSQL
     DataSourceType.HSQLDB -> SQLDialect.HSQLDB
     DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
