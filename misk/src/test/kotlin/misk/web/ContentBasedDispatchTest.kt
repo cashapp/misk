@@ -9,6 +9,7 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
+import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -99,15 +100,17 @@ internal class ContentBasedDispatchTest {
 
   @Test
   fun postGrpcExpectResponse() {
-    val responseContent = postHello(
-      grpcMediaType,
-      null,
-      grpcMediaType,
-      "/hello-bytes",
-      "Test".toByteArray().toByteString().toRequestBody()
-    ).source()
+    val body = "Test".toByteArray().toByteString().toRequestBody()
+    val request = newRequest("/hello-bytes", grpcMediaType, body)
+    val response = httpClient.newCall(request)
+      .execute()
+    assertThat(response.code).isEqualTo(200)
+    val responseContent = response.body!!.source()
     val strResp = String(responseContent.readByteString().toByteArray())
     assertThat(strResp).isEqualTo("Test")
+    val trailers = response.trailers()
+    assertThat(trailers.size).isEqualTo(1)
+    assertThat(trailers["grpc-status"]).isEqualTo("0")
   }
 
   @Test
@@ -205,18 +208,16 @@ internal class ContentBasedDispatchTest {
   class PostGrpcReturnResponseBody @Inject constructor() : WebAction {
     @Grpc("/hello-bytes")
     fun hello(@misk.web.RequestBody message: ByteString): Response<ResponseBody> {
-      return Response(message.toResponseBody())
+      return Response(message.toResponseBody(), trailers = Headers.headersOf("grpc-status", "0"))
     }
   }
 
   private fun postHello(
     contentType: MediaType,
     content: String?,
-    acceptedMediaType: MediaType? = null,
-    path: String = "/hello",
-    requestBody: RequestBody = content!!.toRequestBody(contentType)
+    acceptedMediaType: MediaType? = null
   ): okhttp3.ResponseBody {
-    val request = newRequest(path, contentType, requestBody, acceptedMediaType.toString())
+    val request = newRequest("/hello", contentType, content!!.toRequestBody(contentType), acceptedMediaType.toString())
     val response = httpClient.newCall(request)
       .execute()
     assertThat(response.code).isEqualTo(200)
