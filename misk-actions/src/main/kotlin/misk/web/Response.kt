@@ -8,7 +8,8 @@ import okio.BufferedSink
 data class Response<out T>(
   val body: T,
   val headers: Headers = headersOf(),
-  val statusCode: Int = 200
+  val statusCode: Int = 200,
+  val trailers: Headers? = null
 ) {
   override fun toString(): String = "body=$body, statusCode=$statusCode"
 }
