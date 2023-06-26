@@ -58,12 +58,13 @@ public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
 	public fun <init> ()V
-	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;)V
-	public synthetic fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;Z)V
+	public synthetic fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getAws_sqs_job_receiver_policy ()Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
 	public final fun getExternal_queues ()Ljava/util/Map;
 	public final fun getMessage_batch_size ()I
 	public final fun getQueue_attribute_importer_frequency_ms ()J
+	public final fun getSafe_shutdown ()Z
 	public final fun getSqs_sending_connect_timeout_ms ()I
 	public final fun getSqs_sending_request_timeout_ms ()I
 	public final fun getSqs_sending_socket_timeout_ms ()I

@@ -11,6 +11,7 @@ import com.amazonaws.services.sqs.buffered.QueueBufferConfig
 import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ReadyService
 import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
 import misk.concurrent.ExecutorServiceModule
@@ -27,7 +28,6 @@ import misk.tasks.RepeatedTaskQueueConfig
 import misk.tasks.RepeatedTaskQueueFactory
 import wisp.lease.LeaseManager
 import javax.inject.Inject
-import kotlin.reflect.KFunction1
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
 open class AwsSqsJobQueueModule(
@@ -45,7 +45,7 @@ open class AwsSqsJobQueueModule(
     bind<JobQueue>().to<SqsJobQueue>()
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
 
-    install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)))
+    install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)).dependsOn<ReadyService>())
 
     // We use an unbounded thread pool for the number of consumers, as we want to process
     // the messages received as fast a possible.
@@ -84,7 +84,15 @@ open class AwsSqsJobQueueModule(
       .distinct()
       .forEach {
         regionSpecificClientBinderForReceiving.addBinding(it)
-          .toProvider(AmazonSQSProvider(config, it, true, ::configureSyncClient, ::configureAsyncClient))
+          .toProvider(
+            AmazonSQSProvider(
+              config,
+              it,
+              true,
+              ::configureSyncClient,
+              ::configureAsyncClient
+            )
+          )
       }
 
     // Bind the configs for external queues

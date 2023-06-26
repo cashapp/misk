@@ -1,12 +1,3 @@
-public final class misk/aws2/dynamodb/testing/DockerDynamoDb : misk/testing/ExternalDependency {
-	public static final field INSTANCE Lmisk/aws2/dynamodb/testing/DockerDynamoDb;
-	public fun afterEach ()V
-	public fun beforeEach ()V
-	public fun getId ()Ljava/lang/String;
-	public fun shutdown ()V
-	public fun startup ()V
-}
-
 public final class misk/aws2/dynamodb/testing/DockerDynamoDbModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/util/List;)V
 	public fun <init> ([Lmisk/aws2/dynamodb/testing/DynamoDbTable;)V

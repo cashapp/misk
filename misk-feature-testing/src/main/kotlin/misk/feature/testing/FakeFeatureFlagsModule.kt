@@ -23,6 +23,7 @@ import kotlin.reflect.KClass
  * In a given misk service's test setup, there is one [FakeFeatureFlagsModule] installed and many
  * [FakeFeatureFlagsOverrideModule] installed.
  */
+@Deprecated("Replace the dependency on misk-feature-testing with testFixtures(misk-feature)")
 class FakeFeatureFlagsModule(
   private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {

@@ -1,6 +1,12 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
+  `java-test-fixtures`
 }
 
 dependencies {
@@ -31,6 +37,24 @@ dependencies {
   runtimeOnly(Dependencies.openTracingJdbc)
   runtimeOnly(Dependencies.postgresql)
 
+  testFixturesApi(Dependencies.datasourceProxy)
+  testFixturesApi(Dependencies.javaxInject)
+  testFixturesApi(Dependencies.moshi)
+  testFixturesApi(Dependencies.okHttp)
+  testFixturesApi(project(":misk-inject"))
+  testFixturesApi(project(":misk-jdbc"))
+  testFixturesImplementation(Dependencies.guice)
+  testFixturesImplementation(Dependencies.hikariCp)
+  testFixturesImplementation(Dependencies.kotlinLogging)
+  testFixturesImplementation(Dependencies.okio)
+  testFixturesImplementation(Dependencies.wispContainersTesting)
+  testFixturesImplementation(Dependencies.wispDeployment)
+  testFixturesImplementation(Dependencies.wispLogging)
+  testFixturesImplementation(project(":misk"))
+  testFixturesImplementation(project(":misk-core"))
+  testFixturesImplementation(project(":misk-service"))
+  testFixturesRuntimeOnly(Dependencies.hsqldb)
+
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
@@ -39,6 +63,12 @@ dependencies {
   testImplementation(Dependencies.openTracingMock)
   testImplementation(Dependencies.wispContainersTesting)
   testImplementation(project(":misk-jdbc"))
-  testImplementation(project(":misk-jdbc-testing"))
   testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-jdbc")))
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

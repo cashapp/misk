@@ -1,6 +1,11 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
   
   // Needed to generate jooq test db classes
   id("org.flywaydb.flyway") version "9.14.1"
@@ -95,3 +100,9 @@ generateJooq.dependsOn("flywayMigrate")
 // main source set instead of your tests as it is done below.
 sourceSets.getByName("test").java.srcDirs
   .add(File("${project.projectDir}/src/test/generated/kotlin"))
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
+}

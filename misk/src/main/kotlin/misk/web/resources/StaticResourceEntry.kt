@@ -10,10 +10,10 @@ import misk.web.dashboard.ValidWebEntry
  * multibind<StaticResourceEntry>().toInstance(StaticResourceEntry(...))
  * ```
  */
-class StaticResourceEntry(
-  url_path_prefix: String = "/",
+data class StaticResourceEntry(
+  val url_path_prefix: String = "/",
   private val resourcePath: String
-) : ValidWebEntry(url_path_prefix = url_path_prefix) {
+) : ValidWebEntry(valid_url_path_prefix = url_path_prefix) {
 
   fun resourcePath(urlPath: String): String {
     val normalizedResourcePath = if (!resourcePath.endsWith("/")) "$resourcePath/" else resourcePath

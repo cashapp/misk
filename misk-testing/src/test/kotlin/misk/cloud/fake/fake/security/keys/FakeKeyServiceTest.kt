@@ -1,5 +1,6 @@
-package misk.cloud.fake.security.keys
+package misk.cloud.fake.fake.security.keys
 
+import misk.cloud.fake.security.keys.FakeKeyService
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

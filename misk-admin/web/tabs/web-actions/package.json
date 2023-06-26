@@ -22,15 +22,17 @@
     "@misk/common": "0.4.0",
     "@misk/core": "0.4.0",
     "@misk/simpleredux": "0.4.0",
-    "copy-to-clipboard": "^3.1.0"
+    "@types/content-disposition": "^0.5.4",
+    "copy-to-clipboard": "^3.1.0",
+    "js-file-download": "^0.4.12"
   },
   "devDependencies": {
+    "@misk/cli": "0.4.0",
     "@misk/dev": "0.4.0",
-    "@misk/test": "0.4.0",
     "@misk/prettier": "0.4.0",
+    "@misk/test": "0.4.0",
     "@misk/tslint": "0.4.0",
     "tslib": "2.3.0",
-    "@misk/cli": "0.4.0",
     "webpack": "4.43.0",
     "webpack-cli": "3.3.11",
     "webpack-dev-server": "3.11.0"

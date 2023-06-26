@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ReadyService
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
@@ -20,12 +21,12 @@ class CronModule(
 ) : KAbstractModule() {
   override fun configure() {
     install(FakeCronModule(zoneId, threadPoolSize, dependencies))
-    install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class))
+    install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
     install(
       ServiceModule(
         key = CronTask::class.toKey(),
         dependsOn = dependencies,
-      )
+      ).dependsOn<ReadyService>()
     )
   }
 
@@ -50,7 +51,12 @@ class FakeCronModule(
         threadPoolSize
       )
     )
-    install(ServiceModule(key = CronService::class.toKey(), dependsOn = dependencies))
+    install(
+      ServiceModule(
+        key = CronService::class.toKey(),
+        dependsOn = dependencies
+      ).dependsOn<ReadyService>()
+    )
   }
 }
 

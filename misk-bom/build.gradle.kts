@@ -13,14 +13,8 @@ dependencies {
   }
 }
 
-mavenPublishing {
-  pomFromGradleProperties()
-
-  publishing {
-    publications {
-      create<MavenPublication>("maven") {
-        from(components["javaPlatform"])
-      }
-    }
+extensions.configure<PublishingExtension> {
+  publications.create("maven", MavenPublication::class) {
+    from(project.components.getByName("javaPlatform"))
   }
 }

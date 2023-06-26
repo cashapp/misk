@@ -3,6 +3,7 @@ package misk.redis
 import com.google.common.base.Ticker
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.metrics.v2.Metrics
@@ -39,7 +40,7 @@ class RedisModule(
 ) : KAbstractModule() {
   override fun configure() {
     bind<RedisConfig>().toInstance(redisConfig)
-    install(ServiceModule<RedisService>())
+    install(ServiceModule<RedisService>().enhancedBy<ReadyService>())
     requireBinding<Metrics>()
   }
 

@@ -24,6 +24,7 @@ import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
  * `@MiskExternalDependency DockerDynamoDb`. DynamoDB may execute in Docker or in-process, but never
  * both.
  */
+@Deprecated("Replace the dependency on misk-aws2-dynamodb-testing with testFixtures(misk-aws2-dynamodb)")
 class InProcessDynamoDbModule(
   private val tables: List<DynamoDbTable>
 ) : KAbstractModule() {

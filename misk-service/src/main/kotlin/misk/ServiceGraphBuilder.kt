@@ -14,7 +14,6 @@ import javax.inject.Provider
 internal class ServiceGraphBuilder {
   private var serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
-  private val enhancementMap = mutableMapOf<Key<*>, Key<*>>()
 
   /**
    * Registers a [service] with this [ServiceGraphBuilder]
@@ -23,7 +22,7 @@ internal class ServiceGraphBuilder {
    * Keys must be unique. If a key is reused, then the original key-service pair will be replaced.
    */
   fun addService(key: Key<*>, service: Service) {
-    addService(key, Provider<Service> { service })
+    addService(key) { service }
   }
 
   fun addService(key: Key<*>, serviceProvider: Provider<out Service>) {
@@ -34,7 +33,7 @@ internal class ServiceGraphBuilder {
   }
 
   /**
-   * Registers a dependency pair with the service graph. Specifies that the [dependent] service must
+   * Registers a dependency pair in the service graph. Specifies that the [dependent] must
    * start after [dependsOn], and conversely that [dependent] must stop before [dependsOn].
    */
   fun addDependency(dependent: Key<*>, dependsOn: Key<*>) {
@@ -42,23 +41,13 @@ internal class ServiceGraphBuilder {
   }
 
   /**
-   * Adds a [enhancement] to the service [toBeEnhanced]. The service [toBeEnhanced] depends on its
-   * enhancements.
-   *
-   * Service [enhancement]s will be started after the service [toBeEnhanced] is started, but before
-   * any of its dependents can start. Conversely, the dependents of the service [toBeEnhanced] will
-   * be shut down, followed by all of its [enhancement]s, and finally the service [toBeEnhanced]
-   * itself.
-   *
-   * @param toBeEnhanced The identifier for the service to be enhanced by [enhancement].
-   * @param enhancement The identifier for the service that depends on [toBeEnhanced].
-   * @throws IllegalStateException if the enhancement has already been applied to another service.
+   * This is the opposite of addDependency in that we're specifying that [toBeEnhanced] is a
+   * dependency of [enhancement]. The purpose of this is to avoid having to intertwine
+   * dependencies. For example, misk-service has no dependencies on other misk services but
+   * in the service graph ReadyService depends on many things by using enhancements.
    */
   fun enhanceService(toBeEnhanced: Key<*>, enhancement: Key<*>) {
-    check(enhancementMap[enhancement] == null) {
-      "Enhancement $enhancement cannot be applied more than once"
-    }
-    enhancementMap[enhancement] = toBeEnhanced
+    dependencyMap.put(toBeEnhanced, enhancement)
   }
 
   /**
@@ -78,14 +67,6 @@ internal class ServiceGraphBuilder {
    * maps.
    */
   private fun linkDependencies() {
-    // First apply enhancements.
-    for ((enhancementKey, serviceKey) in enhancementMap) {
-      val service = serviceMap[serviceKey]!!
-      val enhancement = serviceMap[enhancementKey]!!
-      service.addEnhancements(enhancement)
-    }
-
-    // Now handle regular dependencies.
     for ((key, service) in serviceMap) {
       val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
       service.addDependentServices(*dependencies.toTypedArray())

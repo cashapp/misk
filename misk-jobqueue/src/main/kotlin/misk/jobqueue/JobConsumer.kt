@@ -8,6 +8,7 @@ interface JobConsumer {
    * handler. A service may only have one subscription outstanding per queue
    */
   fun subscribe(queueName: QueueName, handler: JobHandler)
+  fun unsubscribe(queueName: QueueName)
 }
 
 inline fun JobConsumer.subscribe(queueName: QueueName, crossinline handler: (Job) -> Unit) =
