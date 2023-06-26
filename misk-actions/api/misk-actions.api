@@ -142,11 +142,11 @@ public abstract interface annotation class misk/web/Get : java/lang/annotation/A
 	public abstract fun pathPattern ()Ljava/lang/String;
 }
 
-public abstract interface annotation class misk/web/Patch : java/lang/annotation/Annotation {
+public abstract interface annotation class misk/web/Grpc : java/lang/annotation/Annotation {
 	public abstract fun pathPattern ()Ljava/lang/String;
 }
 
-public abstract interface annotation class misk/web/Grpc : java/lang/annotation/Annotation {
+public abstract interface annotation class misk/web/Patch : java/lang/annotation/Annotation {
 	public abstract fun pathPattern ()Ljava/lang/String;
 }
 
