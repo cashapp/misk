@@ -47,12 +47,12 @@ class FrontendIndexAction @Inject constructor(
   @AppName private val appName: String,
   private val deployment: Deployment,
 ) : WebAction {
-  @Get("/{suffix:.*}")
+  @Get("/")
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess
-  fun get(@PathParam suffix: String?): String {
+  fun get(): String {
     return buildHtml {
-      HtmlLayout("/app", "$appName frontend", deployment.isLocalDevelopment) {
+      HtmlLayout(appRoot = "/app", title = "$appName frontend", playCdn = false, appCssPath = "/static/cache/tailwind.exemplar.min.css") {
         turbo_frame(id = "tab") {
           div("bg-white") {
 //            +"""<!--

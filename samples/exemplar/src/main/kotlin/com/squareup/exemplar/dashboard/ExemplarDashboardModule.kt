@@ -10,9 +10,21 @@ import misk.web.dashboard.EnvironmentToColorLookup
 import misk.web.dashboard.MiskWebColor
 import misk.web.dashboard.MiskWebTheme
 import misk.web.metadata.config.ConfigMetadataAction
+import misk.web.resources.StaticResourceAction
+import misk.web.resources.StaticResourceEntry
 
 class ExemplarDashboardModule : KAbstractModule() {
   override fun configure() {
+    // Favicon.ico and any other shared static assets available at /static/*
+    multibind<StaticResourceEntry>()
+      .toInstance(
+        StaticResourceEntry(
+          url_path_prefix = "/static/",
+          resourcePath = "classpath:/web/static/"
+        )
+      )
+    install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = "/static/"))
+
     // Custom Frontend at /app/
     install(WebActionModule.create<FrontendIndexAction>())
 

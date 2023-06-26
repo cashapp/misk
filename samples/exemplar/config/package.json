@@ -4,7 +4,7 @@
   "description": "Tailwind CSS configuration for Misk",
   "main": "tailwind.config.js",
   "scripts": {
-    "build": "tailwindcss -i ./input.css -o ../src/main/resources/web/static/cache/tailwind.misk.min.css -m"
+    "build": "tailwindcss -i ./input.css -o ../src/main/resources/web/static/cache/tailwind.exemplar.min.css -m"
   },
   "author": "",
   "license": "ISC",

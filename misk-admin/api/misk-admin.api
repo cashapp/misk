@@ -340,6 +340,11 @@ public final class misk/web/dashboard/EnvironmentToColorLookup {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/web/dashboard/HtmlLayoutKt {
+	public static final fun HtmlLayout (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun HtmlLayout$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
 public final class misk/web/dashboard/MiskWebColor : java/lang/Enum {
 	public static final field ACCENT Lmisk/web/dashboard/MiskWebColor;
 	public static final field BLUE Lmisk/web/dashboard/MiskWebColor;

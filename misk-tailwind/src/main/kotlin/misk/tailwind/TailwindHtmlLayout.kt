@@ -10,7 +10,7 @@ import kotlinx.html.script
 import kotlinx.html.title
 import misk.turbo.addHotwireHeadImports
 
-fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: Boolean, headBlock: TagConsumer<*>.() -> Unit = {}, bodyBlock: TagConsumer<*>.() -> Unit) {
+fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: Boolean, appCssPath: String? = null, headBlock: TagConsumer<*>.() -> Unit = {}, bodyBlock: TagConsumer<*>.() -> Unit) {
   html {
     attributes["class"] = "h-full bg-white"
     head {
@@ -30,6 +30,12 @@ fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: B
         // Play CDN is useful for development
         script {
           src = "https://cdn.tailwindcss.com"
+        }
+      }
+      appCssPath?.let { path ->
+        link {
+          href = path
+          rel = "stylesheet"
         }
       }
       link {
