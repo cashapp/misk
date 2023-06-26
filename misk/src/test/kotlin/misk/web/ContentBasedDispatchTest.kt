@@ -208,7 +208,7 @@ internal class ContentBasedDispatchTest {
   class PostGrpcReturnResponseBody @Inject constructor() : WebAction {
     @Grpc("/hello-bytes")
     fun hello(@misk.web.RequestBody message: ByteString): Response<ResponseBody> {
-      return Response(message.toResponseBody(), trailers = Headers.headersOf("grpc-status", "0"))
+      return Response(message.toResponseBody(), trailers = { Headers.headersOf("grpc-status", "0") })
     }
   }
 
