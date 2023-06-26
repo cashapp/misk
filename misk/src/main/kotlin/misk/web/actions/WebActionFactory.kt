@@ -13,6 +13,7 @@ import misk.web.ConnectWebSocket
 import misk.web.Delete
 import misk.web.DispatchMechanism
 import misk.web.Get
+import misk.web.Grpc
 import misk.web.NetworkInterceptor
 import misk.web.Patch
 import misk.web.PathPattern
@@ -64,6 +65,7 @@ internal class WebActionFactory @Inject constructor(
         it.findAnnotationWithOverrides<Post>() != null ||
         it.findAnnotationWithOverrides<Patch>() != null ||
         it.findAnnotationWithOverrides<Put>() != null ||
+        it.findAnnotationWithOverrides<Grpc>() != null ||
         it.findAnnotationWithOverrides<Delete>() != null ||
         it.findAnnotationWithOverrides<ConnectWebSocket>() != null ||
         it.findAnnotationWithOverrides<WireRpc>() != null
@@ -94,6 +96,7 @@ internal class WebActionFactory @Inject constructor(
       val patch = actionFunction.findAnnotationWithOverrides<Patch>()
       val put = actionFunction.findAnnotationWithOverrides<Put>()
       val delete = actionFunction.findAnnotationWithOverrides<Delete>()
+      val webActionGrpc = actionFunction.findAnnotationWithOverrides<Grpc>()
       val connectWebSocket = actionFunction.findAnnotationWithOverrides<ConnectWebSocket>()
       val grpc = actionFunction.findAnnotationWithOverrides<WireRpc>()
 
@@ -125,6 +128,12 @@ internal class WebActionFactory @Inject constructor(
         collectBoundActions(
           result, provider, actionFunction,
           effectivePrefix + delete.pathPattern, DispatchMechanism.DELETE
+        )
+      }
+      if (webActionGrpc != null) {
+        collectBoundActions(
+          result, provider, actionFunction,
+          effectivePrefix + webActionGrpc.pathPattern, DispatchMechanism.GRPC
         )
       }
       if (connectWebSocket != null) {
