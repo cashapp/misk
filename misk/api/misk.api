@@ -1343,6 +1343,7 @@ public final class misk/web/ResponseExtensionsKt {
 	public static final fun readUtf8 (Lmisk/web/Response;)Ljava/lang/String;
 	public static final fun toMisk (Lokhttp3/Response;)Lmisk/web/Response;
 	public static final fun toResponseBody (Ljava/lang/String;)Lmisk/web/ResponseBody;
+	public static final fun toResponseBody (Lokio/ByteString;)Lmisk/web/ResponseBody;
 }
 
 public abstract class misk/web/SocketAddress {

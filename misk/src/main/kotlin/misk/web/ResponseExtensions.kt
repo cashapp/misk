@@ -2,12 +2,22 @@ package misk.web
 
 import okio.Buffer
 import okio.BufferedSink
+import okio.ByteString
 
 /** Returns a [ResponseBody] that writes this out as UTF-8. */
 fun String.toResponseBody(): ResponseBody {
   return object : ResponseBody {
     override fun writeTo(sink: BufferedSink) {
       sink.writeUtf8(this@toResponseBody)
+    }
+  }
+}
+
+/** Returns a [ResponseBody] that writes this out as bytestring. */
+fun ByteString.toResponseBody(): ResponseBody {
+  return object : ResponseBody {
+    override fun writeTo(sink: BufferedSink) {
+      sink.write(this@toResponseBody)
     }
   }
 }
