@@ -10,6 +10,9 @@ annotation class Post(val pathPattern: String)
 annotation class Put(val pathPattern: String)
 
 @Target(AnnotationTarget.FUNCTION)
+annotation class Grpc(val pathPattern: String)
+
+@Target(AnnotationTarget.FUNCTION)
 annotation class Delete(val pathPattern: String)
 
 @Target(AnnotationTarget.FUNCTION)
