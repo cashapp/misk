@@ -81,6 +81,9 @@ class FakeStrongFeatureFlags : StrongFeatureFlags {
     ): FakeStrongFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
     private fun <T : Any> getAny(flag: FeatureFlag<T>): T {
+        // Run standard validations against the feature
+        FeatureFlagValidation.checkValidKey(flag.feature, flag.key)
+
         val featureConfig = getFeatureConfig(flag.javaClass)
         return featureConfig.matchers.lastOrNull() { it.condition(flag) }?.value
             ?: error("no flag match found for $flag")
