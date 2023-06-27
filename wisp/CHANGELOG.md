@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.4.8 *(2023-06-28)*
+----------------------------
+
+* Add key validation for strong feature flags
+
+
 Version 1.4.7 *(2023-06-09)*
 ----------------------------
 
