@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
     if (httpClientsConfig.logRequests) {
       val outgoingRequest = result.request
-      logger.info { "Request: ${outgoingRequest.url}, headers=${headers(outgoingRequest)}" }
+      logger.info { "Outgoing request: ${outgoingRequest.url}, headers=${headers(outgoingRequest)}" }
     }
 
     return result
