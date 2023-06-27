@@ -14,7 +14,8 @@ data class HttpClientsConfig(
   @JsonAlias("hosts")
   // Need to retain ordering, hence LinkedHashMap
   val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
-  val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
+  val endpoints: Map<String, HttpClientEndpointConfig> = mapOf(),
+  val logRequests: Boolean = false,
 ) : Config {
   init {
     validatePatterns()
