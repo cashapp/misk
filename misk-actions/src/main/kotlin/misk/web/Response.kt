@@ -11,6 +11,13 @@ data class Response<out T>(
   val statusCode: Int = 200,
   val trailers: () -> Headers? = { null }
 ) {
+
+  constructor(body: T, headers: Headers = headersOf(), statusCode: Int = 200) : this(
+    body,
+    headers,
+    statusCode,
+    { null }
+  )
   override fun toString(): String = "body=$body, statusCode=$statusCode"
 }
 
