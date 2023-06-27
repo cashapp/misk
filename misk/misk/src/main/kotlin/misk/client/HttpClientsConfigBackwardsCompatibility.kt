@@ -40,7 +40,8 @@ data class BackwardsCompatibleClientsConfig(
 
   // New fields
   @JsonAlias("hosts")
-  val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf()
+  val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
+  val logRequests: Boolean = false,
 )
 
 class BackwardsCompatibleClientsConfigConverter :
