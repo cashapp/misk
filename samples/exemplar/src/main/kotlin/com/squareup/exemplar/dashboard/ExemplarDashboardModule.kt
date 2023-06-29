@@ -1,6 +1,8 @@
 package com.squareup.exemplar.dashboard
 
-import com.squareup.exemplar.dashboard.frontend.FrontendIndexAction
+import com.squareup.exemplar.dashboard.frontend.EcommerceLandingPage
+import com.squareup.exemplar.dashboard.frontend.IndexPage
+import com.squareup.exemplar.dashboard.frontend.SimplePage
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.dashboard.AdminDashboard
@@ -26,7 +28,9 @@ class ExemplarDashboardModule : KAbstractModule() {
     install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = "/static/"))
 
     // Custom Frontend at /app/
-    install(WebActionModule.create<FrontendIndexAction>())
+    install(WebActionModule.create<EcommerceLandingPage>())
+    install(WebActionModule.create<SimplePage>())
+    install(WebActionModule.create<IndexPage>())
 
     // Admin Dashboard Setup
     bind<DashboardTheme>().toInstance(

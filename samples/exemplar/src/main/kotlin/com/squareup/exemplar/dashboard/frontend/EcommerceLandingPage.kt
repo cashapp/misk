@@ -28,7 +28,6 @@ import misk.config.AppName
 import misk.turbo.buildHtml
 import misk.turbo.turbo_frame
 import misk.web.Get
-import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
@@ -43,16 +42,16 @@ import javax.inject.Singleton
  * https://tailwindui.com/components/ecommerce/page-examples/storefront-pages
  */
 @Singleton
-class FrontendIndexAction @Inject constructor(
+class EcommerceLandingPage @Inject constructor(
   @AppName private val appName: String,
   private val deployment: Deployment,
 ) : WebAction {
-  @Get("/")
+  @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess
   fun get(): String {
     return buildHtml {
-      HtmlLayout(appRoot = "/app", title = "$appName frontend", playCdn = false, appCssPath = "/static/cache/tailwind.exemplar.min.css") {
+      HtmlLayout(appRoot = "/app", title = "$appName frontend", playCdn = deployment.isLocalDevelopment, appCssPath = "/static/cache/tailwind.exemplar.min.css") {
         turbo_frame(id = "tab") {
           div("bg-white") {
 //            +"""<!--
@@ -623,5 +622,10 @@ class FrontendIndexAction @Inject constructor(
         }
       }
     }
+  }
+
+
+  companion object {
+    const val PATH = "/ui/example/ecommerce-landing-page"
   }
 }

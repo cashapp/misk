@@ -83,7 +83,6 @@ fun TagConsumer<*>.Navbar(
                   type = ButtonType.button
                   attributes["data-action"] = "toggle#toggle"
                   span("sr-only") { +"""Close sidebar""" }
-                  // TODO add to Heroicons
                   unsafe {
                     raw(
                       """
@@ -135,7 +134,6 @@ fun TagConsumer<*>.Navbar(
             attributes["data-action"] = "toggle#toggle"
             type = ButtonType.button
             span("sr-only") { +"""Open sidebar""" }
-            // TODO add to Heroicons
             unsafe {
               raw(
                 """
