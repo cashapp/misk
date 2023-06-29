@@ -1,4 +1,4 @@
-package misk.slack
+package misk.`slack-webhooks`
 
 import wisp.logging.getLogger
 import javax.inject.Inject

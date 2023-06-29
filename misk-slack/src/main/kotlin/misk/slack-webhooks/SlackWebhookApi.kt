@@ -1,4 +1,4 @@
-package misk.slack
+package misk.`slack-webhooks`
 
 import com.squareup.moshi.JsonClass
 import retrofit2.Call

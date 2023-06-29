@@ -1,4 +1,4 @@
-package misk.slack
+package misk.`slack-webhooks`
 
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi

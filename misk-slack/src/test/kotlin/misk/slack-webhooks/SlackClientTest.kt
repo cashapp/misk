@@ -1,4 +1,4 @@
-package misk.slack
+package misk.`slack-webhooks`
 
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
