@@ -4,6 +4,10 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
+import misk.slack.SlackClient
+import misk.slack.SlackConfig
+import misk.slack.SlackModule
+import misk.slack.SlackWebhookResponse
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okhttp3.mockwebserver.MockResponse

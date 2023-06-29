@@ -1,4 +1,4 @@
-package slack
+package `slack-api`
 
 interface SlackClient {
   fun postMessage(

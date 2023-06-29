@@ -1,4 +1,4 @@
-package misk.`slack-webhooks`
+package misk.slack
 
 import javax.inject.Inject
 

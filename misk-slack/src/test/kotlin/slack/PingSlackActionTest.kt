@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import `slack-api`.SlackApi
+import `slack-api`.SlackClientInterceptor
+import `slack-api`.SlackConfig
 
 class PingSlackActionTest {
   private val server = MockWebServer()

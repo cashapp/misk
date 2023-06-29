@@ -1,11 +1,11 @@
-package slack.slashcommands
+package `slack-api`.slashcommands
 
-import slack.BlockJson
-import slack.PostMessageJson
-import slack.SlackApi
-import slack.SlashCommandJson
-import slack.TextJson
-import slack.checkSuccessful
+import `slack-api`.BlockJson
+import `slack-api`.PostMessageJson
+import `slack-api`.SlackApi
+import `slack-api`.SlashCommandJson
+import `slack-api`.TextJson
+import `slack-api`.checkSuccessful
 
 abstract class SlashCommandHandler constructor(
   open val slackApi: SlackApi

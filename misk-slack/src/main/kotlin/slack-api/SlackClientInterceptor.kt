@@ -1,4 +1,4 @@
-package slack
+package `slack-api`
 
 import javax.inject.Inject
 import javax.inject.Singleton

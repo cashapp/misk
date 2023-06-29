@@ -1,6 +1,6 @@
 @file:Suppress("PropertyName") // We use snake_case to match Slack's JSON.
 
-package slack
+package `slack-api`
 
 /**
  * Message posted to /api/chat.postMessage

@@ -1,4 +1,4 @@
-package slack
+package `slack-api`
 
 import retrofit2.Call
 import retrofit2.Response

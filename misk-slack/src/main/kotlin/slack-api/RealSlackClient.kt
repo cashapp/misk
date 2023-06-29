@@ -1,11 +1,11 @@
-package slack
+package `slack-api`
 
 import retrofit2.Response
 import java.io.IOException
 import java.io.UncheckedIOException
 import javax.inject.Inject
 
-class FakeSlackClient @Inject constructor(
+class RealSlackClient @Inject constructor(
   private val slackApi: SlackApi
 ) : SlackClient {
   override fun postMessage(request: PostMessageJson) : PostMessageResponseJson {
@@ -24,3 +24,4 @@ class FakeSlackClient @Inject constructor(
     }
   }
 }
+

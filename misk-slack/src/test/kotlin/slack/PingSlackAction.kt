@@ -11,6 +11,12 @@ import misk.web.ResponseBody
 import misk.web.actions.WebAction
 import misk.web.toResponseBody
 import okhttp3.Headers
+import `slack-api`.BlockJson
+import `slack-api`.PostMessageJson
+import `slack-api`.SlackApi
+import `slack-api`.TextJson
+import `slack-api`.buildMrkdwn
+import `slack-api`.checkSuccessful
 
 @Singleton
 class PingSlackAction @Inject constructor(
@@ -26,7 +32,8 @@ class PingSlackAction @Inject constructor(
     val postMessageJson = PostMessageJson(
       channel = "test",
       response_type = "in_channel",
-      blocks = listOf(BlockJson(
+      blocks = listOf(
+        BlockJson(
         type = "section",
         text = TextJson(
           type = "mrkdwn",

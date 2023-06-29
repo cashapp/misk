@@ -1,4 +1,4 @@
-package slack
+package `slack-api`
 
 /**
  * Mrkdwn is Slack's weird thing that isn't Markdown. This class attempts to implement proper

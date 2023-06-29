@@ -1,4 +1,4 @@
-package slack
+package `slack-api`
 
 import java.time.Clock
 import javax.inject.Inject
