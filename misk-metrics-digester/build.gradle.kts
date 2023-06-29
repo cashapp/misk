@@ -1,23 +1,24 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
-}
-
-sourceSets {
-  val main by getting {
-    java.srcDir("src/main/kotlin/")
-  }
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
-  implementation(Dependencies.wireGrpcClient)
+  api(Dependencies.okio)
   implementation(Dependencies.wireRuntime)
-  implementation(Dependencies.moshiCore)
-  implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.moshiAdapters)
-  implementation(project(":misk"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinTest)
+  testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.wispTimeTesting)
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

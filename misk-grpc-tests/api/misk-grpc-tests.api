@@ -191,6 +191,7 @@ public abstract interface class routeguide/RouteGuideGetFeatureBlockingServer : 
 
 public final class routeguide/RouteGuideGrpc {
 	public static final field SERVICE_NAME Ljava/lang/String;
+	public static final fun bindService (Lrouteguide/RouteGuideGrpc$AsyncService;)Lio/grpc/ServerServiceDefinition;
 	public static fun getGetFeatureMethod ()Lio/grpc/MethodDescriptor;
 	public static fun getListFeaturesMethod ()Lio/grpc/MethodDescriptor;
 	public static fun getRecordRouteMethod ()Lio/grpc/MethodDescriptor;
@@ -199,6 +200,13 @@ public final class routeguide/RouteGuideGrpc {
 	public static fun newBlockingStub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideBlockingStub;
 	public static fun newFutureStub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideFutureStub;
 	public static fun newStub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideStub;
+}
+
+public abstract interface class routeguide/RouteGuideGrpc$AsyncService {
+	public fun getFeature (Lrouteguide/RouteGuideProto$Point;Lio/grpc/stub/StreamObserver;)V
+	public fun listFeatures (Lrouteguide/RouteGuideProto$Rectangle;Lio/grpc/stub/StreamObserver;)V
+	public fun recordRoute (Lio/grpc/stub/StreamObserver;)Lio/grpc/stub/StreamObserver;
+	public fun routeChat (Lio/grpc/stub/StreamObserver;)Lio/grpc/stub/StreamObserver;
 }
 
 public final class routeguide/RouteGuideGrpc$RouteGuideBlockingStub : io/grpc/stub/AbstractBlockingStub {
@@ -210,13 +218,9 @@ public final class routeguide/RouteGuideGrpc$RouteGuideFutureStub : io/grpc/stub
 	public fun getFeature (Lrouteguide/RouteGuideProto$Point;)Lcom/google/common/util/concurrent/ListenableFuture;
 }
 
-public abstract class routeguide/RouteGuideGrpc$RouteGuideImplBase : io/grpc/BindableService {
+public abstract class routeguide/RouteGuideGrpc$RouteGuideImplBase : io/grpc/BindableService, routeguide/RouteGuideGrpc$AsyncService {
 	public fun <init> ()V
 	public final fun bindService ()Lio/grpc/ServerServiceDefinition;
-	public fun getFeature (Lrouteguide/RouteGuideProto$Point;Lio/grpc/stub/StreamObserver;)V
-	public fun listFeatures (Lrouteguide/RouteGuideProto$Rectangle;Lio/grpc/stub/StreamObserver;)V
-	public fun recordRoute (Lio/grpc/stub/StreamObserver;)Lio/grpc/stub/StreamObserver;
-	public fun routeChat (Lio/grpc/stub/StreamObserver;)Lio/grpc/stub/StreamObserver;
 }
 
 public final class routeguide/RouteGuideGrpc$RouteGuideStub : io/grpc/stub/AbstractAsyncStub {

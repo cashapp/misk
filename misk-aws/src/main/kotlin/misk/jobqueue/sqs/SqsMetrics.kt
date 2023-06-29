@@ -74,6 +74,12 @@ internal class SqsMetrics @Inject internal constructor(metrics: Metrics) {
     listOf("queueName", "QueueName")
   )
 
+  val queueProcessingLag = metrics.histogram(
+    "jobs_sqs_processing_lag",
+    "time it took to receive a job from when it was enqueued",
+    listOf("queueName", "QueueName")
+  )
+
   val sqsApproxNumberOfMessages = metrics.gauge(
     "ApproximateNumberOfMessagesVisible",
     "the approximate number of messages available for retrieval from SQS",

@@ -5,12 +5,8 @@ import com.google.inject.name.Named
 import com.google.inject.name.Names
 import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
-import java.net.SocketTimeoutException
-import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Singleton
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -27,12 +23,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.Callback
-import retrofit2.Invocation
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import java.net.SocketTimeoutException
 import java.net.URL
+import java.time.Duration
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @MiskTest
 internal class ClientMetricsInterceptorTest {

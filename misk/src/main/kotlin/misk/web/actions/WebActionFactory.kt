@@ -13,23 +13,27 @@ import misk.web.ConnectWebSocket
 import misk.web.Delete
 import misk.web.DispatchMechanism
 import misk.web.Get
+import misk.web.Grpc
 import misk.web.NetworkInterceptor
 import misk.web.Patch
 import misk.web.PathPattern
 import misk.web.Post
 import misk.web.Put
 import misk.web.RequestBody
+import misk.web.ResponseContentType
 import misk.web.WebActionBinding
 import misk.web.WebActionSeedDataTransformerFactory
 import misk.web.interceptors.BeforeContentEncoding
 import misk.web.interceptors.ForContentEncoding
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
+import okhttp3.MediaType.Companion.toMediaType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
 
 @Singleton
@@ -61,6 +65,7 @@ internal class WebActionFactory @Inject constructor(
         it.findAnnotationWithOverrides<Post>() != null ||
         it.findAnnotationWithOverrides<Patch>() != null ||
         it.findAnnotationWithOverrides<Put>() != null ||
+        it.findAnnotationWithOverrides<Grpc>() != null ||
         it.findAnnotationWithOverrides<Delete>() != null ||
         it.findAnnotationWithOverrides<ConnectWebSocket>() != null ||
         it.findAnnotationWithOverrides<WireRpc>() != null
@@ -91,6 +96,7 @@ internal class WebActionFactory @Inject constructor(
       val patch = actionFunction.findAnnotationWithOverrides<Patch>()
       val put = actionFunction.findAnnotationWithOverrides<Put>()
       val delete = actionFunction.findAnnotationWithOverrides<Delete>()
+      val webActionGrpc = actionFunction.findAnnotationWithOverrides<Grpc>()
       val connectWebSocket = actionFunction.findAnnotationWithOverrides<ConnectWebSocket>()
       val grpc = actionFunction.findAnnotationWithOverrides<WireRpc>()
 
@@ -124,6 +130,12 @@ internal class WebActionFactory @Inject constructor(
           effectivePrefix + delete.pathPattern, DispatchMechanism.DELETE
         )
       }
+      if (webActionGrpc != null) {
+        collectBoundActions(
+          result, provider, actionFunction,
+          effectivePrefix + webActionGrpc.pathPattern, DispatchMechanism.GRPC
+        )
+      }
       if (connectWebSocket != null) {
         collectBoundActions(
           result, provider, actionFunction,
@@ -148,17 +160,31 @@ internal class WebActionFactory @Inject constructor(
     pathPattern: String,
     dispatchMechanism: DispatchMechanism
   ) {
-    // NB: The response media type may be omitted; in this case only generic return types (String,
-    // ByteString, ResponseBody, etc) are supported
-    val action = function.asAction(dispatchMechanism)
-    result += newBoundAction(provider, pathPattern, action)
+    val responseContentTypes = function.findAnnotation<ResponseContentType>()
+      ?.value
+      ?.toList()
+      // We have to have an element in the list to be able to flatMap over it below.
+      ?: listOf(null)
 
-    // If we can create a synthetic action with a different media type, do it. This means all
-    // protobuf actions are also published as JSON actions.
-    val jsonVariant = transformActionIntoJson(action)
-    if (jsonVariant != null) {
-      result += newBoundAction(provider, pathPattern, jsonVariant)
+    val actions = responseContentTypes.flatMap { responseContentType ->
+      // NB: The response media type may be omitted; in this case only generic return types (String,
+      // ByteString, ResponseBody, etc) are supported
+      val action = function.asAction(dispatchMechanism, responseContentType?.toMediaType())
+
+      // If we can create a synthetic action with a different media type, do it. This means all
+      // protobuf actions are also published as JSON actions.
+      val jsonVariant = transformActionIntoJson(action)
+
+      listOfNotNull(
+        newBoundAction(provider, pathPattern, action),
+        jsonVariant?.let { newBoundAction(provider, pathPattern, jsonVariant) },
+      )
     }
+
+    // Because we create a synthetic JSON action for each protobuf action, we need to dedupe the
+    // actions for the case where a user explicitly annotates an endpoint to service both JSON and
+    // Protobuf, to avoid having the synthetic JSON action and the "real" one from the annotation.
+    result += actions.distinctBy { it.action }
   }
 
   /**

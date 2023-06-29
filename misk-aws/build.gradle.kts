@@ -1,41 +1,60 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
-  implementation(Dependencies.awsS3)
-  implementation(Dependencies.awsSqs)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.loggingApi)
+  api(Dependencies.awsJavaSdkCore)
+  api(Dependencies.awsS3)
+  api(Dependencies.awsSqs)
+  api(Dependencies.guice)
+  api(Dependencies.javaxInject)
+  api(Dependencies.wispAwsEnvironment)
+  api(Dependencies.wispConfig)
+  api(Dependencies.wispLease)
+  api(project(":misk"))
+  api(project(":misk-config"))
+  api(project(":misk-feature"))
+  api(project(":misk-inject"))
+  api(project(":misk-jobqueue"))
+  implementation(Dependencies.kotlinLogging)
+  implementation(Dependencies.moshi)
+  implementation(Dependencies.openTracingApi)
   implementation(Dependencies.openTracingDatadog)
   implementation(Dependencies.prometheusClient)
-  implementation(project(":misk"))
+  implementation(Dependencies.slf4jApi)
+  implementation(Dependencies.tracingDatadog)
+  implementation(Dependencies.wispDeployment)
+  implementation(Dependencies.wispLogging)
+  implementation(Dependencies.wispTracing)
   implementation(project(":misk-core"))
-  implementation(project(":misk-feature"))
   implementation(project(":misk-hibernate"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-jobqueue"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
   implementation(project(":misk-transactional-jobqueue"))
-  api(Dependencies.wispAwsEnvironment)
-  api(Dependencies.wispConfig)
-  api(Dependencies.wispContainersTesting)
-  api(Dependencies.wispLease)
-  api(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.awaitility)
-  testImplementation(Dependencies.dockerCore)
-  testImplementation(Dependencies.dockerTransport)
+  testImplementation(Dependencies.dockerApi)
   testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.kotlinTest)
-  testImplementation(project(":misk-testing"))
-  testImplementation(project(":misk-feature-testing"))
   testImplementation(Dependencies.mockitoCore)
+  testImplementation(Dependencies.wispContainersTesting)
   testImplementation(Dependencies.wispFeatureTesting)
   testImplementation(Dependencies.wispTimeTesting)
+  testImplementation(project(":misk-clustering"))
+  testImplementation(project(":misk-feature-testing"))
+  testImplementation(project(":misk-testing"))
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

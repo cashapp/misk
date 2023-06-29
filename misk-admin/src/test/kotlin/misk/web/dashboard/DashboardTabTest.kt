@@ -9,7 +9,7 @@ internal class DashboardTabTest {
     DashboardTab(
       "good-1-slug-test",
       url_path_prefix = "/a/path/",
-      name = "Name",
+      menuLabel = "Name",
       dashboard_slug = "admin"
     )
   }
@@ -20,7 +20,7 @@ internal class DashboardTabTest {
       DashboardTab(
         "bad slug",
         url_path_prefix = "/a/path/",
-        name = "Name",
+        menuLabel = "Name",
         dashboard_slug = "admin"
       )
     }
@@ -29,15 +29,23 @@ internal class DashboardTabTest {
   @Test
   internal fun tabSlugWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      DashboardTab("BadSlug", url_path_prefix = "/a/path/", name = "Name", dashboard_slug = "admin")
+      DashboardTab(
+        "BadSlug",
+        url_path_prefix = "/a/path/",
+        menuLabel = "Name",
+        dashboard_slug = "admin"
+      )
     }
   }
 
   @Test
   internal fun tabGoodCategory() {
     DashboardTab(
-      slug = "slug", url_path_prefix = "/a/path/", name = "Name",
-      category = "@tea-pot_418", dashboard_slug = "admin"
+      slug = "slug",
+      url_path_prefix = "/a/path/",
+      menuLabel = "Name",
+      menuCategory = "@tea-pot_418",
+      dashboard_slug = "admin"
     )
   }
 
@@ -45,8 +53,11 @@ internal class DashboardTabTest {
   internal fun tabCategoryWithSpace() {
     assertFailsWith<IllegalArgumentException> {
       DashboardTab(
-        slug = "bad slug", url_path_prefix = "/a/path/", name = "Name",
-        category = "bad icon", dashboard_slug = "admin"
+        slug = "bad slug",
+        url_path_prefix = "/a/path/",
+        menuLabel = "Name",
+        menuCategory = "bad icon",
+        dashboard_slug = "admin"
       )
     }
   }
@@ -55,8 +66,11 @@ internal class DashboardTabTest {
   internal fun tabCategoryWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
       DashboardTab(
-        slug = "BadSlug", url_path_prefix = "/a/path/", name = "Name",
-        category = "Bad-Icon", dashboard_slug = "admin"
+        slug = "BadSlug",
+        url_path_prefix = "/a/path/",
+        menuLabel = "Name",
+        menuCategory = "Bad-Icon",
+        dashboard_slug = "admin"
       )
     }
   }
@@ -66,7 +80,7 @@ internal class DashboardTabTest {
     DashboardTab(
       slug = "slug",
       url_path_prefix = "/a/path/",
-      name = "Name",
+      menuLabel = "Name",
       dashboard_slug = "admin"
     )
   }
@@ -77,7 +91,7 @@ internal class DashboardTabTest {
       DashboardTab(
         slug = "slug",
         url_path_prefix = "a/path/",
-        name = "Name",
+        menuLabel = "Name",
         dashboard_slug = "admin"
       )
     }
@@ -89,7 +103,7 @@ internal class DashboardTabTest {
       DashboardTab(
         slug = "slug",
         url_path_prefix = "/a/path",
-        name = "Name",
+        menuLabel = "Name",
         dashboard_slug = "admin"
       )
     }

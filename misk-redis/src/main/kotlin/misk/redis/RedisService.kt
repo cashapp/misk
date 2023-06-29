@@ -19,10 +19,8 @@ class RedisService @Inject internal constructor(
   }
 
   override fun shutDown() {
-    // If the redis client variable was initialized
     if (::redis.isInitialized) {
-      // If the redis client was a real client, close the connection
-      (redis as? RealRedis)?.close()
+      redis.close()
     }
   }
 }

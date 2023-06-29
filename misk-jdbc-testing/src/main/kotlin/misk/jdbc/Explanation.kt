@@ -9,6 +9,7 @@ import java.sql.ResultSet
 /**
  * A MySQL query explanation.
  */
+@Deprecated("Replace the dependency on misk-jdcb-testing with testFixtures(misk-jdbc)")
 internal class Explanation {
   internal var id: BigInteger? = null
   internal var select_type: String? = null

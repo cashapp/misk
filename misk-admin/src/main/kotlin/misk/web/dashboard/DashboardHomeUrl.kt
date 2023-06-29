@@ -9,7 +9,7 @@ import misk.web.dashboard.ValidWebEntry.Companion.slugify
 data class DashboardHomeUrl(
   val dashboard_slug: String,
   val url: String
-) : ValidWebEntry(slug = dashboard_slug, url_path_prefix = url)
+) : ValidWebEntry(valid_slug = dashboard_slug, valid_url_path_prefix = url)
 
 inline fun <reified DA : Annotation> DashboardHomeUrl(
   urlPathPrefix: String

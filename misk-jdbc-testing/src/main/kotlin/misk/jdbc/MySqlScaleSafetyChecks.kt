@@ -11,6 +11,7 @@ import java.util.Properties
 import javax.inject.Singleton
 import javax.sql.DataSource
 
+@Deprecated("Replace the dependency on misk-jdcb-testing with testFixtures(misk-jdbc)")
 @Singleton
 class MySqlScaleSafetyChecks(
   val config: DataSourceConfig,

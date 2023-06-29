@@ -12,6 +12,7 @@ import kotlin.reflect.full.findAnnotation
  * Use [configureTable] to customize the table creation request for testing, such as to configure
  * the secondary indexes required by `ProjectionType.ALL`.
  */
+@Deprecated("Replace the dependency on misk-aws-dynamodb-testing with testFixtures(misk-aws-dynamodb)")
 data class DynamoDbTable(
   val tableClass: KClass<*>,
   val configureTable: (CreateTableRequest) -> CreateTableRequest = { it }

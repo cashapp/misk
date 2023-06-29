@@ -1,6 +1,7 @@
 package misk.client
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import java.net.URL
 import java.time.Duration
@@ -144,5 +145,21 @@ class HttpClientsConfigTest {
           ).withGlobalDefaults()
         )
       )
+  }
+  
+  @Test
+  fun `endpoint settings cannot be given both a URL and envoy config`() {
+    assertThatThrownBy {
+      HttpClientsConfig(
+        endpoints = mapOf(
+          "test" to HttpClientEndpointConfig(
+            url = "http://domain.com",
+            envoy = HttpClientEnvoyConfig("app")
+          )
+        )
+      )
+    }
+      .isInstanceOf(IllegalArgumentException::class.java)
+      .hasMessage("Cannot set both url and envoy configs")
   }
 }

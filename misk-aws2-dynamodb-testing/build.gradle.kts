@@ -1,49 +1,31 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
-  implementation(Dependencies.guice)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.okHttp)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.aws2Dynamodb)
-  implementation(Dependencies.aws2DynamodbEnhanced)
-
-  // tempest uses old log4j
-  implementation(Dependencies.tempest2TestingInternal) {
-    exclude("org.apache.logging.log4j", "log4j-core")
-    exclude("org.apache.logging.log4j", "log4j-api")
-  }
-  // tempest uses old log4j
-  implementation(Dependencies.tempest2TestingJvm) {
-    exclude("org.apache.logging.log4j")
-  }
+  api(Dependencies.aws2Dynamodb)
+  api(Dependencies.aws2DynamodbEnhanced)
+  api(Dependencies.guice)
+  api(Dependencies.javaxInject)
+  api(Dependencies.tempest2TestingInternal)
+  api(project(":misk-aws2-dynamodb"))
+  api(project(":misk-inject"))
+  api(project(":misk-testing"))
+  implementation(Dependencies.tempest2Testing)
   implementation(Dependencies.tempest2TestingDocker)
-  // for tempest...
-  implementation("org.apache.logging.log4j:log4j-core:2.19.0")
-  implementation("org.apache.logging.log4j:log4j-api:2.19.0")
-
-  implementation(project(":misk"))
-  implementation(project(":misk-aws"))
-  implementation(project(":misk-aws2-dynamodb"))
+  implementation(Dependencies.tempest2TestingJvm)
   implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
-  implementation(project(":misk-testing"))
-  api(Dependencies.wispContainersTesting)
-  api(Dependencies.wispLogging)
+}
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.awaitility)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.junitEngine)
-  testImplementation(Dependencies.junitParams)
-
-  testImplementation("org.antlr:antlr4-runtime")  {
-    version {
-      strictly("4.9.3")
-    }
-  }
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

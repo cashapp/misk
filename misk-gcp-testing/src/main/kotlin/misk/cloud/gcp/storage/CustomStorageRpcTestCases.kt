@@ -17,6 +17,7 @@ import java.nio.ByteBuffer
 import kotlin.test.assertFailsWith
 
 /** Test cases covering custom storage RPC implementations, used for testing local and in-memory storage */
+@Deprecated("Replace the dependency on misk-gcp-testing with testFixtures(misk-gcp)")
 internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   lateinit var rpc: T
   lateinit var storage: Storage

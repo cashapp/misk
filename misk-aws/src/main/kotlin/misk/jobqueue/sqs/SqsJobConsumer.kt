@@ -16,14 +16,17 @@ import misk.jobqueue.QueueName
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
-import misk.tracing.traceWithNewRootSpan
 import org.slf4j.MDC
 import wisp.lease.LeaseManager
 import wisp.logging.getLogger
+import wisp.tracing.traceWithNewRootSpan
+import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -41,6 +44,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   private val queues: QueueResolver,
   private val serviceManagerProvider: Provider<ServiceManager>,
   private val tracer: Tracer,
+  private val clock: Clock,
   awsSqsJobQueueConfig: AwsSqsJobQueueConfig
 ) : JobConsumer {
   private val receiverPolicy = awsSqsJobQueueConfig.aws_sqs_job_receiver_policy
@@ -68,8 +72,19 @@ internal class SqsJobConsumer @Inject internal constructor(
     }
   }
 
+  override fun unsubscribe(queueName: QueueName) {
+    subscriptions.get(queueName)?.stop()
+  }
+
   internal fun getReceiver(queueName: QueueName): QueueReceiver {
     return subscriptions[queueName]!!
+  }
+
+  fun shutDown() {
+    receivingThreads.shutdown()
+    handlingThreads.shutdown()
+    // Giving it some time to the handlers to finish.
+    handlingThreads.awaitTermination(10, TimeUnit.SECONDS)
   }
 
   internal inner class QueueReceiver(
@@ -77,8 +92,15 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val handler: JobHandler
   ) {
     private val queue = queues.getForReceiving(queueName)
+    private val shouldKeepRunning = AtomicBoolean(false)
+    fun stop() {
+      shouldKeepRunning.set(false)
+    }
 
     fun run(): Status {
+      if (!shouldKeepRunning.get()) {
+        Status.NO_RESCHEDULE
+      }
       val size = sqsConsumerAllocator.computeSqsConsumersForPod(queue.name, receiverPolicy)
       val futures = List(size) {
         CompletableFuture.supplyAsync({ receive() }, receivingThreads)
@@ -116,6 +138,25 @@ internal class SqsJobConsumer @Inject internal constructor(
       } catch (e: ClientExecutionTimeoutException) {
         log.info("timed out long polling for messages from ${queue.queueName}")
         emptyList<Message>()
+      }
+
+      for(message in messages) {
+        try {
+          val sentTimestamp = message.attributes[SQS_ATTRIBUTE_SENT_TIMESTAMP]!!.toLong()
+          val receiveCount = message.attributes[SQS_ATTRIBUTE_APPROX_RECEIVE_COUNT]!!.toLong()
+
+          if (receiveCount <= 1) {
+            // Calculate miliseconds between received time and when job was sent.
+            val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli()
+            metrics.queueProcessingLag.record(processingLag.toDouble(), queue.queueName, queue.queueName);
+          }
+
+
+        } catch (e: NumberFormatException) {
+          log.warn("Message ${message.messageId} had invalid SentTimestamp format")
+        } catch (e: NullPointerException) {
+          log.warn("Message ${message.messageId} was missing SentTimestamp or ApproximateReceiveCount")
+        }
       }
 
       return messages.map { SqsJob(queue.name, queues, metrics, moshi, it) }
@@ -185,6 +226,8 @@ internal class SqsJobConsumer @Inject internal constructor(
     internal val CONSUMERS_BATCH_SIZE = Feature("jobqueue-consumers-fetch-batch-size")
     private val ORIGINAL_TRACE_ID_TAG = StringTag("original.trace_id")
     private const val SQS_JOB_ID_MDC = "sqs_job_id"
+    private const val SQS_ATTRIBUTE_SENT_TIMESTAMP = "SentTimestamp"
+    private const val SQS_ATTRIBUTE_APPROX_RECEIVE_COUNT = "ApproximateReceiveCount"
   }
 
 }

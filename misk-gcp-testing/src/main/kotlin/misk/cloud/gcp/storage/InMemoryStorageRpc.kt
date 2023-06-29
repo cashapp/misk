@@ -17,6 +17,7 @@ import kotlin.concurrent.write
  * Implementation of [StorageRpc] that keeps all of its data purely in-memory, useful primarily
  * for tests. This implementation is fully thread safe.
  */
+@Deprecated("Replace the dependency on misk-gcp-testing with testFixtures(misk-gcp)")
 class InMemoryStorageRpc : BaseCustomStorageRpc() {
   private val content = mutableMapOf<String, ByteArray>()
   private val metadata = mutableMapOf<String, StorageObject>()

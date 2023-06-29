@@ -9,7 +9,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.RejectedExecutionException
 import kotlin.test.assertFailsWith
 
-@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class RealExecutorServiceFactoryTest {
   @Test fun happyPath() {
     val tracer = MockTracer()

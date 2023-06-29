@@ -2,7 +2,6 @@ package misk.web.jetty
 
 import misk.Action
 import misk.MiskTestingServiceModule
-import wisp.client.UnixDomainSocketFactory
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -19,8 +18,10 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.client.UnixDomainSocketFactory
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
@@ -61,6 +62,16 @@ class WebActionsServletTest {
     assertThat(response.header("ActualSocketName")).isEqualTo(socketName)
   }
 
+  @Test
+  fun testPatch404() {
+    val response = call(
+      Request.Builder()
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/fooasdf/").build())
+        .patch("bar".toRequestBody())
+    )
+    assertThat(response.body?.string()).contains("Nothing found at PATCH", "fooasdf")
+  }
+
   internal class WebActionsServletNetworkInterceptor : NetworkInterceptor {
     override fun intercept(chain: NetworkChain) {
       chain.httpCall.addResponseHeaders(
@@ -68,9 +79,9 @@ class WebActionsServletTest {
           .set(
             "ActualSocketName",
             with(chain.httpCall.linkLayerLocalAddress) {
-              when {
-                this is SocketAddress.Network -> "${this.ipAddress}:${this.port}"
-                this is SocketAddress.Unix -> this.path
+              when (this) {
+                is SocketAddress.Network -> "${this.ipAddress}:${this.port}"
+                is SocketAddress.Unix -> this.path
                 else -> "null"
               }
             }
@@ -112,6 +123,7 @@ class WebActionsServletTest {
         viaUDS -> {
           udsCall(get())
         }
+
         else -> {
           call(get())
         }

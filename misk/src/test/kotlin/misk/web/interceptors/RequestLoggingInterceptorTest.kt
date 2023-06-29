@@ -231,6 +231,20 @@ internal class RequestLoggingInterceptorTest {
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
   }
 
+  @Test
+  fun configOverride() {
+    for (i in 0..10) {
+      assertThat(invoke("/call/configOverride/foo", "caller").isSuccessful).isTrue()
+      val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+      
+      // Even though this endpoint is configured with low rate limiting and body sampling in its annotation,
+      // the RequestLoggingConfig injected will override it to no rate limiting and 1.0 sampling
+      assertThat(messages).containsExactly(
+        "ConfigOverrideAction principal=caller time=100.0 ms code=200 request=[foo] response=echo: foo"
+      )
+    }
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(AccessControlModule())
@@ -239,6 +253,9 @@ internal class RequestLoggingInterceptorTest {
       install(LogCollectorModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(TestActionsModule())
+      multibind<RequestLoggingConfig>().toInstance(
+        RequestLoggingConfig(mapOf("ConfigOverrideAction" to ActionLoggingConfig(0, 0, 1.0, 1.0)))
+      )
     }
   }
 
@@ -250,6 +267,7 @@ internal class RequestLoggingInterceptorTest {
       install(WebActionModule.create<ExceptionThrowingRequestLoggingAction>())
       install(WebActionModule.create<NoRequestLoggingAction>())
       install(WebActionModule.create<RequestLoggingActionWithHeaders>())
+      install(WebActionModule.create<ConfigOverrideAction>())
     }
   }
 }
@@ -322,4 +340,17 @@ internal class RequestLoggingActionWithHeaders @Inject constructor() : WebAction
     if (message == "fail") throw BadRequestException(message = "boom")
     return "echo: $message"
   }
+}
+
+internal class ConfigOverrideAction @Inject constructor() : WebAction {
+  @Get("/call/configOverride/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 1L,
+    errorRatePerSecond = 1L,
+    bodySampling = 0.0,
+    errorBodySampling = 0.0
+  ) // these values overridden by RequestLoggingConfig binding above
+  fun call(@PathParam message: String): String = "echo: $message"
 }

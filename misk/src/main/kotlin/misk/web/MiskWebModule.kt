@@ -6,18 +6,10 @@ import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
-import java.io.IOException
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
-import javax.servlet.http.HttpServletRequest
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
+import misk.ReadyService
 import misk.ServiceModule
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
@@ -33,6 +25,8 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
+import misk.web.concurrencylimits.ConcurrencyLimiterFactory
+import misk.web.concurrencylimits.ConcurrencyLimitsModule
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
@@ -50,7 +44,6 @@ import misk.web.extractors.ResponseBodyFeatureBinding
 import misk.web.extractors.WebSocketFeatureBinding
 import misk.web.extractors.WebSocketListenerFeatureBinding
 import misk.web.interceptors.BeforeContentEncoding
-import misk.web.interceptors.ConcurrencyLimiterFactory
 import misk.web.interceptors.ConcurrencyLimitsInterceptor
 import misk.web.interceptors.ForContentEncoding
 import misk.web.interceptors.GunzipRequestBodyInterceptor
@@ -59,6 +52,7 @@ import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RebalancingInterceptor
 import misk.web.interceptors.RequestBodyLoggingInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
+import misk.web.interceptors.RequestLoggingConfig
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
@@ -89,6 +83,15 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.thread.ThreadPool
+import java.io.IOException
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import javax.servlet.http.HttpServletRequest
 
 class MiskWebModule(
   private val config: WebConfig,
@@ -98,7 +101,12 @@ class MiskWebModule(
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    install(ServiceModule(key = JettyService::class.toKey(), dependsOn = jettyDependsOn))
+    install(
+      ServiceModule(
+        key = JettyService::class.toKey(),
+        dependsOn = jettyDependsOn
+      ).dependsOn<ReadyService>()
+    )
     install(ServiceModule<JettyThreadPoolMetricsCollector>())
     install(ServiceModule<JettyConnectionMetricsCollector>())
 
@@ -163,10 +171,22 @@ class MiskWebModule(
       .to<MetricsInterceptor.Factory>()
 
     newMultibinder<ConcurrencyLimiterFactory>()
-    if (!config.concurrency_limiter_disabled) {
+    if (!config.concurrency_limiter_disabled && config.concurrency_limiter?.disabled != true) {
       // Shed calls when we're degraded.
       multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<ConcurrencyLimitsInterceptor.Factory>()
+
+      // Configure custom concurrency limiting configuration. Use the defaults from the web config
+      // if not set in the limiter config.
+      val concurrencyLimiterConfig = config.concurrency_limiter?.copy(
+        // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints that
+        // receive the majority of traffic (power law, yay!), and those endpoints should _start up_
+        // without triggering the concurrency limiter at the parallelism that we configured Jetty
+        // to support.
+        initial_limit = config.concurrency_limiter.initial_limit
+          ?: (config.jetty_max_thread_pool_size / 2),
+      )
+      concurrencyLimiterConfig?.let { install(ConcurrencyLimitsModule(it)) }
     }
 
     // Traces requests as they work their way through the system.
@@ -178,6 +198,7 @@ class MiskWebModule(
       .to<ExceptionHandlingInterceptor.Factory>()
 
     // Optionally log request and response details
+    newMultibinder<RequestLoggingConfig>()
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
       .to<RequestLoggingInterceptor.Factory>()
 
@@ -256,14 +277,14 @@ class MiskWebModule(
 
   private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>):
     BlockingQueue<Runnable> {
-      return if (config.enable_thread_pool_queue_metrics) {
-        TimedBlockingQueue(
-          config.jetty_max_thread_pool_queue_size
-        ) { d -> metrics.get().recordQueueLatency(d) }
-      } else {
-        ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
-      }
+    return if (config.enable_thread_pool_queue_metrics) {
+      TimedBlockingQueue(
+        config.jetty_max_thread_pool_queue_size
+      ) { d -> metrics.get().recordQueueLatency(d) }
+    } else {
+      ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
     }
+  }
 
   class MiskCallerProvider @Inject constructor(
     private val authenticators: List<MiskCallerAuthenticator>

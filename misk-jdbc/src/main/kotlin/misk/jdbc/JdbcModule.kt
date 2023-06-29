@@ -2,6 +2,7 @@ package misk.jdbc
 
 import io.opentracing.Tracer
 import io.prometheus.client.CollectorRegistry
+import misk.ReadyService
 import misk.ServiceModule
 import misk.database.StartDatabaseService
 import misk.healthchecks.HealthCheck
@@ -28,12 +29,13 @@ import kotlin.reflect.KClass
  * This also registers services to connect to the database ([DataSourceService]) and to verify
  * that the schema is up-to-date ([SchemaMigratorService]).
  */
-class JdbcModule(
+class JdbcModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   config: DataSourceConfig,
   private val readerQualifier: KClass<out Annotation>?,
   readerConfig: DataSourceConfig?,
-  val databasePool: DatabasePool = RealDatabasePool
+  val databasePool: DatabasePool = RealDatabasePool,
+  val installHealthCheck: Boolean = true
 ) : KAbstractModule() {
   val config = config.withDefaults()
   val readerConfig = readerConfig?.withDefaults()
@@ -101,9 +103,12 @@ class JdbcModule(
     install(
       ServiceModule<SchemaMigratorService>(qualifier)
         .dependsOn<DataSourceService>(qualifier)
+        .enhancedBy<ReadyService>()
     )
 
-    multibind<HealthCheck>().to(schemaMigratorServiceKey)
+    if (installHealthCheck) {
+      multibind<HealthCheck>().to(schemaMigratorServiceKey)
+    }
   }
 
   private fun bindDataSource(
@@ -158,6 +163,7 @@ class JdbcModule(
     install(
       ServiceModule<DataSourceService>(qualifier)
         .dependsOn<PingDatabaseService>(qualifier)
+        .enhancedBy<ReadyService>()
     )
     bind(keyOf<Transacter>(qualifier))
       .toProvider(Provider<Transacter> { RealTransacter(dataSourceProvider.get()) })

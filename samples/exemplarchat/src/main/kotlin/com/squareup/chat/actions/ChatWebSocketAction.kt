@@ -1,59 +1,45 @@
 package com.squareup.chat.actions
 
-import misk.eventrouter.EventRouter
-import misk.eventrouter.Listener
-import misk.eventrouter.Subscription
+import misk.redis.Redis
 import misk.web.ConnectWebSocket
 import misk.web.PathParam
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import redis.clients.jedis.JedisPubSub
 import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.concurrent.thread
 
 /**
  * ChatWebSocketAction is a basic chat program which supports multiple chat rooms and their
  * histories through web socket connections.
  */
-class ChatWebSocketAction @Inject constructor() : WebAction {
-  @Inject lateinit var eventRouter: EventRouter
-
+@Singleton
+class ChatWebSocketAction @Inject constructor(
+  private val redis: Redis
+) : WebAction {
   @ConnectWebSocket("/room/{name}")
   fun chat(@PathParam name: String, webSocket: WebSocket): WebSocketListener {
-    val topic = eventRouter.getTopic<String>(name)
     webSocket.send("Welcome to $name!")
-
-    val listener = object : Listener<String> {
-      override fun onEvent(subscription: Subscription<String>, event: String) {
-        webSocket.send(event)
+    val pubSub = object : JedisPubSub() {
+      override fun onSubscribe(channel: String, subscribedChannels: Int) {
+        webSocket.send("Subscribed to $name")
       }
 
-      override fun onOpen(subscription: Subscription<String>) = Unit
-
-      override fun onClose(subscription: Subscription<String>) {
-        webSocket.close(1000, "Topic owner has probably changed")
-      }
-
-      override fun toString(): String {
-        return "$name.eventListener"
+      override fun onMessage(channel: String, message: String) {
+        webSocket.send(message)
       }
     }
-    val subscription = topic.subscribe(listener)
+    thread { redis.subscribe(pubSub, name) }
 
     return object : WebSocketListener() {
       override fun onMessage(webSocket: WebSocket, text: String) {
-        topic.publish(text)
-      }
-
-      override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
-        subscription.cancel()
+        redis.publish(name, text)
       }
 
       override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) {
-        subscription.cancel()
-      }
-
-      override fun onFailure(webSocket: WebSocket, t: Throwable) {
-        subscription.cancel()
+        pubSub.unsubscribe()
       }
 
       override fun toString(): String {

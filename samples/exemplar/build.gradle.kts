@@ -1,26 +1,33 @@
 plugins {
   kotlin("jvm")
-
+  application
   id("com.squareup.wire")
 }
 
-sourceSets {
-  val main by getting {
-    java.srcDir("src/main/kotlin/")
-  }
+val applicationMainClass = "com.squareup.exemplar.ExemplarServiceKt"
+application {
+  mainClass.set(applicationMainClass)
 }
 
 dependencies {
-  // TODO: these should be implementation("com.squareup.misk:*")
+  implementation(Dependencies.guice)
+  implementation(Dependencies.javaxInject)
+  implementation(Dependencies.okHttp)
+  implementation(Dependencies.okio)
+  implementation(Dependencies.wispConfig)
+  implementation(Dependencies.wispToken)
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
-  implementation(project(":misk-admin"))
-  implementation(project(":misk-core"))
+  implementation(project(":misk-config"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-prometheus"))
+  implementation(Dependencies.wispDeployment)
+  implementation(project(":misk-admin"))
+  implementation(project(":misk-core"))
 
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
   testImplementation(project(":misk-testing"))
-  testImplementation("org.assertj:assertj-core:3.24.2")
 }
 
 val jar by tasks.getting(Jar::class) {

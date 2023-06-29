@@ -2,6 +2,7 @@ package misk.cloud.gcp.testing
 
 import com.google.api.client.http.HttpTransport
 
+@Deprecated("Replace the dependency on misk-gcp-testing with testFixtures(misk-gcp)")
 class FakeHttpRouter(val router: (FakeHttpRequest) -> FakeHttpResponse) : HttpTransport() {
   companion object {
     fun respondWithJson(item: Any) = FakeHttpResponse()

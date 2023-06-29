@@ -254,7 +254,14 @@ private class RequestBridgeInterceptor(
     if (returnValue is Response<*>) {
       httpCall.statusCode = returnValue.statusCode
       httpCall.addResponseHeaders(returnValue.headers)
+      val trailers = returnValue.trailers()
       returnValue = returnValue.body!!
+      if (trailers?.any() == true) {
+        httpCall.requireTrailers()
+        trailers.map {
+          httpCall.setResponseTrailer(it.first, it.second)
+        }
+      }
     }
 
     webActionBinding.afterCall(chain.webAction, httpCall, pathMatcher, returnValue)

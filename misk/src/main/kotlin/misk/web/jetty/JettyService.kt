@@ -127,6 +127,9 @@ class JettyService @Inject internal constructor(
     )
     httpConnector.port = webConfig.port
     httpConnector.idleTimeout = webConfig.idle_timeout
+    if (webConfig.override_shutdown_idle_timeout != null) {
+      httpConnector.shutdownIdleTimeout = webConfig.override_shutdown_idle_timeout
+    }
     httpConnector.reuseAddress = true
     httpConnector.name = "http"
     if (webConfig.queue_size != null) {

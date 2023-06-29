@@ -1,33 +1,42 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
+  api(Dependencies.javaxInject)
+  api(Dependencies.kotlinLogging)
+  api(Dependencies.kotlinRetry)
+  api(Dependencies.okHttp)
+  api(Dependencies.slf4jApi)
   api(Dependencies.wispConfig)
-  api(Dependencies.wispLease)
-  api(Dependencies.wispLeaseTesting)
-  api(Dependencies.wispLogging)
-  api(Dependencies.wispResourceLoader)
-  api(Dependencies.wispResourceLoaderTesting)
   api(Dependencies.wispSsl)
-  implementation(Dependencies.bouncycastle)
+  api(Dependencies.wispToken)
+  api(project(":misk-config"))
+  api(project(":misk-inject"))
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.kotlinReflection)
-  api(Dependencies.kotlinRetry)
-  api(Dependencies.loggingApi)
-  implementation(Dependencies.logbackClassic)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.okHttp)
-  implementation(Dependencies.slf4jApi)
-
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-service"))
+  implementation(Dependencies.wispResourceLoader)
+  implementation(Dependencies.wispTokenTesting)
 
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.kotlinxCoroutines)
-  testImplementation(project(":misk-testing"))
+  testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.wispLogging)
   testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-testing"))
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

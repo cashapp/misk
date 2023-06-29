@@ -3,6 +3,7 @@ package misk.cloud.gcp.spanner
 import com.google.auth.Credentials
 import com.google.cloud.spanner.SpannerOptions
 import misk.cloud.gcp.TransportConfig
+import misk.config.Redact
 import wisp.config.Config
 
 /** Configuration for talking to Google datastore */
@@ -17,6 +18,7 @@ data class SpannerConfig(
    * > environment where applicable, or ignore setting credentials for
    * > emulator development.
    */
+  @Redact
   val credentials: Credentials? = null,
 
   /**

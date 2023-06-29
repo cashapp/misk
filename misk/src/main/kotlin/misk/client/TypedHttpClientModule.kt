@@ -101,6 +101,7 @@ class TypedPeerHttpClientModule<T : Any>(
     // Initialize empty sets for our multibindings.
     newMultibinder<ClientApplicationInterceptorFactory>()
     newMultibinder<ClientNetworkInterceptor.Factory>()
+    newMultibinder<CallFactoryWrapper>()
 
     @Suppress("UNCHECKED_CAST")
     val key = Key.get(
@@ -153,6 +154,12 @@ class TypedClientFactory @Inject constructor() {
   @Inject(optional = true)
   private val clientApplicationInterceptorFactories:
     Provider<List<ClientApplicationInterceptorFactory>> = Provider { emptyList() }
+
+  @Inject(optional = true)
+  private val callFactoryWrappers: Provider<List<CallFactoryWrapper>> = Provider { emptyList() }
+
+  @Inject
+  private lateinit var clientLoggingInterceptor: ClientLoggingInterceptor
 
   @Inject
   private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
@@ -224,7 +231,9 @@ class TypedClientFactory @Inject constructor() {
       eventListenerFactory,
       tracer,
       moshi,
-      clientMetricsInterceptorFactory
+      clientLoggingInterceptor,
+      clientMetricsInterceptorFactory,
+      callFactoryWrappers
     )
 
     return kclass.cast(

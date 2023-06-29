@@ -4,10 +4,10 @@ import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.contrib.okhttp3.TracingCallFactory
 import misk.web.mediatype.MediaTypes
+import okhttp3.Call
 import okhttp3.EventListener
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.protobuf.ProtoConverterFactory
@@ -40,7 +40,9 @@ internal class ClientInvocationHandler(
   eventListenerFactory: EventListener.Factory?,
   tracer: Tracer?,
   moshi: Moshi,
-  clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
+  clientLoggingInterceptor: ClientLoggingInterceptor,
+  clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory,
+  callFactoryWrappers: Provider<List<CallFactoryWrapper>> = Provider<List<CallFactoryWrapper>> { emptyList() },
 ) : InvocationHandler {
 
   private val actionsByMethod = interfaceType.functions
@@ -56,6 +58,7 @@ internal class ClientInvocationHandler(
     val networkInterceptors = networkInterceptorFactories.get().mapNotNull { it.create(action) }
     val clientBuilder = okHttpTemplate.newBuilder()
     clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(clientName))
+    clientBuilder.addInterceptor(clientLoggingInterceptor)
     applicationInterceptors.forEach { clientBuilder.addInterceptor(it) }
     networkInterceptors.forEach {
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
@@ -66,11 +69,18 @@ internal class ClientInvocationHandler(
     val actionSpecificClient = clientBuilder.build()
 
     val retrofitBuilder = retrofit.newBuilder()
-      .client(actionSpecificClient)
 
-    if (tracer != null) retrofitBuilder.callFactory(
+    val initialCallFactory: Call.Factory = if (tracer != null) {
       TracingCallFactory(actionSpecificClient, tracer)
-    )
+    } else {
+      actionSpecificClient
+    }
+
+    val callFactoryWrapped = callFactoryWrappers.get().fold(initialCallFactory) { callFactory, callFactoryWrapper ->
+       callFactoryWrapper.wrap(action, callFactory) ?: callFactory
+    }
+
+    retrofitBuilder.callFactory(callFactoryWrapped)
 
     val mediaTypes = getEndpointMediaTypes(methodName)
     if (mediaTypes.contains(MediaTypes.APPLICATION_PROTOBUF)) {

@@ -11,8 +11,6 @@ import misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode.SAFE
  *
  * [mode] If you have config parameters that include secrets, you should only install this tab
  *    in [SAFE] mode because the Misk secrets will be visible at runtime in the admin dashboard.
- *
- * TODO fix Misk.Secrets redaction in config, maybe with !secret yaml parser
  */
 class ConfigDashboardTabModule(
   private val isDevelopment: Boolean,
@@ -22,20 +20,14 @@ class ConfigDashboardTabModule(
   override fun configure() {
     bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
     install(WebActionModule.create<ConfigMetadataAction>())
-    multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-        slug = "config",
-        url_path_prefix = "/_admin/config/",
-        name = "Config",
-        category = "Container Admin"
-      )
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "config",
-        web_proxy_url = "http://localhost:3200/"
-      )
-    )
+
+    install(DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
+      isDevelopment = isDevelopment,
+      slug = "config",
+      urlPathPrefix = "/_admin/config/",
+      developmentWebProxyUrl = "http://localhost:3200/",
+      menuLabel = "Config",
+      menuCategory = "Container Admin"
+    ))
   }
 }

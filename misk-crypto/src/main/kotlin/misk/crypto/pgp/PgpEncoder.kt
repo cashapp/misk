@@ -43,16 +43,3 @@ interface PgpDecrypter {
   fun decrypt(ciphertext: ByteArray): ByteArray
 }
 
-internal data class PgpKeyJsonFileMetadata(
-  val name: String,
-  val email: String,
-  val comment: String
-)
-
-internal data class PgpKeyJsonFile(
-  val region: String,
-  val encrypted_private_key: String,
-  val public_key: String,
-  val pgp: PgpKeyJsonFileMetadata,
-  val aws_kms_key_id: String
-)

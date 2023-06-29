@@ -14,7 +14,8 @@ data class HttpClientsConfig(
   @JsonAlias("hosts")
   // Need to retain ordering, hence LinkedHashMap
   val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
-  val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
+  val endpoints: Map<String, HttpClientEndpointConfig> = mapOf(),
+  val logRequests: Boolean = false,
 ) : Config {
   init {
     validatePatterns()
@@ -154,6 +155,10 @@ data class HttpClientEndpointConfig(
   val envoy: HttpClientEnvoyConfig? = null,
   val clientConfig: HttpClientConfig = HttpClientConfig()
 ) {
+  init {
+    require(url == null || envoy == null) { "Cannot set both url and envoy configs" }
+  }
+  
   @Deprecated(
     "Use clientConfig property",
     replaceWith = ReplaceWith("clientConfig.connectTimeout")
