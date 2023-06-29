@@ -245,6 +245,34 @@ internal class RequestLoggingInterceptorTest {
     }
   }
 
+  @Test
+  fun `requestResponseBodyTransformer works`() {
+    assertThat(invoke("/call/logEverything/Evan", "caller").isSuccessful).isTrue()
+    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+
+    assertThat(messages).containsExactly(
+      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Evan] response=echo: Evan, the jerk"
+    )
+  }
+
+  @Test
+  fun `requestResponseBodyTransformer contains explosions`() {
+    assertThat(invoke("/call/logEverything/Oppenheimer", "caller").isSuccessful).isTrue()
+    val events = logCollector.takeEvents()
+
+    // Transformer exception is logged
+    val allLogs = events.map { it.formattedMessage }
+    assertThat(allLogs).contains("RequestLoggingTransformer of type [misk.web.interceptors.ThrowingTransformer] failed to transform: request=[[Oppenheimer]] response[echo: Oppenheimer]")
+
+    // Regular request logging still happened
+    val interceptorLogs = events
+      .filter { it.loggerName == RequestLoggingInterceptor::class.qualifiedName }
+      .map { it.message }
+    assertThat(interceptorLogs).containsExactly(
+      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Oppenheimer] response=echo: Oppenheimer"
+    )
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(AccessControlModule())
@@ -256,11 +284,14 @@ internal class RequestLoggingInterceptorTest {
       multibind<RequestLoggingConfig>().toInstance(
         RequestLoggingConfig(mapOf("ConfigOverrideAction" to ActionLoggingConfig(0, 0, 1.0, 1.0)))
       )
+      multibind<RequestLoggingTransformer>().to<EvanHatingTransformer>()
+      multibind<RequestLoggingTransformer>().to<ThrowingTransformer>()
     }
   }
 
   class TestActionsModule : KAbstractModule() {
     override fun configure() {
+      install(WebActionModule.create<LogEverythingAction>())
       install(WebActionModule.create<RateLimitingRequestLoggingAction>())
       install(WebActionModule.create<RateLimitingIncludesBodyRequestLoggingAction>())
       install(WebActionModule.create<NoRateLimitingRequestLoggingAction>())
@@ -270,6 +301,19 @@ internal class RequestLoggingInterceptorTest {
       install(WebActionModule.create<ConfigOverrideAction>())
     }
   }
+}
+
+internal class LogEverythingAction @Inject constructor() : WebAction {
+  @Get("/call/logEverything/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 0,
+    errorRatePerSecond = 0,
+    bodySampling = 1.0,
+    errorBodySampling = 1.0
+  )
+  fun call(@PathParam message: String) = "echo: $message"
 }
 
 internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
@@ -353,4 +397,32 @@ internal class ConfigOverrideAction @Inject constructor() : WebAction {
     errorBodySampling = 0.0
   ) // these values overridden by RequestLoggingConfig binding above
   fun call(@PathParam message: String): String = "echo: $message"
+}
+
+/**
+ * A [RequestLoggingTransformer] that doesn't like seeing "Evan" in String response bodies
+ */
+internal class EvanHatingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return if (responseString?.contains("Evan") == true) {
+      requestResponseBody.copy(response = responseString.replace("Evan", "Evan, the jerk"))
+    } else {
+      requestResponseBody
+    }
+  }
+}
+
+/**
+ * A [RequestLoggingTransformer] that explodes if you say the secret word
+ */
+internal class ThrowingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return if (responseString?.contains("Oppenheimer") == true) {
+      throw Exception("I am become death, destroyer of frameworks")
+    } else {
+      requestResponseBody
+    }
+  }
 }
