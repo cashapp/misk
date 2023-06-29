@@ -47,7 +47,7 @@ interface Metrics {
    *
    * Deprecated: if you really need a summary metric, use [misk.metrics.v2.Metrics.summary] instead.
    *
-   * For legacy reasons this function is called histogram(...) but its not backed by a histogram
+   * For legacy reasons this function is called histogram(...) but it's not backed by a histogram
    * because of issues with the previous time series backend.
    *
    * If you're using this metric type, you likely want a real Histogram instead of a Summary.
