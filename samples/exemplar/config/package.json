@@ -1,0 +1,20 @@
+{
+  "name": "misk-tailwind-css",
+  "version": "0.0.1",
+  "description": "Tailwind CSS configuration for Misk",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "build": "tailwindcss -i ./input.css -o ../src/main/resources/web/static/cache/tailwind.exemplar.min.css -m"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.3.2"
+  },
+  "dependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.3",
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "@tailwindcss/typography": "^0.5.9"
+  }
+}
