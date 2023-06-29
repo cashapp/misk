@@ -10,6 +10,8 @@ plugins {
 
 dependencies {
   api(Dependencies.kotlinxHtml)
+  api(project(":misk-actions"))
+  implementation(Dependencies.okio)
 }
 
 configure<MavenPublishBaseExtension> {
