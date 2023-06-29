@@ -9,6 +9,7 @@ import java.sql.SQLSyntaxErrorException
 import java.sql.Timestamp
 import java.time.Duration
 
+@Deprecated("Replace the dependency on misk-jdcb-testing with testFixtures(misk-jdbc)")
 object ScaleSafetyChecks {
   private val logger = KotlinLogging.logger {}
   private val COMMENT_PATTERN = "/\\*+[^*]*\\*+(?:[^/*][^*]*\\*+)*/".toRegex()

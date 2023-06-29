@@ -29,6 +29,7 @@ import javax.inject.Singleton
  * assertJobSideEffects()
  * ```
  */
+@Deprecated("Replace the dependency on misk-jobqueue-testing with testFixtures(misk-jobqueue)")
 @Singleton
 class FakeJobQueue @Inject constructor(
   private val clock: Clock,

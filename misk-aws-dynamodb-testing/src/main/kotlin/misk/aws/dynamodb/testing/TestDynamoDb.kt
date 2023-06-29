@@ -8,6 +8,7 @@ import com.google.inject.Singleton
 /**
  * Thin wrapper to make `TestDynamoDbService`, which is not a @Singleton, compatible with `ServiceModule`.
  */
+@Deprecated("Replace the dependency on misk-aws-dynamodb-testing with testFixtures(misk-aws-dynamodb)")
 @Singleton
 class TestDynamoDb @Inject constructor(
   val service: TestDynamoDbService

@@ -3,14 +3,15 @@ package misk.perf
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
 import com.google.common.base.Ticker
-import misk.ServiceManagerModule
+import com.google.inject.Key
+import misk.MiskTestingServiceModule
 import misk.concurrent.FakeTicker
 import misk.concurrent.Sleeper
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
-import misk.metrics.v2.FakeMetricsModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebServerTestingModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,13 +23,13 @@ import javax.inject.Inject
 class PauseDetectorTest {
   @MiskTestModule val module = TestModule()
 
-  @Inject lateinit var fakeTicker: FakeTicker
+  @Inject @ForPauseDetector lateinit var fakeTicker: FakeTicker
   @Inject internal lateinit var detector: PauseDetector
   @Inject lateinit var logCollector: LogCollector
 
   @BeforeEach fun setup() {
     // We'll drive the detector from the test thread rather than running a detector thread.
-    assertThat(detector.isRunning()).isFalse()
+    assertThat(detector.isRunning).isFalse()
 
     // Do one cycle to calibrate shortestObservedDeltaTimeNsec
     detector.sleep()
@@ -86,6 +87,9 @@ class PauseDetectorTest {
   }
 
   @Test fun `ticker goes backwards`() {
+    // Move forward 5s so that we can move _backwards_ to a positive value in the test.
+    fakeTicker.sleepMs(5000);
+
     // 1ms of sleep
     detector.sleep()
     // Move the ticker back 2020ms
@@ -112,14 +116,18 @@ class PauseDetectorTest {
         logErrorMillis = 10000
       )
       // NB: We are intentionally _not_ installing the module
-      // because we want to drive the detector check/sleep cycles from this test harness
+      // because we want to drive the detector check/sleep cycles from this test harness and
+      // we want to configure a fake ticker.
       bind<PauseDetectorConfig>().toInstance(config)
+      bind<FakeTicker>().annotatedWith<ForPauseDetector>().toInstance(FakeTicker())
+      bind<Ticker>().annotatedWith<ForPauseDetector>()
+        .to(Key.get(FakeTicker::class.java, ForPauseDetector::class.java))
+      bind<Sleeper>().annotatedWith<ForPauseDetector>()
+        .to(Key.get(FakeTicker::class.java, ForPauseDetector::class.java))
 
       // And its dependencies with test fakes
-      install(ServiceManagerModule())
-      install(FakeMetricsModule())
-      bind<Ticker>().to<FakeTicker>()
-      bind<Sleeper>().to<FakeTicker>()
+      install(MiskTestingServiceModule())
+      install(WebServerTestingModule())
 
       // Test support
       install(LogCollectorModule())

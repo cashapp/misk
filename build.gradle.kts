@@ -1,4 +1,5 @@
-import org.gradle.api.tasks.compile.JavaCompile
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
@@ -20,20 +21,72 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
-    classpath(Dependencies.kotlinBinaryCompatibilityPlugin)
   }
 }
 
-val testShardNonHibernate by tasks.creating() {
-  group = "Continuous integration"
-  description = "Runs all tests that don't depend on misk-hibernate. " +
-          "This target is intended for manually sharding tests to make CI faster."
+plugins {
+  id("com.autonomousapps.dependency-analysis") version Dependencies.dependencyAnalysisPluginVersion
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version Dependencies.kotlinBinaryCompatibilityPluginVersion
 }
 
-val testShardHibernate by tasks.creating() {
+apply(plugin = "com.vanniktech.maven.publish.base")
+
+allprojects {
+  group = project.property("GROUP") as String
+  version = project.findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
+}
+
+dependencyAnalysis {
+  issues {
+    all {
+      ignoreSourceSet("testFixtures")
+      onAny {
+        severity("fail")
+        // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
+        exclude("() -> java.io.File?")
+        exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
+        exclude(":misk-testing")
+      }
+    }
+    // False positives.
+    project(":misk-gcp") {
+      onUsedTransitiveDependencies {
+        // Can be removed once dd-trace-ot uses 0.33.0 of open tracing.
+        exclude("io.opentracing:opentracing-util:0.32.0")
+        exclude("io.opentracing:opentracing-noop:0.33.0")
+      }
+      onRuntimeOnly {
+        exclude("com.datadoghq:dd-trace-ot:1.12.1")
+      }
+    }
+    project(":misk-grpc-tests") {
+      onUnusedDependencies {
+        exclude("javax.annotation:javax.annotation-api:1.3.2")
+      }
+    }
+    project(":misk-jooq") {
+      onIncorrectConfiguration {
+        exclude("org.jooq:jooq:3.18.2")
+      }
+    }
+  }
+}
+
+apiValidation {
+  ignoredProjects.addAll(listOf("exemplar", "exemplarchat"))
+  additionalSourceSets.addAll(listOf("testFixtures"))
+}
+
+val testShardNonHibernate by tasks.creating {
+  group = "Continuous integration"
+  description = "Runs all tests that don't depend on misk-hibernate. " +
+    "This target is intended for manually sharding tests to make CI faster."
+}
+
+val testShardHibernate by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that depend on misk-hibernate. " +
-          "This target is intended for manually sharding tests to make CI faster."
+    "This target is intended for manually sharding tests to make CI faster."
 }
 
 subprojects {
@@ -63,7 +116,6 @@ subprojects {
     }
 
     dependencies {
-      add("testImplementation", Dependencies.junitApi)
       add("testRuntimeOnly", Dependencies.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.
@@ -76,8 +128,9 @@ subprojects {
       add("api", platform(Dependencies.jettyBom))
       add("api", platform(Dependencies.kotlinBom))
       add("api", platform(Dependencies.nettyBom))
-      add("api", platform(Dependencies.wispBom))
       add("api", platform(Dependencies.prometheusClientBom))
+      add("api", platform(Dependencies.wireBom))
+      add("api", platform(Dependencies.wispBom))
     }
 
     tasks.withType<GenerateModuleMetadata> {
@@ -125,22 +178,46 @@ subprojects {
     }
   }
 
-  if (file("$rootDir/hooks.gradle").exists()) {
-    apply(from = file("$rootDir/hooks.gradle"))
-  }
-
-  if (!path.startsWith(":samples")) {
-    apply(plugin = "com.vanniktech.maven.publish")
-    apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
-    apply(from = "$rootDir/gradle-mvn-publish.gradle")
-  }
-
   // Workaround the Gradle bug resolving multiplatform dependencies.
   // https://github.com/square/okio/issues/647
   configurations.all {
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
-      attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
+      attributes.attribute(
+        Usage.USAGE_ATTRIBUTE,
+        this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
+      )
     }
   }
 }
 
+allprojects {
+  plugins.withId("com.vanniktech.maven.publish.base") {
+    configure<MavenPublishBaseExtension> {
+      publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+      signAllPublications()
+      pom {
+        description.set("Open source application container in Kotlin")
+        name.set(project.name)
+        url.set("https://github.com/cashapp/misk/")
+        licenses {
+          license {
+            name.set("The Apache Software License, Version 2.0")
+            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            distribution.set("repo")
+          }
+        }
+        scm {
+          url.set("https://github.com/cashapp/misk/")
+          connection.set("scm:git:git://github.com/cashapp/misk.git")
+          developerConnection.set("scm:git:ssh://git@github.com/cashapp/misk.git")
+        }
+        developers {
+          developer {
+            id.set("square")
+            name.set("Square, Inc.")
+          }
+        }
+      }
+    }
+  }
+}

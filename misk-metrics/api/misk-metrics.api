@@ -1,3 +1,23 @@
+public final class misk/metrics/FakeMetrics : misk/metrics/Metrics {
+	public fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public final fun get (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun getAllSamples ()Lkotlin/sequences/Sequence;
+	public final fun getSample (Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
+	public static synthetic fun getSample$default (Lmisk/metrics/FakeMetrics;Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;ILjava/lang/Object;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
+	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public final fun histogramCount (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun histogramMean (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun histogramP50 (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun histogramP99 (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun histogramQuantile (Ljava/lang/String;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun histogramSum (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+}
+
+public final class misk/metrics/FakeMetricsModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
 public abstract interface class misk/metrics/Histogram {
 	public abstract fun count ([Ljava/lang/String;)I
 	public abstract fun record (D[Ljava/lang/String;)V
@@ -29,6 +49,28 @@ public final class misk/metrics/MetricsKt {
 }
 
 public class misk/metrics/MetricsScope {
+}
+
+public final class misk/metrics/v2/FakeMetrics : misk/metrics/v2/Metrics {
+	public fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public final fun get (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun getAllSamples ()Lkotlin/sequences/Sequence;
+	public final fun getSample (Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
+	public static synthetic fun getSample$default (Lmisk/metrics/v2/FakeMetrics;Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;ILjava/lang/Object;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
+	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
+	public fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
+	public fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
+	public final fun summaryCount (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun summaryMean (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun summaryP50 (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun summaryP99 (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun summaryQuantile (Ljava/lang/String;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public final fun summarySum (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+}
+
+public final class misk/metrics/v2/FakeMetricsModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
 }
 
 public abstract interface class misk/metrics/v2/Metrics {

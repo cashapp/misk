@@ -36,6 +36,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     val module = object : KAbstractModule() {
       override fun configure() {
         binder().requireAtInjectOnConstructors()
+        multibind<BeforeEachCallback>().to<LogLevelExtension>()
 
         if (context.startService()) {
           multibind<BeforeEachCallback>().to<StartServicesBeforeEach>()
@@ -48,7 +49,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
         context.requiredTestInstances.allInstances.forEach { install(BoundFieldModule.of(it)) }
 
         multibind<BeforeEachCallback>().to<InjectUninject>()
-        multibind<BeforeEachCallback>().to<LogLevelExtension>()
         multibind<AfterEachCallback>().to<InjectUninject>()
 
         // Initialize empty sets for our multibindings.
@@ -74,8 +74,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   }
 
   class StartServicesBeforeEach @Inject constructor() : BeforeEachCallback {
-    @Inject
-    lateinit var serviceManager: ServiceManager
+    @Inject lateinit var serviceManager: ServiceManager
 
     override fun beforeEach(context: ExtensionContext) {
       if (context.startService()) {

@@ -1,7 +1,9 @@
 package misk.redis
 
+import com.google.common.base.Ticker
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.metrics.v2.Metrics
@@ -38,7 +40,7 @@ class RedisModule(
 ) : KAbstractModule() {
   override fun configure() {
     bind<RedisConfig>().toInstance(redisConfig)
-    install(ServiceModule<RedisService>())
+    install(ServiceModule<RedisService>().enhancedBy<ReadyService>())
     requireBinding<Metrics>()
   }
 
@@ -46,14 +48,15 @@ class RedisModule(
   internal fun provideRedisClient(
     config: RedisConfig,
     deployment: Deployment,
-    metrics: Metrics
+    metrics: Metrics,
+    ticker: Ticker,
   ): Redis {
     // Get the first replication group, we only support 1 replication group per service.
     val replicationGroup = config[config.keys.first()]
       ?: throw RuntimeException("At least 1 replication group must be specified")
 
     // Create our jedis pool with client-side metrics.
-    val clientMetrics = RedisClientMetrics(metrics)
+    val clientMetrics = RedisClientMetrics(ticker, metrics)
     val jedisPoolWithMetrics = JedisPoolWithMetrics(
       metrics = clientMetrics,
       poolConfig = jedisPoolConfig,

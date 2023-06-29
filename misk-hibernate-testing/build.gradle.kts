@@ -1,16 +1,22 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
-  implementation(Dependencies.guice)
-  api(project(":misk-jdbc-testing"))
-  api(project(":misk"))
-  api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
-  api(project(":misk-testing"))
-  api(project(":misk-hibernate"))
-  testImplementation(Dependencies.junitApi)
+  implementation(Dependencies.guice)
+  implementation(project(":misk-jdbc-testing"))
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

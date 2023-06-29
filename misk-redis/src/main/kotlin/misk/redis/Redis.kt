@@ -1,6 +1,7 @@
 package misk.redis
 
 import okio.ByteString
+import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.args.ListDirection
@@ -439,6 +440,16 @@ interface Redis {
    * Closes the client, so it may not be used further.
    */
   fun close()
+
+  /**
+   * Subscribe to a redis channel via pubsub. This is blocking!
+   */
+  fun subscribe(jedisPubSub: JedisPubSub, channel: String)
+
+  /**
+   * Publish a message to a channel.
+   */
+  fun publish(channel: String, message: String)
 }
 
 /**

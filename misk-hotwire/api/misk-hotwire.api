@@ -1,0 +1,4 @@
+public final class misk/hotwire/BuildHtmlKt {
+	public static final fun buildHtml (Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+}
+

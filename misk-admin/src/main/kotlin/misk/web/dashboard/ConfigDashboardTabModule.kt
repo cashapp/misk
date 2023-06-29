@@ -20,20 +20,14 @@ class ConfigDashboardTabModule(
   override fun configure() {
     bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
     install(WebActionModule.create<ConfigMetadataAction>())
-    multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-        slug = "config",
-        url_path_prefix = "/_admin/config/",
-        name = "Config",
-        category = "Container Admin"
-      )
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "config",
-        web_proxy_url = "http://localhost:3200/"
-      )
-    )
+
+    install(DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
+      isDevelopment = isDevelopment,
+      slug = "config",
+      urlPathPrefix = "/_admin/config/",
+      developmentWebProxyUrl = "http://localhost:3200/",
+      menuLabel = "Config",
+      menuCategory = "Container Admin"
+    ))
   }
 }

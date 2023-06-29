@@ -29,7 +29,10 @@ class LogCollectorTest {
     val logger = getLogger<LogCollectorTest>()
 
     logger.info("this is a log message!")
-    assertThat(logCollector.takeMessages()).containsExactly("this is a log message!")
+    assertThat(logCollector.takeMessages()).containsExactly(
+      "Starting ready service",
+      "this is a log message!"
+    )
 
     logger.info("another log message")
     logger.info("and a third!")
@@ -44,7 +47,7 @@ class LogCollectorTest {
     logger.info("this is INFO.")
     logger.warn("this is WARN!")
     assertThat(logCollector.takeMessages(minLevel = Level.INFO))
-      .containsExactly("this is INFO.", "this is WARN!")
+      .containsExactly("Starting ready service", "this is INFO.", "this is WARN!")
   }
 
   @Test
@@ -90,7 +93,10 @@ class LogCollectorTest {
       .containsExactly("A thing happened")
     assertThat(logCollector.takeMessages(LogCollectorModule::class, consumeUnmatchedLogs = false))
       .containsExactly("Another thing happened")
-    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false)).isEmpty()
+    // Ready service can start before or after logCollector, so it's inconsistent without this.
+    val withoutReadyService = logCollector.takeMessages(consumeUnmatchedLogs = false)
+      .filterNot { it == "Starting ready service" }
+    assertThat(withoutReadyService).isEmpty()
 
     // We can collect messages of different error levels.
     logger.info { "this is a log message!" }
@@ -102,7 +108,7 @@ class LogCollectorTest {
 
     // We can collect messages matching certain patterns.
     logger.info { "hit by pattern match" }
-    logger.info { "missed by pattern match"}
+    logger.info { "missed by pattern match" }
     assertThat(logCollector.takeMessages(pattern = Regex("hit.*"), consumeUnmatchedLogs = false))
       .containsExactly("hit by pattern match")
     assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
@@ -111,6 +117,7 @@ class LogCollectorTest {
 
   @Test
   fun takeTimeout() {
+    logCollector.takeEvent()
     val exception = assertFailsWith<IllegalArgumentException> {
       logCollector.takeEvent()
     }
@@ -128,6 +135,7 @@ class LogCollectorTest {
         logger.info("this is a log message!")
       }
     }
+    logCollector.takeMessage()
     thread.start()
 
     assertThat(logCollector.takeMessage()).isEqualTo("this is a log message!")

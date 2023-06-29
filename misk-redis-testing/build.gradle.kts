@@ -1,22 +1,30 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
-  implementation(Dependencies.dockerCore)
-  implementation(Dependencies.dockerTransport)
+  api(Dependencies.javaxInject)
+  api(Dependencies.jedis)
+  api(project(":misk-inject"))
+  api(project(":misk-redis"))
+  api(project(":misk-testing"))
+  implementation(Dependencies.dockerApi)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.jedis)
+  implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.okio)
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-redis"))
-  implementation(project(":misk-testing"))
+  implementation(Dependencies.wispContainersTesting)
+  implementation(Dependencies.wispLogging)
+}
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.wispTimeTesting)
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

@@ -271,7 +271,8 @@ public final class misk/Action {
 }
 
 public final class misk/ActionsKt {
-	public static final fun asAction (Lkotlin/reflect/KFunction;Lmisk/web/DispatchMechanism;)Lmisk/Action;
+	public static final fun asAction (Lkotlin/reflect/KFunction;Lmisk/web/DispatchMechanism;Lokhttp3/MediaType;)Lmisk/Action;
+	public static synthetic fun asAction$default (Lkotlin/reflect/KFunction;Lmisk/web/DispatchMechanism;Lokhttp3/MediaType;ILjava/lang/Object;)Lmisk/Action;
 }
 
 public abstract interface class misk/ApplicationInterceptor {
@@ -315,8 +316,8 @@ public final class misk/MiskRealServiceModule : misk/inject/KAbstractModule {
 
 public final class misk/client/BackwardsCompatibleClientsConfig {
 	public fun <init> ()V
-	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/util/Map;Ljava/util/LinkedHashMap;)V
-	public synthetic fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/util/Map;Ljava/util/LinkedHashMap;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/util/Map;Ljava/util/LinkedHashMap;Z)V
+	public synthetic fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/util/Map;Ljava/util/LinkedHashMap;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/time/Duration;
 	public final fun component2 ()Ljava/time/Duration;
 	public final fun component3 ()Ljava/time/Duration;
@@ -325,8 +326,9 @@ public final class misk/client/BackwardsCompatibleClientsConfig {
 	public final fun component6 ()Ljava/time/Duration;
 	public final fun component7 ()Ljava/util/Map;
 	public final fun component8 ()Ljava/util/LinkedHashMap;
-	public final fun copy (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/util/Map;Ljava/util/LinkedHashMap;)Lmisk/client/BackwardsCompatibleClientsConfig;
-	public static synthetic fun copy$default (Lmisk/client/BackwardsCompatibleClientsConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/util/Map;Ljava/util/LinkedHashMap;ILjava/lang/Object;)Lmisk/client/BackwardsCompatibleClientsConfig;
+	public final fun component9 ()Z
+	public final fun copy (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/util/Map;Ljava/util/LinkedHashMap;Z)Lmisk/client/BackwardsCompatibleClientsConfig;
+	public static synthetic fun copy$default (Lmisk/client/BackwardsCompatibleClientsConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/util/Map;Ljava/util/LinkedHashMap;ZILjava/lang/Object;)Lmisk/client/BackwardsCompatibleClientsConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDefaultCallTimeout ()Ljava/time/Duration;
 	public final fun getDefaultConnectTimeout ()Ljava/time/Duration;
@@ -335,6 +337,7 @@ public final class misk/client/BackwardsCompatibleClientsConfig {
 	public final fun getDefaultWriteTimeout ()Ljava/time/Duration;
 	public final fun getEndpoints ()Ljava/util/Map;
 	public final fun getHostConfigs ()Ljava/util/LinkedHashMap;
+	public final fun getLogRequests ()Z
 	public final fun getSsl ()Lmisk/client/HttpClientSSLConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -585,18 +588,20 @@ public final class misk/client/HttpClientSSLConfig {
 public final class misk/client/HttpClientsConfig : wisp/config/Config {
 	public static final field Companion Lmisk/client/HttpClientsConfig$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/util/LinkedHashMap;Ljava/util/Map;)V
-	public synthetic fun <init> (Ljava/util/LinkedHashMap;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/LinkedHashMap;Ljava/util/Map;Z)V
+	public synthetic fun <init> (Ljava/util/LinkedHashMap;Ljava/util/Map;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/LinkedHashMap;
 	public final fun component2 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/LinkedHashMap;Ljava/util/Map;)Lmisk/client/HttpClientsConfig;
-	public static synthetic fun copy$default (Lmisk/client/HttpClientsConfig;Ljava/util/LinkedHashMap;Ljava/util/Map;ILjava/lang/Object;)Lmisk/client/HttpClientsConfig;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/util/LinkedHashMap;Ljava/util/Map;Z)Lmisk/client/HttpClientsConfig;
+	public static synthetic fun copy$default (Lmisk/client/HttpClientsConfig;Ljava/util/LinkedHashMap;Ljava/util/Map;ZILjava/lang/Object;)Lmisk/client/HttpClientsConfig;
 	public final fun endpointNames ()Ljava/util/Set;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun get (Ljava/lang/String;)Lmisk/client/HttpClientEndpointConfig;
 	public final fun get (Ljava/net/URL;)Lmisk/client/HttpClientEndpointConfig;
 	public final fun getEndpoints ()Ljava/util/Map;
 	public final fun getHostConfigs ()Ljava/util/LinkedHashMap;
+	public final fun getLogRequests ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -777,60 +782,6 @@ public abstract class misk/concurrent/WrappingListeningExecutorService : com/goo
 	protected abstract fun wrap (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;
 }
 
-public abstract interface annotation class misk/config/AppName : java/lang/annotation/Annotation {
-}
-
-public final class misk/config/AppNameModule : misk/inject/KAbstractModule {
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class misk/config/ConfigModule : misk/inject/KAbstractModule {
-	public static final field Companion Lmisk/config/ConfigModule$Companion;
-	public fun <init> (Ljava/lang/Class;Ljava/lang/String;Lwisp/config/Config;)V
-}
-
-public final class misk/config/ConfigModule$Companion {
-}
-
-public final class misk/config/MiskConfig {
-	public static final field INSTANCE Lmisk/config/MiskConfig;
-	public static final fun filesInDir (Ljava/lang/String;Ljava/io/FilenameFilter;)Ljava/util/List;
-	public static synthetic fun filesInDir$default (Ljava/lang/String;Ljava/io/FilenameFilter;ILjava/lang/Object;)Ljava/util/List;
-	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;)Lwisp/config/Config;
-	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;)Lwisp/config/Config;
-	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lwisp/config/Config;
-	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lwisp/config/Config;
-	public final fun loadConfigYamlMap (Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;)Ljava/util/Map;
-	public static synthetic fun loadConfigYamlMap$default (Lmisk/config/MiskConfig;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Ljava/util/Map;
-	public final fun toRedactedYaml (Lwisp/config/Config;Lmisk/resources/ResourceLoader;)Ljava/lang/String;
-}
-
-public final class misk/config/MiskConfig$RealSecret : misk/config/Secret {
-	public fun <init> (Ljava/lang/Object;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getValue ()Ljava/lang/Object;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/config/MiskConfig$RedactSecretJacksonModule : com/fasterxml/jackson/databind/module/SimpleModule {
-	public fun <init> ()V
-	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
-}
-
-public final class misk/config/MiskConfig$SecretJacksonModule : com/fasterxml/jackson/databind/module/SimpleModule {
-	public fun <init> (Lmisk/resources/ResourceLoader;Lcom/fasterxml/jackson/databind/ObjectMapper;)V
-	public final fun getMapper ()Lcom/fasterxml/jackson/databind/ObjectMapper;
-	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
-	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
-}
-
-public abstract interface annotation class misk/config/Redact : java/lang/annotation/Annotation {
-}
-
-public abstract interface class misk/config/Secret {
-	public abstract fun getValue ()Ljava/lang/Object;
-}
-
 public final class misk/environment/DeploymentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Lwisp/deployment/Deployment;)V
@@ -923,6 +874,9 @@ public final class misk/okio/OkioExtensionsKt {
 	public static final fun forEachBlock (Lokio/BufferedSource;ILkotlin/jvm/functions/Function2;)V
 	public static final fun forEachBlock (Lokio/BufferedSource;[BLkotlin/jvm/functions/Function2;)V
 	public static final fun split (Lokio/BufferedSource;Lokio/ByteString;)Lkotlin/sequences/Sequence;
+}
+
+public abstract interface annotation class misk/perf/ForPauseDetector : java/lang/annotation/Annotation {
 }
 
 public final class misk/perf/PauseDetectorConfig {
@@ -1393,6 +1347,7 @@ public final class misk/web/ResponseExtensionsKt {
 	public static final fun readUtf8 (Lmisk/web/Response;)Ljava/lang/String;
 	public static final fun toMisk (Lokhttp3/Response;)Lmisk/web/Response;
 	public static final fun toResponseBody (Ljava/lang/String;)Lmisk/web/ResponseBody;
+	public static final fun toResponseBody (Lokio/ByteString;)Lmisk/web/ResponseBody;
 }
 
 public abstract class misk/web/SocketAddress {
@@ -1527,16 +1482,6 @@ public final class misk/web/WebUnixDomainSocketConfig {
 	public final fun getPath ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/web/actions/FakeWebSocket : misk/web/actions/WebSocket {
-	public fun <init> ()V
-	public fun cancel ()V
-	public fun close (ILjava/lang/String;)Z
-	public fun queueSize ()J
-	public fun send (Ljava/lang/String;)Z
-	public fun send (Lokio/ByteString;)Z
-	public final fun takeLog ()Ljava/util/List;
 }
 
 public final class misk/web/actions/InternalErrorAction : misk/web/actions/WebAction {
@@ -2078,7 +2023,15 @@ public final class misk/web/proxy/WebProxyAction : misk/web/actions/WebAction {
 public final class misk/web/proxy/WebProxyEntry : misk/web/dashboard/ValidWebEntry {
 	public fun <init> (Ljava/lang/String;Lokhttp3/HttpUrl;)V
 	public synthetic fun <init> (Ljava/lang/String;Lokhttp3/HttpUrl;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lokhttp3/HttpUrl;
+	public final fun copy (Ljava/lang/String;Lokhttp3/HttpUrl;)Lmisk/web/proxy/WebProxyEntry;
+	public static synthetic fun copy$default (Lmisk/web/proxy/WebProxyEntry;Ljava/lang/String;Lokhttp3/HttpUrl;ILjava/lang/Object;)Lmisk/web/proxy/WebProxyEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUrl_path_prefix ()Ljava/lang/String;
 	public final fun getWeb_proxy_url ()Lokhttp3/HttpUrl;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/web/proxy/WebProxyEntryKt {
@@ -2101,6 +2054,13 @@ public final class misk/web/resources/StaticResourceAction : misk/web/actions/We
 public final class misk/web/resources/StaticResourceEntry : misk/web/dashboard/ValidWebEntry {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/resources/StaticResourceEntry;
+	public static synthetic fun copy$default (Lmisk/web/resources/StaticResourceEntry;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/resources/StaticResourceEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUrl_path_prefix ()Ljava/lang/String;
+	public fun hashCode ()I
 	public final fun resourcePath (Ljava/lang/String;)Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
 }
 

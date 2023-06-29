@@ -24,6 +24,7 @@ public final class misk/scope/ActionScope : java/lang/AutoCloseable {
 	public final fun propagate (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;
 	public final fun propagate (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
 	public final fun propagate (Lkotlin/reflect/KFunction;)Lkotlin/reflect/KFunction;
+	public final fun snapshotActionScope ()Ljava/util/Map;
 }
 
 public final class misk/scope/ActionScope$Companion {

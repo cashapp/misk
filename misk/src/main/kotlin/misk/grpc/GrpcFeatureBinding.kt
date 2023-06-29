@@ -7,6 +7,7 @@ import misk.web.DispatchMechanism
 import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
+import misk.web.Grpc
 import misk.web.PathPattern
 import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaTypes
@@ -83,10 +84,7 @@ internal class GrpcFeatureBinding(
         "@Grpc functions must have either 1 or 2 parameters: $action"
       }
 
-      val wireAnnotation = action.function.findAnnotationWithOverrides<WireRpc>()
-      requireNotNull(wireAnnotation) {
-        "@Grpc function must have @WireRpc annotations"
-      }
+      val wireAnnotation = action.function.findAnnotationWithOverrides<WireRpc>() ?: return null
 
       claimer.claimParameter(0)
       claimer.claimRequestBody()

@@ -241,25 +241,25 @@ class SampledLogger constructor(
     t: Throwable?
   ) = sampled { underlyingLogger.info(marker, msg, t) }
 
-  override fun isDebugEnabled(): Boolean = isDebugEnabled
+  override fun isDebugEnabled(): Boolean = underlyingLogger.isDebugEnabled
 
-  override fun isDebugEnabled(marker: org.slf4j.Marker?): Boolean = isDebugEnabled(marker)
+  override fun isDebugEnabled(marker: org.slf4j.Marker?): Boolean = underlyingLogger.isDebugEnabled(marker)
 
-  override fun isErrorEnabled(): Boolean = isErrorEnabled
+  override fun isErrorEnabled(): Boolean = underlyingLogger.isErrorEnabled
 
-  override fun isErrorEnabled(marker: org.slf4j.Marker?): Boolean = isErrorEnabled(marker)
+  override fun isErrorEnabled(marker: org.slf4j.Marker?): Boolean = underlyingLogger.isErrorEnabled(marker)
 
-  override fun isInfoEnabled(): Boolean = isInfoEnabled
+  override fun isInfoEnabled(): Boolean = underlyingLogger.isInfoEnabled
 
-  override fun isInfoEnabled(marker: org.slf4j.Marker?): Boolean = isInfoEnabled(marker)
+  override fun isInfoEnabled(marker: org.slf4j.Marker?): Boolean = underlyingLogger.isInfoEnabled(marker)
 
-  override fun isTraceEnabled(): Boolean = isTraceEnabled
+  override fun isTraceEnabled(): Boolean = underlyingLogger.isTraceEnabled
 
-  override fun isTraceEnabled(marker: org.slf4j.Marker?): Boolean = isTraceEnabled(marker)
+  override fun isTraceEnabled(marker: org.slf4j.Marker?): Boolean = underlyingLogger.isTraceEnabled(marker)
 
-  override fun isWarnEnabled(): Boolean = isWarnEnabled
+  override fun isWarnEnabled(): Boolean = underlyingLogger.isWarnEnabled
 
-  override fun isWarnEnabled(marker: org.slf4j.Marker?): Boolean = isWarnEnabled(marker)
+  override fun isWarnEnabled(marker: org.slf4j.Marker?): Boolean = underlyingLogger.isWarnEnabled(marker)
 
   override fun <T : Throwable> throwing(throwable: T): T = throwing(throwable)
 

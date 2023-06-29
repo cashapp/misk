@@ -8,16 +8,16 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.Scopes
 import com.google.inject.Singleton
-import javax.inject.Inject
-import kotlin.test.assertFailsWith
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 internal class ServiceManagerModuleTest {
-  @com.google.inject.Singleton
+  @Singleton
   class SingletonService1 : AbstractIdleService() {
     override fun startUp() {}
     override fun shutDown() {}
@@ -117,12 +117,12 @@ internal class ServiceManagerModuleTest {
                 .`in`(Scopes.SINGLETON)
               install(ServiceModule<SingletonAnnotationService>())
               bind(keyOf<SingletonAnnotationService>())
-                .`in`(com.google.inject.Singleton::class.java)
+                .`in`(Singleton::class.java)
               install(
                 ServiceModule<GoogleSingletonAnnotationService>()
               )
               bind(keyOf<GoogleSingletonAnnotationService>())
-                .`in`(com.google.inject.Singleton::class.java)
+                .`in`(Singleton::class.java)
 
               // Should be recognized as non-singletons
               install(ServiceModule<NonSingletonService1>())
@@ -150,6 +150,7 @@ internal class ServiceManagerModuleTest {
     init {
       log.append("ProducerService.init\n")
     }
+
     override fun doStart() {
       log.append("ProducerService.startUp\n")
       notifyStarted()
@@ -168,6 +169,7 @@ internal class ServiceManagerModuleTest {
     init {
       log.append("ConsumerService.init\n")
     }
+
     override fun doStart() {
       log.append("ConsumerService.startUp\n")
       notifyStarted()
@@ -186,6 +188,7 @@ internal class ServiceManagerModuleTest {
     init {
       log.append("AnotherUpstreamService.init\n")
     }
+
     override fun doStart() {
       log.append("AnotherUpstreamService.startUp\n")
       notifyStarted()
@@ -205,9 +208,11 @@ internal class ServiceManagerModuleTest {
         override fun configure() {
           bind<StringBuilder>().toInstance(log)
           install(ServiceModule<ProducerService>())
-          install(ServiceModule<ConsumerService>()
-            .dependsOn<ProducerService>()
-            .dependsOn<AnotherUpstreamService>())
+          install(
+            ServiceModule<ConsumerService>()
+              .dependsOn<ProducerService>()
+              .dependsOn<AnotherUpstreamService>()
+          )
           install(ServiceModule<AnotherUpstreamService>())
         }
       }
@@ -220,7 +225,8 @@ internal class ServiceManagerModuleTest {
     serviceManager.stopAsync()
     serviceManager.awaitStopped()
 
-    assertThat(log.toString()).isEqualTo("""
+    assertThat(log.toString()).isEqualTo(
+      """
       |ProducerService.init
       |ProducerService.startUp
       |AnotherUpstreamService.init
@@ -231,6 +237,7 @@ internal class ServiceManagerModuleTest {
       |ConsumerService.shutDown
       |ProducerService.shutDown
       |AnotherUpstreamService.shutDown
-      |""".trimMargin())
+      |""".trimMargin()
+    )
   }
 }

@@ -1,8 +1,12 @@
 package misk.redis
 
+import com.google.common.base.Stopwatch
+import com.google.common.base.Ticker
 import misk.metrics.v2.Metrics
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 
-class RedisClientMetrics(metrics: Metrics) {
+class RedisClientMetrics(private val ticker: Ticker, metrics: Metrics) {
   internal val maxTotalConnectionsGauge = metrics.gauge(
     name = MAX_TOTAL_CONNECTIONS,
     help = """
@@ -34,12 +38,16 @@ class RedisClientMetrics(metrics: Metrics) {
   )
   private val operationTime = metrics.histogram(
     name = OPERATION_TIME,
-    help = "The time it took in seconds, as reported by the client, to complete an operation.",
+    help = "The time it took in milliseconds, as reported by the client, to complete an operation.",
     labelNames = listOf("command"),
   )
 
-  internal fun <T> timed(commandName: String, block: () -> T): T {
-    return operationTime.labels(commandName).time(block)
+  fun <T> timed(commandName: String, block: () -> T): T {
+    val stopwatch = Stopwatch.createStarted(ticker)
+    val result = runCatching { block() }
+    stopwatch.stop()
+    operationTime.labels(commandName).observe(stopwatch.elapsed().toMillis().toDouble())
+    return result.getOrThrow()
   }
 
   companion object {
@@ -48,6 +56,6 @@ class RedisClientMetrics(metrics: Metrics) {
     internal const val IDLE_CONNECTIONS = "redis_client_idle_connections"
     internal const val ACTIVE_CONNECTIONS = "redis_client_active_connections"
     internal const val DESTROYED_CONNECTIONS_TOTAL = "redis_client_pool_destroyed_connections_total"
-    internal const val OPERATION_TIME = "redis_client_operation_time_seconds"
+    internal const val OPERATION_TIME = "redis_client_operation_time_millis"
   }
 }
