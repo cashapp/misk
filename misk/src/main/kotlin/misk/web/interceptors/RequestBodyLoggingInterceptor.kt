@@ -130,7 +130,7 @@ fun RequestLoggingTransformer.tryTransform(requestResponseBody: RequestResponseB
     transform(requestResponseBody)
   } catch (ex: Exception) {
     logger.warn(ex) {
-      "RequestLoggingTransformer of type [${this.javaClass.name}] failed to transform: request=[${requestResponseBody?.request}] response[${requestResponseBody?.response}]"
+      "RequestLoggingTransformer of type [${this.javaClass.name}] failed to transform: request=${requestResponseBody?.request} response=${requestResponseBody?.response}"
     }
     requestResponseBody
   }

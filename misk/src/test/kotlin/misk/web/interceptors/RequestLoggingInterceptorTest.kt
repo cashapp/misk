@@ -262,7 +262,7 @@ internal class RequestLoggingInterceptorTest {
 
     // Transformer exception is logged
     val allLogs = events.map { it.formattedMessage }
-    assertThat(allLogs).contains("RequestLoggingTransformer of type [misk.web.interceptors.ThrowingTransformer] failed to transform: request=[[Oppenheimer]] response[echo: Oppenheimer]")
+    assertThat(allLogs).contains("RequestLoggingTransformer of type [misk.web.interceptors.ThrowingTransformer] failed to transform: request=[Oppenheimer] response=echo: Oppenheimer")
 
     // Regular request logging still happened
     val interceptorLogs = events
