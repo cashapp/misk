@@ -109,6 +109,7 @@ class HibernateModule(
     install(
       ServiceModule<SchemaMigratorService>(qualifier)
         .dependsOn<DataSourceService>(qualifier)
+        .enhancedBy<ReadyService>()
     )
 
     val transacterServiceProvider = getProvider(keyOf<TransacterService>(qualifier))
@@ -226,6 +227,7 @@ class HibernateModule(
     } else {
       install(
         ServiceModule<TransacterService>(qualifier)
+          .enhancedBy<ReadyService>()
           .dependsOn<DataSourceService>(qualifier)
       )
     }

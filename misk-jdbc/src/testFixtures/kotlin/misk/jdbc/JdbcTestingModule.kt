@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import com.squareup.moshi.Moshi
+import misk.ReadyService
 import javax.inject.Provider
 import kotlin.reflect.KClass
 import misk.ServiceModule
@@ -42,6 +43,7 @@ class JdbcTestingModule(
     install(
       ServiceModule(truncateTablesServiceKey)
         .enhances<SchemaMigratorService>(qualifier)
+        .enhancedBy<ReadyService>()
     )
     bind(truncateTablesServiceKey).toProvider(Provider {
       TruncateTablesService(

@@ -1,8 +1,7 @@
 package misk.jdbc
 
 import com.squareup.moshi.Moshi
-import javax.inject.Provider
-import kotlin.reflect.KClass
+import misk.ReadyService
 import misk.ServiceModule
 import misk.database.StartDatabaseService
 import misk.inject.KAbstractModule
@@ -12,6 +11,8 @@ import misk.inject.toKey
 import misk.time.ForceUtcTimeZoneService
 import misk.vitess.VitessScaleSafetyChecks
 import okhttp3.OkHttpClient
+import javax.inject.Provider
+import kotlin.reflect.KClass
 
 /**
  * Installs a service to clear the test datasource before running tests. This module should be
@@ -43,6 +44,7 @@ class JdbcTestingModule(
     install(
       ServiceModule(truncateTablesServiceKey)
         .enhances<SchemaMigratorService>(qualifier)
+        .enhancedBy<ReadyService>()
     )
     bind(truncateTablesServiceKey).toProvider(Provider {
       TruncateTablesService(
