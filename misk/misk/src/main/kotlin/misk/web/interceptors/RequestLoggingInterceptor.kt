@@ -34,7 +34,8 @@ class RequestLoggingInterceptor internal constructor(
   private val errorRatePerSecond: Long,
   private val bodySampling: Double,
   private val errorBodySampling: Double,
-  private val bodyCapture: RequestResponseCapture
+  private val bodyCapture: RequestResponseCapture,
+  private val requestLoggingTransformers: List<RequestLoggingTransformer>,
 ) : NetworkInterceptor {
   @Singleton
   class Factory @Inject internal constructor(
@@ -45,6 +46,7 @@ class RequestLoggingInterceptor internal constructor(
     private val logRateLimiter: LogRateLimiter,
     private val deployment: Deployment,
     private val configs: Set<RequestLoggingConfig>,
+    private val requestLoggingTransformers: List<RequestLoggingTransformer>,
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
       // Only bother with endpoints that have the annotation
@@ -77,7 +79,8 @@ class RequestLoggingInterceptor internal constructor(
         config.errorRatePerSecond,
         config.bodySampling,
         config.errorBodySampling,
-        bodyCapture
+        bodyCapture,
+        requestLoggingTransformers,
       )
     }
   }
@@ -131,7 +134,14 @@ class RequestLoggingInterceptor internal constructor(
     val sampling = if (isError) errorBodySampling else bodySampling
     val randomDouble = random.current().nextDouble()
     if (randomDouble < sampling) {
-      val requestResponseBody = bodyCapture.get()
+      // Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
+      // and cannot be reliably controlled by services.
+      // In practice, they will be applied in the order that they happened to be bound.
+      val requestResponseBody =
+        requestLoggingTransformers.fold(bodyCapture.get()) { body, transformer ->
+          transformer.tryTransform(body)
+        }
+      
       requestResponseBody?.let {
         requestResponseBody.request?.let {
           builder.append(" request=${requestResponseBody.request}")

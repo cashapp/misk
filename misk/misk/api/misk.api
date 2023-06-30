@@ -1730,6 +1730,10 @@ public final class misk/web/interceptors/RequestBodyLoggingInterceptor$Factory :
 	public fun create (Lmisk/Action;)Lmisk/ApplicationInterceptor;
 }
 
+public final class misk/web/interceptors/RequestBodyLoggingInterceptorKt {
+	public static final fun tryTransform (Lmisk/web/interceptors/RequestLoggingTransformer;Lmisk/web/interceptors/RequestResponseBody;)Lmisk/web/interceptors/RequestResponseBody;
+}
+
 public final class misk/web/interceptors/RequestLoggingConfig {
 	public fun <init> (Ljava/util/Map;)V
 	public final fun component1 ()Ljava/util/Map;
@@ -1748,6 +1752,23 @@ public final class misk/web/interceptors/RequestLoggingInterceptor : misk/web/Ne
 
 public final class misk/web/interceptors/RequestLoggingInterceptor$Factory : misk/web/NetworkInterceptor$Factory {
 	public fun create (Lmisk/Action;)Lmisk/web/NetworkInterceptor;
+}
+
+public abstract interface class misk/web/interceptors/RequestLoggingTransformer {
+	public abstract fun transform (Lmisk/web/interceptors/RequestResponseBody;)Lmisk/web/interceptors/RequestResponseBody;
+}
+
+public final class misk/web/interceptors/RequestResponseBody {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lmisk/web/interceptors/RequestResponseBody;
+	public static synthetic fun copy$default (Lmisk/web/interceptors/RequestResponseBody;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lmisk/web/interceptors/RequestResponseBody;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRequest ()Ljava/lang/Object;
+	public final fun getResponse ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/web/interceptors/ResponseBodyMarshallerFactory {
