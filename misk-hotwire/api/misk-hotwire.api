@@ -1,9 +1,5 @@
 public final class misk/hotwire/BuildHtmlKt {
 	public static final fun buildHtml (Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
-}
-
-public final class misk/turbo/BuildHtmlKt {
-	public static final fun buildHtml (Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
 	public static final fun buildHtmlResponseBody (Lkotlin/jvm/functions/Function1;)Lmisk/web/ResponseBody;
 }
 

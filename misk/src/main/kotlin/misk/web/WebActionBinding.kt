@@ -194,7 +194,7 @@ internal class WebActionBinding @Inject constructor(
       val nonNullParameters = mutableListOf<FeatureBinding>()
       for (i in 0 until parameters.size) {
         nonNullParameters += checkNotNull(parameters[i]) {
-          "$action parameter $i not claimed (did you forget @RequestBody ?)"
+          "$action parameter $i not claimed (did you forget @RequestBody ? Did you use correct /path/{param} syntax for your path parameter?)"
         }
       }
 

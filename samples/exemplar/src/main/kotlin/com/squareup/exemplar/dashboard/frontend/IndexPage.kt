@@ -8,7 +8,7 @@ import kotlinx.html.nav
 import kotlinx.html.role
 import kotlinx.html.ul
 import misk.config.AppName
-import misk.turbo.buildHtml
+import misk.hotwire.buildHtml
 import misk.turbo.turbo_frame
 import misk.web.Get
 import misk.web.ResponseContentType
