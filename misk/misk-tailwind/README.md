@@ -12,5 +12,3 @@ To support Misk UI, the `misk-tailwind/config` directory includes a full Tailwin
 For services using Misk, they will likely need to mimic this setup so that they can get generated CSS for the classes that your UI uses (which may be a superset of the Misk classes).
 
 Notably, in local development environments, the Tailwind Play CDN is used for easy iteration without running the config task. 
-
-## Maintainers

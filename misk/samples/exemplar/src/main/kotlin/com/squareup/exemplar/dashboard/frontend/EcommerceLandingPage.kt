@@ -25,7 +25,7 @@ import kotlinx.html.span
 import kotlinx.html.ul
 import kotlinx.html.unsafe
 import misk.config.AppName
-import misk.turbo.buildHtml
+import misk.hotwire.buildHtml
 import misk.turbo.turbo_frame
 import misk.web.Get
 import misk.web.ResponseContentType

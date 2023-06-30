@@ -62,8 +62,7 @@ internal class WebActionsServlet @Inject constructor(
     for (action in boundActions) {
       for (other in boundActions) {
         check(action === other || !action.hasIdenticalRouting(other)) {
-          "Actions [${action.action.name}, ${other.action.name}] have identical routing " +
-            "annotations."
+          "Actions [${action.action.name}, ${other.action.name}] have identical routing annotations."
         }
       }
     }
