@@ -134,8 +134,11 @@ class RequestLoggingInterceptor internal constructor(
     val sampling = if (isError) errorBodySampling else bodySampling
     val randomDouble = random.current().nextDouble()
     if (randomDouble < sampling) {
+      // Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
+      // and cannot be reliably controlled by services.
+      // In practice, they will be applied in the order that they happened to be bound.
       val requestResponseBody =
-        requestLoggingTransformers.foldRight(bodyCapture.get()) { transformer, body ->
+        requestLoggingTransformers.fold(bodyCapture.get()) { body, transformer ->
           transformer.tryTransform(body)
         }
       

@@ -246,30 +246,32 @@ internal class RequestLoggingInterceptorTest {
   }
 
   @Test
-  fun `requestResponseBodyTransformer works`() {
+  fun `requestResponseBodyTransformer applies all relevant transformers`() {
     assertThat(invoke("/call/logEverything/Evan", "caller").isSuccessful).isTrue()
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
 
+    // Note that the [DontSayDumbTransformer] is registered earlier and thus ran _before_ the
+    // [EvanHatingTransformer] which added "dumb" to the response, so it doesn't get applied here.
     assertThat(messages).containsExactly(
-      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Evan] response=echo: Evan, the jerk"
+      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Evan] response=echo: Evan, the big dumb meanie"
     )
   }
 
   @Test
   fun `requestResponseBodyTransformer contains explosions`() {
-    assertThat(invoke("/call/logEverything/Oppenheimer", "caller").isSuccessful).isTrue()
+    assertThat(invoke("/call/logEverything/Oppenheimer-the-jerk", "caller").isSuccessful).isTrue()
     val events = logCollector.takeEvents()
 
     // Transformer exception is logged
     val allLogs = events.map { it.formattedMessage }
-    assertThat(allLogs).contains("RequestLoggingTransformer of type [misk.web.interceptors.ThrowingTransformer] failed to transform: request=[Oppenheimer] response=echo: Oppenheimer")
+    assertThat(allLogs).contains("RequestLoggingTransformer of type [misk.web.interceptors.ThrowingTransformer] failed to transform: request=[Oppenheimer-the-jerk] response=echo: Oppenheimer-the-jerk")
 
-    // Regular request logging still happened
+    // Regular request logging still happened, and [DontSayJerkTransformer] still ran
     val interceptorLogs = events
       .filter { it.loggerName == RequestLoggingInterceptor::class.qualifiedName }
       .map { it.message }
     assertThat(interceptorLogs).containsExactly(
-      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Oppenheimer] response=echo: Oppenheimer"
+      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Oppenheimer-the-jerk] response=echo: Oppenheimer-the-meanie"
     )
   }
 
@@ -284,8 +286,12 @@ internal class RequestLoggingInterceptorTest {
       multibind<RequestLoggingConfig>().toInstance(
         RequestLoggingConfig(mapOf("ConfigOverrideAction" to ActionLoggingConfig(0, 0, 1.0, 1.0)))
       )
-      multibind<RequestLoggingTransformer>().to<EvanHatingTransformer>()
+      
+      // Note: the order of these registrations is intentional as it impacts behavior in same tests
       multibind<RequestLoggingTransformer>().to<ThrowingTransformer>()
+      multibind<RequestLoggingTransformer>().to<DontSayDumbTransformer>()
+      multibind<RequestLoggingTransformer>().to<EvanHatingTransformer>()
+      multibind<RequestLoggingTransformer>().to<DontSayJerkTransformer>()
     }
   }
 
@@ -406,10 +412,30 @@ internal class EvanHatingTransformer @Inject constructor() : RequestLoggingTrans
   override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
     val responseString = requestResponseBody?.response as? String
     return if (responseString?.contains("Evan") == true) {
-      requestResponseBody.copy(response = responseString.replace("Evan", "Evan, the jerk"))
+      requestResponseBody.copy(response = responseString.replace("Evan", "Evan, the big dumb jerk"))
     } else {
       requestResponseBody
     }
+  }
+}
+
+/**
+ * A [RequestLoggingTransformer] that doesn't like the word "dumb"
+ */
+internal class DontSayDumbTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return requestResponseBody?.copy(response = responseString?.replace("dumb", "silly"))
+  }
+}
+
+/**
+ * A [RequestLoggingTransformer] that doesn't like the word "jerk"
+ */
+internal class DontSayJerkTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return requestResponseBody?.copy(response = responseString?.replace("jerk", "meanie"))
   }
 }
 

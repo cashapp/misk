@@ -120,6 +120,9 @@ data class RequestResponseBody(val request: Any?, val response: Any?)
 /**
  * Transforms request and/or response bodies before they get logged by [RequestLoggingInterceptor].
  * Useful for things like stripping out noisy data.
+ * 
+ * Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
+ * and cannot be reliably controlled.
  */
 interface RequestLoggingTransformer {
   fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody?
