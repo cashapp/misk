@@ -115,4 +115,25 @@ internal class RequestResponseCapture @Inject constructor() {
   }
 }
 
-internal data class RequestResponseBody(val request: Any?, val response: Any?)
+data class RequestResponseBody(val request: Any?, val response: Any?)
+
+/**
+ * Transforms request and/or response bodies before they get logged by [RequestLoggingInterceptor].
+ * Useful for things like stripping out noisy data.
+ * 
+ * Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
+ * and cannot be reliably controlled.
+ */
+interface RequestLoggingTransformer {
+  fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody?
+}
+
+fun RequestLoggingTransformer.tryTransform(requestResponseBody: RequestResponseBody?): RequestResponseBody? =
+  try {
+    transform(requestResponseBody)
+  } catch (ex: Exception) {
+    logger.warn(ex) {
+      "RequestLoggingTransformer of type [${this.javaClass.name}] failed to transform: request=${requestResponseBody?.request} response=${requestResponseBody?.response}"
+    }
+    requestResponseBody
+  }

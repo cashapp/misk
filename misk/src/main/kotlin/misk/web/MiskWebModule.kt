@@ -54,6 +54,7 @@ import misk.web.interceptors.RequestBodyLoggingInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingConfig
 import misk.web.interceptors.RequestLoggingInterceptor
+import misk.web.interceptors.RequestLoggingTransformer
 import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
@@ -210,6 +211,7 @@ class MiskWebModule(
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
       .to<RequestBodyLoggingInterceptor.Factory>()
 
+    newMultibinder<RequestLoggingTransformer>()
     newMultibinder<WebActionSeedDataTransformerFactory>()
 
     install(ExceptionMapperModule.create<WebActionException, WebActionExceptionMapper>())
