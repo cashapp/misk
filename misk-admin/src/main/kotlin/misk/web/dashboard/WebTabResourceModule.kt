@@ -51,7 +51,7 @@ class WebTabResourceModule(
       web_proxy_url?.let {
         install(WebActionModule.createWithPrefix<WebProxyAction>(url_path_prefix = url_path_prefix))
         multibind<WebProxyEntry>().toInstance(
-          WebProxyEntry(url_path_prefix = url_path_prefix, web_proxy_url = it)
+          WebProxyEntry(url_path_prefix = url_path_prefix, web_proxy_url = web_proxy_url)
         )
       }
     } else {

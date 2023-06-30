@@ -22,6 +22,7 @@ data class MenuSection(
   val links: List<Link>
 )
 
+// TODO fix scrolling of non-iframe tabs scrolling the sidebar color
 fun TagConsumer<*>.Navbar(
   appName: String,
   deployment: Deployment,
@@ -83,6 +84,7 @@ fun TagConsumer<*>.Navbar(
                   type = ButtonType.button
                   attributes["data-action"] = "toggle#toggle"
                   span("sr-only") { +"""Close sidebar""" }
+                  // TODO add to Heroicons
                   unsafe {
                     raw(
                       """
@@ -134,6 +136,7 @@ fun TagConsumer<*>.Navbar(
             attributes["data-action"] = "toggle#toggle"
             type = ButtonType.button
             span("sr-only") { +"""Open sidebar""" }
+            // TODO add to Heroicons
             unsafe {
               raw(
                 """
