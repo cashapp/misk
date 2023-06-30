@@ -18,6 +18,6 @@ class ExemplarAccessModule : KAbstractModule() {
 
     // Setup authentication in the development environment
     bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
-      .toInstance(MiskCaller(user = "development", capabilities = setOf("admin_console", "users")))
+      .toInstance(MiskCaller(user = "triceratops", capabilities = setOf("admin_console", "users")))
   }
 }
