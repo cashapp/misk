@@ -1760,13 +1760,20 @@ public abstract interface class misk/web/interceptors/RequestLoggingTransformer 
 
 public final class misk/web/interceptors/RequestResponseBody {
 	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V
+	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/Object;
 	public final fun component2 ()Ljava/lang/Object;
-	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lmisk/web/interceptors/RequestResponseBody;
-	public static synthetic fun copy$default (Lmisk/web/interceptors/RequestResponseBody;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lmisk/web/interceptors/RequestResponseBody;
+	public final fun component3 ()Ljava/lang/Object;
+	public final fun component4 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Lmisk/web/interceptors/RequestResponseBody;
+	public static synthetic fun copy$default (Lmisk/web/interceptors/RequestResponseBody;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lmisk/web/interceptors/RequestResponseBody;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getRequest ()Ljava/lang/Object;
+	public final fun getRequestHeaders ()Ljava/lang/Object;
 	public final fun getResponse ()Ljava/lang/Object;
+	public final fun getResponseHeaders ()Ljava/lang/Object;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
