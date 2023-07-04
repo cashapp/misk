@@ -2,6 +2,7 @@ package misk.exceptions
 
 import com.squareup.wire.AnyMessage
 import com.squareup.wire.GrpcStatus
+import java.net.HttpURLConnection.HTTP_BAD_GATEWAY
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import java.net.HttpURLConnection.HTTP_CONFLICT
 import java.net.HttpURLConnection.HTTP_ENTITY_TOO_LARGE
@@ -98,6 +99,13 @@ open class TooManyRequestsException(message: String = "", cause: Throwable? = nu
 /** This exception is custom to Misk. */
 open class ClientClosedRequestException(message: String = "", cause: Throwable? = null) :
   WebActionException(499, message, message, cause)
+
+/**
+ * Base exception for when a server is acting as a gateway and gets invalid response from upstream.
+ * The message is not exposed to the caller.
+ */
+open class BadGatewayException(message: String = "", cause: Throwable? = null) :
+  WebActionException(HTTP_BAD_GATEWAY, "BAD_GATEWAY", message, cause)
 
 /**
  * Base exception for when a server is acting as a gateway and cannot get a response in time.

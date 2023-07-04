@@ -17,6 +17,12 @@ public final class misk/MiskCaller {
 	public fun toString ()Ljava/lang/String;
 }
 
+public class misk/exceptions/BadGatewayException : misk/exceptions/WebActionException {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
 public class misk/exceptions/BadRequestException : misk/exceptions/WebActionException {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
