@@ -194,6 +194,10 @@ subprojects {
     resolutionStrategy.capabilitiesResolution.withCapability("com.google.guava:listenablefuture") {
       select("com.google.guava:guava:0")
     }
+
+    // Omit optional dependency from Guice + Guava.
+    // https://github.com/google/guice/pull/1739
+    exclude(group = "com.google.errorprone", module = "error_prone_annotations")
   }
 }
 

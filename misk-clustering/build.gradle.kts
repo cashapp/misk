@@ -15,7 +15,6 @@ dependencies {
   api(Dependencies.wispConfig)
   api(Dependencies.wispLeaseTesting)
   api(project(":misk-inject"))
-  implementation(Dependencies.errorproneAnnotations)
   implementation(Dependencies.guice)
   implementation(Dependencies.kubernetesClient)
   implementation(Dependencies.kubernetesClientApi)
