@@ -24,10 +24,18 @@ import javax.inject.Singleton
 
 /**
  * StaticResourceAction
+ *
  * This data class is used with Guice multibindings. Register instances by calling `multibind()`
  * in a `KAbstractModule`:
  * ```
- * multibind<StaticResourceEntry>().toInstance(StaticResourceEntry(...))
+ * multibind<StaticResourceEntry>()
+ *   .toInstance(
+ *     StaticResourceEntry(
+ *       url_path_prefix = "/static/",
+ *       resourcePath = "classpath:/web/static/"
+ *     )
+ *   )
+ * install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = "/static/"))
  * ```
  */
 @Singleton

@@ -245,6 +245,36 @@ internal class RequestLoggingInterceptorTest {
     }
   }
 
+  @Test
+  fun `requestResponseBodyTransformer applies all relevant transformers`() {
+    assertThat(invoke("/call/logEverything/Quokka", "caller").isSuccessful).isTrue()
+    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+
+    // Note that the [DontSayDumbTransformer] is registered earlier and thus ran _before_ the
+    // [EvanHatingTransformer] which added "dumb" to the response, so it doesn't get applied here.
+    assertThat(messages).containsExactly(
+      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Quokka] response=echo: Quokka (the happiest, most bestest animal)"
+    )
+  }
+
+  @Test
+  fun `requestResponseBodyTransformer contains explosions`() {
+    assertThat(invoke("/call/logEverything/Oppenheimer-the-bestest", "caller").isSuccessful).isTrue()
+    val events = logCollector.takeEvents()
+
+    // Transformer exception is logged
+    val allLogs = events.map { it.formattedMessage }
+    assertThat(allLogs).contains("RequestLoggingTransformer of type [misk.web.interceptors.ThrowingTransformer] failed to transform: request=[Oppenheimer-the-bestest] response=echo: Oppenheimer-the-bestest")
+
+    // Regular request logging still happened, and [DontSayJerkTransformer] still ran
+    val interceptorLogs = events
+      .filter { it.loggerName == RequestLoggingInterceptor::class.qualifiedName }
+      .map { it.message }
+    assertThat(interceptorLogs).containsExactly(
+      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Oppenheimer-the-bestest] response=echo: Oppenheimer-the-most bestest"
+    )
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(AccessControlModule())
@@ -256,11 +286,18 @@ internal class RequestLoggingInterceptorTest {
       multibind<RequestLoggingConfig>().toInstance(
         RequestLoggingConfig(mapOf("ConfigOverrideAction" to ActionLoggingConfig(0, 0, 1.0, 1.0)))
       )
+      
+      // Note: the order of these registrations is intentional as it impacts behavior in same tests
+      multibind<RequestLoggingTransformer>().to<ThrowingTransformer>()
+      multibind<RequestLoggingTransformer>().to<RegularSuperlativeEnhancingTransformer>()
+      multibind<RequestLoggingTransformer>().to<QuokkaLovingTransformer>()
+      multibind<RequestLoggingTransformer>().to<SillySuperlativeEnhancingTransformer>()
     }
   }
 
   class TestActionsModule : KAbstractModule() {
     override fun configure() {
+      install(WebActionModule.create<LogEverythingAction>())
       install(WebActionModule.create<RateLimitingRequestLoggingAction>())
       install(WebActionModule.create<RateLimitingIncludesBodyRequestLoggingAction>())
       install(WebActionModule.create<NoRateLimitingRequestLoggingAction>())
@@ -270,6 +307,19 @@ internal class RequestLoggingInterceptorTest {
       install(WebActionModule.create<ConfigOverrideAction>())
     }
   }
+}
+
+internal class LogEverythingAction @Inject constructor() : WebAction {
+  @Get("/call/logEverything/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 0,
+    errorRatePerSecond = 0,
+    bodySampling = 1.0,
+    errorBodySampling = 1.0
+  )
+  fun call(@PathParam message: String) = "echo: $message"
 }
 
 internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
@@ -353,4 +403,48 @@ internal class ConfigOverrideAction @Inject constructor() : WebAction {
     errorBodySampling = 0.0
   ) // these values overridden by RequestLoggingConfig binding above
   fun call(@PathParam message: String): String = "echo: $message"
+}
+
+/**
+ * A [RequestLoggingTransformer] that really loves Quokkas
+ */
+internal class QuokkaLovingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return requestResponseBody?.copy(response = responseString?.replace("Quokka", "Quokka (the happiest, bestest animal)"))
+  }
+}
+
+/**
+ * A [RequestLoggingTransformer] that enhances silly superlatives
+ */
+internal class SillySuperlativeEnhancingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return requestResponseBody?.copy(response = responseString?.replace("bestest", "most bestest"))
+  }
+}
+
+/**
+ * A [RequestLoggingTransformer] that doesn't like the word "jerk" in String response bodies
+ */
+internal class RegularSuperlativeEnhancingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return requestResponseBody?.copy(response = responseString?.replace("happiest", "most happiest"))
+  }
+}
+
+/**
+ * A [RequestLoggingTransformer] that explodes if you say the secret word
+ */
+internal class ThrowingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return if (responseString?.contains("Oppenheimer") == true) {
+      throw Exception("I am become death, destroyer of frameworks")
+    } else {
+      requestResponseBody
+    }
+  }
 }

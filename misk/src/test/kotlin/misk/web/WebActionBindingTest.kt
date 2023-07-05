@@ -7,6 +7,7 @@ import okio.BufferedSink
 import okio.BufferedSource
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 internal class WebActionBindingTest {
@@ -60,13 +61,13 @@ internal class WebActionBindingTest {
         pathPattern
       )
     }
-    assertThat(e).hasMessage(
+    assertEquals(
       "${
       TestAction::fakeApiCall.asAction(
         DispatchMechanism.POST
       )
-      } parameter 1 not claimed (did you forget @RequestBody ?)"
-    )
+      } parameter 1 not claimed (did you forget @RequestBody ? Did you use correct /path/{param} syntax for your path parameter?)"
+    , e.message)
   }
 
   @Test
@@ -166,6 +167,7 @@ internal class WebActionBindingTest {
   class TestAction : WebAction {
     fun fakeApiCall(p0: String, p1: String): String = TODO()
     fun voidApiCall(p0: String, p1: String): Unit = TODO()
+    fun pathParamCall(@PathParam p0: String): String = TODO()
   }
 
   internal class FakeFeatureBinding(

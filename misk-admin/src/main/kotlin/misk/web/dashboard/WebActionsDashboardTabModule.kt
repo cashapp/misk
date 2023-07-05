@@ -12,6 +12,7 @@ import misk.web.metadata.webaction.WebActionMetadataAction
  */
 class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstractModule() {
   override fun configure() {
+    // Web Actions v2
     install(WebActionModule.create<WebActionMetadataAction>())
 
     // Web Actions v2
