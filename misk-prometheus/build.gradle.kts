@@ -9,6 +9,7 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.guava)
   api(Dependencies.javaxInject)
   api(Dependencies.prometheusClient)
   api(Dependencies.wispConfig)

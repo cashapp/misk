@@ -10,6 +10,7 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.guava)
   api(Dependencies.javaxInject)
   api(Dependencies.jedis)
   api(Dependencies.wispConfig)
@@ -17,7 +18,6 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
   implementation(Dependencies.apacheCommonsPool2)
-  implementation(Dependencies.guava)
   implementation(Dependencies.guice)
   implementation(Dependencies.okio)
   implementation(Dependencies.prometheusClient)

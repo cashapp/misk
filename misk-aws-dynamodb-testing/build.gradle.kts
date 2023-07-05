@@ -10,11 +10,13 @@ plugins {
 
 dependencies {
   api(Dependencies.awsDynamodb)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.tempestTestingInternal)
   api(project(":misk-aws-dynamodb"))
   api(project(":misk-inject"))
+  implementation(Dependencies.errorproneAnnotations)
   implementation(Dependencies.kotlinReflect)
   implementation(Dependencies.tempestTesting)
   implementation(Dependencies.tempestTestingDocker)

@@ -65,6 +65,7 @@ sourceSets {
 dependencies {
   api(Dependencies.grpcApi)
   api(Dependencies.grpcStub)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.okHttp)

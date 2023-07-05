@@ -13,13 +13,13 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.guava)
   api(Dependencies.javaxInject)
   api(Dependencies.jooq)
   api(Dependencies.kotlinLogging)
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
-  implementation(Dependencies.guava)
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinRetry)
   implementation(Dependencies.kotlinxCoroutines)

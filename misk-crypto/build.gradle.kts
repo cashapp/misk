@@ -23,6 +23,7 @@ dependencies {
   api(project(":misk-inject"))
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.bouncycastlePgp)
+  implementation(Dependencies.guava)
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.moshi)
   implementation(Dependencies.okio)

@@ -12,6 +12,7 @@ plugins {
 dependencies {
   api(Dependencies.awsDynamodb)
   api(Dependencies.awsJavaSdkCore)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.kotlinLogging)

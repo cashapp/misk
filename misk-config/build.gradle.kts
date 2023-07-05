@@ -17,6 +17,7 @@ dependencies {
   api(Dependencies.wispResourceLoader)
   api(project(":misk-inject"))
   implementation(Dependencies.apacheCommonsLang3)
+  implementation(Dependencies.guava)
   implementation(Dependencies.guice)
   implementation(Dependencies.jacksonCore)
   implementation(Dependencies.jacksonDataformatYaml)
