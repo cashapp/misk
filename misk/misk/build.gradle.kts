@@ -11,6 +11,7 @@ plugins {
 
 dependencies {
   api(Dependencies.concurrencyLimitsCore)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.jacksonAnotations)
   api(Dependencies.jacksonDatabind)
@@ -35,7 +36,6 @@ dependencies {
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
-  implementation(Dependencies.guava)
   implementation(Dependencies.jCommander)
   implementation(Dependencies.jettyAlpnServer)
   implementation(Dependencies.jettyHttp)

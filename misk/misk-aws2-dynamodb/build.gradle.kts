@@ -13,6 +13,7 @@ dependencies {
   api(Dependencies.aws2Dynamodb)
   api(Dependencies.awsAuth)
   api(Dependencies.awsSdkCore)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.kotlinLogging)

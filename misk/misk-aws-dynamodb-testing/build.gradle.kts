@@ -10,6 +10,7 @@ plugins {
 
 dependencies {
   api(Dependencies.awsDynamodb)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.tempestTestingInternal)

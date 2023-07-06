@@ -9,11 +9,11 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.guava)
   api(Dependencies.javaxInject)
   api(Dependencies.wispFeature)
   api(Dependencies.wispLaunchDarkly)
   api(project(":misk-feature"))
-  implementation(Dependencies.guava)
   implementation(Dependencies.kotlinStdLibJdk8)
 
   testImplementation(Dependencies.assertj)

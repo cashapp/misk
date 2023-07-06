@@ -10,8 +10,8 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.guava)
   api(Dependencies.wispFeature)
-  implementation(Dependencies.guava)
   implementation(Dependencies.kotlinStdLibJdk8)
 
   testFixturesApi(Dependencies.javaxInject)
