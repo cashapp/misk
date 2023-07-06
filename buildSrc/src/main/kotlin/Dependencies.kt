@@ -72,7 +72,7 @@ object Dependencies {
   val jerseyBom = "org.glassfish.jersey:jersey-bom:3.0.2"
   val jettyAlpnServer = "org.eclipse.jetty:jetty-alpn-server"
   val jettyAlpnServerJava = "org.eclipse.jetty:jetty-alpn-java-server"
-  val jettyBom = "org.eclipse.jetty:jetty-bom:10.0.14"
+  val jettyBom = "org.eclipse.jetty:jetty-bom:10.0.15"
   val jettyHttp = "org.eclipse.jetty:jetty-http"
   val jettyHttp2 = "org.eclipse.jetty.http2:http2-server"
   val jettyHttp2Common = "org.eclipse.jetty.http2:http2-common"
