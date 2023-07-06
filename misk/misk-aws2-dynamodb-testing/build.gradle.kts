@@ -18,6 +18,7 @@ dependencies {
   api(project(":misk-aws2-dynamodb"))
   api(project(":misk-inject"))
   api(project(":misk-testing"))
+  implementation(Dependencies.errorproneAnnotations)
   implementation(Dependencies.tempest2Testing)
   implementation(Dependencies.tempest2TestingDocker)
   implementation(Dependencies.tempest2TestingJvm)
