@@ -28,6 +28,7 @@ dependencies {
   }
   api(Dependencies.googleApiServicesStorage)
   api(Dependencies.googleHttpClient)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.kotlinLogging)

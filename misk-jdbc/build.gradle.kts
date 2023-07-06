@@ -13,6 +13,7 @@ dependencies {
   api(Dependencies.datasourceProxy)
   api(Dependencies.dockerApi)
   api(Dependencies.dockerCore)
+  api(Dependencies.guava)
   api(Dependencies.javaxInject)
   api(Dependencies.moshi)
   api(Dependencies.openTracingApi)
