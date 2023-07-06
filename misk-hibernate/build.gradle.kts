@@ -25,6 +25,7 @@ sourceSets {
 }
 
 dependencies {
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.hibernateCore)
   api(Dependencies.javaxInject)

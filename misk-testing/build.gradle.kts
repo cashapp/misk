@@ -11,6 +11,7 @@ plugins {
 dependencies {
   api(Dependencies.assertj)
   api(Dependencies.dockerApi)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.jettyServletApi)

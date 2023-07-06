@@ -122,7 +122,8 @@ subprojects {
       // Enforce misk-bom -- it should take priority over external BOMs.
       add("api", enforcedPlatform(project(":misk-bom")))
       add("api", platform(Dependencies.grpcBom))
-      add("api", platform(Dependencies.guava))
+      add("api", platform(Dependencies.guavaBom))
+      add("api", platform(Dependencies.guiceBom))
       add("api", platform(Dependencies.jacksonBom))
       add("api", platform(Dependencies.jerseyBom))
       add("api", platform(Dependencies.jettyBom))
@@ -178,14 +179,20 @@ subprojects {
     }
   }
 
-  // Workaround the Gradle bug resolving multiplatform dependencies.
-  // https://github.com/square/okio/issues/647
   configurations.all {
+    // Workaround the Gradle bug resolving multiplatform dependencies.
+    // https://github.com/square/okio/issues/647
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
       attributes.attribute(
         Usage.USAGE_ATTRIBUTE,
         this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
       )
+    }
+
+    // Workaround reports of dependency overlaps with Guava.
+    // https://github.com/google/guava/releases/tag/v32.1.0
+    resolutionStrategy.capabilitiesResolution.withCapability("com.google.guava:listenablefuture") {
+      select("com.google.guava:guava:0")
     }
   }
 }

@@ -81,7 +81,9 @@ class MiskClientMiskServerTest {
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
       "GetFeatureGrpcAction principal=unknown time=0.000 ns code=200 " +
         "request=[Point{latitude=43, longitude=-80}] " +
-        "response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}}"
+        "requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]} " +
+        "response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}} " +
+        "responseHeaders={}"
     )
     assertThat(callCounter.counter("default.GetFeature").get()).isEqualTo(1)
     assertThat(callCounter.counter("default.RouteChat").get()).isEqualTo(0)
@@ -101,7 +103,10 @@ class MiskClientMiskServerTest {
     // Confirm interceptors were invoked.
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
       "RouteChatGrpcAction principal=unknown time=0.000 ns code=200 " +
-        "request=[GrpcMessageSource, GrpcMessageSink] response=kotlin.Unit"
+        "request=[GrpcMessageSource, GrpcMessageSink] " +
+        "requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]} " +
+        "response=kotlin.Unit " +
+        "responseHeaders={content-type=[application/grpc]}"
     )
     assertThat(callCounter.counter("default.GetFeature").get()).isEqualTo(0)
     assertThat(callCounter.counter("default.RouteChat").get()).isEqualTo(1)

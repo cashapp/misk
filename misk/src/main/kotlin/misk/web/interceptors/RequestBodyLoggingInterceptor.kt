@@ -58,13 +58,30 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
   override fun intercept(chain: Chain): Any {
     val principal = caller.get()?.principal ?: "unknown"
 
-    val redactedArgs = chain.args.map { if (it is Headers) HeadersCapture(it) else it }
-    bodyCapture.set(RequestResponseBody(redactedArgs, null))
+    // Only log some request headers.
+    val redactedRequestHeaders = HeadersCapture(chain.httpCall.requestHeaders)
+    // Since we already log headers separately, no need to log them if they are in args.
+    val args = chain.args.filter { it !is Headers }
+    bodyCapture.set(
+      RequestResponseBody(
+        args,
+        null,
+        redactedRequestHeaders.headers,
+        null,
+      )
+    )
 
     try {
       val result = chain.proceed(chain.args)
-      // Only log some request headers.
-      bodyCapture.set(RequestResponseBody(redactedArgs, result))
+      val redactedResponseHeaders = HeadersCapture(chain.httpCall.responseHeaders)
+      bodyCapture.set(
+        RequestResponseBody(
+          args,
+          result,
+          redactedRequestHeaders.headers,
+          redactedResponseHeaders.headers,
+        )
+      )
       return result
     } catch (t: Throwable) {
       logger.info { "${action.name} principal=$principal failed" }
@@ -115,12 +132,17 @@ internal class RequestResponseCapture @Inject constructor() {
   }
 }
 
-data class RequestResponseBody(val request: Any?, val response: Any?)
+data class RequestResponseBody @JvmOverloads constructor(
+  val request: Any?,
+  val response: Any?,
+  val requestHeaders: Any? = null,
+  val responseHeaders: Any? = null,
+)
 
 /**
  * Transforms request and/or response bodies before they get logged by [RequestLoggingInterceptor].
  * Useful for things like stripping out noisy data.
- * 
+ *
  * Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
  * and cannot be reliably controlled.
  */

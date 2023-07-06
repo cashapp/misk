@@ -10,11 +10,11 @@ plugins {
 
 dependencies {
   api(Dependencies.cronUtils)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(project(":misk"))
   api(project(":misk-inject"))
-  implementation(Dependencies.guava)
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.wispLease)
   implementation(Dependencies.wispLogging)

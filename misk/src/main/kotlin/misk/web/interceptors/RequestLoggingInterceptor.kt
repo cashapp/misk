@@ -146,8 +146,14 @@ class RequestLoggingInterceptor internal constructor(
         requestResponseBody.request?.let {
           builder.append(" request=${requestResponseBody.request}")
         }
+        requestResponseBody.requestHeaders?.let {
+          builder.append(" requestHeaders=${requestResponseBody.requestHeaders}")
+        }
         requestResponseBody.response?.let {
           builder.append(" response=${requestResponseBody.response}")
+        }
+        requestResponseBody.responseHeaders?.let {
+          builder.append(" responseHeaders=${requestResponseBody.responseHeaders}")
         }
       }
     }

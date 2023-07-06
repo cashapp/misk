@@ -61,8 +61,9 @@ internal class RequestLoggingInterceptorTest {
       ).isSuccessful
     ).isTrue()
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
-      "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms " +
-        "code=200 request=[hello] response=echo: hello"
+      "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms code=200 " +
+        "request=[hello] requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+        "response=echo: hello responseHeaders={}"
     )
 
     // Setting to low value to show that even though it is less than the bodySampling value in the
@@ -88,7 +89,10 @@ internal class RequestLoggingInterceptorTest {
     ).isTrue()
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
       "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms " +
-        "code=200 request=[hello3] response=echo: hello3"
+        "code=200 request=[hello3] " +
+        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+        "response=echo: hello3 " +
+        "responseHeaders={}"
     )
 
     fakeTicker.advance(1, TimeUnit.SECONDS)
@@ -143,7 +147,9 @@ internal class RequestLoggingInterceptorTest {
       .isEqualTo(500)
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
-      "ExceptionThrowingRequestLoggingAction principal=caller time=100.0 ms failed request=[fail]"
+      "ExceptionThrowingRequestLoggingAction principal=caller time=100.0 ms failed " +
+        "request=[fail] " +
+        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]}"
     )
   }
 
@@ -198,10 +204,11 @@ internal class RequestLoggingInterceptorTest {
       .isTrue()
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
-      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms " +
-        "code=200 request=[hello, HeadersCapture(headers={accept=[*/*], accept-encoding=[gzip], " +
-        "connection=[keep-alive], content-length=[5], " +
-        "content-type=[application/json;charset=UTF-8]})] response=echo: hello"
+      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms code=200 " +
+        "request=[hello] " +
+        "requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], " +
+        "content-length=[5], content-type=[application/json;charset=UTF-8]} " +
+        "response=echo: hello responseHeaders={}"
     )
     assertThat(messages[0]).doesNotContain(headerToNotLog)
     assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
@@ -221,10 +228,9 @@ internal class RequestLoggingInterceptorTest {
       .isFalse()
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
-      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms " +
-        "failed request=[fail, HeadersCapture(headers={accept=[*/*], accept-encoding=[gzip], " +
-        "connection=[keep-alive], content-length=[4], " +
-        "content-type=[application/json;charset=UTF-8]})]"
+      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms failed request=[fail] " +
+        "requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], " +
+        "content-length=[4], content-type=[application/json;charset=UTF-8]}"
     )
     assertThat(messages[0]).doesNotContain(headerToNotLog)
     assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
@@ -240,7 +246,9 @@ internal class RequestLoggingInterceptorTest {
       // Even though this endpoint is configured with low rate limiting and body sampling in its annotation,
       // the RequestLoggingConfig injected will override it to no rate limiting and 1.0 sampling
       assertThat(messages).containsExactly(
-        "ConfigOverrideAction principal=caller time=100.0 ms code=200 request=[foo] response=echo: foo"
+        "ConfigOverrideAction principal=caller time=100.0 ms code=200 request=[foo] " +
+          "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+          "response=echo: foo responseHeaders={}"
       )
     }
   }
@@ -253,7 +261,9 @@ internal class RequestLoggingInterceptorTest {
     // Note that the [DontSayDumbTransformer] is registered earlier and thus ran _before_ the
     // [EvanHatingTransformer] which added "dumb" to the response, so it doesn't get applied here.
     assertThat(messages).containsExactly(
-      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Quokka] response=echo: Quokka (the happiest, most bestest animal)"
+      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Quokka] " +
+        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+        "response=echo: Quokka (the happiest, most bestest animal) responseHeaders={}"
     )
   }
 
@@ -271,7 +281,10 @@ internal class RequestLoggingInterceptorTest {
       .filter { it.loggerName == RequestLoggingInterceptor::class.qualifiedName }
       .map { it.message }
     assertThat(interceptorLogs).containsExactly(
-      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Oppenheimer-the-bestest] response=echo: Oppenheimer-the-most bestest"
+      "LogEverythingAction principal=caller time=100.0 ms code=200 " +
+        "request=[Oppenheimer-the-bestest] " +
+        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+        "response=echo: Oppenheimer-the-most bestest responseHeaders={}"
     )
   }
 
