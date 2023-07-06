@@ -103,7 +103,7 @@ class JdbcModule @JvmOverloads constructor(
     install(
       ServiceModule<SchemaMigratorService>(qualifier)
         .dependsOn<DataSourceService>(qualifier)
-        .enhances<ReadyService>()
+        .enhancedBy<ReadyService>()
     )
 
     if (installHealthCheck) {
