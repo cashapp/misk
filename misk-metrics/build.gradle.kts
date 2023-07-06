@@ -11,6 +11,7 @@ plugins {
 
 dependencies {
   api(Dependencies.prometheusClient)
+  implementation(Dependencies.findBugs)
   implementation(Dependencies.guava)
   implementation(Dependencies.kotlinStdLibJdk8)
 

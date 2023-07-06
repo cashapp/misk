@@ -10,6 +10,7 @@ plugins {
 
 dependencies {
   api(Dependencies.datasourceProxy)
+  api(Dependencies.guava)
   api(Dependencies.javaxInject)
   api(Dependencies.moshi)
   api(Dependencies.okHttp)

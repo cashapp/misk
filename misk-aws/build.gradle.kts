@@ -12,6 +12,7 @@ dependencies {
   api(Dependencies.awsJavaSdkCore)
   api(Dependencies.awsS3)
   api(Dependencies.awsSqs)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.wispAwsEnvironment)

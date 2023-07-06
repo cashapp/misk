@@ -23,6 +23,7 @@ dependencies {
   api(Dependencies.gcpSpanner)
   api(Dependencies.googleApiServicesStorage)
   api(Dependencies.googleAuthLibraryCredentials)
+  api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.logbackClassic)
