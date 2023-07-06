@@ -10,9 +10,21 @@ import javax.inject.Singleton
  * services which process traffic (Jetty, SQS, Kinesis, Cron, Tasks, etc.) and services which
  * are required to do work (Database, Redis, GCP, Feature Flags).
  *
- * By having the former depend on ReadyService and the latter enhance ReadyService we can force,
+ * By having the former depend on ReadyService and the latter enhanced by ReadyService we can force,
  * for example, JettyService to stop _before_ our feature flag service without having to intertwine
  * our dependency graph.
+ *
+ * Example
+ *
+ * ```kotlin
+ * install(
+ *   ServiceModule<TransacterService>(qualifier)
+ *     .enhancedBy<SchemaMigratorService>(qualifier)
+ *     // ReadyService won't run until TransacterService is complete
+ *     .enhancedBy<ReadyService>()
+ *     .dependsOn<DataSourceService>(qualifier)
+ * )
+ * ```
  */
 @Singleton
 class ReadyService @Inject constructor() : AbstractIdleService() {
