@@ -25,6 +25,7 @@ object Dependencies {
   val dockerTransport = "com.github.docker-java:docker-java-transport:3.3.0"
   val dockerTransportHttpClient = "com.github.docker-java:docker-java-transport-httpclient5:3.3.0"
   val dokkaGradlePlugin = "org.jetbrains.dokka:dokka-gradle-plugin:1.6.10"
+  val errorproneAnnotations = "com.google.errorprone:error_prone_annotations:2.20.0"
   val findBugs = "com.google.code.findbugs:jsr305:3.0.2"
   val gax = "com.google.api:gax:2.5.0"
   val gcpCloudCore = "com.google.cloud:google-cloud-core:1.95.4"
