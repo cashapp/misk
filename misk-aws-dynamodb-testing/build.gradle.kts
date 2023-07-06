@@ -16,6 +16,7 @@ dependencies {
   api(Dependencies.tempestTestingInternal)
   api(project(":misk-aws-dynamodb"))
   api(project(":misk-inject"))
+  implementation(Dependencies.errorproneAnnotations)
   implementation(Dependencies.kotlinReflect)
   implementation(Dependencies.tempestTesting)
   implementation(Dependencies.tempestTestingDocker)
