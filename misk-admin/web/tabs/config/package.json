@@ -25,10 +25,10 @@
   },
   "devDependencies": {
     "@misk/dev": "0.4.0",
-    "@misk/test": "0.4.0",
+    "@misk/test": "0.6.3",
     "@misk/prettier": "0.4.0",
     "@misk/tslint": "0.4.0",
-    "@misk/cli": "0.4.0"
+    "@misk/cli": "0.6.3"
   },
   "jest": {
     "testEnvironment": "jsdom",
