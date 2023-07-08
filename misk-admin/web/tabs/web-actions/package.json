@@ -27,10 +27,10 @@
     "js-file-download": "^0.4.12"
   },
   "devDependencies": {
-    "@misk/cli": "0.4.0",
+    "@misk/cli": "0.6.3",
     "@misk/dev": "0.4.0",
     "@misk/prettier": "0.4.0",
-    "@misk/test": "0.4.0",
+    "@misk/test": "0.6.3",
     "@misk/tslint": "0.4.0",
     "tslib": "2.3.0",
     "webpack": "4.43.0",
