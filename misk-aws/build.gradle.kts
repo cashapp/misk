@@ -38,7 +38,6 @@ dependencies {
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
   implementation(project(":misk-transactional-jobqueue"))
-
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.awaitility)
   testImplementation(Dependencies.dockerApi)
