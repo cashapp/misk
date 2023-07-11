@@ -48,6 +48,12 @@ dependencyAnalysis {
         exclude(":misk-testing")
       }
     }
+    all {
+      onUnusedDependencies {
+        exclude("com.github.docker-java:docker-java-api:3.3.0")
+        exclude("com.github.docker-java:docker-java-api:3.3.1")
+      }
+    }
     // False positives.
     project(":misk-gcp") {
       onUsedTransitiveDependencies {

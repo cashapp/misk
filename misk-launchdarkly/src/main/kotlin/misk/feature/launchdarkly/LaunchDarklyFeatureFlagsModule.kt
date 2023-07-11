@@ -7,6 +7,7 @@ import com.launchdarkly.sdk.server.LDConfig
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import misk.ReadyService
+import io.micrometer.core.instrument.MeterRegistry
 import misk.ServiceModule
 import misk.client.HttpClientSSLConfig
 import misk.config.Redact
@@ -41,8 +42,9 @@ class LaunchDarklyModule(
       object : Provider<wisp.launchdarkly.LaunchDarklyFeatureFlags> {
         @Inject private lateinit var ldClient: LDClientInterface
         @Inject private lateinit var moshi: Moshi
+        @Inject private lateinit var meterRegistry: MeterRegistry
         override fun get(): wisp.launchdarkly.LaunchDarklyFeatureFlags =
-          wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi)
+          wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi, meterRegistry)
       }
     ).asSingleton()
     bind(wisp.feature.FeatureFlags::class.toKey(qualifier)).to(wispLaunchDarklyFeatureFlagsKey)
