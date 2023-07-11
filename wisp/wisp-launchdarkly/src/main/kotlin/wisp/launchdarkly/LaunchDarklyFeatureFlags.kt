@@ -43,7 +43,9 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
 
             if (attempts == 0 && !ldClient.isInitialized) {
                 launchDarklyClientMetrics.failedCount.increment()
-                throw Exception("LaunchDarkly did not initialize in 30 seconds")
+                val errorMessage = "LaunchDarkly did not initialize in 30 seconds."
+                logger.error { errorMessage }
+                throw Exception(errorMessage)
             }
 
             // ldClient successfully initialized
@@ -52,7 +54,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
         launchDarklyClientMetrics
             .initializationDuration(meterRegistry)
             .record(timedResult.toDouble())
-
+        logger.info { "LaunchDarkly successfully initialized in ${timedResult.toDouble()} seconds" }
         return this
     }
 
