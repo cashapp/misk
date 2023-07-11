@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+
+Version 1.4.10 *(2023-07-11)*
+----------------------------
+
+* add logs for launchdarkly client startup
+
+
 Version 1.4.9 *(2023-07-10)*
 ----------------------------
 
