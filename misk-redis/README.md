@@ -1,0 +1,14 @@
+# Module: Redis Module
+**[Module Documentation Pending]**
+
+## Metrics
+This module automatically generates metrics related to Redis. These metrics are defined by the `RedisClientMetrics` class, and are as follows:
+
+| Metric                | Slug                                          | Description                                                                                                                                    | Labels  | Type                                                                                      |
+| --------------------- | --------------------------------------------- |------------------------------------------------------------------------------------------------------------------------------------------------| ------- |-------------------------------------------------------------------------------------------|
+| Max Total Connections | redis_client_max_total_connections            | Max number of connections for the misk-redis client connection pool (configured at startup)                                                    |         | [Gauge](https://prometheus.github.io/client_java/io/prometheus/client/Gauge.html)         |
+| Max Idle Connections  | redis_client_max_idle_connections             | Max number of idle connections for the misk-redis client connection pool (configured at startup)                                               |         | [Gauge](https://prometheus.github.io/client_java/io/prometheus/client/Gauge.html)         |
+| Idle Connections      | redis_client_idle_connections                 | Current number of idle connections for the misk-redis client connection pool                                                                   |         | [Gauge](https://prometheus.github.io/client_java/io/prometheus/client/Gauge.html)         |
+| Active Connections    | redis_client_active_connections               | Current number of active connections for the misk-redis client connection pool.                                                                |         | [Gauge](https://prometheus.github.io/client_java/io/prometheus/client/Gauge.html)         |
+| Destroyed Connections | redis_client_pool_destroyed_connections_total | The total count of connections dropped from the pool. Connections are dropped when they fail validation, and may be in an inconsistent state.  |         | [Counter](https://prometheus.github.io/client_java/io/prometheus/client/Counter.html)     |
+| Operation Time        | redis_client_operation_time_millis            | The time it took in milliseconds, as reported by the client, to complete an operation.                                                         | Command | [Histogram](https://prometheus.github.io/client_java/io/prometheus/client/Histogram.html) |
