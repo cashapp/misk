@@ -1,7 +1,9 @@
-package `slack-api`
+package misk.slack.webapi
 
 import misk.client.TypedHttpClientModule
 import misk.inject.KAbstractModule
+import misk.slack.webapi.interceptors.SlackClientInterceptor
+import misk.slack.webapi.interceptors.SlackSignedRequestsInterceptor
 import misk.web.NetworkInterceptor
 import okhttp3.Interceptor
 

@@ -1,4 +1,4 @@
-package `slack-api`
+package misk.slack.webapi.helpers
 
 /**
  * Mrkdwn is Slack's weird thing that isn't Markdown. This class attempts to implement proper
@@ -52,7 +52,6 @@ class MrkdwnBuilder {
     delegate.append("|")
     append(label)
     delegate.append(">")
-
   }
 
   fun appendBlockquotePrefix() {

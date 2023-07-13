@@ -1,19 +1,20 @@
-package `slack-api`
+package misk.slack.webapi.interceptors
 
-import java.time.Clock
-import javax.inject.Inject
-import javax.inject.Singleton
-import kotlin.math.abs
-import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.exceptions.BadRequestException
 import misk.exceptions.UnauthorizedException
+import misk.slack.webapi.SlackConfig
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import okio.ByteString.Companion.decodeHex
 import okio.HashingSink
 import okio.blackholeSink
 import okio.buffer
+import java.time.Clock
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.math.abs
+import kotlin.reflect.full.findAnnotation
 
 @Singleton
 class SlackSignedRequestsInterceptor @Inject constructor(
@@ -22,6 +23,10 @@ class SlackSignedRequestsInterceptor @Inject constructor(
 ) : NetworkInterceptor {
   private val signingSecret = slackConfig.signing_secret.value.decodeHex()
 
+  /**
+   * Verify that Slack initiated the request.
+   * https://api.slack.com/authentication/verifying-requests-from-slack
+   */
   override fun intercept(chain: NetworkChain) {
     //authorize slack request
     //https://api.slack.com/authentication/verifying-requests-from-slack
@@ -64,6 +69,7 @@ class SlackSignedRequestsInterceptor @Inject constructor(
       return when {
         action.function.findAnnotation<SlackSignedRequestsOnly>() != null ->
           slackSignedRequestsInterceptor
+
         else -> null
       }
     }

@@ -1,6 +1,4 @@
-@file:Suppress("PropertyName") // We use snake_case to match Misk YAML.
-
-package `slack-api`
+package misk.slack.webapi
 
 import misk.config.Secret
 

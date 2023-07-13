@@ -1,12 +1,13 @@
-package `slack-api`
+package misk.slack.webapi
 
+import misk.slack.webapi.helpers.PostMessage
+import misk.slack.webapi.helpers.PostMessageResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Url
-
 
 interface SlackApi {
 
@@ -17,9 +18,8 @@ interface SlackApi {
   @POST("/api/chat.postMessage")
   @Headers(value = ["accept: application/json"])
   fun postMessage(
-    @Body postMessageJson: PostMessageJson
-  ): Call<PostMessageResponseJson>
-
+    @Body postMessageJson: PostMessage,
+  ): Call<PostMessageResponse>
 
   /**
    * Calls Slack and asks it to post a confirmation message to the dynamic URL
@@ -30,11 +30,11 @@ interface SlackApi {
   @Headers(value = ["accept: application/json"])
   fun postConfirmation(
     @Url url: String,
-    @Body confirmationMessageJson: PostMessageJson
-  ): Call<PostMessageResponseJson>
+    @Body confirmationMessageJson: PostMessage,
+  ): Call<PostMessageResponse>
 }
 
-fun Response<PostMessageResponseJson>.checkSuccessful() {
+fun Response<PostMessageResponse>.checkSuccessful() {
   check(isSuccessful) {
     "Slack HTTP call failed: ${errorBody()!!.string()}"
   }

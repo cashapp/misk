@@ -1,34 +1,34 @@
-package `slack-api`.slashcommands
+package misk.slack.webapi.slashcommands
 
-import `slack-api`.BlockJson
-import `slack-api`.PostMessageJson
-import `slack-api`.SlackApi
-import `slack-api`.SlashCommandJson
-import `slack-api`.TextJson
-import `slack-api`.checkSuccessful
+import misk.slack.webapi.SlackApi
+import misk.slack.webapi.checkSuccessful
+import misk.slack.webapi.helpers.Block
+import misk.slack.webapi.helpers.PostMessage
+import misk.slack.webapi.helpers.SlashCommand
+import misk.slack.webapi.helpers.Text
 
 abstract class SlashCommandHandler constructor(
-  open val slackApi: SlackApi
+  open val slackApi: SlackApi,
 ) {
   /**
    * Business logic to handle the slash command sent from the user
    * https://api.slack.com/interactivity/slash-commands
    * Returns true if [slashCommandJson] was handled.
    * */
-  abstract fun handle(slashCommandJson: SlashCommandJson) : Boolean
+  abstract fun handle(slashCommandJson: SlashCommand): Boolean
 
   open fun sendSlackConfirmation(
     channelId: String,
     text: String,
-    responseUrl: String
+    responseUrl: String,
   ) {
 
-    val confirmationJson = PostMessageJson(
+    val confirmationJson = PostMessage(
       channel = channelId,
       blocks = listOf(
-        BlockJson(
+        Block(
           type = "section",
-          text = TextJson(
+          text = Text(
             type = "mrkdwn",
             text = text,
           )
