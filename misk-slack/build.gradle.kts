@@ -17,6 +17,7 @@ dependencies {
   api(project(":misk"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
+  implementation(project(":misk-service"))
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.okHttp)

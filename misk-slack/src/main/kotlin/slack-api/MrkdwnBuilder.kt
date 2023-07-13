@@ -4,6 +4,9 @@ package `slack-api`
  * Mrkdwn is Slack's weird thing that isn't Markdown. This class attempts to implement proper
  * escaping and formatting.
  *
+ * [SlackApi.postMessage] and [SlackApi.postConfirmation] can both post JSON with markdown formatting.
+ * [SlackJson.TextJson] allows you to set the type as plain text or markdown.
+ *
  * Note that the Mrkdwn docs aren't particularly helpful here.
  *
  * Note that this implementation is more conservative about encoding than strictly necessary. For

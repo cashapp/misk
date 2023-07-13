@@ -10,7 +10,11 @@ import `slack-api`.checkSuccessful
 abstract class SlashCommandHandler constructor(
   open val slackApi: SlackApi
 ) {
-  /** Returns true if [slashCommandJson] was handled. */
+  /**
+   * Business logic to handle the slash command sent from the user
+   * https://api.slack.com/interactivity/slash-commands
+   * Returns true if [slashCommandJson] was handled.
+   * */
   abstract fun handle(slashCommandJson: SlashCommandJson) : Boolean
 
   open fun sendSlackConfirmation(

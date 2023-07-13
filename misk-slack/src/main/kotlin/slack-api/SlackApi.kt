@@ -7,19 +7,25 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Url
 
-/**
- * Calls Slack and asks it to post message.
- */
+
 interface SlackApi {
 
-  /** https://api.slack.com/methods/chat.postMessage */
+  /**
+   * Calls Slack and asks it to post message.
+   * https://api.slack.com/methods/chat.postMessage
+   */
   @POST("/api/chat.postMessage")
   @Headers(value = ["accept: application/json"])
   fun postMessage(
     @Body postMessageJson: PostMessageJson
   ): Call<PostMessageResponseJson>
 
-  /** https://api.slack.com/interactivity/handling#message_responses */
+
+  /**
+   * Calls Slack and asks it to post a confirmation message to the dynamic URL
+   * sent from Slack.
+   * https://api.slack.com/interactivity/handling#message_responses
+   */
   @POST
   @Headers(value = ["accept: application/json"])
   fun postConfirmation(

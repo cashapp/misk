@@ -1,4 +1,4 @@
-package slack
+package `slack-api`
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -9,9 +9,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import `slack-api`.SlackApi
-import `slack-api`.SlackClientInterceptor
-import `slack-api`.SlackConfig
 
 class PingSlackActionTest {
   private val server = MockWebServer()
@@ -45,6 +42,8 @@ class PingSlackActionTest {
 
   /**
    * This is a facet for manual testing.
+   * With the correct secrets, you can use this to valiate that messages
+   * are being delivered to your intended slack channel.
    */
   @Test
   @Disabled
