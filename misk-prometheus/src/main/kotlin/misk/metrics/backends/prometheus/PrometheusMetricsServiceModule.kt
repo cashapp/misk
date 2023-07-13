@@ -9,6 +9,7 @@ import io.prometheus.client.hotspot.MemoryPoolsExports
 import io.prometheus.client.hotspot.StandardExports
 import io.prometheus.client.hotspot.ThreadExports
 import io.prometheus.client.hotspot.VersionInfoExports
+import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import javax.inject.Inject
@@ -25,7 +26,10 @@ class PrometheusMetricsServiceModule(private val config: PrometheusConfig) : KAb
     install(PrometheusMetricsClientModule())
 
     bind<PrometheusConfig>().toInstance(config)
-    install(ServiceModule<PrometheusHttpService>())
+    install(
+      ServiceModule<PrometheusHttpService>()
+        .enhancedBy<ReadyService>()
+    )
 
     // For every Collector registered with a multibinding, configure it in the registry when the
     // injector is created.
