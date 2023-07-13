@@ -19,7 +19,7 @@ class MockSlackServer @Inject constructor(
 
   private val jsonAdapter = moshi.adapter(PostMessage::class.java)
   override fun startUp() {
-    server.start(8912)
+    server.start(60992)
   }
 
   override fun shutDown() {
