@@ -165,20 +165,6 @@ class ActionScope @Inject internal constructor(
     return value as T
   }
 
-  /** Tries to return the action scoped value for the given key
-   * If no value is present, returns null. get() above throws for null values.
-   * */
-  fun <T> getAndCatch(key: Key<T>): T? {
-    try {
-      return get(key)
-    } catch (e: IllegalStateException) {
-      if (e.message == "$key can only be provided as seed data") {
-        return null
-      }
-      throw e
-    }
-  }
-
   @Suppress("UNCHECKED_CAST")
   private fun providerFor(key: Key<*>): ActionScopedProvider<*> {
     return requireNotNull(providers[key]?.get()) {
@@ -190,7 +176,7 @@ class ActionScope @Inject internal constructor(
     val seedData: Map<Key<*>, Any?>,
     val scope: ActionScope,
     val wrapped: KFunction<T>,
-    val threadUUID: UUID,
+    val threadUUID: UUID
   ) : KFunction<T> {
     override fun call(vararg args: Any?): T {
       // If the original thread is the same as the thread that calls the KFunction and we are already
