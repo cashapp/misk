@@ -93,6 +93,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
+import kotlin.math.min
 
 class MiskWebModule(
   private val config: WebConfig,
@@ -108,8 +109,14 @@ class MiskWebModule(
         dependsOn = jettyDependsOn
       ).dependsOn<ReadyService>()
     )
-    install(ServiceModule<JettyThreadPoolMetricsCollector>())
-    install(ServiceModule<JettyConnectionMetricsCollector>())
+    install(
+      ServiceModule<JettyThreadPoolMetricsCollector>()
+        .enhancedBy<ReadyService>()
+    )
+    install(
+      ServiceModule<JettyConnectionMetricsCollector>()
+        .enhancedBy<ReadyService>()
+    )
 
     // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {
@@ -240,7 +247,7 @@ class MiskWebModule(
     install(WebActionModule.create<NotFoundAction>())
 
     val maxThreads = config.jetty_max_thread_pool_size
-    val minThreads = Math.min(config.jetty_min_thread_pool_size, maxThreads)
+    val minThreads = min(config.jetty_min_thread_pool_size, maxThreads)
     val idleTimeout = 60_000
     if (config.jetty_max_thread_pool_queue_size > 0) {
       val threadPool = QueuedThreadPool(
