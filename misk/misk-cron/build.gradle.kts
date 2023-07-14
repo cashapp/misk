@@ -13,21 +13,21 @@ dependencies {
   api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
-  api(project(":misk"))
-  api(project(":misk-inject"))
+  api(project(":misk:misk"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.wispLease)
   implementation(Dependencies.wispLogging)
-  implementation(project(":misk-clustering"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-service"))
+  implementation(project(":misk:misk-clustering"))
+  implementation(project(":misk:misk-core"))
+  implementation(project(":misk:misk-service"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.logbackClassic)
   testImplementation(Dependencies.wispLoggingTesting)
   testImplementation(Dependencies.wispTimeTesting)
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

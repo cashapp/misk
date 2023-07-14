@@ -14,7 +14,7 @@ dependencies {
   api(Dependencies.kotlinLogging)
   api(Dependencies.wispConfig)
   api(Dependencies.wispLeaseTesting)
-  api(project(":misk-inject"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.errorproneAnnotations)
   implementation(Dependencies.guice)
   implementation(Dependencies.kubernetesClient)
@@ -22,14 +22,14 @@ dependencies {
   implementation(Dependencies.okHttp)
   implementation(Dependencies.wispLease)
   implementation(Dependencies.wispLogging)
-  implementation(project(":misk-core"))
-  implementation(project(":misk-lease"))
-  implementation(project(":misk-service"))
+  implementation(project(":misk:misk-core"))
+  implementation(project(":misk:misk-lease"))
+  implementation(project(":misk:misk-service"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-clustering"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-clustering"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

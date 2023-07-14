@@ -20,18 +20,18 @@ dependencies {
   implementation(Dependencies.wispConfig)
   implementation(Dependencies.wispDeployment)
   implementation(Dependencies.wispToken)
-  implementation(project(":misk"))
-  implementation(project(":misk-actions"))
-  implementation(project(":misk-admin"))
-  implementation(project(":misk-config"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-hotwire"))
-  implementation(project(":misk-prometheus"))
+  implementation(project(":misk:misk"))
+  implementation(project(":misk:misk-actions"))
+  implementation(project(":misk:misk-admin"))
+  implementation(project(":misk:misk-config"))
+  implementation(project(":misk:misk-core"))
+  implementation(project(":misk:misk-inject"))
+  implementation(project(":misk:misk-hotwire"))
+  implementation(project(":misk:misk-prometheus"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 val jar by tasks.getting(Jar::class) {

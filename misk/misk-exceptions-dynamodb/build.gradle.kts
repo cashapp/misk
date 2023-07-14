@@ -13,16 +13,16 @@ dependencies {
   api(Dependencies.awsJavaSdkCore)
   api(Dependencies.javaxInject)
   api(Dependencies.slf4jApi)
-  api(project(":misk"))
-  api(project(":misk-actions"))
-  api(project(":misk-inject"))
+  api(project(":misk:misk"))
+  api(project(":misk:misk-actions"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.guice)
   implementation(Dependencies.okHttp)
-  implementation(project(":misk-core"))
+  implementation(project(":misk:misk-core"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

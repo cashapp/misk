@@ -13,7 +13,7 @@ dependencies {
   api(Dependencies.javaxInject)
   api(Dependencies.wispFeature)
   api(Dependencies.wispLaunchDarkly)
-  api(project(":misk-feature"))
+  api(project(":misk:misk-feature"))
   implementation(Dependencies.kotlinStdLibJdk8)
 
   testImplementation(Dependencies.assertj)

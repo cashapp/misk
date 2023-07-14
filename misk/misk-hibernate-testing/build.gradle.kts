@@ -9,10 +9,10 @@ plugins {
 }
 
 dependencies {
-  api(project(":misk-inject"))
-  api(project(":misk-jdbc"))
+  api(project(":misk:misk-inject"))
+  api(project(":misk:misk-jdbc"))
   implementation(Dependencies.guice)
-  implementation(project(":misk-jdbc-testing"))
+  implementation(project(":misk:misk-jdbc-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

@@ -10,7 +10,7 @@ plugins {
 
 dependencies {
   api(Dependencies.kotlinLogging)
-  api(project(":misk-inject"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.guice)
   implementation(Dependencies.openTracingApi)
   implementation(Dependencies.openTracingUtil)

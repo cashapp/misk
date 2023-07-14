@@ -11,8 +11,8 @@ plugins {
 dependencies {
   api(Dependencies.javaxInject)
   api(Dependencies.prometheusClient)
-  api(project(":misk-inject"))
-  api(project(":misk-metrics"))
+  api(project(":misk:misk-inject"))
+  api(project(":misk:misk-metrics"))
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinStdLibJdk8)
 }

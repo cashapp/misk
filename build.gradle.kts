@@ -31,11 +31,6 @@ plugins {
 
 apply(plugin = "com.vanniktech.maven.publish.base")
 
-allprojects {
-  group = project.property("GROUP") as String
-  version = project.findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
-}
-
 dependencyAnalysis {
   issues {
     all {
@@ -55,7 +50,7 @@ dependencyAnalysis {
       }
     }
     // False positives.
-    project(":misk-gcp") {
+    project(":misk:misk-gcp") {
       onUsedTransitiveDependencies {
         // Can be removed once dd-trace-ot uses 0.33.0 of open tracing.
         exclude("io.opentracing:opentracing-util:0.32.0")
@@ -65,12 +60,12 @@ dependencyAnalysis {
         exclude("com.datadoghq:dd-trace-ot:1.12.1")
       }
     }
-    project(":misk-grpc-tests") {
+    project(":misk:misk-grpc-tests") {
       onUnusedDependencies {
         exclude("javax.annotation:javax.annotation-api:1.3.2")
       }
     }
-    project(":misk-jooq") {
+    project(":misk:misk-jooq") {
       onIncorrectConfiguration {
         exclude("org.jooq:jooq:3.18.2")
       }
@@ -126,7 +121,7 @@ subprojects {
 
       // Platform/BOM dependencies constrain versions only.
       // Enforce misk-bom -- it should take priority over external BOMs.
-      add("api", enforcedPlatform(project(":misk-bom")))
+      add("api", enforcedPlatform(project(":misk:misk-bom")))
       add("api", platform(Dependencies.grpcBom))
       add("api", platform(Dependencies.guavaBom))
       add("api", platform(Dependencies.guiceBom))

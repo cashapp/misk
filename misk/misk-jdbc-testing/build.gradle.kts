@@ -14,8 +14,8 @@ dependencies {
   api(Dependencies.javaxInject)
   api(Dependencies.moshi)
   api(Dependencies.okHttp)
-  api(project(":misk-inject"))
-  api(project(":misk-jdbc"))
+  api(project(":misk:misk-inject"))
+  api(project(":misk:misk-jdbc"))
   implementation(Dependencies.guice)
   implementation(Dependencies.hikariCp)
   implementation(Dependencies.kotlinLogging)
@@ -23,9 +23,9 @@ dependencies {
   implementation(Dependencies.wispContainersTesting)
   implementation(Dependencies.wispDeployment)
   implementation(Dependencies.wispLogging)
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-service"))
+  implementation(project(":misk:misk"))
+  implementation(project(":misk:misk-core"))
+  implementation(project(":misk:misk-service"))
   runtimeOnly(Dependencies.hsqldb)
 }
 

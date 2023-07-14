@@ -13,23 +13,23 @@ application {
 dependencies {
   implementation(Dependencies.javaxInject)
   implementation(Dependencies.wispConfig)
-  implementation(project(":misk"))
-  implementation(project(":misk-actions"))
-  implementation(project(":misk-clustering"))
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
-  implementation(project(":misk-prometheus"))
-  implementation(project(":misk-redis"))
+  implementation(project(":misk:misk"))
+  implementation(project(":misk:misk-actions"))
+  implementation(project(":misk:misk-clustering"))
+  implementation(project(":misk:misk-core"))
+  implementation(project(":misk:misk-inject"))
+  implementation(project(":misk:misk-prometheus"))
+  implementation(project(":misk:misk-redis"))
   implementation(Dependencies.guice)
   implementation(Dependencies.jedis)
   implementation(Dependencies.okHttp)
   implementation(Dependencies.wispDeployment)
-  implementation(project(":misk-config"))
-  implementation(project(":misk-redis-testing"))
+  implementation(project(":misk:misk-config"))
+  implementation(project(":misk:misk-redis-testing"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 val jar by tasks.getting(Jar::class) {

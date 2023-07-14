@@ -17,12 +17,12 @@ dependencies {
   testFixturesApi(Dependencies.javaxInject)
   testFixturesApi(Dependencies.wispFeature)
   testFixturesApi(Dependencies.wispFeatureTesting)
-  testFixturesApi(project(":misk-feature"))
-  testFixturesApi(project(":misk-inject"))
+  testFixturesApi(project(":misk:misk-feature"))
+  testFixturesApi(project(":misk:misk-inject"))
   testFixturesImplementation(Dependencies.guice)
   testFixturesImplementation(Dependencies.kotlinStdLibJdk8)
   testFixturesImplementation(Dependencies.moshi)
-  testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":misk:misk-service"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.guice)
@@ -32,9 +32,9 @@ dependencies {
   testImplementation(Dependencies.moshi)
   testImplementation(Dependencies.wispFeatureTesting)
   testImplementation(Dependencies.wispMoshi)
-  testImplementation(project(":misk-feature"))
-  testImplementation(project(":misk-inject"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-feature"))
+  testImplementation(project(":misk:misk-inject"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

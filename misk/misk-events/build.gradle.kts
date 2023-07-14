@@ -10,8 +10,8 @@ plugins {
 
 dependencies {
   api(Dependencies.guava)
-  api(project(":misk-events-core"))
-  api(project(":misk-hibernate"))
+  api(project(":misk:misk-events-core"))
+  api(project(":misk:misk-hibernate"))
 }
 
 configure<MavenPublishBaseExtension> {

@@ -15,7 +15,7 @@ dependencies {
   api(Dependencies.wispConfig)
   api(Dependencies.wispDeployment)
   api(Dependencies.wispResourceLoader)
-  api(project(":misk-inject"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.apacheCommonsLang3)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
@@ -34,9 +34,9 @@ dependencies {
   testImplementation(Dependencies.logbackClassic)
   testImplementation(Dependencies.slf4jApi)
   testImplementation(Dependencies.wispLoggingTesting)
-  testImplementation(project(":misk"))
-  testImplementation(project(":misk-config"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk"))
+  testImplementation(project(":misk:misk-config"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

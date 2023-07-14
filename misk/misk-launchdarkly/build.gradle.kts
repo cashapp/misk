@@ -12,10 +12,10 @@ dependencies {
   api(Dependencies.guice)
   api(Dependencies.launchDarkly)
   api(Dependencies.wispConfig)
-  api(project(":misk"))
-  api(project(":misk-config"))
-  api(project(":misk-core"))
-  api(project(":misk-inject"))
+  api(project(":misk:misk"))
+  api(project(":misk:misk-config"))
+  api(project(":misk:misk-core"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.javaxInject)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.micrometerCore)
@@ -23,9 +23,9 @@ dependencies {
   implementation(Dependencies.wispFeature)
   implementation(Dependencies.wispLaunchDarkly)
   implementation(Dependencies.wispSsl)
-  implementation(project(":misk-feature"))
-  implementation(project(":misk-launchdarkly-core"))
-  implementation(project(":misk-service"))
+  implementation(project(":misk:misk-feature"))
+  implementation(project(":misk:misk-launchdarkly-core"))
+  implementation(project(":misk:misk-service"))
 }
 
 configure<MavenPublishBaseExtension> {

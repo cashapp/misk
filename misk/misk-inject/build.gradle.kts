@@ -16,8 +16,8 @@ dependencies {
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-inject"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-inject"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

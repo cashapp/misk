@@ -12,14 +12,14 @@ dependencies {
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.wispToken)
-  api(project(":misk"))
-  api(project(":misk-hibernate"))
-  api(project(":misk-inject"))
-  api(project(":misk-jobqueue"))
-  api(project(":misk-transactional-jobqueue"))
+  api(project(":misk:misk"))
+  api(project(":misk:misk-hibernate"))
+  api(project(":misk:misk-inject"))
+  api(project(":misk:misk-jobqueue"))
+  api(project(":misk:misk-transactional-jobqueue"))
   implementation(Dependencies.guava)
-  implementation(project(":misk-core"))
-  implementation(project(":misk-service"))
+  implementation(project(":misk:misk-core"))
+  implementation(project(":misk:misk-service"))
 }
 
 configure<MavenPublishBaseExtension> {

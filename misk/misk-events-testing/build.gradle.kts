@@ -10,15 +10,15 @@ plugins {
 
 dependencies {
   api(Dependencies.javaxInject)
-  api(project(":misk-events-core"))
-  api(project(":misk-inject"))
+  api(project(":misk:misk-events-core"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.guice)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.okio)
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

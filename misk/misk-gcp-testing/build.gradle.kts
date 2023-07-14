@@ -32,8 +32,8 @@ dependencies {
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.kotlinLogging)
-  api(project(":misk-gcp"))
-  api(project(":misk-inject"))
+  api(project(":misk:misk-gcp"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.assertj)
   implementation(Dependencies.dockerTransport)
   implementation(Dependencies.gax)
@@ -47,8 +47,8 @@ dependencies {
   implementation(Dependencies.moshi)
   implementation(Dependencies.wispContainersTesting)
   implementation(Dependencies.wispMoshi)
-  implementation(project(":misk-service"))
-  implementation(project(":misk-testing"))
+  implementation(project(":misk:misk-service"))
+  implementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

@@ -11,9 +11,9 @@ plugins {
 dependencies {
   api(Dependencies.javaxInject)
   api(Dependencies.jedis)
-  api(project(":misk-inject"))
-  api(project(":misk-redis"))
-  api(project(":misk-testing"))
+  api(project(":misk:misk-inject"))
+  api(project(":misk:misk-redis"))
+  api(project(":misk:misk-testing"))
   implementation(Dependencies.dockerApi)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)

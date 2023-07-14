@@ -27,8 +27,8 @@ dependencies {
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.wireReflector)
-  api(project(":misk-actions"))
-  api(project(":misk-inject"))
+  api(project(":misk:misk-actions"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.kotlinReflect)
   implementation(Dependencies.okio)
@@ -42,10 +42,10 @@ dependencies {
   testImplementation(Dependencies.okHttp)
   testImplementation(Dependencies.protobufJava)
   testImplementation(Dependencies.slf4jApi)
-  testImplementation(project(":misk"))
-  testImplementation(project(":misk-core"))
-  testImplementation(project(":misk-grpc-tests"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk"))
+  testImplementation(project(":misk:misk-core"))
+  testImplementation(project(":misk:misk-grpc-tests"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

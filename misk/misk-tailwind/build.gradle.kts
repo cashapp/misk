@@ -11,7 +11,7 @@ plugins {
 dependencies {
   api(Dependencies.kotlinxHtml)
   api(Dependencies.wispDeployment)
-  implementation(project(":misk-hotwire"))
+  implementation(project(":misk:misk-hotwire"))
 }
 
 configure<MavenPublishBaseExtension> {

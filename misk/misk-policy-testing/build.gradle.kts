@@ -13,8 +13,8 @@ dependencies {
   api(Dependencies.dockerCore)
   api(Dependencies.guava)
   api(Dependencies.javaxInject)
-  api(project(":misk-inject"))
-  api(project(":misk-policy"))
+  api(project(":misk:misk-inject"))
+  api(project(":misk:misk-policy"))
   implementation(Dependencies.dockerTransport)
   implementation(Dependencies.dockerTransportHttpClient)
   implementation(Dependencies.guice)
@@ -22,8 +22,8 @@ dependencies {
   implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)
   implementation(Dependencies.wispLogging)
-  implementation(project(":misk-core"))
-  implementation(project(":misk-service"))
+  implementation(project(":misk:misk-core"))
+  implementation(project(":misk:misk-service"))
 }
 
 configure<MavenPublishBaseExtension> {

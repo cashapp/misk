@@ -13,9 +13,9 @@ dependencies {
   api(Dependencies.javaxInject)
   api(Dependencies.moshi)
   api(Dependencies.retrofit)
-  api(project(":misk"))
-  api(project(":misk-config"))
-  api(project(":misk-inject"))
+  api(project(":misk:misk"))
+  api(project(":misk:misk-config"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.okHttp)
   implementation(Dependencies.retrofitMoshi)
@@ -28,7 +28,7 @@ dependencies {
   testImplementation(Dependencies.okHttpMockWebServer)
   testImplementation("com.squareup.okio:okio:3.3.0")
   testImplementation(Dependencies.wispDeployment)
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

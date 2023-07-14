@@ -9,8 +9,8 @@ plugins {
 }
 
 dependencies {
-  api(project(":misk-hibernate"))
-  api(project(":misk-jobqueue"))
+  api(project(":misk:misk-hibernate"))
+  api(project(":misk:misk-jobqueue"))
 }
 
 configure<MavenPublishBaseExtension> {

@@ -15,15 +15,15 @@ dependencies {
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
   api(Dependencies.tempest2TestingInternal)
-  api(project(":misk-aws2-dynamodb"))
-  api(project(":misk-inject"))
-  api(project(":misk-testing"))
+  api(project(":misk:misk-aws2-dynamodb"))
+  api(project(":misk:misk-inject"))
+  api(project(":misk:misk-testing"))
   implementation(Dependencies.errorproneAnnotations)
   implementation(Dependencies.tempest2Testing)
   implementation(Dependencies.tempest2TestingDocker)
   implementation(Dependencies.tempest2TestingJvm)
-  implementation(project(":misk-core"))
-  implementation(project(":misk-service"))
+  implementation(project(":misk:misk-core"))
+  implementation(project(":misk:misk-service"))
 }
 
 configure<MavenPublishBaseExtension> {

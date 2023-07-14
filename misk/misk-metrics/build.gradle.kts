@@ -17,8 +17,8 @@ dependencies {
 
   testFixturesApi(Dependencies.javaxInject)
   testFixturesApi(Dependencies.prometheusClient)
-  testFixturesApi(project(":misk-inject"))
-  testFixturesApi(project(":misk-metrics"))
+  testFixturesApi(project(":misk:misk-inject"))
+  testFixturesApi(project(":misk:misk-metrics"))
   testFixturesImplementation(Dependencies.guava)
   testFixturesImplementation(Dependencies.guice)
   testFixturesImplementation(Dependencies.kotlinStdLibJdk8)
@@ -26,8 +26,8 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.javaxInject)
   testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-metrics"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-metrics"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

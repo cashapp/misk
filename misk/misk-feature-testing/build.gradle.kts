@@ -13,12 +13,12 @@ dependencies {
   api(Dependencies.javaxInject)
   api(Dependencies.wispFeature)
   api(Dependencies.wispFeatureTesting)
-  api(project(":misk-feature"))
-  api(project(":misk-inject"))
+  api(project(":misk:misk-feature"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.moshi)
-  implementation(project(":misk-service"))
+  implementation(project(":misk:misk-service"))
 }
 
 configure<MavenPublishBaseExtension> {

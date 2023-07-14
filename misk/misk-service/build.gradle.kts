@@ -12,7 +12,7 @@ dependencies {
   api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.javaxInject)
-  api(project(":misk-inject"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.wispLogging)
@@ -20,7 +20,7 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

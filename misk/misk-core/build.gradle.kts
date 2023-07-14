@@ -18,8 +18,8 @@ dependencies {
   api(Dependencies.wispConfig)
   api(Dependencies.wispSsl)
   api(Dependencies.wispToken)
-  api(project(":misk-config"))
-  api(project(":misk-inject"))
+  api(project(":misk:misk-config"))
+  api(project(":misk:misk-inject"))
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.wispResourceLoader)
@@ -32,8 +32,8 @@ dependencies {
   testImplementation(Dependencies.logbackClassic)
   testImplementation(Dependencies.wispLogging)
   testImplementation(Dependencies.wispLoggingTesting)
-  testImplementation(project(":misk-core"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk:misk-core"))
+  testImplementation(project(":misk:misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {
