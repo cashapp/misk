@@ -8,7 +8,7 @@ plugins {
   id("com.vanniktech.maven.publish.base")
   
   // Needed to generate jooq test db classes
-  id("org.flywaydb.flyway") version "9.14.1"
+  id("org.flywaydb.flyway") version "9.20.1"
   id("nu.studer.jooq") version "8.2"
 }
 
