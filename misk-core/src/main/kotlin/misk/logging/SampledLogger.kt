@@ -169,7 +169,7 @@ class SampledLogger constructor(
 
   override fun <T> exit(result: T): T = underlyingLogger.exit(result)
 
-  override fun getName(): String = name
+  override fun getName(): String = underlyingLogger.name
 
   override fun info(msg: () -> Any?) = sampled { underlyingLogger.info(msg) }
 
