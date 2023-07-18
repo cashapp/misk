@@ -69,3 +69,373 @@ public final class misk/slack/SlackWebhookResponse : java/lang/Enum {
 	public static fun values ()[Lmisk/slack/SlackWebhookResponse;
 }
 
+public final class misk/slack/webapi/RealSlackClient : misk/slack/webapi/SlackClient {
+	public fun <init> (Lmisk/slack/webapi/SlackApi;)V
+	public fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
+	public fun postMessage (Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
+}
+
+public final class misk/slack/webapi/RealSlackClientModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/slack/webapi/SlackConfig;)V
+}
+
+public abstract interface class misk/slack/webapi/SlackApi {
+	public abstract fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lretrofit2/Call;
+	public abstract fun postMessage (Lmisk/slack/webapi/helpers/PostMessageRequest;)Lretrofit2/Call;
+}
+
+public final class misk/slack/webapi/SlackApiKt {
+	public static final fun checkSuccessful (Lretrofit2/Response;)V
+}
+
+public abstract interface class misk/slack/webapi/SlackClient {
+	public abstract fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
+	public abstract fun postMessage (Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
+}
+
+public final class misk/slack/webapi/SlackConfig {
+	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lmisk/config/Secret;
+	public final fun component3 ()Lmisk/config/Secret;
+	public final fun copy (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;)Lmisk/slack/webapi/SlackConfig;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/SlackConfig;Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;ILjava/lang/Object;)Lmisk/slack/webapi/SlackConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBearer_token ()Lmisk/config/Secret;
+	public final fun getSigning_secret ()Lmisk/config/Secret;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/Actions {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lmisk/slack/webapi/helpers/Text;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/Actions;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/Actions;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/Actions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAction_id ()Ljava/lang/String;
+	public final fun getAction_ts ()Ljava/lang/String;
+	public final fun getBlock_id ()Ljava/lang/String;
+	public final fun getText ()Lmisk/slack/webapi/helpers/Text;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/Block {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Lmisk/slack/webapi/helpers/ButtonLinkAndValue;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Lmisk/slack/webapi/helpers/ButtonLinkAndValue;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Boolean;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lmisk/slack/webapi/helpers/Text;
+	public final fun component5 ()Lmisk/slack/webapi/helpers/ButtonLinkAndValue;
+	public final fun component6 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Lmisk/slack/webapi/helpers/ButtonLinkAndValue;Ljava/util/List;)Lmisk/slack/webapi/helpers/Block;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/Block;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Lmisk/slack/webapi/helpers/ButtonLinkAndValue;Ljava/util/List;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/Block;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccessory ()Lmisk/slack/webapi/helpers/ButtonLinkAndValue;
+	public final fun getBlock_id ()Ljava/lang/String;
+	public final fun getElements ()Ljava/util/List;
+	public final fun getReplace_original ()Ljava/lang/Boolean;
+	public final fun getText ()Lmisk/slack/webapi/helpers/Text;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/ButtonLinkAndValue {
+	public fun <init> (Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lmisk/slack/webapi/helpers/Text;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/ButtonLinkAndValue;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/ButtonLinkAndValue;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/ButtonLinkAndValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAction_id ()Ljava/lang/String;
+	public final fun getText ()Lmisk/slack/webapi/helpers/Text;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/ButtonPress {
+	public fun <init> (Ljava/lang/String;Lmisk/slack/webapi/helpers/User;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Container;Ljava/lang/String;Lmisk/slack/webapi/helpers/Team;Lmisk/slack/webapi/helpers/Id;ZLmisk/slack/webapi/helpers/Id;Lmisk/slack/webapi/helpers/Message;Lmisk/slack/webapi/helpers/Values;Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Lmisk/slack/webapi/helpers/Id;
+	public final fun component11 ()Lmisk/slack/webapi/helpers/Message;
+	public final fun component12 ()Lmisk/slack/webapi/helpers/Values;
+	public final fun component13 ()Ljava/lang/String;
+	public final fun component14 ()Ljava/util/List;
+	public final fun component2 ()Lmisk/slack/webapi/helpers/User;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lmisk/slack/webapi/helpers/Container;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Lmisk/slack/webapi/helpers/Team;
+	public final fun component8 ()Lmisk/slack/webapi/helpers/Id;
+	public final fun component9 ()Z
+	public final fun copy (Ljava/lang/String;Lmisk/slack/webapi/helpers/User;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Container;Ljava/lang/String;Lmisk/slack/webapi/helpers/Team;Lmisk/slack/webapi/helpers/Id;ZLmisk/slack/webapi/helpers/Id;Lmisk/slack/webapi/helpers/Message;Lmisk/slack/webapi/helpers/Values;Ljava/lang/String;Ljava/util/List;)Lmisk/slack/webapi/helpers/ButtonPress;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/ButtonPress;Ljava/lang/String;Lmisk/slack/webapi/helpers/User;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Container;Ljava/lang/String;Lmisk/slack/webapi/helpers/Team;Lmisk/slack/webapi/helpers/Id;ZLmisk/slack/webapi/helpers/Id;Lmisk/slack/webapi/helpers/Message;Lmisk/slack/webapi/helpers/Values;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/ButtonPress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActions ()Ljava/util/List;
+	public final fun getApi_app_id ()Ljava/lang/String;
+	public final fun getChannel ()Lmisk/slack/webapi/helpers/Id;
+	public final fun getContainer ()Lmisk/slack/webapi/helpers/Container;
+	public final fun getEnterprise ()Lmisk/slack/webapi/helpers/Id;
+	public final fun getMessage ()Lmisk/slack/webapi/helpers/Message;
+	public final fun getResponse_url ()Ljava/lang/String;
+	public final fun getState ()Lmisk/slack/webapi/helpers/Values;
+	public final fun getTeam ()Lmisk/slack/webapi/helpers/Team;
+	public final fun getToken ()Ljava/lang/String;
+	public final fun getTrigger_id ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUser ()Lmisk/slack/webapi/helpers/User;
+	public fun hashCode ()I
+	public final fun is_enterprise_install ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/Container {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lmisk/slack/webapi/helpers/Container;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/Container;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lmisk/slack/webapi/helpers/Container;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChannel_id ()Ljava/lang/String;
+	public final fun getMessage_ts ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun is_ephemeral ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/Id {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/Id;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/Id;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/Id;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/Message {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)Lmisk/slack/webapi/helpers/Message;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/Message;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/Message;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApp_id ()Ljava/lang/String;
+	public final fun getBlocks ()Ljava/util/List;
+	public final fun getBot_id ()Ljava/lang/String;
+	public final fun getTeam ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public final fun getTs ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUser ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/MrkdwnBuilder {
+	public fun <init> ()V
+	public final fun append (Ljava/lang/String;)V
+	public final fun appendBlockquotePrefix ()V
+	public final fun appendLink (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun build ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/MrkdwnBuilderKt {
+	public static final fun buildMrkdwn (Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+	public static final fun getZwsp ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/PostMessageRequest {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/slack/webapi/helpers/PostMessageRequest;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/PostMessageRequest;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/PostMessageRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBlocks ()Ljava/util/List;
+	public final fun getChannel ()Ljava/lang/String;
+	public final fun getResponse_type ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/PostMessageResponse {
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Message;)V
+	public synthetic fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Message;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lmisk/slack/webapi/helpers/Message;
+	public final fun copy (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Message;)Lmisk/slack/webapi/helpers/PostMessageResponse;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/PostMessageResponse;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Message;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/PostMessageResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChannel ()Ljava/lang/String;
+	public final fun getError ()Ljava/lang/String;
+	public final fun getMessage ()Lmisk/slack/webapi/helpers/Message;
+	public final fun getOk ()Z
+	public final fun getTs ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/SlashCommand {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/SlashCommand;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/SlashCommand;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/SlashCommand;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApi_app_id ()Ljava/lang/String;
+	public final fun getChannel_id ()Ljava/lang/String;
+	public final fun getCommand ()Ljava/lang/String;
+	public final fun getResponse_url ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public final fun getTrigger_id ()Ljava/lang/String;
+	public final fun getUser_id ()Ljava/lang/String;
+	public final fun getUser_name ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/SlashInteractionResponse {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/SlashInteractionResponse;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/SlashInteractionResponse;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/SlashInteractionResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResponse_type ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/Team {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/Team;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/Team;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/Team;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDomain ()Ljava/lang/String;
+	public final fun getEnterprise_id ()Ljava/lang/String;
+	public final fun getEnterprise_name ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/Text {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/Boolean;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lmisk/slack/webapi/helpers/Text;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/Text;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEmoji ()Ljava/lang/Boolean;
+	public final fun getText ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/User {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/User;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/User;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/User;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTeam_id ()Ljava/lang/String;
+	public final fun getUsername ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/Values {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/slack/webapi/helpers/Values;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/Values;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/Values;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/interceptors/SlackClientInterceptor : okhttp3/Interceptor {
+	public fun <init> (Lmisk/slack/webapi/SlackConfig;)V
+	public final fun getConfig ()Lmisk/slack/webapi/SlackConfig;
+	public fun intercept (Lokhttp3/Interceptor$Chain;)Lokhttp3/Response;
+}
+
+public final class misk/slack/webapi/interceptors/SlackSignedRequestsInterceptor : misk/web/NetworkInterceptor {
+	public fun <init> (Ljava/time/Clock;Lmisk/slack/webapi/SlackConfig;)V
+	public fun intercept (Lmisk/web/NetworkChain;)V
+}
+
+public final class misk/slack/webapi/interceptors/SlackSignedRequestsInterceptor$Factory : misk/web/NetworkInterceptor$Factory {
+	public fun <init> (Lmisk/slack/webapi/interceptors/SlackSignedRequestsInterceptor;)V
+	public fun create (Lmisk/Action;)Lmisk/web/NetworkInterceptor;
+}
+
+public abstract interface annotation class misk/slack/webapi/interceptors/SlackSignedRequestsOnly : java/lang/annotation/Annotation {
+}
+
+public abstract class misk/slack/webapi/slashcommands/SlashCommandHandler {
+	public fun <init> (Lmisk/slack/webapi/SlackApi;)V
+	public fun getSlackApi ()Lmisk/slack/webapi/SlackApi;
+	public abstract fun handle (Lmisk/slack/webapi/helpers/SlashCommand;)Z
+	public fun sendSlackConfirmation (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+}
+
