@@ -19,6 +19,7 @@ public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator : com/google/com
 	public fun <init> (Lmisk/cloud/gcp/spanner/SpannerConfig;)V
 	public final fun clearTables ()V
 	public final fun getConfig ()Lmisk/cloud/gcp/spanner/SpannerConfig;
+	public final fun pullImage ()V
 	public final fun pullImage (Ljava/lang/String;)V
 	public static synthetic fun pullImage$default (Lmisk/cloud/gcp/spanner/GoogleSpannerEmulator;Ljava/lang/String;ILjava/lang/Object;)V
 }

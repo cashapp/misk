@@ -187,6 +187,7 @@ public abstract interface annotation class misk/web/dashboard/AdminDashboardAcce
 }
 
 public final class misk/web/dashboard/AdminDashboardModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
 	public fun <init> (ZLmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;)V
 	public synthetic fun <init> (ZLmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -200,11 +201,13 @@ public final class misk/web/dashboard/BaseDashboardModule : misk/inject/KAbstrac
 }
 
 public final class misk/web/dashboard/ConfigDashboardTabModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
 	public fun <init> (ZLmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;)V
 	public synthetic fun <init> (ZLmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/web/dashboard/DashboardHomeUrl : misk/web/dashboard/ValidWebEntry {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -222,6 +225,8 @@ public final class misk/web/dashboard/DashboardHomeUrl : misk/web/dashboard/Vali
 
 public final class misk/web/dashboard/DashboardModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/web/dashboard/DashboardModule$Companion;
+	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;)V
+	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/DashboardTabLoader;)V
 	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/DashboardTabLoader;Lmisk/web/dashboard/WebTabResourceModule;)V
 	public synthetic fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/DashboardTabLoader;Lmisk/web/dashboard/WebTabResourceModule;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -258,6 +263,12 @@ public final class misk/web/dashboard/DashboardNavbarStatus : misk/web/dashboard
 }
 
 public final class misk/web/dashboard/DashboardTab : misk/web/dashboard/WebTab {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -330,8 +341,13 @@ public final class misk/web/dashboard/DashboardTabLoaderEntry {
 
 public final class misk/web/dashboard/DashboardTabProvider : javax/inject/Provider {
 	public field accessAnnotationEntries Ljava/util/List;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lkotlin/reflect/KClass;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;)V
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lmisk/web/dashboard/DashboardTab;
 	public final fun getAccessAnnotationEntries ()Ljava/util/List;
@@ -461,6 +477,8 @@ public final class misk/web/dashboard/WebActionsDashboardTabModule : misk/inject
 }
 
 public class misk/web/dashboard/WebTab : misk/web/dashboard/ValidWebEntry {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getCapabilities ()Ljava/util/Set;
@@ -470,8 +488,12 @@ public class misk/web/dashboard/WebTab : misk/web/dashboard/ValidWebEntry {
 }
 
 public final class misk/web/dashboard/WebTabResourceModule : misk/inject/KAbstractModule {
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Lwisp/deployment/Deployment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Lwisp/deployment/Deployment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;)V
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;)V
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getResourcePath ()Ljava/lang/String;
@@ -488,6 +510,10 @@ public final class misk/web/metadata/DashboardMetadataAction : misk/web/actions/
 
 public final class misk/web/metadata/DashboardMetadataAction$DashboardMetadata {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/util/List;)V
 	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lmisk/web/dashboard/MiskWebTheme;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lmisk/web/dashboard/MiskWebTheme;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -509,6 +535,9 @@ public final class misk/web/metadata/DashboardMetadataAction$DashboardMetadata {
 
 public final class misk/web/metadata/DashboardMetadataAction$DashboardTabMetadata {
 	public static final field Companion Lmisk/web/metadata/DashboardMetadataAction$DashboardTabMetadata$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -617,6 +646,8 @@ public abstract interface class misk/web/metadata/database/DatabaseQueryFunction
 public final class misk/web/metadata/database/DatabaseQueryMetadata {
 	public static final field Companion Lmisk/web/metadata/database/DatabaseQueryMetadata$Companion;
 	public static final field DYNAMIC_QUERY_KCLASS_SUFFIX Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;)V
 	public fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/util/Map;Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/Map;)V
@@ -827,6 +858,7 @@ public final class misk/web/v2/DashboardPageLayout {
 	public static final field BETA_PREFIX Ljava/lang/String;
 	public static final field Companion Lmisk/web/v2/DashboardPageLayout$Companion;
 	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lwisp/deployment/Deployment;Lmisk/scope/ActionScoped;)V
+	public final fun build ()Ljava/lang/String;
 	public final fun build (Lkotlin/jvm/functions/Function4;)Ljava/lang/String;
 	public static synthetic fun build$default (Lmisk/web/v2/DashboardPageLayout;Lkotlin/jvm/functions/Function4;ILjava/lang/Object;)Ljava/lang/String;
 	public final fun newBuilder ()Lmisk/web/v2/DashboardPageLayout;

@@ -24,7 +24,7 @@ import kotlin.reflect.KClass
  * [FakeFeatureFlagsOverrideModule] installed.
  */
 @Deprecated("Replace the dependency on misk-feature-testing with testFixtures(misk-feature)")
-class FakeFeatureFlagsModule(
+class FakeFeatureFlagsModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
   private val overrides = mutableListOf<FakeFeatureFlagsOverrideModule>()

@@ -21,7 +21,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
  * multibind<WebProxyEntry>().toInstance(WebProxyEntry(...))
  * ```
  */
-data class WebProxyEntry(
+data class WebProxyEntry @JvmOverloads constructor(
   val url_path_prefix: String = "/",
   val web_proxy_url: HttpUrl
 ) : ValidWebEntry(valid_url_path_prefix = url_path_prefix) {

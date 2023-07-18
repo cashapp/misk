@@ -1,0 +1,27 @@
+# See https://github.com/detekt/detekt/blob/master/detekt-core/src/main/resources/default-detekt-config.yml
+# for default settings.
+
+output-reports:
+  active: true
+  exclude:
+    - 'XmlOutputReport'
+    - 'SarifOutputReport'
+    - 'MdOutputReport'
+
+console-reports:
+  active: true
+  exclude:
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'NotificationReport'
+    - 'FileBasedFindingsReport'
+    - 'LiteFindingsReport'
+
+complexity:
+  LongParameterList:
+    active: false
+
+detektive:
+  active: true
+  AnnotatePublicApisWithJvmOverloads:
+    active: true

@@ -60,6 +60,7 @@ class TestDatabasePool(
    *
    * @param retention Must be longer than any test could possibly run for.
    */
+  @JvmOverloads
   fun pruneOldDatabases(retention: Duration = Duration.ofDays(2)) {
     for (pool in poolsByKey.values) {
       pool.pruneOldDatabases(retention)

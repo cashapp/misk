@@ -6,7 +6,7 @@ import wisp.deployment.getDeploymentFromEnvironmentVariable
 
 /** Binds [Deployment] to make it available to services and actions
  */
-class DeploymentModule(
+class DeploymentModule @JvmOverloads constructor(
   private val deployment: Deployment = getDeploymentFromEnvironmentVariable()
 ) : KAbstractModule() {
 

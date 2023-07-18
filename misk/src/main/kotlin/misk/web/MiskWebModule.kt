@@ -95,7 +95,7 @@ import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import kotlin.math.min
 
-class MiskWebModule(
+class MiskWebModule @JvmOverloads constructor(
   private val config: WebConfig,
   private val jettyDependsOn: List<Key<out Service>> = emptyList(),
 ) : KAbstractModule() {

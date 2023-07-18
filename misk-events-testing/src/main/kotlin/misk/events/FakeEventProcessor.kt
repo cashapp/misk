@@ -56,6 +56,7 @@ class FakeEventProcessor @Inject constructor(
   /**
    * Deliver all enqueued events including retries.
    */
+  @JvmOverloads
   fun deliverAll(batchSize: Int = 100, allowRetries: Boolean = false) {
     retryQueue.drainTo(queue)
     while (true) {

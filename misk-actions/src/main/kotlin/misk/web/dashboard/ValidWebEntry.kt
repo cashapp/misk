@@ -4,7 +4,10 @@ import com.google.common.base.CharMatcher
 
 private val BlockedUrlPathPrefixes = listOf("/api/")
 
-open class ValidWebEntry(val valid_slug: String = "", val valid_url_path_prefix: String = "/") {
+open class ValidWebEntry @JvmOverloads constructor(
+  val valid_slug: String = "",
+  val valid_url_path_prefix: String = "/"
+) {
   init {
     // internal link url_path_prefix must start and end with '/'
     require(valid_url_path_prefix.startsWith("http") || valid_url_path_prefix.matches(Regex("(/[^/]+)*/"))) {
@@ -15,11 +18,11 @@ open class ValidWebEntry(val valid_slug: String = "", val valid_url_path_prefix:
     // url_path_prefix must not be in the blocked list of prefixes to prevent forwarding conflicts with webactions
     require(BlockedUrlPathPrefixes.all { !valid_url_path_prefix.startsWith(it) }) {
       "Url path prefix begins with a blocked prefix: ${
-      BlockedUrlPathPrefixes.filter {
-        valid_url_path_prefix.startsWith(
-          it
-        )
-      }
+        BlockedUrlPathPrefixes.filter {
+          valid_url_path_prefix.startsWith(
+            it
+          )
+        }
       }."
     }
 

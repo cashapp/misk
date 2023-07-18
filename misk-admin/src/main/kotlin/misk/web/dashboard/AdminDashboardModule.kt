@@ -18,7 +18,7 @@ import javax.inject.Qualifier
  *   Dashboard Annotation [AdminDashboard]. Tabs are then included in the admin dashboard menu
  *   grouping according to the [DashboardTab].category field and sorting by [DashboardTab].name
  */
-class AdminDashboardModule(
+class AdminDashboardModule @JvmOverloads constructor(
   private val isDevelopment: Boolean,
   private val configTabMode: ConfigMetadataAction.ConfigTabMode = ConfigMetadataAction.ConfigTabMode.SAFE,
 ) : KAbstractModule() {

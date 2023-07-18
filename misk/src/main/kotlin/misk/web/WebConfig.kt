@@ -7,7 +7,7 @@ import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.slf4j.event.Level
 import wisp.config.Config
 
-data class WebConfig(
+data class WebConfig @JvmOverloads constructor(
   /** HTTP port to listen on, or 0 for any available port. */
   val port: Int,
 
@@ -185,7 +185,7 @@ data class WebConfig(
   )
 }
 
-data class WebSslConfig(
+data class WebSslConfig @JvmOverloads constructor(
   /** HTTPS port to listen on, or 0 for any available port. */
   val port: Int,
   val cert_store: CertStoreConfig,
@@ -213,14 +213,14 @@ data class WebSslConfig(
   }
 }
 
-data class WebUnixDomainSocketConfig(
+data class WebUnixDomainSocketConfig @JvmOverloads constructor(
   /** The Unix Domain Socket to listen on. */
   val path: String,
   /** If true, the listener will support H2C. */
   val h2c: Boolean? = true
 )
 
-data class CorsConfig(
+data class CorsConfig @JvmOverloads constructor(
   /** A comma separated list of origins that are allowed to access the resources. */
   val allowedOrigins: Array<String> = arrayOf("*"),
   /**
@@ -249,7 +249,7 @@ data class CorsConfig(
   val exposedHeaders: Array<String> = arrayOf()
 )
 
-data class ConcurrencyLimiterConfig(
+data class ConcurrencyLimiterConfig @JvmOverloads constructor(
   /** If true, disables automatic load shedding when degraded. */
   val disabled: Boolean = false,
 

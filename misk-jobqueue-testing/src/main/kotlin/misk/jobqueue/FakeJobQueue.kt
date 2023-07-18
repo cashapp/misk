@@ -97,6 +97,7 @@ class FakeJobQueue @Inject constructor(
   }
 
   /** Returns all jobs that were handled. */
+  @JvmOverloads
   fun handleJobs(
     queueName: QueueName,
     assertAcknowledged: Boolean = true,
@@ -110,6 +111,7 @@ class FakeJobQueue @Inject constructor(
   }
 
   /** Returns all jobs that were handled. */
+  @JvmOverloads
   fun handleJobs(
     assertAcknowledged: Boolean = true,
     considerDelays: Boolean = false
@@ -122,6 +124,7 @@ class FakeJobQueue @Inject constructor(
   }
 
   /** Returns true if job was handled. */
+  @JvmOverloads
   fun handleJob(
     job: Job,
     assertAcknowledged: Boolean = true,
@@ -133,6 +136,7 @@ class FakeJobQueue @Inject constructor(
   }
 
   /** Returns all jobs that were handled. */
+  @JvmOverloads
   fun reprocessDeadlettered(
     queueName: QueueName,
     assertAcknowledged: Boolean = true,
@@ -145,6 +149,7 @@ class FakeJobQueue @Inject constructor(
   }
 
   /** Returns true if job was handled. */
+  @JvmOverloads
   fun reprocessDeadlettered(
     job: Job,
     assertAcknowledged: Boolean = true,
@@ -221,7 +226,7 @@ class FakeJobQueue @Inject constructor(
   }
 }
 
-data class FakeJob(
+data class FakeJob @JvmOverloads constructor(
   override val queueName: QueueName,
   override val id: String,
   override val idempotenceKey: String,

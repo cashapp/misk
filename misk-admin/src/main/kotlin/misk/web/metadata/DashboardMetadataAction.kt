@@ -89,7 +89,7 @@ class DashboardMetadataAction @Inject constructor(
     )
   }
 
-  data class DashboardTabMetadata(
+  data class DashboardTabMetadata @JvmOverloads constructor(
     val slug: String,
     val url_path_prefix: String,
     val dashboard_slug: String,
@@ -111,7 +111,7 @@ class DashboardMetadataAction @Inject constructor(
     }
   }
 
-  data class DashboardMetadata(
+  data class DashboardMetadata @JvmOverloads constructor(
     val home_url: String = "",
     val navbar_items: List<String> = listOf(),
     val navbar_status: String = "",
@@ -120,5 +120,5 @@ class DashboardMetadataAction @Inject constructor(
     val theme: MiskWebTheme? = null,
   )
 
-  data class Response(val dashboardMetadata: DashboardMetadata = DashboardMetadata())
+  data class Response @JvmOverloads constructor(val dashboardMetadata: DashboardMetadata = DashboardMetadata())
 }

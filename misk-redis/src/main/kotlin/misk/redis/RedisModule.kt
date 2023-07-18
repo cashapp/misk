@@ -33,7 +33,7 @@ import wisp.deployment.Deployment
  *
  * See: https://github.com/xetorthio/jedis/wiki/Getting-started#using-jedis-in-a-multithreaded-environment
  */
-class RedisModule(
+class RedisModule @JvmOverloads constructor(
   private val redisConfig: RedisConfig,
   private val jedisPoolConfig: JedisPoolConfig,
   private val useSsl: Boolean = true,

@@ -10,6 +10,7 @@ public final class misk/slack/RealSlackClient$Companion {
 
 public class misk/slack/SlackClient {
 	public fun <init> ()V
+	public final fun postMessage (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/SlackWebhookResponse;
 	public fun postMessage (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/SlackWebhookResponse;
 	public static synthetic fun postMessage$default (Lmisk/slack/SlackClient;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/SlackWebhookResponse;
 }
@@ -17,6 +18,7 @@ public class misk/slack/SlackClient {
 public final class misk/slack/SlackConfig {
 	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/config/Secret;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lmisk/config/Secret;
 	public final fun component3 ()Ljava/lang/String;
@@ -96,6 +98,7 @@ public abstract interface class misk/slack/webapi/SlackClient {
 public final class misk/slack/webapi/SlackConfig {
 	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;)V
 	public synthetic fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/config/Secret;Lmisk/config/Secret;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lmisk/config/Secret;
 	public final fun component3 ()Lmisk/config/Secret;
@@ -131,6 +134,11 @@ public final class misk/slack/webapi/helpers/Actions {
 }
 
 public final class misk/slack/webapi/helpers/Block {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Lmisk/slack/webapi/helpers/ButtonLinkAndValue;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Lmisk/slack/webapi/helpers/ButtonLinkAndValue;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Lmisk/slack/webapi/helpers/ButtonLinkAndValue;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -153,6 +161,9 @@ public final class misk/slack/webapi/helpers/Block {
 }
 
 public final class misk/slack/webapi/helpers/ButtonLinkAndValue {
+	public fun <init> (Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;)V
+	public fun <init> (Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Lmisk/slack/webapi/helpers/Text;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -280,6 +291,7 @@ public final class misk/slack/webapi/helpers/MrkdwnBuilderKt {
 public final class misk/slack/webapi/helpers/PostMessageRequest {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/util/List;
@@ -294,6 +306,10 @@ public final class misk/slack/webapi/helpers/PostMessageRequest {
 }
 
 public final class misk/slack/webapi/helpers/PostMessageResponse {
+	public fun <init> (Z)V
+	public fun <init> (ZLjava/lang/String;)V
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;)V
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Message;)V
 	public synthetic fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/Message;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
@@ -339,6 +355,7 @@ public final class misk/slack/webapi/helpers/SlashCommand {
 }
 
 public final class misk/slack/webapi/helpers/SlashInteractionResponse {
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -370,6 +387,8 @@ public final class misk/slack/webapi/helpers/Team {
 }
 
 public final class misk/slack/webapi/helpers/Text {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;

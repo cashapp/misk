@@ -3,7 +3,7 @@ package misk.perf
 /**
  * Configuration for the [PauseDetector]
  */
-data class PauseDetectorConfig(
+data class PauseDetectorConfig @JvmOverloads constructor(
   /** The delay between detector runs. If 0, the detector runs in a spin loop. */
   val resolutionMillis: Long = 1,
 

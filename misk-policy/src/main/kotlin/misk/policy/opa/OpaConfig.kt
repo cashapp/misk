@@ -2,7 +2,7 @@ package misk.policy.opa
 
 import misk.config.Config
 
-data class OpaConfig(
+data class OpaConfig @JvmOverloads constructor(
   val baseUrl: String,
   val unixSocket: String?,
   val provenance: Boolean = false

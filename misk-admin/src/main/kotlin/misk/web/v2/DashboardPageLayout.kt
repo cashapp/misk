@@ -50,6 +50,7 @@ class DashboardPageLayout @Inject constructor(
   private var path: String = clientHttpCall.get().url.encodedPath
   fun path(path: String) = apply { this.path = path }
 
+  @JvmOverloads
   fun build(tabBlock: TagConsumer<*>.(appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab?) -> Unit = { _, _, _ -> Unit }): String {
     check(newBuilder) {
       "You must call newBuilder() before calling build() to prevent builder reuse."

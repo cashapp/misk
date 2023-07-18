@@ -30,7 +30,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
-class JooqModule(
+class JooqModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   private val dataSourceClusterConfig: DataSourceClusterConfig,
   private val jooqCodeGenSchemaName: String,

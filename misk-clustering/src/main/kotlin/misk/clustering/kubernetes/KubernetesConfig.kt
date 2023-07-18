@@ -8,7 +8,7 @@ import wisp.config.Config
  *     the namespace are included in the cluster.
  *     Ex: "app = helloserver".
  */
-data class KubernetesConfig(
+data class KubernetesConfig @JvmOverloads constructor(
   val my_pod_namespace: String = System.getenv("MY_POD_NAMESPACE") ?: "<invalid-namespace>",
   val my_pod_name: String = System.getenv("MY_POD_NAME") ?: "<invalid-pod-name>",
   val my_pod_ip: String = System.getenv("MY_POD_IP") ?: "<invalid-pod-ip>",

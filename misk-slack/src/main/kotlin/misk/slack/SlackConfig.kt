@@ -2,7 +2,7 @@ package misk.slack
 
 import misk.config.Secret
 
-data class SlackConfig(
+data class SlackConfig @JvmOverloads constructor(
   val baseUrl: String = "https://hooks.slack.com/",
 
   /**

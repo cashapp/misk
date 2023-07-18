@@ -31,7 +31,7 @@ import wisp.logging.getLogger
  *
  *  If a requested key alias does not exist, this will raise a [ExternalKeyManagerException]
  */
-class S3KeySource @Inject constructor(
+class S3KeySource @Inject @JvmOverloads constructor(
   private val deployment: Deployment,
   defaultS3: AmazonS3,
   @ExternalDataKeys val allKeyAliases: Map<KeyAlias, KeyType>,

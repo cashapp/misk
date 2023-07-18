@@ -126,6 +126,7 @@ class GoogleSpannerEmulator @Inject constructor(
   /**
    * Pulls a Docker container containing the Google Spanner emulator.
    */
+  @JvmOverloads
   fun pullImage(imageVersion: String? = null) {
     image = fullImageName(imageVersion)
     Companion.pullImage()
