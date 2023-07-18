@@ -48,23 +48,12 @@ class RealSlackClientTest {
     assertThat(response.isSuccessful()).isTrue()
   }
 
-  @Test
-  fun `post confirmation`() {
-    server.enqueueMessageResponse(samplePostMessageJson)
-
-    val response = slackApi.postConfirmation(
-      "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
-      samplePostMessageJson
-    ).execute()
-    assertThat(response.isSuccessful()).isTrue()
-  }
 
   inner class SlackTestingModule : KAbstractModule() {
     override fun configure() {
       install(LogCollectorModule())
       install(DeploymentModule(TESTING))
       install(MiskTestingServiceModule())
-      install(FakeSlackClientModule())
       install(
         HttpClientsConfigModule(
           HttpClientsConfig(

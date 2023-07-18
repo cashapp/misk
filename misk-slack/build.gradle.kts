@@ -13,7 +13,6 @@ dependencies {
   api(Dependencies.javaxInject)
   api(Dependencies.moshi)
   api(Dependencies.retrofit)
-  api(Dependencies.retrofitMock)
   api(project(":misk"))
   api(project(":misk-config"))
   api(project(":misk-inject"))

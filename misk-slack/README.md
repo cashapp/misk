@@ -13,7 +13,7 @@ methods (https://api.slack.com/methods).
 
 ```
   slack:
-    webhook_path: "filesystem:/etc/secrets/service/slack-api-webhook-url"
+    webhook_path: "filesystem:/etc/secrets/service/slack-webhook-url"
     default_channel: "#misk" # optional
 ```
 
