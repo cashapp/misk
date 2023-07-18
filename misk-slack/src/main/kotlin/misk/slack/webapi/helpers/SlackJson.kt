@@ -5,7 +5,7 @@ package misk.slack.webapi.helpers
  *
  * https://api.slack.com/methods/chat.postMessage
  */
-data class PostMessageRequest(
+data class PostMessageRequest @JvmOverloads constructor(
   val channel: String,
   val response_type: String? = "in_channel",
   val blocks: List<Any>,
@@ -16,7 +16,7 @@ data class PostMessageRequest(
  *
  * https://api.slack.com/reference/block-kit/blocks
  */
-data class Block(
+data class Block @JvmOverloads constructor(
   val type: String,
   val replace_original: Boolean? = null,
   val block_id: String? = null,
@@ -26,7 +26,7 @@ data class Block(
 )
 
 /** https://api.slack.com/reference/block-kit/composition-objects#text */
-data class Text(
+data class Text @JvmOverloads constructor(
   val type: String,
   val text: String? = null,
   /** This must be null if [type] is "mrkdwn". */
@@ -34,7 +34,7 @@ data class Text(
 )
 
 /** https://api.slack.com/reference/block-kit/block-elements#button */
-data class ButtonLinkAndValue(
+data class ButtonLinkAndValue @JvmOverloads constructor(
   val type: String,
   val text: Text,
   val value: String? = null,
@@ -47,7 +47,7 @@ data class ButtonLinkAndValue(
  *
  * https://api.slack.com/methods/chat.postMessage
  */
-data class PostMessageResponse(
+data class PostMessageResponse @JvmOverloads constructor(
   val ok: Boolean,
   val error: String? = null,
   val channel: String? = null,
@@ -144,7 +144,7 @@ data class SlashCommand(
 /**
  * Response sent back to Slack while slash commands are being handled.
  */
-data class SlashInteractionResponse(
+data class SlashInteractionResponse @JvmOverloads constructor(
   val response_type: String? = "in_channel",
   val text: String,
 )
