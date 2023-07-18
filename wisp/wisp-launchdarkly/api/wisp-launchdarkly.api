@@ -6,9 +6,11 @@ public final class wisp/launchdarkly/LaunchDarklyClient {
 public final class wisp/launchdarkly/LaunchDarklyClientMetrics {
 	public static final field Companion Lwisp/launchdarkly/LaunchDarklyClientMetrics$Companion;
 	public static final field FAILED_COUNTER_NAME Ljava/lang/String;
-	public static final field HISTO_DURATION_NAME Ljava/lang/String;
+	public static final field INITIALIZATION_DURATION_NAME Ljava/lang/String;
 	public static final field SUCCESS_COUNTER_NAME Ljava/lang/String;
 	public fun <init> (Lio/micrometer/core/instrument/MeterRegistry;)V
+	public final fun onInitFailure ()V
+	public final fun onInitSuccess (J)V
 }
 
 public final class wisp/launchdarkly/LaunchDarklyClientMetrics$Companion {
