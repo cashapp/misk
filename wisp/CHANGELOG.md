@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+Version 1.4.11 *(2023-07-18)*
+----------------------------
+* change the implementation of ld metrics ([#182](https://github.com/cashapp/wisp/pull/182)) 
 
 Version 1.4.10 *(2023-07-11)*
 ----------------------------
