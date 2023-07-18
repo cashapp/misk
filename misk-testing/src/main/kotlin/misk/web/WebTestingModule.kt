@@ -16,7 +16,7 @@ import wisp.deployment.TESTING
     "the composability of testing modules for application owners",
   replaceWith = ReplaceWith(expression = "WebServerTestingModule", "misk.web")
 )
-class WebTestingModule(
+class WebTestingModule @JvmOverloads constructor(
   private val webConfig: WebConfig = TESTING_WEB_CONFIG
 ) : KAbstractModule() {
   override fun configure() {
@@ -33,7 +33,7 @@ class WebTestingModule(
  * A module that starts an embedded Jetty web server configured for testing. The server supports
  * both plaintext and TLS.
  */
-class WebServerTestingModule(
+class WebServerTestingModule @JvmOverloads constructor(
   private val webConfig: WebConfig = TESTING_WEB_CONFIG
 ) : KAbstractModule() {
   override fun configure() {

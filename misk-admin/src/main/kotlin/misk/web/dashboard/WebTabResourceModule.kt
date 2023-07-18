@@ -25,7 +25,7 @@ import wisp.deployment.Deployment
  *    dashboard urls such as `/_admin/` or `/app/` since path routing is by url prefix.
  * @property resourcePath JVM path for non-Development environment static resources (includes `classpath:/` prefix)
  */
-class WebTabResourceModule(
+class WebTabResourceModule @JvmOverloads constructor(
   private val isDevelopment: Boolean = false,
   val slug: String,
   val web_proxy_url: String? = null,

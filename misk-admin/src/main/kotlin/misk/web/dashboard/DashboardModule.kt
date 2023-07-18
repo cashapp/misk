@@ -7,7 +7,7 @@ import misk.web.v2.DashboardIFrameTabAction
 import misk.web.v2.DashboardPageLayout.Companion.BETA_PREFIX
 
 /** Handles installation of Misk Dashboard components (admin dashboard or custom...). */
-class DashboardModule(
+class DashboardModule @JvmOverloads constructor(
   private val dashboardTabProvider: DashboardTabProvider,
   private val dashboardTabLoader: DashboardTabLoader? = null,
   private val webTabResourceModule: WebTabResourceModule? = null

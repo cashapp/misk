@@ -74,23 +74,12 @@ import misk.inject.toKey
  * This service will stall in the `STARTING` state until all upstream services are `RUNNING`.
  * Symmetrically it stalls in the `STOPPING` state until all dependent services are `TERMINATED`.
  */
-class ServiceModule constructor(
+class ServiceModule @JvmOverloads constructor(
   val key: Key<out Service>,
   val dependsOn: List<Key<out Service>> = listOf(),
   val enhancedBy: List<Key<out Service>> = listOf(),
   val enhances: Key<out Service>? = null
 ) : KAbstractModule() {
-  // This constructor exists for binary-compatibility with older callers.
-  constructor(
-    key: Key<out Service>,
-    dependsOn: List<Key<out Service>> = listOf(),
-    enhancedBy: List<Key<out Service>> = listOf()
-  ) : this(
-    key = key,
-    dependsOn = dependsOn,
-    enhancedBy = enhancedBy,
-    enhances = null
-  )
 
   override fun configure() {
     multibind<ServiceEntry>().toInstance(ServiceEntry(key))
@@ -122,12 +111,15 @@ class ServiceModule constructor(
   fun enhances(toBeEnhanced: Key<out Service>) =
     ServiceModule(key, dependsOn, enhancedBy, toBeEnhanced)
 
+  @JvmOverloads
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
     dependsOn(T::class.toKey(qualifier))
 
+  @JvmOverloads
   inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
     enhancedBy(T::class.toKey(qualifier))
 
+  @JvmOverloads
   inline fun <reified T : Service> enhances(qualifier: KClass<out Annotation>? = null) =
     enhances(T::class.toKey(qualifier))
 }

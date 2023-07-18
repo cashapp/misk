@@ -58,6 +58,14 @@ public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
 	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;I)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;J)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JI)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JII)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIII)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;)V
 	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;Z)V
 	public synthetic fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getAws_sqs_job_receiver_policy ()Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
@@ -97,6 +105,8 @@ public final class misk/jobqueue/sqs/AwsSqsJobReceiverPolicy : java/lang/Enum {
 
 public final class misk/jobqueue/sqs/AwsSqsQueueConfig {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;

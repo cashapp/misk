@@ -10,7 +10,7 @@ import wisp.config.Config
  * [AwsSqsJobQueueConfig] is the configuration for job queueing backed by Amazon's
  * Simple Queuing Service
  */
-class AwsSqsJobQueueConfig(
+class AwsSqsJobQueueConfig @JvmOverloads constructor(
   /**
    * External queues is a set of externally owned SQS queues accessed by this service, mapping
    * an internal queue name to the (account ID, region, name) of the queue in the external account

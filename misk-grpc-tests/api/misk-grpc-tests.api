@@ -30,6 +30,7 @@ public final class misk/grpc/miskserver/RouteGuideMiskServiceModule : misk/injec
 
 public final class misk/grpc/protocclient/GrpcChannelFactory {
 	public fun <init> (Lmisk/resources/ResourceLoader;)V
+	public final fun createClientChannel (Ljava/net/SocketAddress;)Lio/grpc/ManagedChannel;
 	public final fun createClientChannel (Ljava/net/SocketAddress;Ljava/lang/String;)Lio/grpc/ManagedChannel;
 	public static synthetic fun createClientChannel$default (Lmisk/grpc/protocclient/GrpcChannelFactory;Ljava/net/SocketAddress;Ljava/lang/String;ILjava/lang/Object;)Lio/grpc/ManagedChannel;
 	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;

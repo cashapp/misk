@@ -133,7 +133,7 @@ fun <T> Transacter.failSafeRead(shard: Shard, block: (session: Session) -> T): T
 /**
  * Thrown to explicitly trigger a retry, subject to retry limits and config such as noRetries().
  */
-class RetryTransactionException(
+class RetryTransactionException @JvmOverloads constructor(
   message: String? = null,
   cause: Throwable? = null
 ) : Exception(message, cause)

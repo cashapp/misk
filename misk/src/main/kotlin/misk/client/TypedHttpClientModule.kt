@@ -23,7 +23,7 @@ import kotlin.reflect.cast
  * @param retrofitBuilderProvider Optional provider of a [Retrofit.Builder]. This provider should
  * not return a singleton since the builder it returns will be mutated.
  */
-class TypedHttpClientModule<T : Any>(
+class TypedHttpClientModule<T : Any> @JvmOverloads constructor(
   private val kclass: KClass<T>,
   private val name: String,
   private val annotation: Annotation? = null,
@@ -89,7 +89,7 @@ interface TypedPeerClientFactory<T> {
  *
  * The factory returned typed clients that can be used to call other members of the cluster.
  */
-class TypedPeerHttpClientModule<T : Any>(
+class TypedPeerHttpClientModule<T : Any> @JvmOverloads constructor(
   private val kclass: KClass<T>,
   private val name: String,
   private val retrofitBuilderProvider: Provider<Retrofit.Builder>? = null
@@ -201,6 +201,7 @@ class TypedClientFactory @Inject constructor() {
     return typedClient(client, baseUrl, kclass, name, retrofitBuilderProvider)
   }
 
+  @JvmOverloads
   /** Reified flavor of build */
   inline fun <reified T : Any> build(
     endpointConfig: HttpClientEndpointConfig,

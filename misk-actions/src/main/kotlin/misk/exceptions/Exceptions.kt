@@ -17,6 +17,7 @@ import java.net.HttpURLConnection.HTTP_UNSUPPORTED_TYPE
  * Even though all kotlin exceptions are runtime exceptions.
  * To ensure java inter-op all exception need to extend from RuntimeException.
  */
+@Suppress("AnnotatePublicApisWithJvmOverloads")
 open class WebActionException(
   /** The HTTP status code. Should be 400..599. */
   val code: Int,
@@ -63,61 +64,61 @@ open class WebActionException(
 }
 
 /** Base exception for when resources are not found */
-open class NotFoundException(message: String = "", cause: Throwable? = null) :
+open class NotFoundException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_NOT_FOUND, message, cause)
 
 /** Base exception for when authentication fails */
-open class UnauthenticatedException(message: String = "", cause: Throwable? = null) :
+open class UnauthenticatedException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_UNAUTHORIZED, message, cause)
 
 /** Base exception for when authenticated credentials lack access to a resource */
-open class UnauthorizedException(message: String = "", cause: Throwable? = null) :
+open class UnauthorizedException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_FORBIDDEN, message, cause)
 
 /**
  * Base exception for when a resource is unavailable. The message is not exposed to the caller.
  */
-open class ResourceUnavailableException(message: String = "", cause: Throwable? = null) :
+open class ResourceUnavailableException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_UNAVAILABLE, "RESOURCE_UNAVAILABLE", message, cause)
 
 /** Base exception for bad client requests */
-open class BadRequestException(message: String = "", cause: Throwable? = null) :
+open class BadRequestException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_BAD_REQUEST, message, cause)
 
 /** Base exception for when a request causes a conflict */
-open class ConflictException(message: String = "", cause: Throwable? = null) :
+open class ConflictException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_CONFLICT, message, cause)
 
 /** This exception is custom to Misk. */
-open class UnprocessableEntityException(message: String = "", cause: Throwable? = null) :
+open class UnprocessableEntityException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(422, message, cause)
 
 /** This exception is custom to Misk. */
-open class TooManyRequestsException(message: String = "", cause: Throwable? = null) :
+open class TooManyRequestsException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(429, message, cause)
 
 /** This exception is custom to Misk. */
-open class ClientClosedRequestException(message: String = "", cause: Throwable? = null) :
+open class ClientClosedRequestException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(499, message, message, cause)
 
 /**
  * Base exception for when a server is acting as a gateway and gets invalid response from upstream.
  * The message is not exposed to the caller.
  */
-open class BadGatewayException(message: String = "", cause: Throwable? = null) :
+open class BadGatewayException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_BAD_GATEWAY, "BAD_GATEWAY", message, cause)
 
 /**
  * Base exception for when a server is acting as a gateway and cannot get a response in time.
  * The message is not exposed to the caller.
  */
-open class GatewayTimeoutException(message: String = "", cause: Throwable? = null) :
+open class GatewayTimeoutException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_GATEWAY_TIMEOUT, "GATEWAY_TIMEOUT", message, cause)
 
-open class PayloadTooLargeException(message: String = "", cause: Throwable? = null) :
+open class PayloadTooLargeException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_ENTITY_TOO_LARGE, message, cause)
 
-open class UnsupportedMediaTypeException(message: String = "", cause: Throwable? = null) :
+open class UnsupportedMediaTypeException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_UNSUPPORTED_TYPE, message, cause)
 
 /** Similar to [kotlin.require], but throws [BadRequestException] if the check fails */

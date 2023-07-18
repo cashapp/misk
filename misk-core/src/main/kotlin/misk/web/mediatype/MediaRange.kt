@@ -4,7 +4,7 @@ import okhttp3.MediaType
 import java.nio.charset.Charset
 
 /** An RFC-2616 media range */
-data class MediaRange(
+data class MediaRange @JvmOverloads constructor(
   val type: String,
   val subtype: String,
   val charset: Charset? = null,
@@ -56,7 +56,7 @@ data class MediaRange(
     return Matcher(this, true)
   }
 
-  class Matcher(
+  class Matcher @JvmOverloads constructor(
     val mediaRange: MediaRange,
     val matchesCharset: Boolean = false
   ) : Comparable<Matcher> {

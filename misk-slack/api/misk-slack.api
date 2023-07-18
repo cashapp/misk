@@ -10,6 +10,7 @@ public final class misk/slack/RealSlackClient$Companion {
 
 public class misk/slack/SlackClient {
 	public fun <init> ()V
+	public final fun postMessage (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/SlackWebhookResponse;
 	public fun postMessage (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/SlackWebhookResponse;
 	public static synthetic fun postMessage$default (Lmisk/slack/SlackClient;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/SlackWebhookResponse;
 }
@@ -17,6 +18,7 @@ public class misk/slack/SlackClient {
 public final class misk/slack/SlackConfig {
 	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/config/Secret;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lmisk/config/Secret;
 	public final fun component3 ()Ljava/lang/String;

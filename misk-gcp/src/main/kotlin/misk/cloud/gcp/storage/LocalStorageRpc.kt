@@ -94,7 +94,7 @@ import kotlin.streams.asSequence
  * as the etag value.
  *
  */
-class LocalStorageRpc(
+class LocalStorageRpc @JvmOverloads constructor(
   root: Path,
   moshi: Moshi = defaultKotlinMoshi
 ) : BaseCustomStorageRpc() {

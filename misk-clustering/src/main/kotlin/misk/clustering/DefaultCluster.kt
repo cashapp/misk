@@ -14,7 +14,7 @@ import javax.inject.Singleton
  * that need to be triggered as the cluster changes.
  */
 @Singleton
-class DefaultCluster(
+class DefaultCluster @JvmOverloads constructor(
   self: Cluster.Member,
   private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
     { ClusterHashRing(it) }
@@ -74,6 +74,7 @@ class DefaultCluster(
   }
 
   /** Triggers a change to the cluster in response members becoming ready or not ready */
+  @JvmOverloads
   fun clusterChanged(
     membersBecomingReady: Set<Cluster.Member> = setOf(),
     membersBecomingNotReady: Set<Cluster.Member> = setOf()

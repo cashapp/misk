@@ -20,7 +20,7 @@ interface Sampler {
 }
 
 /** A [Sampler] randomly invokes an action based on a sample percentage */
-class PercentSampler(
+class PercentSampler @JvmOverloads constructor(
   val samplePercentage: () -> Int,
   val random: () -> Int = { ThreadLocalRandom.current().nextInt(0, 100) }
 ) : Sampler {

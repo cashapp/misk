@@ -48,7 +48,7 @@ private const val MAX_MAX_ROWS = 10_000
 private const val ROW_COUNT_ERROR_LIMIT = 3000
 private const val ROW_COUNT_WARNING_LIMIT = 2000
 
-class HibernateModule(
+class HibernateModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   config: DataSourceConfig,
   private val readerQualifier: KClass<out Annotation>?,

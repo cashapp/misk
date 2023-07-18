@@ -25,7 +25,7 @@ import okhttp3.OkHttpClient
  * See [misk.jdbc.SHARED_TEST_DATABASE_POOL].
  */
 @Deprecated("Replace the dependency on misk-jdcb-testing with testFixtures(misk-jdbc)")
-class JdbcTestingModule(
+class JdbcTestingModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   private val startUpStatements: List<String> = listOf(),
   private val shutDownStatements: List<String> = listOf(),

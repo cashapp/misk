@@ -404,7 +404,10 @@ object MiskConfig {
     }
   }
 
-  class RealSecret<T>(override val value: T, internal val reference: String = "") : Secret<T> {
+  class RealSecret<T> @JvmOverloads constructor(
+    override val value: T,
+    internal val reference: String = ""
+  ) : Secret<T> {
     override fun toString(): String = "RealSecret(value=████████, reference=$reference)"
   }
 }

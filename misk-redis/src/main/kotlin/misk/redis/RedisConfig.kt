@@ -9,7 +9,7 @@ class RedisConfig : java.util.LinkedHashMap<String, RedisReplicationGroupConfig>
   constructor(m: Map<String, RedisReplicationGroupConfig>) : super(m)
 }
 
-data class RedisReplicationGroupConfig(
+data class RedisReplicationGroupConfig @JvmOverloads constructor(
   val writer_endpoint: RedisNodeConfig,
   val reader_endpoint: RedisNodeConfig,
   @Redact
