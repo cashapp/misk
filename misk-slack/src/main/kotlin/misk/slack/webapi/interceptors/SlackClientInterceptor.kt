@@ -15,7 +15,9 @@ class SlackClientInterceptor @Inject constructor(
   private val bearerToken = config.bearer_token.value
 
   /**
-   * Bearer token generated from Slack used for authenticating request.
+   * The SlackClientInterceptor intercepts outgoing requests to Slack and
+   * chains the bearer token to the request. This token is provided by the Slack API
+   * when a Slack app is originally created.
    * https://api.slack.com/web#url-encoded-bodies
    */
   override fun intercept(chain: Interceptor.Chain): Response {

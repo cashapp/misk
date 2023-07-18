@@ -1,6 +1,6 @@
 package misk.slack.webapi
 
-import misk.slack.webapi.helpers.PostMessage
+import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.PostMessageResponse
 import retrofit2.Call
 import retrofit2.Response
@@ -18,7 +18,7 @@ interface SlackApi {
   @POST("/api/chat.postMessage")
   @Headers(value = ["accept: application/json"])
   fun postMessage(
-    @Body postMessageJson: PostMessage,
+    @Body postMessageJson: PostMessageRequest,
   ): Call<PostMessageResponse>
 
   /**
@@ -30,7 +30,7 @@ interface SlackApi {
   @Headers(value = ["accept: application/json"])
   fun postConfirmation(
     @Url url: String,
-    @Body confirmationMessageJson: PostMessage,
+    @Body confirmationMessageJson: PostMessageRequest,
   ): Call<PostMessageResponse>
 }
 

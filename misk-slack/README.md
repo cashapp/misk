@@ -3,9 +3,9 @@ Use the webhook client for posting one-off messages to channels.
 Use the Slack Web API when enabling user interactivity or calling any of the API
 methods (https://api.slack.com/methods).
 
-## Slack Webhook Client:
+## Slack Webhook Client
 
-### Installation:
+### Installation
 
 1. Install the `SlackModule`
 2. Create a secret for your app that contains the webhook path
@@ -17,13 +17,13 @@ methods (https://api.slack.com/methods).
     default_channel: "#misk" # optional
 ```
 
-### Usage:
+### Usage
 
 1. `@Inject` the `SlackClient`
 2. Call `SlackClient.postMessage()`
 
 
-## Slack Web API:
+## Slack Web API
 
 1. Install the `RealSlackClientModule`
 2. Upload the bearer token and signing secret provided by the Slack app.

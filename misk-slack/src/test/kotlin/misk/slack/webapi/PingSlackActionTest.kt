@@ -5,7 +5,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.config.MiskConfig.RealSecret
 import misk.security.authz.Unauthenticated
 import misk.slack.webapi.helpers.Block
-import misk.slack.webapi.helpers.PostMessage
+import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.Text
 import misk.slack.webapi.helpers.buildMrkdwn
 import misk.slack.webapi.interceptors.SlackClientInterceptor
@@ -69,7 +69,7 @@ class PingSlackActionTest {
   }
 
   @Singleton
-  class PingSlackAction @Inject constructor(
+  internal class PingSlackAction @Inject constructor(
     private val slackApi: SlackApi,
     moshi: Moshi,
   ) : WebAction {
@@ -79,7 +79,7 @@ class PingSlackActionTest {
     ): Response<ResponseBody> {
 
       //set the channel to the channel ID (ie. "C04PSNFH65Q")
-      val postMessageJson = PostMessage(
+      val postMessageJson = PostMessageRequest(
         channel = "test",
         response_type = "in_channel",
         blocks = listOf(

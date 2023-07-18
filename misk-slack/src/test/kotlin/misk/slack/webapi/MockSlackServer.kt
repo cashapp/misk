@@ -2,7 +2,7 @@ package misk.slack.webapi
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
-import misk.slack.webapi.helpers.PostMessage
+import misk.slack.webapi.helpers.PostMessageRequest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import javax.inject.Inject
@@ -17,7 +17,7 @@ class MockSlackServer @Inject constructor(
 ) : AbstractIdleService() {
   val server = MockWebServer()
 
-  private val jsonAdapter = moshi.adapter(PostMessage::class.java)
+  private val jsonAdapter = moshi.adapter(PostMessageRequest::class.java)
   override fun startUp() {
     server.start(60992)
   }
@@ -28,7 +28,7 @@ class MockSlackServer @Inject constructor(
 
   /** [SlackApi.postMessage] and [SlackApi.postConfirmation] return this */
 
-  fun enqueueMessageResponse(postMessageJson: PostMessage) {
+  fun enqueueMessageResponse(postMessageJson: PostMessageRequest) {
     server.enqueue(
       MockResponse()
         .setBody(jsonAdapter.toJson(postMessageJson))

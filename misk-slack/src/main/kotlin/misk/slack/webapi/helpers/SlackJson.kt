@@ -5,7 +5,7 @@ package misk.slack.webapi.helpers
  *
  * https://api.slack.com/methods/chat.postMessage
  */
-data class PostMessage(
+data class PostMessageRequest(
   val channel: String,
   val response_type: String? = "in_channel",
   val blocks: List<Any>,

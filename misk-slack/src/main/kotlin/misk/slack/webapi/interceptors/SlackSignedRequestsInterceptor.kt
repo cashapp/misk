@@ -24,7 +24,9 @@ class SlackSignedRequestsInterceptor @Inject constructor(
   private val signingSecret = slackConfig.signing_secret.value.decodeHex()
 
   /**
-   * Verify that Slack initiated the request.
+   * The SlackSignedRequestsInterceptor verifies that the incoming request is
+   * authorized by using the signing secret provided from Slack and cross-checking
+   * it against slack's incoming header with a signature
    * https://api.slack.com/authentication/verifying-requests-from-slack
    */
   override fun intercept(chain: NetworkChain) {

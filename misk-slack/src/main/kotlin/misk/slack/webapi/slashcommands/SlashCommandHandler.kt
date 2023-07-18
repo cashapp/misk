@@ -3,7 +3,7 @@ package misk.slack.webapi.slashcommands
 import misk.slack.webapi.SlackApi
 import misk.slack.webapi.checkSuccessful
 import misk.slack.webapi.helpers.Block
-import misk.slack.webapi.helpers.PostMessage
+import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.SlashCommand
 import misk.slack.webapi.helpers.Text
 
@@ -23,7 +23,7 @@ abstract class SlashCommandHandler constructor(
     responseUrl: String,
   ) {
 
-    val confirmationJson = PostMessage(
+    val confirmationJson = PostMessageRequest(
       channel = channelId,
       blocks = listOf(
         Block(

@@ -13,7 +13,7 @@ import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
 import misk.slack.webapi.helpers.Block
-import misk.slack.webapi.helpers.PostMessage
+import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.Text
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -84,7 +84,7 @@ class RealSlackClientTest {
   }
 
   companion object {
-    val samplePostMessageJson = PostMessage(
+    val samplePostMessageJson = PostMessageRequest(
       channel = "#default-channel",
       blocks = listOf(
         Block(
