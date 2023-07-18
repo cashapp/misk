@@ -18,7 +18,7 @@ import misk.moshi.wire.WireMessageAdapter as MiskOnlyMessageAdapter
  * For service setup, prefer to install [misk.MiskCommonServiceModule] over installing [MoshiModule]
  * directly.
  */
-class MoshiModule(
+class MoshiModule @JvmOverloads constructor(
   private val useWireToRead: Boolean = false,
   private val useWireToWrite: Boolean = false
 ) : KAbstractModule() {

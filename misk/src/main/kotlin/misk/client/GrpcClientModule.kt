@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 /**
  * Creates a gRPC client given a Wire-generated interface and HTTP configuration.
  */
-class GrpcClientModule<T : Service, G : T>(
+class GrpcClientModule<T : Service, G : T> @JvmOverloads constructor(
   /** The Wire-generated service interface. */
   private val kclass: KClass<T>,
 

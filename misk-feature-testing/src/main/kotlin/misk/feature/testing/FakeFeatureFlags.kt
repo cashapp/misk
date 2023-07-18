@@ -177,14 +177,7 @@ class FakeFeatureFlags @Inject constructor(
     tracker: (T) -> Unit
   ) = delegate.trackJson(feature, KEY, clazz, executor, tracker).toMisk()
 
-  fun <T : Any, Flag : FeatureFlag<in T>> overrideAny(
-    clazz: Class<out FeatureFlag<T>>,
-    value: T
-  ): FakeFeatureFlags {
-    delegate.overrideAny(clazz, value)
-    return this
-  }
-
+  @JvmOverloads
   fun <T : Any, Flag : FeatureFlag<in T>> overrideAny(
     clazz: Class<out FeatureFlag<T>>,
     value: T,
@@ -194,31 +187,37 @@ class FakeFeatureFlags @Inject constructor(
     return this
   }
 
+  @JvmOverloads
   inline fun <reified Flag : BooleanFeatureFlag> override(
     value: Boolean,
     noinline matcher: (Flag) -> Boolean = { _ -> true }
   ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+  @JvmOverloads
   inline fun <reified Flag : StringFeatureFlag> override(
     value: String,
     noinline matcher: (Flag) -> Boolean = { _ -> true }
   ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+  @JvmOverloads
   inline fun <reified Flag: IntFeatureFlag> override(
     value: Int,
     noinline matcher: (Flag) -> Boolean = { _ -> true }
   ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+  @JvmOverloads
   inline fun <reified Flag: DoubleFeatureFlag> override(
     value: Double,
     noinline matcher: (Flag) -> Boolean = { _ -> true }
   ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+  @JvmOverloads
   inline fun <reified Flag: JsonFeatureFlag<T>, T : Any> override(
     value: T,
     noinline matcher: (Flag) -> Boolean = { _ -> true }
   ): FakeFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+  @JvmOverloads
   inline fun <reified Flag: EnumFeatureFlag<T>, T : Enum<T>> override(
     value: T,
     noinline matcher: (Flag) -> Boolean = { _ -> true }

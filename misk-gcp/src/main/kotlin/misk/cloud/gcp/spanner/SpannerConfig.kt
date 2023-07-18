@@ -7,7 +7,7 @@ import misk.config.Redact
 import wisp.config.Config
 
 /** Configuration for talking to Google datastore */
-data class SpannerConfig(
+data class SpannerConfig @JvmOverloads constructor(
   /**
    * A set of Google Cloud credentials to use for making requests to Spanner.
    *
@@ -51,7 +51,7 @@ data class SpannerConfig(
 /**
  * Options for configuring the Spanner emulator.
  */
-data class SpannerEmulatorConfig(
+data class SpannerEmulatorConfig @JvmOverloads constructor(
   /**
    * Whether or not to start the Spanner emulator when the GoogleSpannerModule
    * is installed.

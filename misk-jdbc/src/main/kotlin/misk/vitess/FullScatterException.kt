@@ -14,7 +14,7 @@ import misk.jdbc.CheckException
  * differentiate between these types of reads for the detector but if you do need this it can be
  * implemented.
  */
-class FullScatterException(
+class FullScatterException @JvmOverloads constructor(
   message: String? = null,
   cause: Throwable? = null
 ) : CheckException(message, cause)

@@ -38,7 +38,7 @@ import kotlin.reflect.KClass
  *  AccessAnnotationEntry<PaleontologistAccess>(capabilities = listOf("paleontologist", "intern")))
  * ```
  */
-data class AccessAnnotationEntry(
+data class AccessAnnotationEntry @JvmOverloads constructor(
   val annotation: KClass<out Annotation>,
   val services: List<String> = listOf(),
   val capabilities: List<String> = listOf()

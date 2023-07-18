@@ -9,7 +9,7 @@ import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 /** Provides an [OkHttpClient] and [ProtoMessageHttpClient] for a peer service */
-class HttpClientModule constructor(
+class HttpClientModule @JvmOverloads constructor(
   private val name: String,
   private val annotation: Annotation? = null
 ) : KAbstractModule() {

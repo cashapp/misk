@@ -19,6 +19,7 @@ class JooqTransacter(
   private val dslContext: Lazy<DSLContext>
 ) {
 
+  @JvmOverloads
   fun <RETURN_TYPE> transaction(
     options: TransacterOptions = TransacterOptions(),
     callback: (jooqSession: JooqSession) -> RETURN_TYPE
@@ -75,7 +76,7 @@ class JooqTransacter(
     }
   }
 
-  data class TransacterOptions(
+  data class TransacterOptions @JvmOverloads constructor(
     val maxAttempts: Int = 3,
     val maxRetryDelayMillis: Long = 500,
   )

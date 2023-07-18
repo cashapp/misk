@@ -67,7 +67,7 @@ interface JobQueue {
    * @param attributes Arbitrary contextual attributes associated with the job. Implementations may limit the number of
    * attributes per message.
    */
-  data class JobRequest(
+  data class JobRequest @JvmOverloads constructor(
     val body: String,
     val idempotenceKey: String = UUID.randomUUID().toString(),
     val deliveryDelay: Duration? = null,

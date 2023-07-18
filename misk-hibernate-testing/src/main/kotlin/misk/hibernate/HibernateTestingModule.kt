@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
  * See [misk.jdbc.SHARED_TEST_DATABASE_POOL].
  */
 @Deprecated("Use JdbcTestingModule instead")
-class HibernateTestingModule(
+class HibernateTestingModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig? = null,
   private val startUpStatements: List<String> = listOf(),

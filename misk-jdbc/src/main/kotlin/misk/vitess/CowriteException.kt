@@ -14,7 +14,7 @@ import misk.jdbc.CheckException
  * two entity groups resided on the same shard before the transaction they may no longer do so when
  * the transaction is retried.
  */
-class CowriteException(
+class CowriteException @JvmOverloads constructor(
   message: String? = null,
   cause: Throwable? = null
 ) : CheckException(message, cause)

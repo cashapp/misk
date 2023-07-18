@@ -1,7 +1,7 @@
 package misk
 
 /** Information about the authenticated caller of a given action */
-data class MiskCaller(
+data class MiskCaller @JvmOverloads constructor(
   /** Present if the caller is an authenticated peer service */
   val service: String? = null,
 

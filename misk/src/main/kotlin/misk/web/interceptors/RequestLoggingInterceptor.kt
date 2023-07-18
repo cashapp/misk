@@ -174,7 +174,7 @@ data class RequestLoggingConfig(val actions: Map<String, ActionLoggingConfig>) {
 /**
  * This class should have all the same config options as [LogRequestResponse]. See that class for details.
  */
-data class ActionLoggingConfig(
+data class ActionLoggingConfig @JvmOverloads constructor(
   val ratePerSecond: Long = 10,
   val errorRatePerSecond: Long = 0,
   val bodySampling: Double = 0.0,

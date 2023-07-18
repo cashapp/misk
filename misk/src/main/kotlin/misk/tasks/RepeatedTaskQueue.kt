@@ -122,6 +122,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
    * next execution time. Provide an optional retryDelayOnFailure parameter to determine when
    * the job should be retried in the case of an unhandled exception by the client
    */
+  @JvmOverloads
   fun schedule(delay: Duration, retryDelayOnFailure: Duration? = null, task: () -> Result) {
     val wrappedTask: () -> Result = {
       val timedResult = timed {
@@ -149,6 +150,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
    * Schedules a task to run repeatedly at a fixed delay, with back-off for errors and lack
    * of available work
    */
+  @JvmOverloads
   fun scheduleWithBackoff(
     timeBetweenRuns: Duration,
     initialDelay: Duration = timeBetweenRuns,
@@ -219,6 +221,7 @@ class RepeatedTaskQueueFactory @Inject constructor(
   /**
    * Builds a new instance of a [RepeatedTaskQueue]
    */
+  @JvmOverloads
   fun new(
     name: String,
     config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig(),
@@ -245,6 +248,7 @@ class RepeatedTaskQueueFactory @Inject constructor(
   /**
    * Builds a new instance of a [RepeatedTaskQueue] for testing
    */
+  @JvmOverloads
   fun forTesting(
     name: String,
     backingStorage: ExplicitReleaseDelayQueue<DelayedTask>,

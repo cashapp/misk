@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
  *     the [databasePool] can pick an alternate database name for testing.
  */
 @Singleton
-class DataSourceService(
+class DataSourceService @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   private val baseConfig: DataSourceConfig,
   private val deployment: Deployment,

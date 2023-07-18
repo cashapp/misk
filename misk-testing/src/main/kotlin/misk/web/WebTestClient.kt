@@ -44,6 +44,7 @@ class WebTestClient @Inject constructor(
   /**
    * Performs a POST request.
    */
+  @JvmOverloads
   fun post(
     path: String,
     body: String,
