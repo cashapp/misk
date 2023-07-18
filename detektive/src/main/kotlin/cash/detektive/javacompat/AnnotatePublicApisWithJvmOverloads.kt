@@ -28,7 +28,7 @@ class AnnotatePublicApisWithJvmOverloads(config: Config) : Rule(config) {
   override val issue = Issue(
     javaClass.simpleName,
     Severity.Defect,
-    "Public functions and constructors with default values should be annotated with @JvmOverloads",
+    "Public functions and constructors with default arguments should be annotated with @JvmOverloads",
     Debt.FIVE_MINS
   )
 
