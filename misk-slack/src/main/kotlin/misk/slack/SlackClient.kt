@@ -14,7 +14,7 @@ open class SlackClient @Inject constructor() {
     username: String,
     iconEmoji: String,
     message: String,
-    channel: String? = null
+    channel: String? = null,
   ): SlackWebhookResponse? {
     return null
   }
