@@ -73,6 +73,7 @@ public final class misk/slack/SlackWebhookResponse : java/lang/Enum {
 
 public final class misk/slack/webapi/RealSlackClient : misk/slack/webapi/SlackClient {
 	public fun <init> (Lmisk/slack/webapi/SlackApi;)V
+	public fun getUserByEmail (Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetUserResponse;
 	public fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
 	public fun postMessage (Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
 }
@@ -82,6 +83,7 @@ public final class misk/slack/webapi/RealSlackClientModule : misk/inject/KAbstra
 }
 
 public abstract interface class misk/slack/webapi/SlackApi {
+	public abstract fun getUserByEmail (Ljava/lang/String;)Lretrofit2/Call;
 	public abstract fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lretrofit2/Call;
 	public abstract fun postMessage (Lmisk/slack/webapi/helpers/PostMessageRequest;)Lretrofit2/Call;
 }
@@ -91,6 +93,7 @@ public final class misk/slack/webapi/SlackApiKt {
 }
 
 public abstract interface class misk/slack/webapi/SlackClient {
+	public abstract fun getUserByEmail (Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetUserResponse;
 	public abstract fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
 	public abstract fun postMessage (Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
 }
@@ -234,6 +237,52 @@ public final class misk/slack/webapi/helpers/Container {
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun is_ephemeral ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/EnterpriseUser {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;[Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;[Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/Boolean;
+	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun component6 ()[Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;[Ljava/lang/String;)Lmisk/slack/webapi/helpers/EnterpriseUser;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;[Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/EnterpriseUser;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnterprise_id ()Ljava/lang/String;
+	public final fun getEnterprise_name ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getTeams ()[Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun is_admin ()Ljava/lang/Boolean;
+	public final fun is_owner ()Ljava/lang/Boolean;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/GetUserResponse {
+	public fun <init> (Z)V
+	public fun <init> (ZLjava/lang/String;)V
+	public fun <init> (ZLjava/lang/String;Lmisk/slack/webapi/helpers/UserData;)V
+	public synthetic fun <init> (ZLjava/lang/String;Lmisk/slack/webapi/helpers/UserData;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lmisk/slack/webapi/helpers/UserData;
+	public final fun copy (ZLjava/lang/String;Lmisk/slack/webapi/helpers/UserData;)Lmisk/slack/webapi/helpers/GetUserResponse;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/GetUserResponse;ZLjava/lang/String;Lmisk/slack/webapi/helpers/UserData;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/GetUserResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/String;
+	public final fun getOk ()Z
+	public final fun getUser ()Lmisk/slack/webapi/helpers/UserData;
+	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -417,6 +466,203 @@ public final class misk/slack/webapi/helpers/User {
 	public final fun getName ()Ljava/lang/String;
 	public final fun getTeam_id ()Ljava/lang/String;
 	public final fun getUsername ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/UserData {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Boolean;
+	public final fun component10 ()Ljava/lang/Boolean;
+	public final fun component11 ()Ljava/lang/Boolean;
+	public final fun component12 ()Ljava/lang/Boolean;
+	public final fun component13 ()Ljava/lang/Boolean;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/lang/Boolean;
+	public final fun component17 ()Ljava/lang/String;
+	public final fun component18 ()Ljava/lang/String;
+	public final fun component19 ()Lmisk/slack/webapi/helpers/UserProfile;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/lang/String;
+	public final fun component21 ()Ljava/lang/String;
+	public final fun component22 ()Ljava/lang/String;
+	public final fun component23 ()Ljava/lang/String;
+	public final fun component24 ()Ljava/lang/String;
+	public final fun component25 ()Ljava/lang/Integer;
+	public final fun component26 ()Ljava/lang/Integer;
+	public final fun component3 ()Ljava/lang/Boolean;
+	public final fun component4 ()Lmisk/slack/webapi/helpers/EnterpriseUser;
+	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/Boolean;
+	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun component9 ()Ljava/lang/Boolean;
+	public final fun copy (Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;)Lmisk/slack/webapi/helpers/UserData;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/UserData;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Lmisk/slack/webapi/helpers/EnterpriseUser;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/UserData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlways_active ()Ljava/lang/Boolean;
+	public final fun getColor ()Ljava/lang/String;
+	public final fun getDeleted ()Ljava/lang/Boolean;
+	public final fun getEnterprise_user ()Lmisk/slack/webapi/helpers/EnterpriseUser;
+	public final fun getHas_2fa ()Ljava/lang/Boolean;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLocale ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getProfile ()Lmisk/slack/webapi/helpers/UserProfile;
+	public final fun getReal_name ()Ljava/lang/String;
+	public final fun getTeam_id ()Ljava/lang/String;
+	public final fun getTwo_factor_type ()Ljava/lang/String;
+	public final fun getTz ()Ljava/lang/String;
+	public final fun getTz_label ()Ljava/lang/String;
+	public final fun getTz_offset ()Ljava/lang/Integer;
+	public final fun getUpdated ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public final fun is_admin ()Ljava/lang/Boolean;
+	public final fun is_app_user ()Ljava/lang/Boolean;
+	public final fun is_bot ()Ljava/lang/Boolean;
+	public final fun is_email_confirmed ()Ljava/lang/Boolean;
+	public final fun is_invited_user ()Ljava/lang/Boolean;
+	public final fun is_owner ()Ljava/lang/Boolean;
+	public final fun is_primary_owner ()Ljava/lang/Boolean;
+	public final fun is_restricted ()Ljava/lang/Boolean;
+	public final fun is_stranger ()Ljava/lang/Boolean;
+	public final fun is_ultra_restricted ()Ljava/lang/Boolean;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/UserProfile {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component11 ()Ljava/lang/String;
+	public final fun component12 ()Ljava/lang/String;
+	public final fun component13 ()Ljava/lang/String;
+	public final fun component14 ()Ljava/lang/String;
+	public final fun component15 ()Ljava/lang/String;
+	public final fun component16 ()Ljava/lang/String;
+	public final fun component17 ()Ljava/lang/String;
+	public final fun component18 ()Ljava/lang/String;
+	public final fun component19 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/lang/String;
+	public final fun component21 ()Ljava/lang/Integer;
+	public final fun component22 ()Ljava/lang/String;
+	public final fun component23 ()Ljava/lang/String;
+	public final fun component24 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lmisk/slack/webapi/helpers/UserProfileFields;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/UserProfile;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/UserProfile;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/UserProfile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAvatar_hash ()Ljava/lang/String;
+	public final fun getDisplay_name ()Ljava/lang/String;
+	public final fun getDisplay_name_normalized ()Ljava/lang/String;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getFields ()Lmisk/slack/webapi/helpers/UserProfileFields;
+	public final fun getFirst_name ()Ljava/lang/String;
+	public final fun getImage_192 ()Ljava/lang/String;
+	public final fun getImage_24 ()Ljava/lang/String;
+	public final fun getImage_32 ()Ljava/lang/String;
+	public final fun getImage_48 ()Ljava/lang/String;
+	public final fun getImage_512 ()Ljava/lang/String;
+	public final fun getImage_72 ()Ljava/lang/String;
+	public final fun getLast_name ()Ljava/lang/String;
+	public final fun getPhone ()Ljava/lang/String;
+	public final fun getPronouns ()Ljava/lang/String;
+	public final fun getReal_name ()Ljava/lang/String;
+	public final fun getReal_name_normalized ()Ljava/lang/String;
+	public final fun getSkype ()Ljava/lang/String;
+	public final fun getStart_date ()Ljava/lang/String;
+	public final fun getStatus_emoji ()Ljava/lang/String;
+	public final fun getStatus_expiration ()Ljava/lang/Integer;
+	public final fun getStatus_text ()Ljava/lang/String;
+	public final fun getTeam ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/slack/webapi/helpers/UserProfileFields {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/UserProfileFields;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/UserProfileFields;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/UserProfileFields;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDisplay_name ()Ljava/lang/String;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getFirst_name ()Ljava/lang/String;
+	public final fun getLast_name ()Ljava/lang/String;
+	public final fun getPhone ()Ljava/lang/String;
+	public final fun getPronouns ()Ljava/lang/String;
+	public final fun getReal_name ()Ljava/lang/String;
+	public final fun getStart_date ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
