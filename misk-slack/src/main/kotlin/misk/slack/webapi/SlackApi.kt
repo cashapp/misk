@@ -38,7 +38,7 @@ interface SlackApi {
   /**
    * Calls Slack to fetch user for given email.
    *
-   * https://api.slack.com/methods/chat.postMessage
+   * https://api.slack.com/methods/users.lookupByEmail
    */
   @GET("/api/users.lookupByEmail")
   @Headers(value = ["accept: application/json"])

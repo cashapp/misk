@@ -154,7 +154,7 @@ data class SlashInteractionResponse @JvmOverloads constructor(
  *
  * https://api.slack.com/enterprise/grid
  */
-data class EnterpriseUser(
+data class EnterpriseUser @JvmOverloads constructor(
   /**
    * A unique ID for the Enterprise Grid organization this user belongs to.
    */
@@ -189,7 +189,7 @@ data class EnterpriseUser(
  *
  * https://api.slack.com/types/user#profile
  */
-data class UserProfileFields(
+data class UserProfileFields @JvmOverloads constructor(
   /**
    * The display name the user has chosen to identify themselves by in their workspace profile.
    */
@@ -243,7 +243,7 @@ data class UserProfileFields(
  *
  * https://api.slack.com/types/user
  */
-data class UserProfile(
+data class UserProfile @JvmOverloads constructor(
   /**
    * The hash identifier for the user's avatar image.
    */
@@ -359,7 +359,7 @@ data class UserProfile(
  *
  * https://api.slack.com/types/user
  */
-data class UserData(
+data class UserData @JvmOverloads constructor(
   /**
    * Indicates that a bot user is set to be constantly active in presence status.
    */
@@ -490,7 +490,7 @@ data class UserData(
  *
  * https://api.slack.com/methods/chat.postMessage
  */
-data class GetUserResponse(
+data class GetUserResponse @JvmOverloads constructor(
   val ok: Boolean,
   val error: String? = null,
   val user: UserData? = null
