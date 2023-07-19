@@ -5,7 +5,7 @@ import misk.security.ssl.SslLoader.Companion.FORMAT_JCEKS
 import javax.inject.Inject
 import wisp.security.ssl.TrustStoreConfig as WispTrustStoreConfig
 
-data class TrustStoreConfig @Inject constructor(
+data class TrustStoreConfig @Inject @JvmOverloads constructor(
   val resource: String,
   @Redact
   val passphrase: String? = null,

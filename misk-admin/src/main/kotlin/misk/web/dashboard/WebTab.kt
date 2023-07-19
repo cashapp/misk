@@ -1,6 +1,6 @@
 package misk.web.dashboard
 
-open class WebTab(
+open class WebTab @JvmOverloads constructor(
   open val slug: String,
   open val url_path_prefix: String,
   // capabilities, services permissions control visibility of tab to misk web application user

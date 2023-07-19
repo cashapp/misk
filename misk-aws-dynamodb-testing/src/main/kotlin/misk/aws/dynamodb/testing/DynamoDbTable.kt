@@ -13,7 +13,7 @@ import kotlin.reflect.full.findAnnotation
  * the secondary indexes required by `ProjectionType.ALL`.
  */
 @Deprecated("Replace the dependency on misk-aws-dynamodb-testing with testFixtures(misk-aws-dynamodb)")
-data class DynamoDbTable(
+data class DynamoDbTable @JvmOverloads constructor(
   val tableClass: KClass<*>,
   val configureTable: (CreateTableRequest) -> CreateTableRequest = { it }
 ) {

@@ -7,7 +7,7 @@ import kotlin.reflect.KType
 
 // TODO(adrw) add local date, date picker support to form
 /** Metadata front end model for Database Query Misk-Web Tab */
-data class DatabaseQueryMetadata(
+data class DatabaseQueryMetadata @JvmOverloads constructor(
   val queryWebActionPath: String,
   val allowedCapabilities: Set<String> = setOf(),
   val allowedServices: Set<String> = setOf(),

@@ -45,7 +45,7 @@ enum class DataSourceType(
 }
 
 /** Configuration element for an individual datasource */
-data class DataSourceConfig(
+data class DataSourceConfig @JvmOverloads constructor(
   val type: DataSourceType,
   val host: String? = null,
   val port: Int? = null,

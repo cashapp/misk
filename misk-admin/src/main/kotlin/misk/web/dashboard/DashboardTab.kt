@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
  * @property [capabilities] Set to show the tab only for authenticated capabilities, else shows always
  * @property [services] Set to show the tab only for authenticated services, else shows always
  */
-data class DashboardTab(
+data class DashboardTab @JvmOverloads constructor(
   override val slug: String,
   override val url_path_prefix: String,
   val dashboard_slug: String,
@@ -36,7 +36,7 @@ data class DashboardTab(
 /**
  * Sets the tab's authentication capabilities/services by the multibound [AccessAnnotationEntry]
  */
-class DashboardTabProvider(
+class DashboardTabProvider @JvmOverloads constructor(
   val slug: String,
   val url_path_prefix: String,
   val menuLabel: String,

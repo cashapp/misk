@@ -151,7 +151,7 @@ class HybridDecryptKeyManager @Inject internal constructor(
   injector: Injector
 ) : MappedKeyManager<HybridDecrypt>(injector, HybridDecrypt::class.java)
 
-class KeyNotFoundException(
+class KeyNotFoundException @JvmOverloads constructor(
   message: String? = null,
   cause: Throwable? = null
 ) : GeneralSecurityException(message, cause)

@@ -10,7 +10,7 @@ import misk.web.dashboard.ValidWebEntry
  * multibind<StaticResourceEntry>().toInstance(StaticResourceEntry(...))
  * ```
  */
-data class StaticResourceEntry(
+data class StaticResourceEntry @JvmOverloads constructor(
   val url_path_prefix: String = "/",
   private val resourcePath: String
 ) : ValidWebEntry(valid_url_path_prefix = url_path_prefix) {

@@ -39,7 +39,7 @@ fun TagConsumer<*>.heroicon(
   }
 }
 
-data class HeroiconProps(
+data class HeroiconProps @JvmOverloads constructor(
   val icon: Heroicons,
   val modifierClass: String? = null,
   val spanClass: String? = null,

@@ -187,6 +187,7 @@ public final class misk/database/TidbCluster {
 }
 
 public final class misk/database/VitessCluster {
+	public fun <init> (Ljava/lang/String;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;)V
 	public fun <init> (Ljava/lang/String;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/squareup/moshi/Moshi;)V
 	public synthetic fun <init> (Ljava/lang/String;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/squareup/moshi/Moshi;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
@@ -222,6 +223,7 @@ public final class misk/jdbc/CheckDisabler {
 
 public class misk/jdbc/CheckException : java/sql/SQLException {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -281,6 +283,35 @@ public final class misk/jdbc/DataSourceClustersConfig : java/util/LinkedHashMap,
 }
 
 public final class misk/jdbc/DataSourceConfig {
+	public fun <init> (Lmisk/jdbc/DataSourceType;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Z)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZ)V
 	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;)V
 	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun asReplica ()Lmisk/jdbc/DataSourceConfig;
@@ -364,6 +395,7 @@ public abstract interface class misk/jdbc/DataSourceDecorator {
 
 public final class misk/jdbc/DataSourceService : com/google/common/util/concurrent/AbstractIdleService, javax/inject/Provider, misk/jdbc/DataSourceConnector {
 	public static final field Companion Lmisk/jdbc/DataSourceService$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun config ()Lmisk/jdbc/DataSourceConfig;
@@ -549,6 +581,7 @@ public final class misk/jdbc/StringBuilderCarrier : io/opentracing/propagation/T
 
 public final class misk/jdbc/TableScanException : misk/jdbc/CheckException {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -559,6 +592,7 @@ public final class misk/jdbc/TestDatabasePool : misk/jdbc/DatabasePool {
 	public final fun getBackend ()Lmisk/jdbc/TestDatabasePool$Backend;
 	public final fun getClock ()Ljava/time/Clock;
 	public final fun getPool (Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/TestDatabasePool$ConfigSpecificPool;
+	public final fun pruneOldDatabases ()V
 	public final fun pruneOldDatabases (Ljava/time/Duration;)V
 	public static synthetic fun pruneOldDatabases$default (Lmisk/jdbc/TestDatabasePool;Ljava/time/Duration;ILjava/lang/Object;)V
 	public fun releaseDatabase (Lmisk/jdbc/DataSourceConfig;)V
@@ -614,6 +648,8 @@ public abstract interface class misk/jdbc/Transacter {
 }
 
 public final class misk/jdbc/TruncateTablesService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -628,6 +664,7 @@ public final class misk/vitess/ConnectionExtensionsKt {
 
 public final class misk/vitess/CowriteException : misk/jdbc/CheckException {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -659,6 +696,7 @@ public final class misk/vitess/Destination$Companion {
 
 public final class misk/vitess/FullScatterException : misk/jdbc/CheckException {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }

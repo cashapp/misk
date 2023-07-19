@@ -14,7 +14,7 @@ import misk.tasks.RepeatedTaskQueueFactory
 import java.time.ZoneId
 import javax.inject.Qualifier
 
-class CronModule(
+class CronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf()
@@ -37,7 +37,7 @@ class CronModule(
     queueFactory.new("misk.cron.task-queue")
 }
 
-class FakeCronModule(
+class FakeCronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf()

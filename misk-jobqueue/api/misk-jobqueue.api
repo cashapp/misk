@@ -144,6 +144,9 @@ public final class misk/jobqueue/JobQueue$EnqueueErrorResult {
 }
 
 public final class misk/jobqueue/JobQueue$JobRequest {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;

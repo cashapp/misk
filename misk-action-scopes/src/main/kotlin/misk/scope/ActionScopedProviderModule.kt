@@ -75,6 +75,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds a provider that returns a constant value on every invocation. */
+  @JvmOverloads
   fun <T : Any> bindConstant(
     kclass: KClass<T>,
     providedValue: T,
@@ -97,6 +98,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds a provider that returns a constant value on every invocation. */
+  @JvmOverloads
   fun <T : Any> bindConstant(
     type: TypeLiteral<T>,
     providedValue: T,
@@ -120,6 +122,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
+  @JvmOverloads
   fun <T : Any> bindProvider(
     kclass: KClass<T>,
     providerType: KClass<out ActionScopedProvider<T>>,
@@ -138,6 +141,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
+  @JvmOverloads
   fun <T> bindProvider(
     type: TypeLiteral<T>,
     providerType: KClass<out ActionScopedProvider<T>>,

@@ -12,6 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 class GrpcChannelFactory @Inject constructor(val resourceLoader: ResourceLoader) {
+  @JvmOverloads
   fun createClientChannel(
     serverAddress: SocketAddress,
     serverCertResource: String = "classpath:/ssl/server_cert.pem"

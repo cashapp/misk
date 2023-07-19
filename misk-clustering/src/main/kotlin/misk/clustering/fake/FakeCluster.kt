@@ -38,6 +38,7 @@ class FakeCluster internal constructor(
     }
   }
 
+  @JvmOverloads
   fun clusterChanged(
     membersBecomingReady: Set<Cluster.Member> = setOf(),
     membersBecomingNotReady: Set<Cluster.Member> = setOf()

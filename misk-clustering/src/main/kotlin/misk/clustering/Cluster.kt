@@ -10,7 +10,7 @@ typealias ClusterWatch = (Cluster.Changes) -> Unit
 interface Cluster {
   data class Member(val name: String, val ipAddress: String)
 
-  data class Changes(
+  data class Changes @JvmOverloads constructor(
     val snapshot: Snapshot,
     val added: Set<Member> = setOf(),
     val removed: Set<Member> = setOf()
@@ -19,7 +19,7 @@ interface Cluster {
   }
 
   /** [Snapshot] is a consistent moment-in-time view of the cluster state */
-  data class Snapshot(
+  data class Snapshot @JvmOverloads constructor(
     /** The member representing this instance of the service */
     val self: Member,
 

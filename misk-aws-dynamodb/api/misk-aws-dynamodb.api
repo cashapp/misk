@@ -76,6 +76,7 @@ public abstract interface class misk/dynamodb/DynamoDbService : com/google/commo
 public class misk/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule {
 	public fun <init> (Lcom/amazonaws/ClientConfiguration;[Lkotlin/reflect/KClass;)V
 	public synthetic fun <init> (Lcom/amazonaws/ClientConfiguration;[Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> ([Lkotlin/reflect/KClass;)V
 	protected fun configure ()V
 	public fun configureClient (Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBClientBuilder;)V
 	public fun configureStreamsClient (Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBStreamsClientBuilder;)V

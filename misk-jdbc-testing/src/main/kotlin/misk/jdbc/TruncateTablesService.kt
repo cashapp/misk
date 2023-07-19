@@ -21,7 +21,7 @@ private val logger = getLogger<TruncateTablesService>()
  * test wasn't able to clean up after itself.
  */
 @Deprecated("Replace the dependency on misk-jdcb-testing with testFixtures(misk-jdbc)")
-class TruncateTablesService(
+class TruncateTablesService @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   private val dataSourceService: DataSourceService,
   private val transacterProvider: Provider<Transacter>,

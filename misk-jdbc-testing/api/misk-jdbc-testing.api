@@ -21,6 +21,9 @@ public final class misk/jdbc/ExtendedQueryExecutionListener$Companion {
 }
 
 public final class misk/jdbc/JdbcTestingModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public fun <init> (Lkotlin/reflect/KClass;Ljava/util/List;)V
+	public fun <init> (Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;)V
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;Z)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -50,6 +53,7 @@ public final class misk/jdbc/TestDatabasePool : misk/jdbc/DatabasePool {
 	public fun <init> (Lmisk/jdbc/TestDatabasePool$Backend;Ljava/time/Clock;)V
 	public final fun getBackend ()Lmisk/jdbc/TestDatabasePool$Backend;
 	public final fun getClock ()Ljava/time/Clock;
+	public final fun pruneOldDatabases ()V
 	public final fun pruneOldDatabases (Ljava/time/Duration;)V
 	public static synthetic fun pruneOldDatabases$default (Lmisk/jdbc/TestDatabasePool;Ljava/time/Duration;ILjava/lang/Object;)V
 	public fun releaseDatabase (Lmisk/jdbc/DataSourceConfig;)V
@@ -85,6 +89,8 @@ public final class misk/jdbc/TestDatabasePoolKt {
 }
 
 public final class misk/jdbc/TruncateTablesService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
