@@ -2,9 +2,9 @@ package misk
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
-import kotlin.reflect.KClass
 import misk.inject.KAbstractModule
 import misk.inject.toKey
+import kotlin.reflect.KClass
 
 /**
  * # Misk Services
@@ -75,24 +75,25 @@ import misk.inject.toKey
  * Symmetrically it stalls in the `STOPPING` state until all dependent services are `TERMINATED`.
  */
 @Suppress("AnnotatePublicApisWithJvmOverloads")
-class ServiceModule constructor(
+class ServiceModule(
   val key: Key<out Service>,
   val dependsOn: List<Key<out Service>> = listOf(),
   val enhancedBy: List<Key<out Service>> = listOf(),
-  val enhances: Key<out Service>? = null
 ) : KAbstractModule() {
 
   // This constructor exists for binary-compatibility with older callers.
+  @Deprecated("the enhances argument does nothing please don't use this.")
   constructor(
     key: Key<out Service>,
     dependsOn: List<Key<out Service>> = listOf(),
-    enhancedBy: List<Key<out Service>> = listOf()
+    enhancedBy: List<Key<out Service>> = listOf(),
+    enhances: Key<out Service>? = null
   ) : this(
     key = key,
     dependsOn = dependsOn,
     enhancedBy = enhancedBy,
-    enhances = null
   )
+
   override fun configure() {
     multibind<ServiceEntry>().toInstance(ServiceEntry(key))
 
@@ -106,11 +107,6 @@ class ServiceModule constructor(
         EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey)
       )
     }
-    if (enhances != null) {
-      multibind<EnhancementEdge>().toInstance(
-        EnhancementEdge(toBeEnhanced = enhances, enhancement = key)
-      )
-    }
   }
 
   fun dependsOn(upstream: Key<out Service>) = ServiceModule(
@@ -120,9 +116,6 @@ class ServiceModule constructor(
   fun enhancedBy(enhancement: Key<out Service>) =
     ServiceModule(key, dependsOn, enhancedBy + enhancement)
 
-  fun enhances(toBeEnhanced: Key<out Service>) =
-    ServiceModule(key, dependsOn, enhancedBy, toBeEnhanced)
-
   @JvmOverloads
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
     dependsOn(T::class.toKey(qualifier))
@@ -130,10 +123,6 @@ class ServiceModule constructor(
   @JvmOverloads
   inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
     enhancedBy(T::class.toKey(qualifier))
-
-  @JvmOverloads
-  inline fun <reified T : Service> enhances(qualifier: KClass<out Annotation>? = null) =
-    enhances(T::class.toKey(qualifier))
 }
 
 /**

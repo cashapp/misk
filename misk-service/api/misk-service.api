@@ -27,11 +27,8 @@ public final class misk/ServiceModule : misk/inject/KAbstractModule {
 	public final fun dependsOn (Lcom/google/inject/Key;)Lmisk/ServiceModule;
 	public final synthetic fun enhancedBy ()Lmisk/ServiceModule;
 	public final fun enhancedBy (Lcom/google/inject/Key;)Lmisk/ServiceModule;
-	public final synthetic fun enhances ()Lmisk/ServiceModule;
-	public final fun enhances (Lcom/google/inject/Key;)Lmisk/ServiceModule;
 	public final fun getDependsOn ()Ljava/util/List;
 	public final fun getEnhancedBy ()Ljava/util/List;
-	public final fun getEnhances ()Lcom/google/inject/Key;
 	public final fun getKey ()Lcom/google/inject/Key;
 }
 
