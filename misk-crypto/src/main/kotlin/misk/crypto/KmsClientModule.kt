@@ -14,7 +14,8 @@ import javax.inject.Qualifier
  * If no file is provided, tries to initialize the client using the default
  * credentials path as specified in [AwsKmsClient.withDefaultCredentials]
  */
-class AwsKmsClientModule(private val credentialsPath: String? = null) : KAbstractModule() {
+class AwsKmsClientModule @JvmOverloads constructor(private val credentialsPath: String? = null) :
+  KAbstractModule() {
   // TODO: Allow initializing an AWS KMS client with a credentials provider
   // once tink supports it: https://github.com/google/tink/pull/184
   @Provides @Singleton
@@ -28,7 +29,8 @@ class AwsKmsClientModule(private val credentialsPath: String? = null) : KAbstrac
  * * If no file is provided, tries to initialize the client using the default
  * credentials path as specified in [GcpKmsClient.withDefaultCredentials]
  */
-class GcpKmsClientModule(private val credentialsPath: String? = null) : KAbstractModule() {
+class GcpKmsClientModule @JvmOverloads constructor(private val credentialsPath: String? = null) :
+  KAbstractModule() {
   @Provides @Singleton
   fun getKmsClient(): KmsClient = credentialsPath?.let { GcpKmsClient().withCredentials(it) }
     ?: GcpKmsClient().withDefaultCredentials()

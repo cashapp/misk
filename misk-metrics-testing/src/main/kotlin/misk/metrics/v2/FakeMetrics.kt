@@ -117,6 +117,7 @@ class FakeMetrics @Inject internal constructor(
     return getSample(name, extraLabels.toTypedArray())?.value
   }
 
+  @JvmOverloads
   fun getSample(
     name: String,
     labels: Array<out Pair<String, String>>,

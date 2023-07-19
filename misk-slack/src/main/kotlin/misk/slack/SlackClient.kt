@@ -10,11 +10,12 @@ open class SlackClient @Inject constructor() {
    * If the service has not configured a slack module, this method is a no-op.
    * Does not throw on IO exceptions.
    */
+  @JvmOverloads
   open fun postMessage(
     username: String,
     iconEmoji: String,
     message: String,
-    channel: String? = null
+    channel: String? = null,
   ): SlackWebhookResponse? {
     return null
   }

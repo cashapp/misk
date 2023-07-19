@@ -26,7 +26,7 @@ import kotlin.reflect.full.findAnnotation
  *
  * @param requiredTableTypes a list of mapper classes annotated [DynamoDBTable].
  */
-open class RealDynamoDbModule constructor(
+open class RealDynamoDbModule @JvmOverloads constructor(
   private val clientConfig: ClientConfiguration = ClientConfiguration(),
   vararg requiredTableTypes: KClass<*>,
 ) : KAbstractModule() {

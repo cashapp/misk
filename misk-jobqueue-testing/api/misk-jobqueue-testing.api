@@ -4,6 +4,7 @@ public final class misk/jobqueue/DevelopmentJobProcessorModule : misk/inject/KAb
 }
 
 public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/Job {
+	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;)V
 	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)V
 	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun acknowledge ()V
@@ -52,15 +53,26 @@ public final class misk/jobqueue/FakeJobQueue : misk/jobqueue/JobQueue, misk/job
 	public fun enqueue (Lmisk/hibernate/Session;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+	public final fun handleJob (Lmisk/jobqueue/Job;)Z
+	public final fun handleJob (Lmisk/jobqueue/Job;Z)Z
 	public final fun handleJob (Lmisk/jobqueue/Job;ZI)Z
 	public static synthetic fun handleJob$default (Lmisk/jobqueue/FakeJobQueue;Lmisk/jobqueue/Job;ZIILjava/lang/Object;)Z
+	public final fun handleJobs ()Ljava/util/List;
+	public final fun handleJobs (Lmisk/jobqueue/QueueName;)Ljava/util/List;
+	public final fun handleJobs (Lmisk/jobqueue/QueueName;Z)Ljava/util/List;
+	public final fun handleJobs (Lmisk/jobqueue/QueueName;ZI)Ljava/util/List;
 	public final fun handleJobs (Lmisk/jobqueue/QueueName;ZIZ)Ljava/util/List;
+	public final fun handleJobs (Z)Ljava/util/List;
 	public final fun handleJobs (ZZ)Ljava/util/List;
 	public static synthetic fun handleJobs$default (Lmisk/jobqueue/FakeJobQueue;Lmisk/jobqueue/QueueName;ZIZILjava/lang/Object;)Ljava/util/List;
 	public static synthetic fun handleJobs$default (Lmisk/jobqueue/FakeJobQueue;ZZILjava/lang/Object;)Ljava/util/List;
 	public final fun peekDeadlettered (Lmisk/jobqueue/QueueName;)Ljava/util/List;
 	public final fun peekJobs (Lmisk/jobqueue/QueueName;)Ljava/util/List;
+	public final fun reprocessDeadlettered (Lmisk/jobqueue/Job;)Z
+	public final fun reprocessDeadlettered (Lmisk/jobqueue/Job;Z)Z
 	public final fun reprocessDeadlettered (Lmisk/jobqueue/Job;ZI)Z
+	public final fun reprocessDeadlettered (Lmisk/jobqueue/QueueName;)Ljava/util/List;
+	public final fun reprocessDeadlettered (Lmisk/jobqueue/QueueName;Z)Ljava/util/List;
 	public final fun reprocessDeadlettered (Lmisk/jobqueue/QueueName;ZI)Ljava/util/List;
 	public static synthetic fun reprocessDeadlettered$default (Lmisk/jobqueue/FakeJobQueue;Lmisk/jobqueue/Job;ZIILjava/lang/Object;)Z
 	public static synthetic fun reprocessDeadlettered$default (Lmisk/jobqueue/FakeJobQueue;Lmisk/jobqueue/QueueName;ZIILjava/lang/Object;)Ljava/util/List;

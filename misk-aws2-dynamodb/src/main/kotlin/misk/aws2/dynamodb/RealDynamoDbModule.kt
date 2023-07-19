@@ -22,7 +22,7 @@ import javax.inject.Singleton
 /**
  * Install this module to have access to a DynamoDbClient.
  */
-open class RealDynamoDbModule constructor(
+open class RealDynamoDbModule @JvmOverloads constructor(
   private val clientOverrideConfig: ClientOverrideConfiguration =
     ClientOverrideConfiguration.builder().build(),
   private val requiredTables: List<RequiredDynamoDbTable> = listOf(),

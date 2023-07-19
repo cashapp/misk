@@ -10,6 +10,7 @@ class SslLoader @Inject internal constructor(
 ) {
   val delegate: WispSslLoader = WispSslLoader(resourceLoader.delegate)
 
+  @JvmOverloads
   fun loadTrustStore(
     path: String,
     format: String = FORMAT_PEM,
@@ -18,6 +19,7 @@ class SslLoader @Inject internal constructor(
 
   fun loadTrustStore(config: TrustStoreConfig) = delegate.loadTrustStore(config.toWispConfig())
 
+  @JvmOverloads
   fun loadCertStore(
     path: String,
     format: String = FORMAT_PEM,

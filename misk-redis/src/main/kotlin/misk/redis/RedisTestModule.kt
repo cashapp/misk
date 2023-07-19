@@ -5,7 +5,8 @@ import javax.inject.Qualifier
 import kotlin.random.Random
 
 @Deprecated("Moved to misk-redis-testing.", ReplaceWith("misk.redis.testing.RedisTestModule"))
-class RedisTestModule(private val random: Random = Random.Default) : KAbstractModule() {
+class RedisTestModule @JvmOverloads constructor(private val random: Random = Random.Default) :
+  KAbstractModule() {
   override fun configure() {
     bind<Random>().annotatedWith<ForFakeRedis>().toInstance(random)
     bind<Redis>().toInstance(FakeRedis())

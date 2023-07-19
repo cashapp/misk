@@ -41,7 +41,7 @@ class JooqTimestampRecordListener(
  * If you leave the one you don't want set as an empty string the [JooqTimestampRecordListener] will
  * ignore it.
  */
-data class JooqTimestampRecordListenerOptions(
+data class JooqTimestampRecordListenerOptions @JvmOverloads constructor(
   val install: Boolean,
   val createdAtColumnName: String = "",
   val updatedAtColumnName: String = ""

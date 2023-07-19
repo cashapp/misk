@@ -2,7 +2,7 @@ package misk.slack
 
 import misk.config.Secret
 
-data class SlackConfig(
+data class SlackConfig @JvmOverloads constructor(
   val baseUrl: String = "https://hooks.slack.com/",
 
   /**
@@ -15,5 +15,5 @@ data class SlackConfig(
    * A service that always posts to one channel should specify this, but a service that operates
    * on other services can instead specify a channel for each message.
    */
-  val default_channel: String?
+  val default_channel: String?,
 )

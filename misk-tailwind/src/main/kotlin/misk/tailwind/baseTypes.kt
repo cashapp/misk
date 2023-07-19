@@ -1,7 +1,7 @@
 package misk.tailwind
 
 /** Defines a link (such as for <a href />) with configuration including for styles and Hotwire Turbo handling. */
-data class Link(
+data class Link @JvmOverloads constructor(
   val label: String,
   val href: String,
   val style: Style? = null,

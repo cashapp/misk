@@ -152,6 +152,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
     return this
   }
 
+  @JvmOverloads
   fun execute(insertIgnore: Boolean = false) {
     checkNotNull(targetRoot) { "You have to specify entity root target" }
     checkNotNull(sourceRoot) { "You have to specify entity root source" }

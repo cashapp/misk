@@ -1,4 +1,10 @@
 public final class misk/tailwind/Link {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;Z)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZ)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;Z)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -39,6 +45,8 @@ public final class misk/tailwind/TailwindsHeadKt {
 }
 
 public final class misk/tailwind/icons/HeroiconProps {
+	public fun <init> (Lmisk/tailwind/icons/Heroicons;)V
+	public fun <init> (Lmisk/tailwind/icons/Heroicons;Ljava/lang/String;)V
 	public fun <init> (Lmisk/tailwind/icons/Heroicons;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Lmisk/tailwind/icons/Heroicons;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lmisk/tailwind/icons/Heroicons;
