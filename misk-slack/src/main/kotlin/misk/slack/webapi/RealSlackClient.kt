@@ -1,6 +1,7 @@
 package misk.slack.webapi
 
 import misk.slack.webapi.helpers.PostMessageRequest
+import misk.slack.webapi.helpers.GetUserResponse
 import misk.slack.webapi.helpers.PostMessageResponse
 import retrofit2.Response
 import java.io.IOException
@@ -16,6 +17,10 @@ class RealSlackClient @Inject constructor(
 
   override fun postConfirmation(url: String, request: PostMessageRequest): PostMessageResponse {
     return callSlack { slackApi.postConfirmation(url, request).execute() }
+  }
+
+  override fun getUserByEmail(email: String): GetUserResponse {
+    return callSlack { slackApi.getUserByEmail(email).execute() }
   }
 
   private fun <T> callSlack(callable: () -> Response<T>): T {
