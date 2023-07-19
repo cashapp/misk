@@ -1,6 +1,7 @@
 package misk.slack.webapi
 
 import misk.slack.webapi.helpers.PostMessageRequest
+import misk.slack.webapi.helpers.GetUserResponse
 import misk.slack.webapi.helpers.PostMessageResponse
 
 interface SlackClient {
@@ -12,4 +13,6 @@ interface SlackClient {
     url: String,
     request: PostMessageRequest,
   ): PostMessageResponse
+
+  fun getUserByEmail(mail: String): GetUserResponse
 }
