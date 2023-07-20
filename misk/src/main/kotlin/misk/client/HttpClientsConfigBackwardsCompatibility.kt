@@ -86,7 +86,8 @@ class BackwardsCompatibleClientsConfigConverter :
 
     return HttpClientsConfig(
       hostConfigs = hostConfigs,
-      endpoints = endpoints
+      endpoints = endpoints,
+      logRequests = value.logRequests,
     )
   }
 
