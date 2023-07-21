@@ -13,8 +13,11 @@ import javax.inject.Singleton
 class HttpClientFactory @Inject constructor(
   private val sslLoader: SslLoader,
   private val sslContextFactory: SslContextFactory,
-  private val okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator
+  private val okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator,
 ) {
+  // Field-injected so ClientLoggingInterceptor remains internal.
+  @Inject private lateinit var clientLoggingInterceptor: ClientLoggingInterceptor
+
   @com.google.inject.Inject(optional = true)
   var envoyClientEndpointProvider: EnvoyClientEndpointProvider? = null
 
@@ -28,7 +31,8 @@ class HttpClientFactory @Inject constructor(
       sslContextFactory.delegate,
       okHttpClientCommonConfigurator.delegate,
       envoyClientEndpointProvider,
-      okhttpInterceptors?.get()
+      okhttpInterceptors?.let { it.get() + clientLoggingInterceptor }
+        ?: listOf(clientLoggingInterceptor)
     )
 
     val okHttpClient = delegate.create(config.toWispConfig())
