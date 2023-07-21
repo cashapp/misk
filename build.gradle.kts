@@ -75,7 +75,7 @@ dependencyAnalysis {
     }
     project(":misk-jooq") {
       onIncorrectConfiguration {
-        exclude("org.jooq:jooq:3.18.2")
+        exclude("org.jooq:jooq:3.18.5")
       }
     }
     project(":detektive") {
