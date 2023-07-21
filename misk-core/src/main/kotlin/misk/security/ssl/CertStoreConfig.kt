@@ -4,7 +4,6 @@ import misk.config.Redact
 import wisp.security.ssl.CertStoreConfig as WispCertStoreConfig
 import javax.inject.Inject
 
-@Suppress("AnnotatePublicApisWithJvmOverloads")
 data class CertStoreConfig @Inject constructor(
   val resource: String,
   @Redact

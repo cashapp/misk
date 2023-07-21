@@ -5,7 +5,6 @@ import misk.security.ssl.SslLoader.Companion.FORMAT_JCEKS
 import javax.inject.Inject
 import wisp.security.ssl.TrustStoreConfig as WispTrustStoreConfig
 
-@Suppress("AnnotatePublicApisWithJvmOverloads")
 data class TrustStoreConfig @Inject constructor(
   val resource: String,
   @Redact

@@ -8,10 +8,12 @@ import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
 import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
+import io.gitlab.arturbosch.detekt.rules.fqNameOrNull
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.descriptors.effectiveVisibility
+import org.jetbrains.kotlin.psi.KtAnnotated
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFunction
@@ -71,11 +73,22 @@ class AnnotatePublicApisWithJvmOverloads(config: Config) : Rule(config) {
     // Has any parameters with default values
     if (!element.valueParameters.any { it.hasDefaultValue() }) return false
 
+    // Is not annotated with @Inject
+    if (element.hasAnyAnnotation("javax.inject.Inject", "com.google.inject.Inject")) return false
+
     // Is public
     val callableMemberDescriptor = descriptor as? CallableMemberDescriptor
     val visibility = callableMemberDescriptor?.effectiveVisibility()?.toVisibility()
     return Visibilities.Public == visibility ||
       (visibility == Visibilities.Internal && callableMemberDescriptor.isPublishedApi())
+  }
+
+  private fun KtAnnotated.hasAnyAnnotation(vararg annotationFqNames: String): Boolean {
+    return annotationEntries
+      .asSequence()
+      .mapNotNull { it.typeReference }
+      .mapNotNull { bindingContext[BindingContext.TYPE, it] }
+      .any { annotationFqNames.toList().contains(it.fqNameOrNull()?.toString()) }
   }
 
   enum class ElementType {

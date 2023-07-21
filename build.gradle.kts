@@ -78,6 +78,11 @@ dependencyAnalysis {
         exclude("org.jooq:jooq:3.18.2")
       }
     }
+    project(":detektive") {
+      onUnusedDependencies() {
+        exclude("com.google.inject:guice")
+      }
+    }
   }
 }
 

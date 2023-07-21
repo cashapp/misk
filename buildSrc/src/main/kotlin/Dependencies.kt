@@ -22,6 +22,7 @@ object Dependencies {
   val dependencyAnalysisPluginVersion = "1.20.0"
   val detektApi = "io.gitlab.arturbosch.detekt:detekt-api:1.23.0"
   val detektGradlePlugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.0"
+  val detektPsiUtils = "io.gitlab.arturbosch.detekt:detekt-psi-utils:1.23.0"
   val detektTest = "io.gitlab.arturbosch.detekt:detekt-test:1.23.0"
   val detektTestUtils = "io.gitlab.arturbosch.detekt:detekt-test-utils:1.23.0"
   val dockerApi = "com.github.docker-java:docker-java-api:3.3.0"
