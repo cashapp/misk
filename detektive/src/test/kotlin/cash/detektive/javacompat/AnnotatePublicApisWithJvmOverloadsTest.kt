@@ -129,7 +129,7 @@ internal class AnnotatePublicApisWithJvmOverloadsTest(private val env: KotlinCor
       NoErrorTestCase(
         description = "Public constructor annotated with javax Inject",
         code = """
-        import com.google.inject.Inject
+        import javax.inject.Inject
 
         class Subject @Inject constructor(x: String = "", y: Int) {}
         """
