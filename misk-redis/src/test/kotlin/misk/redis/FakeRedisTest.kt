@@ -159,4 +159,42 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis[key], "Key did not expire")
   }
 
+  @Test fun getsetWithExpiry() {
+    val key = "key"
+    val value1 = "value1".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val value3 = "value3".encodeUtf8()
+    val value4 = "value4".encodeUtf8()
+    val expiryDuration = Duration.ofSeconds(5L)
+
+    assertNull(redis.getset(key, expiryDuration, value1), "Key should be empty")
+
+    clock.add(Duration.ofSeconds(3))
+    assertEquals(value1, redis.getset(key, expiryDuration, value2))
+
+    clock.add(Duration.ofSeconds(4))
+    assertEquals(value2, redis.getset(key, expiryDuration, value3))
+
+    clock.add(Duration.ofSeconds(5))
+    assertNull(redis.getset(key, expiryDuration, value4), "Key should be empty after expiry")
+  }
+
+  @Test fun getsetnxWithExpiry() {
+    val key = "key"
+    val value1 = "value1".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val value3 = "value3".encodeUtf8()
+    val expiryDuration = Duration.ofSeconds(5L)
+
+    assertNull(redis.getsetnx(key, expiryDuration, value1), "Key should be empty")
+
+    clock.add(Duration.ofSeconds(3))
+    assertEquals(value1, redis.getsetnx(key, expiryDuration, value2))
+
+    clock.add(Duration.ofSeconds(4))
+    assertNull(redis.getsetnx(key, expiryDuration, value3), "Key should have expired")
+
+    clock.add(Duration.ofSeconds(2))
+    assertEquals(value3, redis.getsetnx(key, expiryDuration, value2))
+  }
 }

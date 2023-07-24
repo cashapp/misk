@@ -23,6 +23,10 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun expire (Ljava/lang/String;J)Z
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
+	public fun getset (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Lokio/ByteString;
+	public fun getset (Ljava/lang/String;Lokio/ByteString;)Lokio/ByteString;
+	public fun getsetnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Lokio/ByteString;
+	public fun getsetnx (Ljava/lang/String;Lokio/ByteString;)Lokio/ByteString;
 	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;

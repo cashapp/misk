@@ -52,6 +52,50 @@ interface Redis {
   operator fun get(key: String): ByteString?
 
   /**
+   * Sets the [ByteString] value for the given key, and retrieves
+   * the existing value, if it was already set.
+   *
+   * @param key the key to retrieve and set
+   * @param value the new value to set
+   */
+  fun getset(key: String, value: ByteString): ByteString?
+
+  /**
+   * Sets the [ByteString] value for a key with an expiration date,
+   * and retrieves the existing value, if it was already set.
+   *
+   * @param key the key to retrieve and set
+   * @param expiryDuration the new amount of time before the key expires
+   * @param value the new value to set
+   */
+  fun getset(key: String, expiryDuration: Duration, value: ByteString): ByteString?
+
+  /**
+   * Sets the [ByteString] value for the given key, if it does not already exist,
+   * and retrieves the existing value, if it was already set.
+   *
+   * @param key the key to retrieve and set
+   * @param value the new value to set
+   *
+   * Only available on Redis 7.0.0 and higher.
+   */
+  fun getsetnx(key: String, value: ByteString): ByteString?
+
+  /**
+   * Sets the [ByteString] value for a key with an expiration date,
+   * if it does not already exist, and retrieves the existing value,
+   * if it was already set.
+   *
+   * @param key the key to retrieve and set
+   * @param expiryDuration the new amount of time before the key expires
+   * @param value the new value to set
+   *
+   * Only available on Redis 7.0.0 and higher.
+   */
+  fun getsetnx(key: String, expiryDuration: Duration, value: ByteString): ByteString?
+
+
+  /**
    * Delete one or more hash [fields] stored at [key].
    * Specified fields that do not exist are ignored.
    *

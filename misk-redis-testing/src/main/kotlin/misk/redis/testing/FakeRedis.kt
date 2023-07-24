@@ -81,6 +81,30 @@ class FakeRedis @Inject constructor(
     return value.data
   }
 
+  override fun getset(key: String, value: ByteString): ByteString? {
+    val existingValue = get(key)
+    set(key, value)
+    return existingValue
+  }
+
+  override fun getset(key: String, expiryDuration: Duration, value: ByteString): ByteString? {
+    val existingValue = get(key)
+    set(key, expiryDuration, value)
+    return existingValue
+  }
+
+  override fun getsetnx(key: String, value: ByteString): ByteString? {
+    val existingValue = get(key)
+    setnx(key, value)
+    return existingValue
+  }
+
+  override fun getsetnx(key: String, expiryDuration: Duration, value: ByteString): ByteString? {
+    val existingValue = get(key)
+    setnx(key, expiryDuration, value)
+    return existingValue
+  }
+
   @Synchronized
   override fun hdel(key: String, vararg fields: String): Long {
     val value = hKeyValueStore[key] ?: return 0L

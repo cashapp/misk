@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.args.ListDirection
+import java.time.Duration
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -235,6 +236,52 @@ abstract class AbstractRedisTest {
 
     // Keys should be deleted
     listOf(*keysToInsert, key3).forEach { assertNull(redis[it], "Key should have been deleted") }
+  }
+
+  @Test fun getset() {
+    val key = "getset-key"
+    val value1 = "value1".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val value3 = "value3".encodeUtf8()
+
+    assertNull(redis.getset(key, value1), "Key should be empty")
+    assertEquals(value1, redis.getset(key, value2))
+    assertEquals(value2, redis.getset(key, value3))
+  }
+
+  @Test fun getsetWithExpiryDummy() {
+    val key = "getset-key"
+    val value1 = "value1".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val value3 = "value3".encodeUtf8()
+    val expiryDuration = Duration.ofSeconds(5L)
+
+    assertNull(redis.getset(key, expiryDuration, value1), "Key should be empty")
+    assertEquals(value1, redis.getset(key, expiryDuration, value2))
+    assertEquals(value2, redis.getset(key, expiryDuration, value3))
+  }
+
+  @Test fun getsetnx() {
+    val key = "getsetnx-key"
+    val value1 = "value1".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val value3 = "value3".encodeUtf8()
+
+    assertNull(redis.getsetnx(key, value1), "Key should be empty")
+    assertEquals(value1, redis.getsetnx(key, value2))
+    assertEquals(value1, redis.getsetnx(key, value3))
+  }
+
+  @Test fun getsetnxWithExpiryDummy() {
+    val key = "getsetnx-key"
+    val value1 = "value1".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val value3 = "value3".encodeUtf8()
+    val expiryDuration = Duration.ofSeconds(5L)
+
+    assertNull(redis.getsetnx(key, expiryDuration, value1), "Key should be empty")
+    assertEquals(value1, redis.getsetnx(key, expiryDuration, value2))
+    assertEquals(value1, redis.getsetnx(key, expiryDuration, value3))
   }
 
   @Test fun incrOnKeyThatDoesNotExist() {

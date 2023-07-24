@@ -1,6 +1,7 @@
 package misk.redis
 
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPubSub
@@ -48,6 +49,34 @@ class RealRedis(
   override fun get(key: String): ByteString? {
     val keyBytes = key.toByteArray(charset)
     return jedis { get(keyBytes) }?.toByteString()
+  }
+
+  override fun getset(key: String, value: ByteString): ByteString? {
+    val keyBytes = key.toByteArray(charset)
+    val valueBytes = value.toByteArray()
+    val params = SetParams().get()
+    return jedis { set(keyBytes, valueBytes, params) }?.encodeUtf8()
+  }
+
+  override fun getset(key: String, expiryDuration: Duration, value: ByteString): ByteString? {
+    val keyBytes = key.toByteArray(charset)
+    val valueBytes = value.toByteArray()
+    val params = SetParams().get().px(expiryDuration.toMillis())
+    return jedis { set(keyBytes, valueBytes, params) }?.encodeUtf8()
+  }
+
+  override fun getsetnx(key: String, value: ByteString): ByteString? {
+    val keyBytes = key.toByteArray(charset)
+    val valueBytes = value.toByteArray()
+    val params = SetParams().get().nx()
+    return jedis { set(keyBytes, valueBytes, params) }?.encodeUtf8()
+  }
+
+  override fun getsetnx(key: String, expiryDuration: Duration, value: ByteString): ByteString? {
+    val keyBytes = key.toByteArray(charset)
+    val valueBytes = value.toByteArray()
+    val params = SetParams().get().nx().px(expiryDuration.toMillis())
+    return jedis { set(keyBytes, valueBytes, params) }?.encodeUtf8()
   }
 
   override fun hdel(key: String, vararg fields: String): Long {

@@ -30,7 +30,7 @@ object DockerRedis : ExternalDependency {
   private const val port = 6379
   private val hostname = if (isRunningInDocker) "host.docker.internal" else "localhost"
   private val logger = getLogger<DockerRedis>()
-  private const val redisVersion = "6.2"
+  private const val redisVersion = "7.0"
 
   private val client by lazy { JedisPool(hostname, port) }
 
