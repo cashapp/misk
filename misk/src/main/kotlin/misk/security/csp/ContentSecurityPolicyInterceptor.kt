@@ -3,7 +3,7 @@ package misk.security.csp
 import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.reflect.full.findAnnotation
 
 class ContentSecurityPolicyInterceptor(val rules: List<String>) : NetworkInterceptor {

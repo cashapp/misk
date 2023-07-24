@@ -7,8 +7,8 @@ import misk.clustering.DefaultCluster
 import wisp.logging.getLogger
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * A [FakeCluster] is a [Cluster] that is a fake. It delegates entirely to [DefaultCluster],

@@ -26,8 +26,8 @@ import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
 import org.hibernate.exception.ConstraintViolationException
 import java.time.Clock
-import javax.inject.Inject
-import javax.inject.Provider
+import com.google.inject.Inject
+import com.google.inject.Provider
 import javax.persistence.OptimisticLockException
 import javax.sql.DataSource
 import kotlin.reflect.KClass

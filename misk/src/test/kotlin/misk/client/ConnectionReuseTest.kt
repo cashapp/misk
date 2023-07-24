@@ -11,9 +11,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.http.GET
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Provider
+import com.google.inject.Singleton
 
 @MiskTest
 internal class ConnectionReuseTest {

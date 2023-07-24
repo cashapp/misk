@@ -13,9 +13,9 @@ import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Instant
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Provider
+import com.google.inject.Singleton
 
 /**
  * Returns the current status of the service for programmatic tools that want to

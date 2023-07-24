@@ -6,7 +6,7 @@ import misk.slack.webapi.helpers.PostMessageResponse
 import retrofit2.Response
 import java.io.IOException
 import java.io.UncheckedIOException
-import javax.inject.Inject
+import com.google.inject.Inject
 
 class RealSlackClient @Inject constructor(
   private val slackApi: SlackApi,

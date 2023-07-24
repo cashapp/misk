@@ -7,8 +7,8 @@ import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
 import misk.metrics.v2.Metrics
 import misk.metrics.v2.PeakGauge
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Accepts metrics and writes them to the Prometheus [CollectorRegistry].

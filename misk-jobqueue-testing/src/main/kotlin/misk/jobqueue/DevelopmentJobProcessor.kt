@@ -5,9 +5,9 @@ import com.google.common.util.concurrent.ServiceManager
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Provider
+import com.google.inject.Singleton
 
 @Deprecated("Replace the dependency on misk-jobqueue-testing with testFixtures(misk-jobqueue)")
 @Singleton

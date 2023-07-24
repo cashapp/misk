@@ -14,7 +14,7 @@ import org.junit.jupiter.api.assertThrows
 import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = false)
 class TestDatabasePoolTest {

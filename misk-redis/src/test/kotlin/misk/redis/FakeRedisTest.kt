@@ -9,7 +9,7 @@ import okio.ByteString.Companion.encodeUtf8
 import org.junit.jupiter.api.Test
 import wisp.time.FakeClock
 import java.time.Duration
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.random.Random
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

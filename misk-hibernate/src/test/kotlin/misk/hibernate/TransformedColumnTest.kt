@@ -14,7 +14,7 @@ import wisp.config.Config
 import wisp.deployment.TESTING
 import java.io.Serializable
 import java.util.Objects
-import javax.inject.Inject
+import com.google.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.AttributeConverter
 import javax.persistence.Column

@@ -12,7 +12,7 @@ import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.web.jetty.JettyService
 import java.time.Duration
-import javax.inject.Singleton
+import com.google.inject.Singleton
 
 /**
  * Configures an OkHttp client with HTTPS and HTTP/2.

@@ -16,7 +16,7 @@ import wisp.logging.error
 import wisp.logging.getLogger
 import wisp.logging.info
 import wisp.logging.warn
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 class LoggingTest {

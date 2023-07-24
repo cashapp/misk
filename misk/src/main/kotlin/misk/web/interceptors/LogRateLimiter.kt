@@ -3,8 +3,8 @@ package misk.web.interceptors
 import misk.sampling.RateLimiter
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Holds rate limiters for logging success and error responses. There is a rate limiter for every

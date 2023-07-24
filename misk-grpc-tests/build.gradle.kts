@@ -67,7 +67,6 @@ dependencies {
   api(Dependencies.grpcStub)
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
   api(Dependencies.okHttp)
   api(Dependencies.okio)
   api(Dependencies.protobufJava)

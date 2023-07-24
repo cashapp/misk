@@ -10,7 +10,7 @@ plugins {
 
 dependencies {
   api(Dependencies.guava)
-  api(Dependencies.javaxInject)
+  api(Dependencies.guice)
   api(Dependencies.wispLease)
 }
 

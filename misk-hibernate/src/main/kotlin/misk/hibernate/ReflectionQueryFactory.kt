@@ -11,8 +11,8 @@ import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
 import java.util.*
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.Path

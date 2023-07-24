@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true) // NB: only starting services here to get log collection to work.
 class PauseDetectorTest {

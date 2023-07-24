@@ -7,8 +7,8 @@ import misk.web.actions.WebAction
 import misk.web.interceptors.LogRequestResponse
 import routeguide.RouteGuideRouteChatBlockingServer
 import routeguide.RouteNote
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 class RouteChatGrpcAction @Inject constructor() : WebAction, RouteGuideRouteChatBlockingServer {

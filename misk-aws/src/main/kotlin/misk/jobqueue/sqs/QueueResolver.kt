@@ -9,8 +9,8 @@ import misk.jobqueue.QueueName
 import wisp.logging.getLogger
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 internal class QueueResolver @Inject internal constructor(

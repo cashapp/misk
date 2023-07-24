@@ -9,7 +9,7 @@ import okio.ByteString.Companion.decodeHex
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Instant
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = false)
 internal class BuiltInAdaptersTest {

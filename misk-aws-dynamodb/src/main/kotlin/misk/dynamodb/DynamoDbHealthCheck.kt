@@ -1,8 +1,8 @@
 package misk.dynamodb
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import wisp.logging.getLogger

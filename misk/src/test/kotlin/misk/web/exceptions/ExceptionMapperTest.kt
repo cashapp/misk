@@ -27,7 +27,7 @@ import wisp.logging.LogCollector
 import java.net.HttpURLConnection.HTTP_FORBIDDEN
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 internal class ExceptionMapperTest {

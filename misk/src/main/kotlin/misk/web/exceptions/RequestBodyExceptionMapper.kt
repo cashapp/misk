@@ -7,7 +7,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
 import org.slf4j.event.Level
-import javax.inject.Inject
+import com.google.inject.Inject
 
 class RequestBodyExceptionMapper @Inject internal constructor() : ExceptionMapper<RequestBodyException> {
   override fun loggingLevel(th: RequestBodyException) = Level.INFO

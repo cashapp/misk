@@ -7,7 +7,7 @@ import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /** Installs a version of the [Datastore] that works off an in-memory local store */
 class FakeDatastoreModule : KAbstractModule() {

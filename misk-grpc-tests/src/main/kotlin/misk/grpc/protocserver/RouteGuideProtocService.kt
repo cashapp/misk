@@ -5,8 +5,8 @@ import routeguide.RouteGuideGrpc.RouteGuideImplBase
 import routeguide.RouteGuideProto
 import routeguide.RouteGuideProto.Feature
 import routeguide.RouteGuideProto.Point
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 internal class RouteGuideProtocService @Inject constructor() : RouteGuideImplBase() {

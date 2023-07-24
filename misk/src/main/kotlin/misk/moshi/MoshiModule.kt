@@ -10,7 +10,7 @@ import misk.moshi.time.InstantAdapter
 import misk.moshi.time.LocalDateAdapter
 import wisp.moshi.buildMoshi
 import java.util.Date
-import javax.inject.Singleton
+import com.google.inject.Singleton
 import com.squareup.wire.WireJsonAdapterFactory as WireOnlyJsonAdapterFactory
 import misk.moshi.wire.WireMessageAdapter as MiskOnlyMessageAdapter
 

@@ -5,7 +5,7 @@ import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.web.HttpCall
 import javax.inject.Qualifier
-import javax.inject.Singleton
+import com.google.inject.Singleton
 
 /**
  * A caller authenticator that blindly trusts HTTP headers. Unsafe for production use.

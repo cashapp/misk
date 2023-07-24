@@ -1,7 +1,7 @@
 package misk.scope
 
 import com.google.inject.Key
-import javax.inject.Inject
+import com.google.inject.Inject
 
 internal class RealActionScoped<T> @Inject internal constructor(
   val key: Key<T>,

@@ -22,8 +22,8 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.reflect.full.findAnnotation
 
 /**

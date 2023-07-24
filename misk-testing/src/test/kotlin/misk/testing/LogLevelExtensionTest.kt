@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import wisp.logging.getLogger
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 class LogLevelExtensionTest {

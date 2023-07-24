@@ -10,7 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ThreadPoolExecutor
-import javax.inject.Inject
+import com.google.inject.Inject
 import javax.inject.Qualifier
 
 @MiskTest(startService = true)

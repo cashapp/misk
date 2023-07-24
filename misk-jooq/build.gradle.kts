@@ -14,7 +14,6 @@ plugins {
 
 dependencies {
   api(Dependencies.guava)
-  api(Dependencies.javaxInject)
   api(Dependencies.jooq)
   api(Dependencies.kotlinLogging)
   api(project(":misk-core"))

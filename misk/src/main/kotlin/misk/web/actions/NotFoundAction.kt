@@ -16,9 +16,9 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers.Companion.headersOf
 import wisp.logging.getLogger
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Provider
+import com.google.inject.Singleton
 
 @Singleton
 class NotFoundAction @Inject internal constructor(

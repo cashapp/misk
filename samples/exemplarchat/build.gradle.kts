@@ -11,7 +11,6 @@ application {
 }
 
 dependencies {
-  implementation(Dependencies.javaxInject)
   implementation(Dependencies.wispConfig)
   implementation(project(":misk"))
   implementation(project(":misk-actions"))

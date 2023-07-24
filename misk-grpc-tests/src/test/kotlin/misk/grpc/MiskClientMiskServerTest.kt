@@ -34,8 +34,8 @@ import routeguide.RouteGuideClient
 import routeguide.RouteNote
 import wisp.logging.LogCollector
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
-import javax.inject.Inject
-import javax.inject.Named
+import com.google.inject.Inject
+import jakarta.inject.Named
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

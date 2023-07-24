@@ -5,8 +5,8 @@ import com.google.inject.Provider
 import kotlinx.coroutines.asContextElement
 import java.util.UUID
 import java.util.concurrent.Callable
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter

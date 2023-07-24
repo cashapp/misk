@@ -12,7 +12,7 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.Collections.shuffle
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 internal class DeterministicRoutingTest {

@@ -6,8 +6,8 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import okio.GzipSource
 import okio.buffer
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Inflates a gzipped compressed request.

@@ -9,8 +9,8 @@ import okhttp3.Headers
 import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 

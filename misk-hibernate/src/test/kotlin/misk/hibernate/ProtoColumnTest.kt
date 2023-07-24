@@ -12,7 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
-import javax.inject.Inject
+import com.google.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity

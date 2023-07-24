@@ -1,6 +1,6 @@
 package com.squareup.exemplar;
 
-import javax.inject.Singleton;
+import com.google.inject.Singleton;
 import misk.web.Get;
 import misk.web.PathParam;
 import misk.web.RequestHeaders;

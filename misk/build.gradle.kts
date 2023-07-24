@@ -15,7 +15,6 @@ dependencies {
   api(Dependencies.guice)
   api(Dependencies.jacksonAnotations)
   api(Dependencies.jacksonDatabind)
-  api(Dependencies.javaxInject)
   api(Dependencies.jettyServer)
   api(Dependencies.jettyServletApi)
   api(Dependencies.jettyUtil)

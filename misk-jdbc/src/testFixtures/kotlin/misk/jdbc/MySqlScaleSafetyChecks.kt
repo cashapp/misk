@@ -8,7 +8,7 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
 import java.util.Properties
-import javax.inject.Singleton
+import com.google.inject.Singleton
 import javax.sql.DataSource
 
 @Singleton

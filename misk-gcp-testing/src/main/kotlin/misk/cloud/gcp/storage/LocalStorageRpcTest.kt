@@ -5,7 +5,7 @@ import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
 import misk.testing.TemporaryFolderModule
 import wisp.moshi.defaultKotlinMoshi
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @Deprecated("Replace the dependency on misk-gcp-testing with testFixtures(misk-gcp)")
 @MiskTest(startService = false)

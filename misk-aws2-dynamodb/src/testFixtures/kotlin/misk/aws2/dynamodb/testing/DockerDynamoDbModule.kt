@@ -13,8 +13,8 @@ import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.

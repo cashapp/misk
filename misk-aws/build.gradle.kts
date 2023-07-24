@@ -14,7 +14,6 @@ dependencies {
   api(Dependencies.awsSqs)
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
   api(Dependencies.wispAwsEnvironment)
   api(Dependencies.wispConfig)
   api(Dependencies.wispLease)

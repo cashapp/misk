@@ -15,7 +15,7 @@ import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull

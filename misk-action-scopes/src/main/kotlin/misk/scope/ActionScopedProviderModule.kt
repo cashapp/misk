@@ -12,7 +12,7 @@ import misk.inject.parameterizedType
 import misk.inject.toKey
 import misk.inject.typeLiteral
 import java.lang.reflect.Type
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.javaMethod
 

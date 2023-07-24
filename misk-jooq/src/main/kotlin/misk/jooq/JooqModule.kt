@@ -26,8 +26,8 @@ import org.jooq.impl.DSL
 import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
 import java.time.Clock
-import javax.inject.Inject
-import javax.inject.Provider
+import com.google.inject.Inject
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 class JooqModule @JvmOverloads constructor(

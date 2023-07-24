@@ -27,8 +27,8 @@ import misk.web.mediatype.MediaTypes
 import misk.web.metadata.database.DatabaseQueryMetadata
 import wisp.logging.getLogger
 import java.lang.reflect.ParameterizedType
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.reflect.KClass
 
 /** Runs query from Database Query dashboard tab against DB and returns results */

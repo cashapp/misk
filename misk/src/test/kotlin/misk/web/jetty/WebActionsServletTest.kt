@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
 import wisp.client.UnixDomainSocketFactory
 import java.io.File
 import java.util.UUID
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 class WebActionsServletTest {

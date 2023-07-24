@@ -2,8 +2,8 @@ package misk.clustering.kubernetes
 
 import misk.clustering.Cluster
 import misk.clustering.DefaultCluster
-import javax.inject.Inject
-import javax.inject.Provider
+import com.google.inject.Inject
+import com.google.inject.Provider
 
 internal class KubernetesClusterProvider @Inject internal constructor(
   private val config: KubernetesConfig

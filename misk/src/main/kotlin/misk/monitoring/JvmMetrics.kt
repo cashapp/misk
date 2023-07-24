@@ -3,8 +3,8 @@ package misk.monitoring
 import io.prometheus.client.Gauge
 import misk.metrics.v2.Metrics
 import java.lang.management.RuntimeMXBean
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Exposes additional JVM metrics.

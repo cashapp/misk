@@ -10,7 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import wisp.logging.getLogger
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

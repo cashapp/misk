@@ -27,7 +27,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestTemplate
 import java.io.ByteArrayInputStream
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 internal class UnspecifiedContentTypeTest {

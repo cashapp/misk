@@ -11,7 +11,7 @@ import misk.web.metadata.jvm.JvmMetadataAction.JvmRuntimeResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.lang.management.RuntimeMXBean
-import javax.inject.Inject
+import com.google.inject.Inject
 import javax.management.ObjectName
 
 @MiskTest(startService = false)

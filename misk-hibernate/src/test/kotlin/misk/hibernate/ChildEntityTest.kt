@@ -7,7 +7,7 @@ import org.hibernate.TypeMismatchException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 class ChildEntityTest {

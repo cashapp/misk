@@ -4,7 +4,7 @@ import okio.Timeout
 import java.io.InterruptedIOException
 import java.time.Duration
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /**
  * Simulates a pool of a limited resource like database connections or disk bandwidth. Configure the

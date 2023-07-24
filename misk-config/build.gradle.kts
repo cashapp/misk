@@ -11,7 +11,6 @@ plugins {
 dependencies {
   api(Dependencies.jacksonAnotations)
   api(Dependencies.jacksonDatabind)
-  api(Dependencies.javaxInject)
   api(Dependencies.wispConfig)
   api(Dependencies.wispDeployment)
   api(Dependencies.wispResourceLoader)

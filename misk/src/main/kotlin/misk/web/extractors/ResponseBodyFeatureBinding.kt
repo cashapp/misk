@@ -11,8 +11,8 @@ import misk.web.actions.WebSocketListener
 import misk.web.actions.findAnnotationWithOverrides
 import misk.web.interceptors.ResponseBodyMarshallerFactory
 import misk.web.marshal.Marshaller
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 internal class ResponseBodyFeatureBinding(
   private val responseBodyMarshaller: Marshaller<Any>

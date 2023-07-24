@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

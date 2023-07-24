@@ -8,8 +8,8 @@ import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 internal class CronTask @Inject constructor() : AbstractIdleService() {

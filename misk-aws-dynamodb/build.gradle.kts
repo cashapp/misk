@@ -14,7 +14,6 @@ dependencies {
   api(Dependencies.awsJavaSdkCore)
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
   api(Dependencies.kotlinLogging)
   api(project(":misk-aws"))
   api(project(":misk-core"))
@@ -26,7 +25,6 @@ dependencies {
 
   testFixturesApi(Dependencies.awsDynamodb)
   testFixturesApi(Dependencies.guice)
-  testFixturesApi(Dependencies.javaxInject)
   testFixturesApi(Dependencies.tempestTestingInternal)
   testFixturesApi(project(":misk-aws-dynamodb"))
   testFixturesApi(project(":misk-inject"))

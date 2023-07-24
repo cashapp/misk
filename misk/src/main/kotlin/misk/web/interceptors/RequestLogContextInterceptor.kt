@@ -7,8 +7,8 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.mdc.LogContextProvider
 import org.slf4j.MDC
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 
 /**

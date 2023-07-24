@@ -30,8 +30,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.InterruptedIOException
 import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * This test gets Misk running as a GRPC server and then acts as a basic GRPC client to send a

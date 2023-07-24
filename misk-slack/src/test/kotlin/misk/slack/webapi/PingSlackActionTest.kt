@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.net.HttpURLConnection
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 class PingSlackActionTest {
   private val server = MockWebServer()

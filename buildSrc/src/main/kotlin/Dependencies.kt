@@ -58,6 +58,7 @@ object Dependencies {
   val guavaTestLib = "com.google.guava:guava-testlib"
   val guice = "com.google.inject:guice"
   val guiceBom = "com.google.inject:guice-bom:6.0.0"
+  val guice7Bom = "com.google.inject:guice-bom:7.0.0"
   val guiceTestLib = "com.google.inject.extensions:guice-testlib"
   val hibernateCore = "org.hibernate:hibernate-core:5.5.3.Final"
   val hikariCp = "com.zaxxer:HikariCP:4.0.3"
@@ -70,7 +71,9 @@ object Dependencies {
   val jacksonDataformatYaml = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2"
   val jacksonJsr310 = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2"
   val jacksonKotlin = "com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2"
+  val jakartaInject = "jakarta.inject:jakarta.inject-api:2.0.1"
   val javaxAnnotation = "javax.annotation:javax.annotation-api:1.3.2"
+  @Deprecated("Use jakartaInject instead", replaceWith = ReplaceWith("jakartaInject"))
   val javaxInject = "javax.inject:javax.inject:1"
   val javaxPersistenceApi = "javax.persistence:javax.persistence-api:2.2"
   val jedis = "redis.clients:jedis:4.1.1"

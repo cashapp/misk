@@ -7,7 +7,7 @@ import misk.web.toResponseBody
 import okhttp3.Headers
 import org.eclipse.jetty.io.EofException
 import org.slf4j.event.Level
-import javax.inject.Inject
+import com.google.inject.Inject
 
 internal class EofExceptionMapper @Inject internal constructor() : ExceptionMapper<EofException> {
   override fun toResponse(th: EofException) = CLIENT_CLOSED_REQUEST

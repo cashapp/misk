@@ -30,8 +30,8 @@ import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
 import wisp.logging.getLogger
 import java.net.HttpURLConnection
 import java.net.ProtocolException
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 

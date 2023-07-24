@@ -8,8 +8,8 @@ import misk.scope.ActionScoped
 import okhttp3.Headers
 import wisp.logging.getLogger
 import java.util.Locale
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.reflect.full.findAnnotation
 
 private val logger = getLogger<RequestBodyLoggingInterceptor>()

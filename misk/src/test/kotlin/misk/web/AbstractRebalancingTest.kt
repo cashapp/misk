@@ -22,8 +22,8 @@ import okhttp3.internal.closeQuietly
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 abstract class AbstractRebalancingTest(
   val percent: Double

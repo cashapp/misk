@@ -27,7 +27,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueConfig
 import misk.tasks.RepeatedTaskQueueFactory
 import wisp.lease.LeaseManager
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
 open class AwsSqsJobQueueModule(

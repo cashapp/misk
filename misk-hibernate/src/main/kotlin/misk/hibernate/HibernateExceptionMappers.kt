@@ -11,7 +11,7 @@ import okhttp3.Headers.Companion.headersOf
 import org.hibernate.exception.ConstraintViolationException
 import org.hibernate.exception.GenericJDBCException
 import org.slf4j.event.Level
-import javax.inject.Inject
+import com.google.inject.Inject
 import javax.persistence.OptimisticLockException
 
 internal class RetryTransactionExceptionMapper @Inject internal constructor() :

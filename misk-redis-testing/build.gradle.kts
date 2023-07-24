@@ -9,7 +9,6 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
   api(Dependencies.jedis)
   api(project(":misk-inject"))
   api(project(":misk-redis"))

@@ -7,8 +7,8 @@ import okhttp3.Headers
 import okhttp3.MediaType
 import okio.BufferedSource
 import okio.ByteString
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.reflect.KType
 
 object PlainTextMarshaller : Marshaller<Any> {

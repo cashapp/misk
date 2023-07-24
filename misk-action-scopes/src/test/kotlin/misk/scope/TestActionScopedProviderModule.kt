@@ -4,7 +4,7 @@ import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import java.util.Optional
-import javax.inject.Inject
+import com.google.inject.Inject
 
 internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
   override fun configureProviders() {

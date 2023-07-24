@@ -3,7 +3,7 @@ package misk.prometheus
 import misk.metrics.Histogram
 import misk.metrics.HistogramRegistry
 import misk.metrics.Metrics
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @Deprecated("use Metrics instead")
 class PrometheusHistogramRegistry @Inject constructor(

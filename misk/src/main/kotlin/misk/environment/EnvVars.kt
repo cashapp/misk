@@ -4,7 +4,7 @@ import misk.inject.KAbstractModule
 import wisp.deployment.EnvironmentVariableLoader
 import wisp.deployment.FakeEnvironmentVariableLoader
 import wisp.deployment.RealEnvironmentVariableLoader
-import javax.inject.Inject
+import com.google.inject.Inject
 import javax.inject.Qualifier
 
 /*

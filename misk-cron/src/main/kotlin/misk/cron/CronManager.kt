@@ -11,8 +11,8 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 class CronManager @Inject constructor() {

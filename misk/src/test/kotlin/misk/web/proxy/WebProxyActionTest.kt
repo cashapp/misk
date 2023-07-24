@@ -25,8 +25,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Provider
+import com.google.inject.Inject
+import com.google.inject.Provider
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

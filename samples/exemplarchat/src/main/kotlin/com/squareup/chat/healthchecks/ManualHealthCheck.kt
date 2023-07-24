@@ -2,7 +2,7 @@ package com.squareup.chat.healthchecks
 
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
-import javax.inject.Singleton
+import com.google.inject.Singleton
 
 @Singleton
 class ManualHealthCheck : HealthCheck {

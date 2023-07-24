@@ -6,7 +6,7 @@ import ch.qos.logback.classic.LoggerContext
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.slf4j.LoggerFactory
-import javax.inject.Inject
+import com.google.inject.Inject
 
 class LogLevelExtension @Inject constructor() : BeforeEachCallback {
   override fun beforeEach(context: ExtensionContext?) {

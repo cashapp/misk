@@ -6,7 +6,7 @@ import misk.vitess.shards
 import misk.vitess.target
 import wisp.logging.getLogger
 import java.util.*
-import javax.inject.Provider
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 private val logger = getLogger<TruncateTablesService>()

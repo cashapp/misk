@@ -27,8 +27,8 @@ import org.junit.jupiter.api.assertThrows
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.time.Instant
-import javax.inject.Inject
-import javax.inject.Provider
+import com.google.inject.Inject
+import com.google.inject.Provider
 import javax.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity

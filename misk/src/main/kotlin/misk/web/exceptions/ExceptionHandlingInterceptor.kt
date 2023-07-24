@@ -27,7 +27,7 @@ import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
 import java.util.Base64
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /**
  * Converts and logs application and component level dispatch exceptions into the appropriate

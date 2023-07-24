@@ -8,7 +8,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 class WebTestClientTest {

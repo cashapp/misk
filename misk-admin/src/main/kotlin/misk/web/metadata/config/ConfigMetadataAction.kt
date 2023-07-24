@@ -13,7 +13,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.config.Config
 import wisp.deployment.Deployment
-import javax.inject.Singleton
+import com.google.inject.Singleton
 
 @Singleton
 class ConfigMetadataAction @Inject constructor(

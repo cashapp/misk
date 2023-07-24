@@ -7,8 +7,8 @@ import misk.web.NetworkInterceptor
 import misk.web.SocketAddress
 import misk.web.WebConfig
 import wisp.logging.getLogger
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 private val logger = getLogger<RebalancingInterceptor>()
 

@@ -13,7 +13,6 @@ dependencies {
   implementation(Dependencies.findBugs)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.javaxInject)
   implementation(Dependencies.kotlinxHtml)
   implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)

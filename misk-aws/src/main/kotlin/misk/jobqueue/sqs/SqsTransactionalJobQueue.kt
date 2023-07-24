@@ -7,8 +7,8 @@ import misk.jobqueue.QueueName
 import misk.jobqueue.TransactionalJobQueue
 import wisp.logging.getLogger
 import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 // Implements the TransactionalJobQueue interface by registering a post-commit hook that
 // forwards the message to SQS. It is not truly transactional, and is intended only for

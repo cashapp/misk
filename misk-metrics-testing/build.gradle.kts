@@ -9,7 +9,6 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
   api(Dependencies.prometheusClient)
   api(project(":misk-inject"))
   api(project(":misk-metrics"))

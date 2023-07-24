@@ -18,7 +18,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.test.assertEquals
 
 @MiskTest(startService = true)

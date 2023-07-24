@@ -21,8 +21,8 @@ import misk.web.MiskWebFormBuilder.Field
 import misk.web.MiskWebFormBuilder.Type
 import misk.web.metadata.database.DatabaseQueryMetadata
 import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import javax.persistence.Table
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction

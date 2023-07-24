@@ -3,7 +3,7 @@ package misk.web.resources
 import misk.web.dashboard.ValidWebEntry
 import misk.web.proxy.WebProxyEntry
 import okhttp3.HttpUrl
-import javax.inject.Inject
+import com.google.inject.Inject
 
 class ResourceEntryFinder @Inject constructor(
   private val webProxyEntries: List<WebProxyEntry>,

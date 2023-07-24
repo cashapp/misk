@@ -13,8 +13,8 @@ import misk.web.mediatype.MediaTypes
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 internal interface ReturnADinosaur {
   @POST("/cooldinos")

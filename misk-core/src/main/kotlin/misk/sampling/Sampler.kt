@@ -4,8 +4,8 @@ import com.google.common.base.Ticker
 import misk.concurrent.Sleeper
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 interface Sampler {
   /** If an action should be taken based on the implementation's policy, returns true */

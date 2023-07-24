@@ -14,8 +14,8 @@ import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import wisp.logging.info
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.reflect.full.findAnnotation
 
 private val logger = getLogger<RequestLoggingInterceptor>()

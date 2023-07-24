@@ -23,7 +23,7 @@ import org.assertj.core.data.Offset
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 internal class JettyServiceMetricsTest {

@@ -7,7 +7,7 @@ import misk.security.keys.KeyService
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import java.nio.ByteBuffer
-import javax.inject.Inject
+import com.google.inject.Inject
 
 internal class GcpKeyService @Inject internal constructor(
   kms: CloudKMS,

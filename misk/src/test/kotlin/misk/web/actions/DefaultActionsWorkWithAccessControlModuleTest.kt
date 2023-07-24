@@ -7,7 +7,7 @@ import misk.security.authz.MiskCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 internal class DefaultActionsWorkWithAccessControlModuleTest {

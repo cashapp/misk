@@ -15,8 +15,8 @@ import wisp.time.FakeClock
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

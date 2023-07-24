@@ -10,7 +10,7 @@ import misk.testing.MiskTestModule
 import misk.web.interceptors.LogRateLimiter.LogBucketId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 class LogRateLimiterTest {

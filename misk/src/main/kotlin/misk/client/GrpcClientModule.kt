@@ -5,7 +5,7 @@ import com.google.inject.name.Names
 import com.squareup.wire.Service
 import misk.inject.KAbstractModule
 import okhttp3.OkHttpClient
-import javax.inject.Singleton
+import com.google.inject.Singleton
 import kotlin.reflect.KClass
 
 /**

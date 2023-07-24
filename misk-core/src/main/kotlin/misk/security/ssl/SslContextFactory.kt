@@ -1,7 +1,7 @@
 package misk.security.ssl
 
 import java.security.KeyStore
-import javax.inject.Inject
+import com.google.inject.Inject
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import wisp.security.ssl.SslContextFactory as WispSslContextFactory

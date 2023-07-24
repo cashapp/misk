@@ -18,7 +18,7 @@ import okio.GzipSink
 import okio.buffer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 internal class GzipTest : AbstractGzipTest() {

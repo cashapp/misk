@@ -1,6 +1,6 @@
 package misk.slack
 
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /** Dummy client that does nothing if SlackModule is not installed .*/
 open class SlackClient @Inject constructor() {

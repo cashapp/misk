@@ -7,8 +7,8 @@ import io.netty.handler.ssl.SslContext
 import io.netty.handler.ssl.SslContextBuilder
 import misk.resources.ResourceLoader
 import java.net.SocketAddress
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 class GrpcChannelFactory @Inject constructor(val resourceLoader: ResourceLoader) {

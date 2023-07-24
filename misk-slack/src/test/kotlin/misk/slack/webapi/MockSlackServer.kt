@@ -6,8 +6,8 @@ import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.UserData
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Wrap [MockWebServer] to pretend its a Slack server.

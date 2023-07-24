@@ -16,7 +16,7 @@ import com.google.inject.name.Names
 import misk.crypto.pgp.PgpDecrypter
 import misk.crypto.pgp.PgpEncrypter
 import java.security.GeneralSecurityException
-import javax.inject.Singleton
+import com.google.inject.Singleton
 
 sealed class MappedKeyManager<KeyT> constructor(
   private val injector: Injector,

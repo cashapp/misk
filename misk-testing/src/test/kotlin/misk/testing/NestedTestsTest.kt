@@ -7,8 +7,8 @@ import misk.inject.KAbstractModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @MiskTest(startService = true)
 class NestedTestsTest {

@@ -14,8 +14,8 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import wisp.logging.getLogger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 

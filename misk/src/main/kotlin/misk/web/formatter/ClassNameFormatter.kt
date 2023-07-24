@@ -1,6 +1,6 @@
 package misk.web.formatter
 
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.reflect.KClass
 
 class ClassNameFormatter @Inject constructor() {

@@ -30,7 +30,6 @@ dependencies {
   api(Dependencies.googleHttpClient)
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
   api(Dependencies.kotlinLogging)
   api(project(":misk-gcp"))
   api(project(":misk-inject"))

@@ -11,7 +11,6 @@ plugins {
 dependencies {
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
   api(project(":misk-inject"))
   implementation(Dependencies.kotlinReflect)
   implementation(Dependencies.kotlinStdLibJdk8)

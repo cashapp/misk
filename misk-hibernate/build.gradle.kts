@@ -28,7 +28,6 @@ dependencies {
   api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.hibernateCore)
-  api(Dependencies.javaxInject)
   api(Dependencies.javaxPersistenceApi)
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))

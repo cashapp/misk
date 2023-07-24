@@ -5,7 +5,7 @@ import misk.concurrent.Sleeper
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /**
  * A deterministic testable rate limiter that uses two variables:

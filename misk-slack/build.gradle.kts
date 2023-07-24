@@ -10,7 +10,6 @@ plugins {
 
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
   api(Dependencies.moshi)
   api(Dependencies.okHttp)
   api(Dependencies.retrofit)

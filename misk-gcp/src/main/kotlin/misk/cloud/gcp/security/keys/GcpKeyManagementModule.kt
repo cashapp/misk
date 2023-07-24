@@ -8,7 +8,7 @@ import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.security.keys.KeyService
-import javax.inject.Singleton
+import com.google.inject.Singleton
 
 class GcpKeyManagementModule(private val config: GcpKmsConfig) : KAbstractModule() {
   override fun configure() {

@@ -5,7 +5,7 @@ import misk.web.actions.WebAction
 import okio.BufferedSink
 import okio.BufferedSource
 import java.util.regex.Matcher
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.reflect.KParameter
 
 /** HTTP binding as specified by [FeatureBinding]. */

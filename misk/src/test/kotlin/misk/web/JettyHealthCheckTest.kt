@@ -25,7 +25,7 @@ import java.util.concurrent.Phaser
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import com.google.inject.Inject
 import javax.inject.Qualifier
 
 @MiskTest(startService = true)

@@ -22,7 +22,7 @@ import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import javax.inject.Inject
+import com.google.inject.Inject
 
 // Common module for web action-related tests to use to use that bind up some sample web actions
 class TestWebActionModule : KAbstractModule() {

@@ -16,7 +16,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.test.assertEquals
 
 @MiskTest(startService = false)

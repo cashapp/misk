@@ -10,7 +10,6 @@ plugins {
 
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
   api(Dependencies.wispToken)
   api(project(":misk"))
   api(project(":misk-hibernate"))

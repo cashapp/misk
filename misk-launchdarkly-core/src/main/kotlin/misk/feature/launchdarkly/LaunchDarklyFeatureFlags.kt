@@ -13,8 +13,8 @@ import wisp.feature.IntFeatureFlag
 import wisp.feature.JsonFeatureFlag
 import wisp.feature.StringFeatureFlag
 import java.util.concurrent.Executor
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Implementation of [FeatureFlags] using LaunchDarkly's Java SDK.

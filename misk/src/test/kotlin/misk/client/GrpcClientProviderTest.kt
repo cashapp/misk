@@ -17,8 +17,8 @@ import misk.ApplicationInterceptor
 import misk.Chain
 import java.time.Duration
 import java.util.concurrent.LinkedBlockingDeque
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule

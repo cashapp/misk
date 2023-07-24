@@ -6,8 +6,8 @@ import io.grpc.Server
 import io.grpc.ServerBuilder
 import misk.resources.ResourceLoader
 import okhttp3.HttpUrl
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Runs a standard gRPC server: generated protoc protos and a Netty backend. This isn't how Misk

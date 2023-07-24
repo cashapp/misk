@@ -20,8 +20,8 @@ import wisp.logging.LogCollector
 import java.time.Duration
 import java.util.concurrent.BlockingDeque
 import java.util.concurrent.LinkedBlockingDeque
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 internal class WarmupTest {
   private val events = LinkedBlockingDeque<String>()

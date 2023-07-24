@@ -9,7 +9,7 @@ import misk.web.toResponseBody
 import okhttp3.Headers
 import okhttp3.Headers.Companion.toHeaders
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /** Maps ClientExecutionTimeoutException to 503 responses because the exception is concurrency related */
 class ClientExecutionTimeoutExceptionMapper @Inject constructor() :

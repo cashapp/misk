@@ -4,8 +4,8 @@ import com.google.common.annotations.VisibleForTesting
 import misk.feature.FeatureFlags
 import misk.jobqueue.QueueName
 import wisp.lease.LeaseManager
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Uses a [LeaseManager] and [FeatureFlags] to calculate the number of sqs consumers a pods should

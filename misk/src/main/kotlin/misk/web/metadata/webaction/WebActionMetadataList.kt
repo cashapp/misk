@@ -1,9 +1,9 @@
 package misk.web.metadata.webaction
 
 import misk.web.jetty.WebActionsServlet
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Provider
+import com.google.inject.Singleton
 
 @Singleton
 class WebActionMetadataList @Inject internal constructor(

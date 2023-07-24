@@ -4,8 +4,8 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import wisp.logging.getLogger
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton internal class ClientLoggingInterceptor @Inject constructor(
   private val httpClientsConfig: HttpClientsConfig

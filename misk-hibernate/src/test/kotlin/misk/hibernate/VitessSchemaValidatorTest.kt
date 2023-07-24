@@ -4,8 +4,8 @@ import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
-import javax.inject.Provider
+import com.google.inject.Inject
+import com.google.inject.Provider
 
 @MiskTest(startService = true)
 class VitessSchemaValidatorTest {

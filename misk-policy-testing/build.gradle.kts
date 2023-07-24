@@ -12,7 +12,6 @@ dependencies {
   api(Dependencies.dockerApi)
   api(Dependencies.dockerCore)
   api(Dependencies.guava)
-  api(Dependencies.javaxInject)
   api(project(":misk-inject"))
   api(project(":misk-policy"))
   implementation(Dependencies.dockerTransport)

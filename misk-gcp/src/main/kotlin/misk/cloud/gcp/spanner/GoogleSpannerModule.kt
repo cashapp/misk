@@ -12,7 +12,7 @@ import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import wisp.logging.getLogger
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /**
  * [GoogleSpannerModule] provides a Google Spanner client for your app.

@@ -2,7 +2,7 @@ package misk.client
 
 import okhttp3.OkHttpClient
 import wisp.client.HttpClientEndpointConfig
-import javax.inject.Inject
+import com.google.inject.Inject
 
 class OkHttpClientCommonConfigurator @Inject constructor() {
   val delegate = wisp.client.OkHttpClientCommonConfigurator()

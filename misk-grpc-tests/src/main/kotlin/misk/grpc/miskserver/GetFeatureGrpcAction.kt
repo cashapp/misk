@@ -10,7 +10,7 @@ import routeguide.Point
 import routeguide.Rectangle
 import routeguide.RouteGuideGetFeatureBlockingServer
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
-import javax.inject.Inject
+import com.google.inject.Inject
 
 class GetFeatureGrpcAction @Inject constructor() : WebAction, RouteGuideGetFeatureBlockingServer {
   @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)

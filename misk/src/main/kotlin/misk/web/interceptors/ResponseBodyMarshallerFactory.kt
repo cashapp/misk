@@ -5,8 +5,8 @@ import misk.web.marshal.GenericMarshallers
 import misk.web.marshal.Marshaller
 import misk.web.mediatype.MediaTypes
 import okhttp3.MediaType
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.reflect.KType
 
 @Singleton

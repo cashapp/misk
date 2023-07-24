@@ -2,8 +2,8 @@ package misk.grpc.miskclient
 
 import java.util.Collections
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import misk.client.ClientAction
 import misk.client.ClientNetworkChain
 import misk.client.ClientNetworkInterceptor

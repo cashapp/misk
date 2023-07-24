@@ -2,7 +2,7 @@ package misk.security.ssl
 
 import misk.config.Redact
 import wisp.security.ssl.CertStoreConfig as WispCertStoreConfig
-import javax.inject.Inject
+import com.google.inject.Inject
 
 data class CertStoreConfig @Inject constructor(
   val resource: String,

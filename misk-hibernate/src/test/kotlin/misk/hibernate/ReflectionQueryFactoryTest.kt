@@ -14,7 +14,7 @@ import wisp.logging.LogCollector
 import wisp.time.FakeClock
 import java.time.Duration.ofSeconds
 import java.time.LocalDate
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

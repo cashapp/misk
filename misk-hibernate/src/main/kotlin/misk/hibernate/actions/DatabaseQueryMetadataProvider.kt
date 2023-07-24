@@ -4,8 +4,8 @@ import misk.hibernate.DbEntity
 import misk.hibernate.Query
 import misk.web.metadata.database.DatabaseQueryMetadata
 import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
-import javax.inject.Inject
-import javax.inject.Provider
+import com.google.inject.Inject
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 internal class DatabaseQueryMetadataProvider<T : DbEntity<T>>(

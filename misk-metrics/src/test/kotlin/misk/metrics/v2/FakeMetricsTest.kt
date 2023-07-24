@@ -1,7 +1,7 @@
 package misk.metrics.v2
 
 import io.prometheus.client.Collector.MetricFamilySamples.Sample
-import javax.inject.Inject
+import com.google.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat

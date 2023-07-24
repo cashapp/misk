@@ -13,7 +13,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest
 internal class ZeroIdleTimeoutTest : AbstractJettyShutdownTest() {

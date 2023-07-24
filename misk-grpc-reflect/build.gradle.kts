@@ -25,7 +25,6 @@ wire {
 
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
   api(Dependencies.wireReflector)
   api(project(":misk-actions"))
   api(project(":misk-inject"))

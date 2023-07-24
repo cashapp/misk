@@ -3,8 +3,8 @@ package misk.logging
 import com.google.common.util.concurrent.AbstractIdleService
 import wisp.logging.LogCollector
 import wisp.logging.WispQueuedLogCollector
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 internal class RealLogCollector @Inject constructor(

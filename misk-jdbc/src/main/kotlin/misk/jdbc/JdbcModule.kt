@@ -13,8 +13,8 @@ import misk.inject.setOfType
 import misk.inject.toKey
 import misk.resources.ResourceLoader
 import wisp.deployment.Deployment
-import javax.inject.Inject
-import javax.inject.Provider
+import com.google.inject.Inject
+import com.google.inject.Provider
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 

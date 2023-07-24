@@ -26,7 +26,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import wisp.containers.ContainerUtil
 import wisp.deployment.TESTING
 import java.time.Duration
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest
 @Disabled("Flaky test")

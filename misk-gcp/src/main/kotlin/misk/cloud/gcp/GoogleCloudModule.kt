@@ -20,7 +20,7 @@ import misk.inject.KAbstractModule
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.nio.file.Paths
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /** Installs support for talking to real GCP services, either direct or via emulator */
 class GoogleCloudModule(

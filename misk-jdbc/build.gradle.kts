@@ -14,7 +14,6 @@ dependencies {
   api(Dependencies.dockerApi)
   api(Dependencies.dockerCore)
   api(Dependencies.guava)
-  api(Dependencies.javaxInject)
   api(Dependencies.moshi)
   api(Dependencies.openTracingApi)
   api(Dependencies.prometheusClient)
@@ -39,7 +38,6 @@ dependencies {
   runtimeOnly(Dependencies.postgresql)
 
   testFixturesApi(Dependencies.datasourceProxy)
-  testFixturesApi(Dependencies.javaxInject)
   testFixturesApi(Dependencies.moshi)
   testFixturesApi(Dependencies.okHttp)
   testFixturesApi(project(":misk-inject"))

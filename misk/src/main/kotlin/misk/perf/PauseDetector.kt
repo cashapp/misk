@@ -11,8 +11,8 @@ import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.NANOSECONDS
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Detects and records pauses experienced by the VM. Garbage collection is a common source of

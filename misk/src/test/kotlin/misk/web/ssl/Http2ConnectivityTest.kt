@@ -48,8 +48,8 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import kotlin.test.assertFailsWith
 

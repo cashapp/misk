@@ -7,8 +7,8 @@ import misk.metrics.Histogram
 import misk.metrics.Metrics
 import misk.metrics.v2.PeakGauge
 import misk.metrics.v2.Metrics as MetricsV2
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Accepts metrics and writes them to the Prometheus [CollectorRegistry].

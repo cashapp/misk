@@ -23,8 +23,8 @@ import misk.security.ssl.SslLoader
 import wisp.config.Config
 import java.net.URI
 import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Provider
+import com.google.inject.Inject
+import com.google.inject.Provider
 import javax.net.ssl.X509TrustManager
 import kotlin.reflect.KClass
 

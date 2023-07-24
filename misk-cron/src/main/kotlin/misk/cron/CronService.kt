@@ -3,8 +3,8 @@ package misk.cron
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Injector
 import wisp.logging.getLogger
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 internal class CronService @Inject constructor(

@@ -10,7 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.reflect.KFunction
 
 internal class ActionScopePropagationTest {

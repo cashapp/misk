@@ -1,7 +1,7 @@
 package misk.feature.testing;
 
 import java.util.Map;
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import misk.inject.KAbstractModule;
 import misk.testing.MiskTest;
 import misk.testing.MiskTestModule;

@@ -7,8 +7,8 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import redis.clients.jedis.JedisPubSub
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.concurrent.thread
 
 /**

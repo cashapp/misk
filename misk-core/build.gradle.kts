@@ -10,7 +10,6 @@ plugins {
 
 dependencies {
   api(Dependencies.guava)
-  api(Dependencies.javaxInject)
   api(Dependencies.kotlinLogging)
   api(Dependencies.kotlinRetry)
   api(Dependencies.okHttp)

@@ -3,8 +3,8 @@ package misk.web.jetty
 import com.google.common.util.concurrent.AbstractScheduledService
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 internal class JettyConnectionMetricsCollector @Inject internal constructor(

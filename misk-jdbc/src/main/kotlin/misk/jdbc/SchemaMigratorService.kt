@@ -8,7 +8,7 @@ import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import wisp.deployment.Deployment
 import java.time.Duration
-import javax.inject.Provider
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 class SchemaMigratorService internal constructor(

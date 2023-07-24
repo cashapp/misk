@@ -1,7 +1,7 @@
 package misk.random
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 class FakeRandom @Inject constructor() : Random() {

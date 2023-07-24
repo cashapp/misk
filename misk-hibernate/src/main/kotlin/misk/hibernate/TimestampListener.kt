@@ -5,8 +5,8 @@ import org.hibernate.event.spi.PreInsertEventListener
 import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
 import java.time.Clock
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 internal class TimestampListener @Inject constructor() :

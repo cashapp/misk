@@ -11,8 +11,8 @@ import okio.HashingSink
 import okio.blackholeSink
 import okio.buffer
 import java.time.Clock
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import kotlin.math.abs
 import kotlin.reflect.full.findAnnotation
 

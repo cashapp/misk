@@ -9,8 +9,8 @@ import com.google.inject.Scopes
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import wisp.logging.getLogger
-import javax.inject.Provider
-import javax.inject.Singleton
+import com.google.inject.Provider
+import com.google.inject.Singleton
 
 class ServiceManagerModule : KAbstractModule() {
   companion object {

@@ -1,8 +1,8 @@
 package misk.clustering.fake.lease
 
 import wisp.lease.FakeLeaseManager
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * A [FakeLeaseManager] provides explicit control over leases for the purposes of testing. By

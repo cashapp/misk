@@ -16,8 +16,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClientBuilder
 import java.net.URI
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * Install this module to have access to a DynamoDbClient.

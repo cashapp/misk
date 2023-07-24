@@ -15,7 +15,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

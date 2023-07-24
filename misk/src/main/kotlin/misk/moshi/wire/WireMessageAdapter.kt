@@ -7,7 +7,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.wire.Message
 import com.squareup.wire.WireField
 import java.lang.reflect.Type
-import javax.inject.Inject
+import com.google.inject.Inject
 
 /** Json marshaling for Wire messages, correctly using Builders to construct properly formed type */
 @Deprecated("Use WireJsonAdapterFactory instead")

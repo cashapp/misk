@@ -1,7 +1,7 @@
 package misk.grpc.miskclient
 
 import com.google.inject.Provides
-import javax.inject.Singleton
+import com.google.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.client.ClientNetworkInterceptor
 import misk.client.GrpcClientModule

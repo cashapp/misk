@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test
 import wisp.client.UnixDomainSocketFactory
 import java.io.File
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @MiskTest(startService = true)
 class UDSHttp2ConnectivityTest {

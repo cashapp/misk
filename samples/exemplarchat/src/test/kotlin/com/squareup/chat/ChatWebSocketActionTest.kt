@@ -15,7 +15,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import redis.clients.jedis.JedisPoolConfig
 import wisp.deployment.TESTING
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = true)
 class ChatWebSocketActionTest {

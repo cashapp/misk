@@ -3,8 +3,8 @@ package misk.concurrent
 import com.google.common.base.Ticker
 import java.time.Duration
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 @Singleton
 class FakeTicker @Inject constructor() : Ticker(), Sleeper {

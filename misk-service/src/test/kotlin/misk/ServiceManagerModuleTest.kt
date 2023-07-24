@@ -13,7 +13,7 @@ import misk.inject.getInstance
 import misk.inject.keyOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import com.google.inject.Inject
 import kotlin.test.assertFailsWith
 
 internal class ServiceManagerModuleTest {

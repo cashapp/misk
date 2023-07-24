@@ -5,7 +5,7 @@ import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
 import misk.testing.TemporaryFolderModule
 import wisp.moshi.defaultKotlinMoshi
-import javax.inject.Inject
+import com.google.inject.Inject
 
 @MiskTest(startService = false)
 internal class LocalStorageRpcTest : CustomStorageRpcTestCases<LocalStorageRpc>() {

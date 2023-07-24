@@ -13,7 +13,6 @@ dependencies {
   api(Dependencies.dockerApi)
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
   api(Dependencies.jettyServletApi)
   api(Dependencies.junitApi)
   api(Dependencies.kotlinLogging)

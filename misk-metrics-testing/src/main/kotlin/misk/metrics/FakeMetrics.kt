@@ -2,8 +2,8 @@ package misk.metrics
 
 import io.prometheus.client.*
 import io.prometheus.client.Collector.MetricFamilySamples.Sample
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
 /**
  * An in-memory metrics store with APIs to verify which metrics were collected.
