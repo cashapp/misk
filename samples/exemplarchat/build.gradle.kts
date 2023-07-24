@@ -35,7 +35,7 @@ val jar by tasks.getting(Jar::class) {
   manifest {
     attributes("Main-Class" to "com.squareup.chat.ChatServiceKt")
   }
-  classifier = "unshaded"
+  archiveClassifier.set("unshaded")
 }
 
 val compileKotlin by tasks.getting(KotlinCompile::class) {
