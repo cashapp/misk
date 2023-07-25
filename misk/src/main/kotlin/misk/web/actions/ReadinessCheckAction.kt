@@ -50,7 +50,7 @@ class ReadinessCheckAction @Inject internal constructor(
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   @AvailableWhenDegraded
-  fun readinessCheck(): Response<String> = runBlocking {
+  fun readinessCheck(): Response<String> {
     val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().asList()
       .filterNot { it.isRunning }
 
@@ -62,7 +62,7 @@ class ReadinessCheckAction @Inject internal constructor(
       // Don't do healthchecks if services haven't all started. The app isn't in a good state yet,
       // and a health check could end up triggering random errors that we don't want to flood the
       // logs with.
-      return@runBlocking Response("", statusCode = 503)
+      return Response("", statusCode = 503)
     }
 
     // Only null on first run
@@ -85,19 +85,19 @@ class ReadinessCheckAction @Inject internal constructor(
 
     if (clock.instant().isAfter(lastUpdate.plusMillis(config.readiness_max_age_ms.toLong()))) {
       logger.info("Failed health check: last status check is older than max age")
-      return@runBlocking Response("", statusCode = 503)
+      return Response("", statusCode = 503)
     }
 
     val failedHealthChecks = statuses.filter { !it.isHealthy }
 
     if (failedHealthChecks.isEmpty()) {
-      return@runBlocking Response("", statusCode = 200)
+      return Response("", statusCode = 200)
     }
 
     for (healthCheck in failedHealthChecks) {
       logger.info("Failed health check: ${healthCheck.messages}")
     }
-    return@runBlocking Response("", statusCode = 503)
+    return Response("", statusCode = 503)
   }
 
   private fun refreshStatuses(): CachedStatus {
