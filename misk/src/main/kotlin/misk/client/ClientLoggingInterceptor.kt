@@ -7,15 +7,17 @@ import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class ClientLoggingInterceptor @Inject constructor(
-  private val httpClientsConfig: HttpClientsConfig
-): Interceptor {
+@Singleton internal class ClientLoggingInterceptor @Inject constructor(): Interceptor {
+  // Optional so it defaults to not logging requests when no config is available.
+  @com.google.inject.Inject(optional = true)
+  private val httpClientsConfig: HttpClientsConfig = HttpClientsConfig()
+
   override fun intercept(chain: Interceptor.Chain): Response {
     val result = chain.proceed(chain.request())
 
     if (httpClientsConfig.logRequests) {
-      val outgoingRequest = result.request
-      logger.info { "Outgoing request: ${outgoingRequest.url}, headers=${headers(outgoingRequest)}" }
+      val outgoingReq = result.request
+      logger.info { "Outgoing request: ${outgoingReq.url}, headers=${headers(outgoingReq)}" }
     }
 
     return result
