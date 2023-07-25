@@ -40,7 +40,6 @@ internal class ClientInvocationHandler(
   eventListenerFactory: EventListener.Factory?,
   tracer: Tracer?,
   moshi: Moshi,
-  clientLoggingInterceptor: ClientLoggingInterceptor,
   clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory,
   callFactoryWrappers: Provider<List<CallFactoryWrapper>> = Provider<List<CallFactoryWrapper>> { emptyList() },
 ) : InvocationHandler {
@@ -58,7 +57,6 @@ internal class ClientInvocationHandler(
     val networkInterceptors = networkInterceptorFactories.get().mapNotNull { it.create(action) }
     val clientBuilder = okHttpTemplate.newBuilder()
     clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(clientName))
-    clientBuilder.addInterceptor(clientLoggingInterceptor)
     applicationInterceptors.forEach { clientBuilder.addInterceptor(it) }
     networkInterceptors.forEach {
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
