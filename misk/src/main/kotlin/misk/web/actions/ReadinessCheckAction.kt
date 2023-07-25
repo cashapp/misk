@@ -1,6 +1,7 @@
 package misk.web.actions
 
 import com.google.common.util.concurrent.ServiceManager
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import misk.healthchecks.HealthCheck
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
@@ -17,6 +18,9 @@ import kotlinx.coroutines.*
 import misk.healthchecks.HealthStatus
 import java.time.Clock
 import java.time.Instant
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 private val logger = getLogger<ReadinessCheckAction>()
 
@@ -28,8 +32,19 @@ class ReadinessCheckAction @Inject internal constructor(
   val clock: Clock
 ) : WebAction {
 
-  var lastUpdate: Instant? = null
-  var statuses: List<HealthStatus> = listOf()
+  @Volatile
+  private var cachedStatus: CachedStatus? = null
+
+  private val refreshExecutor = ThreadPoolExecutor(
+    // no concurrency on refresh
+    1,
+    1,
+    config.readiness_max_age_ms.toLong(), TimeUnit.MILLISECONDS,
+    SynchronousQueue(),
+    ThreadFactoryBuilder()
+      .setNameFormat("readiness-refresh-%d")
+      .build()
+  )
 
   @Get("/_readiness")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -50,23 +65,27 @@ class ReadinessCheckAction @Inject internal constructor(
       return@runBlocking Response("", statusCode = 503)
     }
 
-    // First run needs to block and get statuses
-    if (lastUpdate == null) {
-      refreshStatuses()
-    } else {
-      // This needs to be independent of the max age check so that services can recover
-      // If refreshStatuses() is never run then a failed/stale check can never recover
-      if (clock.instant().isAfter(lastUpdate!!.plusMillis(config.readiness_refresh_interval_ms.toLong()))) {
-        // Launch in the background so that we can still return the cached state
-        launch(Job()) {
-          refreshStatuses()
-        }
-      }
+    // Only null on first run
+    // This will block since the refresh is being done on this thread
+    val (lastUpdate, statuses) = cachedStatus
+      ?: refreshStatuses()
 
-      if (clock.instant().isAfter(lastUpdate!!.plusMillis(config.readiness_max_age_ms.toLong()))) {
-        logger.info("Failed health check: last status check is older than max age")
-        return@runBlocking Response("", statusCode = 503)
+    // This needs to be independent of the max age check so that services can recover
+    // If refreshStatuses() is never run then a failed/stale check can never recover
+    if (
+      clock.instant().isAfter(lastUpdate.plusMillis(config.readiness_refresh_interval_ms.toLong()))
+      // don't launch concurrent refreshes
+      && refreshExecutor.activeCount == 0
+    ) {
+      // Launch in the background so that we can still return the cached state
+      refreshExecutor.execute {
+        refreshStatuses()
       }
+    }
+
+    if (clock.instant().isAfter(lastUpdate.plusMillis(config.readiness_max_age_ms.toLong()))) {
+      logger.info("Failed health check: last status check is older than max age")
+      return@runBlocking Response("", statusCode = 503)
     }
 
     val failedHealthChecks = statuses.filter { !it.isHealthy }
@@ -81,8 +100,19 @@ class ReadinessCheckAction @Inject internal constructor(
     return@runBlocking Response("", statusCode = 503)
   }
 
-  private fun refreshStatuses() {
-    statuses = healthChecks.map { it.status() }
-    lastUpdate = clock.instant()
+  private fun refreshStatuses(): CachedStatus {
+    val statuses = healthChecks.map { it.status() }
+    // Get time AFTER health checks have completed
+    val lastUpdate = clock.instant()
+    cachedStatus = CachedStatus(lastUpdate, statuses)
+
+    // This cast is safe only as long as there is no concurrent updates
+    // We ensure this by capping the thread pool to one thread
+    return cachedStatus as CachedStatus
   }
+
+  data class CachedStatus(
+    val lastUpdate: Instant,
+    val statuses: List<HealthStatus>
+  )
 }
