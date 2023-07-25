@@ -22,9 +22,12 @@ import misk.scope.ActionScopedProviderModule
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.csp.ContentSecurityPolicyInterceptor
 import misk.security.ssl.CertificatesModule
+import misk.tasks.RepeatedTaskQueue
+import misk.tasks.RepeatedTaskQueueFactory
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
+import misk.web.actions.ReadinessRefreshQueue
 import misk.web.actions.StatusAction
 import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import misk.web.concurrencylimits.ConcurrencyLimitsModule
@@ -246,6 +249,8 @@ class MiskWebModule @JvmOverloads constructor(
     // Bind build-in actions.
     install(WebActionModule.create<StatusAction>())
     install(WebActionModule.create<ReadinessCheckAction>())
+    install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
+
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
 
@@ -286,6 +291,12 @@ class MiskWebModule @JvmOverloads constructor(
   fun provideGzipHandler(): GzipHandler {
     return GzipHandler()
   }
+
+  @Provides @ReadinessRefreshQueue @Singleton
+  fun readinessRefreshQueue(
+    queueFactory: RepeatedTaskQueueFactory
+  ): RepeatedTaskQueue = queueFactory.new("readiness-refresh-queue")
+
 
   private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>):
     BlockingQueue<Runnable> {

@@ -1,14 +1,19 @@
 package misk.web.actions
 
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provides
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
+import misk.ServiceModule
+import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.healthchecks.FakeHealthCheck
 import misk.healthchecks.FakeHealthCheckModule
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import misk.inject.KAbstractModule
 import misk.services.FakeServiceModule
+import misk.tasks.RepeatedTaskQueue
+import misk.tasks.RepeatedTaskQueueFactory
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -32,7 +37,13 @@ class ReadinessCheckActionTest {
       override fun configure() {
         multibind<HealthCheck>().to<CountingHealthCheck>()
         bind<WebConfig>().toInstance(WebConfig(8000))
+        install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
       }
+
+      @Provides @ReadinessRefreshQueue @Singleton
+      fun readinessRefreshQueue(
+        queueFactory: RepeatedTaskQueueFactory
+      ): RepeatedTaskQueue = queueFactory.forTesting("readiness-refresh-queue", ExplicitReleaseDelayQueue())
     }
   )
 
@@ -91,11 +102,10 @@ class ReadinessCheckActionTest {
   }
 
   private fun forceRefresh() {
-    // advance time so that a refresh is triggered
+    // advance time
     clock.add((readinessCheckAction.config.readiness_refresh_interval_ms + 1).toLong(), TimeUnit.MILLISECONDS)
-    // first hit will still return cache and queue update in background
-    // result can be ignored since it will be the same as previous
-    readinessCheckAction.readinessCheck()
+    // manually refresh
+    readinessCheckAction.refreshStatuses()
   }
 
   @Singleton

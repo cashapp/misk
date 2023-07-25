@@ -1,7 +1,9 @@
 package misk.web.actions
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.ServiceManager
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import com.google.inject.BindingAnnotation
 import misk.healthchecks.HealthCheck
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
@@ -14,9 +16,11 @@ import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
-import kotlinx.coroutines.*
 import misk.healthchecks.HealthStatus
+import misk.tasks.RepeatedTaskQueue
+import misk.tasks.Status
 import java.time.Clock
+import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -28,11 +32,11 @@ private val logger = getLogger<ReadinessCheckAction>()
 class ReadinessCheckAction @Inject internal constructor(
   private val serviceManagerProvider: Provider<ServiceManager>,
   @JvmSuppressWildcards private val healthChecks: List<HealthCheck>,
+  @ReadinessRefreshQueue private val taskQueue: RepeatedTaskQueue,
   val config: WebConfig,
   val clock: Clock
 ) : WebAction {
 
-  @Volatile
   private var cachedStatus: CachedStatus? = null
 
   private val refreshExecutor = ThreadPoolExecutor(
@@ -66,9 +70,14 @@ class ReadinessCheckAction @Inject internal constructor(
     }
 
     // Only null on first run
-    // This will block since the refresh is being done on this thread
     val (lastUpdate, statuses) = cachedStatus
-      ?: refreshStatuses()
+      // Block to get the initial status and enqueue background refresh
+      ?: refreshStatuses().also {
+        taskQueue.scheduleWithBackoff(Duration.ofMillis(config.readiness_refresh_interval_ms.toLong())) {
+          refreshStatuses()
+          Status.OK
+        }
+      }
 
     // This needs to be independent of the max age check so that services can recover
     // If refreshStatuses() is never run then a failed/stale check can never recover
@@ -100,14 +109,12 @@ class ReadinessCheckAction @Inject internal constructor(
     return Response("", statusCode = 503)
   }
 
-  private fun refreshStatuses(): CachedStatus {
+  @VisibleForTesting
+  internal fun refreshStatuses(): CachedStatus {
     val statuses = healthChecks.map { it.status() }
     // Get time AFTER health checks have completed
     val lastUpdate = clock.instant()
     cachedStatus = CachedStatus(lastUpdate, statuses)
-
-    // This cast is safe only as long as there is no concurrent updates
-    // We ensure this by capping the thread pool to one thread
     return cachedStatus as CachedStatus
   }
 
@@ -116,3 +123,7 @@ class ReadinessCheckAction @Inject internal constructor(
     val statuses: List<HealthStatus>
   )
 }
+
+@BindingAnnotation
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+annotation class ReadinessRefreshQueue
