@@ -61,7 +61,9 @@ class WebServerTestingModule @JvmOverloads constructor(
           format = SslLoader.FORMAT_PEM
         ),
         mutual_auth = WebSslConfig.MutualAuth.NONE
-      )
+      ),
+      // Remove Connection: close in test requests to keep them deterministic.
+      close_connection_percent = 0.0,
     )
   }
 }
