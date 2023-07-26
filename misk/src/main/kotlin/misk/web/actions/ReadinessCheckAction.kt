@@ -27,9 +27,8 @@ class ReadinessCheckAction @Inject internal constructor(
   @AvailableWhenDegraded
   fun readinessCheck(): Response<String> {
 
-    // Null until first run has finished, which means not yet ready
     val (lastUpdate, statuses) = readinessService.status
-      // Block to get the initial status and enqueue background refresh
+      // Null until first run has finished, which means not yet ready
       ?: return Response("", statusCode = 503)
 
     if (clock.instant().isAfter(lastUpdate.plusMillis(config.readiness_max_age_ms.toLong()))) {
