@@ -39,10 +39,9 @@ class ReadinessCheckService @Inject constructor(
   override fun startUp() {
     logger.info { "starting readiness service" }
 
-    val delay = Duration.ofMillis(config.readiness_refresh_interval_ms.toLong())
-    taskQueue.schedule(delay) {
+    taskQueue.schedule(Duration.ofMillis(0)) {
       refreshStatuses()
-      Result(Status.OK, delay)
+      Result(Status.OK, Duration.ofMillis(config.readiness_refresh_interval_ms.toLong()))
     }
   }
 
