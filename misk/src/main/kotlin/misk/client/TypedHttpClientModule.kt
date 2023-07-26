@@ -159,9 +159,6 @@ class TypedClientFactory @Inject constructor() {
   private val callFactoryWrappers: Provider<List<CallFactoryWrapper>> = Provider { emptyList() }
 
   @Inject
-  private lateinit var clientLoggingInterceptor: ClientLoggingInterceptor
-
-  @Inject
   private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
 
   @Inject
@@ -232,7 +229,6 @@ class TypedClientFactory @Inject constructor() {
       eventListenerFactory,
       tracer,
       moshi,
-      clientLoggingInterceptor,
       clientMetricsInterceptorFactory,
       callFactoryWrappers
     )
