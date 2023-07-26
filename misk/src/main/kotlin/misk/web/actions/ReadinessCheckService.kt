@@ -30,7 +30,7 @@ class ReadinessCheckService @Inject constructor(
     private set
 
   init {
-    require(config.readiness_refresh_interval_ms < config.readiness_max_age_ms || config.health_port <= 0) {
+    require(config.readiness_refresh_interval_ms < config.readiness_max_age_ms) {
       "readiness_refresh_interval_ms must be less than readiness_max_age_ms"
     }
   }
