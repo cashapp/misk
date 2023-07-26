@@ -1415,9 +1415,6 @@ public final class misk/web/PathPattern$Companion {
 	public final fun parse (Ljava/lang/String;)Lmisk/web/PathPattern;
 }
 
-public abstract interface annotation class misk/web/ReadinessRefreshQueue : java/lang/annotation/Annotation {
-}
-
 public final class misk/web/ResponseExtensionsKt {
 	public static final fun readUtf8 (Lmisk/web/Response;)Ljava/lang/String;
 	public static final fun toMisk (Lokhttp3/Response;)Lmisk/web/Response;
@@ -1615,28 +1612,6 @@ public final class misk/web/actions/NotFoundAction$Companion {
 
 public final class misk/web/actions/ReadinessCheckAction : misk/web/actions/WebAction {
 	public final fun readinessCheck ()Lmisk/web/Response;
-}
-
-public final class misk/web/actions/ReadinessCheckService : com/google/common/util/concurrent/AbstractIdleService {
-	public static final field Companion Lmisk/web/actions/ReadinessCheckService$Companion;
-	public fun <init> (Lmisk/web/WebConfig;Ljava/time/Clock;Ljavax/inject/Provider;Ljava/util/List;Lmisk/tasks/RepeatedTaskQueue;)V
-	public final fun getStatus ()Lmisk/web/actions/ReadinessCheckService$CachedStatus;
-}
-
-public final class misk/web/actions/ReadinessCheckService$CachedStatus {
-	public fun <init> (Ljava/time/Instant;Ljava/util/List;)V
-	public final fun component1 ()Ljava/time/Instant;
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Ljava/time/Instant;Ljava/util/List;)Lmisk/web/actions/ReadinessCheckService$CachedStatus;
-	public static synthetic fun copy$default (Lmisk/web/actions/ReadinessCheckService$CachedStatus;Ljava/time/Instant;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/actions/ReadinessCheckService$CachedStatus;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getLastUpdate ()Ljava/time/Instant;
-	public final fun getStatuses ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/web/actions/ReadinessCheckService$Companion {
 }
 
 public final class misk/web/actions/StatusAction : misk/web/actions/WebAction {

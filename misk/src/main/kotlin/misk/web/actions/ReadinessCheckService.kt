@@ -19,7 +19,7 @@ import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
-class ReadinessCheckService @Inject constructor(
+internal class ReadinessCheckService @Inject constructor(
   private val config: WebConfig,
   private val clock: Clock,
   private val serviceManagerProvider: Provider<ServiceManager>,

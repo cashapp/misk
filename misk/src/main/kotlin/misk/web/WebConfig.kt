@@ -133,7 +133,7 @@ data class WebConfig @JvmOverloads constructor(
   val readiness_refresh_interval_ms: Int = 1000,
 
   /** Maximum age of readiness status. If exceeded readiness will return an error */
-  val readiness_max_age_ms: Int = 5000
+  val readiness_max_age_ms: Int = 10000
 ) : Config {
   @Deprecated(
     message = "obsolete; for binary-compatibility only",
