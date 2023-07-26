@@ -256,7 +256,6 @@ class MiskWebModule @JvmOverloads constructor(
     // Bind build-in actions.
     install(WebActionModule.create<StatusAction>())
     install(WebActionModule.create<ReadinessCheckAction>())
-    install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())

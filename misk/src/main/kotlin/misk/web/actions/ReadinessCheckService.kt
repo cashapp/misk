@@ -29,18 +29,13 @@ class ReadinessCheckService @Inject constructor(
   var status: CachedStatus? = null
     private set
 
-  private val isServiceActive = config.health_port >= 0
-
   init {
-    if (isServiceActive) {
-      require(config.readiness_refresh_interval_ms < config.readiness_max_age_ms || config.health_port <= 0) {
-        "readiness_refresh_interval_ms must be less than readiness_max_age_ms"
-      }
+    require(config.readiness_refresh_interval_ms < config.readiness_max_age_ms || config.health_port <= 0) {
+      "readiness_refresh_interval_ms must be less than readiness_max_age_ms"
     }
   }
 
   override fun startUp() {
-    if (!isServiceActive) return
     logger.info { "starting readiness service" }
 
     val delay = Duration.ofMillis(config.readiness_refresh_interval_ms.toLong())
@@ -51,7 +46,6 @@ class ReadinessCheckService @Inject constructor(
   }
 
   override fun shutDown() {
-    if (!isServiceActive) return
     logger.info { "stopping readiness service" }
 
     status = null
