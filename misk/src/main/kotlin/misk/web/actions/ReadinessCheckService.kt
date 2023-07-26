@@ -26,6 +26,7 @@ class ReadinessCheckService @Inject constructor(
   @JvmSuppressWildcards private val healthChecks: List<HealthCheck>,
   @ReadinessRefreshQueue private val taskQueue: RepeatedTaskQueue,
 ): AbstractIdleService() {
+  @Volatile
   var status: CachedStatus? = null
     private set
 

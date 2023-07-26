@@ -125,9 +125,11 @@ data class WebConfig @JvmOverloads constructor(
    */
   val override_shutdown_idle_timeout: Long? = null,
 
-  /** How often readiness will re-run its status check.
+  /**
+   * How often readiness will re-run its status check.
    *
-   * Ensure that [readiness_refresh_interval_ms] + "readiness latency" is less than [readiness_max_age_ms] or readiness will fail."  */
+   * Ensure that [readiness_refresh_interval_ms] + "readiness latency" is less than [readiness_max_age_ms] or readiness will fail."
+   */
   val readiness_refresh_interval_ms: Int = 1000,
 
   /** Maximum age of readiness status. If exceeded readiness will return an error */
