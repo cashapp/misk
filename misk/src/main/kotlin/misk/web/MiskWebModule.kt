@@ -1,6 +1,7 @@
 package misk.web
 
 import com.google.common.util.concurrent.Service
+import com.google.inject.BindingAnnotation
 import com.google.inject.Key
 import com.google.inject.Provider
 import com.google.inject.Provides
@@ -27,7 +28,7 @@ import misk.tasks.RepeatedTaskQueueFactory
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
-import misk.web.actions.ReadinessRefreshQueue
+import misk.web.actions.ReadinessCheckService
 import misk.web.actions.StatusAction
 import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import misk.web.concurrencylimits.ConcurrencyLimitsModule
@@ -122,6 +123,12 @@ class MiskWebModule @JvmOverloads constructor(
       ServiceModule<JettyConnectionMetricsCollector>()
         .enhancedBy<ReadyService>()
     )
+    install(
+      ServiceModule<ReadinessCheckService>()
+        .enhancedBy<ReadyService>()
+    )
+
+    install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 
     // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {
@@ -323,3 +330,7 @@ class MiskWebModule @JvmOverloads constructor(
     val miskCallerType = object : TypeLiteral<MiskCaller?>() {}
   }
 }
+
+@BindingAnnotation
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+annotation class ReadinessRefreshQueue

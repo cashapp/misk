@@ -27,7 +27,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import javax.inject.Inject
 
-// Common module for web action-related tests to use to use that bind up some sample web actions
+// Common module for web action-related tests to use that bind up some sample web actions
 class TestWebActionModule : KAbstractModule() {
   override fun configure() {
     install(WebServerTestingModule())

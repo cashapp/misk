@@ -1,19 +1,10 @@
 package misk.web.actions
 
 import com.google.common.util.concurrent.ServiceManager
-import com.google.inject.Provides
 import com.google.inject.util.Modules
-import misk.MiskTestingServiceModule
-import misk.ServiceModule
-import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.healthchecks.FakeHealthCheck
 import misk.healthchecks.FakeHealthCheckModule
-import misk.healthchecks.HealthCheck
-import misk.healthchecks.HealthStatus
-import misk.inject.KAbstractModule
 import misk.services.FakeServiceModule
-import misk.tasks.RepeatedTaskQueue
-import misk.tasks.RepeatedTaskQueueFactory
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -23,99 +14,52 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @MiskTest
 class ReadinessCheckActionTest {
   @MiskTestModule
   val module = Modules.combine(
-    MiskTestingServiceModule(),
+    TestWebActionModule(),
     FakeServiceModule(),
     FakeHealthCheckModule(),
     WebActionModule.create<ReadinessCheckAction>(),
-    object : KAbstractModule() {
-      override fun configure() {
-        multibind<HealthCheck>().to<CountingHealthCheck>()
-        bind<WebConfig>().toInstance(WebConfig(8000))
-        install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
-      }
-
-      @Provides @ReadinessRefreshQueue @Singleton
-      fun readinessRefreshQueue(
-        queueFactory: RepeatedTaskQueueFactory
-      ): RepeatedTaskQueue = queueFactory.forTesting("readiness-refresh-queue", ExplicitReleaseDelayQueue())
-    }
   )
 
   @Inject lateinit var clock: FakeClock
+  @Inject lateinit var config: WebConfig
   @Inject lateinit var readinessCheckAction: ReadinessCheckAction
+  @Inject lateinit var readinessCheckService: ReadinessCheckService
   @Inject lateinit var serviceManager: ServiceManager
-  @Inject lateinit var fakeHealthCheck: FakeHealthCheck
-  @Inject lateinit var countingHealthCheck: CountingHealthCheck
+  @Inject lateinit var healthCheck: FakeHealthCheck
 
   @Test fun readinessDependsOnServiceStateAndHealthChecksPassing() {
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)
-
-    fakeHealthCheck.setUnhealthy()
-    forceRefresh()
+    // Starts unhealthy
     assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(503)
 
-    fakeHealthCheck.setHealthy()
-    forceRefresh()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+
+    // Healthy after start
+    updateStatus()
     assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)
+
+    updateStatus { healthCheck.setUnhealthy() }
+    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(503)
+
+    updateStatus { healthCheck.setHealthy() }
+    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)
+
+    // unhealthy when stale
+    clock.add((config.readiness_max_age_ms + 1).toLong(), TimeUnit.MILLISECONDS)
+    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(503)
 
     serviceManager.stopAsync()
     serviceManager.awaitStopped()
     assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(503)
   }
 
-  @Test fun readinessReusesStatusUntilElapsedTtl() {
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)
-    assertThat(countingHealthCheck.checks).isEqualTo(1)
-
-    // still the same
-    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)
-    assertThat(countingHealthCheck.checks).isEqualTo(1)
-
-    // move up and verify count increases just once
-    forceRefresh()
-    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)
-    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)
-    assertThat(countingHealthCheck.checks).isEqualTo(2)
-  }
-
-  @Test fun readinessReturnsErrorPastMaxAgeThenRefreshes() {
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)
-
-    // move past max age
-    clock.add((readinessCheckAction.config.readiness_max_age_ms + 1).toLong(), TimeUnit.MILLISECONDS)
-    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(503)
-
-    // Next run should still see the updated state
-    assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)
-  }
-
-  private fun forceRefresh() {
-    // advance time
-    clock.add((readinessCheckAction.config.readiness_refresh_interval_ms + 1).toLong(), TimeUnit.MILLISECONDS)
-    // manually refresh
-    readinessCheckAction.refreshStatuses()
-  }
-
-  @Singleton
-  class CountingHealthCheck @Inject constructor() : HealthCheck {
-    var checks = 0
-    var status = HealthStatus.healthy()
-
-    override fun status(): HealthStatus{
-      checks++
-      return status
-    }
+  private fun updateStatus(fn: () -> Unit = {}) {
+    fn()
+    readinessCheckService.refreshStatuses()
   }
 }
