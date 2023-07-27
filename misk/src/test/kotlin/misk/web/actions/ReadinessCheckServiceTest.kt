@@ -21,7 +21,7 @@ class ReadinessCheckServiceTest {
   )
 
   @Inject lateinit var clock: FakeClock
-  @Inject lateinit var readinessCheckService: ReadinessCheckService
+  @Inject internal lateinit var readinessCheckService: ReadinessCheckService
   @Inject lateinit var serviceManager: ServiceManager
 
   @Test fun waitsForRunningServicesBeforeHealthChecks() {
