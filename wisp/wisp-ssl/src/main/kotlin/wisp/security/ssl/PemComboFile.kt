@@ -69,10 +69,8 @@ data class PemComboFile(
                             Regex("-+END PRIVATE KEY-+")
                         )
                     }
-                    line.isBlank() -> {
-                        // This is ok, just keep going
-                    }
-                    else -> throw IOException("unexpected line: $line")
+
+                    // Ignore everything else
                 }
             }
 
