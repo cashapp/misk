@@ -76,7 +76,7 @@ data class WebConfig @JvmOverloads constructor(
   val jetty_max_concurrent_streams: Int? = null,
 
   /** A value in [0.0..100.0]. Include 'Connection: close' in this percentage of responses. */
-  val close_connection_percent: Double = 0.01,
+  val close_connection_percent: Double = 0.0,
 
   /**
    * If true responses which are larger than the minGzipSize will be compressed.
@@ -146,7 +146,7 @@ data class WebConfig @JvmOverloads constructor(
     enable_thread_pool_queue_metrics: Boolean = false,
     action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
     jetty_max_concurrent_streams: Int? = null,
-    close_connection_percent: Double = 0.01,
+    close_connection_percent: Double = 0.0,
     gzip: Boolean = true,
     minGzipSize: Int = 1024,
     cors: Map<String, CorsConfig> = mapOf(),
