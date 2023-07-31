@@ -8,7 +8,6 @@ import wisp.resources.ClasspathResourceLoaderBackend
 import wisp.resources.FakeFilesystemLoaderBackend
 import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.MemoryResourceLoaderBackend
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
 import wisp.resources.ResourceLoader as WispResourceLoader
@@ -49,5 +48,4 @@ class TestingResourceLoaderModule : KAbstractModule() {
 }
 
 @Qualifier
-@BindingAnnotation
 annotation class ForFakeFiles

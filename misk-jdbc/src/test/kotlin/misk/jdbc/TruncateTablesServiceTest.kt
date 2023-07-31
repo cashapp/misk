@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 @MiskTest(startService = true)
@@ -113,7 +112,6 @@ internal class TruncateTablesServiceTest {
   data class TestConfig(val data_source: DataSourceConfig) : Config
 
   @Qualifier
-@BindingAnnotation
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class TestDatasource
 }

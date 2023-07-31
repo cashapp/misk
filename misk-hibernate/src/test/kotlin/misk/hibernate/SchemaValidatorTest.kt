@@ -29,7 +29,6 @@ import wisp.deployment.TESTING
 import java.time.Instant
 import jakarta.inject.Inject
 import com.google.inject.Provider
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -240,8 +239,7 @@ internal class SchemaValidatorTest {
   data class RootConfig(val data_source: DataSourceConfig) : Config
 
   @Qualifier
-@BindingAnnotation
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class ValidationDb
 
   @Entity

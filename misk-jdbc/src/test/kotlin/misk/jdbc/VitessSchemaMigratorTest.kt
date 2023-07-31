@@ -18,7 +18,6 @@ import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
 import jakarta.inject.Inject
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 @MiskTest(startService = true)
@@ -101,12 +100,10 @@ internal class VitessSchemaMigratorTest {
 }
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class Movies
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class Movies2
 

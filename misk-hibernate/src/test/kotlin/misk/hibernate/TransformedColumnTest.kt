@@ -15,7 +15,6 @@ import wisp.deployment.TESTING
 import java.io.Serializable
 import java.util.Objects
 import jakarta.inject.Inject
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 import javax.persistence.AttributeConverter
 import javax.persistence.Column
@@ -454,8 +453,7 @@ class TransformedColumnTest {
   }
 
   @Qualifier
-@BindingAnnotation
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class TransformedColumnTestDb
 
   data class TransformedColumnTestConfig(val data_source: DataSourceConfig) : Config

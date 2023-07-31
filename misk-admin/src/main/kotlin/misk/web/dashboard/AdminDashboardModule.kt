@@ -4,7 +4,6 @@ import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.v2.BaseDashboardV2Module
 import misk.web.metadata.config.ConfigMetadataAction
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 /**
@@ -77,6 +76,5 @@ class AdminDashboardTestingModule : KAbstractModule() {
 
 /** Dashboard Annotation used for all tabs bound in the Misk Admin Dashboard */
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class AdminDashboard

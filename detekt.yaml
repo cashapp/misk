@@ -26,16 +26,16 @@ style:
     active: true
     imports:
       - value: 'javax.inject.Inject'
-        reason: 'To be Guice 7+ compliant, `com.google.inject.*` or `jakarta.inject.*` must be used.'
+        reason: 'To be Guice 7+ compliant, use `jakarta.inject.Inject`'
       - value: 'javax.inject.Qualifier'
-        reason: 'To be Guice 7+ compliant, `com.google.inject.*` or `jakarta.inject.*` must be used.'
+        reason: 'To be Guice 7+ compliant, use `jakarta.inject.Qualifier`'
       - value: 'javax.inject.Singleton'
-        reason: 'To be Guice 7+ compliant, `com.google.inject.*` or `jakarta.inject.*` must be used.'
+        reason: 'To be Guice 7+ compliant, use `jakarta.inject.Singleton`'
       - value: 'javax.inject.Provider'
-        reason: 'To be Guice 7+ compliant, `com.google.inject.*` must be used.'
+        reason: 'To be Guice 7+ compliant, use `com.google.inject.Provider`'
       # Until moved to Guice 7, jakarta.inject.Provider causes issues with type overloads in Guice 6
       - value: 'jakarta.inject.Provider'
-        reason: 'To be Guice 6 compliant, `com.google.inject.*` must be used.'
+        reason: 'To be Guice 6 compliant, use `com.google.inject.Provider`'
 
 detektive:
   active: true

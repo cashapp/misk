@@ -22,9 +22,9 @@ import kotlin.reflect.KClass
  * Binds database connectivity for a qualified data source. This binds the following public types:
  *
  *  * @Qualifier
-@BindingAnnotation [javax.sql.DataSource]
+[javax.sql.DataSource]
  *  * @Qualifier
-@BindingAnnotation [misk.jdbc.DataSourceConfig]
+[misk.jdbc.DataSourceConfig]
  *
  * [DataSource.getConnection] can be used to get JDBC connections to your database.
  *

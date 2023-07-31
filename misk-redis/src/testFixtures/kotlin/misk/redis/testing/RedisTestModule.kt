@@ -4,7 +4,6 @@ import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.redis.Redis
 import misk.time.FakeClock
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 import kotlin.random.Random
 
@@ -17,7 +16,6 @@ class RedisTestModule(private val random: Random = Random.Default) : KAbstractMo
 }
 
 @Qualifier
-@BindingAnnotation
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 annotation class ForFakeRedis

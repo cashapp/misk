@@ -6,7 +6,6 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 @MiskTest(startService = false)
@@ -33,11 +32,9 @@ internal class MiskCallerTestModule : KAbstractModule() {
 }
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class TestUser
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class TestService

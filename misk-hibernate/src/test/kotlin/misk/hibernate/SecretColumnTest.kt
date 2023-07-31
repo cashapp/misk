@@ -17,7 +17,6 @@ import wisp.deployment.TESTING
 import java.util.Arrays
 import java.util.Objects
 import jakarta.inject.Inject
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -238,8 +237,7 @@ class SecretColumnTest {
   }
 
   @Qualifier
-@BindingAnnotation
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class JerryGarciaDb
 
   @Entity

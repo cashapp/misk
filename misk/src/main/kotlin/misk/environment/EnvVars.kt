@@ -5,7 +5,6 @@ import wisp.deployment.EnvironmentVariableLoader
 import wisp.deployment.FakeEnvironmentVariableLoader
 import wisp.deployment.RealEnvironmentVariableLoader
 import jakarta.inject.Inject
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 /*
@@ -52,7 +51,6 @@ class RealEnvVarModule : KAbstractModule() {
 }
 
 @Qualifier
-@BindingAnnotation
 annotation class ForEnvVars
 
 /**

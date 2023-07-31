@@ -1,7 +1,6 @@
 package misk.web.interceptors
 
 import misk.web.NetworkInterceptor
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 /**
@@ -10,7 +9,6 @@ import jakarta.inject.Qualifier
  * installed before interceptors annotated with [ForContentEncoding].
  */
 @Qualifier
-@BindingAnnotation
 @Retention(AnnotationRetention.RUNTIME)
 @Target(
   AnnotationTarget.CLASS,

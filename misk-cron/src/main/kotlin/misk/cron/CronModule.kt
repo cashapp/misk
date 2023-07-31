@@ -12,7 +12,6 @@ import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import java.time.ZoneId
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 class CronModule @JvmOverloads constructor(
@@ -62,6 +61,5 @@ class FakeCronModule @JvmOverloads constructor(
 }
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 internal annotation class ForMiskCron

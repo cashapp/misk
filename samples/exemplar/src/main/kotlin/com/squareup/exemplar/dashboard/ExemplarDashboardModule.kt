@@ -20,7 +20,6 @@ import misk.web.dashboard.MiskWebTheme
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 class ExemplarDashboardModule : KAbstractModule() {
@@ -95,7 +94,6 @@ class ExemplarDashboardModule : KAbstractModule() {
 
 /** Dashboard Annotation used for all tabs bound in the Exemplar service support dashboard. */
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class SupportDashboard
 

@@ -3,7 +3,6 @@ package misk.security.ssl
 import misk.scope.ActionScoped
 import misk.security.cert.X500Name
 import java.security.cert.X509Certificate
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 /**
@@ -11,7 +10,6 @@ import jakarta.inject.Qualifier
  * certificate chain provided by the client (if any)
  */
 @Qualifier
-@BindingAnnotation
 @Retention(AnnotationRetention.RUNTIME)
 @Target(
   AnnotationTarget.CLASS,
@@ -25,7 +23,6 @@ annotation class ClientCertChain
  * Qualifier annotation for an [ActionScoped] [X500Name] containing the subject of the client cert
  */
 @Qualifier
-@BindingAnnotation
 @Retention(AnnotationRetention.RUNTIME)
 @Target(
   AnnotationTarget.CLASS,
@@ -39,7 +36,6 @@ annotation class ClientCertSubject
  * Qualifier annotation for an [ActionScoped] [X500Name] containing the issuer of the client cert
  */
 @Qualifier
-@BindingAnnotation
 @Retention(AnnotationRetention.RUNTIME)
 @Target(
   AnnotationTarget.CLASS,

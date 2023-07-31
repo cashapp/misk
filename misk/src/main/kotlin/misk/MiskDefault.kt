@@ -1,6 +1,5 @@
 package misk
 
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 import kotlin.annotation.AnnotationRetention.RUNTIME
 
@@ -10,7 +9,6 @@ import kotlin.annotation.AnnotationRetention.RUNTIME
  * installed.
  */
 @Qualifier
-@BindingAnnotation
 @Retention(RUNTIME)
 @Target(
   AnnotationTarget.CLASS,

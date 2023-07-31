@@ -4,7 +4,6 @@ import com.google.inject.Inject
 import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.web.HttpCall
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
 
@@ -47,6 +46,5 @@ class FakeCallerAuthenticator @Inject constructor(
 }
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class DevelopmentOnly

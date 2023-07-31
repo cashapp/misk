@@ -5,7 +5,6 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 @MiskTest
@@ -31,7 +30,6 @@ class MapBinderTest {
 }
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD)
 annotation class TestAnnotation
 

@@ -12,7 +12,6 @@ import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import misk.logging.LogCollectorModule
 import org.jooq.impl.DefaultExecuteListenerProvider
 import wisp.deployment.TESTING
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 class ClientJooqTestingModule : KAbstractModule() {
@@ -59,11 +58,9 @@ class ClientJooqTestingModule : KAbstractModule() {
 }
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 annotation class JooqDBIdentifier
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 annotation class JooqDBReadOnlyIdentifier

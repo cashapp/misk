@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -119,8 +118,7 @@ class ProtoColumnTest {
   }
 
   @Qualifier
-@BindingAnnotation
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class SuperHeroMoviesDb
 
   data class RootConfig(val data_source: DataSourceConfig) : Config

@@ -4,7 +4,6 @@ import com.google.inject.Guice
 import misk.inject.getSetOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 
 internal class HibernateEntityModuleTest {
@@ -61,12 +60,10 @@ internal class HibernateEntityModuleTest {
   private fun Set<HibernateEntity>.unwrap() = map { it.entity }
 
   @Qualifier
-@BindingAnnotation
-  annotation class Dinosaurs
+annotation class Dinosaurs
 
   @Qualifier
-@BindingAnnotation
-  annotation class Shapes
+annotation class Shapes
 
   abstract class Square : DbUnsharded<Square>
   abstract class Circle : DbEntity<Circle>

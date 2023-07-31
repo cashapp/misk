@@ -36,11 +36,11 @@ import kotlin.reflect.KClass
  * Binds database connectivity for a qualified data source. This binds the following public types:
  *
  *  * @Qualifier
-@BindingAnnotation [misk.jdbc.DataSourceConfig]
+[misk.jdbc.DataSourceConfig]
  *  * @Qualifier
-@BindingAnnotation [SessionFactory]
+[SessionFactory]
  *  * @Qualifier
-@BindingAnnotation [Transacter]
+[Transacter]
  *  * [Query.Factory] (with no qualifier)
  *
  * This also registers services to connect to the database ([SessionFactoryService]) and to verify

@@ -9,7 +9,6 @@ import misk.feature.testing.FakeFeatureFlagsTest.JsonFeature
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import org.junit.jupiter.api.Test
-import com.google.inject.BindingAnnotation
 import jakarta.inject.Qualifier
 import kotlin.test.assertEquals
 
@@ -111,6 +110,5 @@ class FakeFeatureFlagsModuleTest {
 }
 
 @Qualifier
-@BindingAnnotation
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.FIELD)
 annotation class AnotherFeatureFlag
