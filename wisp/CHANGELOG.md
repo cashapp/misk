@@ -1,5 +1,8 @@
 Change Log
 ==========
+Version 1.4.12 *(2023-07-31)*
+----------------------------
+* Fixed certificate error. While parsing certificates, all fields except the part between BEGIN and END lines will be ignored.
 
 Version 1.4.11 *(2023-07-18)*
 ----------------------------
