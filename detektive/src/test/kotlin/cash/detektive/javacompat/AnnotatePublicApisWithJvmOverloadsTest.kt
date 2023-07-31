@@ -129,7 +129,15 @@ internal class AnnotatePublicApisWithJvmOverloadsTest(private val env: KotlinCor
       NoErrorTestCase(
         description = "Public constructor annotated with javax Inject",
         code = """
-        import javax.inject.Inject
+        import jakarta.inject.Inject
+
+        class Subject @Inject constructor(x: String = "", y: Int) {}
+        """
+      ),
+      NoErrorTestCase(
+        description = "Public constructor annotated with jakarta Inject",
+        code = """
+        import jakarta.inject.Inject
 
         class Subject @Inject constructor(x: String = "", y: Int) {}
         """
@@ -137,7 +145,7 @@ internal class AnnotatePublicApisWithJvmOverloadsTest(private val env: KotlinCor
       NoErrorTestCase(
         description = "Public constructor annotated with guice Inject",
         code = """
-        import com.google.inject.Inject
+        import jakarta.inject.Inject
 
         class Subject @Inject constructor(x: String = "", y: Int) {}
         """

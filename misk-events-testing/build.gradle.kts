@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(project(":misk-events-core"))
   api(project(":misk-inject"))
   implementation(Dependencies.guice)

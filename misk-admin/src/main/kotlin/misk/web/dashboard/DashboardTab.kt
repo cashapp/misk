@@ -2,8 +2,8 @@ package misk.web.dashboard
 
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 /**

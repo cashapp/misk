@@ -11,7 +11,7 @@ plugins {
 
 dependencies {
   testFixturesApi(Dependencies.guice)
-  testFixturesApi(Dependencies.javaxInject)
+  testFixturesApi(Dependencies.jakartaInject)
   testFixturesApi(Dependencies.wispToken)
   testFixturesApi(project(":misk"))
   testFixturesApi(project(":misk-hibernate"))
@@ -23,7 +23,7 @@ dependencies {
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.guice)
-  testImplementation(Dependencies.javaxInject)
+  testImplementation(Dependencies.jakartaInject)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinLogging)
   testImplementation(Dependencies.kotlinTest)

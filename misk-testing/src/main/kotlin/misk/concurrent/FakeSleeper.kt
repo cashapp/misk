@@ -3,8 +3,8 @@ package misk.concurrent
 import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.locks.ReentrantLock
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.concurrent.withLock
 
 /**

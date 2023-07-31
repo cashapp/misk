@@ -13,16 +13,18 @@ import misk.inject.setOfType
 import misk.inject.toKey
 import misk.resources.ResourceLoader
 import wisp.deployment.Deployment
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 /**
  * Binds database connectivity for a qualified data source. This binds the following public types:
  *
- *  * @Qualifier [javax.sql.DataSource]
- *  * @Qualifier [misk.jdbc.DataSourceConfig]
+ *  * @Qualifier
+@BindingAnnotation [javax.sql.DataSource]
+ *  * @Qualifier
+@BindingAnnotation [misk.jdbc.DataSourceConfig]
  *
  * [DataSource.getConnection] can be used to get JDBC connections to your database.
  *

@@ -11,7 +11,7 @@ import misk.inject.toKey
 import misk.time.ForceUtcTimeZoneService
 import misk.vitess.VitessScaleSafetyChecks
 import okhttp3.OkHttpClient
-import javax.inject.Provider
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 /**

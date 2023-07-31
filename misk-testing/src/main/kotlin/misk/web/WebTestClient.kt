@@ -8,7 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.reflect.KClass
 
 /**

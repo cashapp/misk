@@ -12,7 +12,7 @@ dependencies {
   api(Dependencies.guice)
   api(project(":misk-inject"))
   implementation(Dependencies.guava)
-  implementation(Dependencies.javaxInject)
+  implementation(Dependencies.jakartaInject)
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.wispLogging)
   implementation(project(":misk-core"))

@@ -11,8 +11,8 @@ import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createType

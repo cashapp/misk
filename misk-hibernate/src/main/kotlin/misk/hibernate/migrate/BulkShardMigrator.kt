@@ -21,8 +21,8 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
 import java.util.stream.Collectors.joining
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 

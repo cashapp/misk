@@ -6,8 +6,8 @@ import io.prometheus.client.exporter.HTTPServer
 import wisp.logging.getLogger
 import java.io.IOException
 import java.net.InetSocketAddress
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class PrometheusHttpService @Inject internal constructor(

@@ -4,9 +4,10 @@ import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.integration.awskms.AwsKmsClient
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient
 import com.google.inject.Provides
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
-import javax.inject.Qualifier
+import com.google.inject.BindingAnnotation
+import jakarta.inject.Qualifier
 
 /**
  * AWS specific KMS client module.
@@ -41,6 +42,7 @@ class GcpKmsClientModule @JvmOverloads constructor(private val credentialsPath: 
  * instance should be used by misk to construct a [KmsClient] and communicate with the KMS service
  */
 @Qualifier
+@BindingAnnotation
 @Target(
   AnnotationTarget.FIELD,
   AnnotationTarget.VALUE_PARAMETER
@@ -53,6 +55,7 @@ annotation class MiskAWSKMS
  * being used by misk to load encryption keys
  */
 @Qualifier
+@BindingAnnotation
 @Target(
   AnnotationTarget.FIELD,
   AnnotationTarget.VALUE_PARAMETER

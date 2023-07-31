@@ -1,6 +1,7 @@
 package misk.testing
 
 import com.google.inject.BindingAnnotation
+import jakarta.inject.Qualifier
 import com.google.inject.Provides
 import misk.inject.KAbstractModule
 import org.assertj.core.api.Assertions.assertThat

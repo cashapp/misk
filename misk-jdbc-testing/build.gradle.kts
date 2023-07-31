@@ -11,7 +11,7 @@ plugins {
 dependencies {
   api(Dependencies.datasourceProxy)
   api(Dependencies.guava)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.moshi)
   api(Dependencies.okHttp)
   api(project(":misk-inject"))

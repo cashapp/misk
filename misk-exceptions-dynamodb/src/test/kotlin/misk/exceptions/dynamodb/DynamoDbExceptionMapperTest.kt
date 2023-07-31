@@ -20,7 +20,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class DynamoDbExceptionMapperTest {

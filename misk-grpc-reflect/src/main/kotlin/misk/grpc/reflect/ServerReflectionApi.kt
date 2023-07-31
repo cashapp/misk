@@ -8,7 +8,7 @@ import grpc.reflection.v1alpha.ServerReflectionResponse
 import grpc.reflection.v1alpha.ServerReflectionServerReflectionInfoBlockingServer
 import misk.security.authz.Unauthenticated
 import misk.web.actions.WebAction
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 // https://raw.githubusercontent.com/grpc/grpc/master/src/proto/grpc/reflection/v1alpha/reflection.proto
 class ServerReflectionApi @Inject constructor(

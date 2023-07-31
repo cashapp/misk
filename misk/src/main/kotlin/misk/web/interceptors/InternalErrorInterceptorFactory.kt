@@ -6,8 +6,8 @@ import misk.web.NetworkInterceptor
 import misk.web.extractors.RequestBodyException
 import wisp.logging.getLogger
 import java.io.IOException
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 private val logger = getLogger<InternalErrorInterceptorFactory>()
 

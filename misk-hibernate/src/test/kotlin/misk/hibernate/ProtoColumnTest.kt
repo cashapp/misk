@@ -12,8 +12,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
-import javax.inject.Inject
-import javax.inject.Qualifier
+import jakarta.inject.Inject
+import com.google.inject.BindingAnnotation
+import jakarta.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -118,6 +119,7 @@ class ProtoColumnTest {
   }
 
   @Qualifier
+@BindingAnnotation
   @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class SuperHeroMoviesDb
 

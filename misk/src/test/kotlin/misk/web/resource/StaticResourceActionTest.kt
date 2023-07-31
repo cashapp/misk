@@ -23,7 +23,7 @@ import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import jakarta.inject.Inject
 import javax.inject.Named
 import kotlin.test.assertFailsWith
 

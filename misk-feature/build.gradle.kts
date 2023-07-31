@@ -14,7 +14,7 @@ dependencies {
   api(Dependencies.wispFeature)
   implementation(Dependencies.kotlinStdLibJdk8)
 
-  testFixturesApi(Dependencies.javaxInject)
+  testFixturesApi(Dependencies.jakartaInject)
   testFixturesApi(Dependencies.wispFeature)
   testFixturesApi(Dependencies.wispFeatureTesting)
   testFixturesApi(project(":misk-feature"))
@@ -26,7 +26,7 @@ dependencies {
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.guice)
-  testImplementation(Dependencies.javaxInject)
+  testImplementation(Dependencies.jakartaInject)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.moshi)

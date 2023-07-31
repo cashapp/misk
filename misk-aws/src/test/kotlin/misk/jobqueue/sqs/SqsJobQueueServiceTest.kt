@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /** This is separate from [SqsJobQueueTest] because we don't want the services started automatically. */
 @MiskTest

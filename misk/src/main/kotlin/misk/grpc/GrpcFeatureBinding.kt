@@ -12,8 +12,8 @@ import misk.web.PathPattern
 import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaTypes
 import java.lang.reflect.Type
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 internal class GrpcFeatureBinding(
   private val requestAdapter: ProtoAdapter<Any>,

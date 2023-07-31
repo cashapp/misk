@@ -1,7 +1,7 @@
 package misk.web.interceptors
 
 import com.google.inject.Inject
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import io.opentracing.Span
 import io.opentracing.SpanContext
 import io.opentracing.Tracer

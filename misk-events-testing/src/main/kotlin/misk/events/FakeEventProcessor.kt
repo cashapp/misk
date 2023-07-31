@@ -2,8 +2,8 @@ package misk.events
 
 import java.util.concurrent.BlockingDeque
 import java.util.concurrent.LinkedBlockingDeque
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * An in-memory events system for testing publishers and consumers.

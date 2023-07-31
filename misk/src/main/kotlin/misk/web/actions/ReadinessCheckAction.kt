@@ -9,9 +9,9 @@ import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
 private val logger = getLogger<ReadinessCheckAction>()
 

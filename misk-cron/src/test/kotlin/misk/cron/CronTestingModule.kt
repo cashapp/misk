@@ -1,7 +1,7 @@
 package misk.cron
 
 import com.google.inject.Provides
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
 import misk.clustering.fake.lease.FakeLeaseModule

@@ -20,7 +20,7 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
 import javax.inject.Named
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 /**
  * WebProxyAction

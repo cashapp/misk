@@ -1,7 +1,8 @@
 package misk.web.interceptors
 
 import misk.web.NetworkInterceptor
-import javax.inject.Qualifier
+import com.google.inject.BindingAnnotation
+import jakarta.inject.Qualifier
 
 /**
  * Denotes a target interceptor to handle a message payload represented by a possible list
@@ -10,6 +11,7 @@ import javax.inject.Qualifier
  * after [BeforeContentEncoding] annotated interceptors.
  */
 @Qualifier
+@BindingAnnotation
 @Retention(AnnotationRetention.RUNTIME)
 @Target(
   AnnotationTarget.CLASS,

@@ -34,7 +34,7 @@ import routeguide.RouteGuideClient
 import routeguide.RouteNote
 import wisp.logging.LogCollector
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
-import javax.inject.Inject
+import jakarta.inject.Inject
 import javax.inject.Named
 import kotlin.test.assertFailsWith
 

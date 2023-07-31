@@ -18,8 +18,8 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.nio.charset.Charset
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class ResponseContentTypeTest {

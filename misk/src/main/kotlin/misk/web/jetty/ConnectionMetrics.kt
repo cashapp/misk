@@ -2,8 +2,8 @@ package misk.web.jetty
 
 import com.google.common.annotations.VisibleForTesting
 import misk.metrics.Metrics
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 internal class ConnectionMetrics @Inject internal constructor(metrics: Metrics) {

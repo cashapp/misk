@@ -3,7 +3,7 @@ package misk.policy.opa
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import okhttp3.ResponseBody
-import javax.inject.Inject
+import jakarta.inject.Inject
 import javax.inject.Named
 
 /**

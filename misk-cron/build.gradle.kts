@@ -12,7 +12,7 @@ dependencies {
   api(Dependencies.cronUtils)
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(project(":misk"))
   api(project(":misk-inject"))
   implementation(Dependencies.kotlinLogging)

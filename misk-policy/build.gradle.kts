@@ -11,7 +11,7 @@ plugins {
 
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.moshi)
   api(Dependencies.okHttp)
   api(Dependencies.retrofit)
@@ -23,7 +23,7 @@ dependencies {
 
   testFixturesApi(Dependencies.dockerApi)
   testFixturesApi(Dependencies.dockerCore)
-  testFixturesApi(Dependencies.javaxInject)
+  testFixturesApi(Dependencies.jakartaInject)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-policy"))
   testFixturesImplementation(Dependencies.dockerTransport)

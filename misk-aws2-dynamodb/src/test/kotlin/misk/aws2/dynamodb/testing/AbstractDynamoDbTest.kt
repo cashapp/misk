@@ -11,7 +11,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import java.time.LocalDate
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 abstract class AbstractDynamoDbTest {
   @Inject lateinit var dynamoDbClient: DynamoDbClient

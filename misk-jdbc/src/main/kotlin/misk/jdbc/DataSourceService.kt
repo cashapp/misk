@@ -8,8 +8,8 @@ import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import io.prometheus.client.CollectorRegistry
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
-import javax.inject.Provider
-import javax.inject.Singleton
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 

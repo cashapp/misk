@@ -25,8 +25,9 @@ import java.util.concurrent.Phaser
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Qualifier
+import jakarta.inject.Inject
+import com.google.inject.BindingAnnotation
+import jakarta.inject.Qualifier
 
 @MiskTest(startService = true)
 internal class JettyHealthCheckTest {
@@ -136,15 +137,19 @@ internal class JettyHealthCheckTest {
   }
 
   @Qualifier
+@BindingAnnotation
   internal annotation class Requests
 
   @Qualifier
+@BindingAnnotation
   internal annotation class Waiting
 
   @Qualifier
+@BindingAnnotation
   internal annotation class HealthBlocking
 
   @Qualifier
+@BindingAnnotation
   internal annotation class Health
 
   internal class BlockingAction @Inject constructor(

@@ -13,7 +13,7 @@ dependencies {
   api(Dependencies.aws2DynamodbEnhanced)
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.tempest2TestingInternal)
   api(project(":misk-aws2-dynamodb"))
   api(project(":misk-inject"))

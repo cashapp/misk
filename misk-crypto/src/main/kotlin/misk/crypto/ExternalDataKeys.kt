@@ -1,6 +1,7 @@
 package misk.crypto
 
-import javax.inject.Qualifier
+import com.google.inject.BindingAnnotation
+import jakarta.inject.Qualifier
 import kotlin.annotation.AnnotationRetention.RUNTIME
 
 /**
@@ -12,6 +13,7 @@ import kotlin.annotation.AnnotationRetention.RUNTIME
  * keys available to the service.
  */
 @Qualifier
+@BindingAnnotation
 @Target(
   AnnotationTarget.FIELD,
   AnnotationTarget.VALUE_PARAMETER

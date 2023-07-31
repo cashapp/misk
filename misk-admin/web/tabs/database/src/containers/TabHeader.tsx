@@ -156,6 +156,7 @@ internal class YourServiceAccessModule : KAbstractModule() {
 
 /** Set access for read-only queries through Database tab */
 @Qualifier
+@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class DatabaseQueryAdminDashboardAccess
 `}

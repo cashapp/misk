@@ -5,7 +5,7 @@ import misk.inject.KAbstractModule
 import okhttp3.HttpUrl
 import java.net.InetSocketAddress
 import javax.inject.Named
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 class ProtocGrpcClientModule : KAbstractModule() {
   override fun configure() {}

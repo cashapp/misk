@@ -21,9 +21,9 @@ import org.mockito.Mockito.anyString
 import retrofit2.Response
 import retrofit2.mock.Calls
 import wisp.moshi.defaultKotlinMoshi
-import javax.inject.Inject
+import jakarta.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 @MiskTest(startService = false)
 internal class RealOpaPolicyEngineTest {

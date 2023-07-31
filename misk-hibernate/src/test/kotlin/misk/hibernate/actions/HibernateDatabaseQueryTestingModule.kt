@@ -10,7 +10,8 @@ import misk.hibernate.OperatorsMovieQuery
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceType
 import misk.security.authz.AccessAnnotationEntry
-import javax.inject.Qualifier
+import com.google.inject.BindingAnnotation
+import jakarta.inject.Qualifier
 
 class HibernateDatabaseQueryTestingModule : KAbstractModule() {
   override fun configure() {
@@ -51,9 +52,11 @@ class HibernateDatabaseQueryTestingModule : KAbstractModule() {
 }
 
 @Qualifier
+@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class DynamicMovieQueryAccess
 
 @Qualifier
+@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class OperatorsMovieQueryAccess

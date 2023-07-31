@@ -8,9 +8,9 @@ import misk.client.HttpClientFactory
 import misk.inject.KAbstractModule
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import wisp.moshi.buildMoshi
-import javax.inject.Inject
+import jakarta.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 class OpaModule @Inject constructor(
   private val config: OpaConfig

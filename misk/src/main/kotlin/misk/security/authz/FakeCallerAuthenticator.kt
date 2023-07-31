@@ -4,8 +4,9 @@ import com.google.inject.Inject
 import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.web.HttpCall
-import javax.inject.Qualifier
-import javax.inject.Singleton
+import com.google.inject.BindingAnnotation
+import jakarta.inject.Qualifier
+import jakarta.inject.Singleton
 
 /**
  * A caller authenticator that blindly trusts HTTP headers. Unsafe for production use.
@@ -46,5 +47,6 @@ class FakeCallerAuthenticator @Inject constructor(
 }
 
 @Qualifier
+@BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class DevelopmentOnly

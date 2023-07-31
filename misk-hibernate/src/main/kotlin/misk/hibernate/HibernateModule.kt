@@ -26,8 +26,8 @@ import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
 import org.hibernate.exception.ConstraintViolationException
 import java.time.Clock
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 import javax.persistence.OptimisticLockException
 import javax.sql.DataSource
 import kotlin.reflect.KClass
@@ -35,9 +35,12 @@ import kotlin.reflect.KClass
 /**
  * Binds database connectivity for a qualified data source. This binds the following public types:
  *
- *  * @Qualifier [misk.jdbc.DataSourceConfig]
- *  * @Qualifier [SessionFactory]
- *  * @Qualifier [Transacter]
+ *  * @Qualifier
+@BindingAnnotation [misk.jdbc.DataSourceConfig]
+ *  * @Qualifier
+@BindingAnnotation [SessionFactory]
+ *  * @Qualifier
+@BindingAnnotation [Transacter]
  *  * [Query.Factory] (with no qualifier)
  *
  * This also registers services to connect to the database ([SessionFactoryService]) and to verify

@@ -10,7 +10,7 @@ plugins {
 
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   implementation(Dependencies.kotlinReflect)
   implementation(Dependencies.kotlinStdLibJdk8)
 
