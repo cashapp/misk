@@ -339,7 +339,7 @@ public final class misk/web/dashboard/DashboardTabLoaderEntry {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/dashboard/DashboardTabProvider : javax/inject/Provider {
+public final class misk/web/dashboard/DashboardTabProvider : com/google/inject/Provider {
 	public field accessAnnotationEntries Ljava/util/List;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V

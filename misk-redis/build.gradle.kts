@@ -24,7 +24,6 @@ dependencies {
   implementation(Dependencies.wispDeployment)
   implementation(project(":misk-service"))
 
-  testFixturesApi(Dependencies.jakartaInject)
   testFixturesApi(Dependencies.jedis)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-redis"))

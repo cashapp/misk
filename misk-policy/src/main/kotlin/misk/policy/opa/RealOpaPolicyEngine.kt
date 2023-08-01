@@ -4,7 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import okhttp3.ResponseBody
 import jakarta.inject.Inject
-import javax.inject.Named
+import jakarta.inject.Named
 
 /**
  * Support for the Open Policy Engine (OPA).

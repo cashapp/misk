@@ -15,7 +15,6 @@ dependencies {
   implementation(Dependencies.guava)
   implementation(Dependencies.kotlinStdLibJdk8)
 
-  testFixturesApi(Dependencies.jakartaInject)
   testFixturesApi(Dependencies.prometheusClient)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-metrics"))

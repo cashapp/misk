@@ -13,6 +13,7 @@ dependencies {
   api(Dependencies.concurrencyLimitsCore)
   api(Dependencies.guava)
   api(Dependencies.guice)
+  api(Dependencies.jakartaInject)
   api(Dependencies.jacksonAnotations)
   api(Dependencies.jacksonDatabind)
   api(Dependencies.jakartaInject)

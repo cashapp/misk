@@ -237,7 +237,7 @@ class SecretColumnTest {
   }
 
   @Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class JerryGarciaDb
 
   @Entity

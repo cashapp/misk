@@ -115,7 +115,7 @@ fun uninject(target: Any) {
           if (!f.type.isPrimitive) f.set(target, null)
         }
         if (f.isAnnotationPresent(com.google.inject.Inject::class.java)) {
-          throw AssertionError("prefer @javax.inject.Inject for " + target.javaClass)
+          throw AssertionError("prefer @jakarta.inject.Inject for " + target.javaClass)
         }
       }
       c = c.superclass

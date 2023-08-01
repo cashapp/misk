@@ -47,12 +47,12 @@ internal class ExecutorServiceModuleTest {
   }
 
   @Qualifier
-@Target(AnnotationTarget.FIELD)
+  @Target(AnnotationTarget.FIELD)
   @Retention(AnnotationRetention.RUNTIME)
   annotation class Fixed
 
   @Qualifier
-@Target(AnnotationTarget.FIELD)
+  @Target(AnnotationTarget.FIELD)
   @Retention(AnnotationRetention.RUNTIME)
   annotation class Unbound
 }

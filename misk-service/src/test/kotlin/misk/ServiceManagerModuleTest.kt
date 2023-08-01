@@ -23,8 +23,14 @@ internal class ServiceManagerModuleTest {
     override fun shutDown() {}
   }
 
-  @javax.inject.Singleton
+  @jakarta.inject.Singleton
   class SingletonService2 : AbstractIdleService() {
+    override fun startUp() {}
+    override fun shutDown() {}
+  }
+
+  @javax.inject.Singleton
+  class SingletonService3 : AbstractIdleService() {
     override fun startUp() {}
     override fun shutDown() {}
   }
@@ -80,6 +86,7 @@ internal class ServiceManagerModuleTest {
               // that was bound.
               multibind<Service>().to<SingletonService1>()
               multibind<Service>().to<SingletonService2>()
+              multibind<Service>().to<SingletonService3>()
             }
           }
         )
@@ -103,6 +110,7 @@ internal class ServiceManagerModuleTest {
               // Should be recognized as singletons
               install(ServiceModule<SingletonService1>())
               install(ServiceModule<SingletonService2>())
+              install(ServiceModule<SingletonService3>())
               install(ServiceModule<ProvidesMethodService>())
               install(ServiceModule<InstanceService>())
               bind(keyOf<InstanceService>()).toInstance(

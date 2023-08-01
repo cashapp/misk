@@ -58,7 +58,7 @@ class PrimitiveColumnsTest {
   }
 
   @Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class PrimitivesDb
 
   data class RootConfig(val data_source: DataSourceConfig) : Config

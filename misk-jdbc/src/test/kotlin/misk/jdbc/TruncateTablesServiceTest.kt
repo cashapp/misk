@@ -112,6 +112,6 @@ internal class TruncateTablesServiceTest {
   data class TestConfig(val data_source: DataSourceConfig) : Config
 
   @Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class TestDatasource
 }

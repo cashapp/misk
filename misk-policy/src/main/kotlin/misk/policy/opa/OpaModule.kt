@@ -9,7 +9,7 @@ import misk.inject.KAbstractModule
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import wisp.moshi.buildMoshi
 import jakarta.inject.Inject
-import javax.inject.Named
+import jakarta.inject.Named
 import jakarta.inject.Singleton
 
 class OpaModule @Inject constructor(

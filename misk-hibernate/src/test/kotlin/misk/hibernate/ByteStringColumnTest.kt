@@ -111,7 +111,7 @@ class ByteStringColumnTest {
   }
 
   @Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class ByteStringColumn
 
   data class RootConfig(val data_source: DataSourceConfig) : Config

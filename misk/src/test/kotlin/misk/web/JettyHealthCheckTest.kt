@@ -136,16 +136,16 @@ internal class JettyHealthCheckTest {
   }
 
   @Qualifier
-internal annotation class Requests
+  internal annotation class Requests
 
   @Qualifier
-internal annotation class Waiting
+  internal annotation class Waiting
 
   @Qualifier
-internal annotation class HealthBlocking
+  internal annotation class HealthBlocking
 
   @Qualifier
-internal annotation class Health
+  internal annotation class Health
 
   internal class BlockingAction @Inject constructor(
     @Requests private val phaser: Phaser

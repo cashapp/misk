@@ -89,10 +89,10 @@ public final class misk/jdbc/TestDatabasePoolKt {
 }
 
 public final class misk/jdbc/TruncateTablesService : com/google/common/util/concurrent/AbstractIdleService {
-	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;)V
-	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;)V
-	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Ljavax/inject/Provider;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/vitess/VitessScaleSafetyChecks : misk/jdbc/DataSourceDecorator {

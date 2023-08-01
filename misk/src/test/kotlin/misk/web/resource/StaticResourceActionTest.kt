@@ -24,7 +24,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
-import javax.inject.Named
+import jakarta.inject.Named
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

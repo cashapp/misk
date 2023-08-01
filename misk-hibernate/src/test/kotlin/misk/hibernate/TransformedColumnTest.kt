@@ -453,7 +453,7 @@ class TransformedColumnTest {
   }
 
   @Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class TransformedColumnTestDb
 
   data class TransformedColumnTestConfig(val data_source: DataSourceConfig) : Config

@@ -70,7 +70,7 @@ class ExternalColumnTest {
   }
 
   @Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class ExternalColumnDb
 
   data class RootConfig(val data_source: DataSourceConfig) : Config

@@ -22,7 +22,7 @@ import retrofit2.Response
 import retrofit2.mock.Calls
 import wisp.moshi.defaultKotlinMoshi
 import jakarta.inject.Inject
-import javax.inject.Named
+import jakarta.inject.Named
 import jakarta.inject.Singleton
 
 @MiskTest(startService = false)

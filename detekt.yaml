@@ -27,6 +27,8 @@ style:
     imports:
       - value: 'javax.inject.Inject'
         reason: 'To be Guice 7+ compliant, use `jakarta.inject.Inject`'
+      - value: 'javax.inject.Named'
+        reason: 'To be Guice 7+ compliant, use `jakarta.inject.Named`'
       - value: 'javax.inject.Qualifier'
         reason: 'To be Guice 7+ compliant, use `jakarta.inject.Qualifier`'
       - value: 'javax.inject.Singleton'

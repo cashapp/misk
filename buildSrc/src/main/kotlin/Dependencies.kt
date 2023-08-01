@@ -73,6 +73,7 @@ object Dependencies {
   val jacksonKotlin = "com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2"
   val javaxAnnotation = "javax.annotation:javax.annotation-api:1.3.2"
   val jakartaInject = "jakarta.inject:jakarta.inject-api:2.0.1"
+  @Deprecated("Use jakartaInject", replaceWith = ReplaceWith("jakartaInject"))
   val javaxInject = "javax.inject:javax.inject:1"
   val javaxPersistenceApi = "javax.persistence:javax.persistence-api:2.2"
   val jedis = "redis.clients:jedis:4.1.1"

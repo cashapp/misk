@@ -153,7 +153,7 @@ class BoxedStringColumnTest {
   }
 
   @Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class TokenColumn
 
   data class RootConfig(val data_source: DataSourceConfig) : Config
