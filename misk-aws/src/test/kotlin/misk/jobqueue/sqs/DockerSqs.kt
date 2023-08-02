@@ -6,6 +6,7 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClient
+import com.amazonaws.services.sqs.model.AmazonSQSException
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
@@ -22,7 +23,7 @@ import wisp.logging.getLogger
 internal object DockerSqs : ExternalDependency {
 
   private val log = getLogger<DockerSqs>()
-  private const val clientPort = 4100
+  private const val clientPort = 9324
   private const val hostInternalTarget = "host.docker.internal"
 
   override fun beforeEach() {
@@ -43,7 +44,7 @@ internal object DockerSqs : ExternalDependency {
       // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
       // the same external port as we do for the internal port
       val exposedClientPort = ExposedPort.tcp(clientPort)
-      withImage("pafortin/goaws")
+      withImage("softwaremill/elasticmq:1.4.2")
         .withName("sqs")
         .withCmd(listOf("goaws"))
         .withExposedPorts(exposedClientPort)
