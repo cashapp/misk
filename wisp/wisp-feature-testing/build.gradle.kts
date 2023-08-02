@@ -10,14 +10,14 @@ sourceSets {
 
 dependencies {
     api(libs.moshiCore)
-    api(project(":wisp-config"))
-    api(project(":wisp-feature"))
-    implementation(project(":wisp-moshi"))
+    api(project(":wisp:wisp-config"))
+    api(project(":wisp:wisp-feature"))
+    implementation(project(":wisp:wisp-moshi"))
 
     testImplementation(libs.assertj)
     testImplementation(libs.hopliteCore)
     testImplementation(libs.junitApi)
     testImplementation(libs.kotestAssertionsShared)
     testImplementation(libs.kotestCommon)
-    testImplementation(project(":wisp-resource-loader"))
+    testImplementation(project(":wisp:wisp-resource-loader"))
 }

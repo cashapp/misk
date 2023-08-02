@@ -10,9 +10,9 @@ sourceSets {
 
 dependencies {
     api(libs.okHttp)
-    api(project(":wisp-ssl"))
+    api(project(":wisp:wisp-ssl"))
     implementation(libs.jnrUnixsocket)
-    implementation(project(":wisp-resource-loader"))
+    implementation(project(":wisp:wisp-resource-loader"))
 
     testImplementation(libs.assertj)
     testImplementation(libs.junitApi)

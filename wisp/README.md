@@ -58,7 +58,3 @@ Modules that are named ending in "Testing" are for test code and should never be
 ## Changelog
 
 See a list of changes in each release [here](CHANGELOG.md)
-
-## Contributing
-
-For details on contributing, see [here](CONTRIBUTING.md)

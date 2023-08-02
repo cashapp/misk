@@ -4,7 +4,7 @@ plugins {
 
 
 dependencies {
-    api(project(":wisp-token"))
+    api(project(":wisp:wisp-token"))
 
     testImplementation(libs.kotestAssertionsShared)
     testImplementation(libs.kotestCommon)

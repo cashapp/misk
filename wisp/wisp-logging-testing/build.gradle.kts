@@ -11,5 +11,5 @@ dependencies {
 
     testImplementation(libs.junitApi)
     testImplementation(libs.kotlinTest)
-    testImplementation(project(":wisp-logging"))
+    testImplementation(project(":wisp:wisp-logging"))
 }

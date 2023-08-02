@@ -22,7 +22,7 @@ dependencies {
   api(project(":misk-inject"))
   implementation(Dependencies.awsCore)
   implementation(Dependencies.awsRegions)
-  implementation(Dependencies.wispLogging)
+  implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
 
