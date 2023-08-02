@@ -1,28 +1,21 @@
 plugins {
   `java-platform`
-  alias(libs.plugins.mavenPublishGradlePlugin)
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
   constraints {
     // TODO - check constraints...
     project.rootProject.subprojects.forEach { subproject ->
-      if (subproject.name != "wisp-bom") {
+      if (subproject.name != "wisp-bom" && subproject.name.startsWith("wisp-")) {
         api(subproject)
       }
     }
   }
 }
 
-// This requires a separate publish block because it's a javaPlatform, not a source library.
-plugins.withId("com.vanniktech.maven.publish.base") {
-  val publishingExtension = extensions.getByType(PublishingExtension::class.java)
-  configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
-    pomFromGradleProperties()
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT, true)
-    signAllPublications()
-  }
-  publishingExtension.publications.create<MavenPublication>("maven") {
-    from(components["javaPlatform"])
+extensions.configure<PublishingExtension> {
+  publications.create("maven", MavenPublication::class) {
+    from(project.components.getByName("javaPlatform"))
   }
 }

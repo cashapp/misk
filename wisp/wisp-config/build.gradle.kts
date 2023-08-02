@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(libs.hopliteCore)
-    api(project(":wisp-resource-loader"))
+    api(project(":wisp:wisp-resource-loader"))
     implementation(libs.hopliteJson)
     implementation(libs.hopliteToml)
     implementation(libs.hopliteYaml)

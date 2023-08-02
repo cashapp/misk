@@ -5,7 +5,7 @@ plugins {
 dependencies {
     implementation(libs.loggingApi)
     implementation(libs.okio)
-    implementation(project(":wisp-logging"))
+    implementation(project(":wisp:wisp-logging"))
     runtimeOnly(libs.bouncycastle)
 
     testImplementation(libs.assertj)

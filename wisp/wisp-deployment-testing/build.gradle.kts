@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    api(project(":wisp-deployment"))
+    api(project(":wisp:wisp-deployment"))
 }

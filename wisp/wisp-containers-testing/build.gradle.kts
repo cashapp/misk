@@ -8,7 +8,7 @@ dependencies {
     implementation(libs.dockerCore)
     implementation(libs.dockerJavaTransport)
     implementation(libs.dockerTransport)
-    implementation(project(":wisp-logging"))
+    implementation(project(":wisp:wisp-logging"))
     runtimeOnly(libs.logbackClassic)
 
     testImplementation(libs.junitApi)

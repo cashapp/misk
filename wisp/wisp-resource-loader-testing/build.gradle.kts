@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":wisp-resource-loader"))
+    api(project(":wisp:wisp-resource-loader"))
     implementation(libs.okio)
     runtimeOnly(libs.bouncycastle)
 

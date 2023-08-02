@@ -11,8 +11,8 @@ plugins {
 dependencies {
   api(Dependencies.guava)
   api(Dependencies.javaxInject)
-  api(Dependencies.wispFeature)
-  api(Dependencies.wispFeatureTesting)
+  api(project(":wisp:wisp-feature"))
+  api(project(":wisp:wisp-feature-testing"))
   api(project(":misk-feature"))
   api(project(":misk-inject"))
   implementation(Dependencies.guice)
