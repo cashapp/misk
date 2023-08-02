@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    testImplementation(libs.assertj)
-    testImplementation(libs.junitApi)
+    testImplementation(Dependencies.assertj)
+    testImplementation(Dependencies.junitApi)
 }

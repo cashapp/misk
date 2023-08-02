@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(libs.moshiCore)
-    implementation(libs.loggingApi)
+    api(Dependencies.moshi)
+    implementation(Dependencies.kotlinLogging)
 }
