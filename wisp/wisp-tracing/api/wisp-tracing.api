@@ -51,3 +51,10 @@ public final class wisp/tracing/TracingKt {
 	public static synthetic fun spanned$default (Lio/opentracing/Tracer;Ljava/lang/String;ZZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
+public class wisp/tracing/testing/ConcurrentMockTracer : io/opentracing/mock/MockTracer {
+	public fun <init> ()V
+	protected fun onSpanFinished (Lio/opentracing/mock/MockSpan;)V
+	public final fun take ()Lio/opentracing/mock/MockSpan;
+	public final fun take (Ljava/lang/String;)Lio/opentracing/mock/MockSpan;
+}
+
