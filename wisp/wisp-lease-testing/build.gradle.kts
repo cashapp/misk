@@ -5,6 +5,6 @@ plugins {
 dependencies {
     api(project(":wisp:wisp-lease"))
 
-    testImplementation(libs.assertj)
-    testImplementation(libs.junitApi)
+    testImplementation(Dependencies.assertj)
+    testImplementation(Dependencies.junitApi)
 }

@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api(project(":wisp:wisp-deployment"))
 
-    testImplementation(libs.junitApi)
-    testImplementation(libs.kotlinTest)
-    testImplementation(libs.mockitoCore)
+    testImplementation(Dependencies.junitApi)
+    testImplementation(Dependencies.kotlinTest)
+    testImplementation(Dependencies.mockitoCore)
 }

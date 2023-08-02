@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(libs.moshiCore)
-    implementation(libs.moshiKotlin)
+    api(Dependencies.moshi)
+    implementation(Dependencies.moshiKotlin)
 }

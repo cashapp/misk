@@ -4,9 +4,9 @@ plugins {
 
 dependencies {
     api(project(":wisp:wisp-deployment"))
-    implementation(platform(libs.aws2Bom))
+    implementation(platform(Dependencies.aws2Bom))
 
-    testImplementation(libs.junitApi)
-    testImplementation(libs.kotlinTest)
+    testImplementation(Dependencies.junitApi)
+    testImplementation(Dependencies.kotlinTest)
     testImplementation(project(":wisp:wisp-deployment-testing"))
 }

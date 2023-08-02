@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    testImplementation(libs.junitApi)
-    testImplementation(libs.kotlinTest)
+    testImplementation(Dependencies.junitApi)
+    testImplementation(Dependencies.kotlinTest)
     testImplementation(project(":wisp:wisp-deployment-testing"))
 }

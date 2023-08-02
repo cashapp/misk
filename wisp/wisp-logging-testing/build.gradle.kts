@@ -3,13 +3,13 @@ plugins {
 }
 
 dependencies {
-    api(libs.logbackClassic)
-    api(libs.loggingApi)
-    api(libs.assertj)
-    implementation(libs.logbackCore)
-    implementation(libs.slf4jApi)
+    api(Dependencies.logbackClassic)
+    api(Dependencies.kotlinLogging)
+    api(Dependencies.assertj)
+    implementation(Dependencies.logbackCore)
+    implementation(Dependencies.slf4jApi)
 
-    testImplementation(libs.junitApi)
-    testImplementation(libs.kotlinTest)
+    testImplementation(Dependencies.junitApi)
+    testImplementation(Dependencies.kotlinTest)
     testImplementation(project(":wisp:wisp-logging"))
 }
