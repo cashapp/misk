@@ -94,7 +94,7 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.logbackClassic)
   testImplementation(Dependencies.protoGoogleCommon)
-  testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(project(":wisp:wisp-logging-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

@@ -12,7 +12,7 @@ application {
 
 dependencies {
   implementation(Dependencies.javaxInject)
-  implementation(Dependencies.wispConfig)
+  implementation(project(":wisp:wisp-config"))
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-clustering"))
@@ -23,7 +23,7 @@ dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.jedis)
   implementation(Dependencies.okHttp)
-  implementation(Dependencies.wispDeployment)
+  implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-config"))
   implementation(project(":misk-redis-testing"))
 

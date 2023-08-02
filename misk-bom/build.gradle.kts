@@ -6,7 +6,7 @@ plugins {
 dependencies {
   constraints {
     project.rootProject.subprojects.forEach { subproject ->
-      if (subproject.name != "misk-bom") {
+      if (subproject.name != "misk-bom" && !subproject.name.startsWith("wisp")) {
         api(subproject)
       }
     }
