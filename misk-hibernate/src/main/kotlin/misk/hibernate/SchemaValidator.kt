@@ -351,7 +351,7 @@ internal data class Message(
  */
 internal fun String.toSnakeCase(): String =
   if (contains(Regex("([_\\-])"))) {
-    replace("-", "_").toLowerCase()
+    replace("-", "_").lowercase()
   } else {
     // Lets guess the identifier is in CamelCase.
     CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this)

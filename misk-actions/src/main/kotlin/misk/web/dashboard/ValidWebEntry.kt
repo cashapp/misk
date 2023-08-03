@@ -9,31 +9,8 @@ open class ValidWebEntry @JvmOverloads constructor(
   val valid_url_path_prefix: String = "/"
 ) {
   init {
-    // internal link url_path_prefix must start and end with '/'
-    require(valid_url_path_prefix.startsWith("http") || valid_url_path_prefix.matches(Regex("(/[^/]+)*/"))) {
-      "Invalid or unexpected url path prefix: '$valid_url_path_prefix'. " +
-        "Must start with 'http' OR start and end with '/'."
-    }
-
-    // url_path_prefix must not be in the blocked list of prefixes to prevent forwarding conflicts with webactions
-    require(BlockedUrlPathPrefixes.all { !valid_url_path_prefix.startsWith(it) }) {
-      "Url path prefix begins with a blocked prefix: ${
-        BlockedUrlPathPrefixes.filter {
-          valid_url_path_prefix.startsWith(
-            it
-          )
-        }
-      }."
-    }
-
-    // slug must must only contain characters in ranges [a-z], [0-9] or '-'
-    require(
-      CharMatcher.inRange('a', 'z').or(CharMatcher.inRange('0', '9')).or(
-        CharMatcher.`is`('-')
-      ).matchesAllOf(valid_slug)
-    ) {
-      "Slug contains invalid characters. Can only contain characters in ranges [a-z], [0-9] or '-'."
-    }
+    valid_url_path_prefix.requireValidUrlPathPrefix()
+    valid_slug.requireValidSlug()
   }
 
   companion object {
@@ -44,8 +21,37 @@ open class ValidWebEntry @JvmOverloads constructor(
 
     /** Generate a valid slug from a String */
     fun String.slugify() = this
-      .toLowerCase()
+      .lowercase()
+      .replace(" ", "-")
       .replace(".", "-")
       .replace("_", "-")
+      .replace("/", "")
+      .replace(":", "")
+
+    /** Slug must must only contain characters in ranges [a-z], [0-9] or '-' */
+    private fun String.requireValidSlug() = apply {
+      require(
+        CharMatcher.inRange('a', 'z').or(CharMatcher.inRange('0', '9')).or(CharMatcher.`is`('-'))
+          .matchesAllOf(this)
+      ) {
+        "[slug=$this] contains invalid characters. Can only contain characters in ranges [a-z], [0-9] or '-'."
+      }
+    }
+
+    /** Valid URL path prefix must have correct form and not use any blocked prefixes. */
+    private fun String.requireValidUrlPathPrefix() = apply {
+      // internal link url_path_prefix must start and end with '/'
+      require(this.startsWith("http") || this.matches(Regex("(/[^/]+)*/"))) {
+        "Invalid or unexpected [urlPathPrefix=$this]. " +
+          "Must start with 'http' OR start and end with '/'."
+      }
+
+      // url_path_prefix must not be in the blocked list of prefixes to prevent forwarding conflicts with webactions
+      require(BlockedUrlPathPrefixes.all { !this.startsWith(it) }) {
+        "[urlPathPrefix=$this] begins with a blocked prefix: ${
+          BlockedUrlPathPrefixes.filter { this.startsWith(it) }
+        }."
+      }
+    }
   }
 }

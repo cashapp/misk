@@ -7,7 +7,6 @@ import misk.MiskCaller
 import misk.scope.ActionScoped
 import okhttp3.Headers
 import wisp.logging.getLogger
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.full.findAnnotation
@@ -96,7 +95,7 @@ internal data class HeadersCapture(
   constructor(okHttpHeaders: Headers) : this(
     okHttpHeaders.toMultimap()
       .filter { (key, _) ->
-        key.lowercase(Locale.getDefault()) in listOf(
+        key.lowercase() in listOf(
           "accept",
           "accept-encoding",
           "connection",
