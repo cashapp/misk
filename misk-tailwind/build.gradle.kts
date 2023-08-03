@@ -10,7 +10,7 @@ plugins {
 
 dependencies {
   api(Dependencies.kotlinxHtml)
-  api(Dependencies.wispDeployment)
+  api(project(":wisp:wisp-deployment"))
   implementation(project(":misk-hotwire"))
 }
 

@@ -4,7 +4,8 @@
 build
 .idea
 *.iml
-
+*.swp
+*.hprof
 .DS_Store
 .git
 .hermit
@@ -16,7 +17,6 @@ npm-debug.log*
 coverage
 node_modules
 .npm
-build
 lib
 dist
 .hash

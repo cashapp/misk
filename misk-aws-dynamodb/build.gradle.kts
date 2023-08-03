@@ -20,7 +20,7 @@ dependencies {
   api(project(":misk-core"))
   api(project(":misk-inject"))
   implementation(Dependencies.kotlinReflect)
-  implementation(Dependencies.wispLogging)
+  implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
 

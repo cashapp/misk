@@ -11,7 +11,7 @@ plugins {
 dependencies {
   api(Dependencies.guava)
   api(Dependencies.jakartaInject)
-  api(Dependencies.wispLease)
+  api(project(":wisp:wisp-lease"))
 }
 
 configure<MavenPublishBaseExtension> {

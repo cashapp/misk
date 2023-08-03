@@ -211,7 +211,7 @@ internal class RequestLoggingInterceptorTest {
         "response=echo: hello responseHeaders={}"
     )
     assertThat(messages[0]).doesNotContain(headerToNotLog)
-    assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
+    assertThat(messages[0]).doesNotContain(headerToNotLog.lowercase())
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
   }
 
@@ -233,7 +233,7 @@ internal class RequestLoggingInterceptorTest {
         "content-length=[4], content-type=[application/json;charset=UTF-8]}"
     )
     assertThat(messages[0]).doesNotContain(headerToNotLog)
-    assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
+    assertThat(messages[0]).doesNotContain(headerToNotLog.lowercase())
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
   }
 

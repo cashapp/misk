@@ -101,7 +101,7 @@ object MiskConfig {
     val jsonNode = flattenYamlMap(configYamls, overrideValues)
     val configEnvironmentName = deployment.mapToEnvironmentName()
 
-    val configFile = "$appName-${configEnvironmentName.toLowerCase(Locale.US)}.yaml"
+    val configFile = "$appName-${configEnvironmentName.lowercase(Locale.US)}.yaml"
     return readFlattenedYaml(
       mapper,
       jsonNode,
