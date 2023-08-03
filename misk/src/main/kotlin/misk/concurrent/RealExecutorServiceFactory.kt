@@ -15,7 +15,7 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 /**
  * This is an implementation of ExecutorServiceFactory suitable for production use. It shuts down

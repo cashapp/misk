@@ -20,7 +20,7 @@ import misk.web.dashboard.MiskWebTheme
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 class ExemplarDashboardModule : KAbstractModule() {
   override fun configure() {

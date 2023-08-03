@@ -7,7 +7,7 @@ import org.jooq.impl.DSL.now
 import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Duration
-import javax.inject.Provider
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 class JooqHealthCheck(

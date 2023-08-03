@@ -5,8 +5,8 @@ import app.cash.tempest2.testing.TestTable
 import app.cash.tempest2.testing.internal.TestDynamoDbService
 import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.ServiceModule
 import misk.aws2.dynamodb.DynamoDbHealthCheck
 import misk.aws2.dynamodb.DynamoDbService

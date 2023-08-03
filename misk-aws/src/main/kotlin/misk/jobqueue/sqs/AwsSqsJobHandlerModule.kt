@@ -9,8 +9,8 @@ import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 
 /**

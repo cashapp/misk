@@ -9,8 +9,8 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers.Companion.toHeaders
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class DownloadAFileWebAction @Inject constructor() : WebAction {

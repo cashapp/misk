@@ -14,7 +14,7 @@ dependencies {
   api(Dependencies.awsSqs)
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(project(":wisp:wisp-aws-environment"))
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-lease"))

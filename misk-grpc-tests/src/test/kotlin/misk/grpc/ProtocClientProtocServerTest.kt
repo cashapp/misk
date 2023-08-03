@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test
 import routeguide.RouteGuideGrpc
 import routeguide.RouteGuideProto.Feature
 import routeguide.RouteGuideProto.Point
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 
 @MiskTest(startService = true)
 class ProtocClientProtocServerTest {

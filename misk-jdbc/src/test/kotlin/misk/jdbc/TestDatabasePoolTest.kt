@@ -1,7 +1,7 @@
 package misk.jdbc
 
 import com.google.inject.Module
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.assertThrows
 import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = false)
 class TestDatabasePoolTest {

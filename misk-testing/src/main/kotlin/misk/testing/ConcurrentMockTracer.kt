@@ -4,8 +4,8 @@ import io.opentracing.mock.MockSpan
 import io.opentracing.mock.MockTracer
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Extends [MockTracer] for use in concurrent environments, such as a web server and test client.

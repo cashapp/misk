@@ -18,7 +18,7 @@ import wisp.deployment.TESTING
 import wisp.logging.LogCollector
 import java.io.File
 import java.time.Duration
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest

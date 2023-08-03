@@ -15,8 +15,8 @@ import wisp.feature.IntFeatureFlag
 import wisp.feature.JsonFeatureFlag
 import wisp.feature.StringFeatureFlag
 import java.util.concurrent.Executor
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.

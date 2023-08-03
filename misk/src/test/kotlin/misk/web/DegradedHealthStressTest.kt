@@ -28,7 +28,7 @@ import java.time.Duration
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class DegradedHealthStressTest {

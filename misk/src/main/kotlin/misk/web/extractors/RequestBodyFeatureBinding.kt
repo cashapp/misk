@@ -11,8 +11,8 @@ import misk.web.marshal.GenericUnmarshallers
 import misk.web.marshal.Unmarshaller
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.IOException
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KParameter
 
 /** Binds parameters annotated [RequestBody] to the unmarshalled request body. */

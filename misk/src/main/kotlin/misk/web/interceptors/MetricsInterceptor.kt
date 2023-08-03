@@ -10,8 +10,8 @@ import misk.scope.ActionScoped
 import misk.time.timed
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 internal class MetricsInterceptor internal constructor(
   private val actionName: String,

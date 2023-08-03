@@ -4,10 +4,10 @@ import com.google.cloud.datastore.Datastore
 import com.google.cloud.datastore.testing.LocalDatastoreHelper
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provides
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /** Installs a version of the [Datastore] that works off an in-memory local store */
 @Deprecated("Replace the dependency on misk-gcp-testing with testFixtures(misk-gcp)")

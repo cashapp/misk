@@ -23,7 +23,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
-import javax.inject.Provider
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation

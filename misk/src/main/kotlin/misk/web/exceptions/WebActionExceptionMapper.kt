@@ -7,7 +7,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
 import okhttp3.Headers.Companion.toHeaders
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Maps [WebActionException]s into the appropriate status code. [WebActionException]s' response
