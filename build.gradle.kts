@@ -267,12 +267,6 @@ allprojects {
       var repo_url = "https://github.com/cashapp/misk/"
       var scm_connection = "scm:git:git://github.com/cashapp/misk.git"
       var scm_dev_connection = "scm:git:ssh://git@github.com/cashapp/misk.git"
-      //Use old wisp settings for now until we get access to Sonatype
-      if (project.path.startsWith(":wisp")) {
-        repo_url = "https://github.com/cashapp/wisp/"
-        scm_connection = "scm:git:git://github.com/cashapp/wisp.git"
-        scm_dev_connection = "scm:git:ssh://git@github.com/cashapp/wisp.git"
-      }
       publishToMavenCentral(sonatypeHost, automaticRelease = true)
       signAllPublications()
       pom {
