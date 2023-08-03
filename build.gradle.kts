@@ -263,7 +263,11 @@ subprojects {
 allprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
     configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+      var sonatypeHost = SonatypeHost.S01
+      if (project.path.startsWith(":wisp")) {
+        sonatypeHost = SonatypeHost.DEFAULT
+      } 
+      publishToMavenCentral(sonatypeHost, automaticRelease = true)
       signAllPublications()
       pom {
         description.set("Open source application container in Kotlin")
