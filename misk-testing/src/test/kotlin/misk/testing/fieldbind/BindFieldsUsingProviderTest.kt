@@ -4,8 +4,8 @@ import com.google.inject.testing.fieldbinder.Bind
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 
 @MiskTest
 class BindFieldsUsingProviderTest {

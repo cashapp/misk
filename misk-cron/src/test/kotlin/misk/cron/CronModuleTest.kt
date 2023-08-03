@@ -16,8 +16,8 @@ import wisp.logging.LogCollector
 import wisp.logging.getLogger
 import java.lang.Thread.sleep
 import java.time.ZoneId
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class CronModuleTest {

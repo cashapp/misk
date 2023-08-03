@@ -7,8 +7,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
 import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import misk.ServiceModule
 import misk.dynamodb.DynamoDbHealthCheck

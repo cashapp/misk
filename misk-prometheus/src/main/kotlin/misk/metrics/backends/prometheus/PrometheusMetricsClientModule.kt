@@ -7,8 +7,8 @@ import misk.metrics.backends.prometheus.v2.PrometheusMetricsClientModule as Prom
 import misk.metrics.HistogramRegistry
 import misk.metrics.Metrics
 import misk.prometheus.PrometheusHistogramRegistry
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 
 /**
  * Binds a [Metrics] implementation whose metrics don't write to a Prometheus infrastructure. For

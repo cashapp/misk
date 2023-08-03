@@ -28,7 +28,7 @@ import wisp.tracing.traceWithSpan
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.HttpURLConnection
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class TracingInterceptorTest {

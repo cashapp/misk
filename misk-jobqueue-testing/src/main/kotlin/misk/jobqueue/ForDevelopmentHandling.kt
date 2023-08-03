@@ -1,6 +1,6 @@
 package misk.jobqueue
 
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 @Deprecated("Replace the dependency on misk-jobqueue-testing with testFixtures(misk-jobqueue)")
 @Qualifier

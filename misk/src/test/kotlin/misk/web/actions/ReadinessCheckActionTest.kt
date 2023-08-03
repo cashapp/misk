@@ -11,7 +11,7 @@ import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest
 class ReadinessCheckActionTest {

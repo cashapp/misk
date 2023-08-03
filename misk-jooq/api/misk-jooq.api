@@ -8,7 +8,7 @@ public final class misk/jooq/JooqExtensionsKt {
 
 public final class misk/jooq/JooqHealthCheck : misk/healthchecks/HealthCheck {
 	public static final field Companion Lmisk/jooq/JooqHealthCheck$Companion;
-	public fun <init> (Lkotlin/reflect/KClass;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljava/time/Clock;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lcom/google/inject/Provider;Lcom/google/inject/Provider;Ljava/time/Clock;)V
 	public fun status ()Lmisk/healthchecks/HealthStatus;
 }
 

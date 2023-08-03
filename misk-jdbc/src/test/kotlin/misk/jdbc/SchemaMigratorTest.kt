@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.SQLException
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = false)

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.deployment.TESTING
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest
 class SecretConfigTest {

@@ -17,8 +17,8 @@ import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.HtmlLayout
 import misk.web.mediatype.MediaTypes
 import wisp.deployment.Deployment
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Example page from Tailwind UI

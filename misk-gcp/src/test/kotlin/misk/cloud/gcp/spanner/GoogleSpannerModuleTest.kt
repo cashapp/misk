@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import wisp.containers.ContainerUtil
 import wisp.deployment.TESTING
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class GoogleSpannerModuleTest {

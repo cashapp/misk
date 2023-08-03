@@ -13,7 +13,7 @@ import okhttp3.EventListener
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.lang.reflect.Proxy
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 

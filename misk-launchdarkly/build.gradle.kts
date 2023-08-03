@@ -16,7 +16,7 @@ dependencies {
   api(project(":misk-config"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
-  implementation(Dependencies.javaxInject)
+  implementation(Dependencies.jakartaInject)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.micrometerCore)
   implementation(Dependencies.moshi)

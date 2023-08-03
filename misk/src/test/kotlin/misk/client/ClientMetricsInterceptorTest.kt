@@ -30,8 +30,8 @@ import retrofit2.http.POST
 import java.net.SocketTimeoutException
 import java.net.URL
 import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @MiskTest
 internal class ClientMetricsInterceptorTest {

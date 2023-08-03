@@ -11,7 +11,7 @@ plugins {
 
 dependencies {
   api(Dependencies.guava)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.jedis)
   api(project(":wisp:wisp-config"))
   api(project(":misk-config"))
@@ -24,7 +24,6 @@ dependencies {
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-service"))
 
-  testFixturesApi(Dependencies.javaxInject)
   testFixturesApi(Dependencies.jedis)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-redis"))

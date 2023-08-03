@@ -27,8 +27,8 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

@@ -27,9 +27,9 @@ import org.junit.jupiter.api.assertThrows
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.time.Instant
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Qualifier
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -239,7 +239,7 @@ internal class SchemaValidatorTest {
   data class RootConfig(val data_source: DataSourceConfig) : Config
 
   @Qualifier
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class ValidationDb
 
   @Entity

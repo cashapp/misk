@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.Service
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import java.util.Collections
-import javax.inject.Provider
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 internal class SchemaValidatorService internal constructor(

@@ -10,7 +10,7 @@ plugins {
 
 dependencies {
   api(Dependencies.guava)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.kotlinLogging)
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-lease-testing"))

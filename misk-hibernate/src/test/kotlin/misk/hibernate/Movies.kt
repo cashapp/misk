@@ -1,6 +1,6 @@
 package misk.hibernate
 
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 @Qualifier
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)

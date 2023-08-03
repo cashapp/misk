@@ -5,8 +5,8 @@ import okio.ByteString
 import wisp.resources.ClasspathResourceLoaderBackend
 import wisp.resources.FilesystemLoaderBackend
 import java.nio.file.Path
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import wisp.resources.ResourceLoader as WispResourceLoader
 
 /**

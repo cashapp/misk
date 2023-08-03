@@ -11,7 +11,7 @@ import org.bouncycastle.openpgp.PGPPublicKeyRingCollection
 import org.bouncycastle.openpgp.PGPUtil
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator
 import java.io.BufferedInputStream
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class PgpEncrypterProvider(
   private val alias: KeyAlias

@@ -34,8 +34,8 @@ import wisp.logging.LogCollector
 import java.time.Clock
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class ConcurrencyLimitsInterceptorTest {

@@ -5,7 +5,7 @@ import misk.feature.DynamicConfig
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import java.util.concurrent.Executor
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 @Singleton
 class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : DynamicConfig {

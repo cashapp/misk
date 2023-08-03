@@ -1,6 +1,6 @@
 package misk.testing.fieldbind
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 interface CountService {
   fun getAndInc(): Int

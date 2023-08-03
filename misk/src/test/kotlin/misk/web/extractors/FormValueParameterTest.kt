@@ -16,7 +16,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class FormValueParameterTest {
