@@ -176,7 +176,7 @@ class VitessScaleSafetyChecks(
 
     override fun afterQuery(query: String) {
       if (!CheckDisabler.isCheckEnabled(Check.COWRITE)) return
-      if (!ScaleSafetyChecks.isDml(query)) return
+      if (!ScaleSafetyChecks.shouldIgnore(query)) return
 
       val queryInDatabase = extractLastDmlQuery() ?: return
 
