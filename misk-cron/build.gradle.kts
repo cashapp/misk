@@ -16,8 +16,8 @@ dependencies {
   api(project(":misk"))
   api(project(":misk-inject"))
   implementation(Dependencies.kotlinLogging)
-  implementation(project(":wisp:wisp-lease"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(Dependencies.wispLease)
+  implementation(Dependencies.wispLogging)
   implementation(project(":misk-clustering"))
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
@@ -25,8 +25,8 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.logbackClassic)
-  testImplementation(project(":wisp:wisp-logging-testing"))
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(Dependencies.wispTimeTesting)
   testImplementation(project(":misk-testing"))
 }
 

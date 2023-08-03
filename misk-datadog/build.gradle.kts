@@ -16,7 +16,7 @@ dependencies {
   implementation(Dependencies.openTracingUtil)
   implementation(Dependencies.slf4jApi)
   implementation(Dependencies.tracingDatadog)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(Dependencies.wispLogging)
 }
 
 configure<MavenPublishBaseExtension> {

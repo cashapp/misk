@@ -21,7 +21,7 @@ dependencies {
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(Dependencies.wispLogging)
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
 }

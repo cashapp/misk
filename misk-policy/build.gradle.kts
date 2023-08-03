@@ -18,7 +18,7 @@ dependencies {
   api(project(":misk-core"))
   api(project(":misk-inject"))
   implementation(Dependencies.retrofitScalars)
-  implementation(project(":wisp:wisp-moshi"))
+  implementation(Dependencies.wispMoshi)
   implementation(project(":misk"))
 
   testFixturesApi(Dependencies.dockerApi)
@@ -32,7 +32,7 @@ dependencies {
   testFixturesImplementation(Dependencies.kotlinLogging)
   testFixturesImplementation(Dependencies.okHttp)
   testFixturesImplementation(Dependencies.okio)
-  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(Dependencies.wispLogging)
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
 

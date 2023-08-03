@@ -35,7 +35,7 @@ dependencies {
   implementation(Dependencies.wireGrpcClient)
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.wireSchema)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)

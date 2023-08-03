@@ -45,8 +45,8 @@ dependencies {
   implementation(Dependencies.kotlinTest)
   implementation(Dependencies.kotlinxCoroutines)
   implementation(Dependencies.moshi)
-  implementation(project(":wisp:wisp-containers-testing"))
-  implementation(project(":wisp:wisp-moshi"))
+  implementation(Dependencies.wispContainersTesting)
+  implementation(Dependencies.wispMoshi)
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
 }

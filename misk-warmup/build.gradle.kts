@@ -14,13 +14,13 @@ dependencies {
   implementation(Dependencies.guava)
   implementation(Dependencies.javaxInject)
   implementation(Dependencies.kotlinLogging)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(Dependencies.wispLogging)
   implementation(project(":misk-core"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.logbackClassic)
-  testImplementation(project(":wisp:wisp-logging-testing"))
+  testImplementation(Dependencies.wispLoggingTesting)
   testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
 }

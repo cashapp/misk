@@ -11,12 +11,12 @@ plugins {
 
 dependencies {
   api(Dependencies.guava)
-  api(project(":wisp:wisp-feature"))
+  api(Dependencies.wispFeature)
   implementation(Dependencies.kotlinStdLibJdk8)
 
   testFixturesApi(Dependencies.javaxInject)
-  testFixturesApi(project(":wisp:wisp-feature"))
-  testFixturesApi(project(":wisp:wisp-feature-testing"))
+  testFixturesApi(Dependencies.wispFeature)
+  testFixturesApi(Dependencies.wispFeatureTesting)
   testFixturesApi(project(":misk-feature"))
   testFixturesApi(project(":misk-inject"))
   testFixturesImplementation(Dependencies.guice)
@@ -30,8 +30,8 @@ dependencies {
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.moshi)
-  testImplementation(project(":wisp:wisp-feature-testing"))
-  testImplementation(project(":wisp:wisp-moshi"))
+  testImplementation(Dependencies.wispFeatureTesting)
+  testImplementation(Dependencies.wispMoshi)
   testImplementation(project(":misk-feature"))
   testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-testing"))

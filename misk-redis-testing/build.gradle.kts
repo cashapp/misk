@@ -19,8 +19,8 @@ dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.okio)
-  implementation(project(":wisp:wisp-containers-testing"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(Dependencies.wispContainersTesting)
+  implementation(Dependencies.wispLogging)
 }
 
 configure<MavenPublishBaseExtension> {
