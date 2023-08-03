@@ -108,7 +108,7 @@ internal class ClientInvocationHandler(
     return headers.value.mapNotNull {
       val (headerKey, headerValue) = it.split(":").map { it.trim() }
       if (headerKey.equals("Accept", true) || headerKey.equals("Content-type", true)) {
-        headerValue.toLowerCase()
+        headerValue.lowercase()
       } else {
         null
       }

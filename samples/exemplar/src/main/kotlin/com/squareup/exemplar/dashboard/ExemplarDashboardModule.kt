@@ -51,6 +51,14 @@ class ExemplarDashboardModule : KAbstractModule() {
       menuLabel = "Bravo",
       menuCategory = "Support"
     ))
+    install(DashboardModule.createMenuLink<SupportDashboard, SupportDashboardAccess>(
+      label = "Admin Dashboard",
+      url = "/_admin/",
+    ))
+    install(DashboardModule.createMenuLink<SupportDashboard, SupportDashboardAccess>(
+      label = "Cash App",
+      url = "https://cash.app/",
+    ))
 
     // Admin Dashboard Setup
     bind<DashboardTheme>().toInstance(

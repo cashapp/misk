@@ -62,7 +62,7 @@ object ScaleSafetyChecks {
     val first = query
       .replace(COMMENT_PATTERN, "")
       .trimStart()
-      .toLowerCase()
+      .lowercase()
       .takeWhile { !it.isWhitespace() }
     return DML.contains(first)
   }
