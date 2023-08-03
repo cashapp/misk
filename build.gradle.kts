@@ -264,15 +264,21 @@ allprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
     configure<MavenPublishBaseExtension> {
       var sonatypeHost = SonatypeHost.S01
+      var repo_url = "https://github.com/cashapp/misk/"
+      var scm_connection = "scm:git:git://github.com/cashapp/misk.git"
+      var scm_dev_connection = "scm:git:ssh://git@github.com/cashapp/misk.git"
+      //Use old wisp settings for now until we get access to Sonatype
       if (project.path.startsWith(":wisp")) {
-        sonatypeHost = SonatypeHost.DEFAULT
-      } 
+        repo_url = "https://github.com/cashapp/wisp/"
+        scm_connection = "scm:git:git://github.com/cashapp/wisp.git"
+        scm_dev_connection = "scm:git:ssh://git@github.com/cashapp/wisp.git"
+      }
       publishToMavenCentral(sonatypeHost, automaticRelease = true)
       signAllPublications()
       pom {
         description.set("Open source application container in Kotlin")
         name.set(project.name)
-        url.set("https://github.com/cashapp/misk/")
+        url.set(repo_url)
         licenses {
           license {
             name.set("The Apache Software License, Version 2.0")
@@ -281,9 +287,9 @@ allprojects {
           }
         }
         scm {
-          url.set("https://github.com/cashapp/misk/")
-          connection.set("scm:git:git://github.com/cashapp/misk.git")
-          developerConnection.set("scm:git:ssh://git@github.com/cashapp/misk.git")
+          url.set(repo_url)
+          connection.set(scm_connection)
+          developerConnection.set(scm_dev_connection)
         }
         developers {
           developer {
