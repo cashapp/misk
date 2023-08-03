@@ -1,6 +1,7 @@
 plugins {
   `java-platform`
-  id("com.vanniktech.maven.publish.base")
+  //disable wisp publishing until sonatype issue is resolved
+  //id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
@@ -14,8 +15,10 @@ dependencies {
   }
 }
 
+/*
 extensions.configure<PublishingExtension> {
   publications.create("maven", MavenPublication::class) {
     from(project.components.getByName("javaPlatform"))
   }
 }
+*/
