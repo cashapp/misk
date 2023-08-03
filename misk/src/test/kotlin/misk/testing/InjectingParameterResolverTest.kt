@@ -13,6 +13,7 @@ internal class InjectingParameterResolverTest {
     @Provides @TestAnnotation fun myAnnotatedList(): List<String> = listOf("strings?")
   }
 
+  @Qualifier
   annotation class TestAnnotation
 
   @InjectTest fun `retrieves all parameters if the method is annotated`(
