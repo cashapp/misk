@@ -47,7 +47,7 @@ class DashboardTabProvider @JvmOverloads constructor(
   val services: Set<String> = setOf(),
   val accessAnnotationKClass: KClass<out Annotation>? = null,
   val dashboardAnnotationKClass: KClass<out Annotation>,
-) : Provider<DashboardTab> {
+) : Provider<DashboardTab>, ValidWebEntry(slug, url_path_prefix) {
   @Inject lateinit var accessAnnotationEntries: List<AccessAnnotationEntry>
 
   override fun get(): DashboardTab {

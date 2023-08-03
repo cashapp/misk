@@ -47,7 +47,7 @@ open class ExtendedQueryExecutionListener : QueryExecutionListener, MethodExecut
     if (queryInfoList == null) return
 
     for (info in queryInfoList) {
-      val query = info.query.toLowerCase()
+      val query = info.query.lowercase()
       if (query == "begin") {
         beforeStartTransaction()
       } else if (query == "commit") {
@@ -64,7 +64,7 @@ open class ExtendedQueryExecutionListener : QueryExecutionListener, MethodExecut
     if (queryInfoList == null) return
 
     for (info in queryInfoList) {
-      val query = info.query.toLowerCase(Locale.ROOT)
+      val query = info.query.lowercase(Locale.ROOT)
       if (query == "begin") {
         afterStartTransaction()
       } else if (query == "commit") {
