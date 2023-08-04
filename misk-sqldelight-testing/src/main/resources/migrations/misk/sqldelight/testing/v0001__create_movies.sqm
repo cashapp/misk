@@ -1,0 +1,6 @@
+CREATE TABLE movies(
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `title` varchar(255) NOT NULL,
+    `version` bigint AS LOCK NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 ROW_FORMAT = DYNAMIC;

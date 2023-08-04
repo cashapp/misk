@@ -1,0 +1,27 @@
+public final class misk/sqldelight/RetryingTransacter : app/cash/sqldelight/Transacter {
+	public fun <init> (Lapp/cash/sqldelight/Transacter;Lmisk/sqldelight/TransacterOptions;)V
+	public synthetic fun <init> (Lapp/cash/sqldelight/Transacter;Lmisk/sqldelight/TransacterOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun retries (I)Lmisk/sqldelight/RetryingTransacter;
+	public fun transaction (ZLkotlin/jvm/functions/Function1;)V
+	public fun transactionWithResult (ZLkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/sqldelight/TransacterOptions {
+	public fun <init> ()V
+	public fun <init> (IJJJ)V
+	public synthetic fun <init> (IJJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()J
+	public final fun component3 ()J
+	public final fun component4 ()J
+	public final fun copy (IJJJ)Lmisk/sqldelight/TransacterOptions;
+	public static synthetic fun copy$default (Lmisk/sqldelight/TransacterOptions;IJJJILjava/lang/Object;)Lmisk/sqldelight/TransacterOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMaxAttempts ()I
+	public final fun getMaxRetryDelayMillis ()J
+	public final fun getMinRetryDelayMillis ()J
+	public final fun getRetryJitterMillis ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

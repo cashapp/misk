@@ -25,6 +25,7 @@ buildscript {
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
     classpath(Dependencies.revapiGradlePlugin)
+    classpath(Dependencies.sqldelightGradlePlugin)
   }
 }
 
