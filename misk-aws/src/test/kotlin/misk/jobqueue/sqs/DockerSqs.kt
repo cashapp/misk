@@ -46,7 +46,6 @@ internal object DockerSqs : ExternalDependency {
       val exposedClientPort = ExposedPort.tcp(clientPort)
       withImage("softwaremill/elasticmq:1.4.2")
         .withName("sqs")
-        .withCmd(listOf("goaws"))
         .withExposedPorts(exposedClientPort)
         .withHostConfig(
           HostConfig.newHostConfig().withPortBindings(
