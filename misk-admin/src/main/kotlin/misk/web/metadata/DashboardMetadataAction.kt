@@ -16,8 +16,8 @@ import misk.web.dashboard.DashboardTheme
 import misk.web.dashboard.MiskWebTheme
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.DashboardMetadataAction.DashboardTabMetadata.Companion.toMetadata
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Serve metadata related to a Misk-Web Dashboard

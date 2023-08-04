@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import wisp.time.FakeClock
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 abstract class TimestampListenerTest {
   @Inject @Movies lateinit var transacter: Transacter

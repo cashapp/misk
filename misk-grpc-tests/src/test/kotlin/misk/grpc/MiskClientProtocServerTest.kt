@@ -2,8 +2,8 @@ package misk.grpc
 
 import com.google.inject.Guice
 import com.google.inject.util.Modules
-import javax.inject.Inject
-import javax.inject.Named
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule

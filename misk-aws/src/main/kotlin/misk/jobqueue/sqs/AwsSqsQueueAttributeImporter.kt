@@ -9,7 +9,7 @@ import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 internal class AwsSqsQueueAttributeImporter @Inject constructor(
   private val config: AwsSqsJobQueueConfig,

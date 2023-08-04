@@ -5,8 +5,8 @@ import wisp.deployment.TESTING
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.Properties
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import javax.sql.DataSource
 
 /**

@@ -1,7 +1,7 @@
 package misk.random
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Abstraction for Java's Random that allows for testing.

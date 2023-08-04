@@ -10,7 +10,7 @@ import com.amazonaws.services.sqs.buffered.AmazonSQSBufferedAsyncClient
 import com.amazonaws.services.sqs.buffered.QueueBufferConfig
 import com.google.inject.Provider
 import com.google.inject.Provides
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
@@ -27,7 +27,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueConfig
 import misk.tasks.RepeatedTaskQueueFactory
 import wisp.lease.LeaseManager
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
 open class AwsSqsJobQueueModule(

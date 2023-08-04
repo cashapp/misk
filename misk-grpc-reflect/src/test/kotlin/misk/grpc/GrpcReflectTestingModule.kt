@@ -16,8 +16,8 @@ import misk.security.ssl.TrustStoreConfig
 import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import okhttp3.HttpUrl
-import javax.inject.Named
-import javax.inject.Singleton
+import jakarta.inject.Named
+import jakarta.inject.Singleton
 
 class GrpcReflectTestingModule : KAbstractModule() {
   val webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(

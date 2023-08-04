@@ -7,7 +7,7 @@ import okhttp3.Headers.Companion.headersOf
 import org.slf4j.event.Level
 import java.io.IOException
 import java.net.HttpURLConnection
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Maps [IOException]s to HTTP 500.

@@ -7,8 +7,8 @@ import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartReader
 import okio.BufferedSource
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KType
 
 object MultipartUnmarshaller : Unmarshaller {

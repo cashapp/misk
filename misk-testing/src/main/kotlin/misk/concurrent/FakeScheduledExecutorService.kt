@@ -10,8 +10,8 @@ import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * ScheduledExecutorService for testing that runs in the current thread and is triggered using the

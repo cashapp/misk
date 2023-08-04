@@ -15,8 +15,8 @@ import misk.moshi.adapter
 import misk.time.timed
 import wisp.tracing.traceWithSpan
 import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 internal class SqsJobQueue @Inject internal constructor(

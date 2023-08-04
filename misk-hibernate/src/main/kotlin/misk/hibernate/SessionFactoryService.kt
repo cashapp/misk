@@ -21,7 +21,7 @@ import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
 import wisp.logging.getLogger
-import javax.inject.Provider
+import com.google.inject.Provider
 import javax.persistence.Column
 import javax.persistence.Table
 import javax.sql.DataSource

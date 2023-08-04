@@ -15,7 +15,7 @@ import com.google.crypto.tink.mac.MacFactory
 import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.streamingaead.StreamingAeadFactory
-import com.google.inject.Inject
+import jakarta.inject.Inject
 import com.google.inject.Provider
 import misk.crypto.AeadKeyManager
 import misk.crypto.DeterministicAeadKeyManager

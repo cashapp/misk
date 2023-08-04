@@ -1,7 +1,7 @@
 package misk.web.interceptors
 
 import misk.web.NetworkInterceptor
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 /**
  * Denotes a target to be in the first order of execution before any content decoding happens.

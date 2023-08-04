@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.deployment.TESTING
 import java.util.Base64
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class PgpKeyTest {

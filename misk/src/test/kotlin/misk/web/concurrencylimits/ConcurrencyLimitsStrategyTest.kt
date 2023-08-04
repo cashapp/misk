@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import wisp.deployment.Deployment
 import wisp.deployment.TESTING
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class ConcurrencyLimitsStrategyTest {

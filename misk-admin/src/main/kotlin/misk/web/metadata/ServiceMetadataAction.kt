@@ -8,8 +8,8 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import wisp.deployment.Deployment
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Service Metadata used for front end dashboards including App Name and Misk.Deployment name

@@ -11,12 +11,12 @@ plugins {
 
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.kotlinxHtml)
   api(Dependencies.moshi)
   api(Dependencies.okio)
-  api(Dependencies.wispConfig)
-  api(Dependencies.wispDeployment)
+  api(project(":wisp:wisp-config"))
+  api(project(":wisp:wisp-deployment"))
   api(project(":misk"))
   api(project(":misk-action-scopes"))
   api(project(":misk-actions"))

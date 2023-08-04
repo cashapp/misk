@@ -10,7 +10,7 @@ plugins {
 
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.moshi)
   api(Dependencies.okHttp)
   api(Dependencies.retrofit)
@@ -21,8 +21,8 @@ dependencies {
   implementation(Dependencies.kotlinReflect)
   implementation(project(":misk-actions"))
   implementation(Dependencies.retrofitMoshi)
-  implementation(Dependencies.wispLogging)
-  implementation(Dependencies.wispMoshi)
+  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":wisp:wisp-moshi"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.guava)
@@ -30,7 +30,7 @@ dependencies {
   testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.moshiKotlin)
   testImplementation(Dependencies.okHttpMockWebServer)
-  testImplementation(Dependencies.wispDeployment)
+  testImplementation(project(":wisp:wisp-deployment"))
   testImplementation("com.squareup.okio:okio:3.3.0")
   testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))

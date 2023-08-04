@@ -5,7 +5,7 @@ import misk.ServiceModule
 import misk.inject.KAbstractModule
 import wisp.logging.LogCollector
 import wisp.logging.WispQueuedLogCollector
-import javax.inject.Provider
+import com.google.inject.Provider
 
 class LogCollectorModule : KAbstractModule() {
   override fun configure() {

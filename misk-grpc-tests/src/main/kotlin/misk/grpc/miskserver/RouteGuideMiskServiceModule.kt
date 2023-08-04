@@ -8,7 +8,7 @@ import misk.metrics.FakeMetricsModule
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.jetty.JettyService
-import javax.inject.Named
+import jakarta.inject.Named
 
 /** A module that runs a Misk gRPC server: Wire protos and a Jetty backend. */
 class RouteGuideMiskServiceModule : KAbstractModule() {

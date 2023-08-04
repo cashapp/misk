@@ -1,7 +1,7 @@
 package misk.policy.opa
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Deprecated("Replace the dependency on misk-policy-testing with testFixtures(misk-policy)")
 @Singleton

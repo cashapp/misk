@@ -8,8 +8,8 @@ import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.*
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 private val logger = getLogger<PingDatabaseService>()
 

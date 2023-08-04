@@ -594,9 +594,9 @@ public final class misk/client/HttpClientFactory {
 	public fun <init> (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/client/OkHttpClientCommonConfigurator;)V
 	public final fun create (Lmisk/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient;
 	public final fun getEnvoyClientEndpointProvider ()Lwisp/client/EnvoyClientEndpointProvider;
-	public final fun getOkhttpInterceptors ()Ljavax/inject/Provider;
+	public final fun getOkhttpInterceptors ()Lcom/google/inject/Provider;
 	public final fun setEnvoyClientEndpointProvider (Lwisp/client/EnvoyClientEndpointProvider;)V
-	public final fun setOkhttpInterceptors (Ljavax/inject/Provider;)V
+	public final fun setOkhttpInterceptors (Lcom/google/inject/Provider;)V
 }
 
 public final class misk/client/HttpClientFactory$Companion {
@@ -1649,7 +1649,7 @@ public final class misk/web/concurrencylimits/ConcurrencyLimiterStrategy : java/
 
 public final class misk/web/concurrencylimits/ConcurrencyLimitsModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/web/ConcurrencyLimiterConfig;)V
-	public final fun concurrencyLimiterFactory (Ljavax/inject/Provider;Ljava/time/Clock;)Lmisk/web/concurrencylimits/ConcurrencyLimiterFactory;
+	public final fun concurrencyLimiterFactory (Lcom/google/inject/Provider;Ljava/time/Clock;)Lmisk/web/concurrencylimits/ConcurrencyLimiterFactory;
 }
 
 public final class misk/web/exceptions/ActionExceptionLogLevelConfig : wisp/config/Config {

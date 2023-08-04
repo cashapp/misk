@@ -12,7 +12,7 @@ import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSession
 

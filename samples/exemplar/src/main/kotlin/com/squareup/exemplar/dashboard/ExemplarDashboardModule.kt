@@ -20,7 +20,7 @@ import misk.web.dashboard.MiskWebTheme
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 class ExemplarDashboardModule : KAbstractModule() {
   override fun configure() {
@@ -50,6 +50,14 @@ class ExemplarDashboardModule : KAbstractModule() {
       urlPathPrefix = "/support/bravo/",
       menuLabel = "Bravo",
       menuCategory = "Support"
+    ))
+    install(DashboardModule.createMenuLink<SupportDashboard, SupportDashboardAccess>(
+      label = "Admin Dashboard",
+      url = "/_admin/",
+    ))
+    install(DashboardModule.createMenuLink<SupportDashboard, SupportDashboardAccess>(
+      label = "Cash App",
+      url = "https://cash.app/",
     ))
 
     // Admin Dashboard Setup

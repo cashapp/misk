@@ -4,7 +4,7 @@ import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.v2.BaseDashboardV2Module
 import misk.web.metadata.config.ConfigMetadataAction
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 /**
  * Installs default Admin Dashboard that runs at multibound DashboardHomeUrl<AdminDashboard>

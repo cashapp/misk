@@ -32,7 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class RequestLoggingInterceptorTest {
@@ -211,7 +211,7 @@ internal class RequestLoggingInterceptorTest {
         "response=echo: hello responseHeaders={}"
     )
     assertThat(messages[0]).doesNotContain(headerToNotLog)
-    assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
+    assertThat(messages[0]).doesNotContain(headerToNotLog.lowercase())
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
   }
 
@@ -233,7 +233,7 @@ internal class RequestLoggingInterceptorTest {
         "content-length=[4], content-type=[application/json;charset=UTF-8]}"
     )
     assertThat(messages[0]).doesNotContain(headerToNotLog)
-    assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
+    assertThat(messages[0]).doesNotContain(headerToNotLog.lowercase())
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
   }
 

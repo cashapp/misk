@@ -16,31 +16,31 @@ class ValidWebEntryTest {
   }
 
   @Test fun `fails on bad url path prefix missing trailing slash`() {
-    val errMsg = assertFailsWith<IllegalArgumentException> {
+    val classException = assertFailsWith<IllegalArgumentException> {
       class TestWebEntry : ValidWebEntry(valid_slug = "test-slug", valid_url_path_prefix = "/test-path")
       TestWebEntry()
     }
     assertEquals(
-      "Invalid or unexpected url path prefix: '/test-path'. " +
+      "Invalid or unexpected [urlPathPrefix=/test-path]. " +
         "Must start with 'http' OR start and end with '/'.",
-      errMsg.message
+      classException.message
     )
   }
 
   @Test fun `fails on bad url path prefix missing starting slash`() {
-    val errMsg = assertFailsWith<IllegalArgumentException> {
+    val classException = assertFailsWith<IllegalArgumentException> {
       class TestWebEntry : ValidWebEntry(valid_slug = "test-slug", valid_url_path_prefix = "test-path/")
       TestWebEntry()
     }
     assertEquals(
-      "Invalid or unexpected url path prefix: 'test-path/'. " +
+      "Invalid or unexpected [urlPathPrefix=test-path/]. " +
         "Must start with 'http' OR start and end with '/'.",
-      errMsg.message
+      classException.message
     )
   }
 
   @Test fun `fails on bad url path prefix not starting with http if absolute path`() {
-    val errMsg = assertFailsWith<IllegalArgumentException> {
+    val classException = assertFailsWith<IllegalArgumentException> {
       class TestWebEntry : ValidWebEntry(
         valid_slug = "test-slug",
         valid_url_path_prefix = "www.cash.app/test-path"
@@ -48,29 +48,29 @@ class ValidWebEntryTest {
       TestWebEntry()
     }
     assertEquals(
-      "Invalid or unexpected url path prefix: 'www.cash.app/test-path'. " +
+      "Invalid or unexpected [urlPathPrefix=www.cash.app/test-path]. " +
         "Must start with 'http' OR start and end with '/'.",
-      errMsg.message
+      classException.message
     )
   }
 
   @Test fun `fails on blocked prefix`() {
-    val errMsg = assertFailsWith<IllegalArgumentException> {
+    val classException = assertFailsWith<IllegalArgumentException> {
       class TestWebEntry : ValidWebEntry(valid_slug = "test-slug", valid_url_path_prefix = "/api/test-path/")
       TestWebEntry()
     }
-    assertEquals("Url path prefix begins with a blocked prefix: [/api/].", errMsg.message)
+    assertEquals("[urlPathPrefix=/api/test-path/] begins with a blocked prefix: [/api/].", classException.message)
   }
 
   @Test fun `fails on invalid slug characters`() {
-    val errMsg = assertFailsWith<IllegalArgumentException> {
+    val classException = assertFailsWith<IllegalArgumentException> {
       class TestWebEntry : ValidWebEntry(valid_slug = "!test-slug", valid_url_path_prefix = "/test-path/")
       TestWebEntry()
     }
     assertEquals(
-      "Slug contains invalid characters. " +
+      "[slug=!test-slug] contains invalid characters. " +
         "Can only contain characters in ranges [a-z], [0-9] or '-'.",
-      errMsg.message
+      classException.message
     )
   }
 }

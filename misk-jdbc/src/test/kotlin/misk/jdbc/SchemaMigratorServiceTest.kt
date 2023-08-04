@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = false)
 internal class MySQLSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSourceType.MYSQL)
