@@ -17,7 +17,6 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import org.slf4j.MDC
-import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import wisp.tracing.traceWithNewRootSpan
 import java.time.Clock
@@ -38,7 +37,6 @@ internal class SqsJobConsumer @Inject internal constructor(
   @ForSqsReceiving private val receivingThreads: ExecutorService,
   private val sqsConsumerAllocator: SqsConsumerAllocator,
   private val featureFlags: FeatureFlags,
-  private val leaseManager: LeaseManager,
   private val metrics: SqsMetrics,
   private val moshi: Moshi,
   private val queues: QueueResolver,
@@ -73,7 +71,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   }
 
   override fun unsubscribe(queueName: QueueName) {
-    subscriptions.get(queueName)?.stop()
+    subscriptions[queueName]?.stop()
   }
 
   internal fun getReceiver(queueName: QueueName): QueueReceiver {
@@ -146,9 +144,13 @@ internal class SqsJobConsumer @Inject internal constructor(
           val receiveCount = message.attributes[SQS_ATTRIBUTE_APPROX_RECEIVE_COUNT]!!.toLong()
 
           if (receiveCount <= 1) {
-            // Calculate miliseconds between received time and when job was sent.
+            // Calculate milliseconds between received time and when job was sent.
             val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli()
-            metrics.queueProcessingLag.record(processingLag.toDouble(), queue.queueName, queue.queueName);
+            metrics.queueProcessingLag.record(
+              processingLag.toDouble(),
+              queue.queueName,
+              queue.queueName
+            )
           }
 
 
@@ -196,6 +198,9 @@ internal class SqsJobConsumer @Inject internal constructor(
               // Run the handler and record timing
               try {
                 MDC.put(SQS_JOB_ID_MDC, message.id)
+                MDC.put(SQS_JOB_ID_STRUCTURED_MDC, message.id)
+                MDC.put(SQS_QUEUE_NAME_MDC, message.queueName.value)
+                MDC.put(SQS_QUEUE_TYPE_MDC, SQS_QUEUE_TYPE)
                 val (duration, _) = timed { handler.handleJob(message) }
                 metrics.handlerDispatchTime.record(
                   duration.toMillis().toDouble(), queue.queueName,
@@ -209,6 +214,9 @@ internal class SqsJobConsumer @Inject internal constructor(
                 Status.FAILED
               } finally {
                 MDC.remove(SQS_JOB_ID_MDC)
+                MDC.remove(SQS_JOB_ID_STRUCTURED_MDC)
+                MDC.remove(SQS_QUEUE_NAME_MDC)
+                MDC.remove(SQS_QUEUE_TYPE_MDC)
               }
             }
           },
@@ -226,6 +234,10 @@ internal class SqsJobConsumer @Inject internal constructor(
     internal val CONSUMERS_BATCH_SIZE = Feature("jobqueue-consumers-fetch-batch-size")
     private val ORIGINAL_TRACE_ID_TAG = StringTag("original.trace_id")
     private const val SQS_JOB_ID_MDC = "sqs_job_id"
+    private const val SQS_QUEUE_TYPE_MDC = "misk.job_queue.queue_type"
+    private const val SQS_JOB_ID_STRUCTURED_MDC = "misk.job_queue.job_id"
+    private const val SQS_QUEUE_NAME_MDC = "misk.job_queue.queue_name"
+    private const val SQS_QUEUE_TYPE = "aws-sqs"
     private const val SQS_ATTRIBUTE_SENT_TIMESTAMP = "SentTimestamp"
     private const val SQS_ATTRIBUTE_APPROX_RECEIVE_COUNT = "ApproximateReceiveCount"
   }
