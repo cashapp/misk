@@ -263,16 +263,12 @@ subprojects {
 allprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
     configure<MavenPublishBaseExtension> {
-      val sonatypeHost = SonatypeHost.S01
-      var repo_url = "https://github.com/cashapp/misk/"
-      var scm_connection = "scm:git:git://github.com/cashapp/misk.git"
-      var scm_dev_connection = "scm:git:ssh://git@github.com/cashapp/misk.git"
-      publishToMavenCentral(sonatypeHost, automaticRelease = true)
+      publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
       signAllPublications()
       pom {
         description.set("Open source application container in Kotlin")
         name.set(project.name)
-        url.set(repo_url)
+        url.set("https://github.com/cashapp/misk/")
         licenses {
           license {
             name.set("The Apache Software License, Version 2.0")
@@ -281,9 +277,9 @@ allprojects {
           }
         }
         scm {
-          url.set(repo_url)
-          connection.set(scm_connection)
-          developerConnection.set(scm_dev_connection)
+          url.set("https://github.com/cashapp/misk/")
+          connection.set("scm:git:git://github.com/cashapp/misk.git")
+          developerConnection.set("scm:git:ssh://git@github.com/cashapp/misk.git")
         }
         developers {
           developer {
