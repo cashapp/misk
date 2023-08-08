@@ -11,7 +11,7 @@ import misk.dynamodb.DynamoDbHealthCheck
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 abstract class AbstractDynamoDbTest {
   @Inject lateinit var dynamoDbClient: AmazonDynamoDB

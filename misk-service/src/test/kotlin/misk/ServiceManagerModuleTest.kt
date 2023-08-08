@@ -7,13 +7,13 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.Scopes
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 
 internal class ServiceManagerModuleTest {
@@ -23,8 +23,14 @@ internal class ServiceManagerModuleTest {
     override fun shutDown() {}
   }
 
-  @javax.inject.Singleton
+  @jakarta.inject.Singleton
   class SingletonService2 : AbstractIdleService() {
+    override fun startUp() {}
+    override fun shutDown() {}
+  }
+
+  @javax.inject.Singleton
+  class SingletonService3 : AbstractIdleService() {
     override fun startUp() {}
     override fun shutDown() {}
   }
@@ -80,6 +86,7 @@ internal class ServiceManagerModuleTest {
               // that was bound.
               multibind<Service>().to<SingletonService1>()
               multibind<Service>().to<SingletonService2>()
+              multibind<Service>().to<SingletonService3>()
             }
           }
         )
@@ -103,6 +110,7 @@ internal class ServiceManagerModuleTest {
               // Should be recognized as singletons
               install(ServiceModule<SingletonService1>())
               install(ServiceModule<SingletonService2>())
+              install(ServiceModule<SingletonService3>())
               install(ServiceModule<ProvidesMethodService>())
               install(ServiceModule<InstanceService>())
               bind(keyOf<InstanceService>()).toInstance(

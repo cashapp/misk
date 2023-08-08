@@ -15,8 +15,8 @@ import misk.Action
 import misk.inject.KAbstractModule
 import misk.web.ConcurrencyLimiterConfig
 import java.time.Clock
-import javax.inject.Provider
-import javax.inject.Singleton
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
 class ConcurrencyLimitsModule(
   private val config: ConcurrencyLimiterConfig

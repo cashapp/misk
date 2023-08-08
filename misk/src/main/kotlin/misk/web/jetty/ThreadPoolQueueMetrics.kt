@@ -2,8 +2,8 @@ package misk.web.jetty
 
 import misk.metrics.Metrics
 import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class ThreadPoolQueueMetrics @Inject internal constructor(

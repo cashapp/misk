@@ -6,7 +6,7 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.Listener
 import com.google.common.util.concurrent.Service.State
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Provider
+import com.google.inject.Provider
 
 internal class CoordinatedService(
   private val serviceProvider: Provider<out Service>

@@ -11,19 +11,19 @@ plugins {
 
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.moshi)
   api(Dependencies.okHttp)
   api(Dependencies.retrofit)
   api(project(":misk-core"))
   api(project(":misk-inject"))
   implementation(Dependencies.retrofitScalars)
-  implementation(Dependencies.wispMoshi)
+  implementation(project(":wisp:wisp-moshi"))
   implementation(project(":misk"))
 
   testFixturesApi(Dependencies.dockerApi)
   testFixturesApi(Dependencies.dockerCore)
-  testFixturesApi(Dependencies.javaxInject)
+  testFixturesApi(Dependencies.jakartaInject)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-policy"))
   testFixturesImplementation(Dependencies.dockerTransport)
@@ -32,7 +32,7 @@ dependencies {
   testFixturesImplementation(Dependencies.kotlinLogging)
   testFixturesImplementation(Dependencies.okHttp)
   testFixturesImplementation(Dependencies.okio)
-  testFixturesImplementation(Dependencies.wispLogging)
+  testFixturesImplementation(project(":wisp:wisp-logging"))
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
 

@@ -26,7 +26,7 @@ internal data class FormData(
         val keyEnd = source.indexOf('='.toByte(), 0, keyValueEnd)
         requireRequest(keyEnd != 1L) { "invalid form encoding" }
 
-        val key = source.readUtf8(keyEnd).urlDecode().toLowerCase()
+        val key = source.readUtf8(keyEnd).urlDecode().lowercase()
         source.readByte() // Consume '='.
 
         val value = source.readUtf8(keyValueEnd - keyEnd - 1).urlDecode()

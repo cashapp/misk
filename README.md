@@ -2,9 +2,7 @@
 
 See the [project website][misk] for documentation and APIs.
 
-Misk is a new open source application container from Cash App.
-
-Misk is not ready for use. The API is not stable.
+Misk is an open source application container from Cash App.
 
 # Releases
 
@@ -14,8 +12,7 @@ Our [change log][changelog] has release history. API is subject to change.
 implementation("com.squareup.misk:misk:0.24.0")
 ```
 
-Snapshot builds are [available][snap].
-
+Public builds for each commit are [available][snap].
 
 # Modules
 
@@ -108,23 +105,15 @@ implementation.
  
 An event publisher + consumer. There is no open source reference implementation at this time.
 
+## wisp-*
+
+The wisp-* modules contain no Dependency Injection based code (i.e. no Guice, etc) and back many misk-* module implementations.  
 
 ## Looking for Misk-Web?
 
-Misk-Web powers the Misk Admin Dashboard with modular Typescript + React powered tabs. 
-
-
-**Check out [Misk-Web][miskweb]!**
+[Misk-Web][miskweb] powers the Misk Admin Dashboard with modular Typescript + React powered tabs.
 
 [changelog]: http://cashapp.github.io/misk/changelog/
 [misk]: https://cashapp.github.io/misk/
 [miskweb]: https://cashapp.github.io/misk-web/
 [snap]: https://mvnrepository.com/artifact/com.squareup.misk/misk
-
-## Looking for Wisp?
-
-The wisp* modules contain no Dependency Injection based code (i.e. no Guice, etc) and back many misk* module implementations.  
-
-Wisp used to live inside Misk. It now has its [own project](https://github.com/cashapp/wisp).
-
-Misk apps should use wisp modules directly with caution as breaking changes might be required.

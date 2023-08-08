@@ -16,7 +16,7 @@ import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import misk.crypto.internal.AeadEnvelopeProvider

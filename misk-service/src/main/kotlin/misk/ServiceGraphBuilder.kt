@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
 import misk.CoordinatedService.Companion.CycleValidity
-import javax.inject.Provider
+import com.google.inject.Provider
 
 /**
  * Builds a graph of [CoordinatedService]s which defer start up and shut down until their dependent

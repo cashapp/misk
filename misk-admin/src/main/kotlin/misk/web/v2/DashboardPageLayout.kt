@@ -14,7 +14,7 @@ import misk.web.dashboard.DashboardNavbarItem
 import misk.web.dashboard.DashboardTab
 import misk.web.v2.DashboardIndexAction.Companion.titlecase
 import wisp.deployment.Deployment
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Builds dashboard UI for index homepage.

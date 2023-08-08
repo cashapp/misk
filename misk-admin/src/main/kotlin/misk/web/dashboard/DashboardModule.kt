@@ -2,9 +2,11 @@ package misk.web.dashboard
 
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
+import misk.web.dashboard.ValidWebEntry.Companion.slugify
 import misk.web.v2.DashboardHotwireTabAction
 import misk.web.v2.DashboardIFrameTabAction
 import misk.web.v2.DashboardPageLayout.Companion.BETA_PREFIX
+import okio.ByteString.Companion.encodeUtf8
 
 /** Handles installation of Misk Dashboard components (admin dashboard or custom...). */
 class DashboardModule @JvmOverloads constructor(
@@ -50,13 +52,15 @@ class DashboardModule @JvmOverloads constructor(
       url: String,
       category: String = "",
     ): DashboardModule {
+      // Create a unique hash for the link that will not conflict with any other link
+      val hash = (label + url + category).encodeUtf8().sha256().hex().take(24)
       val dashboardTabProvider = DashboardTabProvider(
-        slug = "menu-link-$url",
+        slug = "menu-link-$hash",
         url_path_prefix = url,
         menuLabel = label,
         menuUrl = url,
         menuCategory = category,
-        dashboard_slug = ValidWebEntry.slugify<DA>(),
+        dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
       )
@@ -88,7 +92,7 @@ class DashboardModule @JvmOverloads constructor(
         menuLabel = menuLabel,
         menuUrl = menuUrl,
         menuCategory = menuCategory,
-        dashboard_slug = ValidWebEntry.slugify<DA>(),
+        dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
       )
@@ -128,7 +132,7 @@ class DashboardModule @JvmOverloads constructor(
         menuLabel = menuLabel,
         menuUrl = menuUrl,
         menuCategory = menuCategory,
-        dashboard_slug = ValidWebEntry.slugify<DA>(),
+        dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
       )
@@ -173,7 +177,7 @@ class DashboardModule @JvmOverloads constructor(
         menuLabel = menuLabel,
         menuUrl = menuUrl,
         menuCategory = menuCategory,
-        dashboard_slug = ValidWebEntry.slugify<DA>(),
+        dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
       )

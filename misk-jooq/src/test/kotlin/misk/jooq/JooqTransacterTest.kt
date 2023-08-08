@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 import wisp.time.FakeClock
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class JooqTransacterTest {

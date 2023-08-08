@@ -23,7 +23,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
-import javax.inject.Provider
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
@@ -108,7 +108,7 @@ internal class ClientInvocationHandler(
     return headers.value.mapNotNull {
       val (headerKey, headerValue) = it.split(":").map { it.trim() }
       if (headerKey.equals("Accept", true) || headerKey.equals("Content-type", true)) {
-        headerValue.toLowerCase()
+        headerValue.lowercase()
       } else {
         null
       }

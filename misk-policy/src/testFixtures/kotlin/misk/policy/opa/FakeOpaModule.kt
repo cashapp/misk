@@ -1,7 +1,7 @@
 package misk.policy.opa
 
 import misk.inject.KAbstractModule
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class FakeOpaModule @Inject constructor(): KAbstractModule()  {
   override fun configure() {

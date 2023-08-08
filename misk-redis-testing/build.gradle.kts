@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.jedis)
   api(project(":misk-inject"))
   api(project(":misk-redis"))
@@ -19,8 +19,8 @@ dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinLogging)
   implementation(Dependencies.okio)
-  implementation(Dependencies.wispContainersTesting)
-  implementation(Dependencies.wispLogging)
+  implementation(project(":wisp:wisp-containers-testing"))
+  implementation(project(":wisp:wisp-logging"))
 }
 
 configure<MavenPublishBaseExtension> {

@@ -74,7 +74,7 @@ class AnnotatePublicApisWithJvmOverloads(config: Config) : Rule(config) {
     if (!element.valueParameters.any { it.hasDefaultValue() }) return false
 
     // Is not annotated with @Inject
-    if (element.hasAnyAnnotation("javax.inject.Inject", "com.google.inject.Inject")) return false
+    if (element.hasAnyAnnotation("javax.inject.Inject", "jakarta.inject.Inject", "com.google.inject.Inject")) return false
 
     // Is public
     val callableMemberDescriptor = descriptor as? CallableMemberDescriptor

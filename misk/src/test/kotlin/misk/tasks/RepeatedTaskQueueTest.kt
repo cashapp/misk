@@ -23,9 +23,9 @@ import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Named
+import jakarta.inject.Singleton
 import kotlin.concurrent.withLock
 import kotlin.test.assertEquals
 

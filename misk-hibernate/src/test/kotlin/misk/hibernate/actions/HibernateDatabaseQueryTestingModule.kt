@@ -10,7 +10,7 @@ import misk.hibernate.OperatorsMovieQuery
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceType
 import misk.security.authz.AccessAnnotationEntry
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 class HibernateDatabaseQueryTestingModule : KAbstractModule() {
   override fun configure() {

@@ -19,8 +19,8 @@ import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
 import java.net.HttpURLConnection
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * StaticResourceAction

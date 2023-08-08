@@ -4,8 +4,8 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import wisp.logging.getLogger
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton internal class ClientLoggingInterceptor @Inject constructor(): Interceptor {
   // Optional so it defaults to not logging requests when no config is available.

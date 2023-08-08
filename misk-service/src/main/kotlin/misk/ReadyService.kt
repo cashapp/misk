@@ -2,8 +2,8 @@ package misk
 
 import com.google.common.util.concurrent.AbstractIdleService
 import wisp.logging.getLogger
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * This is a symbolic service that's useful to define the relationship, generally, between

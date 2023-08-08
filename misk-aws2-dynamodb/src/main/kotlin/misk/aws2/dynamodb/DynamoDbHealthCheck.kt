@@ -1,7 +1,7 @@
 package misk.aws2.dynamodb
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient

@@ -11,7 +11,7 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class AwsSqsQueueAttributeImporterTest {

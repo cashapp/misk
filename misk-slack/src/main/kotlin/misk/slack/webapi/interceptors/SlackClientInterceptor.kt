@@ -5,8 +5,8 @@ import misk.slack.webapi.SlackConfig
 import okhttp3.Interceptor
 import okhttp3.Response
 import retrofit2.Invocation
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class SlackClientInterceptor @Inject constructor(

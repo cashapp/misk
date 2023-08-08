@@ -5,7 +5,7 @@ import wisp.logging.getLogger
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 /**
  * A [DefaultCluster] is the default implementation of the [Cluster], which relies on an outside

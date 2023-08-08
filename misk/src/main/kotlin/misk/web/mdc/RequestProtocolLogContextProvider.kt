@@ -1,6 +1,6 @@
 package misk.web.mdc
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 import javax.servlet.http.HttpServletRequest
 
 internal class RequestProtocolLogContextProvider @Inject constructor() : LogContextProvider {

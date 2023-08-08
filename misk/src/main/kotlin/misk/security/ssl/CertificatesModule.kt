@@ -6,7 +6,7 @@ import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
 import misk.security.cert.X500Name
 import java.security.cert.X509Certificate
-import javax.inject.Inject
+import jakarta.inject.Inject
 import javax.servlet.http.HttpServletRequest
 
 /** Installs support for accessing client certificates */

@@ -14,7 +14,7 @@ import misk.web.actions.WebActionEntry
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import wisp.logging.getLogger
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions

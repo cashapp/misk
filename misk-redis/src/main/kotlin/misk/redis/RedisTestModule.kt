@@ -1,7 +1,7 @@
 package misk.redis
 
 import misk.inject.KAbstractModule
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 import kotlin.random.Random
 
 @Deprecated("Moved to misk-redis-testing.", ReplaceWith("misk.redis.testing.RedisTestModule"))

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.JedisPoolConfig
 import wisp.deployment.PRODUCTION
 import wisp.deployment.TESTING
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest
 class RedisAuthPasswordEnvTest {

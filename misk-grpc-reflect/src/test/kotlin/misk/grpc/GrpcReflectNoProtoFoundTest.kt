@@ -13,9 +13,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import routeguide.Feature
 import routeguide.Point
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class GrpcReflectNoProtoFoundTest {

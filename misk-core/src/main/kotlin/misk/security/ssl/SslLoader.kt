@@ -1,7 +1,7 @@
 package misk.security.ssl
 
 import misk.resources.ResourceLoader
-import javax.inject.Inject
+import jakarta.inject.Inject
 import wisp.security.ssl.SslLoader as WispSslLoader
 
 /** Loads keys and certificates from the file system. */

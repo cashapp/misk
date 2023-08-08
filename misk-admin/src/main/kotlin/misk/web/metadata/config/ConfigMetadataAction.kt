@@ -1,6 +1,6 @@
 package misk.web.metadata.config
 
-import com.google.inject.Inject
+import jakarta.inject.Inject
 import misk.config.AppName
 import misk.config.MiskConfig
 import misk.resources.ResourceLoader
@@ -13,7 +13,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.config.Config
 import wisp.deployment.Deployment
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 @Singleton
 class ConfigMetadataAction @Inject constructor(

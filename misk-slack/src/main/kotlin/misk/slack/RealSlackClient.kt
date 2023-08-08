@@ -1,7 +1,7 @@
 package misk.slack
 
 import wisp.logging.getLogger
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class RealSlackClient @Inject constructor(
   private val slackWebHookApi: SlackWebhookApi,

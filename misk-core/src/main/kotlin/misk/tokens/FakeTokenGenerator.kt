@@ -1,7 +1,7 @@
 package misk.tokens
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class FakeTokenGenerator @Inject constructor() : TokenGenerator by wisp.token.FakeTokenGenerator()

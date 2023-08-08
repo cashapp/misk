@@ -1,6 +1,6 @@
 package misk.crypto
 
-import com.google.inject.Inject
+import jakarta.inject.Inject
 import wisp.logging.getLogger
 
 /**

@@ -14,8 +14,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.time.FakeClock
 import java.time.Instant
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 
 @MiskTest(startService = true)
 class HealthCheckTest {

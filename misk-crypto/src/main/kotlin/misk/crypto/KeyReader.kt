@@ -7,7 +7,7 @@ import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.proto.KeyTemplate
-import com.google.inject.Inject
+import jakarta.inject.Inject
 import wisp.logging.getLogger
 import java.security.GeneralSecurityException
 

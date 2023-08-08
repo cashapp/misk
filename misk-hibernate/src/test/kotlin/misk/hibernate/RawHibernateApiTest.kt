@@ -6,7 +6,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /** Test that we can access Hibernate's SessionFactory directly. */
 @MiskTest(startService = true)
