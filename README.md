@@ -1,20 +1,30 @@
 <img src="https://github.com/cashapp/misk/raw/master/misk.png" width="300">
 
-See the [project website][misk] for documentation and APIs.
 
-Misk is an open source application container from Cash App.
+* Releases
+  * See most recent [public build][snap]
+  * [change log][changelog]
+  * API is subject to change
 
-# Releases
+* Documentation
+  * [Project Website][misk]
+  * [Getting Started](./docs/getting-started.md)
+  * [User's Guide](./docs/user-guide.md)
+  * [Developer's Guide](./docs/develops-guide.md)
 
-Our [change log][changelog] has release history. API is subject to change. 
+* Related Projects
+  * [misk-web][miskweb]
+  * [wisp][wisp]: wisp now is part of Misk
+ 
 
-```kotlin
-implementation("com.squareup.misk:misk:0.24.0")
-```
+# Overview
+Misk (Microservice Container in Kotlin) is an open source microservice container from Cash App.
+It allows you to quickly create a microservice in Kotlin or Java, and provides libraries for common
+concerns like serving endpoints, caching, queueing, persistence, distributed leasing and clustering.
+It also includes [the Wisp library](./wisp/README.md), which is a collection of Kotlin modules
+providing various features and utilities, including config, logging, feature flags and more.
 
-Public builds for each commit are [available][snap].
-
-# Modules
+## Modules
 
 ### misk-actions
 
@@ -117,3 +127,4 @@ The wisp-* modules contain no Dependency Injection based code (i.e. no Guice, et
 [misk]: https://cashapp.github.io/misk/
 [miskweb]: https://cashapp.github.io/misk-web/
 [snap]: https://mvnrepository.com/artifact/com.squareup.misk/misk
+[wisp]: https://github.com/cashapp/wisp
