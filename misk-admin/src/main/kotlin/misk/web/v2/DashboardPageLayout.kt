@@ -50,6 +50,9 @@ class DashboardPageLayout @Inject constructor(
   private var path: String = clientHttpCall.get().url.encodedPath
   fun path(path: String) = apply { this.path = path }
 
+  private var headBlock: TagConsumer<*>.() -> Unit = {}
+  fun headBlock(block: TagConsumer<*>.() -> Unit) = apply { this.headBlock = block }
+
   @JvmOverloads
   fun build(tabBlock: TagConsumer<*>.(appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab?) -> Unit = { _, _, _ -> Unit }): String {
     check(newBuilder) {
@@ -72,9 +75,10 @@ class DashboardPageLayout @Inject constructor(
 
     return buildHtml {
       HtmlLayout(
-        homeUrl,
-        title(appName, dashboardHomeUrl, dashboardTab),
-        deployment.isLocalDevelopment
+        appRoot = homeUrl,
+        title = title(appName, dashboardHomeUrl, dashboardTab),
+        playCdn = deployment.isLocalDevelopment,
+        headBlock = headBlock
       ) {
         Navbar(
           appName = appName,
@@ -91,7 +95,7 @@ class DashboardPageLayout @Inject constructor(
     }
   }
 
-  fun toMenuSections(
+  private fun toMenuSections(
     navbarItems: List<DashboardNavbarItem>,
     dashboardTabs: List<DashboardTab>,
     currentPath: String
