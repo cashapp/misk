@@ -22,11 +22,11 @@ dependencies {
   api(project(":misk-actions"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
-  api(project(":misk-tailwind"))
   api(Dependencies.kotlinxHtml)
   implementation(Dependencies.okHttp)
   implementation(project(":misk-core"))
   implementation(project(":misk-hotwire"))
+  implementation(project(":misk-tailwind"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)

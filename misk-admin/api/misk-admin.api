@@ -861,10 +861,10 @@ public final class misk/web/v2/DashboardPageLayout {
 	public final fun build ()Ljava/lang/String;
 	public final fun build (Lkotlin/jvm/functions/Function4;)Ljava/lang/String;
 	public static synthetic fun build$default (Lmisk/web/v2/DashboardPageLayout;Lkotlin/jvm/functions/Function4;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun headBlock (Lkotlin/jvm/functions/Function1;)Lmisk/web/v2/DashboardPageLayout;
 	public final fun newBuilder ()Lmisk/web/v2/DashboardPageLayout;
 	public final fun path (Ljava/lang/String;)Lmisk/web/v2/DashboardPageLayout;
 	public final fun title (Lkotlin/jvm/functions/Function3;)Lmisk/web/v2/DashboardPageLayout;
-	public final fun toMenuSections (Ljava/util/List;Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
 }
 
 public final class misk/web/v2/DashboardPageLayout$Companion {
