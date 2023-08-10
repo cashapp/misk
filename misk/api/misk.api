@@ -1370,7 +1370,7 @@ public final class misk/web/MiskWebModule : misk/inject/KAbstractModule {
 	public synthetic fun <init> (Lmisk/web/WebConfig;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun provideGzipHandler ()Lorg/eclipse/jetty/server/handler/gzip/GzipHandler;
 	public final fun provideStatisticsHandler ()Lorg/eclipse/jetty/server/handler/StatisticsHandler;
-	public final fun readinessRefreshQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
+	public final fun readinessRefreshQueue (Lmisk/tasks/RepeatedTaskQueueFactory;Lwisp/deployment/Deployment;)Lmisk/tasks/RepeatedTaskQueue;
 }
 
 public final class misk/web/MiskWebModule$MiskCallerProvider : misk/scope/ActionScopedProvider {
