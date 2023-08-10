@@ -12,7 +12,7 @@ import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import misk.logging.LogCollectorModule
 import org.jooq.impl.DefaultExecuteListenerProvider
 import wisp.deployment.TESTING
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 class ClientJooqTestingModule : KAbstractModule() {
   override fun configure() {

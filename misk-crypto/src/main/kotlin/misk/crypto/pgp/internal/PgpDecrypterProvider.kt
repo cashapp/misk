@@ -1,7 +1,7 @@
 package misk.crypto.pgp.internal
 
 import com.google.crypto.tink.aead.KmsEnvelopeAead
-import com.google.inject.Inject
+import jakarta.inject.Inject
 import com.google.inject.Provider
 import com.squareup.moshi.Moshi
 import misk.crypto.KeyAlias

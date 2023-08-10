@@ -2,8 +2,8 @@ package misk.lease
 
 import com.google.common.util.concurrent.AbstractIdleService
 import wisp.lease.LeaseManager
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class LeaseService @Inject constructor(

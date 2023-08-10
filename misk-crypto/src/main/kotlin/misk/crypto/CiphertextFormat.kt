@@ -221,7 +221,7 @@ class CiphertextFormat private constructor() {
         context.putAll(
           ContextKey.values()
             .filter { it.index and bitmask != 0 }
-            .map { it.name.toLowerCase() to null }
+            .map { it.name.lowercase() to null }
             .toMap()
         )
       }

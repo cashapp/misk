@@ -339,7 +339,7 @@ public final class misk/web/dashboard/DashboardTabLoaderEntry {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/dashboard/DashboardTabProvider : javax/inject/Provider {
+public final class misk/web/dashboard/DashboardTabProvider : misk/web/dashboard/ValidWebEntry, com/google/inject/Provider {
 	public field accessAnnotationEntries Ljava/util/List;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
@@ -861,10 +861,10 @@ public final class misk/web/v2/DashboardPageLayout {
 	public final fun build ()Ljava/lang/String;
 	public final fun build (Lkotlin/jvm/functions/Function4;)Ljava/lang/String;
 	public static synthetic fun build$default (Lmisk/web/v2/DashboardPageLayout;Lkotlin/jvm/functions/Function4;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun headBlock (Lkotlin/jvm/functions/Function1;)Lmisk/web/v2/DashboardPageLayout;
 	public final fun newBuilder ()Lmisk/web/v2/DashboardPageLayout;
 	public final fun path (Ljava/lang/String;)Lmisk/web/v2/DashboardPageLayout;
 	public final fun title (Lkotlin/jvm/functions/Function3;)Lmisk/web/v2/DashboardPageLayout;
-	public final fun toMenuSections (Ljava/util/List;Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
 }
 
 public final class misk/web/v2/DashboardPageLayout$Companion {

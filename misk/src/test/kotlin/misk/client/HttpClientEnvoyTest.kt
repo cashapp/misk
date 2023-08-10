@@ -20,8 +20,8 @@ import retrofit2.http.POST
 import wisp.client.EnvoyClientEndpointProvider
 import java.io.File
 import java.util.Arrays
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /** Demonstrates ability to bind up an envoy-based http client and connect via unix sockets. */
 @MiskTest(startService = true)

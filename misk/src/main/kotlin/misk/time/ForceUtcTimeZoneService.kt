@@ -3,8 +3,8 @@ package misk.time
 import com.google.common.util.concurrent.AbstractIdleService
 import java.time.ZoneOffset
 import java.util.TimeZone
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Forces the default JVM timezone to UTC.

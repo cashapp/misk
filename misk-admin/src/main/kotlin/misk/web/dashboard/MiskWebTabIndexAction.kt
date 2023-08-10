@@ -15,8 +15,8 @@ import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Kotlin backed tab loader, equivalent to /_tab/slug/index.html

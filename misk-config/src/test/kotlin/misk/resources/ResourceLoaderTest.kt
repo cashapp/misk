@@ -3,7 +3,7 @@ package misk.resources
 import com.google.inject.util.Modules
 import java.io.File
 import java.net.URLClassLoader
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule

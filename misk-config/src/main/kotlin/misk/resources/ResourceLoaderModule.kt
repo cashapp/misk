@@ -8,8 +8,8 @@ import wisp.resources.ClasspathResourceLoaderBackend
 import wisp.resources.FakeFilesystemLoaderBackend
 import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.MemoryResourceLoaderBackend
-import javax.inject.Qualifier
-import javax.inject.Singleton
+import jakarta.inject.Qualifier
+import jakarta.inject.Singleton
 import wisp.resources.ResourceLoader as WispResourceLoader
 
 class ResourceLoaderModule : KAbstractModule() {

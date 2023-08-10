@@ -18,7 +18,7 @@ import okhttp3.HttpUrl
 import okhttp3.MediaType
 import org.slf4j.MDC
 import java.util.regex.Matcher
-import javax.inject.Provider
+import com.google.inject.Provider
 import javax.servlet.http.HttpServletRequest
 import kotlin.reflect.KType
 

@@ -24,8 +24,6 @@ data class WebConfig @JvmOverloads constructor(
    * checks may fail and k8s will kill the container, even though it might be perfectly healthy. This
    * can cause cascading failures by sending more requests to other containers, resulting in longer
    * queues and more health checks failures.
-   *
-   * TODO(rhall): make this required
    */
   val health_port: Int = -1,
 
@@ -76,7 +74,7 @@ data class WebConfig @JvmOverloads constructor(
   val jetty_max_concurrent_streams: Int? = null,
 
   /** A value in [0.0..100.0]. Include 'Connection: close' in this percentage of responses. */
-  val close_connection_percent: Double = 0.01,
+  val close_connection_percent: Double = 0.0,
 
   /**
    * If true responses which are larger than the minGzipSize will be compressed.
@@ -111,7 +109,7 @@ data class WebConfig @JvmOverloads constructor(
   val shutdown_sleep_ms: Int = 0,
 
   /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
-  val http_request_header_size: Int? = null,
+  val http_request_header_size: Int? = 32768,
 
   /** The size of Jetty's header field cache, in terms of unique character branches. */
   val http_header_cache_size: Int? = null,
@@ -134,66 +132,7 @@ data class WebConfig @JvmOverloads constructor(
 
   /** Maximum age of readiness status. If exceeded readiness will return an error */
   val readiness_max_age_ms: Int = 10000
-) : Config {
-  @Deprecated(
-    message = "obsolete; for binary-compatibility only",
-    level = DeprecationLevel.HIDDEN,
-  )
-  constructor(
-    port: Int,
-    idle_timeout: Long = 0,
-    health_port: Int = -1,
-    host: String? = null,
-    ssl: WebSslConfig? = null,
-    unix_domain_socket: WebUnixDomainSocketConfig? = null,
-    http2: Boolean = false,
-    selectors: Int? = null,
-    acceptors: Int? = null,
-    queue_size: Int? = null,
-    jetty_max_thread_pool_size: Int = 200,
-    jetty_min_thread_pool_size: Int = 8,
-    jetty_max_thread_pool_queue_size: Int = 300,
-    enable_thread_pool_queue_metrics: Boolean = false,
-    action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
-    jetty_max_concurrent_streams: Int? = null,
-    close_connection_percent: Double = 0.01,
-    gzip: Boolean = true,
-    minGzipSize: Int = 1024,
-    cors: Map<String, CorsConfig> = mapOf(),
-    concurrency_limiter_disabled: Boolean = false,
-    shutdown_sleep_ms: Int = 0,
-    http_request_header_size: Int? = null,
-    http_header_cache_size: Int? = null,
-    override_shutdown_idle_timeout: Long? = null,
-  ) : this(
-    port = port,
-    idle_timeout = idle_timeout,
-    health_port = health_port,
-    host = host,
-    ssl = ssl,
-    unix_domain_socket = unix_domain_socket,
-    http2 = http2,
-    selectors = selectors,
-    acceptors = acceptors,
-    queue_size = queue_size,
-    jetty_max_thread_pool_size = jetty_max_thread_pool_size,
-    jetty_min_thread_pool_size = jetty_min_thread_pool_size,
-    jetty_max_thread_pool_queue_size = jetty_max_thread_pool_queue_size,
-    enable_thread_pool_queue_metrics = enable_thread_pool_queue_metrics,
-    action_exception_log_level = action_exception_log_level,
-    jetty_max_concurrent_streams = jetty_max_concurrent_streams,
-    close_connection_percent = close_connection_percent,
-    gzip = gzip,
-    minGzipSize = minGzipSize,
-    cors = cors,
-    concurrency_limiter_disabled = concurrency_limiter_disabled,
-    concurrency_limiter_log_level = Level.ERROR,
-    shutdown_sleep_ms = shutdown_sleep_ms,
-    http_request_header_size = http_request_header_size,
-    http_header_cache_size = http_header_cache_size,
-    override_shutdown_idle_timeout = override_shutdown_idle_timeout,
-  )
-}
+) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
   /** HTTPS port to listen on, or 0 for any available port. */

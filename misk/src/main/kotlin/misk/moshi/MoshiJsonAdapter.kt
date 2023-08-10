@@ -1,6 +1,6 @@
 package misk.moshi
 
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)

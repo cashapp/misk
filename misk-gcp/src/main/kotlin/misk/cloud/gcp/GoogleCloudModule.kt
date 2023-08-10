@@ -10,7 +10,7 @@ import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provides
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.cloud.gcp.datastore.DatastoreConfig
@@ -20,7 +20,7 @@ import misk.inject.KAbstractModule
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.nio.file.Paths
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /** Installs support for talking to real GCP services, either direct or via emulator */
 class GoogleCloudModule(

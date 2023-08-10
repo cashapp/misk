@@ -6,7 +6,7 @@ import misk.mockito.Mockito.whenever
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest
 class BindFieldUsingMockTest {

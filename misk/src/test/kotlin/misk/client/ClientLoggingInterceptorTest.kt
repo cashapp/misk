@@ -20,8 +20,8 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import wisp.logging.LogCollector
 import java.time.Duration
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 internal class ClientLoggingInterceptorTest {

@@ -35,7 +35,10 @@ plugins {
 apply(plugin = "com.vanniktech.maven.publish.base")
 
 allprojects {
-  group = project.property("GROUP") as String
+  group = when {
+    project.path.startsWith(":wisp") -> "app.cash.wisp"
+    else -> "com.squareup.misk"
+  }
   version = project.findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
 }
 
@@ -83,6 +86,12 @@ dependencyAnalysis {
         exclude("com.google.inject:guice")
       }
     }
+    project(":wisp:wisp-logging-testing") {
+      onUnusedDependencies {
+        // False positive.
+        exclude(":wisp:wisp-logging")
+      }
+    }
   }
 }
 
@@ -94,20 +103,25 @@ apiValidation {
 val testShardNonHibernate by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that don't depend on misk-hibernate. " +
-    "This target is intended for manually sharding tests to make CI faster."
+      "This target is intended for manually sharding tests to make CI faster."
 }
 
 val testShardHibernate by tasks.creating {
   group = "Continuous integration"
   description = "Runs all tests that depend on misk-hibernate. " +
-    "This target is intended for manually sharding tests to make CI faster."
+      "This target is intended for manually sharding tests to make CI faster."
 }
 
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
   apply(plugin = "io.gitlab.arturbosch.detekt")
 
-  if (!listOf("detektive", "exemplar", "exemplarchat", "misk-bom").contains(name)) {
+  if (!listOf(
+          "detektive",
+          "exemplar",
+          "exemplarchat",
+          "misk-bom"
+      ).contains(name) && !name.startsWith("wisp")) {
     extensions.configure(DetektExtension::class) {
       parallel = true
       buildUponDefaultConfig = false
@@ -152,7 +166,8 @@ subprojects {
       add("testRuntimeOnly", Dependencies.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.
-      // Enforce misk-bom -- it should take priority over external BOMs.
+      // Enforce misk-bom and wisk-bom -- it should take priority over external BOMs.
+      add("api", enforcedPlatform(project(":wisp:wisp-bom")))
       add("api", enforcedPlatform(project(":misk-bom")))
       add("api", platform(Dependencies.grpcBom))
       add("api", platform(Dependencies.guavaBom))
@@ -164,7 +179,6 @@ subprojects {
       add("api", platform(Dependencies.nettyBom))
       add("api", platform(Dependencies.prometheusClientBom))
       add("api", platform(Dependencies.wireBom))
-      add("api", platform(Dependencies.wispBom))
     }
 
     tasks.withType<GenerateModuleMetadata> {
@@ -201,15 +215,15 @@ subprojects {
   plugins.withType<BasePlugin> {
     tasks.findByName("check")!!.apply {
       if (listOf(
-          "misk-aws",
-          "misk-events",
-          "misk-jobqueue",
-          "misk-jobqueue-testing",
-          "misk-jdbc",
-          "misk-jdbc-testing",
-          "misk-hibernate",
-          "misk-hibernate-testing"
-        ).contains(project.name)) {
+              "misk-aws",
+              "misk-events",
+              "misk-jobqueue",
+              "misk-jobqueue-testing",
+              "misk-jdbc",
+              "misk-jdbc-testing",
+              "misk-hibernate",
+              "misk-hibernate-testing"
+          ).contains(project.name)) {
         testShardHibernate.dependsOn(this)
       } else {
         testShardNonHibernate.dependsOn(this)
@@ -217,7 +231,12 @@ subprojects {
 
       // Disable the default `detekt` task and enable `detektMain` which has type resolution enabled
       dependsOn(dependsOn.filterNot { name != "detekt" })
-      if (!listOf("detektive", "exemplar", "exemplarchat", "misk-bom").contains(project.name)) {
+      if (!listOf(
+              "detektive",
+              "exemplar",
+              "exemplarchat",
+              "misk-bom"
+          ).contains(project.name) && !project.name.startsWith("wisp")) {
         dependsOn("detektMain")
       }
     }
@@ -228,8 +247,8 @@ subprojects {
     // https://github.com/square/okio/issues/647
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
       attributes.attribute(
-        Usage.USAGE_ATTRIBUTE,
-        this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
+          Usage.USAGE_ATTRIBUTE,
+          this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
       )
     }
 

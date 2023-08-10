@@ -1,24 +1,24 @@
 package misk.web.actions
 
+import com.google.common.util.concurrent.ServiceManager
+import misk.healthchecks.HealthCheck
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
-import misk.web.WebConfig
 import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
-import java.time.Clock
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
 private val logger = getLogger<ReadinessCheckAction>()
 
 @Singleton
 class ReadinessCheckAction @Inject internal constructor(
-  private val readinessService: ReadinessCheckService,
-  private val config: WebConfig,
-  private val clock: Clock,
+  private val serviceManagerProvider: Provider<ServiceManager>,
+  @JvmSuppressWildcards private val healthChecks: List<HealthCheck>
 ) : WebAction {
 
   @Get("/_readiness")
@@ -26,17 +26,23 @@ class ReadinessCheckAction @Inject internal constructor(
   @Unauthenticated
   @AvailableWhenDegraded
   fun readinessCheck(): Response<String> {
+    val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().asList()
+      .filterNot { it.isRunning }
 
-    val (lastUpdate, statuses) = readinessService.status
-      // Null until first run has finished, which means not yet ready
-      ?: return Response("", statusCode = 503)
+    for (service in servicesNotRunning) {
+      logger.info("Service not running: $service")
+    }
 
-    if (clock.instant().isAfter(lastUpdate.plusMillis(config.readiness_max_age_ms.toLong()))) {
-      logger.info("Failed health check: last status check is older than max age")
+    if (!servicesNotRunning.isEmpty()) {
+      // Don't do healthchecks if services haven't all started. The app isn't in a good state yet,
+      // and a health check could end up triggering random errors that we don't want to flood the
+      // logs with.
       return Response("", statusCode = 503)
     }
 
-    val failedHealthChecks = statuses.filter { !it.isHealthy }
+    val failedHealthChecks = healthChecks
+      .map { it.status() }
+      .filter { !it.isHealthy }
 
     if (failedHealthChecks.isEmpty()) {
       return Response("", statusCode = 200)
@@ -48,4 +54,3 @@ class ReadinessCheckAction @Inject internal constructor(
     return Response("", statusCode = 503)
   }
 }
-

@@ -4,7 +4,7 @@ import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import wisp.deployment.Deployment
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {

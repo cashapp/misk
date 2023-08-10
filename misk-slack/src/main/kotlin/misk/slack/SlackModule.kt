@@ -8,8 +8,8 @@ import misk.inject.KAbstractModule
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import wisp.moshi.buildMoshi
-import javax.inject.Named
-import javax.inject.Singleton
+import jakarta.inject.Named
+import jakarta.inject.Singleton
 
 /**
  * Installs the Slack webhook client.

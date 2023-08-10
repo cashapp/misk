@@ -10,9 +10,9 @@ plugins {
 
 dependencies {
   api(Dependencies.guava)
-  api(Dependencies.javaxInject)
-  api(Dependencies.wispFeature)
-  api(Dependencies.wispLaunchDarkly)
+  api(Dependencies.jakartaInject)
+  api(project(":wisp:wisp-feature"))
+  api(project(":wisp:wisp-launchdarkly"))
   api(project(":misk-feature"))
   implementation(Dependencies.kotlinStdLibJdk8)
 
@@ -23,8 +23,8 @@ dependencies {
   testImplementation(Dependencies.micrometerCore)
   testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.moshi)
-  testImplementation(Dependencies.wispLoggingTesting)
-  testImplementation(Dependencies.wispMoshi)
+  testImplementation(project(":wisp:wisp-logging-testing"))
+  testImplementation(project(":wisp:wisp-moshi"))
 }
 
 configure<MavenPublishBaseExtension> {

@@ -1,8 +1,8 @@
 package misk.services
 
 import com.google.common.util.concurrent.AbstractIdleService
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class FakeService @Inject constructor() : AbstractIdleService() {

@@ -7,8 +7,8 @@ import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * An in-memory metrics store with APIs to verify which metrics were collected.

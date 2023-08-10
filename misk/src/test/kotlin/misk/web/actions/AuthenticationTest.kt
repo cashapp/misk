@@ -20,7 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

@@ -67,7 +67,7 @@ dependencies {
   api(Dependencies.grpcStub)
   api(Dependencies.guava)
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.okHttp)
   api(Dependencies.okio)
   api(Dependencies.protobufJava)
@@ -94,7 +94,7 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.logbackClassic)
   testImplementation(Dependencies.protoGoogleCommon)
-  testImplementation(Dependencies.wispLoggingTesting)
+  testImplementation(project(":wisp:wisp-logging-testing"))
 }
 
 configure<MavenPublishBaseExtension> {
