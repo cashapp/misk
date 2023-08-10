@@ -98,6 +98,8 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.concurrent.ExplicitReleaseDelayQueue
+import wisp.deployment.Deployment
 import javax.servlet.http.HttpServletRequest
 import kotlin.math.min
 
@@ -300,9 +302,16 @@ class MiskWebModule @JvmOverloads constructor(
 
   @Provides @ReadinessRefreshQueue @Singleton
   fun readinessRefreshQueue(
-    queueFactory: RepeatedTaskQueueFactory
-  ): RepeatedTaskQueue = queueFactory.new("readiness-refresh-queue")
-
+    queueFactory: RepeatedTaskQueueFactory,
+    deployment: Deployment
+  ): RepeatedTaskQueue {
+    val queueName = "readiness-refresh-queue"
+    return if (deployment.isReal) {
+      queueFactory.new(queueName)
+    } else {
+      queueFactory.forTesting(queueName, ExplicitReleaseDelayQueue())
+    }
+  }
 
   private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>):
     BlockingQueue<Runnable> {
