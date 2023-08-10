@@ -14,9 +14,9 @@ import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
 @Singleton
 internal class ReadinessCheckService @Inject constructor(
