@@ -1,6 +1,7 @@
 package misk.web
 
 import com.google.common.util.concurrent.Service
+import com.google.inject.BindingAnnotation
 import com.google.inject.Key
 import com.google.inject.Provider
 import com.google.inject.Provides
@@ -22,9 +23,12 @@ import misk.scope.ActionScopedProviderModule
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.csp.ContentSecurityPolicyInterceptor
 import misk.security.ssl.CertificatesModule
+import misk.tasks.RepeatedTaskQueue
+import misk.tasks.RepeatedTaskQueueFactory
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
+import misk.web.actions.ReadinessCheckService
 import misk.web.actions.StatusAction
 import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import misk.web.concurrencylimits.ConcurrencyLimitsModule
@@ -94,6 +98,8 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.concurrent.ExplicitReleaseDelayQueue
+import wisp.deployment.Deployment
 import javax.servlet.http.HttpServletRequest
 import kotlin.math.min
 
@@ -119,6 +125,12 @@ class MiskWebModule @JvmOverloads constructor(
       ServiceModule<JettyConnectionMetricsCollector>()
         .enhancedBy<ReadyService>()
     )
+    install(
+      ServiceModule<ReadinessCheckService>()
+        .enhancedBy<ReadyService>()
+    )
+
+    install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 
     // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {
@@ -246,6 +258,7 @@ class MiskWebModule @JvmOverloads constructor(
     // Bind build-in actions.
     install(WebActionModule.create<StatusAction>())
     install(WebActionModule.create<ReadinessCheckAction>())
+
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
 
@@ -287,6 +300,19 @@ class MiskWebModule @JvmOverloads constructor(
     return GzipHandler()
   }
 
+  @Provides @ReadinessRefreshQueue @Singleton
+  fun readinessRefreshQueue(
+    queueFactory: RepeatedTaskQueueFactory,
+    deployment: Deployment
+  ): RepeatedTaskQueue {
+    val queueName = "readiness-refresh-queue"
+    return if (deployment.isReal) {
+      queueFactory.new(queueName)
+    } else {
+      queueFactory.forTesting(queueName, ExplicitReleaseDelayQueue())
+    }
+  }
+
   private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>):
     BlockingQueue<Runnable> {
     return if (config.enable_thread_pool_queue_metrics) {
@@ -312,3 +338,7 @@ class MiskWebModule @JvmOverloads constructor(
     val miskCallerType = object : TypeLiteral<MiskCaller?>() {}
   }
 }
+
+@BindingAnnotation
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+annotation internal class ReadinessRefreshQueue
