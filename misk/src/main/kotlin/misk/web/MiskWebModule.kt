@@ -8,11 +8,14 @@ import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.squareup.wire.GrpcException
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
 import misk.ReadyService
 import misk.ServiceModule
+import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
 import misk.inject.KAbstractModule
@@ -90,16 +93,13 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.thread.ThreadPool
+import wisp.deployment.Deployment
 import java.io.IOException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import misk.concurrent.ExplicitReleaseDelayQueue
-import wisp.deployment.Deployment
 import javax.servlet.http.HttpServletRequest
 import kotlin.math.min
 
@@ -117,18 +117,9 @@ class MiskWebModule @JvmOverloads constructor(
         dependsOn = jettyDependsOn
       ).dependsOn<ReadyService>()
     )
-    install(
-      ServiceModule<JettyThreadPoolMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<JettyConnectionMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<ReadinessCheckService>()
-        .enhancedBy<ReadyService>()
-    )
+    install(ServiceModule<JettyThreadPoolMetricsCollector>().enhancedBy<ReadyService>())
+    install(ServiceModule<JettyConnectionMetricsCollector>().enhancedBy<ReadyService>())
+    install(ServiceModule<ReadinessCheckService>())
 
     install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 
