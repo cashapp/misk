@@ -166,8 +166,7 @@ subprojects {
       add("testRuntimeOnly", Dependencies.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.
-      // Enforce misk-bom and wisk-bom -- it should take priority over external BOMs.
-      add("api", enforcedPlatform(project(":wisp:wisp-bom")))
+      // Enforce misk-bom -- it should take priority over external BOMs.
       add("api", enforcedPlatform(project(":misk-bom")))
       add("api", platform(Dependencies.grpcBom))
       add("api", platform(Dependencies.guavaBom))
