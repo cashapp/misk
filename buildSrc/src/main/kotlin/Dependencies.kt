@@ -136,7 +136,7 @@ object Dependencies {
   val moshi = "com.squareup.moshi:moshi:1.15.0"
   val moshiAdapters = "com.squareup.moshi:moshi-adapters:1.14.0"
   val moshiKotlin = "com.squareup.moshi:moshi-kotlin:1.15.0"
-  val mysql = "mysql:mysql-connector-java:8.0.21"
+  val mysql = "mysql:mysql-connector-j:8.0.33"
   val nettyBom = "io.netty:netty-bom:4.1.92.Final"
   val nettyHandler = "io.netty:netty-handler:4.1.92.Final"
   val okHttp = "com.squareup.okhttp3:okhttp:4.11.0"
