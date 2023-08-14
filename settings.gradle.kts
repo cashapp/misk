@@ -11,7 +11,6 @@ gradleEnterprise {
 
 include(":detektive")
 include(":wisp:wisp-aws-environment")
-include(":wisp:wisp-bom")
 include(":wisp:wisp-client")
 include(":wisp:wisp-config")
 include(":wisp:wisp-containers-testing")
