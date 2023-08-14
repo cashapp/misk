@@ -1,5 +1,6 @@
 package com.squareup.exemplar
 
+import com.squareup.exemplar.dashboard.SupportDashboardAccess
 import misk.MiskCaller
 import misk.inject.KAbstractModule
 import misk.security.authz.*
@@ -16,8 +17,14 @@ class ExemplarAccessModule : KAbstractModule() {
       capabilities = listOf("admin_console"))
     )
 
+    // Give engineers access to the support dashboard
+    multibind<AccessAnnotationEntry>().toInstance(
+      AccessAnnotationEntry<SupportDashboardAccess>(
+        capabilities = listOf("customer_support"))
+    )
+
     // Setup authentication in the development environment
     bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
-      .toInstance(MiskCaller(user = "triceratops", capabilities = setOf("admin_console", "users")))
+      .toInstance(MiskCaller(user = "triceratops", capabilities = setOf("admin_console", "customer_support", "users")))
   }
 }
