@@ -114,7 +114,7 @@ fun TagConsumer<*>.Navbar(
       }
     }
     // +"""<!-- Static sidebar for desktop -->"""
-    div("hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col") {
+    div("bg-gray-900 hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col") {
       // +"""<!-- Sidebar component, swap this element with another sidebar if you like -->"""
       div("flex grow flex-col gap-y-5 overflow-y-auto bg-black/10 px-6 ring-1 ring-white/5") {
         div("flex h-16 shrink-0 items-center") {
@@ -130,7 +130,7 @@ fun TagConsumer<*>.Navbar(
     }
     div("xl:pl-72") {
       // +"""<!-- Sticky search header -->"""
-      div("sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b-4 border-b-${deployment.asColor()} bg-gray-900 px-6 shadow-sm sm:px-6 lg:px-6") {
+      div("sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b-4 ${deployment.asBorderColor()} bg-gray-900 px-6 shadow-sm sm:px-6 lg:px-6") {
         if (menuSections.isNotEmpty()) {
           button(classes = "-m-2.5 p-2.5 text-white xl:hidden") {
             attributes["data-action"] = "toggle#toggle"
@@ -152,7 +152,7 @@ fun TagConsumer<*>.Navbar(
           a(homeHref) {
             h1("text-white text-lg") { +appName.uppercase() }
           }
-          h1("text-${deployment.asColor()} text-lg") {
+          h1("${deployment.asTextColor()} text-lg") {
             +deployment.mapToEnvironmentName().uppercase()
           }
         }
@@ -166,11 +166,20 @@ fun TagConsumer<*>.Navbar(
   }
 }
 
-fun Deployment.asColor() = when {
-  isProduction -> "red-500"
-  isStaging -> "green-500"
-  isTest -> "white"
-  else -> "blue-500"
+/** Classes must be complete or they are not included in the production CSS. */
+private fun Deployment.asTextColor() = when {
+  isProduction -> "text-red-500"
+  isStaging -> "text-green-500"
+  isTest -> "text-white"
+  else -> "text-blue-500"
+}
+
+/** Classes must be complete or they are not included in the production CSS. */
+private fun Deployment.asBorderColor() = when {
+  isProduction -> "border-b-red-500"
+  isStaging -> "border-b-green-500"
+  isTest -> "border-b-white"
+  else -> "border-b-blue-500"
 }
 
 private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {

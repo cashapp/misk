@@ -19,8 +19,8 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors.newSingleThreadExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * A [RepeatedTaskQueue] runs repeated tasks at a user controlled rate. Internally it uses

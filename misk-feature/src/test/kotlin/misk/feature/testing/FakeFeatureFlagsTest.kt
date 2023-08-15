@@ -11,7 +11,7 @@ import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.getEnum
 import misk.feature.getJson
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest
 internal class FakeFeatureFlagsTest {

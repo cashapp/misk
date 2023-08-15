@@ -2,7 +2,7 @@ package misk.perf
 
 import com.google.common.base.Ticker
 import com.google.common.util.concurrent.AbstractExecutionThreadService
-import io.prometheus.client.Summary
+import io.prometheus.client.Histogram
 import misk.concurrent.Sleeper
 import misk.metrics.v2.Metrics
 import misk.metrics.v2.PeakGauge
@@ -11,8 +11,8 @@ import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.NANOSECONDS
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Detects and records pauses experienced by the VM. Garbage collection is a common source of
@@ -40,15 +40,23 @@ internal class PauseDetector @Inject constructor(
   /**
    * Tracks the distribution and total amount of pause time observed.
    *
-   * (Using a summary instead of a histogram to prefer more accurate node-local data over
-   * more accurate aggregations)
+   * (We prefer histogram to summary here because the latter has higher CPU overhead, this runs
+   * ideally at close to 1k QPS, and we don't strictly require accurate quantiles.)
    */
-  private val pauseSummary: Summary =
-    metrics.summary("jvm_pause_time_summary_ms", "Summary in ms of pause time", listOf())
+  private val pauseHistogram: Histogram =
+    metrics.histogram(
+      "jvm_pause_time_histogram_ms",
+      "Histogram of observed pause time durations in millis",
+      listOf()
+    )
 
   /** Tracks peak pause time. */
   private val pausePeak: PeakGauge =
-    metrics.peakGauge("jvm_pause_time_peak_ms", "Peak gauge of pause time", listOf())
+    metrics.peakGauge(
+      "jvm_pause_time_peak_ms",
+      "Peak gauge of observed pause time duration in millis",
+      listOf()
+    )
 
   // No synchronization is necessary for these variables: they are only ever accessed by the
   // detector thread itself OR by a test harness thread.
@@ -107,7 +115,7 @@ internal class PauseDetector @Inject constructor(
     val pauseMillis = NANOSECONDS.toMillis(pauseTimeNsec)
     if (pauseMillis >= config.metricsUpdateFloor) {
       val pauseMillisDouble = pauseMillis.toDouble()
-      pauseSummary.observe(pauseMillisDouble)
+      pauseHistogram.observe(pauseMillisDouble)
       pausePeak.record(pauseMillisDouble)
     }
 

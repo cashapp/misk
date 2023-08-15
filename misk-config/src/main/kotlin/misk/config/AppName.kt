@@ -1,6 +1,6 @@
 package misk.config
 
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 @Qualifier
 @Target(

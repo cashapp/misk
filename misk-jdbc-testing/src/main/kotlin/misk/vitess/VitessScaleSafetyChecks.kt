@@ -23,7 +23,7 @@ import java.util.ArrayDeque
 import java.util.Collections
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import javax.sql.DataSource
 
 internal data class Instruction(

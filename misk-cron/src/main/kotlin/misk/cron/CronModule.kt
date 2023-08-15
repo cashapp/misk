@@ -3,7 +3,7 @@ package misk.cron
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import com.google.inject.Provides
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceModule
@@ -12,7 +12,7 @@ import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import java.time.ZoneId
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 class CronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,

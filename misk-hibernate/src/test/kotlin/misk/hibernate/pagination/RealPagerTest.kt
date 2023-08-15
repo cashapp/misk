@@ -24,7 +24,7 @@ import wisp.logging.LogCollector
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class RealPagerTest {

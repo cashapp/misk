@@ -10,8 +10,8 @@ import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import java.lang.management.RuntimeMXBean
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Conveys information about the current JVM

@@ -12,7 +12,7 @@ import io.prometheus.client.hotspot.VersionInfoExports
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Exposes prometheus metrics over a dedicated port. Allows internal metrics to be exposed via a k8s

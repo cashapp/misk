@@ -14,7 +14,7 @@ dependencies {
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.wispTimeTesting)
+  testImplementation(project(":wisp:wisp-time-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

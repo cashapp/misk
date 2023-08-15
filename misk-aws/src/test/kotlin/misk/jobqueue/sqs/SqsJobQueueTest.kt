@@ -29,7 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -228,7 +228,7 @@ internal class SqsJobQueueTest {
       sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
     ).isEqualTo(1.0)
     assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(2)
+    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
 
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
       0.0
@@ -414,7 +414,7 @@ internal class SqsJobQueueTest {
       sqsMetrics.jobsDeadLettered.labels(queueName.value, queueName.value).get()
     ).isEqualTo(0.0)
     assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(3)
+    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
 
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
       2.0

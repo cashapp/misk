@@ -13,7 +13,7 @@ import misk.inject.asSingleton
 import misk.inject.parameterizedType
 import misk.inject.toKey
 import misk.inject.typeLiteral
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.reflect.KClass
 
 /**

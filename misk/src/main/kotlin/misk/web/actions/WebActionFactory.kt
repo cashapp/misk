@@ -28,8 +28,8 @@ import misk.web.interceptors.ForContentEncoding
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import okhttp3.MediaType.Companion.toMediaType
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter

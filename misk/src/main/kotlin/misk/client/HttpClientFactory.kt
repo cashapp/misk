@@ -5,9 +5,9 @@ import misk.security.ssl.SslLoader
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import wisp.client.EnvoyClientEndpointProvider
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
 @Singleton
 class HttpClientFactory @Inject constructor(

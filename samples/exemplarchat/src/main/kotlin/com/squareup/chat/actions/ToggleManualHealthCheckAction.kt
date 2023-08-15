@@ -5,8 +5,8 @@ import misk.web.Post
 import misk.web.QueryParam
 import misk.web.Response
 import misk.web.actions.WebAction
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class ToggleManualHealthCheckAction @Inject constructor() : WebAction {

@@ -1,8 +1,8 @@
 package misk.jobqueue.sqs
 
 import misk.metrics.Metrics
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * SQS Jobqueue metrics.

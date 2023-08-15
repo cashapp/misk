@@ -8,9 +8,9 @@ import com.google.inject.util.Types
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
@@ -115,7 +115,7 @@ fun uninject(target: Any) {
           if (!f.type.isPrimitive) f.set(target, null)
         }
         if (f.isAnnotationPresent(com.google.inject.Inject::class.java)) {
-          throw AssertionError("prefer @javax.inject.Inject for " + target.javaClass)
+          throw AssertionError("prefer @jakarta.inject.Inject for " + target.javaClass)
         }
       }
       c = c.superclass

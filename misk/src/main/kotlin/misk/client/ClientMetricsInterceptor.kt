@@ -14,8 +14,8 @@ import retrofit2.Invocation
 import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 class ClientMetricsInterceptor private constructor(
   val clientName: String,

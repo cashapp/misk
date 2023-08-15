@@ -4,7 +4,7 @@ import com.google.inject.Provides
 import io.grpc.BindableService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import javax.inject.Named
+import jakarta.inject.Named
 
 /** A module that runs a standard gRPC server: generated protoc protos and a Netty backend. */
 class RouteGuideProtocServiceModule : KAbstractModule() {

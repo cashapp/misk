@@ -27,7 +27,7 @@ import org.hibernate.jpa.event.spi.Callback
 import org.hibernate.jpa.event.spi.CallbackRegistry
 import org.hibernate.jpa.event.spi.CallbackRegistryConsumer
 import org.hibernate.persister.entity.EntityPersister
-import javax.inject.Provider
+import com.google.inject.Provider
 
 /**
  * This class delegates to other event listeners registered with Guice. This allows us to defer

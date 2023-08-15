@@ -11,7 +11,7 @@ import okhttp3.Headers.Companion.toHeaders
 import org.slf4j.event.Level
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /** Maps certain TransactionCanceledExceptionMapper to 503 responses when the exception is concurrency related */
 class TransactionCanceledExceptionMapper @Inject constructor() :

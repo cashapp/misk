@@ -2,8 +2,8 @@ package misk.web.dashboard
 
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 /**
@@ -47,7 +47,7 @@ class DashboardTabProvider @JvmOverloads constructor(
   val services: Set<String> = setOf(),
   val accessAnnotationKClass: KClass<out Annotation>? = null,
   val dashboardAnnotationKClass: KClass<out Annotation>,
-) : Provider<DashboardTab> {
+) : Provider<DashboardTab>, ValidWebEntry(slug, url_path_prefix) {
   @Inject lateinit var accessAnnotationEntries: List<AccessAnnotationEntry>
 
   override fun get(): DashboardTab {

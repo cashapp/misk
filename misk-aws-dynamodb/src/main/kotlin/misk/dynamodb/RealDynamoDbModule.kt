@@ -15,8 +15,8 @@ import misk.cloud.aws.AwsRegion
 import misk.exceptions.dynamodb.DynamoDbExceptionMapperModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 

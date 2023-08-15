@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertEquals
 
 @MiskTest(startService = true)

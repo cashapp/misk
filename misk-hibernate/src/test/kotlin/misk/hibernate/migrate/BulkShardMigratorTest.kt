@@ -26,7 +26,7 @@ import org.assertj.core.api.ListAssert
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 abstract class BulkShardMigratorTest {
   @Inject @Movies lateinit var transacter: Transacter

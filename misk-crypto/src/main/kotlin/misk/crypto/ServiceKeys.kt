@@ -1,6 +1,6 @@
 package misk.crypto
 
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 import kotlin.annotation.AnnotationRetention.RUNTIME
 
 /**

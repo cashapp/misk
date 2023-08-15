@@ -3,7 +3,7 @@ package misk
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.ParameterException
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * A command to run from the command line. Each command has an associated name and

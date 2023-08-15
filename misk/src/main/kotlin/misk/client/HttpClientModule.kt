@@ -6,7 +6,7 @@ import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import okhttp3.OkHttpClient
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /** Provides an [OkHttpClient] and [ProtoMessageHttpClient] for a peer service */
 class HttpClientModule @JvmOverloads constructor(

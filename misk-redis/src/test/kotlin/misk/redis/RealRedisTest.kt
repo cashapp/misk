@@ -10,7 +10,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import redis.clients.jedis.JedisPoolConfig
 import wisp.deployment.TESTING
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest
 class RealRedisTest : AbstractRedisTest() {

@@ -2,7 +2,7 @@ package misk.redis
 
 import com.google.common.base.Ticker
 import com.google.inject.Provides
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule

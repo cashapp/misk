@@ -25,7 +25,7 @@ wire {
 
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.javaxInject)
+  api(Dependencies.jakartaInject)
   api(Dependencies.wireReflector)
   api(project(":misk-actions"))
   api(project(":misk-inject"))
@@ -35,7 +35,7 @@ dependencies {
   implementation(Dependencies.wireGrpcClient)
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.wireSchema)
-  implementation(Dependencies.wispLogging)
+  implementation(project(":wisp:wisp-logging"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
