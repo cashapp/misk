@@ -9,18 +9,29 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
  */
 val defaultKotlinMoshi = buildMoshi(emptyList())
 
-fun buildMoshi(jsonAdapters: List<Any>): Moshi {
-    val builder = Moshi.Builder()
+@JvmOverloads
+fun buildMoshi(
+  jsonAdapters: List<Any>,
+  jsonLastAdapters: List<Any> = emptyList()
+): Moshi {
+  val builder = Moshi.Builder()
 
-    jsonAdapters.forEach { jsonAdapter ->
-        when (jsonAdapter) {
-            is JsonAdapter.Factory -> builder.add(jsonAdapter)
-            else -> builder.add(jsonAdapter)
-        }
+  jsonAdapters.forEach { jsonAdapter ->
+    when (jsonAdapter) {
+      is JsonAdapter.Factory -> builder.add(jsonAdapter)
+      else -> builder.add(jsonAdapter)
     }
+  }
 
-    // Install last so that user adapters take precedence.
-    builder.add(KotlinJsonAdapterFactory())
+  // addLast so that user adapters take precedence.
+  jsonLastAdapters.forEach { jsonAdapter ->
+    when (jsonAdapter) {
+      is JsonAdapter.Factory -> builder.addLast(jsonAdapter)
+      else -> builder.addLast(jsonAdapter)
+    }
+  }
+  
+  builder.addLast(KotlinJsonAdapterFactory())
 
-    return builder.build()
+  return builder.build()
 }

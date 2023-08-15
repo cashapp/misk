@@ -6,6 +6,8 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
+import com.squareup.protos.test.grpc.HelloRequest
+import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -40,6 +42,24 @@ internal class MoshiModuleTest {
     val jsonAdapter = moshi.adapter<Point>()
     assertThat(jsonAdapter.toJson(value)).isEqualTo(json.trimMargin())
     assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
+  }
+
+  /** Ensure we our custom Wire Message features, including ignoring unknown fields */
+  @Test
+  fun wireFeaturesAreEnabled() {
+    val jsonAdapter = moshi.adapter<HelloRequest>()
+    val value = HelloRequest.Builder().name("Robbie").build()
+    assertThat(jsonAdapter.fromJson("""{"name":"Robbie"}""")).isEqualTo(value)
+    assertThat(jsonAdapter.toJson(value)).isEqualTo("""{"name":"Robbie"}""")
+  }
+
+  /** But if we install a custom adapter for a Wire class, it takes precedence. */
+  @Test
+  fun customAdapterIsPreferredOverWireAdapter() {
+    val jsonAdapter = moshi.adapter<Dinosaur>()
+    val value = Dinosaur.Builder().name("Robbie").build()
+    assertThat(jsonAdapter.fromJson("""["Rawr! My name is Robbie"]""")).isEqualTo(value)
+    assertThat(jsonAdapter.toJson(value)).isEqualTo("""["Rawr! My name is Robbie"]""")
   }
 
   /** We can also install an adapter that has an explicit type. */
@@ -78,6 +98,22 @@ internal class MoshiModuleTest {
 
           override fun toJson(writer: JsonWriter, value: Hat?) {
             writer.value(value!!.size)
+          }
+        })
+      )
+      install(
+        MoshiAdapterModule<Dinosaur>(object : JsonAdapter<Dinosaur>() {
+          override fun fromJson(reader: JsonReader): Dinosaur? {
+            reader.beginArray()
+            val name = reader.nextString().split(" ").last()
+            reader.endArray()
+            return Dinosaur.Builder().name(name).build()
+          }
+
+          override fun toJson(writer: JsonWriter, value: Dinosaur?) {
+            writer.beginArray()
+            writer.value("Rawr! My name is ${value?.name}")
+            writer.endArray()
           }
         })
       )
