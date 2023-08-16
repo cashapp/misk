@@ -44,7 +44,7 @@ internal class MoshiModuleTest {
     assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
   }
 
-  /** Ensure we our custom Wire Message features, including ignoring unknown fields */
+  /** Ensure we get our custom Wire Message features, including ignoring unknown fields */
   @Test
   fun wireFeaturesAreEnabled() {
     val jsonAdapter = moshi.adapter<HelloRequest>()
