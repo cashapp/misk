@@ -177,6 +177,7 @@ subprojects {
       add("api", platform(Dependencies.kotlinBom))
       add("api", platform(Dependencies.nettyBom))
       add("api", platform(Dependencies.prometheusClientBom))
+      add("api", platform(Dependencies.tempestBom))
       add("api", platform(Dependencies.wireBom))
     }
 
