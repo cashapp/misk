@@ -17,14 +17,18 @@ fun buildMoshi(
   val builder = Moshi.Builder()
 
   jsonAdapters.forEach { jsonAdapter ->
+    // There are multiple overloads of add() that do different things based on the type of the param.
+    // This forces the correct overload for be called for JsonAdapter.Factory
     when (jsonAdapter) {
       is JsonAdapter.Factory -> builder.add(jsonAdapter)
       else -> builder.add(jsonAdapter)
     }
   }
 
-  // addLast so that user adapters take precedence.
+  // addLast() so that user adapters take precedence
   jsonLastAdapters.forEach { jsonAdapter ->
+    // There are multiple overloads of add() that do different things based on the type of the param.
+    // This forces the correct overload for be called for JsonAdapter.Factory
     when (jsonAdapter) {
       is JsonAdapter.Factory -> builder.addLast(jsonAdapter)
       else -> builder.addLast(jsonAdapter)
