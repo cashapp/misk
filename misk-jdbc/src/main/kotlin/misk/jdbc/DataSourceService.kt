@@ -10,6 +10,7 @@ import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import com.google.inject.Provider
 import jakarta.inject.Singleton
+import java.time.Duration
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
@@ -72,6 +73,10 @@ class DataSourceService @JvmOverloads constructor(
     hikariConfig.poolName = qualifier.simpleName
     hikariConfig.connectionTimeout = config.connection_timeout.toMillis()
     hikariConfig.validationTimeout = config.validation_timeout.toMillis()
+    hikariConfig.idleTimeout = config.connection_idle_timeout.let {
+      val idleTimeout = it ?: config.connection_max_lifetime.minus(DEFAULT_IDLE_TIMEOUT_OFFSET)
+      idleTimeout.toMillis()
+    }
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
 
     if (config.type != DataSourceType.VITESS_MYSQL) {
@@ -138,5 +143,6 @@ class DataSourceService @JvmOverloads constructor(
 
   companion object {
     val logger = getLogger<DataSourceService>()
+    private val DEFAULT_IDLE_TIMEOUT_OFFSET = Duration.ofSeconds(10)
   }
 }
