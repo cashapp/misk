@@ -23,6 +23,9 @@ class MoshiModule @JvmOverloads constructor(
   private val useWireToWrite: Boolean = false
 ) : KAbstractModule() {
   override fun configure() {
+    newMultibinder<Any>(MoshiJsonAdapter::class)
+    newMultibinder<Any>(MoshiJsonLastAdapter::class)
+    
     val wireFactory = WireOnlyJsonAdapterFactory()
     val miskFactory = MiskOnlyMessageAdapter.Factory()
     install(
@@ -30,7 +33,8 @@ class MoshiModule @JvmOverloads constructor(
         MigratingJsonAdapterFactory(
           reader = if (useWireToRead) wireFactory else miskFactory,
           writer = if (useWireToWrite) wireFactory else miskFactory
-        )
+        ),
+        addLast = true,
       )
     )
 
@@ -44,8 +48,9 @@ class MoshiModule @JvmOverloads constructor(
   @Provides
   @Singleton
   fun provideMoshi(
-    @MoshiJsonAdapter jsonAdapters: List<Any>
+    @MoshiJsonAdapter jsonAdapters: List<Any>,
+    @MoshiJsonLastAdapter jsonLastAdapters: List<Any>,
   ): Moshi {
-    return buildMoshi(jsonAdapters)
+    return buildMoshi(jsonAdapters, jsonLastAdapters)
   }
 }
