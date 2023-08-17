@@ -1,5 +1,6 @@
 package misk.security.authz
 
+import com.google.inject.BindingAnnotation
 import kotlin.reflect.KClass
 
 /**
@@ -50,3 +51,22 @@ inline fun <reified T : Annotation> AccessAnnotationEntry(
 ): AccessAnnotationEntry {
   return AccessAnnotationEntry(T::class, services, capabilities)
 }
+
+/**
+ * Exclude a service from @AllowAllServices.
+ *
+ * Add any external proxies that do service-to-service authentication to prevent AllowAllServices
+ * from also allowing e.g. external traffic.
+ *
+ * You can still explicitly include these services by including them in
+ * @Authenticated(services=["my-proxy"]) or with a custom decorotor that creates
+ * an AccessAnnotationEntry.
+ *
+ * Usage:
+ *  multibind<String, ExcludeServiceFromWildcards>().toInstance("web-proxy")
+ *  multibind<String, ExcludeServiceFromWildcards>().toInstance("access-proxy")
+ */
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@BindingAnnotation
+annotation class ExcludeServiceFromWildcards

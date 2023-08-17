@@ -29,6 +29,7 @@ data class MiskCaller @JvmOverloads constructor(
   }
 
   /** Determine based on allowed capabilities/services if the caller is permitted */
+  @Deprecated("This has been inlined into AccessInterceptor.isAuthorized()")
   fun isAllowed(allowedCapabilities: Set<String>, allowedServices: Set<String>): Boolean {
     // Allow if we don't have any requirements on service or capability
     if (allowedServices.isEmpty() && allowedCapabilities.isEmpty()) return true

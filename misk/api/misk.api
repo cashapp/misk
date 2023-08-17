@@ -980,7 +980,7 @@ public final class misk/security/authz/AccessControlModule : misk/scope/ActionSc
 
 public final class misk/security/authz/AccessInterceptor : misk/ApplicationInterceptor {
 	public static final field Companion Lmisk/security/authz/AccessInterceptor$Companion;
-	public synthetic fun <init> (Ljava/util/Set;Ljava/util/Set;Lmisk/scope/ActionScoped;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/Set;Ljava/util/Set;Lmisk/scope/ActionScoped;ZLjava/util/Set;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getAllowedCapabilities ()Ljava/util/Set;
 	public final fun getAllowedServices ()Ljava/util/Set;
 	public fun intercept (Lmisk/Chain;)Ljava/lang/Object;
@@ -991,6 +991,9 @@ public final class misk/security/authz/AccessInterceptor$Companion {
 }
 
 public abstract interface annotation class misk/security/authz/DevelopmentOnly : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class misk/security/authz/ExcludeServiceFromWildcards : java/lang/annotation/Annotation {
 }
 
 public final class misk/security/authz/FakeCallerAuthenticator : misk/security/authz/MiskCallerAuthenticator {

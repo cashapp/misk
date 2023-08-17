@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import jakarta.inject.Inject
+import misk.security.authz.AccessInterceptor
+import wisp.logging.LogCollector
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -30,6 +32,7 @@ class AuthenticationTest {
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
+  @Inject private lateinit var logCollector: LogCollector
 
   @Test fun customServiceAccess_unauthenticated() {
     assertThat(executeRequest(path = "/custom_service_access"))
@@ -77,6 +80,103 @@ class AuthenticationTest {
       )
     )
       .isEqualTo("$caller authorized with custom capability")
+  }
+
+  @Test fun testEmptyAuthenticatedWithUser() {
+    val caller = MiskCaller(user = "sandy", capabilities = setOf("nothingfancy"))
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_access",
+        user = "sandy",
+        capabilities = "nothingfancy"
+      )
+    )
+      .isEqualTo("$caller authorized with empty Authenticated")
+    val logs = logCollector.takeEvents(AccessInterceptor::class).map { it.message }
+    assertThat(logs).contains("EmptyAuthenticatedAccessAction::get() is has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated.")
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = ["widgeteer", "web-proxy", "access-proxy"]) // web-proxy and access-proxy are both ExcludeServiceFromWildcards
+  fun testEmptyAuthenticatedWithService(service: String) {
+    val caller = MiskCaller(service = service)
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_access",
+        service = service
+      )
+    )
+      .isEqualTo("$caller authorized with empty Authenticated")
+    val logs = logCollector.takeEvents(AccessInterceptor::class).map { it.message }
+    assertThat(logs).contains("EmptyAuthenticatedAccessAction::get() is has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated.")
+  }
+
+  @Test fun testEmptyAuthenticatedUnauthenticated() {
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_access"
+      )
+    )
+      .isEqualTo("unauthenticated")
+    val logs = logCollector.takeEvents(AccessInterceptor::class).map { it.message }
+    assertThat(logs).contains("EmptyAuthenticatedAccessAction::get() is has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated.")
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = ["web-proxy", "access-proxy"]) // web-proxy and access-proxy are both ExcludeServiceFromWildcards
+  fun testEmptyAllowAnyServiceWithExcludedServices(service: String) {
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_access",
+        service = service
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun testEmptyAllowAnyService() {
+    val service = "widgeteer"
+    val caller = MiskCaller(service = service)
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_access",
+        service = service
+      )
+    )
+      .isEqualTo("$caller authorized as any service")
+  }
+
+  @Test fun testEmptyAllowAnyServiceWithUser() {
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_access",
+        user = "sandy"
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun testEmptyAllowAnyServiceWithExcludedButExplicityAddedService() {
+    val service = "web-proxy"
+    val caller = MiskCaller(service = service)
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_access_with_wildcard_included",
+        service = service
+      )
+    )
+      .isEqualTo("$caller authorized as any service")
+  }
+
+  @Test fun testEmptyAllowAnyServiceWithExcludedButWrongExplicityAddedService() {
+    val service = "access-proxy"
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_access_with_wildcard_included",
+        service = service
+      )
+    )
+      .isEqualTo("unauthorized")
   }
 
   private class MixesUnauthenticatedWithOtherAnnotations @Inject constructor() : WebAction {

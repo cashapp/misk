@@ -10,5 +10,6 @@ class AccessControlModule : ActionScopedProviderModule() {
   override fun configureProviders() {
     multibind<ApplicationInterceptor.Factory>().to<AccessInterceptor.Factory>()
     newMultibinder<AccessAnnotationEntry>()
+    newMultibinder<String, ExcludeServiceFromWildcards>()
   }
 }

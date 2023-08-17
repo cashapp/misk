@@ -1,5 +1,6 @@
 package misk.security.authz
 
+import jakarta.inject.Inject
 import misk.Action
 import misk.ApplicationInterceptor
 import misk.Chain
@@ -8,18 +9,19 @@ import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.scope.ActionScoped
 import wisp.logging.getLogger
-import jakarta.inject.Inject
 import kotlin.reflect.KClass
 
 class AccessInterceptor private constructor(
   val allowedServices: Set<String>,
   val allowedCapabilities: Set<String>,
-  private val caller: ActionScoped<MiskCaller?>
+  private val caller: ActionScoped<MiskCaller?>,
+  private val allowAnyService: Boolean,
+  private val excludeServicesFromWildcard: Set<String>
 ) : ApplicationInterceptor {
 
   override fun intercept(chain: Chain): Any {
     val caller = caller.get() ?: throw UnauthenticatedException()
-    if (!caller.isAllowed(allowedCapabilities, allowedServices)) {
+    if (!isAuthorized(caller)) {
       logger.warn { "$caller is not allowed to access ${chain.action}" }
       throw UnauthorizedException()
     }
@@ -29,24 +31,41 @@ class AccessInterceptor private constructor(
 
   internal class Factory @Inject internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-    private val registeredEntries: List<AccessAnnotationEntry>
+    private val registeredEntries: List<AccessAnnotationEntry>,
+    @ExcludeServiceFromWildcards private val excludeServiceFromWildcards: List<String>,
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
       // Gather all of the access annotations on this action.
       val actionEntries = mutableListOf<AccessAnnotationEntry>()
       for (annotation in action.function.annotations) when {
         annotation is Authenticated -> actionEntries += annotation.toAccessAnnotationEntry()
-        annotation is Unauthenticated -> actionEntries += annotation.toAccessAnnotationEntry()
         registeredEntries.find { it.annotation == annotation.annotationClass } != null -> {
           actionEntries += registeredEntries.find { it.annotation == annotation.annotationClass }!!
         }
       }
 
+      // This action is explicitly marked as unauthenticated, so we return null (do not intercept)
+      if (action.hasAnnotation<Unauthenticated>()) {
+        check(actionEntries.size == 0) {
+          val otherAnnotations = actionEntries
+            .filterNot { it.annotation == Unauthenticated::class }
+            .map { "@${it.annotation.qualifiedName!!}" }
+            .sorted()
+            .joinToString()
+          """${action.name}::${action.function.name}() is annotated with @${Unauthenticated::class.qualifiedName}, but also annotated with the following access annotations: $otherAnnotations. This is a contradiction.
+          """.trimIndent()
+        }
+        return null
+      }
+
+      val allowAnyService = action.hasAnnotation<AllowAnyService>()
+
       // No access annotations. Fail with a useful message.
-      check(actionEntries.isNotEmpty()) {
+      check(allowAnyService || actionEntries.isNotEmpty()) {
         val requiredAnnotations = mutableListOf<KClass<out Annotation>>()
         requiredAnnotations += Authenticated::class
         requiredAnnotations += Unauthenticated::class
+        requiredAnnotations += AllowAnyService::class
         requiredAnnotations += registeredEntries.map { it.annotation }
         """You need to register an AccessAnnotationEntry to tell the authorization system which capabilities and services are allowed to access ${action.name}::${action.function.name}(). You can either:
           |
@@ -69,26 +88,21 @@ class AccessInterceptor private constructor(
           """.trimMargin()
       }
 
-      // This action is explicitly marked as unauthenticated.
-      if (action.hasAnnotation<Unauthenticated>()) {
-        check(actionEntries.size == 1) {
-          val otherAnnotations = actionEntries
-            .filterNot { it.annotation == Unauthenticated::class }
-            .map { "@${it.annotation.qualifiedName!!}" }
-            .sorted()
-            .joinToString()
-          """${action.name}::${action.function.name}() is annotated with @${Unauthenticated::class.qualifiedName}, but also annotated with the following access annotations: $otherAnnotations. This is a contradiction.
-          """.trimIndent()
-        }
-        return null
-      }
-
       // Return an interceptor representing the union of the capabilities/services of all
       // annotations.
+      val allowedServices = actionEntries.flatMap { it.services }.toSet()
+      val allowedCapabilities = actionEntries.flatMap { it.capabilities }.toSet()
+
+      if (!allowAnyService && allowedServices.isEmpty() && allowedCapabilities.isEmpty()) {
+        logger.warn { "${action.name}::${action.function.name}() is has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated."}
+      }
+
       return AccessInterceptor(
-        actionEntries.flatMap { it.services }.toSet(),
-        actionEntries.flatMap { it.capabilities }.toSet(),
-        caller
+        allowedServices,
+        allowedCapabilities,
+        caller,
+        allowAnyService,
+        excludeServiceFromWildcards.toSet()
       )
     }
 
@@ -96,12 +110,27 @@ class AccessInterceptor private constructor(
       Authenticated::class, services.toList(), capabilities.toList()
     )
 
-    private fun Unauthenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
-      Unauthenticated::class, listOf(), listOf()
-    )
-
     private inline fun <reified T : Annotation> Action.hasAnnotation() =
       function.annotations.any { it.annotationClass == T::class }
+  }
+
+  /** Check whether the caller is allowed to access this endpoint */
+  private fun isAuthorized(caller: MiskCaller): Boolean {
+    // Compatability with the no-arguments @Authenticated decorator
+    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty() && !allowAnyService) {
+      return true
+    }
+
+    if (caller.user != null) {
+      return caller.capabilities.any { allowedCapabilities.contains(it) }
+    }
+
+    if (caller.service != null) {
+      val allowedAny = allowAnyService && !excludeServicesFromWildcard.contains(caller.service)
+      return allowedAny || allowedServices.contains(caller.service)
+    }
+
+    return false
   }
 
   companion object {
