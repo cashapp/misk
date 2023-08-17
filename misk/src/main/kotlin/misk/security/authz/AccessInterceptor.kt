@@ -19,7 +19,7 @@ class AccessInterceptor private constructor(
 
   override fun intercept(chain: Chain): Any {
     val caller = caller.get() ?: throw UnauthenticatedException()
-    if (!caller.isAllowed(allowedCapabilities, allowedServices)) {
+    if (!isAuthorized(caller)) {
       logger.warn { "$caller is not allowed to access ${chain.action}" }
       throw UnauthorizedException()
     }
@@ -102,6 +102,18 @@ class AccessInterceptor private constructor(
 
     private inline fun <reified T : Annotation> Action.hasAnnotation() =
       function.annotations.any { it.annotationClass == T::class }
+  }
+
+  /** Check whether the caller is allowed to access this endpoint */
+  private fun isAuthorized(caller: MiskCaller): Boolean {
+    // Allow if we don't have any requirements on service or capability
+    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty()) return true
+
+    // Allow if the caller has provided an allowed service
+    if (caller.service != null && allowedServices.contains(caller.service)) return true
+
+    // Allow if the caller has provided an allowed capability
+    return caller.capabilities.any { allowedCapabilities.contains(it) }
   }
 
   companion object {
