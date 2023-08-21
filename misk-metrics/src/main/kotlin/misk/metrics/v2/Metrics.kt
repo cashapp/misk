@@ -94,6 +94,9 @@ interface Metrics {
    *
    * See https://prometheus.github.io/client_java/io/prometheus/client/Summary.html for more info.
    *
+   * NB: Summaries can be an order of magnitude more expensive than histograms in terms of CPU.
+   * Unless you require the specific properties of a summary, consider using [histogram] instead.
+   *
    * @param name the name of the metric which will be supplied to prometheus.
    *  Must be unique across all metric types.
    * @param help human-readable help text that will be supplied to prometheus.
