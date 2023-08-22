@@ -8,11 +8,14 @@ import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.squareup.wire.GrpcException
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
 import misk.ReadyService
 import misk.ServiceModule
+import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
 import misk.inject.KAbstractModule
@@ -87,19 +90,17 @@ import misk.web.resources.StaticResourceEntry
 import org.eclipse.jetty.io.EofException
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
+import org.eclipse.jetty.util.VirtualThreads
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.thread.ThreadPool
+import wisp.deployment.Deployment
 import java.io.IOException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import misk.concurrent.ExplicitReleaseDelayQueue
-import wisp.deployment.Deployment
 import javax.servlet.http.HttpServletRequest
 import kotlin.math.min
 
@@ -272,6 +273,9 @@ class MiskWebModule @JvmOverloads constructor(
         idleTimeout,
         provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java))
       )
+      if (config.use_virtual_threads && VirtualThreads.areSupported()) {
+        threadPool.setVirtualThreadsExecutor { VirtualThreads.getDefaultVirtualThreadsExecutor() }
+      }
       threadPool.name = "jetty-thread"
       bind<ThreadPool>().toInstance(threadPool)
       bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(threadPool))
@@ -285,22 +289,29 @@ class MiskWebModule @JvmOverloads constructor(
       )
       val threadPool = ExecutorThreadPool(executor)
       threadPool.name = "jetty-thread"
+      if (config.use_virtual_threads && VirtualThreads.areSupported()) {
+        threadPool.setVirtualThreadsExecutor { VirtualThreads.getDefaultVirtualThreadsExecutor() }
+      }
       bind<ThreadPool>().toInstance(threadPool)
       bind<MeasuredThreadPool>().toInstance(MeasuredThreadPoolExecutor(executor))
     }
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun provideStatisticsHandler(): StatisticsHandler {
     return StatisticsHandler()
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun provideGzipHandler(): GzipHandler {
     return GzipHandler()
   }
 
-  @Provides @ReadinessRefreshQueue @Singleton
+  @Provides
+  @ReadinessRefreshQueue
+  @Singleton
   fun readinessRefreshQueue(
     queueFactory: RepeatedTaskQueueFactory,
     deployment: Deployment
@@ -313,14 +324,15 @@ class MiskWebModule @JvmOverloads constructor(
     }
   }
 
-  private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>):
-    BlockingQueue<Runnable> {
+  private fun provideThreadPoolQueue(
+    metrics: Provider<ThreadPoolQueueMetrics>
+  ): BlockingQueue<Runnable> {
     return if (config.enable_thread_pool_queue_metrics) {
       TimedBlockingQueue(
         config.jetty_max_thread_pool_queue_size
       ) { d -> metrics.get().recordQueueLatency(d) }
     } else {
-      ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
+      ArrayBlockingQueue(config.jetty_max_thread_pool_queue_size)
     }
   }
 
@@ -328,9 +340,9 @@ class MiskWebModule @JvmOverloads constructor(
     private val authenticators: List<MiskCallerAuthenticator>
   ) : ActionScopedProvider<MiskCaller?> {
     override fun get(): MiskCaller? {
-      return authenticators.mapNotNull {
+      return authenticators.firstNotNullOfOrNull {
         it.getAuthenticatedCaller()
-      }.firstOrNull()
+      }
     }
   }
 
@@ -341,4 +353,4 @@ class MiskWebModule @JvmOverloads constructor(
 
 @BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
-annotation internal class ReadinessRefreshQueue
+internal annotation class ReadinessRefreshQueue

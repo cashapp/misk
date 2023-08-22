@@ -131,7 +131,10 @@ data class WebConfig @JvmOverloads constructor(
   val readiness_refresh_interval_ms: Int = 1000,
 
   /** Maximum age of readiness status. If exceeded readiness will return an error */
-  val readiness_max_age_ms: Int = 10000
+  val readiness_max_age_ms: Int = 10000,
+
+  /** If possible (e.g. running on JDK 21) misk will attempt to use a virtual thread executor for jetty. */
+  val use_virtual_threads: Boolean = false
 ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
