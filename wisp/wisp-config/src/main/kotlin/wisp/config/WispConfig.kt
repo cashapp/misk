@@ -51,7 +51,7 @@ object WispConfig {
  * Config location and format (default yaml).  The location should be in a format that
  * [ResourceLoader] understands.
  */
-data class ConfigSource(val configLocation: String, val format: String = "yml")
+data class ConfigSource @JvmOverloads constructor(val configLocation: String, val format: String = "yml")
 
 /**
  * Add the config sources in the order supplied. If the config source location does not

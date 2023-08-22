@@ -7,6 +7,7 @@ import javax.net.ssl.TrustManagerFactory
 
 open class SslContextFactory constructor(private val sslLoader: SslLoader) {
     /** @return A new [SSLContext] for the given certstore and optional truststore config */
+    @JvmOverloads
     fun create(certStore: CertStoreConfig? = null, trustStore: TrustStoreConfig? = null): SSLContext {
         val loadedCertStore = certStore?.let { sslLoader.loadCertStore(certStore) }
         val loadedTrustStore = trustStore?.let { sslLoader.loadTrustStore(trustStore) }
@@ -14,6 +15,7 @@ open class SslContextFactory constructor(private val sslLoader: SslLoader) {
     }
 
     /** @return A new [SSLContext] for the given certstore and optional truststore config */
+    @JvmOverloads
     fun create(certStore: CertStore?, pin: CharArray?, trustStore: TrustStore? = null): SSLContext {
         val sslContext = SSLContext.getInstance("TLS", "SunJSSE")
         val trustManagers = trustStore?.keyStore?.let {

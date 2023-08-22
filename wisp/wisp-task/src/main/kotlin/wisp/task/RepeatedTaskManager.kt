@@ -12,7 +12,9 @@ import wisp.task.exception.TaskAlreadyExistsException
 /**
  * Basic management of repeated tasks.
  */
-class RepeatedTaskManager(private val meterRegistry: MeterRegistry = Metrics.globalRegistry) {
+class RepeatedTaskManager @JvmOverloads constructor(
+    private val meterRegistry: MeterRegistry = Metrics.globalRegistry
+) {
     private val repeatedTasks = mutableMapOf<String, RepeatedTask>()
 
     /**
@@ -21,6 +23,7 @@ class RepeatedTaskManager(private val meterRegistry: MeterRegistry = Metrics.glo
      *
      * Does not start the task.
      */
+    @JvmOverloads
     fun createTask(
         name: String,
         meterRegistry: MeterRegistry = this.meterRegistry,

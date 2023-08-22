@@ -3,7 +3,7 @@ package wisp.deployment
 /**
  * A Fake [EnvironmentVariableLoader] that loads from an in memory map
  */
-class FakeEnvironmentVariableLoader(val vars: MutableMap<String, String> = mutableMapOf()) :
+class FakeEnvironmentVariableLoader @JvmOverloads constructor(val vars: MutableMap<String, String> = mutableMapOf()) :
     EnvironmentVariableLoader {
 
     override fun getEnvironmentVariable(name: String): String {
