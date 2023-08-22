@@ -32,8 +32,8 @@ class JooqModule @JvmOverloads constructor(
   private val readerQualifier: KClass<out Annotation>? = null,
   private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions =
     JooqTimestampRecordListenerOptions(install = false),
-  private val jooqConfigExtension: Configuration.() -> Unit = {},
   private val installHealthChecks: Boolean = true,
+  private val jooqConfigExtension: Configuration.() -> Unit = {},
 ) : KAbstractModule() {
 
   override fun configure() {
