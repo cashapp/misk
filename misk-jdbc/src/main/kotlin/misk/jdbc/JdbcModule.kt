@@ -1,7 +1,9 @@
 package misk.jdbc
 
+import com.google.inject.Provider
 import io.opentracing.Tracer
 import io.prometheus.client.CollectorRegistry
+import jakarta.inject.Inject
 import misk.ReadyService
 import misk.ServiceModule
 import misk.database.StartDatabaseService
@@ -13,8 +15,6 @@ import misk.inject.setOfType
 import misk.inject.toKey
 import misk.resources.ResourceLoader
 import wisp.deployment.Deployment
-import jakarta.inject.Inject
-import com.google.inject.Provider
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
@@ -60,7 +60,8 @@ class JdbcModule @JvmOverloads constructor(
     bind(
       keyOf<StartDatabaseService>(qualifier)
     ).toProvider(object : Provider<StartDatabaseService> {
-      @Inject lateinit var deployment: Deployment
+      @Inject
+      lateinit var deployment: Deployment
       override fun get(): StartDatabaseService {
         return StartDatabaseService(deployment = deployment, config = config, qualifier = qualifier)
           .init()
@@ -80,7 +81,8 @@ class JdbcModule @JvmOverloads constructor(
 
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
-      @Inject lateinit var resourceLoader: ResourceLoader
+      @Inject
+      lateinit var resourceLoader: ResourceLoader
       override fun get(): SchemaMigrator = SchemaMigrator(
         qualifier = qualifier,
         resourceLoader = resourceLoader,
@@ -93,7 +95,8 @@ class JdbcModule @JvmOverloads constructor(
     val schemaMigratorServiceKey = keyOf<SchemaMigratorService>(qualifier)
     bind(schemaMigratorServiceKey)
       .toProvider(object : Provider<SchemaMigratorService> {
-        @Inject lateinit var deployment: Deployment
+        @Inject
+        lateinit var deployment: Deployment
         override fun get(): SchemaMigratorService = SchemaMigratorService(
           qualifier = qualifier,
           deployment = deployment,
@@ -127,17 +130,19 @@ class JdbcModule @JvmOverloads constructor(
     bind(keyOf<DataSourceConfig>(qualifier)).toInstance(config)
 
     // Bind PingDatabaseService.
-    bind(keyOf<PingDatabaseService>(qualifier)).toProvider(Provider {
-      PingDatabaseService(config, deploymentProvider.get())
-    }).asSingleton()
-    // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
-    // env. This is to remove flakiness in tests that are not waiting until Vitess is ready.
-    // This should be replaced with an ExternalDependency that manages vitess.
-    // TODO(jontirsen): I don't think this is needed anymore...
-    install(
-      ServiceModule<PingDatabaseService>(qualifier)
-        .dependsOn<StartDatabaseService>(this.qualifier)
-    )
+    if (installHealthCheck) {
+      bind(keyOf<PingDatabaseService>(qualifier)).toProvider {
+        PingDatabaseService(config, deploymentProvider.get())
+      }.asSingleton()
+      // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
+      // env. This is to remove flakiness in tests that are not waiting until Vitess is ready.
+      // This should be replaced with an ExternalDependency that manages vitess.
+      // TODO(jontirsen): I don't think this is needed anymore...
+      install(
+        ServiceModule<PingDatabaseService>(qualifier)
+          .dependsOn<StartDatabaseService>(this.qualifier)
+      )
+    }
 
     // Bind DataSourceService.
     val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)
@@ -164,11 +169,13 @@ class JdbcModule @JvmOverloads constructor(
     bind(keyOf<DataSourceConnector>(qualifier)).toProvider(dataSourceServiceProvider)
     install(
       ServiceModule<DataSourceService>(qualifier)
-        .dependsOn<PingDatabaseService>(qualifier)
+        .let {
+          if (installHealthCheck) it.dependsOn<PingDatabaseService>(qualifier)
+          else it
+        }
         .enhancedBy<ReadyService>()
     )
-    bind(keyOf<Transacter>(qualifier))
-      .toProvider(Provider<Transacter> { RealTransacter(dataSourceProvider.get()) })
+    bind(keyOf<Transacter>(qualifier)).toProvider { RealTransacter(dataSourceProvider.get()) }
 
     if (config.type == DataSourceType.VITESS_MYSQL) {
       val spanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)
