@@ -7,7 +7,13 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.toKey
-import misk.jdbc.*
+import misk.jdbc.DataSourceClusterConfig
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceService
+import misk.jdbc.DataSourceType
+import misk.jdbc.DatabasePool
+import misk.jdbc.JdbcModule
+import misk.jdbc.RealDatabasePool
 import misk.jooq.listeners.AvoidUsingSelectStarListener
 import misk.jooq.listeners.JooqSQLLogger
 import misk.jooq.listeners.JooqTimestampRecordListener
