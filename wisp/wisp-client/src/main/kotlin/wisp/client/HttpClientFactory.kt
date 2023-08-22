@@ -10,7 +10,7 @@ import java.io.File
 import java.net.Proxy
 import javax.net.ssl.X509TrustManager
 
-class HttpClientFactory constructor(
+class HttpClientFactory @JvmOverloads constructor(
     private val sslLoader: SslLoader = SslLoader(ResourceLoader.SYSTEM),
     private val sslContextFactory: SslContextFactory = SslContextFactory(sslLoader),
     private val okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator = OkHttpClientCommonConfigurator(),

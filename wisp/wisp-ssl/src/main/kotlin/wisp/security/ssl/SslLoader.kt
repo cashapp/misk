@@ -13,6 +13,7 @@ import java.security.spec.PKCS8EncodedKeySpec
 open class SslLoader constructor(
     private val resourceLoader: ResourceLoader
 ) {
+    @JvmOverloads
     fun loadTrustStore(
         path: String,
         format: String = FORMAT_PEM,
@@ -56,6 +57,7 @@ open class SslLoader constructor(
         return TrustStore(keyStore)
     }
 
+    @JvmOverloads
     fun loadCertStore(
         path: String,
         format: String = FORMAT_PEM,

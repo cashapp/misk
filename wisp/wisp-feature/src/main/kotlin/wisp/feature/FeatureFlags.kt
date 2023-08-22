@@ -380,6 +380,7 @@ open class Attributes @JvmOverloads constructor(
         return copy(number = number.plus(name to value))
     }
 
+    @JvmOverloads
     fun copy(
         text: Map<String, String> = this.text,
         number: Map<String, Number>? = this.number,

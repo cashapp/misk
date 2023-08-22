@@ -2,7 +2,7 @@ package wisp.task
 
 import wisp.config.Config
 
-data class RepeatedTaskConfig(
+data class RepeatedTaskConfig @JvmOverloads constructor(
     /**
      * Time between runs of tasks, set to 0 if immediately repeat task
      */
