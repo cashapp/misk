@@ -71,7 +71,7 @@ dependencies {
   implementation(project(":misk-service"))
   runtimeOnly(Dependencies.jettyAlpnServerJava)
 
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.guavaTestLib)
   testImplementation(Dependencies.junitApi)
