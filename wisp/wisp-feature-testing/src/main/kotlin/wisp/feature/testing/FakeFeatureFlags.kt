@@ -38,37 +38,44 @@ open class FakeFeatureFlags private constructor(
         moshi: Moshi = defaultKotlinMoshi
     ) : this({ moshi })
 
+    @JvmOverloads
     fun <T : Any, Flag : FeatureFlag<in T>> overrideAny(
         clazz: Class<out FeatureFlag<T>>,
         value: T,
         matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeFeatureFlags = this.also { strongFeatureFlags.overrideAny(clazz, value, matcher) }
 
+    @JvmOverloads
     inline fun <reified Flag : BooleanFeatureFlag> override(
         value: Boolean,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeFeatureFlags = this.also { strongFeatureFlags.override(value, matcher) }
 
+    @JvmOverloads
     inline fun <reified Flag : StringFeatureFlag> override(
         value: String,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeFeatureFlags = this.also { strongFeatureFlags.override(value, matcher) }
 
+    @JvmOverloads
     inline fun <reified Flag : IntFeatureFlag> override(
         value: Int,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeFeatureFlags = this.also { strongFeatureFlags.override(value, matcher) }
 
+    @JvmOverloads
     inline fun <reified Flag : DoubleFeatureFlag> override(
         value: Double,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeFeatureFlags = this.also { strongFeatureFlags.override(value, matcher) }
 
+    @JvmOverloads
     inline fun <reified Flag : JsonFeatureFlag<T>, T : Any> override(
         value: T,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeFeatureFlags = this.also { strongFeatureFlags.override(value, matcher) }
 
+    @JvmOverloads
     inline fun <reified Flag : EnumFeatureFlag<T>, T : Enum<T>> override(
         value: T,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
@@ -212,7 +219,7 @@ open class FakeFeatureFlags private constructor(
 
 }
 
-data class FeaturesConfig(
+data class FeaturesConfig @JvmOverloads constructor(
     val featureName: String,
     val key: String? = null,
     val attributes: Attributes = Attributes(),
@@ -220,6 +227,6 @@ data class FeaturesConfig(
     val type: String = "String"
 )
 
-data class FakeFeatureFlagsConfig(
+data class FakeFeatureFlagsConfig @JvmOverloads constructor(
     val featuresConfig: List<FeaturesConfig> = emptyList()
 ) : Config

@@ -4,7 +4,7 @@ import java.util.*
 
 /** Deployment describes the context in which the application is running
  */
-data class Deployment(
+data class Deployment @JvmOverloads constructor(
     /**
      * The name of this deployment. This is used for debugging and should not be parsed.
      *

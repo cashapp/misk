@@ -19,7 +19,7 @@ import java.io.FileNotFoundException
  *
  * [prefix] is either [CLASSPATH_PREFIX] or [FILESYSTEM_PREFIX]
  */
-class PrefixResourceLoaderPreprocessor(
+class PrefixResourceLoaderPreprocessor @JvmOverloads constructor(
   val prefix: String,
   val resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
 ) : TraversingPrimitivePreprocessor() {
