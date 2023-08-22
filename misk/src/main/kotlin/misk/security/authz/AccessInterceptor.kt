@@ -109,11 +109,8 @@ class AccessInterceptor private constructor(
     // Allow if we don't have any requirements on service or capability
     if (allowedServices.isEmpty() && allowedCapabilities.isEmpty()) return true
 
-    // Allow if the caller has provided an allowed service
-    if (caller.service != null && allowedServices.contains(caller.service)) return true
-
     // Allow if the caller has provided an allowed capability
-    return caller.capabilities.any { allowedCapabilities.contains(it) }
+    return caller.hasCapability(allowedCapabilities) || caller.isService(allowedServices)
   }
 
   companion object {
