@@ -21,10 +21,8 @@ import kotlin.reflect.KClass
 /**
  * Binds database connectivity for a qualified data source. This binds the following public types:
  *
- *  * @Qualifier
-[javax.sql.DataSource]
- *  * @Qualifier
-[misk.jdbc.DataSourceConfig]
+ *  * @Qualifier [javax.sql.DataSource]
+ *  * @Qualifier [misk.jdbc.DataSourceConfig]
  *
  * [DataSource.getConnection] can be used to get JDBC connections to your database.
  *
@@ -37,7 +35,7 @@ class JdbcModule @JvmOverloads constructor(
   private val readerQualifier: KClass<out Annotation>?,
   readerConfig: DataSourceConfig?,
   val databasePool: DatabasePool = RealDatabasePool,
-  val installHealthCheck: Boolean = true
+  private val installHealthCheck: Boolean = true,
 ) : KAbstractModule() {
   val config = config.withDefaults()
   val readerConfig = readerConfig?.withDefaults()
@@ -45,7 +43,7 @@ class JdbcModule @JvmOverloads constructor(
   constructor(
     qualifier: KClass<out Annotation>,
     config: DataSourceConfig,
-    databasePool: DatabasePool = RealDatabasePool
+    databasePool: DatabasePool = RealDatabasePool,
   ) : this(qualifier, config, null, null, databasePool)
 
   override fun configure() {
@@ -119,9 +117,8 @@ class JdbcModule @JvmOverloads constructor(
   private fun bindDataSource(
     qualifier: KClass<out Annotation>,
     config: DataSourceConfig,
-    isWriter: Boolean
+    isWriter: Boolean,
   ) {
-
     // These items are configured on the writer qualifier only
     val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(this.qualifier)
 
@@ -181,8 +178,7 @@ class JdbcModule @JvmOverloads constructor(
       val spanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)
       bind(spanInjectorDecoratorKey)
         .toProvider(object : Provider<SpanInjector> {
-          @com.google.inject.Inject(optional = true)
-          var tracer: Tracer? = null
+          @com.google.inject.Inject(optional = true) var tracer: Tracer? = null
 
           override fun get(): SpanInjector =
             SpanInjector(tracer, config)

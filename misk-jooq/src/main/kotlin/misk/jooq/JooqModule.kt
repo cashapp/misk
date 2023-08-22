@@ -1,17 +1,13 @@
 package misk.jooq
 
+import com.google.inject.Provider
+import jakarta.inject.Inject
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.toKey
-import misk.jdbc.DataSourceClusterConfig
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceService
-import misk.jdbc.DataSourceType
-import misk.jdbc.DatabasePool
-import misk.jdbc.JdbcModule
-import misk.jdbc.RealDatabasePool
+import misk.jdbc.*
 import misk.jooq.listeners.AvoidUsingSelectStarListener
 import misk.jooq.listeners.JooqSQLLogger
 import misk.jooq.listeners.JooqTimestampRecordListener
@@ -26,8 +22,6 @@ import org.jooq.impl.DSL
 import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
 import java.time.Clock
-import jakarta.inject.Inject
-import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 class JooqModule @JvmOverloads constructor(
@@ -38,7 +32,8 @@ class JooqModule @JvmOverloads constructor(
   private val readerQualifier: KClass<out Annotation>? = null,
   private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions =
     JooqTimestampRecordListenerOptions(install = false),
-  private val jooqConfigExtension: Configuration.() -> Unit = {}
+  private val jooqConfigExtension: Configuration.() -> Unit = {},
+  private val installHealthChecks: Boolean = true,
 ) : KAbstractModule() {
 
   override fun configure() {
@@ -48,7 +43,8 @@ class JooqModule @JvmOverloads constructor(
         dataSourceClusterConfig.writer,
         readerQualifier,
         dataSourceClusterConfig.reader,
-        databasePool
+        databasePool,
+        installHealthChecks
       )
     )
 
@@ -62,8 +58,7 @@ class JooqModule @JvmOverloads constructor(
     val healthCheckKey = keyOf<HealthCheck>(qualifier)
     bind(healthCheckKey)
       .toProvider(object : Provider<JooqHealthCheck> {
-        @Inject
-        lateinit var clock: Clock
+        @Inject lateinit var clock: Clock
 
         override fun get(): JooqHealthCheck {
           return JooqHealthCheck(
@@ -79,13 +74,13 @@ class JooqModule @JvmOverloads constructor(
 
   private fun bindTransacter(
     qualifier: KClass<out Annotation>,
-    datasourceConfig: DataSourceConfig
+    datasourceConfig: DataSourceConfig,
   ) {
     val transacterKey = JooqTransacter::class.toKey(qualifier)
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
     bind(transacterKey).toProvider(object : Provider<JooqTransacter> {
-      @Inject
-      lateinit var clock: Clock
+      @Inject lateinit var clock: Clock
+
       override fun get(): JooqTransacter {
         return JooqTransacter(
           dslContext = lazy { dslContext(dataSourceServiceProvider.get(), clock, datasourceConfig) }
@@ -97,7 +92,7 @@ class JooqModule @JvmOverloads constructor(
   private fun dslContext(
     dataSourceService: DataSourceService,
     clock: Clock,
-    datasourceConfig: DataSourceConfig
+    datasourceConfig: DataSourceConfig,
   ): DSLContext {
     val settings = Settings()
       .withExecuteWithOptimisticLocking(true)
