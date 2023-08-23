@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 /** Controllable clock for testing. */
-open class FakeClock(
+open class FakeClock @JvmOverloads constructor(
     epochMillis: Long = Instant.parse("2018-01-01T00:00:00Z").toEpochMilli(),
     private val zone: ZoneId = ZoneId.of("UTC")
 ) : Clock() {

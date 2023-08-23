@@ -121,7 +121,7 @@ subprojects {
           "exemplar",
           "exemplarchat",
           "misk-bom"
-      ).contains(name) && !name.startsWith("wisp")) {
+      ).contains(name)) {
     extensions.configure(DetektExtension::class) {
       parallel = true
       buildUponDefaultConfig = false
@@ -209,7 +209,7 @@ subprojects {
 
   tasks.withType<Detekt> {
     dependsOn(":detektive:assemble")
-    exclude { it.file.absolutePath.contains("/generated/source/") }
+    exclude { it.file.absolutePath.contains("/generated/source/") || it.file.absolutePath.contains("SampledLogger") }
   }
 
   plugins.withType<BasePlugin> {
@@ -236,7 +236,7 @@ subprojects {
               "exemplar",
               "exemplarchat",
               "misk-bom"
-          ).contains(project.name) && !project.name.startsWith("wisp")) {
+          ).contains(project.name)) {
         dependsOn("detektMain")
       }
     }
