@@ -92,8 +92,6 @@ class AuthenticationTest {
       )
     )
       .isEqualTo("$caller authorized with empty Authenticated")
-    val logs = logCollector.takeEvents(AccessInterceptor::class).map { it.message }
-    assertThat(logs).contains("EmptyAuthenticatedAccessAction::get() is has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated.")
   }
 
   @ParameterizedTest
@@ -107,8 +105,6 @@ class AuthenticationTest {
       )
     )
       .isEqualTo("$caller authorized with empty Authenticated")
-    val logs = logCollector.takeEvents(AccessInterceptor::class).map { it.message }
-    assertThat(logs).contains("EmptyAuthenticatedAccessAction::get() is has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated.")
   }
 
   @Test fun testEmptyAuthenticatedUnauthenticated() {
@@ -118,8 +114,57 @@ class AuthenticationTest {
       )
     )
       .isEqualTo("unauthenticated")
-    val logs = logCollector.takeEvents(AccessInterceptor::class).map { it.message }
-    assertThat(logs).contains("EmptyAuthenticatedAccessAction::get() is has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated.")
+  }
+
+  @Test fun testEmptyAuthenticatedPlusCustomUnauthenticated() {
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_and_custom_capability_access"
+      )
+    )
+      .isEqualTo("unauthenticated")
+  }
+
+  @Test fun testEmptyAuthenticatedPlusCustomWithWrongCapability() {
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_and_custom_capability_access",
+        user = "sandy",
+        capabilities = "nothingfancy"
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun testEmptyAuthenticatedPlusCustomAsService() {
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_and_custom_capability_access",
+        service = "widgeteer",
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun checkAccessInterceptorFactoryLogs() {
+    // We don't need to execute a request to check these logs, they're logged on installation of
+    // the interceptor on the endpoint.
+
+    assertThat(logCollector.takeEvents(AccessInterceptor::class).map { it.message }).contains(
+      "Conflicting auth annotations on EmptyAuthenticatedWithCustomAnnototationAccessAction::get(), @Authenticated won't have any effect due to @CustomCapabilityAccess"
+    )
+  }
+
+  @Test fun testEmptyAuthenticatedPlusCustomWithRightCapability() {
+    val caller = MiskCaller(user = "sandy", capabilities = setOf("admin"))
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_and_custom_capability_access",
+        user = "sandy",
+        capabilities = "admin"
+      )
+    )
+      .isEqualTo("$caller authorized with CustomCapabilityAccess")
   }
 
   @ParameterizedTest

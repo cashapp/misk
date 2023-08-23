@@ -37,7 +37,7 @@ import kotlin.system.measureTimeMillis
  *
  *     repeatedTask.startUp()
  */
-class RepeatedTask(
+class RepeatedTask @JvmOverloads constructor(
     val name: String,
     private val meterRegistry: MeterRegistry = Metrics.globalRegistry,
     private val repeatedTaskConfig: RepeatedTaskConfig = RepeatedTaskConfig(),

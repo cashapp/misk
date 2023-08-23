@@ -44,9 +44,9 @@ class AccessInterceptor private constructor(
         }
       }
 
-      // This action is explicitly marked as unauthenticated, so we return null (do not intercept)
+      // Do not intercept if this action is explicitly marked as unauthenticated.
       if (action.hasAnnotation<Unauthenticated>()) {
-        check(actionEntries.size == 0) {
+        check(actionEntries.isEmpty()) {
           val otherAnnotations = actionEntries
             .filterNot { it.annotation == Unauthenticated::class }
             .map { "@${it.annotation.qualifiedName!!}" }
@@ -88,6 +88,15 @@ class AccessInterceptor private constructor(
           """.trimMargin()
       }
 
+      if (actionEntries.size > 1) {
+        val (openAuthEntries, closedAuthEntries) = actionEntries.partition { it.services.isEmpty() && it.capabilities.isEmpty() }
+        if (openAuthEntries.isNotEmpty() && closedAuthEntries.isNotEmpty()) {
+          val openAuthString = openAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
+          val closedAuthString = closedAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
+          logger.warn("Conflicting auth annotations on ${action.name}::${action.function.name}(), $openAuthString won't have any effect due to $closedAuthString")
+        }
+      }
+
       // Return an interceptor representing the union of the capabilities/services of all
       // annotations.
       val allowedServices = actionEntries.flatMap { it.services }.toSet()
@@ -116,21 +125,15 @@ class AccessInterceptor private constructor(
 
   /** Check whether the caller is allowed to access this endpoint */
   private fun isAuthorized(caller: MiskCaller): Boolean {
-    // Compatability with the no-arguments @Authenticated decorator
-    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty() && !allowAnyService) {
+    // Allow if we don't have any requirements on service or capability
+    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty() && !allowAnyService) return true
+
+    if (allowAnyService && caller.service != null && !excludeServicesFromWildcard.contains(caller.service)) {
       return true
     }
 
-    if (caller.user != null) {
-      return caller.capabilities.any { allowedCapabilities.contains(it) }
-    }
-
-    if (caller.service != null) {
-      val allowedAny = allowAnyService && !excludeServicesFromWildcard.contains(caller.service)
-      return allowedAny || allowedServices.contains(caller.service)
-    }
-
-    return false
+    // Allow if the caller has provided an allowed capability
+    return caller.hasCapability(allowedCapabilities) || caller.isService(allowedServices)
   }
 
   companion object {

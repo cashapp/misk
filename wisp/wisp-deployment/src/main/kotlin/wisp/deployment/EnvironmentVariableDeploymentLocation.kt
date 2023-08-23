@@ -3,7 +3,7 @@ package wisp.deployment
 /**
  * Provides a deployment location id from the environment variable value.
  */
-class EnvironmentVariableDeploymentLocation(
+class EnvironmentVariableDeploymentLocation @JvmOverloads constructor(
     private val environmentVariableName: String,
     private val environmentVariableLoader: EnvironmentVariableLoader = EnvironmentVariableLoader.real
 ) : DeploymentLocation {

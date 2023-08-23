@@ -35,6 +35,7 @@ class FakeStrongFeatureFlags : StrongFeatureFlags {
      *
      * Prefer [override] instead for a more convenient interface.
      */
+    @JvmOverloads
     fun <T : Any, Flag : FeatureFlag<in T>> overrideAny(
         clazz: Class<out FeatureFlag<T>>,
         value: T,
@@ -50,31 +51,37 @@ class FakeStrongFeatureFlags : StrongFeatureFlags {
         return this
     }
 
+    @JvmOverloads
     inline fun <reified Flag : BooleanFeatureFlag> override(
         value: Boolean,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeStrongFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+    @JvmOverloads
     inline fun <reified Flag : StringFeatureFlag> override(
         value: String,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeStrongFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+    @JvmOverloads
     inline fun <reified Flag : IntFeatureFlag> override(
         value: Int,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeStrongFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+    @JvmOverloads
     inline fun <reified Flag : DoubleFeatureFlag> override(
         value: Double,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeStrongFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+    @JvmOverloads
     inline fun <reified Flag : JsonFeatureFlag<T>, T : Any> override(
         value: T,
         noinline matcher: (Flag) -> Boolean = { _ -> true }
     ): FakeStrongFeatureFlags = overrideAny(Flag::class.java, value, matcher)
 
+    @JvmOverloads
     inline fun <reified Flag : EnumFeatureFlag<T>, T : Enum<T>> override(
         value: T,
         noinline matcher: (Flag) -> Boolean = { _ -> true }

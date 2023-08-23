@@ -45,6 +45,8 @@ class TestWebActionModule : KAbstractModule() {
     install(WebActionModule.create<GrpcAction>())
     install(WebActionModule.create<GreetServiceWebAction>())
     install(WebActionModule.create<EmptyAuthenticatedAccessAction>())
+    install(WebActionModule.create<EmptyAuthenticatedWithCustomAnnototationAccessAction>())
+    install(WebActionModule.create<EmptyAuthenticatedAccessAction>())
     install(WebActionModule.create<AllowAnyServiceAccessAction>())
     install(WebActionModule.create<AllowAnyServiceWithWildcardIncludedAccessAction>())
 
@@ -152,6 +154,17 @@ class EmptyAuthenticatedAccessAction @Inject constructor() : WebAction {
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
   @Authenticated
   fun get() = "${scopedCaller.get()} authorized with empty Authenticated".toResponseBody()
+}
+
+class EmptyAuthenticatedWithCustomAnnototationAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/empty_authorized_and_custom_capability_access")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @Authenticated
+  @CustomCapabilityAccess
+  fun get() = "${scopedCaller.get()} authorized with CustomCapabilityAccess".toResponseBody()
 }
 
 class AllowAnyServiceAccessAction @Inject constructor() : WebAction {

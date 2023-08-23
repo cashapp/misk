@@ -9,6 +9,8 @@ public final class wisp/sampling/PercentageSampler : wisp/sampling/Sampler {
 }
 
 public final class wisp/sampling/RateLimiter {
+	public fun <init> (J)V
+	public fun <init> (JLwisp/sampling/Ticker;)V
 	public fun <init> (JLwisp/sampling/Ticker;Lwisp/sampling/Sleeper;)V
 	public synthetic fun <init> (JLwisp/sampling/Ticker;Lwisp/sampling/Sleeper;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getPermitsPerSecond ()J

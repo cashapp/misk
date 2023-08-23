@@ -5,7 +5,7 @@ import wisp.security.ssl.TrustStoreConfig
 import java.net.URL
 import java.time.Duration
 
-data class HttpClientsConfig(
+data class HttpClientsConfig @JvmOverloads constructor(
     // Need to retain ordering, hence LinkedHashMap
     val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
     val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
@@ -89,7 +89,7 @@ data class HttpClientSSLConfig(
     val trust_store: TrustStoreConfig
 )
 
-data class HttpClientConfig(
+data class HttpClientConfig @JvmOverloads constructor(
     val connectTimeout: Duration? = null,
     val writeTimeout: Duration? = null,
     val readTimeout: Duration? = null,
@@ -122,7 +122,7 @@ fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
         retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure
     )
 
-data class HttpClientEndpointConfig(
+data class HttpClientEndpointConfig @JvmOverloads constructor(
     val url: String? = null,
     val envoy: HttpClientEnvoyConfig? = null,
     val clientConfig: HttpClientConfig = HttpClientConfig()
@@ -132,7 +132,7 @@ data class HttpClientEndpointConfig(
     }
 }
 
-data class HttpClientEnvoyConfig(
+data class HttpClientEnvoyConfig @JvmOverloads constructor(
     val app: String,
 
     /** Environment to target. If null, the same environment as the app is running in is assumed. */
