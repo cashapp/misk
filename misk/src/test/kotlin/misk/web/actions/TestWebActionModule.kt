@@ -26,6 +26,7 @@ import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import jakarta.inject.Inject
+import misk.logging.LogCollectorModule
 import misk.security.authz.Authenticated
 
 // Common module for web action-related tests to use that bind up some sample web actions
@@ -34,6 +35,7 @@ class TestWebActionModule : KAbstractModule() {
     install(WebServerTestingModule())
     install(MiskTestingServiceModule())
     install(AccessControlModule())
+    install(LogCollectorModule())
 
     install(WebActionModule.create<CustomServiceAccessAction>())
     install(WebActionModule.create<CustomCapabilityAccessAction>())

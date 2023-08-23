@@ -36,10 +36,23 @@ class AccessInterceptor private constructor(
       val actionEntries = mutableListOf<AccessAnnotationEntry>()
       for (annotation in action.function.annotations) when {
         annotation is Authenticated -> actionEntries += annotation.toAccessAnnotationEntry()
-        annotation is Unauthenticated -> actionEntries += annotation.toAccessAnnotationEntry()
         registeredEntries.find { it.annotation == annotation.annotationClass } != null -> {
           actionEntries += registeredEntries.find { it.annotation == annotation.annotationClass }!!
         }
+      }
+
+      // Do not intercept if this action is explicitly marked as unauthenticated.
+      if (action.hasAnnotation<Unauthenticated>()) {
+        check(actionEntries.isEmpty()) {
+          val otherAnnotations = actionEntries
+            .filterNot { it.annotation == Unauthenticated::class }
+            .map { "@${it.annotation.qualifiedName!!}" }
+            .sorted()
+            .joinToString()
+          """${action.name}::${action.function.name}() is annotated with @${Unauthenticated::class.qualifiedName}, but also annotated with the following access annotations: $otherAnnotations. This is a contradiction.
+          """.trimIndent()
+        }
+        return null
       }
 
       // No access annotations. Fail with a useful message.
@@ -69,18 +82,13 @@ class AccessInterceptor private constructor(
           """.trimMargin()
       }
 
-      // This action is explicitly marked as unauthenticated.
-      if (action.hasAnnotation<Unauthenticated>()) {
-        check(actionEntries.size == 1) {
-          val otherAnnotations = actionEntries
-            .filterNot { it.annotation == Unauthenticated::class }
-            .map { "@${it.annotation.qualifiedName!!}" }
-            .sorted()
-            .joinToString()
-          """${action.name}::${action.function.name}() is annotated with @${Unauthenticated::class.qualifiedName}, but also annotated with the following access annotations: $otherAnnotations. This is a contradiction.
-          """.trimIndent()
+      if (actionEntries.size > 1) {
+        val (openAuthEntries, closedAuthEntries) = actionEntries.partition { it.services.isEmpty() && it.capabilities.isEmpty() }
+        if (openAuthEntries.isNotEmpty() && closedAuthEntries.isNotEmpty()) {
+          val openAuthString = openAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
+          val closedAuthString = closedAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
+          logger.warn("Conflicting auth annotations on ${action.name}::${action.function.name}(), $openAuthString won't have any effect due to $closedAuthString")
         }
-        return null
       }
 
       // Return an interceptor representing the union of the capabilities/services of all
@@ -94,10 +102,6 @@ class AccessInterceptor private constructor(
 
     private fun Authenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
       Authenticated::class, services.toList(), capabilities.toList()
-    )
-
-    private fun Unauthenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
-      Unauthenticated::class, listOf(), listOf()
     )
 
     private inline fun <reified T : Annotation> Action.hasAnnotation() =
