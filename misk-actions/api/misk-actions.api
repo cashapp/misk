@@ -14,8 +14,10 @@ public final class misk/MiskCaller {
 	public final fun getPrincipal ()Ljava/lang/String;
 	public final fun getService ()Ljava/lang/String;
 	public final fun getUser ()Ljava/lang/String;
+	public final fun hasCapability (Ljava/util/Set;)Z
 	public fun hashCode ()I
 	public final fun isAllowed (Ljava/util/Set;Ljava/util/Set;)Z
+	public final fun isService (Ljava/util/Set;)Z
 	public fun toString ()Ljava/lang/String;
 }
 
