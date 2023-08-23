@@ -151,7 +151,7 @@ class AuthenticationTest {
     // the interceptor on the endpoint.
 
     assertThat(logCollector.takeEvents(AccessInterceptor::class).map { it.message }).contains(
-      "Conflicting auth annotations on EmptyAuthenticatedWithCustomAnnototationAccessAction::get(), @Authenticated no longer have any effect due to @CustomCapabilityAccess"
+      "Conflicting auth annotations on EmptyAuthenticatedWithCustomAnnototationAccessAction::get(), @Authenticated won't have any effect due to @CustomCapabilityAccess"
     )
   }
 

@@ -85,9 +85,9 @@ class AccessInterceptor private constructor(
       if (actionEntries.size > 1) {
         val (openAuthEntries, closedAuthEntries) = actionEntries.partition { it.services.isEmpty() && it.capabilities.isEmpty() }
         if (openAuthEntries.isNotEmpty() && closedAuthEntries.isNotEmpty()) {
-          val openAuthString = openAuthEntries.joinToString(separator = ",") { it.annotation.simpleName.toString() }
-          val closedAuthString = closedAuthEntries.joinToString(separator = ",") { it.annotation.simpleName.toString() }
-          logger.warn("Conflicting auth annotations on ${action.name}::${action.function.name}(), @$openAuthString no longer have any effect due to @$closedAuthString")
+          val openAuthString = openAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
+          val closedAuthString = closedAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
+          logger.warn("Conflicting auth annotations on ${action.name}::${action.function.name}(), $openAuthString won't have any effect due to $closedAuthString")
         }
       }
 
