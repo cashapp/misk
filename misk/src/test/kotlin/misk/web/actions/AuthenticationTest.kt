@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import jakarta.inject.Inject
 import misk.security.authz.AccessInterceptor
+import wisp.logging.LogCollector
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -31,6 +32,7 @@ class AuthenticationTest {
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
+  @Inject private lateinit var logCollector: LogCollector
 
   @Test fun customServiceAccess_unauthenticated() {
     assertThat(executeRequest(path = "/custom_service_access"))
@@ -142,6 +144,15 @@ class AuthenticationTest {
       )
     )
       .isEqualTo("unauthorized")
+  }
+
+  @Test fun checkAccessInterceptorFactoryLogs() {
+    // We don't need to execute a request to check these logs, they're logged on installation of
+    // the interceptor on the endpoint.
+
+    assertThat(logCollector.takeEvents(AccessInterceptor::class).map { it.message }).contains(
+      "Conflicting auth annotations on EmptyAuthenticatedWithCustomAnnototationAccessAction::get(), @Authenticated no longer have any effect due to @CustomCapabilityAccess"
+    )
   }
 
   @Test fun testEmptyAuthenticatedPlusCustomWithRightCapability() {
