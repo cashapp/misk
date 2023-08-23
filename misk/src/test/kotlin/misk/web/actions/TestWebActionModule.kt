@@ -26,6 +26,7 @@ import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import jakarta.inject.Inject
+import misk.security.authz.Authenticated
 
 // Common module for web action-related tests to use that bind up some sample web actions
 class TestWebActionModule : KAbstractModule() {
@@ -39,6 +40,8 @@ class TestWebActionModule : KAbstractModule() {
     install(WebActionModule.create<RequestTypeAction>())
     install(WebActionModule.create<GrpcAction>())
     install(WebActionModule.create<GreetServiceWebAction>())
+    install(WebActionModule.create<EmptyAuthenticatedAccessAction>())
+    install(WebActionModule.create<EmptyAuthenticatedWithCustomAnnototationAccessAction>())
 
     multibind<AccessAnnotationEntry>().toInstance(
       AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments"))
@@ -131,4 +134,25 @@ class GrpcAction @Inject constructor() :
       .warehouse_id(7777L)
       .build()
   }
+}
+
+class EmptyAuthenticatedAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/empty_authorized_access")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @Authenticated
+  fun get() = "${scopedCaller.get()} authorized with empty Authenticated".toResponseBody()
+}
+
+class EmptyAuthenticatedWithCustomAnnototationAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/empty_authorized_and_custom_capability_access")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @Authenticated
+  @CustomCapabilityAccess
+  fun get() = "${scopedCaller.get()} authorized with CustomCapabilityAccess".toResponseBody()
 }
