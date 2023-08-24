@@ -16,9 +16,8 @@ class AccessInterceptor private constructor(
   val allowedCapabilities: Set<String>,
   private val caller: ActionScoped<MiskCaller?>,
   private val allowAnyService: Boolean,
-  private val excludeServicesFromWildcard: Set<String>
+  private val excludeFromAllowAnyService: Set<String>
 ) : ApplicationInterceptor {
-
   override fun intercept(chain: Chain): Any {
     val caller = caller.get() ?: throw UnauthenticatedException()
     if (!isAuthorized(caller)) {
@@ -29,10 +28,23 @@ class AccessInterceptor private constructor(
     return chain.proceed(chain.args)
   }
 
+  /** Check whether the caller is allowed to access this endpoint */
+  private fun isAuthorized(caller: MiskCaller): Boolean {
+    // Allow if we don't have any requirements on service or capability
+    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty() && !allowAnyService) return true
+
+    if (allowAnyService && caller.service != null && !excludeFromAllowAnyService.contains(caller.service)) {
+      return true
+    }
+
+    // Allow if the caller has provided an allowed capability
+    return caller.hasCapability(allowedCapabilities) || caller.isService(allowedServices)
+  }
+
   internal class Factory @Inject internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val registeredEntries: List<AccessAnnotationEntry>,
-    @ExcludeServiceFromWildcards private val excludeServiceFromWildcards: List<String>,
+    @ExcludeFromAllowAnyService private val excludeFromAllowAnyService: List<String>,
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
       // Gather all of the access annotations on this action.
@@ -111,7 +123,7 @@ class AccessInterceptor private constructor(
         allowedCapabilities,
         caller,
         allowAnyService,
-        excludeServiceFromWildcards.toSet()
+        excludeFromAllowAnyService.toSet()
       )
     }
 
@@ -121,19 +133,6 @@ class AccessInterceptor private constructor(
 
     private inline fun <reified T : Annotation> Action.hasAnnotation() =
       function.annotations.any { it.annotationClass == T::class }
-  }
-
-  /** Check whether the caller is allowed to access this endpoint */
-  private fun isAuthorized(caller: MiskCaller): Boolean {
-    // Allow if we don't have any requirements on service or capability
-    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty() && !allowAnyService) return true
-
-    if (allowAnyService && caller.service != null && !excludeServicesFromWildcard.contains(caller.service)) {
-      return true
-    }
-
-    // Allow if the caller has provided an allowed capability
-    return caller.hasCapability(allowedCapabilities) || caller.isService(allowedServices)
   }
 
   companion object {

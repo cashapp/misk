@@ -95,7 +95,7 @@ class AuthenticationTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = ["widgeteer", "web-proxy", "access-proxy"]) // web-proxy and access-proxy are both ExcludeServiceFromWildcards
+  @ValueSource(strings = ["widgeteer", "web-proxy", "access-proxy"]) // web-proxy and access-proxy are both ExcludeFromAllowAnyService
   fun testEmptyAuthenticatedWithService(service: String) {
     val caller = MiskCaller(service = service)
     assertThat(
@@ -150,8 +150,9 @@ class AuthenticationTest {
     // We don't need to execute a request to check these logs, they're logged on installation of
     // the interceptor on the endpoint.
 
-    assertThat(logCollector.takeEvents(AccessInterceptor::class).map { it.message }).contains(
-      "Conflicting auth annotations on EmptyAuthenticatedWithCustomAnnototationAccessAction::get(), @Authenticated won't have any effect due to @CustomCapabilityAccess"
+    assertThat(logCollector.takeEvents(AccessInterceptor::class).map { it.message }).containsExactlyInAnyOrder(
+      "Conflicting auth annotations on EmptyAuthenticatedWithCustomAnnototationAccessAction::get(), @Authenticated won't have any effect due to @CustomCapabilityAccess",
+      "EmptyAuthenticatedAccessAction::get() is has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated."
     )
   }
 
@@ -168,8 +169,8 @@ class AuthenticationTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = ["web-proxy", "access-proxy"]) // web-proxy and access-proxy are both ExcludeServiceFromWildcards
-  fun testEmptyAllowAnyServiceWithExcludedServices(service: String) {
+  @ValueSource(strings = ["web-proxy", "access-proxy"]) // web-proxy and access-proxy are both ExcludeFromAllowAnyService
+  fun testAllowAnyServiceWithExcludedServices(service: String) {
     assertThat(
       executeRequest(
         path = "/allow_any_service_access",
@@ -179,7 +180,7 @@ class AuthenticationTest {
       .isEqualTo("unauthorized")
   }
 
-  @Test fun testEmptyAllowAnyService() {
+  @Test fun testAllowAnyServiceNotExcluded() {
     val service = "widgeteer"
     val caller = MiskCaller(service = service)
     assertThat(
@@ -191,7 +192,7 @@ class AuthenticationTest {
       .isEqualTo("$caller authorized as any service")
   }
 
-  @Test fun testEmptyAllowAnyServiceWithUser() {
+  @Test fun testAllowAnyServiceWithUser() {
     assertThat(
       executeRequest(
         path = "/allow_any_service_access",
@@ -201,24 +202,48 @@ class AuthenticationTest {
       .isEqualTo("unauthorized")
   }
 
-  @Test fun testEmptyAllowAnyServiceWithExcludedButExplicityAddedService() {
+  @Test fun testAllowAnyServiceWithAuthenticatedAsExcludedButExplicityAllowedService() {
     val service = "web-proxy"
     val caller = MiskCaller(service = service)
     assertThat(
       executeRequest(
-        path = "/allow_any_service_access_with_wildcard_included",
+        path = "/allow_any_service_plus_authenticated",
         service = service
       )
     )
       .isEqualTo("$caller authorized as any service")
   }
 
-  @Test fun testEmptyAllowAnyServiceWithExcludedButWrongExplicityAddedService() {
+  @Test fun testAllowAnyServiceWithAuthenticatedAsExcludedService() {
     val service = "access-proxy"
     assertThat(
       executeRequest(
-        path = "/allow_any_service_access_with_wildcard_included",
+        path = "/allow_any_service_plus_authenticated",
         service = service
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun testAllowAnyServiceWithAuthenticatedAsAllowedUser() {
+    val caller = MiskCaller(user = "sandy", capabilities = setOf("admin"))
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_plus_authenticated",
+        user = caller.user,
+        capabilities = caller.capabilities.first()
+      )
+    )
+      .isEqualTo("$caller authorized as any service")
+  }
+
+  @Test fun testAllowAnyServiceWithAuthenticatedAsNotAllowedUser() {
+    val caller = MiskCaller(user = "sandy", capabilities = setOf("nothing"))
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_plus_authenticated",
+        user = caller.user,
+        capabilities = caller.capabilities.first()
       )
     )
       .isEqualTo("unauthorized")

@@ -53,20 +53,20 @@ inline fun <reified T : Annotation> AccessAnnotationEntry(
 }
 
 /**
- * Exclude a service from @AllowAllServices.
+ * Exclude a service from @AllowAnyService.
  *
- * Add any external proxies that do service-to-service authentication to prevent AllowAllServices
- * from also allowing e.g. external traffic.
+ * Add any external proxies that do service-to-service authentication to prevent AllowAnyService
+ * from also allowing external traffic to your service.
  *
  * You can still explicitly include these services by including them in
- * @Authenticated(services=["my-proxy"]) or with a custom decorotor that creates
+ * @Authenticated(services=["my-proxy"]) or with an equivalent decorator that creates
  * an AccessAnnotationEntry.
  *
  * Usage:
- *  multibind<String, ExcludeServiceFromWildcards>().toInstance("web-proxy")
- *  multibind<String, ExcludeServiceFromWildcards>().toInstance("access-proxy")
+ *  multibind<String, ExcludeFromAllowAnyService>().toInstance("web-proxy")
+ *  multibind<String, ExcludeFromAllowAnyService>().toInstance("access-proxy")
  */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @BindingAnnotation
-annotation class ExcludeServiceFromWildcards
+annotation class ExcludeFromAllowAnyService
