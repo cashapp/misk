@@ -995,7 +995,7 @@ public final class misk/security/authz/AccessInterceptor$Companion {
 public abstract interface annotation class misk/security/authz/DevelopmentOnly : java/lang/annotation/Annotation {
 }
 
-public abstract interface annotation class misk/security/authz/ExcludeServiceFromWildcards : java/lang/annotation/Annotation {
+public abstract interface annotation class misk/security/authz/ExcludeFromAllowAnyService : java/lang/annotation/Annotation {
 }
 
 public final class misk/security/authz/FakeCallerAuthenticator : misk/security/authz/MiskCallerAuthenticator {
