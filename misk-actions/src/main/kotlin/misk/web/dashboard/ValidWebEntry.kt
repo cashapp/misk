@@ -1,6 +1,7 @@
 package misk.web.dashboard
 
 import com.google.common.base.CharMatcher
+import kotlin.reflect.KClass
 
 private val BlockedUrlPathPrefixes = listOf("/api/")
 
@@ -14,6 +15,11 @@ open class ValidWebEntry @JvmOverloads constructor(
   }
 
   companion object {
+    /** Generate a valid slug from an Annotation class */
+    fun slugify(annotation: KClass<out Annotation>) = annotation.simpleName!!
+      .toString()
+      .slugify()
+
     /** Generate a valid slug from an Annotation class */
     inline fun <reified A : Annotation> slugify() = A::class.simpleName!!
       .toString()

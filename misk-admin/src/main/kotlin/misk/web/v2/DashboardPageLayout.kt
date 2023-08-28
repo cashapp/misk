@@ -37,7 +37,7 @@ class DashboardPageLayout @Inject constructor(
     allNavbarItem = allNavbarItem,
     allTabs = allTabs,
     deployment = deployment,
-    clientHttpCall = clientHttpCall
+    clientHttpCall = clientHttpCall,
   ).setNewBuilder()
 
   private var title: (appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab?) -> String =
