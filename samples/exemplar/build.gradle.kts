@@ -15,6 +15,8 @@ dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.jakartaInject)
   implementation(Dependencies.kotlinxHtml)
+  implementation(Dependencies.logbackClassic)
+  implementation(Dependencies.slf4jApi)
   implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)
   implementation(project(":wisp:wisp-config"))
