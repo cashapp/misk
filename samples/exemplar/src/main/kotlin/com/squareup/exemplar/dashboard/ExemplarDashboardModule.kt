@@ -26,6 +26,10 @@ import kotlinx.html.div
 import kotlinx.html.p
 import kotlinx.html.span
 import kotlinx.html.unsafe
+import misk.MiskCaller
+import misk.security.authz.AccessAnnotationEntry
+import misk.web.dashboard.DashboardTab
+import misk.web.v2.DashboardIndexAccessBlock
 import misk.web.v2.DashboardIndexBlock
 
 class ExemplarDashboardModule : KAbstractModule() {
@@ -94,7 +98,7 @@ class ExemplarDashboardModule : KAbstractModule() {
         configTabMode = ConfigMetadataAction.ConfigTabMode.SHOW_REDACTED_EFFECTIVE_CONFIG
       )
     )
-    multibind<DashboardIndexBlock>().toInstance(DashboardIndexBlock<AdminDashboard> {
+    multibind<DashboardIndexAccessBlock>().toInstance(DashboardIndexAccessBlock<AdminDashboard> { appName: String, dashboardAccessAnnotationEntry: AccessAnnotationEntry, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab> ->
       div("rounded-md bg-blue-50 p-4") {
         div("flex") {
           div("flex-shrink-0") {
@@ -107,10 +111,11 @@ class ExemplarDashboardModule : KAbstractModule() {
             }
           }
           div("ml-3 flex-1 md:flex md:justify-between") {
-            p("text-sm text-blue-700") { +"""Missing access to some dashboard tabs? Ensure you have the admin_console capability in Access Registry.""" }
+            p("text-sm text-blue-700") { +"""You have access to ${authenticatedTabs.size} / ${dashboardTabs.size} tabs.""" }
+            p("text-sm text-blue-700") { +"""Missing access to some dashboard tabs? Ensure you have one of the required capabilities ${dashboardAccessAnnotationEntry.capabilities} in Access Registry.""" }
             p("mt-3 text-sm md:ml-6 md:mt-0") {
               a(classes = "whitespace-nowrap font-medium text-blue-700 hover:text-blue-600") {
-                href = "#"
+                href = "#registry/${caller?.principal}"
                 +"""Access Registry"""
                 span {
                   attributes["aria-hidden"] = "true"
@@ -121,6 +126,13 @@ class ExemplarDashboardModule : KAbstractModule() {
           }
         }
       }
+    })
+
+    multibind<DashboardIndexBlock>().toInstance(DashboardIndexBlock<AdminDashboard> {
+      p { +"""Content 1""" }
+    })
+    multibind<DashboardIndexBlock>().toInstance(DashboardIndexBlock<AdminDashboard> {
+      p { +"""Content 2""" }
     })
 
     // Custom Admin Dashboard Tab at /_admin/...

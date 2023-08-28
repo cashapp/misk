@@ -7,6 +7,7 @@ import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 import misk.web.metadata.DashboardMetadataAction
 import misk.web.metadata.ServiceMetadataAction
 import misk.web.metadata.jvm.JvmMetadataModule
+import misk.web.v2.DashboardIndexAccessBlock
 import misk.web.v2.DashboardIndexBlock
 
 /**
@@ -25,6 +26,7 @@ class BaseDashboardModule(
     newMultibinder<DashboardNavbarItem>()
     newMultibinder<DashboardNavbarStatus>()
     newMultibinder<DashboardTheme>()
+    newMultibinder<DashboardIndexAccessBlock>()
     newMultibinder<DashboardIndexBlock>()
 
     // Add metadata actions to support dashboards

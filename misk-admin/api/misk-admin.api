@@ -845,12 +845,25 @@ public final class misk/web/v2/DashboardIFrameTabAction : misk/web/actions/WebAc
 
 public final class misk/web/v2/DashboardIndexAction : misk/web/actions/WebAction {
 	public static final field Companion Lmisk/web/v2/DashboardIndexAction$Companion;
-	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/web/v2/DashboardPageLayout;)V
+	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/web/v2/DashboardPageLayout;Ljava/util/List;Ljava/util/List;)V
 	public final fun get ()Ljava/lang/String;
 }
 
 public final class misk/web/v2/DashboardIndexAction$Companion {
 	public final fun titlecase (Lkotlin/reflect/KClass;)Ljava/lang/String;
+}
+
+public final class misk/web/v2/DashboardIndexBlock {
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
+	public final fun component1 ()Lkotlin/reflect/KClass;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)Lmisk/web/v2/DashboardIndexBlock;
+	public static synthetic fun copy$default (Lmisk/web/v2/DashboardIndexBlock;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/web/v2/DashboardIndexBlock;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnnotation ()Lkotlin/reflect/KClass;
+	public final fun getBlock ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/web/v2/DashboardPageLayout {
