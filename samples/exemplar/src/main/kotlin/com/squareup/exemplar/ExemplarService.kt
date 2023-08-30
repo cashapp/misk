@@ -12,6 +12,7 @@ import misk.web.MiskWebModule
 import wisp.deployment.Deployment
 
 fun main(args: Array<String>) {
+  ExemplarLogging.configure()
   val deployment = Deployment(name = "exemplar", isLocalDevelopment = true)
   val config = MiskConfig.load<ExemplarConfig>("exemplar", deployment)
   MiskApplication(

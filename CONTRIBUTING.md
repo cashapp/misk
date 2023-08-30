@@ -26,6 +26,20 @@ the root user. You might stand up a server with a docker image, e.g.
 docker run -d --rm --name "mysql-57" -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=true -e MYSQL_LOG_CONSOLE=true mysql:5.7 --sql-mode=""
 ```
 
+Misk may download these Docker images as part of its tests. Because tests can time out, pre-downloading these can help resolve timeouts.
+
+```
+alpine:latest
+amazon/dynamodb-local:latest
+cockroachdb/cockroach
+gcr.io/cloud-spanner-emulator/emulator
+pingcap/tidb
+postgres
+redis:6.2-alpine
+softwaremill/elasticmq
+vitess/base
+```
+
 ## Breaking changes
 
 We use the [Kotlin binary compatibility validator][2] to check for API changes. If 
