@@ -12,10 +12,9 @@ import misk.web.MiskWebModule
 import redis.clients.jedis.JedisPoolConfig
 
 fun main(args: Array<String>) {
+  ChatLogging.configure()
   val deployment = wisp.deployment.Deployment(name = "exemplarchat", isLocalDevelopment = true)
-
   val config = MiskConfig.load<ChatConfig>("chat", deployment)
-
   MiskApplication(
     MiskRealServiceModule(),
     MiskWebModule(config.web),
