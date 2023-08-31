@@ -15,7 +15,14 @@ class DynamoDbHealthCheck @Inject constructor(
   override fun status(): HealthStatus {
     for (table in requiredTables) {
       try {
-        dynamoDb.describeTable(table.name)
+        if (table.healthCheck != null) {
+          val result = table.healthCheck.status()
+          if (!result.isHealthy) {
+            return result
+          }
+        } else {
+          dynamoDb.describeTable(table.name)
+        }
       } catch (e: Exception) {
         logger.error(e) { "error performing DynamoDB health check for ${table.name}" }
         return HealthStatus.unhealthy("DynamoDB: failed to describe ${table.name}")

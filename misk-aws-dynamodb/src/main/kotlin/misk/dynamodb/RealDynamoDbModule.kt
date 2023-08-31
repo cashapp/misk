@@ -25,15 +25,17 @@ import kotlin.reflect.full.findAnnotation
  * used to create a DynamoDbMapper for querying of a DynamoDb table.
  *
  * @param requiredTableTypes a list of mapper classes annotated [DynamoDBTable].
+ * @param customTableHealthChecks map of mapper class to [HealthCheck] for custom Healthcheck execution.
  */
 open class RealDynamoDbModule @JvmOverloads constructor(
   private val clientConfig: ClientConfiguration = ClientConfiguration(),
   vararg requiredTableTypes: KClass<*>,
+  private val customTableHealthChecks: Map<KClass<*>, HealthCheck> = mapOf(),
 ) : KAbstractModule() {
   private val requiredTables: List<RequiredDynamoDbTable> = requiredTableTypes.map {
     val annotation = it.findAnnotation<DynamoDBTable>()
       ?: throw IllegalArgumentException("no @DynamoDBTable on $it")
-    RequiredDynamoDbTable(annotation.tableName)
+    RequiredDynamoDbTable(annotation.tableName, customTableHealthChecks[it])
   }
 
   override fun configure() {

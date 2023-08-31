@@ -10,7 +10,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter
 import java.time.LocalDate
 
-@DynamoDBTable(tableName = "movies")
+@DynamoDBTable(tableName = DyMovie.tableName)
 class DyMovie {
   @DynamoDBHashKey(attributeName = "name")
   var name: String? = null
@@ -23,6 +23,10 @@ class DyMovie {
   @DynamoDBIndexHashKey(globalSecondaryIndexName = "movies.release_date_index")
   @DynamoDBAttribute
   var directed_by: String? = null
+
+  companion object {
+    const val tableName = "movies"
+  }
 }
 
 internal class LocalDateTypeConverter : DynamoDBTypeConverter<String, LocalDate> {
