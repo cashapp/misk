@@ -6,8 +6,7 @@ This document outlines the automated process for releasing new versions of Misk 
 
 Before proceeding with the release process, ensure the following:
 - You have read [CONTRIBUTING.md](CONTRIBUTING.md)
-- `build.gradle` is properly configured with the correct publishing configurations and publishing plugin is
-applied
+- `build.gradle` is properly configured with the correct publishing configurations and publishing plugin is applied
 - If you are changing the publication details, it is recommended that you have the necessary permissions 
 and credentials to publish artifacts to Sonatype Nexus Repository (OSSRH)
 
