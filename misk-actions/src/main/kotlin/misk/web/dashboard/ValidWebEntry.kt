@@ -15,17 +15,15 @@ open class ValidWebEntry @JvmOverloads constructor(
   }
 
   companion object {
-    /** Generate a valid slug from an Annotation class */
+    /** Generate a valid slug from an Annotation class. */
     fun slugify(annotation: KClass<out Annotation>) = annotation.simpleName!!
       .toString()
       .slugify()
 
-    /** Generate a valid slug from an Annotation class */
-    inline fun <reified A : Annotation> slugify() = A::class.simpleName!!
-      .toString()
-      .slugify()
+    /** Generate a valid slug from an Annotation class. */
+    inline fun <reified A : Annotation> slugify() = slugify(A::class)
 
-    /** Generate a valid slug from a String */
+    /** Generate a valid slug from a String. */
     fun String.slugify() = this
       .lowercase()
       .replace(" ", "-")
@@ -34,7 +32,7 @@ open class ValidWebEntry @JvmOverloads constructor(
       .replace("/", "")
       .replace(":", "")
 
-    /** Slug must must only contain characters in ranges [a-z], [0-9] or '-' */
+    /** Slug must must only contain characters in ranges [a-z], [0-9] or '-'. */
     private fun String.requireValidSlug() = apply {
       require(
         CharMatcher.inRange('a', 'z').or(CharMatcher.inRange('0', '9')).or(CharMatcher.`is`('-'))

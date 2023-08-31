@@ -225,13 +225,18 @@ public final class misk/web/dashboard/DashboardHomeUrl : misk/web/dashboard/Vali
 
 public final class misk/web/dashboard/DashboardModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/web/dashboard/DashboardModule$Companion;
+	public fun <init> ()V
 	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;)V
 	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/DashboardTabLoader;)V
 	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/DashboardTabLoader;Lmisk/web/dashboard/WebTabResourceModule;)V
-	public synthetic fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/DashboardTabLoader;Lmisk/web/dashboard/WebTabResourceModule;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/DashboardTabLoader;Lmisk/web/dashboard/WebTabResourceModule;Ljava/util/List;)V
+	public fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/DashboardTabLoader;Lmisk/web/dashboard/WebTabResourceModule;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Lmisk/web/dashboard/DashboardTabProvider;Lmisk/web/dashboard/DashboardTabLoader;Lmisk/web/dashboard/WebTabResourceModule;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/web/dashboard/DashboardModule$Companion {
+	public final fun addIndexAccessBlocks ([Lmisk/web/v2/DashboardIndexAccessBlock;)Lmisk/web/dashboard/DashboardModule;
+	public final fun addIndexBlocks ([Lmisk/web/v2/DashboardIndexBlock;)Lmisk/web/dashboard/DashboardModule;
 }
 
 public final class misk/web/dashboard/DashboardNavbarItem : misk/web/dashboard/ValidWebEntry {
@@ -843,9 +848,22 @@ public final class misk/web/v2/DashboardIFrameTabAction : misk/web/actions/WebAc
 	public final fun get (Ljava/lang/String;)Ljava/lang/String;
 }
 
+public final class misk/web/v2/DashboardIndexAccessBlock {
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function5;)V
+	public final fun component1 ()Lkotlin/reflect/KClass;
+	public final fun component2 ()Lkotlin/jvm/functions/Function5;
+	public final fun copy (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function5;)Lmisk/web/v2/DashboardIndexAccessBlock;
+	public static synthetic fun copy$default (Lmisk/web/v2/DashboardIndexAccessBlock;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function5;ILjava/lang/Object;)Lmisk/web/v2/DashboardIndexAccessBlock;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnnotation ()Lkotlin/reflect/KClass;
+	public final fun getBlock ()Lkotlin/jvm/functions/Function5;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/v2/DashboardIndexAction : misk/web/actions/WebAction {
 	public static final field Companion Lmisk/web/v2/DashboardIndexAction$Companion;
-	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/web/v2/DashboardPageLayout;Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/web/v2/DashboardPageLayout;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
 	public final fun get ()Ljava/lang/String;
 }
 
