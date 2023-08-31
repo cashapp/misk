@@ -109,7 +109,8 @@ internal data class HeadersCapture(
           "x-ddtrace-parent_span_id",
           "x-datadog-parent-id",
           "x-datadog-trace-id",
-          "x-datadog-span-id",
+          "x-datadog-sampling-priority",
+          "x-request-id",
         )
       }
   )
