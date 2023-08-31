@@ -18,6 +18,7 @@ class DynamoDbHealthCheck @Inject constructor(
         if (table.healthCheck != null) {
           val result = table.healthCheck.status()
           if (!result.isHealthy) {
+            logger.error { "error performing DynamoDB ${table.healthCheck::class.simpleName ?: "custom"} health check for ${table.name}" }
             return result
           }
         } else {
