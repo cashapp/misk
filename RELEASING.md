@@ -1,6 +1,8 @@
 # Releasing
 
-This document outlines the automated process for releasing new versions of Misk repository.
+Our release process is designed to be hands-off and automatic. This document aims to provide an understanding of the 
+automated workflow we use to release new versions of Misk repository, along with insights into how to troubleshoot 
+potential publishing issues. 
 
 # Prerequisites
 
@@ -21,6 +23,9 @@ This repository is set up with an automated workflow using GitHub Actions.
 - Public builds can be found [here](https://mvnrepository.com/artifact/com.squareup.misk/misk)
 
 # Troubleshooting
+
+While our release process is designed to be seamless, occasionally, issues may arise that require attention. 
+Here are some tips to help diagnose:
 
 1. Review the logs and look for error messages or warnings related to the publishing process
 2. If the failure seems to be related to network issues or timeouts, you can manually re-run the job 
