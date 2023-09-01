@@ -1,8 +1,7 @@
 # Releasing
 
-Our release process is designed to be hands-off and automatic. This document aims to provide an understanding of the 
-automated workflow we use to release new versions of Misk repository, along with insights into how to troubleshoot 
-potential publishing issues. 
+Our release process is designed to be hands-off and automatic. This document aims to provide an understanding of the automated 
+workflow we use to release new versions of Misk repository, along with insights into how to troubleshoot potential publishing issues. 
 
 # Prerequisites
 
