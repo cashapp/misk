@@ -2,20 +2,18 @@ package misk.testing
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
-import ch.qos.logback.classic.LoggerContext
+import jakarta.inject.Inject
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.slf4j.LoggerFactory
-import jakarta.inject.Inject
 
 class LogLevelExtension @Inject constructor() : BeforeEachCallback {
   override fun beforeEach(context: ExtensionContext?) {
     // Note that the root logger will be a org.slf4j.Logger, but may not
     // be a ch.qos.logback.class.Logger instance. In particular, it can
     // sometimes be a org.gradle.internal.logging.slf4j.OutputEventListenerBackedLogger
-    val loggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
-    val rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME)
-    rootLogger.level = level(context)
+    val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as? Logger
+    root?.let { it.level = level(context) }
   }
 
   private fun level(context: ExtensionContext?): Level {
