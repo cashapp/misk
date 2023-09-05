@@ -22,6 +22,8 @@ dependencies {
   implementation(project(":misk-redis"))
   implementation(Dependencies.guice)
   implementation(Dependencies.jedis)
+  implementation(Dependencies.logbackClassic)
+  implementation(Dependencies.slf4jApi)
   implementation(Dependencies.okHttp)
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-config"))

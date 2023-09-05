@@ -131,6 +131,9 @@ public class misk/exceptions/WebActionException : java/lang/RuntimeException {
 	public final fun isServerError ()Z
 }
 
+public abstract interface annotation class misk/security/authz/AllowAnyService : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class misk/security/authz/Authenticated : java/lang/annotation/Annotation {
 	public abstract fun capabilities ()[Ljava/lang/String;
 	public abstract fun services ()[Ljava/lang/String;
@@ -289,6 +292,7 @@ public class misk/web/dashboard/ValidWebEntry {
 
 public final class misk/web/dashboard/ValidWebEntry$Companion {
 	public final fun slugify (Ljava/lang/String;)Ljava/lang/String;
+	public final fun slugify (Lkotlin/reflect/KClass;)Ljava/lang/String;
 }
 
 public abstract interface annotation class misk/web/interceptors/LogRequestResponse : java/lang/annotation/Annotation {
