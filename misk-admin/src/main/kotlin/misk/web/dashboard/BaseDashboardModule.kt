@@ -7,6 +7,8 @@ import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 import misk.web.metadata.DashboardMetadataAction
 import misk.web.metadata.ServiceMetadataAction
 import misk.web.metadata.jvm.JvmMetadataModule
+import misk.web.v2.DashboardIndexAccessBlock
+import misk.web.v2.DashboardIndexBlock
 
 /**
  * Installs base functionality for the Admin Dashboard including:
@@ -24,6 +26,8 @@ class BaseDashboardModule(
     newMultibinder<DashboardNavbarItem>()
     newMultibinder<DashboardNavbarStatus>()
     newMultibinder<DashboardTheme>()
+    newMultibinder<DashboardIndexAccessBlock>()
+    newMultibinder<DashboardIndexBlock>()
 
     // Add metadata actions to support dashboards
     install(WebActionModule.create<DashboardMetadataAction>())
