@@ -292,6 +292,7 @@ public class misk/web/dashboard/ValidWebEntry {
 
 public final class misk/web/dashboard/ValidWebEntry$Companion {
 	public final fun slugify (Ljava/lang/String;)Ljava/lang/String;
+	public final fun slugify (Lkotlin/reflect/KClass;)Ljava/lang/String;
 }
 
 public abstract interface annotation class misk/web/interceptors/LogRequestResponse : java/lang/annotation/Annotation {

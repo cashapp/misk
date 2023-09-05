@@ -1,10 +1,10 @@
 package misk.web.dashboard
 
+import jakarta.inject.Qualifier
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
-import misk.web.v2.BaseDashboardV2Module
 import misk.web.metadata.config.ConfigMetadataAction
-import jakarta.inject.Qualifier
+import misk.web.v2.BaseDashboardV2Module
 
 /**
  * Installs default Admin Dashboard that runs at multibound DashboardHomeUrl<AdminDashboard>
@@ -22,7 +22,6 @@ class AdminDashboardModule @JvmOverloads constructor(
   private val isDevelopment: Boolean,
   private val configTabMode: ConfigMetadataAction.ConfigTabMode = ConfigMetadataAction.ConfigTabMode.SAFE,
 ) : KAbstractModule() {
-
   override fun configure() {
     // v1 Dashboard
     install(BaseDashboardModule(isDevelopment))
@@ -68,7 +67,7 @@ class AdminDashboardTestingModule : KAbstractModule() {
     install(
       AdminDashboardModule(
         isDevelopment = true,
-        configTabMode = ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS
+        configTabMode = ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS,
       )
     )
   }
