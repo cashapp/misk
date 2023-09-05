@@ -1,18 +1,21 @@
 package misk.web.v2
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import kotlinx.html.TagConsumer
 import kotlinx.html.div
 import kotlinx.html.h1
 import kotlinx.html.h2
 import kotlinx.html.span
 import misk.MiskCaller
 import misk.scope.ActionScoped
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
-import misk.web.dashboard.AdminDashboardAccess
+import misk.web.dashboard.DashboardTab
+import misk.web.dashboard.ValidWebEntry.Companion.slugify
 import misk.web.mediatype.MediaTypes
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
@@ -21,11 +24,14 @@ import kotlin.reflect.KClass
 @Singleton
 class DashboardIndexAction @Inject constructor(
   private val callerProvider: ActionScoped<MiskCaller?>,
-  private val dashboardPageLayout: DashboardPageLayout
+  private val dashboardPageLayout: DashboardPageLayout,
+  private val allTabs: List<DashboardTab>,
+  private val allDashboardIndexAccessBlocks: List<DashboardIndexAccessBlock>,
+  private val allDashboardIndexBlocks: List<DashboardIndexBlock>,
 ) : WebAction {
   @Get("/")
   @ResponseContentType(MediaTypes.TEXT_HTML)
-  @AdminDashboardAccess
+  @Unauthenticated
   fun get(): String = dashboardPageLayout
     .newBuilder()
     .title { appName, dashboardHomeUrl, _ -> "Home | $appName ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase() ?: ""}" }
@@ -40,6 +46,31 @@ class DashboardIndexAction @Inject constructor(
           +"""This is the ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase()} for """
           span("font-bold font-mono") { +appName }
           +"""."""
+        }
+
+        // TODO setup better 404 for dashboard /*
+
+        // Access notice block.
+        val dashboardTabs =
+          allTabs.filter { it.dashboard_slug == dashboardHomeUrl?.dashboard_slug }
+        val authenticatedTabs = dashboardTabs.filter {
+          callerProvider.get()?.hasCapability(it.capabilities) ?: false
+        }
+
+        allDashboardIndexAccessBlocks.firstOrNull { slugify(it.annotation) == dashboardHomeUrl?.dashboard_slug }?.block?.let {
+          div("pt-5") {
+            it(appName, callerProvider.get(), authenticatedTabs, dashboardTabs)
+          }
+        }
+
+        if (authenticatedTabs.isNotEmpty()) {
+          // Only shown if authenticated for at least 1 tab to limit potential for data leak since index is unauthenticated.
+          // Other content for the dashboard homepage.
+          allDashboardIndexBlocks.filter { slugify(it.annotation) == dashboardHomeUrl?.dashboard_slug }.forEach {
+            div("pt-5") {
+              it.block(this@build)
+            }
+          }
         }
       }
     }
@@ -59,3 +90,45 @@ class DashboardIndexAction @Inject constructor(
     }
   }
 }
+
+
+/**
+ * Bind to set custom access notice for the dashboard home page.
+ *
+ * ```kotlin
+ * multibind<DashboardIndexAccessBlock>().toInstance(
+ *   DashboardIndexAccessBlock(
+ *     p { +"""You have access to ${authenticatedTabs.size} / ${dashboardTabs.size} tabs.""" }
+ *     p { +"""Add the necessary permissions to your user in the company registry.""" }
+ *   )
+ * )
+ * ```
+ */
+data class DashboardIndexAccessBlock @JvmOverloads constructor(
+  val annotation: KClass<out Annotation>,
+  val block: TagConsumer<*>.(appName: String, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab>) -> Unit
+)
+
+inline fun <reified T : Annotation> DashboardIndexAccessBlock(
+  noinline block: TagConsumer<*>.(appName: String, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab>) -> Unit
+): DashboardIndexAccessBlock = DashboardIndexAccessBlock(T::class, block)
+
+/**
+ * Bind to set custom content for the dashboard home page.
+ *
+ * ```kotlin
+ * multibind<DashboardIndexBlock>().toInstance(
+ *   DashboardIndexBlock(
+ *     p { +"""This content will show up on the dashboard homepage.""" }
+ *   )
+ * )
+ * ```
+ */
+data class DashboardIndexBlock @JvmOverloads constructor(
+  val annotation: KClass<out Annotation>,
+  val block: TagConsumer<*>.() -> Unit
+)
+
+inline fun <reified T : Annotation> DashboardIndexBlock(
+  noinline block: TagConsumer<*>.() -> Unit
+): DashboardIndexBlock = DashboardIndexBlock(T::class, block)
