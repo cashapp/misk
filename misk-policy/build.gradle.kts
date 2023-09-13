@@ -18,6 +18,7 @@ dependencies {
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
+  implementation(Dependencies.prometheusClient)
   implementation(Dependencies.retrofitScalars)
   implementation(project(":wisp:wisp-moshi"))
   implementation(project(":misk"))
