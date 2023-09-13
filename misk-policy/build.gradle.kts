@@ -17,6 +17,7 @@ dependencies {
   api(Dependencies.retrofit)
   api(project(":misk-core"))
   api(project(":misk-inject"))
+  api(project(":misk-metrics"))
   implementation(Dependencies.retrofitScalars)
   implementation(project(":wisp:wisp-moshi"))
   implementation(project(":misk"))
@@ -42,6 +43,7 @@ dependencies {
   testImplementation(Dependencies.retrofitMock)
   testImplementation(project(":misk-policy"))
   testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-metrics")))
 }
 
 configure<MavenPublishBaseExtension> {

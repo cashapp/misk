@@ -5,6 +5,8 @@ import com.google.inject.Provides
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
+import misk.metrics.v2.FakeMetrics
+import misk.metrics.v2.FakeMetricsModule
 import misk.mockito.Mockito
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -15,7 +17,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyString
 import retrofit2.Response
@@ -29,7 +30,14 @@ import jakarta.inject.Singleton
 internal class RealOpaPolicyEngineTest {
   @MiskTestModule val module: Module = object : KAbstractModule() {
     override fun configure() {
+      install(FakeMetricsModule())
+      bind<OpaMetrics>().to<MiskOpaMetrics>()
       bind<OpaPolicyEngine>().to<RealOpaPolicyEngine>()
+    }
+
+    @Provides @Singleton
+    fun opaConfig(): OpaConfig {
+      return OpaConfig("fake", null, true, true)
     }
 
     @Provides @Singleton
@@ -40,16 +48,66 @@ internal class RealOpaPolicyEngineTest {
       return defaultKotlinMoshi
     }
 
-    @Provides @Singleton
-    fun opaConfig(): Boolean = true
   }
 
   @Inject lateinit var opaApi: OpaApi
   @Inject lateinit var opaPolicyEngine: OpaPolicyEngine
+  @Inject lateinit var fakeMetrics: FakeMetrics
+
+  val metricsPayload = """
+, "metrics": {
+    "counter_server_query_cache_hit": 1,
+    "timer_rego_external_resolve_ns": 6000,
+    "timer_rego_input_parse_ns": 9833,
+    "timer_rego_query_eval_ns": 283083,
+    "timer_server_handler_ns": 582042
+}    
+  """.trimIndent()
+
+  @Test
+  fun metricsInResponse() {
+    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean()))
+      .thenReturn(
+        Calls.response(
+          ResponseBody.create(
+            APPLICATION_JSON.asMediaType(),
+            "{\"decision_id\": \"decisionIdString\", \"result\": {\"test\": \"a\"} ${metricsPayload}}"
+          )
+        )
+      )
+
+    val evaluate: BasicResponse = opaPolicyEngine.evaluate("test")
+
+    assertThat(evaluate).isEqualTo(BasicResponse("a"))
+    assertThat(evaluate.metrics).isNotNull
+
+    assertThat(
+      fakeMetrics.get(
+        MiskOpaMetrics.MetricType.opa_server_query_cache_hit.name,
+        "document" to "test"
+      )
+    )
+      .isEqualTo(1.0)
+    assertThat(
+      fakeMetrics.summaryCount(
+        MiskOpaMetrics.MetricType.opa_rego_query_eval_ns.name,
+        "document" to "test"
+      )
+    )
+      .isEqualTo(1.0)
+    assertThat(
+      fakeMetrics.summaryMean(
+        MiskOpaMetrics.MetricType.opa_rego_query_eval_ns.name,
+        "document" to "test"
+      )
+    )
+      .isEqualTo(2.83083E-4)
+
+  }
 
   @Test
   fun emptyInputQuery() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean())).thenReturn(
+    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         ResponseBody.create(
           APPLICATION_JSON.asMediaType(),
@@ -64,7 +122,7 @@ internal class RealOpaPolicyEngineTest {
   @Test
   fun pojoInputQuery() {
     val requestCaptor = Mockito.captor<String>()
-    Mockito.whenever(opaApi.queryDocument(anyString(), capture(requestCaptor), anyBoolean())).thenReturn(
+    Mockito.whenever(opaApi.queryDocument(anyString(), capture(requestCaptor), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         ResponseBody.create(
           APPLICATION_JSON.asMediaType(),
@@ -82,7 +140,7 @@ internal class RealOpaPolicyEngineTest {
   @Test
   fun rawJsonInputQuery() {
     val requestCaptor = Mockito.captor<String>()
-    Mockito.whenever(opaApi.queryDocument(anyString(), capture(requestCaptor), anyBoolean())).thenReturn(
+    Mockito.whenever(opaApi.queryDocument(anyString(), capture(requestCaptor), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         ResponseBody.create(
           APPLICATION_JSON.asMediaType(),
@@ -99,7 +157,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun responseIsNotOk() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean())).thenReturn(
+    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         Response.error(
           403,
@@ -116,7 +174,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun unableToParseResponseIntoRequestedShape() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean())).thenReturn(
+    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         ResponseBody.create(
           APPLICATION_JSON.asMediaType(),
@@ -135,7 +193,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun unknownPolicyDocument() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean())).thenReturn(
+    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         ResponseBody.create(
           APPLICATION_JSON.asMediaType(),
@@ -160,7 +218,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun returnsProvenanceBundleIfSpecified() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean())).thenReturn(
+    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         ResponseBody.create(
           APPLICATION_JSON.asMediaType(),
@@ -178,7 +236,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun returnsProvenanceRevisionIfSpecified() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean())).thenReturn(
+    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         ResponseBody.create(
           APPLICATION_JSON.asMediaType(),
