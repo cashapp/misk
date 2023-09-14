@@ -141,7 +141,7 @@ object Dependencies {
   val nettyHandler = "io.netty:netty-handler:4.1.92.Final"
   val okHttp = "com.squareup.okhttp3:okhttp:4.11.0"
   val okHttpMockWebServer = "com.squareup.okhttp3:mockwebserver:4.11.0"
-  val okio = "com.squareup.okio:okio:3.3.0"
+  val okio = "com.squareup.okio:okio:3.4.0"
   val openTracingApi = "io.opentracing:opentracing-api:0.33.0"
   val openTracingConcurrent = "io.opentracing.contrib:opentracing-concurrent:0.4.0"
   val openTracingDatadog = "com.datadoghq:dd-trace-ot:1.12.1"
