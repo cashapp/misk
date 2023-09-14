@@ -140,6 +140,9 @@ class RealOpaPolicyEngine @Inject constructor(
       throw PolicyEngineException("Response shape did not match", e)
     }
 
+    // Policy was evaluated whether it returned a result or not.
+    metrics.evaluated(document)
+
     if (extractedResponse.result == null) {
       throw PolicyEngineException("Policy document \"$document\" not found.")
     }

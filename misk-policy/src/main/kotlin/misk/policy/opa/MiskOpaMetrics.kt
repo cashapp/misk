@@ -17,7 +17,8 @@ class MiskOpaMetrics @Inject constructor(metrics: Metrics) : OpaMetrics {
     opa_rego_external_resolve_ns,
     opa_rego_input_parse_ns,
     opa_rego_query_eval_ns,
-    opa_server_handler_ns
+    opa_server_handler_ns,
+    opa_rego_evaluated
   }
 
   companion object {
@@ -53,6 +54,16 @@ class MiskOpaMetrics @Inject constructor(metrics: Metrics) : OpaMetrics {
     "Time take (in nanoseconds) to handle the API request.",
     listOf("document")
   )
+
+  private val opaRegoEvaluated: Counter = metrics.counter(
+    MetricType.opa_rego_evaluated.name,
+    "Count of evaluations on a policy.",
+    listOf("document")
+  )
+
+  override fun evaluated(document: String) {
+    opaRegoEvaluated.labels(document).inc()
+  }
 
   /**
    * Dispatches [OpaResponse.metrics] into the prometheus client.

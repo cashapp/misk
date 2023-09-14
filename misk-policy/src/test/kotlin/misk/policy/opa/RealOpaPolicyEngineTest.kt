@@ -12,7 +12,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.mediatype.MediaTypes.APPLICATION_JSON
 import misk.web.mediatype.asMediaType
-import okhttp3.ResponseBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -73,9 +72,14 @@ internal class RealOpaPolicyEngineTest {
           "{\"decision_id\": \"decisionIdString\", \"result\": {\"test\": \"a\"} ${metricsPayload}}"
             .toResponseBody(APPLICATION_JSON.asMediaType())
         )
+      ).thenReturn(
+        Calls.response(
+          "{\"decision_id\": \"decisionIdString\", \"result\": {\"test\": \"a\"} ${metricsPayload}}"
+            .toResponseBody(APPLICATION_JSON.asMediaType())
+        )
       )
 
-    val evaluate: BasicResponse = opaPolicyEngine.evaluate("test")
+    var evaluate: BasicResponse = opaPolicyEngine.evaluate("test")
 
     assertThat(evaluate).isEqualTo(BasicResponse("a"))
     assertThat(evaluate.metrics).isNotNull
@@ -101,6 +105,51 @@ internal class RealOpaPolicyEngineTest {
       )
     )
       .isEqualTo(2.83083E-4)
+
+    assertThat(
+      fakeMetrics.get(
+        MiskOpaMetrics.MetricType.opa_rego_evaluated.name,
+        "document" to "test"
+      )
+    ).isEqualTo(1.0)
+
+    evaluate = opaPolicyEngine.evaluate("test")
+
+    assertThat(
+      fakeMetrics.get(
+        MiskOpaMetrics.MetricType.opa_server_query_cache_hit.name,
+        "document" to "test"
+      )
+    )
+      .isEqualTo(2.0)
+    assertThat(
+      fakeMetrics.summaryCount(
+        MiskOpaMetrics.MetricType.opa_rego_query_eval_ns.name,
+        "document" to "test"
+      )
+    )
+      .isEqualTo(2.0)
+    assertThat(
+      fakeMetrics.summaryMean(
+        MiskOpaMetrics.MetricType.opa_rego_query_eval_ns.name,
+        "document" to "test"
+      )
+    )
+      .isEqualTo(2.83083E-4)
+
+    assertThat(
+      fakeMetrics.get(
+        MiskOpaMetrics.MetricType.opa_rego_evaluated.name,
+        "document" to "test"
+      )
+    ).isEqualTo(2.0)
+
+    assertThat(
+      fakeMetrics.get(
+        MiskOpaMetrics.MetricType.opa_rego_evaluated.name,
+        "document" to "test"
+      )
+    ).isEqualTo(2.0)
 
   }
 
