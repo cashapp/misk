@@ -9,13 +9,14 @@ import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlin.reflect.KClass
 import misk.ServiceModule
+import misk.dynamodb.DynamoDBHealthCheckFactory
 import misk.dynamodb.DynamoDbHealthCheck
 import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import kotlin.reflect.KClass
 
 /**
  * Executes a DynamoDB service in-process per test. It clears the table content before each test
@@ -26,7 +27,8 @@ import misk.inject.KAbstractModule
  * both.
  */
 class InProcessDynamoDbModule(
-  private val tables: List<DynamoDbTable>
+  private val tables: List<DynamoDbTable>,
+  private val healthChecks: Map<DynamoDbTable, DynamoDBHealthCheckFactory> = mapOf(),
 ) : KAbstractModule() {
 
   constructor(vararg tables: DynamoDbTable) : this(tables.toList())
@@ -65,7 +67,7 @@ class InProcessDynamoDbModule(
 
   @Provides @Singleton
   fun provideRequiredTables(): List<RequiredDynamoDbTable> =
-    tables.map { RequiredDynamoDbTable(it.tableName) }
+    tables.map { RequiredDynamoDbTable(it.tableName, healthChecks[it]) }
 
   /** This service does nothing; depending on Tempest's [TestDynamoDb] is sufficient. */
   @Singleton

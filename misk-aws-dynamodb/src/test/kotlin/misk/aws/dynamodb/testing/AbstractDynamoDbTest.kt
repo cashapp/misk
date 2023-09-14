@@ -4,19 +4,36 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.BillingMode
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator
 import com.amazonaws.services.dynamodbv2.model.Condition
 import com.google.common.util.concurrent.ServiceManager
+import jakarta.inject.Inject
+import misk.dynamodb.DynamoDBHealthCheckFactory
 import misk.dynamodb.DynamoDbHealthCheck
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import jakarta.inject.Inject
 
 abstract class AbstractDynamoDbTest {
+  private var customHealthCheckSuccess = true
+  private val movieTable = DynamoDbTable(DyMovie::class)
+  private val characterTable = DynamoDbTable(DyCharacter::class) {
+    it.withBillingMode(BillingMode.PAY_PER_REQUEST)
+  }
+  val tables = listOf(movieTable, characterTable)
+  val tableToHealthChecks =
+    mapOf(movieTable to DynamoDBHealthCheckFactory { _ -> if (customHealthCheckSuccess) healthyHealthCheck else unhealthyHealthCheck })
+
   @Inject lateinit var dynamoDbClient: AmazonDynamoDB
   @Inject lateinit var healthCheck: DynamoDbHealthCheck
   @Inject lateinit var serviceManager: ServiceManager
+
+  @BeforeEach
+  fun setup() {
+    customHealthCheckSuccess = true
+  }
 
   @Test
   fun happyPath() {
@@ -104,5 +121,17 @@ abstract class AbstractDynamoDbTest {
     serviceManager.awaitStopped()
     val healthStatus = healthCheck.status()
     assertThat(healthStatus.isHealthy).isFalse()
+  }
+
+  @Test
+  fun `healthCheck should succeed when custom health check is successful`() {
+    customHealthCheckSuccess = true
+    assertThat(healthCheck.status().isHealthy).isTrue()
+  }
+
+  @Test
+  fun `healthCheck should fail when custom health check fails `() {
+    customHealthCheckSuccess = false
+    assertThat(healthCheck.status().isHealthy).isFalse()
   }
 }

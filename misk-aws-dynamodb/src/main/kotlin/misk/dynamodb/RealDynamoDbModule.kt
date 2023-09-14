@@ -9,14 +9,14 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
 import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
 import misk.exceptions.dynamodb.DynamoDbExceptionMapperModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
@@ -25,17 +25,17 @@ import kotlin.reflect.full.findAnnotation
  * used to create a DynamoDbMapper for querying of a DynamoDb table.
  *
  * @param requiredTableTypes a list of mapper classes annotated [DynamoDBTable].
- * @param customTableHealthChecks map of mapper class to [HealthCheck] for custom Healthcheck execution.
+ * @param customHealthCheckFactories a map of mapper class to [DynamoDBHealthCheckFactory] for custom [HealthCheck] for given mapper table.
  */
 open class RealDynamoDbModule @JvmOverloads constructor(
   private val clientConfig: ClientConfiguration = ClientConfiguration(),
   vararg requiredTableTypes: KClass<*>,
-  private val customTableHealthChecks: Map<KClass<*>, HealthCheck> = mapOf(),
+  private val customHealthCheckFactories: Map<KClass<*>, DynamoDBHealthCheckFactory> = mapOf(),
 ) : KAbstractModule() {
   private val requiredTables: List<RequiredDynamoDbTable> = requiredTableTypes.map {
     val annotation = it.findAnnotation<DynamoDBTable>()
       ?: throw IllegalArgumentException("no @DynamoDBTable on $it")
-    RequiredDynamoDbTable(annotation.tableName, customTableHealthChecks[it])
+    RequiredDynamoDbTable(annotation.tableName, customHealthCheckFactories[it])
   }
 
   override fun configure() {

@@ -15,10 +15,10 @@ class DynamoDbHealthCheck @Inject constructor(
   override fun status(): HealthStatus {
     for (table in requiredTables) {
       try {
-        if (table.healthCheck != null) {
-          val result = table.healthCheck.status()
+        if (table.healthCheckFactory != null) {
+          val result = table.healthCheckFactory.create(dynamoDb).status()
           if (!result.isHealthy) {
-            logger.error { "error performing DynamoDB ${table.healthCheck::class.simpleName ?: "custom"} health check for ${table.name}" }
+            logger.error { "error performing DynamoDB ${table.healthCheckFactory::class.simpleName ?: "custom"} health check for ${table.name}" }
             return result
           }
         } else {

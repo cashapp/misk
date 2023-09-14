@@ -1,6 +1,5 @@
 package misk.aws.dynamodb.testing
 
-import com.amazonaws.services.dynamodbv2.model.BillingMode
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -8,20 +7,12 @@ import misk.testing.MiskTestModule
 
 @MiskTest(startService = true)
 class DockerDynamoDbTest : AbstractDynamoDbTest() {
-  @MiskTestModule val module = TestModule()
+  @MiskTestModule val module = TestModule(DockerDynamoDbModule(tables, tableToHealthChecks))
 
-  class TestModule : KAbstractModule() {
+  class TestModule(private val dockerModule: DockerDynamoDbModule) : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-
-      install(
-        DockerDynamoDbModule(
-          DynamoDbTable(DyMovie::class),
-          DynamoDbTable(DyCharacter::class) {
-            it.withBillingMode(BillingMode.PAY_PER_REQUEST)
-          }
-        )
-      )
+      install(dockerModule)
     }
   }
 }

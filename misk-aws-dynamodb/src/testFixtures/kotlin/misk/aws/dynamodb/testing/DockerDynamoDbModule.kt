@@ -9,13 +9,14 @@ import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlin.reflect.KClass
 import misk.ServiceModule
+import misk.dynamodb.DynamoDBHealthCheckFactory
 import misk.dynamodb.DynamoDbHealthCheck
 import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import kotlin.reflect.KClass
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
@@ -24,7 +25,8 @@ import misk.inject.KAbstractModule
  * in-process, but never both.
  */
 class DockerDynamoDbModule(
-  private val tables: List<DynamoDbTable>
+  private val tables: List<DynamoDbTable>,
+  private val healthChecks: Map<DynamoDbTable, DynamoDBHealthCheckFactory> = mapOf(),
 ) : KAbstractModule() {
 
   constructor(vararg tables: DynamoDbTable) : this(tables.toList())
@@ -42,7 +44,7 @@ class DockerDynamoDbModule(
 
   @Provides @Singleton
   fun provideRequiredTables(): List<RequiredDynamoDbTable> =
-    tables.map { RequiredDynamoDbTable(it.tableName) }
+    tables.map { RequiredDynamoDbTable(it.tableName, healthChecks[it]) }
 
   @Provides @Singleton
   fun providesTestDynamoDb(): TestDynamoDb {
