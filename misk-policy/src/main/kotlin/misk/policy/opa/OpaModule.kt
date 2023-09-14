@@ -11,21 +11,17 @@ import wisp.moshi.buildMoshi
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import jakarta.inject.Singleton
+import misk.metrics.v2.Metrics
 
 class OpaModule @Inject constructor(
   private val config: OpaConfig
 ) : KAbstractModule() {
   override fun configure() {
+    requireBinding<Metrics>()
     require(config.baseUrl.isNotBlank())
     bind<OpaConfig>().toInstance(config)
+    bind<OpaMetrics>().to<MiskOpaMetrics>()
     bind<OpaPolicyEngine>().to<RealOpaPolicyEngine>()
-  }
-
-  @Provides
-  internal fun opaConfig(
-    config: OpaConfig
-  ): Boolean {
-    return config.provenance
   }
 
   @Provides
