@@ -36,17 +36,14 @@ internal class RealOpaPolicyEngineTest {
     }
 
     @Provides @Singleton
-    fun opaConfig(): OpaConfig {
-      return OpaConfig("fake", null, true, true)
-    }
+    fun opaConfig(): OpaConfig =
+      OpaConfig("fake", null, true, true)
 
     @Provides @Singleton
     fun opaApi(): OpaApi = Mockito.mock()
 
     @Provides @Singleton @Named("opa-moshi")
-    fun provideMoshi(): Moshi {
-      return defaultKotlinMoshi
-    }
+    fun provideMoshi(): Moshi = defaultKotlinMoshi
 
   }
 
@@ -93,14 +90,14 @@ internal class RealOpaPolicyEngineTest {
       .isEqualTo(1.0)
     assertThat(
       fakeMetrics.summaryCount(
-        MiskOpaMetrics.MetricType.opa_rego_query_eval_ns.name,
+        MiskOpaMetrics.MetricType.opa_rego_query_eval.name,
         "document" to "test"
       )
     )
       .isEqualTo(1.0)
     assertThat(
       fakeMetrics.summaryMean(
-        MiskOpaMetrics.MetricType.opa_rego_query_eval_ns.name,
+        MiskOpaMetrics.MetricType.opa_rego_query_eval.name,
         "document" to "test"
       )
     )
@@ -124,14 +121,14 @@ internal class RealOpaPolicyEngineTest {
       .isEqualTo(2.0)
     assertThat(
       fakeMetrics.summaryCount(
-        MiskOpaMetrics.MetricType.opa_rego_query_eval_ns.name,
+        MiskOpaMetrics.MetricType.opa_rego_query_eval.name,
         "document" to "test"
       )
     )
       .isEqualTo(2.0)
     assertThat(
       fakeMetrics.summaryMean(
-        MiskOpaMetrics.MetricType.opa_rego_query_eval_ns.name,
+        MiskOpaMetrics.MetricType.opa_rego_query_eval.name,
         "document" to "test"
       )
     )
