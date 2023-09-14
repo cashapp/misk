@@ -22,7 +22,7 @@ class MiskOpaMetrics @Inject constructor(metrics: Metrics) : OpaMetrics {
   }
 
   companion object {
-    const val NANOSECONDS_PER_SECOND = 1E9
+    const val NANOSECONDS_PER_SECOND: Double = 1E9
   }
 
   private val serverQueryCacheHit: Counter = metrics.counter(
