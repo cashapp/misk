@@ -1,5 +1,6 @@
 public final class misk/aws/dynamodb/testing/DockerDynamoDbModule : misk/inject/KAbstractModule {
-	public fun <init> (Ljava/util/List;)V
+	public fun <init> (Ljava/util/List;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> ([Lkotlin/reflect/KClass;)V
 	public fun <init> ([Lmisk/aws/dynamodb/testing/DynamoDbTable;)V
 	public final fun provideRequiredTables ()Ljava/util/List;
@@ -24,7 +25,8 @@ public final class misk/aws/dynamodb/testing/DynamoDbTable {
 }
 
 public final class misk/aws/dynamodb/testing/InProcessDynamoDbModule : misk/inject/KAbstractModule {
-	public fun <init> (Ljava/util/List;)V
+	public fun <init> (Ljava/util/List;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> ([Lkotlin/reflect/KClass;)V
 	public fun <init> ([Lmisk/aws/dynamodb/testing/DynamoDbTable;)V
 	public final fun provideRequiredTables ()Ljava/util/List;
@@ -48,6 +50,11 @@ public final class misk/aws/dynamodb/testing/TestDynamoDb : com/google/common/ut
 	public fun stopAsync ()Lcom/google/common/util/concurrent/Service;
 }
 
+public final class misk/aws/dynamodb/testing/TestHealthChecksKt {
+	public static final fun getHealthyHealthCheck ()Lmisk/healthchecks/HealthCheck;
+	public static final fun getUnhealthyHealthCheck ()Lmisk/healthchecks/HealthCheck;
+}
+
 public abstract interface class misk/dynamodb/DyTimestampedEntity {
 	public abstract fun getCreated_at ()Ljava/util/Date;
 	public abstract fun getUpdated_at ()Ljava/util/Date;
@@ -58,6 +65,10 @@ public abstract interface class misk/dynamodb/DyTimestampedEntity {
 public abstract interface class misk/dynamodb/DyVersionedEntity {
 	public abstract fun getVersion ()J
 	public abstract fun setVersion (J)V
+}
+
+public abstract interface class misk/dynamodb/DynamoDBHealthCheckFactory {
+	public abstract fun create (Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;)Lmisk/healthchecks/HealthCheck;
 }
 
 public final class misk/dynamodb/DynamoDbHealthCheck : misk/healthchecks/HealthCheck {
@@ -87,14 +98,14 @@ public class misk/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule {
 }
 
 public final class misk/dynamodb/RequiredDynamoDbTable {
-	public fun <init> (Ljava/lang/String;Lmisk/healthchecks/HealthCheck;)V
-	public synthetic fun <init> (Ljava/lang/String;Lmisk/healthchecks/HealthCheck;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lmisk/dynamodb/DynamoDBHealthCheckFactory;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/dynamodb/DynamoDBHealthCheckFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lmisk/healthchecks/HealthCheck;
-	public final fun copy (Ljava/lang/String;Lmisk/healthchecks/HealthCheck;)Lmisk/dynamodb/RequiredDynamoDbTable;
-	public static synthetic fun copy$default (Lmisk/dynamodb/RequiredDynamoDbTable;Ljava/lang/String;Lmisk/healthchecks/HealthCheck;ILjava/lang/Object;)Lmisk/dynamodb/RequiredDynamoDbTable;
+	public final fun component2 ()Lmisk/dynamodb/DynamoDBHealthCheckFactory;
+	public final fun copy (Ljava/lang/String;Lmisk/dynamodb/DynamoDBHealthCheckFactory;)Lmisk/dynamodb/RequiredDynamoDbTable;
+	public static synthetic fun copy$default (Lmisk/dynamodb/RequiredDynamoDbTable;Ljava/lang/String;Lmisk/dynamodb/DynamoDBHealthCheckFactory;ILjava/lang/Object;)Lmisk/dynamodb/RequiredDynamoDbTable;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCustomHealthCheck ()Lmisk/healthchecks/HealthCheck;
+	public final fun getHealthCheckFactory ()Lmisk/dynamodb/DynamoDBHealthCheckFactory;
 	public final fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
