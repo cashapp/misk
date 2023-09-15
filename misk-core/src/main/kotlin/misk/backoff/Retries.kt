@@ -11,7 +11,7 @@ fun <A> retry(
   upTo: Int,
   withBackoff: Backoff,
   onRetry: ((retryCount: Int, exception: Exception) -> Unit)? = null,
-  f: (retryCount: Int) -> A,
+  block: (retryCount: Int) -> A,
   ): A {
   require(upTo > 0) { "must support at least one call" }
 
@@ -21,7 +21,7 @@ fun <A> retry(
 
   for (i in 0 until upTo) {
     try {
-      val result = f(i)
+      val result = block(i)
       withBackoff.reset()
       return result
     } catch (e: DontRetryException) {
