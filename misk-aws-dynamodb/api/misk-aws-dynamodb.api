@@ -60,16 +60,6 @@ public abstract interface class misk/dynamodb/DyVersionedEntity {
 	public abstract fun setVersion (J)V
 }
 
-public final class misk/dynamodb/DynamoDbHealthCheck : misk/healthchecks/HealthCheck {
-	public static final field Companion Lmisk/dynamodb/DynamoDbHealthCheck$Companion;
-	public fun <init> (Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;Ljava/util/List;)V
-	public fun status ()Lmisk/healthchecks/HealthStatus;
-}
-
-public final class misk/dynamodb/DynamoDbHealthCheck$Companion {
-	public final fun getLogger ()Lmu/KLogger;
-}
-
 public abstract interface class misk/dynamodb/DynamoDbService : com/google/common/util/concurrent/Service {
 }
 
@@ -83,6 +73,10 @@ public class misk/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule {
 	public final fun provideRequiredTables ()Ljava/util/List;
 	public final fun providesAmazonDynamoDB (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;
 	public final fun providesAmazonDynamoDBStreams (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBStreams;
+}
+
+public final class misk/dynamodb/RealDynamoDbService : com/google/common/util/concurrent/AbstractIdleService, misk/dynamodb/DynamoDbService {
+	public fun <init> (Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;Ljava/util/List;)V
 }
 
 public final class misk/dynamodb/RequiredDynamoDbTable {
