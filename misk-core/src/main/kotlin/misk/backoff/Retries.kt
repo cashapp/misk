@@ -2,8 +2,9 @@ package misk.backoff
 
 /**
  * Retries the provided function up to a certain number of times, applying the given backoff
- * between each retry. The retry function is provided with current retry count, in case this is
- * relevant
+ * between each retry. If provided, the onRetry callback is called when a retry happens, allowing
+ * clients to perform a task (log, emit metrics) every time a retry occurs.
+ * The retry function is provided with current retry count, in case this is relevant.
  */
 @JvmOverloads
 fun <A> retry(
