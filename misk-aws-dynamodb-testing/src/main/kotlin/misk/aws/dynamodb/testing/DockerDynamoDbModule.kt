@@ -9,13 +9,11 @@ import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlin.reflect.KClass
 import misk.ServiceModule
-import misk.dynamodb.DynamoDbHealthCheck
 import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
-import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import kotlin.reflect.KClass
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
@@ -25,7 +23,7 @@ import misk.inject.KAbstractModule
  */
 @Deprecated("Replace the dependency on misk-aws-dynamodb-testing with testFixtures(misk-aws-dynamodb)")
 class DockerDynamoDbModule(
-  private val tables: List<DynamoDbTable>
+  private val tables: List<DynamoDbTable>,
 ) : KAbstractModule() {
 
   constructor(vararg tables: DynamoDbTable) : this(tables.toList())
@@ -35,17 +33,18 @@ class DockerDynamoDbModule(
     for (table in tables) {
       multibind<DynamoDbTable>().toInstance(table)
     }
-    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
     bind<DynamoDbService>().to<DockerDynamoDbService>()
     install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
     install(ServiceModule<TestDynamoDb>())
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun provideRequiredTables(): List<RequiredDynamoDbTable> =
     tables.map { RequiredDynamoDbTable(it.tableName) }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesTestDynamoDb(): TestDynamoDb {
     return TestDynamoDb(
       TestDynamoDbService.create(
@@ -56,12 +55,14 @@ class DockerDynamoDbModule(
     )
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesAmazonDynamoDB(testDynamoDb: TestDynamoDb): AmazonDynamoDB {
     return testDynamoDb.service.client.dynamoDb
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesAmazonDynamoDBStreams(testDynamoDb: TestDynamoDb): AmazonDynamoDBStreams {
     return testDynamoDb.service.client.dynamoDbStreams
   }
