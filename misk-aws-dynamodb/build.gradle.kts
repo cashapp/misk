@@ -15,12 +15,9 @@ dependencies {
   api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.jakartaInject)
-  api(Dependencies.kotlinLogging)
   api(project(":misk-aws"))
-  api(project(":misk-core"))
   api(project(":misk-inject"))
   implementation(Dependencies.kotlinReflect)
-  implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
 
@@ -40,7 +37,6 @@ dependencies {
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-aws-dynamodb"))
 }
 
 configure<MavenPublishBaseExtension> {
