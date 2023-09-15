@@ -5,7 +5,13 @@ package misk.backoff
  * between each retry. The retry function is provided with current retry count, in case this is
  * relevant
  */
-fun <A> retry(upTo: Int, withBackoff: Backoff, f: (retryCount: Int) -> A): A {
+@JvmOverloads
+fun <A> retry(
+  upTo: Int,
+  withBackoff: Backoff,
+  onRetry: ((retryCount: Int, exception: Exception) -> Unit)? = null,
+  f: (retryCount: Int) -> A,
+  ): A {
   require(upTo > 0) { "must support at least one call" }
 
   withBackoff.reset()
@@ -20,6 +26,7 @@ fun <A> retry(upTo: Int, withBackoff: Backoff, f: (retryCount: Int) -> A): A {
     } catch (e: DontRetryException) {
       throw e
     } catch (e: Exception) {
+      onRetry?.invoke(i + 1, e)
       lastException = e
 
       if (i + 1 < upTo) {
