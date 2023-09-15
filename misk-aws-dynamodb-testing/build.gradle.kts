@@ -21,7 +21,6 @@ dependencies {
   implementation(Dependencies.tempestTesting)
   implementation(Dependencies.tempestTestingDocker)
   implementation(Dependencies.tempestTestingJvm)
-  implementation(project(":misk-core"))
   implementation(project(":misk-service"))
 }
 
