@@ -10,21 +10,38 @@ import jakarta.inject.Singleton
  *
  * The only way to create an instance of this is with [FakeMetricsModule].
  */
+@Deprecated(
+  message = "Misk Metrics V1 is Deprecated, please use V2",
+  replaceWith = ReplaceWith("misk.metrics.v2.FakeMetrics"),
+  level = DeprecationLevel.WARNING
+)
 @Singleton
 class FakeMetrics @Inject internal constructor(
   private val registry: CollectorRegistry
 ) : Metrics {
+  @Deprecated(
+    message = "Misk Metrics V1 is Deprecated, please use V2",
+    level = DeprecationLevel.WARNING
+  )
   override fun counter(name: String, help: String, labelNames: List<String>): Counter =
     Counter.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .register(registry)
 
+  @Deprecated(
+    message = "Misk Metrics V1 is Deprecated, please use V2",
+    level = DeprecationLevel.WARNING
+  )
   override fun gauge(name: String, help: String, labelNames: List<String>): Gauge =
     Gauge.build(name, help)
       .labelNames(*labelNames.toTypedArray())
       .register(registry)
 
-  override fun histogram(
+  @Deprecated(
+    message = "Recommend migrating to misk.metrics.v2.Metrics.histogram. See kdoc for detail",
+    level = DeprecationLevel.WARNING
+  )
+  override fun legacyHistogram(
     name: String,
     help: String,
     labelNames: List<String>,
@@ -54,6 +71,19 @@ class FakeMetrics @Inject internal constructor(
         summary.labels(*labelValues).get().count.toInt()
     }
   }
+
+  @Deprecated(
+    message = "Recommend migrating to misk.metrics.v2.Metrics.histogram. See kdoc for detail",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("legacyHistogram(name,help,labelNames,quantiles,maxAgeSeconds)")
+  )
+  override fun histogram(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?
+  ): Histogram = legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
 
   /** Returns a measurement for a [counter] or [gauge]. */
   fun get(name: String, vararg labels: Pair<String, String>): Double? =

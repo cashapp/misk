@@ -9,6 +9,7 @@ import misk.metrics.v2.Metrics
 import misk.metrics.v2.PeakGauge
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.metrics.backends.prometheus.PrometheusHistogram
 
 /**
  * Accepts metrics and writes them to the Prometheus [CollectorRegistry].
@@ -35,7 +36,8 @@ internal class PrometheusMetrics @Inject internal constructor(
     .labelNames(*labelNames.toTypedArray())
     .register(registry)
 
-  override fun peakGauge(name: String,
+  override fun peakGauge(
+    name: String,
     help: String,
     labelNames: List<String>
   ): PeakGauge = PeakGauge
@@ -74,6 +76,26 @@ internal class PrometheusMetrics @Inject internal constructor(
       }
     }
     .register(registry)
+
+  @Deprecated(
+    "Recommend migrating to histogram. See kdoc for detail",
+    level = DeprecationLevel.WARNING,
+  )
+  override fun legacyHistogram(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?
+  ): misk.metrics.Histogram = PrometheusHistogram(
+    summary(
+      name,
+      help,
+      labelNames,
+      quantiles,
+      maxAgeSeconds
+    )
+  )
 
   companion object {
     /**
