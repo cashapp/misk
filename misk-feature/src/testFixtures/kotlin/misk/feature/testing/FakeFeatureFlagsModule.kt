@@ -8,12 +8,12 @@ import misk.feature.DynamicConfig
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.feature.testing.FakeFeatureFlagsOverrideModule.FakeFeatureFlagsOverride
-import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.parameterizedType
 import misk.inject.toKey
 import misk.inject.typeLiteral
 import jakarta.inject.Inject
+import misk.inject.KInstallOnceModule
 import kotlin.reflect.KClass
 
 /**
@@ -25,7 +25,7 @@ import kotlin.reflect.KClass
  */
 class FakeFeatureFlagsModule(
   private val qualifier: KClass<out Annotation>? = null
-) : KAbstractModule() {
+) : KInstallOnceModule() {
   private val overrides = mutableListOf<FakeFeatureFlagsOverrideModule>()
 
   override fun configure() {
