@@ -3,12 +3,14 @@ package misk.policy.opa
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.metrics.v2.Metrics
 import java.lang.IllegalArgumentException
 
 /**
  * Maps [OpaResponse.metrics] into prometheus counters and histograms.
  */
+@Singleton
 class MiskOpaMetrics @Inject constructor(metrics: Metrics) : OpaMetrics {
 
   @Suppress("ktlint:enum-entry-name-case")
