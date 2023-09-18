@@ -11,12 +11,14 @@ plugins {
 
 dependencies {
   api(project(":misk-inject"))
+  api(Dependencies.micrometerCore)
   api(Dependencies.prometheusClient)
   implementation(Dependencies.findBugs)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
   implementation(Dependencies.jakartaInject)
   implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(Dependencies.micrometerPrometheus)
 
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(Dependencies.prometheusClient)

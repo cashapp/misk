@@ -1,10 +1,17 @@
 package misk.metrics.v2
 
+import io.micrometer.core.instrument.Clock
+import io.micrometer.core.instrument.Tag
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
-import io.prometheus.client.Summary
 import io.prometheus.client.Histogram
+import io.prometheus.client.Summary
+import java.util.concurrent.TimeUnit
+import java.util.function.Supplier
+import misk.metrics.v3.Metrics as V3Metrics
 
 /**
  * Interface for application code to emit metrics to a metrics backend like Prometheus.
@@ -18,8 +25,14 @@ import io.prometheus.client.Histogram
  * Tests that use this should install a metrics client like `PrometheusMetricsClientModule`.
  * Services that use this should install a metrics service like `PrometheusMetricsServiceModule`.
  */
+@Deprecated(
+  message = "Misk Metrics V2 is Deprecated, please use V3 or micrometer directly",
+  replaceWith = ReplaceWith("misk.metrics.v3.Metrics"),
+  level = DeprecationLevel.WARNING
+)
 interface Metrics {
   fun getRegistry(): CollectorRegistry
+  fun getMetricsV3(): V3Metrics
 
   /**
    * counter creates and registers a new `Counter` prometheus type.
@@ -31,6 +44,10 @@ interface Metrics {
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
+  @Deprecated(
+    message = "Misk Metrics V2 is Deprecated, please use V3",
+    level = DeprecationLevel.WARNING
+  )
   fun counter(
     name: String,
     help: String,
@@ -68,6 +85,10 @@ interface Metrics {
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
+  @Deprecated(
+    message = "Misk Metrics V2 is Deprecated, please use V3",
+    level = DeprecationLevel.WARNING
+  )
   fun peakGauge(
     name: String,
     help: String = "",
@@ -94,6 +115,10 @@ interface Metrics {
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    * @param buckets a list of upper bounds of buckets for the histogram.
    */
+  @Deprecated(
+    message = "Misk Metrics V2 is Deprecated, please use V3",
+    level = DeprecationLevel.WARNING
+  )
   fun histogram(
     name: String,
     help: String = "",
@@ -121,6 +146,10 @@ interface Metrics {
    *  for the metric. The key of the map is the quantile as a ratio (e.g. 0.99 represents p99) and
    *  the value is the "tolerable error" of the computed quantile.
    */
+  @Deprecated(
+    message = "Misk Metrics V2 is Deprecated, please use V3",
+    level = DeprecationLevel.WARNING
+  )
   fun summary(
     name: String,
     help: String = "",
@@ -184,9 +213,124 @@ interface Metrics {
     )
   )
 
+  /**
+   * counter creates and registers a new `Counter` prometheus type.
+   *
+   * See https://prometheus.github.io/client_java/io/prometheus/client/Counter.html for more info.
+   *
+   * @param name the name of the metric which will be supplied to prometheus.
+   *  Must be unique across all metric types.
+   * @param description a human-readable description of what the metric does for display in the metrics UI.
+   * @param tags a list of key/value pairs to categorize the metric.
+   */
+  @Deprecated(
+    message = "Misk Metrics V2 is Deprecated, please use V3. This is a bridge method to aid migration to V3",
+    level = DeprecationLevel.WARNING
+  )
+  fun micrometerCounter(
+    name: String,
+    description: String,
+    tags: Iterable<Tag> = listOf(),
+  ) = getMetricsV3().counter(name, description, tags)
+
+  /**
+   * gauge creates and registers a new `Gauge` prometheus type.
+   *
+   * See https://prometheus.github.io/client_java/io/prometheus/client/Gauge.html for more info.
+   *
+   * @param name the name of the metric which will be supplied to prometheus.
+   *  Must be unique across all metric types.
+   * @param supplier a closure that will be called when rendering metrics for the metrics backend.
+   * @param description a human-readable description of what the metric does for display in the metrics UI.
+   * @param tags a list of key/value pairs to categorize the metric.
+   */
+  @Deprecated(
+    message = "Misk Metrics V2 is Deprecated, please use V3. This is a bridge method to aid migration to V3",
+    level = DeprecationLevel.WARNING
+  )
+  fun micrometerGauge(
+    name: String,
+    supplier: Supplier<Number>,
+    description: String = "",
+    tags: Iterable<Tag> = listOf(),
+  ) = getMetricsV3().gauge(name, supplier, description, tags)
+
+  /**
+   * histogram creates a new `Histogram` prometheus type with the supplied parameters.
+   *
+   * NOTE: `misk.metrics.v2.Metrics` is NOT backward compatible with `misk.metrics.Metrics`.
+   *   This is because the metric type of the `histogram(...)` function has changed.
+   *   If a callsite which used `misk.metrics.Metrics.histogram(...)` is upgraded to use
+   *   `misk.metrics.v2.Metrics.histogram(...)`, the dashboards and monitors based on the
+   *   metric will break because the data type of the metric will have changed.
+   *
+   * See https://prometheus.github.io/client_java/io/prometheus/client/Histogram.html for more info.
+   *
+   * @param name the name of the metric which will be supplied to prometheus.
+   *  Must be unique across all metric types.
+   * @param description a human-readable description of what the metric does for display in the metrics UI.
+   * @param tags a list of key/value pairs to categorize the metric.
+   * @param buckets a list of upper bounds of buckets for the histogram.
+   */
+  @Deprecated(
+    message = "Misk Metrics V2 is Deprecated, please use V3. This is a bridge method to aid migration to V3",
+    level = DeprecationLevel.WARNING
+  )
+  fun micrometerHistogram(
+    name: String,
+    description: String = "",
+    tags: Iterable<Tag> = listOf(),
+    buckets: List<Double> = misk.metrics.v3.defaultBuckets
+  ) = getMetricsV3().histogram(name, description, tags, buckets)
+
+  /**
+   * summary creates and registers a new `Summary` prometheus type.
+   *
+   * See https://prometheus.github.io/client_java/io/prometheus/client/Summary.html for more info.
+   *
+   * NB: Summaries can be an order of magnitude more expensive than histograms in terms of CPU.
+   * Unless you require the specific properties of a summary, consider using [histogram] instead.
+   *
+   * @param name the name of the metric which will be supplied to prometheus.
+   *  Must be unique across all metric types.
+   * @param description a human-readable description of what the metric does for display in the metrics UI.
+   * @param tags a list of key/value pairs to categorize the metric.
+   * @param quantiles is a map of all of the quantiles (a.k.a. percentiles) that will be computed
+   *  for the metric. The key of the map is the quantile as a ratio (e.g. 0.99 represents p99) and
+   *  the value is the "tolerable error" of the computed quantile.
+   */
+  @Deprecated(
+    message = "Misk Metrics V2 is Deprecated, please use V3. This is a bridge method to aid migration to V3",
+    level = DeprecationLevel.WARNING
+  )
+  fun micrometerSummary(
+    name: String,
+    description: String = "",
+    tags: Iterable<Tag> = listOf(),
+    quantiles: Map<Double, Double> = misk.metrics.v3.defaultQuantiles,
+    maxAgeSeconds: Long = TimeUnit.MINUTES.toMillis(10)
+  ) = getMetricsV3().summary(name, description, tags, quantiles, maxAgeSeconds)
+
   companion object {
-    fun factory(registry: CollectorRegistry) = object : Metrics {
+    fun factory(
+      registry: CollectorRegistry,
+    ) = factory(
+      registry,
+      V3Metrics(
+        PrometheusMeterRegistry(
+          PrometheusConfig.DEFAULT,
+          registry,
+          Clock.SYSTEM
+        )
+      )
+    )
+
+    fun factory(
+      registry: CollectorRegistry,
+      metricsV3: V3Metrics,
+    ) = object : Metrics {
       override fun getRegistry() = registry
+      override fun getMetricsV3() = metricsV3
     }
   }
 

@@ -21,9 +21,11 @@ import misk.metrics.summarySum
  */
 @Singleton
 class FakeMetrics @Inject internal constructor(
-  private val registry: CollectorRegistry
+  private val registry: CollectorRegistry,
+  private val v3Metrics: misk.metrics.v3.Metrics,
 ) : Metrics {
   override fun getRegistry() = registry
+  override fun getMetricsV3() = v3Metrics
 
   override fun counter(
     name: String,

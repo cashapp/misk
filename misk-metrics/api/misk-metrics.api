@@ -4,6 +4,7 @@ public final class misk/metrics/FakeMetrics : misk/metrics/Metrics {
 	public final fun get (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun getAllSamples ()Lkotlin/sequences/Sequence;
 	public fun getMetrics ()Lmisk/metrics/v2/Metrics;
+	public final fun getRegistry ()Lio/prometheus/client/CollectorRegistry;
 	public final fun getSample (Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
 	public static synthetic fun getSample$default (Lmisk/metrics/FakeMetrics;Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;ILjava/lang/Object;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
 	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
@@ -88,11 +89,16 @@ public final class misk/metrics/v2/FakeMetrics : misk/metrics/v2/Metrics {
 	public fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
 	public final fun get (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun getAllSamples ()Lkotlin/sequences/Sequence;
+	public fun getMetricsV3 ()Lmisk/metrics/v3/Metrics;
 	public fun getRegistry ()Lio/prometheus/client/CollectorRegistry;
 	public final fun getSample (Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
 	public static synthetic fun getSample$default (Lmisk/metrics/v2/FakeMetrics;Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;ILjava/lang/Object;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
 	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
 	public fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public fun micrometerCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/Counter;
+	public fun micrometerGauge (Ljava/lang/String;Ljava/util/function/Supplier;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/Gauge;
+	public fun micrometerHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/List;)Lio/micrometer/core/instrument/DistributionSummary;
+	public fun micrometerSummary (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/Map;J)Lio/micrometer/core/instrument/DistributionSummary;
 	public fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
 	public fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
 	public final fun summaryCount (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
@@ -111,15 +117,21 @@ public abstract interface class misk/metrics/v2/Metrics {
 	public static final field Companion Lmisk/metrics/v2/Metrics$Companion;
 	public abstract fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
 	public abstract fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public abstract fun getMetricsV3 ()Lmisk/metrics/v3/Metrics;
 	public abstract fun getRegistry ()Lio/prometheus/client/CollectorRegistry;
 	public abstract fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
 	public abstract fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public abstract fun micrometerCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/Counter;
+	public abstract fun micrometerGauge (Ljava/lang/String;Ljava/util/function/Supplier;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/Gauge;
+	public abstract fun micrometerHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/List;)Lio/micrometer/core/instrument/DistributionSummary;
+	public abstract fun micrometerSummary (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/Map;J)Lio/micrometer/core/instrument/DistributionSummary;
 	public abstract fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
 	public abstract fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
 }
 
 public final class misk/metrics/v2/Metrics$Companion {
 	public final fun factory (Lio/prometheus/client/CollectorRegistry;)Lmisk/metrics/v2/Metrics;
+	public final fun factory (Lio/prometheus/client/CollectorRegistry;Lmisk/metrics/v3/Metrics;)Lmisk/metrics/v2/Metrics;
 }
 
 public final class misk/metrics/v2/Metrics$DefaultImpls {
@@ -131,6 +143,14 @@ public final class misk/metrics/v2/Metrics$DefaultImpls {
 	public static synthetic fun histogram$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Histogram;
 	public static fun legacyHistogram (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
 	public static synthetic fun legacyHistogram$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lmisk/metrics/Histogram;
+	public static fun micrometerCounter (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/Counter;
+	public static synthetic fun micrometerCounter$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;ILjava/lang/Object;)Lio/micrometer/core/instrument/Counter;
+	public static fun micrometerGauge (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/util/function/Supplier;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/Gauge;
+	public static synthetic fun micrometerGauge$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/util/function/Supplier;Ljava/lang/String;Ljava/lang/Iterable;ILjava/lang/Object;)Lio/micrometer/core/instrument/Gauge;
+	public static fun micrometerHistogram (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/List;)Lio/micrometer/core/instrument/DistributionSummary;
+	public static synthetic fun micrometerHistogram$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/List;ILjava/lang/Object;)Lio/micrometer/core/instrument/DistributionSummary;
+	public static fun micrometerSummary (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/Map;J)Lio/micrometer/core/instrument/DistributionSummary;
+	public static synthetic fun micrometerSummary$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/Map;JILjava/lang/Object;)Lio/micrometer/core/instrument/DistributionSummary;
 	public static fun peakGauge (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
 	public static synthetic fun peakGauge$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v2/PeakGauge;
 	public static fun summary (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
@@ -167,5 +187,41 @@ public final class misk/metrics/v2/PeakGauge$Child {
 
 public final class misk/metrics/v2/PeakGauge$Companion {
 	public final fun builder (Ljava/lang/String;Ljava/lang/String;)Lmisk/metrics/v2/PeakGauge$Builder;
+}
+
+public class misk/metrics/v3/Metrics {
+	public static final field Companion Lmisk/metrics/v3/Metrics$Companion;
+	public final fun counter (Ljava/lang/String;Ljava/lang/String;)Lio/micrometer/core/instrument/Counter;
+	public final fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/Counter;
+	public static synthetic fun counter$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;ILjava/lang/Object;)Lio/micrometer/core/instrument/Counter;
+	public final fun gauge (Ljava/lang/String;Ljava/util/function/Supplier;)Lio/micrometer/core/instrument/Gauge;
+	public final fun gauge (Ljava/lang/String;Ljava/util/function/Supplier;Ljava/lang/String;)Lio/micrometer/core/instrument/Gauge;
+	public final fun gauge (Ljava/lang/String;Ljava/util/function/Supplier;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/Gauge;
+	public static synthetic fun gauge$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/util/function/Supplier;Ljava/lang/String;Ljava/lang/Iterable;ILjava/lang/Object;)Lio/micrometer/core/instrument/Gauge;
+	public final fun histogram (Ljava/lang/String;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun histogram (Ljava/lang/String;Ljava/lang/String;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/List;)Lio/micrometer/core/instrument/DistributionSummary;
+	public static synthetic fun histogram$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/List;ILjava/lang/Object;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun summary (Ljava/lang/String;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun summary (Ljava/lang/String;Ljava/lang/String;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/Map;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/Map;J)Lio/micrometer/core/instrument/DistributionSummary;
+	public static synthetic fun summary$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Iterable;Ljava/util/Map;JILjava/lang/Object;)Lio/micrometer/core/instrument/DistributionSummary;
+}
+
+public final class misk/metrics/v3/Metrics$Companion {
+}
+
+public final class misk/metrics/v3/Metrics$Companion$PeakGauge {
+	public fun <init> ()V
+	public final fun getAndClear ()D
+	public final fun record (D)V
+}
+
+public final class misk/metrics/v3/MetricsKt {
+	public static final fun getDefaultBuckets ()Ljava/util/List;
+	public static final fun getDefaultQuantiles ()Ljava/util/Map;
 }
 

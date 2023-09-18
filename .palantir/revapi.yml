@@ -87,3 +87,36 @@ acceptedBreaks:
     - code: "java.class.removed"
       old: "class misk.metrics.MetricsModule"
       justification: "These classes are not referenced anywhere in cash"
+  "2023.10.20.052058-cb86be8":
+    com.squareup.misk:misk-metrics:
+    - code: "java.method.addedToInterface"
+      new: "method io.micrometer.core.instrument.Counter misk.metrics.v2.Metrics::micrometerCounter(java.lang.String,\
+        \ java.lang.String, java.lang.Iterable<? extends io.micrometer.core.instrument.Tag>)"
+      justification: "Adding misk metrics v3"
+    - code: "java.method.addedToInterface"
+      new: "method io.micrometer.core.instrument.DistributionSummary misk.metrics.v2.Metrics::micrometerHistogram(java.lang.String,\
+        \ java.lang.String, java.lang.Iterable<? extends io.micrometer.core.instrument.Tag>,\
+        \ java.util.List<java.lang.Double>)"
+      justification: "Adding misk metrics v3"
+    - code: "java.method.addedToInterface"
+      new: "method io.micrometer.core.instrument.DistributionSummary misk.metrics.v2.Metrics::micrometerSummary(java.lang.String,\
+        \ java.lang.String, java.lang.Iterable<? extends io.micrometer.core.instrument.Tag>,\
+        \ java.util.Map<java.lang.Double, java.lang.Double>, long)"
+      justification: "Adding misk metrics v3"
+    - code: "java.method.addedToInterface"
+      new: "method io.micrometer.core.instrument.Gauge misk.metrics.v2.Metrics::micrometerGauge(java.lang.String,\
+        \ java.util.function.Supplier<java.lang.Number>, java.lang.String, java.lang.Iterable<?\
+        \ extends io.micrometer.core.instrument.Tag>)"
+      justification: "Adding misk metrics v3"
+    - code: "java.method.addedToInterface"
+      new: "method misk.metrics.v3.Metrics misk.metrics.v2.Metrics::getMetricsV3()"
+      justification: "Adding misk metrics v3"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.metrics.MetricsModule.V2MetricsProvider::<init>(io.prometheus.client.CollectorRegistry)"
+      new: "method void misk.metrics.MetricsModule.V2MetricsProvider::<init>(io.prometheus.client.CollectorRegistry,\
+        \ misk.metrics.v3.Metrics)"
+      justification: "Adding misk metrics v3"
+    com.squareup.misk:misk-prometheus:
+    - code: "java.class.removed"
+      old: "class misk.metrics.MetricsModule"
+      justification: "These classes are not referenced anywhere in cash"

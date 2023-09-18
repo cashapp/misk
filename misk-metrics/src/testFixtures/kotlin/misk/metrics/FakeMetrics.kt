@@ -16,9 +16,12 @@ import jakarta.inject.Singleton
   level = DeprecationLevel.WARNING
 )
 @Singleton
-class FakeMetrics @Inject internal constructor(private val registry: CollectorRegistry) : Metrics {
+class FakeMetrics @Inject internal constructor(
+  val registry: CollectorRegistry,
+  metricsV3: misk.metrics.v3.Metrics,
+) : Metrics {
 
-  private val v2Metrics = misk.metrics.v2.Metrics.factory(registry)
+  private val v2Metrics = misk.metrics.v2.Metrics.factory(registry, metricsV3)
 
   override fun getMetrics() = v2Metrics
 
