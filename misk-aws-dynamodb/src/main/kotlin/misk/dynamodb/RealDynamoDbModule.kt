@@ -7,16 +7,13 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
-import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
 import misk.exceptions.dynamodb.DynamoDbExceptionMapperModule
-import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
@@ -39,19 +36,20 @@ open class RealDynamoDbModule @JvmOverloads constructor(
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
     requireBinding<AwsRegion>()
-    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
     bind<DynamoDbService>().to<RealDynamoDbService>()
     install(ServiceModule<DynamoDbService>().enhancedBy<ReadyService>())
     install(DynamoDbExceptionMapperModule())
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun provideRequiredTables(): List<RequiredDynamoDbTable> = requiredTables
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesAmazonDynamoDB(
     awsRegion: AwsRegion,
-    awsCredentialsProvider: AWSCredentialsProvider
+    awsCredentialsProvider: AWSCredentialsProvider,
   ): AmazonDynamoDB {
     val builder = AmazonDynamoDBClientBuilder
       .standard()
@@ -64,10 +62,11 @@ open class RealDynamoDbModule @JvmOverloads constructor(
 
   open fun configureClient(builder: AmazonDynamoDBClientBuilder) {}
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesAmazonDynamoDBStreams(
     awsRegion: AwsRegion,
-    awsCredentialsProvider: AWSCredentialsProvider
+    awsCredentialsProvider: AWSCredentialsProvider,
   ): AmazonDynamoDBStreams {
     val builder = AmazonDynamoDBStreamsClientBuilder
       .standard()
@@ -79,11 +78,4 @@ open class RealDynamoDbModule @JvmOverloads constructor(
   }
 
   open fun configureStreamsClient(builder: AmazonDynamoDBStreamsClientBuilder) {}
-
-  /** We don't currently perform any startup work to connect to DynamoDB. */
-  @Singleton
-  private class RealDynamoDbService @Inject constructor() : AbstractService(), DynamoDbService {
-    override fun doStart() = notifyStarted()
-    override fun doStop() = notifyStopped()
-  }
 }
