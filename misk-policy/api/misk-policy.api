@@ -97,6 +97,17 @@ public abstract interface class misk/policy/opa/OpaMetrics {
 	public abstract fun observe (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
 }
 
+public final class misk/policy/opa/OpaMetrics$Names : java/lang/Enum {
+	public static final field opa_rego_evaluated Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_rego_external_resolve Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_rego_input_parse Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_rego_query_eval Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_server_handler Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_server_query_cache_hit Lmisk/policy/opa/OpaMetrics$Names;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/policy/opa/OpaMetrics$Names;
+	public static fun values ()[Lmisk/policy/opa/OpaMetrics$Names;
+}
+
 public final class misk/policy/opa/OpaModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/policy/opa/OpaConfig;)V
 	public final fun provideMoshi ()Lcom/squareup/moshi/Moshi;
