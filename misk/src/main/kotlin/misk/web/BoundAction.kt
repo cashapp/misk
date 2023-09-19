@@ -2,12 +2,10 @@ package misk.web
 
 import com.google.inject.Key
 import misk.Action
-import misk.ApplicationInterceptor
 import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.scope.SeedDataTransformer
 import misk.security.authz.AccessInterceptor
-import misk.web.actions.WebAction
 import misk.web.actions.asChain
 import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaRange
@@ -19,6 +17,8 @@ import okhttp3.MediaType
 import org.slf4j.MDC
 import java.util.regex.Matcher
 import com.google.inject.Provider
+import misk.ApplicationInterceptor
+import misk.web.actions.WebAction
 import javax.servlet.http.HttpServletRequest
 import kotlin.reflect.KType
 

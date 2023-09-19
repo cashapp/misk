@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Optional
 import jakarta.inject.Inject
+import javax.swing.Action
 import kotlin.test.assertFailsWith
 
 internal class ActionScopedTest {
@@ -169,7 +170,7 @@ internal class ActionScopedTest {
 
     )
     scope.enter(seedData).use { actionScope ->
-      runBlocking(actionScope.asContextElement()) {
+      runBlocking((actionScope as ActionScope).asContextElement()) {
         assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
       }
     }
@@ -213,7 +214,7 @@ internal class ActionScopedTest {
     scope.enter(seedData).use { actionScope ->
       var thrown: Throwable? = null
 
-      val snapshot = actionScope.snapshotActionScope()
+      val snapshot = (actionScope as ActionScope).snapshotActionScope()
       thread {
         try {
           actionScope.enter(snapshot).use {

@@ -14,13 +14,14 @@ public abstract class misk/concurrent/WrappingListeningExecutorService : com/goo
 	protected abstract fun wrap (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;
 }
 
-public final class misk/scope/ActionScope : java/lang/AutoCloseable {
+public final class misk/scope/ActionScope : misk/scope/Scope {
 	public static final field Companion Lmisk/scope/ActionScope$Companion;
 	public final fun asContextElement ()Lkotlin/coroutines/CoroutineContext$Element;
 	public fun close ()V
-	public final fun enter (Ljava/util/Map;)Lmisk/scope/ActionScope;
+	public fun enter (Ljava/util/Map;)Lmisk/scope/Scope;
 	public final fun get (Lcom/google/inject/Key;)Ljava/lang/Object;
-	public final fun inScope ()Z
+	public fun get (Ljava/lang/Class;)Ljava/lang/Object;
+	public fun inScope ()Z
 	public final fun propagate (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;
 	public final fun propagate (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
 	public final fun propagate (Lkotlin/reflect/KFunction;)Lkotlin/reflect/KFunction;
@@ -37,10 +38,6 @@ public abstract interface class misk/scope/ActionScoped {
 
 public final class misk/scope/ActionScoped$Companion {
 	public final fun of (Ljava/lang/Object;)Lmisk/scope/ActionScoped;
-}
-
-public abstract interface class misk/scope/ActionScopedProvider {
-	public abstract fun get ()Ljava/lang/Object;
 }
 
 public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstractModule {

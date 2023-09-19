@@ -12,6 +12,7 @@ dependencies {
   api(Dependencies.okHttp)
   api(Dependencies.wireGrpcClient) // GrpcStatus
   api(Dependencies.wireRuntime) // AnyMessage
+  api(project(":misk-api"))
   api(project(":misk-inject"))
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)

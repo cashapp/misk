@@ -1,8 +1,8 @@
 package misk.web
 
 import com.google.inject.Binder
-import misk.inject.KAbstractModule
 import misk.web.actions.WebAction
+import misk.inject.KAbstractModule
 import misk.web.actions.WebActionEntry
 import kotlin.reflect.KClass
 

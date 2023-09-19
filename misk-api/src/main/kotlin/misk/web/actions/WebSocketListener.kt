@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.web.actions.WebSocket
 import okio.ByteString
 
 open class WebSocketListener {

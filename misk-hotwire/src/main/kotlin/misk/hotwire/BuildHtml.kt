@@ -9,7 +9,8 @@ fun buildHtml(renderer: TagConsumer<*>.() -> Unit) = StringBuilder().apply {
   appendHTML().renderer()
 }.toString()
 
-fun buildHtmlResponseBody(renderer: TagConsumer<*>.() -> Unit): ResponseBody = object : ResponseBody {
+fun buildHtmlResponseBody(renderer: TagConsumer<*>.() -> Unit): ResponseBody = object :
+  ResponseBody {
   override fun writeTo(sink: BufferedSink) {
     sink.writeUtf8(buildHtml(renderer))
   }

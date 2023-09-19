@@ -7,7 +7,6 @@ import misk.web.DispatchMechanism
 import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
-import misk.web.Grpc
 import misk.web.PathPattern
 import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaTypes

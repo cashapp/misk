@@ -21,7 +21,7 @@ class ActionScope @Inject internal constructor(
   // this circular dependency by injecting a map of Provider<ActionScopedProvider>
   // rather than the map of ActionScopedProvider directly
   private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
-) : AutoCloseable {
+) : Scope {
   companion object {
     private val threadLocalScope = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
     private val threadLocalUUID = ThreadLocal<UUID>()
@@ -57,12 +57,14 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Starts the scope on a thread with the provided seed data */
-  fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
+  override fun enter(seedData: Map<out Any, Any?>): Scope {
+    val seedMap: Map<Key<*>, Any?> = seedData as Map<Key<*>, Any?>
+
     check(!inScope()) {
       "cannot begin an ActionScope on a thread that is already running in an action scope"
     }
 
-    threadLocalScope.set(LinkedHashMap(seedData))
+    threadLocalScope.set(LinkedHashMap(seedMap))
 
     // If an action scope had previously been entered on the thread, re-use its UUID.
     // Otherwise, generate a new one.
@@ -83,7 +85,15 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Returns true if currently in the scope */
-  fun inScope(): Boolean = threadLocalScope.get() != null
+  override fun inScope(): Boolean = threadLocalScope.get() != null
+
+  override fun <T> get(type: Class<T>): T? {
+    if (!inScope()) {
+      return null
+    }
+
+    return get(Key.get(type))
+  }
 
   /**
    * Wraps a [Callable] that will be called on another thread, propagating the current

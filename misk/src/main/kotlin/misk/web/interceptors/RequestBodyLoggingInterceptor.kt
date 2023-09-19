@@ -1,7 +1,6 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.ApplicationInterceptor
 import misk.Chain
 import misk.MiskCaller
 import misk.scope.ActionScoped
@@ -9,6 +8,7 @@ import okhttp3.Headers
 import wisp.logging.getLogger
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.ApplicationInterceptor
 import kotlin.reflect.full.findAnnotation
 
 private val logger = getLogger<RequestBodyLoggingInterceptor>()

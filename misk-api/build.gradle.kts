@@ -9,19 +9,16 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guava)
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
-  api(project(":misk-inject"))
-  api(project(":misk-api"))
-  implementation(Dependencies.kotlinReflect)
-  implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.kotlinxCoroutines)
-  implementation(Dependencies.moshi)
+  // Avoid adding anything here, this module should be as self-contained as possible.
+  api(Dependencies.okio)
+  api(Dependencies.okHttp)
+  implementation(kotlin("reflect"))
+
+  // Will be removed with task https://ccp-cashapp.atlassian.net/browse/CCPOKR-9336
+  api(Dependencies.jettyServletApi)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinTest)
 }
 
 configure<MavenPublishBaseExtension> {

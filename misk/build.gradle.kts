@@ -32,6 +32,7 @@ dependencies {
   api(project(":wisp:wisp-deployment"))
   api(project(":misk-action-scopes"))
   api(project(":misk-actions"))
+  api(project(":misk-api"))
   api(project(":misk-clustering"))
   api(project(":misk-config"))
   api(project(":misk-core"))

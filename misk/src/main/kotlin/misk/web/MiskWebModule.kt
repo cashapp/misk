@@ -21,8 +21,10 @@ import misk.grpc.GrpcFeatureBinding
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.queuing.TimedBlockingQueue
+import misk.scope.ActionScope
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
+import misk.scope.Scope
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.csp.ContentSecurityPolicyInterceptor
 import misk.security.ssl.CertificatesModule
@@ -136,6 +138,7 @@ class MiskWebModule @JvmOverloads constructor(
     // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
+        multibind<Scope>().to<ActionScope>()
         bindSeedData(HttpCall::class)
         bindSeedData(HttpServletRequest::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)

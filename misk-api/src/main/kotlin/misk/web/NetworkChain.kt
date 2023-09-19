@@ -1,7 +1,7 @@
 package misk.web
 
-import misk.Action
 import misk.web.actions.WebAction
+import misk.Action
 
 interface NetworkChain {
   /** The live HTTP call. You can access hot streams on this call. */
