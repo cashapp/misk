@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Optional
 import jakarta.inject.Inject
-import javax.swing.Action
 import kotlin.test.assertFailsWith
 
 internal class ActionScopedTest {
