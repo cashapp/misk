@@ -6,17 +6,13 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator
 import com.amazonaws.services.dynamodbv2.model.Condition
-import com.google.common.util.concurrent.ServiceManager
-import misk.dynamodb.DynamoDbHealthCheck
+import jakarta.inject.Inject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import jakarta.inject.Inject
 
 abstract class AbstractDynamoDbTest {
   @Inject lateinit var dynamoDbClient: AmazonDynamoDB
-  @Inject lateinit var healthCheck: DynamoDbHealthCheck
-  @Inject lateinit var serviceManager: ServiceManager
 
   @Test
   fun happyPath() {
@@ -89,20 +85,5 @@ abstract class AbstractDynamoDbTest {
     val newSpielbergMovies = movieMapper.query(query)
     val newSpielbergMovieNames = newSpielbergMovies.map { it.name }
     assertThat(newSpielbergMovieNames).contains("Bridge of Spies", "Ready Player One")
-  }
-
-  @Test
-  fun `healthCheck healthy`() {
-    val healthStatus = healthCheck.status()
-    assertThat(healthStatus.isHealthy).isTrue()
-  }
-
-  @Test
-  fun `healthCheck unhealthy`() {
-    // Stop the ServiceManager early will disconnect the DynamoDB client.
-    serviceManager.stopAsync()
-    serviceManager.awaitStopped()
-    val healthStatus = healthCheck.status()
-    assertThat(healthStatus.isHealthy).isFalse()
   }
 }

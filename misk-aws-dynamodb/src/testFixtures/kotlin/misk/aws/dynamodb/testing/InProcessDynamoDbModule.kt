@@ -9,13 +9,11 @@ import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlin.reflect.KClass
 import misk.ServiceModule
-import misk.dynamodb.DynamoDbHealthCheck
 import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
-import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import kotlin.reflect.KClass
 
 /**
  * Executes a DynamoDB service in-process per test. It clears the table content before each test
@@ -26,7 +24,7 @@ import misk.inject.KAbstractModule
  * both.
  */
 class InProcessDynamoDbModule(
-  private val tables: List<DynamoDbTable>
+  private val tables: List<DynamoDbTable>,
 ) : KAbstractModule() {
 
   constructor(vararg tables: DynamoDbTable) : this(tables.toList())
@@ -36,13 +34,13 @@ class InProcessDynamoDbModule(
     for (table in tables) {
       multibind<DynamoDbTable>().toInstance(table)
     }
-    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
     bind<DynamoDbService>().to<InProcessDynamoDbService>()
     install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
     install(ServiceModule<TestDynamoDb>())
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesDynamoDbServiceWrapper(): TestDynamoDb {
     return TestDynamoDb(
       TestDynamoDbService.create(
@@ -53,17 +51,20 @@ class InProcessDynamoDbModule(
     )
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesAmazonDynamoDB(testDynamoDb: TestDynamoDb): AmazonDynamoDB {
     return testDynamoDb.service.client.dynamoDb
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesAmazonDynamoDBStreams(testDynamoDb: TestDynamoDb): AmazonDynamoDBStreams {
     return testDynamoDb.service.client.dynamoDbStreams
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun provideRequiredTables(): List<RequiredDynamoDbTable> =
     tables.map { RequiredDynamoDbTable(it.tableName) }
 

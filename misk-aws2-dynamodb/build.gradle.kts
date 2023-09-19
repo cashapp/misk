@@ -16,13 +16,10 @@ dependencies {
   api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.jakartaInject)
-  api(Dependencies.kotlinLogging)
   api(project(":misk-aws"))
-  api(project(":misk-core"))
   api(project(":misk-inject"))
   implementation(Dependencies.awsCore)
   implementation(Dependencies.awsRegions)
-  implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
 
@@ -43,7 +40,6 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.aws2DynamodbEnhanced)
   testImplementation(Dependencies.junitApi)
-  testImplementation(project(":misk-aws2-dynamodb"))
   // Have to clamp until DynamoDBLocal supports later versions (dependency from tempest).
   testRuntimeOnly("org.antlr:antlr4-runtime") {
     version {
