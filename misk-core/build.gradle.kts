@@ -13,7 +13,6 @@ dependencies {
   api(Dependencies.jakartaInject)
   api(Dependencies.kotlinLogging)
   api(Dependencies.kotlinRetry)
-  api(Dependencies.okHttp)
   api(Dependencies.slf4jApi)
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-ssl"))
@@ -30,8 +29,10 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.okHttp)
   testImplementation(project(":wisp:wisp-logging"))
   testImplementation(project(":wisp:wisp-logging-testing"))
+  testImplementation(project(":misk-api"))
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-testing"))
 }

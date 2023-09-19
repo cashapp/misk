@@ -23,7 +23,7 @@ dependencies {
   api(Dependencies.servletApi)
   api(project(":wisp:wisp-time-testing"))
   api(project(":misk"))
-  api(project(":misk-actions"))
+  api(project(":misk-api"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
   implementation(Dependencies.guavaTestLib)
@@ -42,6 +42,7 @@ dependencies {
   implementation(project(":misk-service"))
 
   testImplementation(Dependencies.kotlinTest)
+  testImplementation(project(":misk-actions"))
 }
 
 configure<MavenPublishBaseExtension> {

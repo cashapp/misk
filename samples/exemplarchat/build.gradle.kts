@@ -15,6 +15,7 @@ dependencies {
   implementation(project(":wisp:wisp-config"))
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
+  implementation(project(":misk-api"))
   implementation(project(":misk-clustering"))
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))

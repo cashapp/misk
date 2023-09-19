@@ -25,14 +25,15 @@ dependencies {
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-admin"))
+  implementation(project(":misk-api"))
   implementation(project(":misk-config"))
-  implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-prometheus"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
+  testImplementation(project(":misk-core"))
   testImplementation(project(":misk-testing"))
 }
 
