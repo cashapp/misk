@@ -74,6 +74,28 @@ class FakeMetrics @Inject internal constructor(
       }
       .register(registry)
 
+  @Deprecated(
+    "Recommend migrating to histogram. See kdoc for detail",
+    level = DeprecationLevel.WARNING,
+  )
+  override fun legacyHistogram(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?
+  ): misk.metrics.Histogram {
+    val summary = summary(name, help, labelNames, quantiles, maxAgeSeconds)
+    return object : misk.metrics.Histogram {
+      override fun record(duration: Double, vararg labelValues: String) {
+        summary.labels(*labelValues).observe(duration)
+      }
+
+      override fun count(vararg labelValues: String): Int =
+        summary.labels(*labelValues).get().count.toInt()
+    }
+  }
+
   /** Returns a measurement for a [counter] or [gauge]. */
   fun get(name: String, vararg labels: Pair<String, String>): Double? =
     getSample(name, labels)?.value
