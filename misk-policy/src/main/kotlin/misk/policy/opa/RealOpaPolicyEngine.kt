@@ -116,6 +116,10 @@ class RealOpaPolicyEngine @Inject constructor(
     }
 
     val response = opaApi.queryDocument(document, inputString, config.provenance, config.metrics).execute()
+    if (config.metrics) {
+      metrics.evaluated(document)
+    }
+
     if (!response.isSuccessful) {
       throw PolicyEngineException("[${response.code()}]: ${response.errorBody()?.string()}")
     }
@@ -140,14 +144,12 @@ class RealOpaPolicyEngine @Inject constructor(
       throw PolicyEngineException("Response shape did not match", e)
     }
 
-    metrics.evaluated(document)
-
     if (extractedResponse.result == null) {
       throw PolicyEngineException("Policy document \"$document\" not found.")
     }
     extractedResponse.result.provenance = extractedResponse.provenance
-    extractedResponse.metrics?.also {
-      extractedResponse.result.metrics = it
+    if (config.metrics && extractedResponse.metrics != null) {
+      extractedResponse.result.metrics = extractedResponse.metrics
       metrics.observe(document, extractedResponse.result)
     }
 
