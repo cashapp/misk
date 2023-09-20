@@ -111,7 +111,7 @@ internal class RealOpaPolicyEngineTest {
         "document" to "test"
       )
     )
-      .isEqualTo(2.83083E-4)
+      .isEqualTo(283083.0)
 
     assertThat(
       fakeMetrics.get(
@@ -142,7 +142,7 @@ internal class RealOpaPolicyEngineTest {
         "document" to "test"
       )
     )
-      .isEqualTo(2.83083E-4)
+      .isEqualTo(283083.0)
 
     assertThat(
       fakeMetrics.get(
