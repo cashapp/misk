@@ -9,13 +9,11 @@ import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlin.reflect.KClass
 import misk.ServiceModule
-import misk.dynamodb.DynamoDbHealthCheck
 import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
-import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import kotlin.reflect.KClass
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
@@ -34,7 +32,6 @@ class DockerDynamoDbModule(
     for (table in tables) {
       multibind<DynamoDbTable>().toInstance(table)
     }
-    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
     bind<DynamoDbService>().to<DockerDynamoDbService>()
     install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
     install(ServiceModule<TestDynamoDb>())

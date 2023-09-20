@@ -1,5 +1,6 @@
 package misk.policy.opa
 
+import com.google.inject.Injector
 import com.google.inject.Module
 import com.google.inject.Provides
 import com.squareup.moshi.JsonDataException
@@ -50,6 +51,7 @@ internal class RealOpaPolicyEngineTest {
   @Inject lateinit var opaApi: OpaApi
   @Inject lateinit var opaPolicyEngine: OpaPolicyEngine
   @Inject lateinit var fakeMetrics: FakeMetrics
+  @Inject lateinit var injector: Injector
 
   val metricsPayload = """
 , "metrics": {
@@ -60,6 +62,14 @@ internal class RealOpaPolicyEngineTest {
     "timer_server_handler_ns": 582042
 }    
   """.trimIndent()
+
+  @Test
+  fun validateSingletonInjectorScope() {
+
+    injector.getInstance(MiskOpaMetrics::class.java)
+    injector.getInstance(MiskOpaMetrics::class.java)
+
+  }
 
   @Test
   fun metricsInResponse() {
@@ -83,21 +93,21 @@ internal class RealOpaPolicyEngineTest {
 
     assertThat(
       fakeMetrics.get(
-        MiskOpaMetrics.MetricType.opa_server_query_cache_hit.name,
+        OpaMetrics.Names.opa_server_query_cache_hit.name,
         "document" to "test"
       )
     )
       .isEqualTo(1.0)
     assertThat(
       fakeMetrics.summaryCount(
-        MiskOpaMetrics.MetricType.opa_rego_query_eval.name,
+        OpaMetrics.Names.opa_rego_query_eval.name,
         "document" to "test"
       )
     )
       .isEqualTo(1.0)
     assertThat(
       fakeMetrics.summaryMean(
-        MiskOpaMetrics.MetricType.opa_rego_query_eval.name,
+        OpaMetrics.Names.opa_rego_query_eval.name,
         "document" to "test"
       )
     )
@@ -105,7 +115,7 @@ internal class RealOpaPolicyEngineTest {
 
     assertThat(
       fakeMetrics.get(
-        MiskOpaMetrics.MetricType.opa_rego_evaluated.name,
+        OpaMetrics.Names.opa_rego_evaluated.name,
         "document" to "test"
       )
     ).isEqualTo(1.0)
@@ -114,21 +124,21 @@ internal class RealOpaPolicyEngineTest {
 
     assertThat(
       fakeMetrics.get(
-        MiskOpaMetrics.MetricType.opa_server_query_cache_hit.name,
+        OpaMetrics.Names.opa_server_query_cache_hit.name,
         "document" to "test"
       )
     )
       .isEqualTo(2.0)
     assertThat(
       fakeMetrics.summaryCount(
-        MiskOpaMetrics.MetricType.opa_rego_query_eval.name,
+        OpaMetrics.Names.opa_rego_query_eval.name,
         "document" to "test"
       )
     )
       .isEqualTo(2.0)
     assertThat(
       fakeMetrics.summaryMean(
-        MiskOpaMetrics.MetricType.opa_rego_query_eval.name,
+        OpaMetrics.Names.opa_rego_query_eval.name,
         "document" to "test"
       )
     )
@@ -136,14 +146,14 @@ internal class RealOpaPolicyEngineTest {
 
     assertThat(
       fakeMetrics.get(
-        MiskOpaMetrics.MetricType.opa_rego_evaluated.name,
+        OpaMetrics.Names.opa_rego_evaluated.name,
         "document" to "test"
       )
     ).isEqualTo(2.0)
 
     assertThat(
       fakeMetrics.get(
-        MiskOpaMetrics.MetricType.opa_rego_evaluated.name,
+        OpaMetrics.Names.opa_rego_evaluated.name,
         "document" to "test"
       )
     ).isEqualTo(2.0)
