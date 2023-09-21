@@ -84,7 +84,7 @@ dependencies {
   implementation(Dependencies.wireGrpcClient)
   implementation(Dependencies.wireRuntime)
   implementation(project(":misk-core"))
-  implementation(project(":misk-metrics-testing"))
+  implementation(testFixtures(project(":misk-metrics")))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
 

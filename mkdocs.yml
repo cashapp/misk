@@ -70,6 +70,8 @@ nav:
   - 'Internals':
       - 'Graceful Shutdown': internals/graceful-shutdown.md
       - 'Service Management': internals/service-management.md
+  - 'Migrations':
+      - 'Misk Metrics': migrations/misk-metrics.md
   - 'Change Log': changelog.md
   - 'Releasing': releasing.md
   - 'Manual Releasing': releasing-manual.md

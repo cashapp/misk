@@ -50,14 +50,9 @@ public final class misk/policy/opa/Metrics {
 }
 
 public final class misk/policy/opa/MiskOpaMetrics : misk/policy/opa/OpaMetrics {
-	public static final field Companion Lmisk/policy/opa/MiskOpaMetrics$Companion;
-	public static final field NANOSECONDS_PER_SECOND D
 	public fun <init> (Lmisk/metrics/v2/Metrics;)V
 	public fun evaluated (Ljava/lang/String;)V
 	public fun observe (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
-}
-
-public final class misk/policy/opa/MiskOpaMetrics$Companion {
 }
 
 public abstract interface class misk/policy/opa/OpaApi {

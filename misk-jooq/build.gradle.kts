@@ -30,7 +30,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-deployment"))
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":misk"))
-  testImplementation(project(":misk-jdbc-testing"))
+  testImplementation(testFixtures(project(":misk-jdbc")))
   testImplementation(project(":misk-testing"))
 
   // Needed to generate jooq test db classes
