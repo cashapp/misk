@@ -63,7 +63,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":misk-config"))
   testImplementation(project(":misk-hibernate-testing"))
-  testImplementation(project(":misk-jdbc-testing"))
+  testImplementation(testFixtures(project(":misk-jdbc")))
   testImplementation(project(":misk-metrics"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-crypto")))
