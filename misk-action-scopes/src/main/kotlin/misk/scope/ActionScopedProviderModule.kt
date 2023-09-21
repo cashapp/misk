@@ -13,7 +13,6 @@ import misk.inject.toKey
 import misk.inject.typeLiteral
 import java.lang.reflect.Type
 import jakarta.inject.Inject
-import misk.ApplicationInterceptor
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.javaMethod
 

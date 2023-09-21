@@ -1,9 +1,7 @@
 package misk.security.authz
 
 import misk.ApplicationInterceptor
-import misk.scope.ActionScope
 import misk.scope.ActionScopedProviderModule
-import misk.scope.Scope
 
 /**
  * Install support for performing access control checks for actions based on the incoming caller.

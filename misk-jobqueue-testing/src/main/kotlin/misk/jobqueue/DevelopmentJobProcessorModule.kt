@@ -5,7 +5,6 @@ import jakarta.inject.Singleton
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
-import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 

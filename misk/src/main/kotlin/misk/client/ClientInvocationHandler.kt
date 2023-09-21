@@ -29,7 +29,6 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberFunctions
-import misk.client.ClientAction
 
 internal class ClientInvocationHandler(
   private val interfaceType: KClass<*>,

@@ -7,7 +7,6 @@ import misk.feature.FeatureFlags
 import misk.feature.getJson
 import misk.feature.testing.FakeFeatureFlagsTest.JsonFeature
 import misk.inject.KAbstractModule
-import misk.inject.keyOf
 import org.junit.jupiter.api.Test
 import jakarta.inject.Qualifier
 import kotlin.test.assertEquals

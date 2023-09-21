@@ -35,7 +35,7 @@ interface HttpCall {
   var requestHeaders: Headers
 
   /** Cookies derived from request's "Cookie" header, if any */
-  //TODO: Remove cookies
+  //TODO: Remove cookies so that misk-api does not depend on jetty
   var cookies: List<Cookie>
 
   /** Meaningful HTTP status about what actually happened. Not sent over the wire in the case
@@ -177,7 +177,7 @@ interface HttpCall {
 
     return okhttp3.Request.Builder()
       .url(url)
-      .method(dispatchMechanism.method, okRequestBody as okhttp3.RequestBody?)
+      .method(dispatchMechanism.method, okRequestBody)
       .headers(requestHeaders)
       .build()
   }
