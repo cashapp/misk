@@ -139,7 +139,7 @@ class CryptoModule(
           .toProvider(MacProvider(alias))
           .`in`(Singleton::class.java)
       }
-      KeyType.DIGITAL_SIGNATURE -> {
+      KeyType.DIGITAL_SIGNATURE, KeyType.SIGNATURE -> {
         bind<PublicKeySign>()
           .annotatedWith(Names.named(alias))
           .toProvider(DigitalSignatureSignerProvider(alias))
