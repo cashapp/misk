@@ -197,6 +197,7 @@ public final class misk/crypto/KeyType : java/lang/Enum {
 	public static final field MAC Lmisk/crypto/KeyType;
 	public static final field PGP_DECRYPT Lmisk/crypto/KeyType;
 	public static final field PGP_ENCRYPT Lmisk/crypto/KeyType;
+	public static final field SIGNATURE Lmisk/crypto/KeyType;
 	public static final field STREAMING_AEAD Lmisk/crypto/KeyType;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/crypto/KeyType;
 	public static fun values ()[Lmisk/crypto/KeyType;

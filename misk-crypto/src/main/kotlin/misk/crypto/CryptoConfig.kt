@@ -65,5 +65,10 @@ enum class KeyType {
   HYBRID_ENCRYPT_DECRYPT,
   STREAMING_AEAD,
   PGP_DECRYPT,
-  PGP_ENCRYPT
+  PGP_ENCRYPT,
+
+  /**
+   * Alias for [DIGITAL_SIGNATURE].
+   */
+  SIGNATURE
 }
