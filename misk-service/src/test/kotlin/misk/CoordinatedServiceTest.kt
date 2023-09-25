@@ -7,6 +7,7 @@ import com.google.inject.Provider
 import com.google.inject.name.Names
 import misk.ServiceGraphBuilderTest.AppendingService
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
@@ -45,6 +46,28 @@ class CoordinatedServiceTest {
     assertThat(services).allMatch { (_, service) -> service.state() == Service.State.TERMINATED }
   }
 
+  @Test fun canStopWhenADependencyHasFailed() {
+    val service = FakeService("service").toCoordinated()
+    val failOnStartService = FailOnStartService().toCoordinated()
+
+    val manager = ServiceGraphBuilder().also { builder ->
+      builder.addService(key("service"), service)
+      builder.addService(key("failOnStartService"), failOnStartService)
+      builder.addDependency(key("failOnStartService"), key("service"))
+    }.build()
+
+    manager.startAsync()
+    assertThatThrownBy {
+      manager.awaitHealthy()
+    }.isInstanceOf(IllegalStateException::class.java)
+
+    manager.stopAsync()
+    manager.awaitStopped()
+
+    assertThat(service.state()).isEqualTo(Service.State.TERMINATED)
+    assertThat(failOnStartService.state()).isEqualTo(Service.State.FAILED)
+  }
+
   @Test fun cannotAddRunningServiceAsDependency() {
     val target = StringBuilder()
     val runningService = CoordinatedService(
@@ -81,6 +104,14 @@ class CoordinatedServiceTest {
     assertThat(failure).hasMessage("Running Service must be NEW for it to be coordinated")
 
     service.stopAsync()
+  }
+
+  private class FailOnStartService : AbstractIdleService() {
+    override fun startUp() {
+      throw RuntimeException("Failed to start")
+    }
+
+    override fun shutDown() {}
   }
 
   private class FakeService(
