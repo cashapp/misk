@@ -85,7 +85,7 @@ interface Metrics {
   fun histogram(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     buckets: List<Double> = defaultBuckets
   ): Histogram
 
@@ -108,7 +108,7 @@ interface Metrics {
   fun summary(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = defaultQuantiles,
     maxAgeSeconds: Long? = null
   ): Summary
@@ -142,7 +142,7 @@ interface Metrics {
   fun legacyHistogram(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = misk.metrics.defaultQuantiles,
     maxAgeSeconds: Long? = null
   ): misk.metrics.Histogram
