@@ -15,6 +15,19 @@ public final class misk/metrics/FakeMetrics : misk/metrics/Metrics {
 	public fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
 }
 
+public final class misk/metrics/FakeMetricsKt {
+	public static final fun get (Lio/prometheus/client/CollectorRegistry;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public static final fun getAllSamples (Lio/prometheus/client/CollectorRegistry;)Lkotlin/sequences/Sequence;
+	public static final fun getSample (Lio/prometheus/client/CollectorRegistry;Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
+	public static synthetic fun getSample$default (Lio/prometheus/client/CollectorRegistry;Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;ILjava/lang/Object;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
+	public static final fun summaryCount (Lio/prometheus/client/CollectorRegistry;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public static final fun summaryMean (Lio/prometheus/client/CollectorRegistry;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public static final fun summaryP50 (Lio/prometheus/client/CollectorRegistry;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public static final fun summaryP99 (Lio/prometheus/client/CollectorRegistry;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public static final fun summaryQuantile (Lio/prometheus/client/CollectorRegistry;Ljava/lang/String;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public static final fun summarySum (Lio/prometheus/client/CollectorRegistry;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+}
+
 public final class misk/metrics/FakeMetricsModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
