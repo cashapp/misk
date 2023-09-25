@@ -64,8 +64,8 @@ internal class CoordinatedService(
     }
   }
 
-  private fun isTerminated(): Boolean {
-    return state() == State.TERMINATED
+  private fun isTerminatedOrFailed(): Boolean {
+    return state() == State.TERMINATED || state() == State.FAILED
   }
 
   override fun doStart() {
@@ -90,7 +90,7 @@ internal class CoordinatedService(
 
   private fun stopIfReady() {
     val canStopInner =
-      state() == State.STOPPING && dependencies.all { it.isTerminated() }
+      state() == State.STOPPING && dependencies.all { it.isTerminatedOrFailed() }
 
     // stopAsync can be called multiple times, with subsequent calls being ignored
     if (canStopInner) {
