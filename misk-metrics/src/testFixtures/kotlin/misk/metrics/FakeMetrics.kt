@@ -16,74 +16,9 @@ import jakarta.inject.Singleton
   level = DeprecationLevel.WARNING
 )
 @Singleton
-class FakeMetrics @Inject internal constructor(
-  private val registry: CollectorRegistry
-) : Metrics {
-  @Deprecated(
-    message = "Misk Metrics V1 is Deprecated, please use V2",
-    level = DeprecationLevel.WARNING
-  )
-  override fun counter(name: String, help: String, labelNames: List<String>): Counter =
-    Counter.build(name, help)
-      .labelNames(*labelNames.toTypedArray())
-      .register(registry)
-
-  @Deprecated(
-    message = "Misk Metrics V1 is Deprecated, please use V2",
-    level = DeprecationLevel.WARNING
-  )
-  override fun gauge(name: String, help: String, labelNames: List<String>): Gauge =
-    Gauge.build(name, help)
-      .labelNames(*labelNames.toTypedArray())
-      .register(registry)
-
-  @Deprecated(
-    message = "Recommend migrating to misk.metrics.v2.Metrics.histogram. See kdoc for detail",
-    level = DeprecationLevel.WARNING
-  )
-  override fun legacyHistogram(
-    name: String,
-    help: String,
-    labelNames: List<String>,
-    quantiles: Map<Double, Double>,
-    maxAgeSeconds: Long?
-  ): Histogram {
-    val summary = Summary.build(name, help)
-      .labelNames(*labelNames.toTypedArray())
-      .apply {
-        quantiles.forEach { (key, value) ->
-          quantile(key, value)
-        }
-      }
-      .apply {
-        if (maxAgeSeconds != null) {
-          this.maxAgeSeconds(maxAgeSeconds)
-        }
-      }
-      .register(registry)
-
-    return object : Histogram {
-      override fun record(duration: Double, vararg labelValues: String) {
-        summary.labels(*labelValues).observe(duration)
-      }
-
-      override fun count(vararg labelValues: String): Int =
-        summary.labels(*labelValues).get().count.toInt()
-    }
-  }
-
-  @Deprecated(
-    message = "Recommend migrating to misk.metrics.v2.Metrics.histogram. See kdoc for detail",
-    level = DeprecationLevel.WARNING,
-    replaceWith = ReplaceWith("legacyHistogram(name,help,labelNames,quantiles,maxAgeSeconds)")
-  )
-  override fun histogram(
-    name: String,
-    help: String,
-    labelNames: List<String>,
-    quantiles: Map<Double, Double>,
-    maxAgeSeconds: Long?
-  ): Histogram = legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
+class FakeMetrics @Inject internal constructor(private val registry: CollectorRegistry) : Metrics(
+  misk.metrics.v2.Metrics(registry)
+) {
 
   /** Returns a measurement for a [counter] or [gauge]. */
   @Deprecated("Use same extention method on CollectorRegistry instead")

@@ -19,6 +19,10 @@ public final class misk/metrics/backends/prometheus/PrometheusConfig : wisp/conf
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/metrics/backends/prometheus/PrometheusHistogram : misk/metrics/Histogram {
+	public fun <init> (Lio/prometheus/client/Summary;)V
+}
+
 public final class misk/metrics/backends/prometheus/PrometheusHttpService : com/google/common/util/concurrent/AbstractIdleService {
 }
 
@@ -40,16 +44,11 @@ public final class misk/metrics/backends/prometheus/v2/PrometheusMetricsClientMo
 
 public final class misk/prometheus/PrometheusHistogram : misk/metrics/Histogram {
 	public fun <init> (Lio/prometheus/client/Summary;)V
-	public fun count ([Ljava/lang/String;)I
-	public final fun getHistogram ()Lio/prometheus/client/Summary;
-	public fun record (D[Ljava/lang/String;)V
-	public fun timedMills ([Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
 public final class misk/prometheus/PrometheusHistogramRegistry : misk/metrics/HistogramRegistry {
 	public fun <init> (Lmisk/metrics/Metrics;)V
 	public final fun getMetrics ()Lmisk/metrics/Metrics;
-	public fun newHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
 }
 
 public final class misk/prometheus/PrometheusHistogramRegistryModule : misk/inject/KAbstractModule {

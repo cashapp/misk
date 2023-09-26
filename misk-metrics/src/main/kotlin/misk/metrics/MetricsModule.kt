@@ -5,7 +5,6 @@ import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
-import misk.metrics.backends.prometheus.PrometheusMetricsClientModule
 
 class MetricsModule : KAbstractModule() {
   override fun configure() {
