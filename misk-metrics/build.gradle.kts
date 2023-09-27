@@ -10,28 +10,23 @@ plugins {
 }
 
 dependencies {
-  api(project(":misk-inject"))
-  api(Dependencies.jakartaInject)
   api(Dependencies.prometheusClient)
   implementation(Dependencies.findBugs)
   implementation(Dependencies.guava)
-  implementation(Dependencies.guice)
   implementation(Dependencies.kotlinStdLibJdk8)
 
-  testFixturesApi(project(":misk-inject"))
   testFixturesApi(Dependencies.prometheusClient)
+  testFixturesApi(project(":misk-inject"))
+  testFixturesApi(project(":misk-metrics"))
   testFixturesImplementation(Dependencies.guava)
   testFixturesImplementation(Dependencies.guice)
   testFixturesImplementation(Dependencies.kotlinStdLibJdk8)
-  testFixturesImplementation(Dependencies.micrometerCore)
-  testFixturesImplementation(Dependencies.micrometerPrometheus)
 
-  testImplementation(project(":misk-testing"))
-  testImplementation(project(":misk-metrics"))
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.jakartaInject)
   testImplementation(Dependencies.junitApi)
-
-
+  testImplementation(project(":misk-metrics"))
+  testImplementation(project(":misk-testing"))
 }
 
 configure<MavenPublishBaseExtension> {

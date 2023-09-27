@@ -2,9 +2,6 @@ package misk.metrics
 
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import misk.metrics.v2.Metrics
 
 /**
  * Interface for application code to emit metrics to a metrics backend like Prometheus.
@@ -17,10 +14,7 @@ import misk.metrics.v2.Metrics
   replaceWith = ReplaceWith("misk.metrics.v2.Metrics"),
   level = DeprecationLevel.WARNING
 )
-@Singleton
-open class Metrics @Inject constructor(
-  private val metricsV2: Metrics
-) {
+interface Metrics {
   /**
    * counter creates and registers a new `Counter` prometheus type.
    *
@@ -35,12 +29,11 @@ open class Metrics @Inject constructor(
     message = "Misk Metrics V1 is Deprecated, please use V2",
     level = DeprecationLevel.WARNING
   )
-  @JvmOverloads
   fun counter(
     name: String,
     help: String,
     labelNames: List<String> = listOf()
-  ) = metricsV2.counter(name, help, labelNames)
+  ): Counter
 
   /**
    * gauge creates and registers a new `Gauge` prometheus type.
@@ -56,12 +49,11 @@ open class Metrics @Inject constructor(
     message = "Misk Metrics V1 is Deprecated, please use V2",
     level = DeprecationLevel.WARNING
   )
-  @JvmOverloads
   fun gauge(
     name: String,
     help: String = "",
     labelNames: List<String> = listOf()
-  ) = metricsV2.gauge(name, help, labelNames)
+  ): Gauge
 
   /**
    * histogram creates and registers a new `Summary` prometheus type.
@@ -90,14 +82,13 @@ open class Metrics @Inject constructor(
     level = DeprecationLevel.WARNING,
     replaceWith = ReplaceWith("legacyHistogram(name,help,labelNames,quantiles,maxAgeSeconds)")
   )
-  @JvmOverloads
   fun histogram(
     name: String,
     help: String = "",
     labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = defaultQuantiles,
     maxAgeSeconds: Long? = null
-  ) = legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
+  ): Histogram
 
   /**
    * histogram creates and registers a new `Summary` prometheus type.
@@ -125,15 +116,13 @@ open class Metrics @Inject constructor(
     message = "Recommend migrating to misk.metrics.v2.Metrics.histogram. See kdoc for detail",
     level = DeprecationLevel.WARNING
   )
-  @JvmOverloads
   fun legacyHistogram(
     name: String,
     help: String = "",
     labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = defaultQuantiles,
     maxAgeSeconds: Long? = null
-  ) = metricsV2.legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
-
+  ): Histogram
 }
 
 val defaultQuantiles = mapOf(

@@ -26,7 +26,83 @@ import misk.metrics.summarySum
 @Singleton
 class FakeMetrics @Inject internal constructor(
   private val registry: CollectorRegistry
-) : Metrics(registry) {
+) : Metrics {
+  override fun counter(
+    name: String,
+    help: String,
+    labelNames: List<String>
+  ): Counter =
+    Counter.build(name, help)
+      .labelNames(*labelNames.toTypedArray())
+      .register(registry)
+
+  override fun gauge(
+    name: String,
+    help: String,
+    labelNames: List<String>
+  ): Gauge =
+    Gauge.build(name, help)
+      .labelNames(*labelNames.toTypedArray())
+      .register(registry)
+
+  override fun peakGauge(name: String, help: String, labelNames: List<String>): PeakGauge =
+    PeakGauge.builder(name, help)
+      .labelNames(*labelNames.toTypedArray())
+      .register(registry)
+
+  override fun histogram(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    buckets: List<Double>
+  ): Histogram =
+    Histogram.build(name, help)
+      .labelNames(*labelNames.toTypedArray())
+      .buckets(*buckets.toDoubleArray())
+      .register(registry)
+
+  override fun summary(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?
+  ): Summary =
+    Summary.build(name, help)
+      .labelNames(*labelNames.toTypedArray())
+      .apply {
+        quantiles.forEach { (key, value) ->
+          quantile(key, value)
+        }
+      }
+      .apply {
+        if (maxAgeSeconds != null) {
+          this.maxAgeSeconds(maxAgeSeconds)
+        }
+      }
+      .register(registry)
+
+  @Deprecated(
+    "Recommend migrating to histogram. See kdoc for detail",
+    level = DeprecationLevel.WARNING,
+  )
+  override fun legacyHistogram(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?
+  ): misk.metrics.Histogram {
+    val summary = summary(name, help, labelNames, quantiles, maxAgeSeconds)
+    return object : misk.metrics.Histogram {
+      override fun record(duration: Double, vararg labelValues: String) {
+        summary.labels(*labelValues).observe(duration)
+      }
+
+      override fun count(vararg labelValues: String): Int =
+        summary.labels(*labelValues).get().count.toInt()
+    }
+  }
 
   /** Returns a measurement for a [counter] or [gauge]. */
   @Deprecated("Use same extention method on CollectorRegistry instead")
