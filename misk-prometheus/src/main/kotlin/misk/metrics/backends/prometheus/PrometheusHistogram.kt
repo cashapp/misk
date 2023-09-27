@@ -6,6 +6,14 @@ import misk.metrics.Histogram
 /**
  * PrometheusHistogram implements `Histogram` interface with prometheus `Summary` type.
  */
-class PrometheusHistogram(
-  histogram: PrometheusSummary
-) : Histogram(histogram)
+internal class PrometheusHistogram constructor(
+  val histogram: PrometheusSummary
+) : Histogram {
+  override fun record(duration: Double, vararg labelValues: String) {
+    histogram.labels(*labelValues).observe(duration)
+  }
+
+  override fun count(vararg labelValues: String): Int {
+    return histogram.labels(*labelValues).get().count.toInt()
+  }
+}
