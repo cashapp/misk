@@ -1,13 +1,3 @@
-public final class misk/aws2/dynamodb/DynamoDbHealthCheck : misk/healthchecks/HealthCheck {
-	public static final field Companion Lmisk/aws2/dynamodb/DynamoDbHealthCheck$Companion;
-	public fun <init> (Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Ljava/util/List;)V
-	public fun status ()Lmisk/healthchecks/HealthStatus;
-}
-
-public final class misk/aws2/dynamodb/DynamoDbHealthCheck$Companion {
-	public final fun getLogger ()Lmu/KLogger;
-}
-
 public abstract interface class misk/aws2/dynamodb/DynamoDbService : com/google/common/util/concurrent/Service {
 }
 
@@ -23,6 +13,10 @@ public class misk/aws2/dynamodb/RealDynamoDbModule : misk/inject/KAbstractModule
 	public final fun provideRequiredTables ()Ljava/util/List;
 	public final fun providesDynamoDbClient (Lmisk/cloud/aws/AwsRegion;Lsoftware/amazon/awssdk/auth/credentials/AwsCredentialsProvider;)Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;
 	public final fun providesDynamoDbStreamsClient (Lmisk/cloud/aws/AwsRegion;Lsoftware/amazon/awssdk/auth/credentials/AwsCredentialsProvider;)Lsoftware/amazon/awssdk/services/dynamodb/streams/DynamoDbStreamsClient;
+}
+
+public final class misk/aws2/dynamodb/RealDynamoDbService : com/google/common/util/concurrent/AbstractIdleService, misk/aws2/dynamodb/DynamoDbService {
+	public fun <init> (Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Ljava/util/List;)V
 }
 
 public final class misk/aws2/dynamodb/RequiredDynamoDbTable {

@@ -5,39 +5,46 @@ import misk.web.WebActionModule
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
 import misk.web.v2.DashboardHotwireTabAction
 import misk.web.v2.DashboardIFrameTabAction
+import misk.web.v2.DashboardIndexAccessBlock
+import misk.web.v2.DashboardIndexBlock
 import misk.web.v2.DashboardPageLayout.Companion.BETA_PREFIX
 import okio.ByteString.Companion.encodeUtf8
 
 /** Handles installation of Misk Dashboard components (admin dashboard or custom...). */
 class DashboardModule @JvmOverloads constructor(
-  private val dashboardTabProvider: DashboardTabProvider,
+  private val dashboardTabProvider: DashboardTabProvider? = null,
   private val dashboardTabLoader: DashboardTabLoader? = null,
-  private val webTabResourceModule: WebTabResourceModule? = null
+  private val webTabResourceModule: WebTabResourceModule? = null,
+  private val indexAccessBlocks: List<DashboardIndexAccessBlock> = listOf(),
+  private val indexBlocks: List<DashboardIndexBlock> = listOf(),
 ) : KAbstractModule() {
   override fun configure() {
-    multibind<DashboardTab>().toProvider(dashboardTabProvider)
+    dashboardTabProvider?.let { multibind<DashboardTab>().toProvider(it) }
     dashboardTabLoader?.let {
       multibind<DashboardTabLoaderEntry>().toInstance(
-        DashboardTabLoaderEntry(
-          "$BETA_PREFIX${dashboardTabLoader.urlPathPrefix}",
-          dashboardTabLoader
-        )
+        DashboardTabLoaderEntry("$BETA_PREFIX${it.urlPathPrefix}", it)
       )
-      multibind<DashboardTabLoader>().toInstance(dashboardTabLoader)
+      multibind<DashboardTabLoader>().toInstance(it)
+
+      when (it) {
+        is DashboardTabLoader.HotwireTab -> {
+          install(WebActionModule.createWithPrefix<DashboardHotwireTabAction>("$BETA_PREFIX${it.urlPathPrefix}"))
+        }
+        is DashboardTabLoader.IframeTab -> {
+          install(WebActionModule.createWithPrefix<DashboardIFrameTabAction>(url_path_prefix = "$BETA_PREFIX${it.urlPathPrefix}"))
+        }
+      }
     }
 
-    when (dashboardTabLoader) {
-      is DashboardTabLoader.HotwireTab -> {
-        install(WebActionModule.createWithPrefix<DashboardHotwireTabAction>("$BETA_PREFIX${dashboardTabLoader.urlPathPrefix}"))
-      }
-
-      is DashboardTabLoader.IframeTab -> {
-        install(WebActionModule.createWithPrefix<DashboardIFrameTabAction>(url_path_prefix = "$BETA_PREFIX${dashboardTabLoader.urlPathPrefix}"))
-      }
-
-      else -> {}
-    }
     webTabResourceModule?.let { install(it) }
+
+    indexAccessBlocks.forEach {
+      multibind<DashboardIndexAccessBlock>().toInstance(it)
+    }
+
+    indexBlocks.forEach {
+      multibind<DashboardIndexBlock>().toInstance(it)
+    }
   }
 
   companion object {
@@ -194,5 +201,19 @@ class DashboardModule @JvmOverloads constructor(
         webTabResourceModule = webTabResourceModule
       )
     }
+
+    /**
+     * Add access blocks to dashboard index.
+     */
+    fun addIndexAccessBlocks(
+      vararg blocks: DashboardIndexAccessBlock
+    ) = DashboardModule(indexAccessBlocks = blocks.toList())
+
+    /**
+     * Add access blocks to dashboard index.
+     */
+    fun addIndexBlocks(
+      vararg blocks: DashboardIndexBlock
+    ) = DashboardModule(indexBlocks = blocks.toList())
   }
 }

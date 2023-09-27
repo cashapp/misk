@@ -23,7 +23,7 @@ internal class ReadinessCheckService @Inject constructor(
   private val config: WebConfig,
   private val clock: Clock,
   private val serviceManagerProvider: Provider<ServiceManager>,
-  @JvmSuppressWildcards private val healthChecks: List<HealthCheck>,
+  @JvmSuppressWildcards private val healthCheckProvider: Provider<List<HealthCheck>>,
   @ReadinessRefreshQueue private val taskQueue: RepeatedTaskQueue,
 ): AbstractIdleService() {
   @Volatile
@@ -65,7 +65,7 @@ internal class ReadinessCheckService @Inject constructor(
     // logs with.
     if (!servicesNotRunning.isEmpty()) return
 
-    val statuses = healthChecks.map { it.status() }
+    val statuses = healthCheckProvider.get().map { it.status() }
 
     // Get time AFTER health checks have completed
     val lastUpdate = clock.instant()

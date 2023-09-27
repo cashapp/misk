@@ -1,7 +1,11 @@
 public final class wisp/task/RepeatedTask {
 	public static final field Companion Lwisp/task/RepeatedTask$Companion;
+	public fun <init> (Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lkotlin/jvm/functions/Function2;)V
+	public fun <init> (Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lwisp/task/RepeatedTaskConfig;Lkotlin/jvm/functions/Function2;)V
+	public fun <init> (Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lwisp/task/RepeatedTaskConfig;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public fun <init> (Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lwisp/task/RepeatedTaskConfig;Lkotlin/jvm/functions/Function2;Lwisp/task/TaskConfig;Lkotlin/jvm/functions/Function2;)V
 	public synthetic fun <init> (Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lwisp/task/RepeatedTaskConfig;Lkotlin/jvm/functions/Function2;Lwisp/task/TaskConfig;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
 	public final fun getName ()Ljava/lang/String;
 	public final fun isRunning ()Z
 	public final fun shutDown ()V
@@ -13,6 +17,9 @@ public final class wisp/task/RepeatedTask$Companion {
 
 public final class wisp/task/RepeatedTaskConfig : wisp/config/Config {
 	public fun <init> ()V
+	public fun <init> (J)V
+	public fun <init> (JJ)V
+	public fun <init> (JJJ)V
 	public fun <init> (JJJJ)V
 	public synthetic fun <init> (JJJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()J
@@ -38,7 +45,11 @@ public final class wisp/task/RepeatedTaskManager {
 	public fun <init> ()V
 	public fun <init> (Lio/micrometer/core/instrument/MeterRegistry;)V
 	public synthetic fun <init> (Lio/micrometer/core/instrument/MeterRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun createTask (Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lkotlin/jvm/functions/Function2;)Lwisp/task/RepeatedTask;
+	public final fun createTask (Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lwisp/task/RepeatedTaskConfig;Lkotlin/jvm/functions/Function2;)Lwisp/task/RepeatedTask;
+	public final fun createTask (Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lwisp/task/RepeatedTaskConfig;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)Lwisp/task/RepeatedTask;
 	public final fun createTask (Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lwisp/task/RepeatedTaskConfig;Lkotlin/jvm/functions/Function2;Lwisp/task/TaskConfig;Lkotlin/jvm/functions/Function2;)Lwisp/task/RepeatedTask;
+	public final fun createTask (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)Lwisp/task/RepeatedTask;
 	public static synthetic fun createTask$default (Lwisp/task/RepeatedTaskManager;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Lwisp/task/RepeatedTaskConfig;Lkotlin/jvm/functions/Function2;Lwisp/task/TaskConfig;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lwisp/task/RepeatedTask;
 	public final fun getTask (Ljava/lang/String;)Lwisp/task/RepeatedTask;
 	public final fun isTaskRunning (Ljava/lang/String;)Z

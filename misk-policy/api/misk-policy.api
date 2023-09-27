@@ -30,21 +30,49 @@ public final class misk/policy/opa/LocalOpaService$Callback : com/github/dockerj
 public final class misk/policy/opa/LocalOpaService$Companion {
 }
 
+public final class misk/policy/opa/Metrics {
+	public fun <init> (JJJJJ)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun component3 ()J
+	public final fun component4 ()J
+	public final fun component5 ()J
+	public final fun copy (JJJJJ)Lmisk/policy/opa/Metrics;
+	public static synthetic fun copy$default (Lmisk/policy/opa/Metrics;JJJJJILjava/lang/Object;)Lmisk/policy/opa/Metrics;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCounter_server_query_cache_hit ()J
+	public final fun getTimer_rego_external_resolve_ns ()J
+	public final fun getTimer_rego_input_parse_ns ()J
+	public final fun getTimer_rego_query_eval_ns ()J
+	public final fun getTimer_server_handler_ns ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/policy/opa/MiskOpaMetrics : misk/policy/opa/OpaMetrics {
+	public fun <init> (Lmisk/metrics/v2/Metrics;)V
+	public fun evaluated (Ljava/lang/String;)V
+	public fun observe (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
+}
+
 public abstract interface class misk/policy/opa/OpaApi {
-	public abstract fun queryDocument (Ljava/lang/String;Ljava/lang/String;Z)Lretrofit2/Call;
+	public abstract fun queryDocument (Ljava/lang/String;Ljava/lang/String;ZZ)Lretrofit2/Call;
 }
 
 public final class misk/policy/opa/OpaConfig : misk/config/Config {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZZ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Lmisk/policy/opa/OpaConfig;
-	public static synthetic fun copy$default (Lmisk/policy/opa/OpaConfig;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lmisk/policy/opa/OpaConfig;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZZ)Lmisk/policy/opa/OpaConfig;
+	public static synthetic fun copy$default (Lmisk/policy/opa/OpaConfig;Ljava/lang/String;Ljava/lang/String;ZZILjava/lang/Object;)Lmisk/policy/opa/OpaConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBaseUrl ()Ljava/lang/String;
+	public final fun getMetrics ()Z
 	public final fun getProvenance ()Z
 	public final fun getUnixSocket ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -57,6 +85,22 @@ public final class misk/policy/opa/OpaDevelopmentModule : misk/inject/KAbstractM
 	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;ZLjava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/policy/opa/OpaMetrics {
+	public abstract fun evaluated (Ljava/lang/String;)V
+	public abstract fun observe (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
+}
+
+public final class misk/policy/opa/OpaMetrics$Names : java/lang/Enum {
+	public static final field opa_rego_evaluated Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_rego_external_resolve Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_rego_input_parse Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_rego_query_eval Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_server_handler Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_server_query_cache_hit Lmisk/policy/opa/OpaMetrics$Names;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/policy/opa/OpaMetrics$Names;
+	public static fun values ()[Lmisk/policy/opa/OpaMetrics$Names;
 }
 
 public final class misk/policy/opa/OpaModule : misk/inject/KAbstractModule {
@@ -76,7 +120,9 @@ public abstract class misk/policy/opa/OpaRequest {
 
 public abstract class misk/policy/opa/OpaResponse {
 	public fun <init> ()V
+	public final fun getMetrics ()Lmisk/policy/opa/Metrics;
 	public final fun getProvenance ()Lmisk/policy/opa/Provenance;
+	public final fun setMetrics (Lmisk/policy/opa/Metrics;)V
 	public final fun setProvenance (Lmisk/policy/opa/Provenance;)V
 }
 
@@ -119,7 +165,7 @@ public final class misk/policy/opa/ProvenanceBundle {
 }
 
 public final class misk/policy/opa/RealOpaPolicyEngine : misk/policy/opa/OpaPolicyEngine {
-	public fun <init> (Lmisk/policy/opa/OpaApi;Lcom/squareup/moshi/Moshi;Z)V
+	public fun <init> (Lmisk/policy/opa/OpaApi;Lcom/squareup/moshi/Moshi;Lmisk/policy/opa/OpaMetrics;Lmisk/policy/opa/OpaConfig;)V
 	public fun evaluateNoInput (Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 	public fun evaluateRawJsonInput (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
 	public fun evaluateWithInput (Ljava/lang/String;Lmisk/policy/opa/OpaRequest;Ljava/lang/Class;Ljava/lang/Class;)Lmisk/policy/opa/OpaResponse;
@@ -137,14 +183,16 @@ public final class misk/policy/opa/Request {
 }
 
 public final class misk/policy/opa/Response {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Object;Lmisk/policy/opa/Provenance;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;Lmisk/policy/opa/Provenance;Lmisk/policy/opa/Metrics;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/Object;
 	public final fun component3 ()Lmisk/policy/opa/Provenance;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Object;Lmisk/policy/opa/Provenance;)Lmisk/policy/opa/Response;
-	public static synthetic fun copy$default (Lmisk/policy/opa/Response;Ljava/lang/String;Ljava/lang/Object;Lmisk/policy/opa/Provenance;ILjava/lang/Object;)Lmisk/policy/opa/Response;
+	public final fun component4 ()Lmisk/policy/opa/Metrics;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Object;Lmisk/policy/opa/Provenance;Lmisk/policy/opa/Metrics;)Lmisk/policy/opa/Response;
+	public static synthetic fun copy$default (Lmisk/policy/opa/Response;Ljava/lang/String;Ljava/lang/Object;Lmisk/policy/opa/Provenance;Lmisk/policy/opa/Metrics;ILjava/lang/Object;)Lmisk/policy/opa/Response;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDecision_id ()Ljava/lang/String;
+	public final fun getMetrics ()Lmisk/policy/opa/Metrics;
 	public final fun getProvenance ()Lmisk/policy/opa/Provenance;
 	public final fun getResult ()Ljava/lang/Object;
 	public fun hashCode ()I

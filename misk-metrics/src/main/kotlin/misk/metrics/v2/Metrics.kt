@@ -1,9 +1,12 @@
 package misk.metrics.v2
 
+import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
 import io.prometheus.client.Histogram
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Interface for application code to emit metrics to a metrics backend like Prometheus.
@@ -17,7 +20,10 @@ import io.prometheus.client.Histogram
  * Tests that use this should install a metrics client like `PrometheusMetricsClientModule`.
  * Services that use this should install a metrics service like `PrometheusMetricsServiceModule`.
  */
-interface Metrics {
+@Singleton
+open class Metrics @Inject constructor(
+  private val registry: CollectorRegistry
+) {
   /**
    * counter creates and registers a new `Counter` prometheus type.
    *
@@ -28,11 +34,15 @@ interface Metrics {
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
+  @JvmOverloads
   fun counter(
     name: String,
     help: String,
     labelNames: List<String> = listOf()
-  ): Counter
+  ) = Counter
+    .build(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .register(registry)
 
   /**
    * gauge creates and registers a new `Gauge` prometheus type.
@@ -44,11 +54,15 @@ interface Metrics {
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
+  @JvmOverloads
   fun gauge(
     name: String,
     help: String = "",
     labelNames: List<String> = listOf()
-  ): Gauge
+  ) = Gauge
+    .build(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .register(registry)
 
   /**
    * peakGauge creates and registers a new `Gauge` prometheus type that resets to its
@@ -59,11 +73,15 @@ interface Metrics {
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
+  @JvmOverloads
   fun peakGauge(
     name: String,
     help: String = "",
     labelNames: List<String> = listOf()
-  ): PeakGauge
+  ) = PeakGauge
+    .builder(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .register(registry)
 
   /**
    * histogram creates a new `Histogram` prometheus type with the supplied parameters.
@@ -82,17 +100,25 @@ interface Metrics {
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    * @param buckets a list of upper bounds of buckets for the histogram.
    */
+  @JvmOverloads
   fun histogram(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     buckets: List<Double> = defaultBuckets
-  ): Histogram
+  ) = Histogram
+    .build(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .buckets(*buckets.toDoubleArray())
+    .register(registry)
 
   /**
    * summary creates and registers a new `Summary` prometheus type.
    *
    * See https://prometheus.github.io/client_java/io/prometheus/client/Summary.html for more info.
+   *
+   * NB: Summaries can be an order of magnitude more expensive than histograms in terms of CPU.
+   * Unless you require the specific properties of a summary, consider using [histogram] instead.
    *
    * @param name the name of the metric which will be supplied to prometheus.
    *  Must be unique across all metric types.
@@ -102,13 +128,71 @@ interface Metrics {
    *  for the metric. The key of the map is the quantile as a ratio (e.g. 0.99 represents p99) and
    *  the value is the "tolerable error" of the computed quantile.
    */
+  @JvmOverloads
   fun summary(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = defaultQuantiles,
     maxAgeSeconds: Long? = null
-  ): Summary
+  ) = Summary
+    .build(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .apply {
+      quantiles.forEach { (key, value) ->
+        quantile(key, value)
+      }
+    }
+    .apply {
+      if (maxAgeSeconds != null) {
+        this.maxAgeSeconds(maxAgeSeconds)
+      }
+    }
+    .register(registry)
+
+  /**
+   * histogram creates and registers a new `Summary` prometheus type.
+   *
+   * For legacy reasons this function is called histogram(...) but it's not backed by a histogram
+   * because of issues with the previous time series backend.
+   *
+   * If you're using this metric type, you likely want a real Histogram instead of a Summary.
+   * To change to histogram type, you need to create a different metric (with another name) as the
+   * data structure used by the time series database is incompatible and can break existing dashboards
+   * and monitors.
+   *
+   * See https://prometheus.github.io/client_java/io/prometheus/client/Summary.html or
+   * https://prometheus.github.io/client_java/io/prometheus/client/Histogram.html for more info.
+   *
+   * @param name the name of the metric which will be supplied to prometheus.
+   *  Must be unique across all metric types.
+   * @param help human-readable help text that will be supplied to prometheus.
+   * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
+   * @param quantiles is a map of all of the quantiles (a.k.a. percentiles) that will be computed
+   *  for the metric. The key of the map is the quantile as a ratio (e.g. 0.99 represents p99) and
+   *  the value is the "tolerable error" of the computed quantile.
+   */
+  @Deprecated(
+    "Recommend migrating to histogram. See kdoc for detail",
+    level = DeprecationLevel.WARNING,
+  )
+  @JvmOverloads
+  fun legacyHistogram(
+    name: String,
+    help: String = "",
+    labelNames: List<String> = listOf(),
+    quantiles: Map<Double, Double> = misk.metrics.defaultQuantiles,
+    maxAgeSeconds: Long? = null
+  ) = misk.metrics.Histogram(
+    summary(
+      name,
+      help,
+      labelNames,
+      quantiles,
+      maxAgeSeconds
+    )
+  )
+
 }
 
 val defaultQuantiles = mapOf(

@@ -26,6 +26,10 @@ import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import jakarta.inject.Inject
+import misk.logging.LogCollectorModule
+import misk.security.authz.AllowAnyService
+import misk.security.authz.Authenticated
+import misk.security.authz.ExcludeFromAllowAnyService
 
 // Common module for web action-related tests to use that bind up some sample web actions
 class TestWebActionModule : KAbstractModule() {
@@ -33,12 +37,18 @@ class TestWebActionModule : KAbstractModule() {
     install(WebServerTestingModule())
     install(MiskTestingServiceModule())
     install(AccessControlModule())
+    install(LogCollectorModule())
 
     install(WebActionModule.create<CustomServiceAccessAction>())
     install(WebActionModule.create<CustomCapabilityAccessAction>())
     install(WebActionModule.create<RequestTypeAction>())
     install(WebActionModule.create<GrpcAction>())
     install(WebActionModule.create<GreetServiceWebAction>())
+    install(WebActionModule.create<EmptyAuthenticatedAccessAction>())
+    install(WebActionModule.create<EmptyAuthenticatedWithCustomAnnototationAccessAction>())
+    install(WebActionModule.create<EmptyAuthenticatedAccessAction>())
+    install(WebActionModule.create<AllowAnyServiceAccessAction>())
+    install(WebActionModule.create<AllowAnyServicePlusAuthenticatedAccessAction>())
 
     multibind<AccessAnnotationEntry>().toInstance(
       AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments"))
@@ -53,6 +63,9 @@ class TestWebActionModule : KAbstractModule() {
       AccessAnnotationEntry<CustomCapabilityAccess2>(capabilities = listOf("some_other_group"))
     )
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
+
+    multibind<String, ExcludeFromAllowAnyService>().toInstance("web-proxy")
+    multibind<String, ExcludeFromAllowAnyService>().toInstance("access-proxy")
   }
 
   // TODO(jwilson): get Wire to generate this interface.
@@ -131,4 +144,46 @@ class GrpcAction @Inject constructor() :
       .warehouse_id(7777L)
       .build()
   }
+}
+
+class EmptyAuthenticatedAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/empty_authorized_access")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @Authenticated
+  fun get() = "${scopedCaller.get()} authorized with empty Authenticated".toResponseBody()
+}
+
+class EmptyAuthenticatedWithCustomAnnototationAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/empty_authorized_and_custom_capability_access")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @Authenticated
+  @CustomCapabilityAccess
+  fun get() = "${scopedCaller.get()} authorized with CustomCapabilityAccess".toResponseBody()
+}
+
+class AllowAnyServiceAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/allow_any_service_access")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @AllowAnyService
+  fun get() = "${scopedCaller.get()} authorized as any service".toResponseBody()
+}
+
+class AllowAnyServicePlusAuthenticatedAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/allow_any_service_plus_authenticated")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @AllowAnyService
+  @Authenticated(services = ["web-proxy"], capabilities = ["admin"])
+  fun get() = "${scopedCaller.get()} authorized as any service".toResponseBody()
 }

@@ -32,6 +32,7 @@ internal class CoordinatedService(
 
             override fun failed(from: State, failure: Throwable) {
               outerService.notifyFailed(failure)
+              directDependsOn.forEach { it.stopIfReady() }
             }
           },
           MoreExecutors.directExecutor()
@@ -64,8 +65,16 @@ internal class CoordinatedService(
     }
   }
 
-  private fun isTerminated(): Boolean {
-    return state() == State.TERMINATED
+  private fun isTerminatedOrFailed(): Boolean {
+    return state() == State.TERMINATED || state() == State.FAILED
+  }
+
+  override fun doCancelStart() {
+    // If not started, skip the inner service and attempt to stop.
+    val started = innerServiceStarted.getAndSet(true)
+    if (!started) {
+      stopIfReady()
+    }
   }
 
   override fun doStart() {
@@ -90,7 +99,7 @@ internal class CoordinatedService(
 
   private fun stopIfReady() {
     val canStopInner =
-      state() == State.STOPPING && dependencies.all { it.isTerminated() }
+      state() == State.STOPPING && dependencies.all { it.isTerminatedOrFailed() }
 
     // stopAsync can be called multiple times, with subsequent calls being ignored
     if (canStopInner) {

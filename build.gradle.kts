@@ -121,7 +121,7 @@ subprojects {
           "exemplar",
           "exemplarchat",
           "misk-bom"
-      ).contains(name) && !name.startsWith("wisp")) {
+      ).contains(name)) {
     extensions.configure(DetektExtension::class) {
       parallel = true
       buildUponDefaultConfig = false
@@ -166,8 +166,7 @@ subprojects {
       add("testRuntimeOnly", Dependencies.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.
-      // Enforce misk-bom and wisk-bom -- it should take priority over external BOMs.
-      add("api", enforcedPlatform(project(":wisp:wisp-bom")))
+      // Enforce misk-bom -- it should take priority over external BOMs.
       add("api", enforcedPlatform(project(":misk-bom")))
       add("api", platform(Dependencies.grpcBom))
       add("api", platform(Dependencies.guavaBom))
@@ -178,6 +177,7 @@ subprojects {
       add("api", platform(Dependencies.kotlinBom))
       add("api", platform(Dependencies.nettyBom))
       add("api", platform(Dependencies.prometheusClientBom))
+      add("api", platform(Dependencies.tempestBom))
       add("api", platform(Dependencies.wireBom))
     }
 
@@ -209,7 +209,7 @@ subprojects {
 
   tasks.withType<Detekt> {
     dependsOn(":detektive:assemble")
-    exclude { it.file.absolutePath.contains("/generated/source/") }
+    exclude { it.file.absolutePath.contains("/generated/source/") || it.file.absolutePath.contains("SampledLogger") }
   }
 
   plugins.withType<BasePlugin> {
@@ -236,7 +236,7 @@ subprojects {
               "exemplar",
               "exemplarchat",
               "misk-bom"
-          ).contains(project.name) && !project.name.startsWith("wisp")) {
+          ).contains(project.name)) {
         dependsOn("detektMain")
       }
     }

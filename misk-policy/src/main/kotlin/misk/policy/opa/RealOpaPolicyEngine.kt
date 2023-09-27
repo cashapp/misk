@@ -14,7 +14,8 @@ import jakarta.inject.Named
 class RealOpaPolicyEngine @Inject constructor(
   private val opaApi: OpaApi,
   @Named("opa-moshi") private val moshi: Moshi,
-  private val provenance: Boolean
+  private val metrics: OpaMetrics,
+  private val config: OpaConfig
 ) : OpaPolicyEngine {
 
   /**
@@ -114,7 +115,11 @@ class RealOpaPolicyEngine @Inject constructor(
       throw IllegalArgumentException("Must specify document")
     }
 
-    val response = opaApi.queryDocument(document, inputString, provenance).execute()
+    val response = opaApi.queryDocument(document, inputString, config.provenance, config.metrics).execute()
+    if (config.metrics) {
+      metrics.evaluated(document)
+    }
+
     if (!response.isSuccessful) {
       throw PolicyEngineException("[${response.code()}]: ${response.errorBody()?.string()}")
     }
@@ -143,6 +148,11 @@ class RealOpaPolicyEngine @Inject constructor(
       throw PolicyEngineException("Policy document \"$document\" not found.")
     }
     extractedResponse.result.provenance = extractedResponse.provenance
+    if (config.metrics && extractedResponse.metrics != null) {
+      extractedResponse.result.metrics = extractedResponse.metrics
+      metrics.observe(document, extractedResponse.result)
+    }
+
     return extractedResponse.result
   }
 }

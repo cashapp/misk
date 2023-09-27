@@ -22,10 +22,12 @@ dependencies {
   implementation(project(":misk-redis"))
   implementation(Dependencies.guice)
   implementation(Dependencies.jedis)
+  implementation(Dependencies.logbackClassic)
+  implementation(Dependencies.slf4jApi)
   implementation(Dependencies.okHttp)
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-config"))
-  implementation(project(":misk-redis-testing"))
+  implementation(testFixtures(project(":misk-redis")))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)

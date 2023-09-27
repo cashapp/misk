@@ -26,12 +26,14 @@ fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: B
         type = "image/x-icon"
         href = "/static/favicon.ico"
       }
-      if (playCdn) {
+      // TODO add Gradle plugin to comb through service JAR to build minified Tailwind CSS
+      // Until then, use play CDN so all CSS is present for UI from Misk or internal libaries/services
+//      if (playCdn) {
         // Play CDN is useful for development
-        script {
-          src = "https://cdn.tailwindcss.com"
-        }
+      script {
+        src = "https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"
       }
+//      }
       appCssPath?.let { path ->
         link {
           href = path

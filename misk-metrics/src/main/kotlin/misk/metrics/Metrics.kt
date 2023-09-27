@@ -2,6 +2,9 @@ package misk.metrics
 
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import misk.metrics.v2.Metrics
 
 /**
  * Interface for application code to emit metrics to a metrics backend like Prometheus.
@@ -9,7 +12,15 @@ import io.prometheus.client.Gauge
  * Tests that use this should install a metrics client like `PrometheusMetricsClientModule`.
  * Services that use this should install a metrics service like `PrometheusMetricsServiceModule`.
  */
-interface Metrics {
+@Deprecated(
+  message = "Misk Metrics V1 is Deprecated, please use V2",
+  replaceWith = ReplaceWith("misk.metrics.v2.Metrics"),
+  level = DeprecationLevel.WARNING
+)
+@Singleton
+open class Metrics @Inject constructor(
+  private val metricsV2: Metrics
+) {
   /**
    * counter creates and registers a new `Counter` prometheus type.
    *
@@ -20,11 +31,16 @@ interface Metrics {
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
+  @Deprecated(
+    message = "Misk Metrics V1 is Deprecated, please use V2",
+    level = DeprecationLevel.WARNING
+  )
+  @JvmOverloads
   fun counter(
     name: String,
     help: String,
     labelNames: List<String> = listOf()
-  ): Counter
+  ) = metricsV2.counter(name, help, labelNames)
 
   /**
    * gauge creates and registers a new `Gauge` prometheus type.
@@ -36,16 +52,19 @@ interface Metrics {
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
+  @Deprecated(
+    message = "Misk Metrics V1 is Deprecated, please use V2",
+    level = DeprecationLevel.WARNING
+  )
+  @JvmOverloads
   fun gauge(
     name: String,
     help: String = "",
     labelNames: List<String> = listOf()
-  ): Gauge
+  ) = metricsV2.gauge(name, help, labelNames)
 
   /**
    * histogram creates and registers a new `Summary` prometheus type.
-   *
-   * Deprecated: if you really need a summary metric, use [misk.metrics.v2.Metrics.summary] instead.
    *
    * For legacy reasons this function is called histogram(...) but it's not backed by a histogram
    * because of issues with the previous time series backend.
@@ -66,14 +85,55 @@ interface Metrics {
    *  for the metric. The key of the map is the quantile as a ratio (e.g. 0.99 represents p99) and
    *  the value is the "tolerable error" of the computed quantile.
    */
-  @Deprecated("Use misk.metrics.v2.Metrics.summary instead")
+  @Deprecated(
+    message = "Recommend migrating to misk.metrics.v2.Metrics.histogram. See kdoc for detail",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("legacyHistogram(name,help,labelNames,quantiles,maxAgeSeconds)")
+  )
+  @JvmOverloads
   fun histogram(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = defaultQuantiles,
     maxAgeSeconds: Long? = null
-  ): Histogram
+  ) = legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
+
+  /**
+   * histogram creates and registers a new `Summary` prometheus type.
+   *
+   * For legacy reasons this function is called histogram(...) but it's not backed by a histogram
+   * because of issues with the previous time series backend.
+   *
+   * If you're using this metric type, you likely want a real Histogram instead of a Summary.
+   * To change to histogram type, you need to create a different metric (with another name) as the
+   * data structure used by the time series database is incompatible and can break existing dashboards
+   * and monitors.
+   *
+   * See https://prometheus.github.io/client_java/io/prometheus/client/Summary.html or
+   * https://prometheus.github.io/client_java/io/prometheus/client/Histogram.html for more info.
+   *
+   * @param name the name of the metric which will be supplied to prometheus.
+   *  Must be unique across all metric types.
+   * @param help human-readable help text that will be supplied to prometheus.
+   * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
+   * @param quantiles is a map of all of the quantiles (a.k.a. percentiles) that will be computed
+   *  for the metric. The key of the map is the quantile as a ratio (e.g. 0.99 represents p99) and
+   *  the value is the "tolerable error" of the computed quantile.
+   */
+  @Deprecated(
+    message = "Recommend migrating to misk.metrics.v2.Metrics.histogram. See kdoc for detail",
+    level = DeprecationLevel.WARNING
+  )
+  @JvmOverloads
+  fun legacyHistogram(
+    name: String,
+    help: String = "",
+    labelNames: List<String> = listOf(),
+    quantiles: Map<Double, Double> = defaultQuantiles,
+    maxAgeSeconds: Long? = null
+  ) = metricsV2.legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
+
 }
 
 val defaultQuantiles = mapOf(
