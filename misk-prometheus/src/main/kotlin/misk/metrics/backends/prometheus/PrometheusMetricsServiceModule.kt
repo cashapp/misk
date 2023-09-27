@@ -13,7 +13,6 @@ import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import jakarta.inject.Inject
-import misk.metrics.MetricsModule
 
 /**
  * Exposes prometheus metrics over a dedicated port. Allows internal metrics to be exposed via a k8s
@@ -24,7 +23,7 @@ import misk.metrics.MetricsModule
  */
 class PrometheusMetricsServiceModule(private val config: PrometheusConfig) : KAbstractModule() {
   override fun configure() {
-    install(MetricsModule())
+    install(PrometheusMetricsClientModule())
 
     bind<PrometheusConfig>().toInstance(config)
     install(
