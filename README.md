@@ -27,22 +27,29 @@ providing various features and utilities, including config, logging, feature fla
 It has been powering hundreds microservices within Cash App since 2018.
 
 ## A Tour of Features
-* Cloud Native
- * AWS
- * Google Cloud
-* Configuration using yaml
 * Server
+  * Built on top of [Jetty](https://eclipse.dev/jetty/)
+  * HTTP/2 and gRPC support
+  * configurable through YAML
+  * Service management through [Guava](https://github.com/google/guava/wiki/ServiceExplained)
+  * Web-based admin console
 * Client
-  * gRPC client
-  * httpClient
-* Job Queue
-* Cron Jobs
-* Web Actions
-* Admin console
-* Hibernate
-* Cache: redis access using Jedis
-* Metrics: integration with prometheus
-* A collection of utilities: Wisp
+  * configurable HTTP clients built on top of [OkHttp](https://github.com/square/okhttp)
+    and [Retrofit](https://github.com/square/retrofit)
+  * gRPC clients built on top of [Wire](https://github.com/square/wire)
+* Cloud integration
+  * AWS: SQS, S3, DynamoDB
+  * Google Cloud: Spanner
+* Scheduled Jobs with cron syntax
+* Persistence
+  * ORM: Hibernate
+  * JDBC: Connection pooling through [Hikari](https://github.com/brettwooldridge/HikariCP)
+  * Cache: redis client
+* Metrics:
+  * integration with prometheus
+  * built-in metrics for JVM performance, networking and connection pooling
+* Testing framework
+* Kotlin utilities with minimal dependencies: Wisp
 
 ## What's Next?
 Want to jump right into it? Check out our [Getting Started](./docs/getting-started.md).
