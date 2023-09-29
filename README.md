@@ -12,7 +12,7 @@
 
 * Related Projects
   * [misk-web][miskweb]
-  * [wisp][wisp]: wisp now is a part of Misk
+  * [wisp](./wisp/README.md): wisp is now a part of Misk
  
 
 # Overview
