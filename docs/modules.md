@@ -1,6 +1,6 @@
 Misk Modules
 ===============
-
+Misk is split into many Gradle subprojects to organize functionality. The below is an overview of some of the modules.
 ## misk-actions
 
 The core annotations and interfaces necessary to define actions that can be hosted in Misk.
