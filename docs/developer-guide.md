@@ -33,9 +33,9 @@ the integration with clouds and various common technologies.
 Learn more about [Misk modules](./docs/modules.md)
 
 ## Wisp
-Comes with Misk, Wisp is a collection of kotlin modules providing various features and utilities,
-including config, logging, feature flags and more. The wisp modules contain no Dependency-Injection
-based code (i.e. no Guice, etc) and back many Misk module implementations.
+Wisp is a collection of kotlin modules providing various features and utilities, including config,
+logging, feature flags and more. The wisp modules contain no Dependency Injection code (i.e.,
+no Guice), and back many Misk module implementations.
 
 Learn more about [Wisp](../wisp/README.md).
 

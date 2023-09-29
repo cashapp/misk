@@ -29,11 +29,11 @@ It has been powering hundreds microservices within Cash App since 2018.
 * Server
   * Built on top of [Jetty](https://eclipse.dev/jetty/)
   * HTTP/2 and gRPC support
-  * configurable through YAML
+  * Configurable through YAML
   * Service management through [Guava](https://github.com/google/guava/wiki/ServiceExplained)
   * Web-based admin console
 * Client
-  * configurable HTTP clients built on top of [OkHttp](https://github.com/square/okhttp)
+  * Configurable HTTP clients built on top of [OkHttp](https://github.com/square/okhttp)
     and [Retrofit](https://github.com/square/retrofit)
   * gRPC clients built on top of [Wire](https://github.com/square/wire)
 * Cloud integration
