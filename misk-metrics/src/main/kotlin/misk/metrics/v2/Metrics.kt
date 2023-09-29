@@ -5,8 +5,6 @@ import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
 import io.prometheus.client.Histogram
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /**
  * Interface for application code to emit metrics to a metrics backend like Prometheus.
@@ -20,10 +18,9 @@ import jakarta.inject.Singleton
  * Tests that use this should install a metrics client like `PrometheusMetricsClientModule`.
  * Services that use this should install a metrics service like `PrometheusMetricsServiceModule`.
  */
-@Singleton
-open class Metrics @Inject constructor(
-  private val registry: CollectorRegistry
-) {
+interface Metrics {
+  fun getRegistry(): CollectorRegistry
+
   /**
    * counter creates and registers a new `Counter` prometheus type.
    *
@@ -34,7 +31,6 @@ open class Metrics @Inject constructor(
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
-  @JvmOverloads
   fun counter(
     name: String,
     help: String,
@@ -42,7 +38,7 @@ open class Metrics @Inject constructor(
   ) = Counter
     .build(name, help)
     .labelNames(*labelNames.toTypedArray())
-    .register(registry)
+    .register(getRegistry())
 
   /**
    * gauge creates and registers a new `Gauge` prometheus type.
@@ -54,7 +50,6 @@ open class Metrics @Inject constructor(
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
-  @JvmOverloads
   fun gauge(
     name: String,
     help: String = "",
@@ -62,7 +57,7 @@ open class Metrics @Inject constructor(
   ) = Gauge
     .build(name, help)
     .labelNames(*labelNames.toTypedArray())
-    .register(registry)
+    .register(getRegistry())
 
   /**
    * peakGauge creates and registers a new `Gauge` prometheus type that resets to its
@@ -73,7 +68,6 @@ open class Metrics @Inject constructor(
    * @param help human-readable help text that will be supplied to prometheus.
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    */
-  @JvmOverloads
   fun peakGauge(
     name: String,
     help: String = "",
@@ -81,7 +75,7 @@ open class Metrics @Inject constructor(
   ) = PeakGauge
     .builder(name, help)
     .labelNames(*labelNames.toTypedArray())
-    .register(registry)
+    .register(getRegistry())
 
   /**
    * histogram creates a new `Histogram` prometheus type with the supplied parameters.
@@ -100,7 +94,6 @@ open class Metrics @Inject constructor(
    * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
    * @param buckets a list of upper bounds of buckets for the histogram.
    */
-  @JvmOverloads
   fun histogram(
     name: String,
     help: String = "",
@@ -110,7 +103,7 @@ open class Metrics @Inject constructor(
     .build(name, help)
     .labelNames(*labelNames.toTypedArray())
     .buckets(*buckets.toDoubleArray())
-    .register(registry)
+    .register(getRegistry())
 
   /**
    * summary creates and registers a new `Summary` prometheus type.
@@ -128,7 +121,6 @@ open class Metrics @Inject constructor(
    *  for the metric. The key of the map is the quantile as a ratio (e.g. 0.99 represents p99) and
    *  the value is the "tolerable error" of the computed quantile.
    */
-  @JvmOverloads
   fun summary(
     name: String,
     help: String = "",
@@ -148,7 +140,7 @@ open class Metrics @Inject constructor(
         this.maxAgeSeconds(maxAgeSeconds)
       }
     }
-    .register(registry)
+    .register(getRegistry())
 
   /**
    * histogram creates and registers a new `Summary` prometheus type.
@@ -176,14 +168,13 @@ open class Metrics @Inject constructor(
     "Recommend migrating to histogram. See kdoc for detail",
     level = DeprecationLevel.WARNING,
   )
-  @JvmOverloads
   fun legacyHistogram(
     name: String,
     help: String = "",
     labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = misk.metrics.defaultQuantiles,
     maxAgeSeconds: Long? = null
-  ) = misk.metrics.Histogram(
+  ) = misk.metrics.Histogram.factory(
     summary(
       name,
       help,
@@ -192,6 +183,12 @@ open class Metrics @Inject constructor(
       maxAgeSeconds
     )
   )
+
+  companion object {
+    fun factory(registry: CollectorRegistry) = object : Metrics {
+      override fun getRegistry() = registry
+    }
+  }
 
 }
 

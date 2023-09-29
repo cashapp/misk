@@ -2,10 +2,6 @@ package misk.metrics.v2
 
 import io.prometheus.client.Collector.MetricFamilySamples.Sample
 import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.Counter
-import io.prometheus.client.Gauge
-import io.prometheus.client.Histogram
-import io.prometheus.client.Summary
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.metrics.get
@@ -26,7 +22,53 @@ import misk.metrics.summarySum
 @Singleton
 class FakeMetrics @Inject internal constructor(
   private val registry: CollectorRegistry
-) : Metrics(registry) {
+) : Metrics {
+  override fun getRegistry() = registry
+
+  override fun counter(
+    name: String,
+    help: String,
+    labelNames: List<String>
+  ) = super.counter(name, help, labelNames)
+
+  override fun gauge(
+    name: String,
+    help: String,
+    labelNames: List<String>
+  ) = super.gauge(name, help, labelNames)
+
+  override fun peakGauge(name: String, help: String, labelNames: List<String>) = super.peakGauge(
+    name,
+    help,
+    labelNames
+  )
+
+  override fun histogram(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    buckets: List<Double>
+  ) = super.histogram(name, help, labelNames, buckets)
+
+  override fun summary(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?
+  ) = super.summary(name, help, labelNames, quantiles, maxAgeSeconds)
+
+  @Deprecated(
+    "Recommend migrating to histogram. See kdoc for detail",
+    level = DeprecationLevel.WARNING,
+  )
+  override fun legacyHistogram(
+    name: String,
+    help: String,
+    labelNames: List<String>,
+    quantiles: Map<Double, Double>,
+    maxAgeSeconds: Long?
+  ) = super.legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
 
   /** Returns a measurement for a [counter] or [gauge]. */
   @Deprecated("Use same extention method on CollectorRegistry instead")

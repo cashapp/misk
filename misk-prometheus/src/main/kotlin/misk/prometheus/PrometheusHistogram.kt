@@ -5,5 +5,7 @@ import misk.metrics.Histogram
 
 @Deprecated("Unexpected that this is used. Checkout Metrics instead")
 class PrometheusHistogram(
-  histogram: Summary
-) : Histogram(histogram)
+  private val histogram: Summary
+) : Histogram {
+  override final fun getHistogram() = histogram
+}

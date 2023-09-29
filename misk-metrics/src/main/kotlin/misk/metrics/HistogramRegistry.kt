@@ -7,16 +7,23 @@ package misk.metrics
  * An example implementation can be found in PrometheusHistogramRegistry
  */
 @Deprecated("use Metrics.histogram() instead")
-open class HistogramRegistry(
-  private val metrics: Metrics,
-  ) {
+interface HistogramRegistry {
+
+  fun getMetrics(): Metrics
+
   /** Creates a new histogram */
-   fun newHistogram(
+  fun newHistogram(
     name: String,
     help: String,
     labelNames: List<String>,
     quantiles: Map<Double, Double>
   ): Histogram {
-    return metrics.histogram(name, help, labelNames, quantiles)
+    return getMetrics().histogram(name, help, labelNames, quantiles)
+  }
+
+  companion object {
+    fun factory(metrics: Metrics) = object : HistogramRegistry {
+      override fun getMetrics() = metrics
+    }
   }
 }

@@ -14,17 +14,18 @@ import java.util.concurrent.TimeUnit
  *
  * A sample implementation can be found in PrometheusHistogram
  */
-open class Histogram(
-  val histogram: Summary
-) {
+interface Histogram {
+
+  fun getHistogram(): Summary
+
   /** records a new set of labels and accompanying duration */
   fun record(duration: Double, vararg labelValues: String) {
-    histogram.labels(*labelValues).observe(duration)
+    getHistogram().labels(*labelValues).observe(duration)
   }
 
   /** returns the number of buckets */
   fun count(vararg labelValues: String): Int {
-    return histogram.labels(*labelValues).get().count.toInt()
+    return getHistogram().labels(*labelValues).get().count.toInt()
   }
 
   /** records a new set of labels and the time to execute the work lambda in milliseconds */
@@ -32,6 +33,13 @@ open class Histogram(
     val (time, result) = TimedFunctions.timed { work.invoke() }
     record(time.toMillis().toDouble(), *labelValues)
     return result
+  }
+
+  companion object {
+    fun factory(summary: Summary) = object : Histogram {
+      override fun getHistogram() = summary
+
+    }
   }
 }
 

@@ -10,8 +10,8 @@ import misk.metrics.v2.Metrics
  */
 @Singleton
 internal class PrometheusMetrics @Inject internal constructor(
-  registry: CollectorRegistry
-) : Metrics(registry) {
+  private val registry: CollectorRegistry
+) : Metrics {
   companion object {
     /**
      * @return a version of the name, sanitized to remove elements that are incompatible
@@ -19,4 +19,6 @@ internal class PrometheusMetrics @Inject internal constructor(
      */
     fun sanitize(name: String) = name.replace("[\\-\\.\t]", "_")
   }
+
+  override fun getRegistry() = registry
 }

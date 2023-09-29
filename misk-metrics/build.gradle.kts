@@ -11,8 +11,8 @@ plugins {
 
 dependencies {
   api(project(":misk-inject"))
-  api(Dependencies.jakartaInject)
   api(Dependencies.prometheusClient)
+  implementation(Dependencies.jakartaInject)
   implementation(Dependencies.findBugs)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)

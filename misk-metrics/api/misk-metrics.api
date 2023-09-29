@@ -1,14 +1,19 @@
 public final class misk/metrics/FakeMetrics : misk/metrics/Metrics {
+	public fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
 	public final fun get (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun getAllSamples ()Lkotlin/sequences/Sequence;
+	public fun getMetrics ()Lmisk/metrics/v2/Metrics;
 	public final fun getSample (Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
 	public static synthetic fun getSample$default (Lmisk/metrics/FakeMetrics;Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;ILjava/lang/Object;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
+	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
 	public final fun histogramCount (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun histogramMean (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun histogramP50 (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun histogramP99 (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun histogramQuantile (Ljava/lang/String;Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun histogramSum (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
+	public fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
 }
 
 public final class misk/metrics/FakeMetricsKt {
@@ -28,39 +33,59 @@ public final class misk/metrics/FakeMetricsModule : misk/inject/KAbstractModule 
 	public fun <init> ()V
 }
 
-public class misk/metrics/Histogram {
-	public fun <init> (Lio/prometheus/client/Summary;)V
-	public final fun count ([Ljava/lang/String;)I
-	public final fun getHistogram ()Lio/prometheus/client/Summary;
-	public final fun record (D[Ljava/lang/String;)V
-	public final fun timedMills ([Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+public abstract interface class misk/metrics/Histogram {
+	public static final field Companion Lmisk/metrics/Histogram$Companion;
+	public abstract fun count ([Ljava/lang/String;)I
+	public abstract fun getHistogram ()Lio/prometheus/client/Summary;
+	public abstract fun record (D[Ljava/lang/String;)V
+	public abstract fun timedMills ([Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
-public class misk/metrics/HistogramRegistry {
-	public fun <init> (Lmisk/metrics/Metrics;)V
-	public final fun newHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
+public final class misk/metrics/Histogram$Companion {
+	public final fun factory (Lio/prometheus/client/Summary;)Lmisk/metrics/Histogram;
 }
 
-public class misk/metrics/Metrics {
-	public fun <init> (Lmisk/metrics/v2/Metrics;)V
-	public final fun counter (Ljava/lang/String;Ljava/lang/String;)Lio/prometheus/client/Counter;
-	public final fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+public final class misk/metrics/Histogram$DefaultImpls {
+	public static fun count (Lmisk/metrics/Histogram;[Ljava/lang/String;)I
+	public static fun record (Lmisk/metrics/Histogram;D[Ljava/lang/String;)V
+	public static fun timedMills (Lmisk/metrics/Histogram;[Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/metrics/HistogramRegistry {
+	public static final field Companion Lmisk/metrics/HistogramRegistry$Companion;
+	public abstract fun getMetrics ()Lmisk/metrics/Metrics;
+	public abstract fun newHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
+}
+
+public final class misk/metrics/HistogramRegistry$Companion {
+	public final fun factory (Lmisk/metrics/Metrics;)Lmisk/metrics/HistogramRegistry;
+}
+
+public final class misk/metrics/HistogramRegistry$DefaultImpls {
+	public static fun newHistogram (Lmisk/metrics/HistogramRegistry;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
+}
+
+public abstract interface class misk/metrics/Metrics {
+	public static final field Companion Lmisk/metrics/Metrics$Companion;
+	public abstract fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public abstract fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public abstract fun getMetrics ()Lmisk/metrics/v2/Metrics;
+	public abstract fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public abstract fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+}
+
+public final class misk/metrics/Metrics$Companion {
+	public final fun factory (Lmisk/metrics/v2/Metrics;)Lmisk/metrics/Metrics;
+}
+
+public final class misk/metrics/Metrics$DefaultImpls {
+	public static fun counter (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
 	public static synthetic fun counter$default (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Counter;
-	public final fun gauge (Ljava/lang/String;)Lio/prometheus/client/Gauge;
-	public final fun gauge (Ljava/lang/String;Ljava/lang/String;)Lio/prometheus/client/Gauge;
-	public final fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public static fun gauge (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
 	public static synthetic fun gauge$default (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Gauge;
-	public final fun histogram (Ljava/lang/String;)Lmisk/metrics/Histogram;
-	public final fun histogram (Ljava/lang/String;Ljava/lang/String;)Lmisk/metrics/Histogram;
-	public final fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/Histogram;
-	public final fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
-	public final fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public static fun histogram (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
 	public static synthetic fun histogram$default (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lmisk/metrics/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;)Lmisk/metrics/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;)Lmisk/metrics/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public static fun legacyHistogram (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
 	public static synthetic fun legacyHistogram$default (Lmisk/metrics/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lmisk/metrics/Histogram;
 }
 
@@ -76,10 +101,17 @@ public class misk/metrics/MetricsScope {
 }
 
 public final class misk/metrics/v2/FakeMetrics : misk/metrics/v2/Metrics {
+	public fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
 	public final fun get (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun getAllSamples ()Lkotlin/sequences/Sequence;
+	public fun getRegistry ()Lio/prometheus/client/CollectorRegistry;
 	public final fun getSample (Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
 	public static synthetic fun getSample$default (Lmisk/metrics/v2/FakeMetrics;Ljava/lang/String;[Lkotlin/Pair;Ljava/lang/String;ILjava/lang/Object;)Lio/prometheus/client/Collector$MetricFamilySamples$Sample;
+	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
+	public fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
+	public fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
 	public final fun summaryCount (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun summaryMean (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun summaryP50 (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
@@ -92,35 +124,33 @@ public final class misk/metrics/v2/FakeMetricsModule : misk/inject/KAbstractModu
 	public fun <init> ()V
 }
 
-public class misk/metrics/v2/Metrics {
-	public fun <init> (Lio/prometheus/client/CollectorRegistry;)V
-	public final fun counter (Ljava/lang/String;Ljava/lang/String;)Lio/prometheus/client/Counter;
-	public final fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+public abstract interface class misk/metrics/v2/Metrics {
+	public static final field Companion Lmisk/metrics/v2/Metrics$Companion;
+	public abstract fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public abstract fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public abstract fun getRegistry ()Lio/prometheus/client/CollectorRegistry;
+	public abstract fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
+	public abstract fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public abstract fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
+	public abstract fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
+}
+
+public final class misk/metrics/v2/Metrics$Companion {
+	public final fun factory (Lio/prometheus/client/CollectorRegistry;)Lmisk/metrics/v2/Metrics;
+}
+
+public final class misk/metrics/v2/Metrics$DefaultImpls {
+	public static fun counter (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
 	public static synthetic fun counter$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Counter;
-	public final fun gauge (Ljava/lang/String;)Lio/prometheus/client/Gauge;
-	public final fun gauge (Ljava/lang/String;Ljava/lang/String;)Lio/prometheus/client/Gauge;
-	public final fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public static fun gauge (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
 	public static synthetic fun gauge$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Gauge;
-	public final fun histogram (Ljava/lang/String;)Lio/prometheus/client/Histogram;
-	public final fun histogram (Ljava/lang/String;Ljava/lang/String;)Lio/prometheus/client/Histogram;
-	public final fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Histogram;
-	public final fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
+	public static fun histogram (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
 	public static synthetic fun histogram$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/prometheus/client/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;)Lmisk/metrics/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;)Lmisk/metrics/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
-	public final fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public static fun legacyHistogram (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
 	public static synthetic fun legacyHistogram$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lmisk/metrics/Histogram;
-	public final fun peakGauge (Ljava/lang/String;)Lmisk/metrics/v2/PeakGauge;
-	public final fun peakGauge (Ljava/lang/String;Ljava/lang/String;)Lmisk/metrics/v2/PeakGauge;
-	public final fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
+	public static fun peakGauge (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
 	public static synthetic fun peakGauge$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v2/PeakGauge;
-	public final fun summary (Ljava/lang/String;)Lio/prometheus/client/Summary;
-	public final fun summary (Ljava/lang/String;Ljava/lang/String;)Lio/prometheus/client/Summary;
-	public final fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Summary;
-	public final fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lio/prometheus/client/Summary;
-	public final fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
+	public static fun summary (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
 	public static synthetic fun summary$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lio/prometheus/client/Summary;
 }
 
