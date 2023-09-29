@@ -44,17 +44,21 @@ It has been powering hundreds microservices within Cash App since 2018.
 * Persistence
   * ORM: Hibernate
   * JDBC: Connection pooling through [Hikari](https://github.com/brettwooldridge/HikariCP)
-  * Cache: redis client
+* Cache: redis client
 * Metrics:
   * integration with prometheus
   * built-in metrics for JVM performance, networking and connection pooling
-* Testing framework
+* Testing framework with annotations
 * Kotlin utilities with minimal dependencies: Wisp
 
 ## What's Next?
 Want to jump right into it? Check out our [Getting Started](./docs/getting-started.md).
 
-What to know more about each module, see [Developer Guide](./docs/developer-guide.md) 
+What to know more about each module, see [Developer Guide](./docs/developer-guide.md).
+
+## Looking for Misk-Web?
+
+[Misk-Web][miskweb] powers the Misk Admin Dashboard with modular Typescript + React powered tabs.
 
 [changelog]: http://cashapp.github.io/misk/changelog/
 [misk]: https://cashapp.github.io/misk/
