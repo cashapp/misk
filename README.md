@@ -45,8 +45,8 @@ It has been powering hundreds microservices within Cash App since 2018.
   * JDBC: Connection pooling through [Hikari](https://github.com/brettwooldridge/HikariCP)
 * Cache: redis client
 * Metrics:
-  * integration with prometheus
-  * built-in metrics for JVM performance, networking and connection pooling
+  * Integration with prometheus
+  * Built-in metrics for JVM performance, networking and connection pooling
 * Testing framework with annotations
 * Kotlin utilities with minimal dependencies: Wisp
 
