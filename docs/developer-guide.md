@@ -37,8 +37,7 @@ Comes with Misk, Wisp is a collection of kotlin modules providing various featur
 including config, logging, feature flags and more. The wisp modules contain no Dependency-Injection
 based code (i.e. no Guice, etc) and back many Misk module implementations.
 
-Learn more about [Wisp][wisp].
+Learn more about [Wisp](../wisp/README.md).
 
 
 [OkHttp Interceptors]: https://square.github.io/okhttp/features/interceptors/
-[wisp]: https://github.com/cashapp/wisp

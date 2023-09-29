@@ -63,4 +63,3 @@ What to know more about each module, see [Developer Guide](./docs/developer-guid
 [misk]: https://cashapp.github.io/misk/
 [miskweb]: https://cashapp.github.io/misk-web/
 [snap]: https://mvnrepository.com/artifact/com.squareup.misk/misk
-[wisp]: https://github.com/cashapp/wisp
