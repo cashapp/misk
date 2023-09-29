@@ -34,8 +34,8 @@ Learn more about [Misk modules](./docs/modules.md)
 
 ## Wisp
 Wisp is a collection of kotlin modules providing various features and utilities, including config,
-logging, feature flags and more. The wisp modules contain no Dependency Injection code (i.e.,
-no Guice), and back many Misk module implementations.
+logging, feature flags and more. It is basically extracted Misk functionality without Dependency
+Injection (i.e., no Guice).
 
 Learn more about [Wisp](../wisp/README.md).
 

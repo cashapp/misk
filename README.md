@@ -23,7 +23,7 @@ concerns like serving endpoints, caching, queueing, persistence, distributed lea
 It also includes [the Wisp library](./wisp/README.md), which is a collection of Kotlin modules
 providing various features and utilities, including config, logging, feature flags and more.
 
-It has been powering hundreds microservices within Cash App since 2018.
+It has been powering hundreds of microservices within Cash App since 2018.
 
 ## A Tour of Features
 * Server
