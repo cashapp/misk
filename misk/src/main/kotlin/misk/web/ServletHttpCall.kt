@@ -4,11 +4,11 @@ import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.jetty.headers
 import misk.web.jetty.httpUrl
+import okhttp3.Cookie
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
-import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
 internal data class ServletHttpCall(
@@ -125,16 +125,19 @@ internal data class ServletHttpCall(
         check(webSocket != null)
       }
 
+      val url = request.httpUrl()
+      val headers = request.headers()
+
       return ServletHttpCall(
-        url = request.httpUrl(),
+        url = url,
         linkLayerLocalAddress = linkLayerLocalAddress,
         dispatchMechanism = dispatchMechanism,
-        requestHeaders = request.headers(),
+        requestHeaders = headers,
         upstreamResponse = upstreamResponse,
         requestBody = requestBody,
         responseBody = responseBody,
         webSocket = webSocket,
-        cookies = request.cookies?.toList() ?: listOf(),
+        cookies = Cookie.parseAll(request.httpUrl(), headers),
       )
     }
   }

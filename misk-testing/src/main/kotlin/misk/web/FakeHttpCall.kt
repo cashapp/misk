@@ -2,6 +2,7 @@ package misk.web
 
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import okhttp3.Cookie
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
@@ -9,7 +10,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.Buffer
 import okio.BufferedSink
 import okio.BufferedSource
-import javax.servlet.http.Cookie
 
 data class FakeHttpCall @JvmOverloads constructor(
   override val url: HttpUrl = "https://example.com/".toHttpUrl(),

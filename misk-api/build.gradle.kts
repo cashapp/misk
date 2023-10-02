@@ -14,8 +14,6 @@ dependencies {
   api(Dependencies.okHttp)
   runtimeOnly(kotlin("reflect"))
 
-  // Will be removed with task https://ccp-cashapp.atlassian.net/browse/CCPOKR-9336
-  api(Dependencies.jettyServletApi)
 }
 
 configure<MavenPublishBaseExtension> {

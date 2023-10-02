@@ -3,6 +3,7 @@ package misk.web
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.mediatype.MediaRange
+import okhttp3.Cookie
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.MediaType
@@ -11,7 +12,6 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import okio.BufferedSource
-import javax.servlet.http.Cookie
 
 /**
  * Information about the socket on which a HTTP call arrived.
@@ -35,7 +35,6 @@ interface HttpCall {
   var requestHeaders: Headers
 
   /** Cookies derived from request's "Cookie" header, if any */
-  //TODO: Remove cookies so that misk-api does not depend on jetty
   var cookies: List<Cookie>
 
   /** Meaningful HTTP status about what actually happened. Not sent over the wire in the case
