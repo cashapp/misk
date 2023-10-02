@@ -1,11 +1,12 @@
 package misk.web
 
-import com.google.inject.Key
+import com.google.inject.Provider
 import misk.Action
-import misk.inject.keyOf
+import misk.ApplicationInterceptor
 import misk.scope.ActionScope
 import misk.scope.SeedDataTransformer
 import misk.security.authz.AccessInterceptor
+import misk.web.actions.WebAction
 import misk.web.actions.asChain
 import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaRange
@@ -16,11 +17,9 @@ import okhttp3.HttpUrl
 import okhttp3.MediaType
 import org.slf4j.MDC
 import java.util.regex.Matcher
-import com.google.inject.Provider
-import misk.ApplicationInterceptor
-import misk.web.actions.WebAction
 import javax.servlet.http.HttpServletRequest
 import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 
 /**
  * Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP
@@ -107,10 +106,10 @@ internal class BoundAction<A : WebAction>(
     httpCall: HttpCall,
     pathMatcher: Matcher
   ) {
-    val initialSeedData = mapOf<Key<*>, Any?>(
-      keyOf<HttpServletRequest>() to request,
-      keyOf<HttpCall>() to httpCall,
-      keyOf<Action>() to action,
+    val initialSeedData = mapOf<KType, Any?>(
+      HttpServletRequest::class.createType() to request,
+      HttpCall::class.createType() to httpCall,
+      Action::class.createType() to action,
     )
     val seedData =
       seedDataTransformers.fold(initialSeedData) { seedData, interceptor ->

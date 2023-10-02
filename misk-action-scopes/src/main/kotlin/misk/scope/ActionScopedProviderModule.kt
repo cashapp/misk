@@ -6,14 +6,15 @@ import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
 import com.squareup.moshi.Types
+import jakarta.inject.Inject
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.parameterizedType
 import misk.inject.toKey
 import misk.inject.typeLiteral
 import java.lang.reflect.Type
-import jakarta.inject.Inject
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaMethod
 
 /** Module used by components and applications to provide [ActionScoped] context objects */
@@ -44,6 +45,11 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     )
   }
 
+  /** Binds an [ActionScoped] which only pulls from data seeded at the scope entry */
+  fun <T : Any> bindSeedData(kType: KType) {
+    bindSeedData(Key.get(kType.javaClass), Key.get(actionScopedType(kType.javaClass)))
+  }
+
   /** Binds an annotation qualified [ActionScoped] which only pulls from data seeded at the scope entry */
   fun <T : Any> bindSeedData(kclass: KClass<T>, a: Annotation) {
     bindSeedData(Key.get(kclass.java, a), Key.get(actionScopedType(kclass), a))
@@ -58,6 +64,11 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
         a
       ) as Key<ActionScoped<T>>,
     )
+  }
+
+  /** Binds an annotation qualified [ActionScoped] which only pulls from data seeded at the scope entry */
+  fun <T : Any> bindSeedData(kType: KType, a: Annotation) {
+    bindSeedData(Key.get(kType.javaClass, a), Key.get(actionScopedType(kType.javaClass), a))
   }
 
   /** Binds an annotation qualified [ActionScoped] which only pulls from data seeded at the scope entry */
@@ -229,6 +240,13 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     private val ACTION_SCOPED_PROVIDER_TYPE = object : TypeLiteral<ActionScopedProvider<*>>() {}
 
     private class SeedDataActionScopedProvider<out T>(private val key: Key<T>) :
+      ActionScopedProvider<T> {
+      override fun get(): T {
+        throw IllegalStateException("$key can only be provided as seed data")
+      }
+    }
+
+    private class SeedKTypeDataActionScopedProvider<out T>(private val key: KType) :
       ActionScopedProvider<T> {
       override fun get(): T {
         throw IllegalStateException("$key can only be provided as seed data")

@@ -1,12 +1,11 @@
 package misk.scope
 
-import com.google.inject.Key
 import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.asContextElement
 import java.util.UUID
 import java.util.concurrent.Callable
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -17,13 +16,13 @@ import kotlin.reflect.KVisibility
 @Singleton
 class ActionScope @Inject internal constructor(
   // NB(mmihic): ActionScoped depends on ActionScope depends on
-  // on ActionScopedProviders, which might depend on other ActionScopeds. We break
+  // ActionScopedProviders, which might depend on other ActionScopeds. We break
   // this circular dependency by injecting a map of Provider<ActionScopedProvider>
   // rather than the map of ActionScopedProvider directly
-  private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
+  private val providers: @JvmSuppressWildcards Map<KType, Provider<ActionScopedProvider<*>>>
 ) : Scope {
   companion object {
-    private val threadLocalScope = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
+    private val threadLocalScope = ThreadLocal<LinkedHashMap<KType, Any?>>()
     private val threadLocalUUID = ThreadLocal<UUID>()
   }
 
@@ -51,20 +50,18 @@ class ActionScope @Inject internal constructor(
     return threadLocalScope.asContextElement(currentScopedData)
   }
 
-  fun snapshotActionScope(): Map<Key<*>, Any?> {
+  fun snapshotActionScope(): Map<KType, Any?> {
     check(inScope()) { "not running within an ActionScope" }
     return threadLocalScope.get().toMap()
   }
 
   /** Starts the scope on a thread with the provided seed data */
-  override fun enter(seedData: Map<out Any, Any?>): Scope {
-    val seedMap: Map<Key<*>, Any?> = seedData as Map<Key<*>, Any?>
-
+  override fun enter(seedData: Map<out KType, Any?>): Scope {
     check(!inScope()) {
       "cannot begin an ActionScope on a thread that is already running in an action scope"
     }
 
-    threadLocalScope.set(LinkedHashMap(seedMap))
+    threadLocalScope.set(LinkedHashMap(seedData))
 
     // If an action scope had previously been entered on the thread, re-use its UUID.
     // Otherwise, generate a new one.
@@ -86,14 +83,6 @@ class ActionScope @Inject internal constructor(
 
   /** Returns true if currently in the scope */
   override fun inScope(): Boolean = threadLocalScope.get() != null
-
-  override fun <T> get(type: Class<T>): T? {
-    if (!inScope()) {
-      return null
-    }
-
-    return get(Key.get(type))
-  }
 
   /**
    * Wraps a [Callable] that will be called on another thread, propagating the current
@@ -154,7 +143,7 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Returns the action scoped value for the given key */
-  fun <T> get(key: Key<T>): T {
+  override fun <T> get(key: KType): T {
     check(inScope()) { "not running within an ActionScope" }
 
     // NB(mmihic): We don't use computeIfAbsent because computing the value of this
@@ -168,22 +157,21 @@ class ActionScope @Inject internal constructor(
       return cachedValue as T
     }
 
-    val value = providerFor(key as Key<*>).get()
+    val value = providerFor(key).get()
     threadState[key] = value
 
     @Suppress("UNCHECKED_CAST")
     return value as T
   }
 
-  @Suppress("UNCHECKED_CAST")
-  private fun providerFor(key: Key<*>): ActionScopedProvider<*> {
+  private fun providerFor(key: KType): ActionScopedProvider<*> {
     return requireNotNull(providers[key]?.get()) {
       "no ActionScopedProvider available for $key"
     }
   }
 
   private class WrappedKFunction<T>(
-    val seedData: Map<Key<*>, Any?>,
+    val seedData: Map<KType, Any?>,
     val scope: ActionScope,
     val wrapped: KFunction<T>,
     val threadUUID: UUID

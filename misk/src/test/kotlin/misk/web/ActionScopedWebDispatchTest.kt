@@ -1,10 +1,10 @@
 package misk.web
 
-import com.google.inject.Key
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
-import misk.inject.keyOf
 import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
@@ -18,8 +18,8 @@ import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.security.Principal
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 
 @MiskTest(startService = true)
 internal class ActionScopedWebDispatchTest {
@@ -86,12 +86,12 @@ internal class ActionScopedWebDispatchTest {
       })
       val principalSeeder = object : SeedDataTransformer {
         override fun transform(
-          seedData: Map<Key<*>, Any?>,
-        ): Map<Key<*>, Any?> {
-          val httpCall = seedData.getValue(keyOf<HttpCall>()) as HttpCall
+          seedData: Map<KType, Any?>,
+        ): Map<KType, Any?> {
+          val httpCall = seedData.getValue(HttpCall::class.createType()) as HttpCall
           val principalSeed = httpCall.requestHeaders["Principal-Seed"] ?: return seedData
           val principal = Principal { principalSeed }
-          return seedData + mapOf(Key.get(Principal::class.java) to principal)
+          return seedData + mapOf(Principal::class.createType() to principal)
         }
       }
 

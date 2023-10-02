@@ -2,13 +2,13 @@ package misk.web
 
 import com.google.inject.Injector
 import misk.MiskCaller
-import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.testing.retrieve
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
+import kotlin.reflect.full.createType
 
 class MiskCallerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallback {
   override fun beforeTestExecution(context: ExtensionContext) {
@@ -17,7 +17,7 @@ class MiskCallerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallb
     val actionScope = actionScopeProvider.provider.get()
     actionScope.enter(
       mapOf(
-        keyOf<MiskCaller>() to context.getPrincipal()
+        MiskCaller::class.createType() to context.getPrincipal()
       )
     )
   }

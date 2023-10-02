@@ -1,6 +1,6 @@
 package misk.scope
 
-import com.google.inject.Key
+import kotlin.reflect.KType
 
 /**
  * While executing, actions have [ActionScoped] values that can be injected by anything running
@@ -18,5 +18,5 @@ import com.google.inject.Key
  * [ActionScopedProviderModule.bindSeedData]. This makes the seed data type injectable by Guice.
  */
 interface SeedDataTransformer {
-  fun transform(seedData: Map<Key<*>, Any?>): Map<Key<*>, Any?>
+  fun transform(seedData: Map<KType, Any?>): Map<KType, Any?>
 }

@@ -1,12 +1,12 @@
 package misk.scope.executor
 
 import com.google.inject.Guice
-import com.google.inject.Key
 import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
-import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.scope.ActionScoped
 import misk.scope.TestActionScopedProviderModule
@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 import kotlin.test.assertFailsWith
 
 internal class ActionScopedExecutorServiceTest {
@@ -38,8 +38,8 @@ internal class ActionScopedExecutorServiceTest {
     val executor = injector.getInstance(ExecutorService::class.java)
     val scope = injector.getInstance(ActionScope::class.java)
 
-    val seedData: Map<Key<*>, Any> = mapOf(
-      keyOf<String>(Names.named("from-seed")) to "my seed data"
+    val seedData: Map<KType, Any> = mapOf(
+      (Names.named("from-seed"))::class.createType() to "my seed data"
     )
 
     val future = scope.enter(seedData).use {

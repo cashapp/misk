@@ -9,12 +9,12 @@ import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.scope.ActionScoped
 import misk.scope.ActionScopedProviderModule
@@ -38,7 +38,8 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 
 @MiskTest(startService = true)
 class PropagatingScopeActionInInterceptorsTest {
@@ -53,8 +54,8 @@ class PropagatingScopeActionInInterceptorsTest {
   private lateinit var suspendClient: TypedHttpClientTest.ReturnADinosaurNonBlocking
   private lateinit var dinoService: DinoService
 
-  private val seedData: Map<Key<*>, Any> = mapOf(
-    keyOf<String>(Names.named("language-preference")) to "es-US"
+  private val seedData: Map<KType, Any> = mapOf(
+    Names.named("language-preference")::class.createType() to "es-US"
   )
 
   @BeforeEach
@@ -133,7 +134,7 @@ class PropagatingScopeActionInInterceptorsTest {
             return@Factory delegate.newCall(request)
           }
 
-         val language = actionScope.get(Key.get(String::class.java, Names.named("language-preference")))
+         val language = actionScope.get(Key.get(String::class.java, Names.named("language-preference"))::class.createType())
          val newRequest = request.newBuilder()
            .tag(LanguageContainer::class.java, LanguageContainer(language))
            .build()

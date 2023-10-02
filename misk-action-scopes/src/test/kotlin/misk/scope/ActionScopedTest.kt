@@ -1,20 +1,19 @@
 package misk.scope
 
 import com.google.inject.Guice
-import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
-import kotlin.concurrent.thread
+import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
-import misk.inject.keyOf
-import misk.inject.toKey
 import misk.inject.uninject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Optional
-import jakarta.inject.Inject
+import kotlin.concurrent.thread
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 import kotlin.test.assertFailsWith
 
 internal class ActionScopedTest {
@@ -51,9 +50,8 @@ internal class ActionScopedTest {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)
 
-    val seedData: Map<Key<*>, Any> = mapOf(
-      keyOf<String>(Names.named("from-seed")) to "seed-value"
-
+    val seedData: Map<KType, Any> = mapOf(
+      Names.named("from-seed")::class.createType() to "seed-value"
     )
     scope.enter(seedData).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
   }
@@ -94,7 +92,7 @@ internal class ActionScopedTest {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)
 
-    val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "null")
+    val seedData: Map<KType, Any> = mapOf(Names.named("from-seed")::class.createType() to "null")
     val result = scope.enter(seedData).use { nullableFoo.get() }
     assertThat(result).isNull()
   }
@@ -119,15 +117,15 @@ internal class ActionScopedTest {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)
 
-    val optionalStringKey = object : TypeLiteral<Optional<String>>() {}.toKey()
+    val optionalStringKey = object : TypeLiteral<Optional<String>>() {}::class.createType()
 
-    val emptyOptionalSeedData: Map<Key<*>, Any> = mapOf(
+    val emptyOptionalSeedData: Map<KType, Any> = mapOf(
       optionalStringKey to Optional.empty<String>(),
     )
     val emptyOptionalResult = scope.enter(emptyOptionalSeedData).use { optional.get() }
     assertThat(emptyOptionalResult).isEqualTo("empty")
 
-    val presentOptionalSeedData: Map<Key<*>, Any> = mapOf(
+    val presentOptionalSeedData: Map<KType, Any> = mapOf(
       optionalStringKey to Optional.of("present"),
     )
     val presentOptionalResult = scope.enter(presentOptionalSeedData).use { optional.get() }
@@ -139,7 +137,7 @@ internal class ActionScopedTest {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)
 
-    val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "null")
+    val seedData: Map<KType, Any> = mapOf(Names.named("from-seed")::class.createType() to "null")
     val result = scope.enter(seedData).use { nullableBasedOnFoo.get() }
     assertThat(result).isNull()
   }
@@ -152,8 +150,8 @@ internal class ActionScopedTest {
 
       // NB(mmihic): Seed data set to a value that causes zed resolution to fail
       // with a user-defined exception
-      val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<String>(Names.named("from-seed")) to "illegal-state"
+      val seedData: Map<KType, Any> = mapOf(
+        Names.named("from-seed")::class.createType() to "illegal-state"
       )
       scope.enter(seedData).use { zed.get() }
     }
@@ -164,8 +162,8 @@ internal class ActionScopedTest {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)
 
-    val seedData: Map<Key<*>, Any> = mapOf(
-      keyOf<String>(Names.named("from-seed")) to "seed-value"
+    val seedData: Map<KType, Any> = mapOf(
+      Names.named("from-seed")::class.createType() to "seed-value"
 
     )
     scope.enter(seedData).use { actionScope ->
@@ -190,8 +188,8 @@ internal class ActionScopedTest {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)
 
-    val seedData: Map<Key<*>, Any> = mapOf(
-      keyOf<String>(Names.named("from-seed")) to "seed-value"
+    val seedData: Map<KType, Any> = mapOf(
+      Names.named("from-seed")::class.createType() to "seed-value"
     )
 
     // exhibit A: trying to access scoped things in a new thread results in exceptions

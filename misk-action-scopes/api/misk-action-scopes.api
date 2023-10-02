@@ -19,8 +19,7 @@ public final class misk/scope/ActionScope : misk/scope/Scope {
 	public final fun asContextElement ()Lkotlin/coroutines/CoroutineContext$Element;
 	public fun close ()V
 	public fun enter (Ljava/util/Map;)Lmisk/scope/Scope;
-	public final fun get (Lcom/google/inject/Key;)Ljava/lang/Object;
-	public fun get (Ljava/lang/Class;)Ljava/lang/Object;
+	public fun get (Lkotlin/reflect/KType;)Ljava/lang/Object;
 	public fun inScope ()Z
 	public final fun propagate (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;
 	public final fun propagate (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
@@ -62,6 +61,8 @@ public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstr
 	public final fun bindSeedData (Lkotlin/reflect/KClass;)V
 	public final fun bindSeedData (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V
 	public final fun bindSeedData (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
+	public final fun bindSeedData (Lkotlin/reflect/KType;)V
+	public final fun bindSeedData (Lkotlin/reflect/KType;Ljava/lang/annotation/Annotation;)V
 	protected fun configure ()V
 	public abstract fun configureProviders ()V
 }
