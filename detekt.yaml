@@ -1,5 +1,7 @@
 # See https://github.com/detekt/detekt/blob/master/detekt-core/src/main/resources/default-detekt-config.yml
 # for default settings.
+build:
+  excludeCorrectable: true
 
 output-reports:
   active: true
@@ -43,3 +45,4 @@ detektive:
   active: true
   AnnotatePublicApisWithJvmOverloads:
     active: true
+    autoCorrect: true
