@@ -52,7 +52,7 @@ It has been powering hundreds of microservices within Cash App since 2018.
 * Kotlin utilities with minimal dependencies: Wisp
 
 ## What's Next?
-Want to jump right into it? Check out our [Getting Started](./docs/getting-started.md).
+Want to jump right into it? Check out our [Getting Started Guide](./docs/getting-started.md).
 
 What to know more about each module, see [Developer Guide](./docs/developer-guide.md).
 
