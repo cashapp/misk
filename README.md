@@ -52,15 +52,11 @@ It has been powering hundreds of microservices within Cash App since 2018.
 * Kotlin utilities with minimal dependencies: Wisp
 
 ## What's Next?
-Want to jump right into it? Check out our [Getting Started](./docs/getting-started.md).
+Want to jump right into it? Check out our [Getting Started Guide](./docs/getting-started.md).
 
 What to know more about each module, see [Developer Guide](./docs/developer-guide.md).
 
-## Looking for Misk-Web?
-
-[Misk-Web][miskweb] powers the Misk Admin Dashboard with modular Typescript + React powered tabs.
-
 [changelog]: http://cashapp.github.io/misk/changelog/
 [misk]: https://cashapp.github.io/misk/
-[miskweb]: https://cashapp.github.io/misk-web/
+[miskweb]: https://github.com/cashapp/misk-web/
 [snap]: https://mvnrepository.com/artifact/com.squareup.misk/misk
