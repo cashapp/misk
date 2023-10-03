@@ -12,6 +12,7 @@ dependencies {
   // Avoid adding anything here, this module should be as self-contained as possible.
   api(Dependencies.okio)
   api(Dependencies.okHttp)
+  api(Dependencies.guice)
   runtimeOnly(kotlin("reflect"))
 
 }

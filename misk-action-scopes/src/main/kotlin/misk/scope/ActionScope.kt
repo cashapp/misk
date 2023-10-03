@@ -1,5 +1,6 @@
 package misk.scope
 
+import com.google.inject.Key
 import com.google.inject.Provider
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -19,10 +20,10 @@ class ActionScope @Inject internal constructor(
   // ActionScopedProviders, which might depend on other ActionScopeds. We break
   // this circular dependency by injecting a map of Provider<ActionScopedProvider>
   // rather than the map of ActionScopedProvider directly
-  private val providers: @JvmSuppressWildcards Map<KType, Provider<ActionScopedProvider<*>>>
+  private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
 ) : Scope {
   companion object {
-    private val threadLocalScope = ThreadLocal<LinkedHashMap<KType, Any?>>()
+    private val threadLocalScope = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
     private val threadLocalUUID = ThreadLocal<UUID>()
   }
 
@@ -50,13 +51,13 @@ class ActionScope @Inject internal constructor(
     return threadLocalScope.asContextElement(currentScopedData)
   }
 
-  fun snapshotActionScope(): Map<KType, Any?> {
+  fun snapshotActionScope(): Map<Key<*>, Any?> {
     check(inScope()) { "not running within an ActionScope" }
     return threadLocalScope.get().toMap()
   }
 
   /** Starts the scope on a thread with the provided seed data */
-  override fun enter(seedData: Map<out KType, Any?>): Scope {
+  override fun enter(seedData: Map<Key<*>, Any?>): Scope {
     check(!inScope()) {
       "cannot begin an ActionScope on a thread that is already running in an action scope"
     }
@@ -143,7 +144,7 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Returns the action scoped value for the given key */
-  override fun <T> get(key: KType): T {
+  override fun <T> get(key: Key<T>): T {
     check(inScope()) { "not running within an ActionScope" }
 
     // NB(mmihic): We don't use computeIfAbsent because computing the value of this
@@ -157,21 +158,22 @@ class ActionScope @Inject internal constructor(
       return cachedValue as T
     }
 
-    val value = providerFor(key).get()
+    val value = providerFor(key as Key<*>).get()
     threadState[key] = value
 
     @Suppress("UNCHECKED_CAST")
     return value as T
   }
 
-  private fun providerFor(key: KType): ActionScopedProvider<*> {
+  @Suppress("UNCHECKED_CAST")
+  private fun providerFor(key: Key<*>): ActionScopedProvider<*> {
     return requireNotNull(providers[key]?.get()) {
       "no ActionScopedProvider available for $key"
     }
   }
 
   private class WrappedKFunction<T>(
-    val seedData: Map<KType, Any?>,
+    val seedData: Map<Key<*>, Any?>,
     val scope: ActionScope,
     val wrapped: KFunction<T>,
     val threadUUID: UUID

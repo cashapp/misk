@@ -2,6 +2,7 @@ package misk.web
 
 import com.google.inject.Injector
 import misk.MiskCaller
+import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.testing.retrieve
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
@@ -17,7 +18,7 @@ class MiskCallerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallb
     val actionScope = actionScopeProvider.provider.get()
     actionScope.enter(
       mapOf(
-        MiskCaller::class.createType() to context.getPrincipal()
+        keyOf<MiskCaller>() to context.getPrincipal()
       )
     )
   }

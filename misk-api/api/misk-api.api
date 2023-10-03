@@ -116,7 +116,7 @@ public abstract interface class misk/scope/ActionScopedProvider {
 
 public abstract interface class misk/scope/Scope : java/lang/AutoCloseable {
 	public abstract fun enter (Ljava/util/Map;)Lmisk/scope/Scope;
-	public abstract fun get (Lkotlin/reflect/KType;)Ljava/lang/Object;
+	public abstract fun get (Lcom/google/inject/Key;)Ljava/lang/Object;
 	public abstract fun inScope ()Z
 }
 
