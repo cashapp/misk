@@ -56,10 +56,6 @@ Want to jump right into it? Check out our [Getting Started](./docs/getting-start
 
 What to know more about each module, see [Developer Guide](./docs/developer-guide.md).
 
-## Looking for Misk-Web?
-
-[Misk-Web][miskweb] powers the Misk Admin Dashboard with modular Typescript + React powered tabs.
-
 [changelog]: http://cashapp.github.io/misk/changelog/
 [misk]: https://cashapp.github.io/misk/
 [miskweb]: https://cashapp.github.io/misk-web/
