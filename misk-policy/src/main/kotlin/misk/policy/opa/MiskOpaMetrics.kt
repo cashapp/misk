@@ -14,6 +14,10 @@ import java.lang.IllegalArgumentException
 class MiskOpaMetrics @Inject constructor(metrics: Metrics) : OpaMetrics {
 
   @Suppress("ktlint:enum-entry-name-case")
+  @Deprecated(
+    "Use OpaMetrics.Names instead",
+    ReplaceWith("OpaMetrics.Names", "misk.policy.opa.OpaMetrics")
+  )
   internal enum class MetricType {
     opa_server_query_cache_hit,
     opa_rego_external_resolve,
@@ -23,42 +27,38 @@ class MiskOpaMetrics @Inject constructor(metrics: Metrics) : OpaMetrics {
     opa_rego_evaluated
   }
 
-  companion object {
-    const val NANOSECONDS_PER_SECOND: Double = 1E9
-  }
-
   private val serverQueryCacheHit: Counter = metrics.counter(
-    MetricType.opa_server_query_cache_hit.name,
+    OpaMetrics.Names.opa_server_query_cache_hit.name,
     "Number of cache hits for a successful query.",
     listOf("document")
   )
 
   private val regoExternalResolve: Histogram = metrics.histogram(
-    MetricType.opa_rego_external_resolve.name,
-    "Time taken (in seconds) to resolve external data on a successful query.",
+    OpaMetrics.Names.opa_rego_external_resolve.name,
+    "Time taken to resolve external data on a successful query.",
     listOf("document")
   )
 
   private val regoInputParse: Histogram = metrics.histogram(
-    MetricType.opa_rego_input_parse.name,
-    "Time taken (in seconds) to parse the input for a successful query.",
+    OpaMetrics.Names.opa_rego_input_parse.name,
+    "Time taken to parse the input for a successful query.",
     listOf("document")
   )
 
   private val regoQueryEval: Histogram = metrics.histogram(
-    MetricType.opa_rego_query_eval.name,
-    "Time taken (in seconds) to evaluate a successful query.",
+    OpaMetrics.Names.opa_rego_query_eval.name,
+    "Time taken to evaluate a successful query.",
     listOf("document")
   )
 
   private val serverHandler: Histogram = metrics.histogram(
-    MetricType.opa_server_handler.name,
-    "Time take (in seconds) to handle a successful API request.",
+    OpaMetrics.Names.opa_server_handler.name,
+    "Time take to handle a successful API request.",
     listOf("document")
   )
 
   private val opaRegoEvaluated: Counter = metrics.counter(
-    MetricType.opa_rego_evaluated.name,
+    OpaMetrics.Names.opa_rego_evaluated.name,
     "Count of evaluations on a policy, whether it was successful or not.",
     listOf("document")
   )
@@ -77,13 +77,13 @@ class MiskOpaMetrics @Inject constructor(metrics: Metrics) : OpaMetrics {
 
     serverQueryCacheHit.labels(document).inc(_metrics.counter_server_query_cache_hit.toDouble())
     regoExternalResolve.labels(document)
-      .observe(_metrics.timer_rego_external_resolve_ns / NANOSECONDS_PER_SECOND)
+      .observe(_metrics.timer_rego_external_resolve_ns.toDouble())
     regoInputParse.labels(document)
-      .observe(_metrics.timer_rego_input_parse_ns / NANOSECONDS_PER_SECOND)
+      .observe(_metrics.timer_rego_input_parse_ns.toDouble())
     regoQueryEval.labels(document)
-      .observe(_metrics.timer_rego_query_eval_ns / NANOSECONDS_PER_SECOND)
+      .observe(_metrics.timer_rego_query_eval_ns.toDouble())
     serverHandler.labels(document)
-      .observe(_metrics.timer_server_handler_ns / NANOSECONDS_PER_SECOND)
+      .observe(_metrics.timer_server_handler_ns.toDouble())
 
   }
 

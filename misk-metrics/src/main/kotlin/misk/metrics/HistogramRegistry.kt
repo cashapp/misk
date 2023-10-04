@@ -8,11 +8,22 @@ package misk.metrics
  */
 @Deprecated("use Metrics.histogram() instead")
 interface HistogramRegistry {
+
+  fun getMetrics(): Metrics
+
   /** Creates a new histogram */
   fun newHistogram(
     name: String,
     help: String,
     labelNames: List<String>,
     quantiles: Map<Double, Double>
-  ): Histogram
+  ): Histogram {
+    return getMetrics().histogram(name, help, labelNames, quantiles)
+  }
+
+  companion object {
+    fun factory(metrics: Metrics) = object : HistogramRegistry {
+      override fun getMetrics() = metrics
+    }
+  }
 }

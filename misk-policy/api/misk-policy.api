@@ -50,14 +50,9 @@ public final class misk/policy/opa/Metrics {
 }
 
 public final class misk/policy/opa/MiskOpaMetrics : misk/policy/opa/OpaMetrics {
-	public static final field Companion Lmisk/policy/opa/MiskOpaMetrics$Companion;
-	public static final field NANOSECONDS_PER_SECOND D
 	public fun <init> (Lmisk/metrics/v2/Metrics;)V
 	public fun evaluated (Ljava/lang/String;)V
 	public fun observe (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
-}
-
-public final class misk/policy/opa/MiskOpaMetrics$Companion {
 }
 
 public abstract interface class misk/policy/opa/OpaApi {
@@ -95,6 +90,17 @@ public final class misk/policy/opa/OpaDevelopmentModule : misk/inject/KAbstractM
 public abstract interface class misk/policy/opa/OpaMetrics {
 	public abstract fun evaluated (Ljava/lang/String;)V
 	public abstract fun observe (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
+}
+
+public final class misk/policy/opa/OpaMetrics$Names : java/lang/Enum {
+	public static final field opa_rego_evaluated Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_rego_external_resolve Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_rego_input_parse Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_rego_query_eval Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_server_handler Lmisk/policy/opa/OpaMetrics$Names;
+	public static final field opa_server_query_cache_hit Lmisk/policy/opa/OpaMetrics$Names;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/policy/opa/OpaMetrics$Names;
+	public static fun values ()[Lmisk/policy/opa/OpaMetrics$Names;
 }
 
 public final class misk/policy/opa/OpaModule : misk/inject/KAbstractModule {

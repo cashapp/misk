@@ -7,22 +7,21 @@ import com.google.inject.Provider
 import com.google.inject.name.Names
 import misk.ServiceGraphBuilderTest.AppendingService
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
 class CoordinatedServiceTest {
 
   @RepeatedTest(100) fun fuzzCoordinatedServiceGraphStartAndStop() {
-    fun service(id: String): Pair<Key<*>, Service> = key(id) to FakeService(id).toCoordinated()
-
     val services = List(10) { service("$it") }.shuffled()
 
     // Build randomized service graph and dependency chain
     val manager = ServiceGraphBuilder().also { builder ->
-      services.forEach { (key, service) ->
-        builder.addService(key, service)
-      }
+      services.forEach { builder.addService(it) }
       val randomKeys = services.shuffled().map { it.first }.toMutableList()
       val dependencies = mutableListOf<Key<*>>()
       while(randomKeys.isNotEmpty()) {
@@ -43,6 +42,64 @@ class CoordinatedServiceTest {
     manager.awaitStopped()
 
     assertThat(services).allMatch { (_, service) -> service.state() == Service.State.TERMINATED }
+  }
+
+  @Test fun canShutDownGracefullyOnStartFailure() {
+    class FailOnStartService : AbstractIdleService() {
+      override fun startUp() = error("failed to start")
+      override fun shutDown() {}
+    }
+
+    val canStartService = service("canStartService")
+    val neverStartedService = service("neverStartedService")
+    val failOnStartService =
+      key("failOnStartService") to FailOnStartService().toCoordinated()
+
+    val manager = ServiceGraphBuilder().also { builder ->
+      builder.addService(canStartService)
+      builder.addService(failOnStartService)
+      builder.addService(neverStartedService)
+      builder.addDependency(failOnStartService.first, canStartService.first)
+      builder.addDependency(neverStartedService.first, failOnStartService.first)
+    }.build()
+
+    manager.startAsync()
+    assertThatThrownBy {
+      manager.awaitHealthy()
+    }.isInstanceOf(IllegalStateException::class.java)
+
+    manager.stopAsync()
+    manager.awaitStopped(5, TimeUnit.SECONDS)
+
+    assertThat(canStartService.second.state()).isEqualTo(Service.State.TERMINATED)
+    assertThat(failOnStartService.second.state()).isEqualTo(Service.State.FAILED)
+    assertThat(neverStartedService.second.state()).isEqualTo(Service.State.TERMINATED)
+  }
+
+  @Test fun canShutDownGracefullyOnStopFailure() {
+    class FailOnStopService : AbstractIdleService() {
+      override fun startUp() {}
+      override fun shutDown() = error("failed to stop")
+    }
+
+    val service = service("service")
+    val failOnStopService =
+      key("failOnStopService") to FailOnStopService().toCoordinated()
+
+    val manager = ServiceGraphBuilder().also { builder ->
+      builder.addService(failOnStopService)
+      builder.addService(service)
+      builder.addDependency(failOnStopService.first, service.first)
+    }.build()
+
+    manager.startAsync()
+    manager.awaitHealthy()
+
+    manager.stopAsync()
+    manager.awaitStopped()
+
+    assertThat(service.second.state()).isEqualTo(Service.State.TERMINATED)
+    assertThat(failOnStopService.second.state()).isEqualTo(Service.State.FAILED)
   }
 
   @Test fun cannotAddRunningServiceAsDependency() {
@@ -89,6 +146,13 @@ class CoordinatedServiceTest {
     override fun startUp() {}
     override fun shutDown() {}
     override fun toString() = "FakeService-$name"
+  }
+
+  private fun service(id: String): Pair<Key<*>, CoordinatedService> =
+    key(id) to FakeService(id).toCoordinated()
+
+  private fun ServiceGraphBuilder.addService(pair: Pair<Key<*>, Service>) {
+    addService(pair.first, pair.second)
   }
 
   private fun Service.toCoordinated() = CoordinatedService(Provider { this })

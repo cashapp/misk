@@ -259,7 +259,6 @@ class JettyService @Inject internal constructor(
     statisticsHandler.handler = servletContextHandler
     statisticsHandler.server = server
 
-    server.stopAtShutdown = true
     // Kubernetes sends a SIG_TERM and gives us 30 seconds to stop gracefully.
     server.stopTimeout = 25_000
     val serverStats = ConnectionStatistics()

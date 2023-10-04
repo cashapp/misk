@@ -112,7 +112,7 @@ class CryptoTestModule(
             .asEagerSingleton()
         }
 
-        KeyType.DIGITAL_SIGNATURE -> {
+        KeyType.DIGITAL_SIGNATURE, KeyType.SIGNATURE -> {
           bind<PublicKeySign>()
             .annotatedWith(Names.named(key.key_name))
             .toProvider(DigitalSignatureSignerProvider(key.key_name))
