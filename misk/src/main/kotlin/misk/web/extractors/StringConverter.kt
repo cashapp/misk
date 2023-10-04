@@ -1,5 +1,6 @@
 package misk.web.extractors
 
+import com.squareup.moshi.rawType
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubtypeOf
@@ -49,14 +50,11 @@ private fun numberConversionWrapper(wrappedFunc: StringConverter): StringConvert
 
 private fun createFromValueOf(type: KType): StringConverter? {
   try {
-    @Suppress("UNCHECKED_CAST")
-    val javaClass = type.javaType as Class<Any>?
-    val valueOfMethod = javaClass?.getMethod("valueOf", String::class.java)
-    if (valueOfMethod != null) {
-      return { param -> valueOfMethod(null, param) }
-    }
-  } catch (e: ClassCastException) {
-  } catch (e: NoSuchMethodException) {
+    val javaClass = type.javaType.rawType
+    val valueOfMethod = javaClass.getMethod("valueOf", String::class.java)
+    return { param -> valueOfMethod(null, param) }
+  } catch (_: ClassCastException) {
+  } catch (_: NoSuchMethodException) {
   }
   return null
 }
