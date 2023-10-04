@@ -14,6 +14,7 @@ import misk.inject.typeLiteral
 import java.lang.reflect.Type
 import jakarta.inject.Inject
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaMethod
 
 /** Module used by components and applications to provide [ActionScoped] context objects */
@@ -32,7 +33,8 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds an [ActionScoped] which only pulls from data seeded at the scope entry */
-  fun <T : Any> bindSeedData(type: TypeLiteral<T>) {
+  @JvmOverloads
+  fun <T : Any> bindSeedData(type: TypeLiteral<T>, newThing: String? = null) {
     bindSeedData(
       type.toKey(),
       Key.get(
@@ -43,6 +45,8 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
       ) as Key<ActionScoped<T>>,
     )
   }
+
+  fun newShinyBindSeedData(type: KType) = bindSeedData(type.typeLiteral())
 
   /** Binds an annotation qualified [ActionScoped] which only pulls from data seeded at the scope entry */
   fun <T : Any> bindSeedData(kclass: KClass<T>, a: Annotation) {
@@ -164,7 +168,8 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   fun <T : Any, A : Annotation> bindProvider(
     kclass: KClass<T>,
     providerType: KClass<out ActionScopedProvider<T>>,
-    annotatedBy: Class<A>
+    annotatedBy: Class<A>,
+    newThing: String
   ) {
     val typeKey = Key.get(kclass.java, annotatedBy)
     val actionScopedType = actionScopedType(kclass.java)
