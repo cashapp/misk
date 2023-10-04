@@ -2,6 +2,7 @@ package misk.metrics
 
 import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
+import io.prometheus.client.Summary
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -14,17 +15,31 @@ import java.util.concurrent.TimeUnit
  * A sample implementation can be found in PrometheusHistogram
  */
 interface Histogram {
+
+  fun getHistogram(): Summary
+
   /** records a new set of labels and accompanying duration */
-  fun record(duration: Double, vararg labelValues: String)
+  fun record(duration: Double, vararg labelValues: String) {
+    getHistogram().labels(*labelValues).observe(duration)
+  }
 
   /** returns the number of buckets */
-  fun count(vararg labelValues: String): Int
+  fun count(vararg labelValues: String): Int {
+    return getHistogram().labels(*labelValues).get().count.toInt()
+  }
 
   /** records a new set of labels and the time to execute the work lambda in milliseconds */
   fun <T> timedMills(vararg labelValues: String, work: () -> T): T {
     val (time, result) = TimedFunctions.timed { work.invoke() }
     record(time.toMillis().toDouble(), *labelValues)
     return result
+  }
+
+  companion object {
+    fun factory(summary: Summary) = object : Histogram {
+      override fun getHistogram() = summary
+
+    }
   }
 }
 
