@@ -37,6 +37,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import wisp.logging.getLogger
+import java.lang.Thread.sleep
 import java.net.InetAddress
 import java.nio.file.InvalidPathException
 import java.util.EnumSet
@@ -44,8 +45,6 @@ import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import javax.servlet.DispatcherType
-
-private val logger = getLogger<JettyService>()
 
 @Singleton
 class JettyService @Inject internal constructor(
@@ -324,11 +323,11 @@ class JettyService @Inject internal constructor(
     }
   }
 
-  override fun shutDown() {
-    val stopwatch = Stopwatch.createStarted()
-    logger.info("Stopping Jetty")
-
+  internal fun stop() {
     if (server.isRunning) {
+      val stopwatch = Stopwatch.createStarted()
+      logger.info("Stopping Jetty")
+
       try {
         server.stop()
       } catch (_: InvalidPathException) {
@@ -337,15 +336,34 @@ class JettyService @Inject internal constructor(
         // the address is a null byte ('\0'). The address has no connection with filesystem
         // path names.
       }
-      server.destroy()
+
+      logger.info { "Stopped Jetty in $stopwatch" }
     }
 
     if (healthExecutor != null) {
       healthExecutor!!.shutdown()
       healthExecutor!!.awaitTermination(10, TimeUnit.SECONDS)
     }
+  }
 
-    logger.info { "Stopped Jetty in $stopwatch" }
+  override fun shutDown() {
+    // We need jetty to shut down at the very end to keep outbound connections alive
+    // (due to sidecars). As such, we wait for `shutdown_sleep_ms` so that our
+    // in flight requests drain, but we don't shut down dependencies until after.
+    //
+    // The true jetty shutdown occurs in stop() above, called from MiskApplication.
+    //
+    // Ideally we could call jetty.awaitInflightRequests() but that's not available
+    // for us.
+    if (webConfig.shutdown_sleep_ms > 0) {
+      sleep(webConfig.shutdown_sleep_ms.toLong())
+    } else {
+      stop()
+    }
+  }
+
+  companion object {
+    private val logger = getLogger<JettyService>()
   }
 }
 

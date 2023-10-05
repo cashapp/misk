@@ -6,11 +6,10 @@ import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
-import com.google.inject.Key
 import com.google.inject.Module
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.web.WebConfig
+import misk.web.jetty.JettyService
 import wisp.logging.getLogger
 
 /** The entry point for misk applications */
@@ -25,6 +24,7 @@ class MiskApplication private constructor(
     modules: List<Module>,
     commands: List<MiskCommand> = listOf(),
   ) : this({ Guice.createInjector(modules) }, commands)
+
   constructor(injector: Injector) : this({ injector })
 
   private val commands = commands.associateBy { it.name }
@@ -99,12 +99,10 @@ class MiskApplication private constructor(
     Runtime.getRuntime().addShutdownHook(object : Thread() {
       override fun run() {
         log.info { "received a shutdown hook! performing an orderly shutdown" }
-        if (injector.getExistingBinding(Key.get(WebConfig::class.java)) != null) {
-          val config = injector.getInstance<WebConfig>()
-          sleep(config.shutdown_sleep_ms.toLong())
-        }
         serviceManager.stopAsync()
         serviceManager.awaitStopped()
+        val jettyService = injector.getInstance<JettyService>()
+        jettyService.stop()
         log.info { "orderly shutdown complete" }
       }
     })
