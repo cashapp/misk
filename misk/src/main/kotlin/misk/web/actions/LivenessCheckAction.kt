@@ -2,6 +2,9 @@ package misk.web.actions
 
 import com.google.common.util.concurrent.Service.State
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
 import misk.web.Get
@@ -9,15 +12,10 @@ import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
-
-private val logger = getLogger<LivenessCheckAction>()
 
 @Singleton
 class LivenessCheckAction @Inject internal constructor(
-  private val serviceManagerProvider: Provider<ServiceManager>
+  private val serviceManagerProvider: Provider<ServiceManager>,
 ) : WebAction {
 
   @Get("/_liveness")
@@ -34,8 +32,15 @@ class LivenessCheckAction @Inject internal constructor(
     }
 
     for (service in failedServices) {
-      logger.info("Service failed: $service")
+      // Only log failed services.
+      if (service.state() == State.FAILED) {
+        logger.info("Service failed: $service")
+      }
     }
     return Response("", statusCode = 503)
+  }
+
+  companion object {
+    private val logger = getLogger<LivenessCheckAction>()
   }
 }
