@@ -3,6 +3,8 @@ package misk.web.jetty
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
@@ -33,15 +35,14 @@ import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
-import wisp.logging.getLogger
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
+import wisp.logging.getLogger
 import java.net.InetAddress
+import java.nio.file.InvalidPathException
 import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import javax.servlet.DispatcherType
 
 private val logger = getLogger<JettyService>()
@@ -54,7 +55,7 @@ class JettyService @Inject internal constructor(
   threadPool: ThreadPool,
   private val connectionMetricsCollector: JettyConnectionMetricsCollector,
   private val statisticsHandler: StatisticsHandler,
-  private val gzipHandler: GzipHandler
+  private val gzipHandler: GzipHandler,
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val healthServerUrl: HttpUrl? get() = server.healthUrl
@@ -170,9 +171,11 @@ class JettyService @Inject internal constructor(
           sslContextFactory.setIncludeProtocols(*TlsProtocols.compatible)
           sslContextFactory.setIncludeCipherSuites(*CipherSuites.compatible)
         }
+
         WebSslConfig.CipherCompatibility.MODERN -> {
           // Use Jetty's default set of protocols and cipher suites.
         }
+
         WebSslConfig.CipherCompatibility.RESTRICTED -> {
           sslContextFactory.setIncludeProtocols(*TlsProtocols.restricted)
           // Use Jetty's default set of cipher suites for now; we can restrict it further later
@@ -326,7 +329,15 @@ class JettyService @Inject internal constructor(
     logger.info("Stopping Jetty")
 
     if (server.isRunning) {
-      server.stop()
+      try {
+        server.stop()
+      } catch (_: InvalidPathException) {
+        // Currently we get a nul character exception since an abstract socket address is
+        // distinguished from a regular unix socket by the fact that the first byte of
+        // the address is a null byte ('\0'). The address has no connection with filesystem
+        // path names.
+      }
+      server.destroy()
     }
 
     if (healthExecutor != null) {
