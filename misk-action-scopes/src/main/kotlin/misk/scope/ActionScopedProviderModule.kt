@@ -21,6 +21,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   override fun configure() {
     MapBinder.newMapBinder(binder(), KEY_TYPE, ACTION_SCOPED_PROVIDER_TYPE)
     Multibinder.newSetBinder(binder(), KEY_TYPE)
+    bind<Scope>().to<ActionScope>()
     configureProviders()
   }
 
