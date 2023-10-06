@@ -30,7 +30,7 @@ class ReadinessCheckAction @Inject internal constructor(
 
     for (service in servicesNotRunning) {
       // Only log failed services.
-      if (service.state() == State.TERMINATED) {
+      if (service.state() == State.FAILED) {
         logger.info("Service not running: $service")
       }
     }
