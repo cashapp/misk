@@ -1,7 +1,7 @@
 # See https://github.com/detekt/detekt/blob/master/detekt-core/src/main/resources/default-detekt-config.yml
 # for default settings.
 build:
-  excludeCorrectable: true
+  excludeCorrectable: false
 
 output-reports:
   active: true
