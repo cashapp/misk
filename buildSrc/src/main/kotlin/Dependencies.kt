@@ -18,7 +18,7 @@ object Dependencies {
   val bouncycastle = "org.bouncycastle:bcprov-jdk15on:1.70"
   val bouncycastlePgp = "org.bouncycastle:bcpg-jdk15on:1.70"
   val concurrencyLimitsCore = "com.netflix.concurrency-limits:concurrency-limits-core:0.3.6"
-  val cronUtils = "com.cronutils:cron-utils:9.1.5"
+  val cronUtils = "com.cronutils:cron-utils:9.2.0"
   val datasourceProxy = "net.ttddyy:datasource-proxy:1.7"
   val dependencyAnalysisPluginVersion = "1.20.0"
   val detektApi = "io.gitlab.arturbosch.detekt:detekt-api:1.23.1"
