@@ -126,6 +126,7 @@ subprojects {
       parallel = true
       buildUponDefaultConfig = false
       ignoreFailures = false
+      autoCorrect = true
       config.setFrom(files("$rootDir/detekt.yaml"))
     }
   } else {
