@@ -1,21 +1,60 @@
 package cash.detektive.javacompat
 
 import cash.detektive.javacompat.AnnotatePublicApisWithJvmOverloads.ElementType
+import io.github.detekt.parser.DetektPomModel
+import io.github.detekt.test.utils.compileForTest
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.Severity
+import io.gitlab.arturbosch.detekt.api.internal.CompilerResources
 import io.gitlab.arturbosch.detekt.rules.KotlinCoreEnvironmentTest
+import io.gitlab.arturbosch.detekt.test.TestConfig
 import io.gitlab.arturbosch.detekt.test.compileAndLintWithContext
+import io.gitlab.arturbosch.detekt.test.getContextForPaths
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.com.intellij.mock.MockProject
+import org.jetbrains.kotlin.com.intellij.openapi.diagnostic.Logger
+import org.jetbrains.kotlin.com.intellij.pom.PomModel
+import org.jetbrains.kotlin.config.CompilerConfigurationKey
+import org.jetbrains.kotlin.config.languageVersionSettings
+import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowValueFactoryImpl
+import org.jetbrains.kotlin.utils.PrintingLogger
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import java.io.File
 
 @KotlinCoreEnvironmentTest
 internal class AnnotatePublicApisWithJvmOverloadsTest(private val env: KotlinCoreEnvironment) {
-
   @BeforeEach
-  fun setUp() {}
+  fun setUp() {
+  }
+
+  @Test
+  fun testAutoCorrect() {
+    (env.project as MockProject).registerService(PomModel::class.java, DetektPomModel(env.project))
+    env.configuration.add(CompilerConfigurationKey(Config.AUTO_CORRECT_KEY), true)
+    val languageVersionSettings = env.configuration.languageVersionSettings
+
+    val ktFile = compileForTest(
+      File("src/test/kotlin/cash/detektive/javacompat/TestCode.kt").toPath()
+    )
+
+    AnnotatePublicApisWithJvmOverloads(TestConfig(Config.AUTO_CORRECT_KEY to true)).visitFile(
+      ktFile,
+      env.getContextForPaths(listOf(ktFile)),
+      CompilerResources(languageVersionSettings, DataFlowValueFactoryImpl(languageVersionSettings))
+    )
+
+    val modifiedContents = ktFile.viewProvider.contents
+    assertThat(modifiedContents).contains(
+      "class TestCode @JvmOverloads constructor(val things: List<String> = emptyList())"
+    )
+    assertThat(modifiedContents).contains("@JvmOverloads\n fun doIt")
+  }
 
   @ParameterizedTest
   @MethodSource("errorTestCases")
@@ -46,8 +85,25 @@ internal class AnnotatePublicApisWithJvmOverloadsTest(private val env: KotlinCor
 
   companion object {
     data class ErrorTestCase(
-      val description: String, val elementType: ElementType, val elementName: String, val code: String
+      val description: String,
+      val elementType: ElementType,
+      val elementName: String,
+      val code: String
     )
+
+    private var defaultLoggerFactory = Logger.getFactory()
+
+    @BeforeAll
+    @JvmStatic
+    fun beforeAll() {
+      Logger.setFactory { PrintingLogger(System.out) }
+    }
+
+    @AfterAll
+    @JvmStatic
+    fun afterAll() {
+      Logger.setFactory(defaultLoggerFactory)
+    }
 
     @JvmStatic
     fun errorTestCases() = listOf(
