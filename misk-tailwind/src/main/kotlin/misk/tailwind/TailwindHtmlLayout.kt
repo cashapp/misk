@@ -31,7 +31,7 @@ fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: B
 //      if (playCdn) {
         // Play CDN is useful for development
       script {
-        src = "https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"
+        src = "https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"
       }
 //      }
       appCssPath?.let { path ->
