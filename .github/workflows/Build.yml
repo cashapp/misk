@@ -84,10 +84,13 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Assign a version
+        id: assign_version
         run: |
           # set a version name like "2023.05.26.091805-c1fcb3a"
-          echo "VERSION_NAME=$(git log -n1 --pretty='format:%cd' --date=format:'%Y.%m.%d.%H%M%S')-$(git rev-parse --short=7 HEAD)" >> gradle.properties
+          VERSION="$(git log -n1 --pretty='format:%cd' --date=format:'%Y.%m.%d.%H%M%S')-$(git rev-parse --short=7 HEAD)"
+          echo "VERSION_NAME=$VERSION" >> gradle.properties
           cat gradle.properties
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build Misk Web
         run: |
@@ -97,3 +100,9 @@ jobs:
       - name: Publish the artifacts
         run: |
           gradle clean publish --stacktrace
+
+      - name: Tag Misk repo
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.assign_version.outputs.version }}
