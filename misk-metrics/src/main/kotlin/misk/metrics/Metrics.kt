@@ -1,7 +1,6 @@
 package misk.metrics
 
-import io.prometheus.client.Counter
-import io.prometheus.client.Gauge
+import misk.metrics.v2.Metrics
 
 /**
  * Interface for application code to emit metrics to a metrics backend like Prometheus.
@@ -15,6 +14,8 @@ import io.prometheus.client.Gauge
   level = DeprecationLevel.WARNING
 )
 interface Metrics {
+  fun getMetrics(): Metrics
+
   /**
    * counter creates and registers a new `Counter` prometheus type.
    *
@@ -33,7 +34,7 @@ interface Metrics {
     name: String,
     help: String,
     labelNames: List<String> = listOf()
-  ): Counter
+  ) = getMetrics().counter(name, help, labelNames)
 
   /**
    * gauge creates and registers a new `Gauge` prometheus type.
@@ -53,7 +54,7 @@ interface Metrics {
     name: String,
     help: String = "",
     labelNames: List<String> = listOf()
-  ): Gauge
+  ) = getMetrics().gauge(name, help, labelNames)
 
   /**
    * histogram creates and registers a new `Summary` prometheus type.
@@ -85,10 +86,10 @@ interface Metrics {
   fun histogram(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = defaultQuantiles,
     maxAgeSeconds: Long? = null
-  ): Histogram
+  ) = legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
 
   /**
    * histogram creates and registers a new `Summary` prometheus type.
@@ -119,10 +120,17 @@ interface Metrics {
   fun legacyHistogram(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = defaultQuantiles,
     maxAgeSeconds: Long? = null
-  ): Histogram
+  ) = getMetrics().legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
+
+  companion object {
+    fun factory(metrics: Metrics) = object : misk.metrics.Metrics {
+      override fun getMetrics() = metrics
+
+    }
+  }
 }
 
 val defaultQuantiles = mapOf(

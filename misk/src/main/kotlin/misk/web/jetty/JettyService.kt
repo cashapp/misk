@@ -3,6 +3,8 @@ package misk.web.jetty
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
@@ -33,18 +35,16 @@ import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
-import wisp.logging.getLogger
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
+import wisp.logging.getLogger
+import java.lang.Thread.sleep
 import java.net.InetAddress
+import java.nio.file.InvalidPathException
 import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import javax.servlet.DispatcherType
-
-private val logger = getLogger<JettyService>()
 
 @Singleton
 class JettyService @Inject internal constructor(
@@ -54,7 +54,7 @@ class JettyService @Inject internal constructor(
   threadPool: ThreadPool,
   private val connectionMetricsCollector: JettyConnectionMetricsCollector,
   private val statisticsHandler: StatisticsHandler,
-  private val gzipHandler: GzipHandler
+  private val gzipHandler: GzipHandler,
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val healthServerUrl: HttpUrl? get() = server.healthUrl
@@ -170,9 +170,11 @@ class JettyService @Inject internal constructor(
           sslContextFactory.setIncludeProtocols(*TlsProtocols.compatible)
           sslContextFactory.setIncludeCipherSuites(*CipherSuites.compatible)
         }
+
         WebSslConfig.CipherCompatibility.MODERN -> {
           // Use Jetty's default set of protocols and cipher suites.
         }
+
         WebSslConfig.CipherCompatibility.RESTRICTED -> {
           sslContextFactory.setIncludeProtocols(*TlsProtocols.restricted)
           // Use Jetty's default set of cipher suites for now; we can restrict it further later
@@ -259,7 +261,6 @@ class JettyService @Inject internal constructor(
     statisticsHandler.handler = servletContextHandler
     statisticsHandler.server = server
 
-    server.stopAtShutdown = true
     // Kubernetes sends a SIG_TERM and gives us 30 seconds to stop gracefully.
     server.stopTimeout = 25_000
     val serverStats = ConnectionStatistics()
@@ -322,20 +323,47 @@ class JettyService @Inject internal constructor(
     }
   }
 
-  override fun shutDown() {
-    val stopwatch = Stopwatch.createStarted()
-    logger.info("Stopping Jetty")
-
+  internal fun stop() {
     if (server.isRunning) {
-      server.stop()
+      val stopwatch = Stopwatch.createStarted()
+      logger.info("Stopping Jetty")
+
+      try {
+        server.stop()
+      } catch (_: InvalidPathException) {
+        // Currently we get a nul character exception since an abstract socket address is
+        // distinguished from a regular unix socket by the fact that the first byte of
+        // the address is a null byte ('\0'). The address has no connection with filesystem
+        // path names.
+      }
+
+      logger.info { "Stopped Jetty in $stopwatch" }
     }
 
     if (healthExecutor != null) {
       healthExecutor!!.shutdown()
       healthExecutor!!.awaitTermination(10, TimeUnit.SECONDS)
     }
+  }
 
-    logger.info { "Stopped Jetty in $stopwatch" }
+  override fun shutDown() {
+    // We need jetty to shut down at the very end to keep outbound connections alive
+    // (due to sidecars). As such, we wait for `shutdown_sleep_ms` so that our
+    // in flight requests drain, but we don't shut down dependencies until after.
+    //
+    // The true jetty shutdown occurs in stop() above, called from MiskApplication.
+    //
+    // Ideally we could call jetty.awaitInflightRequests() but that's not available
+    // for us.
+    if (webConfig.shutdown_sleep_ms > 0) {
+      sleep(webConfig.shutdown_sleep_ms.toLong())
+    } else {
+      stop()
+    }
+  }
+
+  companion object {
+    private val logger = getLogger<JettyService>()
   }
 }
 

@@ -1,5 +1,6 @@
 package misk.metrics.v2
 
+import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
@@ -18,6 +19,8 @@ import io.prometheus.client.Histogram
  * Services that use this should install a metrics service like `PrometheusMetricsServiceModule`.
  */
 interface Metrics {
+  fun getRegistry(): CollectorRegistry
+
   /**
    * counter creates and registers a new `Counter` prometheus type.
    *
@@ -32,7 +35,10 @@ interface Metrics {
     name: String,
     help: String,
     labelNames: List<String> = listOf()
-  ): Counter
+  ) = Counter
+    .build(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .register(getRegistry())
 
   /**
    * gauge creates and registers a new `Gauge` prometheus type.
@@ -48,7 +54,10 @@ interface Metrics {
     name: String,
     help: String = "",
     labelNames: List<String> = listOf()
-  ): Gauge
+  ) = Gauge
+    .build(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .register(getRegistry())
 
   /**
    * peakGauge creates and registers a new `Gauge` prometheus type that resets to its
@@ -63,7 +72,10 @@ interface Metrics {
     name: String,
     help: String = "",
     labelNames: List<String> = listOf()
-  ): PeakGauge
+  ) = PeakGauge
+    .builder(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .register(getRegistry())
 
   /**
    * histogram creates a new `Histogram` prometheus type with the supplied parameters.
@@ -85,9 +97,13 @@ interface Metrics {
   fun histogram(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     buckets: List<Double> = defaultBuckets
-  ): Histogram
+  ) = Histogram
+    .build(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .buckets(*buckets.toDoubleArray())
+    .register(getRegistry())
 
   /**
    * summary creates and registers a new `Summary` prometheus type.
@@ -108,10 +124,23 @@ interface Metrics {
   fun summary(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = defaultQuantiles,
     maxAgeSeconds: Long? = null
-  ): Summary
+  ) = Summary
+    .build(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .apply {
+      quantiles.forEach { (key, value) ->
+        quantile(key, value)
+      }
+    }
+    .apply {
+      if (maxAgeSeconds != null) {
+        this.maxAgeSeconds(maxAgeSeconds)
+      }
+    }
+    .register(getRegistry())
 
   /**
    * histogram creates and registers a new `Summary` prometheus type.
@@ -142,10 +171,25 @@ interface Metrics {
   fun legacyHistogram(
     name: String,
     help: String = "",
-    labelNames: List<String>,
+    labelNames: List<String> = listOf(),
     quantiles: Map<Double, Double> = misk.metrics.defaultQuantiles,
     maxAgeSeconds: Long? = null
-  ): misk.metrics.Histogram
+  ) = misk.metrics.Histogram.factory(
+    summary(
+      name,
+      help,
+      labelNames,
+      quantiles,
+      maxAgeSeconds
+    )
+  )
+
+  companion object {
+    fun factory(registry: CollectorRegistry) = object : Metrics {
+      override fun getRegistry() = registry
+    }
+  }
+
 }
 
 val defaultQuantiles = mapOf(
