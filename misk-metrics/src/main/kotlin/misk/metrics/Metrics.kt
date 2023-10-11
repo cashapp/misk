@@ -1,6 +1,8 @@
 package misk.metrics
 
 import misk.metrics.v2.Metrics
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Interface for application code to emit metrics to a metrics backend like Prometheus.
@@ -13,8 +15,11 @@ import misk.metrics.v2.Metrics
   replaceWith = ReplaceWith("misk.metrics.v2.Metrics"),
   level = DeprecationLevel.WARNING
 )
-interface Metrics {
-  fun getMetrics(): Metrics
+@Singleton
+open class Metrics @Inject constructor(
+  private val metricsV2: Metrics
+) {
+  fun getMetrics(): Metrics = metricsV2
 
   /**
    * counter creates and registers a new `Counter` prometheus type.
@@ -30,6 +35,7 @@ interface Metrics {
     message = "Misk Metrics V1 is Deprecated, please use V2",
     level = DeprecationLevel.WARNING
   )
+  @JvmOverloads
   fun counter(
     name: String,
     help: String,
@@ -50,6 +56,7 @@ interface Metrics {
     message = "Misk Metrics V1 is Deprecated, please use V2",
     level = DeprecationLevel.WARNING
   )
+  @JvmOverloads
   fun gauge(
     name: String,
     help: String = "",
@@ -83,6 +90,7 @@ interface Metrics {
     level = DeprecationLevel.WARNING,
     replaceWith = ReplaceWith("legacyHistogram(name,help,labelNames,quantiles,maxAgeSeconds)")
   )
+  @JvmOverloads
   fun histogram(
     name: String,
     help: String = "",
@@ -117,6 +125,7 @@ interface Metrics {
     message = "Recommend migrating to misk.metrics.v2.Metrics.histogram. See kdoc for detail",
     level = DeprecationLevel.WARNING
   )
+  @JvmOverloads
   fun legacyHistogram(
     name: String,
     help: String = "",
@@ -126,10 +135,7 @@ interface Metrics {
   ) = getMetrics().legacyHistogram(name, help, labelNames, quantiles, maxAgeSeconds)
 
   companion object {
-    fun factory(metrics: Metrics) = object : misk.metrics.Metrics {
-      override fun getMetrics() = metrics
-
-    }
+    fun factory(metrics: Metrics) = Metrics(metrics)
   }
 }
 

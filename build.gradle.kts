@@ -24,6 +24,7 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
+    classpath("com.palantir.gradle.revapi:gradle-revapi:1.7.0")
   }
 }
 

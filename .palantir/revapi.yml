@@ -1,0 +1,2 @@
+versionOverrides:
+  com.squareup.misk:misk-metrics:misk-0.18.0: "2023.10.10.000002-b1ed23e"

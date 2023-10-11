@@ -17,7 +17,7 @@ import jakarta.inject.Singleton
 @Singleton
 internal class PrometheusMetrics @Inject internal constructor(
   private val metricsV2: MetricsV2
-) : Metrics {
+) : Metrics(metricsV2) {
   companion object {
     /**
      * @return a version of the name, sanitized to remove elements that are incompatible
@@ -25,6 +25,4 @@ internal class PrometheusMetrics @Inject internal constructor(
      */
     fun sanitize(name: String) = name.replace("[\\-\\.\t]", "_")
   }
-
-  override fun getMetrics() = metricsV2
 }

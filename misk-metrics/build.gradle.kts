@@ -7,12 +7,13 @@ plugins {
   `java-library`
   id("com.vanniktech.maven.publish.base")
   `java-test-fixtures`
+  id("com.palantir.revapi")
 }
 
 dependencies {
   api(project(":misk-inject"))
   api(Dependencies.prometheusClient)
-  implementation(Dependencies.jakartaInject)
+  api(Dependencies.jakartaInject)
   implementation(Dependencies.findBugs)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
