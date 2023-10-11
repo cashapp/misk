@@ -18,7 +18,8 @@ public final class misk/scope/ActionScope : misk/scope/Scope {
 	public static final field Companion Lmisk/scope/ActionScope$Companion;
 	public final fun asContextElement ()Lkotlin/coroutines/CoroutineContext$Element;
 	public fun close ()V
-	public fun enter (Ljava/util/Map;)Lmisk/scope/Scope;
+	public fun enter (Ljava/util/Map;)Lmisk/scope/ActionScope;
+	public synthetic fun enter (Ljava/util/Map;)Lmisk/scope/Scope;
 	public fun get (Lcom/google/inject/Key;)Ljava/lang/Object;
 	public fun inScope ()Z
 	public final fun propagate (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;

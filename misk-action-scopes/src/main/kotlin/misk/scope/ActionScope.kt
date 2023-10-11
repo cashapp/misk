@@ -57,7 +57,7 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Starts the scope on a thread with the provided seed data */
-  override fun enter(seedData: Map<Key<*>, Any?>): Scope {
+  override fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
     check(!inScope()) {
       "cannot begin an ActionScope on a thread that is already running in an action scope"
     }
