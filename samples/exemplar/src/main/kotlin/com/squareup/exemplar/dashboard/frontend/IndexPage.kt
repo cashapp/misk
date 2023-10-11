@@ -59,6 +59,12 @@ class IndexPage @Inject constructor(
                 }
                 li {
                   a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
+                    href = GraphD3JsPage.PATH
+                    +"""Graph with D3.js"""
+                  }
+                }
+                li {
+                  a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
                     href = "/support/"
                     +"""Support Custom Dashboard"""
                   }
