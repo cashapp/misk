@@ -2,6 +2,7 @@ package com.squareup.exemplar.dashboard
 
 import com.squareup.exemplar.dashboard.admin.AlphaIndexAction
 import com.squareup.exemplar.dashboard.frontend.EcommerceLandingPage
+import com.squareup.exemplar.dashboard.frontend.GraphD3JsPage
 import com.squareup.exemplar.dashboard.frontend.IndexPage
 import com.squareup.exemplar.dashboard.frontend.SimplePage
 import com.squareup.exemplar.dashboard.support.SupportBravoIndexAction
@@ -49,6 +50,7 @@ class ExemplarDashboardModule : KAbstractModule() {
 
     // Custom Frontend at /app/
     install(WebActionModule.create<EcommerceLandingPage>())
+    install(WebActionModule.create<GraphD3JsPage>())
     install(WebActionModule.create<SimplePage>())
     install(WebActionModule.create<IndexPage>())
 
