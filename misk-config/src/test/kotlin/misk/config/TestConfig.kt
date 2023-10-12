@@ -11,11 +11,14 @@ data class TestConfig(
   val consumer_b: ConsumerConfig,
   val duration: DurationConfig,
   val nested: NestedConfig,
+  val collection: List<CollectionItem>,
   val action_exception_log_level: ActionExceptionLogLevelConfig
 ) : Config
 
 data class ConsumerConfig(val min_items: Int = 0, val max_items: Int) : Config
 data class DurationConfig(val interval: Duration) : Config
+
+data class CollectionItem(val name: String, val optional: Int?) : Config
 
 data class NestedConfig(val child_nested: ChildNestedConfig) : Config
 data class ChildNestedConfig(val nested_value: String) : Config

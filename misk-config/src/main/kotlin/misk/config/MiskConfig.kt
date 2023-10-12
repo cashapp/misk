@@ -124,7 +124,7 @@ object MiskConfig {
       @Suppress("UNCHECKED_CAST")
       return mapper.readValue(jsonNode.toString(), configClass) as T
     } catch (e: UnrecognizedPropertyException) {
-      val path = Joiner.on('.').join(e.path.map { it.fieldName })
+      val path = Joiner.on('.').join(e.path.map { it.fieldName ?: it.index })
       logger.warn(e) {
         "$configFile: '$path' not found in '${configClass.simpleName}', ignoring " +
           suggestSpelling(e)
@@ -157,7 +157,7 @@ object MiskConfig {
     configFile: String,
     jsonNode: JsonNode
   ): Nothing {
-    val path = Joiner.on('.').join(e.path.map { it.fieldName })
+    val path = Joiner.on('.').join(e.path.map { it.fieldName ?: it.index })
     throw IllegalStateException(
       "could not find '${path}' of '${configClass.simpleName}'" +
         " in $configFile or in any of the combined logical config " +
