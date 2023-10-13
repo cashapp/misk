@@ -4,7 +4,10 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
+import com.google.inject.Stage
 import com.google.inject.testing.fieldbinder.BoundFieldModule
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.uninject
@@ -14,8 +17,6 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import wisp.logging.getLogger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
@@ -57,7 +58,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       }
     }
 
-    val injector = Guice.createInjector(module)
+    val injector = Guice.createInjector(Stage.PRODUCTION, module)
     context.store("injector", injector)
     injector.getInstance<Callbacks>().beforeEach(context)
   }
@@ -120,7 +121,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
   class Callbacks @Inject constructor(
     private val beforeEachCallbacks: Set<BeforeEachCallback>,
-    private val afterEachCallbacks: Set<AfterEachCallback>
+    private val afterEachCallbacks: Set<AfterEachCallback>,
   ) : BeforeEachCallback, AfterEachCallback {
 
     override fun afterEach(context: ExtensionContext) {
