@@ -62,7 +62,7 @@ object Dependencies {
   val guiceBom = "com.google.inject:guice-bom:6.0.0"
   val guice7Bom = "com.google.inject:guice-bom:7.0.0"
   val guiceTestLib = "com.google.inject.extensions:guice-testlib"
-  val hibernateCore = "org.hibernate:hibernate-core:5.6.15.Final"
+  val hibernateCore = "org.hibernate:hibernate-core:5.5.3.Final"
   val hikariCp = "com.zaxxer:HikariCP:4.0.3"
   val hopliteCore = "com.sksamuel.hoplite:hoplite-core:2.7.4"
   val hopliteHocon = "com.sksamuel.hoplite:hoplite-hocon:2.7.4"
