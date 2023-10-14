@@ -6,7 +6,6 @@ plugins {
   kotlin("jvm")
   `java-library`
   id("com.vanniktech.maven.publish.base")
-  id("com.palantir.revapi")
 }
 
 dependencies {

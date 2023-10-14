@@ -169,7 +169,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     kclass: KClass<T>,
     providerType: KClass<out ActionScopedProvider<T>>,
     annotatedBy: Class<A>,
-    newThing: String
+    newThingy: String
   ) {
     val typeKey = Key.get(kclass.java, annotatedBy)
     val actionScopedType = actionScopedType(kclass.java)

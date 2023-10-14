@@ -24,7 +24,7 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
-    classpath("com.palantir.gradle.revapi:gradle-revapi:1.7.0")
+    classpath(Dependencies.revapiGradlePlugin)
   }
 }
 
@@ -123,6 +123,7 @@ subprojects {
           "exemplarchat",
           "misk-bom"
       ).contains(name)) {
+    apply(plugin = "com.palantir.revapi")
     extensions.configure(DetektExtension::class) {
       parallel = true
       buildUponDefaultConfig = false
