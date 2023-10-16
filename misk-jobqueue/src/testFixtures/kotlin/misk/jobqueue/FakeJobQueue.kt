@@ -37,6 +37,7 @@ class FakeJobQueue @Inject constructor(
 ) : JobQueue, TransactionalJobQueue {
   private val jobQueues = ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>()
   private val deadletteredJobs = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
+  private val returnedForRetryJobs = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
 
   override fun enqueue(
     session: Session,
@@ -92,6 +93,11 @@ class FakeJobQueue @Inject constructor(
 
   fun peekDeadlettered(queueName: QueueName): List<Job> {
     val jobs = deadletteredJobs[queueName]
+    return jobs?.toList() ?: listOf()
+  }
+
+  fun peekReturnedForRetry(queueName: QueueName): List<Job> {
+    val jobs = returnedForRetryJobs[queueName]
     return jobs?.toList() ?: listOf()
   }
 
@@ -173,6 +179,7 @@ class FakeJobQueue @Inject constructor(
         // If we don't reset whether it's deadlettered we'll always add it back to the queue.
         job.deadLettered = false
         job.acknowledged = false
+        job.returnedForRetry = false
       }
 
       val jobHandler = jobHandlers[job.queueName]!!
@@ -185,7 +192,9 @@ class FakeJobQueue @Inject constructor(
       }
 
       result += job
-      if (!job.deadLettered && assertAcknowledged && !job.acknowledged) {
+      if (job.returnedForRetry) {
+        returnedForRetryJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
+      } else if (!job.deadLettered && assertAcknowledged && !job.acknowledged) {
         deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
         error("Expected $job to be acknowledged after handling")
       }
@@ -238,6 +247,8 @@ data class FakeJob(
     internal set
   var deadLettered: Boolean = false
     internal set
+  var returnedForRetry: Boolean = false
+    internal set
 
   override fun acknowledge() {
     acknowledged = true
@@ -245,6 +256,10 @@ data class FakeJob(
 
   override fun deadLetter() {
     deadLettered = true
+  }
+
+  override fun retryLater(recommendedWait: Duration) {
+    returnedForRetry = true
   }
 
   override fun compareTo(other: FakeJob): Int {

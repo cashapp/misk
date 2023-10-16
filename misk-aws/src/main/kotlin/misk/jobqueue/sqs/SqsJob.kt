@@ -1,5 +1,6 @@
 package misk.jobqueue.sqs
 
+import com.amazonaws.services.sqs.model.ChangeMessageVisibilityRequest
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.squareup.moshi.Moshi
@@ -7,6 +8,7 @@ import misk.jobqueue.Job
 import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
+import java.time.Duration
 
 internal class SqsJob(
   override val queueName: QueueName,
@@ -53,6 +55,18 @@ internal class SqsJob(
     }
     deleteMessage(queue, message)
     metrics.jobsDeadLettered.labels(queueName.value, queueName.value).inc()
+  }
+
+  override fun retryLater(recommendedWait: Duration) {
+    queue.call { client ->
+      client.changeMessageVisibility(
+        ChangeMessageVisibilityRequest()
+          .withQueueUrl(queue.url)
+          .withVisibilityTimeout(recommendedWait.toSeconds().toInt())
+          .withReceiptHandle(message.receiptHandle)
+      )
+    }
+    metrics.jobsReturned.labels(queueName.value, queueName.value).inc()
   }
 
   private fun deleteMessage(queue: ResolvedQueue, message: Message) {

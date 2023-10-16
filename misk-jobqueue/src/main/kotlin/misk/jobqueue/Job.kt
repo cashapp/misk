@@ -1,5 +1,7 @@
 package misk.jobqueue
 
+import java.time.Duration
+
 /** Incoming job */
 interface Job {
   /** name of the queue on which the job was received */
@@ -29,4 +31,11 @@ interface Job {
 
   /** Moves the job from the main queue onto the associated dead letter queue. May perform an RPC */
   fun deadLetter()
+
+  /**
+   * Move the job back onto the queue it came from. The job can be picked up again after waiting for
+   * at most the recommended wait duration.
+   */
+  fun retryLater(recommendedWait: Duration = Duration.ZERO) {
+  }
 }

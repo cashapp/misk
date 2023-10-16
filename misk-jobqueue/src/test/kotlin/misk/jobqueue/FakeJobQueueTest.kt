@@ -161,6 +161,22 @@ internal class FakeJobQueueTest {
   }
 
   @Test
+  fun returnedForRetryJobPassesIfNotAcknowledged() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    exampleJobEnqueuer.enqueueGreen("retrying-later", hint = ExampleJobHint.RETRY_LATER)
+
+    val jobs = fakeJobQueue.peekJobs(GREEN_QUEUE)
+    assertThat(jobs).hasSize(1)
+
+    val handledJobs = fakeJobQueue.handleJobs(assertAcknowledged = true)
+    val onlyJob = handledJobs.single()
+    assertThat(onlyJob.returnedForRetry).isTrue()
+    assertThat(fakeJobQueue.peekReturnedForRetry(GREEN_QUEUE))
+      .containsExactlyInAnyOrderElementsOf(handledJobs)
+  }
+
+  @Test
   fun expectedMissingAcknowledge() {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
 
@@ -459,7 +475,8 @@ internal enum class ExampleJobHint {
   THROW,
   THROW_ONCE,
   DEAD_LETTER,
-  DEAD_LETTER_ONCE
+  DEAD_LETTER_ONCE,
+  RETRY_LATER
 }
 
 internal class ExampleJobEnqueuer @Inject private constructor(
@@ -525,6 +542,10 @@ internal class ExampleJobHandler @Inject private constructor(moshi: Moshi) : Job
       ExampleJobHint.THROW -> throw ColorException()
       ExampleJobHint.THROW_ONCE -> if (!jobExecutedBefore) {
         throw ColorException()
+      }
+      ExampleJobHint.RETRY_LATER -> {
+        job.retryLater(Duration.ZERO)
+        return
       }
       else -> Unit
     }

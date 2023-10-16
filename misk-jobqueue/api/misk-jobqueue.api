@@ -30,7 +30,9 @@ public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/J
 	public fun getId ()Ljava/lang/String;
 	public fun getIdempotenceKey ()Ljava/lang/String;
 	public fun getQueueName ()Lmisk/jobqueue/QueueName;
+	public final fun getReturnedForRetry ()Z
 	public fun hashCode ()I
+	public fun retryLater (Ljava/time/Duration;)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -78,6 +80,12 @@ public abstract interface class misk/jobqueue/Job {
 	public abstract fun getId ()Ljava/lang/String;
 	public abstract fun getIdempotenceKey ()Ljava/lang/String;
 	public abstract fun getQueueName ()Lmisk/jobqueue/QueueName;
+	public abstract fun retryLater (Ljava/time/Duration;)V
+}
+
+public final class misk/jobqueue/Job$DefaultImpls {
+	public static fun retryLater (Lmisk/jobqueue/Job;Ljava/time/Duration;)V
+	public static synthetic fun retryLater$default (Lmisk/jobqueue/Job;Ljava/time/Duration;ILjava/lang/Object;)V
 }
 
 public abstract interface class misk/jobqueue/JobConsumer {
