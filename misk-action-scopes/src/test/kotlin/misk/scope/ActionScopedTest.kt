@@ -168,7 +168,7 @@ internal class ActionScopedTest {
 
     )
     scope.enter(seedData).use { actionScope ->
-      runBlocking((actionScope as ActionScope).asContextElement()) {
+      runBlocking(actionScope.asContextElement()) {
         assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
       }
     }
@@ -212,7 +212,7 @@ internal class ActionScopedTest {
     scope.enter(seedData).use { actionScope ->
       var thrown: Throwable? = null
 
-      val snapshot = (actionScope as ActionScope).snapshotActionScope()
+      val snapshot = actionScope.snapshotActionScope()
       thread {
         try {
           actionScope.enter(snapshot).use {

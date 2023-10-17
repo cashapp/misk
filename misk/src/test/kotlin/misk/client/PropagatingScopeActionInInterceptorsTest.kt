@@ -78,7 +78,7 @@ class PropagatingScopeActionInInterceptorsTest {
   @Test
   fun `propagate action scoped using typed http client with suspended calls`() {
     val response = scope.enter(seedData).use {
-      runBlocking(Dispatchers.IO + (it as ActionScope).asContextElement()) {
+      runBlocking(Dispatchers.IO + it.asContextElement()) {
         client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
       }
     }
@@ -96,7 +96,7 @@ class PropagatingScopeActionInInterceptorsTest {
   @Test
   fun `propagate action scoped using gRPC client with suspended calls`() {
     val response = scope.enter(seedData).use {
-      runBlocking(Dispatchers.IO +  (it as ActionScope).asContextElement()) {
+      runBlocking(Dispatchers.IO +  it.asContextElement()) {
         dinoService.GetDinosour().execute(Dinosaur.Builder().name("trex").build())
       }
     }
