@@ -2,7 +2,6 @@ package misk.web
 
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
-import okhttp3.Cookie
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl

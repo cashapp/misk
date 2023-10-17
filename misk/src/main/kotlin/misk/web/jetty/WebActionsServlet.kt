@@ -1,6 +1,7 @@
 package misk.web.jetty
 
 import misk.web.BoundAction
+import misk.web.Cookie
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
 import misk.web.SocketAddress
@@ -249,3 +250,20 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
     else -> null
   }
 }
+
+/**
+ * Convert cookies from HttpServletRequest to custom Cookie instances
+ *
+ * @return a list of Cookie
+ */
+internal fun HttpServletRequest.cookies() : List<Cookie> = cookies?.mapNotNull { servletCookie ->
+  Cookie(
+    servletCookie.name,
+    servletCookie.value,
+    servletCookie.domain,
+    servletCookie.path,
+    servletCookie.maxAge,
+    servletCookie.secure,
+    servletCookie.isHttpOnly
+  )
+} ?: emptyList()

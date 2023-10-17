@@ -127,6 +127,35 @@ public abstract interface annotation class misk/web/ConnectWebSocket : java/lang
 	public abstract fun pathPattern ()Ljava/lang/String;
 }
 
+public final class misk/web/Cookie {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZ)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()I
+	public final fun component6 ()Z
+	public final fun component7 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZ)Lmisk/web/Cookie;
+	public static synthetic fun copy$default (Lmisk/web/Cookie;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZILjava/lang/Object;)Lmisk/web/Cookie;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDomain ()Ljava/lang/String;
+	public final fun getHttpOnly ()Z
+	public final fun getMaxAge ()I
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getSecure ()Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface annotation class misk/web/Delete : java/lang/annotation/Annotation {
 	public abstract fun pathPattern ()Ljava/lang/String;
 }

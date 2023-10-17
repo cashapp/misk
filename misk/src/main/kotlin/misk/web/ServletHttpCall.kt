@@ -2,9 +2,9 @@ package misk.web
 
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.jetty.cookies
 import misk.web.jetty.headers
 import misk.web.jetty.httpUrl
-import okhttp3.Cookie
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okio.BufferedSink
@@ -125,19 +125,16 @@ internal data class ServletHttpCall(
         check(webSocket != null)
       }
 
-      val url = request.httpUrl()
-      val headers = request.headers()
-
       return ServletHttpCall(
-        url = url,
+        url = request.httpUrl(),
         linkLayerLocalAddress = linkLayerLocalAddress,
         dispatchMechanism = dispatchMechanism,
-        requestHeaders = headers,
+        requestHeaders = request.headers(),
         upstreamResponse = upstreamResponse,
         requestBody = requestBody,
         responseBody = responseBody,
         webSocket = webSocket,
-        cookies = Cookie.parseAll(request.httpUrl(), headers),
+        cookies = request.cookies(),
       )
     }
   }

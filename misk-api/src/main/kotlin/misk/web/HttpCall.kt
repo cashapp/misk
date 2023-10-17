@@ -3,7 +3,6 @@ package misk.web
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.mediatype.MediaRange
-import okhttp3.Cookie
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.MediaType
