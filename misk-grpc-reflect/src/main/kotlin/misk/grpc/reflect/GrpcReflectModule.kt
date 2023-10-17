@@ -9,12 +9,12 @@ import com.squareup.wire.schema.Schema
 import com.squareup.wire.schema.SchemaLoader
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
-import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import wisp.logging.getLogger
 import jakarta.inject.Singleton
+import misk.web.actions.WebAction
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions

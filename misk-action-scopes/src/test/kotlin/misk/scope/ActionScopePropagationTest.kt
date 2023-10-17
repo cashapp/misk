@@ -5,12 +5,12 @@ import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.name.Named
 import com.google.inject.name.Names
+import jakarta.inject.Inject
 import misk.inject.keyOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
-import jakarta.inject.Inject
 import kotlin.reflect.KFunction
 
 internal class ActionScopePropagationTest {

@@ -1,16 +1,15 @@
 package misk.web.v2
 
+import com.google.inject.Provider
+import jakarta.inject.Inject
 import misk.inject.toKey
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.FakeHttpCall
 import misk.web.HttpCall
-import misk.web.actions.WebAction
 import misk.web.metadata.MetadataTestingModule
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import com.google.inject.Provider
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 

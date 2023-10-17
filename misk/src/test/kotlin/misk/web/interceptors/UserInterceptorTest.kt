@@ -1,7 +1,6 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.ApplicationInterceptor
 import misk.Chain
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -24,6 +23,7 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
+import misk.ApplicationInterceptor
 
 @MiskTest(startService = true)
 class UserInterceptorTest {

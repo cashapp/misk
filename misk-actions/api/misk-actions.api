@@ -1,26 +1,3 @@
-public final class misk/MiskCaller {
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/Set;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)Lmisk/MiskCaller;
-	public static synthetic fun copy$default (Lmisk/MiskCaller;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILjava/lang/Object;)Lmisk/MiskCaller;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCapabilities ()Ljava/util/Set;
-	public final fun getPrincipal ()Ljava/lang/String;
-	public final fun getService ()Ljava/lang/String;
-	public final fun getUser ()Ljava/lang/String;
-	public final fun hasCapability (Ljava/util/Set;)Z
-	public fun hashCode ()I
-	public final fun isAllowed (Ljava/util/Set;Ljava/util/Set;)Z
-	public final fun isService (Ljava/util/Set;)Z
-	public fun toString ()Ljava/lang/String;
-}
-
 public class misk/exceptions/BadGatewayException : misk/exceptions/WebActionException {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
@@ -142,95 +119,6 @@ public abstract interface annotation class misk/security/authz/Authenticated : j
 public abstract interface annotation class misk/security/authz/Unauthenticated : java/lang/annotation/Annotation {
 }
 
-public abstract interface annotation class misk/web/AvailableWhenDegraded : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class misk/web/ConnectWebSocket : java/lang/annotation/Annotation {
-	public abstract fun pathPattern ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/Delete : java/lang/annotation/Annotation {
-	public abstract fun pathPattern ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/Description : java/lang/annotation/Annotation {
-	public abstract fun text ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/FormField : java/lang/annotation/Annotation {
-	public abstract fun name ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/FormValue : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class misk/web/Get : java/lang/annotation/Annotation {
-	public abstract fun pathPattern ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/Grpc : java/lang/annotation/Annotation {
-	public abstract fun pathPattern ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/Patch : java/lang/annotation/Annotation {
-	public abstract fun pathPattern ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/PathParam : java/lang/annotation/Annotation {
-	public abstract fun value ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/Post : java/lang/annotation/Annotation {
-	public abstract fun pathPattern ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/Put : java/lang/annotation/Annotation {
-	public abstract fun pathPattern ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/QueryParam : java/lang/annotation/Annotation {
-	public abstract fun value ()Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/RequestBody : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class misk/web/RequestContentType : java/lang/annotation/Annotation {
-	public abstract fun value ()[Ljava/lang/String;
-}
-
-public abstract interface annotation class misk/web/RequestHeaders : java/lang/annotation/Annotation {
-}
-
-public final class misk/web/Response {
-	public fun <init> (Ljava/lang/Object;)V
-	public fun <init> (Ljava/lang/Object;Lokhttp3/Headers;)V
-	public fun <init> (Ljava/lang/Object;Lokhttp3/Headers;I)V
-	public fun <init> (Ljava/lang/Object;Lokhttp3/Headers;ILkotlin/jvm/functions/Function0;)V
-	public synthetic fun <init> (Ljava/lang/Object;Lokhttp3/Headers;ILkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun component2 ()Lokhttp3/Headers;
-	public final fun component3 ()I
-	public final fun component4 ()Lkotlin/jvm/functions/Function0;
-	public final fun copy (Ljava/lang/Object;Lokhttp3/Headers;ILkotlin/jvm/functions/Function0;)Lmisk/web/Response;
-	public static synthetic fun copy$default (Lmisk/web/Response;Ljava/lang/Object;Lokhttp3/Headers;ILkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lmisk/web/Response;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBody ()Ljava/lang/Object;
-	public final fun getHeaders ()Lokhttp3/Headers;
-	public final fun getStatusCode ()I
-	public final fun getTrailers ()Lkotlin/jvm/functions/Function0;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class misk/web/ResponseBody {
-	public abstract fun writeTo (Lokio/BufferedSink;)V
-}
-
-public abstract interface annotation class misk/web/ResponseContentType : java/lang/annotation/Annotation {
-	public abstract fun value ()[Ljava/lang/String;
-}
-
 public final class misk/web/WebActionModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/web/WebActionModule$Companion;
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -247,9 +135,6 @@ public final class misk/web/WebActionModule$Companion {
 	public final fun createWithPrefix (Lkotlin/reflect/KClass;Ljava/lang/String;)Lmisk/web/WebActionModule;
 }
 
-public abstract interface class misk/web/actions/WebAction {
-}
-
 public final class misk/web/actions/WebActionEntry : misk/web/dashboard/ValidWebEntry {
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;)V
 	public final fun component1 ()Lkotlin/reflect/KClass;
@@ -261,23 +146,6 @@ public final class misk/web/actions/WebActionEntry : misk/web/dashboard/ValidWeb
 	public final fun getUrl_path_prefix ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class misk/web/actions/WebSocket {
-	public abstract fun cancel ()V
-	public abstract fun close (ILjava/lang/String;)Z
-	public abstract fun queueSize ()J
-	public abstract fun send (Ljava/lang/String;)Z
-	public abstract fun send (Lokio/ByteString;)Z
-}
-
-public class misk/web/actions/WebSocketListener {
-	public fun <init> ()V
-	public fun onClosed (Lmisk/web/actions/WebSocket;ILjava/lang/String;)V
-	public fun onClosing (Lmisk/web/actions/WebSocket;ILjava/lang/String;)V
-	public fun onFailure (Lmisk/web/actions/WebSocket;Ljava/lang/Throwable;)V
-	public fun onMessage (Lmisk/web/actions/WebSocket;Ljava/lang/String;)V
-	public fun onMessage (Lmisk/web/actions/WebSocket;Lokio/ByteString;)V
 }
 
 public class misk/web/dashboard/ValidWebEntry {

@@ -3,7 +3,7 @@ package misk.client
 import okhttp3.Request
 import okhttp3.Response
 
-internal class RealClientNetworkChain(
+public class RealClientNetworkChain(
   private val okhttpChain: okhttp3.Interceptor.Chain,
   override val action: ClientAction
 ) : ClientNetworkChain {

@@ -5,6 +5,8 @@ import com.google.inject.Key
 import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.scope.ActionScope
@@ -15,8 +17,6 @@ import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlin.test.assertFailsWith
 
 internal class ActionScopedExecutorServiceTest {

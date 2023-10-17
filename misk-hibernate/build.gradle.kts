@@ -47,6 +47,7 @@ dependencies {
   implementation(project(":misk-action-scopes"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-admin"))
+  implementation(project(":misk-api"))
   implementation(project(":misk-core"))
   implementation(project(":misk-crypto"))
   implementation(project(":misk-service"))

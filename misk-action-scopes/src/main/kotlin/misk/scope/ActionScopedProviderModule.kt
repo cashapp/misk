@@ -6,13 +6,13 @@ import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
 import com.squareup.moshi.Types
+import jakarta.inject.Inject
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.parameterizedType
 import misk.inject.toKey
 import misk.inject.typeLiteral
 import java.lang.reflect.Type
-import jakarta.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.javaMethod
 
@@ -21,6 +21,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   override fun configure() {
     MapBinder.newMapBinder(binder(), KEY_TYPE, ACTION_SCOPED_PROVIDER_TYPE)
     Multibinder.newSetBinder(binder(), KEY_TYPE)
+    bind<Scope>().to<ActionScope>()
     configureProviders()
   }
 

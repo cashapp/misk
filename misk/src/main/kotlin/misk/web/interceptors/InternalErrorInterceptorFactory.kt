@@ -5,7 +5,6 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.extractors.RequestBodyException
 import wisp.logging.getLogger
-import java.io.IOException
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 

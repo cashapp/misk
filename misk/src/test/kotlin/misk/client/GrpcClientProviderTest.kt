@@ -13,8 +13,6 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
-import misk.ApplicationInterceptor
-import misk.Chain
 import java.time.Duration
 import java.util.concurrent.LinkedBlockingDeque
 import jakarta.inject.Inject

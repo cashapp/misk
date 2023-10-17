@@ -2,13 +2,13 @@ package misk.web
 
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.jetty.cookies
 import misk.web.jetty.headers
 import misk.web.jetty.httpUrl
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
-import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
 internal data class ServletHttpCall(
@@ -134,7 +134,7 @@ internal data class ServletHttpCall(
         requestBody = requestBody,
         responseBody = responseBody,
         webSocket = webSocket,
-        cookies = request.cookies?.toList() ?: listOf(),
+        cookies = request.cookies(),
       )
     }
   }

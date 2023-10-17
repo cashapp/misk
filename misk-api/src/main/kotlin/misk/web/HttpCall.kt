@@ -11,7 +11,6 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import okio.BufferedSource
-import javax.servlet.http.Cookie
 
 /**
  * Information about the socket on which a HTTP call arrived.

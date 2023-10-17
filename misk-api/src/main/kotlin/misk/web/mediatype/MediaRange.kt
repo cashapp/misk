@@ -129,7 +129,7 @@ data class MediaRange @JvmOverloads constructor(
               "$s is not a valid media range; encountered charset parameter in extensions"
             }
 
-            charset = Charset.forName(p.second.toUpperCase())
+            charset = Charset.forName(p.second.uppercase())
           }
           inParameters -> parameters[p.first] = p.second
           else -> extensions[p.first] = p.second

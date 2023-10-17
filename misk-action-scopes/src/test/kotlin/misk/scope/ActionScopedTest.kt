@@ -5,7 +5,7 @@ import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
-import kotlin.concurrent.thread
+import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
 import misk.inject.keyOf
 import misk.inject.toKey
@@ -14,7 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Optional
-import jakarta.inject.Inject
+import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
 internal class ActionScopedTest {
@@ -53,7 +53,6 @@ internal class ActionScopedTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(
       keyOf<String>(Names.named("from-seed")) to "seed-value"
-
     )
     scope.enter(seedData).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
   }

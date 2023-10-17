@@ -14,14 +14,14 @@ dependencies {
   api(Dependencies.jakartaInject)
   api(Dependencies.slf4jApi)
   api(project(":misk"))
-  api(project(":misk-actions"))
+  api(project(":misk-api"))
   api(project(":misk-inject"))
   implementation(Dependencies.guice)
   implementation(Dependencies.okHttp)
-  implementation(project(":misk-core"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
+  testImplementation(project(":misk-actions"))
   testImplementation(project(":misk-testing"))
 }
 

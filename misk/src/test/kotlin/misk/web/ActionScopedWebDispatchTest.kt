@@ -1,6 +1,8 @@
 package misk.web
 
 import com.google.inject.Key
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -18,8 +20,6 @@ import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.security.Principal
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 internal class ActionScopedWebDispatchTest {

@@ -2,11 +2,11 @@ package misk.scope
 
 import com.google.inject.Key
 import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.asContextElement
 import java.util.UUID
 import java.util.concurrent.Callable
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -17,11 +17,11 @@ import kotlin.reflect.KVisibility
 @Singleton
 class ActionScope @Inject internal constructor(
   // NB(mmihic): ActionScoped depends on ActionScope depends on
-  // on ActionScopedProviders, which might depend on other ActionScopeds. We break
+  // ActionScopedProviders, which might depend on other ActionScopeds. We break
   // this circular dependency by injecting a map of Provider<ActionScopedProvider>
   // rather than the map of ActionScopedProvider directly
   private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
-) : AutoCloseable {
+) : Scope {
   companion object {
     private val threadLocalScope = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
     private val threadLocalUUID = ThreadLocal<UUID>()
@@ -57,7 +57,7 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Starts the scope on a thread with the provided seed data */
-  fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
+  override fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
     check(!inScope()) {
       "cannot begin an ActionScope on a thread that is already running in an action scope"
     }
@@ -83,7 +83,7 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Returns true if currently in the scope */
-  fun inScope(): Boolean = threadLocalScope.get() != null
+  override fun inScope(): Boolean = threadLocalScope.get() != null
 
   /**
    * Wraps a [Callable] that will be called on another thread, propagating the current
@@ -144,7 +144,7 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Returns the action scoped value for the given key */
-  fun <T> get(key: Key<T>): T {
+  override fun <T> get(key: Key<T>): T {
     check(inScope()) { "not running within an ActionScope" }
 
     // NB(mmihic): We don't use computeIfAbsent because computing the value of this

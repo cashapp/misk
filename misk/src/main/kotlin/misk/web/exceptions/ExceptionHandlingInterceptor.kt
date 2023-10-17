@@ -14,7 +14,6 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
 import misk.web.ResponseBody
-import misk.web.extractors.RequestBodyException
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers.Companion.toHeaders

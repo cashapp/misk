@@ -20,11 +20,11 @@ dependencies {
   api(project(":misk"))
   api(project(":misk-action-scopes"))
   api(project(":misk-actions"))
+  api(project(":misk-api"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(Dependencies.kotlinxHtml)
   implementation(Dependencies.okHttp)
-  implementation(project(":misk-core"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-tailwind"))
 

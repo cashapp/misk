@@ -9,6 +9,7 @@ import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
@@ -38,7 +39,6 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class PropagatingScopeActionInInterceptorsTest {
@@ -133,7 +133,8 @@ class PropagatingScopeActionInInterceptorsTest {
             return@Factory delegate.newCall(request)
           }
 
-         val language = actionScope.get(Key.get(String::class.java, Names.named("language-preference")))
+         val language = actionScope.get(Key.get(String::class.java,
+           Names.named("language-preference")))
          val newRequest = request.newBuilder()
            .tag(LanguageContainer::class.java, LanguageContainer(language))
            .build()

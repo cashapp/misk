@@ -7,7 +7,6 @@ import okhttp3.MediaType
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
-import kotlin.reflect.full.findAnnotation
 
 data class Action(
   val name: String,
@@ -37,10 +36,6 @@ data class Action(
           .firstOrNull()
       }
     }
-
-  internal inline fun <reified T : Annotation> parameterAnnotatedOrNull(): KParameter? {
-    return parameters.firstOrNull { it.findAnnotation<T>() != null }
-  }
 
   fun hasReturnValue() = returnType.classifier != Unit::class
 

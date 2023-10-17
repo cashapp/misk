@@ -14,16 +14,14 @@ dependencies {
   api(Dependencies.guava)
   api(Dependencies.guice)
   api(Dependencies.jakartaInject)
-  api(Dependencies.jettyServletApi)
   api(Dependencies.junitApi)
   api(Dependencies.kotlinLogging)
   api(Dependencies.moshi)
   api(Dependencies.okHttp)
   api(Dependencies.openTracingMock)
-  api(Dependencies.servletApi)
   api(project(":wisp:wisp-time-testing"))
   api(project(":misk"))
-  api(project(":misk-actions"))
+  api(project(":misk-api"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
   implementation(Dependencies.guavaTestLib)
@@ -42,6 +40,7 @@ dependencies {
   implementation(project(":misk-service"))
 
   testImplementation(Dependencies.kotlinTest)
+  testImplementation(project(":misk-actions"))
 }
 
 configure<MavenPublishBaseExtension> {

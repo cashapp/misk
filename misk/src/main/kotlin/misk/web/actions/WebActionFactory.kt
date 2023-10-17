@@ -4,7 +4,6 @@ import com.google.inject.Injector
 import com.google.inject.Provider
 import com.squareup.wire.WireRpc
 import misk.Action
-import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
 import misk.scope.ActionScope
@@ -30,6 +29,7 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.MediaType.Companion.toMediaType
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.ApplicationInterceptor
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter

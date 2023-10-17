@@ -11,6 +11,22 @@ Before proceeding with the release process, ensure the following:
 - If you are changing the publication details, it is recommended that you have the necessary permissions 
 and credentials to publish artifacts to Sonatype Nexus Repository (OSSRH)
 
+# Local Testing
+
+To publish misk changes locally and consume in downstream repositories:
+1. Set `VERSION_NAME='any-version-SNAPSHOT'` in gradle.properties file. 
+2. Run `gradle publishToMavenLocal`. 
+Re-run this command whenever you make subsequent changes to misk.
+3. In the downstream repository, update the miskBom version in the `Dependencies.kt` file 
+with the `SNAPSHOT` version. 
+4. In the root `build.gradle.kts` file, add the following:
+
+      `subprojects {
+        repositories {
+         mavenLocal()
+         }
+        }`
+
 # Automated Publishing Workflow
 
 This repository is set up with an automated workflow using GitHub Actions.

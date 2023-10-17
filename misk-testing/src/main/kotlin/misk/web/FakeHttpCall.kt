@@ -9,7 +9,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.Buffer
 import okio.BufferedSink
 import okio.BufferedSource
-import javax.servlet.http.Cookie
 
 data class FakeHttpCall @JvmOverloads constructor(
   override val url: HttpUrl = "https://example.com/".toHttpUrl(),
