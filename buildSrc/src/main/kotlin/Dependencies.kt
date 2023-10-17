@@ -165,6 +165,7 @@ object Dependencies {
   val retrofitProtobuf = "com.squareup.retrofit2:converter-protobuf:2.9.0"
   val retrofitScalars = "com.squareup.retrofit2:converter-scalars:2.9.0"
   val retrofitWire = "com.squareup.retrofit2:converter-wire:2.9.0"
+  val revapiGradlePlugin = "com.palantir.gradle.revapi:gradle-revapi:1.7.0"
   val servletApi = "javax.servlet:javax.servlet-api:3.1.0"
   val slf4jApi = "org.slf4j:slf4j-api:2.0.7"
   val tempest2Testing = "app.cash.tempest:tempest2-testing"
