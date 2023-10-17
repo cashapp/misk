@@ -8,8 +8,6 @@ consumer_a:
 consumer_b:
   min_items: 1
   max_items: 2
-  # min_and_max exist, but blue_items is deliberately unknown!
-  blue_items: 3
 
 duration:
   interval: "PT1S"
@@ -23,3 +21,5 @@ nested:
 
 collection:
   - name: "Hello"
+    # name exists, but power_level is deliberately unknown!
+    power_level: "Yep"

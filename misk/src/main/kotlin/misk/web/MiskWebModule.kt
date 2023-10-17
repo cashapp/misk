@@ -274,7 +274,7 @@ class MiskWebModule @JvmOverloads constructor(
         provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java))
       )
       if (config.use_virtual_threads && VirtualThreads.areSupported()) {
-        threadPool.setVirtualThreadsExecutor { VirtualThreads.getDefaultVirtualThreadsExecutor() }
+        threadPool.virtualThreadsExecutor = VirtualThreads.getDefaultVirtualThreadsExecutor()
       }
       threadPool.name = "jetty-thread"
       bind<ThreadPool>().toInstance(threadPool)
@@ -290,7 +290,7 @@ class MiskWebModule @JvmOverloads constructor(
       val threadPool = ExecutorThreadPool(executor)
       threadPool.name = "jetty-thread"
       if (config.use_virtual_threads && VirtualThreads.areSupported()) {
-        threadPool.setVirtualThreadsExecutor { VirtualThreads.getDefaultVirtualThreadsExecutor() }
+        threadPool.virtualThreadsExecutor = VirtualThreads.getDefaultVirtualThreadsExecutor()
       }
       bind<ThreadPool>().toInstance(threadPool)
       bind<MeasuredThreadPool>().toInstance(MeasuredThreadPoolExecutor(executor))
