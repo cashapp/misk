@@ -7,6 +7,7 @@ import java.util.UUID
 import java.util.concurrent.Callable
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -25,6 +26,30 @@ class ActionScope @Inject internal constructor(
   companion object {
     private val threadLocalScope = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
     private val threadLocalUUID = ThreadLocal<UUID>()
+  }
+
+  /**
+   * Wraps a [kotlinx.coroutines.runBlocking] to propagate the current action scope.
+   */
+  fun <T> runBlocking(block: suspend CoroutineScope.() -> T): T {
+    return if (inScope()) {
+      kotlinx.coroutines.runBlocking(asContextElement(), block)
+    } else {
+      kotlinx.coroutines.runBlocking {
+        block()
+      }
+    }
+  }
+
+  /**
+   * Wraps a [kotlinx.coroutines.runBlocking] to propagate the current action scope.
+   */
+  fun <T> runBlocking(context: CoroutineContext, block: suspend CoroutineScope.() -> T): T {
+    return if (inScope()) {
+      kotlinx.coroutines.runBlocking(context + asContextElement(), block)
+    } else {
+      kotlinx.coroutines.runBlocking(context, block)
+    }
   }
 
   /**
