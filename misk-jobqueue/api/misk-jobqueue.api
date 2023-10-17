@@ -62,6 +62,7 @@ public final class misk/jobqueue/FakeJobQueue : misk/jobqueue/JobQueue, misk/job
 	public static synthetic fun handleJobs$default (Lmisk/jobqueue/FakeJobQueue;ZZILjava/lang/Object;)Ljava/util/List;
 	public final fun peekDeadlettered (Lmisk/jobqueue/QueueName;)Ljava/util/List;
 	public final fun peekJobs (Lmisk/jobqueue/QueueName;)Ljava/util/List;
+	public final fun peekReturnedForRetry (Lmisk/jobqueue/QueueName;)Ljava/util/List;
 	public final fun reprocessDeadlettered (Lmisk/jobqueue/Job;ZI)Z
 	public final fun reprocessDeadlettered (Lmisk/jobqueue/QueueName;ZI)Ljava/util/List;
 	public static synthetic fun reprocessDeadlettered$default (Lmisk/jobqueue/FakeJobQueue;Lmisk/jobqueue/Job;ZIILjava/lang/Object;)Z
