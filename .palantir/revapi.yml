@@ -1,0 +1,26 @@
+acceptedBreaks:
+  "2023.10.18.080259-adcfb84":
+    com.squareup.misk:misk:
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method java.util.List<javax.servlet.http.Cookie> misk.web.ServletHttpCall::component9()"
+      new: "method java.util.List<misk.web.Cookie> misk.web.ServletHttpCall::component9()"
+      justification: "The new misk-api module is a compatibility layer that contains\
+        \ HTTP related interfaces and we want to avoid introducing unnecessary dependencies\
+        \ on jetty"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method java.util.List<javax.servlet.http.Cookie> misk.web.ServletHttpCall::getCookies()"
+      new: "method java.util.List<misk.web.Cookie> misk.web.ServletHttpCall::getCookies()"
+      justification: "The new misk-api module is a compatibility layer that contains\
+        \ HTTP related interfaces and we want to avoid introducing unnecessary dependencies\
+        \ on jetty"
+    com.squareup.misk:misk-core:
+    - code: "java.class.removed"
+      old: "class misk.web.mediatype.MediaRange"
+      justification: "Moved into the new misk-api module with the same package name"
+    - code: "java.class.removed"
+      old: "class misk.web.mediatype.MediaTypes"
+      justification: "Moved into the new misk-api module with the same package name"
+    - code: "java.class.removed"
+      old: "class misk.web.mediatype.MediaTypesKt"
+      justification: "No MediaTypesKt but MediaTypes was moved into the new misk-api\
+        \ module with the same package name"
