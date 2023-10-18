@@ -24,6 +24,7 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
+    classpath(Dependencies.revapiGradlePlugin)
   }
 }
 
@@ -122,6 +123,8 @@ subprojects {
           "exemplarchat",
           "misk-bom"
       ).contains(name)) {
+    apply(plugin = "com.palantir.revapi")
+
     extensions.configure(DetektExtension::class) {
       parallel = true
       buildUponDefaultConfig = false
@@ -232,12 +235,7 @@ subprojects {
 
       // Disable the default `detekt` task and enable `detektMain` which has type resolution enabled
       dependsOn(dependsOn.filterNot { name != "detekt" })
-      if (!listOf(
-              "detektive",
-              "exemplar",
-              "exemplarchat",
-              "misk-bom"
-          ).contains(project.name)) {
+      if (tasks.findByName("detektMain") != null) {
         dependsOn("detektMain")
       }
     }
