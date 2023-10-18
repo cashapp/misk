@@ -188,4 +188,12 @@ object Dependencies {
   val wireReflector = "com.squareup.wire:wire-reflector:4.8.1"
   val wireRuntime = "com.squareup.wire:wire-runtime:4.8.1"
   val wireSchema = "com.squareup.wire:wire-schema:4.8.1"
+
+  val openRewriteBom = "org.openrewrite:rewrite-bom:8.7.4"
+  val openRewriteJava = "org.openrewrite:rewrite-java"
+  val openRewriteJava17 = "org.openrewrite:rewrite-java-17"
+  val openRewriteJavaTck = "org.openrewrite:rewrite-java-tck"
+  val openRewriteKotlin = "org.openrewrite:rewrite-kotlin:1.4.14"
+  val openRewriteProtobuf = "org.openrewrite:rewrite-protobuf"
+  val openRewriteTest = "org.openrewrite:rewrite-test"
 }
