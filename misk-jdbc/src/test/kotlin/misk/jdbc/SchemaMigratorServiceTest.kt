@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.database.StartDatabaseService
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
-import jakarta.inject.Inject
 
 @MiskTest(startService = false)
 internal class MySQLSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSourceType.MYSQL)

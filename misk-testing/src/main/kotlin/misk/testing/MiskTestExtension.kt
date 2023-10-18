@@ -58,6 +58,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       }
     }
 
+    // TODO: Go back to development guice stage before merging.
     val injector = Guice.createInjector(Stage.PRODUCTION, module)
     context.store("injector", injector)
     injector.getInstance<Callbacks>().beforeEach(context)
