@@ -22,9 +22,11 @@ class DashboardPageLayoutTest {
   @Inject lateinit var actionScope: ActionScope
   @Inject lateinit var layout: Provider<DashboardPageLayout>
 
+  private val fakeHttpCall = FakeHttpCall(url = "http://foobar.com/abc/123".toHttpUrl())
+
   @Test
   fun `happy path`() {
-    actionScope.enter(mapOf(HttpCall::class.toKey() to FakeHttpCall(url = "/abc/123".toHttpUrl()))).use {
+    actionScope.enter(mapOf(HttpCall::class.toKey() to fakeHttpCall)).use {
       // No exception thrown on correct usage
       layout.get().newBuilder().build()
     }
@@ -32,7 +34,7 @@ class DashboardPageLayoutTest {
 
   @Test
   fun `no builder reuse permitted`() {
-    actionScope.enter(mapOf(HttpCall::class.toKey() to FakeHttpCall(url = "/abc/123".toHttpUrl()))).use {
+    actionScope.enter(mapOf(HttpCall::class.toKey() to fakeHttpCall)).use {
       // Fresh builder must have newBuilder() called
       val e1 = assertFailsWith<IllegalStateException> { layout.get().build() }
       assertEquals(

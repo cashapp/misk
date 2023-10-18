@@ -59,18 +59,17 @@ class DashboardPageLayout @Inject constructor(
     }
     newBuilder = false
 
-    val dashboardHomeUrl = allHomeUrls
-      .firstOrNull { clientHttpCall.get().url.encodedPath.startsWith(it.url) }
+    val path = clientHttpCall.get().url.encodedPath
+    val dashboardHomeUrl = allHomeUrls.firstOrNull { path.startsWith(it.url) }
     val homeUrl = dashboardHomeUrl?.url ?: "/"
     val dashboardTab = allTabs
       // TODO make this startsWith after v2 lands
-      .firstOrNull { clientHttpCall.get().url.encodedPath.contains(it.url_path_prefix) }
-    val menuSections =
-      toMenuSections(
-        allNavbarItem.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
-        allTabs.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
-        clientHttpCall.get().url.encodedPath
-      )
+      .firstOrNull { path.contains(it.url_path_prefix) }
+    val menuSections = toMenuSections(
+      allNavbarItem.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
+      allTabs.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
+      path
+    )
 
     return buildHtml {
       HtmlLayout(
