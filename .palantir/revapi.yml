@@ -87,3 +87,15 @@ acceptedBreaks:
     - code: "java.class.removed"
       old: "class misk.metrics.MetricsModule"
       justification: "These classes are not referenced anywhere in cash"
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method java.lang.Double misk.redis.Redis::zscore(java.lang.String, java.lang.String)"
+      justification: "adding wrappers to support zadd, zscore"
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zadd(java.lang.String, double, okio.ByteString,\
+        \ java.util.Set<java.lang.String>)"
+      justification: "adding wrappers to support zadd, zscore"
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zadd(java.lang.String, java.util.Map<okio.ByteString,\
+        \ java.lang.Double>, java.util.Set<java.lang.String>)"
+      justification: "adding wrappers to support zadd, zscore"

@@ -2,6 +2,7 @@ package misk.redis
 
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import okio.use
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
@@ -9,6 +10,7 @@ import redis.clients.jedis.Transaction
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.commands.JedisBinaryCommands
 import redis.clients.jedis.params.SetParams
+import redis.clients.jedis.params.ZAddParams
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
@@ -302,6 +304,47 @@ class RealRedis(
     jedisPool.resource.use { jedis -> jedis.publish(channel, message) }
   }
 
+  override fun zadd(
+    key: String,
+    score: Double,
+    member: ByteString,
+    options: Set<String>): Long {
+    return jedisPool.resource.use { jedis ->
+      jedis.zadd(key.toByteArray(charset), score, member.toByteArray(), getZAddParams(options))
+    }
+  }
+
+  override fun zadd(
+    key: String,
+    scoreMembers: Map<ByteString, Double>,
+    options: Set<String>): Long {
+    val params = getZAddParams(options)
+    val keyBytes = key.toByteArray(charset)
+    val scoreMembersBytes = scoreMembers.entries.associate { it.key.toByteArray() to it.value }
+
+    return jedisPool.resource.use { jedis -> jedis.zadd(keyBytes, scoreMembersBytes, params)}
+  }
+
+  override fun zscore(key: String, member: String): Double? {
+    return jedisPool.resource.use { it.zscore(key, member) }
+  }
+
+  private fun getZAddParams(options: Set<String>): ZAddParams {
+    val params = ZAddParams()
+
+    options.forEach {
+      when(ZAddOptions.valueOf(it.uppercase())) {
+        ZAddOptions.XX -> params.xx()
+        ZAddOptions.NX -> params.nx()
+        ZAddOptions.LT -> params.lt()
+        ZAddOptions.GT -> params.gt()
+        ZAddOptions.CH -> params.ch()
+      }
+    }
+
+    return params
+  }
+
   // Gets a Jedis instance from the pool, and times the requested method invocations.
   private fun <T> jedis(op: JedisBinaryCommands.() -> T): T {
     return jedisPool.resource.use { jedisResource ->
@@ -330,5 +373,13 @@ class RealRedis(
   companion object {
     /** The charset used to convert String keys to ByteArrays for Jedis commands. */
     private val charset = Charsets.UTF_8
+  }
+
+  enum class ZAddOptions(value: String) {
+    XX("XX"),
+    NX("NX"),
+    LT("LT"),
+    GT("GT"),
+    CH("CH")
   }
 }

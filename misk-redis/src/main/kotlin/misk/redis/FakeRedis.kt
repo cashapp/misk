@@ -11,6 +11,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
+import java.util.SortedMap
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -33,6 +34,9 @@ class FakeRedis : Redis {
   /** A nested hash map for hash operations. */
   private val hKeyValueStore =
     ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
+
+  private val sortedSetKeyValueStore =
+    ConcurrentHashMap<String, Value<SortedMap<ByteString, Double>>>()
 
   /** A hash map for list operations. */
   private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
@@ -396,6 +400,27 @@ class FakeRedis : Redis {
   }
 
   override fun publish(channel: String, message: String) {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zadd(
+    key: String,
+    score: Double,
+    member: ByteString,
+    options: Set<String>
+  ): Long {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zadd(
+    key: String,
+    scoreMembers: Map<ByteString, Double>,
+    options: Set<String>,
+  ): Long {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zscore(key: String, member: String): Double? {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 }

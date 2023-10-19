@@ -50,6 +50,9 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
+	public fun zadd (Ljava/lang/String;DLokio/ByteString;Ljava/util/Set;)J
+	public fun zadd (Ljava/lang/String;Ljava/util/Map;Ljava/util/Set;)J
+	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
 public abstract interface annotation class misk/redis/ForFakeRedis : java/lang/annotation/Annotation {
@@ -102,9 +105,22 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
+	public fun zadd (Ljava/lang/String;DLokio/ByteString;Ljava/util/Set;)J
+	public fun zadd (Ljava/lang/String;Ljava/util/Map;Ljava/util/Set;)J
+	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
 public final class misk/redis/RealRedis$Companion {
+}
+
+public final class misk/redis/RealRedis$ZAddOptions : java/lang/Enum {
+	public static final field CH Lmisk/redis/RealRedis$ZAddOptions;
+	public static final field GT Lmisk/redis/RealRedis$ZAddOptions;
+	public static final field LT Lmisk/redis/RealRedis$ZAddOptions;
+	public static final field NX Lmisk/redis/RealRedis$ZAddOptions;
+	public static final field XX Lmisk/redis/RealRedis$ZAddOptions;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/RealRedis$ZAddOptions;
+	public static fun values ()[Lmisk/redis/RealRedis$ZAddOptions;
 }
 
 public abstract interface class misk/redis/Redis {
@@ -152,6 +168,14 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
 	public abstract fun unwatch ([Ljava/lang/String;)V
 	public abstract fun watch ([Ljava/lang/String;)V
+	public abstract fun zadd (Ljava/lang/String;DLokio/ByteString;Ljava/util/Set;)J
+	public abstract fun zadd (Ljava/lang/String;Ljava/util/Map;Ljava/util/Set;)J
+	public abstract fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
+}
+
+public final class misk/redis/Redis$DefaultImpls {
+	public static synthetic fun zadd$default (Lmisk/redis/Redis;Ljava/lang/String;DLokio/ByteString;Ljava/util/Set;ILjava/lang/Object;)J
+	public static synthetic fun zadd$default (Lmisk/redis/Redis;Ljava/lang/String;Ljava/util/Map;Ljava/util/Set;ILjava/lang/Object;)J
 }
 
 public final class misk/redis/RedisClientMetrics {
@@ -307,6 +331,14 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
+	public fun zadd (Ljava/lang/String;DLokio/ByteString;Ljava/util/Set;)J
+	public fun zadd (Ljava/lang/String;Ljava/util/Map;Ljava/util/Set;)J
+	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
+}
+
+public final class misk/redis/testing/FakeRedisKt {
+	public static final fun main ()V
+	public static synthetic fun main ([Ljava/lang/String;)V
 }
 
 public abstract interface annotation class misk/redis/testing/ForFakeRedis : java/lang/annotation/Annotation {

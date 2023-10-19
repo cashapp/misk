@@ -13,6 +13,13 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
+import misk.redis.RealRedis.ZAddOptions.XX
+import misk.redis.RealRedis.ZAddOptions.NX
+import misk.redis.RealRedis.ZAddOptions.LT
+import misk.redis.RealRedis.ZAddOptions.GT
+import misk.redis.RealRedis.ZAddOptions.CH
+import okio.ByteString.Companion.encodeUtf8
+import java.util.SortedMap
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -37,6 +44,9 @@ class FakeRedis @Inject constructor(
 
   /** Acts as the Redis key-value store. */
   private val keyValueStore = ConcurrentHashMap<String, Value<ByteString>>()
+
+  private val sortedSetKeyValueStore =
+    ConcurrentHashMap<String, Value<SortedMap<ByteString, Double>>>()
 
   /** A nested hash map for hash operations. */
   private val hKeyValueStore =
@@ -410,5 +420,90 @@ class FakeRedis @Inject constructor(
 
   override fun publish(channel: String, message: String) {
     throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zadd(
+    key: String,
+    score: Double,
+    member: ByteString,
+    options: Set<String>
+  ): Long {
+    verifyOptions(options)
+    var newFieldCount = 0L
+    var elementsChanged = 0L
+    val optionsUpper = options.map { it.uppercase() }.toMutableList()
+    if (optionsUpper.isEmpty() || (optionsUpper.size == 1 && optionsUpper.contains(CH.name))) {
+      optionsUpper.add(XX.name)
+      optionsUpper.add(NX.name)
+    }
+    if (!sortedSetKeyValueStore.containsKey(key)) {
+      sortedSetKeyValueStore[key] = Value(data = sortedMapOf(), expiryInstant = Instant.MAX)
+    }
+    val exists = sortedSetKeyValueStore[key]!!.data[member] != null
+
+    // Update only if it exists
+    if (optionsUpper.contains(XX.name) && exists) {
+      sortedSetKeyValueStore[key]!!.data[member] = score
+      elementsChanged++
+    }
+
+    //Only add new elements. Don't update already existing elements.
+    if (optionsUpper.contains(NX.name) && !exists) {
+      sortedSetKeyValueStore[key]!!.data[member] = score
+      newFieldCount++
+      elementsChanged++
+    } else if (optionsUpper.contains(LT.name)
+      && exists
+      && score < sortedSetKeyValueStore[key]!!.data[member]!!) {
+      // Update only if it exists and new score is less than existing
+      sortedSetKeyValueStore[key]!!.data[member] = score
+      elementsChanged++
+    } else if (optionsUpper.contains(GT.name)
+      && exists
+      && score > sortedSetKeyValueStore[key]!!.data[member]!!
+      ) {
+      // Update only if it exists and new score is less than existing
+      sortedSetKeyValueStore[key]!!.data[member] = score
+      elementsChanged++
+    }
+
+    if (optionsUpper.contains(CH.name)) {
+      return elementsChanged
+    }
+
+    return newFieldCount
+  }
+
+  private fun verifyOptions(options: Set<String>) {
+    // zadd key [NX|XX] [GT|LT] [CH] score member [score member ...]
+    // only 3 options can be specified at most.
+    if (options.size > 3) {
+      throw IllegalArgumentException()
+    }
+
+    val optionsUpper = options.map { it.uppercase() }
+
+    if ((optionsUpper.contains(NX.name) && optionsUpper.contains(XX.name))) {
+      throw IllegalArgumentException()
+    }
+
+    if ((optionsUpper.contains(NX.name) && optionsUpper.contains(LT.name)) ||
+        (optionsUpper.contains(NX.name) && optionsUpper.contains(GT.name)) ||
+        (optionsUpper.contains(GT.name) && optionsUpper.contains(LT.name))) {
+      throw IllegalArgumentException()
+    }
+  }
+
+  override fun zadd(
+    key: String,
+    scoreMembers: Map<ByteString, Double>,
+    options: Set<String>,
+  ): Long {
+    return scoreMembers.entries.sumOf { (field, value) -> zadd(key, value, field, options) }
+  }
+
+  override fun zscore(key: String, member: String): Double? {
+    if (sortedSetKeyValueStore[key] == null) return null
+    return sortedSetKeyValueStore[key]!!.data[member.encodeUtf8()]
   }
 }

@@ -1,5 +1,6 @@
 package misk.redis
 
+import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -749,5 +750,52 @@ abstract class AbstractRedisTest {
     // Verify
     assertNull(redis.hget("foo", "bar"))
     assertNull(redis["foo"])
+  }
+
+  @Test fun zAddTest() {
+    val aMemberBytes = "a".encodeUtf8()
+    val bMemberBytes = "b".encodeUtf8()
+    // xx: never add new member
+    assertEquals(0L, redis.zadd("foo", 1.0, aMemberBytes, setOf("xx")));
+
+    redis.zadd("foo", 1.0, aMemberBytes);
+    // nx: never update current member
+    assertEquals(0L, redis.zadd("foo", 2.0, aMemberBytes, setOf("nx")));
+    assertEquals(1.0, redis.zscore("foo", "a"));
+
+    val scoreMembers = mutableMapOf<ByteString, Double>()
+    scoreMembers[aMemberBytes] = 2.0;
+    scoreMembers[bMemberBytes] = 1.0;
+    // ch: return count of members not only added, but also updated
+    assertEquals(2L, redis.zadd("foo", scoreMembers, setOf("ch")));
+
+    // lt: only update existing elements if the new score is less than the current score.
+    redis.zadd("foo", 3.0, aMemberBytes, setOf("lt"));
+    assertEquals(2.0, redis.zscore("foo", "a"));
+    redis.zadd("foo", 1.0, aMemberBytes, setOf("lt"));
+    assertEquals(1.0, redis.zscore("foo", "a"));
+
+    // gt: only update existing elements if the new score is greater than the current score.
+    redis.zadd("foo", 0.0, bMemberBytes, setOf("gt"));
+    assertEquals(1.0, redis.zscore("foo", "b"));
+    redis.zadd("foo", 2.0, bMemberBytes, setOf("gt"));
+    assertEquals(2.0, redis.zscore("foo", "b"));
+  }
+  
+  @Test fun zScoreTest() {
+    val aMemberBytes = "a".encodeUtf8()
+    val bMemberBytes = "b".encodeUtf8()
+    val cMemberBytes = "c".encodeUtf8()
+
+    redis.zadd("foo", 1.0, aMemberBytes);
+    redis.zadd("foo", 10.0, bMemberBytes);
+    redis.zadd("foo", 0.1, cMemberBytes);
+    redis.zadd("foo", 2.0, aMemberBytes);
+
+    assertEquals(10.0, redis.zscore("foo", "b"));
+
+    assertEquals(0.1, redis.zscore("foo", "c"));
+
+    assertNull(redis.zscore("foo", "s"));
   }
 }
