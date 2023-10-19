@@ -15,14 +15,14 @@ import wisp.deployment.TESTING
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule(
-  private val type: DataSourceType = DataSourceType.MYSQL,
+  private val type: DataSourceType = DataSourceType.VITESS_MYSQL,
   private val scaleSafetyChecks: Boolean = false,
   private val entitiesModule: HibernateEntityModule = object :
     HibernateEntityModule(Movies::class) {
     override fun configureHibernate() {
       addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
     }
-  }
+  },
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
