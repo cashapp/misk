@@ -1,0 +1,52 @@
+acceptedBreaks:
+  "2023.10.17.232338-9c1976d":
+    com.squareup.misk:misk-admin:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.web.v2.DashboardIndexAction::<init>(misk.scope.ActionScoped<misk.MiskCaller>,\
+        \ misk.web.v2.DashboardPageLayout, java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ java.util.List<misk.web.v2.DashboardIndexAccessBlock>, java.util.List<misk.web.v2.DashboardIndexBlock>)"
+      new: "method void misk.web.v2.DashboardIndexAction::<init>(misk.scope.ActionScoped<misk.MiskCaller>,\
+        \ misk.web.v2.DashboardPageLayout, java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ java.util.List<misk.web.v2.DashboardIndexAccessBlock>, java.util.List<misk.web.v2.DashboardIndexBlock>,\
+        \ wisp.deployment.Deployment)"
+      justification: "Only one downstream usage, can break it without many problems."
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter misk.web.v2.DashboardIndexAccessBlock misk.web.v2.DashboardIndexAccessBlock::copy(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, ===kotlin.jvm.functions.Function5<?\
+        \ super kotlinx.html.TagConsumer<?>, ? super java.lang.String, ? super misk.MiskCaller,\
+        \ ? super java.util.List<misk.web.dashboard.DashboardTab>, ? super java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ kotlin.Unit>===)"
+      new: "parameter misk.web.v2.DashboardIndexAccessBlock misk.web.v2.DashboardIndexAccessBlock::copy(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, ===kotlin.jvm.functions.Function6<?\
+        \ super kotlinx.html.TagConsumer<?>, ? super java.lang.String, ? super wisp.deployment.Deployment,\
+        \ ? super misk.MiskCaller, ? super java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ ? super java.util.List<misk.web.dashboard.DashboardTab>, kotlin.Unit>===)"
+      justification: "Only one downstream usage, can break it without many problems."
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.web.v2.DashboardIndexAccessBlock::<init>(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, ===kotlin.jvm.functions.Function5<?\
+        \ super kotlinx.html.TagConsumer<?>, ? super java.lang.String, ? super misk.MiskCaller,\
+        \ ? super java.util.List<misk.web.dashboard.DashboardTab>, ? super java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ kotlin.Unit>===)"
+      new: "parameter void misk.web.v2.DashboardIndexAccessBlock::<init>(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, ===kotlin.jvm.functions.Function6<?\
+        \ super kotlinx.html.TagConsumer<?>, ? super java.lang.String, ? super wisp.deployment.Deployment,\
+        \ ? super misk.MiskCaller, ? super java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ ? super java.util.List<misk.web.dashboard.DashboardTab>, kotlin.Unit>===)"
+      justification: "Only one downstream usage, can break it without many problems."
+    - code: "java.method.returnTypeChanged"
+      old: "method kotlin.jvm.functions.Function5<kotlinx.html.TagConsumer<?>, java.lang.String,\
+        \ misk.MiskCaller, java.util.List<misk.web.dashboard.DashboardTab>, java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ kotlin.Unit> misk.web.v2.DashboardIndexAccessBlock::component2()"
+      new: "method kotlin.jvm.functions.Function6<kotlinx.html.TagConsumer<?>, java.lang.String,\
+        \ wisp.deployment.Deployment, misk.MiskCaller, java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ java.util.List<misk.web.dashboard.DashboardTab>, kotlin.Unit> misk.web.v2.DashboardIndexAccessBlock::component2()"
+      justification: "Only one downstream usage, can break it without many problems."
+    - code: "java.method.returnTypeChanged"
+      old: "method kotlin.jvm.functions.Function5<kotlinx.html.TagConsumer<?>, java.lang.String,\
+        \ misk.MiskCaller, java.util.List<misk.web.dashboard.DashboardTab>, java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ kotlin.Unit> misk.web.v2.DashboardIndexAccessBlock::getBlock()"
+      new: "method kotlin.jvm.functions.Function6<kotlinx.html.TagConsumer<?>, java.lang.String,\
+        \ wisp.deployment.Deployment, misk.MiskCaller, java.util.List<misk.web.dashboard.DashboardTab>,\
+        \ java.util.List<misk.web.dashboard.DashboardTab>, kotlin.Unit> misk.web.v2.DashboardIndexAccessBlock::getBlock()"
+      justification: "Only one downstream usage, can break it without many problems."
