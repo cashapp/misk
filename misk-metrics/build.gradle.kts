@@ -12,10 +12,10 @@ plugins {
 dependencies {
   api(project(":misk-inject"))
   api(Dependencies.prometheusClient)
-  implementation(Dependencies.jakartaInject)
   implementation(Dependencies.findBugs)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
+  implementation(Dependencies.jakartaInject)
   implementation(Dependencies.kotlinStdLibJdk8)
 
   testFixturesApi(project(":misk-inject"))
@@ -30,7 +30,6 @@ dependencies {
   testImplementation(project(":misk-metrics"))
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-
 
 }
 
