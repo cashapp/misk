@@ -336,11 +336,6 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
-public final class misk/redis/testing/FakeRedisKt {
-	public static final fun main ()V
-	public static synthetic fun main ([Ljava/lang/String;)V
-}
-
 public abstract interface annotation class misk/redis/testing/ForFakeRedis : java/lang/annotation/Annotation {
 }
 
