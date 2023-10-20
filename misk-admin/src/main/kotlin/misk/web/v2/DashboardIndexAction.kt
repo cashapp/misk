@@ -16,6 +16,8 @@ import misk.web.actions.WebAction
 import misk.web.dashboard.DashboardTab
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
 import misk.web.mediatype.MediaTypes
+import wisp.deployment.Deployment
+import wisp.deployment.deployments
 import kotlin.reflect.KClass
 
 /**
@@ -28,6 +30,7 @@ class DashboardIndexAction @Inject constructor(
   private val allTabs: List<DashboardTab>,
   private val allDashboardIndexAccessBlocks: List<DashboardIndexAccessBlock>,
   private val allDashboardIndexBlocks: List<DashboardIndexBlock>,
+  private val deployment: Deployment,
 ) : WebAction {
   @Get("/")
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -59,7 +62,7 @@ class DashboardIndexAction @Inject constructor(
 
         allDashboardIndexAccessBlocks.firstOrNull { slugify(it.annotation) == dashboardHomeUrl?.dashboard_slug }?.block?.let {
           div("pt-5") {
-            it(appName, callerProvider.get(), authenticatedTabs, dashboardTabs)
+            it(appName, deployment, callerProvider.get(), authenticatedTabs, dashboardTabs)
           }
         }
 
@@ -97,20 +100,20 @@ class DashboardIndexAction @Inject constructor(
  *
  * ```kotlin
  * multibind<DashboardIndexAccessBlock>().toInstance(
- *   DashboardIndexAccessBlock(
+ *   DashboardIndexAccessBlock<AdminDashboard>() {
  *     p { +"""You have access to ${authenticatedTabs.size} / ${dashboardTabs.size} tabs.""" }
  *     p { +"""Add the necessary permissions to your user in the company registry.""" }
- *   )
+ *   }
  * )
  * ```
  */
 data class DashboardIndexAccessBlock @JvmOverloads constructor(
   val annotation: KClass<out Annotation>,
-  val block: TagConsumer<*>.(appName: String, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab>) -> Unit
+  val block: TagConsumer<*>.(appName: String, deployment: Deployment, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab>) -> Unit
 )
 
 inline fun <reified T : Annotation> DashboardIndexAccessBlock(
-  noinline block: TagConsumer<*>.(appName: String, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab>) -> Unit
+  noinline block: TagConsumer<*>.(appName: String, deployment: Deployment, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab>) -> Unit
 ): DashboardIndexAccessBlock = DashboardIndexAccessBlock(T::class, block)
 
 /**

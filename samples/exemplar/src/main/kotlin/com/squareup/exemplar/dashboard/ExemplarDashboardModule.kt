@@ -35,6 +35,7 @@ import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
 import misk.web.v2.DashboardIndexAccessBlock
 import misk.web.v2.DashboardIndexBlock
+import wisp.deployment.Deployment
 
 class ExemplarDashboardModule : KAbstractModule() {
   override fun configure() {
@@ -111,7 +112,7 @@ class ExemplarDashboardModule : KAbstractModule() {
       )
     )
 
-    val dashboardIndexAccessBlock = DashboardIndexAccessBlock<AdminDashboard> { appName: String, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab> ->
+    val dashboardIndexAccessBlock = DashboardIndexAccessBlock<AdminDashboard> { appName: String, deployment: Deployment, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab> ->
       val dashboardTabCapabilities = dashboardTabs.flatMap { it.capabilities }.toSet()
 
       val h3TextColor = when {
