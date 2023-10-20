@@ -9,7 +9,6 @@ import misk.inject.asSingleton
 class MetricsModule : KAbstractModule() {
   override fun configure() {
     bind<CollectorRegistry>().toProvider(CollectorRegistryProvider::class.java).asSingleton()
-    bind<HistogramRegistry>().toProvider(HistogramRegistryProvider::class.java).asSingleton()
     bind<Metrics>().toProvider(MetricsProvider::class.java).asSingleton()
     bind<misk.metrics.v2.Metrics>().toProvider(V2MetricsProvider::class.java).asSingleton()
   }
@@ -24,11 +23,6 @@ class MetricsModule : KAbstractModule() {
     }
   }
 
-  internal class HistogramRegistryProvider @Inject constructor(private val metrics: Metrics) : Provider<HistogramRegistry> {
-    override fun get(): HistogramRegistry {
-      return HistogramRegistry.factory(metrics)
-    }
-  }
   internal class MetricsProvider @Inject constructor(private val v2Metrics: misk.metrics.v2.Metrics) : Provider<Metrics> {
     override fun get(): Metrics {
       return Metrics.factory(v2Metrics)

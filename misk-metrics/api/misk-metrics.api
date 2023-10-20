@@ -51,20 +51,6 @@ public final class misk/metrics/Histogram$DefaultImpls {
 	public static fun timedMills (Lmisk/metrics/Histogram;[Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
-public abstract interface class misk/metrics/HistogramRegistry {
-	public static final field Companion Lmisk/metrics/HistogramRegistry$Companion;
-	public abstract fun getMetrics ()Lmisk/metrics/Metrics;
-	public abstract fun newHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
-}
-
-public final class misk/metrics/HistogramRegistry$Companion {
-	public final fun factory (Lmisk/metrics/Metrics;)Lmisk/metrics/HistogramRegistry;
-}
-
-public final class misk/metrics/HistogramRegistry$DefaultImpls {
-	public static fun newHistogram (Lmisk/metrics/HistogramRegistry;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
-}
-
 public abstract interface class misk/metrics/Metrics {
 	public static final field Companion Lmisk/metrics/Metrics$Companion;
 	public abstract fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
@@ -95,9 +81,6 @@ public final class misk/metrics/MetricsKt {
 
 public final class misk/metrics/MetricsModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
-}
-
-public class misk/metrics/MetricsScope {
 }
 
 public final class misk/metrics/v2/FakeMetrics : misk/metrics/v2/Metrics {
