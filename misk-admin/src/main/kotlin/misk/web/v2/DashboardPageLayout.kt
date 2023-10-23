@@ -1,5 +1,6 @@
 package misk.web.v2
 
+import jakarta.inject.Inject
 import kotlinx.html.TagConsumer
 import misk.config.AppName
 import misk.hotwire.buildHtml
@@ -14,7 +15,6 @@ import misk.web.dashboard.DashboardNavbarItem
 import misk.web.dashboard.DashboardTab
 import misk.web.v2.DashboardIndexAction.Companion.titlecase
 import wisp.deployment.Deployment
-import jakarta.inject.Inject
 
 /**
  * Builds dashboard UI for index homepage.
@@ -27,10 +27,15 @@ class DashboardPageLayout @Inject constructor(
   private val allNavbarItem: List<DashboardNavbarItem>,
   private val allTabs: List<DashboardTab>,
   private val deployment: Deployment,
-  @JvmSuppressWildcards private val clientHttpCall: ActionScoped<HttpCall>,
+  private val clientHttpCall: ActionScoped<HttpCall>,
 ) {
   private var newBuilder = false
+  private var headBlock: TagConsumer<*>.() -> Unit = {}
+  private var title: (appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab?) -> String =
+    { appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab? -> "${dashboardTab?.menuLabel?.let { "$it | " } ?: ""}${dashboardTab?.menuCategory} on $appName ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase() ?: ""}" }
+
   private fun setNewBuilder() = apply { newBuilder = true }
+
   fun newBuilder(): DashboardPageLayout = DashboardPageLayout(
     allHomeUrls = allHomeUrls,
     appName = appName,
@@ -40,17 +45,11 @@ class DashboardPageLayout @Inject constructor(
     clientHttpCall = clientHttpCall,
   ).setNewBuilder()
 
-  private var title: (appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab?) -> String =
-    { appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab? -> "${dashboardTab?.menuLabel?.let { "$it | " } ?: ""}${dashboardTab?.menuCategory} on $appName ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase() ?: ""}" }
+  fun title(title: (appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab?) -> String) =
+    apply {
+      this.title = title
+    }
 
-  fun title(title: (appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab?) -> String) = apply {
-    this.title = title
-  }
-
-  private var path: String = clientHttpCall.get().url.encodedPath
-  fun path(path: String) = apply { this.path = path }
-
-  private var headBlock: TagConsumer<*>.() -> Unit = {}
   fun headBlock(block: TagConsumer<*>.() -> Unit) = apply { this.headBlock = block }
 
   @JvmOverloads
@@ -60,18 +59,17 @@ class DashboardPageLayout @Inject constructor(
     }
     newBuilder = false
 
-    val dashboardHomeUrl = allHomeUrls
-      .firstOrNull { path.startsWith(it.url) }
+    val path = clientHttpCall.get().url.encodedPath
+    val dashboardHomeUrl = allHomeUrls.firstOrNull { path.startsWith(it.url) }
     val homeUrl = dashboardHomeUrl?.url ?: "/"
     val dashboardTab = allTabs
       // TODO make this startsWith after v2 lands
       .firstOrNull { path.contains(it.url_path_prefix) }
-    val menuSections =
-      toMenuSections(
-        allNavbarItem.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
-        allTabs.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
-        path
-      )
+    val menuSections = toMenuSections(
+      allNavbarItem.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
+      allTabs.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
+      path
+    )
 
     return buildHtml {
       HtmlLayout(
@@ -98,7 +96,7 @@ class DashboardPageLayout @Inject constructor(
   private fun toMenuSections(
     navbarItems: List<DashboardNavbarItem>,
     dashboardTabs: List<DashboardTab>,
-    currentPath: String
+    currentPath: String,
   ) = if (navbarItems.isNotEmpty()) {
     listOf(
       MenuSection(
@@ -123,7 +121,8 @@ class DashboardPageLayout @Inject constructor(
             // TODO remove /_admin/ hack when old dashboard is removed
             href = if (it.menuUrl == "$ADMIN_DASHBOARD_PATH/" || !it.menuUrl.contains(
                 "$ADMIN_DASHBOARD_PATH/"
-              )) it.menuUrl else "$BETA_PREFIX${it.menuUrl}",
+              )
+            ) it.menuUrl else "$BETA_PREFIX${it.menuUrl}",
             // TODO remove /_admin/ hack when old dashboard is removed
             isSelected = if (it.menuUrl == "$ADMIN_DASHBOARD_PATH/") false else currentPath.startsWith(
               "$BETA_PREFIX${it.menuUrl}"

@@ -12,7 +12,7 @@ fun shards(dataSourceService: DataSourceService): Supplier<Set<Shard>> =
     if (!dataSourceService.config().type.isVitess) {
       Shard.SINGLE_SHARD_SET
     } else {
-      dataSourceService.get().connection.use { connection ->
+      dataSourceService.dataSource.connection.use { connection ->
         connection.createStatement().use { s ->
           val shards = s.executeQuery("SHOW VITESS_SHARDS")
             .map { rs -> Shard.parse(rs.getString(1)) }
