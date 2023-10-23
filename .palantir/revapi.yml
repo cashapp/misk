@@ -87,3 +87,57 @@ acceptedBreaks:
     - code: "java.class.removed"
       old: "class misk.metrics.MetricsModule"
       justification: "These classes are not referenced anywhere in cash"
+  "2023.10.20.131516-9c690c7":
+    com.squareup.misk:misk-admin:
+    - code: "java.method.removed"
+      old: "method misk.web.v2.DashboardPageLayout misk.web.v2.DashboardPageLayout::path(java.lang.String)"
+      justification: "The path() method was unused outside of internal tests"
+    com.squareup.misk:misk-hibernate:
+    - code: "java.annotation.attributeValueChanged"
+      old: "class misk.hibernate.SessionFactoryService"
+      new: "class misk.hibernate.SessionFactoryService"
+      justification: "Aren't constructed outside misk, so safe to change"
+    - code: "java.class.noLongerImplementsInterface"
+      old: "class misk.hibernate.SessionFactoryService"
+      new: "class misk.hibernate.SessionFactoryService"
+      justification: "Aren't constructed outside misk, so safe to change"
+    - code: "java.class.removed"
+      old: "class misk.hibernate.SessionFactoryServiceKt"
+      justification: "Aren't constructed outside misk, so safe to change"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.hibernate.HibernateHealthCheck::<init>(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, com.google.inject.Provider<? extends\
+        \ com.google.common.util.concurrent.Service>, com.google.inject.Provider<org.hibernate.SessionFactory>,\
+        \ java.time.Clock)"
+      new: "method void misk.hibernate.HibernateHealthCheck::<init>(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, com.google.inject.Provider<misk.hibernate.SessionFactoryService>,\
+        \ java.time.Clock)"
+      justification: "Aren't constructed outside misk, so safe to change"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.hibernate.SessionFactoryService::<init>(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, misk.jdbc.DataSourceConnector,\
+        \ com.google.inject.Provider<javax.sql.DataSource>, misk.hibernate.HibernateInjectorAccess,\
+        \ java.util.Set<misk.hibernate.HibernateEntity>, java.util.Set<misk.hibernate.ListenerRegistration>)"
+      new: "method void misk.hibernate.SessionFactoryService::<init>(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, misk.jdbc.DataSourceService, misk.hibernate.HibernateInjectorAccess,\
+        \ java.util.Set<misk.hibernate.HibernateEntity>, java.util.Set<misk.hibernate.ListenerRegistration>)"
+      justification: "Aren't constructed outside misk, so safe to change"
+    - code: "java.method.removed"
+      old: "method org.hibernate.SessionFactory misk.hibernate.SessionFactoryService::get()"
+      justification: "Aren't constructed outside misk, so safe to change"
+    com.squareup.misk:misk-jdbc:
+    - code: "java.annotation.attributeValueChanged"
+      old: "class misk.jdbc.DataSourceService"
+      new: "class misk.jdbc.DataSourceService"
+      justification: "Aren't constructed outside misk, so safe to change"
+    - code: "java.class.noLongerImplementsInterface"
+      old: "class misk.jdbc.DataSourceService"
+      new: "class misk.jdbc.DataSourceService"
+      justification: "Aren't constructed outside misk, so safe to change"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.jdbc.RealTransacter::<init>(===javax.sql.DataSource===)"
+      new: "parameter void misk.jdbc.RealTransacter::<init>(===misk.jdbc.DataSourceService===)"
+      justification: "Aren't constructed outside misk, so safe to change"
+    - code: "java.method.removed"
+      old: "method javax.sql.DataSource misk.jdbc.DataSourceService::get()"
+      justification: "Aren't constructed outside misk, so safe to change"

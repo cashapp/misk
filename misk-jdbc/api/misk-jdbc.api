@@ -396,14 +396,13 @@ public abstract interface class misk/jdbc/DataSourceDecorator {
 	public abstract fun decorate (Ljavax/sql/DataSource;)Ljavax/sql/DataSource;
 }
 
-public final class misk/jdbc/DataSourceService : com/google/common/util/concurrent/AbstractIdleService, com/google/inject/Provider, misk/jdbc/DataSourceConnector {
+public final class misk/jdbc/DataSourceService : com/google/common/util/concurrent/AbstractIdleService, misk/jdbc/DataSourceConnector {
 	public static final field Companion Lmisk/jdbc/DataSourceService$Companion;
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun config ()Lmisk/jdbc/DataSourceConfig;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljavax/sql/DataSource;
+	public final fun getDataSource ()Ljavax/sql/DataSource;
 }
 
 public final class misk/jdbc/DataSourceService$Companion {
@@ -539,7 +538,7 @@ public final class misk/jdbc/RealDatabasePool : misk/jdbc/DatabasePool {
 }
 
 public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
-	public fun <init> (Ljavax/sql/DataSource;)V
+	public fun <init> (Lmisk/jdbc/DataSourceService;)V
 	public fun getInTransaction ()Z
 	public fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;

@@ -6,10 +6,9 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import io.prometheus.client.CollectorRegistry
+import jakarta.inject.Singleton
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 import java.time.Duration
 import javax.sql.DataSource
 import kotlin.reflect.KClass
@@ -27,21 +26,25 @@ class DataSourceService @JvmOverloads constructor(
   private val deployment: Deployment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
-  private val collectorRegistry: CollectorRegistry? = null
-) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
+  private val collectorRegistry: CollectorRegistry? = null,
+) : AbstractIdleService(), DataSourceConnector {
   private lateinit var config: DataSourceConfig
 
   /** The backing connection pool */
   private var hikariDataSource: HikariDataSource? = null
 
   /** The decorated data source */
-  private var dataSource: DataSource? = null
+  private var _dataSource: DataSource? = null
+
+  val dataSource: DataSource
+    get() = _dataSource
+      ?: error("@${qualifier.simpleName} DataSource not created: did you forget to start the service?")
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting @${qualifier.simpleName} connection pool")
 
-    require(dataSource == null)
+    require(_dataSource == null)
     try {
       createDataSource(baseConfig)
     } catch (e: Exception) {
@@ -114,7 +117,7 @@ class DataSourceService @JvmOverloads constructor(
     }
 
     hikariDataSource = HikariDataSource(hikariConfig)
-    dataSource = decorate(hikariDataSource!!)
+    _dataSource = decorate(hikariDataSource!!)
   }
 
   private fun decorate(dataSource: DataSource): DataSource =
@@ -131,12 +134,6 @@ class DataSourceService @JvmOverloads constructor(
     databasePool.releaseDatabase(config)
 
     logger.info("Stopped @${qualifier.simpleName} connection pool in $stopwatch")
-  }
-
-  override fun get(): DataSource {
-    return dataSource ?: throw IllegalStateException(
-      "@${qualifier.simpleName} DataSource not created: did you forget to start the service?"
-    )
   }
 
   companion object {
