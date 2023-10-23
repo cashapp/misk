@@ -3,6 +3,7 @@ package misk.metrics.v3
 import com.google.common.util.concurrent.AtomicDouble
 import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.Tags
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.Collector
@@ -142,8 +143,7 @@ class MetricsTest {
 
     // do the same things with micrometer
     assertThat(micrometerRegistry.get("thread_count", "state" to "running")).isNull()
-    val peakGauge = Metrics.Companion.PeakGauge()
-    metrics.gauge("thread_count", peakGauge::getAndClear, "-", listOf(Tag.of("state", "running")))
+    val peakGauge = metrics.peakGauge("thread_count", "-", Tags.of("state", "running"))
     peakGauge.record(10.0)
     peakGauge.record(20.0)
     assertThat(micrometerRegistry.get("thread_count", "state" to "running")).isEqualTo(20.0)

@@ -68,6 +68,25 @@ open class Metrics @Inject internal constructor(
     .tags(tags)
     .register(registry)
 
+  @JvmOverloads
+  fun peakGauge(
+    name: String,
+    description: String = "",
+    tags: Iterable<Tag> = listOf(),
+  ): PeakGauge {
+    // For simplicity, using an atomic double with an initial value of 0 here.
+    //
+    // If we cared to differentiate between the initial value due to no samples vs having
+    // samples that are equal or less than 0, then we would need to also track whether we
+    // have received an update since the last reset.
+    val value = AtomicDouble()
+    val gauge = Gauge.builder(name) { value.getAndSet(0.0) }
+      .description(description)
+      .tags(tags)
+      .register(registry)
+    return PeakGauge(gauge, value)
+  }
+
   /**
    * histogram creates a new `Histogram` prometheus type with the supplied parameters.
    *
@@ -136,43 +155,30 @@ open class Metrics @Inject internal constructor(
       .register(registry)
   }
 
-  companion object {
+  /**
+   * A peak gauge is a wrapper around an AtomicDouble that resets to an initial value of 0 after
+   * observation (i.e. after a metric collection.)
+   *
+   * This is useful for accurately capturing maximum observed values over time. In contrast to the
+   * histogram maximum which tracks the maximum value in its sampling window. That sampling window
+   * typically covers multiple metric collections.
+   */
+  class PeakGauge(
+    private val gauge: Gauge,
+    private val value: AtomicDouble,
+  ) : Gauge by gauge {
 
     /**
-     * A peak gauge is a wrapper around an AtomicDouble that resets to an initial value of 0 after
-     * observation (i.e. after a metric collection.)
-     *
-     * This is useful for accurately capturing maximum observed values over time. In contrast to the
-     * histogram maximum which tracks the maximum value in its sampling window. That sampling window
-     * typically covers multiple metric collections.
+     * Updates the stored value if the new value is greater.
      */
-    class PeakGauge {
-      // For simplicity, using an atomic double with an initial value of 0 here.
-      //
-      // If we cared to differentiate between the initial value due to no samples vs having
-      // samples that are equal or less than 0, then we would need to also track whether we
-      // have received an update since the last reset.
-      private val value = AtomicDouble()
-
-      /**
-       * Updates the stored value if the new value is greater.
-       */
-      fun record(newValue: Double) {
-        while (true) {
-          val previous = value.get()
-          if (newValue > previous) {
-            value.compareAndSet(previous, newValue)
-          } else {
-            return
-          }
+    fun record(newValue: Double) {
+      while (true) {
+        val previous = value.get()
+        if (newValue > previous) {
+          value.compareAndSet(previous, newValue)
+        } else {
+          return
         }
-      }
-
-      /**
-       * Reset to the initial value and return previously held value.
-       */
-      fun getAndClear(): Double {
-        return value.getAndSet(0.0)
       }
     }
   }

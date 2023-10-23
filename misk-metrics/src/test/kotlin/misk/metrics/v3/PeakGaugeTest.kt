@@ -2,6 +2,7 @@ package misk.metrics.v3
 
 import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.Tags
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
@@ -16,17 +17,20 @@ internal class PeakGaugeTest {
    * after [PeakGauge.getAndClear]
    */
   @Test fun `records maximum and resets on getAndClear`() {
-    val gauge = Metrics.Companion.PeakGauge()
+    val registry = CollectorRegistry(true)
+    val metrics = Metrics(PrometheusMeterRegistry(PrometheusConfig.DEFAULT, registry, Clock.SYSTEM))
+
+    val gauge = metrics.peakGauge("peak_gauge")
 
     // 0 is our implicit initial value
-    assertThat(gauge.getAndClear()).isEqualTo(0.0)
+    assertThat(gauge.value()).isEqualTo(0.0)
 
     // We can read a value after setting it
     gauge.record(37.0)
-    assertThat(gauge.getAndClear()).isEqualTo(37.0)
+    assertThat(gauge.value()).isEqualTo(37.0)
 
-    // Clearing the value should reset it to the initial value
-    assertThat(gauge.getAndClear()).isEqualTo(0.0)
+    // Reading the value should reset it to the initial value
+    assertThat(gauge.value()).isEqualTo(0.0)
 
     // A read after multiple sets returns the peak value
     gauge.record(10.0)
@@ -35,7 +39,7 @@ internal class PeakGaugeTest {
     gauge.record(20.0)
     gauge.record(1.0)
 
-    assertThat(gauge.getAndClear()).isEqualTo(20.0)
+    assertThat(gauge.value()).isEqualTo(20.0)
   }
 
   /**
@@ -46,22 +50,19 @@ internal class PeakGaugeTest {
     val registry = CollectorRegistry(true)
     val metrics = Metrics(PrometheusMeterRegistry(PrometheusConfig.DEFAULT, registry, Clock.SYSTEM))
 
-    val gauge1 = Metrics.Companion.PeakGauge()
-    metrics.gauge(
-      "some_name", gauge1::getAndClear, "some help text", listOf(
-      Tag.of("some_label_name", "some_label_value"),
-      Tag.of("another_label_name", "another_label_value")
+    val gauge1 = metrics.peakGauge(
+      name = "same_name",
+      description = "some help text",
+      tags = Tags.of("some_label_name", "some_label_value", "another_label_name", "another_label_value")
     )
-    )
+
     gauge1.record(36.0)
     gauge1.record(37.0)
 
-    val gauge2 = Metrics.Companion.PeakGauge()
-    metrics.gauge(
-      "some_name", gauge2::getAndClear, "some help text", listOf(
-      Tag.of("some_label_name", "different_label_value"),
-      Tag.of("another_label_name", "another_different_label_value")
-    )
+    val gauge2 = metrics.peakGauge(
+      "same_name",
+      "some help text",
+      Tags.of("some_label_name", "different_label_value", "another_label_name", "another_different_label_value")
     )
     gauge2.record(31.0)
     gauge2.record(30.0)
@@ -70,11 +71,11 @@ internal class PeakGaugeTest {
     val collection = registry.metricFamilySamples().asSequence().toList()
 
     // Verify they have been reset.
-    assertThat(gauge1.getAndClear()).isEqualTo(0.0)
-    assertThat(gauge2.getAndClear()).isEqualTo(0.0)
+    assertThat(gauge1.value()).isEqualTo(0.0)
+    assertThat(gauge2.value()).isEqualTo(0.0)
 
     // We have one set of label names
-    assertThat(collection).hasSize(1);
+    assertThat(collection).hasSize(1)
 
     // We have 2 gauges with distinct label values: gauge1 and gauge2
     val byValue = collection[0].samples.groupBy { it.value }
