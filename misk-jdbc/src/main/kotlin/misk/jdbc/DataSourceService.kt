@@ -2,6 +2,7 @@ package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.inject.Provider
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
@@ -27,7 +28,7 @@ class DataSourceService @JvmOverloads constructor(
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
   private val collectorRegistry: CollectorRegistry? = null,
-) : AbstractIdleService(), DataSourceConnector {
+) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
   private lateinit var config: DataSourceConfig
 
   /** The backing connection pool */
@@ -139,5 +140,9 @@ class DataSourceService @JvmOverloads constructor(
   companion object {
     val logger = getLogger<DataSourceService>()
     private val DEFAULT_CONNECTION_IDLE_TIMEOUT_OFFSET = Duration.ofSeconds(10)
+  }
+
+  override fun get(): DataSource {
+    return dataSource
   }
 }
