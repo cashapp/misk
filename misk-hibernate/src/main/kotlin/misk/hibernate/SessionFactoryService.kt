@@ -2,6 +2,7 @@ package misk.hibernate
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.inject.Provider
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import okio.ByteString
@@ -38,7 +39,7 @@ internal class SessionFactoryService(
   private val hibernateInjectorAccess: HibernateInjectorAccess,
   private val entityClasses: Set<HibernateEntity> = setOf(),
   private val listenerRegistrations: Set<ListenerRegistration> = setOf(),
-) : AbstractIdleService(), TransacterService {
+) : AbstractIdleService(), TransacterService, Provider<SessionFactory> {
   private var _sessionFactory: SessionFactory? = null
 
   val sessionFactory: SessionFactory
@@ -264,5 +265,9 @@ internal class SessionFactoryService(
 
   companion object {
     private val logger = getLogger<SessionFactoryService>()
+  }
+
+  override fun get(): SessionFactory {
+    return sessionFactory
   }
 }
