@@ -10,22 +10,22 @@ plugins {
 
 dependencies {
   api(Dependencies.guice)
+  api(Dependencies.jakartaInject)
   api(Dependencies.launchDarkly)
-  api(project(":wisp:wisp-config"))
   api(project(":misk"))
   api(project(":misk-config"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
-  implementation(Dependencies.jakartaInject)
+  api(project(":wisp:wisp-config"))
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.micrometerCore)
   implementation(Dependencies.moshi)
-  implementation(project(":wisp:wisp-feature"))
-  implementation(project(":wisp:wisp-launchdarkly"))
-  implementation(project(":wisp:wisp-ssl"))
   implementation(project(":misk-feature"))
   implementation(project(":misk-launchdarkly-core"))
   implementation(project(":misk-service"))
+  implementation(project(":wisp:wisp-feature"))
+  implementation(project(":wisp:wisp-launchdarkly"))
+  implementation(project(":wisp:wisp-ssl"))
 }
 
 configure<MavenPublishBaseExtension> {

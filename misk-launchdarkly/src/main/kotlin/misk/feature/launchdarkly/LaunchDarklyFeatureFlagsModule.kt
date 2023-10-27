@@ -41,7 +41,7 @@ class LaunchDarklyModule(
 
   @Provides
   @Singleton
-  fun wispLaunchDarkly(
+  internal fun wispLaunchDarkly(
     ldClient: Provider<LDClientInterface>,
     moshi: Moshi,
     meterRegistry: MeterRegistry,
