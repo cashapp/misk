@@ -21,27 +21,27 @@ import kotlin.system.measureTimeMillis
  * See https://docs.launchdarkly.com/docs/java-sdk-reference documentation.
  */
 class LaunchDarklyFeatureFlags @JvmOverloads constructor(
-    private val ldClient: LDClientInterface,
+    private val ldClient: Lazy<LDClientInterface>,
     private val moshi: Moshi,
-    private val meterRegistry: MeterRegistry = Metrics.globalRegistry,
+    meterRegistry: MeterRegistry = Metrics.globalRegistry,
 ) : FeatureFlags {
 
     private var featuresWithMigrationWarnings: MutableList<Feature> = mutableListOf()
     private val launchDarklyClientMetrics = LaunchDarklyClientMetrics(meterRegistry)
 
     fun startUp(): LaunchDarklyFeatureFlags {
-        var timedResult = measureTimeMillis {
+        val timedResult = measureTimeMillis {
             var attempts = 300
             val intervalMillis = 100L
 
             // LaunchDarkly has its own threads for initialization. We just need to keep checking until
             // it's done. Unfortunately there's no latch or event to wait on.
-            while (!ldClient.isInitialized && attempts > 0) {
+            while (!ldClient.value.isInitialized && attempts > 0) {
                 Thread.sleep(intervalMillis)
                 attempts--
             }
 
-            if (attempts == 0 && !ldClient.isInitialized) {
+            if (attempts == 0 && !ldClient.value.isInitialized) {
                 launchDarklyClientMetrics.onInitFailure()
                 val errorMessage = "LaunchDarkly did not initialize in 30 seconds"
                 logger.error { errorMessage }
@@ -54,8 +54,8 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     }
 
     fun shutDown() {
-        ldClient.flush()
-        ldClient.close()
+        ldClient.value.flush()
+        ldClient.value.close()
     }
 
     private fun <T> get(
@@ -94,22 +94,22 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
 
     override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
         get(feature, key, attributes) { name, user ->
-            ldClient.boolVariationDetail(name, user, false)
+            ldClient.value.boolVariationDetail(name, user, false)
         }
 
     override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
         get(feature, key, attributes) { name, user ->
-            ldClient.doubleVariationDetail(name, user, 0.0)
+            ldClient.value.doubleVariationDetail(name, user, 0.0)
         }
 
     override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
         get(feature, key, attributes) { name, user ->
-            ldClient.intVariationDetail(name, user, 0)
+            ldClient.value.intVariationDetail(name, user, 0)
         }
 
     override fun getString(feature: Feature, key: String, attributes: Attributes): String =
         get(feature, key, attributes) { name, user ->
-            ldClient.stringVariationDetail(name, user, "")
+            ldClient.value.stringVariationDetail(name, user, "")
         }
 
     override fun <T : Enum<T>> getEnum(
@@ -119,7 +119,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
         attributes: Attributes
     ): T {
         val result = get(feature, key, attributes) { name, user ->
-            ldClient.stringVariationDetail(name, user, "")
+            ldClient.value.stringVariationDetail(name, user, "")
         }
         return java.lang.Enum.valueOf(clazz, result.uppercase(Locale.getDefault()))
     }
@@ -131,7 +131,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
         attributes: Attributes
     ): T {
         val result = get(feature, key, attributes) { name, user ->
-            ldClient.jsonValueVariationDetail(name, user, LDValue.ofNull())
+            ldClient.value.jsonValueVariationDetail(name, user, LDValue.ofNull())
         }
         return moshi.adapter(clazz)
             .fromSafeJson(result.toJsonString()) { exception ->
@@ -142,7 +142,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
 
     override fun getJsonString(feature: Feature, key: String, attributes: Attributes): String {
         val result = get(feature, key, attributes) { name, user ->
-            ldClient.jsonValueVariationDetail(name, user, LDValue.ofNull())
+            ldClient.value.jsonValueVariationDetail(name, user, LDValue.ofNull())
         }
         return result.toJsonString()
     }
@@ -156,7 +156,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
         tracker: (T) -> Unit
     ): TrackerReference {
         checkInitialized()
-        val listener = ldClient.flagTracker.addFlagValueChangeListener(
+        val listener = ldClient.value.flagTracker.addFlagValueChangeListener(
             feature.name,
             buildUser(feature, key, attributes)
         ) { event ->
@@ -167,7 +167,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
 
         return object : TrackerReference {
             override fun unregister() {
-                ldClient.flagTracker.removeFlagChangeListener(listener)
+                ldClient.value.flagTracker.removeFlagChangeListener(listener)
             }
         }
     }
@@ -242,7 +242,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
 
     private fun checkInitialized() {
         checkState(
-            ldClient.isInitialized,
+            ldClient.value.isInitialized,
             "LaunchDarkly feature flags not initialized."
         )
     }
@@ -253,7 +253,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
         }
 
         // if we're in offline mode, using the default value if ok
-        if (ldClient.isOffline) {
+        if (ldClient.value.isOffline) {
             return
         }
 
