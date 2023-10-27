@@ -18,6 +18,6 @@ public final class misk/feature/launchdarkly/LaunchDarklyConfig : wisp/config/Co
 public final class misk/feature/launchdarkly/LaunchDarklyModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/feature/launchdarkly/LaunchDarklyConfig;)V
 	public final fun provideLaunchDarklyClient (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/resources/ResourceLoader;)Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;
-	public final fun wispLaunchDarkly (Ljakarta/inject/Provider;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/launchdarkly/LaunchDarklyFeatureFlags;
+	public final fun wispLaunchDarkly (Lcom/google/inject/Provider;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/launchdarkly/LaunchDarklyFeatureFlags;
 }
 
