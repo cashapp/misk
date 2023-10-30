@@ -24,12 +24,14 @@ import wisp.config.Config
 import java.net.URI
 import java.time.Duration
 import javax.net.ssl.X509TrustManager
+import kotlin.reflect.KClass
 
 /**
  * Binds a [FeatureFlags] backed by LaunchDarkly (https://launchdarkly.com).
  */
 class LaunchDarklyModule(
   private val config: LaunchDarklyConfig,
+  private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
   override fun configure() {
     bind<wisp.feature.FeatureFlags>().to<wisp.launchdarkly.LaunchDarklyFeatureFlags>()
