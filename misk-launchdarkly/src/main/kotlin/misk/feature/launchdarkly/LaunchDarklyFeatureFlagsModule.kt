@@ -66,8 +66,7 @@ class LaunchDarklyModule(
       )
     }
 
-    // Use providers and lazy injection to avoid the LDClientInterface from being
-    // constructed which immediately starts the network calls.
+    // Construct LDClient lazily to avoid making network calls until LaunchDarklyFeatureFlags.startup() is called.
     val ldClient = lazy { LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build()) }
     return wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi, meterRegistry)
   }
