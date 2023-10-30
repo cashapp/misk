@@ -36,13 +36,13 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
   private val moshi: Moshi,
   meterRegistry: MeterRegistry = Metrics.globalRegistry,
 ) : FeatureFlags {
-  @Deprecated("Only here for binary compatibility.")
-  @JvmOverloads
-  constructor(ldClient: LDClientInterface, moshi: Moshi, meterRegistry: MeterRegistry = Metrics.globalRegistry) : this(
-    lazy { ldClient },
-    moshi,
-    meterRegistry
-  )
+//  @Deprecated("Only here for binary compatibility.")
+//  @JvmOverloads
+//  constructor(ldClient: LDClientInterface, moshi: Moshi, meterRegistry: MeterRegistry = Metrics.globalRegistry) : this(
+//    lazy { ldClient },
+//    moshi,
+//    meterRegistry
+//  )
 
   private var featuresWithMigrationWarnings: MutableList<Feature> = mutableListOf()
   private val launchDarklyClientMetrics = LaunchDarklyClientMetrics(meterRegistry)
