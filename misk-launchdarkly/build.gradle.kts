@@ -9,17 +9,17 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
-  api(Dependencies.launchDarkly)
   api(project(":misk"))
   api(project(":misk-config"))
-  api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
+  implementation(Dependencies.guice)
+  implementation(Dependencies.jakartaInject)
   implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(Dependencies.launchDarkly)
   implementation(Dependencies.micrometerCore)
   implementation(Dependencies.moshi)
+  implementation(project(":misk-core"))
   implementation(project(":misk-feature"))
   implementation(project(":misk-launchdarkly-core"))
   implementation(project(":misk-service"))
