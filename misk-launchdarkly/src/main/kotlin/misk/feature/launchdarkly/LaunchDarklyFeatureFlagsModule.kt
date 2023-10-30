@@ -27,7 +27,7 @@ import kotlin.reflect.KClass
 /**
  * Binds a [FeatureFlags] backed by LaunchDarkly (https://launchdarkly.com).
  */
-class LaunchDarklyModule(
+class LaunchDarklyModule @JvmOverloads constructor(
   private val config: LaunchDarklyConfig,
   private val qualifier: KClass<out Annotation>? = null,
 ) : KAbstractModule() {
