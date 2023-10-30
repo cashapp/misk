@@ -1,11 +1,9 @@
 package misk.feature.launchdarkly
 
-import com.google.inject.Provider
 import com.google.inject.Provides
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
-import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import io.micrometer.core.instrument.MeterRegistry
 import jakarta.inject.Singleton
@@ -31,7 +29,7 @@ import kotlin.reflect.KClass
  */
 class LaunchDarklyModule(
   private val config: LaunchDarklyConfig,
-  private val qualifier: KClass<out Annotation>? = null
+  private val qualifier: KClass<out Annotation>? = null,
 ) : KAbstractModule() {
   override fun configure() {
     bind<wisp.feature.FeatureFlags>().to<wisp.launchdarkly.LaunchDarklyFeatureFlags>()
@@ -44,22 +42,12 @@ class LaunchDarklyModule(
   @Provides
   @Singleton
   internal fun wispLaunchDarkly(
-    ldClient: Provider<LDClientInterface>,
-    moshi: Moshi,
-    meterRegistry: MeterRegistry,
-  ): wisp.launchdarkly.LaunchDarklyFeatureFlags {
-    // Use providers and lazy injection to avoid the LDClientInterface from being
-    // constructed which immediately starts the network calls.
-    return wisp.launchdarkly.LaunchDarklyFeatureFlags(lazy { ldClient.get() }, moshi, meterRegistry)
-  }
-
-  @Provides
-  @Singleton
-  fun provideLaunchDarklyClient(
     sslLoader: SslLoader,
     sslContextFactory: SslContextFactory,
     resourceLoader: ResourceLoader,
-  ): LDClientInterface {
+    moshi: Moshi,
+    meterRegistry: MeterRegistry,
+  ): wisp.launchdarkly.LaunchDarklyFeatureFlags {
     val baseUri = URI.create(config.base_uri)
     val ldConfig = LDConfig.Builder()
       // Set wait to 0 to not block here. Block in service initialization instead.
@@ -78,7 +66,10 @@ class LaunchDarklyModule(
       )
     }
 
-    return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
+    // Use providers and lazy injection to avoid the LDClientInterface from being
+    // constructed which immediately starts the network calls.
+    val ldClient = lazy { LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build()) }
+    return wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi, meterRegistry)
   }
 }
 
