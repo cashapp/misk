@@ -17,6 +17,7 @@ object Dependencies {
   val awsSqs = "com.amazonaws:aws-java-sdk-sqs:1.12.520"
   val bouncycastle = "org.bouncycastle:bcprov-jdk15on:1.70"
   val bouncycastlePgp = "org.bouncycastle:bcpg-jdk15on:1.70"
+  val bucket4jCore = "com.bucket4j:bucket4j-core:8.5.0"
   val concurrencyLimitsCore = "com.netflix.concurrency-limits:concurrency-limits-core:0.3.6"
   val cronUtils = "com.cronutils:cron-utils:9.2.0"
   val datasourceProxy = "net.ttddyy:datasource-proxy:1.7"
