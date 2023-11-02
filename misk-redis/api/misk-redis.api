@@ -57,7 +57,7 @@ public abstract interface annotation class misk/redis/ForFakeRedis : java/lang/a
 
 public final class misk/redis/RealRedis : misk/redis/Redis {
 	public static final field Companion Lmisk/redis/RealRedis$Companion;
-	public fun <init> (Lredis/clients/jedis/JedisPool;Lmisk/redis/RedisClientMetrics;)V
+	public fun <init> (Lredis/clients/jedis/UnifiedJedis;Lmisk/redis/RedisClientMetrics;)V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public fun close ()V
@@ -200,7 +200,9 @@ public final class misk/redis/RedisKt {
 }
 
 public final class misk/redis/RedisModule : misk/inject/KAbstractModule {
-	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;)V
+	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/ConnectionPoolConfig;)V
+	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/ConnectionPoolConfig;Z)V
+	public synthetic fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/ConnectionPoolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;Z)V
 	public synthetic fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }

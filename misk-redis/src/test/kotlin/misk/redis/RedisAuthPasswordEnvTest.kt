@@ -13,10 +13,10 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import redis.clients.jedis.JedisPoolConfig
 import wisp.deployment.PRODUCTION
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
+import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest
 class RedisAuthPasswordEnvTest {
@@ -50,7 +50,7 @@ class RedisAuthPasswordEnvTest {
 
   private val realRedisModule = object : KAbstractModule() {
     override fun configure() {
-      install(RedisModule(DockerRedis.config, JedisPoolConfig(), useSsl = false))
+      install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
     }
   }

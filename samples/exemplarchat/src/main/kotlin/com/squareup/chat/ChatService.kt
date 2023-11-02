@@ -9,7 +9,7 @@ import misk.metrics.backends.prometheus.PrometheusMetricsServiceModule
 import misk.redis.RedisModule
 import misk.redis.testing.DockerRedis
 import misk.web.MiskWebModule
-import redis.clients.jedis.JedisPoolConfig
+import redis.clients.jedis.ConnectionPoolConfig
 
 fun main(args: Array<String>) {
   ChatLogging.configure()
@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
     MiskRealServiceModule(),
     MiskWebModule(config.web),
     ChatModule(),
-    RedisModule(DockerRedis.config, JedisPoolConfig(), useSsl = false),
+    RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false),
     ConfigModule.create("chat", config),
     DeploymentModule(deployment),
     PrometheusMetricsServiceModule(config.prometheus)

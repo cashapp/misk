@@ -141,3 +141,20 @@ acceptedBreaks:
     - code: "java.method.removed"
       old: "method javax.sql.DataSource misk.jdbc.DataSourceService::get()"
       justification: "Aren't constructed outside misk, so safe to change"
+  "2023.10.23.140429-96308bc":
+    com.squareup.misk:misk-redis:
+    - code: "java.class.removed"
+      old: "class misk.redis.JedisPoolWithMetrics"
+      justification: "Renamed internal class to reflect new version of JedisPooled"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.redis.RealRedis::<init>(===redis.clients.jedis.JedisPool===,\
+        \ misk.redis.RedisClientMetrics)"
+      new: "parameter void misk.redis.RealRedis::<init>(===redis.clients.jedis.UnifiedJedis===,\
+        \ misk.redis.RedisClientMetrics)"
+      justification: "Users are using the misk.redis.Redis interface which did not\
+        \ change"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.redis.RedisModule::<init>(misk.redis.RedisConfig,\
+        \ ===redis.clients.jedis.JedisPoolConfig===)"
+      justification: "New constructor was added to use the new pool config class in\
+        \ latest version but kept the old constructor and marked it as deprecated"
