@@ -18,6 +18,7 @@ object Dependencies {
   val bouncycastle = "org.bouncycastle:bcprov-jdk15on:1.70"
   val bouncycastlePgp = "org.bouncycastle:bcpg-jdk15on:1.70"
   val bucket4jCore = "com.bucket4j:bucket4j-core:8.5.0"
+  val bucket4jDynamoDbV1 = "com.bucket4j:bucket4j-dynamodb-sdk-v1:8.5.0"
   val bucket4jRedis = "com.bucket4j:bucket4j-redis:8.5.0"
   val concurrencyLimitsCore = "com.netflix.concurrency-limits:concurrency-limits-core:0.3.6"
   val cronUtils = "com.cronutils:cron-utils:9.2.0"
