@@ -223,9 +223,16 @@ private class DockerNetwork(private val name: String, private val docker: Docker
     fun start() {
         log.info { "creating $name network" }
 
-        docker.listNetworksCmd().withNameFilter(name).exec().forEach {
-            log.info { "removing previous $name network with id ${it.id}" }
-            docker.removeNetworkCmd(it.id).exec()
+        docker.listNetworksCmd().withNameFilter(name).exec().forEach { network ->
+            log.info { "Cleaning previous $name network's containers before removing it"}
+            network.containers.keys.forEach { containerId ->
+              log.info { "Cleaning container $containerId"}
+              docker.disconnectFromNetworkCmd()
+                .withNetworkId(network.id).withContainerId(containerId)
+                .exec()
+            }
+            log.info { "removing previous $name network with id ${network.id}" }
+            docker.removeNetworkCmd(network.id).exec()
         }
         networkId = docker.createNetworkCmd()
             .withName(name)
