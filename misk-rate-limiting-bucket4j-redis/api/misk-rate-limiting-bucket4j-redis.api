@@ -2,6 +2,6 @@ public final class misk/ratelimiting/bucket4j/redis/RedisBucket4jRateLimiterModu
 	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;Ljava/time/Duration;Z)V
 	public synthetic fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;Ljava/time/Duration;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun provideJedisPool (Lwisp/deployment/Deployment;Lmisk/metrics/v2/Metrics;Lcom/google/common/base/Ticker;)Lredis/clients/jedis/JedisPool;
-	public final fun providedRateLimiter (Ljava/time/Clock;Lredis/clients/jedis/JedisPool;)Lwisp/ratelimiting/RateLimiter;
+	public final fun providedRateLimiter (Ljava/time/Clock;Lredis/clients/jedis/JedisPool;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimiter;
 }
 

@@ -1,5 +1,5 @@
 public final class misk/ratelimiting/bucket4j/dynamodb/v1/DynamoDbV1Bucket4jRateLimiterModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/lang/String;)V
-	public final fun providedRateLimiter (Ljava/time/Clock;Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;)Lwisp/ratelimiting/RateLimiter;
+	public final fun providedRateLimiter (Ljava/time/Clock;Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimiter;
 }
 
