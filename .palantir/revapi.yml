@@ -143,9 +143,6 @@ acceptedBreaks:
       justification: "Aren't constructed outside misk, so safe to change"
   "2023.10.23.140429-96308bc":
     com.squareup.misk:misk-redis:
-    - code: "java.class.removed"
-      old: "class misk.redis.JedisPoolWithMetrics"
-      justification: "Renamed internal class to reflect new version of JedisPooled"
     - code: "java.method.parameterTypeChanged"
       old: "parameter void misk.redis.RealRedis::<init>(===redis.clients.jedis.JedisPool===,\
         \ misk.redis.RedisClientMetrics)"
