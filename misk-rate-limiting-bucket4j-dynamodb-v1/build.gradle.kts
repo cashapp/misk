@@ -17,6 +17,7 @@ dependencies {
   implementation(project(":misk-aws-dynamodb"))
   implementation(Dependencies.bucket4jDynamoDbV1)
 
+  testImplementation(Dependencies.micrometerPrometheus)
   testImplementation(project(":misk"))
   testImplementation(testFixtures(project(":misk-aws-dynamodb")))
   testImplementation(project(":misk-testing"))

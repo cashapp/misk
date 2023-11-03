@@ -28,7 +28,7 @@ class Bucket4jRateLimiter(
       val bucket = getBucketProxy(key, configuration)
       bucket.tryConsumeAndReturnRemaining(amount)
     } catch (e: Exception) {
-      metrics.consumptionCount(configuration, ConsumptionResult.EXCEPTION).increment()
+      metrics.consumptionAttempts(configuration, ConsumptionResult.EXCEPTION).increment()
       throw e
     }
     val metricResult = if (result.isConsumed) {
@@ -36,7 +36,10 @@ class Bucket4jRateLimiter(
     } else {
       ConsumptionResult.REJECTED
     }
-    metrics.consumptionCount(configuration, metricResult).increment()
+    metrics.consumptionAttempts(configuration, metricResult).increment()
+    if (metricResult == ConsumptionResult.SUCCESS) {
+      metrics.tokensConsumed(configuration).increment(amount.toDouble())
+    }
     return RateLimiter.ConsumptionData(
       didConsume = result.isConsumed,
       remaining = result.remainingTokens,

@@ -6,6 +6,7 @@ import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy
 import io.github.bucket4j.distributed.proxy.ClientSideConfig
 import io.github.bucket4j.distributed.serialization.Mapper
 import io.github.bucket4j.redis.jedis.cas.JedisBasedProxyManager
+import io.micrometer.core.instrument.MeterRegistry
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
@@ -38,13 +39,15 @@ class RedisBucket4jRateLimiterModule(
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<Clock>()
+    requireBinding<MeterRegistry>()
     install(ServiceModule<JedisPoolService>().enhancedBy<ReadyService>())
   }
 
   @Provides @Singleton
   fun providedRateLimiter(
     clock: Clock,
-    jedisPool: JedisPool
+    jedisPool: JedisPool,
+    metricsRegistry: MeterRegistry
   ): RateLimiter {
     val proxyManager = JedisBasedProxyManager.builderFor(jedisPool)
       .withClientSideConfig(
@@ -58,7 +61,7 @@ class RedisBucket4jRateLimiterModule(
       )
       .withKeyMapper(Mapper.STRING)
       .build()
-    return Bucket4jRateLimiter(proxyManager, clock)
+    return Bucket4jRateLimiter(proxyManager, clock, metricsRegistry)
   }
 
   @Provides @Singleton

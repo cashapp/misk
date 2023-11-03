@@ -1,7 +1,14 @@
 package misk.ratelimiting.bucket4j.dynamodb.v1
 
 import com.google.inject.Module
+import com.google.inject.Provides
+import io.micrometer.core.instrument.Clock
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.aws.dynamodb.testing.DockerDynamoDbModule
 import misk.aws.dynamodb.testing.DynamoDbTable
@@ -10,7 +17,6 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
@@ -31,6 +37,14 @@ class DynamoDBV1RateLimiterTest {
       install(DynamoDbV1Bucket4jRateLimiterModule("rate_limit_buckets"))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
+    }
+
+    @Provides @Singleton
+    // In prod this is provided by Skim
+    fun provideMeterRegistry(collectorRegistry: CollectorRegistry): MeterRegistry {
+      return PrometheusMeterRegistry(
+        PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM
+      )
     }
   }
 
@@ -63,7 +77,7 @@ class DynamoDBV1RateLimiterTest {
       }
     }
     // We should have been able to increment the counter until we consumed the bucket
-    Assertions.assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
+    assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
   }
 
   @Test
@@ -78,10 +92,10 @@ class DynamoDBV1RateLimiterTest {
     val result = rateLimiter.withToken(KEY, TestRateLimitConfig) {
       counter++
     }
-    Assertions.assertThat(result.consumptionData.didConsume).isFalse()
-    Assertions.assertThat(result.result).isNull()
-    Assertions.assertThat(result.consumptionData.remaining).isZero()
-    Assertions.assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
+    assertThat(result.consumptionData.didConsume).isFalse()
+    assertThat(result.result).isNull()
+    assertThat(result.consumptionData.remaining).isZero()
+    assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
 
     // Elapse enough time that the next request refills the bucket
     fakeClock.add(TestRateLimitConfig.refillPeriod)
@@ -90,7 +104,7 @@ class DynamoDBV1RateLimiterTest {
         counter++
       }
     }
-    Assertions.assertThat(counter).isEqualTo(10)
+    assertThat(counter).isEqualTo(10)
   }
 
   companion object {

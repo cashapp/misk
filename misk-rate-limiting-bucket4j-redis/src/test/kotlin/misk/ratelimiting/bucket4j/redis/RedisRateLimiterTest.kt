@@ -1,17 +1,23 @@
 package misk.ratelimiting.bucket4j.redis
 
 import com.google.inject.Module
+import com.google.inject.Provides
+import io.micrometer.core.instrument.Clock
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
-import misk.redis.RedisModule
 import misk.redis.testing.DockerRedis
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import redis.clients.jedis.JedisPoolConfig
 import wisp.deployment.TESTING
@@ -28,6 +34,14 @@ class RedisRateLimiterTest {
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
     }
+
+    @Provides @Singleton
+    // In prod this is provided by Skim
+    fun provideMeterRegistry(collectorRegistry: CollectorRegistry): MeterRegistry {
+      return PrometheusMeterRegistry(
+        PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM
+      )
+    }
   }
 
   @Suppress("unused")
@@ -43,14 +57,14 @@ class RedisRateLimiterTest {
     repeat(TestRateLimitConfig.capacity.toInt()) {
       val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
       with(result) {
-        Assertions.assertThat(didConsume).isTrue()
-        Assertions.assertThat(remaining).isEqualTo(4L - it)
+        assertThat(didConsume).isTrue()
+        assertThat(remaining).isEqualTo(4L - it)
       }
     }
     val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
     with(result) {
-      Assertions.assertThat(didConsume).isFalse()
-      Assertions.assertThat(remaining).isZero()
+      assertThat(didConsume).isFalse()
+      assertThat(remaining).isZero()
     }
   }
 
@@ -63,7 +77,7 @@ class RedisRateLimiterTest {
       }
     }
     // We should have been able to increment the counter until we consumed the bucket
-    Assertions.assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
+    assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
   }
 
   @Test
@@ -78,10 +92,10 @@ class RedisRateLimiterTest {
     val result = rateLimiter.withToken(KEY, TestRateLimitConfig) {
       counter++
     }
-    Assertions.assertThat(result.consumptionData.didConsume).isFalse()
-    Assertions.assertThat(result.result).isNull()
-    Assertions.assertThat(result.consumptionData.remaining).isZero()
-    Assertions.assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
+    assertThat(result.consumptionData.didConsume).isFalse()
+    assertThat(result.result).isNull()
+    assertThat(result.consumptionData.remaining).isZero()
+    assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
 
     // Elapse enough time that the next request refills the bucket
     fakeClock.add(TestRateLimitConfig.refillPeriod)
@@ -90,7 +104,7 @@ class RedisRateLimiterTest {
         counter++
       }
     }
-    Assertions.assertThat(counter).isEqualTo(10)
+    assertThat(counter).isEqualTo(10)
   }
 
   companion object {
