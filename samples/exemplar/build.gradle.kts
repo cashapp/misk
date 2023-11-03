@@ -30,10 +30,16 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-prometheus"))
+  implementation(project(":misk-rate-limiting-bucket4j-redis"))
+  implementation(project(":misk-rate-limiting-bucket4j-dynamodb-v1"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.micrometerPrometheus)
   testImplementation(project(":misk-testing"))
+
+  testImplementation(testFixtures(project(":misk-aws-dynamodb")))
+  testImplementation(testFixtures(project(":misk-redis")))
 }
 
 val jar by tasks.getting(Jar::class) {

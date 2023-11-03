@@ -10,11 +10,11 @@ plugins {
 }
 
 dependencies {
+  api(project(":misk-aws-dynamodb"))
   api(project(":misk-inject"))
   api(project(":wisp:wisp-rate-limiting:bucket4j"))
 
   implementation(project(":misk-inject"))
-  implementation(project(":misk-aws-dynamodb"))
   implementation(Dependencies.bucket4jDynamoDbV1)
 
   testImplementation(Dependencies.micrometerPrometheus)
