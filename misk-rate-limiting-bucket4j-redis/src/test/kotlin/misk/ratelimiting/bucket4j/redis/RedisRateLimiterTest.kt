@@ -18,14 +18,13 @@ import wisp.deployment.TESTING
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.testing.TestRateLimitConfig
 
-@MiskTest
+@MiskTest(startService = true)
 class RedisRateLimiterTest {
   @Suppress("unused")
   @MiskTestModule
-  private val module: Module = object: KAbstractModule() {
+  private val module: Module = object : KAbstractModule() {
     override fun configure() {
-      install(RedisModule(DockerRedis.config, JedisPoolConfig(), useSsl = false))
-      install(RedisBucket4jRateLimiterModule())
+      install(RedisBucket4jRateLimiterModule(DockerRedis.config, JedisPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
     }

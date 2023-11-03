@@ -1,13 +1,22 @@
 package misk.ratelimiting.bucket4j.redis
 
+import com.google.common.base.Ticker
 import com.google.inject.Provides
 import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy
 import io.github.bucket4j.distributed.proxy.ClientSideConfig
 import io.github.bucket4j.distributed.serialization.Mapper
 import io.github.bucket4j.redis.jedis.cas.JedisBasedProxyManager
 import jakarta.inject.Singleton
+import misk.ReadyService
+import misk.ServiceModule
 import misk.inject.KAbstractModule
+import misk.metrics.v2.Metrics
+import misk.redis.JedisPoolWithMetrics
+import misk.redis.RedisClientMetrics
+import misk.redis.RedisConfig
 import redis.clients.jedis.JedisPool
+import redis.clients.jedis.JedisPoolConfig
+import wisp.deployment.Deployment
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.bucket4j.Bucket4jRateLimiter
 import wisp.ratelimiting.bucket4j.ClockTimeMeter
@@ -22,11 +31,14 @@ import java.time.Duration
  * since reuse is cheaper than creating a new bucket
  */
 class RedisBucket4jRateLimiterModule(
-  private val additionalTtl: Duration = Duration.ofSeconds(5)
+  private val redisConfig: RedisConfig,
+  private val jedisPoolConfig: JedisPoolConfig,
+  private val additionalTtl: Duration = Duration.ofSeconds(5),
+  private val useSsl: Boolean = true
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<Clock>()
-    requireBinding<JedisPool>()
+    install(ServiceModule<JedisPoolService>().enhancedBy<ReadyService>())
   }
 
   @Provides @Singleton
@@ -47,5 +59,24 @@ class RedisBucket4jRateLimiterModule(
       .withKeyMapper(Mapper.STRING)
       .build()
     return Bucket4jRateLimiter(proxyManager, clock)
+  }
+
+  @Provides @Singleton
+  fun provideJedisPool(
+    deployment: Deployment,
+    metrics: Metrics,
+    ticker: Ticker,
+  ): JedisPool {
+    // Get the first replication group, we only support 1 replication group per service.
+    val replicationGroup = redisConfig[redisConfig.keys.first()]
+      ?: throw RuntimeException("At least 1 replication group must be specified")
+    val clientMetrics = RedisClientMetrics(ticker, metrics)
+    return JedisPoolWithMetrics(
+      metrics = clientMetrics,
+      poolConfig = jedisPoolConfig,
+      replicationGroupConfig = replicationGroup,
+      ssl = useSsl,
+      requiresPassword = deployment.isReal
+    )
   }
 }

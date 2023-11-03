@@ -15,6 +15,7 @@ dependencies {
   api(project(":wisp:wisp-rate-limiting:bucket4j"))
 
   implementation(Dependencies.bucket4jRedis)
+  implementation(project(":misk-service"))
 
   testFixturesApi(project(":misk-redis"))
   testFixturesApi(project(":misk-testing"))
