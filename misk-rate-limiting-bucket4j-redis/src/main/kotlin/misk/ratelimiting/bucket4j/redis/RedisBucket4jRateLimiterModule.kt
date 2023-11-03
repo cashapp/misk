@@ -31,7 +31,7 @@ import java.time.Duration
  * enables bucket reuse when a request comes in after the bucket has been refilled,
  * since reuse is cheaper than creating a new bucket
  */
-class RedisBucket4jRateLimiterModule(
+class RedisBucket4jRateLimiterModule @JvmOverloads constructor(
   private val redisConfig: RedisConfig,
   private val jedisPoolConfig: JedisPoolConfig,
   private val additionalTtl: Duration = Duration.ofSeconds(5),

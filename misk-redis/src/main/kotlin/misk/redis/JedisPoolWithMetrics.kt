@@ -7,7 +7,7 @@ import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
 import redis.clients.jedis.Protocol
 
-class JedisPoolWithMetrics(
+class JedisPoolWithMetrics @JvmOverloads constructor(
   private val metrics: RedisClientMetrics,
   poolConfig: JedisPoolConfig,
   replicationGroupConfig: RedisReplicationGroupConfig,

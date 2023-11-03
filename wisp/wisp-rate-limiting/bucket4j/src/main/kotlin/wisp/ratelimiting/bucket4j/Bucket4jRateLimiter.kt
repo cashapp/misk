@@ -12,7 +12,7 @@ import wisp.ratelimiting.RateLimiterMetrics
 import wisp.ratelimiting.RateLimiterMetrics.ConsumptionResult
 import java.time.Clock
 
-class Bucket4jRateLimiter(
+class Bucket4jRateLimiter @JvmOverloads constructor(
   private val bucketProxy: ProxyManager<String>,
   private val clock: Clock,
   meterRegistry: MeterRegistry = Metrics.globalRegistry
