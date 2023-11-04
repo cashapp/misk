@@ -5,9 +5,9 @@ plugins {
 
 dependencies {
   api(project(":wisp:wisp-rate-limiting"))
+  api(Dependencies.bucket4jCore)
   api(Dependencies.micrometerCore)
 
-  implementation(Dependencies.bucket4jCore)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.bucket4jCore) {
@@ -16,7 +16,6 @@ dependencies {
     }
   }
   testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.micrometerCore)
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
 }

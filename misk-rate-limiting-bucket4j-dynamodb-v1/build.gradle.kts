@@ -10,18 +10,25 @@ plugins {
 }
 
 dependencies {
-  api(project(":misk-aws-dynamodb"))
   api(project(":misk-inject"))
-  api(project(":wisp:wisp-rate-limiting:bucket4j"))
+  api(project(":wisp:wisp-rate-limiting"))
+  api(Dependencies.awsDynamodb)
+  api(Dependencies.guice)
+  api(Dependencies.jakartaInject)
+  api(Dependencies.micrometerCore)
 
-  implementation(project(":misk-inject"))
+  implementation(project(":wisp:wisp-rate-limiting:bucket4j"))
+  implementation(Dependencies.bucket4jCore)
   implementation(Dependencies.bucket4jDynamoDbV1)
 
-  testImplementation(Dependencies.micrometerCore)
   testImplementation(project(":misk"))
-  testImplementation(testFixtures(project(":misk-aws-dynamodb")))
+  testImplementation(project(":misk-rate-limiting-bucket4j-dynamodb-v1"))
   testImplementation(project(":misk-testing"))
+  testImplementation(project(":wisp:wisp-deployment"))
+  testImplementation(testFixtures(project(":misk-aws-dynamodb")))
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
 }
 
 configure<MavenPublishBaseExtension> {

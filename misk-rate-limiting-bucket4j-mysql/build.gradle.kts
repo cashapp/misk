@@ -11,17 +11,27 @@ plugins {
 
 dependencies {
   api(project(":misk-inject"))
-  api(project(":misk-jdbc"))
-  api(project(":wisp:wisp-rate-limiting:bucket4j"))
+  api(project(":wisp:wisp-rate-limiting"))
+  api(Dependencies.guice)
+  api(Dependencies.jakartaInject)
+  api(Dependencies.micrometerCore)
 
-  implementation(project(":misk-inject"))
+  implementation(project(":misk-jdbc"))
+  implementation(project(":wisp:wisp-rate-limiting:bucket4j"))
+  implementation(Dependencies.bucket4jCore)
   implementation(Dependencies.bucket4jMySQL)
 
-  testImplementation(Dependencies.micrometerCore)
   testImplementation(project(":misk"))
+  testImplementation(project(":misk-config"))
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-rate-limiting-bucket4j-mysql"))
   testImplementation(project(":misk-testing"))
+  testImplementation(project(":wisp:wisp-config"))
+  testImplementation(project(":wisp:wisp-deployment"))
   testImplementation(testFixtures(project(":misk-jdbc")))
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
 }
 
 configure<MavenPublishBaseExtension> {

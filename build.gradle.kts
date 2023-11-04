@@ -93,6 +93,12 @@ dependencyAnalysis {
         exclude(":wisp:wisp-logging")
       }
     }
+    project(":wisp:wisp-rate-limiting:bucket4j") {
+      onUnusedDependencies() {
+        // Plugin does not recognize use of tests artifact from bucket4j's maven manifest
+        exclude("com.bucket4j:bucket4j-core")
+      }
+    }
   }
 }
 
