@@ -30,15 +30,18 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-prometheus"))
-  implementation(project(":misk-rate-limiting-bucket4j-redis"))
   implementation(project(":misk-rate-limiting-bucket4j-dynamodb-v1"))
+  implementation(project(":misk-rate-limiting-bucket4j-mysql"))
+  implementation(project(":misk-rate-limiting-bucket4j-redis"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.micrometerPrometheus)
+  testImplementation(project(":misk-hibernate"))
   testImplementation(project(":misk-testing"))
 
   testImplementation(testFixtures(project(":misk-aws-dynamodb")))
+  testImplementation(testFixtures(project(":misk-jdbc")))
   testImplementation(testFixtures(project(":misk-redis")))
 }
 
