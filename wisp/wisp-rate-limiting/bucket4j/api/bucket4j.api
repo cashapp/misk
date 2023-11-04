@@ -1,4 +1,5 @@
 public final class wisp/ratelimiting/bucket4j/Bucket4jRateLimiter : wisp/ratelimiting/RateLimiter {
+	public fun <init> (Lio/github/bucket4j/distributed/proxy/ProxyManager;Ljava/time/Clock;)V
 	public fun <init> (Lio/github/bucket4j/distributed/proxy/ProxyManager;Ljava/time/Clock;Lio/micrometer/core/instrument/MeterRegistry;)V
 	public synthetic fun <init> (Lio/github/bucket4j/distributed/proxy/ProxyManager;Ljava/time/Clock;Lio/micrometer/core/instrument/MeterRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun consumeToken (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;J)Lwisp/ratelimiting/RateLimiter$ConsumptionData;

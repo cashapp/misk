@@ -46,12 +46,14 @@ public final class wisp/ratelimiting/RateLimiter$ExecutionResult {
 }
 
 public final class wisp/ratelimiting/RateLimiterMetrics {
-	public static final field COUNTER_NAME Ljava/lang/String;
+	public static final field ATTEMPT_COUNTER_NAME Ljava/lang/String;
 	public static final field Companion Lwisp/ratelimiting/RateLimiterMetrics$Companion;
 	public static final field RATE_LIMIT_TAG Ljava/lang/String;
 	public static final field RESULT_TAG Ljava/lang/String;
+	public static final field TOTAL_CONSUMED_COUNTER_NAME Ljava/lang/String;
 	public fun <init> (Lio/micrometer/core/instrument/MeterRegistry;)V
-	public final fun consumptionCount (Lwisp/ratelimiting/RateLimitConfiguration;Lwisp/ratelimiting/RateLimiterMetrics$ConsumptionResult;)Lio/micrometer/core/instrument/Counter;
+	public final fun consumptionAttempts (Lwisp/ratelimiting/RateLimitConfiguration;Lwisp/ratelimiting/RateLimiterMetrics$ConsumptionResult;)Lio/micrometer/core/instrument/Counter;
+	public final fun tokensConsumed (Lwisp/ratelimiting/RateLimitConfiguration;)Lio/micrometer/core/instrument/Counter;
 }
 
 public final class wisp/ratelimiting/RateLimiterMetrics$Companion {

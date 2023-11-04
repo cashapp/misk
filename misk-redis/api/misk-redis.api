@@ -56,6 +56,8 @@ public abstract interface annotation class misk/redis/ForFakeRedis : java/lang/a
 }
 
 public final class misk/redis/JedisPoolWithMetrics : redis/clients/jedis/JedisPool {
+	public fun <init> (Lmisk/redis/RedisClientMetrics;Lredis/clients/jedis/JedisPoolConfig;Lmisk/redis/RedisReplicationGroupConfig;)V
+	public fun <init> (Lmisk/redis/RedisClientMetrics;Lredis/clients/jedis/JedisPoolConfig;Lmisk/redis/RedisReplicationGroupConfig;Z)V
 	public fun <init> (Lmisk/redis/RedisClientMetrics;Lredis/clients/jedis/JedisPoolConfig;Lmisk/redis/RedisReplicationGroupConfig;ZZ)V
 	public synthetic fun <init> (Lmisk/redis/RedisClientMetrics;Lredis/clients/jedis/JedisPoolConfig;Lmisk/redis/RedisReplicationGroupConfig;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun getResource ()Ljava/lang/Object;
