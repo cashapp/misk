@@ -1,14 +1,9 @@
 package misk.ratelimiting.bucket4j.redis
 
 import com.google.inject.Module
-import com.google.inject.Provides
-import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
-import io.prometheus.client.CollectorRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -33,14 +28,7 @@ class RedisRateLimiterTest {
       install(RedisBucket4jRateLimiterModule(DockerRedis.config, JedisPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
-    }
-
-    @Provides @Singleton
-    // In prod this is provided by Skim
-    fun provideMeterRegistry(collectorRegistry: CollectorRegistry): MeterRegistry {
-      return PrometheusMeterRegistry(
-        PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM
-      )
+      bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
     }
   }
 

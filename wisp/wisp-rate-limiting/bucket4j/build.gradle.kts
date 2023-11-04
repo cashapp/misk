@@ -16,7 +16,7 @@ dependencies {
     }
   }
   testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.micrometerPrometheus)
+  testImplementation(Dependencies.micrometerCore)
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
 }

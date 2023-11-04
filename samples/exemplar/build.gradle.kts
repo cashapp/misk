@@ -36,7 +36,7 @@ dependencies {
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.micrometerPrometheus)
+  testImplementation(Dependencies.micrometerCore)
   testImplementation(project(":misk-hibernate"))
   testImplementation(project(":misk-testing"))
 

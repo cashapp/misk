@@ -1,9 +1,6 @@
 package wisp.ratelimiting.bucket4j
 
-import io.micrometer.core.instrument.Clock
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
-import io.prometheus.client.CollectorRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -14,12 +11,9 @@ import wisp.time.FakeClock
 
 abstract class AbstractBucket4jRateLimiterTest<T> {
   abstract val rateLimiter: RateLimiter
-  private val collectorRegistry = CollectorRegistry()
   protected val fakeClock = FakeClock()
-  protected val prometheusRegistry = PrometheusMeterRegistry(
-    PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM
-  )
-  private val metrics = RateLimiterMetrics(prometheusRegistry)
+  protected val meterRegistry = SimpleMeterRegistry()
+  private val metrics = RateLimiterMetrics(meterRegistry)
 
   private val consumedMetrics by lazy {
     metrics.consumptionAttempts(

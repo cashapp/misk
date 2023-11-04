@@ -17,7 +17,7 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(Dependencies.bucket4jMySQL)
 
-  testImplementation(Dependencies.micrometerPrometheus)
+  testImplementation(Dependencies.micrometerCore)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-jdbc")))

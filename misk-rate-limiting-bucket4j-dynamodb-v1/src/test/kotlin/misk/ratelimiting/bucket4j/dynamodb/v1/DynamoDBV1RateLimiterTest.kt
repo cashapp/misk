@@ -1,14 +1,9 @@
 package misk.ratelimiting.bucket4j.dynamodb.v1
 
 import com.google.inject.Module
-import com.google.inject.Provides
-import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
-import io.prometheus.client.CollectorRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.aws.dynamodb.testing.DockerDynamoDbModule
 import misk.aws.dynamodb.testing.DynamoDbTable
@@ -37,14 +32,7 @@ class DynamoDBV1RateLimiterTest {
       install(DynamoDbV1Bucket4jRateLimiterModule("rate_limit_buckets"))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
-    }
-
-    @Provides @Singleton
-    // In prod this is provided by Skim
-    fun provideMeterRegistry(collectorRegistry: CollectorRegistry): MeterRegistry {
-      return PrometheusMeterRegistry(
-        PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM
-      )
+      bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
     }
   }
 

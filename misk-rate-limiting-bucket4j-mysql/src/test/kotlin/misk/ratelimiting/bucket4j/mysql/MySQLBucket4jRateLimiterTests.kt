@@ -1,14 +1,9 @@
 package misk.ratelimiting.bucket4j.mysql
 
-import com.google.inject.Provides
-import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
-import io.prometheus.client.CollectorRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
-import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
@@ -39,14 +34,7 @@ class MySQLBucket4jRateLimiterTests {
       install(
         MySQLBucket4jRateLimiterModule(RateLimits::class, TABLE_NAME, ID_COLUMN, STATE_COLUMN)
       )
-    }
-
-    @Provides @Singleton
-    // In prod this is provided by Skim
-    fun provideMeterRegistry(collectorRegistry: CollectorRegistry): MeterRegistry {
-      return PrometheusMeterRegistry(
-        PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM
-      )
+      bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
     }
   }
 

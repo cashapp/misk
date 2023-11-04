@@ -20,7 +20,7 @@ dependencies {
   testFixturesApi(project(":misk-redis"))
   testFixturesApi(project(":misk-testing"))
 
-  testImplementation(Dependencies.micrometerPrometheus)
+  testImplementation(Dependencies.micrometerCore)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-redis")))

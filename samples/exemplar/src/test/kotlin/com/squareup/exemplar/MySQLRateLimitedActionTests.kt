@@ -1,18 +1,10 @@
 package com.squareup.exemplar
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.google.inject.Module
-import com.google.inject.Provides
-import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
-import io.prometheus.client.CollectorRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
-import jakarta.inject.Singleton
-import misk.aws.dynamodb.testing.DockerDynamoDbModule
-import misk.aws.dynamodb.testing.DynamoDbTable
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
@@ -21,16 +13,10 @@ import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
-import misk.jdbc.JdbcModule
 import misk.jdbc.JdbcTestingModule
-import misk.ratelimiting.bucket4j.dynamodb.v1.DynamoDbV1Bucket4jRateLimiterModule
 import misk.ratelimiting.bucket4j.mysql.MySQLBucket4jRateLimiterModule
-import misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule
-import misk.redis.testing.DockerRedis
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import redis.clients.jedis.JedisPool
-import redis.clients.jedis.JedisPoolConfig
 import wisp.deployment.TESTING
 
 @MiskTest(startService = true)
@@ -55,14 +41,7 @@ class MySQLRateLimitedActionTests : AbstractRateLimitedActionTests() {
       install(
         MySQLBucket4jRateLimiterModule(RateLimits::class, TABLE_NAME, ID_COLUMN, STATE_COLUMN)
       )
-    }
-
-    @Provides @Singleton
-    // In prod this is provided by Skim
-    fun provideMeterRegistry(collectorRegistry: CollectorRegistry): MeterRegistry {
-      return PrometheusMeterRegistry(
-        PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM
-      )
+      bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
     }
   }
 
