@@ -43,9 +43,10 @@ class BaseDashboardModule(
       WebTabResourceModule(
         isDevelopment = isDevelopment,
         slug = "@misk",
-        web_proxy_url = "http://localhost:3100/",
+        web_proxy_url = "http://localhost:3201/",
         url_path_prefix = "/@misk/",
-        resourcePath = "classpath:/web/_tab/admin-dashboard/@misk/"
+        // Serve the @misk dependencies from the Web Actions tab lib directory
+        resourcePath = "classpath:/web/_tab/web-actions/@misk/"
       )
     )
   }
