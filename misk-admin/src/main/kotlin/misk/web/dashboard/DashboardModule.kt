@@ -7,7 +7,6 @@ import misk.web.v2.DashboardHotwireTabAction
 import misk.web.v2.DashboardIFrameTabAction
 import misk.web.v2.DashboardIndexAccessBlock
 import misk.web.v2.DashboardIndexBlock
-import misk.web.v2.DashboardPageLayout.Companion.BETA_PREFIX
 import okio.ByteString.Companion.encodeUtf8
 
 /** Handles installation of Misk Dashboard components (admin dashboard or custom...). */
@@ -22,16 +21,16 @@ class DashboardModule @JvmOverloads constructor(
     dashboardTabProvider?.let { multibind<DashboardTab>().toProvider(it) }
     dashboardTabLoader?.let {
       multibind<DashboardTabLoaderEntry>().toInstance(
-        DashboardTabLoaderEntry("$BETA_PREFIX${it.urlPathPrefix}", it)
+        DashboardTabLoaderEntry(it.urlPathPrefix, it)
       )
       multibind<DashboardTabLoader>().toInstance(it)
 
       when (it) {
         is DashboardTabLoader.HotwireTab -> {
-          install(WebActionModule.createWithPrefix<DashboardHotwireTabAction>("$BETA_PREFIX${it.urlPathPrefix}"))
+          install(WebActionModule.createWithPrefix<DashboardHotwireTabAction>(it.urlPathPrefix))
         }
         is DashboardTabLoader.IframeTab -> {
-          install(WebActionModule.createWithPrefix<DashboardIFrameTabAction>(url_path_prefix = "$BETA_PREFIX${it.urlPathPrefix}"))
+          install(WebActionModule.createWithPrefix<DashboardIFrameTabAction>(it.urlPathPrefix))
         }
       }
     }

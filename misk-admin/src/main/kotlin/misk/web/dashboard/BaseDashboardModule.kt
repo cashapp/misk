@@ -6,7 +6,6 @@ import misk.web.WebActionModule
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 import misk.web.metadata.DashboardMetadataAction
 import misk.web.metadata.ServiceMetadataAction
-import misk.web.metadata.jvm.JvmMetadataModule
 import misk.web.v2.DashboardIndexAccessBlock
 import misk.web.v2.DashboardIndexBlock
 
@@ -31,33 +30,13 @@ class BaseDashboardModule(
 
     // Add metadata actions to support dashboards
     install(WebActionModule.create<DashboardMetadataAction>())
-    install(WebActionModule.create<MiskWebTabIndexAction>())
     install(WebActionModule.create<ServiceMetadataAction>())
-    install(JvmMetadataModule())
+
+    // Show helpful Not Found exceptions for missing Misk Web tabs in v2 dashboard
+    install(WebActionModule.create<MiskWebTabIndexAction>())
 
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
-
-    // Admin Dashboard Tab
-    multibind<DashboardHomeUrl>().toInstance(
-      DashboardHomeUrl<AdminDashboard>("/_admin/")
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "admin-dashboard",
-        web_proxy_url = "http://localhost:3100/"
-      )
-    )
-    install(
-      WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "admin-dashboard",
-        web_proxy_url = "http://localhost:3100/",
-        url_path_prefix = "/_admin/",
-        resourcePath = "classpath:/web/_tab/admin-dashboard/"
-      )
-    )
 
     // @misk packages
     install(
