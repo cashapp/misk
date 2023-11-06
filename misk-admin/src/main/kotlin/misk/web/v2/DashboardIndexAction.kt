@@ -17,7 +17,6 @@ import misk.web.dashboard.DashboardTab
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
 import misk.web.mediatype.MediaTypes
 import wisp.deployment.Deployment
-import wisp.deployment.deployments
 import kotlin.reflect.KClass
 
 /**

@@ -2,6 +2,7 @@ package misk.web.dashboard
 
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
+import misk.web.dashboard.AdminDashboardModule.Companion.DEFAULT_TAB_CATEGORY
 import misk.web.metadata.webaction.WebActionMetadataAction
 
 /**
@@ -22,7 +23,7 @@ class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstrac
       urlPathPrefix = "/_admin/web-actions/",
       developmentWebProxyUrl = "http://localhost:3201/",
       menuLabel = "Web Actions",
-      menuCategory = "Container Admin"
+      menuCategory = DEFAULT_TAB_CATEGORY
     ))
 
     // Web Actions v1
@@ -33,7 +34,7 @@ class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstrac
       developmentWebProxyUrl = "http://localhost:3201/",
       classpathResourcePathPrefix = "classpath:/web/_tab/web-actions/",
       menuLabel = "Web Actions v1",
-      menuCategory = "Container Admin"
+      menuCategory = DEFAULT_TAB_CATEGORY
     ))
   }
 }

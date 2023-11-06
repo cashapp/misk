@@ -3,6 +3,7 @@ package misk.web.dashboard
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.WebActionModule
+import misk.web.dashboard.AdminDashboardModule.Companion.DEFAULT_TAB_CATEGORY
 import misk.web.metadata.database.DatabaseQueryMetadata
 import misk.web.metadata.database.DatabaseQueryMetadataAction
 import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
@@ -22,7 +23,7 @@ class DatabaseDashboardTabModule(private val isDevelopment: Boolean): KAbstractM
       urlPathPrefix = "/_admin/database/",
       developmentWebProxyUrl = "http://localhost:3202/",
       menuLabel = "Database",
-      menuCategory = "Container Admin"
+      menuCategory = DEFAULT_TAB_CATEGORY
     ))
 
     // Default access that doesn't allow any queries for unconfigured DbEntities

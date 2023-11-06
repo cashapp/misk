@@ -3,6 +3,7 @@ package misk.web.dashboard
 import jakarta.inject.Qualifier
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
+import misk.web.dashboard.tabs.config.ConfigDashboardTabModule
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.v2.NavbarModule
 
@@ -31,6 +32,10 @@ class AdminDashboardModule @JvmOverloads constructor(
     install(ConfigDashboardTabModule(isDevelopment, configTabMode))
     install(DatabaseDashboardTabModule(isDevelopment))
     install(WebActionsDashboardTabModule(isDevelopment))
+  }
+
+  companion object {
+    const val DEFAULT_TAB_CATEGORY = "Container Admin"
   }
 }
 

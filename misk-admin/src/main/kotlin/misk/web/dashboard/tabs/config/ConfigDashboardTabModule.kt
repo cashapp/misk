@@ -1,8 +1,12 @@
-package misk.web.dashboard
+package misk.web.dashboard.tabs.config
 
 import misk.inject.KAbstractModule
 import misk.jvm.JvmManagementFactoryModule
 import misk.web.WebActionModule
+import misk.web.dashboard.AdminDashboard
+import misk.web.dashboard.AdminDashboardAccess
+import misk.web.dashboard.AdminDashboardModule.Companion.DEFAULT_TAB_CATEGORY
+import misk.web.dashboard.DashboardModule
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode.SAFE
 
@@ -24,13 +28,27 @@ class ConfigDashboardTabModule @JvmOverloads constructor(
     bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
     install(WebActionModule.create<ConfigMetadataAction>())
 
-    install(DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
-      isDevelopment = isDevelopment,
-      slug = "config",
-      urlPathPrefix = "/_admin/config/",
-      developmentWebProxyUrl = "http://localhost:3200/",
-      menuLabel = "Config",
-      menuCategory = "Container Admin"
-    ))
+    // Tab v2
+    install(WebActionModule.create<ConfigIndexAction>())
+    install(
+      DashboardModule.createHotwireTab<AdminDashboard, AdminDashboardAccess>(
+        slug = "misk-config",
+        urlPathPrefix = ConfigIndexAction.PATH,
+        menuLabel = "Config",
+        menuCategory = DEFAULT_TAB_CATEGORY
+      )
+    )
+
+    // Tab v1
+    install(
+      DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
+        isDevelopment = isDevelopment,
+        slug = "config",
+        urlPathPrefix = "/_admin/config-v1/",
+        developmentWebProxyUrl = "http://localhost:3200/",
+        menuLabel = "Config v1",
+        menuCategory = DEFAULT_TAB_CATEGORY
+      )
+    )
   }
 }
