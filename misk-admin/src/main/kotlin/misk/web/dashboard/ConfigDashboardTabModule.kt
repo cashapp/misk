@@ -1,6 +1,7 @@
 package misk.web.dashboard
 
 import misk.inject.KAbstractModule
+import misk.jvm.JvmManagementFactoryModule
 import misk.web.WebActionModule
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode.SAFE
@@ -18,6 +19,8 @@ class ConfigDashboardTabModule @JvmOverloads constructor(
   private val mode: ConfigMetadataAction.ConfigTabMode = SAFE,
 ) : KAbstractModule() {
   override fun configure() {
+    install(JvmManagementFactoryModule())
+
     bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
     install(WebActionModule.create<ConfigMetadataAction>())
 
