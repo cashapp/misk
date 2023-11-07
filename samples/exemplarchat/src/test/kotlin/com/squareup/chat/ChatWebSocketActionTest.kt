@@ -13,9 +13,9 @@ import misk.web.FakeWebSocket
 import misk.web.WebActionModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import redis.clients.jedis.JedisPoolConfig
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
+import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest(startService = true)
 class ChatWebSocketActionTest {
@@ -24,7 +24,7 @@ class ChatWebSocketActionTest {
   private val module = Modules.combine(
     MiskTestingServiceModule(),
     DeploymentModule(TESTING),
-    RedisModule(DockerRedis.config, JedisPoolConfig(), useSsl = false),
+    RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false),
     WebActionModule.create<ChatWebSocketAction>()
   )
 
