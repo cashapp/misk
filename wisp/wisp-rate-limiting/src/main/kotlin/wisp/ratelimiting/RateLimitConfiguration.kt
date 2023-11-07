@@ -16,10 +16,12 @@ interface RateLimitConfiguration {
    * configuration governing the rate at which origination files can be processed
    */
   val name: String
+
   /**
    * The amount of tokens added back to the limit bucket every [refillPeriod]
    */
   val refillAmount: Long
+
   /**
    * The period of time over which [refillAmount] tokens are added back to the bucket
    */

@@ -1,6 +1,5 @@
 package wisp.ratelimiting
 
-import java.io.IOException
 import java.time.Instant
 
 /**
@@ -19,8 +18,8 @@ import java.time.Instant
 interface RateLimiter {
   /**
    * Consumes [amount] tokens from the bucket associated with the given key
-   * TODO Confirm the exception type is correct
-   * @throws IOException if there was an error communicating with rate limiter storage
+   * This will raise any exception thrown by the bucket4j proxy manager implementation, e.g.
+   * subclasses of [JedisException] when using the Jedis implementation.
    */
   fun consumeToken(
     key: String,
@@ -30,12 +29,15 @@ interface RateLimiter {
 
   /**
    * Releases [amount] tokens back to the bucket associated with the given key
-   * @throws IOException if there was an error communicating with rate limiter storage
+   * This will raise any exception thrown by the bucket4j proxy manager implementation, e.g.
+   * subclasses of [JedisException] when using the Jedis implementation.
    */
   fun releaseToken(key: String, configuration: RateLimitConfiguration, amount: Long = 1)
 
   /**
    * Executes the given function if a token is available
+   * This will raise any exception thrown by the bucket4j proxy manager implementation, e.g.
+   * subclasses of [JedisException] when using the Jedis implementation.
    */
   fun <T> withToken(
     key: String,
