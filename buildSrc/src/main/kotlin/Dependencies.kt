@@ -87,7 +87,7 @@ object Dependencies {
   @Deprecated("Use jakartaInject", replaceWith = ReplaceWith("jakartaInject"))
   val javaxInject = "javax.inject:javax.inject:1"
   val javaxPersistenceApi = "javax.persistence:javax.persistence-api:2.2"
-  val jedis = "redis.clients:jedis:4.1.1"
+  val jedis = "redis.clients:jedis:4.4.6"
   val jerseyBom = "org.glassfish.jersey:jersey-bom:3.0.2"
   val jettyAlpnServer = "org.eclipse.jetty:jetty-alpn-server"
   val jettyAlpnServerJava = "org.eclipse.jetty:jetty-alpn-java-server"
