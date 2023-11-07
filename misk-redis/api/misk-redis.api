@@ -55,6 +55,19 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 public abstract interface annotation class misk/redis/ForFakeRedis : java/lang/annotation/Annotation {
 }
 
+public final class misk/redis/JedisPoolWithMetrics : redis/clients/jedis/JedisPool {
+	public fun <init> (Lmisk/redis/RedisClientMetrics;Lredis/clients/jedis/JedisPoolConfig;Lmisk/redis/RedisReplicationGroupConfig;)V
+	public fun <init> (Lmisk/redis/RedisClientMetrics;Lredis/clients/jedis/JedisPoolConfig;Lmisk/redis/RedisReplicationGroupConfig;Z)V
+	public fun <init> (Lmisk/redis/RedisClientMetrics;Lredis/clients/jedis/JedisPoolConfig;Lmisk/redis/RedisReplicationGroupConfig;ZZ)V
+	public synthetic fun <init> (Lmisk/redis/RedisClientMetrics;Lredis/clients/jedis/JedisPoolConfig;Lmisk/redis/RedisReplicationGroupConfig;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun getResource ()Ljava/lang/Object;
+	public fun getResource ()Lredis/clients/jedis/Jedis;
+	public synthetic fun returnBrokenResource (Ljava/lang/Object;)V
+	public fun returnBrokenResource (Lredis/clients/jedis/Jedis;)V
+	public synthetic fun returnResource (Ljava/lang/Object;)V
+	public fun returnResource (Lredis/clients/jedis/Jedis;)V
+}
+
 public final class misk/redis/RealRedis : misk/redis/Redis {
 	public static final field Companion Lmisk/redis/RealRedis$Companion;
 	public fun <init> (Lredis/clients/jedis/UnifiedJedis;Lmisk/redis/RedisClientMetrics;)V
