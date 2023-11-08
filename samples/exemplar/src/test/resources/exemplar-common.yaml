@@ -1,0 +1,6 @@
+mysql_data_source:
+  type: MYSQL
+  database: exemplar
+  username: root
+  password: ""
+  migrations_resource: classpath:/migrations
