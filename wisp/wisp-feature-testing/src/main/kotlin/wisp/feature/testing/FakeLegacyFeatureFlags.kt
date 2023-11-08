@@ -380,9 +380,9 @@ constructor(
         value: T,
         attributes: Attributes = defaultAttributes
     ) {
-        val m = moshi().adapter(T::class.java)
-        val jsonValue = { m.toSafeJson(value) }
-        overrideKey<() -> String, T>(feature, key, jsonValue, attributes, { m.fromSafeJson(it())!! })
+        val adapter = moshi().adapter(T::class.java)
+        val jsonValue = { adapter.toSafeJson(value) }
+        overrideKey<() -> String, T>(feature, key, jsonValue, attributes, { adapter.fromSafeJson(it())!! })
     }
 
     @JvmOverloads

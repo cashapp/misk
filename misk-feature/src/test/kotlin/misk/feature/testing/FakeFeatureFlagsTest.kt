@@ -12,7 +12,9 @@ import misk.feature.Feature
 import misk.feature.getEnum
 import misk.feature.getJson
 import jakarta.inject.Inject
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @MiskTest
 internal class FakeFeatureFlagsTest {
@@ -327,17 +329,19 @@ internal class FakeFeatureFlagsTest {
   fun `trackString works`() {
     subject.override(FEATURE, "test")
     assertThat(subject.getString(FEATURE, TOKEN)).isEqualTo("test")
-    var valueReceivedByListenerReceived: String? = null
-    fun listener(newValue: String) {
-      require(valueReceivedByListenerReceived == null)
-      valueReceivedByListenerReceived = newValue
-    }
 
-    subject.trackString(FEATURE, Executors.newSingleThreadExecutor(),  ::listener)
+    val listenerWasCalled = CountDownLatch(1)
+    var valueReceivedByListenerReceived: String? = null
+
+    subject.trackString(FEATURE, Executors.newSingleThreadExecutor()) { newValue ->
+      valueReceivedByListenerReceived = newValue
+      listenerWasCalled.countDown()
+    }
 
     // override the featureflag, this should trigger trackString
     subject.override(FEATURE, "newValue")
-    Thread.sleep(10)
+    listenerWasCalled.await(1, TimeUnit.SECONDS)
+
     assertThat(valueReceivedByListenerReceived).isEqualTo("newValue")
   }
 
@@ -345,17 +349,19 @@ internal class FakeFeatureFlagsTest {
   fun `trackJson works`() {
     subject.overrideJson(FEATURE, JsonFeature("test"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
-    var valueReceivedByListenerReceived: JsonFeature? = null
-    fun listener(newValue: JsonFeature) {
-      require(valueReceivedByListenerReceived == null)
-      valueReceivedByListenerReceived = newValue
-    }
 
-    subject.trackJson(FEATURE, JsonFeature::class.java, Executors.newSingleThreadExecutor(),  ::listener)
+    val listenerWasCalled = CountDownLatch(1)
+    var valueReceivedByListenerReceived: JsonFeature? = null
+
+    subject.trackJson(FEATURE, JsonFeature::class.java, Executors.newSingleThreadExecutor())  { newValue ->
+      valueReceivedByListenerReceived = newValue
+      listenerWasCalled.countDown()
+    }
 
     // override the featureflag, this should trigger trackJson
     subject.overrideJson(FEATURE, JsonFeature("newValue", optional = "some"))
-    Thread.sleep(10)
+    listenerWasCalled.await(1, TimeUnit.SECONDS)
+
     assertThat(valueReceivedByListenerReceived).isEqualTo(JsonFeature("newValue", optional = "some"))
   }
 
