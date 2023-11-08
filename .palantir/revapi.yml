@@ -155,3 +155,11 @@ acceptedBreaks:
         \ ===redis.clients.jedis.JedisPoolConfig===)"
       justification: "New constructor was added to use the new pool config class in\
         \ latest version but kept the old constructor and marked it as deprecated"
+  "2023.10.24.081359-13d4586":
+    com.squareup.misk:misk-admin:
+    - code: "java.class.removed"
+      old: "class misk.web.metadata.jvm.JvmMetadataModule"
+      justification: "There are no downstream usages upon manual verification."
+    - code: "java.class.removed"
+      old: "class misk.web.v2.BaseDashboardV2Module"
+      justification: "There are no downstream usages upon manual verification."
