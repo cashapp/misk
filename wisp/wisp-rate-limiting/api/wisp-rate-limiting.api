@@ -67,11 +67,21 @@ public final class wisp/ratelimiting/RateLimiter$TestConsumptionResult {
 public final class wisp/ratelimiting/RateLimiterMetrics {
 	public static final field ATTEMPT_COUNTER_NAME Ljava/lang/String;
 	public static final field Companion Lwisp/ratelimiting/RateLimiterMetrics$Companion;
+	public static final field LIMIT_AVAILABILITY_DURATION Ljava/lang/String;
+	public static final field LIMIT_CONSUMPTION_DURATION Ljava/lang/String;
+	public static final field LIMIT_RELEASE_DURATION Ljava/lang/String;
+	public static final field LIMIT_RESET_DURATION Ljava/lang/String;
+	public static final field LIMIT_TEST_DURATION Ljava/lang/String;
 	public static final field RATE_LIMIT_TAG Ljava/lang/String;
 	public static final field RESULT_TAG Ljava/lang/String;
 	public static final field TOTAL_CONSUMED_COUNTER_NAME Ljava/lang/String;
 	public fun <init> (Lio/micrometer/core/instrument/MeterRegistry;)V
 	public final fun consumptionAttempts (Lwisp/ratelimiting/RateLimitConfiguration;Lwisp/ratelimiting/RateLimiterMetrics$ConsumptionResult;)Lio/micrometer/core/instrument/Counter;
+	public final fun limitAvailabilityDuration (Lwisp/ratelimiting/RateLimitConfiguration;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun limitConsumptionDuration (Lwisp/ratelimiting/RateLimitConfiguration;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun limitReleaseDuration (Lwisp/ratelimiting/RateLimitConfiguration;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun limitResetDuration (Lwisp/ratelimiting/RateLimitConfiguration;)Lio/micrometer/core/instrument/DistributionSummary;
+	public final fun limitTestDuration (Lwisp/ratelimiting/RateLimitConfiguration;)Lio/micrometer/core/instrument/DistributionSummary;
 	public final fun tokensConsumed (Lwisp/ratelimiting/RateLimitConfiguration;)Lio/micrometer/core/instrument/Counter;
 }
 

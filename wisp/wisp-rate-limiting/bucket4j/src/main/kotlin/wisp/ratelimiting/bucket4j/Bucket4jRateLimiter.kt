@@ -2,6 +2,8 @@ package wisp.ratelimiting.bucket4j
 
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.BucketConfiguration
+import io.github.bucket4j.ConsumptionProbe
+import io.github.bucket4j.EstimationProbe
 import io.github.bucket4j.distributed.BucketProxy
 import io.github.bucket4j.distributed.proxy.ProxyManager
 import io.micrometer.core.instrument.MeterRegistry
@@ -11,6 +13,7 @@ import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.RateLimiterMetrics
 import wisp.ratelimiting.RateLimiterMetrics.ConsumptionResult
 import java.time.Clock
+import kotlin.system.measureTimeMillis
 
 class Bucket4jRateLimiter @JvmOverloads constructor(
   private val bucketProxy: ProxyManager<String>,
@@ -25,8 +28,14 @@ class Bucket4jRateLimiter @JvmOverloads constructor(
     amount: Long
   ): RateLimiter.ConsumptionData {
     val result = try {
-      val bucket = getBucketProxy(key, configuration)
-      bucket.tryConsumeAndReturnRemaining(amount)
+      var consumptionProbe: ConsumptionProbe
+      val millisTaken = measureTimeMillis {
+        val bucket = getBucketProxy(key, configuration)
+        consumptionProbe = bucket.tryConsumeAndReturnRemaining(amount)
+      }
+      metrics.limitConsumptionDuration(configuration).record(millisTaken.toDouble())
+
+      consumptionProbe
     } catch (e: Exception) {
       metrics.consumptionAttempts(configuration, ConsumptionResult.EXCEPTION).increment()
       throw e
@@ -52,28 +61,44 @@ class Bucket4jRateLimiter @JvmOverloads constructor(
     configuration: RateLimitConfiguration,
     amount: Long
   ): RateLimiter.TestConsumptionResult {
-    val bucket = getBucketProxy(key, configuration)
-    val result = bucket.estimateAbilityToConsume(amount)
+    var estimationProbe: EstimationProbe
+    val millisTaken = measureTimeMillis {
+      val bucket = getBucketProxy(key, configuration)
+      estimationProbe = bucket.estimateAbilityToConsume(amount)
+    }
+    metrics.limitTestDuration(configuration).record(millisTaken.toDouble())
+
     return RateLimiter.TestConsumptionResult(
-      couldHaveConsumed = result.canBeConsumed(),
-      remaining = result.remainingTokens,
-      resetTime = clock.instant().plusNanos(result.nanosToWaitForRefill)
+      couldHaveConsumed = estimationProbe.canBeConsumed(),
+      remaining = estimationProbe.remainingTokens,
+      resetTime = clock.instant().plusNanos(estimationProbe.nanosToWaitForRefill)
     )
   }
 
   override fun releaseToken(key: String, configuration: RateLimitConfiguration, amount: Long) {
-    val bucket = getBucketProxy(key, configuration)
-    bucket.addTokens(amount)
+    val millisTaken = measureTimeMillis {
+      val bucket = getBucketProxy(key, configuration)
+      bucket.addTokens(amount)
+    }
+    metrics.limitReleaseDuration(configuration).record(millisTaken.toDouble())
   }
 
   override fun availableTokens(key: String, configuration: RateLimitConfiguration): Long {
-    val bucket = getBucketProxy(key, configuration)
-    return bucket.availableTokens
+    var availableTokens: Long
+    val millisTaken = measureTimeMillis {
+      val bucket = getBucketProxy(key, configuration)
+      availableTokens = bucket.availableTokens
+    }
+    metrics.limitAvailabilityDuration(configuration).record(millisTaken.toDouble())
+    return availableTokens
   }
 
   override fun resetBucket(key: String, configuration: RateLimitConfiguration) {
-    val bucket = getBucketProxy(key, configuration)
-    bucket.reset()
+    val millisTaken = measureTimeMillis {
+      val bucket = getBucketProxy(key, configuration)
+      bucket.reset()
+    }
+    metrics.limitResetDuration(configuration).record(millisTaken.toDouble())
   }
 
   private fun getBucketProxy(key: String, configuration: RateLimitConfiguration): BucketProxy {
