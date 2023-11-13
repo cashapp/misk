@@ -46,13 +46,17 @@ class MySQLBucket4jRateLimiterTests {
       val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
       with(result) {
         assertThat(didConsume).isTrue()
-        assertThat(remaining).isEqualTo(4L - it)
+        assertThat(remaining)
+          .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+          .isEqualTo(4L - it)
       }
     }
     val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
     with(result) {
       assertThat(didConsume).isFalse()
-      assertThat(remaining).isZero()
+      assertThat(remaining)
+        .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+        .isZero()
     }
   }
 

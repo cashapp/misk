@@ -46,13 +46,17 @@ class RedisRateLimiterTest {
       val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
       with(result) {
         assertThat(didConsume).isTrue()
-        assertThat(remaining).isEqualTo(4L - it)
+        assertThat(remaining)
+          .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+          .isEqualTo(4L - it)
       }
     }
     val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
     with(result) {
       assertThat(didConsume).isFalse()
-      assertThat(remaining).isZero()
+      assertThat(remaining)
+        .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+        .isZero()
     }
   }
 
@@ -82,7 +86,9 @@ class RedisRateLimiterTest {
     }
     assertThat(result.consumptionData.didConsume).isFalse()
     assertThat(result.result).isNull()
-    assertThat(result.consumptionData.remaining).isZero()
+    assertThat(result.consumptionData.remaining)
+      .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+      .isZero()
     assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
 
     // Elapse enough time that the next request refills the bucket

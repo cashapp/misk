@@ -46,7 +46,9 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
       val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
       with(result) {
         assertThat(didConsume).isTrue()
-        assertThat(remaining).isEqualTo(4L - it)
+        assertThat(remaining)
+          .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+          .isEqualTo(4L - it)
       }
       assertThat(consumedMetrics.count()).isEqualTo(it.toDouble() + 1.0)
       assertThat(rejectedMetrics.count()).isZero()
@@ -56,11 +58,43 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
     val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
     with(result) {
       assertThat(didConsume).isFalse()
-      assertThat(remaining).isZero()
+      assertThat(remaining)
+        .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+        .isZero()
     }
     assertThat(consumedMetrics.count()).isEqualTo(TestRateLimitConfig.capacity.toDouble())
     assertThat(rejectedMetrics.count()).isOne()
     assertThat(exceptionMetrics.count()).isZero()
+  }
+
+  @Test
+  fun `testConsumptionAttempt does not affect bucket state`() {
+    repeat(TestRateLimitConfig.capacity.toInt()) {
+      val initiallyAvailable = rateLimiter.availableTokens(KEY, TestRateLimitConfig)
+      val testConsumptionResult = rateLimiter.testConsumptionAttempt(KEY, TestRateLimitConfig)
+      val availableAfterTest = rateLimiter.availableTokens(KEY, TestRateLimitConfig)
+      val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
+      assertThat(initiallyAvailable)
+        .isEqualTo(availableAfterTest)
+        // Bucket4j estimation returns the actual amount remaining, not the amount remaining if
+        // test consumption had been a real consumption
+        .isEqualTo(testConsumptionResult.remaining)
+      with(result) {
+        assertThat(didConsume)
+          .isEqualTo(testConsumptionResult.couldHaveConsumed)
+          .isTrue()
+        assertThat(remaining)
+          .isEqualTo(4L - it)
+      }
+      // Test consumptions should not affect metric emission
+      assertThat(consumedMetrics.count()).isEqualTo(it.toDouble() + 1.0)
+      assertThat(rejectedMetrics.count()).isZero()
+      assertThat(exceptionMetrics.count()).isZero()
+    }
+
+    val testConsumptionResult = rateLimiter.testConsumptionAttempt(KEY, TestRateLimitConfig)
+    assertThat(testConsumptionResult.couldHaveConsumed).isFalse()
+    assertThat(testConsumptionResult.remaining).isZero()
   }
 
   @Test
@@ -96,7 +130,9 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
     }
     assertThat(result.consumptionData.didConsume).isFalse()
     assertThat(result.result).isNull()
-    assertThat(result.consumptionData.remaining).isZero()
+    assertThat(result.consumptionData.remaining)
+      .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+      .isZero()
 
     assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
 
@@ -106,6 +142,51 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
 
     // Elapse enough time that the next request refills the bucket
     fakeClock.add(TestRateLimitConfig.refillPeriod)
+    repeat(TestRateLimitConfig.capacity.toInt()) {
+      rateLimiter.withToken(KEY, TestRateLimitConfig) {
+        counter++
+      }
+    }
+    assertThat(counter)
+      .isEqualTo(10)
+      .isEqualTo(TestRateLimitConfig.capacity * 2)
+
+    assertThat(consumedMetrics.count()).isEqualTo(10.0)
+    assertThat(rejectedMetrics.count()).isOne()
+    assertThat(exceptionMetrics.count()).isZero()
+  }
+
+  @Test
+  fun `resetting the bucket permits consumption of full capacity`() {
+    var counter = 0
+    repeat(TestRateLimitConfig.capacity.toInt()) {
+      rateLimiter.withToken(KEY, TestRateLimitConfig) {
+        counter++
+      }
+    }
+    assertThat(consumedMetrics.count()).isEqualTo(TestRateLimitConfig.capacity.toDouble())
+    assertThat(rejectedMetrics.count()).isZero()
+    assertThat(exceptionMetrics.count()).isZero()
+
+    val result = rateLimiter.withToken(KEY, TestRateLimitConfig) {
+      counter++
+    }
+    assertThat(result.consumptionData.didConsume).isFalse()
+    assertThat(result.result).isNull()
+    assertThat(result.consumptionData.remaining)
+      .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+      .isZero()
+
+    assertThat(counter).isEqualTo(TestRateLimitConfig.capacity)
+
+    assertThat(consumedMetrics.count()).isEqualTo(TestRateLimitConfig.capacity.toDouble())
+    assertThat(rejectedMetrics.count()).isOne()
+    assertThat(exceptionMetrics.count()).isZero()
+
+    // Reset the bucket to refill it entirely
+    rateLimiter.resetBucket(KEY, TestRateLimitConfig)
+    assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
+      .isEqualTo(TestRateLimitConfig.capacity)
     repeat(TestRateLimitConfig.capacity.toInt()) {
       rateLimiter.withToken(KEY, TestRateLimitConfig) {
         counter++

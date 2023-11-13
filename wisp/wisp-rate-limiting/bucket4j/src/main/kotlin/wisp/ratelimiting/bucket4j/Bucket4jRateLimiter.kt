@@ -47,9 +47,33 @@ class Bucket4jRateLimiter @JvmOverloads constructor(
     )
   }
 
+  override fun testConsumptionAttempt(
+    key: String,
+    configuration: RateLimitConfiguration,
+    amount: Long
+  ): RateLimiter.TestConsumptionResult {
+    val bucket = getBucketProxy(key, configuration)
+    val result = bucket.estimateAbilityToConsume(amount)
+    return RateLimiter.TestConsumptionResult(
+      couldHaveConsumed = result.canBeConsumed(),
+      remaining = result.remainingTokens,
+      resetTime = clock.instant().plusNanos(result.nanosToWaitForRefill)
+    )
+  }
+
   override fun releaseToken(key: String, configuration: RateLimitConfiguration, amount: Long) {
     val bucket = getBucketProxy(key, configuration)
     bucket.addTokens(amount)
+  }
+
+  override fun availableTokens(key: String, configuration: RateLimitConfiguration): Long {
+    val bucket = getBucketProxy(key, configuration)
+    return bucket.availableTokens
+  }
+
+  override fun resetBucket(key: String, configuration: RateLimitConfiguration) {
+    val bucket = getBucketProxy(key, configuration)
+    bucket.reset()
   }
 
   private fun getBucketProxy(key: String, configuration: RateLimitConfiguration): BucketProxy {
