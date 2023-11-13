@@ -12,6 +12,9 @@ import misk.feature.Feature
 import misk.feature.getEnum
 import misk.feature.getJson
 import jakarta.inject.Inject
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @MiskTest
 internal class FakeFeatureFlagsTest {
@@ -321,4 +324,45 @@ internal class FakeFeatureFlagsTest {
     TYRANNOSAURUS,
     TALARURUS
   }
+
+  @Test
+  fun `trackString works`() {
+    subject.override(FEATURE, "test")
+    assertThat(subject.getString(FEATURE, TOKEN)).isEqualTo("test")
+
+    val listenerWasCalled = CountDownLatch(1)
+    var valueReceivedByListenerReceived: String? = null
+
+    subject.trackString(FEATURE, Executors.newSingleThreadExecutor()) { newValue ->
+      valueReceivedByListenerReceived = newValue
+      listenerWasCalled.countDown()
+    }
+
+    // override the featureflag, this should trigger trackString
+    subject.override(FEATURE, "newValue")
+    listenerWasCalled.await(1, TimeUnit.SECONDS)
+
+    assertThat(valueReceivedByListenerReceived).isEqualTo("newValue")
+  }
+
+  @Test
+  fun `trackJson works`() {
+    subject.overrideJson(FEATURE, JsonFeature("test"))
+    assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
+
+    val listenerWasCalled = CountDownLatch(1)
+    var valueReceivedByListenerReceived: JsonFeature? = null
+
+    subject.trackJson(FEATURE, JsonFeature::class.java, Executors.newSingleThreadExecutor())  { newValue ->
+      valueReceivedByListenerReceived = newValue
+      listenerWasCalled.countDown()
+    }
+
+    // override the featureflag, this should trigger trackJson
+    subject.overrideJson(FEATURE, JsonFeature("newValue", optional = "some"))
+    listenerWasCalled.await(1, TimeUnit.SECONDS)
+
+    assertThat(valueReceivedByListenerReceived).isEqualTo(JsonFeature("newValue", optional = "some"))
+  }
+
 }
