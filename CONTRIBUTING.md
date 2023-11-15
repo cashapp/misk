@@ -62,7 +62,7 @@ introducing new arguments with default values that is accompanied by `@JvmOverlo
 
 To accept a break identified by revapi, run the command suggested by the plugin:
 ```shell
-./gradle revapiAcceptBreak --justification "{why this is ok}" \
+gradle revapiAcceptBreak --justification "{why this is ok}" \
 --code "{revapi check code}" \
 --old "{optional revapi description of old element}" \
 --new "{optional revapi description of new element}"
