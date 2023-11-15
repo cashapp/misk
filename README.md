@@ -1,6 +1,5 @@
 <img src="https://github.com/cashapp/misk/raw/master/misk.png" width="300">
 
-
 * Releases
   * See most recent [public build][snap]
   * [change log][changelog]
@@ -14,7 +13,6 @@
 * Related Projects
   * [misk-web][miskweb]
   * [wisp](./wisp/README.md): wisp is now a part of Misk
- 
 
 # Overview
 ## What is Misk
