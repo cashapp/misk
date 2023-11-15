@@ -28,11 +28,35 @@ interface RateLimiter {
   ): ConsumptionData
 
   /**
+   * This tests whether [amount] tokens are available in the bucket associated with the given key.
+   * It is essentially a dry run of [consumeToken].
+   * Note that this data may be stale when it comes back, as time has elapsed and other pods
+   * could have taken tokens in the meantime.
+   */
+  fun testConsumptionAttempt(
+    key: String,
+    configuration: RateLimitConfiguration,
+    amount: Long = 1
+  ): TestConsumptionResult
+
+  /**
    * Releases [amount] tokens back to the bucket associated with the given key
    * This will raise any exception thrown by the bucket4j proxy manager implementation, e.g.
    * subclasses of [JedisException] when using the Jedis implementation.
    */
   fun releaseToken(key: String, configuration: RateLimitConfiguration, amount: Long = 1)
+
+  /**
+   * Returns how many tokens remain in the bucket.
+   * Note that this data may be stale when it comes back, as time has elapsed and other pods
+   * could have taken tokens in the meantime.
+   */
+  fun availableTokens(key: String, configuration: RateLimitConfiguration): Long
+
+  /**
+   * Resets the bucket back to its maximum capacity
+   */
+  fun resetBucket(key: String, configuration: RateLimitConfiguration)
 
   /**
    * Executes the given function if a token is available
@@ -59,6 +83,23 @@ interface RateLimiter {
     val didConsume: Boolean,
     /**
      * Count of tokens remaining in the bucket
+     */
+    val remaining: Long,
+    /**
+     * The time at which the bucket will be reset.
+     */
+    val resetTime: Instant
+  )
+
+  data class TestConsumptionResult(
+    /**
+     * Whether a token could have been consumed
+     */
+    val couldHaveConsumed: Boolean,
+    /**
+     * Count of tokens remaining in the bucket
+     * Note - this is the actual amount remaining,
+     * not the amount that would be remaining if the test consumption had been a real consumption
      */
     val remaining: Long,
     /**
