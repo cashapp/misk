@@ -1,5 +1,6 @@
 package misk.web.v2
 
+import jakarta.inject.Inject
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
@@ -12,7 +13,6 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
 import java.net.HttpURLConnection.HTTP_MOVED_TEMP
-import javax.inject.Inject
 
 internal class DashboardV2RedirectAction @Inject constructor(
   @JvmSuppressWildcards private val clientHttpCall: ActionScoped<HttpCall>,

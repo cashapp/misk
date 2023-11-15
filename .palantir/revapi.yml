@@ -163,3 +163,21 @@ acceptedBreaks:
     - code: "java.class.removed"
       old: "class misk.web.v2.BaseDashboardV2Module"
       justification: "There are no downstream usages upon manual verification."
+  "2023.11.07.125331-45dfef7":
+    app.cash.wisp:wisp-rate-limiting:
+    - code: "java.method.addedToInterface"
+      new: "method long wisp.ratelimiting.RateLimiter::availableTokens(java.lang.String,\
+        \ wisp.ratelimiting.RateLimitConfiguration)"
+      justification: "No other implementations"
+    - code: "java.method.addedToInterface"
+      new: "method void wisp.ratelimiting.RateLimiter::resetBucket(java.lang.String,\
+        \ wisp.ratelimiting.RateLimitConfiguration)"
+      justification: "No other implementations"
+    - code: "java.method.addedToInterface"
+      new: "method wisp.ratelimiting.RateLimiter.ConsumptionData wisp.ratelimiting.RateLimiter::consumeTokenIdempotently(java.lang.String,\
+        \ wisp.ratelimiting.RateLimitConfiguration, long, java.lang.String)"
+      justification: "No other implementations"
+    - code: "java.method.addedToInterface"
+      new: "method wisp.ratelimiting.RateLimiter.TestConsumptionResult wisp.ratelimiting.RateLimiter::testConsumptionAttempt(java.lang.String,\
+        \ wisp.ratelimiting.RateLimitConfiguration, long)"
+      justification: "No other implementations"
