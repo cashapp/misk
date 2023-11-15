@@ -42,11 +42,33 @@ vitess/base
 
 ## Breaking changes
 
-We use the [Kotlin binary compatibility validator][2] to check for API changes. If 
-a change contains an API change and breaks the build, run the `:apiDump` task and 
-commit the resulting changes to the `.api` files. `.api` files should not have 
-removals and additions in the same change so that downstream apps do not immediately
-run into backwards-compatibility issues.
+We integrate both [Kotlin Binary Compatibility Validator][2] and [Revapi][3] into our build 
+pipeline to automatically detect breaking changes that could affect existing clients.
+
+### Kotlin Binary Compatibility Validator
+This tool checks for changes to the public binary API. The plugin generates a dump of the
+current API and compares it to the previous version. If a binary incompatibility is detected, 
+the build will fail. If the change is intentional, you can run the `:apiDump` task and commit 
+the resulting changes to the `.api` files. `.api` files should not have removals and additions 
+in the same change so that downstream apps do not immediately run into backwards-compatibility 
+issues.
+
+This runs as part of `gradle check` task, or you can call directly with `gradle apiCheck`.
+
+### Revapi
+Similarly, revapi detects binary compatibility changes by analyzing API differences. Unlike the 
+binary-compatibility-validator, this does not complain when adding new methods or when 
+introducing new arguments with default values that is accompanied by `@JvmOverloads`.
+
+To accept a break identified by revapi, run the command suggested by the plugin:
+```shell
+./gradle revapiAcceptBreak --justification "{why this is ok}" \
+--code "{revapi check code}" \
+--old "{optional revapi description of old element}" \
+--new "{optional revapi description of new element}"
+```
+This will add an entry in [.plantir/revapi.yml](.palantir/revapi.yml) to ignore future breaks of the same type.
 
  [1]: https://spreadsheets.google.com/spreadsheet/viewform?formkey=dDViT2xzUHAwRkI3X3k5Z0lQM091OGc6MQ&ndplr=1
  [2]: https://github.com/Kotlin/binary-compatibility-validator
+ [3]: https://github.com/palantir/gradle-revapi
