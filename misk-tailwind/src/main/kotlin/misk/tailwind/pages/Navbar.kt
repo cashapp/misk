@@ -118,7 +118,9 @@ fun TagConsumer<*>.Navbar(
       // +"""<!-- Sidebar component, swap this element with another sidebar if you like -->"""
       div("flex grow flex-col gap-y-5 overflow-y-auto bg-black/10 px-6 ring-1 ring-white/5") {
         div("flex h-16 shrink-0 items-center") {
-          a(homeHref) {
+          a {
+            href = homeHref
+
             img(classes = "h-8 w-auto") {
               src = "/static/favicon.ico"
               alt = "Dashboard Logo"

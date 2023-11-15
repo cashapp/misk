@@ -65,7 +65,7 @@ class DashboardPageLayout @Inject constructor(
     val dashboardTab = allTabs
       // TODO make this startsWith after v2 lands
       .firstOrNull { path.contains(it.url_path_prefix) }
-    val menuSections = toMenuSections(
+    val menuSections = buildMenuSections(
       allNavbarItem.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
       allTabs.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
       path
@@ -93,49 +93,46 @@ class DashboardPageLayout @Inject constructor(
     }
   }
 
-  private fun toMenuSections(
+  private fun buildMenuSections(
     navbarItems: List<DashboardNavbarItem>,
     dashboardTabs: List<DashboardTab>,
     currentPath: String,
   ) = if (navbarItems.isNotEmpty()) {
-    listOf(
-      MenuSection(
-        title = "Links",
-        links = navbarItems
-          // Filter out tabs so duplicate links aren't showing up in the nav menu
-          .filterNot { dashboardTabs.any { tab -> it.item.contains(tab.slug) } }
-          .map {
-            Link(href = "", label = "", rawHtml = it.item)
-          }
+    val links = navbarItems
+      // Filter out tabs so duplicate links aren't showing up in the nav menu
+      .filterNot { dashboardTabs.any { tab -> it.item.contains(tab.slug) } }
+      .map {
+        Link(href = "", label = "", rawHtml = it.item)
+      }
+    if (links.isNotEmpty()) {
+      listOf(
+        MenuSection(
+          title = "Links",
+          links = links
+        )
       )
-    )
+    } else {
+      listOf()
+    }
   } else {
     listOf()
-  } +
-    dashboardTabs.groupBy { it.menuCategory }.map { (sectionTitle, dashboardTabs) ->
-      MenuSection(
-        title = sectionTitle,
-        links = dashboardTabs.map {
-          Link(
-            label = it.menuLabel,
-            // TODO remove /_admin/ hack when old dashboard is removed
-            href = if (it.menuUrl == "$ADMIN_DASHBOARD_PATH/" || !it.menuUrl.contains(
-                "$ADMIN_DASHBOARD_PATH/"
-              )
-            ) it.menuUrl else "$BETA_PREFIX${it.menuUrl}",
-            // TODO remove /_admin/ hack when old dashboard is removed
-            isSelected = if (it.menuUrl == "$ADMIN_DASHBOARD_PATH/") false else currentPath.startsWith(
-              "$BETA_PREFIX${it.menuUrl}"
-            ),
-            isPageNavigation = true,
-          )
-        }
-      )
-    }
+  } + dashboardTabs.groupBy { it.menuCategory }.map { (sectionTitle, dashboardTabs) ->
+    MenuSection(
+      title = sectionTitle,
+      links = dashboardTabs.map {
+        Link(
+          label = it.menuLabel,
+          href = it.menuUrl,
+          isSelected = currentPath.startsWith(it.menuUrl),
+        )
+      }
+    )
+  }
 
   companion object {
     const val ADMIN_DASHBOARD_PATH = "/_admin"
-    const val BETA_PREFIX = "/v2"
 
+    @Deprecated("v2 dashboard is now available at /_admin/ so BETA_PREFIX variable will be removed in a future release")
+    const val BETA_PREFIX = "/v2"
   }
 }

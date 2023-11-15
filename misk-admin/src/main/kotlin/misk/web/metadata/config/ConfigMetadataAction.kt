@@ -10,10 +10,10 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
-import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.config.Config
 import wisp.deployment.Deployment
 import jakarta.inject.Singleton
+import misk.web.metadata.jvm.JvmMetadataAction
 
 @Singleton
 class ConfigMetadataAction @Inject constructor(

@@ -1,11 +1,13 @@
 package misk.web.dashboard
 
 /** Per dashboard customization of the navbar theme */
+@Deprecated("DashboardTheme is no longer supported in the new v2 dashboard and will be removed")
 data class DashboardTheme(
   val dashboard_slug: String,
   val theme: MiskWebTheme,
 )
 
+@Deprecated("DashboardTheme is no longer supported in the new v2 dashboard and will be removed")
 inline fun <reified DA : Annotation> DashboardTheme(
   theme: MiskWebTheme
 ) = DashboardTheme(
@@ -17,6 +19,7 @@ inline fun <reified DA : Annotation> DashboardTheme(
 /**
  * Matches the Misk-Web Theme interface  in @misk/core/src/utilities/theme.ts
  */
+@Deprecated("MiskWebTheme is no longer supported in the new v2 dashboard and will be removed")
 data class MiskWebTheme(
   val bannerLinkHover: String,
   val bannerText: String,
@@ -49,6 +52,7 @@ data class MiskWebTheme(
   }
 }
 
+@Deprecated("EnvironmentToColorLookup is no longer supported in the new v2 dashboard and will be removed")
 data class EnvironmentToColorLookup(
   val default: String,
   val DEVELOPMENT: String,

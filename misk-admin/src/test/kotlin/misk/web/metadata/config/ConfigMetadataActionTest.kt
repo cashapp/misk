@@ -6,13 +6,13 @@ import misk.config.Secret
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.metadata.MetadataTestingModule
-import misk.web.metadata.jvm.JvmMetadataAction
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
+import misk.web.metadata.jvm.JvmMetadataAction
 import kotlin.test.assertEquals
 
 @MiskTest(startService = true)

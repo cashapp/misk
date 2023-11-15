@@ -2,6 +2,8 @@ package misk.web.metadata.jvm
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.moshi.adapter
 import misk.web.Get
 import misk.web.RequestContentType
@@ -10,8 +12,6 @@ import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import java.lang.management.RuntimeMXBean
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /**
  * Conveys information about the current JVM
