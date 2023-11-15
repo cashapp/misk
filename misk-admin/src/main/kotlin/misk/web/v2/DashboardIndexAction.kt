@@ -32,7 +32,7 @@ class DashboardIndexAction @Inject constructor(
   private val allDashboardIndexBlocks: List<DashboardIndexBlock>,
   private val deployment: Deployment,
 ) : WebAction {
-  @Get("/")
+  @Get("/{rest:.*}")
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Unauthenticated
   fun get(): String = dashboardPageLayout

@@ -8,6 +8,7 @@ import misk.web.metadata.DashboardMetadataAction
 import misk.web.metadata.ServiceMetadataAction
 import misk.web.v2.DashboardIndexAccessBlock
 import misk.web.v2.DashboardIndexBlock
+import misk.web.v2.DashboardV2RedirectAction
 
 /**
  * Installs base functionality for the Admin Dashboard including:
@@ -31,6 +32,9 @@ class BaseDashboardModule(
     // Add metadata actions to support dashboards
     install(WebActionModule.create<DashboardMetadataAction>())
     install(WebActionModule.create<ServiceMetadataAction>())
+
+    // Redirect from old beta path /v2/_admin/ to main admin dashboard /_admin/
+    install(WebActionModule.create<DashboardV2RedirectAction>())
 
     // Show helpful Not Found exceptions for missing Misk Web tabs in v2 dashboard
     install(WebActionModule.create<MiskWebTabIndexAction>())
