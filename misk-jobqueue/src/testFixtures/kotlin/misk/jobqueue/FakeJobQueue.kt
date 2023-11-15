@@ -1,5 +1,6 @@
 package misk.jobqueue
 
+import com.google.common.collect.Queues
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.hibernate.Gid
@@ -14,6 +15,8 @@ import java.util.concurrent.PriorityBlockingQueue
 import jakarta.inject.Inject
 import com.google.inject.Provider
 import jakarta.inject.Singleton
+import java.util.concurrent.LinkedBlockingQueue
+import kotlin.jvm.Throws
 
 /**
  * A fake implementation of [JobQueue] and [FakeTransactionalJobQueue] intended for testing.
@@ -37,7 +40,25 @@ class FakeJobQueue @Inject constructor(
 ) : JobQueue, TransactionalJobQueue {
   private val jobQueues = ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>()
   private val deadletteredJobs = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
+  private val failureJobQueues = ConcurrentHashMap<QueueName, LinkedBlockingQueue<Exception>>()
+  private val failureJobQueue = LinkedBlockingQueue<Exception>()
 
+  //TODO(paigepark) add comment
+  fun pushFailure(
+    e: Exception,
+    queueName: QueueName? = null
+  ) {
+    queueName?.let { failureJobQueues.getOrPut(it, ::LinkedBlockingQueue).add(e) } ?: failureJobQueue.add(e)
+  }
+
+  private fun nextFailure(queueName: QueueName?): Exception? {
+    return queueName?.let { failureJobQueues.get(it)?.poll()} ?: failureJobQueue.poll()
+  }
+
+  @Throws
+  private fun throwIfQueuedFailure(queueName: QueueName?) {
+    nextFailure(queueName)?.let {throw(it)}
+  }
   override fun enqueue(
     session: Session,
     gid: Gid<*, *>,
@@ -59,6 +80,7 @@ class FakeJobQueue @Inject constructor(
     attributes: Map<String, String>
   ) {
     session.onPostCommit {
+      throwIfQueuedFailure(queueName)
       enqueue(queueName, body, idempotenceKey, deliveryDelay, attributes)
     }
   }
@@ -70,6 +92,7 @@ class FakeJobQueue @Inject constructor(
     deliveryDelay: Duration?,
     attributes: Map<String, String>
   ) {
+    throwIfQueuedFailure(queueName)
     val id = tokenGenerator.generate("fakeJobQueue")
     val job =
       FakeJob(queueName, id, idempotenceKey, body, attributes, clock.instant(), deliveryDelay)
