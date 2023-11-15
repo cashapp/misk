@@ -813,10 +813,6 @@ public final class misk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse$Co
 	public final fun create (Ljava/lang/management/RuntimeMXBean;)Lmisk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse;
 }
 
-public final class misk/web/metadata/jvm/JvmMetadataModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
 public final class misk/web/metadata/webaction/WebActionMetadataAction : misk/web/actions/WebAction {
 	public fun <init> (Lmisk/web/metadata/webaction/WebActionMetadataList;)V
 	public final fun getAll ()Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;
@@ -832,10 +828,6 @@ public final class misk/web/metadata/webaction/WebActionMetadataAction$Response 
 	public final fun getWebActionMetadata ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/web/v2/BaseDashboardV2Module : misk/inject/KAbstractModule {
-	public fun <init> ()V
 }
 
 public final class misk/web/v2/DashboardHotwireTabAction : misk/web/actions/WebAction {
@@ -898,6 +890,10 @@ public final class misk/web/v2/DashboardPageLayout {
 }
 
 public final class misk/web/v2/DashboardPageLayout$Companion {
+}
+
+public final class misk/web/v2/NavbarModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
 }
 
 public final class misk/web/v2/WrapperKt {

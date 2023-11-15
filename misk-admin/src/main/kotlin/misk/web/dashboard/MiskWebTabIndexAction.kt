@@ -30,7 +30,7 @@ class MiskWebTabIndexAction @Inject constructor(
   @AdminDashboardAccess
   fun get(@PathParam slug: String?, @PathParam rest: String?): String {
     val dashboardTab = dashboardTabs.firstOrNull { slug == it.slug }
-      ?: throw NotFoundException("No tab found for slug: $slug")
+      ?: throw NotFoundException("No Misk-Web tab found for slug: $slug")
     // TODO remove this hack when new Web Actions tab lands and old ones removed, v1 and v2 are in the same web-actions tab
     val normalizedSlug = if (dashboardTab.slug == "web-actions-v1") "web-actions" else dashboardTab.slug
     return buildHtml {

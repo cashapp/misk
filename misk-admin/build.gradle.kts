@@ -39,7 +39,6 @@ dependencies {
 sourceSets {
   val main by getting {
     resources.srcDir(listOf(
-      "web/tabs/admin-dashboard/lib",
       "web/tabs/config/lib",
       "web/tabs/database/lib",
       "web/tabs/web-actions/lib"
