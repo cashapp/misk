@@ -43,7 +43,13 @@ class FakeJobQueue @Inject constructor(
   private val failureJobQueues = ConcurrentHashMap<QueueName, LinkedBlockingQueue<Exception>>()
   private val failureJobQueue = LinkedBlockingQueue<Exception>()
 
-  //TODO(paigepark) add comment
+  /**
+   * pushFailure is used to cause the next enqueue/batchEnqueue call to the job queue to throw.
+   * When queueName is omitted, any enqueue will fail. Otherwise, only enqueues to the specific
+   * queueName will throw the pushed exception.
+   *
+   * pushFailure can be used multiple times to queue up multiple failures
+   */
   fun pushFailure(
     e: Exception,
     queueName: QueueName? = null
@@ -57,7 +63,7 @@ class FakeJobQueue @Inject constructor(
 
   @Throws
   private fun throwIfQueuedFailure(queueName: QueueName?) {
-    nextFailure(queueName)?.let {throw(it)}
+    nextFailure(queueName)?.let { throw(it) }
   }
   override fun enqueue(
     session: Session,
