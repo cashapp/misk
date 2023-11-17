@@ -88,6 +88,18 @@ class ExemplarDashboardModule : KAbstractModule() {
         menuCategory = "Admin Tools"
       )
     )
+
+
+    // TODO force it into Hotwire for now to see if this will work, otherwise need to manually hit their endpoint s2s which means more complex auth
+    install(
+      DashboardModule.createMenuLink<>()<AdminDashboard, AdminDashboardAccess>(
+        slug = "monitor-checkup",
+        urlPathPrefix = "/_admin/cash-eng/monitor-checkup/",
+        iframePath = "https://monitor-checkup.stage.sqprod.co/service/cash-postmaster",
+        menuLabel = "Monitor Checkup",
+        menuCategory = "Cash Eng"
+      )
+    )
   }
 }
 
