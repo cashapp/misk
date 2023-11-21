@@ -9,11 +9,12 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.aws2DynamodbEnhanced)
   api(Dependencies.kotlinLogging)
   api(project(":misk-clustering"))
   api(project(":misk-inject"))
+  api(project(":wisp:wisp-config"))
   implementation(Dependencies.aws2Dynamodb)
+  implementation(Dependencies.aws2DynamodbEnhanced)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
   implementation(Dependencies.jakartaInject)
