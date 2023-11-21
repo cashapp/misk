@@ -94,7 +94,6 @@ object Dependencies {
   val jettyBom = "org.eclipse.jetty:jetty-bom:10.0.15"
   val jettyHttp = "org.eclipse.jetty:jetty-http"
   val jettyHttp2 = "org.eclipse.jetty.http2:http2-server"
-  val jettyHttp2Common = "org.eclipse.jetty.http2:http2-common"
   val jettyIo = "org.eclipse.jetty:jetty-io"
   val jettyServer = "org.eclipse.jetty:jetty-server"
   val jettyServlet = "org.eclipse.jetty:jetty-servlet"
