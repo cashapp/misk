@@ -5,7 +5,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey
 
 @DynamoDbBean
-class DyClusterMember {
+internal class DyClusterMember {
   @get:DynamoDbPartitionKey
   var name: String? = null
 
