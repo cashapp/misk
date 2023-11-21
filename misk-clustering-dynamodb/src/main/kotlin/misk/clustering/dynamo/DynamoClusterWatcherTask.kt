@@ -40,7 +40,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   private val podName = System.getenv("MY_POD_NAME")
 
   override fun startUp() {
-    taskQueue.scheduleWithBackoff(timeBetweenRuns = Duration.ofSeconds(dynamoClusterConfig.update_frequency)) {
+    taskQueue.scheduleWithBackoff(timeBetweenRuns = Duration.ofSeconds(dynamoClusterConfig.update_frequency_seconds)) {
       run()
     }
   }
@@ -54,7 +54,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
     return Status.OK
   }
 
-  internal fun updateOurselfInDynamo() {
+  private fun updateOurselfInDynamo() {
     val (duration, _) = timed {
       val self = dynamoCluster.snapshot.self.name
       val member = DyClusterMember()
@@ -70,7 +70,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   internal fun recordCurrentDynamoCluster() {
     val (duration, _) = timed {
       val members = mutableSetOf<Member>()
-      val threshold = clock.instant().minusSeconds(dynamoClusterConfig.stale_threshold).toEpochMilli()
+      val threshold = clock.instant().minusSeconds(dynamoClusterConfig.stale_threshold_seconds).toEpochMilli()
       val request = ScanEnhancedRequest.builder()
         .consistentRead(true)
         .filterExpression(
