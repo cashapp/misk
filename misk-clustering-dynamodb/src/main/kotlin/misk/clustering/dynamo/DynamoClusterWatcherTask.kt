@@ -36,7 +36,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   private val enhancedClient = DynamoDbEnhancedClient.builder()
     .dynamoDbClient(ddb)
     .build()
-  private val table = enhancedClient.table("misk-cluster-members", TABLE_SCHEMA)
+  private val table = enhancedClient.table(dynamoClusterConfig.table_name, TABLE_SCHEMA)
   private val podName = System.getenv("MY_POD_NAME")
 
   override fun startUp() {
