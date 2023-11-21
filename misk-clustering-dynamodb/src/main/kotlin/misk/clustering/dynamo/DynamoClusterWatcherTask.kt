@@ -31,21 +31,27 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   private val clock: Clock,
   private val clusterWeightProvider: ClusterWeightProvider,
   private val dynamoCluster: DynamoCluster,
+  private val dynamoClusterConfig: DynamoClusterConfig,
 ) : AbstractIdleService() {
   private val enhancedClient = DynamoDbEnhancedClient.builder()
     .dynamoDbClient(ddb)
     .build()
   private val table = enhancedClient.table("misk-cluster-members", TABLE_SCHEMA)
+  private val podName = System.getenv("MY_POD_NAME")
 
   override fun startUp() {
-    taskQueue.scheduleWithBackoff(timeBetweenRuns = Duration.ofSeconds(30)) {
-      // If we're not active, we don't want to mark ourselves as part of the active cluster.
-      if (clusterWeightProvider.get() > 0) {
-        updateOurselfInDynamo()
-      }
-      recordCurrentDynamoCluster()
-      Status.OK
+    taskQueue.scheduleWithBackoff(timeBetweenRuns = Duration.ofSeconds(dynamoClusterConfig.update_frequency)) {
+      run()
     }
+  }
+
+  internal fun run(): Status {
+    // If we're not active, we don't want to mark ourselves as part of the active cluster.
+    if (clusterWeightProvider.get() > 0) {
+      updateOurselfInDynamo()
+    }
+    recordCurrentDynamoCluster()
+    return Status.OK
   }
 
   internal fun updateOurselfInDynamo() {
@@ -54,6 +60,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
       val member = DyClusterMember()
       member.name = self
       member.updated_at = clock.instant().toEpochMilli()
+      podName?.let { member.pod_name = it }
       table.putItem(member)
     }
 
@@ -63,7 +70,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   internal fun recordCurrentDynamoCluster() {
     val (duration, _) = timed {
       val members = mutableSetOf<Member>()
-      val threshold = clock.instant().minusSeconds(60).toEpochMilli()
+      val threshold = clock.instant().minusSeconds(dynamoClusterConfig.stale_threshold).toEpochMilli()
       val request = ScanEnhancedRequest.builder()
         .consistentRead(true)
         .filterExpression(
@@ -88,7 +95,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   override fun shutDown() {}
 
   companion object {
-    private val TABLE_SCHEMA = TableSchema.fromClass(DyClusterMember::class.java)
+    internal val TABLE_SCHEMA = TableSchema.fromClass(DyClusterMember::class.java)
     private val logger = getLogger<DynamoClusterWatcherTask>()
   }
 }

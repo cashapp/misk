@@ -1,0 +1,38 @@
+public final class misk/clustering/dynamo/DyClusterMember {
+	public fun <init> ()V
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPod_name ()Ljava/lang/String;
+	public final fun getUpdated_at ()Ljava/lang/Long;
+	public final fun setName (Ljava/lang/String;)V
+	public final fun setPod_name (Ljava/lang/String;)V
+	public final fun setUpdated_at (Ljava/lang/Long;)V
+}
+
+public final class misk/clustering/dynamo/DynamoCluster : misk/clustering/Cluster {
+	public fun <init> (Ljava/lang/String;)V
+	public fun getSnapshot ()Lmisk/clustering/Cluster$Snapshot;
+	public fun newResourceMapper (Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
+	public final fun update (Ljava/util/Set;)V
+	public fun watch (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class misk/clustering/dynamo/DynamoClusterConfig : wisp/config/Config {
+	public fun <init> ()V
+	public fun <init> (J)V
+	public fun <init> (JJ)V
+	public synthetic fun <init> (JJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun copy (JJ)Lmisk/clustering/dynamo/DynamoClusterConfig;
+	public static synthetic fun copy$default (Lmisk/clustering/dynamo/DynamoClusterConfig;JJILjava/lang/Object;)Lmisk/clustering/dynamo/DynamoClusterConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStale_threshold ()J
+	public final fun getUpdate_frequency ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/clustering/dynamo/DynamoClusterModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/clustering/dynamo/DynamoClusterConfig;)V
+}
+

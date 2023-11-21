@@ -10,9 +10,10 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import java.util.UUID
 
-class DynamoClusterModule : KAbstractModule() {
+class DynamoClusterModule(private val config: DynamoClusterConfig) : KAbstractModule() {
   override fun configure() {
-    val dynamoCluster = DynamoCluster(System.getenv("MY_POD_NAME") ?: UUID.randomUUID().toString())
+    val dynamoCluster = DynamoCluster(UUID.randomUUID().toString())
+    bind<DynamoClusterConfig>().toInstance(config)
     bind<Cluster>().toInstance(dynamoCluster)
     bind<DynamoCluster>().toInstance(dynamoCluster)
 
@@ -24,7 +25,7 @@ class DynamoClusterModule : KAbstractModule() {
   @ForDynamoDbClusterWatching
   @Singleton
   internal fun repeatedTaskQueue(queueFactory: RepeatedTaskQueueFactory): RepeatedTaskQueue {
-    return queueFactory.new("dynamodb-cluster-watching")
+    return queueFactory.new("dynamodb-cluster-watch")
   }
 }
 

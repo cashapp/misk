@@ -12,4 +12,7 @@ class DyClusterMember {
   // Stored as epoch ms
   @get:DynamoDbAttribute("updated_at")
   var updated_at: Long? = null
+
+  @get:DynamoDbAttribute("pod_name")
+  var pod_name: String? = null
 }
