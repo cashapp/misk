@@ -232,7 +232,8 @@ subprojects {
               "misk-jdbc",
               "misk-jdbc-testing",
               "misk-hibernate",
-              "misk-hibernate-testing"
+              "misk-hibernate-testing",
+              "misk-rate-limiting-bucket4j-redis"
           ).contains(project.name)) {
         testShardHibernate.dependsOn(this)
       } else {
