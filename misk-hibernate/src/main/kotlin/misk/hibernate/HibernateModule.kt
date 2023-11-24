@@ -199,6 +199,7 @@ class HibernateModule @JvmOverloads constructor(
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
 
     bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
+    bind(keyOf<SessionFactory>(qualifier)).toProvider(keyOf<SessionFactoryService>(qualifier))
     bind(keyOf<SessionFactoryService>(qualifier)).toProvider {
       SessionFactoryService(
         qualifier = qualifier,
