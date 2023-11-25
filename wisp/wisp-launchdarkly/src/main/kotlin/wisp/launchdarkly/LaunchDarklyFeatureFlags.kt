@@ -10,6 +10,7 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Metrics
+import io.opentracing.util.GlobalTracer
 import mu.KotlinLogging
 import wisp.feature.*
 import java.util.*
@@ -70,6 +71,9 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
             buildUser(feature, key, attributes),
         )
         checkDefaultNotUsed(feature, result)
+        GlobalTracer.get()?.activeSpan()?.let { span ->
+          span.setTag(key, result.value.toString())
+        }
         return result.value
     }
 
