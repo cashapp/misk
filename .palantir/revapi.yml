@@ -181,3 +181,9 @@ acceptedBreaks:
       new: "method wisp.ratelimiting.RateLimiter.TestConsumptionResult wisp.ratelimiting.RateLimiter::testConsumptionAttempt(java.lang.String,\
         \ wisp.ratelimiting.RateLimitConfiguration, long)"
       justification: "No other implementations"
+  "2023.11.27.095502-80b1620":
+    com.squareup.misk:misk-launchdarkly:
+    - code: "java.method.removed"
+      old: "method com.launchdarkly.sdk.server.interfaces.LDClientInterface misk.feature.launchdarkly.LaunchDarklyModule::provideLaunchDarklyClient(misk.security.ssl.SslLoader,\
+        \ misk.security.ssl.SslContextFactory, misk.resources.ResourceLoader)"
+      justification: "This is a provider that's only used internally"
