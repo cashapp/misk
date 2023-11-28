@@ -24,7 +24,7 @@ internal class DashboardV2RedirectAction @Inject constructor(
     val httpCall = clientHttpCall.get()
     val rest = listOf(httpCall.url.encodedPath.removePrefix("/v2"),
       httpCall.url.encodedFragment,
-      httpCall.url.encodedQuery,
+      httpCall.url.encodedQuery?.let { "?$it" },
     ).filterNotNull().joinToString("")
     return Response(
       body = "go to $rest".toResponseBody(),
