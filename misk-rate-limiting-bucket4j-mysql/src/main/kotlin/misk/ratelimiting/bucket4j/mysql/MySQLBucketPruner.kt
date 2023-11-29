@@ -23,7 +23,7 @@ class MySQLBucketPruner @JvmOverloads constructor(
   meterRegistry: MeterRegistry,
   private val stateColumn: String,
   tableName: String,
-  private val isMySQL8: Boolean = false,
+  isMySQL8: Boolean = false,
   pageSize: Long = 1000
 ) : RateLimitPruner {
   private val clockTimeMeter = ClockTimeMeter(clock)
