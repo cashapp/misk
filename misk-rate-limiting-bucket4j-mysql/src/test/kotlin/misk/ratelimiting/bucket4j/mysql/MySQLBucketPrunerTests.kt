@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import wisp.ratelimiting.RateLimitConfiguration
 import wisp.ratelimiting.RateLimitPruner
+import wisp.ratelimiting.RateLimitPrunerMetrics
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.testing.TestRateLimitConfig
 import java.time.Duration
@@ -52,16 +53,22 @@ class MySQLBucketPrunerTests {
 
   @Inject private lateinit var fakeClock: FakeClock
 
+  @Inject private lateinit var injector: Injector
+
+  @Inject private lateinit var meterRegistry: MeterRegistry
+
   @Inject private lateinit var pruner: RateLimitPruner
 
   @Inject private lateinit var rateLimiter: RateLimiter
-
-  @Inject private lateinit var injector: Injector
 
   private val getAllKeysQuery = """
       SELECT ${MySQLBucket4jRateLimiterTests.ID_COLUMN} 
       FROM ${MySQLBucket4jRateLimiterTests.TABLE_NAME}
     """.trimIndent()
+
+  private val prunerMetrics by lazy {
+    RateLimitPrunerMetrics(meterRegistry)
+  }
 
   @Test
   fun `pruning deletes only expired rows`() {
@@ -103,6 +110,11 @@ class MySQLBucketPrunerTests {
     }
 
     pruner.prune()
+
+    assertThat(prunerMetrics.bucketsPruned.count()).isEqualTo(15.0)
+    // Use count to verify interaction instead of checking the duration
+    //  sometimes in tests the time can be so fast it registers as 0, resulting in a flaky test
+    assertThat(prunerMetrics.pruningDuration.count()).isGreaterThan(0L)
 
     val partitionedBucketKeys = mixedBucketKeys.withIndex().partition {
       it.index % 2 == 0

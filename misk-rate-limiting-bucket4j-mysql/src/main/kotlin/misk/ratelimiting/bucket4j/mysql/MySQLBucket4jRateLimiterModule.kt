@@ -53,13 +53,15 @@ class MySQLBucket4jRateLimiterModule @JvmOverloads constructor(
   @Provides @Singleton
   fun providedPruner(
     clock: Clock,
-    injector: Injector
+    injector: Injector,
+    meterRegistry: MeterRegistry
   ): RateLimitPruner {
     val dataSourceService = injector.getInstance(keyOf<DataSourceService>(qualifier))
     return MySQLBucketPruner(
       clock = clock,
       dataSource = dataSourceService.dataSource,
       idColumn = idColumn,
+      meterRegistry = meterRegistry,
       stateColumn = stateColumn,
       tableName = tableName,
       pageSize = prunerPageSize

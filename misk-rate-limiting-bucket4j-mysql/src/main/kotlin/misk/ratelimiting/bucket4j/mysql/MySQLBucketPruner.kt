@@ -2,8 +2,11 @@ package misk.ratelimiting.bucket4j.mysql
 
 import io.github.bucket4j.distributed.remote.RemoteBucketState
 import io.github.bucket4j.distributed.serialization.DataOutputSerializationAdapter
+import io.micrometer.core.instrument.MeterRegistry
+import org.checkerframework.checker.units.qual.m
 import wisp.logging.getLogger
 import wisp.ratelimiting.RateLimitPruner
+import wisp.ratelimiting.RateLimitPrunerMetrics
 import wisp.ratelimiting.bucket4j.ClockTimeMeter
 import java.io.ByteArrayInputStream
 import java.io.DataInputStream
@@ -12,11 +15,13 @@ import java.sql.ResultSet
 import java.sql.SQLException
 import java.time.Clock
 import javax.sql.DataSource
+import kotlin.system.measureTimeMillis
 
 class MySQLBucketPruner @JvmOverloads constructor(
   clock: Clock,
   private val dataSource: DataSource,
   private val idColumn: String,
+  meterRegistry: MeterRegistry,
   private val stateColumn: String,
   tableName: String,
   pageSize: Long = 1000
@@ -42,6 +47,8 @@ class MySQLBucketPruner @JvmOverloads constructor(
     FOR UPDATE SKIP LOCKED
   """.trimIndent()
 
+  private val prunerMetrics = RateLimitPrunerMetrics(meterRegistry)
+
   /**
    * Prunes the rate limit table, returning the number of rows pruned.
    */
@@ -49,7 +56,10 @@ class MySQLBucketPruner @JvmOverloads constructor(
     val connection = dataSource.connection
     try {
       connection.autoCommit = false
-      pruneLoop(connection)
+      val millisTaken = measureTimeMillis {
+        pruneLoop(connection)
+      }
+      prunerMetrics.pruningDuration.record(millisTaken.toDouble())
     } catch (e: Exception) {
       connection.rollback()
       logger.warn(e) { "Caught exception, rolling back current pruning transaction" }
@@ -70,6 +80,7 @@ class MySQLBucketPruner @JvmOverloads constructor(
         break
       }
 
+      var deletedBuckets = 0
       while (true) {
         val key = resultSet.getString(idColumn)
         val stateBytes = resultSet.getBytes(stateColumn)
@@ -84,6 +95,7 @@ class MySQLBucketPruner @JvmOverloads constructor(
           val deleteBucketStatement = connection.prepareStatement(deleteStatement)
           deleteBucketStatement.setString(1, key)
           deleteBucketStatement.execute()
+          deletedBuckets++
         }
 
         // Advance result set cursor, breaking if we're out of rows
@@ -95,6 +107,7 @@ class MySQLBucketPruner @JvmOverloads constructor(
       }
 
       connection.commit()
+      prunerMetrics.bucketsPruned.increment(deletedBuckets.toDouble())
     }
   }
 

@@ -2,15 +2,15 @@ public final class misk/ratelimiting/bucket4j/mysql/MySQLBucket4jRateLimiterModu
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun providedPruner (Ljava/time/Clock;Lcom/google/inject/Injector;)Lwisp/ratelimiting/RateLimitPruner;
+	public final fun providedPruner (Ljava/time/Clock;Lcom/google/inject/Injector;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimitPruner;
 	public final fun providedRateLimiter (Ljava/time/Clock;Lcom/google/inject/Injector;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimiter;
 }
 
 public final class misk/ratelimiting/bucket4j/mysql/MySQLBucketPruner : wisp/ratelimiting/RateLimitPruner {
 	public static final field Companion Lmisk/ratelimiting/bucket4j/mysql/MySQLBucketPruner$Companion;
-	public fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
-	public synthetic fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;J)V
+	public synthetic fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun prune ()V
 }
 
