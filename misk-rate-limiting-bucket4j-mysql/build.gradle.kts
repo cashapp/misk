@@ -21,6 +21,7 @@ dependencies {
   implementation(project(":wisp:wisp-rate-limiting:bucket4j"))
   implementation(Dependencies.bucket4jCore)
   implementation(Dependencies.bucket4jMySQL)
+  implementation(Dependencies.kotlinLogging)
 
   testImplementation(project(":misk"))
   testImplementation(project(":misk-config"))

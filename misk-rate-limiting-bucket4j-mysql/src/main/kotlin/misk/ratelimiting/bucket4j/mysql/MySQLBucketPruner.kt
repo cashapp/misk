@@ -3,7 +3,6 @@ package misk.ratelimiting.bucket4j.mysql
 import io.github.bucket4j.distributed.remote.RemoteBucketState
 import io.github.bucket4j.distributed.serialization.DataOutputSerializationAdapter
 import io.micrometer.core.instrument.MeterRegistry
-import org.checkerframework.checker.units.qual.m
 import wisp.logging.getLogger
 import wisp.ratelimiting.RateLimitPruner
 import wisp.ratelimiting.RateLimitPrunerMetrics
