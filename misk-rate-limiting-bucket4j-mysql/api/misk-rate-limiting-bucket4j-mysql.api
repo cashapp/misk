@@ -9,8 +9,9 @@ public final class misk/ratelimiting/bucket4j/mysql/MySQLBucket4jRateLimiterModu
 public final class misk/ratelimiting/bucket4j/mysql/MySQLBucketPruner : wisp/ratelimiting/RateLimitPruner {
 	public static final field Companion Lmisk/ratelimiting/bucket4j/mysql/MySQLBucketPruner$Companion;
 	public fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;)V
-	public fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;J)V
-	public synthetic fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;ZJ)V
+	public synthetic fun <init> (Ljava/time/Clock;Ljavax/sql/DataSource;Ljava/lang/String;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;ZJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun prune ()V
 }
 
