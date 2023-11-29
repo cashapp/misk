@@ -5,6 +5,10 @@ public abstract interface class wisp/ratelimiting/RateLimitConfiguration {
 	public abstract fun getRefillPeriod ()Ljava/time/Duration;
 }
 
+public abstract interface class wisp/ratelimiting/RateLimitPruner {
+	public abstract fun prune ()V
+}
+
 public abstract interface class wisp/ratelimiting/RateLimiter {
 	public abstract fun availableTokens (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;)J
 	public abstract fun consumeToken (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;J)Lwisp/ratelimiting/RateLimiter$ConsumptionData;
