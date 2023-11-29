@@ -17,9 +17,11 @@ dependencies {
   api(Dependencies.micrometerCore)
 
   implementation(project(":misk-jdbc"))
+  implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-rate-limiting:bucket4j"))
   implementation(Dependencies.bucket4jCore)
   implementation(Dependencies.bucket4jMySQL)
+  implementation(Dependencies.kotlinLogging)
 
   testImplementation(project(":misk"))
   testImplementation(project(":misk-config"))

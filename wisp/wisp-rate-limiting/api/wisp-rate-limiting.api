@@ -5,6 +5,22 @@ public abstract interface class wisp/ratelimiting/RateLimitConfiguration {
 	public abstract fun getRefillPeriod ()Ljava/time/Duration;
 }
 
+public abstract interface class wisp/ratelimiting/RateLimitPruner {
+	public abstract fun prune ()V
+}
+
+public final class wisp/ratelimiting/RateLimitPrunerMetrics {
+	public static final field Companion Lwisp/ratelimiting/RateLimitPrunerMetrics$Companion;
+	public static final field PRUNED_BUCKETS_COUNTER_NAME Ljava/lang/String;
+	public static final field PRUNING_DURATION Ljava/lang/String;
+	public fun <init> (Lio/micrometer/core/instrument/MeterRegistry;)V
+	public final fun getBucketsPruned ()Lio/micrometer/core/instrument/Counter;
+	public final fun getPruningDuration ()Lio/micrometer/core/instrument/DistributionSummary;
+}
+
+public final class wisp/ratelimiting/RateLimitPrunerMetrics$Companion {
+}
+
 public abstract interface class wisp/ratelimiting/RateLimiter {
 	public abstract fun availableTokens (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;)J
 	public abstract fun consumeToken (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;J)Lwisp/ratelimiting/RateLimiter$ConsumptionData;

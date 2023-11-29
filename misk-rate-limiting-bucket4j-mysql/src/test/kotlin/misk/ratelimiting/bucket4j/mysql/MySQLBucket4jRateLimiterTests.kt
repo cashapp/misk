@@ -60,15 +60,15 @@ class MySQLBucket4jRateLimiterTests {
     }
   }
 
-  private data class RootConfig(
+  internal data class RootConfig(
     val mysql_data_source: DataSourceConfig
   ) : Config
 
   companion object {
-    private const val KEY = "test_key"
-    private const val TABLE_NAME = "rate_limit_buckets"
-    private const val ID_COLUMN = "id"
-    private const val STATE_COLUMN = "state"
+    internal const val KEY = "test_key"
+    internal const val TABLE_NAME = "rate_limit_buckets"
+    internal const val ID_COLUMN = "id"
+    internal const val STATE_COLUMN = "state"
   }
 }
 
