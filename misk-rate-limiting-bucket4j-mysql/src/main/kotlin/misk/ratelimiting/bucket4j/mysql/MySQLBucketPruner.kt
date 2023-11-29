@@ -24,6 +24,7 @@ class MySQLBucketPruner @JvmOverloads constructor(
   meterRegistry: MeterRegistry,
   private val stateColumn: String,
   tableName: String,
+  private val isMySQL8: Boolean = false,
   pageSize: Long = 1000
 ) : RateLimitPruner {
   private val clockTimeMeter = ClockTimeMeter(clock)
@@ -32,6 +33,11 @@ class MySQLBucketPruner @JvmOverloads constructor(
     WHERE $idColumn = ?
   """.trimIndent()
 
+  private val lockingClause = if (isMySQL8) {
+    "FOR UPDATE SKIP LOCKED"
+  } else {
+    "FOR UPDATE"
+  }
   /**
    * Notes about this query:
    * * We use `SKIP LOCKED` because that indicates bucket4j is currently using the row
@@ -44,7 +50,7 @@ class MySQLBucketPruner @JvmOverloads constructor(
     WHERE $idColumn > ?
     ORDER BY $idColumn
     LIMIT $pageSize
-    FOR UPDATE SKIP LOCKED
+    $lockingClause
   """.trimIndent()
 
   private val prunerMetrics = RateLimitPrunerMetrics(meterRegistry)
