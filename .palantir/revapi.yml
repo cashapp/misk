@@ -187,3 +187,10 @@ acceptedBreaks:
       old: "method com.launchdarkly.sdk.server.interfaces.LDClientInterface misk.feature.launchdarkly.LaunchDarklyModule::provideLaunchDarklyClient(misk.security.ssl.SslLoader,\
         \ misk.security.ssl.SslContextFactory, misk.resources.ResourceLoader)"
       justification: "This is a provider that's only used internally"
+  "2023.11.28.185208-a161c56":
+    app.cash.wisp:wisp-rate-limiting:
+    - code: "java.field.constantValueChanged"
+      old: "field wisp.ratelimiting.RateLimiterMetrics.LIMIT_RESET_DURATION"
+      new: "field wisp.ratelimiting.RateLimiterMetrics.LIMIT_RESET_DURATION"
+      justification: "Metric label was incorrect, changing is not breaking because\
+        \ there are no users of it currently"

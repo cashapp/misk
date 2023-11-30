@@ -13,17 +13,19 @@ import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.jdbc.DataSourceService
+import wisp.ratelimiting.RateLimitPruner
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.bucket4j.Bucket4jRateLimiter
 import wisp.ratelimiting.bucket4j.ClockTimeMeter
 import java.time.Clock
 import kotlin.reflect.KClass
 
-class MySQLBucket4jRateLimiterModule(
+class MySQLBucket4jRateLimiterModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   private val tableName: String,
   private val idColumn: String,
-  private val stateColumn: String
+  private val stateColumn: String,
+  private val prunerPageSize: Long = 1000L
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<Clock>()
@@ -46,5 +48,23 @@ class MySQLBucket4jRateLimiterModule(
 
     val proxyManager: ProxyManager<String> = MySQLSelectForUpdateBasedProxyManager(sqlConfiguration)
     return Bucket4jRateLimiter(proxyManager, clock, meterRegistry)
+  }
+
+  @Provides @Singleton
+  fun providedPruner(
+    clock: Clock,
+    injector: Injector,
+    meterRegistry: MeterRegistry
+  ): RateLimitPruner {
+    val dataSourceService = injector.getInstance(keyOf<DataSourceService>(qualifier))
+    return MySQLBucketPruner(
+      clock = clock,
+      dataSource = dataSourceService.dataSource,
+      idColumn = idColumn,
+      meterRegistry = meterRegistry,
+      stateColumn = stateColumn,
+      tableName = tableName,
+      pageSize = prunerPageSize
+    )
   }
 }

@@ -92,7 +92,7 @@ class RateLimiterMetrics(private val meterRegistry: MeterRegistry) {
     const val LIMIT_TEST_DURATION = "rate_limiter.limit_test_duration"
     const val LIMIT_AVAILABILITY_DURATION = "rate_limiter.limit_availability_duration"
     const val LIMIT_RELEASE_DURATION = "rate_limiter.limit_release_duration"
-    const val LIMIT_RESET_DURATION = "rate_limiter.limit_release_duration"
+    const val LIMIT_RESET_DURATION = "rate_limiter.limit_reset_duration"
     const val ATTEMPT_COUNTER_NAME = "rate_limiter.consumption_attempts"
     const val TOTAL_CONSUMED_COUNTER_NAME = "rate_limiter.tokens_consumed"
     const val RATE_LIMIT_TAG = "rate_limit_config"
