@@ -3,6 +3,7 @@ package misk.feature.launchdarkly
 import ch.qos.logback.classic.Level
 import com.launchdarkly.sdk.EvaluationDetail
 import com.launchdarkly.sdk.EvaluationReason
+import com.launchdarkly.sdk.LDContext
 import com.launchdarkly.sdk.LDUser
 import com.launchdarkly.sdk.LDValue
 import com.launchdarkly.sdk.UserAttribute
@@ -51,7 +52,7 @@ internal class LaunchDarklyFeatureFlagsTest {
   @Test
   fun getEnum() {
     Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .`when`(client.stringVariationDetail(anyString(), LDContext.fromUser(any(LDUser::class.java)), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
           "TYRANNOSAURUS", 1, EvaluationReason.targetMatch()
@@ -75,7 +76,7 @@ internal class LaunchDarklyFeatureFlagsTest {
 
     val userCaptor = ArgumentCaptor.forClass(LDUser::class.java)
     verify(client, times(1))
-      .stringVariationDetail(eq("which-dinosaur"), userCaptor.capture(), eq(""))
+      .stringVariationDetail(eq("which-dinosaur"), LDContext.fromUser(userCaptor.capture()), eq(""))
 
     val user = userCaptor.value
 
@@ -102,7 +103,7 @@ internal class LaunchDarklyFeatureFlagsTest {
   @Test
   fun getEnumThrowsOnDefault() {
     Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .`when`(client.stringVariationDetail(anyString(), LDContext.fromUser(any(LDUser::class.java)), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
           "PTERODACTYL",
@@ -121,7 +122,7 @@ internal class LaunchDarklyFeatureFlagsTest {
   @Test
   fun getEnumThrowsOnEvalError() {
     Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .`when`(client.stringVariationDetail(anyString(), LDContext.fromUser(any(LDUser::class.java)), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
           "PTERODACTYL",
@@ -148,7 +149,7 @@ internal class LaunchDarklyFeatureFlagsTest {
     Mockito
       .`when`(
         client.jsonValueVariationDetail(
-          anyString(), any(LDUser::class.java),
+          anyString(), LDContext.fromUser(any(LDUser::class.java)),
           any(LDValue::class.java)
         )
       )
@@ -173,7 +174,7 @@ internal class LaunchDarklyFeatureFlagsTest {
     Mockito
       .`when`(
         client.jsonValueVariationDetail(
-          anyString(), any(LDUser::class.java),
+          anyString(), LDContext.fromUser(any(LDUser::class.java)),
           any(LDValue::class.java)
         )
       )
@@ -215,7 +216,7 @@ internal class LaunchDarklyFeatureFlagsTest {
   @Test
   fun attributes() {
     Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .`when`(client.stringVariationDetail(anyString(), LDContext.fromUser(any(LDUser::class.java)), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
           "value",
@@ -243,13 +244,12 @@ internal class LaunchDarklyFeatureFlagsTest {
 
     val userCaptor = ArgumentCaptor.forClass(LDUser::class.java)
     verify(client, times(1))
-      .stringVariationDetail(eq("key"), userCaptor.capture(), eq(""))
+      .stringVariationDetail(eq("key"), LDContext.fromUser(userCaptor.capture()), eq(""))
 
     val user = userCaptor.value
     // NB: LDUser properties are package-local so we can't read them here.
     // Create expected user and compare against actual.
     val expected = LDUser.Builder("user")
-      .secondary("secondary value")
       .ip("127.0.0.1")
       .email("email@value.com")
       .name("name value")
@@ -257,6 +257,7 @@ internal class LaunchDarklyFeatureFlagsTest {
       .firstName("firstName value")
       .lastName("lastName value")
       .country("US")
+      .privateCustom("secondary", "secondary value")
       .privateCustom("custom1", "custom1 value")
       .privateCustom("custom2", "custom2 value")
       .build()
