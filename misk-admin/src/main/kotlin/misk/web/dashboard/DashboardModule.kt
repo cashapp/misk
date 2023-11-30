@@ -202,6 +202,49 @@ class DashboardModule @JvmOverloads constructor(
     }
 
     /**
+     * Installs a Misk-Web app for a dashboard [DA] with access [AA].
+     * The tab is identified by a unique [slug] and is routed to by match on [urlPathPrefix].
+     * In local development – when [isDevelopment] is true, the [developmentWebProxyUrl] is used
+     * to resolve requests to [resourcePathPrefix]. In real environments,
+     * the [classpathResourcePathPrefix] is used to resolve resource requests to files in classpath.
+     * The tab is included in the dashboard navbar menu with [menuLabel] and in the menu group [menuCategory].
+     */
+    inline fun <reified DA : Annotation, reified AA : Annotation> createMiskWebDashboard(
+      isDevelopment: Boolean,
+      slug: String,
+      urlPathPrefix: String,
+      developmentWebProxyUrl: String,
+      resourcePathPrefix: String = "/_tab/$slug/",
+      classpathResourcePathPrefix: String = "classpath:/web$resourcePathPrefix",
+      menuLabel: String,
+      menuUrl: String = urlPathPrefix,
+      menuCategory: String = "Admin",
+    ): DashboardModule {
+      val dashboardTabProvider = DashboardTabProvider(
+        slug = slug,
+        url_path_prefix = urlPathPrefix,
+        menuLabel = menuLabel,
+        menuUrl = menuUrl,
+        menuCategory = menuCategory,
+        dashboard_slug = slugify<DA>(),
+        accessAnnotationKClass = AA::class,
+        dashboardAnnotationKClass = DA::class,
+      )
+      val webTabResourceModule = WebTabResourceModule(
+        isDevelopment = isDevelopment,
+        slug = slug,
+        url_path_prefix = resourcePathPrefix,
+        resourcePath = classpathResourcePathPrefix,
+        web_proxy_url = developmentWebProxyUrl
+      )
+      return DashboardModule(
+        dashboardTabProvider = dashboardTabProvider,
+        dashboardTabLoader = null,
+        webTabResourceModule = webTabResourceModule
+      )
+    }
+
+    /**
      * Add access blocks to dashboard index.
      */
     fun addIndexAccessBlocks(
