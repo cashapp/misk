@@ -8,6 +8,8 @@ import misk.web.v2.DashboardIFrameTabAction
 import misk.web.v2.DashboardIndexAccessBlock
 import misk.web.v2.DashboardIndexBlock
 import okio.ByteString.Companion.encodeUtf8
+import wisp.deployment.Deployment
+import wisp.deployment.PRODUCTION
 
 /** Handles installation of Misk Dashboard components (admin dashboard or custom...). */
 class DashboardModule @JvmOverloads constructor(
@@ -63,6 +65,34 @@ class DashboardModule @JvmOverloads constructor(
       val dashboardTabProvider = DashboardTabProvider(
         slug = "menu-link-$hash",
         url_path_prefix = url,
+        menuLabel = { _, _ -> label },
+        menuUrl = { _, _ -> url },
+        menuCategory = category,
+        dashboard_slug = slugify<DA>(),
+        accessAnnotationKClass = AA::class,
+        dashboardAnnotationKClass = DA::class,
+      )
+      return DashboardModule(
+        dashboardTabProvider = dashboardTabProvider,
+      )
+    }
+
+    /**
+     * Create menu link with [label] for [url] under menu [category]
+     * for a dashboard [DA] with access [AA].
+     *
+     * If [category] is empty, it will appear at the top of the menu list.
+     */
+    inline fun <reified DA : Annotation, reified AA : Annotation> createMenuLink(
+      noinline label: (appName: String, deployment: Deployment) -> String,
+      noinline url: (appName: String, deployment: Deployment) -> String,
+      category: String = "",
+    ): DashboardModule {
+      // Create a unique hash for the link that will not conflict with any other link
+      val hash = (label.toString() + url.toString() + category).encodeUtf8().sha256().hex().take(24)
+      val dashboardTabProvider = DashboardTabProvider(
+        slug = "menu-link-$hash",
+        url_path_prefix = url("app", PRODUCTION),
         menuLabel = label,
         menuUrl = url,
         menuCategory = category,
@@ -95,8 +125,8 @@ class DashboardModule @JvmOverloads constructor(
       val dashboardTabProvider = DashboardTabProvider(
         slug = slug,
         url_path_prefix = urlPathPrefix,
-        menuLabel = menuLabel,
-        menuUrl = menuUrl,
+        menuLabel = { _, _ -> menuLabel },
+        menuUrl = { _, _ -> menuUrl },
         menuCategory = menuCategory,
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
@@ -135,8 +165,8 @@ class DashboardModule @JvmOverloads constructor(
       val dashboardTabProvider = DashboardTabProvider(
         slug = slug,
         url_path_prefix = urlPathPrefix,
-        menuLabel = menuLabel,
-        menuUrl = menuUrl,
+        menuLabel = { _, _ -> menuLabel },
+        menuUrl = { _, _ -> menuUrl },
         menuCategory = menuCategory,
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
@@ -180,8 +210,8 @@ class DashboardModule @JvmOverloads constructor(
       val dashboardTabProvider = DashboardTabProvider(
         slug = slug,
         url_path_prefix = urlPathPrefix,
-        menuLabel = menuLabel,
-        menuUrl = menuUrl,
+        menuLabel = { _, _ -> menuLabel },
+        menuUrl = { _, _ -> menuUrl },
         menuCategory = menuCategory,
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
@@ -223,8 +253,8 @@ class DashboardModule @JvmOverloads constructor(
       val dashboardTabProvider = DashboardTabProvider(
         slug = slug,
         url_path_prefix = urlPathPrefix,
-        menuLabel = menuLabel,
-        menuUrl = menuUrl,
+        menuLabel = { _, _ -> menuLabel },
+        menuUrl = { _, _ -> menuUrl },
         menuCategory = menuCategory,
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,

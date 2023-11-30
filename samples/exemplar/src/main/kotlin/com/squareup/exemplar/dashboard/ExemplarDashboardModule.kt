@@ -88,6 +88,13 @@ class ExemplarDashboardModule : KAbstractModule() {
         menuCategory = "Admin Tools"
       )
     )
+
+    // Custom links
+    install(DashboardModule.createMenuLink<AdminDashboard, AdminDashboardAccess>(
+      label = { appName, deployment -> "Internal Tool" },
+      url = { appName, deployment -> "https://internal-tool.cash.app/?app=$appName&deployment=$deployment" },
+      category = "Internal"
+    ))
   }
 }
 
