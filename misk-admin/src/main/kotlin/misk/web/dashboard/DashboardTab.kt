@@ -4,6 +4,8 @@ import misk.security.authz.AccessAnnotationEntry
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
 import jakarta.inject.Inject
 import com.google.inject.Provider
+import misk.config.AppName
+import wisp.deployment.Deployment
 import kotlin.reflect.KClass
 
 /**
@@ -39,8 +41,8 @@ data class DashboardTab @JvmOverloads constructor(
 class DashboardTabProvider @JvmOverloads constructor(
   val slug: String,
   val url_path_prefix: String,
-  val menuLabel: String,
-  val menuUrl: String = url_path_prefix,
+  val menuLabel: (appName: String, deployment: Deployment) -> String,
+  val menuUrl: (appName: String, deployment: Deployment) -> String = { _, _ -> url_path_prefix },
   val menuCategory: String = "Admin",
   val dashboard_slug: String,
   val capabilities: Set<String> = setOf(),
@@ -48,6 +50,8 @@ class DashboardTabProvider @JvmOverloads constructor(
   val accessAnnotationKClass: KClass<out Annotation>? = null,
   val dashboardAnnotationKClass: KClass<out Annotation>,
 ) : Provider<DashboardTab>, ValidWebEntry(slug, url_path_prefix) {
+  @Inject @AppName lateinit var appName: String
+  @Inject lateinit var deployment: Deployment
   @Inject lateinit var accessAnnotationEntries: List<AccessAnnotationEntry>
 
   override fun get(): DashboardTab {
@@ -56,8 +60,8 @@ class DashboardTabProvider @JvmOverloads constructor(
       slug = slug,
       url_path_prefix = url_path_prefix,
       dashboard_slug = dashboard_slug,
-      menuLabel = menuLabel,
-      menuUrl = menuUrl,
+      menuLabel = menuLabel(appName, deployment),
+      menuUrl = menuUrl(appName, deployment),
       menuCategory = menuCategory,
       capabilities = accessAnnotationEntry?.capabilities?.toSet() ?: capabilities,
       services = accessAnnotationEntry?.services?.toSet() ?: services,
@@ -81,9 +85,9 @@ inline fun <reified DA : Annotation> DashboardTabProvider(
 ) = DashboardTabProvider(
   slug = slug,
   url_path_prefix = url_path_prefix,
-  menuLabel = name,
+  menuLabel = { _, _ -> name },
   menuCategory = category,
-  menuUrl = menuUrl,
+  menuUrl = { _, _ -> menuUrl },
   dashboard_slug = slugify<DA>(),
   capabilities = capabilities,
   services = services,
@@ -102,9 +106,9 @@ inline fun <reified DA : Annotation, reified AA : Annotation> DashboardTabProvid
 ) = DashboardTabProvider(
   slug = slug,
   url_path_prefix = url_path_prefix,
-  menuLabel = name,
+  menuLabel = { _,_ -> name },
   menuCategory = category,
-  menuUrl = menuUrl,
+  menuUrl = { _, _ -> menuUrl },
   dashboard_slug = slugify<DA>(),
   accessAnnotationKClass = AA::class,
   dashboardAnnotationKClass = DA::class,
