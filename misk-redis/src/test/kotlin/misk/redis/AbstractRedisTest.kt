@@ -402,9 +402,9 @@ abstract class AbstractRedisTest {
 
   @Test fun lmoveOnSeparateKeys() {
     // Setup
-    val sourceKey = "foo"
+    val sourceKey = "{same-slot-key}1"
     val sourceElements = listOf("bar", "bat").map { it.encodeUtf8() }
-    val destinationKey = "oof"
+    val destinationKey = "{same-slot-key}2"
     val destinationElements = listOf("baz".encodeUtf8())
 
     redis.rpush(sourceKey, *sourceElements.toTypedArray())
@@ -586,9 +586,9 @@ abstract class AbstractRedisTest {
 
   @Test fun rpoplpushOnSeparateKeys() {
     // Setup
-    val sourceKey = "foo"
+    val sourceKey = "{same-slot-key}3"
     val sourceElements = listOf("bar", "bat").map { it.encodeUtf8() }
-    val destinationKey = "oof"
+    val destinationKey = "{same-slot-key}4"
     val destinationElements = listOf("baz".encodeUtf8())
 
     redis.rpush(sourceKey, *sourceElements.toTypedArray())

@@ -2,6 +2,7 @@ package misk.redis
 
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
@@ -10,7 +11,9 @@ import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.commands.JedisBinaryCommands
 import redis.clients.jedis.params.SetParams
+import redis.clients.jedis.util.JedisClusterCRC16
 import java.lang.reflect.InvocationHandler
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.time.Duration
@@ -30,20 +33,64 @@ class RealRedis(
   }
 
   override fun del(vararg keys: String): Int {
-    val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
-    return jedis { del(*keysAsBytes) }.toInt()
+    return when(unifiedJedis) {
+      is JedisPooled -> {
+        val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+        jedis { unifiedJedis.del(*keysAsBytes) }.toInt()
+      }
+
+      is JedisCluster -> {
+        // JedisCluster does not support multi-key del, so we need to group by slot and perform del for each slot
+        keys.groupBy { JedisClusterCRC16.getSlot(it) }
+          .map { (_, slotKeys) -> jedis { unifiedJedis.del(*slotKeys.toTypedArray()) } }
+          .sumOf { it.toInt() }
+      }
+
+      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+    }
   }
 
   override fun mget(vararg keys: String): List<ByteString?> {
-    val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
-    return jedis { mget(*keysAsBytes) }
-      .map { it?.toByteString() }
+    return when(unifiedJedis) {
+      is JedisPooled -> {
+        val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+        jedis { unifiedJedis.mget(*keysAsBytes) }.map { it?.toByteString() }
+      }
+      is JedisCluster -> {
+        // JedisCluster does not support multi-key mget, so we need to group by slot and perform mget for each slot
+        val keyToValueMap = mutableMapOf<String, ByteString?>()
+        keys.groupBy { JedisClusterCRC16.getSlot(it) }
+          .flatMap { (_, slotKeys) ->
+            val result = jedis { unifiedJedis.mget(*slotKeys.toTypedArray()) }
+            slotKeys.zip(result)
+        }.forEach { (key, value) ->
+          keyToValueMap[key] = value?.toByteArray(charset)?.toByteString()
+        }
+        keys.map{keyToValueMap[it]}
+      }
+
+      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+    }
+
   }
 
   override fun mset(vararg keyValues: ByteString) {
     require(keyValues.size % 2 == 0) { "Wrong number of arguments to mset" }
-    val byteArrays = keyValues.map { it.toByteArray() }.toTypedArray()
-    jedis { mset(*byteArrays) }
+    when(unifiedJedis) {
+      is JedisPooled -> {
+        val byteArrays = keyValues.map { it.toByteArray() }.toTypedArray()
+        return jedis { unifiedJedis.mset(*byteArrays) }
+      }
+      is JedisCluster -> {
+        // JedisCluster does not support multi-key mset, so we need to group by slot and perform mset for each slot
+        keyValues.toList().chunked(2).groupBy { JedisClusterCRC16.getSlot(it[0].toByteArray()) }
+          .forEach { (_, slotKeys) ->
+            jedis { unifiedJedis.mset(*slotKeys.flatten().map{it.toByteArray()}.toTypedArray())}
+          }
+      }
+
+      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+    }
   }
 
   override fun get(key: String): ByteString? {
@@ -340,8 +387,12 @@ class RealRedis(
     private val clientMetrics: RedisClientMetrics,
   ) : InvocationHandler {
     override fun invoke(proxy: Any, method: Method, args: Array<out Any?>?): Any? =
-      clientMetrics.timed(method.name) {
-        method.invoke(jedisCommand, *(args ?: arrayOf()))
+      try {
+        clientMetrics.timed(method.name) {
+          method.invoke(jedisCommand, *(args ?: arrayOf()))
+        }
+      } catch (e: InvocationTargetException) {
+        throw e.cause!!
       }
   }
 
