@@ -12,13 +12,13 @@ plugins {
 dependencies {
   api(project(":misk-inject"))
   api(project(":wisp:wisp-rate-limiting"))
+  api(project(":wisp:wisp-rate-limiting:bucket4j"))
   api(Dependencies.guice)
   api(Dependencies.jakartaInject)
   api(Dependencies.micrometerCore)
 
   implementation(project(":misk-jdbc"))
   implementation(project(":wisp:wisp-logging"))
-  implementation(project(":wisp:wisp-rate-limiting:bucket4j"))
   implementation(Dependencies.bucket4jCore)
   implementation(Dependencies.bucket4jMySQL)
   implementation(Dependencies.kotlinLogging)
