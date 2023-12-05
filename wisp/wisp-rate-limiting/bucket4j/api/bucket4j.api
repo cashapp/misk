@@ -1,3 +1,10 @@
+public abstract class wisp/ratelimiting/bucket4j/Bucket4jPruner : wisp/ratelimiting/RateLimitPruner {
+	public fun <init> ()V
+	protected final fun deserializeState ([B)Lio/github/bucket4j/distributed/remote/RemoteBucketState;
+	public abstract fun getClockTimeMeter ()Lwisp/ratelimiting/bucket4j/ClockTimeMeter;
+	protected final fun isBucketStale (Lio/github/bucket4j/distributed/remote/RemoteBucketState;)Z
+}
+
 public final class wisp/ratelimiting/bucket4j/Bucket4jRateLimiter : wisp/ratelimiting/RateLimiter {
 	public fun <init> (Lio/github/bucket4j/distributed/proxy/ProxyManager;Ljava/time/Clock;)V
 	public fun <init> (Lio/github/bucket4j/distributed/proxy/ProxyManager;Ljava/time/Clock;Lio/micrometer/core/instrument/MeterRegistry;)V
