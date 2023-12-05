@@ -69,7 +69,7 @@ dependencyAnalysis {
         exclude("io.opentracing:opentracing-noop:0.33.0")
       }
       onRuntimeOnly {
-        exclude("com.datadoghq:dd-trace-ot:1.23.0")
+        exclude("com.datadoghq:dd-trace-ot:1.24.2")
       }
     }
     project(":misk-grpc-tests") {
