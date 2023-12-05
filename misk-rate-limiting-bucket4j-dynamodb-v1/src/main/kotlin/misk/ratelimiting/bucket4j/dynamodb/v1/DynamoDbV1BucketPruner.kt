@@ -6,15 +6,11 @@ import com.amazonaws.services.dynamodbv2.document.Expected
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec
 import com.amazonaws.services.dynamodbv2.model.ReturnValue
-import io.github.bucket4j.distributed.remote.RemoteBucketState
-import io.github.bucket4j.distributed.serialization.DataOutputSerializationAdapter
 import io.micrometer.core.instrument.MeterRegistry
 import wisp.logging.getLogger
-import wisp.ratelimiting.RateLimitPruner
 import wisp.ratelimiting.RateLimitPrunerMetrics
+import wisp.ratelimiting.bucket4j.Bucket4jPruner
 import wisp.ratelimiting.bucket4j.ClockTimeMeter
-import java.io.ByteArrayInputStream
-import java.io.DataInputStream
 import java.time.Clock
 import kotlin.system.measureTimeMillis
 
@@ -24,8 +20,9 @@ class DynamoDbV1BucketPruner @JvmOverloads constructor(
   meterRegistry: MeterRegistry,
   private val tableName: String,
   private val pageSize: Int = 1000
-) : RateLimitPruner {
-  private val clockTimeMeter = ClockTimeMeter(clock)
+) : Bucket4jPruner() {
+  override val clockTimeMeter = ClockTimeMeter(clock)
+
   private val dynamoDB = DynamoDB(amazonDynamoDB)
   private val prunerMetrics = RateLimitPrunerMetrics(meterRegistry)
 
@@ -72,19 +69,6 @@ class DynamoDbV1BucketPruner @JvmOverloads constructor(
         }
       }
     }
-  }
-
-  private fun isBucketStale(state: RemoteBucketState): Boolean {
-    val refillTimeNanos = state.calculateFullRefillingTime(clockTimeMeter.currentTimeNanos())
-    return refillTimeNanos <= 0L
-  }
-
-  private fun deserializeState(bytes: ByteArray): RemoteBucketState {
-    val inputStream = DataInputStream(ByteArrayInputStream(bytes))
-    return RemoteBucketState.SERIALIZATION_HANDLE.deserialize(
-      DataOutputSerializationAdapter.INSTANCE,
-      inputStream
-    )
   }
 
   companion object {
