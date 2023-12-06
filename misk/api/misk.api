@@ -916,6 +916,12 @@ public final class misk/moshi/time/LocalDateAdapter {
 	public final fun toJson (Ljava/time/LocalDate;)Ljava/util/Date;
 }
 
+public final class misk/moshi/time/OffsetDateTimeAdapter {
+	public static final field INSTANCE Lmisk/moshi/time/OffsetDateTimeAdapter;
+	public final fun fromJson (Ljava/lang/String;)Ljava/time/OffsetDateTime;
+	public final fun toJson (Ljava/time/OffsetDateTime;)Ljava/lang/String;
+}
+
 public final class misk/okio/OkioExtensionsKt {
 	public static final fun forEachBlock (Lokio/BufferedSource;ILkotlin/jvm/functions/Function2;)V
 	public static final fun forEachBlock (Lokio/BufferedSource;[BLkotlin/jvm/functions/Function2;)V
