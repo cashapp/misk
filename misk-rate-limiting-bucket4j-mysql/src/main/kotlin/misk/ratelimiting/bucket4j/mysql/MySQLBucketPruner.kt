@@ -1,14 +1,10 @@
 package misk.ratelimiting.bucket4j.mysql
 
-import io.github.bucket4j.distributed.remote.RemoteBucketState
-import io.github.bucket4j.distributed.serialization.DataOutputSerializationAdapter
 import io.micrometer.core.instrument.MeterRegistry
 import wisp.logging.getLogger
-import wisp.ratelimiting.RateLimitPruner
 import wisp.ratelimiting.RateLimitPrunerMetrics
+import wisp.ratelimiting.bucket4j.Bucket4jPruner
 import wisp.ratelimiting.bucket4j.ClockTimeMeter
-import java.io.ByteArrayInputStream
-import java.io.DataInputStream
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -25,8 +21,9 @@ class MySQLBucketPruner @JvmOverloads constructor(
   tableName: String,
   isMySQL8: Boolean = false,
   pageSize: Long = 1000
-) : RateLimitPruner {
-  private val clockTimeMeter = ClockTimeMeter(clock)
+) : Bucket4jPruner() {
+  override val clockTimeMeter = ClockTimeMeter(clock)
+
   private val deleteStatement = """
     DELETE FROM $tableName
     WHERE $idColumn = ?
@@ -127,19 +124,6 @@ class MySQLBucketPruner @JvmOverloads constructor(
       // if the result set is empty
       true
     }
-  }
-
-  private fun isBucketStale(state: RemoteBucketState): Boolean {
-    val refillTimeNanos = state.calculateFullRefillingTime(clockTimeMeter.currentTimeNanos())
-    return refillTimeNanos <= 0L
-  }
-
-  private fun deserializeState(bytes: ByteArray): RemoteBucketState {
-    val inputStream = DataInputStream(ByteArrayInputStream(bytes))
-    return RemoteBucketState.SERIALIZATION_HANDLE.deserialize(
-      DataOutputSerializationAdapter.INSTANCE,
-      inputStream
-    )
   }
 
   companion object {

@@ -16,6 +16,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import jakarta.inject.Inject
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 @MiskTest(startService = false)
 internal class MoshiModuleTest {
@@ -100,6 +103,15 @@ internal class MoshiModuleTest {
     val json = "\"5.5\""
     val value = BigDecimal("5.5")
     val jsonAdapter = moshi.adapter<BigDecimal>()
+    assertThat(jsonAdapter.toJson(value)).isEqualTo(json)
+    assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
+  }
+
+  @Test
+  fun `OffsetDateTime adapter converts from and to json`() {
+    val json = "\"0001-01-01T01:01:00Z\""
+    val value = OffsetDateTime.of(LocalDateTime.of(1, 1, 1, 1, 1), ZoneOffset.UTC)
+    val jsonAdapter = moshi.adapter<OffsetDateTime>()
     assertThat(jsonAdapter.toJson(value)).isEqualTo(json)
     assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
   }

@@ -79,7 +79,7 @@ class DashboardModule @JvmOverloads constructor(
 
     /**
      * Create menu link with [label] for [url] under menu [category]
-     * for a dashboard [DA] with access [AA].
+     *   for a dashboard [DA] with access [AA].
      *
      * If [category] is empty, it will appear at the top of the menu list.
      */

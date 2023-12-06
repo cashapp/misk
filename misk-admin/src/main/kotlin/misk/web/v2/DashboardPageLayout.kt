@@ -120,10 +120,13 @@ class DashboardPageLayout @Inject constructor(
     MenuSection(
       title = sectionTitle,
       links = dashboardTabs.map {
+        val isExternalLink = it.menuUrl.startsWith("https://")
         Link(
           label = it.menuLabel,
           href = it.menuUrl,
           isSelected = currentPath.startsWith(it.menuUrl),
+          openInNewTab = isExternalLink,
+          dataTurbo = !isExternalLink,
         )
       }
     )
