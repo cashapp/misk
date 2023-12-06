@@ -16,20 +16,28 @@ import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
-import com.google.inject.Singleton
+import jakarta.inject.Singleton
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
+import misk.crypto.internal.AeadEnvelopeProvider
+import misk.crypto.internal.DeterministicAeadProvider
+import misk.crypto.internal.DigitalSignatureSignerProvider
+import misk.crypto.internal.DigitalSignatureVerifierProvider
+import misk.crypto.internal.HybridDecryptProvider
+import misk.crypto.internal.HybridEncryptProvider
+import misk.crypto.internal.MacProvider
+import misk.crypto.internal.StreamingAeadProvider
 import misk.crypto.pgp.PgpDecrypter
-import misk.crypto.pgp.PgpDecrypterProvider
 import misk.crypto.pgp.PgpEncrypter
-import misk.crypto.pgp.PgpEncrypterProvider
+import misk.crypto.pgp.internal.PgpDecrypterProvider
+import misk.crypto.pgp.internal.PgpEncrypterProvider
 import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.GeneralSecurityException
 import java.security.Security
-import java.util.Base64
+import java.util.*
 
 /**
  * Configures and registers the keys listed in the configuration file.
@@ -131,7 +139,7 @@ class CryptoModule(
           .toProvider(MacProvider(alias))
           .`in`(Singleton::class.java)
       }
-      KeyType.DIGITAL_SIGNATURE -> {
+      KeyType.DIGITAL_SIGNATURE, KeyType.SIGNATURE -> {
         bind<PublicKeySign>()
           .annotatedWith(Names.named(alias))
           .toProvider(DigitalSignatureSignerProvider(alias))

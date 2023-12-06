@@ -4,9 +4,11 @@
 build
 .idea
 *.iml
-
+*.swp
+*.hprof
 .DS_Store
 .git
+.hermit
 **/@misk/web
 cachedUrls
 logs
@@ -15,7 +17,6 @@ npm-debug.log*
 coverage
 node_modules
 .npm
-build
 lib
 dist
 .hash

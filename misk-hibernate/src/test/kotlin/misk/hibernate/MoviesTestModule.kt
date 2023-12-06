@@ -22,7 +22,7 @@ class MoviesTestModule(
     override fun configureHibernate() {
       addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
     }
-  }
+  },
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())

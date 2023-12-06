@@ -1,9 +1,11 @@
-import React, {useEffect, useState} from "react"
+import React, { useEffect, useState } from "react"
 import _ from "lodash"
 import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core"
 import { WebActionMetadata } from "./types"
 import { FormComponent } from "./WebActionSendRequestFormComponents"
-import axios from "axios"
+import axios, { AxiosResponse } from "axios"
+import fileDownload from "js-file-download"
+import contentDisposition from "content-disposition"
 import { AppToaster } from "./Toaster"
 
 interface Props {
@@ -11,19 +13,23 @@ interface Props {
 }
 
 export default function WebActionSendRequest({ webActionMetadata }: Props) {
-  const [requestInput, setRequestInput] = useState<any>(null)   // request view model
-  const [requestRaw, setRequestRaw] = useState<any>({})         // request raw data
+  const [requestInput, setRequestInput] = useState<any>(null) // request view model
+  const [requestRaw, setRequestRaw] = useState<any>({}) // request raw data
   const [loading, setLoading] = useState(false)
   const [response, setResponse] = useState("")
   const [url, setUrl] = useState(webActionMetadata.pathPattern)
 
   useEffect(() => {
-    const requestInputAsString = JSON.stringify(requestInput, (key, val) => {
-      // filter out nulls
-      if (_.isNull(val)) return
-      if (Array.isArray(val)) return _.reject(val, _.isNull)
-      return val
-    }, 2)
+    const requestInputAsString = JSON.stringify(
+      requestInput,
+      (key, val) => {
+        // filter out nulls
+        if (_.isNull(val)) return
+        if (Array.isArray(val)) return _.reject(val, _.isNull)
+        return val
+      },
+      2
+    )
     if (_.isEmpty(requestInputAsString)) {
       setRequestRaw({})
     } else {
@@ -50,10 +56,17 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
     axiosRequest
       .then(response => {
         setResponse(JSON.stringify(response.data, null, 2))
+        maybeDownloadFile(response)
       })
       .catch(e => {
         if (e.response) {
-          setResponse(JSON.stringify(_.pick(e.response, "data", "status", "statusText"), null, 2))
+          setResponse(
+            JSON.stringify(
+              _.pick(e.response, "data", "status", "statusText"),
+              null,
+              2
+            )
+          )
         } else {
           setResponse(e.message)
         }
@@ -139,10 +152,37 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
             </Button>
           </div>
         </div>
-        <pre style={{whiteSpace:"pre-wrap"}}>{JSON.stringify(requestRaw, null, 2)}</pre>
+        <pre style={{ whiteSpace: "pre-wrap" }}>
+          {JSON.stringify(requestRaw, null, 2)}
+        </pre>
         <H5>Response</H5>
-        <pre style={{whiteSpace:"pre-wrap"}}>{response}</pre>
+        <pre style={{ whiteSpace: "pre-wrap" }}>{response}</pre>
       </div>
     </div>
   )
+}
+
+function maybeDownloadFile(response: AxiosResponse<any>) {
+  // Download the response to a file if `Content-Disposition` header is
+  //   `attachment; filename="<name>"`
+  try {
+    const filename = getAttachmentFilename(response.headers)
+    if (filename) {
+      const contentType = response.headers?.["Content-Type"] as
+        | string
+        | undefined
+      fileDownload(response.data, filename!, contentType)
+    }
+  } catch (e) {
+    console.log((e as Error).message)
+  }
+}
+
+function getAttachmentFilename(
+  headers?: Record<string, any>
+): string | undefined {
+  const dispositionHeader = headers?.["content-disposition"] as string
+  return dispositionHeader
+    ? contentDisposition.parse(dispositionHeader)?.parameters.filename
+    : undefined
 }

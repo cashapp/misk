@@ -25,6 +25,7 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
 import misk.web.actions.WebAction
+import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
@@ -33,8 +34,8 @@ import wisp.logging.LogCollector
 import java.time.Clock
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class ConcurrencyLimitsInterceptorTest {
@@ -52,7 +53,7 @@ class ConcurrencyLimitsInterceptorTest {
     val interceptor = factory.create(action)!!
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
-    assertThat(logCollector.takeMessages()).isEmpty()
+    assertThat(logCollector.takeMessages()).containsExactly("Starting ready service")
     assertThat(callSuccessCount("HelloAction")).isEqualTo(1.0)
   }
 
@@ -215,7 +216,7 @@ class ConcurrencyLimitsInterceptorTest {
 
   private fun callSuccessCount(id: String): Double {
     return prometheusRegistry.getSampleValue(
-      "concurrency_limits_outcomes",
+      "concurrency_limits_outcomes_total",
       arrayOf("quota_path", "outcome"),
       arrayOf(id, "success")
     )

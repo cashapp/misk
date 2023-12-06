@@ -11,7 +11,9 @@ import misk.vitess.target
 import wisp.logging.getLogger
 import java.sql.Connection
 import java.sql.SQLException
-import java.util.*
+import java.util.SortedSet
+import java.util.TreeMap
+import java.util.TreeSet
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
 
@@ -19,17 +21,17 @@ private val logger = getLogger<SchemaMigrator>()
 
 internal data class NamedspacedMigration(
   val version: Int,
-  val namespace: String = ""
+  val namespace: String = "",
 ) : Comparable<NamedspacedMigration> {
   // We don't store the path from which schema changes came, so we don't use it for comparison
   // between what's in the database and what's available.
   var path = ""
 
   override fun compareTo(other: NamedspacedMigration): Int {
-    if (namespace == other.namespace) {
-      return version.compareTo(other.version)
+    return if (namespace == other.namespace) {
+      version.compareTo(other.version)
     } else {
-      return namespace.compareTo(other.namespace)
+      namespace.compareTo(other.namespace)
     }
   }
 
@@ -44,13 +46,13 @@ internal data class NamedspacedMigration(
      *   The namespace is the subdirectory structure in which the migration was found.
      */
     fun fromNamespacedVersion(namespacedVersion: String): NamedspacedMigration {
-      if (namespacedVersion.toIntOrNull() != null) {
-        return NamedspacedMigration(namespacedVersion.toInt())
+      return if (namespacedVersion.toIntOrNull() != null) {
+        NamedspacedMigration(namespacedVersion.toInt())
       } else {
-        val items = namespacedVersion.split("/")
+        val items = namespacedVersion.split(NAMESPACE_SEPARATOR)
         val version = items.last().toInt()
-        val namespace = items.dropLast(1).joinToString("/") + "/"
-        return NamedspacedMigration(version, namespace)
+        val namespace = items.dropLast(1).joinToString(NAMESPACE_SEPARATOR) + NAMESPACE_SEPARATOR
+        NamedspacedMigration(version, namespace)
       }
     }
 
@@ -59,8 +61,12 @@ internal data class NamedspacedMigration(
      *  - classpath:/migrations/v1_table.sql becomes "1"
      *  - classpath:/migrations/com/example/library/v1_table.sql becomes "com/example/library/1"
      */
-    fun fromResourcePath(resource: String, migrationsResource: String): NamedspacedMigration {
-      val matcher = MIGRATION_PATTERN.matcher(resource)
+    fun fromResourcePath(
+      resource: String,
+      migrationsResource: String,
+      migrationPattern: String,
+    ): NamedspacedMigration {
+      val matcher = Pattern.compile(migrationPattern).matcher(resource)
       require(matcher.matches()) { "unexpected resource: $resource" }
       val cleanNamespace = matcher.group(1).removePrefix(migrationsResource).removePrefix("/")
       val namedspacedMigration = NamedspacedMigration(matcher.group(2).toInt(), cleanNamespace)
@@ -68,8 +74,7 @@ internal data class NamedspacedMigration(
       return namedspacedMigration
     }
 
-    /** Matches file names like `exemplar/migrations/v100__exemplar.sql`. */
-    val MIGRATION_PATTERN = Pattern.compile("(^|.*/)v(\\d+)__[^/]+\\.sql")!!
+    private const val NAMESPACE_SEPARATOR = "/"
   }
 }
 
@@ -97,11 +102,10 @@ internal class SchemaMigrator(
   private val qualifier: KClass<out Annotation>,
   private val resourceLoader: ResourceLoader,
   private val dataSourceConfig: DataSourceConfig,
-  private val dataSource: DataSourceService,
-  private val connector: DataSourceConnector
+  private val dataSourceService: DataSourceService,
+  private val connector: DataSourceConnector,
 ) {
-
-  val shards = misk.vitess.shards(dataSource)
+  val shards = misk.vitess.shards(dataSourceService)
 
   private fun getMigrationsResources(keyspace: Keyspace): List<String> {
     val config = connector.config()
@@ -122,8 +126,15 @@ internal class SchemaMigrator(
   fun availableMigrations(keyspace: Keyspace): SortedSet<NamedspacedMigration> {
     val migrations = mutableListOf<NamedspacedMigration>()
     for (migrationsResource in getMigrationsResources(keyspace)) {
-      val migrationsFound = resourceLoader.walk(migrationsResource).filter { it.endsWith(".sql") }
-        .map { NamedspacedMigration.fromResourcePath(it, migrationsResource) }
+      val migrationsFound = resourceLoader.walk(migrationsResource)
+        .filter { it.endsWith(".sql") }
+        .filter { resource ->
+          connector.config().migrations_resources_exclusion?.none { excludedResource ->
+            resource.contains(excludedResource)
+          } ?: true
+        }.map {
+          NamedspacedMigration.fromResourcePath(it, migrationsResource, connector.config().migrations_resources_regex)
+        }
       migrations.addAll(migrationsFound)
     }
     val migrationMap = TreeMap<NamedspacedMigration, MutableList<NamedspacedMigration>>()
@@ -159,7 +170,7 @@ internal class SchemaMigrator(
         }
         return result
       } catch (e: SQLException) {
-        dataSource.get().connection.use {
+        dataSourceService.dataSource.connection.use {
           it.target(shard) { c ->
             c.createStatement().use { statement ->
               statement.execute(
@@ -198,12 +209,12 @@ internal class SchemaMigrator(
       }
     }
 
-    if (dataSourceConfig.type.isVitess) {
-      return dataSource.get().connection.use {
+    return if (dataSourceConfig.type.isVitess) {
+      dataSourceService.dataSource.connection.use {
         it.failSafeRead(shard, listMigrations)
       }
     } else {
-      return dataSource.get().connection.use {
+      dataSourceService.dataSource.connection.use {
         listMigrations(it)
       }
     }
@@ -221,7 +232,7 @@ internal class SchemaMigrator(
         val migrationSql = resourceLoader.utf8(migration.path)
         val stopwatch = Stopwatch.createStarted()
 
-        dataSource.get().connection.use {
+        dataSourceService.dataSource.connection.use {
           it.target(shard) { c ->
             c.createStatement().use { migrationStatement ->
               migrationStatement.addBatch(migrationSql)
@@ -294,13 +305,13 @@ internal class SchemaMigrator(
 
 /** Snapshot of all shards in a cluster. */
 internal data class MigrationState(
-  val shards: Map<Shard, ShardMigrationState>
+  val shards: Map<Shard, ShardMigrationState>,
 )
 
 /** Snapshot of the migration state of a single shard. */
 internal data class ShardMigrationState(
   val available: SortedSet<NamedspacedMigration>,
-  val applied: SortedSet<NamedspacedMigration>
+  val applied: SortedSet<NamedspacedMigration>,
 ) {
   fun missingMigrations() = available - applied
 

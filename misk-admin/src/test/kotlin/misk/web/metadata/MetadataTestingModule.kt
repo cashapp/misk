@@ -12,7 +12,7 @@ import misk.web.dashboard.DashboardTabProvider
 import misk.web.dashboard.DashboardTheme
 import misk.web.dashboard.MiskWebTheme
 import wisp.config.Config
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 // Common test module used to be able to test admin dashboard WebActions
 class MetadataTestingModule : KAbstractModule() {

@@ -4,8 +4,8 @@ import com.google.common.base.Ticker
 import misk.concurrent.Sleeper
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 interface Sampler {
   /** If an action should be taken based on the implementation's policy, returns true */
@@ -20,7 +20,7 @@ interface Sampler {
 }
 
 /** A [Sampler] randomly invokes an action based on a sample percentage */
-class PercentSampler(
+class PercentSampler @JvmOverloads constructor(
   val samplePercentage: () -> Int,
   val random: () -> Int = { ThreadLocalRandom.current().nextInt(0, 100) }
 ) : Sampler {

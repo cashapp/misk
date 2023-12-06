@@ -7,8 +7,8 @@ import misk.clustering.DefaultCluster
 import wisp.logging.getLogger
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * A [FakeCluster] is a [Cluster] that is a fake. It delegates entirely to [DefaultCluster],
@@ -38,6 +38,7 @@ class FakeCluster internal constructor(
     }
   }
 
+  @JvmOverloads
   fun clusterChanged(
     membersBecomingReady: Set<Cluster.Member> = setOf(),
     membersBecomingNotReady: Set<Cluster.Member> = setOf()

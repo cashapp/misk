@@ -1,7 +1,7 @@
 package misk.web.interceptors
 
 import misk.web.NetworkInterceptor
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 /**
  * Denotes a target interceptor to handle a message payload represented by a possible list

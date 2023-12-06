@@ -8,14 +8,13 @@ import com.google.inject.Provides
 import com.google.inject.Scopes
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
-import mu.KotlinLogging
-import javax.inject.Provider
-import javax.inject.Singleton
+import wisp.logging.getLogger
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
-@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 class ServiceManagerModule : KAbstractModule() {
   companion object {
-    private val log = KotlinLogging.logger {}
+    private val log = getLogger<ServiceManagerModule>()
   }
 
   override fun configure() {

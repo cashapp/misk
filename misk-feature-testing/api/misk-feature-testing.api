@@ -27,6 +27,11 @@ public final class misk/feature/testing/FakeFeatureFlags : com/google/common/uti
 	public fun getString (Lmisk/feature/Feature;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;
+	public final synthetic fun override (D)Lmisk/feature/testing/FakeFeatureFlags;
+	public final synthetic fun override (I)Lmisk/feature/testing/FakeFeatureFlags;
+	public final synthetic fun override (Ljava/lang/Enum;)Lmisk/feature/testing/FakeFeatureFlags;
+	public final synthetic fun override (Ljava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
+	public final synthetic fun override (Ljava/lang/String;)Lmisk/feature/testing/FakeFeatureFlags;
 	public final fun override (Lmisk/feature/Feature;D)V
 	public final fun override (Lmisk/feature/Feature;I)V
 	public final fun override (Lmisk/feature/Feature;Ljava/lang/Enum;)V
@@ -34,6 +39,7 @@ public final class misk/feature/testing/FakeFeatureFlags : com/google/common/uti
 	public final fun override (Lmisk/feature/Feature;Ljava/lang/Object;Ljava/lang/Class;)V
 	public final fun override (Lmisk/feature/Feature;Ljava/lang/String;)V
 	public final fun override (Lmisk/feature/Feature;Z)V
+	public final synthetic fun override (Z)Lmisk/feature/testing/FakeFeatureFlags;
 	public final fun overrideAny (Ljava/lang/Class;Ljava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;
 	public final fun overrideAny (Ljava/lang/Class;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lmisk/feature/testing/FakeFeatureFlags;
 	public static synthetic fun overrideAny$default (Lmisk/feature/testing/FakeFeatureFlags;Ljava/lang/Class;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/feature/testing/FakeFeatureFlags;

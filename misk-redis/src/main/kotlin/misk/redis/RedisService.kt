@@ -1,9 +1,9 @@
 package misk.redis
 
 import com.google.common.util.concurrent.AbstractIdleService
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
 /** Controls the connection lifecycle for Redis. */
 @Singleton
@@ -19,10 +19,8 @@ class RedisService @Inject internal constructor(
   }
 
   override fun shutDown() {
-    // If the redis client variable was initialized
     if (::redis.isInitialized) {
-      // If the redis client was a real client, close the connection
-      (redis as? RealRedis)?.close()
+      redis.close()
     }
   }
 }

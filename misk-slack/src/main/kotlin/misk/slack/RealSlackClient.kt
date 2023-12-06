@@ -1,11 +1,11 @@
 package misk.slack
 
 import wisp.logging.getLogger
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class RealSlackClient @Inject constructor(
   private val slackWebHookApi: SlackWebhookApi,
-  private val config: SlackConfig
+  private val config: SlackConfig,
 ) : SlackClient() {
   /**
    * Post a message as the specified bot username and icon emoji in the channel.
@@ -16,7 +16,7 @@ class RealSlackClient @Inject constructor(
     username: String,
     iconEmoji: String,
     message: String,
-    channel: String?
+    channel: String?,
   ): SlackWebhookResponse? {
     val resolvedChannel = channel ?: config.default_channel
     if (resolvedChannel == null) {

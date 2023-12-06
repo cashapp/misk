@@ -2,10 +2,10 @@ package misk.testing
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import jakarta.inject.Inject
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.slf4j.LoggerFactory
-import javax.inject.Inject
 
 class LogLevelExtension @Inject constructor() : BeforeEachCallback {
   override fun beforeEach(context: ExtensionContext?) {
@@ -17,10 +17,10 @@ class LogLevelExtension @Inject constructor() : BeforeEachCallback {
   }
 
   private fun level(context: ExtensionContext?): Level {
-    if(context == null || context.element.isEmpty) {
+    if (context == null || context.element.isEmpty) {
       return Level.INFO
     }
-    return  context.element.get().annotations.firstNotNullOfOrNull { it as? LogLevel }
+    return context.element.get().annotations.firstNotNullOfOrNull { it as? LogLevel }
       ?.let { mapLevel(it.level) }
       ?: findParent(context)
       ?: Level.INFO

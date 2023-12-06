@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
-import javax.inject.Inject
-import javax.inject.Qualifier
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 
 @MiskTest(startService = true)
 internal class VitessSchemaMigratorTest {
@@ -102,6 +102,10 @@ internal class VitessSchemaMigratorTest {
 @Qualifier
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class Movies
+
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+internal annotation class Movies2
 
 internal data class MoviesConfig(
   val data_source: DataSourceConfig,

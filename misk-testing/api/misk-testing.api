@@ -235,20 +235,11 @@ public final class misk/testing/TemporaryFolderModule$DeleteTempFolder : org/jun
 	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
-public final class misk/time/FakeClock : java/time/Clock {
+public final class misk/time/FakeClock : wisp/time/FakeClock {
 	public fun <init> ()V
-	public fun <init> (JLjava/time/ZoneId;)V
-	public synthetic fun <init> (JLjava/time/ZoneId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun add (JLjava/util/concurrent/TimeUnit;)J
-	public final fun add (Ljava/time/Duration;)J
-	public final fun add (Ljava/time/Period;)J
-	public fun getZone ()Ljava/time/ZoneId;
-	public fun instant ()Ljava/time/Instant;
-	public final fun setNow (Ljava/time/Instant;)V
-	public fun withZone (Ljava/time/ZoneId;)Ljava/time/Clock;
 }
 
-public final class misk/time/FakeClockModule : misk/inject/KAbstractModule {
+public final class misk/time/FakeClockModule : misk/inject/KInstallOnceModule {
 	public fun <init> ()V
 }
 
@@ -258,6 +249,19 @@ public final class misk/time/FakeTickerModule : misk/inject/KAbstractModule {
 
 public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public fun <init> ()V
+	public fun <init> (Lokhttp3/HttpUrl;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;I)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;II)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;Z)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;)V
 	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;)V
 	public synthetic fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun accepts ()Ljava/util/List;
@@ -321,6 +325,16 @@ public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/web/FakeWebSocket : misk/web/actions/WebSocket {
+	public fun <init> ()V
+	public fun cancel ()V
+	public fun close (ILjava/lang/String;)Z
+	public final fun poll ()Ljava/lang/String;
+	public fun queueSize ()J
+	public fun send (Ljava/lang/String;)Z
+	public fun send (Lokio/ByteString;)Z
+}
+
 public final class misk/web/FakeWebSocketListener : okhttp3/WebSocketListener {
 	public fun <init> ()V
 	public final fun getMessages ()Ljava/util/concurrent/LinkedBlockingDeque;
@@ -350,6 +364,7 @@ public final class misk/web/WebTestClient {
 	public final fun call (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun get (Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun post (Ljava/lang/String;Ljava/lang/Object;Lkotlin/reflect/KClass;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun post (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun post (Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;)Lmisk/web/WebTestClient$WebTestResponse;
 	public static synthetic fun post$default (Lmisk/web/WebTestClient;Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;ILjava/lang/Object;)Lmisk/web/WebTestClient$WebTestResponse;
 }

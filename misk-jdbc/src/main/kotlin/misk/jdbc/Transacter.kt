@@ -1,7 +1,6 @@
 package misk.jdbc
 
 import java.sql.Connection
-import javax.sql.DataSource
 
 interface Transacter {
   /**
@@ -18,7 +17,8 @@ interface Transacter {
    * Prefer using [transactionWithSession] instead of this method as it has more functionality such
    * as commit hooks.
    */
-  @Deprecated("Use transactionWithSession instead",
+  @Deprecated(
+    "Use transactionWithSession instead",
     replaceWith = ReplaceWith("transactionWithSession(work)")
   )
   fun <T> transaction(work: (connection: Connection) -> T): T
@@ -35,7 +35,7 @@ interface Transacter {
   fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T
 }
 
-class RealTransacter constructor(private val dataSource: DataSource) : Transacter {
+class RealTransacter(private val dataSourceService: DataSourceService) : Transacter {
   private val transacting = ThreadLocal.withInitial { false }
 
   override val inTransaction: Boolean get() = transacting.get()
@@ -50,7 +50,7 @@ class RealTransacter constructor(private val dataSource: DataSource) : Transacte
 
     var session: JDBCSession? = null
     try {
-      return dataSource.connection.use { connection ->
+      return dataSourceService.dataSource.connection.use { connection ->
         /*
          * We are using Hikari, which will automatically roll back incomplete transactions.
          * This means there's actually no need to wrap the transaction in a try clause to

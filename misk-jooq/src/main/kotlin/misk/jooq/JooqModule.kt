@@ -1,5 +1,7 @@
 package misk.jooq
 
+import com.google.inject.Provider
+import jakarta.inject.Inject
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
@@ -25,13 +27,10 @@ import org.jooq.conf.Settings
 import org.jooq.impl.DSL
 import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
-import java.lang.IllegalArgumentException
 import java.time.Clock
-import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.reflect.KClass
 
-class JooqModule(
+class JooqModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   private val dataSourceClusterConfig: DataSourceClusterConfig,
   private val jooqCodeGenSchemaName: String,
@@ -39,7 +38,8 @@ class JooqModule(
   private val readerQualifier: KClass<out Annotation>? = null,
   private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions =
     JooqTimestampRecordListenerOptions(install = false),
-  private val jooqConfigExtension: Configuration.() -> Unit = {}
+  private val installHealthChecks: Boolean = true,
+  private val jooqConfigExtension: Configuration.() -> Unit = {},
 ) : KAbstractModule() {
 
   override fun configure() {
@@ -49,12 +49,13 @@ class JooqModule(
         dataSourceClusterConfig.writer,
         readerQualifier,
         dataSourceClusterConfig.reader,
-        databasePool
+        databasePool,
+        installHealthChecks
       )
     )
 
     bindTransacter(qualifier, dataSourceClusterConfig.writer)
-    if(readerQualifier != null && dataSourceClusterConfig.reader != null) {
+    if (readerQualifier != null && dataSourceClusterConfig.reader != null) {
       bindTransacter(readerQualifier, dataSourceClusterConfig.reader!!)
     }
 
@@ -63,8 +64,7 @@ class JooqModule(
     val healthCheckKey = keyOf<HealthCheck>(qualifier)
     bind(healthCheckKey)
       .toProvider(object : Provider<JooqHealthCheck> {
-        @Inject
-        lateinit var clock: Clock
+        @Inject lateinit var clock: Clock
 
         override fun get(): JooqHealthCheck {
           return JooqHealthCheck(
@@ -80,16 +80,16 @@ class JooqModule(
 
   private fun bindTransacter(
     qualifier: KClass<out Annotation>,
-    datasourceConfig: DataSourceConfig
+    datasourceConfig: DataSourceConfig,
   ) {
     val transacterKey = JooqTransacter::class.toKey(qualifier)
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
     bind(transacterKey).toProvider(object : Provider<JooqTransacter> {
-      @Inject
-      lateinit var clock: Clock
+      @Inject lateinit var clock: Clock
+
       override fun get(): JooqTransacter {
         return JooqTransacter(
-          dslContext = dslContext(dataSourceServiceProvider.get(), clock, datasourceConfig)
+          dslContext = lazy { dslContext(dataSourceServiceProvider.get(), clock, datasourceConfig) }
         )
       }
     }).asSingleton()
@@ -98,7 +98,7 @@ class JooqModule(
   private fun dslContext(
     dataSourceService: DataSourceService,
     clock: Clock,
-    datasourceConfig: DataSourceConfig
+    datasourceConfig: DataSourceConfig,
   ): DSLContext {
     val settings = Settings()
       .withExecuteWithOptimisticLocking(true)
@@ -109,33 +109,36 @@ class JooqModule(
             .withOutput(datasourceConfig.database)
         )
       )
-    return DSL.using(dataSourceService.get(), datasourceConfig.type.toSqlDialect(), settings).apply {
-      configuration().set(
-        DefaultTransactionProvider(
-          configuration().connectionProvider(),
-          false
-        )
-      ).apply {
-        val executeListeners = mutableListOf(
-          DefaultExecuteListenerProvider(AvoidUsingSelectStarListener())
-        )
-        if ("true" == datasourceConfig.show_sql) {
-          executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
-        }
-        set(*executeListeners.toTypedArray())
+    return DSL.using(dataSourceService.dataSource, datasourceConfig.type.toSqlDialect(), settings)
+      .apply {
+        configuration().set(
+          DefaultTransactionProvider(
+            configuration().connectionProvider(),
+            false
+          )
+        ).apply {
+          val executeListeners = mutableListOf(
+            DefaultExecuteListenerProvider(AvoidUsingSelectStarListener())
+          )
+          if ("true" == datasourceConfig.show_sql) {
+            executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
+          }
+          set(*executeListeners.toTypedArray())
 
-        if(jooqTimestampRecordListenerOptions.install) {
-          set(JooqTimestampRecordListener(
-            clock = clock,
-            createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
-            updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
-          ))
-        }
-      }.apply(jooqConfigExtension)
-    }
+          if (jooqTimestampRecordListenerOptions.install) {
+            set(
+              JooqTimestampRecordListener(
+                clock = clock,
+                createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
+                updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
+              )
+            )
+          }
+        }.apply(jooqConfigExtension)
+      }
   }
 
-  private fun DataSourceType.toSqlDialect() = when(this) {
+  private fun DataSourceType.toSqlDialect() = when (this) {
     DataSourceType.MYSQL -> SQLDialect.MYSQL
     DataSourceType.HSQLDB -> SQLDialect.HSQLDB
     DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL

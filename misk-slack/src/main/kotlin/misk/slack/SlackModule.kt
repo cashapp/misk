@@ -8,8 +8,8 @@ import misk.inject.KAbstractModule
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import wisp.moshi.buildMoshi
-import javax.inject.Named
-import javax.inject.Singleton
+import jakarta.inject.Named
+import jakarta.inject.Singleton
 
 /**
  * Installs the Slack webhook client.
@@ -24,15 +24,16 @@ class SlackModule(private val config: SlackConfig) : KAbstractModule() {
 
   @Provides @Singleton fun provideSlackWebhookApi(
     httpClientFactory: HttpClientFactory,
-    @Named("misk-slack") moshi: Moshi
+    @Named("misk-slack") moshi: Moshi,
   ): SlackWebhookApi {
     val okHttpClient = httpClientFactory.create(
-        HttpClientEndpointConfig(url = config.baseUrl))
+      HttpClientEndpointConfig(url = config.baseUrl)
+    )
     val retrofit = Retrofit.Builder()
-        .baseUrl(config.baseUrl)
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .client(okHttpClient)
-        .build()
+      .baseUrl(config.baseUrl)
+      .addConverterFactory(MoshiConverterFactory.create(moshi))
+      .client(okHttpClient)
+      .build()
     return retrofit.create(SlackWebhookApi::class.java)
   }
 

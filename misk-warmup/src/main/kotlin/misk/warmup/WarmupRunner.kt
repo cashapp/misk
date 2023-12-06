@@ -7,9 +7,9 @@ import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import wisp.logging.getLogger
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
 /**
  * This class is a health check to defer production traffic until all warmup tasks have completed.

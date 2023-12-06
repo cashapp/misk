@@ -10,7 +10,8 @@ import misk.moshi.time.InstantAdapter
 import misk.moshi.time.LocalDateAdapter
 import wisp.moshi.buildMoshi
 import java.util.Date
-import javax.inject.Singleton
+import jakarta.inject.Singleton
+import misk.moshi.time.OffsetDateTimeAdapter
 import com.squareup.wire.WireJsonAdapterFactory as WireOnlyJsonAdapterFactory
 import misk.moshi.wire.WireMessageAdapter as MiskOnlyMessageAdapter
 
@@ -18,11 +19,14 @@ import misk.moshi.wire.WireMessageAdapter as MiskOnlyMessageAdapter
  * For service setup, prefer to install [misk.MiskCommonServiceModule] over installing [MoshiModule]
  * directly.
  */
-class MoshiModule(
+class MoshiModule @JvmOverloads constructor(
   private val useWireToRead: Boolean = false,
   private val useWireToWrite: Boolean = false
 ) : KAbstractModule() {
   override fun configure() {
+    newMultibinder<Any>(MoshiJsonAdapter::class)
+    newMultibinder<Any>(MoshiJsonLastAdapter::class)
+    
     val wireFactory = WireOnlyJsonAdapterFactory()
     val miskFactory = MiskOnlyMessageAdapter.Factory()
     install(
@@ -30,7 +34,8 @@ class MoshiModule(
         MigratingJsonAdapterFactory(
           reader = if (useWireToRead) wireFactory else miskFactory,
           writer = if (useWireToWrite) wireFactory else miskFactory
-        )
+        ),
+        addLast = true,
       )
     )
 
@@ -39,13 +44,15 @@ class MoshiModule(
     install(MoshiAdapterModule(InstantAdapter))
     install(MoshiAdapterModule(BigDecimalAdapter))
     install(MoshiAdapterModule(LocalDateAdapter))
+    install(MoshiAdapterModule(OffsetDateTimeAdapter))
   }
 
   @Provides
   @Singleton
   fun provideMoshi(
-    @MoshiJsonAdapter jsonAdapters: List<Any>
+    @MoshiJsonAdapter jsonAdapters: List<Any>,
+    @MoshiJsonLastAdapter jsonLastAdapters: List<Any>,
   ): Moshi {
-    return buildMoshi(jsonAdapters)
+    return buildMoshi(jsonAdapters, jsonLastAdapters)
   }
 }

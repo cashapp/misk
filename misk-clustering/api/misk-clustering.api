@@ -5,6 +5,8 @@ public abstract interface class misk/clustering/Cluster {
 }
 
 public final class misk/clustering/Cluster$Changes {
+	public fun <init> (Lmisk/clustering/Cluster$Snapshot;)V
+	public fun <init> (Lmisk/clustering/Cluster$Snapshot;Ljava/util/Set;)V
 	public fun <init> (Lmisk/clustering/Cluster$Snapshot;Ljava/util/Set;Ljava/util/Set;)V
 	public synthetic fun <init> (Lmisk/clustering/Cluster$Snapshot;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lmisk/clustering/Cluster$Snapshot;
@@ -39,6 +41,7 @@ public final class misk/clustering/Cluster$Member {
 }
 
 public final class misk/clustering/Cluster$Snapshot {
+	public fun <init> (Lmisk/clustering/Cluster$Member;Ljava/util/Set;Lmisk/clustering/ClusterResourceMapper;)V
 	public fun <init> (Lmisk/clustering/Cluster$Member;Ljava/util/Set;ZLmisk/clustering/ClusterResourceMapper;)V
 	public synthetic fun <init> (Lmisk/clustering/Cluster$Member;Ljava/util/Set;ZLmisk/clustering/ClusterResourceMapper;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lmisk/clustering/Cluster$Member;
@@ -58,6 +61,8 @@ public final class misk/clustering/Cluster$Snapshot {
 }
 
 public final class misk/clustering/ClusterHashRing : misk/clustering/ClusterResourceMapper {
+	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;)V
 	public fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;I)V
 	public synthetic fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
@@ -74,8 +79,11 @@ public abstract interface class misk/clustering/ClusterService : com/google/comm
 
 public final class misk/clustering/DefaultCluster : com/google/common/util/concurrent/AbstractExecutionThreadService, misk/clustering/Cluster, misk/clustering/ClusterService {
 	public static final field Companion Lmisk/clustering/DefaultCluster$Companion;
+	public fun <init> (Lmisk/clustering/Cluster$Member;)V
 	public fun <init> (Lmisk/clustering/Cluster$Member;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lmisk/clustering/Cluster$Member;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clusterChanged ()V
+	public final fun clusterChanged (Ljava/util/Set;)V
 	public final fun clusterChanged (Ljava/util/Set;Ljava/util/Set;)V
 	public static synthetic fun clusterChanged$default (Lmisk/clustering/DefaultCluster;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)V
 	public fun getSnapshot ()Lmisk/clustering/Cluster$Snapshot;
@@ -113,6 +121,8 @@ public final class misk/clustering/fake/FakeCluster : misk/clustering/Cluster, m
 	public fun awaitRunning (JLjava/util/concurrent/TimeUnit;)V
 	public fun awaitTerminated ()V
 	public fun awaitTerminated (JLjava/util/concurrent/TimeUnit;)V
+	public final fun clusterChanged ()V
+	public final fun clusterChanged (Ljava/util/Set;)V
 	public final fun clusterChanged (Ljava/util/Set;Ljava/util/Set;)V
 	public static synthetic fun clusterChanged$default (Lmisk/clustering/fake/FakeCluster;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)V
 	public fun failureCause ()Ljava/lang/Throwable;
@@ -149,6 +159,12 @@ public final class misk/clustering/kubernetes/KubernetesClusterModule : misk/inj
 
 public final class misk/clustering/kubernetes/KubernetesConfig : wisp/config/Config {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJ)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJJ)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;

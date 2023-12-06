@@ -25,10 +25,10 @@ import wisp.deployment.Deployment
  *    dashboard urls such as `/_admin/` or `/app/` since path routing is by url prefix.
  * @property resourcePath JVM path for non-Development environment static resources (includes `classpath:/` prefix)
  */
-class WebTabResourceModule(
-  private val isDevelopment: Boolean,
+class WebTabResourceModule @JvmOverloads constructor(
+  private val isDevelopment: Boolean = false,
   val slug: String,
-  val web_proxy_url: String,
+  val web_proxy_url: String? = null,
   val url_path_prefix: String = "/_tab/$slug/",
   val resourcePath: String = "classpath:/web/_tab/$slug/"
 ) : KAbstractModule() {
@@ -47,12 +47,13 @@ class WebTabResourceModule(
       .toInstance(
         StaticResourceEntry(url_path_prefix = url_path_prefix, resourcePath = resourcePath)
       )
-
     if (isDevelopment) {
-      install(WebActionModule.createWithPrefix<WebProxyAction>(url_path_prefix = url_path_prefix))
-      multibind<WebProxyEntry>().toInstance(
-        WebProxyEntry(url_path_prefix = url_path_prefix, web_proxy_url = web_proxy_url)
-      )
+      web_proxy_url?.let {
+        install(WebActionModule.createWithPrefix<WebProxyAction>(url_path_prefix = url_path_prefix))
+        multibind<WebProxyEntry>().toInstance(
+          WebProxyEntry(url_path_prefix = url_path_prefix, web_proxy_url = web_proxy_url)
+        )
+      }
     } else {
       install(
         WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = url_path_prefix)

@@ -2,8 +2,10 @@ package misk.web.dashboard
 
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import misk.config.AppName
+import wisp.deployment.Deployment
 import kotlin.reflect.KClass
 
 /**
@@ -14,46 +16,57 @@ import kotlin.reflect.KClass
  * @property [url_path_prefix] A unique url path prefix to namespace tab URLs
  * @property [dashboard_slug] A slug that identifies which dashboard the tab is installed to,
  *  generated from a slugified Dashboard Annotation class simple name
- * @property [name] A title case name used in the dashboard menu for the link to the tab
- * @property [category] A title case category used to group tabs in the dashboard menu
+ * @property [menuLabel] A title case name used in the dashboard menu for the link to the tab
+ * @property [menuCategory] A title case category used to group tabs in the dashboard menu
+ * @property [menuUrl] Url to the tab, by default [url_path_prefix]
  * @property [capabilities] Set to show the tab only for authenticated capabilities, else shows always
  * @property [services] Set to show the tab only for authenticated services, else shows always
  */
-class DashboardTab(
-  slug: String,
-  url_path_prefix: String,
+data class DashboardTab @JvmOverloads constructor(
+  override val slug: String,
+  override val url_path_prefix: String,
   val dashboard_slug: String,
-  val name: String,
-  val category: String = "",
-  capabilities: Set<String> = setOf(),
-  services: Set<String> = setOf()
+  val menuLabel: String,
+  val menuCategory: String = "",
+  val menuUrl: String = url_path_prefix,
+  override val capabilities: Set<String> = setOf(),
+  override val services: Set<String> = setOf(),
+  val accessAnnotationKClass: KClass<out Annotation>? = null,
+  val dashboardAnnotationKClass: KClass<out Annotation>? = null,
 ) : WebTab(slug, url_path_prefix, capabilities, services)
 
 /**
  * Sets the tab's authentication capabilities/services by the multibound [AccessAnnotationEntry]
  */
-class DashboardTabProvider(
+class DashboardTabProvider @JvmOverloads constructor(
   val slug: String,
   val url_path_prefix: String,
-  val name: String,
-  val category: String = "Admin",
+  val menuLabel: (appName: String, deployment: Deployment) -> String,
+  val menuUrl: (appName: String, deployment: Deployment) -> String = { _, _ -> url_path_prefix },
+  val menuCategory: String = "Admin",
   val dashboard_slug: String,
-  val accessAnnotation: KClass<out Annotation>? = null,
   val capabilities: Set<String> = setOf(),
-  val services: Set<String> = setOf()
-) : Provider<DashboardTab> {
+  val services: Set<String> = setOf(),
+  val accessAnnotationKClass: KClass<out Annotation>? = null,
+  val dashboardAnnotationKClass: KClass<out Annotation>,
+) : Provider<DashboardTab>, ValidWebEntry(slug, url_path_prefix) {
+  @Inject @AppName lateinit var appName: String
+  @Inject lateinit var deployment: Deployment
   @Inject lateinit var accessAnnotationEntries: List<AccessAnnotationEntry>
 
   override fun get(): DashboardTab {
-    val accessAnnotationEntry = accessAnnotationEntries.find { it.annotation == accessAnnotation }
+    val accessAnnotationEntry = accessAnnotationEntries.find { it.annotation == accessAnnotationKClass }
     return DashboardTab(
       slug = slug,
       url_path_prefix = url_path_prefix,
       dashboard_slug = dashboard_slug,
-      name = name,
-      category = category,
+      menuLabel = menuLabel(appName, deployment),
+      menuUrl = menuUrl(appName, deployment),
+      menuCategory = menuCategory,
       capabilities = accessAnnotationEntry?.capabilities?.toSet() ?: capabilities,
-      services = accessAnnotationEntry?.services?.toSet() ?: services
+      services = accessAnnotationEntry?.services?.toSet() ?: services,
+      accessAnnotationKClass = accessAnnotationKClass,
+      dashboardAnnotationKClass = dashboardAnnotationKClass,
     )
   }
 }
@@ -65,17 +78,20 @@ inline fun <reified DA : Annotation> DashboardTabProvider(
   slug: String,
   url_path_prefix: String,
   name: String,
+  menuUrl: String = url_path_prefix,
   category: String = "Admin",
   capabilities: Set<String> = setOf(),
   services: Set<String> = setOf()
 ) = DashboardTabProvider(
   slug = slug,
   url_path_prefix = url_path_prefix,
-  name = name,
-  category = category,
+  menuLabel = { _, _ -> name },
+  menuCategory = category,
+  menuUrl = { _, _ -> menuUrl },
   dashboard_slug = slugify<DA>(),
   capabilities = capabilities,
-  services = services
+  services = services,
+  dashboardAnnotationKClass = DA::class,
 )
 
 /**
@@ -85,12 +101,15 @@ inline fun <reified DA : Annotation, reified AA : Annotation> DashboardTabProvid
   slug: String,
   url_path_prefix: String,
   name: String,
-  category: String = "Admin"
+  menuUrl: String = url_path_prefix,
+  category: String = "Admin",
 ) = DashboardTabProvider(
   slug = slug,
   url_path_prefix = url_path_prefix,
-  name = name,
-  category = category,
+  menuLabel = { _,_ -> name },
+  menuCategory = category,
+  menuUrl = { _, _ -> menuUrl },
   dashboard_slug = slugify<DA>(),
-  accessAnnotation = AA::class
+  accessAnnotationKClass = AA::class,
+  dashboardAnnotationKClass = DA::class,
 )

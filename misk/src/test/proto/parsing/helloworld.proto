@@ -13,6 +13,8 @@
 // limitations under the License.
 syntax = "proto2";
 
+import "google/protobuf/empty.proto";
+
 option java_package = "com.squareup.protos.test.grpc";
 
 package helloworld;
@@ -21,6 +23,7 @@ package helloworld;
 service Greeter {
   // Sends a greeting
   rpc SayHello (HelloRequest) returns (HelloReply) {}
+  rpc Greet (google.protobuf.Empty) returns (GreetResponse);
 }
 
 // The request message containing the user's name.
@@ -30,5 +33,11 @@ message HelloRequest {
 
 // The response message containing the greetings
 message HelloReply {
+  optional string message = 1;
+}
+
+
+// The response message containing the greetings
+message GreetResponse {
   optional string message = 1;
 }

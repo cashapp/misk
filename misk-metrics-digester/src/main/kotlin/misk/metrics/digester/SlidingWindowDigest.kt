@@ -32,7 +32,7 @@ data class Snapshot(
  * Reported quantiles are at most 5 seconds out of date:
  * NewSlidingWindowDigest(Windower(10, 2),  fun() = VeneurDigest())
  */
-class SlidingWindowDigest<T : TDigest<T>> constructor(
+class SlidingWindowDigest<T : TDigest<T>> @JvmOverloads constructor(
   internal val windower: Windower,
   internal val tDigest: () -> T,
   private val utcNowClock: Clock = Clock.systemUTC()

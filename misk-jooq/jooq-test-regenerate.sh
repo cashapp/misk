@@ -28,6 +28,6 @@ docker run --rm \
 echo "waiting for mysql to start up"
 waitContainer misk-jooq-test-codegen
 
-./gradlew -p misk-jooq generateJooq
+bin/gradle -p misk-jooq generateJooq
 
 docker stop misk-jooq-test-codegen

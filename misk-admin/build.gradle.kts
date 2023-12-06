@@ -1,28 +1,44 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
-  
+  id("com.vanniktech.maven.publish.base")
   id("com.squareup.wire")
 }
 
 dependencies {
-  implementation(Dependencies.kotlinReflection)
-  implementation(project(":misk"))
-  implementation(project(":misk-core"))
+  api(Dependencies.guice)
+  api(Dependencies.jakartaInject)
+  api(Dependencies.kotlinxHtml)
+  api(Dependencies.moshi)
+  api(Dependencies.okio)
+  api(project(":wisp:wisp-config"))
+  api(project(":wisp:wisp-deployment"))
+  api(project(":misk"))
+  api(project(":misk-action-scopes"))
+  api(project(":misk-actions"))
+  api(project(":misk-config"))
   api(project(":misk-inject"))
-  api(Dependencies.wispDeployment)
+  api(Dependencies.kotlinxHtml)
+  implementation(Dependencies.okHttp)
+  implementation(project(":misk-core"))
+  implementation(project(":misk-hotwire"))
+  implementation(project(":misk-tailwind"))
 
-  testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.kotlinReflect)
   testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.moshiKotlin)
   testImplementation(Dependencies.wireRuntime)
+  testImplementation(project(":misk-testing"))
 }
 
 sourceSets {
   val main by getting {
     resources.srcDir(listOf(
-      "web/tabs/admin-dashboard/lib",
       "web/tabs/config/lib",
       "web/tabs/database/lib",
       "web/tabs/web-actions/lib"
@@ -63,4 +79,10 @@ afterEvaluate {
       include(generatedSourceGlob)
     }
   }
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

@@ -1,6 +1,7 @@
 package misk.web.extractors
 
 import misk.Action
+import misk.exceptions.BadRequestException
 import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
@@ -10,8 +11,8 @@ import misk.web.marshal.GenericUnmarshallers
 import misk.web.marshal.Unmarshaller
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.IOException
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KParameter
 
 /** Binds parameters annotated [RequestBody] to the unmarshalled request body. */
@@ -20,11 +21,21 @@ internal class RequestBodyFeatureBinding(
   private val unmarshallerFactories: List<Unmarshaller.Factory>
 ) : FeatureBinding {
   override fun beforeCall(subject: Subject) {
-    val mediaType = subject.httpCall.requestHeaders["Content-Type"]?.let { it.toMediaTypeOrNull() }
+    val contentType = subject.httpCall.requestHeaders["Content-Type"]
+    val mediaType = contentType?.toMediaTypeOrNull()
     val unmarshaller = mediaType?.let { type ->
-      unmarshallerFactories.mapNotNull { it.create(type, parameter.type) }.firstOrNull()
+      unmarshallerFactories.firstNotNullOfOrNull { it.create(type, parameter.type) }
     } ?: GenericUnmarshallers.into(parameter)
-      ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
+
+    if (unmarshaller == null) {
+      if (contentType == null) {
+        throw BadRequestException("Can't parse request: missing Content-Type header")
+      } else {
+        // If this is thrown it means an endpoint was registered with a contentType that misk
+        // doesn't know how to unmarshall or marshall.
+        throw IllegalStateException("Can't parse request as $contentType")
+      }
+    }
 
     val requestBody = subject.httpCall.takeRequestBody()!!
     val value = try {

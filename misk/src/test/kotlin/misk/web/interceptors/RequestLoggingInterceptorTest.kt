@@ -32,7 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class RequestLoggingInterceptorTest {
@@ -61,8 +61,9 @@ internal class RequestLoggingInterceptorTest {
       ).isSuccessful
     ).isTrue()
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
-      "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms " +
-        "code=200 request=[hello] response=echo: hello"
+      "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms code=200 " +
+        "request=[hello] requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+        "response=echo: hello responseHeaders={}"
     )
 
     // Setting to low value to show that even though it is less than the bodySampling value in the
@@ -88,7 +89,10 @@ internal class RequestLoggingInterceptorTest {
     ).isTrue()
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
       "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms " +
-        "code=200 request=[hello3] response=echo: hello3"
+        "code=200 request=[hello3] " +
+        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+        "response=echo: hello3 " +
+        "responseHeaders={}"
     )
 
     fakeTicker.advance(1, TimeUnit.SECONDS)
@@ -143,7 +147,9 @@ internal class RequestLoggingInterceptorTest {
       .isEqualTo(500)
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
-      "ExceptionThrowingRequestLoggingAction principal=caller time=100.0 ms failed request=[fail]"
+      "ExceptionThrowingRequestLoggingAction principal=caller time=100.0 ms failed " +
+        "request=[fail] " +
+        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]}"
     )
   }
 
@@ -198,13 +204,14 @@ internal class RequestLoggingInterceptorTest {
       .isTrue()
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
-      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms " +
-        "code=200 request=[hello, HeadersCapture(headers={accept=[*/*], accept-encoding=[gzip], " +
-        "connection=[keep-alive], content-length=[5], " +
-        "content-type=[application/json;charset=UTF-8]})] response=echo: hello"
+      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms code=200 " +
+        "request=[hello] " +
+        "requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], " +
+        "content-length=[5], content-type=[application/json;charset=UTF-8]} " +
+        "response=echo: hello responseHeaders={}"
     )
     assertThat(messages[0]).doesNotContain(headerToNotLog)
-    assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
+    assertThat(messages[0]).doesNotContain(headerToNotLog.lowercase())
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
   }
 
@@ -221,14 +228,64 @@ internal class RequestLoggingInterceptorTest {
       .isFalse()
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
-      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms " +
-        "failed request=[fail, HeadersCapture(headers={accept=[*/*], accept-encoding=[gzip], " +
-        "connection=[keep-alive], content-length=[4], " +
-        "content-type=[application/json;charset=UTF-8]})]"
+      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms failed request=[fail] " +
+        "requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], " +
+        "content-length=[4], content-type=[application/json;charset=UTF-8]}"
     )
     assertThat(messages[0]).doesNotContain(headerToNotLog)
-    assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
+    assertThat(messages[0]).doesNotContain(headerToNotLog.lowercase())
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
+  }
+
+  @Test
+  fun configOverride() {
+    for (i in 0..10) {
+      assertThat(invoke("/call/configOverride/foo", "caller").isSuccessful).isTrue()
+      val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+      
+      // Even though this endpoint is configured with low rate limiting and body sampling in its annotation,
+      // the RequestLoggingConfig injected will override it to no rate limiting and 1.0 sampling
+      assertThat(messages).containsExactly(
+        "ConfigOverrideAction principal=caller time=100.0 ms code=200 request=[foo] " +
+          "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+          "response=echo: foo responseHeaders={}"
+      )
+    }
+  }
+
+  @Test
+  fun `requestResponseBodyTransformer applies all relevant transformers`() {
+    assertThat(invoke("/call/logEverything/Quokka", "caller").isSuccessful).isTrue()
+    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+
+    // Note that the [DontSayDumbTransformer] is registered earlier and thus ran _before_ the
+    // [EvanHatingTransformer] which added "dumb" to the response, so it doesn't get applied here.
+    assertThat(messages).containsExactly(
+      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Quokka] " +
+        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+        "response=echo: Quokka (the happiest, most bestest animal) responseHeaders={}"
+    )
+  }
+
+  @Test
+  fun `requestResponseBodyTransformer contains explosions`() {
+    assertThat(invoke("/call/logEverything/Oppenheimer-the-bestest", "caller").isSuccessful).isTrue()
+    val events = logCollector.takeEvents()
+
+    // Transformer exception is logged
+    val allLogs = events.map { it.formattedMessage }
+    assertThat(allLogs).contains("RequestLoggingTransformer of type [misk.web.interceptors.ThrowingTransformer] failed to transform: request=[Oppenheimer-the-bestest] response=echo: Oppenheimer-the-bestest")
+
+    // Regular request logging still happened, and [DontSayJerkTransformer] still ran
+    val interceptorLogs = events
+      .filter { it.loggerName == RequestLoggingInterceptor::class.qualifiedName }
+      .map { it.message }
+    assertThat(interceptorLogs).containsExactly(
+      "LogEverythingAction principal=caller time=100.0 ms code=200 " +
+        "request=[Oppenheimer-the-bestest] " +
+        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]} " +
+        "response=echo: Oppenheimer-the-most bestest responseHeaders={}"
+    )
   }
 
   class TestModule : KAbstractModule() {
@@ -239,19 +296,43 @@ internal class RequestLoggingInterceptorTest {
       install(LogCollectorModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(TestActionsModule())
+      multibind<RequestLoggingConfig>().toInstance(
+        RequestLoggingConfig(mapOf("ConfigOverrideAction" to ActionLoggingConfig(0, 0, 1.0, 1.0)))
+      )
+      
+      // Note: the order of these registrations is intentional as it impacts behavior in same tests
+      multibind<RequestLoggingTransformer>().to<ThrowingTransformer>()
+      multibind<RequestLoggingTransformer>().to<RegularSuperlativeEnhancingTransformer>()
+      multibind<RequestLoggingTransformer>().to<QuokkaLovingTransformer>()
+      multibind<RequestLoggingTransformer>().to<SillySuperlativeEnhancingTransformer>()
     }
   }
 
   class TestActionsModule : KAbstractModule() {
     override fun configure() {
+      install(WebActionModule.create<LogEverythingAction>())
       install(WebActionModule.create<RateLimitingRequestLoggingAction>())
       install(WebActionModule.create<RateLimitingIncludesBodyRequestLoggingAction>())
       install(WebActionModule.create<NoRateLimitingRequestLoggingAction>())
       install(WebActionModule.create<ExceptionThrowingRequestLoggingAction>())
       install(WebActionModule.create<NoRequestLoggingAction>())
       install(WebActionModule.create<RequestLoggingActionWithHeaders>())
+      install(WebActionModule.create<ConfigOverrideAction>())
     }
   }
+}
+
+internal class LogEverythingAction @Inject constructor() : WebAction {
+  @Get("/call/logEverything/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 0,
+    errorRatePerSecond = 0,
+    bodySampling = 1.0,
+    errorBodySampling = 1.0
+  )
+  fun call(@PathParam message: String) = "echo: $message"
 }
 
 internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
@@ -321,5 +402,62 @@ internal class RequestLoggingActionWithHeaders @Inject constructor() : WebAction
   fun call(@RequestBody message: String, @RequestHeaders headers: Headers): String {
     if (message == "fail") throw BadRequestException(message = "boom")
     return "echo: $message"
+  }
+}
+
+internal class ConfigOverrideAction @Inject constructor() : WebAction {
+  @Get("/call/configOverride/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 1L,
+    errorRatePerSecond = 1L,
+    bodySampling = 0.0,
+    errorBodySampling = 0.0
+  ) // these values overridden by RequestLoggingConfig binding above
+  fun call(@PathParam message: String): String = "echo: $message"
+}
+
+/**
+ * A [RequestLoggingTransformer] that really loves Quokkas
+ */
+internal class QuokkaLovingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return requestResponseBody?.copy(response = responseString?.replace("Quokka", "Quokka (the happiest, bestest animal)"))
+  }
+}
+
+/**
+ * A [RequestLoggingTransformer] that enhances silly superlatives
+ */
+internal class SillySuperlativeEnhancingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return requestResponseBody?.copy(response = responseString?.replace("bestest", "most bestest"))
+  }
+}
+
+/**
+ * A [RequestLoggingTransformer] that doesn't like the word "jerk" in String response bodies
+ */
+internal class RegularSuperlativeEnhancingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return requestResponseBody?.copy(response = responseString?.replace("happiest", "most happiest"))
+  }
+}
+
+/**
+ * A [RequestLoggingTransformer] that explodes if you say the secret word
+ */
+internal class ThrowingTransformer @Inject constructor() : RequestLoggingTransformer {
+  override fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody? {
+    val responseString = requestResponseBody?.response as? String
+    return if (responseString?.contains("Oppenheimer") == true) {
+      throw Exception("I am become death, destroyer of frameworks")
+    } else {
+      requestResponseBody
+    }
   }
 }

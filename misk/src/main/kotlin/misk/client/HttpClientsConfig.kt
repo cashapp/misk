@@ -10,11 +10,12 @@ import java.net.URL
 import java.time.Duration
 
 @JsonDeserialize(converter = BackwardsCompatibleClientsConfigConverter::class)
-data class HttpClientsConfig(
+data class HttpClientsConfig @JvmOverloads constructor(
   @JsonAlias("hosts")
   // Need to retain ordering, hence LinkedHashMap
   val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
-  val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
+  val endpoints: Map<String, HttpClientEndpointConfig> = mapOf(),
+  val logRequests: Boolean = false,
 ) : Config {
   init {
     validatePatterns()
@@ -100,7 +101,7 @@ data class HttpClientSSLConfig(
   )
 }
 
-data class HttpClientConfig(
+data class HttpClientConfig @JvmOverloads constructor(
   val connectTimeout: Duration? = null,
   val writeTimeout: Duration? = null,
   val readTimeout: Duration? = null,
@@ -112,7 +113,8 @@ data class HttpClientConfig(
   val keepAliveDuration: Duration? = null,
   val ssl: HttpClientSSLConfig? = null,
   val unixSocketFile: String? = null,
-  val protocols: List<String>? = null
+  val protocols: List<String>? = null,
+  val retryOnConnectionFailure: Boolean? = null
 ) {
   fun toWispConfig() = wisp.client.HttpClientConfig(
     connectTimeout,
@@ -127,6 +129,7 @@ data class HttpClientConfig(
     ssl?.toWispConfig(),
     unixSocketFile,
     protocols,
+    retryOnConnectionFailure
   )
 }
 
@@ -143,14 +146,19 @@ fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
     keepAliveDuration = this.keepAliveDuration ?: other.keepAliveDuration,
     ssl = this.ssl ?: other.ssl,
     unixSocketFile = this.unixSocketFile ?: other.unixSocketFile,
-    protocols = this.protocols ?: other.protocols
+    protocols = this.protocols ?: other.protocols,
+    retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure
   )
 
-data class HttpClientEndpointConfig(
+data class HttpClientEndpointConfig @JvmOverloads constructor(
   val url: String? = null,
   val envoy: HttpClientEnvoyConfig? = null,
   val clientConfig: HttpClientConfig = HttpClientConfig()
 ) {
+  init {
+    require(url == null || envoy == null) { "Cannot set both url and envoy configs" }
+  }
+  
   @Deprecated(
     "Use clientConfig property",
     replaceWith = ReplaceWith("clientConfig.connectTimeout")
@@ -226,7 +234,7 @@ data class HttpClientEndpointConfig(
   )
 }
 
-data class HttpClientEnvoyConfig(
+data class HttpClientEnvoyConfig @JvmOverloads constructor(
   val app: String,
 
   /** Environment to target. If null, the same environment as the app is running in is assumed. */

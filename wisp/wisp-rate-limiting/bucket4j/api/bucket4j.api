@@ -1,0 +1,25 @@
+public abstract class wisp/ratelimiting/bucket4j/Bucket4jPruner : wisp/ratelimiting/RateLimitPruner {
+	public fun <init> ()V
+	protected final fun deserializeState ([B)Lio/github/bucket4j/distributed/remote/RemoteBucketState;
+	public abstract fun getClockTimeMeter ()Lwisp/ratelimiting/bucket4j/ClockTimeMeter;
+	protected final fun isBucketStale (Lio/github/bucket4j/distributed/remote/RemoteBucketState;)Z
+}
+
+public final class wisp/ratelimiting/bucket4j/Bucket4jRateLimiter : wisp/ratelimiting/RateLimiter {
+	public fun <init> (Lio/github/bucket4j/distributed/proxy/ProxyManager;Ljava/time/Clock;)V
+	public fun <init> (Lio/github/bucket4j/distributed/proxy/ProxyManager;Ljava/time/Clock;Lio/micrometer/core/instrument/MeterRegistry;)V
+	public synthetic fun <init> (Lio/github/bucket4j/distributed/proxy/ProxyManager;Ljava/time/Clock;Lio/micrometer/core/instrument/MeterRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun availableTokens (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;)J
+	public fun consumeToken (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;J)Lwisp/ratelimiting/RateLimiter$ConsumptionData;
+	public fun releaseToken (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;J)V
+	public fun resetBucket (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;)V
+	public fun testConsumptionAttempt (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;J)Lwisp/ratelimiting/RateLimiter$TestConsumptionResult;
+	public fun withToken (Ljava/lang/String;Lwisp/ratelimiting/RateLimitConfiguration;Lkotlin/jvm/functions/Function0;)Lwisp/ratelimiting/RateLimiter$ExecutionResult;
+}
+
+public final class wisp/ratelimiting/bucket4j/ClockTimeMeter : io/github/bucket4j/TimeMeter {
+	public fun <init> (Ljava/time/Clock;)V
+	public fun currentTimeNanos ()J
+	public fun isWallClockBased ()Z
+}
+

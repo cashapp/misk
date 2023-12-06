@@ -8,7 +8,7 @@ public final class misk/jooq/JooqExtensionsKt {
 
 public final class misk/jooq/JooqHealthCheck : misk/healthchecks/HealthCheck {
 	public static final field Companion Lmisk/jooq/JooqHealthCheck$Companion;
-	public fun <init> (Lkotlin/reflect/KClass;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljava/time/Clock;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lcom/google/inject/Provider;Lcom/google/inject/Provider;Ljava/time/Clock;)V
 	public fun status ()Lmisk/healthchecks/HealthStatus;
 }
 
@@ -19,8 +19,13 @@ public final class misk/jooq/JooqHealthCheck$Companion {
 }
 
 public final class misk/jooq/JooqModule : misk/inject/KAbstractModule {
-	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Z)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZLkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/jooq/JooqSession : misk/jdbc/Session {
@@ -47,18 +52,19 @@ public final class misk/jooq/JooqSession$HookType : java/lang/Enum {
 
 public final class misk/jooq/JooqTransacter {
 	public static final field Companion Lmisk/jooq/JooqTransacter$Companion;
-	public fun <init> (Lorg/jooq/DSLContext;)V
+	public fun <init> (Lkotlin/Lazy;)V
+	public final fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public final fun transaction (Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static synthetic fun transaction$default (Lmisk/jooq/JooqTransacter;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class misk/jooq/JooqTransacter$Companion {
-	public final fun getLog ()Lmu/KLogger;
 	public final fun getNoRetriesOptions ()Lmisk/jooq/JooqTransacter$TransacterOptions;
 }
 
 public final class misk/jooq/JooqTransacter$TransacterOptions {
 	public fun <init> ()V
+	public fun <init> (I)V
 	public fun <init> (IJ)V
 	public synthetic fun <init> (IJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
@@ -108,6 +114,8 @@ public final class misk/jooq/listeners/JooqTimestampRecordListener : org/jooq/im
 }
 
 public final class misk/jooq/listeners/JooqTimestampRecordListenerOptions {
+	public fun <init> (Z)V
+	public fun <init> (ZLjava/lang/String;)V
 	public fun <init> (ZLjava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
@@ -158,8 +166,10 @@ public class misk/jooq/testgen/tables/Movie : org/jooq/impl/TableImpl {
 	public fun <init> (Lorg/jooq/Name;Lorg/jooq/Table;Lorg/jooq/ForeignKey;Lorg/jooq/Table;[Lorg/jooq/Field;)V
 	public fun <init> (Lorg/jooq/Table;Lorg/jooq/ForeignKey;)V
 	public fun as (Ljava/lang/String;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/SelectField;
 	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/Table;
 	public fun as (Lorg/jooq/Name;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/SelectField;
 	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/Table;
 	public fun fieldsRow ()Lorg/jooq/Row6;
 	public synthetic fun fieldsRow ()Lorg/jooq/Row;

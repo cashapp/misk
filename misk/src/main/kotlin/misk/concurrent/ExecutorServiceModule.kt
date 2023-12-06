@@ -4,7 +4,7 @@ import com.google.inject.Provider
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import java.util.concurrent.ExecutorService
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.reflect.KClass
 
 /**

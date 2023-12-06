@@ -1,5 +1,7 @@
 package misk.hibernate.pagination
 
+import ch.qos.logback.classic.Level
+import jakarta.inject.Inject
 import misk.hibernate.CharacterQuery
 import misk.hibernate.DbCharacter
 import misk.hibernate.DbMovie
@@ -7,32 +9,35 @@ import misk.hibernate.Id
 import misk.hibernate.Movies
 import misk.hibernate.MoviesTestModule
 import misk.hibernate.Query
+import misk.hibernate.SessionFactoryService
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.hibernate.or
+import misk.hibernate.queryHint
+import misk.hibernate.withSqlLogging
 import misk.jdbc.DataSourceType
 import misk.jdbc.ScaleSafetyChecks
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class RealPagerTest {
-
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.MYSQL)
 
+  @Inject @Movies private lateinit var sessionFactoryService: SessionFactoryService
   @Inject @Movies private lateinit var transacter: Transacter
-  @Inject @Movies lateinit var sessionFactory: SessionFactory
-  @Inject lateinit var queryFactory: Query.Factory
+  @Inject private lateinit var logCollector: LogCollector
+  @Inject private lateinit var queryFactory: Query.Factory
 
-  @Test fun idAscPagination() {
+  @Test
+  fun idAscPagination() {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, count = 100)
     val expectedCharacterIds = transacter.transaction { session ->
@@ -49,7 +54,8 @@ class RealPagerTest {
     assertThat(actualCharacterIds).containsExactlyElementsOf(expectedCharacterIds)
   }
 
-  @Test fun idDescPagination() {
+  @Test
+  fun idDescPagination() {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, count = 100)
     val expectedCharacterIds = transacter.transaction { session ->
@@ -66,7 +72,8 @@ class RealPagerTest {
     assertThat(actualCharacterIds).containsExactlyElementsOf(expectedCharacterIds)
   }
 
-  @Test fun customPaginationWithDuplicateNames() {
+  @Test
+  fun customPaginationWithDuplicateNames() {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, initialOperatingNumber = 1, count = 50)
     // The first page is split between rows with the same character name.
@@ -88,7 +95,39 @@ class RealPagerTest {
     assertThat(actualCharacterNames).containsExactlyElementsOf(expectedCharacterNames)
   }
 
-  @Test fun `hasNext always true on first page`() {
+  @Test
+  fun customPaginationWithQueryHint() {
+    val movieId = givenStarWarsMovie()
+    givenStormtrooperCharacters(movieId, initialOperatingNumber = 1, count = 50)
+    // The first page is split between rows with the same character name.
+    givenStormtrooperCharacters(movieId, initialOperatingNumber = 4, count = 20)
+    // More rows with duplicate names.
+    givenStormtrooperCharacters(movieId, initialOperatingNumber = 24, count = 20)
+    val expectedCharacterNames = transacter.transaction { session ->
+      queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .nameDesc()
+        .idAsc()
+        .list(session)
+        .map { it.name }
+    }
+    withSqlLogging {
+      logCollector.takeMessages(null, Level.DEBUG, Regex("/* select.*from characters"))
+      val actualCharacterNames = queryFactory.newQuery(CharacterQuery::class)
+        .queryHint("movie_id_idx")
+        .movieId(movieId)
+        .newPager(CharacterNameDescIdAscPaginator, pageSize = 5)
+        .listAll(transacter) { it.name }
+
+      assertThat(logCollector.takeMessage(null, Level.DEBUG, Regex("/* select.*from characters")))
+        .contains("use index (movie_id_idx)")
+
+      assertThat(actualCharacterNames).containsExactlyElementsOf(expectedCharacterNames)
+    }
+  }
+
+  @Test
+  fun `hasNext always true on first page`() {
     val movieId = givenStarWarsMovie()
     val emptyListPager = queryFactory.newQuery(CharacterQuery::class)
       .movieId(movieId)
@@ -105,7 +144,8 @@ class RealPagerTest {
     assertThat(pagerWithContents.hasNext()).isTrue
   }
 
-  @Test fun `hasNext true when there are more pages`() {
+  @Test
+  fun `hasNext true when there are more pages`() {
     val pageSize = 4
     val pageCount = 3
     val movieId = givenStarWarsMovie()
@@ -124,7 +164,8 @@ class RealPagerTest {
     assertThat(pager.hasNext()).isTrue
   }
 
-  @Test fun `nextPage is null when there are no pages left`() {
+  @Test
+  fun `nextPage is null when there are no pages left`() {
     val pageSize = 4
     val pageCount = 3
     val movieId = givenStarWarsMovie()
@@ -142,7 +183,8 @@ class RealPagerTest {
     assertThat(nextPage).isNull()
   }
 
-  @Test fun `paging does not generate duplicate constraints and order by`() {
+  @Test
+  fun `paging does not generate duplicate constraints and order by`() {
     val pageSize = 4
     val pageCount = 3
     val movieId = givenStarWarsMovie()
@@ -152,7 +194,7 @@ class RealPagerTest {
       .movieId(movieId)
       .newPager(idDescPaginator(), pageSize = pageSize)
 
-    sessionFactory.openSession().use { session ->
+    sessionFactoryService.sessionFactory.openSession().use { session ->
       session.doWork { connection ->
         ScaleSafetyChecks.turnOnSqlGeneralLogging(connection)
       }
@@ -166,7 +208,7 @@ class RealPagerTest {
       pager.nextPage(session)
     }
 
-    val queries = sessionFactory.openSession().use { session ->
+    val queries = sessionFactoryService.sessionFactory.openSession().use { session ->
       session.doReturningWork { connection ->
         ScaleSafetyChecks.extractQueriesSince(connection, start)
       }
@@ -198,7 +240,8 @@ class RealPagerTest {
 
   private data class Clauses(val where: Int, val orderBy: Int)
 
-  @Test fun `hasNext is false where there are no pages left`() {
+  @Test
+  fun `hasNext is false where there are no pages left`() {
     val pageSize = 4
     val pageCount = 3
     val movieId = givenStarWarsMovie()
@@ -225,7 +268,7 @@ class RealPagerTest {
   private fun givenStormtrooperCharacters(
     movieId: Id<DbMovie>,
     initialOperatingNumber: Int = 1,
-    count: Int
+    count: Int,
   ) {
     return transacter.transaction { session ->
       val movie = session.load(movieId)

@@ -8,10 +8,13 @@ import misk.healthchecks.FakeHealthCheckModule
 import misk.services.FakeServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.time.FakeClock
 import misk.web.WebActionModule
+import misk.web.WebConfig
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import jakarta.inject.Inject
+import java.util.concurrent.TimeUnit
 
 @MiskTest
 class ReadinessCheckActionTest {

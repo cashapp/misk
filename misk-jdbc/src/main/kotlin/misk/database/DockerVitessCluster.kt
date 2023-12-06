@@ -44,7 +44,7 @@ class Keyspace(val sharded: Boolean, val tables: Map<String, Table>) {
   fun shardCount() = if (sharded) 2 else 1
 }
 
-class VitessCluster(
+class VitessCluster @JvmOverloads constructor(
   val name: String,
   resourceLoader: ResourceLoader,
   val config: DataSourceConfig,

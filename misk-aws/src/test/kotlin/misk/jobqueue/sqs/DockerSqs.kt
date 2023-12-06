@@ -8,6 +8,7 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import com.github.dockerjava.api.model.ExposedPort
+import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
 import misk.jobqueue.sqs.DockerSqs.clientPort
 import misk.testing.ExternalDependency
@@ -22,7 +23,7 @@ import wisp.logging.getLogger
 internal object DockerSqs : ExternalDependency {
 
   private val log = getLogger<DockerSqs>()
-  private const val clientPort = 4100
+  private const val clientPort = 9324
   private const val hostInternalTarget = "host.docker.internal"
 
   override fun beforeEach() {
@@ -43,12 +44,13 @@ internal object DockerSqs : ExternalDependency {
       // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
       // the same external port as we do for the internal port
       val exposedClientPort = ExposedPort.tcp(clientPort)
-      withImage("pafortin/goaws")
+      withImage("softwaremill/elasticmq:1.4.2")
         .withName("sqs")
-        .withCmd(listOf("goaws"))
         .withExposedPorts(exposedClientPort)
-        .withPortBindings(
-          Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(clientPort)) }
+        .withHostConfig(
+          HostConfig.newHostConfig().withPortBindings(
+            Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(clientPort)) }
+          )
         )
     }
   )
@@ -61,10 +63,10 @@ internal object DockerSqs : ExternalDependency {
   }
 
   private fun ensureUrlWithProperTarget(url: String): String {
-    if (ContainerUtil.isRunningInDocker)
-      return url.replace("localhost", hostInternalTarget).replace("127.0.0.1", hostInternalTarget)
+    return if (ContainerUtil.isRunningInDocker)
+      url.replace("localhost", hostInternalTarget).replace("127.0.0.1", hostInternalTarget)
     else
-      return url
+      url
   }
 
   val endpoint = AwsClientBuilder.EndpointConfiguration(

@@ -10,7 +10,7 @@ import wisp.config.Config
  * [AwsSqsJobQueueConfig] is the configuration for job queueing backed by Amazon's
  * Simple Queuing Service
  */
-class AwsSqsJobQueueConfig(
+class AwsSqsJobQueueConfig @JvmOverloads constructor(
   /**
    * External queues is a set of externally owned SQS queues accessed by this service, mapping
    * an internal queue name to the (account ID, region, name) of the queue in the external account
@@ -57,7 +57,13 @@ class AwsSqsJobQueueConfig(
    */
   val sqs_sending_request_timeout_ms: Int = 5000,
 
-  val aws_sqs_job_receiver_policy: AwsSqsJobReceiverPolicy = AwsSqsJobReceiverPolicy.ONE_FLAG_ONLY
+  val aws_sqs_job_receiver_policy: AwsSqsJobReceiverPolicy = AwsSqsJobReceiverPolicy.ONE_FLAG_ONLY,
+
+  /**
+   * Temporary flag to test new shutdown behavior. This flag will eventually be removed and
+   * incorporated as the default behavior of the library.
+   */
+  val safe_shutdown: Boolean = true,
 ) : Config
 
 

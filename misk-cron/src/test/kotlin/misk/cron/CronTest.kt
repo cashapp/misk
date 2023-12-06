@@ -8,15 +8,15 @@ import misk.inject.KAbstractModule
 import misk.tasks.DelayedTask
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.time.FakeClock
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class CronTest {
@@ -75,12 +75,14 @@ class CronTest {
     // Cluster weight is 100 by default, so the cron will run.
     clock.add(Duration.ofMinutes(1))
     waitForNextPendingTask().task()
+    cronManager.waitForCronsComplete()
     assertThat(minuteCron.counter).isEqualTo(1)
 
     // Cluster weight is set to 0, so now the cron will not run.
     fakeClusterWeight.setClusterWeight(0)
     clock.add(Duration.ofMinutes(1))
     waitForNextPendingTask().task()
+    cronManager.waitForCronsComplete()
     assertThat(minuteCron.counter).isEqualTo(1)
   }
 

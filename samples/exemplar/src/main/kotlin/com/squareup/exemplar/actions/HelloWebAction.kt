@@ -1,6 +1,7 @@
 package com.squareup.exemplar.actions
 
 import misk.security.authz.Unauthenticated
+import misk.tokens.TokenGenerator
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.QueryParam
@@ -9,11 +10,13 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
-class HelloWebAction @Inject constructor() : WebAction {
+class HelloWebAction @Inject constructor(
+  private val tokenGenerator: TokenGenerator
+) : WebAction {
   @Get("/hello/{name}")
   @Unauthenticated
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -25,8 +28,9 @@ class HelloWebAction @Inject constructor() : WebAction {
     @QueryParam greetings: List<String>?
   ): HelloResponse {
     return HelloResponse(
-        greetings?.joinToString(separator = " ") ?: "YO",
-        nickName?.toUpperCase() ?: name.toUpperCase())
+      greetings?.joinToString(separator = " ") ?: tokenGenerator.generate(),
+      nickName?.uppercase() ?: name.uppercase()
+    )
   }
 }
 

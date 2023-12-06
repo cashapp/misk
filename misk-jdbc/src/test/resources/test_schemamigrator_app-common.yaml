@@ -3,6 +3,9 @@ mysql_data_source:
   username: root
   password: ""
   database: schemamigrator
+  migrations_resources_exclusion:
+    - all-migrations.sql
+    - jooq-migrations.sql
   migrations_resources:
     - memory:/migrations/sql
     - memory:/migrations/library
@@ -11,6 +14,9 @@ cockroachdb_data_source:
   database: schemamigrator
   username: root
   password: ""
+  migrations_resources_exclusion:
+    - all-migrations.sql
+    - jooq-migrations.sql
   migrations_resources:
     - memory:/migrations/sql
     - memory:/migrations/library
@@ -19,6 +25,9 @@ tidb_data_source:
   database: schemamigrator
   username: root
   password: ""
+  migrations_resources_exclusion:
+    - all-migrations.sql
+    - jooq-migrations.sql
   migrations_resources:
     - memory:/migrations/sql
     - memory:/migrations/library
@@ -27,6 +36,9 @@ postgresql_data_source:
   database: schemamigrator
   username: postgres
   password: password
+  migrations_resources_exclusion:
+    - all-migrations.sql
+    - jooq-migrations.sql
   migrations_resources:
     - memory:/migrations/sql
     - memory:/migrations/library

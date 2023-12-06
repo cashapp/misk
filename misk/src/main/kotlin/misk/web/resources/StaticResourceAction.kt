@@ -19,15 +19,23 @@ import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
 import java.net.HttpURLConnection
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * StaticResourceAction
+ *
  * This data class is used with Guice multibindings. Register instances by calling `multibind()`
  * in a `KAbstractModule`:
  * ```
- * multibind<StaticResourceEntry>().toInstance(StaticResourceEntry(...))
+ * multibind<StaticResourceEntry>()
+ *   .toInstance(
+ *     StaticResourceEntry(
+ *       url_path_prefix = "/static/",
+ *       resourcePath = "classpath:/web/static/"
+ *     )
+ *   )
+ * install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = "/static/"))
  * ```
  */
 @Singleton
@@ -36,7 +44,6 @@ class StaticResourceAction @Inject constructor(
   private val resourceLoader: ResourceLoader,
   private val resourceEntryFinder: ResourceEntryFinder
 ) : WebAction {
-
   @Get("/{path:.*}")
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)
@@ -48,12 +55,10 @@ class StaticResourceAction @Inject constructor(
   }
 
   fun getResponse(httpCall: HttpCall): Response<ResponseBody> {
-    val entry =
-      (
-        resourceEntryFinder.staticResource(httpCall.url) as StaticResourceEntry?
-          ?: return NotFoundAction.response(httpCall.url.encodedPath.drop(1))
-        )
-    return MatchedResource(entry).getResponse(httpCall)
+    val staticResourceEntry =
+      resourceEntryFinder.staticResource(httpCall.url) as StaticResourceEntry?
+        ?: return NotFoundAction.response(httpCall.url.encodedPath.drop(1))
+    return MatchedResource(staticResourceEntry).getResponse(httpCall)
   }
 
   private enum class Kind {
@@ -72,8 +77,10 @@ class StaticResourceAction @Inject constructor(
           urlPath.endsWith("/") -> resourceResponse(
             normalizePath(matchedEntry.url_path_prefix)
           )
+
           else -> null
         }
+
         Kind.RESOURCE -> resourceResponse(urlPath)
         Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(httpCall.url))
       } ?: NotFoundAction.response(httpCall.url.encodedPath.drop(1))
@@ -133,6 +140,7 @@ class StaticResourceAction @Inject constructor(
             )
           )
         }
+
         else -> null
       }
     }

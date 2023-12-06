@@ -1,6 +1,6 @@
 package com.squareup.exemplar;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import misk.web.Get;
 import misk.web.PathParam;
 import misk.web.RequestHeaders;
@@ -14,7 +14,7 @@ public class HelloJavaAction implements WebAction {
   @Get(pathPattern = "/hello/java/{name}")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   public HelloJavaResponse hello(@PathParam("name") String name, @RequestHeaders Headers headers) {
-    return new HelloJavaResponse("YO", name.toUpperCase());
+    return new HelloJavaResponse("Yo", name.toUpperCase());
   }
 
   static class HelloJavaResponse {

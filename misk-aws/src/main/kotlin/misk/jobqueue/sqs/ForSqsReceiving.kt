@@ -1,6 +1,6 @@
 package misk.jobqueue.sqs
 
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 @Qualifier
 internal annotation class ForSqsReceiving

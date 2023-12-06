@@ -64,4 +64,21 @@ internal class RetryTest {
     // Backoff should be reset to base delay after success
     assertThat(backoff.nextRetry()).isEqualTo(Duration.ofMillis(10))
   }
+
+  @Test fun callsOnRetryCallbackIfProvided() {
+    var retryCount = 0
+    var retried = 0
+    // simply counts the number of times it was called
+    val onRetryFunction: (retries: Int, exception: Exception) -> Unit = { _, _ ->
+      retried = retried.inc()
+    }
+
+    // f is a function that throws an exception twice in a row
+    retry(3, FlatBackoff(), onRetryFunction) {
+      retryCount = retryCount.inc()
+      if(retryCount < 3) throw Exception("a failure that triggers a retry")
+    }
+
+    assertThat(retried).isEqualTo(2)
+  }
 }

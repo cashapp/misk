@@ -1,8 +1,8 @@
 package misk.metrics.digester
 
-import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.time.FakeClock
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.SortedMap

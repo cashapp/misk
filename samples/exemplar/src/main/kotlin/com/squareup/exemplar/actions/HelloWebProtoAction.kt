@@ -11,7 +11,7 @@ import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class HelloWebProtoAction @Inject constructor() : WebAction {
   @Post("/hello/proto/")

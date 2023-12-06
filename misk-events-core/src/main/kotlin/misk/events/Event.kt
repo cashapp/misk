@@ -7,7 +7,7 @@ import okio.ByteString.Companion.encodeUtf8
 import java.time.Instant
 
 @Deprecated("This API is no longer supported and replaced by the new event system's client library")
-data class Event(
+data class Event @JvmOverloads constructor(
   /** The type of event */
   val type: String,
 
