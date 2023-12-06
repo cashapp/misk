@@ -3,7 +3,7 @@ package misk.hibernate
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.crypto.CryptoConfig
-import misk.crypto.CryptoTestModule
+import misk.crypto.testing.CryptoTestModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
@@ -16,8 +16,8 @@ import wisp.config.Config
 import wisp.deployment.TESTING
 import java.util.Arrays
 import java.util.Objects
-import javax.inject.Inject
-import javax.inject.Qualifier
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue

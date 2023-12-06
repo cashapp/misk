@@ -4,14 +4,15 @@ import com.squareup.wire.GrpcCall
 import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcStreamingCall
 import com.squareup.wire.Service
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createType
@@ -60,6 +61,8 @@ internal class GrpcClientProvider<T : Service, G : T>(
   private lateinit var interceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
   @Inject
   private lateinit var appInterceptorFactories:Provider<List<ClientApplicationInterceptorFactory>>
+  @Inject
+  private lateinit var callFactoryWrappers: Provider<List<CallFactoryWrapper>>
   @Inject private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
 
   override fun get(): T {
@@ -70,6 +73,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
       httpClient = httpClient,
       interceptorFactories = interceptorFactories.get(),
       appInterceptorFactories = appInterceptorFactories.get(),
+      callFactoryWrappers = callFactoryWrappers.get()
     )
   }
 
@@ -78,6 +82,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
     httpClient: OkHttpClient,
     interceptorFactories: List<ClientNetworkInterceptor.Factory>,
     appInterceptorFactories: List<ClientApplicationInterceptorFactory>,
+    callFactoryWrappers: List<CallFactoryWrapper>,
   ): T {
     val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
 
@@ -99,7 +104,8 @@ internal class GrpcClientProvider<T : Service, G : T>(
         baseUrl = baseUrl,
         interceptorFactories = interceptorFactories,
         appInterceptorFactories = appInterceptorFactories,
-        endpointConfig = endpointConfig
+        endpointConfig = endpointConfig,
+        callFactoryWrappers
       ) ?: continue
       handlers[method.name] = handler
     }
@@ -154,7 +160,8 @@ internal class GrpcClientProvider<T : Service, G : T>(
     baseUrl: String,
     interceptorFactories: List<ClientNetworkInterceptor.Factory>,
     appInterceptorFactories: List<ClientApplicationInterceptorFactory>,
-    endpointConfig: HttpClientEndpointConfig
+    endpointConfig: HttpClientEndpointConfig,
+    callFactoryWrappers: List<CallFactoryWrapper>,
   ): MethodInvocationHandler<T, G>? {
     val action = toClientAction(method) ?: return null
 
@@ -175,8 +182,13 @@ internal class GrpcClientProvider<T : Service, G : T>(
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, interceptor))
     }
 
+    val callFactoryWrapped =
+      callFactoryWrappers.fold(clientBuilder.build() as Call.Factory) { callFactory, callFactoryWrapper ->
+        callFactoryWrapper.wrap(action, callFactory) ?: callFactory
+      }
+
     val grpcClient = GrpcClient.Builder()
-      .client(clientBuilder.build())
+      .callFactory(callFactoryWrapped)
       .baseUrl(baseUrl)
       .build()
 

@@ -16,7 +16,7 @@ import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
 import java.time.LocalDate
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 import kotlin.test.fail
 

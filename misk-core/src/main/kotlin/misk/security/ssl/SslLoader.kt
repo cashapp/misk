@@ -1,7 +1,7 @@
 package misk.security.ssl
 
 import misk.resources.ResourceLoader
-import javax.inject.Inject
+import jakarta.inject.Inject
 import wisp.security.ssl.SslLoader as WispSslLoader
 
 /** Loads keys and certificates from the file system. */
@@ -10,6 +10,7 @@ class SslLoader @Inject internal constructor(
 ) {
   val delegate: WispSslLoader = WispSslLoader(resourceLoader.delegate)
 
+  @JvmOverloads
   fun loadTrustStore(
     path: String,
     format: String = FORMAT_PEM,
@@ -18,6 +19,7 @@ class SslLoader @Inject internal constructor(
 
   fun loadTrustStore(config: TrustStoreConfig) = delegate.loadTrustStore(config.toWispConfig())
 
+  @JvmOverloads
   fun loadCertStore(
     path: String,
     format: String = FORMAT_PEM,

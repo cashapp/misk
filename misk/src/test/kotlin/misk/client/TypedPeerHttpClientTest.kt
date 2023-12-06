@@ -34,8 +34,8 @@ import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 internal class TypedPeerHttpClientTest {

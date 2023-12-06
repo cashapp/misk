@@ -2,19 +2,36 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
+  application
+}
+
+val applicationMainClass = "com.squareup.chat.ChatServiceKt"
+application {
+  mainClass.set(applicationMainClass)
 }
 
 dependencies {
-  // TODO: these should be implementation("com.squareup.misk:*")
+  implementation(Dependencies.jakartaInject)
+  implementation(project(":wisp:wisp-config"))
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
+  implementation(project(":misk-clustering"))
   implementation(project(":misk-core"))
-  implementation(project(":misk-eventrouter"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-prometheus"))
+  implementation(project(":misk-redis"))
+  implementation(Dependencies.guice)
+  implementation(Dependencies.jedis)
+  implementation(Dependencies.logbackClassic)
+  implementation(Dependencies.slf4jApi)
+  implementation(Dependencies.okHttp)
+  implementation(project(":wisp:wisp-deployment"))
+  implementation(project(":misk-config"))
+  implementation(testFixtures(project(":misk-redis")))
 
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
   testImplementation(project(":misk-testing"))
-  testImplementation("org.assertj:assertj-core:3.23.1")
 }
 
 val jar by tasks.getting(Jar::class) {

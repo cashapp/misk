@@ -7,7 +7,10 @@ package misk.security.authz
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class Authenticated(
+  /** Calling services must be listed here to be authenticated */
   val services: Array<String> = [],
+
+  /** Calling users must have at least one of these capabilities to be authenticated */
   val capabilities: Array<String> = []
 )
 
@@ -17,3 +20,10 @@ annotation class Authenticated(
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class Unauthenticated
+
+/**
+ * Annotation indicating that any authenticated service is allowed to access this endpoint.
+ */
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class AllowAnyService

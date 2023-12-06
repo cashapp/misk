@@ -2,8 +2,8 @@ package misk.jobqueue.sqs
 
 import com.google.inject.ImplementedBy
 import misk.jobqueue.QueueName
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Interface for a provider of dead-letter queue names.

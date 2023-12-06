@@ -1,10 +1,11 @@
 package misk.metrics.backends.prometheus
 
 import wisp.config.Config
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /** Configuration for exporting metrics to prometheus */
-data class PrometheusConfig(
+@Suppress("AnnotatePublicApisWithJvmOverloads")
+data class PrometheusConfig constructor(
   // The hostname on which metrics are exposed; if null uses any addr bound to this host
   val hostname: String? = null,
   // The port on metrics are exposed

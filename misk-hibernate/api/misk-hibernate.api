@@ -90,6 +90,7 @@ public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstra
 public final class misk/hibernate/HibernateModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
@@ -189,6 +190,7 @@ public abstract interface annotation class misk/hibernate/ProtoColumn : java/lan
 
 public abstract interface class misk/hibernate/Query {
 	public abstract fun addJpaConstraint (Lkotlin/jvm/functions/Function2;)V
+	public abstract fun addQueryHint (Ljava/lang/String;)V
 	public abstract fun clone ()Lmisk/hibernate/Query;
 	public abstract fun count (Lmisk/hibernate/Session;)J
 	public abstract fun delete (Lmisk/hibernate/Session;)I
@@ -220,10 +222,12 @@ public abstract interface class misk/hibernate/Query$Factory {
 
 public final class misk/hibernate/QueryKt {
 	public static final fun constraint (Lmisk/hibernate/Query;Lkotlin/jvm/functions/Function2;)Lmisk/hibernate/Query;
+	public static final fun queryHint (Lmisk/hibernate/Query;Ljava/lang/String;)Lmisk/hibernate/Query;
 }
 
 public final class misk/hibernate/RetryTransactionException : java/lang/Exception {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -349,6 +353,7 @@ public final class misk/hibernate/migrate/BulkShardMigrator {
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lorg/hibernate/SessionFactory;Lmisk/hibernate/Transacter;Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun batchSize (I)Lmisk/hibernate/migrate/BulkShardMigrator;
 	public final fun batched ()Lmisk/hibernate/migrate/BulkShardMigrator;
+	public final fun execute ()V
 	public final fun execute (Z)V
 	public static synthetic fun execute$default (Lmisk/hibernate/migrate/BulkShardMigrator;ZILjava/lang/Object;)V
 	public final fun inc (Ljava/lang/String;)Lmisk/hibernate/migrate/BulkShardMigrator;

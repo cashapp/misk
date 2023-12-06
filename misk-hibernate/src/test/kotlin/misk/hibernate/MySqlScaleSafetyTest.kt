@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Verifies that we're constraining a few things that makes apps hard to scale out.

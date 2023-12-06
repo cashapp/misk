@@ -4,10 +4,10 @@ import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.contrib.okhttp3.TracingCallFactory
 import misk.web.mediatype.MediaTypes
+import okhttp3.Call
 import okhttp3.EventListener
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.protobuf.ProtoConverterFactory
@@ -23,7 +23,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
-import javax.inject.Provider
+import com.google.inject.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
@@ -40,7 +40,8 @@ internal class ClientInvocationHandler(
   eventListenerFactory: EventListener.Factory?,
   tracer: Tracer?,
   moshi: Moshi,
-  clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
+  clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory,
+  callFactoryWrappers: Provider<List<CallFactoryWrapper>> = Provider<List<CallFactoryWrapper>> { emptyList() },
 ) : InvocationHandler {
 
   private val actionsByMethod = interfaceType.functions
@@ -66,11 +67,18 @@ internal class ClientInvocationHandler(
     val actionSpecificClient = clientBuilder.build()
 
     val retrofitBuilder = retrofit.newBuilder()
-      .client(actionSpecificClient)
 
-    if (tracer != null) retrofitBuilder.callFactory(
+    val initialCallFactory: Call.Factory = if (tracer != null) {
       TracingCallFactory(actionSpecificClient, tracer)
-    )
+    } else {
+      actionSpecificClient
+    }
+
+    val callFactoryWrapped = callFactoryWrappers.get().fold(initialCallFactory) { callFactory, callFactoryWrapper ->
+       callFactoryWrapper.wrap(action, callFactory) ?: callFactory
+    }
+
+    retrofitBuilder.callFactory(callFactoryWrapped)
 
     val mediaTypes = getEndpointMediaTypes(methodName)
     if (mediaTypes.contains(MediaTypes.APPLICATION_PROTOBUF)) {
@@ -100,7 +108,7 @@ internal class ClientInvocationHandler(
     return headers.value.mapNotNull {
       val (headerKey, headerValue) = it.split(":").map { it.trim() }
       if (headerKey.equals("Accept", true) || headerKey.equals("Content-type", true)) {
-        headerValue.toLowerCase()
+        headerValue.lowercase()
       } else {
         null
       }

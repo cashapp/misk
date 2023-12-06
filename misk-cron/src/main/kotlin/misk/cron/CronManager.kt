@@ -11,8 +11,8 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class CronManager @Inject constructor() {
@@ -84,7 +84,7 @@ class CronManager @Inject constructor() {
             logger.info { "Executing cronjob $name" }
             cronEntry.runnable.run()
           } catch (t: Throwable) {
-            logger.warn { "Exception on cronjob $name: ${t.stackTraceToString()}" }
+            logger.error { "Exception on cronjob $name: ${t.stackTraceToString()}" }
           } finally {
             logger.info { "Executing cronjob $name complete" }
           }

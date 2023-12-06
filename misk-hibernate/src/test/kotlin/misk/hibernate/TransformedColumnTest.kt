@@ -14,8 +14,8 @@ import wisp.config.Config
 import wisp.deployment.TESTING
 import java.io.Serializable
 import java.util.Objects
-import javax.inject.Inject
-import javax.inject.Qualifier
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 import javax.persistence.AttributeConverter
 import javax.persistence.Column
 import javax.persistence.Convert

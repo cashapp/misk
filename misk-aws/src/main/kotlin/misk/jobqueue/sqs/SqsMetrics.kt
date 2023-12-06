@@ -1,8 +1,8 @@
 package misk.jobqueue.sqs
 
 import misk.metrics.Metrics
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * SQS Jobqueue metrics.
@@ -71,6 +71,12 @@ internal class SqsMetrics @Inject internal constructor(metrics: Metrics) {
   val sqsDeleteTime = metrics.histogram(
     "jobs_sqs_delete_latency",
     "the round trip time to delete messages from SQS",
+    listOf("queueName", "QueueName")
+  )
+
+  val queueProcessingLag = metrics.histogram(
+    "jobs_sqs_processing_lag",
+    "time it took to receive a job from when it was enqueued",
     listOf("queueName", "QueueName")
   )
 

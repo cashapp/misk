@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import org.hibernate.event.spi.EventType
-import javax.inject.Provider
+import com.google.inject.Provider
 
 /**
  * Control how we register listeners.

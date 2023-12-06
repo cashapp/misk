@@ -16,8 +16,8 @@ import routeguide.RouteGuideGrpc
 import routeguide.RouteGuideProto.Feature
 import routeguide.RouteGuideProto.Point
 import routeguide.RouteGuideProto.Rectangle
-import javax.inject.Inject
-import javax.inject.Provider
+import jakarta.inject.Inject
+import com.google.inject.Provider
 
 @MiskTest(startService = true)
 class ProtocClientMiskServerTest {

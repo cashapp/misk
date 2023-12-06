@@ -4,8 +4,8 @@ import misk.inject.KAbstractModule
 import wisp.deployment.EnvironmentVariableLoader
 import wisp.deployment.FakeEnvironmentVariableLoader
 import wisp.deployment.RealEnvironmentVariableLoader
-import javax.inject.Inject
-import javax.inject.Qualifier
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 
 /*
  * Soft deprecating for wisp.deployment.EnvironmentVariableLoader

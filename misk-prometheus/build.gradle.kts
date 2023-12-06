@@ -1,24 +1,30 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
+  api(Dependencies.guava)
+  api(Dependencies.jakartaInject)
+  api(project(":misk-inject"))
+  api(project(":wisp:wisp-config"))
   implementation(Dependencies.guice)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.prometheusHttpserver)
+  implementation(Dependencies.kotlinLogging)
+  implementation(Dependencies.prometheusClient)
   implementation(Dependencies.prometheusHotspot)
-  implementation(project(":misk-core"))
-  implementation(project(":misk-inject"))
+  implementation(Dependencies.prometheusHttpserver)
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
-  api(Dependencies.wispConfig)
-  api(Dependencies.wispLogging)
+  implementation(project(":wisp:wisp-logging"))
+}
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.junitEngine)
-  testImplementation(Dependencies.junitParams)
-  testImplementation(project(":misk-testing"))
-  testImplementation(project(":misk-gcp-testing"))
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

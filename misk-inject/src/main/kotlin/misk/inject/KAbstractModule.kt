@@ -60,6 +60,9 @@ abstract class KAbstractModule : AbstractModule() {
     annotation: KClass<out Annotation>? = null
   ): Multibinder<T> = newMultibinder(T::class, annotation)
 
+  protected inline fun <reified T : Any, reified A: Annotation> newMultibinder(
+  ): Multibinder<T> = newMultibinder(T::class, A::class)
+
   @Suppress("UNCHECKED_CAST")
   protected fun <T : Any> newMultibinder(
     type: KClass<T>,

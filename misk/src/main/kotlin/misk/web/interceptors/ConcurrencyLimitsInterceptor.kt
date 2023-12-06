@@ -13,6 +13,7 @@ import misk.web.AvailableWhenDegraded
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.WebConfig
+import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import org.slf4j.event.Level
 import wisp.logging.getLogger
 import wisp.logging.log
@@ -21,8 +22,8 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.full.findAnnotation
 
 /**
@@ -172,7 +173,8 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
         action = action,
         defaultLimiter = createLimiterForAction(action, quotaPath = null),
         clock = clock,
-        logLevel = config.concurrency_limiter_log_level
+        logLevel = config.concurrency_limiter?.log_level
+          ?: config.concurrency_limiter_log_level
       )
     }
 

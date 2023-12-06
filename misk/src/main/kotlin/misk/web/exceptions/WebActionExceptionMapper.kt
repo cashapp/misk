@@ -7,7 +7,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
 import okhttp3.Headers.Companion.toHeaders
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Maps [WebActionException]s into the appropriate status code. [WebActionException]s' response
@@ -23,8 +23,6 @@ internal class WebActionExceptionMapper @Inject internal constructor(
   override fun toGrpcResponse(th: WebActionException): GrpcErrorResponse {
     return GrpcErrorResponse(th.grpcStatus ?: toGrpcStatus(th.code), th.responseBody, th.details)
   }
-
-  override fun canHandle(th: Throwable): Boolean = th is WebActionException
 
   override fun loggingLevel(th: WebActionException) =
     if (th.isClientError) config.client_error_level

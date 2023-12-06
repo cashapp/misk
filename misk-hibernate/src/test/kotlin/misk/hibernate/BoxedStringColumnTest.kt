@@ -11,8 +11,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
-import javax.inject.Inject
-import javax.inject.Qualifier
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -109,6 +109,27 @@ class BoxedStringColumnTest {
       )
         .containsExactly(v1, v2, v3, v4)
     }
+  }
+
+  @Test
+  fun likeQuery() {
+    val v1 = TextAndToken("token-1", GoodLuckToken("token-1"))
+    val v2 = TextAndToken("token-2", GoodLuckToken("token-2"))
+    val v3 = TextAndToken("prefixed-token-1", GoodLuckToken("prefixed-token-1"))
+
+    transacter.transaction { session ->
+      session.save(DbTextToken(v1.text, v1.token))
+      session.save(DbTextToken(v2.text, v2.token))
+      session.save(DbTextToken(v3.text, v3.token))
+    }
+
+    val tokenPrefixCount = transacter.transaction { session ->
+      queryFactory.newQuery<TextTokenQuery>()
+        .constraint { root -> like(root.get("token"), "token%") }
+        .count(session)
+    }
+
+    assertThat(tokenPrefixCount).isEqualTo(2)
   }
 
   class TestModule : KAbstractModule() {

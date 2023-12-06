@@ -6,7 +6,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.google.inject.Provides
 import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 open class RealS3Module : KAbstractModule() {
   override fun configure() {

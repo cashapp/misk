@@ -14,14 +14,15 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import javax.inject.Inject
-import javax.inject.Singleton
+import java.time.Duration
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 class InvalidActionsTest {
   @Test fun failIdenticalActions() {
     val exception = assertThrows<ProvisionException>("Should throw an exception") {
       Guice.createInjector(IdenticalActionsModule()).getInstance(ServiceManager::class.java)
-        .startAsync().awaitHealthy()
+        .startAsync().awaitHealthy(Duration.ofSeconds(5))
     }
     assertThat(exception.message).contains(
       "Actions [InvalidActionsTest.SomeAction, InvalidActionsTest.IdenticalAction] have identical routing annotations."

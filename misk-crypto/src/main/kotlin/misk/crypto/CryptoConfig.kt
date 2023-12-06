@@ -6,7 +6,7 @@ import wisp.config.Config
 /**
  * Main configuration object representing to be used in the app.
  */
-data class CryptoConfig(
+data class CryptoConfig @JvmOverloads constructor(
   val keys: List<Key>?,
   /**
    * The KMS' key URI.
@@ -26,7 +26,7 @@ data class CryptoConfig(
 /**
  * Describes a specific key
  */
-data class Key(
+data class Key @JvmOverloads constructor(
   /**
    * Descriptive short string for the key.
    * This name will be used when injecting the corresponding key object in the app, like:
@@ -65,5 +65,10 @@ enum class KeyType {
   HYBRID_ENCRYPT_DECRYPT,
   STREAMING_AEAD,
   PGP_DECRYPT,
-  PGP_ENCRYPT
+  PGP_ENCRYPT,
+
+  /**
+   * Alias for [DIGITAL_SIGNATURE].
+   */
+  SIGNATURE
 }

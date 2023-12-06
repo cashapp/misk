@@ -17,8 +17,8 @@ import misk.ApplicationInterceptor
 import misk.Chain
 import java.time.Duration
 import java.util.concurrent.LinkedBlockingDeque
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -49,7 +49,7 @@ internal class GrpcClientProviderTest {
   val log = LinkedBlockingDeque<String>()
 
   @BeforeEach
-  private fun beforeEach() {
+  fun beforeEach() {
     val clientInjector = Guice.createInjector(ClientModule(jetty))
     clientMetricsInterceptorFactory = clientInjector.getInstance()
     robotLocator = clientInjector.getInstance()

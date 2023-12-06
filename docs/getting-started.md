@@ -1,19 +1,23 @@
 Getting Started
 ===============
 
-Misk is an application container for Kotlin. It provides libraries for common application concerns
-like serving endpoints, caching, queueing, persistence, distributed leasing, and clustering.
-
 The easiest way to get started is to copy the 
 [Misk exemplar project](https://github.com/cashapp/misk/tree/master/samples/exemplar). This exemplar 
 contains a Misk web app with the requisite dependencies.
 
+## Prerequisites
+
+Misk relies on [hermit][hermit] to install tools required to develop and run the service.
+Please follow [this](https://cashapp.github.io/hermit/) to install and activate hermit.
+
+Misk uses [Gradle][gradle] to build and run test locally.
+
 ## Start the service
 
-Run `ExemplarService#main`, or use gradle to run:
+Run `ExemplarService#main` from your IDE, or use gradle to run:
 
 ```bash
-./gradlew run
+gradle run
 ```
 
 ## Set up bindings
@@ -172,7 +176,7 @@ class MyServiceModule : KAbstractModule() {
 }
 ```
 
-Notice that in this examplewe use
+Notice that in this example we use
 [`KAbstractModule()`](https://github.com/square/misk/blob/master/misk/src/main/kotlin/misk/inject/KAbstractModule.kt),
 Misk’s Kotlin wrapper for
 [`AbstractModule`](https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/AbstractModule.html),
@@ -208,3 +212,6 @@ or
 See [Services Explained](https://github.com/google/guava/wiki/ServiceExplained) for details. If your
 service is can make use of exponential backoff and scheduling, take a look at using
 [`RepeatedTaskQueue`](https://github.com/cashapp/misk/blob/master/misk/src/main/kotlin/misk/tasks/RepeatedTaskQueue.kt).
+
+[hermit]: https://cashapp.github.io/hermit/
+[gradle]: https://gradle.org/

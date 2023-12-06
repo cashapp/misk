@@ -1,8 +1,8 @@
 package misk.jdbc
 
 import org.junit.jupiter.api.Test
-import wisp.deployment.TESTING
 import wisp.containers.ContainerUtil
+import wisp.deployment.TESTING
 import kotlin.test.assertEquals
 
 class DataSourceConfigTest {
@@ -181,6 +181,31 @@ class DataSourceConfigTest {
       "jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&sslMode=PREFERRED&" +
         "enabledTLSProtocols=TLSv1.2,TLSv1.3",
+      config.buildJdbcUrl(TESTING)
+    )
+  }
+
+  @Test
+  fun buildMysqlJDBCUrlWithNoTlsAllowPublicKeyRetrieval() {
+    val config = DataSourceConfig(DataSourceType.MYSQL, allow_public_key_retrieval = true)
+    assertEquals(
+      "jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
+        "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&sslMode=PREFERRED&" +
+        "enabledTLSProtocols=TLSv1.2,TLSv1.3&allowPublicKeyRetrieval=true",
+      config.buildJdbcUrl(TESTING)
+    )
+  }
+
+  @Test
+  fun buildMysqlJDBCUrlWithNoTlsCustomJdbcUrlParameters() {
+    val config = DataSourceConfig(
+      DataSourceType.MYSQL,
+      jdbc_url_query_parameters = mapOf("alpha" to "true", "bravo" to "false")
+    )
+    assertEquals(
+      "jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
+        "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&sslMode=PREFERRED&" +
+        "enabledTLSProtocols=TLSv1.2,TLSv1.3&alpha=true&bravo=false",
       config.buildJdbcUrl(TESTING)
     )
   }

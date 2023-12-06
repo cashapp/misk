@@ -17,8 +17,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 internal class WebSocketsTest {
@@ -46,8 +46,25 @@ internal class WebSocketsTest {
     // Confirm interceptors were invoked.
     assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class)).matches(
       "EchoWebSocket principal=unknown time=0.000 ns code=200 " +
-        "request=\\[JettyWebSocket\\[.* to /echo]] response=EchoListener"
+        "request=\\[JettyWebSocket\\[.* to /echo]] .* response=EchoListener .*"
     )
+  }
+
+  @Test
+  fun loggingDisabledByEnv() {
+    val client = OkHttpClient()
+
+    val request = Request.Builder()
+      .url(jettyService.httpServerUrl.resolve("/echo-logging-disabled-by-env")!!)
+      .build()
+
+    val webSocket = client.newWebSocket(request, listener)
+
+    webSocket.send("hello")
+    assertEquals("ACK hello", listener.takeMessage())
+
+    // Confirm request logging interceptor was not invoked.
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
   }
 
   class TestModule : KAbstractModule() {
@@ -65,6 +82,22 @@ class EchoWebSocket @Inject constructor() : WebAction {
   @ConnectWebSocket("/echo")
   @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
   fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
+    return object : WebSocketListener() {
+      override fun onMessage(webSocket: WebSocket, text: String) {
+        webSocket.send("ACK $text")
+      }
+
+      override fun toString() = "EchoListener"
+    }
+  }
+
+  @ConnectWebSocket("/echo-logging-disabled-by-env")
+  @LogRequestResponse(
+    bodySampling = 1.0,
+    errorBodySampling = 1.0,
+    excludedEnvironments = ["testing"]
+  )
+  fun echoLoggingDisabledByEnv(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
     return object : WebSocketListener() {
       override fun onMessage(webSocket: WebSocket, text: String) {
         webSocket.send("ACK $text")

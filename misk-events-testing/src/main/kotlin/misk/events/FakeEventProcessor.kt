@@ -2,8 +2,8 @@ package misk.events
 
 import java.util.concurrent.BlockingDeque
 import java.util.concurrent.LinkedBlockingDeque
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * An in-memory events system for testing publishers and consumers.
@@ -56,6 +56,7 @@ class FakeEventProcessor @Inject constructor(
   /**
    * Deliver all enqueued events including retries.
    */
+  @JvmOverloads
   fun deliverAll(batchSize: Int = 100, allowRetries: Boolean = false) {
     retryQueue.drainTo(queue)
     while (true) {

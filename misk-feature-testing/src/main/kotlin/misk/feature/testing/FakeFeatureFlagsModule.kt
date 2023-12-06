@@ -13,7 +13,7 @@ import misk.inject.asSingleton
 import misk.inject.parameterizedType
 import misk.inject.toKey
 import misk.inject.typeLiteral
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.reflect.KClass
 
 /**
@@ -23,7 +23,8 @@ import kotlin.reflect.KClass
  * In a given misk service's test setup, there is one [FakeFeatureFlagsModule] installed and many
  * [FakeFeatureFlagsOverrideModule] installed.
  */
-class FakeFeatureFlagsModule(
+@Deprecated("Replace the dependency on misk-feature-testing with testFixtures(misk-feature)")
+class FakeFeatureFlagsModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
   private val overrides = mutableListOf<FakeFeatureFlagsOverrideModule>()

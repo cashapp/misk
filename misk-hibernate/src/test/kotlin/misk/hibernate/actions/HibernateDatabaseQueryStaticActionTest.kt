@@ -15,7 +15,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import javax.inject.Inject
+import jakarta.inject.Inject
 import javax.persistence.Transient
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaField

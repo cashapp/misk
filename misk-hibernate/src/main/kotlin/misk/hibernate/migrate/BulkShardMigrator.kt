@@ -21,8 +21,8 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
 import java.util.stream.Collectors.joining
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
@@ -152,6 +152,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
     return this
   }
 
+  @JvmOverloads
   fun execute(insertIgnore: Boolean = false) {
     checkNotNull(targetRoot) { "You have to specify entity root target" }
     checkNotNull(sourceRoot) { "You have to specify entity root source" }

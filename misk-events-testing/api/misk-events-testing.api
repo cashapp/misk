@@ -1,5 +1,7 @@
 public final class misk/events/FakeEventProcessor : misk/events/Producer {
 	public fun <init> (Ljava/util/Map;)V
+	public final fun deliverAll ()V
+	public final fun deliverAll (I)V
 	public final fun deliverAll (IZ)V
 	public static synthetic fun deliverAll$default (Lmisk/events/FakeEventProcessor;IZILjava/lang/Object;)V
 	public final fun getDroppedQueue ()Ljava/util/concurrent/BlockingDeque;

@@ -4,13 +4,15 @@ import io.opentracing.mock.MockSpan
 import io.opentracing.mock.MockTracer
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Extends [MockTracer] for use in concurrent environments, such as a web server and test client.
  * Prefer this wherever you'd otherwise use [MockTracer].
  */
+// TODO(keefer): Deprecate this (or forward the type via delegate) when wisp-tracing-test-fixtures
+//  publication is fixed. wisp-tracing provides a preferred copy of this class.
 @Singleton
 class ConcurrentMockTracer @Inject constructor() : MockTracer() {
   private val queue = LinkedBlockingDeque<MockSpan>()

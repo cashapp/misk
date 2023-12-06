@@ -7,8 +7,8 @@ import misk.MiskCaller
 import misk.scope.ActionScoped
 import okhttp3.Headers
 import wisp.logging.getLogger
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.full.findAnnotation
 
 private val logger = getLogger<RequestBodyLoggingInterceptor>()
@@ -28,17 +28,21 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
   @Singleton
   class Factory @Inject internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-    private val bodyCapture: RequestResponseCapture
+    private val bodyCapture: RequestResponseCapture,
+    private val configs: Set<RequestLoggingConfig>,
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
-      val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
-      require(logRequestResponse.bodySampling in 0.0..1.0) {
+      // Only bother with endpoints that have the annotation
+      val annotation = action.function.findAnnotation<LogRequestResponse>() ?: return null
+      val config = ActionLoggingConfig.fromConfigMapOrAnnotation(action, configs, annotation)
+
+      require(config.bodySampling in 0.0..1.0) {
         "${action.name} @LogRequestResponse bodySampling must be in the range (0.0, 1.0]"
       }
-      require(logRequestResponse.errorBodySampling in 0.0..1.0) {
+      require(config.errorBodySampling in 0.0..1.0) {
         "${action.name} @LogRequestResponse errorBodySampling must be in the range (0.0, 1.0]"
       }
-      if (logRequestResponse.bodySampling == 0.0 && logRequestResponse.errorBodySampling == 0.0) {
+      if (config.bodySampling == 0.0 && config.errorBodySampling == 0.0) {
         return null
       }
 
@@ -53,13 +57,30 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
   override fun intercept(chain: Chain): Any {
     val principal = caller.get()?.principal ?: "unknown"
 
-    val redactedArgs = chain.args.map { if (it is Headers) HeadersCapture(it) else it }
-    bodyCapture.set(RequestResponseBody(redactedArgs, null))
+    // Only log some request headers.
+    val redactedRequestHeaders = HeadersCapture(chain.httpCall.requestHeaders)
+    // Since we already log headers separately, no need to log them if they are in args.
+    val args = chain.args.filter { it !is Headers }
+    bodyCapture.set(
+      RequestResponseBody(
+        args,
+        null,
+        redactedRequestHeaders.headers,
+        null,
+      )
+    )
 
     try {
       val result = chain.proceed(chain.args)
-      // Only log some request headers.
-      bodyCapture.set(RequestResponseBody(redactedArgs, result))
+      val redactedResponseHeaders = HeadersCapture(chain.httpCall.responseHeaders)
+      bodyCapture.set(
+        RequestResponseBody(
+          args,
+          result,
+          redactedRequestHeaders.headers,
+          redactedResponseHeaders.headers,
+        )
+      )
       return result
     } catch (t: Throwable) {
       logger.info { "${action.name} principal=$principal failed" }
@@ -74,12 +95,22 @@ internal data class HeadersCapture(
   constructor(okHttpHeaders: Headers) : this(
     okHttpHeaders.toMultimap()
       .filter { (key, _) ->
-        key.toLowerCase() in listOf(
+        key.lowercase() in listOf(
           "accept",
           "accept-encoding",
           "connection",
           "content-type",
           "content-length",
+          // Also show tracing headers. These are also in logs, but showing them in the headers
+          // gives us more confidence that traces were sent from service to service.
+          "x-b3-traceid",
+          "x-b3-spanid",
+          "x-ddtrace-parent_trace_id",
+          "x-ddtrace-parent_span_id",
+          "x-datadog-parent-id",
+          "x-datadog-trace-id",
+          "x-datadog-sampling-priority",
+          "x-request-id",
         )
       }
   )
@@ -101,4 +132,30 @@ internal class RequestResponseCapture @Inject constructor() {
   }
 }
 
-internal data class RequestResponseBody(val request: Any?, val response: Any?)
+data class RequestResponseBody @JvmOverloads constructor(
+  val request: Any?,
+  val response: Any?,
+  val requestHeaders: Any? = null,
+  val responseHeaders: Any? = null,
+)
+
+/**
+ * Transforms request and/or response bodies before they get logged by [RequestLoggingInterceptor].
+ * Useful for things like stripping out noisy data.
+ *
+ * Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
+ * and cannot be reliably controlled.
+ */
+interface RequestLoggingTransformer {
+  fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody?
+}
+
+fun RequestLoggingTransformer.tryTransform(requestResponseBody: RequestResponseBody?): RequestResponseBody? =
+  try {
+    transform(requestResponseBody)
+  } catch (ex: Exception) {
+    logger.warn(ex) {
+      "RequestLoggingTransformer of type [${this.javaClass.name}] failed to transform: request=${requestResponseBody?.request} response=${requestResponseBody?.response}"
+    }
+    requestResponseBody
+  }

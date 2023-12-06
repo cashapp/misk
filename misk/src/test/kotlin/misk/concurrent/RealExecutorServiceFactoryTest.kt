@@ -1,15 +1,14 @@
 package misk.concurrent
 
 import io.opentracing.mock.MockTracer
-import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.time.FakeClock
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.RejectedExecutionException
 import kotlin.test.assertFailsWith
 
-@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class RealExecutorServiceFactoryTest {
   @Test fun happyPath() {
     val tracer = MockTracer()

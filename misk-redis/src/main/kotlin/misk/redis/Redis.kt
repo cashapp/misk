@@ -1,10 +1,11 @@
 package misk.redis
 
 import okio.ByteString
+import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
+import redis.clients.jedis.args.ListDirection
 import java.time.Duration
-import java.time.Instant
 
 /** A Redis client. */
 interface Redis {
@@ -19,6 +20,8 @@ interface Redis {
   /**
    * Deletes multiple keys.
    *
+   * On cluster mode, this might trigger multiple calls to Redis
+   *
    * @param keys the keys to delete
    * @return 0 if none of the keys were deleted, otherwise a positive integer
    *         representing the number of keys that were deleted
@@ -27,6 +30,8 @@ interface Redis {
 
   /**
    * Retrieves the values for the given list of keys.
+   *
+   * On cluster mode, this might trigger multiple calls to Redis
    *
    * @param keys the keys to retrieve
    * @return a list of String in the same order as the specified list of keys.
@@ -37,8 +42,11 @@ interface Redis {
   /**
    * Sets the key value pairs.
    *
+   * On cluster mode, this might trigger multiple calls to Redis
+   *
    * @param keyValues the list of keys and values in alternating order.
    */
+  // Consider deprecating in favour of a list of pairs?
   fun mset(vararg keyValues: ByteString)
 
   /**
@@ -50,12 +58,11 @@ interface Redis {
   operator fun get(key: String): ByteString?
 
   /**
-   * Delete one or more hash fields
+   * Delete one or more hash [fields] stored at [key].
+   * Specified fields that do not exist are ignored.
    *
-   * @param key the key for which to delete fields
-   * @param fields the specific fields to delete
-   * @return If the field was present in the hash it is deleted and 1 is returned, otherwise 0 is
-   * returned and no operation is performed.
+   * @return The number of fields that were removed from the hash. If the key does not exist,
+   *         it is treated as an empty hash and 0 is returned.
    */
   fun hdel(key: String, vararg fields: String): Long
 
@@ -76,6 +83,11 @@ interface Redis {
    * @return a Map<String, ByteString> of the fields to their associated values
    */
   fun hgetAll(key: String): Map<String, ByteString>?
+
+  /**
+   * Returns the number of fields contained in the hash stored at [key].
+   */
+  fun hlen(key: String): Long
 
   /**
    * Retrieve the values associated to the specified fields.
@@ -102,6 +114,20 @@ interface Redis {
   fun hincrBy(key: String, field: String, increment: Long): Long
 
   /**
+   * Randomly selects [count] fields and values from the hash stored at [key].
+   *
+   * NB: Implementations using Jedis 4 or seeking to emulate Jedis should use [checkHrandFieldCount]
+   * to avoid surprising behaviour like retrieving a result map which is smaller than requested by a
+   * completely random factor.
+   */
+  fun hrandFieldWithValues(key: String, count: Long): Map<String, ByteString>?
+
+  /**
+   * Like [hrandFieldWithValues] but only returns the fields of the hash stored at [key].
+   */
+  fun hrandField(key: String, count: Long): List<String>
+
+  /**
    * Sets the [ByteString] value for the given key.
    *
    * @param key the key to set
@@ -117,7 +143,6 @@ interface Redis {
    * @param value the value to set
    */
   operator fun set(key: String, expiryDuration: Duration, value: ByteString)
-
 
   /**
    * Sets the [ByteString] value for the given key if it does not already exist.
@@ -142,16 +167,20 @@ interface Redis {
    * @param key the key
    * @param field the field
    * @param value the value to set
+   * @return The number of fields that were added.
+   *         Returns 0 if all fields had their values overwritten.
    */
-  fun hset(key: String, field: String, value: ByteString)
+  fun hset(key: String, field: String, value: ByteString): Long
 
   /**
    * Sets the [ByteString] values for the given key and fields
    *
    * @param key the key
    * @param hash the map of fields to [ByteString] value
+   * @return The number of fields that were added.
+   *         Returns 0 if all fields had their values overwritten.
    */
-  fun hset(key: String, hash: Map<String, ByteString>)
+  fun hset(key: String, hash: Map<String, ByteString>): Long
 
   /**
    * Increments the number stored at key by one. If the key does not exist, it is set to 0 before
@@ -175,6 +204,169 @@ interface Redis {
    * See [incr] for extra information.
    */
   fun incrBy(key: String, increment: Long): Long
+
+  /**
+   * [blmove] is the blocking variant of [lmove]. When source contains elements, this command
+   * behaves exactly like [lmove]. When used inside a MULTI/EXEC block, this command behaves exactly
+   * like [lmove]. When source is empty, Redis will block the connection until another client pushes
+   * to it or until timeout (a double value specifying the maximum number of seconds to block) is
+   * reached. A timeout of zero can be used to block indefinitely.
+   *
+   * This command comes in place of the now deprecated [brpoplpush]. Doing BLMOVE RIGHT LEFT is
+   * equivalent.
+   *
+   * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
+   *
+   * See [lmove] for more information.
+   */
+  fun blmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection,
+    timeoutSeconds: Double
+  ): ByteString?
+
+  /**
+   * [brpoplpush] is the blocking variant of [rpoplpush]. When source contains elements, this
+   * command behaves exactly like [rpoplpush]. When used inside a MULTI/EXEC block, this command
+   * behaves exactly like [rpoplpush]. When source is empty, Redis will block the connection until
+   * another client pushes to it or until timeout is reached. A timeout of zero can be used to block
+   * indefinitely.
+   *
+   * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
+   *
+   * See [rpoplpush] for more information.
+   *
+   * As of Redis version 6.2.0, this command is regarded as deprecated.
+   *
+   * It can be replaced by [blmove] with the RIGHT and LEFT arguments when migrating or writing new
+   * code.
+   */
+  fun brpoplpush(sourceKey: String, destinationKey: String, timeoutSeconds: Int): ByteString?
+
+  /**
+   * Atomically returns and removes the first/last element (head/tail depending on the wherefrom
+   * argument) of the list stored at source, and pushes the element at the first/last element
+   * (head/tail depending on the whereto argument) of the list stored at destination.
+   *
+   * For example: consider source holding the list a,b,c, and destination holding the list x,y,z.
+   * Executing LMOVE source destination RIGHT LEFT results in source holding a,b and destination
+   * holding c,x,y,z.
+   *
+   * If source does not exist, the value nil is returned and no operation is performed. If source
+   * and destination are the same, the operation is equivalent to removing the first/last element
+   * from the list and pushing it as first/last element of the list, so it can be considered as a
+   * list rotation command (or a no-op if wherefrom is the same as whereto).
+   *
+   * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
+   *
+   * This command comes in place of the now deprecated RPOPLPUSH. Doing LMOVE RIGHT LEFT is
+   * equivalent.
+   */
+  fun lmove(
+    sourceKey: String,
+    destinationKey: String,
+    from: ListDirection,
+    to: ListDirection
+  ): ByteString?
+
+  /**
+   * Insert all the specified [elements] at the head of the list stored at [key].
+   * If [key] does not exist, it is created as empty list before performing the push operations.
+   * When [key] holds a value that is not a list, an error is returned.
+   *
+   * It is possible to push multiple elements using a single command call just specifying multiple
+   * arguments at the end of the command. Elements are inserted one after the other to the head of
+   * the list, from the leftmost element to the rightmost element.
+   * So for instance the command `LPUSH mylist a b c` will result into a list containing `c` as
+   * first element, `b` as second element and `a` as third element.
+   */
+  fun lpush(key: String, vararg elements: ByteString): Long
+
+  /**
+   * Insert all the specified [elements] at the tail of the list stored at [key].
+   * If [key] does not exist, it is created as empty list before performing the push operations.
+   * When [key] holds a value that is not a list, an error is returned.
+   *
+   * It is possible to push multiple elements using a single command call just specifying multiple
+   * arguments at the end of the command. Elements are inserted one after the other to the tail of
+   * the list, from the leftmost element to the rightmost element.
+   * So for instance the command `RPUSH mylist a b c` will result into a list containing `a` as
+   * first element, `b` as second element and `c` as third element.
+   */
+  fun rpush(key: String, vararg elements: ByteString): Long
+
+  /**
+   * Removes and returns the first [count] elements of the list stored at [key].
+   *
+   * Only available on Redis 6.2.0 and higher.
+   * Throws if Redis is too low of a version.
+   */
+  fun lpop(key: String, count: Int): List<ByteString?>
+
+  /**
+   * Removes and returns the first element of the list stored at [key].
+   */
+  fun lpop(key: String): ByteString?
+
+  /**
+   * Removes and returns the last [count] elements of the list stored at [key].
+   *
+   * Only available on Redis 6.2.0 and higher.
+   * Throws if Redis is too low of a version.
+   */
+  fun rpop(key: String, count: Int): List<ByteString?>
+
+  /**
+   * Removes and returns the last element of the list stored at [key].
+   */
+  fun rpop(key: String): ByteString?
+
+  /**
+   * Returns the specified elements of the list stored at key. The offsets start and stop are
+   * zero-based indexes, with 0 being the first element of the list (the head of the list), 1 being
+   * the next element and so on.
+   *
+   * These offsets can also be negative numbers indicating offsets starting at the end of the list.
+   * For example, -1 is the last element of the list, -2 the penultimate, and so on.
+   */
+  fun lrange(key: String, start: Long, stop: Long): List<ByteString?>
+
+  /**
+   * Removes the first count occurrences of elements equal to element from the list stored at key.
+   * The count argument influences the operation in the following ways:
+   *  count > 0: Remove elements equal to element moving from head to tail.
+   *  count < 0: Remove elements equal to element moving from tail to head.
+   *  count = 0: Remove all elements equal to element.
+   * For example, LREM list -2 "hello" will remove the last two occurrences of "hello" in the list
+   * stored at list.
+   *
+   * Note that non-existing keys are treated like empty lists, so when key does not exist, the
+   * command will always return 0.
+   */
+  fun lrem(key: String, count: Long, element: ByteString): Long
+
+  /**
+   * Atomically returns and removes the last element (tail) of the list stored at source, and pushes
+   * the element at the first element (head) of the list stored at destination.
+   *
+   * For example: consider source holding the list a,b,c, and destination holding the list x,y,z.
+   * Executing [rpoplpush] results in source holding a,b and destination holding c,x,y,z.
+   *
+   * If source does not exist, the value nil is returned and no operation is performed. If source
+   * and destination are the same, the operation is equivalent to removing the last element from the
+   * list and pushing it as first element of the list, so it can be considered as a list rotation
+   * command.
+   *
+   * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
+   *
+   * As of Redis version 6.2.0, this command is regarded as deprecated.
+   *
+   * It can be replaced by [lmove] with the RIGHT and LEFT arguments when migrating or writing new
+   * code.
+   */
+  fun rpoplpush(sourceKey: String, destinationKey: String): ByteString?
 
   /**
    * Set a timeout on key. After the timeout has expired, the key will automatically be deleted. A
@@ -257,4 +449,38 @@ interface Redis {
    * Begin a pipeline operation to batch together several updates for optimal performance
    */
   fun pipelined(): Pipeline
+
+  /**
+   * Closes the client, so it may not be used further.
+   */
+  fun close()
+
+  /**
+   * Subscribe to a redis channel via pubsub. This is blocking!
+   */
+  fun subscribe(jedisPubSub: JedisPubSub, channel: String)
+
+  /**
+   * Publish a message to a channel.
+   */
+  fun publish(channel: String, message: String)
+}
+
+/**
+ * Validates [count] is positive and non-zero.
+ * This is to avoid unexpected behaviour due to limitations in Jedis:
+ * https://github.com/redis/jedis/issues/3017
+ *
+ * This check can be removed when Jedis v5.x is released with full support for the behaviours
+ * for negative counts that are specified by Redis.
+ *
+ * https://redis.io/commands/hrandfield/#specification-of-the-behavior-when-count-is-passed
+ */
+inline fun checkHrandFieldCount(count: Long) {
+  require(count > -1) {
+    "This Redis client does not support negative field counts for HRANDFIELD."
+  }
+  require(count > 0) {
+    "You must request at least 1 field."
+  }
 }

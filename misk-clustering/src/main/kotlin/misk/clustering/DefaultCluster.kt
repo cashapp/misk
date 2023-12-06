@@ -5,7 +5,7 @@ import wisp.logging.getLogger
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 /**
  * A [DefaultCluster] is the default implementation of the [Cluster], which relies on an outside
@@ -14,7 +14,7 @@ import javax.inject.Singleton
  * that need to be triggered as the cluster changes.
  */
 @Singleton
-class DefaultCluster(
+class DefaultCluster @JvmOverloads constructor(
   self: Cluster.Member,
   private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
     { ClusterHashRing(it) }
@@ -74,6 +74,7 @@ class DefaultCluster(
   }
 
   /** Triggers a change to the cluster in response members becoming ready or not ready */
+  @JvmOverloads
   fun clusterChanged(
     membersBecomingReady: Set<Cluster.Member> = setOf(),
     membersBecomingNotReady: Set<Cluster.Member> = setOf()

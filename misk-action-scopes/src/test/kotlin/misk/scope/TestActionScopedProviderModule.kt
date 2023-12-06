@@ -4,10 +4,16 @@ import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import java.util.Optional
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
   override fun configureProviders() {
+    bindConstant(String::class, "constant-value", Names.named("constant"))
+    bindConstant(
+      object : TypeLiteral<Optional<String>>() {},
+      Optional.of("constant-value"),
+      Names.named("constant"),
+    )
     bindSeedData(String::class, Names.named("from-seed"))
     bindSeedData(object : TypeLiteral<Optional<String>>() {})
     bindProvider(String::class, FooProvider::class, Names.named("foo"))

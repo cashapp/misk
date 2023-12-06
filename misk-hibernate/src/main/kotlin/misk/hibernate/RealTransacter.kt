@@ -130,7 +130,7 @@ internal class RealTransacter private constructor(
   }
 
   private val sessionFactory
-    get() = sessionFactoryService.get()
+    get() = sessionFactoryService.sessionFactory
 
   override val inTransaction: Boolean
     get() = sessionFactoryService.threadInTransaction.get()
@@ -279,7 +279,7 @@ internal class RealTransacter private constructor(
 
   private fun reader(): SessionFactory {
     if (readerSessionFactoryService != null) {
-      return readerSessionFactoryService.get()
+      return readerSessionFactoryService.sessionFactory
     }
     if (config.type.isVitess) {
       return sessionFactory
