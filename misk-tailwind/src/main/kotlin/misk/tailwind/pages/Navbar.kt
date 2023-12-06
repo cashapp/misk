@@ -15,6 +15,8 @@ import kotlinx.html.span
 import kotlinx.html.ul
 import kotlinx.html.unsafe
 import misk.tailwind.Link
+import misk.tailwind.icons.Heroicons
+import misk.tailwind.icons.heroicon
 import wisp.deployment.Deployment
 
 data class MenuSection(
@@ -210,7 +212,7 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
                         unsafe { +it }
                       }
                     } ?: let {
-                      a(classes = "$isSelectedStyles group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold") {
+                      a(classes = "$isSelectedStyles group flex justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold") {
                         href = link.href
 
                         if (link.dataTurbo == true) {
@@ -226,6 +228,10 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
                         }
 
                         +link.label
+
+                        if (link.openInNewTab) {
+                          heroicon(Heroicons.MINI_ARROW_TOP_RIGHT_ON_SQUARE)
+                        }
                       }
                     }
                   }
