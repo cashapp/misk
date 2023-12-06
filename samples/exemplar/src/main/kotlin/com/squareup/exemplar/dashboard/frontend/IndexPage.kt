@@ -1,6 +1,8 @@
 package com.squareup.exemplar.dashboard.frontend
 
 import com.squareup.exemplar.dashboard.admin.AlphaIndexAction
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.html.a
 import kotlinx.html.div
 import kotlinx.html.h1
@@ -18,9 +20,6 @@ import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.HtmlLayout
 import misk.web.mediatype.MediaTypes
 import wisp.deployment.Deployment
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import misk.web.v2.DashboardPageLayout.Companion.BETA_PREFIX
 
 /**
  * Example page from Tailwind UI
@@ -59,13 +58,19 @@ class IndexPage @Inject constructor(
                 }
                 li {
                   a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
+                    href = GraphD3JsPage.PATH
+                    +"""Graph with D3.js"""
+                  }
+                }
+                li {
+                  a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
                     href = "/support/"
                     +"""Support Custom Dashboard"""
                   }
                 }
                 li {
                   a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
-                    href = "$BETA_PREFIX${AlphaIndexAction.PATH}"
+                    href = AlphaIndexAction.PATH
                     +"""Custom Admin Dashboard Tab"""
                   }
                 }

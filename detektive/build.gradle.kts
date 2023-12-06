@@ -14,6 +14,7 @@ dependencies {
   compileOnly(Dependencies.kotlinCompilerEmbeddable)
 
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.detektParser)
   testImplementation(Dependencies.detektTest)
   testImplementation(Dependencies.detektTestUtils)
   testImplementation(Dependencies.guice)

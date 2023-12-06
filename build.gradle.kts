@@ -24,6 +24,7 @@ buildscript {
     classpath(Dependencies.protobufGradlePlugin)
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
+    classpath(Dependencies.revapiGradlePlugin)
   }
 }
 
@@ -68,7 +69,7 @@ dependencyAnalysis {
         exclude("io.opentracing:opentracing-noop:0.33.0")
       }
       onRuntimeOnly {
-        exclude("com.datadoghq:dd-trace-ot:1.12.1")
+        exclude("com.datadoghq:dd-trace-ot:1.23.0")
       }
     }
     project(":misk-grpc-tests") {
@@ -92,6 +93,12 @@ dependencyAnalysis {
         exclude(":wisp:wisp-logging")
       }
     }
+    project(":wisp:wisp-rate-limiting:bucket4j") {
+      onUnusedDependencies() {
+        // Plugin does not recognize use of tests artifact from bucket4j's maven manifest
+        exclude("com.bucket4j:bucket4j-core")
+      }
+    }
   }
 }
 
@@ -102,30 +109,54 @@ apiValidation {
 
 val testShardNonHibernate by tasks.creating {
   group = "Continuous integration"
-  description = "Runs all tests that don't depend on misk-hibernate. " +
-      "This target is intended for manually sharding tests to make CI faster."
+  description = "These tests don't have shared infra and can run in parallel"
+}
+
+val testShardRedis by tasks.creating {
+  group = "Continuous integration"
+  description = "These tests use redis and thus can't run in parallel"
 }
 
 val testShardHibernate by tasks.creating {
   group = "Continuous integration"
-  description = "Runs all tests that depend on misk-hibernate. " +
-      "This target is intended for manually sharding tests to make CI faster."
+  description = "These tests use a DB and thus can't run in parallel"
 }
+
+val hibernateProjects = listOf(
+  "misk-aws",
+  "misk-events",
+  "misk-jobqueue",
+  "misk-jobqueue-testing",
+  "misk-jdbc",
+  "misk-jdbc-testing",
+  "misk-hibernate",
+  "misk-hibernate-testing",
+  "misk-rate-limiting-bucket4j-mysql"
+)
+
+val redisProjects = listOf(
+  "misk-redis",
+  "misk-rate-limiting-bucket4j-redis"
+)
 
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
   apply(plugin = "io.gitlab.arturbosch.detekt")
 
   if (!listOf(
-          "detektive",
-          "exemplar",
-          "exemplarchat",
-          "misk-bom"
-      ).contains(name)) {
+      "detektive",
+      "exemplar",
+      "exemplarchat",
+      "misk-bom"
+    ).contains(name)
+  ) {
+    apply(plugin = "com.palantir.revapi")
+
     extensions.configure(DetektExtension::class) {
       parallel = true
       buildUponDefaultConfig = false
       ignoreFailures = false
+      autoCorrect = true
       config.setFrom(files("$rootDir/detekt.yaml"))
     }
   } else {
@@ -214,29 +245,17 @@ subprojects {
 
   plugins.withType<BasePlugin> {
     tasks.findByName("check")!!.apply {
-      if (listOf(
-              "misk-aws",
-              "misk-events",
-              "misk-jobqueue",
-              "misk-jobqueue-testing",
-              "misk-jdbc",
-              "misk-jdbc-testing",
-              "misk-hibernate",
-              "misk-hibernate-testing"
-          ).contains(project.name)) {
+      if (hibernateProjects.contains(project.name)) {
         testShardHibernate.dependsOn(this)
+      } else if (redisProjects.contains(project.name)) {
+        testShardRedis.dependsOn(this)
       } else {
         testShardNonHibernate.dependsOn(this)
       }
 
       // Disable the default `detekt` task and enable `detektMain` which has type resolution enabled
       dependsOn(dependsOn.filterNot { name != "detekt" })
-      if (!listOf(
-              "detektive",
-              "exemplar",
-              "exemplarchat",
-              "misk-bom"
-          ).contains(project.name)) {
+      if (tasks.findByName("detektMain") != null) {
         dependsOn("detektMain")
       }
     }
@@ -247,8 +266,8 @@ subprojects {
     // https://github.com/square/okio/issues/647
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
       attributes.attribute(
-          Usage.USAGE_ATTRIBUTE,
-          this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
+        Usage.USAGE_ATTRIBUTE,
+        this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
       )
     }
 

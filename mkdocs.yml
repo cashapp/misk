@@ -54,7 +54,6 @@ nav:
       - 'misk-events-core': 0.x/misk-events-core/index.md
       - 'misk-events': 0.x/misk-events/index.md
       - 'misk-gcp': 0.x/misk-gcp/index.md
-      - 'misk-gcp-testing': 0.x/misk-gcp-testing/index.md
       - 'misk-grpc-tests': 0.x/misk-grpc-tests/index.md
       - 'misk-hibernate': 0.x/misk-hibernate/index.md
       - 'misk-hibernate-testing': 0.x/misk-hibernate-testing/index.md
@@ -70,6 +69,8 @@ nav:
   - 'Internals':
       - 'Graceful Shutdown': internals/graceful-shutdown.md
       - 'Service Management': internals/service-management.md
+  - 'Migrations':
+      - 'Misk Metrics': migrations/misk-metrics.md
   - 'Change Log': changelog.md
   - 'Releasing': releasing.md
   - 'Manual Releasing': releasing-manual.md

@@ -1,5 +1,7 @@
 package misk.web.jetty
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
@@ -19,7 +21,6 @@ import okio.buffer
 import okio.sink
 import okio.source
 import org.eclipse.jetty.http.HttpMethod
-import org.eclipse.jetty.http2.HTTP2Connection
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.server.ServerConnector
@@ -30,8 +31,6 @@ import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
 import wisp.logging.getLogger
 import java.net.HttpURLConnection
 import java.net.ProtocolException
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -147,9 +146,7 @@ internal class WebActionsServlet @Inject constructor(
       val bestAction = candidateActions.minOrNull()
 
       if (bestAction != null) {
-        bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
-        response.handleHttp2ConnectionClose()
-        return
+        return bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
       }
 
       // We didn't match with an action, so it's a 404. We hit this for things other than get/post
@@ -161,31 +158,18 @@ internal class WebActionsServlet @Inject constructor(
       response.status = HttpURLConnection.HTTP_INTERNAL_ERROR
       response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
       response.writer.close()
-
-      return
     }
   }
 
   private fun sendNotFound(
     request: HttpServletRequest,
     response: HttpServletResponse,
-    responseBody: BufferedSink
+    responseBody: BufferedSink,
   ) {
     response.status = HttpURLConnection.HTTP_NOT_FOUND
     response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
     responseBody.writeUtf8("Nothing found at ${request.method} ${request.httpUrl()}")
     responseBody.close()
-  }
-
-  /**
-   * Jetty 9.x doesn't honor the "Connection: close" header for HTTP/2, so we do it ourselves.
-   * https://github.com/eclipse/jetty.project/issues/2788
-   */
-  private fun Response.handleHttp2ConnectionClose() {
-    val connectionHeader = getHeader("Connection")
-    if ("close".equals(connectionHeader, ignoreCase = true)) {
-      (httpChannel.connection as? HTTP2Connection)?.close()
-    }
   }
 
   override fun configure(factory: JettyWebSocketServletFactory) {

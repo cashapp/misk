@@ -916,6 +916,12 @@ public final class misk/moshi/time/LocalDateAdapter {
 	public final fun toJson (Ljava/time/LocalDate;)Ljava/util/Date;
 }
 
+public final class misk/moshi/time/OffsetDateTimeAdapter {
+	public static final field INSTANCE Lmisk/moshi/time/OffsetDateTimeAdapter;
+	public final fun fromJson (Ljava/lang/String;)Ljava/time/OffsetDateTime;
+	public final fun toJson (Ljava/time/OffsetDateTime;)Ljava/lang/String;
+}
+
 public final class misk/okio/OkioExtensionsKt {
 	public static final fun forEachBlock (Lokio/BufferedSource;ILkotlin/jvm/functions/Function2;)V
 	public static final fun forEachBlock (Lokio/BufferedSource;[BLkotlin/jvm/functions/Function2;)V
@@ -1604,7 +1610,11 @@ public final class misk/web/actions/InternalErrorAction : misk/web/actions/WebAc
 }
 
 public final class misk/web/actions/LivenessCheckAction : misk/web/actions/WebAction {
+	public static final field Companion Lmisk/web/actions/LivenessCheckAction$Companion;
 	public final fun livenessCheck ()Lmisk/web/Response;
+}
+
+public final class misk/web/actions/LivenessCheckAction$Companion {
 }
 
 public final class misk/web/actions/NotFoundAction : misk/web/actions/WebAction {
@@ -1617,7 +1627,11 @@ public final class misk/web/actions/NotFoundAction$Companion {
 }
 
 public final class misk/web/actions/ReadinessCheckAction : misk/web/actions/WebAction {
+	public static final field Companion Lmisk/web/actions/ReadinessCheckAction$Companion;
 	public final fun readinessCheck ()Lmisk/web/Response;
+}
+
+public final class misk/web/actions/ReadinessCheckAction$Companion {
 }
 
 public final class misk/web/actions/StatusAction : misk/web/actions/WebAction {
@@ -1914,9 +1928,13 @@ public final class misk/web/interceptors/WideOpenDevelopmentInterceptorFactory :
 }
 
 public final class misk/web/jetty/JettyService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/web/jetty/JettyService$Companion;
 	public final fun getHealthServerUrl ()Lokhttp3/HttpUrl;
 	public final fun getHttpServerUrl ()Lokhttp3/HttpUrl;
 	public final fun getHttpsServerUrl ()Lokhttp3/HttpUrl;
+}
+
+public final class misk/web/jetty/JettyService$Companion {
 }
 
 public final class misk/web/jetty/MeasuredQueuedThreadPool : misk/web/jetty/MeasuredThreadPool {

@@ -5,16 +5,14 @@ import app.cash.tempest2.testing.TestTable
 import app.cash.tempest2.testing.internal.TestDynamoDbService
 import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.ServiceModule
-import misk.aws2.dynamodb.DynamoDbHealthCheck
 import misk.aws2.dynamodb.DynamoDbService
 import misk.aws2.dynamodb.RequiredDynamoDbTable
-import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
@@ -23,7 +21,7 @@ import jakarta.inject.Singleton
  * in-process, but never both.
  */
 class DockerDynamoDbModule(
-  private val tables: List<DynamoDbTable>
+  private val tables: List<DynamoDbTable>,
 ) : KAbstractModule() {
 
   constructor(vararg tables: DynamoDbTable) : this(tables.toList())
@@ -32,17 +30,18 @@ class DockerDynamoDbModule(
     for (table in tables) {
       multibind<DynamoDbTable>().toInstance(table)
     }
-    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
     bind<DynamoDbService>().to<DockerDynamoDbService>()
     install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
     install(ServiceModule<TestDynamoDb>())
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun provideRequiredTables(): List<RequiredDynamoDbTable> =
     tables.map { RequiredDynamoDbTable(it.tableName) }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesTestDynamoDb(): TestDynamoDb {
     return TestDynamoDb(
       TestDynamoDbService.create(
@@ -57,12 +56,14 @@ class DockerDynamoDbModule(
     )
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesAmazonDynamoDB(testDynamoDb: TestDynamoDb): DynamoDbClient {
     return testDynamoDb.service.client.dynamoDb
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesAmazonDynamoDBStreams(testDynamoDb: TestDynamoDb): DynamoDbStreamsClient {
     return testDynamoDb.service.client.dynamoDbStreams
   }

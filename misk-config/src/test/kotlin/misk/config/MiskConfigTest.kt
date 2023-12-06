@@ -97,6 +97,17 @@ class MiskConfigTest {
   }
 
   @Test
+  fun friendErrorMessageWhenConfigPropertyMissingInList() {
+    val exception = assertFailsWith<IllegalStateException> {
+      MiskConfig.load<TestConfig>("missing_property_in_list", TESTING)
+    }
+
+    assertThat(exception).hasMessageContaining(
+      "could not find 'collection.0.name' of 'TestConfig' in missing_property_in_list-testing.yaml"
+    )
+  }
+
+  @Test
   fun friendlyErrorMessagesWhenFileUnparseable() {
     val exception = assertFailsWith<IllegalStateException> {
       MiskConfig.load<TestConfig>("unparsable", TESTING)
@@ -115,6 +126,15 @@ class MiskConfigTest {
     assertThat(logCollector.takeMessages(MiskConfig::class))
       .hasSize(1)
       .allMatch { it.contains("'consumer_b.blue_items' not found") }
+  }
+
+  @Test
+  fun friendLogsWhenConfigPropertyNotFoundInList() {
+    MiskConfig.load<TestConfig>("unknownproperty_in_list", TESTING)
+
+    assertThat(logCollector.takeMessages(MiskConfig::class))
+      .hasSize(1)
+      .allMatch { it.contains("'collection.0.power_level' not found") }
   }
 
   @Test

@@ -1,6 +1,10 @@
 package misk.web.actions
 
+import com.google.common.util.concurrent.Service.State
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.healthchecks.HealthCheck
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
@@ -9,32 +13,30 @@ import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
-
-private val logger = getLogger<ReadinessCheckAction>()
 
 @Singleton
 class ReadinessCheckAction @Inject internal constructor(
   private val serviceManagerProvider: Provider<ServiceManager>,
-  @JvmSuppressWildcards private val healthChecks: List<HealthCheck>
+  private val healthChecks: List<HealthCheck>,
 ) : WebAction {
-
   @Get("/_readiness")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   @AvailableWhenDegraded
   fun readinessCheck(): Response<String> {
-    val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().asList()
-      .filterNot { it.isRunning }
-
-    for (service in servicesNotRunning) {
-      logger.info("Service not running: $service")
+    val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().filterNot {
+      it.isRunning
     }
 
-    if (!servicesNotRunning.isEmpty()) {
-      // Don't do healthchecks if services haven't all started. The app isn't in a good state yet,
+    for (service in servicesNotRunning) {
+      // Only log failed services.
+      if (service.state() == State.FAILED) {
+        logger.info("Service not running: $service")
+      }
+    }
+
+    if (servicesNotRunning.isNotEmpty()) {
+      // Don't do health checks if services haven't all started. The app isn't in a good state yet,
       // and a health check could end up triggering random errors that we don't want to flood the
       // logs with.
       return Response("", statusCode = 503)
@@ -52,5 +54,9 @@ class ReadinessCheckAction @Inject internal constructor(
       logger.info("Failed health check: ${healthCheck.messages}")
     }
     return Response("", statusCode = 503)
+  }
+
+  companion object {
+    private val logger = getLogger<ReadinessCheckAction>()
   }
 }

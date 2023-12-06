@@ -1,5 +1,6 @@
 package misk.hibernate.migrate
 
+import jakarta.inject.Inject
 import misk.hibernate.CharacterQuery
 import misk.hibernate.DbCharacter
 import misk.hibernate.DbMovie
@@ -9,6 +10,7 @@ import misk.hibernate.Movies
 import misk.hibernate.MoviesTestModule
 import misk.hibernate.Query
 import misk.hibernate.Session
+import misk.hibernate.SessionFactoryService
 import misk.hibernate.Transacter
 import misk.hibernate.allowTableScan
 import misk.hibernate.createInSameShard
@@ -23,18 +25,17 @@ import misk.vitess.Shard
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.IntegerAssert
 import org.assertj.core.api.ListAssert
-import org.hibernate.SessionFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 abstract class BulkShardMigratorTest {
+  @Inject @Movies internal lateinit var sessionFactoryService: SessionFactoryService
   @Inject @Movies lateinit var transacter: Transacter
-  @Inject @Movies lateinit var sessionFactory: SessionFactory
   @Inject lateinit var bulkShardMigratorFactory: BulkShardMigrator.Factory
   @Inject lateinit var queryFactory: Query.Factory
 
-  @Test fun sameShardMigrate() {
+  @Test
+  fun sameShardMigrate() {
     val sourceId = transacter.transaction { session ->
       val movie = DbMovie("Jurassic Park")
       session.save(movie)
@@ -58,7 +59,12 @@ abstract class BulkShardMigratorTest {
 
     // It is expected that we would work on two root entities while merging though on the same shard
     // for this case. The vitess safey checks throw, disabling it for now.
-    bulkShardMigratorFactory.create(transacter, sessionFactory, DbMovie::class, DbCharacter::class)
+    bulkShardMigratorFactory.create(
+      transacter,
+      sessionFactoryService.sessionFactory,
+      DbMovie::class,
+      DbCharacter::class
+    )
       .rootColumn("movie_id")
       .source(sourceId)
       .target(targetId)
@@ -122,13 +128,15 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 
-  @BeforeEach fun setup() {
+  @BeforeEach
+  fun setup() {
     val movieShards = transacter.shards().filter { it.keyspace.name.startsWith("movie") }
     assertThat(movieShards).hasSize(2)
   }
 
   /** Create a root entity and some child entities on one shard and migrate them to another.  */
-  @Test fun distinctShardsMigration() {
+  @Test
+  fun distinctShardsMigration() {
     val sourceId = transacter.transaction { session ->
       val movie = DbMovie("Jurassic Park")
       session.save(movie)
@@ -155,7 +163,12 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
     assertRowCount(sourceId, "Ellie Sattler", "Ian Malcolm").isEqualTo(2)
     assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(0)
 
-    bulkShardMigratorFactory.create(transacter, sessionFactory, DbMovie::class, DbCharacter::class)
+    bulkShardMigratorFactory.create(
+      transacter,
+      sessionFactoryService.sessionFactory,
+      DbMovie::class,
+      DbCharacter::class
+    )
       .rootColumn("movie_id")
       .source(sourceId)
       .target(targetId)
@@ -173,7 +186,8 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
     assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(2)
   }
 
-  @Test fun bulkMigrateDuringSchemaChange() {
+  @Test
+  fun bulkMigrateDuringSchemaChange() {
     val sourceId = transacter.transaction { session ->
       val movie = DbMovie("Jurassic Park")
       session.save(movie)
@@ -210,7 +224,7 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
       }
 
       bulkShardMigratorFactory.create(
-        transacter, sessionFactory, DbMovie::class,
+        transacter, sessionFactoryService.sessionFactory, DbMovie::class,
         DbCharacter::class
       )
         .rootColumn("movie_id")
@@ -239,7 +253,8 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
     }
   }
 
-  @Test fun batchingTest() {
+  @Test
+  fun batchingTest() {
     val sourceId = transacter.transaction { session ->
       val movie = DbMovie("Jurassic Park")
       session.save(movie)
@@ -266,7 +281,6 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
     assertRowCount(sourceId, "Ellie Sattler", "Ian Malcolm").isEqualTo(2)
     assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(0)
     try {
-
       // Change the schema on one the two shards. Previously this would cause BulkShardMigrator to
       // crash because it wasn't expecting shards to have mismatching columns.
       for (shard in listOf(sourceShard, targetShard)) {
@@ -277,7 +291,7 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
 
       // First batch is been moved
       bulkShardMigratorFactory.create(
-        transacter, sessionFactory, DbMovie::class, DbCharacter::class
+        transacter, sessionFactoryService.sessionFactory, DbMovie::class, DbCharacter::class
       )
         .rootColumn("movie_id")
         .source(sourceId)
@@ -300,7 +314,7 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
 
       // Second batch is been moved
       bulkShardMigratorFactory.create(
-        transacter, sessionFactory, DbMovie::class, DbCharacter::class
+        transacter, sessionFactoryService.sessionFactory, DbMovie::class, DbCharacter::class
       )
         .rootColumn("movie_id")
         .source(sourceId)

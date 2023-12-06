@@ -39,11 +39,6 @@ public final class misk/tailwind/TailwindHtmlLayoutKt {
 	public static synthetic fun TailwindHtmlLayout$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
-public final class misk/tailwind/TailwindsHeadKt {
-	public static final fun TailwindHtmlLayout (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun TailwindHtmlLayout$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-}
-
 public final class misk/tailwind/icons/HeroiconProps {
 	public fun <init> (Lmisk/tailwind/icons/Heroicons;)V
 	public fun <init> (Lmisk/tailwind/icons/Heroicons;Ljava/lang/String;)V
@@ -68,6 +63,7 @@ public final class misk/tailwind/icons/Heroicons : java/lang/Enum {
 	public static final field MAGNIFYING_GLASS Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_ARROW_LONG_LEFT Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_ARROW_LONG_RIGHT Lmisk/tailwind/icons/Heroicons;
+	public static final field MINI_ARROW_TOP_RIGHT_ON_SQUARE Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_CHEVRON_DOWN Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_CHEVRON_UP Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_CHEVRON_UP_DOWN Lmisk/tailwind/icons/Heroicons;

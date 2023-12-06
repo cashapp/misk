@@ -8,7 +8,7 @@ import misk.redis.RedisConfig
 import misk.redis.RedisNodeConfig
 import misk.redis.RedisReplicationGroupConfig
 import misk.testing.ExternalDependency
-import redis.clients.jedis.JedisPool
+import redis.clients.jedis.JedisPooled
 import wisp.containers.Composer
 import wisp.containers.Container
 import wisp.containers.ContainerUtil.isRunningInDocker
@@ -32,7 +32,7 @@ object DockerRedis : ExternalDependency {
   private val logger = getLogger<DockerRedis>()
   private const val redisVersion = "6.2"
 
-  private val client by lazy { JedisPool(hostname, port) }
+  private val jedis by lazy { JedisPooled(hostname, port) }
 
   private val redisNodeConfig = RedisNodeConfig(hostname, port)
   private val groupConfig = RedisReplicationGroupConfig(
@@ -73,7 +73,7 @@ object DockerRedis : ExternalDependency {
 
     while (true) {
       try {
-        val pong = client.resource.use { jedis -> jedis.ping() }
+        val pong = jedis.ping()
         check(pong == "PONG") { "Unexpected reply from Redis. Aborting!" }
         logger.info { "Sent command PING, got reply $pong" }
         break
@@ -88,17 +88,15 @@ object DockerRedis : ExternalDependency {
   }
 
   override fun shutdown() {
-    with(client) {
-      clear()
+    with(jedis) {
+      pool.clear()
       close()
     }
     composer.stop()
   }
 
   override fun beforeEach() {
-    client.resource.use { jedis ->
-      jedis.flushAll()
-    }
+    jedis.flushAll()
   }
 
   override fun afterEach() {

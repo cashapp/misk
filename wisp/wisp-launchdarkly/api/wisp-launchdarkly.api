@@ -64,6 +64,9 @@ public final class wisp/launchdarkly/LaunchDarklyFeatureFlags : wisp/feature/Fea
 	public fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;)V
 	public fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;)V
 	public synthetic fun <init> (Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/Lazy;Lcom/squareup/moshi/Moshi;)V
+	public fun <init> (Lkotlin/Lazy;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;)V
+	public synthetic fun <init> (Lkotlin/Lazy;Lcom/squareup/moshi/Moshi;Lio/micrometer/core/instrument/MeterRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun get (Lwisp/feature/BooleanFeatureFlag;)Z
 	public fun get (Lwisp/feature/DoubleFeatureFlag;)D
 	public fun get (Lwisp/feature/EnumFeatureFlag;)Ljava/lang/Enum;

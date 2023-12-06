@@ -1,12 +1,11 @@
 package misk.aws2.dynamodb
 
-import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
 import misk.exceptions.dynamodb.DynamoDbExceptionMapperModule
-import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
@@ -16,8 +15,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClientBuilder
 import java.net.URI
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /**
  * Install this module to have access to a DynamoDbClient.
@@ -31,16 +28,16 @@ open class RealDynamoDbModule @JvmOverloads constructor(
   override fun configure() {
     requireBinding<AwsCredentialsProvider>()
     requireBinding<AwsRegion>()
-    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
     bind<DynamoDbService>().to<RealDynamoDbService>()
     install(ServiceModule<DynamoDbService>().enhancedBy<ReadyService>())
     install(DynamoDbExceptionMapperModule())
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesDynamoDbClient(
     awsRegion: AwsRegion,
-    awsCredentialsProvider: AwsCredentialsProvider
+    awsCredentialsProvider: AwsCredentialsProvider,
   ): DynamoDbClient {
     val builder = DynamoDbClient.builder()
       .region(Region.of(awsRegion.name))
@@ -53,10 +50,11 @@ open class RealDynamoDbModule @JvmOverloads constructor(
     return builder.build()
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun providesDynamoDbStreamsClient(
     awsRegion: AwsRegion,
-    awsCredentialsProvider: AwsCredentialsProvider
+    awsCredentialsProvider: AwsCredentialsProvider,
   ): DynamoDbStreamsClient {
     val builder = DynamoDbStreamsClient.builder()
       .region(Region.of(awsRegion.name))
@@ -72,13 +70,7 @@ open class RealDynamoDbModule @JvmOverloads constructor(
   open fun configureClient(builder: DynamoDbClientBuilder) {}
   open fun configureClient(builder: DynamoDbStreamsClientBuilder) {}
 
-  @Provides @Singleton
-  fun provideRequiredTables(): List<RequiredDynamoDbTable> = requiredTables
-
-  /** We don't currently perform any startup work to connect to DynamoDB. */
+  @Provides
   @Singleton
-  private class RealDynamoDbService @Inject constructor() : AbstractService(), DynamoDbService {
-    override fun doStart() = notifyStarted()
-    override fun doStop() = notifyStopped()
-  }
+  fun provideRequiredTables(): List<RequiredDynamoDbTable> = requiredTables
 }

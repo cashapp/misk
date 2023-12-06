@@ -4,10 +4,10 @@ import com.google.inject.Provides
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
-import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
-import misk.ReadyService
 import io.micrometer.core.instrument.MeterRegistry
+import jakarta.inject.Singleton
+import misk.ReadyService
 import misk.ServiceModule
 import misk.client.HttpClientSSLConfig
 import misk.config.Redact
@@ -15,16 +15,12 @@ import misk.feature.DynamicConfig
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
-import misk.inject.toKey
 import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import wisp.config.Config
 import java.net.URI
 import java.time.Duration
-import jakarta.inject.Inject
-import com.google.inject.Provider
 import javax.net.ssl.X509TrustManager
 import kotlin.reflect.KClass
 
@@ -33,37 +29,25 @@ import kotlin.reflect.KClass
  */
 class LaunchDarklyModule @JvmOverloads constructor(
   private val config: LaunchDarklyConfig,
-  private val qualifier: KClass<out Annotation>? = null
+  private val qualifier: KClass<out Annotation>? = null,
 ) : KAbstractModule() {
   override fun configure() {
-    val wispLaunchDarklyFeatureFlagsKey =
-      wisp.launchdarkly.LaunchDarklyFeatureFlags::class.toKey(qualifier)
-    bind(wispLaunchDarklyFeatureFlagsKey).toProvider(
-      object : Provider<wisp.launchdarkly.LaunchDarklyFeatureFlags> {
-        @Inject private lateinit var ldClient: LDClientInterface
-        @Inject private lateinit var moshi: Moshi
-        @Inject private lateinit var meterRegistry: MeterRegistry
-        override fun get(): wisp.launchdarkly.LaunchDarklyFeatureFlags =
-          wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi, meterRegistry)
-      }
-    ).asSingleton()
-    bind(wisp.feature.FeatureFlags::class.toKey(qualifier)).to(wispLaunchDarklyFeatureFlagsKey)
-
-    val key = LaunchDarklyFeatureFlags::class.toKey(qualifier)
-    bind(FeatureFlags::class.toKey(qualifier)).to(key)
-    bind(FeatureService::class.toKey(qualifier)).to(key)
-    val featureFlagsProvider = getProvider(key)
-    bind(DynamicConfig::class.toKey(qualifier)).toProvider(
-      Provider<DynamicConfig> { LaunchDarklyDynamicConfig(featureFlagsProvider.get()) })
-    install(ServiceModule(FeatureService::class.toKey(qualifier)).enhancedBy<ReadyService>())
+    bind<wisp.feature.FeatureFlags>().to<wisp.launchdarkly.LaunchDarklyFeatureFlags>()
+    bind<FeatureFlags>().to<LaunchDarklyFeatureFlags>()
+    bind<FeatureService>().to<LaunchDarklyFeatureFlags>()
+    bind<DynamicConfig>().to<LaunchDarklyDynamicConfig>()
+    install(ServiceModule<FeatureService>().enhancedBy<ReadyService>())
   }
 
   @Provides
-  fun provideLaunchDarklyClient(
+  @Singleton
+  internal fun wispLaunchDarkly(
     sslLoader: SslLoader,
     sslContextFactory: SslContextFactory,
-    resourceLoader: ResourceLoader
-  ): LDClientInterface {
+    resourceLoader: ResourceLoader,
+    moshi: Moshi,
+    meterRegistry: MeterRegistry,
+  ): wisp.launchdarkly.LaunchDarklyFeatureFlags {
     val baseUri = URI.create(config.base_uri)
     val ldConfig = LDConfig.Builder()
       // Set wait to 0 to not block here. Block in service initialization instead.
@@ -82,7 +66,9 @@ class LaunchDarklyModule @JvmOverloads constructor(
       )
     }
 
-    return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
+    // Construct LDClient lazily to avoid making network calls until LaunchDarklyFeatureFlags.startup() is called.
+    val ldClient = lazy { LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build()) }
+    return wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi, meterRegistry)
   }
 }
 
@@ -90,5 +76,5 @@ data class LaunchDarklyConfig @JvmOverloads constructor(
   @Redact
   val sdk_key: String,
   val base_uri: String,
-  val ssl: HttpClientSSLConfig? = null
+  val ssl: HttpClientSSLConfig? = null,
 ) : Config

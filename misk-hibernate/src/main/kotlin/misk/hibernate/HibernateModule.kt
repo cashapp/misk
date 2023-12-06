@@ -1,6 +1,8 @@
 package misk.hibernate
 
 import com.google.inject.Injector
+import com.google.inject.Provider
+import jakarta.inject.Inject
 import misk.ReadyService
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
@@ -26,10 +28,7 @@ import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
 import org.hibernate.exception.ConstraintViolationException
 import java.time.Clock
-import jakarta.inject.Inject
-import com.google.inject.Provider
 import javax.persistence.OptimisticLockException
-import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 /**
@@ -56,7 +55,7 @@ class HibernateModule @JvmOverloads constructor(
   config: DataSourceConfig,
   private val readerQualifier: KClass<out Annotation>?,
   readerConfig: DataSourceConfig?,
-  val databasePool: DatabasePool = RealDatabasePool
+  val databasePool: DatabasePool = RealDatabasePool,
 ) : KAbstractModule() {
 
   // Make sure Hibernate logs use slf4j. Otherwise, it will base its decision on the classpath and
@@ -71,14 +70,14 @@ class HibernateModule @JvmOverloads constructor(
   constructor(
     qualifier: KClass<out Annotation>,
     config: DataSourceConfig,
-    databasePool: DatabasePool = RealDatabasePool
+    databasePool: DatabasePool = RealDatabasePool,
   ) : this(qualifier, config, null, null, databasePool)
 
   constructor(
     qualifier: KClass<out Annotation>,
     readerQualifier: KClass<out Annotation>,
     cluster: DataSourceClusterConfig,
-    databasePool: DatabasePool = RealDatabasePool
+    databasePool: DatabasePool = RealDatabasePool,
   ) : this(qualifier, cluster.writer, readerQualifier, cluster.reader, databasePool)
 
   override fun configure() {
@@ -186,39 +185,30 @@ class HibernateModule @JvmOverloads constructor(
   private fun bindDataSource(
     qualifier: KClass<out Annotation>,
     config: DataSourceConfig,
-    isWriter: Boolean
+    isWriter: Boolean,
   ) {
-
     // These items are configured on the writer qualifier only
     val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(this.qualifier))
     val eventListenersProvider =
       getProvider(setOfType(ListenerRegistration::class).toKey(this.qualifier))
 
-    val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
-
     val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
 
     // Bind SessionFactoryService as implementation of TransacterService.
     val hibernateInjectorAccessProvider = getProvider(HibernateInjectorAccess::class.java)
-    val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
 
-    bind(keyOf<SessionFactory>(qualifier))
-      .toProvider(keyOf<SessionFactoryService>(qualifier))
-      .asSingleton()
     bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
-    bind(keyOf<SessionFactoryService>(qualifier)).toProvider(
-      Provider {
-        SessionFactoryService(
-          qualifier = qualifier,
-          connector = dataSourceServiceProvider.get(),
-          dataSource = dataSourceProvider,
-          hibernateInjectorAccess = hibernateInjectorAccessProvider.get(),
-          entityClasses = entitiesProvider.get(),
-          listenerRegistrations = eventListenersProvider.get()
-        )
-      }
-    ).asSingleton()
+    bind(keyOf<SessionFactory>(qualifier)).toProvider(keyOf<SessionFactoryService>(qualifier))
+    bind(keyOf<SessionFactoryService>(qualifier)).toProvider {
+      SessionFactoryService(
+        qualifier = qualifier,
+        dataSourceService = dataSourceServiceProvider.get(),
+        hibernateInjectorAccess = hibernateInjectorAccessProvider.get(),
+        entityClasses = entitiesProvider.get(),
+        listenerRegistrations = eventListenersProvider.get()
+      )
+    }.asSingleton()
 
     if (isWriter) {
       install(
@@ -240,9 +230,7 @@ class HibernateModule @JvmOverloads constructor(
       .toProvider(object : Provider<HibernateHealthCheck> {
         @Inject lateinit var clock: Clock
 
-        override fun get() = HibernateHealthCheck(
-          qualifier, sessionFactoryServiceProvider, sessionFactoryProvider, clock
-        )
+        override fun get() = HibernateHealthCheck(qualifier, sessionFactoryServiceProvider, clock)
       })
       .asSingleton()
     multibind<HealthCheck>().to(healthCheckKey)

@@ -52,7 +52,7 @@ class FakeKeyResolver : KeyResolver {
       KeyType.DAEAD -> TestKeysets.DAEAD
       KeyType.STREAMING_AEAD -> TestKeysets.STREAMING_AEAD
       KeyType.MAC -> TestKeysets.MAC
-      KeyType.DIGITAL_SIGNATURE -> TestKeysets.DIGITAL_SIGNATURE
+      KeyType.DIGITAL_SIGNATURE, KeyType.SIGNATURE -> TestKeysets.DIGITAL_SIGNATURE
       KeyType.HYBRID_ENCRYPT, KeyType.HYBRID_ENCRYPT_DECRYPT ->
         TestKeysets.HYBRID
 

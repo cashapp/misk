@@ -20,3 +20,6 @@ action_exception_log_level:
 nested:
   child_nested:
     nested_value: nested value
+
+collection:
+  - name: "Hello"
