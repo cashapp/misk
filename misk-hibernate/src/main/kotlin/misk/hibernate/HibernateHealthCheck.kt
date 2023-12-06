@@ -1,14 +1,13 @@
 package misk.hibernate
 
 import com.google.common.util.concurrent.Service
+import com.google.inject.Provider
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
-import org.hibernate.SessionFactory
 import wisp.logging.getLogger
 import java.sql.Timestamp
 import java.time.Clock
 import java.time.Duration
-import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 /**
@@ -17,19 +16,18 @@ import kotlin.reflect.KClass
 internal class HibernateHealthCheck(
   private val qualifier: KClass<out Annotation>,
   // Lazily provide since the SessionFactory construction relies on Service startup.
-  private val serviceProvider: Provider<out Service>,
-  private val sessionFactoryProvider: Provider<SessionFactory>,
-  private val clock: Clock
+  private val sessionFactoryService: Provider<SessionFactoryService>,
+  private val clock: Clock,
 ) : HealthCheck {
 
   override fun status(): HealthStatus {
-    val state = serviceProvider.get().state()
+    val state = sessionFactoryService.get().state()
     if (state != Service.State.RUNNING) {
       return HealthStatus.unhealthy("Hibernate: ${qualifier.simpleName} database service is $state")
     }
 
     val databaseInstant = try {
-      val sessionFactory = sessionFactoryProvider.get()
+      val sessionFactory = sessionFactoryService.get().sessionFactory
       sessionFactory.openSession().use { session ->
         session.createNativeQuery("SELECT NOW()").uniqueResult() as Timestamp
       }.toInstant()
@@ -46,12 +44,13 @@ internal class HibernateHealthCheck(
       delta > CLOCK_SKEW_UNHEALTHY_THRESHOLD -> {
         HealthStatus.unhealthy(driftMessage)
       }
+
       delta > CLOCK_SKEW_WARN_THRESHOLD -> {
         logger.warn { driftMessage }
         HealthStatus.healthy(driftMessage)
       }
-      else ->
-        HealthStatus.healthy("Hibernate: ${qualifier.simpleName} database")
+
+      else -> HealthStatus.healthy("Hibernate: ${qualifier.simpleName} database")
     }
   }
 

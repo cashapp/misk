@@ -1,7 +1,3 @@
-public final class misk/metrics/MetricsModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
 public final class misk/metrics/backends/prometheus/PrometheusConfig : wisp/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;ILjava/lang/Long;)V
@@ -26,33 +22,11 @@ public final class misk/metrics/backends/prometheus/PrometheusMetricsClientModul
 	public fun <init> ()V
 }
 
-public final class misk/metrics/backends/prometheus/PrometheusMetricsModule : misk/inject/KAbstractModule {
-	public fun <init> (Lmisk/metrics/backends/prometheus/PrometheusConfig;)V
-}
-
 public final class misk/metrics/backends/prometheus/PrometheusMetricsServiceModule : misk/inject/KAbstractModule {
 	public fun <init> (Lmisk/metrics/backends/prometheus/PrometheusConfig;)V
 }
 
 public final class misk/metrics/backends/prometheus/v2/PrometheusMetricsClientModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
-public final class misk/prometheus/PrometheusHistogram : misk/metrics/Histogram {
-	public fun <init> (Lio/prometheus/client/Summary;)V
-	public fun count ([Ljava/lang/String;)I
-	public final fun getHistogram ()Lio/prometheus/client/Summary;
-	public fun record (D[Ljava/lang/String;)V
-	public fun timedMills ([Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-}
-
-public final class misk/prometheus/PrometheusHistogramRegistry : misk/metrics/HistogramRegistry {
-	public fun <init> (Lmisk/metrics/Metrics;)V
-	public final fun getMetrics ()Lmisk/metrics/Metrics;
-	public fun newHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lmisk/metrics/Histogram;
-}
-
-public final class misk/prometheus/PrometheusHistogramRegistryModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
 

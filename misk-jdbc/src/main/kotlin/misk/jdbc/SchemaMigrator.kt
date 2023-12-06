@@ -21,17 +21,17 @@ private val logger = getLogger<SchemaMigrator>()
 
 internal data class NamedspacedMigration(
   val version: Int,
-  val namespace: String = ""
+  val namespace: String = "",
 ) : Comparable<NamedspacedMigration> {
   // We don't store the path from which schema changes came, so we don't use it for comparison
   // between what's in the database and what's available.
   var path = ""
 
   override fun compareTo(other: NamedspacedMigration): Int {
-    if (namespace == other.namespace) {
-      return version.compareTo(other.version)
+    return if (namespace == other.namespace) {
+      version.compareTo(other.version)
     } else {
-      return namespace.compareTo(other.namespace)
+      namespace.compareTo(other.namespace)
     }
   }
 
@@ -64,7 +64,7 @@ internal data class NamedspacedMigration(
     fun fromResourcePath(
       resource: String,
       migrationsResource: String,
-      migrationPattern: String
+      migrationPattern: String,
     ): NamedspacedMigration {
       val matcher = Pattern.compile(migrationPattern).matcher(resource)
       require(matcher.matches()) { "unexpected resource: $resource" }
@@ -102,11 +102,10 @@ internal class SchemaMigrator(
   private val qualifier: KClass<out Annotation>,
   private val resourceLoader: ResourceLoader,
   private val dataSourceConfig: DataSourceConfig,
-  private val dataSource: DataSourceService,
-  private val connector: DataSourceConnector
+  private val dataSourceService: DataSourceService,
+  private val connector: DataSourceConnector,
 ) {
-
-  val shards = misk.vitess.shards(dataSource)
+  val shards = misk.vitess.shards(dataSourceService)
 
   private fun getMigrationsResources(keyspace: Keyspace): List<String> {
     val config = connector.config()
@@ -171,7 +170,7 @@ internal class SchemaMigrator(
         }
         return result
       } catch (e: SQLException) {
-        dataSource.get().connection.use {
+        dataSourceService.dataSource.connection.use {
           it.target(shard) { c ->
             c.createStatement().use { statement ->
               statement.execute(
@@ -210,12 +209,12 @@ internal class SchemaMigrator(
       }
     }
 
-    if (dataSourceConfig.type.isVitess) {
-      return dataSource.get().connection.use {
+    return if (dataSourceConfig.type.isVitess) {
+      dataSourceService.dataSource.connection.use {
         it.failSafeRead(shard, listMigrations)
       }
     } else {
-      return dataSource.get().connection.use {
+      dataSourceService.dataSource.connection.use {
         listMigrations(it)
       }
     }
@@ -233,7 +232,7 @@ internal class SchemaMigrator(
         val migrationSql = resourceLoader.utf8(migration.path)
         val stopwatch = Stopwatch.createStarted()
 
-        dataSource.get().connection.use {
+        dataSourceService.dataSource.connection.use {
           it.target(shard) { c ->
             c.createStatement().use { migrationStatement ->
               migrationStatement.addBatch(migrationSql)
@@ -306,13 +305,13 @@ internal class SchemaMigrator(
 
 /** Snapshot of all shards in a cluster. */
 internal data class MigrationState(
-  val shards: Map<Shard, ShardMigrationState>
+  val shards: Map<Shard, ShardMigrationState>,
 )
 
 /** Snapshot of the migration state of a single shard. */
 internal data class ShardMigrationState(
   val available: SortedSet<NamedspacedMigration>,
-  val applied: SortedSet<NamedspacedMigration>
+  val applied: SortedSet<NamedspacedMigration>,
 ) {
   fun missingMigrations() = available - applied
 

@@ -1,16 +1,16 @@
 package misk.web.v2
 
+import com.google.inject.Provider
+import jakarta.inject.Inject
 import misk.inject.toKey
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.FakeHttpCall
 import misk.web.HttpCall
-import misk.web.actions.WebAction
 import misk.web.metadata.MetadataTestingModule
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import com.google.inject.Provider
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -22,17 +22,19 @@ class DashboardPageLayoutTest {
   @Inject lateinit var actionScope: ActionScope
   @Inject lateinit var layout: Provider<DashboardPageLayout>
 
+  private val fakeHttpCall = FakeHttpCall(url = "http://foobar.com/abc/123".toHttpUrl())
+
   @Test
   fun `happy path`() {
-    actionScope.enter(mapOf(HttpCall::class.toKey() to FakeHttpCall())).use {
+    actionScope.enter(mapOf(HttpCall::class.toKey() to fakeHttpCall)).use {
       // No exception thrown on correct usage
-      layout.get().newBuilder().path("/abc/123").build()
+      layout.get().newBuilder().build()
     }
   }
 
   @Test
   fun `no builder reuse permitted`() {
-    actionScope.enter(mapOf(HttpCall::class.toKey() to FakeHttpCall())).use {
+    actionScope.enter(mapOf(HttpCall::class.toKey() to fakeHttpCall)).use {
       // Fresh builder must have newBuilder() called
       val e1 = assertFailsWith<IllegalStateException> { layout.get().build() }
       assertEquals(
@@ -42,9 +44,9 @@ class DashboardPageLayoutTest {
       // No builder reuse
       val e2 = assertFailsWith<IllegalStateException> {
         val newBuilder = layout.get().newBuilder()
-        newBuilder.path("/abc/123").build()
+        newBuilder.build()
         // Not allowed to call build() twice on same builder
-        newBuilder.path("/abc/123").build()
+        newBuilder.build()
       }
       assertEquals(
         "You must call newBuilder() before calling build() to prevent builder reuse.", e2.message

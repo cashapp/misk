@@ -85,7 +85,7 @@ class JdbcModule @JvmOverloads constructor(
         qualifier = qualifier,
         resourceLoader = resourceLoader,
         dataSourceConfig = config,
-        dataSource = dataSourceServiceProvider.get(),
+        dataSourceService = dataSourceServiceProvider.get(),
         connector = connectorProvider.get()
       )
     }).asSingleton()
@@ -143,9 +143,7 @@ class JdbcModule @JvmOverloads constructor(
 
     // Bind DataSourceService.
     val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)
-    bind(keyOf<DataSource>(qualifier))
-      .toProvider(keyOf<DataSourceService>(qualifier))
-      .asSingleton()
+    bind(keyOf<DataSource>(qualifier)).toProvider(keyOf<DataSourceService>(qualifier))
     bind(keyOf<DataSourceService>(qualifier)).toProvider(object : Provider<DataSourceService> {
       @com.google.inject.Inject(optional = true) var registry: CollectorRegistry? = null
       override fun get(): DataSourceService {
@@ -161,7 +159,6 @@ class JdbcModule @JvmOverloads constructor(
       }
     }).asSingleton()
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
-    val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
 
     bind(keyOf<DataSourceConnector>(qualifier)).toProvider(dataSourceServiceProvider)
     install(
@@ -172,7 +169,7 @@ class JdbcModule @JvmOverloads constructor(
         }
         .enhancedBy<ReadyService>()
     )
-    bind(keyOf<Transacter>(qualifier)).toProvider { RealTransacter(dataSourceProvider.get()) }
+    bind(keyOf<Transacter>(qualifier)).toProvider { RealTransacter(dataSourceServiceProvider.get()) }
 
     if (config.type == DataSourceType.VITESS_MYSQL) {
       val spanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)

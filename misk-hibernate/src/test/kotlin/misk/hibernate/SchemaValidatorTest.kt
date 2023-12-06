@@ -1,6 +1,9 @@
 package misk.hibernate
 
 import com.google.inject.Injector
+import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
@@ -13,7 +16,6 @@ import misk.inject.setOfType
 import misk.inject.toKey
 import misk.inject.typeLiteral
 import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceService
 import misk.jdbc.JdbcModule
 import misk.jdbc.SchemaMigratorService
@@ -21,20 +23,15 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
-import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.time.Instant
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
-import javax.sql.DataSource
 import kotlin.test.assertTrue
 
 @MiskTest(startService = true)
@@ -57,9 +54,6 @@ internal class SchemaValidatorTest {
       val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
 
       val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
-      bind<SessionFactory>()
-        .annotatedWith<ValidationDb>()
-        .toProvider(keyOf<SessionFactoryService>(qualifier))
 
       bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
@@ -79,7 +73,7 @@ internal class SchemaValidatorTest {
 
       install(JdbcModule(qualifier, config.data_source))
 
-      val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
+      val dataSourceService = getProvider(keyOf<DataSourceService>(qualifier))
 
       install(object : HibernateEntityModule(qualifier) {
         override fun configureHibernate() {
@@ -91,19 +85,15 @@ internal class SchemaValidatorTest {
         }
       })
 
-      val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
       bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
-      bind(keyOf<SessionFactoryService>(qualifier)).toProvider(
-        Provider {
-          SessionFactoryService(
-            qualifier = qualifier,
-            connector = connectorProvider.get(),
-            dataSource = dataSourceProvider,
-            hibernateInjectorAccess = injectorServiceProvider.get(),
-            entityClasses = entitiesProvider.get()
-          )
-        }
-      ).asSingleton()
+      bind(keyOf<SessionFactoryService>(qualifier)).toProvider {
+        SessionFactoryService(
+          qualifier = qualifier,
+          dataSourceService = dataSourceService.get(),
+          hibernateInjectorAccess = injectorServiceProvider.get(),
+          entityClasses = entitiesProvider.get()
+        )
+      }.asSingleton()
       install(
         ServiceModule<TransacterService>(qualifier)
           .enhancedBy<SchemaMigratorService>(qualifier)
@@ -239,7 +229,7 @@ internal class SchemaValidatorTest {
   data class RootConfig(val data_source: DataSourceConfig) : Config
 
   @Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class ValidationDb
 
   @Entity

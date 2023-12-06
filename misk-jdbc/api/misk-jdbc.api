@@ -404,6 +404,7 @@ public final class misk/jdbc/DataSourceService : com/google/common/util/concurre
 	public fun config ()Lmisk/jdbc/DataSourceConfig;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljavax/sql/DataSource;
+	public final fun getDataSource ()Ljavax/sql/DataSource;
 }
 
 public final class misk/jdbc/DataSourceService$Companion {
@@ -539,7 +540,7 @@ public final class misk/jdbc/RealDatabasePool : misk/jdbc/DatabasePool {
 }
 
 public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
-	public fun <init> (Ljavax/sql/DataSource;)V
+	public fun <init> (Lmisk/jdbc/DataSourceService;)V
 	public fun getInTransaction ()Z
 	public fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
