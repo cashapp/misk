@@ -361,7 +361,7 @@ class RealRedis(
   }
 
   override fun flushAll() {
-    jedis { flushAll() }
+    unifiedJedis.flushAll()
   }
 
   // Gets a Jedis instance from the pool, and times the requested method invocations.

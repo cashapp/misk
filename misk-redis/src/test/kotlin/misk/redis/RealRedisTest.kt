@@ -11,6 +11,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
@@ -26,6 +27,11 @@ class RealRedisTest : AbstractRedisTest() {
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
     }
+  }
+
+  @BeforeEach
+  fun setUp() {
+    redis.flushAll()
   }
 
   @Inject override lateinit var redis: Redis
