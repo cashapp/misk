@@ -6,7 +6,6 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.redis.testing.DockerRedis
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
@@ -26,10 +25,6 @@ class RealRedisTest : AbstractRedisTest() {
       install(DeploymentModule(TESTING))
     }
   }
-
-  @Suppress("unused")
-  @MiskExternalDependency
-  private val dockerRedis = DockerRedis
 
   @Inject override lateinit var redis: Redis
 

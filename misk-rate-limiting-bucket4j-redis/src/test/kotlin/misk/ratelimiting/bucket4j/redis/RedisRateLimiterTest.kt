@@ -8,7 +8,6 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.redis.testing.DockerRedis
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -31,10 +30,6 @@ class RedisRateLimiterTest {
       bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
     }
   }
-
-  @Suppress("unused")
-  @MiskExternalDependency
-  private val dockerRedis = DockerRedis
 
   @Inject private lateinit var rateLimiter: RateLimiter
 

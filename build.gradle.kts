@@ -6,6 +6,8 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.IOException
+import java.net.Socket
 
 buildscript {
   repositories {
@@ -236,6 +238,7 @@ subprojects {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = false
     }
+    dependsOn(":startRedis")
   }
 
   tasks.withType<Detekt> {
@@ -308,5 +311,45 @@ allprojects {
         }
       }
     }
+  }
+}
+
+tasks.register("startRedis") {
+  group = "other"
+  description = "Ensures a Redis instance is available; " +
+    "starts a redis docker container if there isn't something already there."
+  doLast {
+    val redisVersion = "6.2"
+    val redisPort = System.getenv("REDIS_PORT") ?: "6379"
+    val redisContainerName = "miskTestRedis-$redisPort"
+    val redisImage = "public.ecr.aws/docker/library/redis:$redisVersion"
+
+    val portIsOccupied = try {
+      Socket("localhost", redisPort.toInt()).close()
+      true
+    } catch (e: IOException) {
+      false
+    }
+    if (portIsOccupied) {
+      logger.info("Port $redisPort is bound, assuming Redis is already running")
+      return@doLast
+    }
+
+    logger.info("Attempting to start Redis docker image $redisImage on port $redisPort...")
+    val dockerArguments = arrayOf(
+      "docker", "run",
+      "--detach",
+      "--rm",
+      "--name", redisContainerName,
+      "-p", "$redisPort:6379",
+      redisImage,
+      "redis-server",
+      "--loglevel debug"
+    )
+    exec {
+      workingDir(project.rootProject.rootDir.toPath())
+      commandLine(*dockerArguments)
+    }
+    logger.info("Started Redis docker image $redisImage on port $redisPort")
   }
 }

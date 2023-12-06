@@ -6,7 +6,6 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.redis.RedisModule
 import misk.redis.testing.DockerRedis
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.FakeWebSocket
@@ -27,10 +26,6 @@ class ChatWebSocketActionTest {
     RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false),
     WebActionModule.create<ChatWebSocketAction>()
   )
-
-  @Suppress("unused")
-  @MiskExternalDependency
-  private val dockerRedis = DockerRedis
 
   @Inject lateinit var chatWebSocketAction: ChatWebSocketAction
 
