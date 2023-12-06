@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import misk.redis.testing.RedisFlushModule
+import org.junit.jupiter.api.BeforeEach
 import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest
@@ -31,6 +32,11 @@ class RedisClientMetricsTest {
       install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
       install(RedisFlushModule())
     }
+  }
+
+  @BeforeEach
+  fun setUp() {
+    redis.flushAll()
   }
 
   @Inject private lateinit var collectorRegistry: CollectorRegistry
