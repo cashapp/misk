@@ -64,7 +64,6 @@ dependencies {
   testImplementation(project(":misk-config"))
   testImplementation(project(":misk-hibernate-testing"))
   testImplementation(testFixtures(project(":misk-jdbc")))
-  testImplementation(project(":misk-metrics"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-crypto")))
 }

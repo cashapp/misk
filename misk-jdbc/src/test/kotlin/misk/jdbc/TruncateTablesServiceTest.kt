@@ -1,6 +1,8 @@
 package misk.jdbc
 
 import com.google.inject.util.Providers
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
@@ -12,8 +14,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
-import jakarta.inject.Inject
-import jakarta.inject.Qualifier
 
 @MiskTest(startService = true)
 internal class TruncateTablesServiceTest {

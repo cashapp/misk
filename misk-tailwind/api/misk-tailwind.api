@@ -63,6 +63,7 @@ public final class misk/tailwind/icons/Heroicons : java/lang/Enum {
 	public static final field MAGNIFYING_GLASS Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_ARROW_LONG_LEFT Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_ARROW_LONG_RIGHT Lmisk/tailwind/icons/Heroicons;
+	public static final field MINI_ARROW_TOP_RIGHT_ON_SQUARE Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_CHEVRON_DOWN Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_CHEVRON_UP Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_CHEVRON_UP_DOWN Lmisk/tailwind/icons/Heroicons;

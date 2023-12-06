@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.database.StartDatabaseService
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
-import jakarta.inject.Inject
 
 @MiskTest(startService = false)
 internal class MySQLSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSourceType.MYSQL)
@@ -77,7 +77,8 @@ internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
     }
   }
 
-  @BeforeEach internal fun setUp() {
+  @BeforeEach
+  internal fun setUp() {
     startDatabaseService.startAsync()
     startDatabaseService2.startAsync()
     startDatabaseService.awaitRunning()
@@ -91,7 +92,7 @@ internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
   }
 
   private fun dropTables() {
-    dataSourceService.get().connection.use { connection ->
+    dataSourceService.dataSource.connection.use { connection ->
       val statement = connection.createStatement()
       statement.addBatch("DROP TABLE IF EXISTS schema_version")
       statement.addBatch("DROP TABLE IF EXISTS table_1")
@@ -105,7 +106,8 @@ internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
     }
   }
 
-  @Test fun initializeOnMultipleTables() {
+  @Test
+  fun initializeOnMultipleTables() {
     schemaMigratorService.startAsync()
     schemaMigratorService2.startAsync()
     schemaMigratorService.awaitRunning()
@@ -116,6 +118,6 @@ internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
     val mysql_data_source: DataSourceConfig,
     val cockroachdb_data_source: DataSourceConfig,
     val postgresql_data_source: DataSourceConfig,
-    val tidb_data_source: DataSourceConfig
+    val tidb_data_source: DataSourceConfig,
   ) : Config
 }

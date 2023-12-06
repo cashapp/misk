@@ -1,14 +1,15 @@
 package misk.feature.launchdarkly
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.feature.Attributes
 import misk.feature.DynamicConfig
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import java.util.concurrent.Executor
-import jakarta.inject.Singleton
 
 @Singleton
-class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : DynamicConfig {
+class LaunchDarklyDynamicConfig @Inject constructor(private val featureFlags: FeatureFlags) : DynamicConfig {
   companion object {
     const val KEY = "dynamic_flag"
     val ATTRIBUTES = Attributes(anonymous = true)
@@ -48,13 +49,13 @@ class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : Dynami
     feature: Feature,
     clazz: Class<T>,
     executor: Executor,
-    tracker: (T) -> Unit
+    tracker: (T) -> Unit,
   ) = featureFlags.trackEnum(feature, KEY, clazz, ATTRIBUTES, executor, tracker)
 
   override fun <T> trackJson(
     feature: Feature,
     clazz: Class<T>,
     executor: Executor,
-    tracker: (T) -> Unit
+    tracker: (T) -> Unit,
   ) = featureFlags.trackJson(feature, KEY, clazz, ATTRIBUTES, executor, tracker)
 }
