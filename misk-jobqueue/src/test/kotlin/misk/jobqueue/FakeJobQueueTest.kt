@@ -81,6 +81,99 @@ internal class FakeJobQueueTest {
   }
 
   @Test
+  fun genericFailureQueueThrowsOnEnqueue() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+
+    // Fails the next 2 enqueue
+    fakeJobQueue.pushFailure(Exception(":) 1"))
+    fakeJobQueue.pushFailure(Exception(":) 2"))
+    val e1 = assertFailsWith<Exception> {
+      exampleJobEnqueuer.enqueueRed("dropped")
+    }
+    val e2 = assertFailsWith<Exception> {
+      exampleJobEnqueuer.enqueueGreen("dropped")
+    }
+    assertThat(e1.message).isEqualTo(":) 1")
+    assertThat(e2.message).isEqualTo(":) 2")
+
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    exampleJobEnqueuer.enqueueRed("hello")
+
+    val redJobs = fakeJobQueue.handleJobs(RED_QUEUE)
+    assertThat(redJobs).hasSize(1)
+
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+      "received RED job with message: hello"
+    )
+  }
+
+  @Test
+  fun queueSpecificFailureQueueThrowsOnEnqueue() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+
+    // Fails the next 2 enqueue
+    fakeJobQueue.pushFailure(Exception(":) 1"), RED_QUEUE)
+    fakeJobQueue.pushFailure(Exception(":) 2"), RED_QUEUE)
+    exampleJobEnqueuer.enqueueGreen("not dropped green")
+    val e1 = assertFailsWith<Exception> {
+      exampleJobEnqueuer.enqueueRed("dropped")
+    }
+    val e2 = assertFailsWith<Exception> {
+      exampleJobEnqueuer.enqueueRed("dropped")
+    }
+    assertThat(e1.message).isEqualTo(":) 1")
+    assertThat(e2.message).isEqualTo(":) 2")
+
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(1)
+
+    exampleJobEnqueuer.enqueueRed("not dropped red")
+
+    val redJobs = fakeJobQueue.handleJobs(RED_QUEUE)
+    assertThat(redJobs).hasSize(1)
+    val greenJobs = fakeJobQueue.handleJobs(GREEN_QUEUE)
+    assertThat(greenJobs).hasSize(1)
+
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+      "received RED job with message: not dropped red",
+      "received GREEN job with message: not dropped green"
+    )
+  }
+
+  @Test
+  fun failureQueueThrowsOnBatchEnqueue() {
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+
+    // Fails the next 2 enqueue
+    fakeJobQueue.pushFailure(Exception(":) 1"), RED_QUEUE)
+    fakeJobQueue.pushFailure(Exception(":) 2"), RED_QUEUE)
+    val e1 = assertFailsWith<Exception> {
+      exampleJobEnqueuer.batchEnqueueRed(listOf("dropped1", "dropped2"))
+    }
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+    val e2 = assertFailsWith<Exception> {
+      exampleJobEnqueuer.batchEnqueueRed(listOf("dropped1", "dropped2"))
+    }
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+    assertThat(e1.message).isEqualTo(":) 1")
+    assertThat(e2.message).isEqualTo(":) 2")
+
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+    exampleJobEnqueuer.enqueueRed("not dropped red")
+    val redJobs = fakeJobQueue.handleJobs(RED_QUEUE)
+    assertThat(redJobs).hasSize(1)
+
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+      "received RED job with message: not dropped red",
+    )
+  }
+
+
+  @Test
   fun assignsUniqueAndMonolithicallyIncrementedJobIds() {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
     assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()

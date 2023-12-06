@@ -15,6 +15,8 @@ import kotlinx.html.span
 import kotlinx.html.ul
 import kotlinx.html.unsafe
 import misk.tailwind.Link
+import misk.tailwind.icons.Heroicons
+import misk.tailwind.icons.heroicon
 import wisp.deployment.Deployment
 
 data class MenuSection(
@@ -118,7 +120,9 @@ fun TagConsumer<*>.Navbar(
       // +"""<!-- Sidebar component, swap this element with another sidebar if you like -->"""
       div("flex grow flex-col gap-y-5 overflow-y-auto bg-black/10 px-6 ring-1 ring-white/5") {
         div("flex h-16 shrink-0 items-center") {
-          a(homeHref) {
+          a {
+            href = homeHref
+
             img(classes = "h-8 w-auto") {
               src = "/static/favicon.ico"
               alt = "Dashboard Logo"
@@ -208,7 +212,7 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
                         unsafe { +it }
                       }
                     } ?: let {
-                      a(classes = "$isSelectedStyles group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold") {
+                      a(classes = "$isSelectedStyles group flex justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold") {
                         href = link.href
 
                         if (link.dataTurbo == true) {
@@ -224,6 +228,10 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
                         }
 
                         +link.label
+
+                        if (link.openInNewTab) {
+                          heroicon(Heroicons.MINI_ARROW_TOP_RIGHT_ON_SQUARE)
+                        }
                       }
                     }
                   }

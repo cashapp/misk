@@ -1,0 +1,6 @@
+mysql_data_source:
+  type: MYSQL
+  database: rate_limiter_test
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/ratelimiting/migrations

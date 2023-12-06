@@ -75,12 +75,14 @@ class CronTest {
     // Cluster weight is 100 by default, so the cron will run.
     clock.add(Duration.ofMinutes(1))
     waitForNextPendingTask().task()
+    cronManager.waitForCronsComplete()
     assertThat(minuteCron.counter).isEqualTo(1)
 
     // Cluster weight is set to 0, so now the cron will not run.
     fakeClusterWeight.setClusterWeight(0)
     clock.add(Duration.ofMinutes(1))
     waitForNextPendingTask().task()
+    cronManager.waitForCronsComplete()
     assertThat(minuteCron.counter).isEqualTo(1)
   }
 

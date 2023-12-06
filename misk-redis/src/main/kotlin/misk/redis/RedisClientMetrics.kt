@@ -3,8 +3,7 @@ package misk.redis
 import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
 import misk.metrics.v2.Metrics
-import java.time.Duration
-import java.util.concurrent.TimeUnit
+import org.apache.commons.pool2.impl.GenericObjectPool
 
 class RedisClientMetrics(private val ticker: Ticker, metrics: Metrics) {
   internal val maxTotalConnectionsGauge = metrics.gauge(
@@ -48,6 +47,11 @@ class RedisClientMetrics(private val ticker: Ticker, metrics: Metrics) {
     stopwatch.stop()
     operationTime.labels(commandName).observe(stopwatch.elapsed().toMillis().toDouble())
     return result.getOrThrow()
+  }
+
+  internal fun <T> setActiveIdleConnectionMetrics(pool: GenericObjectPool<T>) {
+    this.activeConnectionsGauge.set(pool.numActive.toDouble())
+    this.idleConnectionsGauge.set(pool.numIdle.toDouble())
   }
 
   companion object {
