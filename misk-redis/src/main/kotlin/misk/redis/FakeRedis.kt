@@ -398,4 +398,10 @@ class FakeRedis : Redis {
   override fun publish(channel: String, message: String) {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
+
+  override fun flushAll() {
+    keyValueStore.clear()
+    hKeyValueStore.clear()
+    lKeyValueStore.clear()
+  }
 }

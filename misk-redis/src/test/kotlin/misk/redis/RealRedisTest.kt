@@ -6,6 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.redis.testing.DockerRedis
+import misk.redis.testing.RedisFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
@@ -21,6 +22,7 @@ class RealRedisTest : AbstractRedisTest() {
   private val module: Module = object : KAbstractModule() {
     override fun configure() {
       install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisFlushModule())
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
     }

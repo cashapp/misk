@@ -7,6 +7,7 @@ import jakarta.inject.Inject
 import misk.inject.KAbstractModule
 import misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule
 import misk.redis.testing.DockerRedis
+import misk.redis.testing.RedisFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import redis.clients.jedis.JedisPool
@@ -19,6 +20,7 @@ class RedisRateLimitedActionTests : AbstractRateLimitedActionTests() {
     override fun configure() {
       install(ExemplarTestModule())
       install(RedisBucket4jRateLimiterModule(DockerRedis.config, JedisPoolConfig(), useSsl = false))
+      install(RedisFlushModule())
       bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
     }
   }
