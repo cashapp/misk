@@ -2,6 +2,7 @@ import { simpleSelectorGet } from "@misk/simpleredux"
 import * as React from "react"
 import { connect } from "react-redux"
 import { ConfigComponent } from "../components"
+import { TabHeader } from "../containers"
 import { IDispatchProps, IState, rootDispatcher, rootSelectors } from "../ducks"
 
 export interface IConfigResources {
@@ -21,7 +22,12 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
       "data",
       "resources"
     ])
-    return <ConfigComponent resources={resources} />
+    return (
+      <div>
+        <TabHeader />
+        <ConfigComponent resources={resources} />
+      </div>
+    )
   }
 }
 

@@ -9,14 +9,11 @@ import misk.web.toResponseBody
 import okhttp3.Headers
 import okhttp3.Headers.Companion.toHeaders
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /** Maps ClientExecutionTimeoutException to 503 responses because the exception is concurrency related */
 class ClientExecutionTimeoutExceptionMapper @Inject constructor() :
   ExceptionMapper<ClientExecutionTimeoutException> {
-  override fun canHandle(th: Throwable): Boolean =
-    th is ClientExecutionTimeoutException
-
   override fun toResponse(th: ClientExecutionTimeoutException): Response<ResponseBody> = Response(
     body = "DynamoDB Resource Contention Exception: $th".toResponseBody(),
     headers = HEADERS,

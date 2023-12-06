@@ -7,8 +7,8 @@ import helpers.protos.Dinosaur
 import io.opentracing.Tracer
 import io.opentracing.mock.MockSpan
 import io.opentracing.mock.MockTracer
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientsConfig

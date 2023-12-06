@@ -1,6 +1,6 @@
 package misk.testing
 
-import com.google.inject.BindingAnnotation
+import jakarta.inject.Qualifier
 import com.google.inject.Provides
 import misk.inject.KAbstractModule
 import org.assertj.core.api.Assertions.assertThat
@@ -13,7 +13,7 @@ internal class InjectingParameterResolverTest {
     @Provides @TestAnnotation fun myAnnotatedList(): List<String> = listOf("strings?")
   }
 
-  @BindingAnnotation
+  @Qualifier
   annotation class TestAnnotation
 
   @InjectTest fun `retrieves all parameters if the method is annotated`(

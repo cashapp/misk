@@ -1,5 +1,6 @@
 package misk.jdbc
 
+import misk.config.Redact
 import wisp.config.Config
 import wisp.deployment.Deployment
 import java.io.File
@@ -44,28 +45,42 @@ enum class DataSourceType(
 }
 
 /** Configuration element for an individual datasource */
-data class DataSourceConfig(
+data class DataSourceConfig @JvmOverloads constructor(
   val type: DataSourceType,
   val host: String? = null,
   val port: Int? = null,
   val database: String? = null,
   val username: String? = null,
+  @Redact
   val password: String? = null,
   val fixed_pool_size: Int = 10,
   val connection_timeout: Duration = Duration.ofSeconds(10),
   val validation_timeout: Duration = Duration.ofSeconds(3),
+  val connection_idle_timeout: Duration? = null,
   val connection_max_lifetime: Duration = Duration.ofMinutes(1),
   val query_timeout: Duration? = Duration.ofMinutes(1),
   val migrations_resource: String? = null,
   val migrations_resources: List<String>? = null,
+  /**
+   * List of filenames to exclude from being processed in database schema migrations
+   */
+  val migrations_resources_exclusion: List<String>? = null,
+  /**
+   * Regular expression migration files names should match.
+   * Any migration filename that doesn't match the given regular expression will cause an exception,
+   * unless it was explicitly mentioned in [migrations_resources_exclusion].
+   */
+  val migrations_resources_regex: String = "(^|.*/)v(\\d+)__[^/]+\\.sql",
   val vitess_schema_resource_root: String? = null,
   /*
      See https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html for
      trust_certificate_key_store_* details.
    */
   val trust_certificate_key_store_url: String? = null,
+  @Redact
   val trust_certificate_key_store_password: String? = null,
   val client_certificate_key_store_url: String? = null,
+  @Redact
   val client_certificate_key_store_password: String? = null,
   // Vitess driver doesn't support passing in URLs so support paths and prefer this for Vitess
   // going forward
@@ -281,10 +296,13 @@ data class DataSourceConfig(
       this.fixed_pool_size,
       this.connection_timeout,
       this.validation_timeout,
+      this.connection_idle_timeout,
       this.connection_max_lifetime,
       this.query_timeout,
       this.migrations_resource,
       this.migrations_resources,
+      this.migrations_resources_exclusion,
+      this.migrations_resources_regex,
       this.vitess_schema_resource_root,
       this.trust_certificate_key_store_url,
       this.trust_certificate_key_store_password,

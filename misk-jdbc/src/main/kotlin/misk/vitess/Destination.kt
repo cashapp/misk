@@ -18,7 +18,7 @@ data class Destination(
   constructor(shard: Shard, tabletType: TabletType) : this(shard.keyspace, shard, tabletType)
 
   override fun toString(): String {
-    val tabletType = (if (tabletType != null) "@$tabletType" else "").toLowerCase()
+    val tabletType = (if (tabletType != null) "@$tabletType" else "").lowercase()
     if (shard != null) {
       return "$shard$tabletType"
     }
@@ -29,11 +29,11 @@ data class Destination(
   }
 
   fun mergedWith(other: Destination) =
-      Destination(
-          if (other.keyspace != null) other.keyspace else this.keyspace,
-          if (other.shard != null) other.shard else this.shard,
-          if (other.tabletType != null) other.tabletType else this.tabletType
-      )
+    Destination(
+      if (other.keyspace != null) other.keyspace else this.keyspace,
+      if (other.shard != null) other.shard else this.shard,
+      if (other.tabletType != null) other.tabletType else this.tabletType
+    )
 
   fun isBlank(): Boolean {
     return keyspace == null && shard == null && tabletType == null

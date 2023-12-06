@@ -2,7 +2,8 @@ package misk.hibernate
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
-import misk.jdbc.DataSourceConnector
+import com.google.inject.Provider
+import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import okio.ByteString
 import org.hibernate.SessionFactory
@@ -21,30 +22,29 @@ import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
 import wisp.logging.getLogger
-import javax.inject.Provider
 import javax.persistence.Column
 import javax.persistence.Table
-import javax.sql.DataSource
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmName
 
-private val logger = getLogger<SessionFactoryService>()
-
 /**
  * Builds a bare connection to a Hibernate database. Doesn't do any schema migration or validation.
  */
 internal class SessionFactoryService(
   private val qualifier: KClass<out Annotation>,
-  private val connector: DataSourceConnector,
-  private val dataSource: Provider<DataSource>,
+  private val dataSourceService: DataSourceService,
   private val hibernateInjectorAccess: HibernateInjectorAccess,
   private val entityClasses: Set<HibernateEntity> = setOf(),
-  private val listenerRegistrations: Set<ListenerRegistration> = setOf()
-) : AbstractIdleService(), Provider<SessionFactory>, TransacterService {
-  private var sessionFactory: SessionFactory? = null
+  private val listenerRegistrations: Set<ListenerRegistration> = setOf(),
+) : AbstractIdleService(), TransacterService, Provider<SessionFactory> {
+  private var _sessionFactory: SessionFactory? = null
+
+  val sessionFactory: SessionFactory
+    get() = _sessionFactory
+      ?: error("@${qualifier.simpleName} Hibernate not connected: did you forget to start the service?")
 
   val threadInTransaction = object : ThreadLocal<Boolean>() {
     override fun initialValue() = false
@@ -56,15 +56,14 @@ internal class SessionFactoryService(
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting @${qualifier.simpleName} Hibernate")
 
-    require(sessionFactory == null)
+    require(_sessionFactory == null)
 
     // Register event listeners.
     val integrator = object : Integrator {
-
       override fun integrate(
         metadata: Metadata,
         sessionFactory: SessionFactoryImplementor,
-        serviceRegistry: SessionFactoryServiceRegistry
+        serviceRegistry: SessionFactoryServiceRegistry,
       ) {
         val eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry::class.java)
         val aggregateListener = AggregateListener(listenerRegistrations)
@@ -75,7 +74,7 @@ internal class SessionFactoryService(
 
       override fun disintegrate(
         sessionFactory: SessionFactoryImplementor,
-        serviceRegistry: SessionFactoryServiceRegistry
+        serviceRegistry: SessionFactoryServiceRegistry,
       ) {
       }
     }
@@ -85,9 +84,9 @@ internal class SessionFactoryService(
 
     val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
     registryBuilder.addInitiator(hibernateInjectorAccess)
-    val config = connector.config()
+    val config = dataSourceService.config()
     registryBuilder.run {
-      applySetting(AvailableSettings.DATASOURCE, dataSource.get())
+      applySetting(AvailableSettings.DATASOURCE, dataSourceService.dataSource)
       applySetting(AvailableSettings.DIALECT, config.type.hibernateDialect)
       applySetting(AvailableSettings.SHOW_SQL, config.show_sql)
       applySetting(AvailableSettings.GENERATE_STATISTICS, config.generate_hibernate_stats)
@@ -167,7 +166,7 @@ internal class SessionFactoryService(
     for ((persistentClass, property) in metadata.allProperties.entries()) {
       processPropertyAnnotations(persistentClass, property)
     }
-    sessionFactory = metadata.buildSessionFactory()
+    _sessionFactory = metadata.buildSessionFactory()
 
     logger.info("Started @${qualifier.simpleName} Hibernate in $stopwatch")
   }
@@ -178,7 +177,7 @@ internal class SessionFactoryService(
    */
   private fun processPropertyAnnotations(
     persistentClass: Class<*>,
-    property: Property
+    property: Property,
   ) {
     val value = property.value as? SimpleValue ?: return
 
@@ -258,18 +257,17 @@ internal class SessionFactoryService(
     val stopwatch = Stopwatch.createStarted()
     logger.info("Stopping @${qualifier.simpleName} Hibernate")
 
-    require(sessionFactory != null)
-    sessionFactory!!.close()
+    require(_sessionFactory != null)
+    _sessionFactory!!.close()
 
     logger.info("Stopped @${qualifier.simpleName} Hibernate in $stopwatch")
   }
 
+  companion object {
+    private val logger = getLogger<SessionFactoryService>()
+  }
+
   override fun get(): SessionFactory {
-    return sessionFactory ?: throw IllegalStateException(
-      """
-      |@${qualifier.simpleName} Hibernate not connected: did you forget to start the service?
-      |    If this is a test, then annotate your test class with @MiskTest(startService = true)
-      |""".trimMargin()
-    )
+    return sessionFactory
   }
 }

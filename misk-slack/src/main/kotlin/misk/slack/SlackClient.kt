@@ -1,6 +1,6 @@
 package misk.slack
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /** Dummy client that does nothing if SlackModule is not installed .*/
 open class SlackClient @Inject constructor() {
@@ -10,11 +10,12 @@ open class SlackClient @Inject constructor() {
    * If the service has not configured a slack module, this method is a no-op.
    * Does not throw on IO exceptions.
    */
+  @JvmOverloads
   open fun postMessage(
     username: String,
     iconEmoji: String,
     message: String,
-    channel: String? = null
+    channel: String? = null,
   ): SlackWebhookResponse? {
     return null
   }

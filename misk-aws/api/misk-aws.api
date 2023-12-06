@@ -58,12 +58,21 @@ public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
 	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;I)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;J)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JI)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JII)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIII)V
 	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;)V
-	public synthetic fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;Z)V
+	public synthetic fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getAws_sqs_job_receiver_policy ()Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
 	public final fun getExternal_queues ()Ljava/util/Map;
 	public final fun getMessage_batch_size ()I
 	public final fun getQueue_attribute_importer_frequency_ms ()J
+	public final fun getSafe_shutdown ()Z
 	public final fun getSqs_sending_connect_timeout_ms ()I
 	public final fun getSqs_sending_request_timeout_ms ()I
 	public final fun getSqs_sending_socket_timeout_ms ()I
@@ -96,6 +105,8 @@ public final class misk/jobqueue/sqs/AwsSqsJobReceiverPolicy : java/lang/Enum {
 
 public final class misk/jobqueue/sqs/AwsSqsQueueConfig {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -125,6 +136,7 @@ public final class misk/jobqueue/sqs/FlaggedBufferedSqsClient : com/amazonaws/se
 	public fun <init> (Lcom/amazonaws/services/sqs/AmazonSQS;Lcom/amazonaws/services/sqs/AmazonSQS;Ljava/lang/String;Lmisk/feature/FeatureFlags;)V
 	public fun addPermission (Lcom/amazonaws/services/sqs/model/AddPermissionRequest;)Lcom/amazonaws/services/sqs/model/AddPermissionResult;
 	public fun addPermission (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lcom/amazonaws/services/sqs/model/AddPermissionResult;
+	public fun cancelMessageMoveTask (Lcom/amazonaws/services/sqs/model/CancelMessageMoveTaskRequest;)Lcom/amazonaws/services/sqs/model/CancelMessageMoveTaskResult;
 	public fun changeMessageVisibility (Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityRequest;)Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityResult;
 	public fun changeMessageVisibility (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityResult;
 	public fun changeMessageVisibilityBatch (Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityBatchRequest;)Lcom/amazonaws/services/sqs/model/ChangeMessageVisibilityBatchResult;
@@ -143,6 +155,7 @@ public final class misk/jobqueue/sqs/FlaggedBufferedSqsClient : com/amazonaws/se
 	public fun getQueueUrl (Lcom/amazonaws/services/sqs/model/GetQueueUrlRequest;)Lcom/amazonaws/services/sqs/model/GetQueueUrlResult;
 	public fun getQueueUrl (Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/GetQueueUrlResult;
 	public fun listDeadLetterSourceQueues (Lcom/amazonaws/services/sqs/model/ListDeadLetterSourceQueuesRequest;)Lcom/amazonaws/services/sqs/model/ListDeadLetterSourceQueuesResult;
+	public fun listMessageMoveTasks (Lcom/amazonaws/services/sqs/model/ListMessageMoveTasksRequest;)Lcom/amazonaws/services/sqs/model/ListMessageMoveTasksResult;
 	public fun listQueueTags (Lcom/amazonaws/services/sqs/model/ListQueueTagsRequest;)Lcom/amazonaws/services/sqs/model/ListQueueTagsResult;
 	public fun listQueueTags (Ljava/lang/String;)Lcom/amazonaws/services/sqs/model/ListQueueTagsResult;
 	public fun listQueues ()Lcom/amazonaws/services/sqs/model/ListQueuesResult;
@@ -162,6 +175,7 @@ public final class misk/jobqueue/sqs/FlaggedBufferedSqsClient : com/amazonaws/se
 	public fun setQueueAttributes (Ljava/lang/String;Ljava/util/Map;)Lcom/amazonaws/services/sqs/model/SetQueueAttributesResult;
 	public fun setRegion (Lcom/amazonaws/regions/Region;)V
 	public fun shutdown ()V
+	public fun startMessageMoveTask (Lcom/amazonaws/services/sqs/model/StartMessageMoveTaskRequest;)Lcom/amazonaws/services/sqs/model/StartMessageMoveTaskResult;
 	public fun tagQueue (Lcom/amazonaws/services/sqs/model/TagQueueRequest;)Lcom/amazonaws/services/sqs/model/TagQueueResult;
 	public fun tagQueue (Ljava/lang/String;Ljava/util/Map;)Lcom/amazonaws/services/sqs/model/TagQueueResult;
 	public fun untagQueue (Lcom/amazonaws/services/sqs/model/UntagQueueRequest;)Lcom/amazonaws/services/sqs/model/UntagQueueResult;

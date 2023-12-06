@@ -1,0 +1,48 @@
+# See https://github.com/detekt/detekt/blob/master/detekt-core/src/main/resources/default-detekt-config.yml
+# for default settings.
+build:
+  excludeCorrectable: false
+
+output-reports:
+  active: true
+  exclude:
+    - 'XmlOutputReport'
+    - 'SarifOutputReport'
+    - 'MdOutputReport'
+
+console-reports:
+  active: true
+  exclude:
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'NotificationReport'
+    - 'FileBasedFindingsReport'
+    - 'LiteFindingsReport'
+
+complexity:
+  LongParameterList:
+    active: false
+
+style:
+  ForbiddenImport:
+    active: true
+    imports:
+      - value: 'javax.inject.Inject'
+        reason: 'To be Guice 7+ compliant, use `jakarta.inject.Inject`'
+      - value: 'javax.inject.Named'
+        reason: 'To be Guice 7+ compliant, use `jakarta.inject.Named`'
+      - value: 'javax.inject.Qualifier'
+        reason: 'To be Guice 7+ compliant, use `jakarta.inject.Qualifier`'
+      - value: 'javax.inject.Singleton'
+        reason: 'To be Guice 7+ compliant, use `jakarta.inject.Singleton`'
+      - value: 'javax.inject.Provider'
+        reason: 'To be Guice 7+ compliant, use `com.google.inject.Provider`'
+      # Until moved to Guice 7, jakarta.inject.Provider causes issues with type overloads in Guice 6
+      - value: 'jakarta.inject.Provider'
+        reason: 'To be Guice 6 compliant, use `com.google.inject.Provider`'
+
+detektive:
+  active: true
+  AnnotatePublicApisWithJvmOverloads:
+    active: true
+    autoCorrect: true

@@ -122,6 +122,7 @@ to inject a missing response header or remove one.
 The built-in outbound application interceptors are:
 
  * ClientMetricsInterceptor
+ * ClientLoggingInterceptor
 
 Multibind these with `ClientApplicationInterceptorFactory`.
 

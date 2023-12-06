@@ -7,7 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.event.spi.EventType
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class EventListenersTest {

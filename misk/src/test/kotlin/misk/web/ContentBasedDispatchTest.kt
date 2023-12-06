@@ -9,13 +9,17 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
+import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class ContentBasedDispatchTest {
@@ -28,6 +32,7 @@ internal class ContentBasedDispatchTest {
 
   private val jsonMediaType = MediaTypes.APPLICATION_JSON.asMediaType()
   private val plainTextMediaType = MediaTypes.TEXT_PLAIN_UTF8.asMediaType()
+  private val grpcMediaType = MediaTypes.APPLICATION_GRPC.asMediaType()
   private val weirdTextMediaType = "text/weird".asMediaType()
   private val weirdMediaType = "weird/weird".asMediaType()
 
@@ -94,8 +99,39 @@ internal class ContentBasedDispatchTest {
   }
 
   @Test
+  fun postGrpcExpectResponse() {
+    val body = "Test".toByteArray().toByteString().toRequestBody()
+    val request = newRequest("/hello-bytes", grpcMediaType, body)
+    val response = httpClient.newCall(request)
+      .execute()
+    assertThat(response.code).isEqualTo(200)
+    val responseContent = response.body!!.source()
+    val strResp = String(responseContent.readByteString().toByteArray())
+    assertThat(strResp).isEqualTo("Test")
+    val trailers = response.trailers()
+    assertThat(trailers.size).isEqualTo(1)
+    assertThat(trailers["grpc-status"]).isEqualTo("0")
+  }
+
+  @Test
+  fun postGrpcExpect404Response() {
+    val request = newRequest(
+      "/doesnt-exist",
+      grpcMediaType,
+      "Test".toByteArray().toByteString().toRequestBody(),
+      grpcMediaType.toString()
+    )
+    val response = httpClient.newCall(request)
+      .execute()
+    assertThat(response.code).isEqualTo(404)
+    assertThat(response.message).isEqualTo("Not Found")
+    assertThat(response.headers["Content-Type"]).isEqualTo("text/plain;charset=utf-8")
+    assertThat(response.body!!.string()).startsWith("Nothing found at")
+  }
+
+  @Test
   fun doesntThrowOnInvalidMediaType() {
-    val request = newRequest("/hello", plainTextMediaType, "hello", "Totally Invalid Media Type")
+    val request = newRequest("/hello", plainTextMediaType, "hello".toRequestBody(), "Totally Invalid Media Type")
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
   }
@@ -112,6 +148,7 @@ internal class ContentBasedDispatchTest {
       install(WebActionModule.create<PostJsonReturnPlainText>())
       install(WebActionModule.create<PostAnythingReturnJson>())
       install(WebActionModule.create<PostAnythingReturnAnything>())
+      install(WebActionModule.create<PostGrpcReturnResponseBody>())
     }
   }
 
@@ -168,12 +205,19 @@ internal class ContentBasedDispatchTest {
     fun hello(@misk.web.RequestBody message: String) = "*->* $message"
   }
 
+  class PostGrpcReturnResponseBody @Inject constructor() : WebAction {
+    @Grpc("/hello-bytes")
+    fun hello(@misk.web.RequestBody message: ByteString): Response<ResponseBody> {
+      return Response(message.toResponseBody(), trailers = { Headers.headersOf("grpc-status", "0") })
+    }
+  }
+
   private fun postHello(
     contentType: MediaType,
-    content: String,
+    content: String?,
     acceptedMediaType: MediaType? = null
   ): okhttp3.ResponseBody {
-    val request = newRequest("/hello", contentType, content, acceptedMediaType.toString())
+    val request = newRequest("/hello", contentType, content!!.toRequestBody(contentType), acceptedMediaType.toString())
     val response = httpClient.newCall(request)
       .execute()
     assertThat(response.code).isEqualTo(200)
@@ -183,16 +227,18 @@ internal class ContentBasedDispatchTest {
   private fun newRequest(
     path: String,
     contentType: MediaType,
-    content: String,
+    requestBody: RequestBody,
     acceptedMediaType: String? = null
   ): Request {
     val request = Request.Builder()
-      .post(content.toRequestBody(contentType))
+      .post(requestBody)
       .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
 
     if (acceptedMediaType != null) {
       request.header("Accept", acceptedMediaType.toString())
     }
+
+    request.header("Content-Type", contentType.toString())
 
     return request.build()
   }

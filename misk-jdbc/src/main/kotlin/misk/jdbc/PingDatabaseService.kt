@@ -8,8 +8,8 @@ import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.*
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 private val logger = getLogger<PingDatabaseService>()
 
@@ -44,7 +44,7 @@ class PingDatabaseService @Inject constructor(
   }
 
   private fun connectToDataSource(dataSource: DriverDataSource) {
-    dataSource.setLoginTimeout((config.connection_timeout.toMillis() / 1000).toInt())
+    dataSource.loginTimeout = (config.connection_timeout.toMillis() / 1000).toInt()
     dataSource.connect().use { c ->
       check(c.createStatement().use { s ->
         s.executeQuery("SELECT 1").uniqueInt()

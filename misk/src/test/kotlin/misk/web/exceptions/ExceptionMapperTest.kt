@@ -1,9 +1,13 @@
 package misk.web.exceptions
 
+import ch.qos.logback.classic.Level
 import com.squareup.moshi.Moshi
+import com.squareup.wire.GrpcException
+import com.squareup.wire.GrpcStatus
 import misk.MiskTestingServiceModule
 import misk.exceptions.WebActionException
 import misk.inject.KAbstractModule
+import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
@@ -19,10 +23,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import java.net.HttpURLConnection.HTTP_FORBIDDEN
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class ExceptionMapperTest {
@@ -35,6 +40,9 @@ internal class ExceptionMapperTest {
 
   @Inject
   lateinit var jettyService: JettyService
+
+  @Inject
+  lateinit var logCollector: LogCollector
 
   private fun serverUrlBuilder(): HttpUrl.Builder {
     return jettyService.httpServerUrl.newBuilder()
@@ -59,6 +67,18 @@ internal class ExceptionMapperTest {
     val response = get("/throws/unmapped-error")
     assertThat(response.code).isEqualTo(HTTP_INTERNAL_ERROR)
     assertThat(response.body?.string()).isEqualTo("internal server error")
+  }
+
+  @Test
+  fun doesNotPropagateGrpcError() {
+    val response = get("/throws/grpc-error")
+    assertThat(response.code).isEqualTo(HTTP_INTERNAL_ERROR)
+    assertThat(response.body?.string()).isEqualTo("internal server error")
+    val loggedError = logCollector.takeMessage(
+      loggerClass = ExceptionHandlingInterceptor::class,
+      minLevel = Level.ERROR
+    )
+    assertThat(loggedError).isEqualTo("exception dispatching to ExceptionMapperTest.ThrowsGrpcError")
   }
 
   fun get(path: String): okhttp3.Response {
@@ -86,12 +106,25 @@ internal class ExceptionMapperTest {
     }
   }
 
+  class ThrowsGrpcError @Inject constructor() : WebAction {
+    @Get("/throws/grpc-error")
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun throwsGrpcError(): String {
+      throw GrpcException(
+        grpcStatus = GrpcStatus.UNKNOWN,
+        grpcMessage = "this was bad",
+      )
+    }
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       install(WebActionModule.create<ThrowsActionException>())
       install(WebActionModule.create<ThrowsUnmappedError>())
+      install(WebActionModule.create<ThrowsGrpcError>())
+      install(LogCollectorModule())
     }
   }
 }

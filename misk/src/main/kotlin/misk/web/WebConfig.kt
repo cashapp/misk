@@ -2,11 +2,12 @@ package misk.web
 
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
+import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.slf4j.event.Level
 import wisp.config.Config
 
-data class WebConfig(
+data class WebConfig @JvmOverloads constructor(
   /** HTTP port to listen on, or 0 for any available port. */
   val port: Int,
 
@@ -23,8 +24,6 @@ data class WebConfig(
    * checks may fail and k8s will kill the container, even though it might be perfectly healthy. This
    * can cause cascading failures by sending more requests to other containers, resulting in longer
    * queues and more health checks failures.
-   *
-   * TODO(rhall): make this required
    */
   val health_port: Int = -1,
 
@@ -75,7 +74,7 @@ data class WebConfig(
   val jetty_max_concurrent_streams: Int? = null,
 
   /** A value in [0.0..100.0]. Include 'Connection: close' in this percentage of responses. */
-  val close_connection_percent: Double = 0.01,
+  val close_connection_percent: Double = 0.0,
 
   /**
    * If true responses which are larger than the minGzipSize will be compressed.
@@ -93,80 +92,58 @@ data class WebConfig(
   /** The level of log when concurrency shedding. */
   val concurrency_limiter_log_level: Level = Level.ERROR,
 
+  /* Custom configuration for calculating concurrency limits */
+  val concurrency_limiter: ConcurrencyLimiterConfig? = ConcurrencyLimiterConfig(
+    disabled = concurrency_limiter_disabled,
+    strategy = ConcurrencyLimiterStrategy.GRADIENT2,
+    max_concurrency = null,
+    // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints that
+    // receive the majority of traffic (power law, yay!), and those endpoints should _start up_
+    // without triggering the concurrency limiter at the parallelism that we configured Jetty
+    // to support.
+    initial_limit = jetty_max_thread_pool_size / 2,
+    log_level = concurrency_limiter_log_level,
+  ),
+
   /** The number of milliseconds to sleep before commencing service shutdown. */
   val shutdown_sleep_ms: Int = 0,
 
   /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
-  val http_request_header_size: Int? = null,
+  val http_request_header_size: Int? = 32768,
 
   /** The size of Jetty's header field cache, in terms of unique character branches. */
   val http_header_cache_size: Int? = null,
-) : Config {
-  @Deprecated(
-    message = "obsolete; for binary-compatibility only",
-    level = DeprecationLevel.HIDDEN,
-  )
-  constructor(
-    port: Int,
-    idle_timeout: Long = 0,
-    health_port: Int = -1,
-    host: String? = null,
-    ssl: WebSslConfig? = null,
-    unix_domain_socket: WebUnixDomainSocketConfig? = null,
-    http2: Boolean = false,
-    selectors: Int? = null,
-    acceptors: Int? = null,
-    queue_size: Int? = null,
-    jetty_max_thread_pool_size: Int = 200,
-    jetty_min_thread_pool_size: Int = 8,
-    jetty_max_thread_pool_queue_size: Int = 300,
-    enable_thread_pool_queue_metrics: Boolean = false,
-    action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
-    jetty_max_concurrent_streams: Int? = null,
-    close_connection_percent: Double = 0.01,
-    gzip: Boolean = true,
-    minGzipSize: Int = 1024,
-    cors: Map<String, CorsConfig> = mapOf(),
-    concurrency_limiter_disabled: Boolean = false,
-    shutdown_sleep_ms: Int = 0,
-    http_request_header_size: Int? = null,
-    http_header_cache_size: Int? = null,
-  ) : this(
-    port = port,
-    idle_timeout = idle_timeout,
-    health_port = health_port,
-    host = host,
-    ssl = ssl,
-    unix_domain_socket = unix_domain_socket,
-    http2 = http2,
-    selectors = selectors,
-    acceptors = acceptors,
-    queue_size = queue_size,
-    jetty_max_thread_pool_size = jetty_max_thread_pool_size,
-    jetty_min_thread_pool_size = jetty_min_thread_pool_size,
-    jetty_max_thread_pool_queue_size = jetty_max_thread_pool_queue_size,
-    enable_thread_pool_queue_metrics = enable_thread_pool_queue_metrics,
-    action_exception_log_level = action_exception_log_level,
-    jetty_max_concurrent_streams = jetty_max_concurrent_streams,
-    close_connection_percent = close_connection_percent,
-    gzip = gzip,
-    minGzipSize = minGzipSize,
-    cors = cors,
-    concurrency_limiter_disabled = concurrency_limiter_disabled,
-    concurrency_limiter_log_level = Level.ERROR,
-    shutdown_sleep_ms = shutdown_sleep_ms,
-    http_request_header_size = http_request_header_size,
-    http_header_cache_size = http_header_cache_size,
-  )
-}
 
-data class WebSslConfig(
+  /**
+   * The number of milliseconds a connection can be idling before commencing service shutdown.
+   * If zero, it is never closed and may cause ungraceful shutdown.
+   *
+   * Note: There is an underlying strategy to determine the default shutdown idle timeout.
+   *  Use this value only when necessary.
+   */
+  val override_shutdown_idle_timeout: Long? = null,
+
+  /**
+   * How often readiness will re-run its status check.
+   *
+   * Ensure that [readiness_refresh_interval_ms] + "readiness latency" is less than [readiness_max_age_ms] or readiness will fail."
+   */
+  val readiness_refresh_interval_ms: Int = 1000,
+
+  /** Maximum age of readiness status. If exceeded readiness will return an error */
+  val readiness_max_age_ms: Int = 10000,
+
+  /** If possible (e.g. running on JDK 21) misk will attempt to use a virtual thread executor for jetty. */
+  val use_virtual_threads: Boolean = false
+) : Config
+
+data class WebSslConfig @JvmOverloads constructor(
   /** HTTPS port to listen on, or 0 for any available port. */
   val port: Int,
   val cert_store: CertStoreConfig,
   val trust_store: TrustStoreConfig? = null,
   val mutual_auth: MutualAuth = MutualAuth.REQUIRED,
-  val cipher_compatibility: CipherCompatibility = CipherCompatibility.COMPATIBLE,
+  val cipher_compatibility: CipherCompatibility = CipherCompatibility.MODERN,
 ) {
   enum class MutualAuth {
     NONE,
@@ -188,14 +165,14 @@ data class WebSslConfig(
   }
 }
 
-data class WebUnixDomainSocketConfig(
+data class WebUnixDomainSocketConfig @JvmOverloads constructor(
   /** The Unix Domain Socket to listen on. */
   val path: String,
   /** If true, the listener will support H2C. */
   val h2c: Boolean? = true
 )
 
-data class CorsConfig(
+data class CorsConfig @JvmOverloads constructor(
   /** A comma separated list of origins that are allowed to access the resources. */
   val allowedOrigins: Array<String> = arrayOf("*"),
   /**
@@ -222,4 +199,29 @@ data class CorsConfig(
   val chainPreflight: Boolean = true,
   /** A comma separated list of HTTP headers that are allowed to be exposed on the client. */
   val exposedHeaders: Array<String> = arrayOf()
+)
+
+data class ConcurrencyLimiterConfig @JvmOverloads constructor(
+  /** If true, disables automatic load shedding when degraded. */
+  val disabled: Boolean = false,
+
+  /** The algorithm to use for determining concurrency limits. */
+  val strategy: ConcurrencyLimiterStrategy = ConcurrencyLimiterStrategy.GRADIENT2,
+
+  /** Minimum concurrency limit allowed. */
+  val min_limit: Int? = null,
+
+  /**
+   * Maximum allowed concurrency limit providing an upper bound failsafe.
+   */
+  val max_concurrency: Int? = null,
+
+  /** Initial limit used by the concurrency limiter. */
+  val initial_limit: Int? = null,
+
+  /**
+   * The level of log when concurrency shedding. Same as concurrency_limiter_log_level default for
+   * backwards compatibility.
+   */
+  val log_level: Level = Level.ERROR,
 )

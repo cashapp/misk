@@ -21,10 +21,10 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
  * multibind<WebProxyEntry>().toInstance(WebProxyEntry(...))
  * ```
  */
-class WebProxyEntry(
-  url_path_prefix: String = "/",
+data class WebProxyEntry @JvmOverloads constructor(
+  val url_path_prefix: String = "/",
   val web_proxy_url: HttpUrl
-) : ValidWebEntry(url_path_prefix = url_path_prefix) {
+) : ValidWebEntry(valid_url_path_prefix = url_path_prefix) {
   init {
     require(
       web_proxy_url.encodedPath.endsWith("/") &&
@@ -37,6 +37,5 @@ fun WebProxyEntry(
   url_path_prefix: String = "/",
   web_proxy_url: String
 ): WebProxyEntry {
-//  TODO(adrw) update all HTTPUrl.parse -> get (no bang bang required) https://github.com/square/misk/issues/419
   return WebProxyEntry(url_path_prefix, web_proxy_url.toHttpUrlOrNull()!!)
 }

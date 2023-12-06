@@ -14,8 +14,8 @@ import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import wisp.logging.info
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.full.findAnnotation
 
 private val logger = getLogger<RequestLoggingInterceptor>()
@@ -34,7 +34,8 @@ class RequestLoggingInterceptor internal constructor(
   private val errorRatePerSecond: Long,
   private val bodySampling: Double,
   private val errorBodySampling: Double,
-  private val bodyCapture: RequestResponseCapture
+  private val bodyCapture: RequestResponseCapture,
+  private val requestLoggingTransformers: List<RequestLoggingTransformer>,
 ) : NetworkInterceptor {
   @Singleton
   class Factory @Inject internal constructor(
@@ -44,22 +45,27 @@ class RequestLoggingInterceptor internal constructor(
     private val bodyCapture: RequestResponseCapture,
     private val logRateLimiter: LogRateLimiter,
     private val deployment: Deployment,
+    private val configs: Set<RequestLoggingConfig>,
+    private val requestLoggingTransformers: List<RequestLoggingTransformer>,
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
-      val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
-      if (logRequestResponse.excludedEnvironments.contains(deployment.name)) {
+      // Only bother with endpoints that have the annotation
+      val annotation = action.function.findAnnotation<LogRequestResponse>() ?: return null
+      val config = ActionLoggingConfig.fromConfigMapOrAnnotation(action, configs, annotation)
+
+      if (config.excludedEnvironments.contains(deployment.name)) {
         return null
       }
-      require(logRequestResponse.ratePerSecond >= 0L) {
+      require(config.ratePerSecond >= 0L) {
         "${action.name} @LogRequestResponse ratePerSecond must be >= 0"
       }
-      require(logRequestResponse.errorRatePerSecond >= 0L) {
+      require(config.errorRatePerSecond >= 0L) {
         "${action.name} @LogRequestResponse errorRatePerSecond must be >= 0"
       }
-      require(logRequestResponse.bodySampling in 0.0..1.0) {
+      require(config.bodySampling in 0.0..1.0) {
         "${action.name} @LogRequestResponse bodySampling must be in the range (0.0, 1.0]"
       }
-      require(logRequestResponse.errorBodySampling in 0.0..1.0) {
+      require(config.errorBodySampling in 0.0..1.0) {
         "${action.name} @LogRequestResponse errorBodySampling must be in the range (0.0, 1.0]"
       }
 
@@ -69,11 +75,12 @@ class RequestLoggingInterceptor internal constructor(
         ticker,
         random,
         logRateLimiter,
-        logRequestResponse.ratePerSecond,
-        logRequestResponse.errorRatePerSecond,
-        logRequestResponse.bodySampling,
-        logRequestResponse.errorBodySampling,
-        bodyCapture
+        config.ratePerSecond,
+        config.errorRatePerSecond,
+        config.bodySampling,
+        config.errorBodySampling,
+        bodyCapture,
+        requestLoggingTransformers,
       )
     }
   }
@@ -127,13 +134,26 @@ class RequestLoggingInterceptor internal constructor(
     val sampling = if (isError) errorBodySampling else bodySampling
     val randomDouble = random.current().nextDouble()
     if (randomDouble < sampling) {
-      val requestResponseBody = bodyCapture.get()
+      // Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
+      // and cannot be reliably controlled by services.
+      // In practice, they will be applied in the order that they happened to be bound.
+      val requestResponseBody =
+        requestLoggingTransformers.fold(bodyCapture.get()) { body, transformer ->
+          transformer.tryTransform(body)
+        }
+      
       requestResponseBody?.let {
         requestResponseBody.request?.let {
           builder.append(" request=${requestResponseBody.request}")
         }
+        requestResponseBody.requestHeaders?.let {
+          builder.append(" requestHeaders=${requestResponseBody.requestHeaders}")
+        }
         requestResponseBody.response?.let {
           builder.append(" response=${requestResponseBody.response}")
+        }
+        requestResponseBody.responseHeaders?.let {
+          builder.append(" responseHeaders=${requestResponseBody.responseHeaders}")
         }
       }
     }
@@ -142,5 +162,47 @@ class RequestLoggingInterceptor internal constructor(
       "response_code" to statusCode,
       "response_time_millis" to stopwatch.elapsed(TimeUnit.MILLISECONDS)
     ) { builder.toString() }
+  }
+}
+
+/**
+ * A set of per-action logging config overrides.
+ */
+data class RequestLoggingConfig(val actions: Map<String, ActionLoggingConfig>) {
+}
+
+/**
+ * This class should have all the same config options as [LogRequestResponse]. See that class for details.
+ */
+data class ActionLoggingConfig @JvmOverloads constructor(
+  val ratePerSecond: Long = 10,
+  val errorRatePerSecond: Long = 0,
+  val bodySampling: Double = 0.0,
+  val errorBodySampling: Double = 0.0,
+  val excludedEnvironments: List<String> = listOf(),
+) {
+  companion object {
+    fun fromAnnotation(logRequestResponse: LogRequestResponse): ActionLoggingConfig = ActionLoggingConfig(
+      ratePerSecond = logRequestResponse.ratePerSecond,
+      errorRatePerSecond = logRequestResponse.errorRatePerSecond,
+      bodySampling = logRequestResponse.bodySampling,
+      errorBodySampling = logRequestResponse.errorBodySampling,
+      excludedEnvironments = logRequestResponse.excludedEnvironments.toList(),
+    )
+
+    fun fromConfigMapOrAnnotation(
+      action: Action,
+      configs: Set<RequestLoggingConfig>,
+      annotation: LogRequestResponse
+    ): ActionLoggingConfig {
+      // Look for any configs that may have been provided from somewhere other than the annotation itself
+      val endpointConfigs = configs.mapNotNull { it.actions[action.name] }.distinct()
+      if (endpointConfigs.size > 1) {
+        throw IllegalArgumentException("Found multiple conflicting configs for action [${action.name}]: $endpointConfigs")
+      }
+
+      // Fall back to using the annotation's config if no other configs were found
+      return endpointConfigs.singleOrNull() ?: fromAnnotation(annotation)
+    }
   }
 }

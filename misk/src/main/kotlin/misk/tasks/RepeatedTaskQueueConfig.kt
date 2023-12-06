@@ -4,7 +4,7 @@ import misk.backoff.Backoff
 import misk.backoff.ExponentialBackoff
 import java.time.Duration
 
-data class RepeatedTaskQueueConfig(
+data class RepeatedTaskQueueConfig @JvmOverloads constructor(
   /**
    * The default amount of jitter to use when scheduling backoffs.
    *

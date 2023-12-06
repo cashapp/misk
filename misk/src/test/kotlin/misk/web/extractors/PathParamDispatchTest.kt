@@ -17,7 +17,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class PathParamDispatchTest {
@@ -40,6 +40,13 @@ internal class PathParamDispatchTest {
   }
 
   @Test
+  fun pathParamsConvertToGenericType() {
+    val response = get("/objects/find/1234")
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body?.string()).isEqualTo("(objectId=Id(t=1234))")
+  }
+
+  @Test
   fun pathParamsSupportExplicitPathNames() {
     val response = get("/custom-named-route")
     assertThat(response.code).isEqualTo(200)
@@ -51,6 +58,7 @@ internal class PathParamDispatchTest {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       install(WebActionModule.create<GetObjectDetails>())
+      install(WebActionModule.create<CustomTypeWithGenerics>())
       install(WebActionModule.create<CustomPathParamName>())
     }
   }
@@ -63,6 +71,25 @@ internal class PathParamDispatchTest {
       @PathParam name: String,
       @PathParam version: Long
     ): String = "(type=$resourceType,name=$name,version=$version)"
+  }
+
+  data class Id<T>(
+    val t: T,
+  ) {
+    companion object {
+      @JvmStatic
+      fun valueOf(value: String): Id<Any> {
+        return Id(value)
+      }
+    }
+  }
+
+  class CustomTypeWithGenerics @Inject constructor() : WebAction {
+    @Get("/objects/find/{objectId}")
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun getObjectDetails(
+      @PathParam objectId: Id<String>,
+    ): String = "(objectId=$objectId)"
   }
 
   class CustomPathParamName @Inject constructor() : WebAction {

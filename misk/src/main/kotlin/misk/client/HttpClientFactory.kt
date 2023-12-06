@@ -1,20 +1,23 @@
 package misk.client
 
+import misk.security.ssl.SslContextFactory
+import misk.security.ssl.SslLoader
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import wisp.client.EnvoyClientEndpointProvider
-import misk.security.ssl.SslContextFactory
-import misk.security.ssl.SslLoader
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import com.google.inject.Provider
+import jakarta.inject.Singleton
 
 @Singleton
 class HttpClientFactory @Inject constructor(
   private val sslLoader: SslLoader,
   private val sslContextFactory: SslContextFactory,
-  private val okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator
+  private val okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator,
 ) {
+  // Field-injected so ClientLoggingInterceptor remains internal.
+  @Inject private lateinit var clientLoggingInterceptor: ClientLoggingInterceptor
+
   @com.google.inject.Inject(optional = true)
   var envoyClientEndpointProvider: EnvoyClientEndpointProvider? = null
 
@@ -28,10 +31,12 @@ class HttpClientFactory @Inject constructor(
       sslContextFactory.delegate,
       okHttpClientCommonConfigurator.delegate,
       envoyClientEndpointProvider,
-      okhttpInterceptors?.get()
+      okhttpInterceptors?.let { it.get() + clientLoggingInterceptor }
+        ?: listOf(clientLoggingInterceptor)
     )
 
-    return delegate.create(config.toWispConfig())
+    val okHttpClient = delegate.create(config.toWispConfig())
+    return okHttpClient
   }
 
   companion object {

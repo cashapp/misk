@@ -7,15 +7,13 @@ import okhttp3.Headers.Companion.headersOf
 import org.slf4j.event.Level
 import java.io.IOException
 import java.net.HttpURLConnection
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Maps [IOException]s to HTTP 500.
  */
 internal class IOExceptionMapper @Inject internal constructor() : ExceptionMapper<IOException> {
   override fun toResponse(th: IOException) = INTERNAL_SERVER_ERROR_RESPONSE
-
-  override fun canHandle(th: Throwable): Boolean = th is IOException
 
   override fun loggingLevel(th: IOException): Level = Level.WARN
 

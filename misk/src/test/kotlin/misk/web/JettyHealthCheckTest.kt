@@ -25,8 +25,8 @@ import java.util.concurrent.Phaser
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Qualifier
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 
 @MiskTest(startService = true)
 internal class JettyHealthCheckTest {

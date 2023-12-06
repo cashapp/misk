@@ -1,0 +1,39 @@
+public final class misk/hotwire/BuildHtmlKt {
+	public static final fun buildHtml (Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+	public static final fun buildHtmlResponseBody (Lkotlin/jvm/functions/Function1;)Lmisk/web/ResponseBody;
+}
+
+public final class misk/turbo/TurboFrame : kotlinx/html/HTMLTag, kotlinx/html/HtmlInlineTag {
+	public fun <init> (Ljava/lang/String;Lkotlinx/html/TagConsumer;)V
+}
+
+public final class misk/turbo/TurboFrameKt {
+	public static final fun turbo_frame (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun turbo_frame$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public final class misk/turbo/TurboHeadKt {
+	public static final fun addHotwireHeadImports (Lkotlinx/html/TagConsumer;Ljava/lang/String;)V
+}
+
+public final class misk/turbo/TurboStream : kotlinx/html/HTMLTag, kotlinx/html/HtmlInlineTag {
+	public fun <init> (Lmisk/turbo/TurboStreamAction;Ljava/lang/String;Lkotlinx/html/TagConsumer;)V
+}
+
+public final class misk/turbo/TurboStreamAction : java/lang/Enum {
+	public static final field AFTER Lmisk/turbo/TurboStreamAction;
+	public static final field APPEND Lmisk/turbo/TurboStreamAction;
+	public static final field BEFORE Lmisk/turbo/TurboStreamAction;
+	public static final field PREPEND Lmisk/turbo/TurboStreamAction;
+	public static final field REMOVE Lmisk/turbo/TurboStreamAction;
+	public static final field REPLACE Lmisk/turbo/TurboStreamAction;
+	public static final field UPDATE Lmisk/turbo/TurboStreamAction;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/turbo/TurboStreamAction;
+	public static fun values ()[Lmisk/turbo/TurboStreamAction;
+}
+
+public final class misk/turbo/TurboStreamKt {
+	public static final fun turbo_stream (Lkotlinx/html/TagConsumer;Lmisk/turbo/TurboStreamAction;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun turbo_stream$default (Lkotlinx/html/TagConsumer;Lmisk/turbo/TurboStreamAction;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+

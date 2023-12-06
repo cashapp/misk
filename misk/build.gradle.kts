@@ -1,83 +1,88 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
-  
+  id("com.vanniktech.maven.publish.base")
   id("com.squareup.wire")
 }
 
 dependencies {
-  implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.apacheCommonsLang3)
-  implementation(Dependencies.bouncycastle)
-  implementation(Dependencies.guava)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.javaxInject)
-  implementation(Dependencies.okHttp)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.kotlinReflection)
-  implementation(Dependencies.moshiCore)
-  implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.moshiAdapters)
-  implementation(Dependencies.httpComponentsCore5)
-  implementation(Dependencies.jettyHttp2)
-  implementation(Dependencies.jettyServer)
-  implementation(Dependencies.jettyUnixSocket)
-  implementation(Dependencies.servletApi)
-  implementation(Dependencies.jettyAlpnJava)
-  implementation(Dependencies.jettyServlet)
-  implementation(Dependencies.jettyServlets)
-  implementation(Dependencies.jettyWebsocketServlet)
-  implementation(Dependencies.jettyWebsocketServer)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.wireGrpcClient)
-  implementation(Dependencies.wireMoshiAdapter)
-  implementation(Dependencies.wireRuntime)
-  implementation(Dependencies.jacksonDatabind)
-  implementation(Dependencies.jacksonDataformatYaml)
-  implementation(Dependencies.jacksonKotlin)
-  implementation(Dependencies.jacksonJsr310)
-  implementation(Dependencies.jCommander)
-  implementation(Dependencies.openTracing)
-  implementation(Dependencies.openTracingUtil)
-  implementation(Dependencies.openTracingOkHttp)
-  implementation(Dependencies.retrofit)
-  implementation(Dependencies.retrofitMoshi)
-  implementation(Dependencies.retrofitProtobuf)
-  implementation(Dependencies.retrofitWire)
-  implementation(Dependencies.jaxbApi)
-  implementation(Dependencies.prometheusClient)
-  implementation(Dependencies.prometheusHotspot)
-  implementation(Dependencies.jnrUnixsocket)
-  implementation(Dependencies.concurrencyLimitsCore)
-  implementation(project(":misk-core"))
-  implementation(project(":misk-metrics"))
-  implementation(project(":misk-prometheus"))
-  implementation(project(":misk-proto"))
-  implementation(project(":misk-service"))
+  api(Dependencies.concurrencyLimitsCore)
+  api(Dependencies.guava)
+  api(Dependencies.guice)
+  api(Dependencies.jakartaInject)
+  api(Dependencies.jacksonAnotations)
+  api(Dependencies.jacksonDatabind)
+  api(Dependencies.jakartaInject)
+  api(Dependencies.jettyServer)
+  api(Dependencies.jettyServletApi)
+  api(Dependencies.jettyUtil)
+  api(Dependencies.moshi)
+  api(Dependencies.okHttp)
+  api(Dependencies.openTracingApi)
+  api(Dependencies.prometheusClient)
+  api(Dependencies.retrofit)
+  api(Dependencies.servletApi)
+  api(Dependencies.slf4jApi)
+  api(project(":wisp:wisp-client"))
+  api(project(":wisp:wisp-config"))
+  api(project(":wisp:wisp-deployment"))
   api(project(":misk-action-scopes"))
   api(project(":misk-actions"))
   api(project(":misk-clustering"))
+  api(project(":misk-config"))
+  api(project(":misk-core"))
   api(project(":misk-inject"))
-  api(Dependencies.wispClient)
-  api(Dependencies.wispConfig)
-  api(Dependencies.wispDeployment)
-  api(Dependencies.wispDeploymentTesting)
-  api(Dependencies.wispLogging)
-  api(Dependencies.wispMoshi)
+  api(project(":misk-metrics"))
+  implementation(Dependencies.jCommander)
+  implementation(Dependencies.jettyAlpnServer)
+  implementation(Dependencies.jettyHttp)
+  implementation(Dependencies.jettyHttp2)
+  implementation(Dependencies.jettyIo)
+  implementation(Dependencies.jettyServlet)
+  implementation(Dependencies.jettyServlets)
+  implementation(Dependencies.jettyUnixSocket)
+  implementation(Dependencies.jettyWebsocketApi)
+  implementation(Dependencies.jettyWebsocketServer)
+  implementation(Dependencies.kotlinLogging)
+  implementation(Dependencies.kotlinReflect)
+  implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(Dependencies.moshiAdapters)
+  implementation(Dependencies.okio)
+  implementation(Dependencies.openTracingConcurrent)
+  implementation(Dependencies.openTracingOkHttp)
+  implementation(Dependencies.retrofitMoshi)
+  implementation(Dependencies.retrofitProtobuf)
+  implementation(Dependencies.retrofitWire)
+  implementation(Dependencies.wireGrpcClient)
+  implementation(Dependencies.wireMoshiAdapter)
+  implementation(Dependencies.wireRuntime)
+  implementation(project(":wisp:wisp-deployment-testing"))
+  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":wisp:wisp-moshi"))
+  implementation(project(":wisp:wisp-ssl"))
+  implementation(project(":wisp:wisp-tracing"))
+  implementation(project(":misk-prometheus"))
+  implementation(project(":misk-proto"))
+  implementation(project(":misk-service"))
+  runtimeOnly(Dependencies.jettyAlpnServerJava)
 
-  testImplementation(Dependencies.kotlinxCoroutines)
-  testImplementation(Dependencies.mockitoCore)
-  testImplementation(project(":misk-metrics-testing"))
-  testImplementation(project(":misk-testing"))
-  testImplementation(Dependencies.junit4Api)
-  testImplementation(Dependencies.junitParams)
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.okHttpMockWebServer) {
-    exclude(group = "junit")
-  }
-  testImplementation(Dependencies.openTracingMock)
   testImplementation(Dependencies.guavaTestLib)
+  testImplementation(Dependencies.junitApi)
+  testImplementation(Dependencies.junitParams)
+  testImplementation(Dependencies.kotlinTest)
+  testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.okHttpMockWebServer)
+  testImplementation(Dependencies.openTracingMock)
+  testImplementation(project(":wisp:wisp-logging-testing"))
+  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk"))
+  testImplementation(project(":misk-testing"))
 }
 
 val generatedSourceDir = "$buildDir/generated/source/wire-test"
@@ -88,6 +93,28 @@ wire {
   }
   java {
     out = generatedSourceDir
+    exclusive = false
+  }
+
+  kotlin {
+    out = generatedSourceDir
+    rpcRole = "client"
+    rpcCallStyle = "blocking"
+    exclusive = false
+    includes = listOf(
+      "helloworld.Greeter"
+    )
+  }
+
+  kotlin {
+    out = generatedSourceDir
+    rpcRole = "server"
+    rpcCallStyle = "blocking"
+    exclusive = false
+    singleMethodServices = true
+    includes = listOf(
+      "helloworld.Greeter"
+    )
   }
 }
 
@@ -112,4 +139,10 @@ afterEvaluate {
       include(generatedSourceGlob)
     }
   }
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

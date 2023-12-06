@@ -1,8 +1,12 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 
 plugins {
   kotlin("jvm")
   `java-library`
+  id("com.vanniktech.maven.publish.base")
 }
 
 apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
@@ -21,36 +25,51 @@ sourceSets {
 }
 
 dependencies {
+  api(Dependencies.guava)
+  api(Dependencies.guice)
   api(Dependencies.hibernateCore)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.okio)
+  api(Dependencies.jakartaInject)
+  api(Dependencies.javaxPersistenceApi)
+  api(project(":misk-inject"))
+  api(project(":misk-jdbc"))
+  implementation(Dependencies.kotlinLogging)
+  implementation(Dependencies.kotlinReflect)
+  implementation(Dependencies.moshi)
   implementation(Dependencies.okHttp)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.moshiCore)
-  implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.moshiAdapters)
-  implementation(Dependencies.wireRuntime)
+  implementation(Dependencies.okio)
+  implementation(Dependencies.slf4jApi)
   implementation(Dependencies.tink)
+  implementation(Dependencies.tinkAwskms)
+  implementation(Dependencies.tinkGcpkms)
+  implementation(Dependencies.wireRuntime)
+  implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk"))
   implementation(project(":misk-action-scopes"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-admin"))
   implementation(project(":misk-core"))
   implementation(project(":misk-crypto"))
-  implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
-  api(project(":misk-jdbc"))
-  api(Dependencies.wispLogging)
 
-  testImplementation(Dependencies.dockerCore)
-  testImplementation(Dependencies.dockerTransport)
-  testImplementation(Dependencies.prometheusClient)
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.mockitoCore)
   testImplementation(Dependencies.logbackClassic)
-  testImplementation(project(":misk-metrics"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(Dependencies.mockitoCore)
+  testImplementation(Dependencies.prometheusClient)
+  testImplementation(project(":wisp:wisp-config"))
+  testImplementation(project(":wisp:wisp-deployment"))
+  testImplementation(project(":wisp:wisp-logging-testing"))
+  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-config"))
   testImplementation(project(":misk-hibernate-testing"))
-  testImplementation(Dependencies.wispConfig)
+  testImplementation(testFixtures(project(":misk-jdbc")))
+  testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-crypto")))
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

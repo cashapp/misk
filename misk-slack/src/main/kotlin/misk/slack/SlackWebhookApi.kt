@@ -16,7 +16,7 @@ data class SlackWebhookRequest(
   val channel: String,
   val username: String,
   val text: String,
-  val icon_emoji: String
+  val icon_emoji: String,
 )
 
 @JsonClass(generateAdapter = true)

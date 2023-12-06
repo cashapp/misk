@@ -4,8 +4,8 @@ import com.google.inject.Injector
 import org.hibernate.boot.registry.StandardServiceInitiator
 import org.hibernate.service.ServiceRegistry
 import org.hibernate.service.spi.ServiceRegistryImplementor
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Exposes the Misk injector to Hibernate extensions like UserTypes. Use it with the `injector`

@@ -2,6 +2,7 @@ package misk.jdbc
 
 import com.google.common.collect.Iterables.getOnlyElement
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.database.StartDatabaseService
@@ -11,13 +12,13 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.vitess.Shard
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.SQLException
-import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = false)
@@ -75,7 +76,8 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     }
   }
 
-  @BeforeEach internal fun setUp() {
+  @BeforeEach
+  internal fun setUp() {
     startDatabaseService.startAsync()
     startDatabaseService.awaitRunning()
     dataSourceService.startAsync()
@@ -85,7 +87,7 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
   }
 
   private fun dropTables() {
-    dataSourceService.get().connection.use { connection ->
+    dataSourceService.dataSource.connection.use { connection ->
       val statement = connection.createStatement()
       statement.addBatch("DROP TABLE IF EXISTS schema_version")
       statement.addBatch("DROP TABLE IF EXISTS table_1")
@@ -99,7 +101,8 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     }
   }
 
-  @Test fun initializeAndMigrate() {
+  @Test
+  fun initializeAndMigrate() {
     val mainSource = config.migrations_resources!![0]
     val librarySource = config.migrations_resources!![1]
 
@@ -118,11 +121,6 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
       "$librarySource/name/space/v1001__actors.sql", """
         |CREATE TABLE library_table (name varchar(255))
         |""".trimMargin()
-    )
-    resourceLoader.put(
-      "$librarySource/all-migrations.sql", """
-        |CREATE TABLE all_migrations (name varchar(255))
-        |""".trimIndent()
     )
 
     // Initially the schema_version table is absent.
@@ -162,7 +160,6 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     assertThat(tableExists("table_3")).isFalse
     assertThat(tableExists("table_4")).isFalse
     assertThat(tableExists("merged_library_table")).isFalse
-    assertThat(tableExists("all_migrations")).isFalse
     schemaMigrator.requireAll()
 
     // When new migrations are added they can be applied.
@@ -183,10 +180,10 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     )
     schemaMigrator.applyAll(
       "SchemaMigratorTest", sortedSetOf(
-      NamedspacedMigration(1001),
-      NamedspacedMigration(1002),
-      NamedspacedMigration(1001, "name/space/")
-    )
+        NamedspacedMigration(1001),
+        NamedspacedMigration(1002),
+        NamedspacedMigration(1001, "name/space/")
+      )
     )
     assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
       NamedspacedMigration(1001),
@@ -203,11 +200,11 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     assertThat(tableExists("table_4")).isTrue
     assertThat(tableExists("library_table")).isTrue
     assertThat(tableExists("merged_library_table")).isTrue
-    assertThat(tableExists("all_migrations")).isFalse
-    schemaMigrator.requireAll()
+    assertThatCode { schemaMigrator.requireAll() }.doesNotThrowAnyException()
   }
 
-  @Test fun requireAllWithMissingMigrations() {
+  @Test
+  fun requireAllWithMissingMigrations() {
     schemaMigrator.initialize()
 
     resourceLoader.put(
@@ -233,7 +230,8 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     )
   }
 
-  @Test fun haveOneMissingOneMigration() {
+  @Test
+  fun haveOneMissingOneMigration() {
     schemaMigrator.initialize()
 
     resourceLoader.put(
@@ -260,7 +258,8 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     )
   }
 
-  @Test fun errorOnDuplicateMigrations() {
+  @Test
+  fun errorOnDuplicateMigrations() {
     resourceLoader.put(
       "${config.migrations_resources!![0]}/v1001__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
@@ -286,7 +285,8 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     assertThat(duplicateFailure).hasMessageNotContaining("1002")
   }
 
-  @Test fun healthChecks() {
+  @Test
+  fun healthChecks() {
     resourceLoader.put(
       "${config.migrations_resources!![0]}/v1002__movies.sql", """
         |CREATE TABLE table_2 (name varchar(255))
@@ -307,9 +307,34 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     )
   }
 
+  @Test
+  fun skipsExcludedMigrations() {
+    val mainSource = config.migrations_resources!![0]
+
+    resourceLoader.put(
+      "$mainSource/v1001__movies.sql", """
+        |CREATE TABLE table_1 (name varchar(255))
+        |""".trimMargin()
+    )
+    resourceLoader.put(
+      "$mainSource/all-migrations.sql", """
+        |CREATE TABLE table_2 (name varchar(255))
+        |""".trimMargin()
+    )
+
+    schemaMigrator.initialize()
+    schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
+
+    assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
+      NamedspacedMigration(1001)
+    )
+    assertThat(tableExists("table_1")).isTrue
+    assertThat(tableExists("table_2")).isFalse
+  }
+
   private fun tableExists(table: String): Boolean {
     try {
-      dataSourceService.get().connection.use { connection ->
+      dataSourceService.dataSource.connection.use { connection ->
         connection.createStatement().use {
           it.execute("SELECT * FROM $table LIMIT 1")
         }
@@ -324,12 +349,13 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     val mysql_data_source: DataSourceConfig,
     val cockroachdb_data_source: DataSourceConfig,
     val postgresql_data_source: DataSourceConfig,
-    val tidb_data_source: DataSourceConfig
+    val tidb_data_source: DataSourceConfig,
   ) : Config
 }
 
 internal class NamedspacedMigrationTest {
-  @Test fun resourceVersionParsing() {
+  @Test
+  fun resourceVersionParsing() {
     assertThat(namespacedMigrationOrNull("foo/migrations/v100__bar.sql")).isEqualTo(
       NamedspacedMigration(100, "foo/migrations/")
     )
@@ -350,11 +376,22 @@ internal class NamedspacedMigrationTest {
     assertThat(namespacedMigrationOrNull("foo/luv1__franklin.sql")).isNull()
   }
 
+  @Test
+  fun filterResourceRegex() {
+    assertThatCode {
+      NamedspacedMigration.fromResourcePath(
+        "foo/migrations/vNotANumber__bar.sql",
+        "",
+        "(^|.*/)v(\\d+)__[^/]+\\.sql"
+      )
+    }.isNotNull
+  }
+
   private fun namespacedMigrationOrNull(resource: String): NamedspacedMigration? {
-    try {
-      return NamedspacedMigration.fromResourcePath(resource, "")
+    return try {
+      NamedspacedMigration.fromResourcePath(resource, "", "(^|.*/)v(\\d+)__[^/]+\\.sql")
     } catch (expected: IllegalArgumentException) {
-      return null
+      null
     }
   }
 }

@@ -1,12 +1,11 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import javax.inject.Inject
 
 /** Test that we can access Hibernate's SessionFactory directly. */
 @MiskTest(startService = true)
@@ -14,12 +13,12 @@ class RawHibernateApiTest {
   @MiskTestModule
   val module = MoviesTestModule()
 
-  @Inject @Movies lateinit var sessionFactory: SessionFactory
+  @Inject @Movies private lateinit var sessionFactoryService: SessionFactoryService
 
   @Test
   fun happyPath() {
     // Insert some movies in a transaction.
-    val jpId = sessionFactory.openSession().use { session ->
+    val jpId = sessionFactoryService.sessionFactory.openSession().use { session ->
       var transaction = session.beginTransaction()
       val jp = DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
       session.save(jp)
@@ -36,7 +35,7 @@ class RawHibernateApiTest {
     }
 
     // Query those movies without a transaction.
-    sessionFactory.openSession().use { session ->
+    sessionFactoryService.sessionFactory.openSession().use { session ->
       val criteriaBuilder = session.entityManagerFactory.criteriaBuilder
       val criteria = criteriaBuilder.createQuery(DbCharacter::class.java)
       val queryRoot = criteria.from(DbCharacter::class.java)

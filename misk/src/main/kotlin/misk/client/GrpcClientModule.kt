@@ -5,13 +5,13 @@ import com.google.inject.name.Names
 import com.squareup.wire.Service
 import misk.inject.KAbstractModule
 import okhttp3.OkHttpClient
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
  * Creates a gRPC client given a Wire-generated interface and HTTP configuration.
  */
-class GrpcClientModule<T : Service, G : T>(
+class GrpcClientModule<T : Service, G : T> @JvmOverloads constructor(
   /** The Wire-generated service interface. */
   private val kclass: KClass<T>,
 
@@ -40,6 +40,7 @@ class GrpcClientModule<T : Service, G : T>(
     // Initialize empty sets for our multibindings.
     newMultibinder<ClientApplicationInterceptorFactory>()
     newMultibinder<ClientNetworkInterceptor.Factory>()
+    newMultibinder<CallFactoryWrapper>()
   }
 
   companion object {

@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.hibernate.annotation.keyspace
@@ -10,13 +11,11 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.vitess.CowriteException
 import misk.vitess.Shard
-import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.lang.reflect.UndeclaredThrowableException
 import java.time.LocalDate
-import javax.inject.Inject
 
 /**
  * Verifies that we're constraining a few things that makes apps hard to scale out.
@@ -26,9 +25,9 @@ class VitessScaleSafetyTest {
   @MiskTestModule
   val module = MoviesTestModule(scaleSafetyChecks = true)
 
-  @Inject @Movies lateinit var sessionFactory: SessionFactory
-  @Inject @Movies lateinit var transacter: Transacter
-  @Inject lateinit var queryFactory: Query.Factory
+  @Inject @Movies private lateinit var sessionFactoryService: SessionFactoryService
+  @Inject @Movies private lateinit var transacter: Transacter
+  @Inject private lateinit var queryFactory: Query.Factory
 
   @Test
   fun crossShardTransactions() {
@@ -233,7 +232,7 @@ class VitessScaleSafetyTest {
   }
 
   private fun <R> hibernateTransaction(block: (hSession: org.hibernate.Session) -> R): R =
-    sessionFactory.openSession().use { hSession ->
+    sessionFactoryService.sessionFactory.openSession().use { hSession ->
       val transaction = hSession.beginTransaction()
       try {
         val result = block(hSession)
@@ -254,7 +253,7 @@ fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(
 
 fun Transacter.createInSeparateShard(
   id: Id<DbMovie>,
-  factory: () -> DbMovie
+  factory: () -> DbMovie,
 ): Id<DbMovie> {
   val sw = createUntil(factory) { session, newId ->
     newId.shard(session) != id.shard(session)
@@ -264,7 +263,7 @@ fun Transacter.createInSeparateShard(
 
 fun Transacter.createInSameShard(
   id: Id<DbMovie>,
-  factory: () -> DbMovie
+  factory: () -> DbMovie,
 ): Id<DbMovie> {
   val sw = createUntil(factory) { session, newId ->
     newId.shard(session) == id.shard(session)
@@ -276,7 +275,7 @@ class NotThereYetException : RuntimeException()
 
 inline fun <reified T : DbRoot<T>> Transacter.createUntil(
   crossinline factory: () -> T,
-  crossinline condition: (Session, Id<T>) -> Boolean
+  crossinline condition: (Session, Id<T>) -> Boolean,
 ): Id<T> = retry(10, FlatBackoff()) {
   transaction { session ->
     val newId = session.save(factory())

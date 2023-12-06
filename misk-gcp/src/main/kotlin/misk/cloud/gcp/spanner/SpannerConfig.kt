@@ -3,10 +3,11 @@ package misk.cloud.gcp.spanner
 import com.google.auth.Credentials
 import com.google.cloud.spanner.SpannerOptions
 import misk.cloud.gcp.TransportConfig
+import misk.config.Redact
 import wisp.config.Config
 
 /** Configuration for talking to Google datastore */
-data class SpannerConfig(
+data class SpannerConfig @JvmOverloads constructor(
   /**
    * A set of Google Cloud credentials to use for making requests to Spanner.
    *
@@ -17,6 +18,7 @@ data class SpannerConfig(
    * > environment where applicable, or ignore setting credentials for
    * > emulator development.
    */
+  @Redact
   val credentials: Credentials? = null,
 
   /**
@@ -49,7 +51,7 @@ data class SpannerConfig(
 /**
  * Options for configuring the Spanner emulator.
  */
-data class SpannerEmulatorConfig(
+data class SpannerEmulatorConfig @JvmOverloads constructor(
   /**
    * Whether or not to start the Spanner emulator when the GoogleSpannerModule
    * is installed.
@@ -70,4 +72,8 @@ data class SpannerEmulatorConfig(
    * this port "+ 10" as the REST / HTTP port for Docker to bind to.
    */
   val port: Int = 9010,
+
+  // Version of the emulate configuration which will be used. When null will
+  // default to the latest
+  val version: String? = null
 )

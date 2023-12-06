@@ -5,6 +5,8 @@ import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
+import kotlin.concurrent.thread
+import kotlinx.coroutines.runBlocking
 import misk.inject.keyOf
 import misk.inject.toKey
 import misk.inject.uninject
@@ -12,7 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Optional
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 
 internal class ActionScopedTest {
@@ -30,6 +32,12 @@ internal class ActionScopedTest {
 
   @Inject @Named("nullable-based-on-foo")
   private lateinit var nullableBasedOnFoo: ActionScoped<String?>
+
+  @Inject @Named("constant")
+  private lateinit var constantString: ActionScoped<String>
+
+  @Inject @Named("constant")
+  private lateinit var optionalConstantString: ActionScoped<Optional<String>>
 
   @Inject private lateinit var scope: ActionScope
 
@@ -92,6 +100,21 @@ internal class ActionScopedTest {
   }
 
   @Test
+  fun supportsReturningConstants() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    scope.enter(mapOf()).use {
+      assertThat(constantString.get()).isEqualTo("constant-value")
+      assertThat(optionalConstantString.get()).isEqualTo(Optional.of("constant-value"))
+
+      // Make sure the same object is returned
+      assertThat(constantString.get()).isSameAs(constantString.get())
+      assertThat(optionalConstantString.get()).isSameAs(optionalConstantString.get())
+    }
+  }
+
+  @Test
   fun supportsParameterizedTypes() {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)
@@ -133,6 +156,74 @@ internal class ActionScopedTest {
         keyOf<String>(Names.named("from-seed")) to "illegal-state"
       )
       scope.enter(seedData).use { zed.get() }
+    }
+  }
+
+  @Test
+  fun `propagate action scope to coroutines scope`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(
+      keyOf<String>(Names.named("from-seed")) to "seed-value"
+
+    )
+    scope.enter(seedData).use { actionScope ->
+      runBlocking(actionScope.asContextElement()) {
+        assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+      }
+    }
+  }
+
+  @Test
+  fun `throws if asContextElement is not call within a scope`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    assertFailsWith<IllegalStateException> {
+      scope.asContextElement()
+    }
+  }
+
+  @Test
+  fun `allow getting scope things from another thread`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(
+      keyOf<String>(Names.named("from-seed")) to "seed-value"
+    )
+
+    // exhibit A: trying to access scoped things in a new thread results in exceptions
+    scope.enter(seedData).use { _ ->
+      var thrown: Throwable? = null
+
+      thread {
+        try {
+          assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+        } catch (t: Throwable) {
+          thrown = t
+        }
+      }.join()
+      assertThat(thrown).isNotNull
+    }
+
+    // exhibit B: trying to access scoped things in a new thread can work, if you take
+    // a snapshot of the scope and use it to instantiate a scope in the new thread.
+    scope.enter(seedData).use { actionScope ->
+      var thrown: Throwable? = null
+
+      val snapshot = actionScope.snapshotActionScope()
+      thread {
+        try {
+          actionScope.enter(snapshot).use {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+          }
+        } catch (t: Throwable) {
+          thrown = t
+        }
+      }.join()
+      assertThat(thrown).isNull()
     }
   }
 }

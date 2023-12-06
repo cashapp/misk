@@ -7,11 +7,12 @@ import io.netty.handler.ssl.SslContext
 import io.netty.handler.ssl.SslContextBuilder
 import misk.resources.ResourceLoader
 import java.net.SocketAddress
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class GrpcChannelFactory @Inject constructor(val resourceLoader: ResourceLoader) {
+  @JvmOverloads
   fun createClientChannel(
     serverAddress: SocketAddress,
     serverCertResource: String = "classpath:/ssl/server_cert.pem"

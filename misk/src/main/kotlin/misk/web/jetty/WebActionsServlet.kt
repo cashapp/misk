@@ -1,5 +1,7 @@
 package misk.web.jetty
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
@@ -14,11 +16,11 @@ import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okio.BufferedSink
 import okio.buffer
 import okio.sink
 import okio.source
 import org.eclipse.jetty.http.HttpMethod
-import org.eclipse.jetty.http2.HTTP2Connection
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.server.ServerConnector
@@ -29,8 +31,6 @@ import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
 import wisp.logging.getLogger
 import java.net.HttpURLConnection
 import java.net.ProtocolException
-import javax.inject.Inject
-import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -61,19 +61,22 @@ internal class WebActionsServlet @Inject constructor(
     for (action in boundActions) {
       for (other in boundActions) {
         check(action === other || !action.hasIdenticalRouting(other)) {
-          "Actions [${action.action.name}, ${other.action.name}] have identical routing " +
-            "annotations."
+          "Actions [${action.action.name}, ${other.action.name}] have identical routing annotations."
         }
       }
     }
     // Check http2 is enabled if any gRPC actions are bound.
     if (boundActions.any { it.action.dispatchMechanism == DispatchMechanism.GRPC }) {
       if (!config.http2) {
-        log.warn { "HTTP/2 must be enabled if any gRPC actions are bound. " +
-          "This will cause an error in the future. Check these actions: " +
-          "${boundActions
-            .filter { it.action.dispatchMechanism == DispatchMechanism.GRPC  }
-            .map { it.action.name }}" }
+        log.warn {
+          "HTTP/2 must be enabled if any gRPC actions are bound. " +
+            "This will cause an error in the future. Check these actions: " +
+            "${
+              boundActions
+                .filter { it.action.dispatchMechanism == DispatchMechanism.GRPC }
+                .map { it.action.name }
+            }"
+        }
       }
     }
   }
@@ -94,7 +97,7 @@ internal class WebActionsServlet @Inject constructor(
     handleCall(request, response)
   }
 
-  fun doPatch(request: HttpServletRequest, response: HttpServletResponse) {
+  private fun doPatch(request: HttpServletRequest, response: HttpServletResponse) {
     handleCall(request, response)
   }
 
@@ -108,6 +111,10 @@ internal class WebActionsServlet @Inject constructor(
 
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
+      val responseBody = response.outputStream.sink().buffer()
+      val dispatchMechanism =
+        request.dispatchMechanism() ?: return sendNotFound(request, response, responseBody)
+
       val httpCall = ServletHttpCall.create(
         request = request,
         linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
@@ -115,17 +122,19 @@ internal class WebActionsServlet @Inject constructor(
             is UnixSocketConnector -> SocketAddress.Unix(
               (this.connector as UnixSocketConnector).unixSocket
             )
+
             is ServerConnector -> SocketAddress.Network(
               this.endPoint.remoteAddress.address.hostAddress,
               (this.connector as ServerConnector).localPort
             )
+
             else -> throw IllegalStateException("Unknown socket connector.")
           }
         },
-        dispatchMechanism = request.dispatchMechanism(),
+        dispatchMechanism = dispatchMechanism,
         upstreamResponse = JettyServletUpstreamResponse(response as Response),
         requestBody = request.inputStream.source().buffer(),
-        responseBody = response.outputStream.sink().buffer()
+        responseBody = responseBody
       )
 
       val requestContentType = httpCall.contentType()
@@ -137,37 +146,30 @@ internal class WebActionsServlet @Inject constructor(
       val bestAction = candidateActions.minOrNull()
 
       if (bestAction != null) {
-        bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
-        response.handleHttp2ConnectionClose()
-        return
+        return bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
       }
-    } catch (_: ProtocolException) {
-      // Probably an unexpected HTTP method. Send a 404 below.
+
+      // We didn't match with an action, so it's a 404. We hit this for things other than get/post
+      // which are covered by the NotFoundAction.
+      sendNotFound(request, response, responseBody)
     } catch (e: Throwable) {
       log.error(e) { "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}" }
 
       response.status = HttpURLConnection.HTTP_INTERNAL_ERROR
       response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
       response.writer.close()
-
-      return
     }
-
-    response.status = HttpURLConnection.HTTP_NOT_FOUND
-    response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-    response.writer.print("Nothing found at ${request.httpUrl()}")
-    response.writer.close()
   }
 
-  /**
-   * Jetty 9.x doesn't honor the "Connection: close" header for HTTP/2, so we do it ourselves.
-   * https://github.com/eclipse/jetty.project/issues/2788
-   */
-  private fun Response.handleHttp2ConnectionClose() {
-    val connectionHeader = getHeader("Connection")
-    if ("close".equals(connectionHeader, ignoreCase = true)) {
-      (httpChannel.connection as? HTTP2Connection)?.close()
-    }
+  private fun sendNotFound(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    responseBody: BufferedSink,
+  ) {
+    response.status = HttpURLConnection.HTTP_NOT_FOUND
+    response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
+    responseBody.writeUtf8("Nothing found at ${request.method} ${request.httpUrl()}")
+    responseBody.close()
   }
 
   override fun configure(factory: JettyWebSocketServletFactory) {
@@ -217,16 +219,17 @@ internal fun HttpServletRequest.httpUrl(): HttpUrl {
 }
 
 /** @throws ProtocolException on unexpected methods. */
-internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism {
+internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
   return when (method) {
     HttpMethod.GET.name -> DispatchMechanism.GET
     HttpMethod.POST.name -> when (contentType()) {
       MediaTypes.APPLICATION_GRPC_MEDIA_TYPE -> DispatchMechanism.GRPC
       else -> DispatchMechanism.POST
     }
-    "PATCH" -> DispatchMechanism.PATCH
+
+    HttpMethod.PATCH.name -> DispatchMechanism.PATCH
     HttpMethod.PUT.name -> DispatchMechanism.PUT
     HttpMethod.DELETE.name -> DispatchMechanism.DELETE
-    else -> throw ProtocolException("unexpected method: $method")
+    else -> null
   }
 }

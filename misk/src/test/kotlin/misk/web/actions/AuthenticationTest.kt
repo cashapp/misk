@@ -20,7 +20,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import javax.inject.Inject
+import jakarta.inject.Inject
+import misk.security.authz.AccessInterceptor
+import wisp.logging.LogCollector
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -30,6 +32,7 @@ class AuthenticationTest {
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
+  @Inject private lateinit var logCollector: LogCollector
 
   @Test fun customServiceAccess_unauthenticated() {
     assertThat(executeRequest(path = "/custom_service_access"))
@@ -77,6 +80,173 @@ class AuthenticationTest {
       )
     )
       .isEqualTo("$caller authorized with custom capability")
+  }
+
+  @Test fun testEmptyAuthenticatedWithUser() {
+    val caller = MiskCaller(user = "sandy", capabilities = setOf("nothingfancy"))
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_access",
+        user = "sandy",
+        capabilities = "nothingfancy"
+      )
+    )
+      .isEqualTo("$caller authorized with empty Authenticated")
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = ["widgeteer", "web-proxy", "access-proxy"]) // web-proxy and access-proxy are both ExcludeFromAllowAnyService
+  fun testEmptyAuthenticatedWithService(service: String) {
+    val caller = MiskCaller(service = service)
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_access",
+        service = service
+      )
+    )
+      .isEqualTo("$caller authorized with empty Authenticated")
+  }
+
+  @Test fun testEmptyAuthenticatedUnauthenticated() {
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_access"
+      )
+    )
+      .isEqualTo("unauthenticated")
+  }
+
+  @Test fun testEmptyAuthenticatedPlusCustomUnauthenticated() {
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_and_custom_capability_access"
+      )
+    )
+      .isEqualTo("unauthenticated")
+  }
+
+  @Test fun testEmptyAuthenticatedPlusCustomWithWrongCapability() {
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_and_custom_capability_access",
+        user = "sandy",
+        capabilities = "nothingfancy"
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun testEmptyAuthenticatedPlusCustomAsService() {
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_and_custom_capability_access",
+        service = "widgeteer",
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun checkAccessInterceptorFactoryLogs() {
+    // We don't need to execute a request to check these logs, they're logged on installation of
+    // the interceptor on the endpoint.
+
+    assertThat(logCollector.takeEvents(AccessInterceptor::class).map { it.message }).containsExactlyInAnyOrder(
+      "Conflicting auth annotations on EmptyAuthenticatedWithCustomAnnototationAccessAction::get(), @Authenticated won't have any effect due to @CustomCapabilityAccess",
+      "EmptyAuthenticatedAccessAction::get() has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated."
+    )
+  }
+
+  @Test fun testEmptyAuthenticatedPlusCustomWithRightCapability() {
+    val caller = MiskCaller(user = "sandy", capabilities = setOf("admin"))
+    assertThat(
+      executeRequest(
+        path = "/empty_authorized_and_custom_capability_access",
+        user = "sandy",
+        capabilities = "admin"
+      )
+    )
+      .isEqualTo("$caller authorized with CustomCapabilityAccess")
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = ["web-proxy", "access-proxy"]) // web-proxy and access-proxy are both ExcludeFromAllowAnyService
+  fun testAllowAnyServiceWithExcludedServices(service: String) {
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_access",
+        service = service
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun testAllowAnyServiceNotExcluded() {
+    val service = "widgeteer"
+    val caller = MiskCaller(service = service)
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_access",
+        service = service
+      )
+    )
+      .isEqualTo("$caller authorized as any service")
+  }
+
+  @Test fun testAllowAnyServiceWithUser() {
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_access",
+        user = "sandy"
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun testAllowAnyServiceWithAuthenticatedAsExcludedButExplicityAllowedService() {
+    val service = "web-proxy"
+    val caller = MiskCaller(service = service)
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_plus_authenticated",
+        service = service
+      )
+    )
+      .isEqualTo("$caller authorized as any service")
+  }
+
+  @Test fun testAllowAnyServiceWithAuthenticatedAsExcludedService() {
+    val service = "access-proxy"
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_plus_authenticated",
+        service = service
+      )
+    )
+      .isEqualTo("unauthorized")
+  }
+
+  @Test fun testAllowAnyServiceWithAuthenticatedAsAllowedUser() {
+    val caller = MiskCaller(user = "sandy", capabilities = setOf("admin"))
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_plus_authenticated",
+        user = caller.user,
+        capabilities = caller.capabilities.first()
+      )
+    )
+      .isEqualTo("$caller authorized as any service")
+  }
+
+  @Test fun testAllowAnyServiceWithAuthenticatedAsNotAllowedUser() {
+    val caller = MiskCaller(user = "sandy", capabilities = setOf("nothing"))
+    assertThat(
+      executeRequest(
+        path = "/allow_any_service_plus_authenticated",
+        user = caller.user,
+        capabilities = caller.capabilities.first()
+      )
+    )
+      .isEqualTo("unauthorized")
   }
 
   private class MixesUnauthenticatedWithOtherAnnotations @Inject constructor() : WebAction {

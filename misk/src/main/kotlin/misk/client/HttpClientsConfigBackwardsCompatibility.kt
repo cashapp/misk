@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import com.fasterxml.jackson.databind.util.Converter
 import java.time.Duration
 
-data class BackwardsCompatibleEndpointConfig(
+data class BackwardsCompatibleEndpointConfig @JvmOverloads constructor(
   // Common fields
   val url: String? = null,
   val envoy: HttpClientEnvoyConfig? = null,
@@ -26,7 +26,7 @@ data class BackwardsCompatibleEndpointConfig(
   val clientConfig: HttpClientConfig? = null
 )
 
-data class BackwardsCompatibleClientsConfig(
+data class BackwardsCompatibleClientsConfig @JvmOverloads constructor(
   // Legacy fields
   val defaultConnectTimeout: Duration? = null,
   val defaultWriteTimeout: Duration? = null,
@@ -40,7 +40,8 @@ data class BackwardsCompatibleClientsConfig(
 
   // New fields
   @JsonAlias("hosts")
-  val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf()
+  val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
+  val logRequests: Boolean = false,
 )
 
 class BackwardsCompatibleClientsConfigConverter :
@@ -85,7 +86,8 @@ class BackwardsCompatibleClientsConfigConverter :
 
     return HttpClientsConfig(
       hostConfigs = hostConfigs,
-      endpoints = endpoints
+      endpoints = endpoints,
+      logRequests = value.logRequests,
     )
   }
 

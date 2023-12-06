@@ -15,6 +15,7 @@ import kotlin.reflect.KClass
  * })
  * ```
  */
+@Deprecated("Replace the dependency on misk-feature-testing with testFixtures(misk-feature)")
 class FakeFeatureFlagsOverrideModule private constructor(
   private val qualifier: KClass<out Annotation>? = null,
   private val override: FakeFeatureFlagsOverride,

@@ -2,8 +2,8 @@ package misk.web.jetty
 
 import com.google.common.util.concurrent.AbstractScheduledService
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 internal class JettyThreadPoolMetricsCollector @Inject internal constructor(

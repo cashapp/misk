@@ -16,8 +16,9 @@ import misk.web.mediatype.compareTo
 import misk.web.metadata.webaction.WebActionMetadata
 import okhttp3.HttpUrl
 import okhttp3.MediaType
+import org.slf4j.MDC
 import java.util.regex.Matcher
-import javax.inject.Provider
+import com.google.inject.Provider
 import javax.servlet.http.HttpServletRequest
 import kotlin.reflect.KType
 
@@ -115,8 +116,15 @@ internal class BoundAction<A : WebAction>(
       seedDataTransformers.fold(initialSeedData) { seedData, interceptor ->
         interceptor.transform(seedData)
       }
-    scope.enter(seedData).use {
-      handle(httpCall, pathMatcher)
+    
+    MDC.clear() // MDC should already be empty, but clear it again just in case
+    
+    try {
+      scope.enter(seedData).use {
+        handle(httpCall, pathMatcher)
+      }
+    } finally {
+      MDC.clear() // don't let any MDC tags leak to subsequent requests
     }
   }
 
@@ -254,7 +262,14 @@ private class RequestBridgeInterceptor(
     if (returnValue is Response<*>) {
       httpCall.statusCode = returnValue.statusCode
       httpCall.addResponseHeaders(returnValue.headers)
+      val trailers = returnValue.trailers()
       returnValue = returnValue.body!!
+      if (trailers?.any() == true) {
+        httpCall.requireTrailers()
+        trailers.map {
+          httpCall.setResponseTrailer(it.first, it.second)
+        }
+      }
     }
 
     webActionBinding.afterCall(chain.webAction, httpCall, pathMatcher, returnValue)

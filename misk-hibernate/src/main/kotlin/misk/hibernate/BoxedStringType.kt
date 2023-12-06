@@ -56,7 +56,12 @@ internal class BoxedStringType<T : Any> : UserType, ParameterizedType {
   override fun assemble(cached: Serializable, owner: Any?) = boxer.box(cached as String)
 
   @Suppress("UNCHECKED_CAST") // Hibernate promises to call us only with the types we support.
-  override fun disassemble(value: Any) = boxer.unbox(value as T)
+  override fun disassemble(value: Any) = when (value) {
+    // In the case where we're trying to do a LIKE query, we may receive a String here, in which
+    // case we just return it
+    is String -> value
+    else -> boxer.unbox(value as T)
+  }
 
   override fun nullSafeSet(
     st: PreparedStatement,
