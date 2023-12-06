@@ -124,6 +124,7 @@ class DashboardPageLayout @Inject constructor(
           label = it.menuLabel,
           href = it.menuUrl,
           isSelected = currentPath.startsWith(it.menuUrl),
+          openInNewTab = it.menuUrl.startsWith("https://")
         )
       }
     )
