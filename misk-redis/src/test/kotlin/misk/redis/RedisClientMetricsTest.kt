@@ -18,7 +18,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
-import misk.redis.testing.RedisFlushModule
 import org.junit.jupiter.api.BeforeEach
 import redis.clients.jedis.ConnectionPoolConfig
 
@@ -30,7 +29,6 @@ class RedisClientMetricsTest {
       install(DeploymentModule(TESTING))
       install(MiskTestingServiceModule())
       install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
-      install(RedisFlushModule())
     }
   }
 

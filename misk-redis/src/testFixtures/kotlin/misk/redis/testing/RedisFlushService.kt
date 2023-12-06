@@ -7,6 +7,12 @@ import misk.redis.Redis
 import redis.clients.jedis.JedisPool
 import wisp.logging.getLogger
 
+/**
+ * Flushes all Redis databases on startup.
+ *
+ * Note: If your test does not use `@MiskTest(startService = true)`,
+ * you will need instead to manually flush redis via `@BeforeEach`. See examples in `RealRedisTest`
+ */
 @Singleton
 class RedisFlushService @Inject constructor() : AbstractIdleService() {
   // TODO(tgregory) Remove this once bucket4j redis uses UnifiedJedis
