@@ -4,7 +4,7 @@ import jakarta.inject.Qualifier
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.metadata.config.ConfigMetadataAction
-import misk.web.v2.BaseDashboardV2Module
+import misk.web.v2.NavbarModule
 
 /**
  * Installs default Admin Dashboard that runs at multibound DashboardHomeUrl<AdminDashboard>
@@ -23,30 +23,14 @@ class AdminDashboardModule @JvmOverloads constructor(
   private val configTabMode: ConfigMetadataAction.ConfigTabMode = ConfigMetadataAction.ConfigTabMode.SAFE,
 ) : KAbstractModule() {
   override fun configure() {
-    // v1 Dashboard
+    // Base setup
     install(BaseDashboardModule(isDevelopment))
+    install(NavbarModule())
 
     // Default container admin tabs
     install(ConfigDashboardTabModule(isDevelopment, configTabMode))
     install(DatabaseDashboardTabModule(isDevelopment))
     install(WebActionsDashboardTabModule(isDevelopment))
-
-    // v2 Dashboard
-    install(BaseDashboardV2Module())
-
-    // Default Menu
-    multibind<DashboardNavbarItem>().toInstance(
-      DashboardNavbarItem<AdminDashboard>(
-        item = "<a href=\"/_admin/database/\">Database</a>",
-        order = 100
-      )
-    )
-    multibind<DashboardNavbarItem>().toInstance(
-      DashboardNavbarItem<AdminDashboard>(
-        item = "<a href=\"/_admin/web-actions/\">Web Actions</a>",
-        order = 101
-      )
-    )
   }
 }
 

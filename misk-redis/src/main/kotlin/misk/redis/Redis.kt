@@ -20,6 +20,8 @@ interface Redis {
   /**
    * Deletes multiple keys.
    *
+   * On cluster mode, this might trigger multiple calls to Redis
+   *
    * @param keys the keys to delete
    * @return 0 if none of the keys were deleted, otherwise a positive integer
    *         representing the number of keys that were deleted
@@ -29,6 +31,8 @@ interface Redis {
   /**
    * Retrieves the values for the given list of keys.
    *
+   * On cluster mode, this might trigger multiple calls to Redis
+   *
    * @param keys the keys to retrieve
    * @return a list of String in the same order as the specified list of keys.
    * For each key, a value will be returned if a key was found, otherwise null is returned.
@@ -37,6 +41,8 @@ interface Redis {
 
   /**
    * Sets the key value pairs.
+   *
+   * On cluster mode, this might trigger multiple calls to Redis
    *
    * @param keyValues the list of keys and values in alternating order.
    */
@@ -209,6 +215,8 @@ interface Redis {
    * This command comes in place of the now deprecated [brpoplpush]. Doing BLMOVE RIGHT LEFT is
    * equivalent.
    *
+   * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
+   *
    * See [lmove] for more information.
    */
   fun blmove(
@@ -225,6 +233,8 @@ interface Redis {
    * behaves exactly like [rpoplpush]. When source is empty, Redis will block the connection until
    * another client pushes to it or until timeout is reached. A timeout of zero can be used to block
    * indefinitely.
+   *
+   * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
    *
    * See [rpoplpush] for more information.
    *
@@ -248,6 +258,8 @@ interface Redis {
    * and destination are the same, the operation is equivalent to removing the first/last element
    * from the list and pushing it as first/last element of the list, so it can be considered as a
    * list rotation command (or a no-op if wherefrom is the same as whereto).
+   *
+   * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
    *
    * This command comes in place of the now deprecated RPOPLPUSH. Doing LMOVE RIGHT LEFT is
    * equivalent.
@@ -346,6 +358,8 @@ interface Redis {
    * and destination are the same, the operation is equivalent to removing the last element from the
    * list and pushing it as first element of the list, so it can be considered as a list rotation
    * command.
+   *
+   * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
    *
    * As of Redis version 6.2.0, this command is regarded as deprecated.
    *

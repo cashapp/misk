@@ -332,13 +332,24 @@ constructor(
         overrideKey(feature, key, jsonValue, defaultAttributes)
     }
 
-    @JvmOverloads
-    fun <T> overrideKey(
-        feature: Feature,
-        key: String,
-        value: T,
-        attributes: Attributes = defaultAttributes
-    ) {
+  @JvmOverloads
+  fun <T> overrideKey(
+    feature: Feature,
+    key: String,
+    value: T,
+    attributes: Attributes = defaultAttributes
+  ) {
+    overrideKey<T, T>(feature, key, value, attributes, mapper = null)
+  }
+
+  @JvmOverloads
+  fun <T, V> overrideKey(
+    feature: Feature,
+    key: String,
+    value: T,
+    attributes: Attributes = defaultAttributes,
+    mapper: ((T) -> V)?,
+  ) {
         val mapKey = MapKey(feature, key)
         overrides
             .computeIfAbsent(mapKey) { PriorityQueue() }
@@ -356,7 +367,7 @@ constructor(
                 ?.forEach { r ->
                     @Suppress("UNCHECKED_CAST")
                     r.executor.execute {
-                        (r as TrackerMapValue<T>).tracker(value)
+                        (r as TrackerMapValue<V>).tracker(mapper?.let{ it(value) } ?: (value as V))
                     }
                 }
         }
@@ -369,8 +380,9 @@ constructor(
         value: T,
         attributes: Attributes = defaultAttributes
     ) {
-        val jsonValue = { moshi().adapter(T::class.java).toSafeJson(value) }
-        overrideKey(feature, key, jsonValue, attributes)
+        val adapter = moshi().adapter(T::class.java)
+        val jsonValue = { adapter.toSafeJson(value) }
+        overrideKey<() -> String, T>(feature, key, jsonValue, attributes, { adapter.fromSafeJson(it())!! })
     }
 
     @JvmOverloads

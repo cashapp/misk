@@ -41,7 +41,6 @@ dependencies {
   implementation(Dependencies.jettyAlpnServer)
   implementation(Dependencies.jettyHttp)
   implementation(Dependencies.jettyHttp2)
-  implementation(Dependencies.jettyHttp2Common)
   implementation(Dependencies.jettyIo)
   implementation(Dependencies.jettyServlet)
   implementation(Dependencies.jettyServlets)

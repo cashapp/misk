@@ -1,14 +1,14 @@
 package com.squareup.exemplar.dashboard.support
 
+import com.squareup.exemplar.dashboard.SupportDashboardAccess
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.html.h1
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
-import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import misk.web.v2.DashboardPageLayout
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @Singleton
 class SupportDashboardIndexAction @Inject constructor(
@@ -16,7 +16,7 @@ class SupportDashboardIndexAction @Inject constructor(
 ) : WebAction {
   @Get("/support/")
   @ResponseContentType(MediaTypes.TEXT_HTML)
-  @AdminDashboardAccess
+  @SupportDashboardAccess
   fun get(): String = dashboardPageLayout
     .newBuilder()
     .build { appName, _, _ ->

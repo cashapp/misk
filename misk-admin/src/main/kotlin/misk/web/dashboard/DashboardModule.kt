@@ -7,8 +7,9 @@ import misk.web.v2.DashboardHotwireTabAction
 import misk.web.v2.DashboardIFrameTabAction
 import misk.web.v2.DashboardIndexAccessBlock
 import misk.web.v2.DashboardIndexBlock
-import misk.web.v2.DashboardPageLayout.Companion.BETA_PREFIX
 import okio.ByteString.Companion.encodeUtf8
+import wisp.deployment.Deployment
+import wisp.deployment.PRODUCTION
 
 /** Handles installation of Misk Dashboard components (admin dashboard or custom...). */
 class DashboardModule @JvmOverloads constructor(
@@ -22,16 +23,16 @@ class DashboardModule @JvmOverloads constructor(
     dashboardTabProvider?.let { multibind<DashboardTab>().toProvider(it) }
     dashboardTabLoader?.let {
       multibind<DashboardTabLoaderEntry>().toInstance(
-        DashboardTabLoaderEntry("$BETA_PREFIX${it.urlPathPrefix}", it)
+        DashboardTabLoaderEntry(it.urlPathPrefix, it)
       )
       multibind<DashboardTabLoader>().toInstance(it)
 
       when (it) {
         is DashboardTabLoader.HotwireTab -> {
-          install(WebActionModule.createWithPrefix<DashboardHotwireTabAction>("$BETA_PREFIX${it.urlPathPrefix}"))
+          install(WebActionModule.createWithPrefix<DashboardHotwireTabAction>(it.urlPathPrefix))
         }
         is DashboardTabLoader.IframeTab -> {
-          install(WebActionModule.createWithPrefix<DashboardIFrameTabAction>(url_path_prefix = "$BETA_PREFIX${it.urlPathPrefix}"))
+          install(WebActionModule.createWithPrefix<DashboardIFrameTabAction>(it.urlPathPrefix))
         }
       }
     }
@@ -64,6 +65,34 @@ class DashboardModule @JvmOverloads constructor(
       val dashboardTabProvider = DashboardTabProvider(
         slug = "menu-link-$hash",
         url_path_prefix = url,
+        menuLabel = { _, _ -> label },
+        menuUrl = { _, _ -> url },
+        menuCategory = category,
+        dashboard_slug = slugify<DA>(),
+        accessAnnotationKClass = AA::class,
+        dashboardAnnotationKClass = DA::class,
+      )
+      return DashboardModule(
+        dashboardTabProvider = dashboardTabProvider,
+      )
+    }
+
+    /**
+     * Create menu link with [label] for [url] under menu [category]
+     *   for a dashboard [DA] with access [AA].
+     *
+     * If [category] is empty, it will appear at the top of the menu list.
+     */
+    inline fun <reified DA : Annotation, reified AA : Annotation> createMenuLink(
+      noinline label: (appName: String, deployment: Deployment) -> String,
+      noinline url: (appName: String, deployment: Deployment) -> String,
+      category: String = "",
+    ): DashboardModule {
+      // Create a unique hash for the link that will not conflict with any other link
+      val hash = (label.toString() + url.toString() + category).encodeUtf8().sha256().hex().take(24)
+      val dashboardTabProvider = DashboardTabProvider(
+        slug = "menu-link-$hash",
+        url_path_prefix = url("app", PRODUCTION),
         menuLabel = label,
         menuUrl = url,
         menuCategory = category,
@@ -96,8 +125,8 @@ class DashboardModule @JvmOverloads constructor(
       val dashboardTabProvider = DashboardTabProvider(
         slug = slug,
         url_path_prefix = urlPathPrefix,
-        menuLabel = menuLabel,
-        menuUrl = menuUrl,
+        menuLabel = { _, _ -> menuLabel },
+        menuUrl = { _, _ -> menuUrl },
         menuCategory = menuCategory,
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
@@ -136,8 +165,8 @@ class DashboardModule @JvmOverloads constructor(
       val dashboardTabProvider = DashboardTabProvider(
         slug = slug,
         url_path_prefix = urlPathPrefix,
-        menuLabel = menuLabel,
-        menuUrl = menuUrl,
+        menuLabel = { _, _ -> menuLabel },
+        menuUrl = { _, _ -> menuUrl },
         menuCategory = menuCategory,
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
@@ -181,8 +210,8 @@ class DashboardModule @JvmOverloads constructor(
       val dashboardTabProvider = DashboardTabProvider(
         slug = slug,
         url_path_prefix = urlPathPrefix,
-        menuLabel = menuLabel,
-        menuUrl = menuUrl,
+        menuLabel = { _, _ -> menuLabel },
+        menuUrl = { _, _ -> menuUrl },
         menuCategory = menuCategory,
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
@@ -198,6 +227,49 @@ class DashboardModule @JvmOverloads constructor(
       return DashboardModule(
         dashboardTabProvider = dashboardTabProvider,
         dashboardTabLoader = dashboardTabLoader,
+        webTabResourceModule = webTabResourceModule
+      )
+    }
+
+    /**
+     * Installs a Misk-Web app for a dashboard [DA] with access [AA].
+     * The tab is identified by a unique [slug] and is routed to by match on [urlPathPrefix].
+     * In local development – when [isDevelopment] is true, the [developmentWebProxyUrl] is used
+     * to resolve requests to [resourcePathPrefix]. In real environments,
+     * the [classpathResourcePathPrefix] is used to resolve resource requests to files in classpath.
+     * The tab is included in the dashboard navbar menu with [menuLabel] and in the menu group [menuCategory].
+     */
+    inline fun <reified DA : Annotation, reified AA : Annotation> createMiskWebDashboard(
+      isDevelopment: Boolean,
+      slug: String,
+      urlPathPrefix: String,
+      developmentWebProxyUrl: String,
+      resourcePathPrefix: String = "/_tab/$slug/",
+      classpathResourcePathPrefix: String = "classpath:/web$resourcePathPrefix",
+      menuLabel: String,
+      menuUrl: String = urlPathPrefix,
+      menuCategory: String = "Admin",
+    ): DashboardModule {
+      val dashboardTabProvider = DashboardTabProvider(
+        slug = slug,
+        url_path_prefix = urlPathPrefix,
+        menuLabel = { _, _ -> menuLabel },
+        menuUrl = { _, _ -> menuUrl },
+        menuCategory = menuCategory,
+        dashboard_slug = slugify<DA>(),
+        accessAnnotationKClass = AA::class,
+        dashboardAnnotationKClass = DA::class,
+      )
+      val webTabResourceModule = WebTabResourceModule(
+        isDevelopment = isDevelopment,
+        slug = slug,
+        url_path_prefix = resourcePathPrefix,
+        resourcePath = classpathResourcePathPrefix,
+        web_proxy_url = developmentWebProxyUrl
+      )
+      return DashboardModule(
+        dashboardTabProvider = dashboardTabProvider,
+        dashboardTabLoader = null,
         webTabResourceModule = webTabResourceModule
       )
     }

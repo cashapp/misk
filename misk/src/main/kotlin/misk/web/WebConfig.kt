@@ -143,7 +143,7 @@ data class WebSslConfig @JvmOverloads constructor(
   val cert_store: CertStoreConfig,
   val trust_store: TrustStoreConfig? = null,
   val mutual_auth: MutualAuth = MutualAuth.REQUIRED,
-  val cipher_compatibility: CipherCompatibility = CipherCompatibility.COMPATIBLE,
+  val cipher_compatibility: CipherCompatibility = CipherCompatibility.MODERN,
 ) {
   enum class MutualAuth {
     NONE,

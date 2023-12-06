@@ -6,12 +6,12 @@ import misk.moshi.MoshiModule
 import misk.moshi.adapter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.metadata.jvm.JvmMetadataAction
 import misk.web.metadata.jvm.JvmMetadataAction.JvmRuntimeResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.lang.management.RuntimeMXBean
 import jakarta.inject.Inject
+import misk.web.metadata.jvm.JvmMetadataAction
 import javax.management.ObjectName
 
 @MiskTest(startService = false)
