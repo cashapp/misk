@@ -2,14 +2,18 @@ package misk.redis
 
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import redis.clients.jedis.JedisPool
+import redis.clients.jedis.JedisCluster
+import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
+import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.commands.JedisBinaryCommands
 import redis.clients.jedis.params.SetParams
+import redis.clients.jedis.util.JedisClusterCRC16
 import java.lang.reflect.InvocationHandler
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.time.Duration
@@ -20,7 +24,7 @@ import kotlin.reflect.cast
  * been issued.
  */
 class RealRedis(
-  private val jedisPool: JedisPool,
+  private val unifiedJedis: UnifiedJedis,
   private val clientMetrics: RedisClientMetrics,
 ) : Redis {
   override fun del(key: String): Boolean {
@@ -29,20 +33,64 @@ class RealRedis(
   }
 
   override fun del(vararg keys: String): Int {
-    val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
-    return jedis { del(*keysAsBytes) }.toInt()
+    return when(unifiedJedis) {
+      is JedisPooled -> {
+        val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+        jedis { unifiedJedis.del(*keysAsBytes) }.toInt()
+      }
+
+      is JedisCluster -> {
+        // JedisCluster does not support multi-key del, so we need to group by slot and perform del for each slot
+        keys.groupBy { JedisClusterCRC16.getSlot(it) }
+          .map { (_, slotKeys) -> jedis { unifiedJedis.del(*slotKeys.toTypedArray()) } }
+          .sumOf { it.toInt() }
+      }
+
+      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+    }
   }
 
   override fun mget(vararg keys: String): List<ByteString?> {
-    val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
-    return jedis { mget(*keysAsBytes) }
-      .map { it?.toByteString() }
+    return when(unifiedJedis) {
+      is JedisPooled -> {
+        val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+        jedis { unifiedJedis.mget(*keysAsBytes) }.map { it?.toByteString() }
+      }
+      is JedisCluster -> {
+        // JedisCluster does not support multi-key mget, so we need to group by slot and perform mget for each slot
+        val keyToValueMap = mutableMapOf<String, ByteString?>()
+        keys.groupBy { JedisClusterCRC16.getSlot(it) }
+          .flatMap { (_, slotKeys) ->
+            val result = jedis { unifiedJedis.mget(*slotKeys.toTypedArray()) }
+            slotKeys.zip(result)
+        }.forEach { (key, value) ->
+          keyToValueMap[key] = value?.toByteArray(charset)?.toByteString()
+        }
+        keys.map{keyToValueMap[it]}
+      }
+
+      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+    }
+
   }
 
   override fun mset(vararg keyValues: ByteString) {
     require(keyValues.size % 2 == 0) { "Wrong number of arguments to mset" }
-    val byteArrays = keyValues.map { it.toByteArray() }.toTypedArray()
-    jedis { mset(*byteArrays) }
+    when(unifiedJedis) {
+      is JedisPooled -> {
+        val byteArrays = keyValues.map { it.toByteArray() }.toTypedArray()
+        return jedis { unifiedJedis.mset(*byteArrays) }
+      }
+      is JedisCluster -> {
+        // JedisCluster does not support multi-key mset, so we need to group by slot and perform mset for each slot
+        keyValues.toList().chunked(2).groupBy { JedisClusterCRC16.getSlot(it[0].toByteArray()) }
+          .forEach { (_, slotKeys) ->
+            jedis { unifiedJedis.mset(*slotKeys.flatten().map{it.toByteArray()}.toTypedArray())}
+          }
+      }
+
+      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+    }
   }
 
   override fun get(key: String): ByteString? {
@@ -267,18 +315,28 @@ class RealRedis(
 
   override fun watch(vararg keys: String) {
     val keysAsBytes = keys.map { it.toByteArray() }.toTypedArray()
-    jedisPool.resource.use { jedis -> jedis.watch(*keysAsBytes) }
+    invokeTransactionOp { watch(*keysAsBytes) }
   }
 
   override fun unwatch(vararg keys: String) {
-    jedisPool.resource.use { jedis -> jedis.unwatch() }
+    invokeTransactionOp { unwatch() }
+  }
+
+  private fun invokeTransactionOp(op: Transaction.() -> Unit) {
+    when (unifiedJedis) {
+      is JedisPooled -> unifiedJedis.pool.resource.use { connection ->
+        val transaction = Transaction(connection, false)
+        transaction.op()
+      }
+      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+    }
   }
 
   // Transactions do not get client histogram metrics right now.
   // multi() returns the jedis to the pool, despite returning a Transaction that holds a reference.
   // This is a bug, and will be fixed in a follow-up.
   override fun multi(): Transaction {
-    return jedisPool.resource.use { jedis -> jedis.multi() }
+    return unifiedJedis.multi()
   }
 
   // Pipelined requests do not get client histogram metrics right now.
@@ -286,44 +344,55 @@ class RealRedis(
   // to the borrowed jedis connection.
   // This is a bug, and will be fixed in a follow-up.
   override fun pipelined(): Pipeline {
-    return jedisPool.resource.use { jedis -> jedis.pipelined() }
+    return unifiedJedis.pipelined() as Pipeline
   }
 
   /** Closes the connection to Redis. */
   override fun close() {
-    return jedisPool.close()
+    return unifiedJedis.close()
   }
 
   override fun subscribe(jedisPubSub: JedisPubSub, channel: String) {
-    jedisPool.resource.use { jedis -> jedis.subscribe(jedisPubSub, channel) }
+    unifiedJedis.subscribe(jedisPubSub, channel)
   }
 
   override fun publish(channel: String, message: String) {
-    jedisPool.resource.use { jedis -> jedis.publish(channel, message) }
+    unifiedJedis.publish(channel, message)
   }
 
   // Gets a Jedis instance from the pool, and times the requested method invocations.
   private fun <T> jedis(op: JedisBinaryCommands.() -> T): T {
-    return jedisPool.resource.use { jedisResource ->
-      val invocationHandler = JedisTimedInvocationHandler(jedisResource, clientMetrics)
-      val timedProxy = JedisBinaryCommands::class.cast(
-        Proxy.newProxyInstance(
-          ClassLoader.getSystemClassLoader(),
-          arrayOf(JedisBinaryCommands::class.java),
-          invocationHandler
-        )
+    updateMetrics()
+    val invocationHandler = JedisTimedInvocationHandler(unifiedJedis, clientMetrics)
+    val timedProxy = JedisBinaryCommands::class.cast(
+      Proxy.newProxyInstance(
+        ClassLoader.getSystemClassLoader(),
+        arrayOf(JedisBinaryCommands::class.java),
+        invocationHandler
       )
-      timedProxy.op()
+    )
+    val response = timedProxy.op()
+    updateMetrics()
+    return response
+  }
+
+  private fun updateMetrics() {
+    when (unifiedJedis) {
+      is JedisPooled -> clientMetrics.setActiveIdleConnectionMetrics(unifiedJedis.pool)
     }
   }
 
   private class JedisTimedInvocationHandler(
-    private val jedis: JedisBinaryCommands,
+    private val jedisCommand: JedisBinaryCommands,
     private val clientMetrics: RedisClientMetrics,
   ) : InvocationHandler {
     override fun invoke(proxy: Any, method: Method, args: Array<out Any?>?): Any? =
-      clientMetrics.timed(method.name) {
-        method.invoke(jedis, *(args ?: arrayOf()))
+      try {
+        clientMetrics.timed(method.name) {
+          method.invoke(jedisCommand, *(args ?: arrayOf()))
+        }
+      } catch (e: InvocationTargetException) {
+        throw e.cause!!
       }
   }
 

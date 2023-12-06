@@ -109,7 +109,7 @@ class JooqModule @JvmOverloads constructor(
             .withOutput(datasourceConfig.database)
         )
       )
-    return DSL.using(dataSourceService.get(), datasourceConfig.type.toSqlDialect(), settings)
+    return DSL.using(dataSourceService.dataSource, datasourceConfig.type.toSqlDialect(), settings)
       .apply {
         configuration().set(
           DefaultTransactionProvider(

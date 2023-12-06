@@ -19,6 +19,5 @@ public final class misk/feature/launchdarkly/LaunchDarklyModule : misk/inject/KA
 	public fun <init> (Lmisk/feature/launchdarkly/LaunchDarklyConfig;)V
 	public fun <init> (Lmisk/feature/launchdarkly/LaunchDarklyConfig;Lkotlin/reflect/KClass;)V
 	public synthetic fun <init> (Lmisk/feature/launchdarkly/LaunchDarklyConfig;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun provideLaunchDarklyClient (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/resources/ResourceLoader;)Lcom/launchdarkly/sdk/server/interfaces/LDClientInterface;
 }
 
