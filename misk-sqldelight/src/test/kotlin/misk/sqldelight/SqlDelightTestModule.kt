@@ -12,6 +12,7 @@ import misk.jdbc.JdbcModule
 import misk.jdbc.JdbcTestingModule
 import misk.logging.LogCollectorModule
 import misk.sqldelight.testing.MoviesDatabase
+import misk.sqldelight.testing.MoviesQueries
 import misk.testing.MockTracingBackendModule
 import misk.time.FakeClockModule
 import wisp.deployment.TESTING
@@ -45,10 +46,11 @@ class SqlDelightTestModule() : KAbstractModule() {
 
   @Provides
   @Singleton
+  @SqlDelightTestdb
   fun provideMoviesDatabase(
     @SqlDelightTestdb dataSource: Provider<DataSource>
-  ): MoviesDatabase {
-    val driver = object : JdbcDriver() {
+  ): JdbcDriver {
+    return object : JdbcDriver() {
       override fun getConnection(): Connection {
         val connection = dataSource.get().connection
         connection.autoCommit = true
@@ -68,14 +70,19 @@ class SqlDelightTestModule() : KAbstractModule() {
         connection.close()
       }
     }
-    return MoviesDatabase(driver)
   }
 
   @Provides
   @Singleton
-  @SqlDelightTestdb
-  fun provideRetryingTransacter(moviesDatabase: MoviesDatabase): RetryingTransacter {
-    return RetryingTransacter(moviesDatabase)
+  fun provideMoviesDatabase(
+    @SqlDelightTestdb jdbcDriver: JdbcDriver,
+  ): MoviesDatabase {
+    val moviesDatabase = MoviesDatabase.invoke(jdbcDriver)
+
+    return object : MoviesDatabase, RetryingTransacter(moviesDatabase) {
+      override val moviesQueries: MoviesQueries
+        get() = moviesDatabase.moviesQueries
+    }
   }
 }
 

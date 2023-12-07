@@ -15,23 +15,23 @@ private val logger = getLogger<RetryingTransacter>()
 
 // NB: all options should be immutable types as copy() is shallow.
 data class TransacterOptions(
-  val maxAttempts: Int = 3,
+  var maxAttempts: Int = 3,
   val minRetryDelayMillis: Long = 100,
   val maxRetryDelayMillis: Long = 500,
   val retryJitterMillis: Long = 400,
 )
 
-class RetryingTransacter(
+abstract class RetryingTransacter(
   private val delegate: Transacter,
-  private val options: TransacterOptions = TransacterOptions()
+  val options: TransacterOptions = TransacterOptions()
 ) : Transacter {
 
   private val inTransaction = object : ThreadLocal<Boolean>() {
     override fun initialValue(): Boolean = false
   }
 
-  fun maxAttempts(maxAttempts: Int): RetryingTransacter = RetryingTransacter(delegate, options.copy(
-    maxAttempts = maxAttempts))
+//  fun maxAttempts(maxAttempts: Int): RetryingTransacter = RetryingTransacter(delegate, options.copy(
+//    maxAttempts = maxAttempts))
 
   override fun transaction(noEnclosing: Boolean,
     body: TransactionWithoutReturn.() -> Unit) = retryWithWork {
