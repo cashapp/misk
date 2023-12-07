@@ -403,16 +403,16 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 public abstract interface annotation class misk/redis/testing/ForFakeRedis : java/lang/annotation/Annotation {
 }
 
-public final class misk/redis/testing/RedisFlushModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-}
-
 public final class misk/redis/testing/RedisFlushService : com/google/common/util/concurrent/AbstractIdleService {
 	public static final field Companion Lmisk/redis/testing/RedisFlushService$Companion;
 	public fun <init> ()V
 }
 
 public final class misk/redis/testing/RedisFlushService$Companion {
+}
+
+public final class misk/redis/testing/RedisTestFlushModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
 }
 
 public final class misk/redis/testing/RedisTestModule : misk/inject/KAbstractModule {
