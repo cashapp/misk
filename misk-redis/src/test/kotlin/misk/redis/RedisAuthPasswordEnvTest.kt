@@ -7,7 +7,6 @@ import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.redis.testing.DockerRedis
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
@@ -20,10 +19,6 @@ import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest
 class RedisAuthPasswordEnvTest {
-  @Suppress("unused")
-  @MiskExternalDependency
-  private val dockerRedis = DockerRedis // Start Redis so that we can properly provision a client.
-
   @Test fun `injection succeeds with password-less config in fake environments`() {
     assertThat(DockerRedis.config.values.first().redis_auth_password).isEmpty()
     val injector = createInjector(fakeEnv, realRedisModule)

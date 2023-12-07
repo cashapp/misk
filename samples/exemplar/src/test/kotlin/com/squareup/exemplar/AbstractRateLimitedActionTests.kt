@@ -5,8 +5,6 @@ import com.squareup.exemplar.actions.RateLimitedAction
 import io.micrometer.core.instrument.MeterRegistry
 import jakarta.inject.Inject
 import misk.exceptions.TooManyRequestsException
-import misk.redis.testing.DockerRedis
-import misk.testing.MiskExternalDependency
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -45,10 +43,6 @@ abstract class AbstractRateLimitedActionTests {
       RateLimiterMetrics.ConsumptionResult.EXCEPTION
     )
   }
-
-  @Suppress("unused")
-  @MiskExternalDependency
-  private val dockerRedis = DockerRedis
 
   abstract fun setException()
 

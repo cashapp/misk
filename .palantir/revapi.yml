@@ -344,3 +344,8 @@ acceptedBreaks:
         \ java.lang.String> misk.web.dashboard.DashboardTabProvider::getMenuUrl()"
       justification: "No external usage of the DashboardTabProvider so this change\
         \ is backwards compatible."
+  "2023.12.06.183120-32a4008":
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method void misk.redis.Redis::flushAll()"
+      justification: "Change is additive and implements a standard Redis command"
