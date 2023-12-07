@@ -54,7 +54,7 @@ class LaunchDarklyModule @JvmOverloads constructor(
 
   @Provides
   @Singleton
-  fun providesLdClientInterface(
+  internal fun providesLdClientInterface(
     sslLoader: SslLoader,
     sslContextFactory: SslContextFactory,
     resourceLoader: ResourceLoader,
