@@ -349,3 +349,19 @@ acceptedBreaks:
     - code: "java.method.addedToInterface"
       new: "method void misk.redis.Redis::flushAll()"
       justification: "Change is additive and implements a standard Redis command"
+  "2023.12.07.185313-f61a2e4":
+    com.squareup.misk:misk-launchdarkly:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method wisp.launchdarkly.LaunchDarklyFeatureFlags misk.feature.launchdarkly.LaunchDarklyModule::wispLaunchDarkly$misk_launchdarkly(misk.security.ssl.SslLoader,\
+        \ misk.security.ssl.SslContextFactory, misk.resources.ResourceLoader, com.squareup.moshi.Moshi,\
+        \ io.micrometer.core.instrument.MeterRegistry)"
+      new: "method wisp.launchdarkly.LaunchDarklyFeatureFlags misk.feature.launchdarkly.LaunchDarklyModule::wispLaunchDarkly$misk_launchdarkly(com.google.inject.Provider<com.launchdarkly.sdk.server.interfaces.LDClientInterface>,\
+        \ com.squareup.moshi.Moshi, io.micrometer.core.instrument.MeterRegistry)"
+      justification: "This is a provider that's not called manually"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method wisp.launchdarkly.LaunchDarklyFeatureFlags misk.feature.launchdarkly.LaunchDarklyModule::wispLaunchDarkly$misk_launchdarkly(misk.security.ssl.SslLoader,\
+        \ misk.security.ssl.SslContextFactory, misk.resources.ResourceLoader, com.squareup.moshi.Moshi,\
+        \ io.micrometer.core.instrument.MeterRegistry)"
+      new: "method wisp.launchdarkly.LaunchDarklyFeatureFlags misk.feature.launchdarkly.LaunchDarklyModule::wispLaunchDarkly$misk_launchdarkly(jakarta.inject.Provider<com.launchdarkly.sdk.server.interfaces.LDClientInterface>,\
+        \ com.squareup.moshi.Moshi, io.micrometer.core.instrument.MeterRegistry)"
+      justification: "This is a provider that's not called manually"
