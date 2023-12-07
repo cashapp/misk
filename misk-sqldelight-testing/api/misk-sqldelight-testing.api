@@ -1,0 +1,47 @@
+public final class misk/sqldelight/testing/Movies {
+	public synthetic fun <init> (JLjava/lang/String;JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3-qicT5oE ()J
+	public final fun copy-3NT5nlE (JLjava/lang/String;J)Lmisk/sqldelight/testing/Movies;
+	public static synthetic fun copy-3NT5nlE$default (Lmisk/sqldelight/testing/Movies;JLjava/lang/String;JILjava/lang/Object;)Lmisk/sqldelight/testing/Movies;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()J
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getVersion-qicT5oE ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/sqldelight/testing/Movies$Version {
+	public static final synthetic fun box-impl (J)Lmisk/sqldelight/testing/Movies$Version;
+	public static fun constructor-impl (J)J
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (JLjava/lang/Object;)Z
+	public static final fun equals-impl0 (JJ)Z
+	public final fun getVersion ()J
+	public fun hashCode ()I
+	public static fun hashCode-impl (J)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (J)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()J
+}
+
+public abstract interface class misk/sqldelight/testing/MoviesDatabase : app/cash/sqldelight/Transacter {
+	public static final field Companion Lmisk/sqldelight/testing/MoviesDatabase$Companion;
+	public abstract fun getMoviesQueries ()Lmisk/sqldelight/testing/MoviesQueries;
+}
+
+public final class misk/sqldelight/testing/MoviesDatabase$Companion {
+	public final fun getSchema ()Lapp/cash/sqldelight/db/SqlSchema;
+	public final fun invoke (Lapp/cash/sqldelight/db/SqlDriver;)Lmisk/sqldelight/testing/MoviesDatabase;
+}
+
+public final class misk/sqldelight/testing/MoviesQueries : app/cash/sqldelight/TransacterImpl {
+	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;)V
+	public final fun createMovie (JLjava/lang/String;)V
+	public final fun getMovie (J)Lapp/cash/sqldelight/Query;
+	public final fun getMovie (JLkotlin/jvm/functions/Function3;)Lapp/cash/sqldelight/Query;
+	public final fun updateMovie-RbX51dc (Ljava/lang/String;JJ)V
+}
+

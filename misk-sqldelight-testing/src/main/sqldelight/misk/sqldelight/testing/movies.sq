@@ -1,0 +1,13 @@
+getMovie:
+ SELECT * FROM movies WHERE id = :id;
+
+updateMovie:
+ UPDATE movies
+ SET
+  title = :title,
+  version = :version + 1
+ WHERE
+  id = :id AND version = :version;
+
+createMovie:
+ INSERT INTO movies(id, title) VALUES (?, ?);
