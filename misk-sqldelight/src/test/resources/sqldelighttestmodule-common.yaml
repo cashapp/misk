@@ -1,0 +1,8 @@
+data_source:
+  type: MYSQL
+  database: sqldelight_test
+  username: root
+  password: ""
+  migrations_resource: classpath:/sqldelighttest/
+  jdbc_url_query_parameters:
+    serverTimezone: UTC

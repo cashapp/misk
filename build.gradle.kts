@@ -27,6 +27,7 @@ buildscript {
     classpath(Dependencies.jgit)
     classpath(Dependencies.wireGradlePlugin)
     classpath(Dependencies.revapiGradlePlugin)
+    classpath(Dependencies.sqldelightGradlePlugin)
   }
 }
 
@@ -133,7 +134,8 @@ val hibernateProjects = listOf(
   "misk-jdbc-testing",
   "misk-hibernate",
   "misk-hibernate-testing",
-  "misk-rate-limiting-bucket4j-mysql"
+  "misk-rate-limiting-bucket4j-mysql",
+  "misk-sqldelight"
 )
 
 val redisProjects = listOf(
