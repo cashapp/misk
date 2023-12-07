@@ -8,7 +8,7 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.redis.testing.DockerRedis
-import misk.redis.testing.RedisFlushModule
+import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -27,7 +27,7 @@ class RedisRateLimiterTest {
     override fun configure() {
       install(RedisBucket4jRateLimiterModule(DockerRedis.config, JedisPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
-      install(RedisFlushModule())
+      install(RedisTestFlushModule())
       install(DeploymentModule(TESTING))
       bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
     }

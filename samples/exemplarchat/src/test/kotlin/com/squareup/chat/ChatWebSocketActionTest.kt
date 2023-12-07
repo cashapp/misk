@@ -14,7 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
-import misk.redis.testing.RedisFlushModule
+import misk.redis.testing.RedisTestFlushModule
 import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest(startService = true)
@@ -25,7 +25,7 @@ class ChatWebSocketActionTest {
     MiskTestingServiceModule(),
     DeploymentModule(TESTING),
     RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false),
-    RedisFlushModule(),
+    RedisTestFlushModule(),
     WebActionModule.create<ChatWebSocketAction>()
   )
 
