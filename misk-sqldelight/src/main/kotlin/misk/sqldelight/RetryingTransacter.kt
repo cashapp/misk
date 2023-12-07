@@ -25,6 +25,11 @@ class RetryingTransacter(
   private val delegate: Transacter,
   private val options: TransacterOptions = TransacterOptions()
 ) : Transacter {
+
+  private val inTransaction = object : ThreadLocal<Boolean>() {
+    override fun initialValue(): Boolean = false
+  }
+
   fun maxAttempts(maxAttempts: Int): RetryingTransacter = RetryingTransacter(delegate, options.copy(
     maxAttempts = maxAttempts))
 
@@ -41,6 +46,14 @@ class RetryingTransacter(
   }
 
   private fun <T> retryWithWork(work: () -> T): T {
+    val outermostTransaction: Boolean
+    if (inTransaction.get()) {
+      outermostTransaction = false
+    } else {
+      outermostTransaction = true
+      inTransaction.set(true)
+    }
+
     val backoff = ExponentialBackoff(
       Duration.ofMillis(options.minRetryDelayMillis),
       Duration.ofMillis(options.maxRetryDelayMillis),
@@ -58,15 +71,24 @@ class RetryingTransacter(
           }
         }
 
+        if (outermostTransaction) {
+          inTransaction.set(false)
+        }
+
         return result
       } catch (e: Exception) {
-        if (!isRetryable(e)) throw e
+        if (!(isRetryable(e) && outermostTransaction)) throw e
 
         if (attempt >= options.maxAttempts) {
           logger.info {
             "recoverable transaction exception " +
               "(attempt $attempt), no more attempts"
           }
+
+          if (outermostTransaction) {
+            inTransaction.set(false)
+          }
+
           throw e
         }
 
