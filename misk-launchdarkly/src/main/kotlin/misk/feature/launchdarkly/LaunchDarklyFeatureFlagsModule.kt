@@ -1,5 +1,6 @@
 package misk.feature.launchdarkly
 
+import com.google.inject.Provider
 import com.google.inject.Provides
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
@@ -7,7 +8,6 @@ import com.launchdarkly.sdk.server.LDConfig
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import io.micrometer.core.instrument.MeterRegistry
-import jakarta.inject.Provider
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
