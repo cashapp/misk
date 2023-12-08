@@ -28,6 +28,7 @@ dependencies {
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-redis"))
   testFixturesApi(project(":misk-testing"))
+  testFixturesImplementation(project(":misk-service"))
   testFixturesImplementation(Dependencies.dockerApi)
   testFixturesImplementation(Dependencies.guava)
   testFixturesImplementation(Dependencies.guice)

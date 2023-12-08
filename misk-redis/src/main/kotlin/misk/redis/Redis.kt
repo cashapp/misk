@@ -464,6 +464,11 @@ interface Redis {
    * Publish a message to a channel.
    */
   fun publish(channel: String, message: String)
+
+  /**
+   * Flushes all keys from all databases.
+   */
+  fun flushAll()
 }
 
 /**

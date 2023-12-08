@@ -6,7 +6,6 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.redis.RedisModule
 import misk.redis.testing.DockerRedis
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.FakeWebSocket
@@ -15,6 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
+import misk.redis.testing.RedisTestFlushModule
 import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest(startService = true)
@@ -25,12 +25,9 @@ class ChatWebSocketActionTest {
     MiskTestingServiceModule(),
     DeploymentModule(TESTING),
     RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false),
+    RedisTestFlushModule(),
     WebActionModule.create<ChatWebSocketAction>()
   )
-
-  @Suppress("unused")
-  @MiskExternalDependency
-  private val dockerRedis = DockerRedis
 
   @Inject lateinit var chatWebSocketAction: ChatWebSocketAction
 

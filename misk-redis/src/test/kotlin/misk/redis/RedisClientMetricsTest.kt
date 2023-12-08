@@ -11,7 +11,6 @@ import misk.redis.RedisClientMetrics.Companion.MAX_IDLE_CONNECTIONS
 import misk.redis.RedisClientMetrics.Companion.MAX_TOTAL_CONNECTIONS
 import misk.redis.RedisClientMetrics.Companion.OPERATION_TIME
 import misk.redis.testing.DockerRedis
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
@@ -19,13 +18,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
+import org.junit.jupiter.api.BeforeEach
 import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest
 class RedisClientMetricsTest {
-  @Suppress("unused")
-  @MiskExternalDependency private val dockerRedis = DockerRedis
-
   @Suppress("unused")
   @MiskTestModule private val module = object : KAbstractModule() {
     override fun configure() {
@@ -33,6 +30,11 @@ class RedisClientMetricsTest {
       install(MiskTestingServiceModule())
       install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
     }
+  }
+
+  @BeforeEach
+  fun setUp() {
+    redis.flushAll()
   }
 
   @Inject private lateinit var collectorRegistry: CollectorRegistry
