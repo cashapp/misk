@@ -365,3 +365,8 @@ acceptedBreaks:
       new: "method wisp.launchdarkly.LaunchDarklyFeatureFlags misk.feature.launchdarkly.LaunchDarklyModule::wispLaunchDarkly$misk_launchdarkly(jakarta.inject.Provider<com.launchdarkly.sdk.server.interfaces.LDClientInterface>,\
         \ com.squareup.moshi.Moshi, io.micrometer.core.instrument.MeterRegistry)"
       justification: "This is a provider that's not called manually"
+  "2023.12.08.115600-a050e0a7":
+    com.squareup.misk:misk-jobqueue:
+    - code: "java.method.addedToInterface"
+      new: "method void misk.jobqueue.Job::retryLater(java.time.Duration)"
+      justification: "Default method provided, no other known implementations: accepting risk of incompatible overload"
