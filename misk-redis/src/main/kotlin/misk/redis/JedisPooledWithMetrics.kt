@@ -2,6 +2,7 @@ package misk.redis
 
 import org.apache.commons.pool2.PooledObject
 import org.apache.commons.pool2.PooledObjectFactory
+import redis.clients.jedis.ClientSetInfoConfig
 import redis.clients.jedis.Connection
 import redis.clients.jedis.ConnectionFactory
 import redis.clients.jedis.ConnectionPoolConfig
@@ -18,7 +19,7 @@ internal class JedisPooledWithMetrics(
   replicationGroupConfig: RedisReplicationGroupConfig,
   ssl: Boolean = true,
   requiresPassword: Boolean = true,
-) : JedisPooled (
+) : JedisPooled(
   PooledConnectionProviderWithMetrics(
     metrics,
     poolConfig,
@@ -63,6 +64,8 @@ private fun createJedisClientConfig(
       })
     .database(Protocol.DEFAULT_DATABASE)
     .ssl(ssl)
+    //CLIENT SETINFO is only supported in Redis v7.2+
+    .clientSetInfoConfig(ClientSetInfoConfig.DISABLED)
     .build()
 }
 
