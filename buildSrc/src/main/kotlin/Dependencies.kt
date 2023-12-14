@@ -130,7 +130,7 @@ object Dependencies {
   val kotlinxHtml = "org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1"
   val kubernetesClient = "io.kubernetes:client-java:18.0.1"
   val kubernetesClientApi = "io.kubernetes:client-java-api:18.0.1"
-  val launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:6.3.0"
+  val launchDarkly = "com.launchdarkly:launchdarkly-java-server-sdk:5.10.7"
   val logbackClassic = "ch.qos.logback:logback-classic:1.4.8"
   val logbackCore = "ch.qos.logback:logback-core:1.4.8"
   val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.25.2"
