@@ -65,9 +65,8 @@ class LaunchDarklyModule @JvmOverloads constructor(
     val ldConfig = LDConfig.Builder()
       // Set wait to 0 to not block here. Block in service initialization instead.
       .startWait(Duration.ofMillis(0))
-      .dataSource(Components.streamingDataSource())
-      .events(Components.sendEvents())
-      .serviceEndpoints(Components.serviceEndpoints().relayProxy(baseUri))
+      .dataSource(Components.streamingDataSource().baseURI(baseUri))
+      .events(Components.sendEvents().baseURI(baseUri))
 
     config.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
