@@ -360,6 +360,10 @@ class RealRedis(
     unifiedJedis.publish(channel, message)
   }
 
+  override fun flushAll() {
+    unifiedJedis.flushAll()
+  }
+
   // Gets a Jedis instance from the pool, and times the requested method invocations.
   private fun <T> jedis(op: JedisBinaryCommands.() -> T): T {
     updateMetrics()

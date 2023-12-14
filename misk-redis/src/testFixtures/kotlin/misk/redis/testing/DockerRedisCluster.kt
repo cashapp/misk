@@ -11,6 +11,8 @@ import misk.testing.ExternalDependency
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisCluster
+import redis.clients.jedis.exceptions.JedisClusterException
+import redis.clients.jedis.util.JedisClusterCRC16
 import wisp.containers.Composer
 import wisp.containers.Container
 import wisp.containers.ContainerUtil
@@ -79,8 +81,16 @@ object DockerRedisCluster : ExternalDependency {
           }
         }
         check(clusterInfo.contains("cluster_state:ok"))
-        jedis.mget("{key}1", "{key}2")
-        logger.info { "Sent GET command, got a reply" }
+        //check if all slots are covered
+        for (i in 1..9) {
+          try {
+            jedis.get(i.toString())
+          } catch (e: JedisClusterException) {
+            logger.info { "Slot ${JedisClusterCRC16.getSlot(i.toString())} of key=$i is not covered by any node yet" }
+            throw e
+          }
+        }
+        logger.info { "Sent GET commands for different slots and got responses from all nodes" }
         break
       } catch (e: Exception) {
         sleep(200)
@@ -89,7 +99,7 @@ object DockerRedisCluster : ExternalDependency {
         error("Could not get a reply from Redis within 30 seconds. Is the Redis Cluster container running?")
       }
     }
-    logger.info { "Redis v$redisVersion is ready!" }
+    logger.info { "Redis Cluster v$redisVersion is ready!" }
   }
 
   override fun shutdown() {

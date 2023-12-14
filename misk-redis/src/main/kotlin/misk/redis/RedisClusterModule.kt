@@ -7,7 +7,9 @@ import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.metrics.v2.Metrics
+import redis.clients.jedis.ClientSetInfoConfig
 import redis.clients.jedis.ConnectionPoolConfig
+import redis.clients.jedis.DefaultJedisClientConfig
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisCluster
 import wisp.deployment.Deployment
@@ -70,23 +72,34 @@ class RedisClusterModule @JvmOverloads constructor(
     // Create our jedis pool with client-side metrics.
     val clientMetrics = RedisClientMetrics(ticker, metrics)
 
-    val jedisCluster = JedisCluster(
-      HostAndPort(
-        replicationGroup.configuration_endpoint.hostname,
-        replicationGroup.configuration_endpoint.port
-      ),
-      replicationGroup.timeout_ms,
-      replicationGroup.timeout_ms,
-      replicationGroup.max_attempts,
-      replicationGroup.redis_auth_password.ifEmpty {
-        check(!deployment.isReal) { "Redis auth password cannot be empty in a real environment!" }
-        null
-      },
-      replicationGroup.client_name,
-      connectionPoolConfig,
-      useSsl
-    )
+    val jedisClientConfig = DefaultJedisClientConfig.builder()
+      .connectionTimeoutMillis(replicationGroup.timeout_ms)
+      .socketTimeoutMillis(replicationGroup.timeout_ms)
+      .password(replicationGroup.redis_auth_password
+        .ifEmpty {
+          check(!deployment.isReal) {
+            "This Redis client is configured to require an auth password, but none was provided!"
+          }
+          null
+        }
+      )
+      .clientName(replicationGroup.client_name)
+      .ssl(useSsl)
+      //CLIENT SETINFO is only supported in Redis v7.2+
+      .clientSetInfoConfig(ClientSetInfoConfig.DISABLED)
+      .build()
 
+    val jedisCluster = JedisCluster(
+      setOf(
+        HostAndPort(
+          replicationGroup.configuration_endpoint.hostname,
+          replicationGroup.configuration_endpoint.port
+        )
+      ),
+      jedisClientConfig,
+      replicationGroup.max_attempts,
+      connectionPoolConfig
+    )
     return RealRedis(jedisCluster, clientMetrics)
   }
 }
