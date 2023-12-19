@@ -176,7 +176,7 @@ object Dependencies {
   val tempest2TestingDocker = "app.cash.tempest:tempest2-testing-docker"
   val tempest2TestingInternal = "app.cash.tempest:tempest2-testing-internal"
   val tempest2TestingJvm = "app.cash.tempest:tempest2-testing-jvm"
-  val tempestBom = "app.cash.tempest:tempest-bom:1.10.2"
+  val tempestBom = "app.cash.tempest:tempest-bom:1.10.3"
   val tempestTesting = "app.cash.tempest:tempest-testing"
   val tempestTestingDocker = "app.cash.tempest:tempest-testing-docker"
   val tempestTestingInternal = "app.cash.tempest:tempest-testing-internal"
