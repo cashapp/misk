@@ -2,6 +2,7 @@ package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.CreateQueueRequest
+import com.amazonaws.services.sqs.model.SetQueueAttributesRequest
 import misk.clustering.fake.lease.FakeLeaseManager
 import misk.feature.testing.FakeFeatureFlags
 import misk.jobqueue.Job
@@ -19,11 +20,9 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import java.lang.annotation.ElementType
 import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -47,6 +46,7 @@ internal class SqsJobQueueTest {
   @Inject private lateinit var fakeLeaseManager: FakeLeaseManager
 
   private lateinit var queueName: QueueName
+  private lateinit var queueUrl: String
   private lateinit var deadLetterQueueName: QueueName
 
   /**
@@ -66,11 +66,13 @@ internal class SqsJobQueueTest {
         fakeFeatureFlags.override(POD_CONSUMERS_PER_QUEUE, 5)
         fakeFeatureFlags.override(POD_MAX_JOBQUEUE_CONSUMERS, 0)
       }
+
       "perQueueConsumers" -> {
         fakeFeatureFlags.override(CONSUMERS_PER_QUEUE, 5)
         fakeFeatureFlags.override(POD_CONSUMERS_PER_QUEUE, -1)
         fakeFeatureFlags.override(POD_MAX_JOBQUEUE_CONSUMERS, 0)
       }
+
       "balancedMax" -> {
         fakeFeatureFlags.override(CONSUMERS_PER_QUEUE, 5)
         fakeFeatureFlags.override(POD_CONSUMERS_PER_QUEUE, -1)
@@ -84,7 +86,7 @@ internal class SqsJobQueueTest {
     queueName = QueueName("sqs_job_queue_test")
     deadLetterQueueName = queueName.deadLetterQueue
     sqs.createQueue(deadLetterQueueName.value)
-    sqs.createQueue(
+    queueUrl = sqs.createQueue(
       CreateQueueRequest()
         .withQueueName(queueName.value)
         .withAttributes(
@@ -93,7 +95,7 @@ internal class SqsJobQueueTest {
             "VisibilityTimeout" to 1.toString()
           )
         )
-    )
+    ).queueUrl
     fakeFeatureFlags.override(CONSUMERS_BATCH_SIZE, 10)
   }
 
@@ -229,6 +231,61 @@ internal class SqsJobQueueTest {
     ).isEqualTo(1.0)
     assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
     assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
+
+    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+      0.0
+    )
+  }
+
+  @TestAllReceiverPolicies
+  fun retriesAfterDelayIfRequested(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
+
+    sqs.setQueueAttributes(
+      SetQueueAttributesRequest()
+        .withQueueUrl(queueUrl)
+        .withAttributes(mapOf("VisibilityTimeout" to "3600"))
+    )
+    val handledJobs = CopyOnWriteArrayList<Job>()
+
+    queue.enqueue(queueName, "retriable job")
+
+    val jobsReceived = AtomicInteger()
+    val allJobsCompleted = CountDownLatch(2)
+    consumer.subscribe(queueName) {
+      handledJobs.add(it)
+
+      when (jobsReceived.getAndIncrement()) {
+        0 -> it.retryLater(Duration.ofSeconds(0))
+        1 -> it.acknowledge()
+      }
+
+      allJobsCompleted.countDown()
+    }
+
+    assertThat(allJobsCompleted.await(10, TimeUnit.SECONDS)).isTrue()
+
+    // Should have processed the same job twice
+    val messageId = handledJobs[0].id
+    assertThat(handledJobs.map { it.body }).containsExactly("retriable job", "retriable job")
+    assertThat(handledJobs).allSatisfy { assertThat(it.id).isEqualTo(messageId) }
+
+    // Confirm metrics
+    assertThat(
+      sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
+    ).isEqualTo(1.0)
+    assertThat(
+      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+    ).isEqualTo(0.0)
+    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
+
+    assertThat(
+      sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
+    ).isEqualTo(2.0)
+
+    assertThat(
+      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+    ).isEqualTo(1.0)
 
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
       0.0

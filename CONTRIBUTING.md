@@ -13,7 +13,7 @@ Before your code can be accepted into the project you must also sign the
 
 Install and activate hermit: https://cashapp.github.io/hermit/
 
-Use gradle to run all Kotlin tests locally:
+Use gradle 7 to run all Kotlin tests locally:
 
 ```shell
 gradle build

@@ -44,6 +44,12 @@ internal class SqsMetrics @Inject internal constructor(metrics: Metrics) {
     listOf("queueName", "QueueName")
   )
 
+  val jobsReturned = metrics.counter(
+    "jobs_returned_total",
+    "total # of jobs returned by handlers",
+    listOf("queueName", "QueueName")
+  )
+
   val handlerFailures = metrics.counter(
     "job_handler_failures",
     "total # of jobs whose handlers threw an exception",
