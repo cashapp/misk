@@ -6,6 +6,7 @@ import misk.clustering.Cluster.Snapshot
 import misk.clustering.ClusterHashRing
 import misk.clustering.ClusterWatch
 
+@Deprecated("Use DefaultCluster")
 class DynamoCluster(self: String) : Cluster {
   private val memberSelf = Member(self, "invalid-ip")
   private var cachedSnapshot = Snapshot(
