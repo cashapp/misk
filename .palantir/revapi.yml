@@ -365,3 +365,16 @@ acceptedBreaks:
       new: "method wisp.launchdarkly.LaunchDarklyFeatureFlags misk.feature.launchdarkly.LaunchDarklyModule::wispLaunchDarkly$misk_launchdarkly(jakarta.inject.Provider<com.launchdarkly.sdk.server.interfaces.LDClientInterface>,\
         \ com.squareup.moshi.Moshi, io.micrometer.core.instrument.MeterRegistry)"
       justification: "This is a provider that's not called manually"
+  "2023.12.14.222754-29dc0a1":
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method java.lang.Double misk.redis.Redis::zscore(java.lang.String, java.lang.String)"
+      justification: "adding wrappers to support zadd, zscore"
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zadd(java.lang.String, double, java.lang.String,\
+        \ misk.redis.Redis.ZAddOptions[])"
+      justification: "adding wrappers to support zadd, zscore"
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zadd(java.lang.String, java.util.Map<java.lang.String,\
+        \ java.lang.Double>, misk.redis.Redis.ZAddOptions[])"
+      justification: "adding wrappers to support zadd, zscore"

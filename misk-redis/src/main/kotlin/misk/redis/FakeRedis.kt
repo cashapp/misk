@@ -404,4 +404,25 @@ class FakeRedis : Redis {
     hKeyValueStore.clear()
     lKeyValueStore.clear()
   }
+
+  override fun zadd(
+    key: String,
+    score: Double,
+    member: String,
+    vararg options: Redis.ZAddOptions,
+  ): Long {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zadd(
+    key: String,
+    scoreMembers: Map<String, Double>,
+    vararg options: Redis.ZAddOptions,
+  ): Long {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zscore(key: String, member: String): Double? {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
 }

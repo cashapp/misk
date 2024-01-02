@@ -13,6 +13,12 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
+import misk.redis.Redis.ZAddOptions.XX
+import misk.redis.Redis.ZAddOptions.NX
+import misk.redis.Redis.ZAddOptions.LT
+import misk.redis.Redis.ZAddOptions.GT
+import misk.redis.Redis.ZAddOptions.CH
+import redis.clients.jedis.exceptions.JedisDataException
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -41,6 +47,15 @@ class FakeRedis @Inject constructor(
   /** A nested hash map for hash operations. */
   private val hKeyValueStore =
     ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
+
+  /**
+   * Note: Redis sorted set actually orders by value. It is quite complex to implement it here.
+   * In this Fake Redis implementation which is generally used for testing, we have simply used a
+   * HashMap to key members->scores. So any sorting based on values will have to be handled in the
+   * implementation of the functions for this sorted set.
+   */
+  private val sortedSetKeyValueStore =
+    ConcurrentHashMap<String, Value<HashMap<String, Double>>>()
 
   /** A hash map for list operations. */
   private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
@@ -416,5 +431,114 @@ class FakeRedis @Inject constructor(
     keyValueStore.clear()
     hKeyValueStore.clear()
     lKeyValueStore.clear()
+  }
+
+  private fun zadd(
+    key: String,
+    score: Double,
+    member: String,
+    options: Set<Redis.ZAddOptions>,
+  ): Long {
+    verifyZAddOptions(options)
+    var newFieldCount = 0L
+    var elementsChanged = 0L
+    val trackChange = options.contains(CH)
+
+    if (!sortedSetKeyValueStore.containsKey(key)) {
+      sortedSetKeyValueStore[key] = Value(data = hashMapOf(), expiryInstant = Instant.MAX)
+    }
+    val sortedSet = sortedSetKeyValueStore[key]!!.data
+    val exists = sortedSet[member] != null
+
+    if (shouldUpdateScore(sortedSet[member], score, exists, options)) {
+      sortedSet[member] = score
+      elementsChanged++
+      if (!exists) newFieldCount++
+    }
+
+    if (trackChange) return elementsChanged
+    return newFieldCount
+  }
+
+  /**
+   * If [exists], the [currentScore] will be present. If not, [currentScore] will be null
+   */
+  private fun shouldUpdateScore(
+    currentScore: Double?,
+    score: Double,
+    exists: Boolean,
+    zaddOptions: Set<Redis.ZAddOptions>
+  ) : Boolean {
+    val options = zaddOptions.filter { it != CH }
+    // default without any options
+    if (options.isEmpty()) return true
+
+    // all valid single options.
+    if ((options.size == 1)
+        && (((options[0] == XX) && exists)
+        || ((options[0] == NX) && !exists)
+        || ((options[0] == LT) && ((exists && score < currentScore!!) || !exists))
+        || ((options[0] == GT) && ((exists && score > currentScore!!) || !exists)))
+    ) return true
+
+    // valid option combos
+    // only two valid combos of two option are possible.
+    // LT XX and GT XX
+
+    // LT XX
+    // for existing ones, the score should be less than the existing scores.
+    // XX will prevent adding new ones.
+    if (options.contains(LT) && options.contains(XX) && exists
+      && score < currentScore!!) return true
+
+    // GT XX
+    // for existing ones, the score should be more than the existing scores.
+    // XX will prevent adding new ones.
+    if (options.contains(GT) && options.contains(XX) && exists
+      && score > currentScore!!) return true
+
+    return false
+  }
+
+  private fun verifyZAddOptions(options: Set<Redis.ZAddOptions>) {
+    // zadd syntax
+    // zadd key [NX|XX] [GT|LT] CH score member [score member ...]
+
+    // NX and XX are mutually exclusive
+    if ((options.contains(NX) && options.contains(XX))) {
+      throw JedisDataException("ERR XX and NX options at the same time are not compatible")
+    }
+
+    // GT, LT, NX are mutually exclusive
+    if ((options.contains(NX) && options.contains(LT)) ||
+      (options.contains(NX) && options.contains(GT)) ||
+      (options.contains(GT) && options.contains(LT))) {
+      throw JedisDataException("ERR GT, LT, and/or NX options at the same time are not compatible")
+    }
+  }
+
+  override fun zadd(
+    key: String,
+    score: Double,
+    member: String,
+    vararg options: Redis.ZAddOptions,
+  ): Long {
+    return zadd(key, score, member, options.toSet())
+  }
+
+  override fun zadd(
+    key: String,
+    scoreMembers: Map<String, Double>,
+    vararg options: Redis.ZAddOptions
+  ): Long {
+    return scoreMembers.entries.sumOf {
+      (member, score) ->
+      zadd(key, score, member, options.toSet())
+    }
+  }
+
+  override fun zscore(key: String, member: String): Double? {
+    if (sortedSetKeyValueStore[key] == null) return null
+    return sortedSetKeyValueStore[key]!!.data[member]
   }
 }
