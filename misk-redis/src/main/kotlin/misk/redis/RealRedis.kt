@@ -1,5 +1,10 @@
 package misk.redis
 
+import misk.redis.Redis.ZAddOptions.CH
+import misk.redis.Redis.ZAddOptions.GT
+import misk.redis.Redis.ZAddOptions.LT
+import misk.redis.Redis.ZAddOptions.NX
+import misk.redis.Redis.ZAddOptions.XX
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisCluster
@@ -11,6 +16,7 @@ import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.commands.JedisBinaryCommands
 import redis.clients.jedis.params.SetParams
+import redis.clients.jedis.params.ZAddParams
 import redis.clients.jedis.util.JedisClusterCRC16
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
@@ -362,6 +368,59 @@ class RealRedis(
 
   override fun flushAll() {
     unifiedJedis.flushAll()
+  }
+
+  override fun zadd(
+    key: String,
+    score: Double,
+    member: String,
+    vararg options: Redis.ZAddOptions,
+  ): Long {
+    return unifiedJedis.zadd(
+      key.toByteArray(charset),
+      score,
+      member.toByteArray(charset),
+      getZAddParams(options)
+    )
+  }
+
+  private fun getZAddParams(options: Array<out Redis.ZAddOptions>): ZAddParams {
+    val params = ZAddParams()
+
+    options.forEach {
+      when (it) {
+        XX -> params.xx()
+        NX -> params.nx()
+        LT -> params.lt()
+        GT -> params.gt()
+        CH -> params.ch()
+      }
+    }
+
+    return params
+  }
+
+  override fun zadd(
+    key: String,
+    scoreMembers: Map<String, Double>,
+    vararg options: Redis.ZAddOptions,
+  ): Long {
+    val params = getZAddParams(options)
+    val keyBytes = key.toByteArray(charset)
+    val scoreMembersBytes =
+      scoreMembers.entries.associate { it.key.toByteArray(charset) to it.value }
+    return unifiedJedis.zadd(
+      keyBytes,
+      scoreMembersBytes,
+      params
+    )
+  }
+
+  override fun zscore(key: String, member: String): Double? {
+    return unifiedJedis.zscore(
+      key.toByteArray(charset),
+      member.toByteArray(charset)
+    )
   }
 
   // Gets a Jedis instance from the pool, and times the requested method invocations.

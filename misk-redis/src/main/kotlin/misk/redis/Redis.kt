@@ -469,6 +469,86 @@ interface Redis {
    * Flushes all keys from all databases.
    */
   fun flushAll()
+
+  /**
+   * Adds the specified [member] with the specified [score] to the sorted set at the [key].
+   * If a specified [member] is already a member of the sorted set, the [score] is updated and the
+   * element reinserted at the right position to ensure the correct ordering.
+   *
+   * If [key] does not exist, a new sorted set with the specified [member] as sole member is
+   * created, like if the sorted set was empty. If the [key] exists but does not hold a sorted set,
+   * an error is returned.
+   *
+   * ZADD supports a list of [options], specified after the name of the key and before the first
+   * score argument. The complete list of options can be found in [ZAddOptions]
+   */
+  fun zadd(
+    key: String,
+    score: Double,
+    member: String,
+    vararg options: ZAddOptions
+  ): Long
+
+  /**
+   * Adds all the specified members with the specified scores in [scoreMembers] to the sorted set
+   * at the [key]. If a specified [member] is already a member of the sorted set, the [score] is
+   * updated and the element reinserted at the right position to ensure the correct ordering.
+   *
+   * If [key] does not exist, a new sorted set with the specified [member] as sole member is
+   * created, like if the sorted set was empty. If the [key] exists but does not hold a sorted set,
+   * an error is returned.
+   *
+   * ZADD supports a list of [options], specified after the name of the key and before the first
+   * score argument. The complete list of options can be found in [ZAddOptions]
+   */
+  fun zadd(
+    key: String,
+    scoreMembers: Map<String, Double>,
+    vararg options: ZAddOptions
+  ): Long
+
+  /**
+   * Returns the score of [member] in the sorted set at [key].
+   *
+   * If [member] does not exist in the sorted set, or [key] does not exist, nil is returned.
+   */
+  fun zscore(
+    key: String,
+    member: String
+  ) : Double?
+
+  enum class ZAddOptions {
+    /**
+     * Only update elements that already exist. Don't add new elements.
+     */
+    XX,
+
+    /**
+     * Only add new elements. Don't update already existing elements.
+     */
+    NX,
+
+    /**
+     * Only update existing elements if the new score is less than the current score.
+     * This flag doesn't prevent adding new elements.
+     */
+    LT,
+
+    /**
+     * Only update existing elements if the new score is greater than the current score.
+     * This flag doesn't prevent adding new elements.
+     */
+    GT,
+
+    /**
+     * Modify the return value from the number of new elements added, to the total number of
+     * elements changed (CH is an abbreviation of changed). Changed elements are new elements
+     * added and elements already existing for which the score was updated. So elements specified
+     * in the command line having the same score as they had in the past are not counted.
+     * Note: normally the return value of ZADD only counts the number of new elements added.
+     */
+    CH
+  }
 }
 
 /**
