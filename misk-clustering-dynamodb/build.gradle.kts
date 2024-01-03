@@ -10,7 +10,6 @@ plugins {
 
 dependencies {
   api(Dependencies.kotlinLogging)
-  api(project(":misk-clustering"))
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
   implementation(Dependencies.aws2Dynamodb)
@@ -19,6 +18,7 @@ dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.jakartaInject)
   implementation(project(":misk"))
+  implementation(project(":misk-clustering"))
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
   implementation(project(":wisp:wisp-logging"))
