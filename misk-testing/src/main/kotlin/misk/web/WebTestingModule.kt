@@ -38,7 +38,7 @@ class WebServerTestingModule @JvmOverloads constructor(
 ) : KAbstractModule() {
   override fun configure() {
     install(DeploymentModule(TESTING))
-    install(MiskWebModule(webConfig))
+    install(MiskWebModule(webConfig.copy(override_shutdown_idle_timeout = 1)))
   }
 
   companion object {
