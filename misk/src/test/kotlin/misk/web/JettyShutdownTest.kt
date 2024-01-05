@@ -108,7 +108,8 @@ internal abstract class AbstractJettyShutdownTest {
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             idle_timeout = idleTimeout,
             override_shutdown_idle_timeout = shutdownIdleTimeout,
-          )
+          ),
+          overrideShutdownTimeout = false
         )
       )
       install(MiskTestingServiceModule())

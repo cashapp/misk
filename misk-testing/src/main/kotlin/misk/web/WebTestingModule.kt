@@ -34,11 +34,16 @@ class WebTestingModule @JvmOverloads constructor(
  * both plaintext and TLS.
  */
 class WebServerTestingModule @JvmOverloads constructor(
-  private val webConfig: WebConfig = TESTING_WEB_CONFIG
+  private val webConfig: WebConfig = TESTING_WEB_CONFIG,
+  private val overrideShutdownTimeout: Boolean = true
 ) : KAbstractModule() {
   override fun configure() {
     install(DeploymentModule(TESTING))
-    install(MiskWebModule(webConfig))
+    if (overrideShutdownTimeout) {
+      install(MiskWebModule(webConfig.copy(override_shutdown_idle_timeout = 10)))
+    } else {
+      install(MiskWebModule(webConfig))
+    }
   }
 
   companion object {
