@@ -109,7 +109,7 @@ internal abstract class AbstractJettyShutdownTest {
             idle_timeout = idleTimeout,
             override_shutdown_idle_timeout = shutdownIdleTimeout,
           ),
-          overrideShutdown = false
+          overrideShutdownTimeout = false
         )
       )
       install(MiskTestingServiceModule())
