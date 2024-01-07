@@ -18,7 +18,6 @@ dependencies {
   implementation(project(":wisp:wisp-logging"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.javaxInject)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(project(":misk-testing"))
