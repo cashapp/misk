@@ -51,11 +51,11 @@ class FakeRedis @Inject constructor(
   /**
    * Note: Redis sorted set actually orders by value. It is quite complex to implement it here.
    * In this Fake Redis implementation which is generally used for testing, we have simply used a
-   * HashMap to key members->scores. So any sorting based on values will have to be handled in the
+   * HashMap to key score->members. So any sorting based on values will have to be handled in the
    * implementation of the functions for this sorted set.
    */
   private val sortedSetKeyValueStore =
-    ConcurrentHashMap<String, Value<HashMap<String, Double>>>()
+    ConcurrentHashMap<String, Value<HashMap<Double, HashSet<String>>>>()
 
   /** A hash map for list operations. */
   private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
@@ -448,12 +448,34 @@ class FakeRedis @Inject constructor(
       sortedSetKeyValueStore[key] = Value(data = hashMapOf(), expiryInstant = Instant.MAX)
     }
     val sortedSet = sortedSetKeyValueStore[key]!!.data
-    val exists = sortedSet[member] != null
+    var currentScore: Double? = null
+    var exists = false
 
-    if (shouldUpdateScore(sortedSet[member], score, exists, options)) {
-      sortedSet[member] = score
+    for (entries in sortedSet.entries) {
+      if (entries.value.contains(member)) {
+        exists = true
+        currentScore = entries.key
+        break
+      }
+    }
+
+    if (shouldUpdateScore(currentScore, score, exists, options)) {
+      val scoreMembers = sortedSet[score] ?: hashSetOf()
+      scoreMembers.add(member)
+      sortedSet[score] = scoreMembers
+
+      if (!exists) {
+        newFieldCount++
+      } else {
+        for (entries in sortedSet.entries) {
+          if (entries.value.contains(member)) {
+            entries.value.remove(member)
+            break
+          }
+        }
+      }
+
       elementsChanged++
-      if (!exists) newFieldCount++
     }
 
     if (trackChange) return elementsChanged
@@ -539,6 +561,16 @@ class FakeRedis @Inject constructor(
 
   override fun zscore(key: String, member: String): Double? {
     if (sortedSetKeyValueStore[key] == null) return null
-    return sortedSetKeyValueStore[key]!!.data[member]
+
+    var currentScore:Double? = null
+    for (entries in sortedSetKeyValueStore[key]!!.data.entries) {
+      if (entries.value.contains(member)) {
+        currentScore = entries.key
+        break
+      }
+    }
+
+    return currentScore
+  }
   }
 }
