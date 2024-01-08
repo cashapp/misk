@@ -517,6 +517,24 @@ interface Redis {
     member: String
   ) : Double?
 
+  /**
+   * Returns the specified range of elements in the sorted set stored at [key].
+   *
+   * ZRANGE can perform different [type]s of range queries: by index (rank), by the score, or by
+   * lexicographical order. See [ZRangeType] for different types of range queries.
+   *
+   * You can specify the [start] and [stop] of the range you want to filter by.
+   * Depending on the [type] you will have to use the appropriate type of [ZRangeMarker].
+   *
+   * The order of elements is from the lowest to the highest score.
+   * Elements with the same score are ordered lexicographically.
+   *
+   * Setting [reverse] reverses the ordering, so elements are ordered from highest to lowest score,
+   * and score ties are resolved by reverse lexicographical ordering.
+   *
+   * The [limit] argument can be used to obtain a sub-range from the matching elements.
+   * See [ZRangeLimit] for more info.
+   */
   fun zrange(
     key: String,
     type: ZRangeType = ZRangeType.INDEX,
@@ -526,6 +544,9 @@ interface Redis {
     limit: ZRangeLimit? = null,
   ): List<ByteString?>
 
+  /**
+   * This is similar to [zrange] but returns the scores along with the members.
+   */
   fun zrangeWithScores(
     key: String,
     type: ZRangeType = ZRangeType.INDEX,
@@ -535,14 +556,45 @@ interface Redis {
     limit: ZRangeLimit? = null,
   ): List<Pair<ByteString?, Double>>
 
+  /**
+   * Different types of range queries.
+   */
   enum class ZRangeType {
-    // value will be type int
+    /**
+     * The <start> and <stop> arguments represent zero-based indexes.
+     * These arguments specify an inclusive range.
+     *
+     * The indexes can also be negative numbers indicating offsets from the end of the sorted set,
+     * with -1 being the last element of the sorted set and so on.
+     *
+     * Out of range indexes do not produce an error.
+     * If <start> is greater than either the end index of the sorted set or <stop>,
+     * an empty list is returned.
+     * If <stop> is greater than the end index of the sorted set, Redis will use the last element
+     * of the sorted set.
+     *
+     * Use [ZRangeIndexMarker] to specify the start and stop for this type.
+     */
     INDEX,
 
-    // value will be type double
+    /**
+     * returns the range of elements from the sorted set having scores equal or between <start>
+     * and <stop>
+     *
+     * <start> and <stop> can be -inf and +inf, denoting the negative and positive infinities,
+     * respectively. This means that you are not required to know the highest or lowest score in the
+     * sorted set to get all elements from or up to a certain score.
+     *
+     * By default, the score intervals specified by <start> and <stop> are closed (inclusive).
+     * It is possible to specify an open interval.
+     *
+     * Use [ZRangeScoreMarker] to specify the start and stop for this type.
+     */
     SCORE,
 
-    // value will be type String
+    /**
+     * This is currently not supported.
+     */
     LEX
   }
 
@@ -551,10 +603,20 @@ interface Redis {
     val included: Boolean
   )
 
+  /**
+   * To be used when [ZRangeType] is [ZRangeType.INDEX].
+   * The [intValue] should be an integer specifying the index (start or stop)
+   */
   data class ZRangeIndexMarker(
     val intValue: Int
   ): ZRangeMarker(intValue, true)
 
+  /**
+   * To be used when [ZRangeType] is [ZRangeType.SCORE].
+   * The [doubleValue] should be a double specifying the score (start or stop)
+   * By default the range is included. Set [isIncluded] to false in order to exclude the start or
+   * stop.
+   */
   data class ZRangeScoreMarker(
     val doubleValue: Double,
     val isIncluded: Boolean = true,
@@ -571,12 +633,23 @@ interface Redis {
     }
   }
 
+  /**
+   * This is currently not supported.
+   */
   data class ZRangeLexMarker(
     val stringValue: String,
     val isIncluded: Boolean,
     val isInfinite: Boolean = false
   ): ZRangeMarker(stringValue, isIncluded)
 
+  /**
+   * The limit argument in [zrange] and [zrangeWithScores] can be used to obtain a sub-range from
+   * the matching elements similar to SELECT LIMIT offset, count in SQL.
+   * A negative [count] returns all elements from the [offset].
+   * Keep in mind that if <offset> is large, the sorted set needs to be traversed for
+   * <offset> elements before getting to the elements to return, which can add up to O(N) time
+   * complexity.
+   */
   data class ZRangeLimit(
     val offset: Int,
     val count: Int

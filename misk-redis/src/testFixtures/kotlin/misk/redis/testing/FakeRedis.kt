@@ -695,6 +695,8 @@ class FakeRedis @Inject constructor(
       count = limit.count
     }
 
+    if  (count < 0) count = Int.MAX_VALUE
+
     val filteredScores = scores.filter { it.cmp() }
 
     for (score in filteredScores) {

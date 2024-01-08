@@ -2431,4 +2431,121 @@ abstract class AbstractRedisTest {
     )
   }
 
+  @Test fun `zrange by score test - limit cases negative count`() {
+    val key = "bar1"
+
+    // The members with same score are lex arranged.
+    redis.zadd(
+      key,
+      mapOf(
+        "b" to 5.0,
+        "bz" to 2.3,
+        "bb" to 4.5,
+        "yy" to 6.7,
+        "ad" to 9.0,
+        "c" to 5.0,
+        "ba" to 2.3
+      )
+    )
+
+    assertEquals(
+      listOf(
+        "b".encodeUtf8(),
+        "c".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "ad".encodeUtf8()
+      ),
+      redis.zrange(
+        key,
+        SCORE,
+        ZRangeScoreMarker(-10.0),
+        ZRangeScoreMarker(10.0),
+        limit = ZRangeLimit(
+          3,
+          -1
+        )
+      )
+    )
+
+    assertEquals(
+      listOf(
+        Pair(
+          "b".encodeUtf8(),
+          5.0
+        ),
+        Pair(
+          "c".encodeUtf8(),
+          5.0
+        ),
+        Pair(
+          "yy".encodeUtf8(),
+          6.7
+        ),
+        Pair(
+          "ad".encodeUtf8(),
+          9.0
+        )
+      ),
+      redis.zrangeWithScores(
+        key,
+        SCORE,
+        ZRangeScoreMarker(-10.0),
+        ZRangeScoreMarker(10.0),
+        limit = ZRangeLimit(
+          3,
+          -2
+        )
+      )
+    )
+    assertEquals(
+      listOf(
+        "b".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "bz".encodeUtf8(),
+        "ba".encodeUtf8(),
+      ),
+      redis.zrange(
+        key,
+        SCORE,
+        ZRangeScoreMarker(-10.0),
+        ZRangeScoreMarker(10.0),
+        true,
+        limit = ZRangeLimit(
+          3,
+          -3
+        )
+      )
+    )
+    assertEquals(
+      listOf(
+        Pair(
+          "b".encodeUtf8(),
+          5.0
+        ),
+        Pair(
+          "bb".encodeUtf8(),
+          4.5
+        ),
+        Pair(
+          "bz".encodeUtf8(),
+          2.3
+        ),
+        Pair(
+          "ba".encodeUtf8(),
+          2.3
+        )
+      ),
+      redis.zrangeWithScores(
+        key,
+        SCORE,
+        ZRangeScoreMarker(-10.0),
+        ZRangeScoreMarker(10.0),
+        true,
+        limit = ZRangeLimit(
+          3,
+          -4
+        )
+      )
+    )
+  }
 }

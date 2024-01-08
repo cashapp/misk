@@ -494,31 +494,31 @@ class RealRedis(
       Either.Left(unifiedJedis.zrangeByScore(key.toByteArray(charset),
                                      minString.toByteArray(charset),
                                      maxString.toByteArray(charset)))
-    } else if (limit == null && !reverse && withScore) {
+    } else if (limit == null && !reverse) {
       Either.Right(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
                                                         minString.toByteArray(charset),
                                                         maxString.toByteArray(charset)))
-    } else if (limit == null && reverse && !withScore) {
+    } else if (limit == null && !withScore) {
       Either.Left(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
                                              maxString.toByteArray(charset),
                                              minString.toByteArray(charset)))
-    } else if (limit == null && reverse && withScore){
+    } else if (limit == null){
       Either.Right(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
                                                         maxString.toByteArray(charset),
                                                         minString.toByteArray(charset)))
-    } else if (limit != null && !reverse && !withScore) {
+    } else if (!reverse && !withScore) {
       Either.Left(unifiedJedis.zrangeByScore(key.toByteArray(charset),
                                              minString.toByteArray(charset),
                                              maxString.toByteArray(charset),
                                              limit.offset,
                                              limit.count))
-    } else if (limit != null && !reverse && withScore) {
+    } else if (!reverse) {
       Either.Right(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
                                                         minString.toByteArray(charset),
                                                         maxString.toByteArray(charset),
                                                         limit.offset,
                                                         limit.count))
-    } else if (limit != null && reverse && !withScore) {
+    } else if (!withScore) {
       Either.Left(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
                                              maxString.toByteArray(charset),
                                              minString.toByteArray(charset),
@@ -528,7 +528,7 @@ class RealRedis(
       Either.Right(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
                                                         maxString.toByteArray(charset),
                                                         minString.toByteArray(charset),
-                                                        limit!!.offset,
+                                                        limit.offset,
                                                         limit.count))
     }
 
