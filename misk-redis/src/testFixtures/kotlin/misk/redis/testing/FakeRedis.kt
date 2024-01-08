@@ -23,7 +23,9 @@ import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
 import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
+import okio.ByteString.Companion.encodeUtf8
 import redis.clients.jedis.exceptions.JedisDataException
+import java.util.SortedMap
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -586,7 +588,8 @@ class FakeRedis @Inject constructor(
     reverse: Boolean,
     limit: ZRangeLimit?,
   ): List<ByteString?> {
-    throw NotImplementedError("Fake client not implemented for this operation")
+    return zrangeWithScores(key, type, start, stop, reverse, limit)
+      .map { (member, _) ->  member }.toList()
   }
 
   override fun zrangeWithScores(
@@ -597,7 +600,115 @@ class FakeRedis @Inject constructor(
     reverse: Boolean,
     limit: ZRangeLimit?,
   ): List<Pair<ByteString?, Double>> {
-    throw NotImplementedError("Fake client not implemented for this operation")
+    val sortedSet = sortedSetKeyValueStore[key]?.data?.toSortedMap() ?: return listOf()
+
+    val ansWithScore = when(type) {
+      ZRangeType.INDEX ->
+        zrangeByIndex(
+          sortedSet = sortedSet,
+          start = start as ZRangeIndexMarker,
+          stop = stop as ZRangeIndexMarker,
+          reverse = reverse
+        )
+      ZRangeType.SCORE ->
+        zrangeByScore(
+          sortedSet = sortedSet,
+          start = start as ZRangeScoreMarker,
+          stop = stop as ZRangeScoreMarker,
+          reverse = reverse,
+          limit = limit
+        )
+      ZRangeType.LEX ->
+        throw RuntimeException("Unsupported UnifiedJedis implementation of BYLEX option for " +
+                                 "zrange command")
+    }
+
+    return ansWithScore
   }
+
+  private fun zrangeByIndex(
+    sortedSet: SortedMap<Double, HashSet<String>>,
+    start: ZRangeIndexMarker,
+    stop: ZRangeIndexMarker,
+    reverse: Boolean
+  ): List<Pair<ByteString?, Double>> {
+    val scores = if (!reverse) sortedSet.keys.toList() else sortedSet.keys.toList().reversed()
+    val length = scores.size
+    var minInt = start.intValue
+    var maxInt = stop.intValue
+
+    if (minInt < -length) minInt = -length
+    if (minInt < 0) minInt += length
+    if (minInt > length-1) minInt = length-1
+
+    if (maxInt < -length) maxInt = -length
+    if (maxInt < 0) maxInt += length
+    if (maxInt > length-1) maxInt = length-1
+
+    if (minInt > maxInt) return listOf()
+
+    fun Int.cmp() = this in minInt..maxInt
+
+    val ans = mutableListOf<Pair<ByteString?, Double>>()
+
+    for (idx in scores.indices.filter { it.cmp() }) {
+      val score = scores[idx]
+      var members = sortedSet[score]!!.sorted()
+      if (reverse) members = members.reversed()
+      for (member in members) {
+        ans.add(Pair(member.encodeUtf8(), score))
+      }
+    }
+
+    return ans
+  }
+
+  private fun zrangeByScore(
+    sortedSet: SortedMap<Double, HashSet<String>>,
+    start: ZRangeScoreMarker,
+    stop: ZRangeScoreMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?
+  ): List<Pair<ByteString?, Double>> {
+    val scores = if (!reverse) sortedSet.keys.toList() else sortedSet.keys.toList().reversed()
+    val minDouble = start.value as Double
+    val maxDouble = stop.value as Double
+
+    if (minDouble > maxDouble) return listOf()
+
+    fun Double.cmp(): Boolean {
+      var ans = if (start.included) this >= minDouble
+      else this > minDouble
+
+      ans = if (stop.included) ans && this <= maxDouble
+      else ans && this < maxDouble
+
+      return ans
+    }
+
+    val ans = mutableListOf<Pair<ByteString?, Double>>()
+    var ctr = 0
+    var offset = 0
+    var count = Int.MAX_VALUE
+    if (limit != null) {
+      offset = limit.offset
+      count = limit.count
+    }
+
+    val filteredScores = scores.filter { it.cmp() }
+
+    for (score in filteredScores) {
+      var members = sortedSet[score]!!.sorted()
+      if (reverse) members = members.reversed()
+      for (member in members) {
+        if (ctr >= offset && ans.size < count) {
+          ans.add(Pair(member.encodeUtf8(), score))
+        }
+        ctr++
+        if (ans.size == count) break
+      }
+      if (ans.size == count) break
+    }
+    return ans
   }
 }

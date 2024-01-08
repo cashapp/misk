@@ -1,5 +1,6 @@
 package misk.redis
 
+import arrow.core.Either
 import misk.redis.Redis.ZAddOptions.CH
 import misk.redis.Redis.ZAddOptions.GT
 import misk.redis.Redis.ZAddOptions.LT
@@ -22,6 +23,8 @@ import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.commands.JedisBinaryCommands
 import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZAddParams
+import redis.clients.jedis.params.ZRangeParams
+import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
@@ -436,7 +439,8 @@ class RealRedis(
     reverse: Boolean,
     limit: ZRangeLimit?,
   ): List<ByteString?> {
-    throw NotImplementedError("Client not implemented for this operation")
+    return zrangeBase(key, type, start, stop, reverse, false, limit)
+      .leftOrNull()?.map { it?.toByteString() } ?: listOf()
   }
 
   override fun zrangeWithScores(
@@ -447,7 +451,107 @@ class RealRedis(
     reverse: Boolean,
     limit: ZRangeLimit?,
   ): List<Pair<ByteString?, Double>> {
-    throw NotImplementedError("Client not implemented for this operation")
+    return zrangeBase(key, type, start, stop, reverse, true, limit)
+      .getOrNull()?.map { Pair(it.binaryElement?.toByteString(), it.score) } ?: listOf()
+  }
+
+  private fun zrangeBase(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    withScore: Boolean,
+    limit: ZRangeLimit?,
+  ): Either<List<ByteArray?>, List<Tuple>> {
+    return when (type) {
+      ZRangeType.INDEX ->
+        zrangeByIndex(key, start as ZRangeIndexMarker, stop as ZRangeIndexMarker, reverse,
+                      withScore)
+
+      ZRangeType.SCORE ->
+        zrangeByScore(key, start as ZRangeScoreMarker, stop as ZRangeScoreMarker, reverse,
+                      withScore, limit)
+
+      ZRangeType.LEX ->
+        throw RuntimeException("Unsupported UnifiedJedis implementation of BYLEX option for " +
+                                 "zrange command")
+    }
+  }
+
+  private fun zrangeByScore(
+    key: String,
+    start: ZRangeScoreMarker,
+    stop: ZRangeScoreMarker,
+    reverse: Boolean,
+    withScore: Boolean,
+    limit: ZRangeLimit?,
+  ): Either<List<ByteArray?>, List<Tuple>> {
+    val minString = start.toString()
+    val maxString = stop.toString()
+
+    return if (limit == null && !reverse && !withScore) {
+      Either.Left(unifiedJedis.zrangeByScore(key.toByteArray(charset),
+                                     minString.toByteArray(charset),
+                                     maxString.toByteArray(charset)))
+    } else if (limit == null && !reverse && withScore) {
+      Either.Right(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
+                                                        minString.toByteArray(charset),
+                                                        maxString.toByteArray(charset)))
+    } else if (limit == null && reverse && !withScore) {
+      Either.Left(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
+                                             maxString.toByteArray(charset),
+                                             minString.toByteArray(charset)))
+    } else if (limit == null && reverse && withScore){
+      Either.Right(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
+                                                        maxString.toByteArray(charset),
+                                                        minString.toByteArray(charset)))
+    } else if (limit != null && !reverse && !withScore) {
+      Either.Left(unifiedJedis.zrangeByScore(key.toByteArray(charset),
+                                             minString.toByteArray(charset),
+                                             maxString.toByteArray(charset),
+                                             limit.offset,
+                                             limit.count))
+    } else if (limit != null && !reverse && withScore) {
+      Either.Right(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
+                                                        minString.toByteArray(charset),
+                                                        maxString.toByteArray(charset),
+                                                        limit.offset,
+                                                        limit.count))
+    } else if (limit != null && reverse && !withScore) {
+      Either.Left(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
+                                             maxString.toByteArray(charset),
+                                             minString.toByteArray(charset),
+                                             limit.offset,
+                                             limit.count))
+    } else {
+      Either.Right(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
+                                                        maxString.toByteArray(charset),
+                                                        minString.toByteArray(charset),
+                                                        limit!!.offset,
+                                                        limit.count))
+    }
+
+  }
+
+  private fun zrangeByIndex(
+    key: String,
+    start: ZRangeIndexMarker,
+    stop: ZRangeIndexMarker,
+    reverse: Boolean,
+    withScore: Boolean
+  ): Either<List<ByteArray?>, List<Tuple>> {
+    val params = ZRangeParams(
+      start.intValue,
+      stop.intValue
+    )
+    if (reverse) params.rev()
+
+    return if (withScore) {
+      Either.Right(unifiedJedis.zrangeWithScores(key.toByteArray(charset), params))
+    } else {
+      Either.Left(unifiedJedis.zrange(key.toByteArray(charset), params))
+    }
   }
 
   // Gets a Jedis instance from the pool, and times the requested method invocations.

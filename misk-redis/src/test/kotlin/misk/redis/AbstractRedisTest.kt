@@ -5,6 +5,11 @@ import misk.redis.Redis.ZAddOptions.GT
 import misk.redis.Redis.ZAddOptions.LT
 import misk.redis.Redis.ZAddOptions.NX
 import misk.redis.Redis.ZAddOptions.XX
+import misk.redis.Redis.ZRangeIndexMarker
+import misk.redis.Redis.ZRangeLimit
+import misk.redis.Redis.ZRangeScoreMarker
+import misk.redis.Redis.ZRangeType.INDEX
+import misk.redis.Redis.ZRangeType.SCORE
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -955,4 +960,626 @@ abstract class AbstractRedisTest {
 
     assertNull(redis.zscore("foo", "s"));
   }
+
+  @Test fun `zrange by index test - happy case`() {
+    val key = "bar1"
+
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 10.0)
+    )
+    // standard happy case. get first four lowest score members.
+    assertEquals(
+      listOf(
+        "bz".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "b".encodeUtf8(),
+        "yy".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX,
+                   ZRangeIndexMarker(0), ZRangeIndexMarker(3))
+    )
+    assertEquals(
+      listOf(
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("yy".encodeUtf8(), 6.7)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(3))
+    )
+    assertEquals(
+      listOf(
+        "ad".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "b".encodeUtf8(),
+        "bb".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(3), true)
+    )
+    assertEquals(
+      listOf(
+        Pair("ad".encodeUtf8(), 10.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("bb".encodeUtf8(), 4.5)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(3), true)
+    )
+  }
+
+  @Test fun `zrange by index test - stop index exceeds the size`() {
+    val key = "bar1"
+
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 10.0)
+    )
+    // stop index exceeds the size. So stop index is the last one.
+    assertEquals(
+      listOf(
+        "bz".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "b".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "ad".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(100))
+    )
+    assertEquals(
+      listOf(
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("ad".encodeUtf8(), 10.0)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(100))
+    )
+    assertEquals(
+      listOf(
+        "ad".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "b".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "bz".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(100), true)
+    )
+    assertEquals(
+      listOf(
+        Pair("ad".encodeUtf8(), 10.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("bz".encodeUtf8(), 2.3)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(100), true)
+    )
+  }
+
+  @Test fun `zrange by index test - start is greater than stop`() {
+    val key = "bar1"
+
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 10.0)
+    )
+    // when start is greater than stop, empty set is returned.
+    assertEquals(
+      listOf(),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(3), ZRangeIndexMarker(1))
+    )
+    assertEquals(
+      listOf(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(3), ZRangeIndexMarker(1))
+    )
+    assertEquals(
+      listOf(),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(3), ZRangeIndexMarker(1), true)
+    )
+    assertEquals(
+      listOf(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(3), ZRangeIndexMarker(1), true)
+    )
+  }
+
+  @Test fun `zrange by index test - negative indices - get second last to last`() {
+    val key = "bar1"
+
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 10.0)
+    )
+
+    // negative indices. get second last to last
+    assertEquals(
+      listOf(
+        "yy".encodeUtf8(),
+        "ad".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(-2), ZRangeIndexMarker(-1))
+    )
+    assertEquals(
+      listOf(
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("ad".encodeUtf8(), 10.0)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(-2), ZRangeIndexMarker(-1))
+    )
+    assertEquals(
+      listOf(
+        "bb".encodeUtf8(),
+        "bz".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(-2), ZRangeIndexMarker(-1), true)
+    )
+    assertEquals(
+      listOf(
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("bz".encodeUtf8(), 2.3)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(-2), ZRangeIndexMarker(-1), true)
+    )
+  }
+
+  @Test fun `zrange by index test - negative indices - get last 100 or as many as there are`() {
+    val key = "bar1"
+
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 10.0)
+    )
+
+    // negative indices. get last 100 or as much there is.
+    assertEquals(
+      listOf(
+        "bz".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "b".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "ad".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(-100), ZRangeIndexMarker(-1))
+    )
+    assertEquals(
+      listOf(
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("ad".encodeUtf8(), 10.0)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(-100), ZRangeIndexMarker(-1))
+    )
+    assertEquals(
+      listOf(
+        "ad".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "b".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "bz".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(-100), ZRangeIndexMarker(-1), true)
+    )
+    assertEquals(
+      listOf(
+        Pair("ad".encodeUtf8(), 10.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("bz".encodeUtf8(), 2.3)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(-100), ZRangeIndexMarker(-1), true)
+    )
+
+  }
+
+  @Test fun `zrange by index test - mixed indices - get from second last to second`() {
+    val key = "bar1"
+
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 10.0)
+    )
+
+    // mixed indices. empty set --> going from second last to second.
+    assertEquals(
+      listOf(),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(-2), ZRangeIndexMarker(1))
+    )
+    assertEquals(
+      listOf(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(-2), ZRangeIndexMarker(1))
+    )
+    assertEquals(
+      listOf(),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(-2), ZRangeIndexMarker(1), true)
+    )
+    assertEquals(
+      listOf(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(-2), ZRangeIndexMarker(1), true)
+    )
+  }
+
+  @Test fun `zrange by index test - mixed indices - get from second to second last`() {
+    val key = "bar1"
+
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 10.0)
+    )
+
+    // mixed indices. get from second to second last
+    assertEquals(
+      listOf(
+        "bb".encodeUtf8(),
+        "b".encodeUtf8(),
+        "yy".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(1), ZRangeIndexMarker(-2))
+    )
+    assertEquals(
+      listOf(
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("yy".encodeUtf8(), 6.7)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(1), ZRangeIndexMarker(-2))
+    )
+    assertEquals(
+      listOf(
+        "yy".encodeUtf8(),
+        "b".encodeUtf8(),
+        "bb".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(1), ZRangeIndexMarker(-2), true)
+    )
+    assertEquals(
+      listOf(
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("bb".encodeUtf8(), 4.5),
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(1), ZRangeIndexMarker(-2), true)
+    )
+  }
+
+  @Test fun `zrange by index test - same score lex sorted`() {
+    val key = "bar1"
+
+    // The members with same score are lex arranged.
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 10.0, "c" to 5.0, "ba" to 2.3)
+    )
+
+    assertEquals(
+      listOf(
+        "ba".encodeUtf8(),
+        "bz".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "b".encodeUtf8(),
+        "c".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "ad".encodeUtf8()
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1))
+    )
+    assertEquals(
+      listOf(
+        Pair("ba".encodeUtf8(), 2.3),
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("c".encodeUtf8(), 5.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("ad".encodeUtf8(), 10.0)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1))
+    )
+    assertEquals(
+      listOf(
+        "ad".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "c".encodeUtf8(),
+        "b".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "bz".encodeUtf8(),
+        "ba".encodeUtf8(),
+      ),
+      redis.zrange(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1), true)
+    )
+    assertEquals(
+      listOf(
+        Pair("ad".encodeUtf8(), 10.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("c".encodeUtf8(), 5.0),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("ba".encodeUtf8(), 2.3)
+      ),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1), true)
+    )
+  }
+
+  @Test fun `zrange by score test - happy case`() {
+    val key = "bar1"
+
+    // The members with same score are lex arranged.
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 9.0, "c" to 5.0, "ba" to 2.3)
+    )
+
+    assertEquals(
+      listOf(
+        "ba".encodeUtf8(),
+        "bz".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "b".encodeUtf8(),
+        "c".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "ad".encodeUtf8()
+      ),
+      redis.zrange(key, SCORE,
+                   ZRangeScoreMarker(-10.0), ZRangeScoreMarker(10.0))
+    )
+
+    assertEquals(
+      listOf(
+        Pair("ba".encodeUtf8(), 2.3),
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("c".encodeUtf8(), 5.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("ad".encodeUtf8(), 9.0)
+      ),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(-10.0),
+                             ZRangeScoreMarker(10.0)
+      )
+    )
+    assertEquals(
+      listOf(
+        "ad".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "c".encodeUtf8(),
+        "b".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "bz".encodeUtf8(),
+        "ba".encodeUtf8(),
+      ),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(-10.0), ZRangeScoreMarker(10.0), true)
+    )
+    assertEquals(
+      listOf(
+        Pair("ad".encodeUtf8(), 9.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("c".encodeUtf8(), 5.0),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("ba".encodeUtf8(), 2.3)
+      ),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(-10.0), ZRangeScoreMarker(10.0), true)
+    )
+  }
+
+  @Test fun `zrange by score test - infinity cases`() {
+    val key = "bar1"
+
+    // The members with same score are lex arranged.
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 9.0, "c" to 5.0, "ba" to 2.3)
+    )
+
+    assertEquals(
+      listOf(
+        "ba".encodeUtf8(),
+        "bz".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "b".encodeUtf8(),
+        "c".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "ad".encodeUtf8()
+      ),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(Double.MIN_VALUE), ZRangeScoreMarker(Double.MAX_VALUE))
+    )
+
+    assertEquals(
+      listOf(
+        Pair("ba".encodeUtf8(), 2.3),
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("c".encodeUtf8(), 5.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("ad".encodeUtf8(), 9.0)
+      ),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(Double.MIN_VALUE), ZRangeScoreMarker(Double.MAX_VALUE))
+    )
+    assertEquals(
+      listOf(
+        "ad".encodeUtf8(),
+        "yy".encodeUtf8(),
+        "c".encodeUtf8(),
+        "b".encodeUtf8(),
+        "bb".encodeUtf8(),
+        "bz".encodeUtf8(),
+        "ba".encodeUtf8(),
+      ),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(Double.MIN_VALUE), ZRangeScoreMarker(Double.MAX_VALUE), true)
+    )
+    assertEquals(
+      listOf(
+        Pair("ad".encodeUtf8(), 9.0),
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("c".encodeUtf8(), 5.0),
+        Pair("b".encodeUtf8(), 5.0),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("ba".encodeUtf8(), 2.3)
+      ),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(Double.MIN_VALUE), ZRangeScoreMarker(Double.MAX_VALUE), true)
+    )
+  }
+
+  @Test fun `zrange by score test - start score exceeds stop`() {
+    val key = "bar1"
+
+    // The members with same score are lex arranged.
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 9.0, "c" to 5.0, "ba" to 2.3)
+    )
+
+    assertEquals(
+      listOf(),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(10.0), ZRangeScoreMarker(-10.0))
+    )
+
+    assertEquals(
+      listOf(),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(10.0), ZRangeScoreMarker(-10.0))
+    )
+    assertEquals(
+      listOf(),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(10.0), ZRangeScoreMarker(-10.0), true)
+    )
+    assertEquals(
+      listOf(),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(10.0), ZRangeScoreMarker(-10.0), true)
+    )
+  }
+
+  @Test fun `zrange by score test - star and stop inclusion cases`() {
+    val key = "bar1"
+
+    // The members with same score are lex arranged.
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 9.0, "ba" to 2.3)
+    )
+
+    // start included, stop included.
+    assertEquals(
+      listOf("bb".encodeUtf8(), "b".encodeUtf8(), "yy".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(4.5), ZRangeScoreMarker(6.7))
+    )
+    assertEquals(
+      listOf(Pair("bb".encodeUtf8(), 4.5), Pair("b".encodeUtf8(), 5.0),
+             Pair("yy".encodeUtf8(), 6.7)),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(4.5), ZRangeScoreMarker(6.7))
+    )
+    assertEquals(
+      listOf("yy".encodeUtf8(), "b".encodeUtf8(), "bb".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(4.5), ZRangeScoreMarker(6.7), true)
+    )
+    assertEquals(
+      listOf(Pair("yy".encodeUtf8(), 6.7), Pair("b".encodeUtf8(), 5.0),
+             Pair("bb".encodeUtf8(), 4.5)),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(4.5), ZRangeScoreMarker(6.7), true)
+    )
+
+    // start not included, stop included.
+    assertEquals(
+      listOf("b".encodeUtf8(), "yy".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(4.5, false), ZRangeScoreMarker(6.7))
+    )
+    assertEquals(
+      listOf(Pair("b".encodeUtf8(), 5.0), Pair("yy".encodeUtf8(), 6.7)),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(4.5, false), ZRangeScoreMarker(6.7))
+    )
+    assertEquals(
+      listOf("yy".encodeUtf8(), "b".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(4.5, false), ZRangeScoreMarker(6.7), true)
+    )
+    assertEquals(
+      listOf(Pair("yy".encodeUtf8(), 6.7), Pair("b".encodeUtf8(), 5.0)),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(4.5, false), ZRangeScoreMarker(6.7), true)
+    )
+
+    // start not included, stop not included.
+    assertEquals(
+      listOf("b".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(4.5, false), ZRangeScoreMarker(6.7, false))
+    )
+    assertEquals(
+      listOf(Pair("b".encodeUtf8(), 5.0)),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(4.5, false), ZRangeScoreMarker(6.7, false))
+    )
+    assertEquals(
+      listOf("b".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(4.5, false), ZRangeScoreMarker(6.7, false), true)
+    )
+    assertEquals(
+      listOf(Pair("b".encodeUtf8(), 5.0)),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(4.5, false), ZRangeScoreMarker(6.7, false), true)
+    )
+
+
+    // start included, stop not included.
+    assertEquals(
+      listOf("bb".encodeUtf8(), "b".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(4.5), ZRangeScoreMarker(6.7, false))
+    )
+    assertEquals(
+      listOf(Pair("bb".encodeUtf8(), 4.5), Pair("b".encodeUtf8(), 5.0)),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(4.5), ZRangeScoreMarker(6.7, false))
+    )
+    assertEquals(
+      listOf("b".encodeUtf8(), "bb".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(4.5), ZRangeScoreMarker(6.7, false), true)
+    )
+    assertEquals(
+      listOf(Pair("b".encodeUtf8(), 5.0), Pair("bb".encodeUtf8(), 4.5)),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(4.5), ZRangeScoreMarker(6.7, false), true)
+    )
+
+  }
+
+  @Test fun `zrange by score test - limit cases`() {
+    val key = "bar1"
+
+    // The members with same score are lex arranged.
+    redis.zadd(
+      key,
+      mapOf("b" to 5.0, "bz" to 2.3, "bb" to 4.5, "yy" to 6.7, "ad" to 9.0, "c" to 5.0, "ba" to 2.3)
+    )
+
+    assertEquals(
+      listOf("bz".encodeUtf8(), "bb".encodeUtf8(), "b".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(-10.0), ZRangeScoreMarker(10.0),
+                   limit = ZRangeLimit(1, 3))
+    )
+
+    assertEquals(
+      listOf(
+        Pair("bz".encodeUtf8(), 2.3),
+        Pair("bb".encodeUtf8(), 4.5),
+        Pair("b".encodeUtf8(), 5.0)
+      ),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(-10.0), ZRangeScoreMarker(10.0),
+                             limit = ZRangeLimit(1, 3)
+      )
+    )
+    assertEquals(
+      listOf("yy".encodeUtf8(), "c".encodeUtf8(), "b".encodeUtf8()),
+      redis.zrange(key, SCORE, ZRangeScoreMarker(-10.0), ZRangeScoreMarker(10.0), true,
+                   limit = ZRangeLimit(1, 3))
+    )
+    assertEquals(
+      listOf(
+        Pair("yy".encodeUtf8(), 6.7),
+        Pair("c".encodeUtf8(), 5.0),
+        Pair("b".encodeUtf8(), 5.0),
+      ),
+      redis.zrangeWithScores(key, SCORE, ZRangeScoreMarker(-10.0), ZRangeScoreMarker(10.0), true,
+                             limit = ZRangeLimit(1, 3))
+    )
+  }
+
 }
