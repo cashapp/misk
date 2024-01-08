@@ -5,6 +5,11 @@ import misk.redis.Redis.ZAddOptions.GT
 import misk.redis.Redis.ZAddOptions.LT
 import misk.redis.Redis.ZAddOptions.NX
 import misk.redis.Redis.ZAddOptions.XX
+import misk.redis.Redis.ZRangeIndexMarker
+import misk.redis.Redis.ZRangeLimit
+import misk.redis.Redis.ZRangeMarker
+import misk.redis.Redis.ZRangeScoreMarker
+import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisCluster
@@ -421,6 +426,28 @@ class RealRedis(
       key.toByteArray(charset),
       member.toByteArray(charset)
     )
+  }
+
+  override fun zrange(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?,
+  ): List<ByteString?> {
+    throw NotImplementedError("Client not implemented for this operation")
+  }
+
+  override fun zrangeWithScores(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?,
+  ): List<Pair<ByteString?, Double>> {
+    throw NotImplementedError("Client not implemented for this operation")
   }
 
   // Gets a Jedis instance from the pool, and times the requested method invocations.

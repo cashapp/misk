@@ -517,6 +517,71 @@ interface Redis {
     member: String
   ) : Double?
 
+  fun zrange(
+    key: String,
+    type: ZRangeType = ZRangeType.INDEX,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean = false,
+    limit: ZRangeLimit? = null,
+  ): List<ByteString?>
+
+  fun zrangeWithScores(
+    key: String,
+    type: ZRangeType = ZRangeType.INDEX,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean = false,
+    limit: ZRangeLimit? = null,
+  ): List<Pair<ByteString?, Double>>
+
+  enum class ZRangeType {
+    // value will be type int
+    INDEX,
+
+    // value will be type double
+    SCORE,
+
+    // value will be type String
+    LEX
+  }
+
+  abstract class ZRangeMarker(
+    val value: Any,
+    val included: Boolean
+  )
+
+  data class ZRangeIndexMarker(
+    val intValue: Int
+  ): ZRangeMarker(intValue, true)
+
+  data class ZRangeScoreMarker(
+    val doubleValue: Double,
+    val isIncluded: Boolean = true,
+  ): ZRangeMarker(doubleValue, isIncluded) {
+    override fun toString(): String {
+      var ans = when (this.doubleValue) {
+        Double.MAX_VALUE -> "+inf"
+        Double.MIN_VALUE -> "-inf"
+        else -> this.doubleValue.toString()
+      }
+
+      if (!this.isIncluded) ans = "($ans"
+      return ans
+    }
+  }
+
+  data class ZRangeLexMarker(
+    val stringValue: String,
+    val isIncluded: Boolean,
+    val isInfinite: Boolean = false
+  ): ZRangeMarker(stringValue, isIncluded)
+
+  data class ZRangeLimit(
+    val offset: Int,
+    val count: Int
+  )
+
   enum class ZAddOptions {
     /**
      * Only update elements that already exist. Don't add new elements.

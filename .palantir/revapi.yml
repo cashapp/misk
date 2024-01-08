@@ -434,3 +434,14 @@ acceptedBreaks:
       old: "method long misk.clustering.dynamo.DynamoClusterConfig::component2()"
       new: "method java.lang.String misk.clustering.dynamo.DynamoClusterConfig::component2()"
       justification: "No external usage, code is still in development"
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method java.util.List<kotlin.Pair<okio.ByteString, java.lang.Double>>\
+        \ misk.redis.Redis::zrangeWithScores(java.lang.String, misk.redis.Redis.ZRangeType,\
+        \ misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker, boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "adding wrappers to support zrange"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.List<okio.ByteString> misk.redis.Redis::zrange(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "adding wrappers to support zrange"

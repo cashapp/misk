@@ -18,6 +18,11 @@ import misk.redis.Redis.ZAddOptions.NX
 import misk.redis.Redis.ZAddOptions.LT
 import misk.redis.Redis.ZAddOptions.GT
 import misk.redis.Redis.ZAddOptions.CH
+import misk.redis.Redis.ZRangeIndexMarker
+import misk.redis.Redis.ZRangeLimit
+import misk.redis.Redis.ZRangeMarker
+import misk.redis.Redis.ZRangeScoreMarker
+import misk.redis.Redis.ZRangeType
 import redis.clients.jedis.exceptions.JedisDataException
 import kotlin.math.max
 import kotlin.math.min
@@ -571,6 +576,28 @@ class FakeRedis @Inject constructor(
     }
 
     return currentScore
+  }
+
+  override fun zrange(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?,
+  ): List<ByteString?> {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zrangeWithScores(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?,
+  ): List<Pair<ByteString?, Double>> {
+    throw NotImplementedError("Fake client not implemented for this operation")
   }
   }
 }
