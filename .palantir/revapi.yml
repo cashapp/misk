@@ -366,10 +366,31 @@ acceptedBreaks:
         \ com.squareup.moshi.Moshi, io.micrometer.core.instrument.MeterRegistry)"
       justification: "This is a provider that's not called manually"
   "2023.12.14.222754-29dc0a1":
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method java.lang.Double misk.redis.Redis::zscore(java.lang.String, java.lang.String)"
+      justification: "adding wrappers to support zadd, zscore"
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zadd(java.lang.String, double, java.lang.String,\
+        \ misk.redis.Redis.ZAddOptions[])"
+      justification: "adding wrappers to support zadd, zscore"
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zadd(java.lang.String, java.util.Map<java.lang.String,\
+        \ java.lang.Double>, misk.redis.Redis.ZAddOptions[])"
+      justification: "adding wrappers to support zadd, zscore"
+  "2023.12.15.211820-b7abf54":
     com.squareup.misk:misk-clustering-dynamodb:
-    - code: "java.method.numberOfParametersChanged"
-      old: "method misk.clustering.dynamo.DynamoClusterConfig misk.clustering.dynamo.DynamoClusterConfig::copy(java.lang.String,\
-        \ long, long)"
-      new: "method misk.clustering.dynamo.DynamoClusterConfig misk.clustering.dynamo.DynamoClusterConfig::copy(java.lang.String,\
-        \ java.lang.String, long, long)"
-      justification: "{This is a new config which is not currently used anywhere.}"
+    - code: "java.class.removed"
+      old: "class misk.clustering.dynamo.DynamoCluster"
+      justification: "No external usage, DynamoClusterModule will use existing DefaultCluster\
+        \ instead"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.clustering.dynamo.DynamoClusterWatcherTask::<init>(misk.tasks.RepeatedTaskQueue,\
+        \ software.amazon.awssdk.services.dynamodb.DynamoDbClient, java.time.Clock,\
+        \ misk.clustering.weights.ClusterWeightProvider, ===misk.clustering.dynamo.DynamoCluster===,\
+        \ misk.clustering.dynamo.DynamoClusterConfig)"
+      new: "parameter void misk.clustering.dynamo.DynamoClusterWatcherTask::<init>(misk.tasks.RepeatedTaskQueue,\
+        \ software.amazon.awssdk.services.dynamodb.DynamoDbClient, java.time.Clock,\
+        \ misk.clustering.weights.ClusterWeightProvider, ===misk.clustering.DefaultCluster===,\
+        \ misk.clustering.dynamo.DynamoClusterConfig)"
+      justification: "No external usage, this prevents deprecation of existing function"

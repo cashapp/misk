@@ -1,12 +1,19 @@
 package misk.redis
 
+import misk.redis.Redis.ZAddOptions.CH
+import misk.redis.Redis.ZAddOptions.GT
+import misk.redis.Redis.ZAddOptions.LT
+import misk.redis.Redis.ZAddOptions.NX
+import misk.redis.Redis.ZAddOptions.XX
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.args.ListDirection
+import redis.clients.jedis.exceptions.JedisDataException
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -749,5 +756,203 @@ abstract class AbstractRedisTest {
     // Verify
     assertNull(redis.hget("foo", "bar"))
     assertNull(redis["foo"])
+  }
+
+  @Test fun `zAdd no option or only CH tests`() {
+    val aMember = "a"
+    val bMember = "b"
+
+    // add new
+    assertEquals(1L, redis.zadd("bar1", 1.0, aMember))
+    // add new and existing
+    assertEquals(1L, redis.zadd("bar1", mapOf(aMember to 2.0, bMember to 1.0)))
+    assertEquals(2.0, redis.zscore("bar1", "a"))
+    assertEquals(1.0, redis.zscore("bar1", "b"))
+
+    // add new
+    assertEquals(1L, redis.zadd("bar2", 1.0, aMember, CH))
+    // add new and existing
+    assertEquals(2L, redis.zadd("bar2", mapOf(aMember to 2.0, bMember to 1.0), CH))
+    assertEquals(2.0, redis.zscore("bar2", "a"))
+    assertEquals(1.0, redis.zscore("bar2", "b"))
+
+  }
+
+  @Test fun `zAdd NX tests`() {
+    val aMember = "a"
+    val bMember = "b"
+
+    // nx: never update current member.
+    redis.zadd("foo", 1.0, aMember)
+    redis.zadd("bar", 1.0, aMember)
+
+    assertEquals(0L, redis.zadd("foo", 2.0, aMember, NX))
+    assertEquals(1.0, redis.zscore("foo", "a"))
+    assertEquals(0L, redis.zadd("bar", 2.0, aMember, NX, CH))
+    assertEquals(1.0, redis.zscore("bar", "a"))
+
+    // add new members
+    assertEquals(1L, redis.zadd("foo", 3.0, bMember, NX))
+    assertEquals(3.0, redis.zscore("foo", "b"))
+    assertEquals(1L, redis.zadd("bar", 3.0, bMember, NX, CH))
+    assertEquals(3.0, redis.zscore("bar", "b"))
+  }
+
+  @Test fun `zAdd XX tests`() {
+    val aMember = "a"
+
+    // never add new member.
+    assertEquals(0L, redis.zadd("foo", 1.0, aMember, XX))
+    assertThat(redis.zscore("foo", "a")).isNull()
+    assertEquals(0L, redis.zadd("bar", 1.0, aMember, XX, CH))
+    assertThat(redis.zscore("bar", "a")).isNull()
+
+    redis.zadd("foo", -1.0, aMember)
+    redis.zadd("bar", -1.0, aMember)
+
+    // update existing members.
+    assertEquals(0L, redis.zadd("foo", 1.0, aMember, XX))
+    assertEquals(1.0, redis.zscore("foo", "a"))
+    assertEquals(1L, redis.zadd("bar", 1.0, aMember, XX, CH))
+    assertEquals(1.0, redis.zscore("bar", "a"))
+  }
+
+  @Test fun `zAdd LT tests`() {
+    val cMember = "c"
+
+    // LT doesn't prevent new members from being added.
+    assertEquals(1L, redis.zadd("foo", 4.0, cMember, LT))
+    assertEquals(4.0, redis.zscore("foo", "c"))
+
+    assertEquals(1L, redis.zadd("bar", 4.0, cMember, LT, CH))
+    assertEquals(4.0, redis.zscore("bar", "c"))
+
+    // LT only updates existing elements if the new score is less than the current score.
+    assertEquals(0L, redis.zadd("foo", 5.0, cMember, LT))
+    assertEquals(4.0, redis.zscore("foo", "c"))
+    assertEquals(0L, redis.zadd("foo", 1.0, cMember, LT))
+    assertEquals(1.0, redis.zscore("foo", "c"))
+
+    assertEquals(0L, redis.zadd("bar", 5.0, cMember, LT, CH))
+    assertEquals(4.0, redis.zscore("bar", "c"))
+    assertEquals(1L, redis.zadd("bar", 1.0, cMember, LT, CH))
+    assertEquals(1.0, redis.zscore("bar", "c"))
+
+  }
+
+  @Test fun `zAdd GT tests`() {
+    val cMember = "c"
+
+    // GT doesn't prevent new members from being added.
+    assertEquals(1L, redis.zadd("foo", 4.0, cMember, GT))
+    assertEquals(4.0, redis.zscore("foo", "c"))
+
+    assertEquals(1L, redis.zadd("bar", 4.0, cMember, GT, CH))
+    assertEquals(4.0, redis.zscore("bar", "c"))
+
+    // GT only updates existing elements if the new score is less than the current score.
+    assertEquals(0L, redis.zadd("foo", 1.0, cMember, GT))
+    assertEquals(4.0, redis.zscore("foo", "c"))
+    assertEquals(0L, redis.zadd("foo", 5.0, cMember, GT))
+    assertEquals(5.0, redis.zscore("foo", "c"))
+
+    assertEquals(0L, redis.zadd("bar", 1.0, cMember, GT, CH))
+    assertEquals(4.0, redis.zscore("bar", "c"))
+    assertEquals(1L, redis.zadd("bar", 5.0, cMember, GT, CH))
+    assertEquals(5.0, redis.zscore("bar", "c"))
+  }
+
+  @Test fun `zAdd valid multiple options test`() {
+    val cMember = "c"
+    val dMemberBytes = "d"
+    // LT XX
+    // LT modifies existing if score is less than current. XX prevents adding new
+
+    // Test not adding new.
+    assertEquals(0L, redis.zadd("foo", 4.0, cMember, LT, XX))
+    assertNull(redis.zscore("foo", "c"))
+
+    assertEquals(0L, redis.zadd("bar", 4.0, cMember, LT, XX, CH))
+    assertNull(redis.zscore("bar", "c"))
+
+    // add some members to test further
+    redis.zadd("foo", 4.0, cMember)
+    redis.zadd("bar", 4.0, cMember)
+
+    // Test updating existing elements if the new score is less than the current score.
+    assertEquals(0L, redis.zadd("foo", 5.0, cMember, LT, XX))
+    assertEquals(4.0, redis.zscore("foo", "c"))
+    assertEquals(0L, redis.zadd("foo", 1.0, cMember, LT, XX))
+    assertEquals(1.0, redis.zscore("foo", "c"))
+
+    assertEquals(0L, redis.zadd("bar", 5.0, cMember, LT, XX, CH))
+    assertEquals(4.0, redis.zscore("bar", "c"))
+    assertEquals(1L, redis.zadd("bar", 1.0, cMember, LT, XX, CH))
+    assertEquals(1.0, redis.zscore("bar", "c"))
+
+
+    // GT XX
+    // GT modifies existing if score is more than current. XX prevents adding new
+
+    // Test not adding new.
+    assertEquals(0L, redis.zadd("foo", 4.0, dMemberBytes, GT, XX))
+    assertNull(redis.zscore("foo", "d"))
+
+    assertEquals(0L, redis.zadd("bar", 4.0, dMemberBytes, GT, XX, CH))
+    assertNull(redis.zscore("bar", "d"))
+
+    // add some members to test further
+    redis.zadd("foo", 4.0, dMemberBytes)
+    redis.zadd("bar", 4.0, dMemberBytes)
+
+    // Test updating existing elements if the new score is more than the current score.
+    assertEquals(0L, redis.zadd("foo", 3.0, dMemberBytes, GT, XX))
+    assertEquals(4.0, redis.zscore("foo", "d"))
+    assertEquals(0L, redis.zadd("foo", 5.0, dMemberBytes, GT, XX))
+    assertEquals(5.0, redis.zscore("foo", "d"))
+
+    assertEquals(0L, redis.zadd("bar", 3.0, dMemberBytes, GT, XX, CH))
+    assertEquals(4.0, redis.zscore("bar", "d"))
+    assertEquals(1L, redis.zadd("bar", 5.0, dMemberBytes, GT, XX, CH))
+    assertEquals(5.0, redis.zscore("bar", "d"))
+  }
+
+  @Test fun `zAdd invalid multiple options test`() {
+    val aMember = "a"
+
+    assertFailsWith<JedisDataException>(
+      message = "ERR XX and NX options at the same time are not compatible",
+      block = { redis.zadd("foo", 2.0, aMember, NX, XX) }
+    )
+
+    setOf(
+      { redis.zadd("foo", 2.0, aMember, NX, LT) },
+      { redis.zadd("foo", 2.0, aMember, NX, GT) },
+      { redis.zadd("foo", 2.0, aMember, GT, LT) },
+      { redis.zadd("foo", 2.0, aMember, NX, LT, GT) },
+      { redis.zadd("foo", 2.0, aMember, XX, LT, GT) },
+    ).forEach {
+      assertFailsWith<JedisDataException>(
+        message = "ERR GT, LT, and/or NX options at the same time are not compatible",
+        block = { it.invoke() }
+      )
+    }
+  }
+
+  @Test fun zScoreTest() {
+    val aMember = "a"
+    val bMember = "b"
+    val cMember = "c"
+
+    redis.zadd("foo", 1.0, aMember);
+    redis.zadd("foo", 10.0, bMember);
+    redis.zadd("foo", 0.1, cMember);
+    redis.zadd("foo", 2.0, aMember);
+
+    assertEquals(10.0, redis.zscore("foo", "b"));
+
+    assertEquals(0.1, redis.zscore("foo", "c"));
+
+    assertNull(redis.zscore("foo", "s"));
   }
 }
