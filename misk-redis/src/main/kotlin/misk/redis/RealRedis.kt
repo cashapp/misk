@@ -1,6 +1,5 @@
 package misk.redis
 
-import arrow.core.Either
 import misk.redis.Redis.ZAddOptions.CH
 import misk.redis.Redis.ZAddOptions.GT
 import misk.redis.Redis.ZAddOptions.LT
@@ -440,7 +439,7 @@ class RealRedis(
     limit: ZRangeLimit?,
   ): List<ByteString?> {
     return zrangeBase(key, type, start, stop, reverse, false, limit)
-      .leftOrNull()?.map { it?.toByteString() } ?: listOf()
+      .noScore?.map { it?.toByteString() } ?: listOf()
   }
 
   override fun zrangeWithScores(
@@ -452,7 +451,7 @@ class RealRedis(
     limit: ZRangeLimit?,
   ): List<Pair<ByteString?, Double>> {
     return zrangeBase(key, type, start, stop, reverse, true, limit)
-      .getOrNull()?.map { Pair(it.binaryElement?.toByteString(), it.score) } ?: listOf()
+      .withScore?.map { Pair(it.binaryElement?.toByteString(), it.score) } ?: listOf()
   }
 
   private fun zrangeBase(
@@ -463,7 +462,7 @@ class RealRedis(
     reverse: Boolean,
     withScore: Boolean,
     limit: ZRangeLimit?,
-  ): Either<List<ByteArray?>, List<Tuple>> {
+  ): ZRangeResponse {
     return when (type) {
       ZRangeType.INDEX ->
         zrangeByIndex(key, start as ZRangeIndexMarker, stop as ZRangeIndexMarker, reverse,
@@ -486,52 +485,65 @@ class RealRedis(
     reverse: Boolean,
     withScore: Boolean,
     limit: ZRangeLimit?,
-  ): Either<List<ByteArray?>, List<Tuple>> {
+  ): ZRangeResponse {
     val minString = start.toString()
     val maxString = stop.toString()
 
     return if (limit == null && !reverse && !withScore) {
-      Either.Left(unifiedJedis.zrangeByScore(key.toByteArray(charset),
-                                     minString.toByteArray(charset),
-                                     maxString.toByteArray(charset)))
+      ZRangeResponse.noScore(unifiedJedis.zrangeByScore(key.toByteArray(charset),
+                                                     minString.toByteArray(charset),
+                                                     maxString.toByteArray(charset)))
     } else if (limit == null && !reverse) {
-      Either.Right(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
-                                                        minString.toByteArray(charset),
-                                                        maxString.toByteArray(charset)))
+      ZRangeResponse.withScore(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
+                                                               minString.toByteArray(charset),
+                                                               maxString.toByteArray(charset)))
     } else if (limit == null && !withScore) {
-      Either.Left(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
+      ZRangeResponse.noScore(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
                                              maxString.toByteArray(charset),
                                              minString.toByteArray(charset)))
     } else if (limit == null){
-      Either.Right(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
+      ZRangeResponse.withScore(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
                                                         maxString.toByteArray(charset),
                                                         minString.toByteArray(charset)))
     } else if (!reverse && !withScore) {
-      Either.Left(unifiedJedis.zrangeByScore(key.toByteArray(charset),
+      ZRangeResponse.noScore(unifiedJedis.zrangeByScore(key.toByteArray(charset),
                                              minString.toByteArray(charset),
                                              maxString.toByteArray(charset),
                                              limit.offset,
                                              limit.count))
     } else if (!reverse) {
-      Either.Right(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
+      ZRangeResponse.withScore(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
                                                         minString.toByteArray(charset),
                                                         maxString.toByteArray(charset),
                                                         limit.offset,
                                                         limit.count))
     } else if (!withScore) {
-      Either.Left(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
+      ZRangeResponse.noScore(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
                                              maxString.toByteArray(charset),
                                              minString.toByteArray(charset),
                                              limit.offset,
                                              limit.count))
     } else {
-      Either.Right(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
+      ZRangeResponse.withScore(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
                                                         maxString.toByteArray(charset),
                                                         minString.toByteArray(charset),
                                                         limit.offset,
                                                         limit.count))
     }
+  }
 
+  /**
+   * A wrapper class for handling response from zrange* methods.
+   */
+  private class ZRangeResponse private constructor(
+    val noScore: List<ByteArray?>?,
+    val withScore: List<Tuple>?
+  ) {
+    companion object {
+      fun noScore(ans: List<ByteArray?>) : ZRangeResponse = ZRangeResponse(ans, null)
+
+      fun withScore(ans: List<Tuple>) : ZRangeResponse = ZRangeResponse(null, ans)
+    }
   }
 
   private fun zrangeByIndex(
@@ -540,7 +552,7 @@ class RealRedis(
     stop: ZRangeIndexMarker,
     reverse: Boolean,
     withScore: Boolean
-  ): Either<List<ByteArray?>, List<Tuple>> {
+  ): ZRangeResponse {
     val params = ZRangeParams(
       start.intValue,
       stop.intValue
@@ -548,9 +560,9 @@ class RealRedis(
     if (reverse) params.rev()
 
     return if (withScore) {
-      Either.Right(unifiedJedis.zrangeWithScores(key.toByteArray(charset), params))
+      ZRangeResponse.withScore(unifiedJedis.zrangeWithScores(key.toByteArray(charset), params))
     } else {
-      Either.Left(unifiedJedis.zrange(key.toByteArray(charset), params))
+      ZRangeResponse.noScore(unifiedJedis.zrange(key.toByteArray(charset), params))
     }
   }
 
