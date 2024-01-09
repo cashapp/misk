@@ -521,7 +521,8 @@ interface Redis {
    * Returns the specified range of elements in the sorted set stored at [key].
    *
    * ZRANGE can perform different [type]s of range queries: by index (rank), by the score, or by
-   * lexicographical order. See [ZRangeType] for different types of range queries.
+   * lexicographical order. Currently only index and score type range queries are supported.
+   * See [ZRangeType] for different types of range queries.
    *
    * You can specify the [start] and [stop] of the range you want to filter by.
    * Depending on the [type] you will have to use the appropriate type of [ZRangeMarker].
@@ -590,12 +591,7 @@ interface Redis {
      *
      * Use [ZRangeScoreMarker] to specify the start and stop for this type.
      */
-    SCORE,
-
-    /**
-     * This is currently not supported.
-     */
-    LEX
+    SCORE
   }
 
   abstract class ZRangeMarker(
@@ -632,15 +628,6 @@ interface Redis {
       return ans
     }
   }
-
-  /**
-   * This is currently not supported.
-   */
-  data class ZRangeLexMarker(
-    val stringValue: String,
-    val isIncluded: Boolean,
-    val isInfinite: Boolean = false
-  ): ZRangeMarker(stringValue, isIncluded)
 
   /**
    * The limit argument in [zrange] and [zrangeWithScores] can be used to obtain a sub-range from

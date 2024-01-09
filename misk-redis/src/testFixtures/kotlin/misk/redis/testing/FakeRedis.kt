@@ -618,9 +618,6 @@ class FakeRedis @Inject constructor(
           reverse = reverse,
           limit = limit
         )
-      ZRangeType.LEX ->
-        throw RuntimeException("Unsupported UnifiedJedis implementation of BYLEX option for " +
-                                 "zrange command")
     }
 
     return ansWithScore

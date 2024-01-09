@@ -211,22 +211,6 @@ public final class misk/redis/Redis$ZRangeIndexMarker : misk/redis/Redis$ZRangeM
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/redis/Redis$ZRangeLexMarker : misk/redis/Redis$ZRangeMarker {
-	public fun <init> (Ljava/lang/String;ZZ)V
-	public synthetic fun <init> (Ljava/lang/String;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Z
-	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;ZZ)Lmisk/redis/Redis$ZRangeLexMarker;
-	public static synthetic fun copy$default (Lmisk/redis/Redis$ZRangeLexMarker;Ljava/lang/String;ZZILjava/lang/Object;)Lmisk/redis/Redis$ZRangeLexMarker;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getStringValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public final fun isIncluded ()Z
-	public final fun isInfinite ()Z
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class misk/redis/Redis$ZRangeLimit {
 	public fun <init> (II)V
 	public final fun component1 ()I
@@ -262,7 +246,6 @@ public final class misk/redis/Redis$ZRangeScoreMarker : misk/redis/Redis$ZRangeM
 
 public final class misk/redis/Redis$ZRangeType : java/lang/Enum {
 	public static final field INDEX Lmisk/redis/Redis$ZRangeType;
-	public static final field LEX Lmisk/redis/Redis$ZRangeType;
 	public static final field SCORE Lmisk/redis/Redis$ZRangeType;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/Redis$ZRangeType;
 	public static fun values ()[Lmisk/redis/Redis$ZRangeType;

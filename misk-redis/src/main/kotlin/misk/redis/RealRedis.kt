@@ -471,10 +471,6 @@ class RealRedis(
       ZRangeType.SCORE ->
         zrangeByScore(key, start as ZRangeScoreMarker, stop as ZRangeScoreMarker, reverse,
                       withScore, limit)
-
-      ZRangeType.LEX ->
-        throw RuntimeException("Unsupported UnifiedJedis implementation of BYLEX option for " +
-                                 "zrange command")
     }
   }
 
