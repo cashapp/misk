@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
-    testRuntimeOnly(Dependencies.junitEngine)
-    testRuntimeOnly(Dependencies.kotestJunitRunnerJvm)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
+    testRuntimeOnly(libs.junitEngine)
+    testRuntimeOnly(libs.kotestJunitRunnerJvm)
 }

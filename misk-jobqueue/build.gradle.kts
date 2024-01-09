@@ -10,8 +10,8 @@ plugins {
 }
 
 dependencies {
-  testFixturesApi(Dependencies.guice)
-  testFixturesApi(Dependencies.jakartaInject)
+  testFixturesApi(libs.guice)
+  testFixturesApi(libs.jakartaInject)
   testFixturesApi(project(":wisp:wisp-token"))
   testFixturesApi(project(":misk"))
   testFixturesApi(project(":misk-hibernate"))
@@ -21,14 +21,14 @@ dependencies {
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.guice)
-  testImplementation(Dependencies.jakartaInject)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinLogging)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.logbackClassic)
-  testImplementation(Dependencies.moshi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.guice)
+  testImplementation(libs.jakartaInject)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinLogging)
+  testImplementation(libs.kotlinTest)
+  testImplementation(libs.logbackClassic)
+  testImplementation(libs.moshi)
   testImplementation(project(":wisp:wisp-logging"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-time-testing"))

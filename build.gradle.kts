@@ -16,24 +16,24 @@ buildscript {
   }
 
   dependencies {
-    classpath(Dependencies.kotlinAllOpenPlugin)
-    classpath(Dependencies.kotlinGradlePlugin)
-    classpath(Dependencies.detektGradlePlugin)
-    classpath(Dependencies.dokkaGradlePlugin)
-    classpath(Dependencies.kotlinNoArgPlugin)
-    classpath(Dependencies.junitGradlePlugin)
-    classpath(Dependencies.mavenPublishGradlePlugin)
-    classpath(Dependencies.protobufGradlePlugin)
-    classpath(Dependencies.jgit)
-    classpath(Dependencies.wireGradlePlugin)
-    classpath(Dependencies.revapiGradlePlugin)
-    classpath(Dependencies.sqldelightGradlePlugin)
+    classpath(libs.kotlinAllOpenPlugin)
+    classpath(libs.kotlinGradlePlugin)
+    classpath(libs.detektGradlePlugin)
+    classpath(libs.dokkaGradlePlugin)
+    classpath(libs.kotlinNoArgPlugin)
+    classpath(libs.junitGradlePlugin)
+    classpath(libs.mavenPublishGradlePlugin)
+    classpath(libs.protobufGradlePlugin)
+    classpath(libs.jgit)
+    classpath(libs.wireGradlePlugin)
+    classpath(libs.revapiGradlePlugin)
+    classpath(libs.sqldelightGradlePlugin)
   }
 }
 
 plugins {
-  id("com.autonomousapps.dependency-analysis") version Dependencies.dependencyAnalysisPluginVersion
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version Dependencies.kotlinBinaryCompatibilityPluginVersion
+  id("com.autonomousapps.dependency-analysis") version libs.versions.dependencyAnalysisPlugin.get()
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version libs.versions.kotlinBinaryCompatibilityPlugin.get()
 }
 
 apply(plugin = "com.vanniktech.maven.publish.base")
@@ -198,22 +198,22 @@ subprojects {
     }
 
     dependencies {
-      add("testRuntimeOnly", Dependencies.junitEngine)
+      add("testRuntimeOnly", rootProject.libs.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.
       // Enforce misk-bom -- it should take priority over external BOMs.
       add("api", enforcedPlatform(project(":misk-bom")))
-      add("api", platform(Dependencies.grpcBom))
-      add("api", platform(Dependencies.guavaBom))
-      add("api", platform(Dependencies.guiceBom))
-      add("api", platform(Dependencies.jacksonBom))
-      add("api", platform(Dependencies.jerseyBom))
-      add("api", platform(Dependencies.jettyBom))
-      add("api", platform(Dependencies.kotlinBom))
-      add("api", platform(Dependencies.nettyBom))
-      add("api", platform(Dependencies.prometheusClientBom))
-      add("api", platform(Dependencies.tempestBom))
-      add("api", platform(Dependencies.wireBom))
+      add("api", platform(rootProject.libs.grpcBom))
+      add("api", platform(rootProject.libs.guavaBom))
+      add("api", platform(rootProject.libs.guiceBom))
+      add("api", platform(rootProject.libs.jacksonBom))
+      add("api", platform(rootProject.libs.jerseyBom))
+      add("api", platform(rootProject.libs.jettyBom))
+      add("api", platform(rootProject.libs.kotlinBom))
+      add("api", platform(rootProject.libs.nettyBom))
+      add("api", platform(rootProject.libs.prometheusClientBom))
+      add("api", platform(rootProject.libs.tempestBom))
+      add("api", platform(rootProject.libs.wireBom))
     }
 
     tasks.withType<GenerateModuleMetadata> {

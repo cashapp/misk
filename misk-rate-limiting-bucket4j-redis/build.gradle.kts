@@ -15,16 +15,16 @@ dependencies {
   api(project(":misk-redis"))
   api(project(":wisp:wisp-deployment"))
   api(project(":wisp:wisp-rate-limiting"))
-  api(Dependencies.guava)
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
-  api(Dependencies.jedis)
-  api(Dependencies.micrometerCore)
+  api(libs.guava)
+  api(libs.guice)
+  api(libs.jakartaInject)
+  api(libs.jedis)
+  api(libs.micrometerCore)
 
   implementation(project(":misk-service"))
   implementation(project(":wisp:wisp-rate-limiting:bucket4j"))
-  implementation(Dependencies.bucket4jCore)
-  implementation(Dependencies.bucket4jRedis)
+  implementation(libs.bucket4jCore)
+  implementation(libs.bucket4jRedis)
 
   testFixturesApi(project(":misk-redis"))
   testFixturesApi(project(":misk-testing"))
@@ -34,8 +34,8 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-redis")))
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
 }
 
 configure<MavenPublishBaseExtension> {
