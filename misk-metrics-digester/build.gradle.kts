@@ -9,11 +9,11 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.okio)
-  implementation(Dependencies.wireRuntime)
+  api(libs.okio)
+  implementation(libs.wireRuntime)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":wisp:wisp-time-testing"))
 }
 

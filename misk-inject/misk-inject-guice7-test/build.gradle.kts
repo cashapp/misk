@@ -4,17 +4,17 @@ plugins {
 }
 
 dependencies {
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.jakartaInject)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.guava)
-  testImplementation(Dependencies.guice) {
+  testImplementation(libs.assertj)
+  testImplementation(libs.jakartaInject)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.guava)
+  testImplementation(libs.guice) {
     version {
       require("7.0.0")
     }
   }
-  testImplementation(Dependencies.guice7Bom)
-  testImplementation(Dependencies.okHttp)
+  testImplementation(libs.guice7Bom)
+  testImplementation(libs.okHttp)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-actions"))
   testImplementation(project(":misk-core"))

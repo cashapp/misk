@@ -21,7 +21,7 @@ wire {
 }
 
 dependencies {
-  api(Dependencies.okio)
+  api(libs.okio)
 }
 
 configure<MavenPublishBaseExtension> {

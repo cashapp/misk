@@ -9,22 +9,22 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.kotlinLogging)
+  api(libs.kotlinLogging)
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
-  implementation(Dependencies.aws2Dynamodb)
-  implementation(Dependencies.aws2DynamodbEnhanced)
-  implementation(Dependencies.guava)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.jakartaInject)
+  implementation(libs.aws2Dynamodb)
+  implementation(libs.aws2DynamodbEnhanced)
+  implementation(libs.guava)
+  implementation(libs.guice)
+  implementation(libs.jakartaInject)
   implementation(project(":misk"))
   implementation(project(":misk-clustering"))
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
   implementation(project(":wisp:wisp-logging"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-aws2-dynamodb")))
 

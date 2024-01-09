@@ -12,7 +12,7 @@ plugins {
 
 wire {
   sourcePath {
-    srcJar(Dependencies.wireReflector)
+    srcJar(libs.wireReflector)
   }
   // Generate service interfaces only; the client comes with wire-reflector.
   kotlin {
@@ -24,24 +24,24 @@ wire {
 }
 
 dependencies {
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
-  api(Dependencies.wireReflector)
+  api(libs.guice)
+  api(libs.jakartaInject)
+  api(libs.wireReflector)
   api(project(":misk-actions"))
   api(project(":misk-inject"))
-  implementation(Dependencies.kotlinLogging)
-  implementation(Dependencies.kotlinReflect)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.wireGrpcClient)
-  implementation(Dependencies.wireRuntime)
-  implementation(Dependencies.wireSchema)
+  implementation(libs.kotlinLogging)
+  implementation(libs.kotlinReflect)
+  implementation(libs.okio)
+  implementation(libs.wireGrpcClient)
+  implementation(libs.wireRuntime)
+  implementation(libs.wireSchema)
   implementation(project(":wisp:wisp-logging"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.okHttp)
-  testImplementation(Dependencies.protobufJava)
-  testImplementation(Dependencies.slf4jApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.okHttp)
+  testImplementation(libs.protobufJava)
+  testImplementation(libs.slf4jApi)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-grpc-tests"))

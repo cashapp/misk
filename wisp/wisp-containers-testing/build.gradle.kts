@@ -3,13 +3,13 @@ plugins {
 }
 
 dependencies {
-    api(Dependencies.dockerApi)
-    api(Dependencies.kotlinLogging)
-    implementation(Dependencies.dockerCore)
-    implementation(Dependencies.dockerTransport)
-    implementation(Dependencies.dockerTransportHttpClient)
+    api(libs.dockerApi)
+    api(libs.kotlinLogging)
+    implementation(libs.dockerCore)
+    implementation(libs.dockerTransport)
+    implementation(libs.dockerTransportHttpClient)
     implementation(project(":wisp:wisp-logging"))
-    runtimeOnly(Dependencies.logbackClassic)
+    runtimeOnly(libs.logbackClassic)
 
-    testImplementation(Dependencies.junitApi)
+    testImplementation(libs.junitApi)
 }
