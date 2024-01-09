@@ -365,3 +365,11 @@ acceptedBreaks:
       new: "method wisp.launchdarkly.LaunchDarklyFeatureFlags misk.feature.launchdarkly.LaunchDarklyModule::wispLaunchDarkly$misk_launchdarkly(jakarta.inject.Provider<com.launchdarkly.sdk.server.interfaces.LDClientInterface>,\
         \ com.squareup.moshi.Moshi, io.micrometer.core.instrument.MeterRegistry)"
       justification: "This is a provider that's not called manually"
+  "2023.12.14.222754-29dc0a1":
+    com.squareup.misk:misk-clustering-dynamodb:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.clustering.dynamo.DynamoClusterConfig misk.clustering.dynamo.DynamoClusterConfig::copy(java.lang.String,\
+        \ long, long)"
+      new: "method misk.clustering.dynamo.DynamoClusterConfig misk.clustering.dynamo.DynamoClusterConfig::copy(java.lang.String,\
+        \ java.lang.String, long, long)"
+      justification: "{This is a new config which is not currently used anywhere.}"
