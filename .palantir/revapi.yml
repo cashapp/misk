@@ -400,3 +400,37 @@ acceptedBreaks:
         \ misk.clustering.weights.ClusterWeightProvider, ===misk.clustering.DefaultCluster===,\
         \ misk.clustering.dynamo.DynamoClusterConfig)"
       justification: "No external usage, this prevents deprecation of existing function"
+  "2024.01.05.050732-580e44f":
+    com.squareup.misk:misk-clustering-dynamodb:
+    - code: "java.annotation.added"
+      old: "method long misk.clustering.dynamo.DynamoClusterConfig::component2()"
+      new: "method java.lang.String misk.clustering.dynamo.DynamoClusterConfig::component2()"
+      justification: "No external usage, code is still in development"
+    - code: "java.annotation.added"
+      old: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===long===)"
+      new: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===java.lang.String===)"
+      justification: "No external usage, code is still in development"
+    - code: "java.annotation.added"
+      old: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===long===, long)"
+      new: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===java.lang.String===, long)"
+      justification: "No external usage, code is still in development"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===long===)"
+      new: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===java.lang.String===)"
+      justification: "No external usage, code is still in development"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===long===, long)"
+      new: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===java.lang.String===, long)"
+      justification: "No external usage, code is still in development"
+    - code: "java.method.returnTypeChanged"
+      old: "method long misk.clustering.dynamo.DynamoClusterConfig::component2()"
+      new: "method java.lang.String misk.clustering.dynamo.DynamoClusterConfig::component2()"
+      justification: "No external usage, code is still in development"
