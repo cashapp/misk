@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.micrometerCore)
+  api(libs.micrometerCore)
 
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
 }

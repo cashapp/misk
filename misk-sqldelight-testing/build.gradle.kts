@@ -4,14 +4,14 @@ plugins {
 }
 
 dependencies {
-  implementation(Dependencies.sqldelightJdbcDriver)
+  implementation(libs.sqldelightJdbcDriver)
 }
 
 sqldelight {
   databases {
     create("MoviesDatabase") {
       packageName.set("misk.sqldelight.testing")
-      dialect(Dependencies.sqldelightMysqlDialect)
+      dialect(libs.sqldelightMysqlDialect)
       srcDirs("src/main/sqldelight", "src/main/resources/migrations")
       deriveSchemaFromMigrations.set(true)
       migrationOutputDirectory.set(file("$buildDir/resources/main/sqldelighttest"))

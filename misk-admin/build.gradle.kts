@@ -10,11 +10,11 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
-  api(Dependencies.kotlinxHtml)
-  api(Dependencies.moshi)
-  api(Dependencies.okio)
+  api(libs.guice)
+  api(libs.jakartaInject)
+  api(libs.kotlinxHtml)
+  api(libs.moshi)
+  api(libs.okio)
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   api(project(":misk"))
@@ -22,17 +22,17 @@ dependencies {
   api(project(":misk-actions"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
-  api(Dependencies.kotlinxHtml)
-  implementation(Dependencies.okHttp)
+  api(libs.kotlinxHtml)
+  implementation(libs.okHttp)
   implementation(project(":misk-core"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-tailwind"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinReflect)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.wireRuntime)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinReflect)
+  testImplementation(libs.kotlinTest)
+  testImplementation(libs.wireRuntime)
   testImplementation(project(":misk-testing"))
 }
 

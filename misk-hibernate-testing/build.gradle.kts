@@ -11,7 +11,7 @@ plugins {
 dependencies {
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
-  implementation(Dependencies.guice)
+  implementation(libs.guice)
   implementation(testFixtures(project(":misk-jdbc")))
 }
 
