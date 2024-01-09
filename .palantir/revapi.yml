@@ -384,6 +384,12 @@ acceptedBreaks:
       old: "class misk.clustering.dynamo.DynamoCluster"
       justification: "No external usage, DynamoClusterModule will use existing DefaultCluster\
         \ instead"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.clustering.dynamo.DynamoClusterConfig misk.clustering.dynamo.DynamoClusterConfig::copy(java.lang.String,\
+        \ long, long)"
+      new: "method misk.clustering.dynamo.DynamoClusterConfig misk.clustering.dynamo.DynamoClusterConfig::copy(java.lang.String,\
+        \ java.lang.String, long, long)"
+      justification: "No external usage, new Config"
     - code: "java.method.parameterTypeChanged"
       old: "parameter void misk.clustering.dynamo.DynamoClusterWatcherTask::<init>(misk.tasks.RepeatedTaskQueue,\
         \ software.amazon.awssdk.services.dynamodb.DynamoDbClient, java.time.Clock,\
