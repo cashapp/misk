@@ -31,10 +31,10 @@ class DynamoClusterTest {
       install(FakeClusterWeightModule())
       install(
         InProcessDynamoDbModule(
-          DynamoDbTable("misk-cluster-members", DyClusterMember::class),
+          DynamoDbTable("$TEST_SERVICE_NAME.misk-cluster-members", DyClusterMember::class),
         )
       )
-      install(DynamoClusterModule(DynamoClusterConfig()))
+      install(DynamoClusterModule(DynamoClusterConfig(appName = TEST_SERVICE_NAME)))
     }
   }
 
@@ -80,7 +80,7 @@ class DynamoClusterTest {
     val enhancedClient = DynamoDbEnhancedClient.builder()
       .dynamoDbClient(ddb)
       .build()
-    val table = enhancedClient.table("misk-cluster-members", DynamoClusterWatcherTask.TABLE_SCHEMA)
+    val table = enhancedClient.table("$TEST_SERVICE_NAME.misk-cluster-members", DynamoClusterWatcherTask.TABLE_SCHEMA)
 
     for (i in 0..150) {
       val member = DyClusterMember()
@@ -112,5 +112,9 @@ class DynamoClusterTest {
       latch.countDown()
     }
     check(latch.await(5, TimeUnit.SECONDS)) { "cluster change did not complete within 5 seconds " }
+  }
+
+  companion object {
+    const val TEST_SERVICE_NAME = "test-service"
   }
 }
