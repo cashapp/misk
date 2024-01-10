@@ -10,6 +10,7 @@ import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType.INDEX
 import misk.redis.Redis.ZRangeType.SCORE
+import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -962,1590 +963,385 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by index test - happy case`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 10.0
-      )
-    )
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair)
+    val start = 0
+    val stop = 3
+
     // standard happy case. get first four lowest score members.
-    assertEquals(
-      listOf(
-        "bz".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "b".encodeUtf8(),
-        "yy".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(3)
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(3)
-      )
-    )
-    assertEquals(
-      listOf(
-        "ad".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "b".encodeUtf8(),
-        "bb".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(3),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "ad".encodeUtf8(),
-          10.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(3),
-        true
-      )
-    )
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by index test - stop index exceeds the size`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 10.0
-      )
-    )
-    // stop index exceeds the size. So stop index is the last one.
-    assertEquals(
-      listOf(
-        "bz".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "b".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "ad".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(100)
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "ad".encodeUtf8(),
-          10.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(100)
-      )
-    )
-    assertEquals(
-      listOf(
-        "ad".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "b".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "bz".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(100),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "ad".encodeUtf8(),
-          10.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(100),
-        true
-      )
-    )
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val start = 0
+    val stop = 100
+
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by index test - start is greater than stop`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 10.0
-      )
-    )
+    val expectedMapForNonReverse = mapOf<String, Double>()
+    val expectedMapForReverse = mapOf<String, Double>()
+    val start = 3
+    val stop = 1
+
     // when start is greater than stop, empty set is returned.
-    assertEquals(
-      listOf(),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(3),
-        ZRangeIndexMarker(1)
-      )
-    )
-    assertEquals(
-      listOf(),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(3),
-        ZRangeIndexMarker(1)
-      )
-    )
-    assertEquals(
-      listOf(),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(3),
-        ZRangeIndexMarker(1),
-        true
-      )
-    )
-    assertEquals(
-      listOf(),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(3),
-        ZRangeIndexMarker(1),
-        true
-      )
-    )
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by index test - negative indices - get second last to last`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 10.0
-      )
-    )
+    val expectedMapForNonReverse = mapOf(yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse = mapOf(bz_2_3Pair, ba_2_3Pair)
+    val start = -2
+    val stop = -1
 
     // negative indices. get second last to last
-    assertEquals(
-      listOf(
-        "yy".encodeUtf8(),
-        "ad".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-2),
-        ZRangeIndexMarker(-1)
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "ad".encodeUtf8(),
-          10.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-2),
-        ZRangeIndexMarker(-1)
-      )
-    )
-    assertEquals(
-      listOf(
-        "bb".encodeUtf8(),
-        "bz".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-2),
-        ZRangeIndexMarker(-1),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-2),
-        ZRangeIndexMarker(-1),
-        true
-      )
-    )
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by index test - negative indices - get last 100 or as many as there are`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 10.0
-      )
-    )
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val start = -100
+    val stop = -1
 
     // negative indices. get last 100 or as much there is.
-    assertEquals(
-      listOf(
-        "bz".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "b".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "ad".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-100),
-        ZRangeIndexMarker(-1)
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "ad".encodeUtf8(),
-          10.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-100),
-        ZRangeIndexMarker(-1)
-      )
-    )
-    assertEquals(
-      listOf(
-        "ad".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "b".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "bz".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-100),
-        ZRangeIndexMarker(-1),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "ad".encodeUtf8(),
-          10.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-100),
-        ZRangeIndexMarker(-1),
-        true
-      )
-    )
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by index test - mixed indices - get from second last to second`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 10.0
-      )
-    )
+    val expectedMapForNonReverse = mapOf<String, Double>()
+    val expectedMapForReverse = mapOf<String, Double>()
+    val start = -2
+    val stop = 1
 
     // mixed indices. empty set --> going from second last to second.
-    assertEquals(
-      listOf(),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-2),
-        ZRangeIndexMarker(1)
-      )
-    )
-    assertEquals(
-      listOf(),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-2),
-        ZRangeIndexMarker(1)
-      )
-    )
-    assertEquals(
-      listOf(),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-2),
-        ZRangeIndexMarker(1),
-        true
-      )
-    )
-    assertEquals(
-      listOf(),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(-2),
-        ZRangeIndexMarker(1),
-        true
-      )
-    )
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by index test - mixed indices - get from second to second last`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 10.0
-      )
-    )
+    val expectedMapForNonReverse =
+      mapOf(bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair)
+    val expectedMapForReverse =
+      mapOf(yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair)
+    val start = 1
+    val stop = -2
 
     // mixed indices. get from second to second last
-    assertEquals(
-      listOf(
-        "bb".encodeUtf8(),
-        "b".encodeUtf8(),
-        "yy".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(1),
-        ZRangeIndexMarker(-2)
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(1),
-        ZRangeIndexMarker(-2)
-      )
-    )
-    assertEquals(
-      listOf(
-        "yy".encodeUtf8(),
-        "b".encodeUtf8(),
-        "bb".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(1),
-        ZRangeIndexMarker(-2),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(1),
-        ZRangeIndexMarker(-2),
-        true
-      )
-    )
-  }
-
-  @Test fun `zrange by index test - same score lex sorted`() {
-    val key = "bar1"
-
-    // The members with same score are lex arranged.
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 10.0,
-        "c" to 5.0,
-        "ba" to 2.3
-      )
-    )
-
-    assertEquals(
-      listOf(
-        "ba".encodeUtf8(),
-        "bz".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "b".encodeUtf8(),
-        "c".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "ad".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(-1)
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "ba".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "c".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "ad".encodeUtf8(),
-          10.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(-1)
-      )
-    )
-    assertEquals(
-      listOf(
-        "ad".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "c".encodeUtf8(),
-        "b".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "bz".encodeUtf8(),
-        "ba".encodeUtf8(),
-      ),
-      redis.zrange(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(-1),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "ad".encodeUtf8(),
-          10.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "c".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "ba".encodeUtf8(),
-          2.3
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        INDEX,
-        ZRangeIndexMarker(0),
-        ZRangeIndexMarker(-1),
-        true
-      )
-    )
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by score test - happy case`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    // The members with same score are lex arranged.
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 9.0,
-        "c" to 5.0,
-        "ba" to 2.3
-      )
-    )
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val start = -10.0
+    val stop = 10.0
 
-    assertEquals(
-      listOf(
-        "ba".encodeUtf8(),
-        "bz".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "b".encodeUtf8(),
-        "c".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "ad".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0)
-      )
-    )
-
-    assertEquals(
-      listOf(
-        Pair(
-          "ba".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "c".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "ad".encodeUtf8(),
-          9.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0)
-      )
-    )
-    assertEquals(
-      listOf(
-        "ad".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "c".encodeUtf8(),
-        "b".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "bz".encodeUtf8(),
-        "ba".encodeUtf8(),
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "ad".encodeUtf8(),
-          9.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "c".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "ba".encodeUtf8(),
-          2.3
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        true
-      )
-    )
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by score test - infinity cases`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    // The members with same score are lex arranged.
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 9.0,
-        "c" to 5.0,
-        "ba" to 2.3
-      )
-    )
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val start = Double.MIN_VALUE
+    val stop = Double.MAX_VALUE
 
-    assertEquals(
-      listOf(
-        "ba".encodeUtf8(),
-        "bz".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "b".encodeUtf8(),
-        "c".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "ad".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(Double.MIN_VALUE),
-        ZRangeScoreMarker(Double.MAX_VALUE)
-      )
-    )
-
-    assertEquals(
-      listOf(
-        Pair(
-          "ba".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "c".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "ad".encodeUtf8(),
-          9.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(Double.MIN_VALUE),
-        ZRangeScoreMarker(Double.MAX_VALUE)
-      )
-    )
-    assertEquals(
-      listOf(
-        "ad".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "c".encodeUtf8(),
-        "b".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "bz".encodeUtf8(),
-        "ba".encodeUtf8(),
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(Double.MIN_VALUE),
-        ZRangeScoreMarker(Double.MAX_VALUE),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "ad".encodeUtf8(),
-          9.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "c".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "ba".encodeUtf8(),
-          2.3
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(Double.MIN_VALUE),
-        ZRangeScoreMarker(Double.MAX_VALUE),
-        true
-      )
-    )
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by score test - start score exceeds stop`() {
-    val key = "bar1"
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    // The members with same score are lex arranged.
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 9.0,
-        "c" to 5.0,
-        "ba" to 2.3
-      )
-    )
+    val expectedMapForNonReverse = mapOf<String, Double>()
+    val expectedMapForReverse = mapOf<String, Double>()
+    val start = 10.0
+    val stop = -10.0
 
-    assertEquals(
-      listOf(),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(10.0),
-        ZRangeScoreMarker(-10.0)
-      )
-    )
-
-    assertEquals(
-      listOf(),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(10.0),
-        ZRangeScoreMarker(-10.0)
-      )
-    )
-    assertEquals(
-      listOf(),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(10.0),
-        ZRangeScoreMarker(-10.0),
-        true
-      )
-    )
-    assertEquals(
-      listOf(),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(10.0),
-        ZRangeScoreMarker(-10.0),
-        true
-      )
-    )
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
-  @Test fun `zrange by score test - star and stop inclusion cases`() {
-    val key = "bar1"
+  @Test fun `zrange by score test - start included, stop included`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    // The members with same score are lex arranged.
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 9.0,
-        "ba" to 2.3
-      )
-    )
+    val expectedMapForNonReverse = mapOf(bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair)
+    val expectedMapForReverse = mapOf(yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair)
+    val start = 4.5
+    val stop = 6.7
 
-    // start included, stop included.
-    assertEquals(
-      listOf(
-        "bb".encodeUtf8(),
-        "b".encodeUtf8(),
-        "yy".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(4.5),
-        ZRangeScoreMarker(6.7)
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(4.5),
-        ZRangeScoreMarker(6.7)
-      )
-    )
-    assertEquals(
-      listOf(
-        "yy".encodeUtf8(),
-        "b".encodeUtf8(),
-        "bb".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(4.5),
-        ZRangeScoreMarker(6.7),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(4.5),
-        ZRangeScoreMarker(6.7),
-        true
-      )
-    )
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
 
-    // start not included, stop included.
-    assertEquals(
-      listOf(
-        "b".encodeUtf8(),
-        "yy".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(
-          4.5,
-          false
-        ),
-        ZRangeScoreMarker(6.7)
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(
-          4.5,
-          false
-        ),
-        ZRangeScoreMarker(6.7)
-      )
-    )
-    assertEquals(
-      listOf(
-        "yy".encodeUtf8(),
-        "b".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(
-          4.5,
-          false
-        ),
-        ZRangeScoreMarker(6.7),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(
-          4.5,
-          false
-        ),
-        ZRangeScoreMarker(6.7),
-        true
-      )
-    )
+  @Test fun `zrange by score test - start not included, stop included`() {
+    redis.zadd(key,
+          mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    // start not included, stop not included.
-    assertEquals(
-      listOf("b".encodeUtf8()),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(
-          4.5,
-          false
-        ),
-        ZRangeScoreMarker(
-          6.7,
-          false
-        )
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(
-          4.5,
-          false
-        ),
-        ZRangeScoreMarker(
-          6.7,
-          false
-        )
-      )
-    )
-    assertEquals(
-      listOf("b".encodeUtf8()),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(
-          4.5,
-          false
-        ),
-        ZRangeScoreMarker(
-          6.7,
-          false
-        ),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(
-          4.5,
-          false
-        ),
-        ZRangeScoreMarker(
-          6.7,
-          false
-        ),
-        true
-      )
-    )
+    val expectedMapForNonReverse = mapOf(b_5Pair, c_5Pair, yy_6_7Pair)
+    val expectedMapForReverse = mapOf(yy_6_7Pair, c_5Pair, b_5Pair)
+    val start = ZRangeScoreMarker(4.5, false)
+    val stop = ZRangeScoreMarker(6.7)
 
-    // start included, stop not included.
-    assertEquals(
-      listOf(
-        "bb".encodeUtf8(),
-        "b".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(4.5),
-        ZRangeScoreMarker(
-          6.7,
-          false
-        )
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(4.5),
-        ZRangeScoreMarker(
-          6.7,
-          false
-        )
-      )
-    )
-    assertEquals(
-      listOf(
-        "b".encodeUtf8(),
-        "bb".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(4.5),
-        ZRangeScoreMarker(
-          6.7,
-          false
-        ),
-        true
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(4.5),
-        ZRangeScoreMarker(
-          6.7,
-          false
-        ),
-        true
-      )
-    )
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - start not included, stop not included`() {
+    redis.zadd(key,
+          mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf(b_5Pair, c_5Pair)
+    val expectedMapForReverse = mapOf(c_5Pair, b_5Pair)
+    val start = ZRangeScoreMarker(4.5, false)
+    val stop = ZRangeScoreMarker(6.7, false)
+
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - start included, stop not included`() {
+    redis.zadd(key,
+          mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf(bb_4_5Pair, b_5Pair, c_5Pair)
+    val expectedMapForReverse = mapOf(c_5Pair, b_5Pair, bb_4_5Pair)
+    val start = ZRangeScoreMarker(4.5)
+    val stop = ZRangeScoreMarker(6.7, false)
+
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
   }
 
   @Test fun `zrange by score test - limit cases`() {
-    val key = "bar1"
+    redis.zadd(key,
+        mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
-    // The members with same score are lex arranged.
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 9.0,
-        "c" to 5.0,
-        "ba" to 2.3
-      )
-    )
+    val m2 = mapOf(bz_2_3Pair, bb_4_5Pair, b_5Pair)
+    val m3 = mapOf(yy_6_7Pair, c_5Pair, b_5Pair)
+    val limit = ZRangeLimit(1, 3)
 
-    assertEquals(
-      listOf(
-        "bz".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "b".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        limit = ZRangeLimit(
-          1,
-          3
-        )
-      )
-    )
-
-    assertEquals(
-      listOf(
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        )
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        limit = ZRangeLimit(
-          1,
-          3
-        )
-      )
-    )
-    assertEquals(
-      listOf(
-        "yy".encodeUtf8(),
-        "c".encodeUtf8(),
-        "b".encodeUtf8()
-      ),
-      redis.zrange(
-        key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        true,
-        limit = ZRangeLimit(
-          1,
-          3
-        )
-      )
-    )
-    assertEquals(
-      listOf(
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "c".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-      ),
-      redis.zrangeWithScores(
-        key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        true,
-        limit = ZRangeLimit(
-          1,
-          3
-        )
-      )
-    )
+    checkZRangeScoreResponse(m2, m3, -10.0, 10.0, limit)
   }
 
   @Test fun `zrange by score test - limit cases negative count`() {
-    val key = "bar1"
 
     // The members with same score are lex arranged.
-    redis.zadd(
-      key,
-      mapOf(
-        "b" to 5.0,
-        "bz" to 2.3,
-        "bb" to 4.5,
-        "yy" to 6.7,
-        "ad" to 9.0,
-        "c" to 5.0,
-        "ba" to 2.3
-      )
-    )
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
+    val m2 = mapOf(b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val m3 = mapOf(b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val limit = ZRangeLimit(3, -2)
+    val start = -10.0
+    val stop = 10.0
+
+    checkZRangeScoreResponse(m2, m3, start, stop, limit)
+  }
+
+  private fun checkZRangeIndexResponse(
+    expectedMapForNonReverse: Map<String, Double>,
+    expectedMapForReverse: Map<String, Double>,
+    start: Int,
+    stop: Int
+  ) {
     assertEquals(
-      listOf(
-        "b".encodeUtf8(),
-        "c".encodeUtf8(),
-        "yy".encodeUtf8(),
-        "ad".encodeUtf8()
-      ),
+      expectedMapForNonReverse.encodedKeys(),
       redis.zrange(
         key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        limit = ZRangeLimit(
-          3,
-          -1
-        )
+        INDEX,
+        ZRangeIndexMarker(start),
+        ZRangeIndexMarker(stop),
       )
     )
-
     assertEquals(
-      listOf(
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "c".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "yy".encodeUtf8(),
-          6.7
-        ),
-        Pair(
-          "ad".encodeUtf8(),
-          9.0
-        )
-      ),
+      expectedMapForNonReverse.toEncodedListOfPairs(),
       redis.zrangeWithScores(
         key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        limit = ZRangeLimit(
-          3,
-          -2
-        )
+        INDEX,
+        ZRangeIndexMarker(start),
+        ZRangeIndexMarker(stop)
       )
     )
     assertEquals(
-      listOf(
-        "b".encodeUtf8(),
-        "bb".encodeUtf8(),
-        "bz".encodeUtf8(),
-        "ba".encodeUtf8(),
-      ),
+      expectedMapForReverse.encodedKeys(),
       redis.zrange(
         key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        true,
-        limit = ZRangeLimit(
-          3,
-          -3
-        )
+        INDEX,
+        ZRangeIndexMarker(start),
+        ZRangeIndexMarker(stop),
+        true
       )
     )
     assertEquals(
-      listOf(
-        Pair(
-          "b".encodeUtf8(),
-          5.0
-        ),
-        Pair(
-          "bb".encodeUtf8(),
-          4.5
-        ),
-        Pair(
-          "bz".encodeUtf8(),
-          2.3
-        ),
-        Pair(
-          "ba".encodeUtf8(),
-          2.3
-        )
-      ),
+      expectedMapForReverse.toEncodedListOfPairs(),
       redis.zrangeWithScores(
         key,
-        SCORE,
-        ZRangeScoreMarker(-10.0),
-        ZRangeScoreMarker(10.0),
-        true,
-        limit = ZRangeLimit(
-          3,
-          -4
-        )
+        INDEX,
+        ZRangeIndexMarker(start),
+        ZRangeIndexMarker(stop),
+        true
       )
     )
   }
+
+  private fun checkZRangeScoreResponse(
+    expectedMapForNonReverse: Map<String, Double>,
+    expectedMapForReverse: Map<String, Double>,
+    start: Double,
+    stop: Double,
+    limit: ZRangeLimit? = null
+  ) {
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse,
+                             ZRangeScoreMarker(start), ZRangeScoreMarker(stop), limit)
+  }
+
+
+  private fun checkZRangeScoreResponse(
+    expectedMapForNonReverse: Map<String, Double>,
+    expectedMapForReverse: Map<String, Double>,
+    start: ZRangeScoreMarker,
+    stop: ZRangeScoreMarker,
+    limit: ZRangeLimit? = null
+  ) {
+    if (limit == null) {
+      assertEquals(
+        expectedMapForNonReverse.encodedKeys(),
+        redis.zrange(
+          key,
+          SCORE,
+          start,
+          stop
+        )
+      )
+      assertEquals(
+        expectedMapForNonReverse.toEncodedListOfPairs(),
+        redis.zrangeWithScores(
+          key,
+          SCORE,
+          start,
+          stop
+        )
+      )
+      assertEquals(
+        expectedMapForReverse.encodedKeys(),
+        redis.zrange(
+          key,
+          SCORE,
+          start,
+          stop,
+          true
+        )
+      )
+      assertEquals(
+        expectedMapForReverse.toEncodedListOfPairs(),
+        redis.zrangeWithScores(
+          key,
+          SCORE,
+          start,
+          stop,
+          true
+        )
+      )
+    } else {
+      assertEquals(
+        expectedMapForNonReverse.encodedKeys(),
+        redis.zrange(
+          key,
+          SCORE,
+          start,
+          stop,
+          limit = limit
+        )
+      )
+      assertEquals(
+        expectedMapForNonReverse.toEncodedListOfPairs(),
+        redis.zrangeWithScores(
+          key,
+          SCORE,
+          start,
+          stop,
+          limit = limit
+        )
+      )
+      assertEquals(
+        expectedMapForReverse.encodedKeys(),
+        redis.zrange(
+          key,
+          SCORE,
+          start,
+          stop,
+          true,
+          limit = limit
+        )
+      )
+      assertEquals(
+        expectedMapForReverse.toEncodedListOfPairs(),
+        redis.zrangeWithScores(
+          key,
+          SCORE,
+          start,
+          stop,
+          true,
+          limit = limit
+        )
+      )
+    }
+  }
+
+  companion object {
+    // common vars used in tests for sorted set commands
+    val b_5Pair = "b" to 5.0
+    val bz_2_3Pair = "bz" to 2.3
+    val bb_4_5Pair = "bb" to 4.5
+    val yy_6_7Pair = "yy" to 6.7
+    val ad_9Pair = "ad" to 9.0
+    val c_5Pair = "c" to 5.0
+    val ba_2_3Pair = "ba" to 2.3
+    val key = "foo"
+  }
+
+  private fun Map<String, Double>.toEncodedListOfPairs() : List<Pair<ByteString, Double>> =
+    this.entries.map { Pair(it.key.encodeUtf8(), it.value) }.toList()
+
+  private fun List<String>.encoded(): List<ByteString> = this.map { it.encodeUtf8() }.toList()
+
+  private fun Map<String, Double>.encodedKeys() : List<ByteString> =
+    this.entries.map { it.key.encodeUtf8() }.toList()
+
 }

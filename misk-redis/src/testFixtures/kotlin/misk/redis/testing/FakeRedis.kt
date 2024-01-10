@@ -630,9 +630,10 @@ class FakeRedis @Inject constructor(
     reverse: Boolean
   ): List<Pair<ByteString?, Double>> {
     val scores = if (!reverse) sortedSet.keys.toList() else sortedSet.keys.toList().reversed()
-    val length = scores.size
     var minInt = start.intValue
     var maxInt = stop.intValue
+    var length = 0
+    sortedSet.values.forEach { length += it.size }
 
     if (minInt < -length) minInt = -length
     if (minInt < 0) minInt += length
@@ -644,16 +645,18 @@ class FakeRedis @Inject constructor(
 
     if (minInt > maxInt) return listOf()
 
-    fun Int.cmp() = this in minInt..maxInt
-
     val ans = mutableListOf<Pair<ByteString?, Double>>()
+    var ctr = 0
 
-    for (idx in scores.indices.filter { it.cmp() }) {
+    for (idx in scores.indices) {
       val score = scores[idx]
       var members = sortedSet[score]!!.sorted()
       if (reverse) members = members.reversed()
       for (member in members) {
-        ans.add(Pair(member.encodeUtf8(), score))
+        if (ctr in minInt..maxInt) {
+          ans.add(Pair(member.encodeUtf8(), score))
+        }
+        ctr++
       }
     }
 
