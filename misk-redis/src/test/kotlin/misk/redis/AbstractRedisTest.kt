@@ -5,6 +5,12 @@ import misk.redis.Redis.ZAddOptions.GT
 import misk.redis.Redis.ZAddOptions.LT
 import misk.redis.Redis.ZAddOptions.NX
 import misk.redis.Redis.ZAddOptions.XX
+import misk.redis.Redis.ZRangeIndexMarker
+import misk.redis.Redis.ZRangeLimit
+import misk.redis.Redis.ZRangeScoreMarker
+import misk.redis.Redis.ZRangeType.INDEX
+import misk.redis.Redis.ZRangeType.SCORE
+import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -955,4 +961,387 @@ abstract class AbstractRedisTest {
 
     assertNull(redis.zscore("foo", "s"));
   }
+
+  @Test fun `zrange by index test - happy case`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair)
+    val start = 0
+    val stop = 3
+
+    // standard happy case. get first four lowest score members.
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by index test - stop index exceeds the size`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val start = 0
+    val stop = 100
+
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by index test - start is greater than stop`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf<String, Double>()
+    val expectedMapForReverse = mapOf<String, Double>()
+    val start = 3
+    val stop = 1
+
+    // when start is greater than stop, empty set is returned.
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by index test - negative indices - get second last to last`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf(yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse = mapOf(bz_2_3Pair, ba_2_3Pair)
+    val start = -2
+    val stop = -1
+
+    // negative indices. get second last to last
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by index test - negative indices - get last 100 or as many as there are`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val start = -100
+    val stop = -1
+
+    // negative indices. get last 100 or as much there is.
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by index test - mixed indices - get from second last to second`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf<String, Double>()
+    val expectedMapForReverse = mapOf<String, Double>()
+    val start = -2
+    val stop = 1
+
+    // mixed indices. empty set --> going from second last to second.
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by index test - mixed indices - get from second to second last`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse =
+      mapOf(bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair)
+    val expectedMapForReverse =
+      mapOf(yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair)
+    val start = 1
+    val stop = -2
+
+    // mixed indices. get from second to second last
+    checkZRangeIndexResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - happy case`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val start = -10.0
+    val stop = 10.0
+
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - infinity cases`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val expectedMapForReverse =
+      mapOf(ad_9Pair, yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val start = Double.MIN_VALUE
+    val stop = Double.MAX_VALUE
+
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - start score exceeds stop`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf<String, Double>()
+    val expectedMapForReverse = mapOf<String, Double>()
+    val start = 10.0
+    val stop = -10.0
+
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - start included, stop included`() {
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf(bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair)
+    val expectedMapForReverse = mapOf(yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair)
+    val start = 4.5
+    val stop = 6.7
+
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - start not included, stop included`() {
+    redis.zadd(key,
+          mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf(b_5Pair, c_5Pair, yy_6_7Pair)
+    val expectedMapForReverse = mapOf(yy_6_7Pair, c_5Pair, b_5Pair)
+    val start = ZRangeScoreMarker(4.5, false)
+    val stop = ZRangeScoreMarker(6.7)
+
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - start not included, stop not included`() {
+    redis.zadd(key,
+          mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf(b_5Pair, c_5Pair)
+    val expectedMapForReverse = mapOf(c_5Pair, b_5Pair)
+    val start = ZRangeScoreMarker(4.5, false)
+    val stop = ZRangeScoreMarker(6.7, false)
+
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - start included, stop not included`() {
+    redis.zadd(key,
+          mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedMapForNonReverse = mapOf(bb_4_5Pair, b_5Pair, c_5Pair)
+    val expectedMapForReverse = mapOf(c_5Pair, b_5Pair, bb_4_5Pair)
+    val start = ZRangeScoreMarker(4.5)
+    val stop = ZRangeScoreMarker(6.7, false)
+
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse, start, stop)
+  }
+
+  @Test fun `zrange by score test - limit cases`() {
+    redis.zadd(key,
+        mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val m2 = mapOf(bz_2_3Pair, bb_4_5Pair, b_5Pair)
+    val m3 = mapOf(yy_6_7Pair, c_5Pair, b_5Pair)
+    val limit = ZRangeLimit(1, 3)
+
+    checkZRangeScoreResponse(m2, m3, -10.0, 10.0, limit)
+  }
+
+  @Test fun `zrange by score test - limit cases negative count`() {
+
+    // The members with same score are lex arranged.
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val m2 = mapOf(b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    val m3 = mapOf(b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
+    val limit = ZRangeLimit(3, -2)
+    val start = -10.0
+    val stop = 10.0
+
+    checkZRangeScoreResponse(m2, m3, start, stop, limit)
+  }
+
+  private fun checkZRangeIndexResponse(
+    expectedMapForNonReverse: Map<String, Double>,
+    expectedMapForReverse: Map<String, Double>,
+    start: Int,
+    stop: Int
+  ) {
+    assertEquals(
+      expectedMapForNonReverse.encodedKeys(),
+      redis.zrange(
+        key,
+        INDEX,
+        ZRangeIndexMarker(start),
+        ZRangeIndexMarker(stop),
+      )
+    )
+    assertEquals(
+      expectedMapForNonReverse.toEncodedListOfPairs(),
+      redis.zrangeWithScores(
+        key,
+        INDEX,
+        ZRangeIndexMarker(start),
+        ZRangeIndexMarker(stop)
+      )
+    )
+    assertEquals(
+      expectedMapForReverse.encodedKeys(),
+      redis.zrange(
+        key,
+        INDEX,
+        ZRangeIndexMarker(start),
+        ZRangeIndexMarker(stop),
+        true
+      )
+    )
+    assertEquals(
+      expectedMapForReverse.toEncodedListOfPairs(),
+      redis.zrangeWithScores(
+        key,
+        INDEX,
+        ZRangeIndexMarker(start),
+        ZRangeIndexMarker(stop),
+        true
+      )
+    )
+  }
+
+  private fun checkZRangeScoreResponse(
+    expectedMapForNonReverse: Map<String, Double>,
+    expectedMapForReverse: Map<String, Double>,
+    start: Double,
+    stop: Double,
+    limit: ZRangeLimit? = null
+  ) {
+    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse,
+                             ZRangeScoreMarker(start), ZRangeScoreMarker(stop), limit)
+  }
+
+
+  private fun checkZRangeScoreResponse(
+    expectedMapForNonReverse: Map<String, Double>,
+    expectedMapForReverse: Map<String, Double>,
+    start: ZRangeScoreMarker,
+    stop: ZRangeScoreMarker,
+    limit: ZRangeLimit? = null
+  ) {
+    if (limit == null) {
+      assertEquals(
+        expectedMapForNonReverse.encodedKeys(),
+        redis.zrange(
+          key,
+          SCORE,
+          start,
+          stop
+        )
+      )
+      assertEquals(
+        expectedMapForNonReverse.toEncodedListOfPairs(),
+        redis.zrangeWithScores(
+          key,
+          SCORE,
+          start,
+          stop
+        )
+      )
+      assertEquals(
+        expectedMapForReverse.encodedKeys(),
+        redis.zrange(
+          key,
+          SCORE,
+          start,
+          stop,
+          true
+        )
+      )
+      assertEquals(
+        expectedMapForReverse.toEncodedListOfPairs(),
+        redis.zrangeWithScores(
+          key,
+          SCORE,
+          start,
+          stop,
+          true
+        )
+      )
+    } else {
+      assertEquals(
+        expectedMapForNonReverse.encodedKeys(),
+        redis.zrange(
+          key,
+          SCORE,
+          start,
+          stop,
+          limit = limit
+        )
+      )
+      assertEquals(
+        expectedMapForNonReverse.toEncodedListOfPairs(),
+        redis.zrangeWithScores(
+          key,
+          SCORE,
+          start,
+          stop,
+          limit = limit
+        )
+      )
+      assertEquals(
+        expectedMapForReverse.encodedKeys(),
+        redis.zrange(
+          key,
+          SCORE,
+          start,
+          stop,
+          true,
+          limit = limit
+        )
+      )
+      assertEquals(
+        expectedMapForReverse.toEncodedListOfPairs(),
+        redis.zrangeWithScores(
+          key,
+          SCORE,
+          start,
+          stop,
+          true,
+          limit = limit
+        )
+      )
+    }
+  }
+
+  companion object {
+    // common vars used in tests for sorted set commands
+    val b_5Pair = "b" to 5.0
+    val bz_2_3Pair = "bz" to 2.3
+    val bb_4_5Pair = "bb" to 4.5
+    val yy_6_7Pair = "yy" to 6.7
+    val ad_9Pair = "ad" to 9.0
+    val c_5Pair = "c" to 5.0
+    val ba_2_3Pair = "ba" to 2.3
+    val key = "foo"
+  }
+
+  private fun Map<String, Double>.toEncodedListOfPairs() : List<Pair<ByteString, Double>> =
+    this.entries.map { Pair(it.key.encodeUtf8(), it.value) }.toList()
+
+  private fun List<String>.encoded(): List<ByteString> = this.map { it.encodeUtf8() }.toList()
+
+  private fun Map<String, Double>.encodedKeys() : List<ByteString> =
+    this.entries.map { it.key.encodeUtf8() }.toList()
+
 }
