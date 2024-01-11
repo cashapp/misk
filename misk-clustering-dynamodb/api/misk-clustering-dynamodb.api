@@ -22,6 +22,8 @@ public final class misk/clustering/dynamo/DynamoClusterConfig : wisp/config/Conf
 }
 
 public final class misk/clustering/dynamo/DynamoClusterModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
 	public fun <init> (Lmisk/clustering/dynamo/DynamoClusterConfig;)V
+	public synthetic fun <init> (Lmisk/clustering/dynamo/DynamoClusterConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
