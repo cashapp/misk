@@ -7,6 +7,7 @@ import misk.redis.Redis.ZAddOptions.NX
 import misk.redis.Redis.ZAddOptions.XX
 import misk.redis.Redis.ZRangeIndexMarker
 import misk.redis.Redis.ZRangeLimit
+import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType.INDEX
 import misk.redis.Redis.ZRangeType.SCORE
@@ -1172,6 +1173,114 @@ abstract class AbstractRedisTest {
     val stop = 10.0
 
     checkZRangeScoreResponse(m2, m3, start, stop, limit)
+  }
+
+  @Test fun `zremRangeByRank - both ranks positive`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedZRangeMap = mapOf(b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+
+    checkZRemRangeByRankResponse(0, 2, 3, expectedZRangeMap)
+  }
+
+  @Test fun `zremRangeByRank - start positive, stop negative`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedZRangeMap = mapOf(yy_6_7Pair, ad_9Pair)
+
+    checkZRemRangeByRankResponse(0, -3, 5, expectedZRangeMap)
+  }
+
+  @Test fun `zremRangeByRank - both rank negative`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedZRangeMap = mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair)
+
+    checkZRemRangeByRankResponse(-3, -1, 3, expectedZRangeMap)
+  }
+
+  @Test fun `zremRangeByRank - start negative stop positive`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedZRangeMap = mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair)
+
+    checkZRemRangeByRankResponse(-4, 4, 2, expectedZRangeMap)
+  }
+
+  @Test fun `zremRangeByRank - start rank after stop`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedZRangeMap =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+
+    checkZRemRangeByRankResponse(-4, 1, 0, expectedZRangeMap)
+    checkZRemRangeByRankResponse(4, 2, 0, expectedZRangeMap)
+    checkZRemRangeByRankResponse(-2, -4, 0, expectedZRangeMap)
+    checkZRemRangeByRankResponse(4, -4, 0, expectedZRangeMap)
+  }
+
+  @Test fun `zremRangeByRank - multiple removes`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    val expectedZRangeMap1 =
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    checkZRemRangeByRankResponse(-4, 1, 0, expectedZRangeMap1)
+
+    val expectedZRangeMap2 = mapOf(bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
+    checkZRemRangeByRankResponse(0, 1, 2, expectedZRangeMap2)
+
+    val expectedZRangeMap3 = mapOf(c_5Pair, yy_6_7Pair, ad_9Pair)
+    checkZRemRangeByRankResponse(0, 1, 2, expectedZRangeMap3)
+
+    val expectedZRangeMap4 = mapOf<String, Double>()
+    checkZRemRangeByRankResponse(0, -1, 3, expectedZRangeMap4)
+  }
+
+  @Test fun `zcard`() {
+    assertEquals(0, redis.zcard(key))
+    redis.zadd(key,
+               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    assertEquals(7, redis.zcard(key))
+
+    redis.zadd("foo", 4.0, "d")
+    redis.zadd("foo", 4.0, "e")
+    assertEquals(9, redis.zcard(key))
+
+    redis.zremRangeByRank(key, ZRangeRankMarker(0), ZRangeRankMarker(2))
+    assertEquals(6, redis.zcard(key))
+
+    redis.zremRangeByRank(key, ZRangeRankMarker(0), ZRangeRankMarker(-1))
+    assertEquals(0, redis.zcard(key))
+  }
+
+
+  private fun checkZRemRangeByRankResponse(
+    start: Long,
+    stop: Long,
+    expectedRemoved: Long,
+    expectedScoreMap: Map<String, Double>
+  ) {
+    assertEquals(
+      expectedRemoved,
+      redis.zremRangeByRank(key, ZRangeRankMarker(start), ZRangeRankMarker(stop))
+    )
+
+    assertEquals(
+      expectedScoreMap.toEncodedListOfPairs(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1))
+    )
   }
 
   private fun checkZRangeIndexResponse(

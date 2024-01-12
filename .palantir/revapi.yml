@@ -462,3 +462,11 @@ acceptedBreaks:
         \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
         \ boolean)"
       justification: "New parameter has a default value"
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zcard(java.lang.String)"
+      justification: "adding wrappers to support zremrangebyrank, zcard"
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zremRangeByRank(java.lang.String, misk.redis.Redis.ZRangeRankMarker,\
+        \ misk.redis.Redis.ZRangeRankMarker)"
+      justification: "adding wrappers to support zremrangebyrank, zcard"

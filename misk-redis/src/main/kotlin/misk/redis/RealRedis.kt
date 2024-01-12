@@ -8,6 +8,7 @@ import misk.redis.Redis.ZAddOptions.XX
 import misk.redis.Redis.ZRangeIndexMarker
 import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
+import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString
@@ -452,6 +453,20 @@ class RealRedis(
   ): List<Pair<ByteString?, Double>> {
     return zrangeBase(key, type, start, stop, reverse, true, limit)
       .withScore?.map { Pair(it.binaryElement?.toByteString(), it.score) } ?: listOf()
+  }
+
+  override fun zremRangeByRank(
+    key: String,
+    start: ZRangeRankMarker,
+    stop: ZRangeRankMarker
+  ) : Long {
+    return unifiedJedis.zremrangeByRank(key, start.longValue, stop.longValue)
+  }
+
+  override fun zcard(
+    key: String
+  ): Long {
+    return unifiedJedis.zcard(key)
   }
 
   private fun zrangeBase(

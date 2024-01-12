@@ -53,8 +53,10 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun watch ([Ljava/lang/String;)V
 	public fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)J
 	public fun zadd (Ljava/lang/String;Ljava/util/Map;[Lmisk/redis/Redis$ZAddOptions;)J
+	public fun zcard (Ljava/lang/String;)J
 	public fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
 	public fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
+	public fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)J
 	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
@@ -124,8 +126,10 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun watch ([Ljava/lang/String;)V
 	public fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)J
 	public fun zadd (Ljava/lang/String;Ljava/util/Map;[Lmisk/redis/Redis$ZAddOptions;)J
+	public fun zcard (Ljava/lang/String;)J
 	public fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
 	public fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
+	public fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)J
 	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
@@ -180,8 +184,10 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun watch ([Ljava/lang/String;)V
 	public abstract fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)J
 	public abstract fun zadd (Ljava/lang/String;Ljava/util/Map;[Lmisk/redis/Redis$ZAddOptions;)J
+	public abstract fun zcard (Ljava/lang/String;)J
 	public abstract fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
 	public abstract fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
+	public abstract fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)J
 	public abstract fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
@@ -228,6 +234,17 @@ public abstract class misk/redis/Redis$ZRangeMarker {
 	public fun <init> (Ljava/lang/Object;Z)V
 	public final fun getIncluded ()Z
 	public final fun getValue ()Ljava/lang/Object;
+}
+
+public final class misk/redis/Redis$ZRangeRankMarker : misk/redis/Redis$ZRangeMarker {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lmisk/redis/Redis$ZRangeRankMarker;
+	public static synthetic fun copy$default (Lmisk/redis/Redis$ZRangeRankMarker;JILjava/lang/Object;)Lmisk/redis/Redis$ZRangeRankMarker;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLongValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/redis/Redis$ZRangeScoreMarker : misk/redis/Redis$ZRangeMarker {
@@ -481,8 +498,10 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun watch ([Ljava/lang/String;)V
 	public fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)J
 	public fun zadd (Ljava/lang/String;Ljava/util/Map;[Lmisk/redis/Redis$ZAddOptions;)J
+	public fun zcard (Ljava/lang/String;)J
 	public fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
 	public fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
+	public fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)J
 	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
