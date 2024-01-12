@@ -558,6 +558,26 @@ interface Redis {
   ): List<Pair<ByteString?, Double>>
 
   /**
+   * Removes all elements in the sorted set stored at [key] with rank between [start] and [stop].
+   * Both start and stop are 0 -based indexes with 0 being the element with the lowest score.
+   * These indexes can be negative numbers, where they indicate offsets starting at the element
+   * with the highest score. For example: -1 is the element with the highest score, -2 the element
+   * with the second highest score and so forth.
+   */
+  fun zremRangeByRank(
+    key: String,
+    start: ZRangeRankMarker,
+    stop: ZRangeRankMarker,
+  ): Long
+
+  /**
+   * Returns the sorted set cardinality (number of elements) of the sorted set stored at [key]
+   */
+  fun zcard(
+    key: String
+  ): Long
+
+  /**
    * Different types of range queries.
    */
   enum class ZRangeType {
@@ -598,6 +618,13 @@ interface Redis {
     val value: Any,
     val included: Boolean
   )
+
+  /**
+   *
+   */
+  data class ZRangeRankMarker(
+    val longValue: Long
+  ): ZRangeMarker(longValue, true)
 
   /**
    * To be used when [ZRangeType] is [ZRangeType.INDEX].
