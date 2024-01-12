@@ -445,3 +445,20 @@ acceptedBreaks:
         \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
         \ boolean, misk.redis.Redis.ZRangeLimit)"
       justification: "adding wrappers to support zrange"
+  "2024.01.11.170843-d27a872":
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean)"
+      justification: "New parameter has a default value"
