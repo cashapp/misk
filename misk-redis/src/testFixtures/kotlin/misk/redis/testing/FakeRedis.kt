@@ -21,6 +21,7 @@ import misk.redis.Redis.ZAddOptions.CH
 import misk.redis.Redis.ZRangeIndexMarker
 import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
+import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString.Companion.encodeUtf8
@@ -62,7 +63,7 @@ class FakeRedis @Inject constructor(
    * implementation of the functions for this sorted set.
    */
   private val sortedSetKeyValueStore =
-    ConcurrentHashMap<String, Value<HashMap<Double, HashSet<String>>>>()
+    ConcurrentHashMap<String, Value<SortedMap<Double, HashSet<String>>>>()
 
   /** A hash map for list operations. */
   private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
@@ -452,7 +453,7 @@ class FakeRedis @Inject constructor(
     val trackChange = options.contains(CH)
 
     if (!sortedSetKeyValueStore.containsKey(key)) {
-      sortedSetKeyValueStore[key] = Value(data = hashMapOf(), expiryInstant = Instant.MAX)
+      sortedSetKeyValueStore[key] = Value(data = sortedMapOf(), expiryInstant = Instant.MAX)
     }
     val sortedSet = sortedSetKeyValueStore[key]!!.data
     var currentScore: Double? = null
@@ -469,8 +470,7 @@ class FakeRedis @Inject constructor(
     if (shouldUpdateScore(currentScore, score, exists, options)) {
       val scoreMembers = sortedSet[score] ?: hashSetOf()
       scoreMembers.add(member)
-      sortedSet[score] = scoreMembers
-
+      // remove from list of score if it exists
       if (!exists) {
         newFieldCount++
       } else {
@@ -482,6 +482,7 @@ class FakeRedis @Inject constructor(
         }
       }
 
+      sortedSet[score] = scoreMembers
       elementsChanged++
     }
 
@@ -623,6 +624,73 @@ class FakeRedis @Inject constructor(
     return ansWithScore
   }
 
+  override fun zremRangeByRank(
+    key: String,
+    start: ZRangeRankMarker,
+    stop: ZRangeRankMarker,
+  ): Long {
+    val sortedSet = sortedSetKeyValueStore[key]?.data ?: return 0
+    val scores = sortedSet.keys.toList()
+
+    val (minInt, maxInt, length) = getMinMaxIndex(sortedSet, start.longValue, stop.longValue)
+
+    if (minInt > maxInt) return 0
+
+    var ctr = 0
+    var added = 0
+
+    val newSortedSet:SortedMap<Double, HashSet<String>> = sortedMapOf()
+
+    for (idx in scores.indices) {
+      val score = scores[idx]
+      val members = sortedSet[score]!!.sorted()
+
+      val newMembers = hashSetOf<String>()
+      for (member in members) {
+        if (ctr !in minInt..maxInt) {
+          newMembers.add(member)
+          added++
+        }
+        ctr++
+      }
+      if (newMembers.isNotEmpty()) newSortedSet[score] = newMembers
+    }
+
+    sortedSetKeyValueStore[key] = Value(data = newSortedSet, expiryInstant = Instant.MAX)
+
+    return (length-added)
+  }
+
+  override fun zcard(
+    key: String
+  ): Long {
+    val sortedSet = sortedSetKeyValueStore[key]?.data ?: return 0
+    var length = 0L
+    sortedSet.values.forEach { length += it.size }
+    return length
+  }
+
+  private fun getMinMaxIndex(
+    sortedSet: SortedMap<Double, HashSet<String>>,
+    start: Long,
+    stop: Long,
+  ) : Triple<Long, Long, Long> {
+    var min = start
+    var max = stop
+    var length = 0L
+    sortedSet.values.forEach { length += it.size }
+
+    if (min < -length) min = -length
+    if (min < 0) min += length
+    if (min > length-1) min = length-1
+
+    if (max < -length) max = -length
+    if (max < 0) max += length
+    if (max > length-1) max = length-1
+
+    return Triple(min, max, length)
+  }
+
   private fun zrangeByIndex(
     sortedSet: SortedMap<Double, HashSet<String>>,
     start: ZRangeIndexMarker,
@@ -630,18 +698,8 @@ class FakeRedis @Inject constructor(
     reverse: Boolean
   ): List<Pair<ByteString?, Double>> {
     val scores = if (!reverse) sortedSet.keys.toList() else sortedSet.keys.toList().reversed()
-    var minInt = start.intValue
-    var maxInt = stop.intValue
-    var length = 0
-    sortedSet.values.forEach { length += it.size }
-
-    if (minInt < -length) minInt = -length
-    if (minInt < 0) minInt += length
-    if (minInt > length-1) minInt = length-1
-
-    if (maxInt < -length) maxInt = -length
-    if (maxInt < 0) maxInt += length
-    if (maxInt > length-1) maxInt = length-1
+    val (minInt, maxInt) =
+      getMinMaxIndex(sortedSet, start.intValue.toLong(), stop.intValue.toLong())
 
     if (minInt > maxInt) return listOf()
 

@@ -557,6 +557,16 @@ interface Redis {
     limit: ZRangeLimit? = null,
   ): List<Pair<ByteString?, Double>>
 
+  fun zremRangeByRank(
+    key: String,
+    start: ZRangeRankMarker,
+    stop: ZRangeRankMarker,
+  ): Long
+
+  fun zcard(
+    key: String
+  ): Long
+
   /**
    * Different types of range queries.
    */
@@ -598,6 +608,13 @@ interface Redis {
     val value: Any,
     val included: Boolean
   )
+
+  /**
+   *
+   */
+  data class ZRangeRankMarker(
+    val longValue: Long
+  ): ZRangeMarker(longValue, true)
 
   /**
    * To be used when [ZRangeType] is [ZRangeType.INDEX].

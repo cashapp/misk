@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
 import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
+import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeType
 import kotlin.math.max
 import kotlin.math.min
@@ -448,6 +449,20 @@ class FakeRedis : Redis {
     reverse: Boolean,
     limit: ZRangeLimit?,
   ): List<Pair<ByteString?, Double>> {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zremRangeByRank(
+    key: String,
+    start: ZRangeRankMarker,
+    stop: ZRangeRankMarker,
+  ): Long {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zcard(
+    key: String
+  ): Long {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 }
