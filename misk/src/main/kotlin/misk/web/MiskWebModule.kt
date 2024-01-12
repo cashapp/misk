@@ -261,7 +261,9 @@ class MiskWebModule @JvmOverloads constructor(
     install(WebActionModule.create<ReadinessCheckAction>())
 
     install(WebActionModule.create<LivenessCheckAction>())
-    install(WebActionModule.create<NotFoundAction>())
+    if (config.install_default_not_found_action) {
+      install(WebActionModule.create<NotFoundAction>())
+    }
 
     val maxThreads = config.jetty_max_thread_pool_size
     val minThreads = min(config.jetty_min_thread_pool_size, maxThreads)
