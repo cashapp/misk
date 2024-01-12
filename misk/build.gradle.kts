@@ -68,6 +68,7 @@ dependencies {
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-proto"))
   implementation(project(":misk-service"))
+  implementation(project(":misk-feature"))
   runtimeOnly(Dependencies.jettyAlpnServerJava)
 
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
@@ -83,6 +84,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":misk"))
   testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-feature")))
 }
 
 val generatedSourceDir = "$buildDir/generated/source/wire-test"

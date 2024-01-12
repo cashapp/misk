@@ -29,6 +29,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.HttpURLConnection
 import jakarta.inject.Inject
+import misk.config.AppNameModule
+import misk.feature.testing.FakeFeatureFlagsModule
+import misk.feature.testing.FakeFeatureFlagsOverrideModule
 
 @MiskTest(startService = true)
 class TracingInterceptorTest {
@@ -236,6 +239,11 @@ class TracingInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(AppNameModule("miskTest"))
+      install(FakeFeatureFlagsModule())
+      install(FakeFeatureFlagsOverrideModule{
+        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
+      })
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       install(MockTracingBackendModule())

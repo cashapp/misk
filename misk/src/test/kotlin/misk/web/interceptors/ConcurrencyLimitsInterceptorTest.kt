@@ -36,6 +36,13 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.config.AppName
+import misk.config.AppNameModule
+import misk.feature.FeatureFlags
+import misk.feature.testing.FakeFeatureFlagsModule
+import misk.feature.testing.FakeFeatureFlagsOverrideModule
+import org.junit.jupiter.api.BeforeEach
+import wisp.feature.testing.FakeFeatureFlags
 
 @MiskTest(startService = true)
 class ConcurrencyLimitsInterceptorTest {
@@ -46,6 +53,16 @@ class ConcurrencyLimitsInterceptorTest {
   @Inject private lateinit var clock: FakeNanoClock
   @Inject lateinit var logCollector: LogCollector
   @Inject lateinit var prometheusRegistry: CollectorRegistry
+  @Inject lateinit var fakeFeatureFlags: FakeFeatureFlags
+  @Inject lateinit var enabledFeature:MiskConcurrencyLimiterEnabledFeature
+
+  @BeforeEach
+  fun setUp() {
+    fakeFeatureFlags.overrideKey(
+      MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE,
+      enabledFeature.appName,
+      true)
+  }
 
   @Test
   fun happyPath() {
@@ -64,9 +81,40 @@ class ConcurrencyLimitsInterceptorTest {
       .limit(SettableLimit(0))
       .build<String>()
     val interceptor =
-      ConcurrencyLimitsInterceptor(factory, action, limitZero, clock, org.slf4j.event.Level.ERROR)
+      ConcurrencyLimitsInterceptor(
+        factory = factory,
+        action = action,
+        defaultLimiter = limitZero,
+        clock = clock,
+        logLevel = org.slf4j.event.Level.ERROR,
+        enabledFeature = enabledFeature
+      )
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
+  }
+
+  @Test
+  fun limitReachedDisabled() {
+    fakeFeatureFlags.overrideKey(
+      MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE,
+      enabledFeature.appName,
+      false)
+
+    val action = HelloAction::call.asAction(DispatchMechanism.GET)
+    val limitZero = SimpleLimiter.Builder()
+      .limit(SettableLimit(0))
+      .build<String>()
+    val interceptor =
+      ConcurrencyLimitsInterceptor(
+        factory = factory,
+        action = action,
+        defaultLimiter = limitZero,
+        clock = clock,
+        logLevel = org.slf4j.event.Level.ERROR,
+        enabledFeature = enabledFeature
+      )
+    assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
+      .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
   }
 
   @Test
@@ -100,7 +148,14 @@ class ConcurrencyLimitsInterceptorTest {
       .limit(SettableLimit(0))
       .build<String>()
     val interceptor =
-      ConcurrencyLimitsInterceptor(factory, action, limitZero, clock, org.slf4j.event.Level.ERROR)
+      ConcurrencyLimitsInterceptor(
+        factory = factory,
+        action = action,
+        defaultLimiter = limitZero,
+        clock = clock,
+        logLevel = org.slf4j.event.Level.ERROR,
+        enabledFeature = enabledFeature
+      )
     // First call logs an error.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
@@ -162,7 +217,14 @@ class ConcurrencyLimitsInterceptorTest {
     val action = HelloAction::call.asAction(DispatchMechanism.GET)
     val limiter = factory.createLimiterForAction(action, null)
     val interceptor =
-      ConcurrencyLimitsInterceptor(factory, action, limiter, clock, org.slf4j.event.Level.ERROR)
+      ConcurrencyLimitsInterceptor(
+        factory = factory,
+        action = action,
+        defaultLimiter = limiter,
+        clock = clock,
+        logLevel = org.slf4j.event.Level.ERROR,
+        enabledFeature = enabledFeature
+      )
 
     // load up some inflight requests so we get past "Prevent upward drift if not close to the limit"
     repeat(10) {
@@ -224,6 +286,11 @@ class ConcurrencyLimitsInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(AppNameModule("miskTest"))
+      install(FakeFeatureFlagsModule())
+      install(FakeFeatureFlagsOverrideModule{
+        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
+      })
       install(LogCollectorModule())
       install(Modules.override(MiskTestingServiceModule()).with(object : KAbstractModule() {
         override fun configure() {

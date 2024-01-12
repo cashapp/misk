@@ -33,6 +33,9 @@ import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
+import misk.config.AppNameModule
+import misk.feature.testing.FakeFeatureFlagsModule
+import misk.feature.testing.FakeFeatureFlagsOverrideModule
 
 @MiskTest(startService = true)
 internal class RequestLoggingInterceptorTest {
@@ -290,6 +293,11 @@ internal class RequestLoggingInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(AppNameModule("miskTest"))
+      install(FakeFeatureFlagsModule())
+      install(FakeFeatureFlagsOverrideModule{
+        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
+      })
       install(AccessControlModule())
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())

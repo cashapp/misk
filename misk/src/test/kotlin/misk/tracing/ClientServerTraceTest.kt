@@ -14,6 +14,9 @@ import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientsConfig
 import misk.client.HttpClientsConfigModule
 import misk.client.TypedHttpClientModule
+import misk.config.AppNameModule
+import misk.feature.testing.FakeFeatureFlagsModule
+import misk.feature.testing.FakeFeatureFlagsOverrideModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
@@ -28,6 +31,7 @@ import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.actions.WebAction
+import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
@@ -173,6 +177,11 @@ internal class ClientServerTraceTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(AppNameModule("miskTest"))
+      install(FakeFeatureFlagsModule())
+      install(FakeFeatureFlagsOverrideModule{
+        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
+      })
       install(MockTracingBackendModule())
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())

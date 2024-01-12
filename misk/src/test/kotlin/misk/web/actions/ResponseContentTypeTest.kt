@@ -20,6 +20,10 @@ import org.junit.jupiter.api.Test
 import java.nio.charset.Charset
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.config.AppNameModule
+import misk.feature.testing.FakeFeatureFlagsModule
+import misk.feature.testing.FakeFeatureFlagsOverrideModule
+import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 
 @MiskTest(startService = true)
 class ResponseContentTypeTest {
@@ -75,6 +79,11 @@ class ResponseContentTypeTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(AppNameModule("miskTest"))
+      install(FakeFeatureFlagsModule())
+      install(FakeFeatureFlagsOverrideModule{
+        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
+      })
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())

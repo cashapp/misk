@@ -18,6 +18,10 @@ import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
+import misk.config.AppNameModule
+import misk.feature.testing.FakeFeatureFlagsModule
+import misk.feature.testing.FakeFeatureFlagsOverrideModule
+import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 
 @MiskTest(startService = true) // NB: only starting services here to get log collection to work.
 class PauseDetectorTest {
@@ -108,6 +112,12 @@ class PauseDetectorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(AppNameModule("miskTest"))
+      install(FakeFeatureFlagsModule())
+      install(FakeFeatureFlagsOverrideModule{
+        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
+      })
+
       // Wire up the detector
       val config = PauseDetectorConfig(
         resolutionMillis = 1,

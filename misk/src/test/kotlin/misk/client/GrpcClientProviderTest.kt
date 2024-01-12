@@ -21,6 +21,9 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
+import misk.config.AppNameModule
+import misk.feature.testing.FakeFeatureFlagsModule
+import misk.feature.testing.FakeFeatureFlagsOverrideModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.security.ssl.SslLoader
@@ -30,6 +33,7 @@ import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.actions.WebAction
+import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 import misk.web.jetty.JettyService
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -248,6 +252,11 @@ internal class GrpcClientProviderTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(AppNameModule("miskTest"))
+      install(FakeFeatureFlagsModule())
+      install(FakeFeatureFlagsOverrideModule{
+        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
+      })
       install(MiskTestingServiceModule())
       install(HttpClientModule("robots", Names.named("robots")))
       install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG))

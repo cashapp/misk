@@ -29,6 +29,10 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import jakarta.inject.Inject
+import misk.config.AppNameModule
+import misk.feature.testing.FakeFeatureFlagsModule
+import misk.feature.testing.FakeFeatureFlagsOverrideModule
+import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 
 @MiskTest(startService = true)
 internal class DegradedHealthStressTest {
@@ -135,6 +139,11 @@ internal class DegradedHealthStressTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(AppNameModule("miskTest"))
+      install(FakeFeatureFlagsModule())
+      install(FakeFeatureFlagsOverrideModule{
+        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
+      })
       install(Modules.override(MiskTestingServiceModule()).with(ClockModule()))
       install(
         WebServerTestingModule(
