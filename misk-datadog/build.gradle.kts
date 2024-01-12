@@ -9,13 +9,13 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.kotlinLogging)
+  api(libs.kotlinLogging)
   api(project(":misk-inject"))
-  implementation(Dependencies.guice)
-  implementation(Dependencies.openTracingApi)
-  implementation(Dependencies.openTracingUtil)
-  implementation(Dependencies.slf4jApi)
-  implementation(Dependencies.tracingDatadog)
+  implementation(libs.guice)
+  implementation(libs.openTracingApi)
+  implementation(libs.openTracingUtil)
+  implementation(libs.slf4jApi)
+  implementation(libs.tracingDatadog)
   implementation(project(":wisp:wisp-logging"))
 }
 

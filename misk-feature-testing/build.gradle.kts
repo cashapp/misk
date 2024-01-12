@@ -9,15 +9,15 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guava)
-  api(Dependencies.jakartaInject)
+  api(libs.guava)
+  api(libs.jakartaInject)
   api(project(":wisp:wisp-feature"))
   api(project(":wisp:wisp-feature-testing"))
   api(project(":misk-feature"))
   api(project(":misk-inject"))
-  implementation(Dependencies.guice)
-  implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.moshi)
+  implementation(libs.guice)
+  implementation(libs.kotlinStdLibJdk8)
+  implementation(libs.moshi)
   implementation(project(":misk-service"))
 }
 

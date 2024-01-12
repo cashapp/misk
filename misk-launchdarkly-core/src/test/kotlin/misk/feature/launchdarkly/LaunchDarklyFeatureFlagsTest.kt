@@ -3,6 +3,7 @@ package misk.feature.launchdarkly
 import ch.qos.logback.classic.Level
 import com.launchdarkly.sdk.EvaluationDetail
 import com.launchdarkly.sdk.EvaluationReason
+import com.launchdarkly.sdk.LDContext
 import com.launchdarkly.sdk.LDUser
 import com.launchdarkly.sdk.LDValue
 import com.launchdarkly.sdk.UserAttribute
@@ -51,7 +52,7 @@ internal class LaunchDarklyFeatureFlagsTest {
   @Test
   fun getEnum() {
     Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
           "TYRANNOSAURUS", 1, EvaluationReason.targetMatch()
@@ -73,36 +74,36 @@ internal class LaunchDarklyFeatureFlagsTest {
 
     assertThat(feature).isEqualTo(Dinosaur.TYRANNOSAURUS)
 
-    val userCaptor = ArgumentCaptor.forClass(LDUser::class.java)
+    val userCaptor = ArgumentCaptor.forClass(LDContext::class.java)
     verify(client, times(1))
       .stringVariationDetail(eq("which-dinosaur"), userCaptor.capture(), eq(""))
 
     val user = userCaptor.value
 
     // User fields are package-private, so we fetch it with reflection magicks!
-    val customField = LDUser::class.java.getDeclaredField("custom")
+    val customField = LDContext::class.java.getDeclaredField("attributes")
     customField.isAccessible = true
     @Suppress("unchecked_cast")
-    val customAttrs = customField.get(user) as Map<UserAttribute, LDValue>
+    val customAttrs = customField.get(user) as Map<String, LDValue>
 
-    val privateAttrsField = LDUser::class.java.getDeclaredField("privateAttributeNames")
+    val privateAttrsField = LDContext::class.java.getDeclaredField("privateAttributes")
     privateAttrsField.isAccessible = true
     @Suppress("unchecked_cast")
-    val privateAttrs = privateAttrsField.get(user) as Set<String>
+    val privateAttrs = privateAttrsField.get(user) as List<String>
     val continent = UserAttribute.forName("continent")
     val platform = UserAttribute.forName("platform")
     val age = UserAttribute.forName("age")
 
-    assertThat(customAttrs.getValue(continent).stringValue()).isEqualTo("europa")
-    assertThat(customAttrs.getValue(platform).stringValue()).isEqualTo("lava")
-    assertThat(customAttrs.getValue(age).intValue()).isEqualTo(100000)
-    assertThat(privateAttrs).isEqualTo(setOf(continent, platform, age))
+    assertThat(customAttrs.getValue("continent").stringValue()).isEqualTo("europa")
+    assertThat(customAttrs.getValue("platform").stringValue()).isEqualTo("lava")
+    assertThat(customAttrs.getValue("age").intValue()).isEqualTo(100000)
+    assertThat(privateAttrs.toSet().equals(setOf(continent, platform, age)))
   }
 
   @Test
   fun getEnumThrowsOnDefault() {
     Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
           "PTERODACTYL",
@@ -121,7 +122,7 @@ internal class LaunchDarklyFeatureFlagsTest {
   @Test
   fun getEnumThrowsOnEvalError() {
     Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
           "PTERODACTYL",
@@ -148,7 +149,7 @@ internal class LaunchDarklyFeatureFlagsTest {
     Mockito
       .`when`(
         client.jsonValueVariationDetail(
-          anyString(), any(LDUser::class.java),
+          anyString(), any(LDContext::class.java),
           any(LDValue::class.java)
         )
       )
@@ -173,7 +174,7 @@ internal class LaunchDarklyFeatureFlagsTest {
     Mockito
       .`when`(
         client.jsonValueVariationDetail(
-          anyString(), any(LDUser::class.java),
+          anyString(), any(LDContext::class.java),
           any(LDValue::class.java)
         )
       )
@@ -215,7 +216,7 @@ internal class LaunchDarklyFeatureFlagsTest {
   @Test
   fun attributes() {
     Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
           "value",
@@ -241,15 +242,14 @@ internal class LaunchDarklyFeatureFlagsTest {
     val feature = featureFlags.getString(Feature("key"), "user", attributes)
     assertThat(feature).isEqualTo("value")
 
-    val userCaptor = ArgumentCaptor.forClass(LDUser::class.java)
+    val userCaptor = ArgumentCaptor.forClass(LDContext::class.java)
     verify(client, times(1))
       .stringVariationDetail(eq("key"), userCaptor.capture(), eq(""))
 
     val user = userCaptor.value
     // NB: LDUser properties are package-local so we can't read them here.
     // Create expected user and compare against actual.
-    val expected = LDUser.Builder("user")
-      .secondary("secondary value")
+    val expected = LDContext.fromUser(LDUser.Builder("user")
       .ip("127.0.0.1")
       .email("email@value.com")
       .name("name value")
@@ -257,9 +257,10 @@ internal class LaunchDarklyFeatureFlagsTest {
       .firstName("firstName value")
       .lastName("lastName value")
       .country("US")
+      .privateCustom("secondary", "secondary value")
       .privateCustom("custom1", "custom1 value")
       .privateCustom("custom2", "custom2 value")
-      .build()
+      .build())
 
     // isEqualTo() would be more appropriate, since LDUser overrides equals(). However, failures would offer no
     // meaningful output, given that LDUser does not override toString. Doing a field-by-field comparison is overkill

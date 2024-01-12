@@ -10,15 +10,15 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.sqldelightRuntime)
-  implementation(Dependencies.kotlinLogging)
+  api(libs.sqldelightRuntime)
+  implementation(libs.kotlinLogging)
   implementation(project(":wisp:wisp-logging"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.guice)
-  testImplementation(Dependencies.jakartaInject)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.sqldelightJdbcDriver)
+  testImplementation(libs.assertj)
+  testImplementation(libs.guice)
+  testImplementation(libs.jakartaInject)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.sqldelightJdbcDriver)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-config"))
   implementation(project(":misk-core"))

@@ -384,6 +384,12 @@ acceptedBreaks:
       old: "class misk.clustering.dynamo.DynamoCluster"
       justification: "No external usage, DynamoClusterModule will use existing DefaultCluster\
         \ instead"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.clustering.dynamo.DynamoClusterConfig misk.clustering.dynamo.DynamoClusterConfig::copy(java.lang.String,\
+        \ long, long)"
+      new: "method misk.clustering.dynamo.DynamoClusterConfig misk.clustering.dynamo.DynamoClusterConfig::copy(java.lang.String,\
+        \ java.lang.String, long, long)"
+      justification: "No external usage, new Config"
     - code: "java.method.parameterTypeChanged"
       old: "parameter void misk.clustering.dynamo.DynamoClusterWatcherTask::<init>(misk.tasks.RepeatedTaskQueue,\
         \ software.amazon.awssdk.services.dynamodb.DynamoDbClient, java.time.Clock,\
@@ -413,3 +419,73 @@ acceptedBreaks:
         \ misk.Action, com.netflix.concurrency.limits.Limiter<java.lang.String>, java.time.Clock,\
         \ org.slf4j.event.Level, misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature)"
       justification: "the interceptor constructor is only called from the guice binding"
+  "2024.01.05.050732-580e44f":
+    com.squareup.misk:misk-clustering-dynamodb:
+    - code: "java.annotation.added"
+      old: "method long misk.clustering.dynamo.DynamoClusterConfig::component2()"
+      new: "method java.lang.String misk.clustering.dynamo.DynamoClusterConfig::component2()"
+      justification: "No external usage, code is still in development"
+    - code: "java.annotation.added"
+      old: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===long===)"
+      new: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===java.lang.String===)"
+      justification: "No external usage, code is still in development"
+    - code: "java.annotation.added"
+      old: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===long===, long)"
+      new: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===java.lang.String===, long)"
+      justification: "No external usage, code is still in development"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===long===)"
+      new: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===java.lang.String===)"
+      justification: "No external usage, code is still in development"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===long===, long)"
+      new: "parameter void misk.clustering.dynamo.DynamoClusterConfig::<init>(java.lang.String,\
+        \ ===java.lang.String===, long)"
+      justification: "No external usage, code is still in development"
+    - code: "java.method.returnTypeChanged"
+      old: "method long misk.clustering.dynamo.DynamoClusterConfig::component2()"
+      new: "method java.lang.String misk.clustering.dynamo.DynamoClusterConfig::component2()"
+      justification: "No external usage, code is still in development"
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method java.util.List<kotlin.Pair<okio.ByteString, java.lang.Double>>\
+        \ misk.redis.Redis::zrangeWithScores(java.lang.String, misk.redis.Redis.ZRangeType,\
+        \ misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker, boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "adding wrappers to support zrange"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.List<okio.ByteString> misk.redis.Redis::zrange(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "adding wrappers to support zrange"
+  "2024.01.11.170843-d27a872":
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean)"
+      justification: "New parameter has a default value"
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zcard(java.lang.String)"
+      justification: "adding wrappers to support zremrangebyrank, zcard"
+    - code: "java.method.addedToInterface"
+      new: "method long misk.redis.Redis::zremRangeByRank(java.lang.String, misk.redis.Redis.ZRangeRankMarker,\
+        \ misk.redis.Redis.ZRangeRankMarker)"
+      justification: "adding wrappers to support zremrangebyrank, zcard"

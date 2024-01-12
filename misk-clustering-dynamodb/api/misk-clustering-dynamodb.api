@@ -1,23 +1,29 @@
 public final class misk/clustering/dynamo/DynamoClusterConfig : wisp/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;J)V
-	public fun <init> (Ljava/lang/String;JJ)V
-	public synthetic fun <init> (Ljava/lang/String;JJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;J)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;JJ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;JJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()J
+	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()J
-	public final fun copy (Ljava/lang/String;JJ)Lmisk/clustering/dynamo/DynamoClusterConfig;
-	public static synthetic fun copy$default (Lmisk/clustering/dynamo/DynamoClusterConfig;Ljava/lang/String;JJILjava/lang/Object;)Lmisk/clustering/dynamo/DynamoClusterConfig;
+	public final fun component4 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;JJ)Lmisk/clustering/dynamo/DynamoClusterConfig;
+	public static synthetic fun copy$default (Lmisk/clustering/dynamo/DynamoClusterConfig;Ljava/lang/String;Ljava/lang/String;JJILjava/lang/Object;)Lmisk/clustering/dynamo/DynamoClusterConfig;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAppName ()Ljava/lang/String;
 	public final fun getStale_threshold_seconds ()J
 	public final fun getTable_name ()Ljava/lang/String;
 	public final fun getUpdate_frequency_seconds ()J
 	public fun hashCode ()I
+	public final fun setTable_name (Ljava/lang/String;)V
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/clustering/dynamo/DynamoClusterModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
 	public fun <init> (Lmisk/clustering/dynamo/DynamoClusterConfig;)V
+	public synthetic fun <init> (Lmisk/clustering/dynamo/DynamoClusterConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 

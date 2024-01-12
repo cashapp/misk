@@ -18,7 +18,15 @@ import misk.redis.Redis.ZAddOptions.NX
 import misk.redis.Redis.ZAddOptions.LT
 import misk.redis.Redis.ZAddOptions.GT
 import misk.redis.Redis.ZAddOptions.CH
+import misk.redis.Redis.ZRangeIndexMarker
+import misk.redis.Redis.ZRangeLimit
+import misk.redis.Redis.ZRangeMarker
+import misk.redis.Redis.ZRangeRankMarker
+import misk.redis.Redis.ZRangeScoreMarker
+import misk.redis.Redis.ZRangeType
+import okio.ByteString.Companion.encodeUtf8
 import redis.clients.jedis.exceptions.JedisDataException
+import java.util.SortedMap
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -51,11 +59,11 @@ class FakeRedis @Inject constructor(
   /**
    * Note: Redis sorted set actually orders by value. It is quite complex to implement it here.
    * In this Fake Redis implementation which is generally used for testing, we have simply used a
-   * HashMap to key members->scores. So any sorting based on values will have to be handled in the
+   * HashMap to key score->members. So any sorting based on values will have to be handled in the
    * implementation of the functions for this sorted set.
    */
   private val sortedSetKeyValueStore =
-    ConcurrentHashMap<String, Value<HashMap<String, Double>>>()
+    ConcurrentHashMap<String, Value<SortedMap<Double, HashSet<String>>>>()
 
   /** A hash map for list operations. */
   private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
@@ -445,15 +453,37 @@ class FakeRedis @Inject constructor(
     val trackChange = options.contains(CH)
 
     if (!sortedSetKeyValueStore.containsKey(key)) {
-      sortedSetKeyValueStore[key] = Value(data = hashMapOf(), expiryInstant = Instant.MAX)
+      sortedSetKeyValueStore[key] = Value(data = sortedMapOf(), expiryInstant = Instant.MAX)
     }
     val sortedSet = sortedSetKeyValueStore[key]!!.data
-    val exists = sortedSet[member] != null
+    var currentScore: Double? = null
+    var exists = false
 
-    if (shouldUpdateScore(sortedSet[member], score, exists, options)) {
-      sortedSet[member] = score
+    for (entries in sortedSet.entries) {
+      if (entries.value.contains(member)) {
+        exists = true
+        currentScore = entries.key
+        break
+      }
+    }
+
+    if (shouldUpdateScore(currentScore, score, exists, options)) {
+      val scoreMembers = sortedSet[score] ?: hashSetOf()
+      scoreMembers.add(member)
+      // remove from list of score if it exists
+      if (!exists) {
+        newFieldCount++
+      } else {
+        for (entries in sortedSet.entries) {
+          if (entries.value.contains(member)) {
+            entries.value.remove(member)
+            break
+          }
+        }
+      }
+
+      sortedSet[score] = scoreMembers
       elementsChanged++
-      if (!exists) newFieldCount++
     }
 
     if (trackChange) return elementsChanged
@@ -539,6 +569,206 @@ class FakeRedis @Inject constructor(
 
   override fun zscore(key: String, member: String): Double? {
     if (sortedSetKeyValueStore[key] == null) return null
-    return sortedSetKeyValueStore[key]!!.data[member]
+
+    var currentScore:Double? = null
+    for (entries in sortedSetKeyValueStore[key]!!.data.entries) {
+      if (entries.value.contains(member)) {
+        currentScore = entries.key
+        break
+      }
+    }
+
+    return currentScore
+  }
+
+  override fun zrange(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?,
+  ): List<ByteString?> {
+    return zrangeWithScores(key, type, start, stop, reverse, limit)
+      .map { (member, _) ->  member }.toList()
+  }
+
+  override fun zrangeWithScores(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?,
+  ): List<Pair<ByteString?, Double>> {
+    val sortedSet = sortedSetKeyValueStore[key]?.data?.toSortedMap() ?: return listOf()
+
+    val ansWithScore = when(type) {
+      ZRangeType.INDEX ->
+        zrangeByIndex(
+          sortedSet = sortedSet,
+          start = start as ZRangeIndexMarker,
+          stop = stop as ZRangeIndexMarker,
+          reverse = reverse
+        )
+      ZRangeType.SCORE ->
+        zrangeByScore(
+          sortedSet = sortedSet,
+          start = start as ZRangeScoreMarker,
+          stop = stop as ZRangeScoreMarker,
+          reverse = reverse,
+          limit = limit
+        )
+    }
+
+    return ansWithScore
+  }
+
+  override fun zremRangeByRank(
+    key: String,
+    start: ZRangeRankMarker,
+    stop: ZRangeRankMarker,
+  ): Long {
+    val sortedSet = sortedSetKeyValueStore[key]?.data ?: return 0
+    val scores = sortedSet.keys.toList()
+
+    val (minInt, maxInt, length) = getMinMaxIndex(sortedSet, start.longValue, stop.longValue)
+
+    if (minInt > maxInt) return 0
+
+    var ctr = 0
+    var added = 0
+
+    val newSortedSet:SortedMap<Double, HashSet<String>> = sortedMapOf()
+
+    for (idx in scores.indices) {
+      val score = scores[idx]
+      val members = sortedSet[score]!!.sorted()
+
+      val newMembers = hashSetOf<String>()
+      for (member in members) {
+        if (ctr !in minInt..maxInt) {
+          newMembers.add(member)
+          added++
+        }
+        ctr++
+      }
+      if (newMembers.isNotEmpty()) newSortedSet[score] = newMembers
+    }
+
+    sortedSetKeyValueStore[key] = Value(data = newSortedSet, expiryInstant = Instant.MAX)
+
+    return (length-added)
+  }
+
+  override fun zcard(
+    key: String
+  ): Long {
+    val sortedSet = sortedSetKeyValueStore[key]?.data ?: return 0
+    var length = 0L
+    sortedSet.values.forEach { length += it.size }
+    return length
+  }
+
+  private fun getMinMaxIndex(
+    sortedSet: SortedMap<Double, HashSet<String>>,
+    start: Long,
+    stop: Long,
+  ) : Triple<Long, Long, Long> {
+    var min = start
+    var max = stop
+    var length = 0L
+    sortedSet.values.forEach { length += it.size }
+
+    if (min < -length) min = -length
+    if (min < 0) min += length
+    if (min > length-1) min = length-1
+
+    if (max < -length) max = -length
+    if (max < 0) max += length
+    if (max > length-1) max = length-1
+
+    return Triple(min, max, length)
+  }
+
+  private fun zrangeByIndex(
+    sortedSet: SortedMap<Double, HashSet<String>>,
+    start: ZRangeIndexMarker,
+    stop: ZRangeIndexMarker,
+    reverse: Boolean
+  ): List<Pair<ByteString?, Double>> {
+    val scores = if (!reverse) sortedSet.keys.toList() else sortedSet.keys.toList().reversed()
+    val (minInt, maxInt) =
+      getMinMaxIndex(sortedSet, start.intValue.toLong(), stop.intValue.toLong())
+
+    if (minInt > maxInt) return listOf()
+
+    val ans = mutableListOf<Pair<ByteString?, Double>>()
+    var ctr = 0
+
+    for (idx in scores.indices) {
+      val score = scores[idx]
+      var members = sortedSet[score]!!.sorted()
+      if (reverse) members = members.reversed()
+      for (member in members) {
+        if (ctr in minInt..maxInt) {
+          ans.add(Pair(member.encodeUtf8(), score))
+        }
+        ctr++
+      }
+    }
+
+    return ans
+  }
+
+  private fun zrangeByScore(
+    sortedSet: SortedMap<Double, HashSet<String>>,
+    start: ZRangeScoreMarker,
+    stop: ZRangeScoreMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?
+  ): List<Pair<ByteString?, Double>> {
+    val scores = if (!reverse) sortedSet.keys.toList() else sortedSet.keys.toList().reversed()
+    val minDouble = start.value as Double
+    val maxDouble = stop.value as Double
+
+    if (minDouble > maxDouble) return listOf()
+
+    fun Double.cmp(): Boolean {
+      var ans = if (start.included) this >= minDouble
+      else this > minDouble
+
+      ans = if (stop.included) ans && this <= maxDouble
+      else ans && this < maxDouble
+
+      return ans
+    }
+
+    val ans = mutableListOf<Pair<ByteString?, Double>>()
+    var ctr = 0
+    var offset = 0
+    var count = Int.MAX_VALUE
+    if (limit != null) {
+      offset = limit.offset
+      count = limit.count
+    }
+
+    if  (count < 0) count = Int.MAX_VALUE
+
+    val filteredScores = scores.filter { it.cmp() }
+
+    for (score in filteredScores) {
+      var members = sortedSet[score]!!.sorted()
+      if (reverse) members = members.reversed()
+      for (member in members) {
+        if (ctr >= offset && ans.size < count) {
+          ans.add(Pair(member.encodeUtf8(), score))
+        }
+        ctr++
+        if (ans.size == count) break
+      }
+      if (ans.size == count) break
+    }
+    return ans
   }
 }

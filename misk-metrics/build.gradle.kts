@@ -11,25 +11,25 @@ plugins {
 
 dependencies {
   api(project(":misk-inject"))
-  api(Dependencies.prometheusClient)
-  implementation(Dependencies.findBugs)
-  implementation(Dependencies.guava)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.jakartaInject)
-  implementation(Dependencies.kotlinStdLibJdk8)
+  api(libs.prometheusClient)
+  implementation(libs.findBugs)
+  implementation(libs.guava)
+  implementation(libs.guice)
+  implementation(libs.jakartaInject)
+  implementation(libs.kotlinStdLibJdk8)
 
   testFixturesApi(project(":misk-inject"))
-  testFixturesApi(Dependencies.prometheusClient)
-  testFixturesImplementation(Dependencies.guava)
-  testFixturesImplementation(Dependencies.guice)
-  testFixturesImplementation(Dependencies.kotlinStdLibJdk8)
-  testFixturesImplementation(Dependencies.micrometerCore)
-  testFixturesImplementation(Dependencies.micrometerPrometheus)
+  testFixturesApi(libs.prometheusClient)
+  testFixturesImplementation(libs.guava)
+  testFixturesImplementation(libs.guice)
+  testFixturesImplementation(libs.kotlinStdLibJdk8)
+  testFixturesImplementation(libs.micrometerCore)
+  testFixturesImplementation(libs.micrometerPrometheus)
 
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-metrics"))
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
 
 }
 
