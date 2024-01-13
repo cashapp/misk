@@ -73,6 +73,9 @@ data class WebConfig @JvmOverloads constructor(
   /** The maximum number of streams per HTTP/2 connection. */
   val jetty_max_concurrent_streams: Int? = null,
 
+  /** The output buffer size of Jetty (default is 32KB). */
+  val jetty_output_buffer_size: Int? = null,
+
   /** A value in [0.0..100.0]. Include 'Connection: close' in this percentage of responses. */
   val close_connection_percent: Double = 0.0,
 
