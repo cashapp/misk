@@ -1,6 +1,8 @@
 package misk.jdbc
 
+import ch.qos.logback.classic.Level
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
@@ -12,11 +14,11 @@ import misk.time.FakeClockModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
 import java.time.LocalDate
-import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 import kotlin.test.fail
 
@@ -271,21 +273,34 @@ abstract class RealTransacterTest {
   }
 
   private fun createTestData() {
+    val hikariLogger: ch.qos.logback.classic.Logger =
+      LoggerFactory.getLogger("com.zaxxer.hikari") as ch.qos.logback.classic.Logger
+    hikariLogger.setLevel(Level.TRACE)
+
     // Insert some movies, characters and actors.
-    transacter.transactionWithSession { session ->
-      session.useConnection { connection ->
-        connection.prepareStatement("INSERT INTO movies (name, created_at) VALUES (?, ?)")
-          .use { statement ->
-            val insertMovie = fun(movie: Movie) {
-              statement.setString(1, movie.name)
-              statement.setObject(2, movie.date)
-              statement.addBatch()
-            }
-            insertMovie(Movie("Jurassic Park", LocalDate.of(1993, 6, 9)))
-            insertMovie(Movie("Star Wars", LocalDate.of(1977, 5, 25)))
-            insertMovie(Movie("Luxo Jr.", LocalDate.of(1986, 8, 17)))
-            statement.executeBatch()
+    var counter = 0
+    while (counter < 10000) {
+      try {
+        Thread.sleep(3000)
+        counter++
+        transacter.transactionWithSession { session ->
+          session.useConnection { connection ->
+            connection.prepareStatement("INSERT INTO movies (name, created_at) VALUES (?, ?)")
+              .use { statement ->
+                val insertMovie = fun(movie: Movie) {
+                  statement.setString(1, movie.name)
+                  statement.setObject(2, movie.date)
+                  statement.addBatch()
+                }
+                insertMovie(Movie("Jurassic Park-$counter", LocalDate.of(1993, 6, 9)))
+                insertMovie(Movie("Star Wars-$counter", LocalDate.of(1977, 5, 25)))
+                insertMovie(Movie("Luxo Jr.-$counter", LocalDate.of(1986, 8, 17)))
+                statement.executeBatch()
+              }
           }
+        }
+      } catch (e: Exception) {
+        println(e.message)
       }
     }
   }

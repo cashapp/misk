@@ -3,16 +3,16 @@ package misk.jdbc
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provider
-import com.mysql.cj.jdbc.MysqlDataSource
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
-import com.zaxxer.hikari.util.PropertyElf
+import com.zaxxer.hikari.util.DriverDataSource
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Singleton
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.time.Duration
+import java.util.Properties
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
@@ -114,31 +114,29 @@ class DataSourceService @JvmOverloads constructor(
       hikariConfig.dataSourceProperties["elideSetAutoCommits"] = "true"
       hikariConfig.dataSourceProperties["maintainTimeStats"] = "false"
       hikariConfig.dataSourceProperties["characterEncoding"] = "UTF-8"
+    }
 
-      // this will blow up if we use the same datasource for read only queries on replicas
-      // should be okay because a read only datasource must be supplied that will not have mysql_validate_connections_are_writable set
-      // can and should be also handle vitess? gut feeling, is yes but not in first pass...
-      // can this code go into HikariCP or mysql connector J? maybe not...
-      if (config.type == DataSourceType.MYSQL && config.mysql_validate_connections_are_writable) {
-        // maybe try nullable delegate approach?
-        // https://github.com/awslabs/aws-advanced-jdbc-wrapper?tab=readme-ov-file#amazon-rds-bluegreen-deployments
-        // why I didn't build a jdbc wrapper?
-        // why I didn't use the inbuilt-decorators? Because isValid is called by HikariPool in getConnection
-        // before it returns the connection to the decorator
-        // mention why connectionTestQuery does not work https://groups.google.com/g/hikari-cp/c/VH7nqwGimCs
-        // articulate why we can't do https://github.com/go-sql-driver/mysql/blob/c48c0e7da17e8fc06133e431ce7c10e7a3e94f06/packets.go#L567
-        // if this works, can extract Guice free things like ConnectionDecoratingDatasource and WritableConnectionValidator
-        // to wisp so that can be pulled into armeria services too
-        val mysqlDataSource = MysqlDataSource()
-        PropertyElf.setTargetFromProperties(mysqlDataSource, hikariConfig.dataSourceProperties);
-
-        hikariConfig.dataSource = ConnectionDecoratingDataSource(
-          connectionDecorator = { connection ->
-            WritableConnectionValidator(connection)
-          },
-          dataSource = mysqlDataSource
-        )
-      }
+    // this will blow up if we use the same datasource for read only queries on replicas
+    // should be okay because a read only datasource must be supplied that will not have mysql_validate_connections_are_writable set
+    // can and should be also handle vitess? gut feeling, is yes but not in first pass...
+    // can this code go into HikariCP or mysql connector J? maybe not...
+    if (config.type == DataSourceType.MYSQL && config.mysql_validate_connections_are_writable) {
+      // maybe try nullable delegate approach?
+      // https://github.com/awslabs/aws-advanced-jdbc-wrapper?tab=readme-ov-file#amazon-rds-bluegreen-deployments
+      // why I didn't build a jdbc wrapper?
+      // why I didn't use the inbuilt-decorators? Because isValid is called by HikariPool in getConnection
+      // before it returns the connection to the decorator
+      // mention why connectionTestQuery does not work https://groups.google.com/g/hikari-cp/c/VH7nqwGimCs
+      // articulate why we can't do https://github.com/go-sql-driver/mysql/blob/c48c0e7da17e8fc06133e431ce7c10e7a3e94f06/packets.go#L567
+      // if this works, can extract Guice free things like ConnectionDecoratingDatasource and WritableConnectionValidator
+      // to wisp so that can be pulled into armeria services too
+      val mysqlDataSource = buildDataSource(hikariConfig)
+      hikariConfig.dataSource = ConnectionDecoratingDataSource(
+        connectionDecorator = { connection ->
+          WritableConnectionValidator(connection)
+        },
+        dataSource = mysqlDataSource
+      )
     }
 
     collectorRegistry?.let {
@@ -172,5 +170,15 @@ class DataSourceService @JvmOverloads constructor(
 
   override fun get(): DataSource {
     return dataSource
+  }
+
+  private fun buildDataSource(config: HikariConfig): DriverDataSource {
+    val jdbcUrl: String = config.jdbcUrl
+    val username: String = config.username
+    val password: String = config.password
+    val driverClassName: String = config.driverClassName
+    val dataSourceProperties: Properties = config.dataSourceProperties
+
+    return DriverDataSource(jdbcUrl, driverClassName, dataSourceProperties, username, password)
   }
 }
