@@ -109,9 +109,11 @@ data class DataSourceConfig @JvmOverloads constructor(
     and reconnections are attempted if the application is connected to a read only DB instance
     when it expects a writable DB instance.
 
+    Has no effect if set on a datasource that isn't DataSourceType.MYSQL.
+
     Full details: https://github.com/cashapp/misk/pull/3094#issue-2080624417
   */
-  val validate_connections_are_writable: Boolean = false
+  val mysql_enforce_writable_connections: Boolean = false
 ) {
   fun withDefaults(): DataSourceConfig {
     val isRunningInDocker = File("/proc/1/cgroup")

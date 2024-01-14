@@ -21,9 +21,9 @@ import wisp.deployment.TESTING
 import java.sql.Connection
 
 @MiskTest(startService = true)
-class ValidateWritableConnectionsTest {
-  @MiskTestModule val module = ValidateWritableConnectionsTestModule(
-    appName = "test_validate_writable_connections"
+class MySQLEnforceWritableConnectionsTest {
+  @MiskTestModule val module = MySQLEnforceWritableConnectionsTestModule(
+    appName = "test_mysql_enforce_writable_connections"
   )
 
   @Inject @Movies lateinit var validatingTransacter: Transacter
@@ -83,10 +83,10 @@ class ValidateWritableConnectionsTest {
 
   data class RootConfig(
     val mysql_data_source: DataSourceConfig,
-    val validate_writable_connections_mysql_data_source: DataSourceConfig
+    val mysql_enforce_writable_connections_data_source: DataSourceConfig
   ) : Config
 
-  class ValidateWritableConnectionsTestModule(private val appName: String) : KAbstractModule() {
+  class MySQLEnforceWritableConnectionsTestModule(private val appName: String) : KAbstractModule() {
     override fun configure() {
       install(
         Modules.override(MiskTestingServiceModule()).with(
@@ -99,7 +99,7 @@ class ValidateWritableConnectionsTest {
       install(JdbcTestingModule(Movies::class))
       install(
         JdbcModule(
-          Movies::class, config.validate_writable_connections_mysql_data_source
+          Movies::class, config.mysql_enforce_writable_connections_data_source
         )
       )
 

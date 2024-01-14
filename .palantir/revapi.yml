@@ -491,5 +491,5 @@ acceptedBreaks:
         \ java.lang.String, boolean, java.util.List<java.lang.String>, java.lang.String,\
         \ java.lang.String, java.lang.Integer, boolean, boolean, java.util.Map<java.lang.String,\
         \ ? extends java.lang.Object>, boolean)"
-      justification: "The new param is validate_connections_are_writable that defaults\
+      justification: "The new param mysql_enforce_writable_connections is a boolean that defaults\
         \ to false"

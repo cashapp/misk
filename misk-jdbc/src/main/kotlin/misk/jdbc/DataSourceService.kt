@@ -123,7 +123,7 @@ class DataSourceService @JvmOverloads constructor(
         * https://cash.slack.com/archives/C06D6QEL9B2/p1704404929855309
         * https://cash.slack.com/archives/C092S0RD1/p1654882551849509?thread_ts=1654882030.556189&cid=C092S0RD1
     */
-    if (config.type == DataSourceType.MYSQL && config.validate_connections_are_writable) {
+    if (config.type == DataSourceType.MYSQL && config.mysql_enforce_writable_connections) {
       /*
           Q. Why isn't this a DataSourceDecorator?
           A. Because HikariCP calls Connection.isValid() in its internal getConnection() method before returning the connection to the DataSourceDecorator.
