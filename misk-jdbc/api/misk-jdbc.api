@@ -233,19 +233,6 @@ public abstract interface class misk/jdbc/Cluster {
 	public abstract fun getWriter ()Ljava/lang/Object;
 }
 
-public final class misk/jdbc/ConnectionDecoratingDataSource : javax/sql/DataSource {
-	public fun <init> (Lkotlin/jvm/functions/Function1;Ljavax/sql/DataSource;)V
-	public fun getConnection ()Ljava/sql/Connection;
-	public fun getConnection (Ljava/lang/String;Ljava/lang/String;)Ljava/sql/Connection;
-	public fun getLogWriter ()Ljava/io/PrintWriter;
-	public fun getLoginTimeout ()I
-	public fun getParentLogger ()Ljava/util/logging/Logger;
-	public fun isWrapperFor (Ljava/lang/Class;)Z
-	public fun setLogWriter (Ljava/io/PrintWriter;)V
-	public fun setLoginTimeout (I)V
-	public fun unwrap (Ljava/lang/Class;)Ljava/lang/Object;
-}
-
 public final class misk/jdbc/DataSourceCluster : misk/jdbc/Cluster {
 	public fun <init> (Ljavax/sql/DataSource;Ljavax/sql/DataSource;)V
 	public synthetic fun getReader ()Ljava/lang/Object;
@@ -671,64 +658,6 @@ public final class misk/jdbc/TruncateTablesService : com/google/common/util/conc
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
-public final class misk/jdbc/WritableConnectionValidator : java/sql/Connection {
-	public fun <init> (Ljava/sql/Connection;)V
-	public fun abort (Ljava/util/concurrent/Executor;)V
-	public fun clearWarnings ()V
-	public fun close ()V
-	public fun commit ()V
-	public fun createArrayOf (Ljava/lang/String;[Ljava/lang/Object;)Ljava/sql/Array;
-	public fun createBlob ()Ljava/sql/Blob;
-	public fun createClob ()Ljava/sql/Clob;
-	public fun createNClob ()Ljava/sql/NClob;
-	public fun createSQLXML ()Ljava/sql/SQLXML;
-	public fun createStatement ()Ljava/sql/Statement;
-	public fun createStatement (II)Ljava/sql/Statement;
-	public fun createStatement (III)Ljava/sql/Statement;
-	public fun createStruct (Ljava/lang/String;[Ljava/lang/Object;)Ljava/sql/Struct;
-	public fun getAutoCommit ()Z
-	public fun getCatalog ()Ljava/lang/String;
-	public fun getClientInfo ()Ljava/util/Properties;
-	public fun getClientInfo (Ljava/lang/String;)Ljava/lang/String;
-	public fun getHoldability ()I
-	public fun getMetaData ()Ljava/sql/DatabaseMetaData;
-	public fun getNetworkTimeout ()I
-	public fun getSchema ()Ljava/lang/String;
-	public fun getTransactionIsolation ()I
-	public fun getTypeMap ()Ljava/util/Map;
-	public fun getWarnings ()Ljava/sql/SQLWarning;
-	public fun isClosed ()Z
-	public fun isReadOnly ()Z
-	public fun isValid (I)Z
-	public fun isWrapperFor (Ljava/lang/Class;)Z
-	public fun nativeSQL (Ljava/lang/String;)Ljava/lang/String;
-	public fun prepareCall (Ljava/lang/String;)Ljava/sql/CallableStatement;
-	public fun prepareCall (Ljava/lang/String;II)Ljava/sql/CallableStatement;
-	public fun prepareCall (Ljava/lang/String;III)Ljava/sql/CallableStatement;
-	public fun prepareStatement (Ljava/lang/String;)Ljava/sql/PreparedStatement;
-	public fun prepareStatement (Ljava/lang/String;I)Ljava/sql/PreparedStatement;
-	public fun prepareStatement (Ljava/lang/String;II)Ljava/sql/PreparedStatement;
-	public fun prepareStatement (Ljava/lang/String;III)Ljava/sql/PreparedStatement;
-	public fun prepareStatement (Ljava/lang/String;[I)Ljava/sql/PreparedStatement;
-	public fun prepareStatement (Ljava/lang/String;[Ljava/lang/String;)Ljava/sql/PreparedStatement;
-	public fun releaseSavepoint (Ljava/sql/Savepoint;)V
-	public fun rollback ()V
-	public fun rollback (Ljava/sql/Savepoint;)V
-	public fun setAutoCommit (Z)V
-	public fun setCatalog (Ljava/lang/String;)V
-	public fun setClientInfo (Ljava/lang/String;Ljava/lang/String;)V
-	public fun setClientInfo (Ljava/util/Properties;)V
-	public fun setHoldability (I)V
-	public fun setNetworkTimeout (Ljava/util/concurrent/Executor;I)V
-	public fun setReadOnly (Z)V
-	public fun setSavepoint ()Ljava/sql/Savepoint;
-	public fun setSavepoint (Ljava/lang/String;)Ljava/sql/Savepoint;
-	public fun setSchema (Ljava/lang/String;)V
-	public fun setTransactionIsolation (I)V
-	public fun setTypeMap (Ljava/util/Map;)V
-	public fun unwrap (Ljava/lang/Class;)Ljava/lang/Object;
 }
 
 public final class misk/vitess/ConnectionExtensionsKt {

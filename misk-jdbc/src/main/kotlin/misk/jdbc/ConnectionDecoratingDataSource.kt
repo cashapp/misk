@@ -3,7 +3,7 @@ package misk.jdbc
 import java.sql.Connection
 import javax.sql.DataSource
 
-class ConnectionDecoratingDataSource(
+internal class ConnectionDecoratingDataSource(
   private val connectionDecorator: (Connection) -> Connection,
   private val dataSource: DataSource
 ) : DataSource by dataSource {

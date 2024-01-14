@@ -4,7 +4,7 @@ import java.sql.Connection
 import com.mysql.cj.jdbc.ConnectionImpl as MysqlJdbcConnectionImpl
 import com.mysql.cj.jdbc.JdbcConnection as MySQLJdbcConnection
 
-class WritableConnectionValidator(
+internal class WritableConnectionValidator(
   private val connection: Connection
 ) : Connection by connection {
 
