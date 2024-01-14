@@ -101,7 +101,8 @@ data class DataSourceConfig @JvmOverloads constructor(
   // See https://mysqlconnector.net/troubleshooting/retrieval-public-key/
   val allow_public_key_retrieval: Boolean = false,
   // Allow setting additional JDBC url parameters for advanced configuration
-  val jdbc_url_query_parameters: Map<String, Any> = mapOf()
+  val jdbc_url_query_parameters: Map<String, Any> = mapOf(),
+  val mysql_validate_connections_are_writable: Boolean = false
 ) {
   fun withDefaults(): DataSourceConfig {
     val isRunningInDocker = File("/proc/1/cgroup")

@@ -2,6 +2,7 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import org.gradle.api.internal.artifacts.dsl.dependencies.DependencyAdderExtensionModule.module
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
@@ -34,7 +35,9 @@ buildscript {
 plugins {
   id("com.autonomousapps.dependency-analysis") version libs.versions.dependencyAnalysisPlugin.get()
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version libs.versions.kotlinBinaryCompatibilityPlugin.get()
+  id("idea")
 }
+
 
 apply(plugin = "com.vanniktech.maven.publish.base")
 
@@ -44,6 +47,12 @@ allprojects {
     else -> "com.squareup.misk"
   }
   version = project.findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
+}
+
+idea {
+  module {
+    isDownloadSources = true
+  }
 }
 
 dependencyAnalysis {
