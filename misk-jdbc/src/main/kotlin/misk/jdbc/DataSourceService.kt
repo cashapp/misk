@@ -117,7 +117,7 @@ class DataSourceService @JvmOverloads constructor(
     }
 
     /*
-      TODO(sahilm): The same mitigation might be applicable for Vitess
+      TODO(sahilm): The same mitigation might be applicable for Vitess.
       Similar looking issues from internal Cash App slack for Vitess backed service:
         * https://cash.slack.com/archives/C06D6QEL9B2/p1704403704775189
         * https://cash.slack.com/archives/C06D6QEL9B2/p1704404929855309
