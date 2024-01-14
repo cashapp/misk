@@ -10,12 +10,13 @@ internal class WritableConnectionValidator(
 
   override fun isValid(timeout: Int): Boolean {
     return connection.isValid(timeout)
+      && !connection.isReadOnly
       && !isMySQLGloballyReadOnly()
   }
 
   /*
-    We don't override isReadOnly() because checking for global read only might have some inadvertent side effects.
-    Creating a special purpose function just for ourselves limits the blast radius.
+    We don't override isReadOnly() because checking for global read only might have some inadvertent side effects
+    for callers who don't expect such a check in isReadOnly(). Creating a special purpose function just for ourselves limits the blast radius.
    */
   private fun isMySQLGloballyReadOnly(): Boolean {
     if (!connection.isWrapperFor(MySQLJdbcConnection::class.java)) return false
