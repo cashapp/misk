@@ -4,6 +4,7 @@ mysql_data_source:
   username: root
   password: ""
   migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
+  validate_connections_are_writable: true
 tidb_data_source:
   type: TIDB
   database: movies_tidb

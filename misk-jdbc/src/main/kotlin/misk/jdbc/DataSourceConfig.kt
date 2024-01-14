@@ -101,7 +101,21 @@ data class DataSourceConfig @JvmOverloads constructor(
   // See https://mysqlconnector.net/troubleshooting/retrieval-public-key/
   val allow_public_key_retrieval: Boolean = false,
   // Allow setting additional JDBC url parameters for advanced configuration
-  val jdbc_url_query_parameters: Map<String, Any> = mapOf()
+  val jdbc_url_query_parameters: Map<String, Any> = mapOf(),
+  /*
+    Implements a custom JDBC4 Connection.isValid() validating that connections are writable.
+    If a connection isn't writable, it will be evicted from the connection pool within at most the validationTimeout.
+    This setting ensures that connections are rapidly evicted and reconnections are attempted
+    if the application is connected to a read only instance when it expects a writable db instance.
+    Mitigation for issues uncovered during some blue/green Aurora cluster upgrades where
+    failover and DNS rerouting to writable instance is slower than expected leaving the application trying to write to a read only instance.
+
+    See also:
+      * Mitigation for the same problem in the [Go SQL Driver](https://github.com/go-sql-driver/mysql?tab=readme-ov-file#rejectreadonly)
+      * [Thread](https://groups.google.com/g/hikari-cp/c/VH7nqwGimCs) in HikariCP mailing list discussing potential solutions
+      * The special purpose AWS Advanced JDBC wrapper explicitly mentions [no mitigation](https://github.com/awslabs/aws-advanced-jdbc-wrapper?tab=readme-ov-file#amazon-rds-bluegreen-deployments)
+  */
+  val validate_connections_are_writable: Boolean = false
 ) {
   fun withDefaults(): DataSourceConfig {
     val isRunningInDocker = File("/proc/1/cgroup")
