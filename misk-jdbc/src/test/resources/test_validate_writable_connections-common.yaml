@@ -1,0 +1,14 @@
+mysql_data_source:
+  type: MYSQL
+  database: movies_mysql
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
+
+validate_writable_connections_mysql_data_source:
+  type: MYSQL
+  database: movies_mysql
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
+  validate_connections_are_writable: true
