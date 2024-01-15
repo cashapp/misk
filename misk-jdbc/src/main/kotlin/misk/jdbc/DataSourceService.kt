@@ -116,7 +116,7 @@ class DataSourceService @JvmOverloads constructor(
       hikariConfig.dataSourceProperties["characterEncoding"] = "UTF-8"
     }
 
-    // TODO(sahilm): The same mitigation might be applicable for Vitess.
+    // TODO(sahilm): The same mitigation _might_ be applicable to the DataSourceTypes VITESS_MYSQL and TIDB
     if (config.type == DataSourceType.MYSQL && config.mysql_enforce_writable_connections) {
       /*
           Q. Why isn't this a DataSourceDecorator?
