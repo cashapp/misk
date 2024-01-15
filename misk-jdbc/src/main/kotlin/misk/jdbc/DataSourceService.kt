@@ -132,7 +132,7 @@ class DataSourceService @JvmOverloads constructor(
           A. Because MySQL does not raise an error if `SET [SESSION] TRANSACTION READ WRITE` is executed on a read only connection.
 
           TODO(sahilm): Extract ConnectionDecoratingDataSource and WritableConnectionValidator to Wisp so the same mitigation can be used in Armeria,
-           should wait for the solution to prove itself first
+           should wait for the solution to prove itself first.
        */
       val mysqlDataSource = buildDataSource(hikariConfig)
       hikariConfig.dataSource = ConnectionDecoratingDataSource(
