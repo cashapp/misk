@@ -170,7 +170,10 @@ class DataSourceService @JvmOverloads constructor(
     return dataSource
   }
 
-  // Copy pasta from PoolBase.initializeDataSource()
+  /**
+   * Lifted from private method com.zaxxer.hikari.pool.PoolBase#initializeDataSource()
+   * @see com.zaxxer.hikari.pool.PoolBase#initializeDataSource()
+   */
   private fun buildDataSource(config: HikariConfig): DriverDataSource {
     val jdbcUrl: String = config.jdbcUrl
     val username: String = config.username
