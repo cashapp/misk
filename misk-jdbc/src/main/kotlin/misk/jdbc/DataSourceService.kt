@@ -116,13 +116,7 @@ class DataSourceService @JvmOverloads constructor(
       hikariConfig.dataSourceProperties["characterEncoding"] = "UTF-8"
     }
 
-    /*
-      TODO(sahilm): The same mitigation might be applicable for Vitess.
-      Similar looking issues from internal Cash App slack for Vitess backed service:
-        * https://cash.slack.com/archives/C06D6QEL9B2/p1704403704775189
-        * https://cash.slack.com/archives/C06D6QEL9B2/p1704404929855309
-        * https://cash.slack.com/archives/C092S0RD1/p1654882551849509?thread_ts=1654882030.556189&cid=C092S0RD1
-    */
+    // TODO(sahilm): The same mitigation might be applicable for Vitess.
     if (config.type == DataSourceType.MYSQL && config.mysql_enforce_writable_connections) {
       /*
           Q. Why isn't this a DataSourceDecorator?
