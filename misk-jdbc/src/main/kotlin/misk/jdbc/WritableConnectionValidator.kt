@@ -11,25 +11,33 @@ internal class WritableConnectionValidator(
   override fun isValid(timeout: Int): Boolean {
     return connection.isValid(timeout)
       && !connection.isReadOnly
-      && !isMySQLGloballyReadOnly()
+      && !isAnyMySQLVarEnabled(MYSQL_GLOBAL_READ_ONLY_VARIABLES)
   }
 
   /*
-    We don't override isReadOnly() because checking for global read only might have some inadvertent side effects
-    for callers who don't expect such a check in isReadOnly(). Creating a special purpose function just for ourselves limits the blast radius.
+    We don't override isReadOnly() because checking for additional read only server variables
+    might have some inadvertent side effects for callers who don't expect such additional checks in isReadOnly().
+    Creating a special purpose function just for ourselves limits the blast radius.
    */
-  private fun isMySQLGloballyReadOnly(): Boolean {
+  private fun isAnyMySQLVarEnabled(vars: List<String>): Boolean {
     if (!connection.isWrapperFor(MySQLJdbcConnection::class.java)) return false
 
     val mysqlJdbcConnection = connection.unwrap(MySQLJdbcConnection::class.java)
     if (mysqlJdbcConnection !is MysqlJdbcConnectionImpl) return false
 
-    val readOnlyVars = listOf("@@global.read_only", "@@global.super_read_only")
-
-    return readOnlyVars.any { variable ->
+    return vars.any { variable ->
       mysqlJdbcConnection
         .session
         .queryServerVariable(variable)?.toInt() != 0
     }
+  }
+
+  companion object {
+    private val MYSQL_GLOBAL_READ_ONLY_VARIABLES = listOf(
+      "@@global.innodb_read_only",
+      "@@global.read_only",
+      "@@global.super_read_only",
+      "@@global.transaction_read_only",
+    )
   }
 }
