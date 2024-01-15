@@ -1,11 +1,14 @@
 package misk.web.actions
 
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.runBlocking
 import misk.ApplicationInterceptor
 import misk.Chain
 import misk.web.HttpCall
 import misk.web.RealChain
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.callSuspendBy
 
 fun WebAction.asChain(
   function: KFunction<*>,
@@ -25,8 +28,17 @@ fun WebAction.asChain(
         }
         argsMap[param] = arg
       }
-      return function.callBy(argsMap)
-        ?: throw IllegalStateException("Null return from WebAction")
+
+      return if (function.isSuspend) {
+        val coroutineName = CoroutineName(
+          "WebAction: ${this@asChain::class.simpleName}.${function.name}"
+        )
+        runBlocking(coroutineName) {
+          function.callSuspendBy(argsMap)
+        }
+      } else {
+        function.callBy(argsMap)
+      } ?: throw IllegalStateException("Null return from WebAction")
     }
   }
   val realChainInterceptors = interceptors + callFunctionInterceptor
