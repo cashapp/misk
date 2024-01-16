@@ -470,3 +470,26 @@ acceptedBreaks:
       new: "method long misk.redis.Redis::zremRangeByRank(java.lang.String, misk.redis.Redis.ZRangeRankMarker,\
         \ misk.redis.Redis.ZRangeRankMarker)"
       justification: "adding wrappers to support zremrangebyrank, zcard"
+  "2024.01.12.192829-8ba49bc":
+    com.squareup.misk:misk-jdbc:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.jdbc.DataSourceConfig misk.jdbc.DataSourceConfig::copy(misk.jdbc.DataSourceType,\
+        \ java.lang.String, java.lang.Integer, java.lang.String, java.lang.String,\
+        \ java.lang.String, int, java.time.Duration, java.time.Duration, java.time.Duration,\
+        \ java.time.Duration, java.time.Duration, java.lang.String, java.util.List<java.lang.String>,\
+        \ java.util.List<java.lang.String>, java.lang.String, java.lang.String, java.lang.String,\
+        \ java.lang.String, java.lang.String, java.lang.String, java.lang.String,\
+        \ java.lang.String, boolean, java.util.List<java.lang.String>, java.lang.String,\
+        \ java.lang.String, java.lang.Integer, boolean, boolean, java.util.Map<java.lang.String,\
+        \ ? extends java.lang.Object>)"
+      new: "method misk.jdbc.DataSourceConfig misk.jdbc.DataSourceConfig::copy(misk.jdbc.DataSourceType,\
+        \ java.lang.String, java.lang.Integer, java.lang.String, java.lang.String,\
+        \ java.lang.String, int, java.time.Duration, java.time.Duration, java.time.Duration,\
+        \ java.time.Duration, java.time.Duration, java.lang.String, java.util.List<java.lang.String>,\
+        \ java.util.List<java.lang.String>, java.lang.String, java.lang.String, java.lang.String,\
+        \ java.lang.String, java.lang.String, java.lang.String, java.lang.String,\
+        \ java.lang.String, boolean, java.util.List<java.lang.String>, java.lang.String,\
+        \ java.lang.String, java.lang.Integer, boolean, boolean, java.util.Map<java.lang.String,\
+        \ ? extends java.lang.Object>, boolean)"
+      justification: "The new param mysql_enforce_writable_connections is a boolean that defaults\
+        \ to false"

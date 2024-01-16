@@ -6,11 +6,13 @@ import com.google.inject.Provider
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
+import com.zaxxer.hikari.util.DriverDataSource
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Singleton
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.time.Duration
+import java.util.Properties
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
@@ -91,6 +93,7 @@ class DataSourceService @JvmOverloads constructor(
       if (!config.use_fixed_pool_size) {
         hikariConfig.minimumIdle = 5
       }
+
       if (config.type == DataSourceType.MYSQL) {
         hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
       }
@@ -111,6 +114,27 @@ class DataSourceService @JvmOverloads constructor(
       hikariConfig.dataSourceProperties["elideSetAutoCommits"] = "true"
       hikariConfig.dataSourceProperties["maintainTimeStats"] = "false"
       hikariConfig.dataSourceProperties["characterEncoding"] = "UTF-8"
+    }
+
+    // TODO(sahilm): The same mitigation _might_ be applicable to the DataSourceTypes VITESS_MYSQL and TIDB
+    if (config.type == DataSourceType.MYSQL && config.mysql_enforce_writable_connections) {
+      /*
+          Q. Why isn't this a DataSourceDecorator?
+          A. Because HikariCP calls Connection.isValid() in its internal getConnection() method before returning the connection to the DataSourceDecorator.
+             Implementing this logic in a DataSourceDecorator is too late and thus must be wrapped in the DataSource that HikariCP uses internally.
+          Q. Why can't we use a connectionTestQuery like `SET [SESSION] TRANSACTION READ WRITE` as [proposed](https://groups.google.com/g/hikari-cp/c/VH7nqwGimCs) in the HikariCP mailing list?
+          A. Because MySQL does not raise an error if `SET [SESSION] TRANSACTION READ WRITE` is executed on a read only connection.
+
+          TODO(sahilm): Extract ConnectionDecoratingDataSource and WritableConnectionValidator to Wisp so the same mitigation can be used in Armeria,
+           should wait for the solution to prove itself first.
+       */
+      val mysqlDataSource = buildDataSource(hikariConfig)
+      hikariConfig.dataSource = ConnectionDecoratingDataSource(
+        connectionDecorator = { connection ->
+          WritableConnectionValidator(connection)
+        },
+        dataSource = mysqlDataSource
+      )
     }
 
     collectorRegistry?.let {
@@ -144,5 +168,19 @@ class DataSourceService @JvmOverloads constructor(
 
   override fun get(): DataSource {
     return dataSource
+  }
+
+  /**
+   * Lifted from private method com.zaxxer.hikari.pool.PoolBase#initializeDataSource()
+   * @see com.zaxxer.hikari.pool.PoolBase#initializeDataSource()
+   */
+  private fun buildDataSource(config: HikariConfig): DriverDataSource {
+    val jdbcUrl: String = config.jdbcUrl
+    val username: String = config.username
+    val password: String = config.password
+    val driverClassName: String = config.driverClassName
+    val dataSourceProperties: Properties = config.dataSourceProperties
+
+    return DriverDataSource(jdbcUrl, driverClassName, dataSourceProperties, username, password)
   }
 }

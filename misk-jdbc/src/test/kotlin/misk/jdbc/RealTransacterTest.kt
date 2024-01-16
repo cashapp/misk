@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
@@ -16,7 +17,6 @@ import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
 import java.time.LocalDate
-import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 import kotlin.test.fail
 
@@ -294,12 +294,16 @@ abstract class RealTransacterTest {
 
   data class RootConfig(
     val mysql_data_source: DataSourceConfig,
+    val mysql_enforce_writable_connections_data_source: DataSourceConfig,
     val cockroachdb_data_source: DataSourceConfig,
     val postgresql_data_source: DataSourceConfig,
     val tidb_data_source: DataSourceConfig,
   ) : Config
 
-  class RealTransacterTestModule(private val type: DataSourceType) : KAbstractModule() {
+  class RealTransacterTestModule(
+    private val type: DataSourceType,
+    private val dataSourceConfig: DataSourceConfig? = null
+  ) : KAbstractModule() {
     override fun configure() {
       install(
         Modules.override(MiskTestingServiceModule()).with(
@@ -309,11 +313,8 @@ abstract class RealTransacterTest {
       )
       install(DeploymentModule(TESTING))
       val config = MiskConfig.load<RootConfig>("test_transacter", TESTING)
-      val dataSourceConfig = selectDataSourceConfig(config)
       install(JdbcTestingModule(Movies::class))
-      install(
-        JdbcModule(Movies::class, dataSourceConfig)
-      )
+      install(JdbcModule(Movies::class, dataSourceConfig ?: selectDataSourceConfig(config)))
     }
 
     private fun selectDataSourceConfig(config: RootConfig): DataSourceConfig {
@@ -332,6 +333,16 @@ abstract class RealTransacterTest {
 class MySQLRealTransacterTest : RealTransacterTest() {
   @MiskTestModule
   val module = RealTransacterTestModule(DataSourceType.MYSQL)
+}
+
+@MiskTest(startService = true)
+class MySQLEnforceWritableConnectionsTransacterTest : RealTransacterTest() {
+  @MiskTestModule
+  val module = RealTransacterTestModule(
+    DataSourceType.MYSQL,
+    MiskConfig.load<RootConfig>("test_transacter", TESTING)
+      .mysql_enforce_writable_connections_data_source
+  )
 }
 
 @MiskTest(startService = true)
