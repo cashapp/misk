@@ -8,6 +8,7 @@ import misk.ReadyService
 import misk.ServiceModule
 import misk.database.StartDatabaseService
 import misk.healthchecks.HealthCheck
+import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
 import misk.inject.asSingleton
 import misk.inject.keyOf

@@ -30,6 +30,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-deployment"))
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":misk"))
+  testImplementation(project(":misk-hibernate"))
   testImplementation(testFixtures(project(":misk-jdbc")))
   testImplementation(project(":misk-testing"))
 

@@ -19,6 +19,26 @@ class ClientJooqTestingModule : KAbstractModule() {
     install(DeploymentModule(TESTING))
     install(MiskTestingServiceModule())
 
+    install(JooqModule(
+      qualifier = JooqDBIdentifier::class,
+      dataSourceClusterConfig = datasourceConfig,
+      jooqCodeGenSchemaName = "jooq",
+      jooqTimestampRecordListenerOptions = JooqTimestampRecordListenerOptions(
+        install = true,
+        createdAtColumnName = "created_at",
+        updatedAtColumnName = "updated_at"
+      ),
+      readerQualifier = JooqDBReadOnlyIdentifier::class
+    ) {
+      val executeListeners = this.executeListenerProviders().toMutableList()
+        .apply { add(DefaultExecuteListenerProvider(DeleteOrUpdateWithoutWhereListener())) }
+      set(*executeListeners.toTypedArray())
+    })
+    install(JdbcTestingModule(JooqDBIdentifier::class))
+    install(LogCollectorModule())
+  }
+
+  companion object {
     val datasourceConfig = DataSourceClusterConfig(
       writer = DataSourceConfig(
         type = DataSourceType.MYSQL,
@@ -37,23 +57,6 @@ class ClientJooqTestingModule : KAbstractModule() {
         show_sql = "true"
       )
     )
-    install(JooqModule(
-      qualifier = JooqDBIdentifier::class,
-      dataSourceClusterConfig = datasourceConfig,
-      jooqCodeGenSchemaName = "jooq",
-      jooqTimestampRecordListenerOptions = JooqTimestampRecordListenerOptions(
-        install = true,
-        createdAtColumnName = "created_at",
-        updatedAtColumnName = "updated_at"
-      ),
-      readerQualifier = JooqDBReadOnlyIdentifier::class
-    ) {
-      val executeListeners = this.executeListenerProviders().toMutableList()
-        .apply { add(DefaultExecuteListenerProvider(DeleteOrUpdateWithoutWhereListener())) }
-      set(*executeListeners.toTypedArray())
-    })
-    install(JdbcTestingModule(JooqDBIdentifier::class))
-    install(LogCollectorModule())
   }
 }
 
