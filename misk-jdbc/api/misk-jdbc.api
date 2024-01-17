@@ -492,7 +492,7 @@ public final class misk/jdbc/JdbcExtensionsKt {
 	public static final fun uniqueString (Ljava/sql/ResultSet;)Ljava/lang/String;
 }
 
-public final class misk/jdbc/JdbcModule : misk/inject/KAbstractModule {
+public final class misk/jdbc/JdbcModule : misk/inject/KInstallOnceModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Z)V
