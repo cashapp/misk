@@ -8,7 +8,7 @@ import misk.ReadyService
 import misk.ServiceModule
 import misk.database.StartDatabaseService
 import misk.healthchecks.HealthCheck
-import misk.inject.KAbstractModule
+import misk.inject.KInstallOnceModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.setOfType
@@ -36,7 +36,7 @@ class JdbcModule @JvmOverloads constructor(
   readerConfig: DataSourceConfig?,
   val databasePool: DatabasePool = RealDatabasePool,
   private val installHealthCheck: Boolean = true,
-) : KAbstractModule() {
+) : KInstallOnceModule() {
   val config = config.withDefaults()
   val readerConfig = readerConfig?.withDefaults()
 
