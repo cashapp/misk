@@ -101,7 +101,19 @@ data class DataSourceConfig @JvmOverloads constructor(
   // See https://mysqlconnector.net/troubleshooting/retrieval-public-key/
   val allow_public_key_retrieval: Boolean = false,
   // Allow setting additional JDBC url parameters for advanced configuration
-  val jdbc_url_query_parameters: Map<String, Any> = mapOf()
+  val jdbc_url_query_parameters: Map<String, Any> = mapOf(),
+  /*
+    Implements a custom JDBC4 `Connection.isValid()` which validates that connections are writable.
+    If a connection isn't writable, it will be evicted from the connection pool within at most
+    the `validationTimeout`. This setting ensures that connections are rapidly evicted
+    and reconnections are attempted if the application is connected to a read only DB instance
+    when it expects a writable DB instance.
+
+    Has no effect if set on a datasource that isn't DataSourceType.MYSQL.
+
+    Full details: https://github.com/cashapp/misk/pull/3094#issue-2080624417
+  */
+  val mysql_enforce_writable_connections: Boolean = false
 ) {
   fun withDefaults(): DataSourceConfig {
     val isRunningInDocker = File("/proc/1/cgroup")
