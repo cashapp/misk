@@ -37,7 +37,6 @@ internal class WritableConnectionValidator(
       "@@global.innodb_read_only",
       "@@global.read_only",
       "@@global.super_read_only",
-      "@@global.transaction_read_only",
     )
   }
 }
