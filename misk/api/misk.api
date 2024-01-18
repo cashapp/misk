@@ -1826,6 +1826,11 @@ public final class misk/web/interceptors/ActionLoggingConfig$Companion {
 	public final fun fromConfigMapOrAnnotation (Lmisk/Action;Ljava/util/Set;Lmisk/web/interceptors/LogRequestResponse;)Lmisk/web/interceptors/ActionLoggingConfig;
 }
 
+public final class misk/web/interceptors/AlwaysEnabledMiskConcurrencyLimiterEnabledFeature : misk/web/interceptors/MiskConcurrencyLimiterEnabledFeature {
+	public static final field INSTANCE Lmisk/web/interceptors/AlwaysEnabledMiskConcurrencyLimiterEnabledFeature;
+	public fun enabled ()Z
+}
+
 public abstract interface annotation class misk/web/interceptors/BeforeContentEncoding : java/lang/annotation/Annotation {
 }
 
@@ -1854,15 +1859,8 @@ public final class misk/web/interceptors/LogRateLimiter$LogBucketId : java/lang/
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/interceptors/MiskConcurrencyLimiterEnabledFeature {
-	public static final field Companion Lmisk/web/interceptors/MiskConcurrencyLimiterEnabledFeature$Companion;
-	public fun <init> (Ljava/lang/String;Lmisk/feature/FeatureFlags;)V
-	public final fun enabled ()Z
-	public final fun getAppName ()Ljava/lang/String;
-}
-
-public final class misk/web/interceptors/MiskConcurrencyLimiterEnabledFeature$Companion {
-	public final fun getENABLED_FEATURE ()Lmisk/feature/Feature;
+public abstract interface class misk/web/interceptors/MiskConcurrencyLimiterEnabledFeature {
+	public abstract fun enabled ()Z
 }
 
 public final class misk/web/interceptors/RebalancingInterceptor : misk/web/NetworkInterceptor {
