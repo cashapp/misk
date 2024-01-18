@@ -106,6 +106,9 @@ class JettyService @Inject internal constructor(
     if (webConfig.http_header_cache_size != null) {
       httpConfig.headerCacheSize = webConfig.http_header_cache_size
     }
+    if (webConfig.jetty_output_buffer_size != null) {
+      httpConfig.outputBufferSize = webConfig.jetty_output_buffer_size
+    }
     httpConnectionFactories += HttpConnectionFactory(httpConfig)
     if (webConfig.http2) {
       val http2 = HTTP2ServerConnectionFactory(httpConfig)

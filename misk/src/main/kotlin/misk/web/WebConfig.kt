@@ -138,7 +138,10 @@ data class WebConfig @JvmOverloads constructor(
 
   /** If true install NotFoundAction, the default action when a path is not found. */
   val install_default_not_found_action: Boolean = true,
-) : Config
+
+  /** The output buffer size of Jetty (default is 32KB). */
+  val jetty_output_buffer_size: Int? = null,
+  ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
   /** HTTPS port to listen on, or 0 for any available port. */
