@@ -6,13 +6,13 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import jakarta.inject.Inject
 import misk.inject.KAbstractModule
 import misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule
+import misk.redis.Redis
 import misk.redis.RedisModule
 import misk.redis.testing.DockerRedis
 import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import redis.clients.jedis.ConnectionPoolConfig
-import redis.clients.jedis.JedisPool
 
 @MiskTest(startService = true)
 class RedisRateLimitedActionTests : AbstractRateLimitedActionTests() {
@@ -27,9 +27,9 @@ class RedisRateLimitedActionTests : AbstractRateLimitedActionTests() {
     }
   }
 
-  @Inject private lateinit var jedisPool: JedisPool
+  @Inject private lateinit var redis: Redis
 
   override fun setException() {
-    jedisPool.close()
+    redis.close()
   }
 }
