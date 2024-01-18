@@ -511,3 +511,57 @@ acceptedBreaks:
         \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
         \ boolean, java.lang.Integer)"
       justification: "Adding a new parameter to WebConfig"
+  "2024.01.18.031247-621592e":
+    com.squareup.misk:misk-rate-limiting-bucket4j-redis:
+    - code: "java.class.removed"
+      old: "class misk.ratelimiting.bucket4j.redis.JedisPoolService"
+      justification: "Only breaks one client, which is owned by the author"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::<init>(misk.redis.RedisConfig,\
+        \ redis.clients.jedis.JedisPoolConfig)"
+      new: "method void misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::<init>()"
+      justification: "Only breaks one client, which is owned by the author"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::<init>(misk.redis.RedisConfig,\
+        \ redis.clients.jedis.JedisPoolConfig, java.time.Duration)"
+      new: "method void misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::<init>(java.time.Duration)"
+      justification: "Only breaks one client, which is owned by the author"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter wisp.ratelimiting.RateLimiter misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::providedRateLimiter(java.time.Clock,\
+        \ ===redis.clients.jedis.JedisPool===, io.micrometer.core.instrument.MeterRegistry)"
+      new: "parameter wisp.ratelimiting.RateLimiter misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::providedRateLimiter(java.time.Clock,\
+        \ ===io.micrometer.core.instrument.MeterRegistry===, redis.clients.jedis.UnifiedJedis)"
+      justification: "Only breaks one client, which is owned by the author"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter wisp.ratelimiting.RateLimiter misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::providedRateLimiter(java.time.Clock,\
+        \ redis.clients.jedis.JedisPool, ===io.micrometer.core.instrument.MeterRegistry===)"
+      new: "parameter wisp.ratelimiting.RateLimiter misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::providedRateLimiter(java.time.Clock,\
+        \ io.micrometer.core.instrument.MeterRegistry, ===redis.clients.jedis.UnifiedJedis===)"
+      justification: "Only breaks one client, which is owned by the author"
+    - code: "java.method.removed"
+      old: "method redis.clients.jedis.JedisPool misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::provideJedisPool(wisp.deployment.Deployment,\
+        \ misk.metrics.v2.Metrics, com.google.common.base.Ticker)"
+      justification: "Only breaks one client, which is owned by the author"
+    - code: "java.method.removed"
+      old: "method void misk.ratelimiting.bucket4j.redis.RedisBucket4jRateLimiterModule::<init>(misk.redis.RedisConfig,\
+        \ redis.clients.jedis.JedisPoolConfig, java.time.Duration, boolean)"
+      justification: "Only breaks one client, which is owned by the author"
+    com.squareup.misk:misk-redis:
+    - code: "java.class.removed"
+      old: "class misk.redis.JedisPoolWithMetrics"
+      justification: "Only breaks one client, which is owned by the author"
+    - code: "java.method.addedToInterface"
+      new: "method void misk.redis.Redis::prepare()"
+      justification: "Only breaks one client, which is owned by the author"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.redis.Redis misk.redis.RedisClusterModule::provideRedisClusterClient$misk_redis(misk.redis.RedisClusterConfig,\
+        \ wisp.deployment.Deployment, misk.metrics.v2.Metrics, com.google.common.base.Ticker)"
+      new: "method misk.redis.Redis misk.redis.RedisClusterModule::provideRedisClusterClient$misk_redis(misk.redis.RedisClientMetrics,\
+        \ redis.clients.jedis.UnifiedJedis)"
+      justification: "Only breaks one client, which is owned by the author"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisConfig,\
+        \ wisp.deployment.Deployment, misk.metrics.v2.Metrics, com.google.common.base.Ticker)"
+      new: "method misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisClientMetrics,\
+        \ redis.clients.jedis.UnifiedJedis)"
+      justification: "Only breaks one client, which is owned by the author"
