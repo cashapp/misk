@@ -12,6 +12,7 @@ import redis.clients.jedis.ConnectionPoolConfig
 import redis.clients.jedis.DefaultJedisClientConfig
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisCluster
+import redis.clients.jedis.UnifiedJedis
 import wisp.deployment.Deployment
 
 /**
@@ -60,18 +61,22 @@ class RedisClusterModule @JvmOverloads constructor(
 
   @Provides @Singleton
   internal fun provideRedisClusterClient(
+    clientMetrics: RedisClientMetrics,
+    unifiedJedis: UnifiedJedis
+  ): Redis = RealRedis(unifiedJedis, clientMetrics)
+
+  @Provides @Singleton
+  internal fun provideUnifiedJedis(
     config: RedisClusterConfig,
     deployment: Deployment,
     metrics: Metrics,
     ticker: Ticker,
-  ): Redis {
+  ): UnifiedJedis {
     // Get the first replication group, we only support 1 replication group per service.
     val replicationGroup = config[config.keys.first()]
       ?: throw RuntimeException("At least 1 replication group must be specified")
 
     // Create our jedis pool with client-side metrics.
-    val clientMetrics = RedisClientMetrics(ticker, metrics)
-
     val jedisClientConfig = DefaultJedisClientConfig.builder()
       .connectionTimeoutMillis(replicationGroup.timeout_ms)
       .socketTimeoutMillis(replicationGroup.timeout_ms)
@@ -88,8 +93,7 @@ class RedisClusterModule @JvmOverloads constructor(
       //CLIENT SETINFO is only supported in Redis v7.2+
       .clientSetInfoConfig(ClientSetInfoConfig.DISABLED)
       .build()
-
-    val jedisCluster = JedisCluster(
+    return JedisCluster(
       setOf(
         HostAndPort(
           replicationGroup.configuration_endpoint.hostname,
@@ -100,6 +104,5 @@ class RedisClusterModule @JvmOverloads constructor(
       replicationGroup.max_attempts,
       connectionPoolConfig
     )
-    return RealRedis(jedisCluster, clientMetrics)
   }
 }

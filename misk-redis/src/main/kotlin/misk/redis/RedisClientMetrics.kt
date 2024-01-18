@@ -2,10 +2,13 @@ package misk.redis
 
 import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.metrics.v2.Metrics
 import org.apache.commons.pool2.impl.GenericObjectPool
 
-class RedisClientMetrics(private val ticker: Ticker, metrics: Metrics) {
+@Singleton
+class RedisClientMetrics @Inject constructor(private val ticker: Ticker, metrics: Metrics) {
   internal val maxTotalConnectionsGauge = metrics.gauge(
     name = MAX_TOTAL_CONNECTIONS,
     help = """
