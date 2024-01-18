@@ -1826,11 +1826,6 @@ public final class misk/web/interceptors/ActionLoggingConfig$Companion {
 	public final fun fromConfigMapOrAnnotation (Lmisk/Action;Ljava/util/Set;Lmisk/web/interceptors/LogRequestResponse;)Lmisk/web/interceptors/ActionLoggingConfig;
 }
 
-public final class misk/web/interceptors/AlwaysEnabledMiskConcurrencyLimiterEnabledFeature : misk/web/interceptors/MiskConcurrencyLimiterEnabledFeature {
-	public static final field INSTANCE Lmisk/web/interceptors/AlwaysEnabledMiskConcurrencyLimiterEnabledFeature;
-	public fun enabled ()Z
-}
-
 public abstract interface annotation class misk/web/interceptors/BeforeContentEncoding : java/lang/annotation/Annotation {
 }
 
@@ -1857,10 +1852,6 @@ public final class misk/web/interceptors/LogRateLimiter$LogBucketId : java/lang/
 	public fun hashCode ()I
 	public final fun isError ()Z
 	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class misk/web/interceptors/MiskConcurrencyLimiterEnabledFeature {
-	public abstract fun enabled ()Z
 }
 
 public final class misk/web/interceptors/RebalancingInterceptor : misk/web/NetworkInterceptor {

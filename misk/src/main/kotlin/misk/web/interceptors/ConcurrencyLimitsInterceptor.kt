@@ -224,11 +224,11 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   }
 }
 
-interface MiskConcurrencyLimiterEnabledFeature{
+internal interface MiskConcurrencyLimiterEnabledFeature{
   fun enabled(): Boolean
 }
 
-object  AlwaysEnabledMiskConcurrencyLimiterEnabledFeature : MiskConcurrencyLimiterEnabledFeature{
+internal object  AlwaysEnabledMiskConcurrencyLimiterEnabledFeature : MiskConcurrencyLimiterEnabledFeature{
   override fun enabled(): Boolean = true
 }
 
