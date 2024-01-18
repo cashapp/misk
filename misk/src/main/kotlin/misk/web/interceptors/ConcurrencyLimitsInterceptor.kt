@@ -224,7 +224,13 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   }
 }
 
-class MiskConcurrencyLimiterEnabledFeature @Inject constructor(
+/**
+ * Feature that dynamically enables/disables the concurrency limiter in
+ * the ConcurrencyLimitsInterceptor.
+ * @param appName The name of the app that this feature is targeted to
+ * @param featureFlags Implementation of Misk FeatureFlags
+ */
+internal class MiskConcurrencyLimiterEnabledFeature @Inject constructor(
   @AppName val appName: String,
   private val featureFlags: FeatureFlags
 ) {

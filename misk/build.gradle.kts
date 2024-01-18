@@ -69,7 +69,6 @@ dependencies {
   implementation(project(":misk-proto"))
   implementation(project(":misk-service"))
   implementation(project(":misk-feature"))
-  runtimeOnly(Dependencies.jettyAlpnServerJava)
   runtimeOnly(libs.jettyAlpnServerJava)
 
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
