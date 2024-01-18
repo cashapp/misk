@@ -131,6 +131,7 @@ internal class TypedPeerHttpClientTest {
         )
       )
 
+      install(MiskTestingServiceModule())
       bind<Cluster>().toInstance(FakeCluster())
       install(WebActionModule.create<ReturnADinosaurAction>())
     }

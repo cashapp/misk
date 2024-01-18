@@ -108,7 +108,6 @@ class PauseDetectorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-
       // Wire up the detector
       val config = PauseDetectorConfig(
         resolutionMillis = 1,

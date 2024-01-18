@@ -29,9 +29,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.HttpURLConnection
 import jakarta.inject.Inject
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
 
 @MiskTest(startService = true)
 class TracingInterceptorTest {

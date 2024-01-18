@@ -34,7 +34,6 @@ class ConcurrencyLimitsStrategyTest {
   @MiskTestModule
   val module = object : KAbstractModule() {
     override fun configure() {
-
       bind<Deployment>().toInstance(TESTING)
 
       install(MiskTestingServiceModule())
