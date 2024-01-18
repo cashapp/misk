@@ -2,6 +2,7 @@ package misk
 
 import misk.concurrent.ExecutorsModule
 import misk.concurrent.SleeperModule
+import misk.config.AppNameModule
 import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
@@ -12,6 +13,8 @@ import misk.resources.ResourceLoaderModule
 import misk.time.ClockModule
 import misk.time.TickerModule
 import misk.tokens.TokenGeneratorModule
+import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
+import misk.web.interceptors.RealMiskConcurrencyLimiterEnabledFeature
 
 /**
  * Install this module in real environments.
@@ -29,6 +32,8 @@ class MiskRealServiceModule : KAbstractModule() {
     install(TickerModule())
     install(TokenGeneratorModule())
     install(MiskCommonServiceModule())
+    bind<MiskConcurrencyLimiterEnabledFeature>()
+      .to(RealMiskConcurrencyLimiterEnabledFeature::class.java)
   }
 }
 

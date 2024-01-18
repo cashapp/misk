@@ -38,10 +38,8 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.config.AppName
 import misk.config.AppNameModule
-import misk.feature.FeatureFlags
 import misk.feature.testing.FakeFeatureFlagsModule
 import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import org.junit.jupiter.api.BeforeEach
 import wisp.feature.testing.FakeFeatureFlags
 
 @MiskTest(startService = true)
@@ -51,18 +49,11 @@ class ConcurrencyLimitsInterceptorTest {
 
   @Inject private lateinit var factory: ConcurrencyLimitsInterceptor.Factory
   @Inject private lateinit var clock: FakeNanoClock
-  @Inject lateinit var logCollector: LogCollector
-  @Inject lateinit var prometheusRegistry: CollectorRegistry
-  @Inject lateinit var fakeFeatureFlags: FakeFeatureFlags
-  @Inject lateinit var enabledFeature:MiskConcurrencyLimiterEnabledFeature
-
-  @BeforeEach
-  fun setUp() {
-    fakeFeatureFlags.overrideKey(
-      MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE,
-      enabledFeature.appName,
-      true)
-  }
+  @Inject private lateinit var logCollector: LogCollector
+  @Inject private lateinit var prometheusRegistry: CollectorRegistry
+  @Inject private lateinit var fakeFeatureFlags: FakeFeatureFlags
+  @Inject private lateinit var enabledFeature:MiskConcurrencyLimiterEnabledFeature
+  @Inject @AppName private lateinit var appName:String
 
   @Test
   fun happyPath() {
@@ -96,8 +87,8 @@ class ConcurrencyLimitsInterceptorTest {
   @Test
   fun limitReachedDisabled() {
     fakeFeatureFlags.overrideKey(
-      MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE,
-      enabledFeature.appName,
+      RealMiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE,
+      appName,
       false)
 
     val action = HelloAction::call.asAction(DispatchMechanism.GET)
@@ -286,11 +277,14 @@ class ConcurrencyLimitsInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
+      install(AppNameModule("misk-service-testing"))
       install(FakeFeatureFlagsModule())
       install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
+        override(RealMiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
       })
+      bind<MiskConcurrencyLimiterEnabledFeature>()
+        .to(RealMiskConcurrencyLimiterEnabledFeature::class.java)
+
       install(LogCollectorModule())
       install(Modules.override(MiskTestingServiceModule()).with(object : KAbstractModule() {
         override fun configure() {

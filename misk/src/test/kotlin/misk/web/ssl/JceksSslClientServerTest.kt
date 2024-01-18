@@ -36,10 +36,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 import javax.net.ssl.SSLHandshakeException
 import kotlin.test.assertFailsWith
 
@@ -98,11 +94,6 @@ internal class JceksSslClientServerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       install(WebActionModule.create<HelloAction>())
       install(MiskTestingServiceModule())
       install(

@@ -25,10 +25,6 @@ import wisp.client.UnixDomainSocketFactory
 import java.io.File
 import java.util.UUID
 import jakarta.inject.Inject
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 
 @MiskTest(startService = true)
 class WebActionsServletTest {
@@ -148,11 +144,6 @@ class WebActionsServletTest {
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       install(
         WebServerTestingModule(
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(

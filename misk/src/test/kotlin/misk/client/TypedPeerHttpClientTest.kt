@@ -36,10 +36,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 
 @MiskTest(startService = true)
 internal class TypedPeerHttpClientTest {
@@ -111,11 +107,6 @@ internal class TypedPeerHttpClientTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       // Run a server using a cert that has OU of "Server"
       install(
         WebServerTestingModule(
@@ -140,7 +131,6 @@ internal class TypedPeerHttpClientTest {
         )
       )
 
-      install(MiskTestingServiceModule())
       bind<Cluster>().toInstance(FakeCluster())
       install(WebActionModule.create<ReturnADinosaurAction>())
     }

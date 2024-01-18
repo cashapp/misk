@@ -27,10 +27,6 @@ import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import com.google.inject.Provider
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -475,11 +471,6 @@ class WebProxyActionTest {
 
   class TestModule(private val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       install(WebActionModule.createWithPrefix<WebProxyAction>("/local/prefix/"))
       multibind<WebProxyEntry>().toProvider(
         Provider<WebProxyEntry> {

@@ -50,11 +50,6 @@ import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import misk.random.FakeRandomModule
-import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 import javax.servlet.http.HttpServletRequest
 import kotlin.test.assertFailsWith
 
@@ -307,11 +302,6 @@ class Http2ConnectivityTest {
   class TestModule : KAbstractModule() {
     val lockInterceptorFactory = LockInterceptor.Factory()
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .toInstance(lockInterceptorFactory)
 

@@ -26,23 +26,14 @@ import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import jakarta.inject.Inject
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
 import misk.logging.LogCollectorModule
 import misk.security.authz.AllowAnyService
 import misk.security.authz.Authenticated
 import misk.security.authz.ExcludeFromAllowAnyService
-import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 
 // Common module for web action-related tests to use that bind up some sample web actions
 class TestWebActionModule : KAbstractModule() {
   override fun configure() {
-    install(AppNameModule("miskTest"))
-    install(FakeFeatureFlagsModule())
-    install(FakeFeatureFlagsOverrideModule{
-      override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-    })
     install(WebServerTestingModule())
     install(MiskTestingServiceModule())
     install(AccessControlModule())

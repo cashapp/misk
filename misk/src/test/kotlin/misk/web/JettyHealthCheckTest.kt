@@ -27,10 +27,6 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 
 @MiskTest(startService = true)
 internal class JettyHealthCheckTest {
@@ -110,11 +106,6 @@ internal class JettyHealthCheckTest {
 
   internal class TestModule : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       install(
         Modules.override(WebServerTestingModule()).with(
           object : KAbstractModule() {

@@ -11,27 +11,16 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestClient
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okio.ByteString
-import okio.buffer
-import okio.source
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestTemplate
-import java.io.ByteArrayInputStream
 import jakarta.inject.Inject
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 
 @MiskTest(startService = true)
 internal class UnspecifiedContentTypeTest {
@@ -89,11 +78,6 @@ internal class UnspecifiedContentTypeTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       install(WebActionModule.create<PassAsString>())

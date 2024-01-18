@@ -1,6 +1,8 @@
 package misk.web.concurrencylimits
 
+import com.google.inject.Provider
 import com.google.inject.Provides
+import com.google.inject.multibindings.OptionalBinder
 import com.google.inject.multibindings.ProvidesIntoSet
 import com.netflix.concurrency.limits.Limit
 import com.netflix.concurrency.limits.Limiter
@@ -14,13 +16,20 @@ import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import misk.Action
 import misk.inject.KAbstractModule
 import misk.web.ConcurrencyLimiterConfig
+import misk.web.interceptors.AlwaysEnabledMiskConcurrencyLimiterEnabledFeature
+import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 import java.time.Clock
-import com.google.inject.Provider
 import jakarta.inject.Singleton
 
 class ConcurrencyLimitsModule(
   private val config: ConcurrencyLimiterConfig
 ) : KAbstractModule() {
+
+  override fun configure() {
+    OptionalBinder.newOptionalBinder(binder(), MiskConcurrencyLimiterEnabledFeature::class.java)
+      .setDefault().toInstance(AlwaysEnabledMiskConcurrencyLimiterEnabledFeature)
+  }
+
   @ProvidesIntoSet
   @Singleton
   fun concurrencyLimiterFactory(

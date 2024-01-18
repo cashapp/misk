@@ -14,10 +14,6 @@ import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import jakarta.inject.Inject
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import misk.web.interceptors.MiskConcurrencyLimiterEnabledFeature
 
 @MiskTest
 internal class ZeroIdleTimeoutTest : AbstractJettyShutdownTest() {
@@ -107,11 +103,6 @@ internal abstract class AbstractJettyShutdownTest {
     private val shutdownIdleTimeout: Long? = null,
   ) : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       install(
         WebServerTestingModule(
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(

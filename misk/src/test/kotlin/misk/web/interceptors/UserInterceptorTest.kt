@@ -131,11 +131,6 @@ class UserInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       multibind<NetworkInterceptor.Factory>().toInstance(UserCreatedNetworkInterceptor.Factory())

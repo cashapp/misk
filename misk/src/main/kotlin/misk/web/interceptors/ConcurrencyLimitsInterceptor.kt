@@ -224,17 +224,25 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   }
 }
 
+interface MiskConcurrencyLimiterEnabledFeature{
+  fun enabled(): Boolean
+}
+
+object  AlwaysEnabledMiskConcurrencyLimiterEnabledFeature : MiskConcurrencyLimiterEnabledFeature{
+  override fun enabled(): Boolean = true
+}
+
 /**
  * Feature that dynamically enables/disables the concurrency limiter in
  * the ConcurrencyLimitsInterceptor.
  * @param appName The name of the app that this feature is targeted to
  * @param featureFlags Implementation of Misk FeatureFlags
  */
-internal class MiskConcurrencyLimiterEnabledFeature @Inject constructor(
+internal class RealMiskConcurrencyLimiterEnabledFeature @Inject constructor(
   @AppName val appName: String,
   private val featureFlags: FeatureFlags
-) {
-  fun enabled(): Boolean = featureFlags.getBoolean(ENABLED_FEATURE, appName)
+) : MiskConcurrencyLimiterEnabledFeature {
+  override fun enabled(): Boolean = featureFlags.getBoolean(ENABLED_FEATURE, appName)
 
   companion object {
     val ENABLED_FEATURE = Feature("misk-concurrency-limiter-enabled")

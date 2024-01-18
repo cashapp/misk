@@ -88,11 +88,6 @@ class MetricsInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("miskTest"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(MiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
       install(AccessControlModule())
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
