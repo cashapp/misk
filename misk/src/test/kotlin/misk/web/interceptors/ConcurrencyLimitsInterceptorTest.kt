@@ -36,11 +36,6 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.config.AppName
-import misk.config.AppNameModule
-import misk.feature.testing.FakeFeatureFlagsModule
-import misk.feature.testing.FakeFeatureFlagsOverrideModule
-import wisp.feature.testing.FakeFeatureFlags
 
 @MiskTest(startService = true)
 class ConcurrencyLimitsInterceptorTest {
@@ -51,9 +46,7 @@ class ConcurrencyLimitsInterceptorTest {
   @Inject private lateinit var clock: FakeNanoClock
   @Inject private lateinit var logCollector: LogCollector
   @Inject private lateinit var prometheusRegistry: CollectorRegistry
-  @Inject private lateinit var fakeFeatureFlags: FakeFeatureFlags
-  @Inject private lateinit var enabledFeature:MiskConcurrencyLimiterEnabledFeature
-  @Inject @AppName private lateinit var appName:String
+  @Inject private lateinit var  enabledFeature: TestableMiskConcurrencyLimiterFeature
 
   @Test
   fun happyPath() {
@@ -86,10 +79,7 @@ class ConcurrencyLimitsInterceptorTest {
 
   @Test
   fun limitReachedDisabled() {
-    fakeFeatureFlags.overrideKey(
-      RealMiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE,
-      appName,
-      false)
+    enabledFeature.isEnabled = false
 
     val action = HelloAction::call.asAction(DispatchMechanism.GET)
     val limitZero = SimpleLimiter.Builder()
@@ -277,13 +267,7 @@ class ConcurrencyLimitsInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(AppNameModule("misk-service-testing"))
-      install(FakeFeatureFlagsModule())
-      install(FakeFeatureFlagsOverrideModule{
-        override(RealMiskConcurrencyLimiterEnabledFeature.ENABLED_FEATURE, true)
-      })
-      bind<MiskConcurrencyLimiterEnabledFeature>()
-        .to(RealMiskConcurrencyLimiterEnabledFeature::class.java)
+      bind<MiskConcurrencyLimiterFeature>().to(TestableMiskConcurrencyLimiterFeature::class.java)
 
       install(LogCollectorModule())
       install(Modules.override(MiskTestingServiceModule()).with(object : KAbstractModule() {
@@ -333,6 +317,12 @@ class ConcurrencyLimitsInterceptorTest {
     val callWasShed: Boolean,
     val statusCode: Int
   )
+}
+
+@Singleton
+class TestableMiskConcurrencyLimiterFeature @Inject constructor() :MiskConcurrencyLimiterFeature{
+  var isEnabled = true
+  override fun enabled() = isEnabled
 }
 
 internal class HelloAction : WebAction {

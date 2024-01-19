@@ -24,9 +24,6 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.config.AppName
-import misk.feature.FeatureFlags
-import misk.feature.Feature
 import kotlin.reflect.full.findAnnotation
 
 /**
@@ -60,7 +57,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   private val defaultLimiter: Limiter<String>,
   private val clock: Clock,
   private val logLevel: Level,
-  private val enabledFeature: MiskConcurrencyLimiterEnabledFeature
+  private val enabledFeature: MiskConcurrencyLimiterFeature
 ) : NetworkInterceptor {
   /**
    * When this fails, it fails a lot. Log at most one error per minute per node and let the
@@ -152,7 +149,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     private val clock: Clock,
     private val limiterFactories: List<ConcurrencyLimiterFactory>,
     private val config: WebConfig,
-    private val enabledFeature: MiskConcurrencyLimiterEnabledFeature,
+    private val enabledFeature: MiskConcurrencyLimiterFeature,
     metrics: Metrics,
   ) : NetworkInterceptor.Factory {
     val outcomeCounter = metrics.counter(
@@ -224,27 +221,18 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   }
 }
 
-internal interface MiskConcurrencyLimiterEnabledFeature{
+/**
+ * Interface for a Feature flag that can dynamically enable/disable the concurrency limiter
+ */
+internal interface MiskConcurrencyLimiterFeature{
   fun enabled(): Boolean
 }
 
-internal object  AlwaysEnabledMiskConcurrencyLimiterEnabledFeature : MiskConcurrencyLimiterEnabledFeature{
+/**
+ * Simple implemenation of MiskConcurrencyLimiterFeature that always returns enabled=true
+ */
+internal object  AlwaysEnabledMiskConcurrencyLimiterFeature : MiskConcurrencyLimiterFeature{
   override fun enabled(): Boolean = true
 }
 
-/**
- * Feature that dynamically enables/disables the concurrency limiter in
- * the ConcurrencyLimitsInterceptor.
- * @param appName The name of the app that this feature is targeted to
- * @param featureFlags Implementation of Misk FeatureFlags
- */
-internal class RealMiskConcurrencyLimiterEnabledFeature @Inject constructor(
-  @AppName val appName: String,
-  private val featureFlags: FeatureFlags
-) : MiskConcurrencyLimiterEnabledFeature {
-  override fun enabled(): Boolean = featureFlags.getBoolean(ENABLED_FEATURE, appName)
 
-  companion object {
-    val ENABLED_FEATURE = Feature("misk-concurrency-limiter-enabled")
-  }
-}
