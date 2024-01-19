@@ -26,9 +26,9 @@ class ConcurrencyLimitsModule(
 ) : KAbstractModule() {
 
   override fun configure() {
-    //Establishes an optional binding for a Feature to dynamically enable/disable the concurrency
-    //limiter in the interceptor. It also sets the default to always enabled. It will use the
-    //default unless there is a binding that ovewrites it.
+    // Establishes an optional binding for a Feature to dynamically enable/disable the concurrency
+    // limiter in the interceptor. It also sets the default to always enabled. It will use the
+    // default unless there is a binding that ovewrites it.
     OptionalBinder.newOptionalBinder(binder(), MiskConcurrencyLimiterFeature::class.java)
       .setDefault().toInstance(AlwaysEnabledMiskConcurrencyLimiterFeature)
   }
