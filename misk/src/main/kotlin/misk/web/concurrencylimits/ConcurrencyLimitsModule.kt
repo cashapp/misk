@@ -1,6 +1,8 @@
 package misk.web.concurrencylimits
 
+import com.google.inject.Provider
 import com.google.inject.Provides
+import com.google.inject.multibindings.OptionalBinder
 import com.google.inject.multibindings.ProvidesIntoSet
 import com.netflix.concurrency.limits.Limit
 import com.netflix.concurrency.limits.Limiter
@@ -14,13 +16,23 @@ import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import misk.Action
 import misk.inject.KAbstractModule
 import misk.web.ConcurrencyLimiterConfig
+import misk.web.interceptors.AlwaysEnabledMiskConcurrencyLimiterFeature
+import misk.web.interceptors.MiskConcurrencyLimiterFeature
 import java.time.Clock
-import com.google.inject.Provider
 import jakarta.inject.Singleton
 
 class ConcurrencyLimitsModule(
   private val config: ConcurrencyLimiterConfig
 ) : KAbstractModule() {
+
+  override fun configure() {
+    // Establishes an optional binding for a Feature to dynamically enable/disable the concurrency
+    // limiter in the interceptor. It also sets the default to always enabled. It will use the
+    // default unless there is a binding that ovewrites it.
+    OptionalBinder.newOptionalBinder(binder(), MiskConcurrencyLimiterFeature::class.java)
+      .setDefault().toInstance(AlwaysEnabledMiskConcurrencyLimiterFeature)
+  }
+
   @ProvidesIntoSet
   @Singleton
   fun concurrencyLimiterFactory(
