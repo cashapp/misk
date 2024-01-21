@@ -1255,20 +1255,6 @@ public final class misk/web/CorsConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/DispatchMechanism : java/lang/Enum {
-	public static final field DELETE Lmisk/web/DispatchMechanism;
-	public static final field GET Lmisk/web/DispatchMechanism;
-	public static final field GRPC Lmisk/web/DispatchMechanism;
-	public static final field PATCH Lmisk/web/DispatchMechanism;
-	public static final field POST Lmisk/web/DispatchMechanism;
-	public static final field PUT Lmisk/web/DispatchMechanism;
-	public static final field WEBSOCKET Lmisk/web/DispatchMechanism;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun getMethod ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lmisk/web/DispatchMechanism;
-	public static fun values ()[Lmisk/web/DispatchMechanism;
-}
-
 public abstract interface class misk/web/FeatureBinding {
 	public abstract fun afterCall (Lmisk/web/FeatureBinding$Subject;)V
 	public abstract fun beforeCall (Lmisk/web/FeatureBinding$Subject;)V
