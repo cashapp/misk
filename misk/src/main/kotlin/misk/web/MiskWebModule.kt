@@ -15,6 +15,7 @@ import misk.MiskCaller
 import misk.MiskDefault
 import misk.ReadyService
 import misk.ServiceModule
+import misk.api.RequestContext
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
@@ -137,6 +138,7 @@ class MiskWebModule @JvmOverloads constructor(
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
         bindSeedData(HttpCall::class)
+        bindSeedData(RequestContext::class)
         bindSeedData(HttpServletRequest::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)
         newMultibinder<MiskCallerAuthenticator>()
