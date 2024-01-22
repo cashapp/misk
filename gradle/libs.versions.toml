@@ -1,6 +1,7 @@
 [versions]
-dependencyAnalysisPlugin = "1.20.0"
+dependencyAnalysisPlugin = "1.29.0"
 kotlinBinaryCompatibilityPlugin = "0.13.1"
+kotlin = "1.9.21"
 
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.11" }
@@ -38,7 +39,7 @@ dockerApi = { module = "com.github.docker-java:docker-java-api", version = "3.3.
 dockerCore = { module = "com.github.docker-java:docker-java-core", version = "3.3.1" }
 dockerTransport = { module = "com.github.docker-java:docker-java-transport", version = "3.3.1" }
 dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version = "3.3.1" }
-dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.6.10" }
+dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.10" }
 errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.20.0" }
 findBugs = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.5.0" }
@@ -117,24 +118,24 @@ kotestAssertionsShared = { module = "io.kotest:kotest-assertions-shared", versio
 kotestCommon = { module = "io.kotest:kotest-common", version = "5.6.2" }
 kotestFrameworkApi = { module = "io.kotest:kotest-framework-api", version = "5.6.2" }
 kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version = "5.6.2" }
-kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version = "1.8.21" }
-kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version = "1.8.21" }
-kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version = "1.8.21" }
-kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "1.8.21" }
+kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
+kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinLogging = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
-kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version = "1.8.21" }
+kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version = "1.8.21" }
 kotlinRetry = { module = "com.michael-bull.kotlin-retry:kotlin-retry", version = "1.0.9" }
-kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version = "1.8.21" }
-kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version = "1.8.21" }
-kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.7.2" }
+kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.7.3" }
 kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.8.1" }
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "18.0.1" }
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "6.3.0" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.4.8" }
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.4.8" }
-mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.25.2" }
+mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.27.0" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version = "1.11.1" }
 micrometerPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.1" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.4.0" }
