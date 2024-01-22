@@ -1,5 +1,7 @@
 package misk.web
 
+import misk.api.RequestContext
+import misk.api.RequestHeadersContext
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.mediatype.MediaRange
@@ -24,12 +26,15 @@ sealed class SocketAddress {
 /**
  * A live HTTP call from a client for use by a chain of network interceptors.
  */
-interface HttpCall {
+interface HttpCall: RequestContext {
 
   /** Immutable information about the incoming HTTP request. */
-  val url: HttpUrl
+  override val url: HttpUrl
   val linkLayerLocalAddress: SocketAddress?
-  val dispatchMechanism: DispatchMechanism
+  override val dispatchMechanism: DispatchMechanism
+
+  override val requestHeadersContext: RequestHeadersContext
+    get() = OkHttpHeadersContext(requestHeaders)
 
   /** HTTP request headers that may be modified via interception. */
   var requestHeaders: Headers
@@ -184,3 +189,9 @@ interface HttpCall {
 
 /** 1 MiB. */
 private const val MAX_BUFFERED_REQUEST_BODY_BYTES: Long = 1L * 1024 * 1024
+
+internal data class OkHttpHeadersContext(private val headers: Headers): RequestHeadersContext {
+  override fun get(name: String): String? = headers[name]
+
+  override fun asIterable(): Iterable<Pair<String, String>> = headers
+}
