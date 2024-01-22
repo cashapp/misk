@@ -1172,6 +1172,7 @@ public final class misk/tasks/Status : java/lang/Enum {
 	public static final field NO_RESCHEDULE Lmisk/tasks/Status;
 	public static final field NO_WORK Lmisk/tasks/Status;
 	public static final field OK Lmisk/tasks/Status;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun metricLabel ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/tasks/Status;
 	public static fun values ()[Lmisk/tasks/Status;
@@ -1262,6 +1263,7 @@ public final class misk/web/DispatchMechanism : java/lang/Enum {
 	public static final field POST Lmisk/web/DispatchMechanism;
 	public static final field PUT Lmisk/web/DispatchMechanism;
 	public static final field WEBSOCKET Lmisk/web/DispatchMechanism;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getMethod ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/DispatchMechanism;
 	public static fun values ()[Lmisk/web/DispatchMechanism;
@@ -1583,6 +1585,7 @@ public final class misk/web/WebSslConfig$CipherCompatibility : java/lang/Enum {
 	public static final field COMPATIBLE Lmisk/web/WebSslConfig$CipherCompatibility;
 	public static final field MODERN Lmisk/web/WebSslConfig$CipherCompatibility;
 	public static final field RESTRICTED Lmisk/web/WebSslConfig$CipherCompatibility;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/WebSslConfig$CipherCompatibility;
 	public static fun values ()[Lmisk/web/WebSslConfig$CipherCompatibility;
 }
@@ -1591,6 +1594,7 @@ public final class misk/web/WebSslConfig$MutualAuth : java/lang/Enum {
 	public static final field DESIRED Lmisk/web/WebSslConfig$MutualAuth;
 	public static final field NONE Lmisk/web/WebSslConfig$MutualAuth;
 	public static final field REQUIRED Lmisk/web/WebSslConfig$MutualAuth;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/WebSslConfig$MutualAuth;
 	public static fun values ()[Lmisk/web/WebSslConfig$MutualAuth;
 }
@@ -1676,6 +1680,7 @@ public final class misk/web/concurrencylimits/ConcurrencyLimiterStrategy : java/
 	public static final field GRADIENT2 Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 	public static final field SETTABLE Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 	public static final field VEGAS Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 	public static fun values ()[Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 }

@@ -67,6 +67,7 @@ public final class misk/slack/SlackWebhookResponse : java/lang/Enum {
 	public static final field missing_text_or_fallback_or_attachments Lmisk/slack/SlackWebhookResponse;
 	public static final field ok Lmisk/slack/SlackWebhookResponse;
 	public static final field user_not_found Lmisk/slack/SlackWebhookResponse;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/slack/SlackWebhookResponse;
 	public static fun values ()[Lmisk/slack/SlackWebhookResponse;
 }

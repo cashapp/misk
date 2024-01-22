@@ -436,6 +436,7 @@ public final class misk/web/dashboard/MiskWebColor : java/lang/Enum {
 	public static final field TEXT Lmisk/web/dashboard/MiskWebColor;
 	public static final field WHITE Lmisk/web/dashboard/MiskWebColor;
 	public static final field YELLOW Lmisk/web/dashboard/MiskWebColor;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getHexColor ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/dashboard/MiskWebColor;
 	public static fun values ()[Lmisk/web/dashboard/MiskWebColor;
@@ -634,6 +635,7 @@ public final class misk/web/metadata/config/ConfigMetadataAction$ConfigTabMode :
 	public static final field SAFE Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
 	public static final field SHOW_REDACTED_EFFECTIVE_CONFIG Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
 	public static final field UNSAFE_LEAK_MISK_SECRETS Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
 	public static fun values ()[Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
 }

@@ -74,6 +74,7 @@ public final class wisp/task/Status : java/lang/Enum {
 	public static final field NO_RESCHEDULE Lwisp/task/Status;
 	public static final field NO_WORK Lwisp/task/Status;
 	public static final field OK Lwisp/task/Status;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun metricLabel ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lwisp/task/Status;
 	public static fun values ()[Lwisp/task/Status;
