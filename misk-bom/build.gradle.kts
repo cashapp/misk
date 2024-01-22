@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
   constraints {
-    project.rootProject.subprojects.forEach { subproject ->
+    project.parent?.subprojects?.forEach { subproject ->
       if (subproject.name != "misk-bom") {
         api(subproject)
       }
