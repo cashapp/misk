@@ -2,6 +2,7 @@ public final class misk/hibernate/BindPolicy : java/lang/Enum {
 	public static final field APPEND Lmisk/hibernate/BindPolicy;
 	public static final field PREPEND Lmisk/hibernate/BindPolicy;
 	public static final field REPLACE Lmisk/hibernate/BindPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/hibernate/BindPolicy;
 	public static fun values ()[Lmisk/hibernate/BindPolicy;
 }
@@ -146,6 +147,7 @@ public final class misk/hibernate/Operator : java/lang/Enum {
 	public static final field LT Lmisk/hibernate/Operator;
 	public static final field NE Lmisk/hibernate/Operator;
 	public static final field NOT_IN Lmisk/hibernate/Operator;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/hibernate/Operator;
 	public static fun values ()[Lmisk/hibernate/Operator;
 }

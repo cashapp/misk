@@ -32,7 +32,6 @@ dependencies {
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinReflect)
   implementation(libs.okio)
-  implementation(libs.wireGrpcClient)
   implementation(libs.wireRuntime)
   implementation(libs.wireSchema)
   implementation(project(":wisp:wisp-logging"))

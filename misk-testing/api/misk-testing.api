@@ -192,6 +192,7 @@ public final class misk/testing/LogLevel$Level : java/lang/Enum {
 	public static final field ERROR Lmisk/testing/LogLevel$Level;
 	public static final field INFO Lmisk/testing/LogLevel$Level;
 	public static final field WARN Lmisk/testing/LogLevel$Level;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/testing/LogLevel$Level;
 	public static fun values ()[Lmisk/testing/LogLevel$Level;
 }

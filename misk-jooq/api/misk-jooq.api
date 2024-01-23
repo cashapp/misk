@@ -46,6 +46,7 @@ public final class misk/jooq/JooqSession$HookType : java/lang/Enum {
 	public static final field POST Lmisk/jooq/JooqSession$HookType;
 	public static final field PRE Lmisk/jooq/JooqSession$HookType;
 	public static final field SESSION_CLOSE Lmisk/jooq/JooqSession$HookType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/jooq/JooqSession$HookType;
 	public static fun values ()[Lmisk/jooq/JooqSession$HookType;
 }

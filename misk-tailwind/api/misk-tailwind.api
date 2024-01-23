@@ -76,6 +76,7 @@ public final class misk/tailwind/icons/Heroicons : java/lang/Enum {
 	public static final field OUTLINE_XMARK Lmisk/tailwind/icons/Heroicons;
 	public static final field QUEUE_LIST Lmisk/tailwind/icons/Heroicons;
 	public final fun getDefaultModifierClass ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getRawHtml ()Lkotlin/jvm/functions/Function1;
 	public final fun getSvgClass ()Ljava/lang/String;
