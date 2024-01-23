@@ -209,6 +209,7 @@ public final class misk/jdbc/Check : java/lang/Enum {
 	public static final field COWRITE Lmisk/jdbc/Check;
 	public static final field FULL_SCATTER Lmisk/jdbc/Check;
 	public static final field TABLE_SCAN Lmisk/jdbc/Check;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/jdbc/Check;
 	public static fun values ()[Lmisk/jdbc/Check;
 }
@@ -422,6 +423,7 @@ public final class misk/jdbc/DataSourceType : java/lang/Enum {
 	public static final field TIDB Lmisk/jdbc/DataSourceType;
 	public static final field VITESS_MYSQL Lmisk/jdbc/DataSourceType;
 	public final fun getDriverClassName ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getHibernateDialect ()Ljava/lang/String;
 	public final fun isVitess ()Z
 	public static fun valueOf (Ljava/lang/String;)Lmisk/jdbc/DataSourceType;
@@ -476,6 +478,7 @@ public final class misk/jdbc/JDBCSession$HookType : java/lang/Enum {
 	public static final field POST Lmisk/jdbc/JDBCSession$HookType;
 	public static final field PRE Lmisk/jdbc/JDBCSession$HookType;
 	public static final field SESSION_CLOSE Lmisk/jdbc/JDBCSession$HookType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/jdbc/JDBCSession$HookType;
 	public static fun values ()[Lmisk/jdbc/JDBCSession$HookType;
 }
@@ -773,6 +776,7 @@ public final class misk/vitess/ShardsKt {
 public final class misk/vitess/TabletType : java/lang/Enum {
 	public static final field MASTER Lmisk/vitess/TabletType;
 	public static final field REPLICA Lmisk/vitess/TabletType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lmisk/vitess/TabletType;
 	public static fun values ()[Lmisk/vitess/TabletType;

@@ -1,0 +1,21 @@
+public abstract interface class misk/api/HttpRequest {
+	public abstract fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
+	public abstract fun getRequestHeaders ()Lokhttp3/Headers;
+	public abstract fun getUrl ()Lokhttp3/HttpUrl;
+	public abstract fun setRequestHeaders (Lokhttp3/Headers;)V
+}
+
+public final class misk/web/DispatchMechanism : java/lang/Enum {
+	public static final field DELETE Lmisk/web/DispatchMechanism;
+	public static final field GET Lmisk/web/DispatchMechanism;
+	public static final field GRPC Lmisk/web/DispatchMechanism;
+	public static final field PATCH Lmisk/web/DispatchMechanism;
+	public static final field POST Lmisk/web/DispatchMechanism;
+	public static final field PUT Lmisk/web/DispatchMechanism;
+	public static final field WEBSOCKET Lmisk/web/DispatchMechanism;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getMethod ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/web/DispatchMechanism;
+	public static fun values ()[Lmisk/web/DispatchMechanism;
+}
+

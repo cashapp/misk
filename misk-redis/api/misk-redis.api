@@ -192,6 +192,7 @@ public final class misk/redis/Redis$ZAddOptions : java/lang/Enum {
 	public static final field LT Lmisk/redis/Redis$ZAddOptions;
 	public static final field NX Lmisk/redis/Redis$ZAddOptions;
 	public static final field XX Lmisk/redis/Redis$ZAddOptions;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/Redis$ZAddOptions;
 	public static fun values ()[Lmisk/redis/Redis$ZAddOptions;
 }
@@ -254,6 +255,7 @@ public final class misk/redis/Redis$ZRangeScoreMarker : misk/redis/Redis$ZRangeM
 public final class misk/redis/Redis$ZRangeType : java/lang/Enum {
 	public static final field INDEX Lmisk/redis/Redis$ZRangeType;
 	public static final field SCORE Lmisk/redis/Redis$ZRangeType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/Redis$ZRangeType;
 	public static fun values ()[Lmisk/redis/Redis$ZRangeType;
 }

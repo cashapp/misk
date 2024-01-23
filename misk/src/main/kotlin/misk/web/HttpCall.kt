@@ -1,10 +1,10 @@
 package misk.web
 
+import misk.api.HttpRequest
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.mediatype.MediaRange
 import okhttp3.Headers
-import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
@@ -24,15 +24,9 @@ sealed class SocketAddress {
 /**
  * A live HTTP call from a client for use by a chain of network interceptors.
  */
-interface HttpCall {
+interface HttpCall: HttpRequest {
 
-  /** Immutable information about the incoming HTTP request. */
-  val url: HttpUrl
   val linkLayerLocalAddress: SocketAddress?
-  val dispatchMechanism: DispatchMechanism
-
-  /** HTTP request headers that may be modified via interception. */
-  var requestHeaders: Headers
 
   /** Cookies derived from request's "Cookie" header, if any */
   var cookies: List<Cookie>

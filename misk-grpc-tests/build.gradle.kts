@@ -78,7 +78,6 @@ dependencies {
   implementation(libs.grpcNetty)
   implementation(libs.grpcProtobuf)
   implementation(libs.javaxAnnotation)
-  implementation(libs.kotlinxCoroutines)
   implementation(libs.nettyHandler)
   implementation(libs.wireGrpcClient)
   implementation(libs.wireRuntime)
