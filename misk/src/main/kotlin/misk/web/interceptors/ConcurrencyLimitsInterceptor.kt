@@ -224,7 +224,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
 /**
  * Interface for a Feature flag that can dynamically enable/disable the concurrency limiter
  */
-internal interface MiskConcurrencyLimiterFeature{
+interface MiskConcurrencyLimiterFeature{
   fun enabled(): Boolean
 }
 
