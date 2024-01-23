@@ -1,6 +1,5 @@
 package misk.redis
 
-import com.google.common.base.Ticker
 import com.google.inject.Provides
 import jakarta.inject.Singleton
 import misk.ReadyService
@@ -10,6 +9,7 @@ import misk.metrics.v2.Metrics
 import redis.clients.jedis.ConnectionPoolConfig
 import redis.clients.jedis.JedisPoolConfig
 import redis.clients.jedis.JedisPooled
+import redis.clients.jedis.UnifiedJedis
 import wisp.deployment.Deployment
 
 /**
@@ -59,28 +59,28 @@ class RedisModule @JvmOverloads constructor(
 
   @Provides @Singleton
   internal fun provideRedisClient(
+    clientMetrics: RedisClientMetrics,
+    unifiedJedis: UnifiedJedis,
+  ): Redis = RealRedis(unifiedJedis, clientMetrics)
+
+  @Provides @Singleton
+  internal fun provideUnifiedJedis(
+    clientMetrics: RedisClientMetrics,
     config: RedisConfig,
     deployment: Deployment,
-    metrics: Metrics,
-    ticker: Ticker,
-  ): Redis {
+  ): UnifiedJedis {
     // Get the first replication group, we only support 1 replication group per service.
     val replicationGroup = config[config.keys.first()]
       ?: throw RuntimeException("At least 1 replication group must be specified")
 
-    // Create our jedis pool with client-side metrics.
-    val clientMetrics = RedisClientMetrics(ticker, metrics)
-    val jedisPooledWithMetrics = JedisPooledWithMetrics(
+    return JedisPooledWithMetrics(
       metrics = clientMetrics,
       poolConfig = connectionPoolConfig,
       replicationGroupConfig = replicationGroup,
       ssl = useSsl,
       requiresPassword = deployment.isReal
     )
-
-    return RealRedis(jedisPooledWithMetrics, clientMetrics)
   }
-
 }
 
 private fun JedisPoolConfig.toConnectionPoolConfig() = ConnectionPoolConfig().apply {

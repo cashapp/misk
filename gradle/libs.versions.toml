@@ -21,10 +21,10 @@ awsSdkCore = { module = "software.amazon.awssdk:sdk-core", version = "2.21.24" }
 awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version = "1.12.576" }
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk15on", version = "1.70" }
 bouncycastlePgp = { module = "org.bouncycastle:bcpg-jdk15on", version = "1.70" }
-bucket4jCore = { module = "com.bucket4j:bucket4j-core", version = "8.5.0" }
-bucket4jDynamoDbV1 = { module = "com.bucket4j:bucket4j-dynamodb-sdk-v1", version = "8.5.0" }
-bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version = "8.5.0" }
-bucket4jRedis = { module = "com.bucket4j:bucket4j-redis", version = "8.5.0" }
+bucket4jCore = { module = "com.bucket4j:bucket4j-core", version = "8.7.0" }
+bucket4jDynamoDbV1 = { module = "com.bucket4j:bucket4j-dynamodb-sdk-v1", version = "8.6.0" }
+bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version = "8.7.0" }
+bucket4jRedis = { module = "com.bucket4j:bucket4j-redis", version = "8.7.0" }
 concurrencyLimitsCore = { module = "com.netflix.concurrency-limits:concurrency-limits-core", version = "0.3.6" }
 cronUtils = { module = "com.cronutils:cron-utils", version = "9.2.0" }
 datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.7" }
