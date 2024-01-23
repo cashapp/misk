@@ -1288,7 +1288,7 @@ public abstract interface class misk/web/FeatureBinding$Subject {
 	public abstract fun takeReturnValue ()Ljava/lang/Object;
 }
 
-public abstract interface class misk/web/HttpCall : misk/api/RequestContext {
+public abstract interface class misk/web/HttpCall : misk/api/HttpRequest {
 	public abstract fun accepts ()Ljava/util/List;
 	public abstract fun addResponseHeaders (Lokhttp3/Headers;)V
 	public abstract fun asOkHttpRequest ()Lokhttp3/Request;

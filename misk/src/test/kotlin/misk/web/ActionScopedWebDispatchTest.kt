@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 import java.security.Principal
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.api.RequestContext
+import misk.api.HttpRequest
 
 @MiskTest(startService = true)
 internal class ActionScopedWebDispatchTest {
@@ -91,11 +91,11 @@ internal class ActionScopedWebDispatchTest {
 
   @Singleton
   class Bye @Inject internal constructor(
-    private val scopedRequestContext: ActionScoped<RequestContext>
+    private val scopedRequest: ActionScoped<HttpRequest>
   ) : WebAction {
     @Get("/bye")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun bye(): String = "bye ${scopedRequestContext.get().requestHeaders["x-name"]}"
+    fun bye(): String = "bye ${scopedRequest.get().requestHeaders["x-name"]}"
   }
 
   class TestModule : KAbstractModule() {

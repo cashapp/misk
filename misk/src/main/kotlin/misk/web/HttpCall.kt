@@ -1,6 +1,6 @@
 package misk.web
 
-import misk.api.RequestContext
+import misk.api.HttpRequest
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.mediatype.MediaRange
@@ -24,7 +24,7 @@ sealed class SocketAddress {
 /**
  * A live HTTP call from a client for use by a chain of network interceptors.
  */
-interface HttpCall: RequestContext {
+interface HttpCall: HttpRequest {
 
   val linkLayerLocalAddress: SocketAddress?
 

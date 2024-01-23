@@ -1,4 +1,4 @@
-public abstract interface class misk/api/RequestContext {
+public abstract interface class misk/api/HttpRequest {
 	public abstract fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
 	public abstract fun getRequestHeaders ()Lokhttp3/Headers;
 	public abstract fun getUrl ()Lokhttp3/HttpUrl;
