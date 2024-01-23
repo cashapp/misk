@@ -95,7 +95,7 @@ internal class ActionScopedWebDispatchTest {
   ) : WebAction {
     @Get("/bye")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun bye(): String = "bye ${scopedRequestContext.get().requestHeadersContext["x-name"]}"
+    fun bye(): String = "bye ${scopedRequestContext.get().requestHeaders["x-name"]}"
   }
 
   class TestModule : KAbstractModule() {

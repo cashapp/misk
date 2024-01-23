@@ -1,12 +1,10 @@
 package misk.web
 
 import misk.api.RequestContext
-import misk.api.RequestHeadersContext
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.mediatype.MediaRange
 import okhttp3.Headers
-import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
@@ -28,16 +26,7 @@ sealed class SocketAddress {
  */
 interface HttpCall: RequestContext {
 
-  /** Immutable information about the incoming HTTP request. */
-  override val url: HttpUrl
   val linkLayerLocalAddress: SocketAddress?
-  override val dispatchMechanism: DispatchMechanism
-
-  override val requestHeadersContext: RequestHeadersContext
-    get() = OkHttpHeadersContext(requestHeaders)
-
-  /** HTTP request headers that may be modified via interception. */
-  var requestHeaders: Headers
 
   /** Cookies derived from request's "Cookie" header, if any */
   var cookies: List<Cookie>
@@ -189,9 +178,3 @@ interface HttpCall: RequestContext {
 
 /** 1 MiB. */
 private const val MAX_BUFFERED_REQUEST_BODY_BYTES: Long = 1L * 1024 * 1024
-
-internal data class OkHttpHeadersContext(private val headers: Headers): RequestHeadersContext {
-  override fun get(name: String): String? = headers[name]
-
-  override fun asIterable(): Iterable<Pair<String, String>> = headers
-}

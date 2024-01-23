@@ -532,9 +532,6 @@ acceptedBreaks:
       justification: "Adding a new parameter to WebConfig"
   "2024.01.18.031247-621592e":
     com.squareup.misk:misk:
-    - code: "java.method.addedToInterface"
-      new: "method misk.api.RequestHeadersContext misk.web.HttpCall::getRequestHeadersContext()"
-      justification: "There is a default implementation for this method in HttpCall"
     - code: "java.method.numberOfParametersChanged"
       old: "method void misk.web.interceptors.ConcurrencyLimitsInterceptor.Factory::<init>(java.time.Clock,\
         \ java.util.List<? extends misk.web.concurrencylimits.ConcurrencyLimiterFactory>,\

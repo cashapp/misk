@@ -1295,21 +1295,16 @@ public abstract interface class misk/web/HttpCall : misk/api/RequestContext {
 	public abstract fun computeRequestHeader (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun contentType ()Lokhttp3/MediaType;
 	public abstract fun getCookies ()Ljava/util/List;
-	public abstract fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
 	public abstract fun getLinkLayerLocalAddress ()Lmisk/web/SocketAddress;
 	public abstract fun getNetworkStatusCode ()I
-	public abstract fun getRequestHeaders ()Lokhttp3/Headers;
-	public abstract fun getRequestHeadersContext ()Lmisk/api/RequestHeadersContext;
 	public abstract fun getResponseHeaders ()Lokhttp3/Headers;
 	public abstract fun getStatusCode ()I
-	public abstract fun getUrl ()Lokhttp3/HttpUrl;
 	public abstract fun initWebSocketListener (Lmisk/web/actions/WebSocketListener;)V
 	public abstract fun putRequestBody (Lokio/BufferedSource;)V
 	public abstract fun putResponseBody (Lokio/BufferedSink;)V
 	public abstract fun putWebSocket (Lmisk/web/actions/WebSocket;)V
 	public abstract fun requireTrailers ()V
 	public abstract fun setCookies (Ljava/util/List;)V
-	public abstract fun setRequestHeaders (Lokhttp3/Headers;)V
 	public abstract fun setResponseHeader (Ljava/lang/String;Ljava/lang/String;)V
 	public abstract fun setResponseTrailer (Ljava/lang/String;Ljava/lang/String;)V
 	public abstract fun setStatusCode (I)V
@@ -1324,7 +1319,6 @@ public final class misk/web/HttpCall$DefaultImpls {
 	public static fun asOkHttpRequest (Lmisk/web/HttpCall;)Lokhttp3/Request;
 	public static fun computeRequestHeader (Lmisk/web/HttpCall;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public static fun contentType (Lmisk/web/HttpCall;)Lokhttp3/MediaType;
-	public static fun getRequestHeadersContext (Lmisk/web/HttpCall;)Lmisk/api/RequestHeadersContext;
 }
 
 public final class misk/web/MiskWebFormBuilder {
