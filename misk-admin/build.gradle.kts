@@ -33,6 +33,7 @@ dependencies {
   testImplementation(libs.kotlinReflect)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.wireRuntime)
+  testImplementation(project(":misk-api"))
   testImplementation(project(":misk-testing"))
 }
 
