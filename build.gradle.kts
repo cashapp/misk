@@ -50,43 +50,45 @@ dependencyAnalysis {
   issues {
     all {
       ignoreSourceSet("testFixtures")
+      ignoreSourceSet("test")
       onAny {
         severity("fail")
-        // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
-        exclude("() -> java.io.File?")
         exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
         exclude(":misk-testing")
       }
     }
     all {
       onUnusedDependencies {
-        exclude("com.github.docker-java:docker-java-api:3.3.0")
-        exclude("com.github.docker-java:docker-java-api:3.3.1")
+        exclude("com.github.docker-java:docker-java-api")
+        exclude("org.jetbrains.kotlin:kotlin-stdlib")
+      }
+      onIncorrectConfiguration {
+        exclude("org.jetbrains.kotlin:kotlin-stdlib")
       }
     }
     // False positives.
     project(":misk-gcp") {
       onUsedTransitiveDependencies {
         // Can be removed once dd-trace-ot uses 0.33.0 of open tracing.
-        exclude("io.opentracing:opentracing-util:0.32.0")
-        exclude("io.opentracing:opentracing-noop:0.33.0")
+        exclude("io.opentracing:opentracing-util")
+        exclude("io.opentracing:opentracing-noop")
       }
       onRuntimeOnly {
-        exclude("com.datadoghq:dd-trace-ot:1.23.0")
+        exclude("com.datadoghq:dd-trace-ot")
       }
     }
     project(":misk-grpc-tests") {
       onUnusedDependencies {
-        exclude("javax.annotation:javax.annotation-api:1.3.2")
+        exclude("javax.annotation:javax.annotation-api")
       }
     }
     project(":misk-jooq") {
       onIncorrectConfiguration {
-        exclude("org.jooq:jooq:3.18.2")
+        exclude("org.jooq:jooq")
       }
     }
     project(":detektive") {
-      onUnusedDependencies() {
+      onUnusedDependencies {
         exclude("com.google.inject:guice")
       }
     }
@@ -97,7 +99,7 @@ dependencyAnalysis {
       }
     }
     project(":wisp:wisp-rate-limiting:bucket4j") {
-      onUnusedDependencies() {
+      onUnusedDependencies {
         // Plugin does not recognize use of tests artifact from bucket4j's maven manifest
         exclude("com.bucket4j:bucket4j-core")
       }

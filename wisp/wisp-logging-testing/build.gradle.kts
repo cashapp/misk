@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     api(libs.logbackClassic)
-    api(libs.kotlinLogging)
     api(libs.assertj)
     implementation(libs.logbackCore)
     implementation(libs.slf4jApi)

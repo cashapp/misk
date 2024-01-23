@@ -24,7 +24,7 @@ abstract class WrappingListeningExecutorService : ForwardingListeningExecutorSer
   }
 
   override fun submit(runnable: Runnable): ListenableFuture<*> {
-    val wrapped = wrap<Unit>(Callable { runnable.run() })
+    val wrapped = wrap<Unit> { runnable.run() }
     return delegate().submit(wrapped)
   }
 
@@ -43,8 +43,8 @@ abstract class WrappingListeningExecutorService : ForwardingListeningExecutorSer
   }
 
   @Throws(InterruptedException::class, ExecutionException::class)
-  override fun <T> invokeAny(callables: Collection<Callable<T>>): T {
-    return delegate().invokeAny(callables.map { wrap(it) })
+  override fun <T> invokeAny(callables: Collection<Callable<T>>): T & Any {
+    return delegate().invokeAny(callables.map { wrap(it) })!!
   }
 
   @Throws(InterruptedException::class, ExecutionException::class, TimeoutException::class)
@@ -52,11 +52,11 @@ abstract class WrappingListeningExecutorService : ForwardingListeningExecutorSer
     callables: Collection<Callable<T>>,
     timeout: Long,
     timeUnit: TimeUnit
-  ): T {
-    return delegate().invokeAny(callables.map { wrap(it) }, timeout, timeUnit)
+  ): T & Any {
+    return delegate().invokeAny(callables.map { wrap(it) }, timeout, timeUnit)!!
   }
 
   override fun execute(runnable: Runnable) {
-    delegate().submit(wrap<Unit>(Callable { runnable.run() }))
+    delegate().submit(wrap<Unit> { runnable.run() })
   }
 }

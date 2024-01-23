@@ -23,6 +23,7 @@ dependencies {
   implementation(libs.retrofitMoshi)
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
+  implementation(libs.okio)
 
   testImplementation(libs.assertj)
   testImplementation(libs.guava)

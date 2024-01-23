@@ -99,6 +99,7 @@ public final class misk/policy/opa/OpaMetrics$Names : java/lang/Enum {
 	public static final field opa_rego_query_eval Lmisk/policy/opa/OpaMetrics$Names;
 	public static final field opa_server_handler Lmisk/policy/opa/OpaMetrics$Names;
 	public static final field opa_server_query_cache_hit Lmisk/policy/opa/OpaMetrics$Names;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/policy/opa/OpaMetrics$Names;
 	public static fun values ()[Lmisk/policy/opa/OpaMetrics$Names;
 }
