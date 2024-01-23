@@ -1841,6 +1841,10 @@ public final class misk/web/interceptors/LogRateLimiter$LogBucketId : java/lang/
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class misk/web/interceptors/MiskConcurrencyLimiterFeature {
+	public abstract fun enabled ()Z
+}
+
 public final class misk/web/interceptors/RebalancingInterceptor : misk/web/NetworkInterceptor {
 	public fun <init> (Lmisk/random/ThreadLocalRandom;D)V
 	public fun intercept (Lmisk/web/NetworkChain;)V
