@@ -11,6 +11,7 @@ plugins {
 dependencies {
   // Avoid adding dependencies on other misk modules here, this module should be as self-contained as possible.
   api(libs.okHttp)
+  compileOnly(libs.jetbrainsAnnotations)
 }
 
 configure<MavenPublishBaseExtension> {
