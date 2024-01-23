@@ -134,8 +134,14 @@ data class WebConfig @JvmOverloads constructor(
   val readiness_max_age_ms: Int = 10000,
 
   /** If possible (e.g. running on JDK 21) misk will attempt to use a virtual thread executor for jetty. */
-  val use_virtual_threads: Boolean = false
-) : Config
+  val use_virtual_threads: Boolean = false,
+
+  /** If true install NotFoundAction, the default action when a path is not found. */
+  val install_default_not_found_action: Boolean = true,
+
+  /** The output buffer size of Jetty (default is 32KB). */
+  val jetty_output_buffer_size: Int? = null,
+  ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
   /** HTTPS port to listen on, or 0 for any available port. */

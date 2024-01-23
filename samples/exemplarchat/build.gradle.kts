@@ -11,7 +11,7 @@ application {
 }
 
 dependencies {
-  implementation(Dependencies.jakartaInject)
+  implementation(libs.jakartaInject)
   implementation(project(":wisp:wisp-config"))
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
@@ -20,17 +20,17 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-redis"))
-  implementation(Dependencies.guice)
-  implementation(Dependencies.jedis)
-  implementation(Dependencies.logbackClassic)
-  implementation(Dependencies.slf4jApi)
-  implementation(Dependencies.okHttp)
+  implementation(libs.guice)
+  implementation(libs.jedis)
+  implementation(libs.logbackClassic)
+  implementation(libs.slf4jApi)
+  implementation(libs.okHttp)
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-config"))
   implementation(testFixtures(project(":misk-redis")))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":misk-testing"))
 }
 

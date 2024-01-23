@@ -9,8 +9,8 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guava)
-  api(Dependencies.jakartaInject)
+  api(libs.guava)
+  api(libs.jakartaInject)
   api(project(":wisp:wisp-lease"))
 }
 

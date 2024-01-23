@@ -9,8 +9,8 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.okio)
-  implementation(Dependencies.wireRuntime)
+  api(libs.okio)
+  implementation(libs.wireRuntime)
 }
 
 configure<MavenPublishBaseExtension> {

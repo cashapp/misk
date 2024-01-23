@@ -1172,6 +1172,7 @@ public final class misk/tasks/Status : java/lang/Enum {
 	public static final field NO_RESCHEDULE Lmisk/tasks/Status;
 	public static final field NO_WORK Lmisk/tasks/Status;
 	public static final field OK Lmisk/tasks/Status;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun metricLabel ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/tasks/Status;
 	public static fun values ()[Lmisk/tasks/Status;
@@ -1254,19 +1255,6 @@ public final class misk/web/CorsConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/DispatchMechanism : java/lang/Enum {
-	public static final field DELETE Lmisk/web/DispatchMechanism;
-	public static final field GET Lmisk/web/DispatchMechanism;
-	public static final field GRPC Lmisk/web/DispatchMechanism;
-	public static final field PATCH Lmisk/web/DispatchMechanism;
-	public static final field POST Lmisk/web/DispatchMechanism;
-	public static final field PUT Lmisk/web/DispatchMechanism;
-	public static final field WEBSOCKET Lmisk/web/DispatchMechanism;
-	public final fun getMethod ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lmisk/web/DispatchMechanism;
-	public static fun values ()[Lmisk/web/DispatchMechanism;
-}
-
 public abstract interface class misk/web/FeatureBinding {
 	public abstract fun afterCall (Lmisk/web/FeatureBinding$Subject;)V
 	public abstract fun beforeCall (Lmisk/web/FeatureBinding$Subject;)V
@@ -1300,27 +1288,23 @@ public abstract interface class misk/web/FeatureBinding$Subject {
 	public abstract fun takeReturnValue ()Ljava/lang/Object;
 }
 
-public abstract interface class misk/web/HttpCall {
+public abstract interface class misk/web/HttpCall : misk/api/HttpRequest {
 	public abstract fun accepts ()Ljava/util/List;
 	public abstract fun addResponseHeaders (Lokhttp3/Headers;)V
 	public abstract fun asOkHttpRequest ()Lokhttp3/Request;
 	public abstract fun computeRequestHeader (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun contentType ()Lokhttp3/MediaType;
 	public abstract fun getCookies ()Ljava/util/List;
-	public abstract fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
 	public abstract fun getLinkLayerLocalAddress ()Lmisk/web/SocketAddress;
 	public abstract fun getNetworkStatusCode ()I
-	public abstract fun getRequestHeaders ()Lokhttp3/Headers;
 	public abstract fun getResponseHeaders ()Lokhttp3/Headers;
 	public abstract fun getStatusCode ()I
-	public abstract fun getUrl ()Lokhttp3/HttpUrl;
 	public abstract fun initWebSocketListener (Lmisk/web/actions/WebSocketListener;)V
 	public abstract fun putRequestBody (Lokio/BufferedSource;)V
 	public abstract fun putResponseBody (Lokio/BufferedSink;)V
 	public abstract fun putWebSocket (Lmisk/web/actions/WebSocket;)V
 	public abstract fun requireTrailers ()V
 	public abstract fun setCookies (Ljava/util/List;)V
-	public abstract fun setRequestHeaders (Lokhttp3/Headers;)V
 	public abstract fun setResponseHeader (Ljava/lang/String;Ljava/lang/String;)V
 	public abstract fun setResponseTrailer (Ljava/lang/String;Ljava/lang/String;)V
 	public abstract fun setStatusCode (I)V
@@ -1482,7 +1466,9 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;I)V
 	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;II)V
 	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZ)V
-	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZ)V
+	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;)V
+	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component10 ()Ljava/lang/Integer;
 	public final fun component11 ()I
@@ -1507,14 +1493,16 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun component29 ()I
 	public final fun component3 ()I
 	public final fun component30 ()Z
+	public final fun component31 ()Z
+	public final fun component32 ()Ljava/lang/Integer;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lmisk/web/WebSslConfig;
 	public final fun component6 ()Lmisk/web/WebUnixDomainSocketConfig;
 	public final fun component7 ()Z
 	public final fun component8 ()Ljava/lang/Integer;
 	public final fun component9 ()Ljava/lang/Integer;
-	public final fun copy (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZ)Lmisk/web/WebConfig;
-	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZILjava/lang/Object;)Lmisk/web/WebConfig;
+	public final fun copy (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;)Lmisk/web/WebConfig;
+	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;ILjava/lang/Object;)Lmisk/web/WebConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptors ()Ljava/lang/Integer;
 	public final fun getAction_exception_log_level ()Lmisk/web/exceptions/ActionExceptionLogLevelConfig;
@@ -1531,10 +1519,12 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun getHttp_header_cache_size ()Ljava/lang/Integer;
 	public final fun getHttp_request_header_size ()Ljava/lang/Integer;
 	public final fun getIdle_timeout ()J
+	public final fun getInstall_default_not_found_action ()Z
 	public final fun getJetty_max_concurrent_streams ()Ljava/lang/Integer;
 	public final fun getJetty_max_thread_pool_queue_size ()I
 	public final fun getJetty_max_thread_pool_size ()I
 	public final fun getJetty_min_thread_pool_size ()I
+	public final fun getJetty_output_buffer_size ()Ljava/lang/Integer;
 	public final fun getMinGzipSize ()I
 	public final fun getOverride_shutdown_idle_timeout ()Ljava/lang/Long;
 	public final fun getPort ()I
@@ -1577,6 +1567,7 @@ public final class misk/web/WebSslConfig$CipherCompatibility : java/lang/Enum {
 	public static final field COMPATIBLE Lmisk/web/WebSslConfig$CipherCompatibility;
 	public static final field MODERN Lmisk/web/WebSslConfig$CipherCompatibility;
 	public static final field RESTRICTED Lmisk/web/WebSslConfig$CipherCompatibility;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/WebSslConfig$CipherCompatibility;
 	public static fun values ()[Lmisk/web/WebSslConfig$CipherCompatibility;
 }
@@ -1585,6 +1576,7 @@ public final class misk/web/WebSslConfig$MutualAuth : java/lang/Enum {
 	public static final field DESIRED Lmisk/web/WebSslConfig$MutualAuth;
 	public static final field NONE Lmisk/web/WebSslConfig$MutualAuth;
 	public static final field REQUIRED Lmisk/web/WebSslConfig$MutualAuth;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/WebSslConfig$MutualAuth;
 	public static fun values ()[Lmisk/web/WebSslConfig$MutualAuth;
 }
@@ -1670,6 +1662,7 @@ public final class misk/web/concurrencylimits/ConcurrencyLimiterStrategy : java/
 	public static final field GRADIENT2 Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 	public static final field SETTABLE Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 	public static final field VEGAS Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 	public static fun values ()[Lmisk/web/concurrencylimits/ConcurrencyLimiterStrategy;
 }

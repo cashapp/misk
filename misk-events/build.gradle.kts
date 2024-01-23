@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guava)
+  api(libs.guava)
   api(project(":misk-events-core"))
   api(project(":misk-hibernate"))
 }

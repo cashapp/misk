@@ -9,19 +9,19 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.awsDynamodb)
-  api(Dependencies.awsJavaSdkCore)
-  api(Dependencies.jakartaInject)
-  api(Dependencies.slf4jApi)
+  api(libs.awsDynamodb)
+  api(libs.awsJavaSdkCore)
+  api(libs.jakartaInject)
+  api(libs.slf4jApi)
   api(project(":misk"))
   api(project(":misk-actions"))
   api(project(":misk-inject"))
-  implementation(Dependencies.guice)
-  implementation(Dependencies.okHttp)
+  implementation(libs.guice)
+  implementation(libs.okHttp)
   implementation(project(":misk-core"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":misk-testing"))
 }
 

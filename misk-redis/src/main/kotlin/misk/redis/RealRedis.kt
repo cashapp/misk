@@ -1,5 +1,16 @@
 package misk.redis
 
+import misk.redis.Redis.ZAddOptions.CH
+import misk.redis.Redis.ZAddOptions.GT
+import misk.redis.Redis.ZAddOptions.LT
+import misk.redis.Redis.ZAddOptions.NX
+import misk.redis.Redis.ZAddOptions.XX
+import misk.redis.Redis.ZRangeIndexMarker
+import misk.redis.Redis.ZRangeLimit
+import misk.redis.Redis.ZRangeMarker
+import misk.redis.Redis.ZRangeRankMarker
+import misk.redis.Redis.ZRangeScoreMarker
+import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisCluster
@@ -11,6 +22,9 @@ import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.commands.JedisBinaryCommands
 import redis.clients.jedis.params.SetParams
+import redis.clients.jedis.params.ZAddParams
+import redis.clients.jedis.params.ZRangeParams
+import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
@@ -358,6 +372,209 @@ class RealRedis(
 
   override fun publish(channel: String, message: String) {
     unifiedJedis.publish(channel, message)
+  }
+
+  override fun flushAll() {
+    unifiedJedis.flushAll()
+  }
+
+  override fun zadd(
+    key: String,
+    score: Double,
+    member: String,
+    vararg options: Redis.ZAddOptions,
+  ): Long {
+    return unifiedJedis.zadd(
+      key.toByteArray(charset),
+      score,
+      member.toByteArray(charset),
+      getZAddParams(options)
+    )
+  }
+
+  private fun getZAddParams(options: Array<out Redis.ZAddOptions>): ZAddParams {
+    val params = ZAddParams()
+
+    options.forEach {
+      when (it) {
+        XX -> params.xx()
+        NX -> params.nx()
+        LT -> params.lt()
+        GT -> params.gt()
+        CH -> params.ch()
+      }
+    }
+
+    return params
+  }
+
+  override fun zadd(
+    key: String,
+    scoreMembers: Map<String, Double>,
+    vararg options: Redis.ZAddOptions,
+  ): Long {
+    val params = getZAddParams(options)
+    val keyBytes = key.toByteArray(charset)
+    val scoreMembersBytes =
+      scoreMembers.entries.associate { it.key.toByteArray(charset) to it.value }
+    return unifiedJedis.zadd(
+      keyBytes,
+      scoreMembersBytes,
+      params
+    )
+  }
+
+  override fun zscore(key: String, member: String): Double? {
+    return unifiedJedis.zscore(
+      key.toByteArray(charset),
+      member.toByteArray(charset)
+    )
+  }
+
+  override fun zrange(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?,
+  ): List<ByteString?> {
+    return zrangeBase(key, type, start, stop, reverse, false, limit)
+      .noScore?.map { it?.toByteString() } ?: listOf()
+  }
+
+  override fun zrangeWithScores(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    limit: ZRangeLimit?,
+  ): List<Pair<ByteString?, Double>> {
+    return zrangeBase(key, type, start, stop, reverse, true, limit)
+      .withScore?.map { Pair(it.binaryElement?.toByteString(), it.score) } ?: listOf()
+  }
+
+  override fun zremRangeByRank(
+    key: String,
+    start: ZRangeRankMarker,
+    stop: ZRangeRankMarker
+  ) : Long {
+    return unifiedJedis.zremrangeByRank(key, start.longValue, stop.longValue)
+  }
+
+  override fun zcard(
+    key: String
+  ): Long {
+    return unifiedJedis.zcard(key)
+  }
+
+  private fun zrangeBase(
+    key: String,
+    type: ZRangeType,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean,
+    withScore: Boolean,
+    limit: ZRangeLimit?,
+  ): ZRangeResponse {
+    return when (type) {
+      ZRangeType.INDEX ->
+        zrangeByIndex(key, start as ZRangeIndexMarker, stop as ZRangeIndexMarker, reverse,
+                      withScore)
+
+      ZRangeType.SCORE ->
+        zrangeByScore(key, start as ZRangeScoreMarker, stop as ZRangeScoreMarker, reverse,
+                      withScore, limit)
+    }
+  }
+
+  private fun zrangeByScore(
+    key: String,
+    start: ZRangeScoreMarker,
+    stop: ZRangeScoreMarker,
+    reverse: Boolean,
+    withScore: Boolean,
+    limit: ZRangeLimit?,
+  ): ZRangeResponse {
+    val minString = start.toString()
+    val maxString = stop.toString()
+
+    return if (limit == null && !reverse && !withScore) {
+      ZRangeResponse.noScore(unifiedJedis.zrangeByScore(key.toByteArray(charset),
+                                                     minString.toByteArray(charset),
+                                                     maxString.toByteArray(charset)))
+    } else if (limit == null && !reverse) {
+      ZRangeResponse.withScore(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
+                                                               minString.toByteArray(charset),
+                                                               maxString.toByteArray(charset)))
+    } else if (limit == null && !withScore) {
+      ZRangeResponse.noScore(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
+                                             maxString.toByteArray(charset),
+                                             minString.toByteArray(charset)))
+    } else if (limit == null){
+      ZRangeResponse.withScore(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
+                                                        maxString.toByteArray(charset),
+                                                        minString.toByteArray(charset)))
+    } else if (!reverse && !withScore) {
+      ZRangeResponse.noScore(unifiedJedis.zrangeByScore(key.toByteArray(charset),
+                                             minString.toByteArray(charset),
+                                             maxString.toByteArray(charset),
+                                             limit.offset,
+                                             limit.count))
+    } else if (!reverse) {
+      ZRangeResponse.withScore(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
+                                                        minString.toByteArray(charset),
+                                                        maxString.toByteArray(charset),
+                                                        limit.offset,
+                                                        limit.count))
+    } else if (!withScore) {
+      ZRangeResponse.noScore(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
+                                             maxString.toByteArray(charset),
+                                             minString.toByteArray(charset),
+                                             limit.offset,
+                                             limit.count))
+    } else {
+      ZRangeResponse.withScore(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
+                                                        maxString.toByteArray(charset),
+                                                        minString.toByteArray(charset),
+                                                        limit.offset,
+                                                        limit.count))
+    }
+  }
+
+  /**
+   * A wrapper class for handling response from zrange* methods.
+   */
+  private class ZRangeResponse private constructor(
+    val noScore: List<ByteArray?>?,
+    val withScore: List<Tuple>?
+  ) {
+    companion object {
+      fun noScore(ans: List<ByteArray?>) : ZRangeResponse = ZRangeResponse(ans, null)
+
+      fun withScore(ans: List<Tuple>) : ZRangeResponse = ZRangeResponse(null, ans)
+    }
+  }
+
+  private fun zrangeByIndex(
+    key: String,
+    start: ZRangeIndexMarker,
+    stop: ZRangeIndexMarker,
+    reverse: Boolean,
+    withScore: Boolean
+  ): ZRangeResponse {
+    val params = ZRangeParams(
+      start.intValue,
+      stop.intValue
+    )
+    if (reverse) params.rev()
+
+    return if (withScore) {
+      ZRangeResponse.withScore(unifiedJedis.zrangeWithScores(key.toByteArray(charset), params))
+    } else {
+      ZRangeResponse.noScore(unifiedJedis.zrange(key.toByteArray(charset), params))
+    }
   }
 
   // Gets a Jedis instance from the pool, and times the requested method invocations.

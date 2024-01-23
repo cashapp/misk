@@ -44,8 +44,9 @@ class ConcurrencyLimitsInterceptorTest {
 
   @Inject private lateinit var factory: ConcurrencyLimitsInterceptor.Factory
   @Inject private lateinit var clock: FakeNanoClock
-  @Inject lateinit var logCollector: LogCollector
-  @Inject lateinit var prometheusRegistry: CollectorRegistry
+  @Inject private lateinit var logCollector: LogCollector
+  @Inject private lateinit var prometheusRegistry: CollectorRegistry
+  @Inject private lateinit var  enabledFeature: TestableMiskConcurrencyLimiterFeature
 
   @Test
   fun happyPath() {
@@ -64,9 +65,37 @@ class ConcurrencyLimitsInterceptorTest {
       .limit(SettableLimit(0))
       .build<String>()
     val interceptor =
-      ConcurrencyLimitsInterceptor(factory, action, limitZero, clock, org.slf4j.event.Level.ERROR)
+      ConcurrencyLimitsInterceptor(
+        factory = factory,
+        action = action,
+        defaultLimiter = limitZero,
+        clock = clock,
+        logLevel = org.slf4j.event.Level.ERROR,
+        enabledFeature = enabledFeature
+      )
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
+  }
+
+  @Test
+  fun limitReachedDisabled() {
+    enabledFeature.isEnabled = false
+
+    val action = HelloAction::call.asAction(DispatchMechanism.GET)
+    val limitZero = SimpleLimiter.Builder()
+      .limit(SettableLimit(0))
+      .build<String>()
+    val interceptor =
+      ConcurrencyLimitsInterceptor(
+        factory = factory,
+        action = action,
+        defaultLimiter = limitZero,
+        clock = clock,
+        logLevel = org.slf4j.event.Level.ERROR,
+        enabledFeature = enabledFeature
+      )
+    assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
+      .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
   }
 
   @Test
@@ -100,7 +129,14 @@ class ConcurrencyLimitsInterceptorTest {
       .limit(SettableLimit(0))
       .build<String>()
     val interceptor =
-      ConcurrencyLimitsInterceptor(factory, action, limitZero, clock, org.slf4j.event.Level.ERROR)
+      ConcurrencyLimitsInterceptor(
+        factory = factory,
+        action = action,
+        defaultLimiter = limitZero,
+        clock = clock,
+        logLevel = org.slf4j.event.Level.ERROR,
+        enabledFeature = enabledFeature
+      )
     // First call logs an error.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
@@ -162,7 +198,14 @@ class ConcurrencyLimitsInterceptorTest {
     val action = HelloAction::call.asAction(DispatchMechanism.GET)
     val limiter = factory.createLimiterForAction(action, null)
     val interceptor =
-      ConcurrencyLimitsInterceptor(factory, action, limiter, clock, org.slf4j.event.Level.ERROR)
+      ConcurrencyLimitsInterceptor(
+        factory = factory,
+        action = action,
+        defaultLimiter = limiter,
+        clock = clock,
+        logLevel = org.slf4j.event.Level.ERROR,
+        enabledFeature = enabledFeature
+      )
 
     // load up some inflight requests so we get past "Prevent upward drift if not close to the limit"
     repeat(10) {
@@ -224,6 +267,8 @@ class ConcurrencyLimitsInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      bind<MiskConcurrencyLimiterFeature>().to(TestableMiskConcurrencyLimiterFeature::class.java)
+
       install(LogCollectorModule())
       install(Modules.override(MiskTestingServiceModule()).with(object : KAbstractModule() {
         override fun configure() {
@@ -272,6 +317,12 @@ class ConcurrencyLimitsInterceptorTest {
     val callWasShed: Boolean,
     val statusCode: Int
   )
+}
+
+@Singleton
+class TestableMiskConcurrencyLimiterFeature @Inject constructor() :MiskConcurrencyLimiterFeature{
+  var isEnabled = true
+  override fun enabled() = isEnabled
 }
 
 internal class HelloAction : WebAction {

@@ -9,18 +9,18 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guava)
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
+  api(libs.guava)
+  api(libs.guice)
+  api(libs.jakartaInject)
   api(project(":misk-inject"))
-  implementation(Dependencies.kotlinReflect)
-  implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.kotlinxCoroutines)
-  implementation(Dependencies.moshi)
+  implementation(libs.kotlinReflect)
+  implementation(libs.kotlinStdLibJdk8)
+  implementation(libs.kotlinxCoroutines)
+  implementation(libs.moshi)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinTest)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
 }
 
 configure<MavenPublishBaseExtension> {

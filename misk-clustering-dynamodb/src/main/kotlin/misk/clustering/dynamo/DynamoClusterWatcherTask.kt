@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.clustering.Cluster.Member
+import misk.clustering.DefaultCluster
 import misk.clustering.weights.ClusterWeightProvider
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
@@ -30,7 +31,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   ddb: DynamoDbClient,
   private val clock: Clock,
   private val clusterWeightProvider: ClusterWeightProvider,
-  private val dynamoCluster: DynamoCluster,
+  private val cluster: DefaultCluster,
   private val dynamoClusterConfig: DynamoClusterConfig,
 ) : AbstractIdleService() {
   private val enhancedClient = DynamoDbEnhancedClient.builder()
@@ -38,6 +39,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
     .build()
   private val table = enhancedClient.table(dynamoClusterConfig.table_name, TABLE_SCHEMA)
   private val podName = System.getenv("MY_POD_NAME")
+  private var prevMembers = cluster.snapshot.readyMembers.toSet()
 
   override fun startUp() {
     taskQueue.scheduleWithBackoff(timeBetweenRuns = Duration.ofSeconds(dynamoClusterConfig.update_frequency_seconds)) {
@@ -56,7 +58,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
 
   private fun updateOurselfInDynamo() {
     val (duration, _) = timed {
-      val self = dynamoCluster.snapshot.self.name
+      val self = cluster.snapshot.self.name
       val member = DyClusterMember()
       member.name = self
       member.updated_at = clock.instant().toEpochMilli()
@@ -85,8 +87,8 @@ internal class DynamoClusterWatcherTask @Inject constructor(
           members.add(Member(item.name!!, "invalid-ip"))
         }
       }
-
-      dynamoCluster.update(members)
+      cluster.clusterChanged(membersBecomingReady = members, membersBecomingNotReady = prevMembers - members)
+      prevMembers = members
     }
 
     logger.info { "Updated cluster information from dynamodb in ${duration.toMillis()}ms" }

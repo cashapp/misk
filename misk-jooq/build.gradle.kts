@@ -13,20 +13,20 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.guava)
-  api(Dependencies.guice)
-  api(Dependencies.jooq)
-  api(Dependencies.kotlinLogging)
+  api(libs.guava)
+  api(libs.guice)
+  api(libs.jooq)
+  api(libs.kotlinLogging)
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
-  implementation(Dependencies.jakartaInject)
-  implementation(Dependencies.kotlinRetry)
-  implementation(Dependencies.kotlinxCoroutines)
+  implementation(libs.jakartaInject)
+  implementation(libs.kotlinRetry)
+  implementation(libs.kotlinxCoroutines)
   implementation(project(":wisp:wisp-logging"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":wisp:wisp-deployment"))
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":misk"))
@@ -34,14 +34,14 @@ dependencies {
   testImplementation(project(":misk-testing"))
 
   // Needed to generate jooq test db classes
-  jooqGenerator(Dependencies.mysql)
+  jooqGenerator(libs.mysql)
 }
 
 // Needed to generate jooq test db classes
 buildscript {
   dependencies {
     classpath("org.flywaydb:flyway-gradle-plugin:9.14.1")
-    classpath(Dependencies.mysql)
+    classpath(libs.mysql)
   }
 }
 

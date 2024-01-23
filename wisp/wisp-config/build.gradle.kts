@@ -3,13 +3,13 @@ plugins {
 }
 
 dependencies {
-    api(Dependencies.hopliteCore)
+    api(libs.hopliteCore)
     api(project(":wisp:wisp-resource-loader"))
-    implementation(Dependencies.hopliteJson)
-    implementation(Dependencies.hopliteToml)
-    implementation(Dependencies.hopliteYaml)
-    runtimeOnly(Dependencies.hopliteHocon)
+    implementation(libs.hopliteJson)
+    implementation(libs.hopliteToml)
+    implementation(libs.hopliteYaml)
+    runtimeOnly(libs.hopliteHocon)
 
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.kotlinTest)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.kotlinTest)
 }

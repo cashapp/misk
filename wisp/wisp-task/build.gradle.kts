@@ -3,16 +3,16 @@ plugins {
 }
 
 dependencies {
-    api(Dependencies.kotlinRetry)
-    api(Dependencies.micrometerCore)
+    api(libs.kotlinRetry)
+    api(libs.micrometerCore)
     api(project(":wisp:wisp-config"))
-    implementation(Dependencies.kotlinxCoroutines)
-    implementation(Dependencies.kotlinLogging)
+    implementation(libs.kotlinxCoroutines)
+    implementation(libs.kotlinLogging)
     implementation(project(":wisp:wisp-logging"))
 
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.kotlinTest)
-    testImplementation(Dependencies.kotlinTest)
-    testImplementation(Dependencies.micrometerPrometheus)
-    testImplementation(Dependencies.prometheusClient)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.micrometerPrometheus)
+    testImplementation(libs.prometheusClient)
 }

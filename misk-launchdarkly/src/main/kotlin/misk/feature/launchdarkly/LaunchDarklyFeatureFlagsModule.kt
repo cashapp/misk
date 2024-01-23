@@ -1,9 +1,11 @@
 package misk.feature.launchdarkly
 
+import com.google.inject.Provider
 import com.google.inject.Provides
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
+import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import io.micrometer.core.instrument.MeterRegistry
 import jakarta.inject.Singleton
@@ -42,18 +44,30 @@ class LaunchDarklyModule @JvmOverloads constructor(
   @Provides
   @Singleton
   internal fun wispLaunchDarkly(
-    sslLoader: SslLoader,
-    sslContextFactory: SslContextFactory,
-    resourceLoader: ResourceLoader,
+    ldClientInterface: Provider<LDClientInterface>,
     moshi: Moshi,
     meterRegistry: MeterRegistry,
   ): wisp.launchdarkly.LaunchDarklyFeatureFlags {
+    val ldClient = lazy { ldClientInterface.get() }
+    return wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi, meterRegistry)
+  }
+
+  @Provides
+  @Singleton
+  internal fun providesLdClientInterface(
+    sslLoader: SslLoader,
+    sslContextFactory: SslContextFactory,
+    resourceLoader: ResourceLoader,
+  ): LDClientInterface {
+    // TODO: This shouldn't exist. We should not be exposing LDClientInterface and the only users of this are
+    //   apps who're installing this module but not even using the misk or wisp LaunchDarklyFeatureFlags.
     val baseUri = URI.create(config.base_uri)
     val ldConfig = LDConfig.Builder()
       // Set wait to 0 to not block here. Block in service initialization instead.
       .startWait(Duration.ofMillis(0))
-      .dataSource(Components.streamingDataSource().baseURI(baseUri))
-      .events(Components.sendEvents().baseURI(baseUri))
+      .dataSource(Components.streamingDataSource())
+      .events(Components.sendEvents())
+      .serviceEndpoints(Components.serviceEndpoints().relayProxy(baseUri))
 
     config.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
@@ -67,8 +81,7 @@ class LaunchDarklyModule @JvmOverloads constructor(
     }
 
     // Construct LDClient lazily to avoid making network calls until LaunchDarklyFeatureFlags.startup() is called.
-    val ldClient = lazy { LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build()) }
-    return wisp.launchdarkly.LaunchDarklyFeatureFlags(ldClient, moshi, meterRegistry)
+    return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
   }
 }
 

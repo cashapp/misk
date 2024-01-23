@@ -3,21 +3,29 @@ package misk.clustering.dynamo
 import com.google.inject.Provides
 import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
+import misk.ReadyService
 import misk.ServiceModule
 import misk.clustering.Cluster
+import misk.clustering.ClusterService
+import misk.clustering.DefaultCluster
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import java.util.UUID
 
-class DynamoClusterModule(private val config: DynamoClusterConfig) : KAbstractModule() {
+class DynamoClusterModule(private val config: DynamoClusterConfig = DynamoClusterConfig()) : KAbstractModule() {
   override fun configure() {
-    val dynamoCluster = DynamoCluster(UUID.randomUUID().toString())
+    val defaultCluster = DefaultCluster(Cluster.Member(UUID.randomUUID().toString(), "invalid-ip"))
     bind<DynamoClusterConfig>().toInstance(config)
-    bind<Cluster>().toInstance(dynamoCluster)
-    bind<DynamoCluster>().toInstance(dynamoCluster)
-
-    install(ServiceModule<DynamoClusterWatcherTask>())
+    bind<Cluster>().toInstance(defaultCluster)
+    bind<DefaultCluster>().toInstance(defaultCluster)
+    bind<ClusterService>().toInstance(defaultCluster)
+    install(ServiceModule<ClusterService>())
+    install(
+      ServiceModule<DynamoClusterWatcherTask>()
+        .dependsOn<ClusterService>()
+        .enhancedBy<ReadyService>()
+    )
     install(ServiceModule<RepeatedTaskQueue>(ForDynamoDbClusterWatching::class))
   }
 

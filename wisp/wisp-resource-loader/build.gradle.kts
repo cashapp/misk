@@ -3,12 +3,12 @@ plugins {
 }
 
 dependencies {
-    implementation(Dependencies.kotlinLogging)
-    implementation(Dependencies.okio)
+    implementation(libs.kotlinLogging)
+    implementation(libs.okio)
     implementation(project(":wisp:wisp-logging"))
-    runtimeOnly(Dependencies.bouncycastle)
+    runtimeOnly(libs.bouncycastle)
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.kotlinTest)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.kotlinTest)
 }

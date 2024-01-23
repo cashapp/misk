@@ -15,6 +15,7 @@ import misk.MiskCaller
 import misk.MiskDefault
 import misk.ReadyService
 import misk.ServiceModule
+import misk.api.HttpRequest
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
@@ -137,6 +138,7 @@ class MiskWebModule @JvmOverloads constructor(
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
         bindSeedData(HttpCall::class)
+        bindSeedData(HttpRequest::class)
         bindSeedData(HttpServletRequest::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)
         newMultibinder<MiskCallerAuthenticator>()
@@ -261,7 +263,9 @@ class MiskWebModule @JvmOverloads constructor(
     install(WebActionModule.create<ReadinessCheckAction>())
 
     install(WebActionModule.create<LivenessCheckAction>())
-    install(WebActionModule.create<NotFoundAction>())
+    if (config.install_default_not_found_action) {
+      install(WebActionModule.create<NotFoundAction>())
+    }
 
     val maxThreads = config.jetty_max_thread_pool_size
     val minThreads = min(config.jetty_min_thread_pool_size, maxThreads)

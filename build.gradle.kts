@@ -6,6 +6,8 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.IOException
+import java.net.Socket
 
 buildscript {
   repositories {
@@ -14,23 +16,24 @@ buildscript {
   }
 
   dependencies {
-    classpath(Dependencies.kotlinAllOpenPlugin)
-    classpath(Dependencies.kotlinGradlePlugin)
-    classpath(Dependencies.detektGradlePlugin)
-    classpath(Dependencies.dokkaGradlePlugin)
-    classpath(Dependencies.kotlinNoArgPlugin)
-    classpath(Dependencies.junitGradlePlugin)
-    classpath(Dependencies.mavenPublishGradlePlugin)
-    classpath(Dependencies.protobufGradlePlugin)
-    classpath(Dependencies.jgit)
-    classpath(Dependencies.wireGradlePlugin)
-    classpath(Dependencies.revapiGradlePlugin)
+    classpath(libs.kotlinAllOpenPlugin)
+    classpath(libs.kotlinGradlePlugin)
+    classpath(libs.detektGradlePlugin)
+    classpath(libs.dokkaGradlePlugin)
+    classpath(libs.kotlinNoArgPlugin)
+    classpath(libs.junitGradlePlugin)
+    classpath(libs.mavenPublishGradlePlugin)
+    classpath(libs.protobufGradlePlugin)
+    classpath(libs.jgit)
+    classpath(libs.wireGradlePlugin)
+    classpath(libs.revapiGradlePlugin)
+    classpath(libs.sqldelightGradlePlugin)
   }
 }
 
 plugins {
-  id("com.autonomousapps.dependency-analysis") version Dependencies.dependencyAnalysisPluginVersion
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version Dependencies.kotlinBinaryCompatibilityPluginVersion
+  id("com.autonomousapps.dependency-analysis") version libs.versions.dependencyAnalysisPlugin.get()
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version libs.versions.kotlinBinaryCompatibilityPlugin.get()
 }
 
 apply(plugin = "com.vanniktech.maven.publish.base")
@@ -47,43 +50,45 @@ dependencyAnalysis {
   issues {
     all {
       ignoreSourceSet("testFixtures")
+      ignoreSourceSet("test")
       onAny {
         severity("fail")
-        // Due to kotlin 1.8.20 see https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/884
-        exclude("() -> java.io.File?")
         exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
         exclude(":misk-testing")
       }
     }
     all {
       onUnusedDependencies {
-        exclude("com.github.docker-java:docker-java-api:3.3.0")
-        exclude("com.github.docker-java:docker-java-api:3.3.1")
+        exclude("com.github.docker-java:docker-java-api")
+        exclude("org.jetbrains.kotlin:kotlin-stdlib")
+      }
+      onIncorrectConfiguration {
+        exclude("org.jetbrains.kotlin:kotlin-stdlib")
       }
     }
     // False positives.
     project(":misk-gcp") {
       onUsedTransitiveDependencies {
         // Can be removed once dd-trace-ot uses 0.33.0 of open tracing.
-        exclude("io.opentracing:opentracing-util:0.32.0")
-        exclude("io.opentracing:opentracing-noop:0.33.0")
+        exclude("io.opentracing:opentracing-util")
+        exclude("io.opentracing:opentracing-noop")
       }
       onRuntimeOnly {
-        exclude("com.datadoghq:dd-trace-ot:1.23.0")
+        exclude("com.datadoghq:dd-trace-ot")
       }
     }
     project(":misk-grpc-tests") {
       onUnusedDependencies {
-        exclude("javax.annotation:javax.annotation-api:1.3.2")
+        exclude("javax.annotation:javax.annotation-api")
       }
     }
     project(":misk-jooq") {
       onIncorrectConfiguration {
-        exclude("org.jooq:jooq:3.18.2")
+        exclude("org.jooq:jooq")
       }
     }
     project(":detektive") {
-      onUnusedDependencies() {
+      onUnusedDependencies {
         exclude("com.google.inject:guice")
       }
     }
@@ -94,7 +99,7 @@ dependencyAnalysis {
       }
     }
     project(":wisp:wisp-rate-limiting:bucket4j") {
-      onUnusedDependencies() {
+      onUnusedDependencies {
         // Plugin does not recognize use of tests artifact from bucket4j's maven manifest
         exclude("com.bucket4j:bucket4j-core")
       }
@@ -131,7 +136,8 @@ val hibernateProjects = listOf(
   "misk-jdbc-testing",
   "misk-hibernate",
   "misk-hibernate-testing",
-  "misk-rate-limiting-bucket4j-mysql"
+  "misk-rate-limiting-bucket4j-mysql",
+  "misk-sqldelight"
 )
 
 val redisProjects = listOf(
@@ -194,22 +200,22 @@ subprojects {
     }
 
     dependencies {
-      add("testRuntimeOnly", Dependencies.junitEngine)
+      add("testRuntimeOnly", rootProject.libs.junitEngine)
 
       // Platform/BOM dependencies constrain versions only.
       // Enforce misk-bom -- it should take priority over external BOMs.
       add("api", enforcedPlatform(project(":misk-bom")))
-      add("api", platform(Dependencies.grpcBom))
-      add("api", platform(Dependencies.guavaBom))
-      add("api", platform(Dependencies.guiceBom))
-      add("api", platform(Dependencies.jacksonBom))
-      add("api", platform(Dependencies.jerseyBom))
-      add("api", platform(Dependencies.jettyBom))
-      add("api", platform(Dependencies.kotlinBom))
-      add("api", platform(Dependencies.nettyBom))
-      add("api", platform(Dependencies.prometheusClientBom))
-      add("api", platform(Dependencies.tempestBom))
-      add("api", platform(Dependencies.wireBom))
+      add("api", platform(rootProject.libs.grpcBom))
+      add("api", platform(rootProject.libs.guavaBom))
+      add("api", platform(rootProject.libs.guiceBom))
+      add("api", platform(rootProject.libs.jacksonBom))
+      add("api", platform(rootProject.libs.jerseyBom))
+      add("api", platform(rootProject.libs.jettyBom))
+      add("api", platform(rootProject.libs.kotlinBom))
+      add("api", platform(rootProject.libs.nettyBom))
+      add("api", platform(rootProject.libs.prometheusClientBom))
+      add("api", platform(rootProject.libs.tempestBom))
+      add("api", platform(rootProject.libs.wireBom))
     }
 
     tasks.withType<GenerateModuleMetadata> {
@@ -236,6 +242,7 @@ subprojects {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = false
     }
+    dependsOn(":startRedis")
   }
 
   tasks.withType<Detekt> {
@@ -308,5 +315,45 @@ allprojects {
         }
       }
     }
+  }
+}
+
+tasks.register("startRedis") {
+  group = "other"
+  description = "Ensures a Redis instance is available; " +
+    "starts a redis docker container if there isn't something already there."
+  doLast {
+    val redisVersion = "6.2"
+    val redisPort = System.getenv("REDIS_PORT") ?: "6379"
+    val redisContainerName = "miskTestRedis-$redisPort"
+    val redisImage = "redis:$redisVersion"
+
+    val portIsOccupied = try {
+      Socket("localhost", redisPort.toInt()).close()
+      true
+    } catch (e: IOException) {
+      false
+    }
+    if (portIsOccupied) {
+      logger.info("Port $redisPort is bound, assuming Redis is already running")
+      return@doLast
+    }
+
+    logger.info("Attempting to start Redis docker image $redisImage on port $redisPort...")
+    val dockerArguments = arrayOf(
+      "docker", "run",
+      "--detach",
+      "--rm",
+      "--name", redisContainerName,
+      "-p", "$redisPort:6379",
+      redisImage,
+      "redis-server",
+      "--loglevel debug"
+    )
+    exec {
+      workingDir(project.rootProject.rootDir.toPath())
+      commandLine(*dockerArguments)
+    }
+    logger.info("Started Redis docker image $redisImage on port $redisPort")
   }
 }
