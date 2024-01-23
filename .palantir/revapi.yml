@@ -531,6 +531,25 @@ acceptedBreaks:
         \ boolean, java.lang.Integer)"
       justification: "Adding a new parameter to WebConfig"
   "2024.01.18.031247-621592e":
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.web.interceptors.ConcurrencyLimitsInterceptor.Factory::<init>(java.time.Clock,\
+        \ java.util.List<? extends misk.web.concurrencylimits.ConcurrencyLimiterFactory>,\
+        \ misk.web.WebConfig, misk.metrics.Metrics)"
+      new: "method void misk.web.interceptors.ConcurrencyLimitsInterceptor.Factory::<init>(java.time.Clock,\
+        \ java.util.List<? extends misk.web.concurrencylimits.ConcurrencyLimiterFactory>,\
+        \ misk.web.WebConfig, misk.web.interceptors.MiskConcurrencyLimiterFeature,\
+        \ misk.metrics.Metrics)"
+      justification: "this factory is created from the guice module only"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.web.interceptors.ConcurrencyLimitsInterceptor::<init>(misk.web.interceptors.ConcurrencyLimitsInterceptor.Factory,\
+        \ misk.Action, com.netflix.concurrency.limits.Limiter<java.lang.String>, java.time.Clock,\
+        \ org.slf4j.event.Level)"
+      new: "method void misk.web.interceptors.ConcurrencyLimitsInterceptor::<init>(misk.web.interceptors.ConcurrencyLimitsInterceptor.Factory,\
+        \ misk.Action, com.netflix.concurrency.limits.Limiter<java.lang.String>, java.time.Clock,\
+        \ org.slf4j.event.Level, misk.web.interceptors.MiskConcurrencyLimiterFeature)"
+      justification: "the factory is created from the guice module only"
+  "2024.01.23.050115-6729352":
     com.squareup.misk:misk-rate-limiting-bucket4j-redis:
     - code: "java.class.removed"
       old: "class misk.ratelimiting.bucket4j.redis.JedisPoolService"
@@ -566,12 +585,6 @@ acceptedBreaks:
         \ redis.clients.jedis.JedisPoolConfig, java.time.Duration, boolean)"
       justification: "Only breaks one client, which is owned by the author"
     com.squareup.misk:misk-redis:
-    - code: "java.class.removed"
-      old: "class misk.redis.JedisPoolWithMetrics"
-      justification: "Only breaks one client, which is owned by the author"
-    - code: "java.method.addedToInterface"
-      new: "method void misk.redis.Redis::prepare()"
-      justification: "Only breaks one client, which is owned by the author"
     - code: "java.method.numberOfParametersChanged"
       old: "method misk.redis.Redis misk.redis.RedisClusterModule::provideRedisClusterClient$misk_redis(misk.redis.RedisClusterConfig,\
         \ wisp.deployment.Deployment, misk.metrics.v2.Metrics, com.google.common.base.Ticker)"
@@ -584,21 +597,3 @@ acceptedBreaks:
       new: "method misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisClientMetrics,\
         \ redis.clients.jedis.UnifiedJedis)"
       justification: "Only breaks one client, which is owned by the author"
-    com.squareup.misk:misk:
-    - code: "java.method.numberOfParametersChanged"
-      old: "method void misk.web.interceptors.ConcurrencyLimitsInterceptor.Factory::<init>(java.time.Clock,\
-        \ java.util.List<? extends misk.web.concurrencylimits.ConcurrencyLimiterFactory>,\
-        \ misk.web.WebConfig, misk.metrics.Metrics)"
-      new: "method void misk.web.interceptors.ConcurrencyLimitsInterceptor.Factory::<init>(java.time.Clock,\
-        \ java.util.List<? extends misk.web.concurrencylimits.ConcurrencyLimiterFactory>,\
-        \ misk.web.WebConfig, misk.web.interceptors.MiskConcurrencyLimiterFeature,\
-        \ misk.metrics.Metrics)"
-      justification: "this factory is created from the guice module only"
-    - code: "java.method.numberOfParametersChanged"
-      old: "method void misk.web.interceptors.ConcurrencyLimitsInterceptor::<init>(misk.web.interceptors.ConcurrencyLimitsInterceptor.Factory,\
-        \ misk.Action, com.netflix.concurrency.limits.Limiter<java.lang.String>, java.time.Clock,\
-        \ org.slf4j.event.Level)"
-      new: "method void misk.web.interceptors.ConcurrencyLimitsInterceptor::<init>(misk.web.interceptors.ConcurrencyLimitsInterceptor.Factory,\
-        \ misk.Action, com.netflix.concurrency.limits.Limiter<java.lang.String>, java.time.Clock,\
-        \ org.slf4j.event.Level, misk.web.interceptors.MiskConcurrencyLimiterFeature)"
-      justification: "the factory is created from the guice module only"
