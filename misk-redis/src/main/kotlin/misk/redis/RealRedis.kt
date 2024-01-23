@@ -366,14 +366,6 @@ class RealRedis(
     return unifiedJedis.close()
   }
 
-  override fun prepare() {
-    when (unifiedJedis) {
-      is JedisPooled -> unifiedJedis.pool.preparePool()
-      is JedisCluster -> unifiedJedis.clusterNodes.forEach { (_, pool) -> pool.preparePool() }
-      else -> {}
-    }
-  }
-
   override fun subscribe(jedisPubSub: JedisPubSub, channel: String) {
     unifiedJedis.subscribe(jedisPubSub, channel)
   }

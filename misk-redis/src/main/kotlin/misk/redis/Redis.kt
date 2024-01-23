@@ -456,11 +456,6 @@ interface Redis {
   fun close()
 
   /**
-   * Initializes the client
-   */
-  fun prepare()
-
-  /**
    * Subscribe to a redis channel via pubsub. This is blocking!
    */
   fun subscribe(jedisPubSub: JedisPubSub, channel: String)

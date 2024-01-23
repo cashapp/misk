@@ -1,8 +1,8 @@
 package misk.redis
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Provider
 import jakarta.inject.Inject
+import com.google.inject.Provider
 import jakarta.inject.Singleton
 
 /** Controls the connection lifecycle for Redis. */
@@ -16,7 +16,6 @@ class RedisService @Inject internal constructor(
   override fun startUp() {
     // Create the client and connect to the redis instance
     redis = redisProvider.get()
-    redis.prepare()
   }
 
   override fun shutDown() {

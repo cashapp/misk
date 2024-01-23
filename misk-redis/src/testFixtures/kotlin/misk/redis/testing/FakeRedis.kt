@@ -1,32 +1,32 @@
 package misk.redis.testing
 
-import jakarta.inject.Inject
 import misk.redis.Redis
-import misk.redis.Redis.ZAddOptions.CH
-import misk.redis.Redis.ZAddOptions.GT
-import misk.redis.Redis.ZAddOptions.LT
-import misk.redis.Redis.ZAddOptions.NX
+import misk.redis.checkHrandFieldCount
+import okio.ByteString
+import okio.ByteString.Companion.encode
+import redis.clients.jedis.JedisPubSub
+import redis.clients.jedis.Pipeline
+import redis.clients.jedis.Transaction
+import redis.clients.jedis.args.ListDirection
+import java.time.Clock
+import java.time.Duration
+import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
+import jakarta.inject.Inject
 import misk.redis.Redis.ZAddOptions.XX
+import misk.redis.Redis.ZAddOptions.NX
+import misk.redis.Redis.ZAddOptions.LT
+import misk.redis.Redis.ZAddOptions.GT
+import misk.redis.Redis.ZAddOptions.CH
 import misk.redis.Redis.ZRangeIndexMarker
 import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
 import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
-import misk.redis.checkHrandFieldCount
-import okio.ByteString
-import okio.ByteString.Companion.encode
 import okio.ByteString.Companion.encodeUtf8
-import redis.clients.jedis.JedisPubSub
-import redis.clients.jedis.Pipeline
-import redis.clients.jedis.Transaction
-import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.exceptions.JedisDataException
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
 import java.util.SortedMap
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -424,10 +424,6 @@ class FakeRedis @Inject constructor(
   }
 
   override fun close() {
-    // no op
-  }
-
-  override fun prepare() {
     // no op
   }
 

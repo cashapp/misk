@@ -1,10 +1,5 @@
 package misk.redis
 
-import jakarta.inject.Inject
-import misk.redis.Redis.ZRangeLimit
-import misk.redis.Redis.ZRangeMarker
-import misk.redis.Redis.ZRangeRankMarker
-import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.encode
 import redis.clients.jedis.JedisPubSub
@@ -15,6 +10,11 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
+import jakarta.inject.Inject
+import misk.redis.Redis.ZRangeLimit
+import misk.redis.Redis.ZRangeMarker
+import misk.redis.Redis.ZRangeRankMarker
+import misk.redis.Redis.ZRangeType
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -393,10 +393,6 @@ class FakeRedis : Redis {
 
   override fun close() {
     // No-op.
-  }
-
-  override fun prepare() {
-    // no op
   }
 
   override fun subscribe(jedisPubSub: JedisPubSub, channel: String) {
