@@ -1,6 +1,5 @@
 package misk.redis
 
-import com.google.common.base.Ticker
 import com.google.inject.Provides
 import jakarta.inject.Singleton
 import misk.ReadyService
@@ -68,9 +67,7 @@ class RedisClusterModule @JvmOverloads constructor(
   @Provides @Singleton
   internal fun provideUnifiedJedis(
     config: RedisClusterConfig,
-    deployment: Deployment,
-    metrics: Metrics,
-    ticker: Ticker,
+    deployment: Deployment
   ): UnifiedJedis {
     // Get the first replication group, we only support 1 replication group per service.
     val replicationGroup = config[config.keys.first()]
