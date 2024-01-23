@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 import java.security.Principal
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.api.HttpRequest
 
 @MiskTest(startService = true)
 internal class ActionScopedWebDispatchTest {
@@ -40,6 +41,20 @@ internal class ActionScopedWebDispatchTest {
       .execute()
     assertThat(response.code).isEqualTo(200)
     assertThat(response.body!!.string()).isEqualTo("hello Thor")
+  }
+
+  @Test
+  fun makesRequestContextAvailableInActionScope() {
+    val httpClient = OkHttpClient()
+    val response = httpClient.newCall(
+      okhttp3.Request.Builder()
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/bye").build())
+        .addHeader("X-Name", "Thor")
+        .build()
+    )
+      .execute()
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body!!.string()).isEqualTo("bye Thor")
   }
 
   @Test
@@ -74,11 +89,21 @@ internal class ActionScopedWebDispatchTest {
     fun hello(): String = "hello ${principal.get().name}"
   }
 
+  @Singleton
+  class Bye @Inject internal constructor(
+    private val scopedRequest: ActionScoped<HttpRequest>
+  ) : WebAction {
+    @Get("/bye")
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun bye(): String = "bye ${scopedRequest.get().requestHeaders["x-name"]}"
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       install(WebActionModule.create<Hello>())
+      install(WebActionModule.create<Bye>())
       install(object : ActionScopedProviderModule() {
         override fun configureProviders() {
           bindProvider(Principal::class, FakeIdentityActionScopedProvider::class)

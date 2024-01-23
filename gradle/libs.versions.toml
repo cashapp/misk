@@ -91,6 +91,7 @@ javaxInject = { module = "javax.inject:javax.inject", version = "1" }
 javaxPersistenceApi = { module = "javax.persistence:javax.persistence-api", version = "2.2" }
 jedis = { module = "redis.clients:jedis", version = "4.4.6" }
 jerseyBom = { module = "org.glassfish.jersey:jersey-bom", version = "3.0.2" }
+jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "22.0.0" }
 jettyAlpnServer = { module = "org.eclipse.jetty:jetty-alpn-server" }
 jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
 jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "10.0.15" }
