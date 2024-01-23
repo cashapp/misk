@@ -7,6 +7,7 @@ import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
+import misk.redis.RedisModule
 import misk.redis.testing.DockerRedis
 import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
@@ -14,7 +15,7 @@ import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import redis.clients.jedis.JedisPoolConfig
+import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.testing.TestRateLimitConfig
@@ -25,7 +26,8 @@ class RedisRateLimiterTest {
   @MiskTestModule
   private val module: Module = object : KAbstractModule() {
     override fun configure() {
-      install(RedisBucket4jRateLimiterModule(DockerRedis.config, JedisPoolConfig(), useSsl = false))
+      install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisBucket4jRateLimiterModule())
       install(MiskTestingServiceModule())
       install(RedisTestFlushModule())
       install(DeploymentModule(TESTING))
