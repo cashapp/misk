@@ -191,10 +191,10 @@ tink = { module = "com.google.crypto.tink:tink", version = "1.6.1" }
 tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.6.1" }
 tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.6.1" }
 tracingDatadog = { module = "com.datadoghq:dd-trace-api", version = "1.23.0" }
-wireBom = { module = "com.squareup.wire:wire-bom", version = "4.8.1" }
-wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version = "4.8.1" }
-wireGrpcClient = { module = "com.squareup.wire:wire-grpc-client", version = "4.8.1" }
-wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version = "4.8.1" }
-wireReflector = { module = "com.squareup.wire:wire-reflector", version = "4.8.1" }
-wireRuntime = { module = "com.squareup.wire:wire-runtime", version = "4.8.1" }
-wireSchema = { module = "com.squareup.wire:wire-schema", version = "4.8.1" }
+wireBom = { module = "com.squareup.wire:wire-bom", version = "4.9.3" }
+wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version = "4.9.3" }
+wireGrpcClient = { module = "com.squareup.wire:wire-grpc-client", version = "4.9.3" }
+wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version = "4.9.3" }
+wireReflector = { module = "com.squareup.wire:wire-reflector", version = "4.9.3" }
+wireRuntime = { module = "com.squareup.wire:wire-runtime", version = "4.9.3" }
+wireSchema = { module = "com.squareup.wire:wire-schema", version = "4.9.3" }
