@@ -151,6 +151,8 @@ val redisProjects = listOf(
   "misk-rate-limiting-bucket4j-redis"
 )
 
+val detektConfig = "$projectDir/detekt.yaml"
+
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
   apply(plugin = "io.gitlab.arturbosch.detekt")
@@ -169,7 +171,7 @@ subprojects {
       buildUponDefaultConfig = false
       ignoreFailures = false
       autoCorrect = true
-      config.setFrom(files("$rootDir/detekt.yaml"))
+      config.setFrom(files(detektConfig))
     }
   } else {
     extensions.configure(DetektExtension::class) {
