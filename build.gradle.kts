@@ -108,7 +108,13 @@ dependencyAnalysis {
 }
 
 apiValidation {
-  ignoredProjects.addAll(listOf("exemplar", "exemplarchat", "detektive"))
+  // ignore subprojects only if present. This allows us to activate only a subset
+  // of projects with settings.gradle.kts overlay if we want to activate only some subprojects.
+  ignoredProjects.addAll(subprojects.map { it.name }.filter { setOf(
+    "exemplar",
+    "exemplarchat",
+    "detektive",
+  ).contains(it) }.toList())
   additionalSourceSets.addAll(listOf("testFixtures"))
 }
 
