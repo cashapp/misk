@@ -82,6 +82,7 @@ public final class routeguide/Feature$Builder : com/squareup/wire/Message$Builde
 }
 
 public final class routeguide/Feature$Companion {
+	public final synthetic fun build (Lkotlin/jvm/functions/Function1;)Lrouteguide/Feature;
 }
 
 public final class routeguide/FeatureDatabase : com/squareup/wire/Message {
@@ -109,6 +110,7 @@ public final class routeguide/FeatureDatabase$Builder : com/squareup/wire/Messag
 }
 
 public final class routeguide/FeatureDatabase$Companion {
+	public final synthetic fun build (Lkotlin/jvm/functions/Function1;)Lrouteguide/FeatureDatabase;
 }
 
 public final class routeguide/GrpcRouteGuideClient : routeguide/RouteGuideClient {
@@ -147,6 +149,7 @@ public final class routeguide/Point$Builder : com/squareup/wire/Message$Builder 
 }
 
 public final class routeguide/Point$Companion {
+	public final synthetic fun build (Lkotlin/jvm/functions/Function1;)Lrouteguide/Point;
 }
 
 public final class routeguide/Rectangle : com/squareup/wire/Message {
@@ -177,6 +180,7 @@ public final class routeguide/Rectangle$Builder : com/squareup/wire/Message$Buil
 }
 
 public final class routeguide/Rectangle$Companion {
+	public final synthetic fun build (Lkotlin/jvm/functions/Function1;)Lrouteguide/Rectangle;
 }
 
 public abstract interface class routeguide/RouteGuideClient : com/squareup/wire/Service {
@@ -1040,6 +1044,7 @@ public final class routeguide/RouteNote$Builder : com/squareup/wire/Message$Buil
 }
 
 public final class routeguide/RouteNote$Companion {
+	public final synthetic fun build (Lkotlin/jvm/functions/Function1;)Lrouteguide/RouteNote;
 }
 
 public final class routeguide/RouteSummary : com/squareup/wire/Message {
@@ -1076,5 +1081,6 @@ public final class routeguide/RouteSummary$Builder : com/squareup/wire/Message$B
 }
 
 public final class routeguide/RouteSummary$Companion {
+	public final synthetic fun build (Lkotlin/jvm/functions/Function1;)Lrouteguide/RouteSummary;
 }
 
