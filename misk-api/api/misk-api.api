@@ -5,6 +5,19 @@ public abstract interface class misk/api/HttpRequest {
 	public abstract fun setRequestHeaders (Lokhttp3/Headers;)V
 }
 
+public abstract interface class misk/scope/ActionScoped {
+	public static final field Companion Lmisk/scope/ActionScoped$Companion;
+	public abstract fun get ()Ljava/lang/Object;
+}
+
+public final class misk/scope/ActionScoped$Companion {
+	public final fun of (Ljava/lang/Object;)Lmisk/scope/ActionScoped;
+}
+
+public abstract interface class misk/scope/ActionScopedProvider {
+	public abstract fun get ()Ljava/lang/Object;
+}
+
 public final class misk/web/DispatchMechanism : java/lang/Enum {
 	public static final field DELETE Lmisk/web/DispatchMechanism;
 	public static final field GET Lmisk/web/DispatchMechanism;

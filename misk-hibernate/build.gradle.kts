@@ -44,7 +44,7 @@ dependencies {
   implementation(libs.wireRuntime)
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk"))
-  implementation(project(":misk-action-scopes"))
+  implementation(project(":misk-api"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-admin"))
   implementation(project(":misk-core"))
