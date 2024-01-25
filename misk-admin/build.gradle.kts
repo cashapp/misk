@@ -18,7 +18,7 @@ dependencies {
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   api(project(":misk"))
-  api(project(":misk-action-scopes"))
+  api(project(":misk-api"))
   api(project(":misk-actions"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
@@ -34,6 +34,7 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.wireRuntime)
   testImplementation(project(":misk-api"))
+  testImplementation(project(":misk-action-scopes"))
   testImplementation(project(":misk-testing"))
 }
 

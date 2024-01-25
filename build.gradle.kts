@@ -104,6 +104,13 @@ dependencyAnalysis {
         exclude("com.bucket4j:bucket4j-core")
       }
     }
+    project(":misk-action-scopes") {
+      onIncorrectConfiguration {
+        // For backwards compatibility, we want Action Scoped classes moved to misk-api to still be
+        // part of misk-action-scopes api.
+        exclude(":misk-api")
+      }
+    }
   }
 }
 
