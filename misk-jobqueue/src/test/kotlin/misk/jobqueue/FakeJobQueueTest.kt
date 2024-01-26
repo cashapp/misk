@@ -1,8 +1,18 @@
 package misk.jobqueue
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.jobqueue.testutilities.ColorException
+import misk.jobqueue.testutilities.ENQUEUER_QUEUE
+import misk.jobqueue.testutilities.EnqueuerJobHandler
+import misk.jobqueue.testutilities.ExampleJob
+import misk.jobqueue.testutilities.ExampleJobEnqueuer
+import misk.jobqueue.testutilities.ExampleJobHint
+import misk.jobqueue.testutilities.GREEN_QUEUE
+import misk.jobqueue.testutilities.RED_QUEUE
 import misk.logging.LogCollectorModule
 import misk.moshi.adapter
 import misk.testing.MiskTest
@@ -15,8 +25,6 @@ import wisp.time.FakeClock
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -530,68 +538,6 @@ private class TestModule : KAbstractModule() {
   }
 }
 
-internal val RED_QUEUE = QueueName("red_queue")
-internal val GREEN_QUEUE = QueueName("green_queue")
-internal val ENQUEUER_QUEUE = QueueName("first_step_queue")
-
-internal enum class Color {
-  RED,
-  GREEN
-}
-
-internal class ColorException : Throwable()
-
-internal data class ExampleJob(
-  val color: Color,
-  val message: String,
-  val hint: ExampleJobHint? = null
-)
-
-internal enum class ExampleJobHint {
-  DONT_ACK,
-  THROW,
-  THROW_ONCE,
-  DEAD_LETTER,
-  DEAD_LETTER_ONCE
-}
-
-internal class ExampleJobEnqueuer @Inject private constructor(
-  private val jobQueue: JobQueue,
-  moshi: Moshi
-) {
-  private val jobAdapter = moshi.adapter<ExampleJob>()
-
-  fun enqueueRed(message: String, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
-    val job = ExampleJob(Color.RED, message, hint)
-    jobQueue.enqueue(
-      RED_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
-      attributes = mapOf("key" to "value")
-    )
-  }
-
-  fun enqueueGreen(message: String, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
-    val job = ExampleJob(Color.GREEN, message, hint)
-    jobQueue.enqueue(
-      GREEN_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
-      attributes = mapOf("key" to "value")
-    )
-  }
-
-  fun batchEnqueueRed(messages: List<String>, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
-    jobQueue.batchEnqueue(RED_QUEUE, messages.map {
-      JobQueue.JobRequest(
-        body = jobAdapter.toJson(ExampleJob(Color.RED, it, hint)),
-        deliveryDelay = deliveryDelay,
-        attributes = mapOf("key" to "value")
-      )
-    })
-  }
-
-  fun enqueueEnqueuer() {
-    jobQueue.enqueue(ENQUEUER_QUEUE, body = "")
-  }
-}
-
 @Singleton
 internal class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobHandler {
   private val jobAdapter = moshi.adapter<ExampleJob>()
@@ -627,20 +573,5 @@ internal class ExampleJobHandler @Inject private constructor(moshi: Moshi) : Job
 
   companion object {
     private val log = getLogger<ExampleJobHandler>()
-  }
-}
-
-internal class EnqueuerJobHandler @Inject private constructor(
-  private val jobQueue: JobQueue,
-  moshi: Moshi
-) : JobHandler {
-  private val jobAdapter = moshi.adapter<ExampleJob>()
-
-  override fun handleJob(job: Job) {
-    jobQueue.enqueue(
-      queueName = GREEN_QUEUE,
-      body = jobAdapter.toJson(ExampleJob(color = Color.GREEN, message = "We made it!"))
-    )
-    job.acknowledge()
   }
 }

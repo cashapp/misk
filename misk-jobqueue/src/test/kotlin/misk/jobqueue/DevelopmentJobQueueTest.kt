@@ -9,6 +9,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import jakarta.inject.Inject
+import misk.jobqueue.testutilities.ExampleJobEnqueuer
+import misk.jobqueue.testutilities.GREEN_QUEUE
+import misk.jobqueue.testutilities.RED_QUEUE
 
 @MiskTest(startService = true)
 internal class DevelopmentJobQueueTest {
