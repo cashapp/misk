@@ -597,3 +597,188 @@ acceptedBreaks:
       new: "method misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisClientMetrics,\
         \ redis.clients.jedis.UnifiedJedis)"
       justification: "Only breaks one client, which is owned by the author"
+  "2024.01.25.022820-30be5eb":
+    com.squareup.misk:misk-aws:
+    - code: "java.annotation.attributeValueChanged"
+      old: "class misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.JobHandler>"
+      new: "class misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.AbstractJobHandler>"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "class misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.JobHandler>"
+      new: "class misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.AbstractJobHandler>"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean)"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>, boolean)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>, boolean)"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.JobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.AbstractJobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.JobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.AbstractJobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean)"
+      justification: "Adding batched job handler interface"
+    - code: "java.generics.formalTypeParameterChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.JobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.AbstractJobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.jobqueue.sqs.SqsJobConsumer.QueueReceiver::<init>(misk.jobqueue.QueueName,\
+        \ ===misk.jobqueue.JobHandler===)"
+      new: "parameter void misk.jobqueue.sqs.SqsJobConsumer.QueueReceiver::<init>(misk.jobqueue.QueueName,\
+        \ ===misk.jobqueue.AbstractJobHandler===)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.jobqueue.sqs.SqsJobConsumer::subscribe(misk.jobqueue.QueueName,\
+        \ ===misk.jobqueue.JobHandler===)"
+      new: "parameter void misk.jobqueue.sqs.SqsJobConsumer::subscribe(misk.jobqueue.QueueName,\
+        \ ===misk.jobqueue.AbstractJobHandler===)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>, boolean)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>, boolean)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule.Companion::create(misk.jobqueue.QueueName,\
+        \ kotlin.reflect.KClass<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.JobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.AbstractJobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.JobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.AbstractJobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean)"
+      justification: "Adding batched job handler interface"
+    - code: "java.method.returnTypeTypeParametersChanged"
+      old: "method <T extends misk.jobqueue.JobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.JobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      new: "method <T extends misk.jobqueue.AbstractJobHandler> misk.jobqueue.sqs.AwsSqsJobHandlerModule<T>\
+        \ misk.jobqueue.sqs.AwsSqsJobHandlerModule<T extends misk.jobqueue.AbstractJobHandler>::create(misk.jobqueue.QueueName,\
+        \ java.lang.Class<T>, boolean, java.util.List<? extends com.google.inject.Key<?\
+        \ extends com.google.common.util.concurrent.Service>>)"
+      justification: "Adding batched job handler interface"
+    com.squareup.misk:misk-jobqueue:
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.jobqueue.JobConsumer::subscribe(misk.jobqueue.QueueName,\
+        \ ===misk.jobqueue.JobHandler===)"
+      new: "parameter void misk.jobqueue.JobConsumer::subscribe(misk.jobqueue.QueueName,\
+        \ ===misk.jobqueue.AbstractJobHandler===)"
+      justification: "Adding batched job handler interface"
