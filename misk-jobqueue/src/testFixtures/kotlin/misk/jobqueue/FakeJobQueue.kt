@@ -1,6 +1,8 @@
 package misk.jobqueue
 
-import com.google.common.collect.Queues
+import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.hibernate.Gid
@@ -11,12 +13,8 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
-import java.util.concurrent.PriorityBlockingQueue
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 import java.util.concurrent.LinkedBlockingQueue
-import kotlin.jvm.Throws
+import java.util.concurrent.PriorityBlockingQueue
 
 /**
  * A fake implementation of [JobQueue] and [FakeTransactionalJobQueue] intended for testing.
@@ -35,7 +33,7 @@ import kotlin.jvm.Throws
 @Singleton
 class FakeJobQueue @Inject constructor(
   private val clock: Clock,
-  private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
+  private val jobHandlers: Provider<Map<QueueName, AbstractJobHandler>>,
   private val tokenGenerator: TokenGenerator
 ) : JobQueue, TransactionalJobQueue {
   private val jobQueues = ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>()
@@ -203,22 +201,51 @@ class FakeJobQueue @Inject constructor(
         job.deadLettered = false
         job.acknowledged = false
       }
-
-      val jobHandler = jobHandlers[job.queueName]!!
-      try {
-        retry(retries, FlatBackoff(Duration.ofMillis(20))) { jobHandler.handleJob(job) }
-      } catch (e: Throwable) {
-        deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
-        // Re-throwing also ensures that we won't cause an infinite loop.
-        throw e
-      }
-
-      result += job
-      if (!job.deadLettered && assertAcknowledged && !job.acknowledged) {
-        deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
-        error("Expected $job to be acknowledged after handling")
-      }
     }
+
+    touchedJobs
+      .groupBy { it.queueName }
+      .forEach { (queueName, jobs) ->
+        val jobHandler = jobHandlers[queueName]!!
+        when (jobHandler) {
+          is BatchedJobHandler -> {
+            try {
+              retry(retries, FlatBackoff(Duration.ofMillis(20))) {
+                jobHandler.handleJobs(jobs)
+              }
+            } catch (e: Throwable) {
+              jobs.filter { it.deadLettered || !it.acknowledged }.forEach { job ->
+                deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
+              }
+              // Re-throwing also ensures that we won't cause an infinite loop.
+              throw e
+            }
+
+            jobs.forEach { job ->
+              result += job
+              if (!job.deadLettered && assertAcknowledged && !job.acknowledged) {
+                deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
+                error("Expected $job to be acknowledged after handling")
+              }
+            }
+          }
+          is JobHandler -> jobs.forEach { job ->
+            try {
+              retry(retries, FlatBackoff(Duration.ofMillis(20))) { jobHandler.handleJob(job) }
+            } catch (e: Throwable) {
+              deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
+              // Re-throwing also ensures that we won't cause an infinite loop.
+              throw e
+            }
+
+            result += job
+            if (!job.deadLettered && assertAcknowledged && !job.acknowledged) {
+              deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
+              error("Expected $job to be acknowledged after handling")
+            }
+          }
+        }
+      }
 
     // Reenqueue deadlettered jobs outside of the main loop to prevent an infinite loop.
     result.forEach { job ->
