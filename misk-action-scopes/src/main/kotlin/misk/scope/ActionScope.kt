@@ -183,6 +183,20 @@ class ActionScope @Inject internal constructor(
       return cachedValue as T
     }
 
+    // Search for any subtype of this key
+    // For example, given `HttpCall` extends `HttpRequest`, the value for `HttpCall` key
+    // will be returned when `HttpRequest` is requested (only if a `HttpRequest` key is not set)
+    val keyClass = key.typeLiteral.rawType
+    val subtypesThreadState = threadState.filterKeys {
+      it.annotation == key.annotation && keyClass.isAssignableFrom(it.typeLiteral.rawType)
+    }
+    if (subtypesThreadState.isNotEmpty()) {
+      val subtypeCachedValue = subtypesThreadState.values.toList()[0]
+      threadState[key] = subtypeCachedValue // cache this value
+      @Suppress("UNCHECKED_CAST")
+      return subtypeCachedValue as T
+    }
+
     val value = providerFor(key as Key<*>).get()
     threadState[key] = value
 
