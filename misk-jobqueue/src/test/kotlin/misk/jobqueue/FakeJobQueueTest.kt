@@ -1,32 +1,27 @@
 package misk.jobqueue
 
-import com.squareup.moshi.Moshi
-import misk.MiskTestingServiceModule
-import misk.inject.KAbstractModule
-import misk.logging.LogCollectorModule
-import misk.moshi.adapter
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
+import jakarta.inject.Inject
+import misk.jobqueue.testutilities.ColorException
+import misk.jobqueue.testutilities.ExampleJobEnqueuer
+import misk.jobqueue.testutilities.ExampleJobHint
+import misk.jobqueue.testutilities.GREEN_QUEUE
+import misk.jobqueue.testutilities.RED_QUEUE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
-import wisp.logging.getLogger
 import wisp.time.FakeClock
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.ConcurrentHashMap
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import kotlin.reflect.KClass
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
-internal class FakeJobQueueTest {
-  @MiskTestModule private val module = TestModule()
-
+abstract class FakeJobQueueTest {
   @Inject private lateinit var exampleJobEnqueuer: ExampleJobEnqueuer
   @Inject private lateinit var fakeClock: FakeClock
   @Inject private lateinit var fakeJobQueue: FakeJobQueue
   @Inject private lateinit var logCollector: LogCollector
+
+  abstract val loggerClass: KClass<*>
 
   @Test
   fun basic() {
@@ -42,7 +37,7 @@ internal class FakeJobQueueTest {
 
     fakeJobQueue.handleJobs()
 
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received GREEN job with message: dinosaur",
       "received GREEN job with message: android",
       "received RED job with message: stop sign"
@@ -105,7 +100,7 @@ internal class FakeJobQueueTest {
     val redJobs = fakeJobQueue.handleJobs(RED_QUEUE)
     assertThat(redJobs).hasSize(1)
 
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received RED job with message: hello"
     )
   }
@@ -138,7 +133,7 @@ internal class FakeJobQueueTest {
     val greenJobs = fakeJobQueue.handleJobs(GREEN_QUEUE)
     assertThat(greenJobs).hasSize(1)
 
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received RED job with message: not dropped red",
       "received GREEN job with message: not dropped green"
     )
@@ -167,7 +162,7 @@ internal class FakeJobQueueTest {
     val redJobs = fakeJobQueue.handleJobs(RED_QUEUE)
     assertThat(redJobs).hasSize(1)
 
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received RED job with message: not dropped red",
     )
   }
@@ -309,7 +304,7 @@ internal class FakeJobQueueTest {
 
     fakeJobQueue.handleJobs()
 
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received GREEN job with message: dinosaur",
       "received GREEN job with message: android",
       "received RED job with message: stop sign"
@@ -334,7 +329,7 @@ internal class FakeJobQueueTest {
     // Handle jobs 4s after test start.
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactly(
       "received GREEN job with message: J1:0s",
       "received GREEN job with message: J3:0s",
       "received GREEN job with message: J5:4s",
@@ -358,7 +353,7 @@ internal class FakeJobQueueTest {
     // Handle jobs 5s after test start: jobs with the delay stay in the queue.
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactly(
       "received GREEN job with message: J1:0s",
     )
 
@@ -366,7 +361,7 @@ internal class FakeJobQueueTest {
     fakeClock.add(Duration.ofSeconds(5))
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactly(
       "received GREEN job with message: J2:0s+10s",
       "received GREEN job with message: J3:5s+5s",
     )
@@ -385,7 +380,7 @@ internal class FakeJobQueueTest {
     fakeClock.add(Duration.ofSeconds(15))
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactly(
       "received GREEN job with message: J1:0s+10s",
       "received GREEN job with message: J2:5s+5s",
     )
@@ -413,7 +408,7 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
 
     // Check order.
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactly(
       "received GREEN job with message: J1:0s",
       "received GREEN job with message: J3:0s",
       "received GREEN job with message: J5:0s",
@@ -442,7 +437,7 @@ internal class FakeJobQueueTest {
     // Same job is not processed the second time.
     assertThat(fakeJobQueue.handleJob(job2)).isFalse()
 
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received GREEN job with message: J2",
     )
 
@@ -450,7 +445,7 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
     assertThat(fakeJobQueue.handleJobs()).hasSize(2)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received GREEN job with message: J1",
       "received GREEN job with message: J3",
     )
@@ -468,7 +463,7 @@ internal class FakeJobQueueTest {
     fakeJobQueue.handleJobs(GREEN_QUEUE, assertAcknowledged = false, retries = 1)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
     assertThat(fakeJobQueue.peekDeadlettered(GREEN_QUEUE)).hasSize(3)
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received GREEN job with message: J1",
       "received GREEN job with message: J2",
       "received GREEN job with message: J3",
@@ -479,7 +474,7 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.handleJob(job2)).isFalse()
     assertThat(fakeJobQueue.reprocessDeadlettered(job2)).isTrue()
     assertThat(fakeJobQueue.reprocessDeadlettered(job2)).isFalse()
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received GREEN job with message: J2",
     )
 
@@ -487,7 +482,7 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.peekDeadlettered(GREEN_QUEUE)).hasSize(2)
     assertThat(fakeJobQueue.reprocessDeadlettered(GREEN_QUEUE)).hasSize(2)
     assertThat(fakeJobQueue.peekDeadlettered(GREEN_QUEUE)).isEmpty()
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received GREEN job with message: J1",
       "received GREEN job with message: J3",
     )
@@ -506,141 +501,15 @@ internal class FakeJobQueueTest {
     val unknownJob =
       FakeJob(GREEN_QUEUE, "unknown", "idempotenceKey", "body", mapOf(), fakeClock.instant())
     assertThat(fakeJobQueue.handleJob(unknownJob)).isFalse()
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).isEmpty()
+    assertThat(logCollector.takeMessages(loggerClass)).isEmpty()
 
     // Process all jobs.
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
     assertThat(fakeJobQueue.handleJobs()).hasSize(2)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(loggerClass)).containsExactlyInAnyOrder(
       "received GREEN job with message: J1",
       "received GREEN job with message: J2",
     )
-  }
-}
-
-private class TestModule : KAbstractModule() {
-  override fun configure() {
-    install(MiskTestingServiceModule())
-    install(LogCollectorModule())
-    install(FakeJobHandlerModule.create<ExampleJobHandler>(RED_QUEUE))
-    install(FakeJobHandlerModule.create<ExampleJobHandler>(GREEN_QUEUE))
-    install(FakeJobHandlerModule.create<EnqueuerJobHandler>(ENQUEUER_QUEUE))
-    install(FakeJobQueueModule())
-  }
-}
-
-internal val RED_QUEUE = QueueName("red_queue")
-internal val GREEN_QUEUE = QueueName("green_queue")
-internal val ENQUEUER_QUEUE = QueueName("first_step_queue")
-
-internal enum class Color {
-  RED,
-  GREEN
-}
-
-internal class ColorException : Throwable()
-
-internal data class ExampleJob(
-  val color: Color,
-  val message: String,
-  val hint: ExampleJobHint? = null
-)
-
-internal enum class ExampleJobHint {
-  DONT_ACK,
-  THROW,
-  THROW_ONCE,
-  DEAD_LETTER,
-  DEAD_LETTER_ONCE
-}
-
-internal class ExampleJobEnqueuer @Inject private constructor(
-  private val jobQueue: JobQueue,
-  moshi: Moshi
-) {
-  private val jobAdapter = moshi.adapter<ExampleJob>()
-
-  fun enqueueRed(message: String, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
-    val job = ExampleJob(Color.RED, message, hint)
-    jobQueue.enqueue(
-      RED_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
-      attributes = mapOf("key" to "value")
-    )
-  }
-
-  fun enqueueGreen(message: String, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
-    val job = ExampleJob(Color.GREEN, message, hint)
-    jobQueue.enqueue(
-      GREEN_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
-      attributes = mapOf("key" to "value")
-    )
-  }
-
-  fun batchEnqueueRed(messages: List<String>, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
-    jobQueue.batchEnqueue(RED_QUEUE, messages.map {
-      JobQueue.JobRequest(
-        body = jobAdapter.toJson(ExampleJob(Color.RED, it, hint)),
-        deliveryDelay = deliveryDelay,
-        attributes = mapOf("key" to "value")
-      )
-    })
-  }
-
-  fun enqueueEnqueuer() {
-    jobQueue.enqueue(ENQUEUER_QUEUE, body = "")
-  }
-}
-
-@Singleton
-internal class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobHandler {
-  private val jobAdapter = moshi.adapter<ExampleJob>()
-  private val jobsExecutedOnce = ConcurrentHashMap<String, Boolean>()
-
-  override fun handleJob(job: Job) {
-    val deserializedJob = jobAdapter.fromJson(job.body)!!
-    log.info { "received ${deserializedJob.color} job with message: ${deserializedJob.message}" }
-
-    assertThat(job.attributes).containsEntry("key", "value")
-
-    val key = "${deserializedJob.color}:${deserializedJob.hint}:${deserializedJob.message}"
-    val jobExecutedBefore = jobsExecutedOnce.putIfAbsent(key, true) == true
-    when (deserializedJob.hint) {
-      ExampleJobHint.DONT_ACK -> return
-      ExampleJobHint.DEAD_LETTER -> {
-        job.deadLetter()
-        return
-      }
-      ExampleJobHint.DEAD_LETTER_ONCE -> if (!jobExecutedBefore) {
-        job.deadLetter()
-        return
-      }
-      ExampleJobHint.THROW -> throw ColorException()
-      ExampleJobHint.THROW_ONCE -> if (!jobExecutedBefore) {
-        throw ColorException()
-      }
-      else -> Unit
-    }
-
-    job.acknowledge()
-  }
-
-  companion object {
-    private val log = getLogger<ExampleJobHandler>()
-  }
-}
-
-internal class EnqueuerJobHandler @Inject private constructor(
-  private val jobQueue: JobQueue,
-  moshi: Moshi
-) : JobHandler {
-  private val jobAdapter = moshi.adapter<ExampleJob>()
-
-  override fun handleJob(job: Job) {
-    jobQueue.enqueue(
-      queueName = GREEN_QUEUE,
-      body = jobAdapter.toJson(ExampleJob(color = Color.GREEN, message = "We made it!"))
-    )
-    job.acknowledge()
   }
 }

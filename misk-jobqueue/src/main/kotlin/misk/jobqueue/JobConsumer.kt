@@ -7,7 +7,7 @@ interface JobConsumer {
    * begin receiving messages from the underlying job queue and dispatch them to the provided
    * handler. A service may only have one subscription outstanding per queue
    */
-  fun subscribe(queueName: QueueName, handler: JobHandler)
+  fun subscribe(queueName: QueueName, handler: AbstractJobHandler)
   fun unsubscribe(queueName: QueueName)
 }
 

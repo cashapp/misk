@@ -4,12 +4,17 @@ import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provider
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.feature.Feature
 import misk.feature.FeatureFlags
+import misk.jobqueue.AbstractJobHandler
+import misk.jobqueue.BatchedJobHandler
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
@@ -26,9 +31,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
 @Singleton
 internal class SqsJobConsumer @Inject internal constructor(
@@ -49,7 +51,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
   private val subscriptions = ConcurrentHashMap<QueueName, QueueReceiver>()
 
-  override fun subscribe(queueName: QueueName, handler: JobHandler) {
+  override fun subscribe(queueName: QueueName, handler: AbstractJobHandler) {
     val receiver = QueueReceiver(queueName, handler)
     check(subscriptions.putIfAbsent(queueName, receiver) == null) {
       "already subscribed to queue ${queueName.value}"
@@ -87,7 +89,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
   internal inner class QueueReceiver(
     queueName: QueueName,
-    private val handler: JobHandler
+    private val handler: AbstractJobHandler
   ) {
     private val queue = queues.getForReceiving(queueName)
     private val shouldKeepRunning = AtomicBoolean(false)
@@ -181,11 +183,50 @@ internal class SqsJobConsumer @Inject internal constructor(
     }
 
     private fun handleMessages(messages: List<SqsJob>): List<CompletableFuture<Status>> {
-      return messages.map { message ->
+      metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc(messages.size.toDouble())
+      return when (handler) {
+        is JobHandler -> handleMessagesUnbatched(handler, messages)
+        is BatchedJobHandler -> listOf(handleMessagesBatched(handler, messages))
+      }
+    }
+
+    private fun handleMessagesBatched(
+      batchedHandler: BatchedJobHandler,
+      messages: List<SqsJob>
+    ): CompletableFuture<Status> =
+      CompletableFuture.supplyAsync(
+        {
+          tracer.traceWithNewRootSpan("handle-batched-jobs-${queue.queueName}") { span ->
+            try {
+              MDC.put(SQS_QUEUE_NAME_MDC, queue.queueName)
+              MDC.put(SQS_QUEUE_TYPE_MDC, SQS_QUEUE_TYPE)
+              val (duration, _) = timed { batchedHandler.handleJobs(messages) }
+              metrics.handlerDispatchTime.record(
+                duration.toMillis().toDouble(), queue.queueName,
+                queue.queueName
+              )
+              Status.OK
+            } catch (th: Throwable) {
+              log.error(th) { "error handling job from ${queue.queueName}" }
+              metrics.handlerFailures.labels(queue.queueName, queue.queueName).inc()
+              Tags.ERROR.set(span, true)
+              Status.FAILED
+            } finally {
+              MDC.remove(SQS_QUEUE_NAME_MDC)
+              MDC.remove(SQS_QUEUE_TYPE_MDC)
+            }
+          }
+        },
+        handlingThreads
+      )
+
+    private fun handleMessagesUnbatched(
+      unbatchedHandler: JobHandler,
+      messages: List<SqsJob>
+    ): List<CompletableFuture<Status>> =
+      messages.map { message ->
         CompletableFuture.supplyAsync(
           {
-            metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc()
-
             tracer.traceWithNewRootSpan("handle-job-${queue.queueName}") { span ->
               // If the incoming job has an original trace id, set that as a tag on the new span.
               // We don't turn that into the parent of the current span because that would
@@ -201,7 +242,7 @@ internal class SqsJobConsumer @Inject internal constructor(
                 MDC.put(SQS_JOB_ID_STRUCTURED_MDC, message.id)
                 MDC.put(SQS_QUEUE_NAME_MDC, message.queueName.value)
                 MDC.put(SQS_QUEUE_TYPE_MDC, SQS_QUEUE_TYPE)
-                val (duration, _) = timed { handler.handleJob(message) }
+                val (duration, _) = timed { unbatchedHandler.handleJob(message) }
                 metrics.handlerDispatchTime.record(
                   duration.toMillis().toDouble(), queue.queueName,
                   queue.queueName
@@ -223,7 +264,6 @@ internal class SqsJobConsumer @Inject internal constructor(
           handlingThreads
         )
       }
-    }
   }
 
   companion object {
