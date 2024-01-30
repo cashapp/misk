@@ -597,3 +597,320 @@ acceptedBreaks:
       new: "method misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisClientMetrics,\
         \ redis.clients.jedis.UnifiedJedis)"
       justification: "Only breaks one client, which is owned by the author"
+  "2024.01.29.234331-880e488":
+    app.cash.wisp:bucket4j:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-aws-environment:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-client:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-config:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-containers-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-deployment:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-deployment-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-feature:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-feature-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-launchdarkly:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-lease:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-lease-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-logging:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-logging-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-moshi:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-rate-limiting:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-resource-loader:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-resource-loader-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-sampling:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-ssl:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-task:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-time-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-token:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-token-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    app.cash.wisp:wisp-tracing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-action-scopes:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-actions:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-admin:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-api:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-aws:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-aws-dynamodb:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-aws2-dynamodb:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-clustering:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-clustering-dynamodb:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-config:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-core:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-cron:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-crypto:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-datadog:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-events:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-events-core:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-events-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-exceptions-dynamodb:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-feature:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-feature-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-gcp:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-grpc-reflect:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-grpc-tests:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-hibernate:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-hibernate-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-hotwire:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-inject:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-inject-guice7-test:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-jdbc:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-jobqueue:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-jooq:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-launchdarkly:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-launchdarkly-core:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-lease:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-metrics:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-metrics-digester:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-policy:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-prometheus:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-proto:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-rate-limiting-bucket4j-dynamodb-v1:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-rate-limiting-bucket4j-mysql:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-rate-limiting-bucket4j-redis:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-redis:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-service:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-slack:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-sqldelight:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-sqldelight-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-tailwind:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-testing:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-transactional-jobqueue:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:misk-warmup:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    com.squareup.misk:samples:
+    - code: "{revapi check code}"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
