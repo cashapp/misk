@@ -387,7 +387,7 @@ internal class errorOnlyRequestLoggingAction @Inject constructor() : WebAction {
   @Get("/call/errorOnlyRequestLoggingAction/{message}")
   @Unauthenticated
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @LogRequestResponse(requestLoggingConstraints = RequestLoggingConstraints.ERROR_ONLY)
+  @LogRequestResponse(requestLoggingMode = RequestLoggingMode.ERROR_ONLY)
   fun call(@PathParam message: String) : String {
     if (message == "fail") {
       throw IllegalStateException(message)

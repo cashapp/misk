@@ -14,7 +14,7 @@ package misk.web.interceptors
  * If you would like to turn off rate limiting and emit all logs, set ratePerSecond and/or
  * errorRatePerSecond to 0.
  *
- * If you would like to turn off logging for all non-error requests, set requestLoggingConstraints to ERROR_ONLY.
+ * If you would like to turn off logging for all non-error requests, set requestLoggingMode to ERROR_ONLY.
  * otherwise, all requests will be logged (excluding those otherwise rate limited, etc).
  *
  * Percentage sampling is used to sample request and response bodies, with 0.0 for none and 1.0 for all.
@@ -38,10 +38,10 @@ annotation class LogRequestResponse(
   /** which deploy environments will not have request/response logging enabled **/
   val excludedEnvironments: Array<String> = [],
   /** By default log non-error responses **/
-  val requestLoggingConstraints: RequestLoggingConstraints = RequestLoggingConstraints.ALL,
+  val requestLoggingMode: RequestLoggingMode = RequestLoggingMode.ALL,
 )
 
-enum class RequestLoggingConstraints {
+enum class RequestLoggingMode {
   /**
    * Log all requests and responses, rate limiting, etc still apply.
    **/
