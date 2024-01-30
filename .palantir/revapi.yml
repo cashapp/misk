@@ -711,6 +711,13 @@ acceptedBreaks:
       justification: "{Adding a new backwards compatible option to the request logging\
         \ interceptor}"
     - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.interceptors.ActionLoggingConfig misk.web.interceptors.ActionLoggingConfig::copy(long,\
+        \ long, double, double, java.util.List<java.lang.String>)"
+      new: "method misk.web.interceptors.ActionLoggingConfig misk.web.interceptors.ActionLoggingConfig::copy(long,\
+        \ long, double, double, java.util.List<java.lang.String>, misk.web.interceptors.RequestLoggingMode)"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    - code: "java.method.numberOfParametersChanged"
       old: "method void misk.web.interceptors.RequestLoggingInterceptor::<init>(misk.Action,\
         \ misk.scope.ActionScoped<misk.MiskCaller>, com.google.common.base.Ticker,\
         \ misk.random.ThreadLocalRandom, misk.web.interceptors.LogRateLimiter, long,\
@@ -721,6 +728,19 @@ acceptedBreaks:
         \ misk.random.ThreadLocalRandom, misk.web.interceptors.LogRateLimiter, long,\
         \ long, double, double, misk.web.interceptors.RequestResponseCapture, java.util.List<?\
         \ extends misk.web.interceptors.RequestLoggingTransformer>, misk.web.interceptors.RequestLoggingConstraints)"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.web.interceptors.RequestLoggingInterceptor::<init>(misk.Action,\
+        \ misk.scope.ActionScoped<misk.MiskCaller>, com.google.common.base.Ticker,\
+        \ misk.random.ThreadLocalRandom, misk.web.interceptors.LogRateLimiter, long,\
+        \ long, double, double, misk.web.interceptors.RequestResponseCapture, java.util.List<?\
+        \ extends misk.web.interceptors.RequestLoggingTransformer>)"
+      new: "method void misk.web.interceptors.RequestLoggingInterceptor::<init>(misk.Action,\
+        \ misk.scope.ActionScoped<misk.MiskCaller>, com.google.common.base.Ticker,\
+        \ misk.random.ThreadLocalRandom, misk.web.interceptors.LogRateLimiter, long,\
+        \ long, double, double, misk.web.interceptors.RequestResponseCapture, java.util.List<?\
+        \ extends misk.web.interceptors.RequestLoggingTransformer>, misk.web.interceptors.RequestLoggingMode)"
       justification: "{Adding a new backwards compatible option to the request logging\
         \ interceptor}"
     - code: "{revapi check code}"
