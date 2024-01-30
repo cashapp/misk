@@ -6,6 +6,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import wisp.lease.LeaseManager
 import wisp.logging.getLogger
+import wisp.logging.info
 import java.time.Clock
 import java.time.Duration
 import jakarta.inject.Inject
@@ -20,11 +21,11 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
   @Inject private lateinit var clusterWeight: ClusterWeightProvider
 
   override fun startUp() {
-    logger.info { "Starting CronTask" }
+    logger.info("task_name" to this::class.simpleName) { "Starting CronTask" }
     var lastRun = clock.instant()
     taskQueue.scheduleWithBackoff(INTERVAL) {
       if (clusterWeight.get() == 0) {
-        logger.info { "CronTask is running on a passive node. Skipping." }
+        logger.info("task_name" to this::class.simpleName) { "CronTask is running on a passive node. Skipping." }
         return@scheduleWithBackoff Status.OK
       }
       val lease = leaseManager.requestLease(CRON_CLUSTER_LEASE_NAME)
@@ -43,7 +44,7 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
   }
 
   override fun shutDown() {
-    logger.info { "Stopping CronTask" }
+    logger.info("task_name" to this::class.simpleName) { "Stopping CronTask" }
     cronManager.removeAllCrons()
   }
 
