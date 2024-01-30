@@ -36,6 +36,7 @@ class RequestLoggingInterceptor internal constructor(
   private val errorBodySampling: Double,
   private val bodyCapture: RequestResponseCapture,
   private val requestLoggingTransformers: List<RequestLoggingTransformer>,
+  private val enableNonErrorLogging: Boolean,
 ) : NetworkInterceptor {
   @Singleton
   class Factory @Inject internal constructor(
@@ -81,6 +82,7 @@ class RequestLoggingInterceptor internal constructor(
         config.errorBodySampling,
         bodyCapture,
         requestLoggingTransformers,
+        config.enableNonErrorLogging,
       )
     }
   }
@@ -124,6 +126,10 @@ class RequestLoggingInterceptor internal constructor(
     }
 
     val isError = statusCode > 299 || error != null
+
+    if (!isError && !enableNonErrorLogging) {
+      return
+    }
 
     val rateLimit = if (isError) errorRatePerSecond else ratePerSecond
     val loggingBucketId = LogBucketId(actionClass = action.name, isError = isError)
@@ -180,6 +186,7 @@ data class ActionLoggingConfig @JvmOverloads constructor(
   val bodySampling: Double = 0.0,
   val errorBodySampling: Double = 0.0,
   val excludedEnvironments: List<String> = listOf(),
+  val enableNonErrorLogging: Boolean = true,
 ) {
   companion object {
     fun fromAnnotation(logRequestResponse: LogRequestResponse): ActionLoggingConfig = ActionLoggingConfig(
@@ -188,6 +195,7 @@ data class ActionLoggingConfig @JvmOverloads constructor(
       bodySampling = logRequestResponse.bodySampling,
       errorBodySampling = logRequestResponse.errorBodySampling,
       excludedEnvironments = logRequestResponse.excludedEnvironments.toList(),
+      enableNonErrorLogging = logRequestResponse.enableNonErrorLogging,
     )
 
     fun fromConfigMapOrAnnotation(
