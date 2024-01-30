@@ -181,14 +181,14 @@ internal class RequestLoggingInterceptorTest {
 
   @Test
   fun noNonErrorRequestLogging() {
-    assertThat(invoke("/call/noNonErrorRequestLoggingAction/fail", "caller").code)
+    assertThat(invoke("/call/errorOnlyRequestLoggingAction/fail", "caller").code)
       .isEqualTo(500)
-    assertThat(invoke("/call/noNonErrorRequestLoggingAction/hello", "caller")
+    assertThat(invoke("/call/errorOnlyRequestLoggingAction/hello", "caller")
       .isSuccessful
     ).isTrue()
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
-      "NoNonErrorRequestLoggingAction principal=caller time=100.0 ms failed"
+      "errorOnlyRequestLoggingAction principal=caller time=100.0 ms failed"
     )
   }
 
@@ -327,7 +327,7 @@ internal class RequestLoggingInterceptorTest {
       install(WebActionModule.create<RateLimitingRequestLoggingAction>())
       install(WebActionModule.create<RateLimitingIncludesBodyRequestLoggingAction>())
       install(WebActionModule.create<NoRateLimitingRequestLoggingAction>())
-      install(WebActionModule.create<NoNonErrorRequestLoggingAction>())
+      install(WebActionModule.create<errorOnlyRequestLoggingAction>())
       install(WebActionModule.create<ExceptionThrowingRequestLoggingAction>())
       install(WebActionModule.create<NoRequestLoggingAction>())
       install(WebActionModule.create<RequestLoggingActionWithHeaders>())
@@ -383,11 +383,11 @@ internal class NoRateLimitingRequestLoggingAction @Inject constructor() : WebAct
   fun call(@PathParam message: String) = "echo: $message"
 }
 
-internal class NoNonErrorRequestLoggingAction @Inject constructor() : WebAction {
-  @Get("/call/noNonErrorRequestLoggingAction/{message}")
+internal class errorOnlyRequestLoggingAction @Inject constructor() : WebAction {
+  @Get("/call/errorOnlyRequestLoggingAction/{message}")
   @Unauthenticated
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @LogRequestResponse(enableNonErrorLogging = false)
+  @LogRequestResponse(requestLoggingConstraints = RequestLoggingConstraints.ERROR_ONLY)
   fun call(@PathParam message: String) : String {
     if (message == "fail") {
       throw IllegalStateException(message)
