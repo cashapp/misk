@@ -301,5 +301,14 @@ public abstract interface annotation class misk/web/interceptors/LogRequestRespo
 	public abstract fun errorRatePerSecond ()J
 	public abstract fun excludedEnvironments ()[Ljava/lang/String;
 	public abstract fun ratePerSecond ()J
+	public abstract fun requestLoggingMode ()Lmisk/web/interceptors/RequestLoggingMode;
+}
+
+public final class misk/web/interceptors/RequestLoggingMode : java/lang/Enum {
+	public static final field ALL Lmisk/web/interceptors/RequestLoggingMode;
+	public static final field ERROR_ONLY Lmisk/web/interceptors/RequestLoggingMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/web/interceptors/RequestLoggingMode;
+	public static fun values ()[Lmisk/web/interceptors/RequestLoggingMode;
 }
 
