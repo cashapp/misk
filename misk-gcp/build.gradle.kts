@@ -44,6 +44,7 @@ dependencies {
   implementation(libs.logbackCore)
   implementation(libs.openTracingDatadog)
   implementation(libs.slf4jApi)
+  implementation(libs.threeTenBp)
   implementation(libs.wireRuntime)
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
