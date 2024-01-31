@@ -1,3 +1,5 @@
+versionOverrides:
+  com.squareup.misk:misk-gcp:misk-0.18.0: "2024.01.25.022820-30be5eb"
 acceptedBreaks:
   "2023.10.17.232338-9c1976d":
     com.squareup.misk:misk-admin:
@@ -597,3 +599,14 @@ acceptedBreaks:
       new: "method misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisClientMetrics,\
         \ redis.clients.jedis.UnifiedJedis)"
       justification: "Only breaks one client, which is owned by the author"
+  misk-0.18.0:
+    com.squareup.misk:misk-gcp:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.cloud.gcp.spanner.SpannerConfig misk.cloud.gcp.spanner.SpannerConfig::copy(com.google.auth.Credentials,\
+        \ java.lang.String, misk.cloud.gcp.spanner.SpannerEmulatorConfig, java.lang.String,\
+        \ java.lang.String)"
+      new: "method misk.cloud.gcp.spanner.SpannerConfig misk.cloud.gcp.spanner.SpannerConfig::copy(com.google.auth.Credentials,\
+        \ java.lang.String, misk.cloud.gcp.spanner.SpannerEmulatorConfig, java.lang.String,\
+        \ java.lang.String, java.lang.Long, java.lang.Long, java.lang.Double, java.lang.Long,\
+        \ java.lang.Long, java.lang.Double, java.lang.Long, java.lang.Integer)"
+      justification: "Extending configuration class."
