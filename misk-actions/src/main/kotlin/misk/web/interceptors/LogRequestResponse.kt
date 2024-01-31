@@ -34,4 +34,17 @@ annotation class LogRequestResponse(
   val errorBodySampling: Double = 0.0,
   /** which deploy environments will not have request/response logging enabled **/
   val excludedEnvironments: Array<String> = [],
+  /** By default log non-error responses **/
+  val requestLoggingMode: RequestLoggingMode = RequestLoggingMode.ALL,
 )
+
+enum class RequestLoggingMode {
+  /**
+   * Log all requests and responses, rate limiting, etc still apply.
+   **/
+  ALL,
+  /**
+   * Log only error requests and responses, rate limiting, etc still apply.
+   **/
+  ERROR_ONLY,
+}

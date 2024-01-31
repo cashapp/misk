@@ -599,6 +599,26 @@ acceptedBreaks:
       new: "method misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisClientMetrics,\
         \ redis.clients.jedis.UnifiedJedis)"
       justification: "Only breaks one client, which is owned by the author"
+  "2024.01.24.000543-2260326":
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.interceptors.ActionLoggingConfig misk.web.interceptors.ActionLoggingConfig::copy(long,\
+        \ long, double, double, java.util.List<java.lang.String>)"
+      new: "method misk.web.interceptors.ActionLoggingConfig misk.web.interceptors.ActionLoggingConfig::copy(long,\
+        \ long, double, double, java.util.List<java.lang.String>, misk.web.interceptors.RequestLoggingMode)"
+      justification: "{Adding new field, chnages to the copy method are safe}"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.web.interceptors.RequestLoggingInterceptor::<init>(misk.Action,\
+        \ misk.scope.ActionScoped<misk.MiskCaller>, com.google.common.base.Ticker,\
+        \ misk.random.ThreadLocalRandom, misk.web.interceptors.LogRateLimiter, long,\
+        \ long, double, double, misk.web.interceptors.RequestResponseCapture, java.util.List<?\
+        \ extends misk.web.interceptors.RequestLoggingTransformer>)"
+      new: "method void misk.web.interceptors.RequestLoggingInterceptor::<init>(misk.Action,\
+        \ misk.scope.ActionScoped<misk.MiskCaller>, com.google.common.base.Ticker,\
+        \ misk.random.ThreadLocalRandom, misk.web.interceptors.LogRateLimiter, long,\
+        \ long, double, double, misk.web.interceptors.RequestResponseCapture, java.util.List<?\
+        \ extends misk.web.interceptors.RequestLoggingTransformer>, misk.web.interceptors.RequestLoggingMode)"
+      justification: "{Adding new field to an internal class is safe}"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
