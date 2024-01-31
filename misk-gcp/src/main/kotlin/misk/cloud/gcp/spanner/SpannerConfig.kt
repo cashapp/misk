@@ -46,6 +46,50 @@ data class SpannerConfig @JvmOverloads constructor(
    * > GCP project - any string will do.
    */
   val project_id: String,
+
+  /**
+   * The initial amount of time to wait before retrying the request.
+   */
+  val initial_retry_delay_ms: Long? = null,
+
+  /**
+   * The maximum amount of time to wait before retrying. I.e. after this value is
+   * reached, the wait time will not increase further by the multiplier.
+   */
+  val max_retry_delay_s: Long? = null,
+
+  /**
+   * The previous wait time is multiplied by this multiplier to come up with the next
+   * wait time, until the max is reached.
+   */
+  val retry_delay_multiplier: Double? = null,
+
+  /**
+   * Configure RPC and total timeout settings.
+   * Timeout for the first RPC call. Subsequent retries will be based off this value.
+   */
+  val initial_rpc_timeout_s: Long? = null,
+
+  /**
+   * The max for the per RPC timeout.
+   */
+  val max_rpc_timeout_s: Long? = null,
+
+  /**
+   * Controls the change of timeout for each retry.
+   */
+  val rpc_timeout_multipler: Double? = null,
+
+  /**
+   * The timeout for all calls (first call + all retries).
+   */
+  val total_timeout_s: Long? = null,
+
+  /**
+   * Total number of attempts for an RPC.
+   * Setting to 1 means no retries will be attempted.
+   */
+  val max_attempts: Int? = null,
 ) : Config
 
 /**

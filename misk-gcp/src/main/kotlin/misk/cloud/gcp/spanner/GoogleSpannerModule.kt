@@ -1,5 +1,6 @@
 package misk.cloud.gcp.spanner
 
+import com.google.api.gax.retrying.RetrySettings
 import com.google.auth.oauth2.ServiceAccountCredentials
 import com.google.cloud.NoCredentials
 import com.google.cloud.http.HttpTransportOptions
@@ -13,6 +14,7 @@ import misk.ServiceModule
 import misk.inject.KAbstractModule
 import wisp.logging.getLogger
 import jakarta.inject.Inject
+import org.threeten.bp.Duration
 
 /**
  * [GoogleSpannerModule] provides a Google Spanner client for your app.
@@ -34,8 +36,39 @@ class GoogleSpannerModule(
       if (config.emulator.enabled) NoCredentials.getInstance()
       else ServiceAccountCredentials.getApplicationDefault()
 
+    val retrySettings = RetrySettings.newBuilder()
+
+    config.max_attempts?.let {
+      retrySettings.setMaxAttempts(it)
+    }
+    config.total_timeout_s?.let {
+      retrySettings.setTotalTimeout(Duration.ofSeconds(it))
+    }
+    config.initial_retry_delay_ms?.let {
+      retrySettings.setInitialRetryDelay(Duration.ofMillis(it))
+    }
+    config.initial_rpc_timeout_s?.let {
+      retrySettings.setInitialRpcTimeout(Duration.ofSeconds(it))
+    }
+    config.max_retry_delay_s?.let {
+      retrySettings.setMaxRetryDelay(Duration.ofSeconds(it))
+    }
+    config.max_rpc_timeout_s?.let {
+      retrySettings.setMaxRpcTimeout(Duration.ofSeconds(it))
+    }
+    config.rpc_timeout_multipler?.let {
+      retrySettings.setRpcTimeoutMultiplier(it)
+    }
+    config.retry_delay_multiplier?.let {
+      retrySettings.setRetryDelayMultiplier(it)
+    }
+
     var builder = SpannerOptions.newBuilder()
       .setProjectId(config.project_id)
+
+    builder.spannerStubSettingsBuilder
+      .executeSqlSettings()
+      .setRetrySettings(retrySettings.build())
 
     if (config.emulator.enabled) {
       builder = builder

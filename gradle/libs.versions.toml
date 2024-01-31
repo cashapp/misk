@@ -183,6 +183,7 @@ tempestTesting = { module = "app.cash.tempest:tempest-testing" }
 tempestTestingDocker = { module = "app.cash.tempest:tempest-testing-docker" }
 tempestTestingInternal = { module = "app.cash.tempest:tempest-testing-internal" }
 tempestTestingJvm = { module = "app.cash.tempest:tempest-testing-jvm" }
+threeTenBp = { module = "org.threeten:threetenbp", version = "1.6.8" }
 sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version = "2.0.0" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version = "2.0.0" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version = "2.0.0" }
