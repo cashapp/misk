@@ -179,19 +179,6 @@ internal class RequestLoggingInterceptorTest {
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
   }
 
-  @Test
-  fun noNonErrorRequestLogging() {
-    assertThat(invoke("/call/errorOnlyRequestLoggingAction/fail", "caller").code)
-      .isEqualTo(500)
-    assertThat(invoke("/call/errorOnlyRequestLoggingAction/hello", "caller")
-      .isSuccessful
-    ).isTrue()
-    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
-    assertThat(messages).containsExactly(
-      "errorOnlyRequestLoggingAction principal=caller time=100.0 ms failed"
-    )
-  }
-
   fun invoke(path: String, asService: String? = null): okhttp3.Response {
     val url = jettyService.httpServerUrl.newBuilder()
       .encodedPath(path)
@@ -327,7 +314,6 @@ internal class RequestLoggingInterceptorTest {
       install(WebActionModule.create<RateLimitingRequestLoggingAction>())
       install(WebActionModule.create<RateLimitingIncludesBodyRequestLoggingAction>())
       install(WebActionModule.create<NoRateLimitingRequestLoggingAction>())
-      install(WebActionModule.create<errorOnlyRequestLoggingAction>())
       install(WebActionModule.create<ExceptionThrowingRequestLoggingAction>())
       install(WebActionModule.create<NoRequestLoggingAction>())
       install(WebActionModule.create<RequestLoggingActionWithHeaders>())
@@ -381,20 +367,6 @@ internal class NoRateLimitingRequestLoggingAction @Inject constructor() : WebAct
     errorBodySampling = 0.5
   )
   fun call(@PathParam message: String) = "echo: $message"
-}
-
-internal class errorOnlyRequestLoggingAction @Inject constructor() : WebAction {
-  @Get("/call/errorOnlyRequestLoggingAction/{message}")
-  @Unauthenticated
-  @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @LogRequestResponse(requestLoggingMode = RequestLoggingMode.ERROR_ONLY)
-  fun call(@PathParam message: String) : String {
-    if (message == "fail") {
-      throw IllegalStateException(message)
-    } else {
-      return "echo: $message"
-    }
-  }
 }
 
 internal class ExceptionThrowingRequestLoggingAction @Inject constructor() : WebAction {
