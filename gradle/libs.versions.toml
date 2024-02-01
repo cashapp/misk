@@ -150,7 +150,7 @@ okHttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version =
 okio = { module = "com.squareup.okio:okio", version = "3.4.0" }
 openTracingApi = { module = "io.opentracing:opentracing-api", version = "0.33.0" }
 openTracingConcurrent = { module = "io.opentracing.contrib:opentracing-concurrent", version = "0.4.0" }
-openTracingDatadog = { module = "com.datadoghq:dd-trace-ot", version = "1.23.0" }
+openTracingDatadog = { module = "com.datadoghq:dd-trace-ot", version = "1.28.0" }
 openTracingJdbc = { module = "io.opentracing.contrib:opentracing-jdbc", version = "0.2.15" }
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
