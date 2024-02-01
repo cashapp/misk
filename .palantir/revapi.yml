@@ -621,6 +621,28 @@ acceptedBreaks:
     - code: "java.method.addedToInterface"
       new: "method T misk.scope.ActionScoped<T>::getIfInScope()"
       justification: "{there is a default implementation for the method}"
+  "2024.02.07.021446-3634fc6":
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.interceptors.ActionLoggingConfig misk.web.interceptors.ActionLoggingConfig::copy(long,\
+        \ long, double, double, java.util.List<java.lang.String>)"
+      new: "method misk.web.interceptors.ActionLoggingConfig misk.web.interceptors.ActionLoggingConfig::copy(long,\
+        \ long, double, double, java.util.List<java.lang.String>, misk.web.interceptors.RequestLoggingMode)"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.web.interceptors.RequestLoggingInterceptor::<init>(misk.Action,\
+        \ misk.scope.ActionScoped<misk.MiskCaller>, com.google.common.base.Ticker,\
+        \ misk.random.ThreadLocalRandom, misk.web.interceptors.LogRateLimiter, long,\
+        \ long, double, double, misk.web.interceptors.RequestResponseCapture, java.util.List<?\
+        \ extends misk.web.interceptors.RequestLoggingTransformer>)"
+      new: "method void misk.web.interceptors.RequestLoggingInterceptor::<init>(misk.Action,\
+        \ misk.scope.ActionScoped<misk.MiskCaller>, com.google.common.base.Ticker,\
+        \ misk.random.ThreadLocalRandom, misk.web.interceptors.LogRateLimiter, long,\
+        \ long, double, double, misk.web.interceptors.RequestResponseCapture, java.util.List<?\
+        \ extends misk.web.interceptors.RequestLoggingTransformer>, misk.web.interceptors.RequestLoggingMode)"
+      justification: "{Adding a new backwards compatible option to the request logging\
+        \ interceptor}"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
