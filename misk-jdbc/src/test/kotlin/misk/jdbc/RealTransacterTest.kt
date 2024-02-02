@@ -310,9 +310,9 @@ abstract class RealTransacterTest {
       install(DeploymentModule(TESTING))
       val config = MiskConfig.load<RootConfig>("test_transacter", TESTING)
       val dataSourceConfig = selectDataSourceConfig(config)
-      install(JdbcTestingModule(Movies::class))
+      //install(JdbcTestingModule(Movies::class))
       install(
-        JdbcModule(Movies::class, dataSourceConfig)
+        JdbcModule(qualifier = Movies::class, config = dataSourceConfig, readerConfig = null, readerQualifier = null, installHealthCheck = false)
       )
     }
 

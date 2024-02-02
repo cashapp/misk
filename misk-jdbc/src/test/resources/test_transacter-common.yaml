@@ -1,7 +1,7 @@
 mysql_data_source:
   type: MYSQL
   database: movies_mysql
-  username: root
+  username: asdasda
   password: ""
   migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
 tidb_data_source:

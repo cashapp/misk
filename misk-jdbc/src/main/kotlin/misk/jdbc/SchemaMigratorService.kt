@@ -22,7 +22,7 @@ class SchemaMigratorService internal constructor(
   override fun startUp() {
     val schemaMigrator = schemaMigratorProvider.get()
     val connector = connectorProvider.get()
-    if (deployment.isTest || deployment.isLocalDevelopment) {
+    if (false) {
       val type = connector.config().type
       if (type != DataSourceType.VITESS_MYSQL) {
         // Retry wrapped to handle multiple JDBC modules racing to create the `schema_version` table.
@@ -38,7 +38,9 @@ class SchemaMigratorService internal constructor(
         migrationState = MigrationState(emptyMap())
       }
     } else {
-      migrationState = schemaMigrator.requireAll()
+      // option 1: for the config where we don't care about the database. we can skip this if the connection is not well.
+      // maybe we want to ask the datasourceService if they were able to create the connections.
+//      migrationState = schemaMigrator.requireAll()
     }
   }
 

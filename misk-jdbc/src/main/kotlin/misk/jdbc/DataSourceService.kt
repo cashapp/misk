@@ -2,6 +2,7 @@ package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.AbstractScheduledService
 import com.google.inject.Provider
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -11,6 +12,7 @@ import jakarta.inject.Singleton
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
@@ -28,7 +30,7 @@ class DataSourceService @JvmOverloads constructor(
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
   private val collectorRegistry: CollectorRegistry? = null,
-) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
+) : AbstractScheduledService(), DataSourceConnector, Provider<DataSource> {
   private lateinit var config: DataSourceConfig
 
   /** The backing connection pool */
@@ -37,9 +39,39 @@ class DataSourceService @JvmOverloads constructor(
   /** The decorated data source */
   private var _dataSource: DataSource? = null
 
+  private var reconectCount = 0
+  // we need to keep state to know if the datasource was not created
+
   val dataSource: DataSource
     get() = _dataSource
       ?: error("@${qualifier.simpleName} DataSource not created: did you forget to start the service?")
+
+  /**
+   *  1. explain the use case and why this is impportant
+   *
+   *  Changes:
+   *  * Add configuration to allow to let the datasourceservice start with a null datasource
+   *  * we need to prevent exepctions in the start up method (we might want to create a different sub class for this)
+   *     - we need a different time of datasourceservice that runs every X seconds to create the connection pool.
+   *  * we need to bypass the migration checks if datasource is not well
+   *  * datasource needs to have an interface to let the application know if the datasource is not well.
+   *  * figure out a way to test this behavior. Datasource decorator might be able to use to replicate behavior.
+   *
+   */
+  override fun runOneIteration() {
+    if (_dataSource != null) {
+      return
+    }
+    reconectCount ++
+    val stopwatch = Stopwatch.createStarted()
+    logger.info("Starting @${qualifier.simpleName} connection pool")
+
+    try {
+      createDataSource(baseConfig)
+    } catch (e: Exception) {
+      logger.error(e) { "Fail $reconectCount time to start the data source" }
+    }
+  }
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
@@ -51,9 +83,10 @@ class DataSourceService @JvmOverloads constructor(
     } catch (e: Exception) {
       logger.error(e) { "Fail to start the data source, trying to do it with replica" }
       if (!baseConfig.canRecoverOnReplica()) {
-        throw e
+       //
+      //  throw e
       }
-      createDataSource(baseConfig.asReplica())
+//      createDataSource(baseConfig.asReplica())
 
     }
     logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")
@@ -137,12 +170,17 @@ class DataSourceService @JvmOverloads constructor(
     logger.info("Stopped @${qualifier.simpleName} connection pool in $stopwatch")
   }
 
+  override fun scheduler(): Scheduler {
+    return Scheduler.newFixedDelaySchedule(0, 5, TimeUnit.SECONDS)
+  }
+
   companion object {
     val logger = getLogger<DataSourceService>()
     private val DEFAULT_CONNECTION_IDLE_TIMEOUT_OFFSET = Duration.ofSeconds(10)
   }
 
   override fun get(): DataSource {
+
     return dataSource
   }
 }
