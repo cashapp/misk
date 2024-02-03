@@ -81,10 +81,8 @@ class ClientMetricsInterceptor private constructor(
     response: Response
   ) {
     val grpcStatusHeader = if (readTrailers) {
-      /**
-       * If the response has trailers, we should use them to get the grpc-status.
-       * trailers() is only available after HTTP response body has been consumed.
-       */
+      // If the response has trailers, we should use them to get the grpc-status.
+      // trailers() is only available after HTTP response body has been consumed.
       response.trailers()[GRPC_STATUS_HEADER] ?: response.headers[GRPC_STATUS_HEADER]
     } else {
       response.headers[GRPC_STATUS_HEADER]
