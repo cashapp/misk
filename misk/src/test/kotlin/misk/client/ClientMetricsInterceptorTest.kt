@@ -13,6 +13,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
+import okhttp3.internal.http1.Http1ExchangeCodec
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -32,6 +33,8 @@ import java.net.URL
 import java.time.Duration
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import okhttp3.Headers.Companion.headersOf
+import okhttp3.Protocol
 
 @MiskTest
 internal class ClientMetricsInterceptorTest {
@@ -41,8 +44,13 @@ internal class ClientMetricsInterceptorTest {
   @MiskTestModule
   val module = TestModule()
 
+  //uses http1 by default
   @Named("pinger") @Inject private lateinit var client: Pinger
   @Named("pingerDelay") @Inject private lateinit var clientDelay: PingerDelay
+
+  //uses http2
+  @Named("pingerHttp2") @Inject private lateinit var clientHttp2: PingerHttp2
+
   @Inject private lateinit var factory: ClientMetricsInterceptor.Factory
   @Inject private lateinit var mockWebServer: MockWebServer
 
@@ -69,6 +77,26 @@ internal class ClientMetricsInterceptorTest {
         .setResponseCode(200)
         .setBody("{}")
     )
+
+    /**
+     * In [Http1ExchangeCodec] Trailers() is null unless the response body uses chunked
+     * transfer-encoding and includes trailers
+     */
+    mockWebServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("{}")
+        //trailers here would be ignored and would map to 200 code
+        .setTrailers(headersOf("grpc-status", "2")) // UNKNOWN, maps to HTTP 500
+    )
+
+    mockWebServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setChunkedBody("{}", 1024)
+        .setTrailers(headersOf("grpc-status", "2")) // UNKNOWN, maps to HTTP 500
+    )
+
     assertThat(client.ping(AppRequest(200)).execute().code()).isEqualTo(200)
     assertThat(client.ping(AppRequest(200)).execute().code()).isEqualTo(200)
     assertThat(client.ping(AppRequest(202)).execute().code()).isEqualTo(202)
@@ -76,21 +104,70 @@ internal class ClientMetricsInterceptorTest {
     assertThat(client.ping(AppRequest(404)).execute().code()).isEqualTo(404)
     assertThat(client.ping(AppRequest(503)).execute().code()).isEqualTo(503)
     assertThat(client.ping(AppRequest(200)).execute().code()).isEqualTo(200)
+    val emptyTrailersResponse = client.ping(AppRequest(200)).execute()
+    assertThat(emptyTrailersResponse.code()).isEqualTo(200)
+    assertThat(emptyTrailersResponse.raw().trailers()).isEmpty()
+
+    val withTrailersResponse = client.ping(AppRequest(200)).execute()
+    assertThat(withTrailersResponse.code()).isEqualTo(200)
+    assertThat(withTrailersResponse.raw().trailers()).isEqualTo(headersOf("grpc-status", "2"))
 
     SoftAssertions.assertSoftly { softly ->
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "200").get().count.toInt()).isEqualTo(2)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "200").get().count.toInt()).isEqualTo(3)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "202").get().count.toInt()).isEqualTo(1)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "404").get().count.toInt()).isEqualTo(1)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "403").get().count.toInt()).isEqualTo(1)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "503").get().count.toInt()).isEqualTo(1)
       softly.assertThat(requestDurationSummary.labels("pinger.ping", "400").get().count.toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "500").get().count.toInt()).isEqualTo(1)
 
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "200").get().buckets.last().toInt()).isEqualTo(2)
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "200").get().buckets.last().toInt()).isEqualTo(3)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "202").get().buckets.last().toInt()).isEqualTo(1)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "404").get().buckets.last().toInt()).isEqualTo(1)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.last().toInt()).isEqualTo(1)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "503").get().buckets.last().toInt()).isEqualTo(1)
       softly.assertThat(requestDurationHistogram.labels("pinger.ping", "400").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "500").get().buckets.last().toInt()).isEqualTo(1)
+    }
+  }
+
+  @Test
+  fun readTrailersOnHttp2() {
+    mockWebServer.protocols = listOf(Protocol.H2_PRIOR_KNOWLEDGE)
+
+    mockWebServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("{}")
+        .setTrailers(headersOf("grpc-status", "13"))
+    )
+
+    mockWebServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("{}")
+        .setTrailers(headersOf("grpc-status", "0"))
+    )
+
+    mockWebServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("{}")
+        .setTrailers(headersOf("grpc-status", "3"))
+    )
+
+    assertThat(clientHttp2.ping(AppRequest(200)).execute().code()).isEqualTo(200)
+    assertThat(clientHttp2.ping(AppRequest(200)).execute().code()).isEqualTo(200)
+    assertThat(clientHttp2.ping(AppRequest(200)).execute().code()).isEqualTo(200)
+
+    SoftAssertions.assertSoftly { softly ->
+      softly.assertThat(requestDurationSummary.labels("pingerHttp2.ping", "500").get().count.toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pingerHttp2.ping", "200").get().count.toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pingerHttp2.ping", "400").get().count.toInt()).isEqualTo(1)
+
+      softly.assertThat(requestDurationHistogram.labels("pingerHttp2.ping", "500").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pingerHttp2.ping", "200").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationHistogram.labels("pingerHttp2.ping", "400").get().buckets.last().toInt()).isEqualTo(1)
     }
   }
 
@@ -99,15 +176,17 @@ internal class ClientMetricsInterceptorTest {
     val interceptor = factory.create("urlTestClient")
 
     mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("{}"))
-    val okHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).build()
+    val okHttpClient = OkHttpClient.Builder()
+      .addInterceptor(interceptor)
+      .build()
 
     val targetUrl = mockWebServer.url("/path/to/test///?some&get=params") // leading/trailing slashes and GET params will be dropped in the interceptor
     val request = Request.Builder().url(targetUrl).tag(URL::class.java, targetUrl.toUrl()).build()
 
-    okHttpClient.newCall(request).execute().use {
-      assertThat(requestDurationSummary.labels("urlTestClient.path.to.test", "200").get().count.toInt()).isEqualTo(1)
-      assertThat(requestDurationHistogram.labels("urlTestClient.path.to.test", "200").get().buckets.last().toInt()).isEqualTo(1)
-    }
+    okHttpClient.newCall(request).execute().use { assertThat(it.code).isEqualTo(200) }
+    assertThat(requestDurationSummary.labels("urlTestClient.path.to.test", "200").get().count.toInt()).isEqualTo(1)
+    assertThat(requestDurationHistogram.labels("urlTestClient.path.to.test", "200").get().buckets.last().toInt()).isEqualTo(1)
+
   }
 
   @Test
@@ -161,6 +240,7 @@ internal class ClientMetricsInterceptorTest {
       install(MiskTestingServiceModule())
       install(TypedHttpClientModule.create<Pinger>("pinger", Names.named("pinger")))
       install(TypedHttpClientModule.create<PingerDelay>("pingerDelay", Names.named("pingerDelay")))
+      install(TypedHttpClientModule.create<PingerHttp2>("pingerHttp2", Names.named("pingerHttp2")))
       bind<MockWebServer>().toInstance(MockWebServer())
     }
 
@@ -179,7 +259,14 @@ internal class ClientMetricsInterceptorTest {
           "pingerDelay" to HttpClientEndpointConfig(
             url = url.toString(),
             clientConfig = HttpClientConfig(
-              readTimeout = Duration.ofSeconds(5)
+              readTimeout = Duration.ofSeconds(5),
+            )
+          ),
+          "pingerHttp2" to HttpClientEndpointConfig(
+            url = url.toString(),
+            clientConfig = HttpClientConfig(
+              readTimeout = Duration.ofMillis(100),
+              protocols = listOf(Protocol.H2_PRIOR_KNOWLEDGE.toString())
             )
           )
         )
@@ -197,6 +284,15 @@ internal class ClientMetricsInterceptorTest {
   }
 
   interface PingerDelay {
+    @POST("/ping")
+    @Headers(
+      "Accept: " + MediaTypes.APPLICATION_JSON,
+      "Content-type: " + MediaTypes.APPLICATION_JSON
+    )
+    fun ping(@Body request: AppRequest): Call<AppResponse>
+  }
+
+  interface PingerHttp2 {
     @POST("/ping")
     @Headers(
       "Accept: " + MediaTypes.APPLICATION_JSON,

@@ -6,16 +6,17 @@ import com.squareup.wire.GrpcMethod
 import com.squareup.wire.GrpcStatus
 import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.metrics.backends.prometheus.PrometheusConfig
 import misk.metrics.v2.Metrics
 import okhttp3.Interceptor
 import okhttp3.Response
+import okhttp3.ResponseBody
 import retrofit2.Invocation
 import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 class ClientMetricsInterceptor private constructor(
   val clientName: String,
@@ -31,13 +32,20 @@ class ClientMetricsInterceptor private constructor(
     try {
       val result = chain.proceed(chain.request())
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
-      // We should read both the headers and trailers for grpc-status but the trailers aren't
-      // available yet, so just do the headers
-      val grpcStatus = result.headers["grpc-status"]?.toIntOrNull()
-      val code = grpcStatusToHttpCode(grpcStatus) ?: result.code
-      requestDurationSummary.labels(actionName, "$code").observe(elapsedMillis)
-      requestDurationHistogram.labels(actionName, "$code").observe(elapsedMillis)
-      return result
+
+      if (result.body == null) {
+        emitStatusCodeMetrics(actionName, elapsedMillis, false, result)
+        return result
+      }
+
+      return result.newBuilder()
+        .body(
+          TrailerAwareResponseBody(
+            result.body!!,
+          ) { emitStatusCodeMetrics(actionName, elapsedMillis, true, result) }
+        )
+        .build()
+
     } catch (e: SocketTimeoutException) {
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
       requestDurationSummary.labels(actionName, "timeout").observe(elapsedMillis)
@@ -66,6 +74,27 @@ class ClientMetricsInterceptor private constructor(
     return null
   }
 
+  private fun emitStatusCodeMetrics(
+    actionName: String,
+    elapsedMillis: Double,
+    readTrailers: Boolean,
+    response: Response
+  ) {
+    val grpcStatusHeader = if (readTrailers) {
+      /**
+       * If the response has trailers, we should use them to get the grpc-status.
+       * trailers() is only available after HTTP response body has been consumed.
+       */
+      response.trailers()[GRPC_STATUS_HEADER] ?: response.headers[GRPC_STATUS_HEADER]
+    } else {
+      response.headers[GRPC_STATUS_HEADER]
+    }
+    val grpcStatus = grpcStatusHeader?.toIntOrNull()
+    val code = grpcStatusToHttpCode(grpcStatus) ?: response.code
+    requestDurationSummary.labels(actionName, "$code").observe(elapsedMillis)
+    requestDurationHistogram.labels(actionName, "$code").observe(elapsedMillis)
+  }
+
   private fun grpcStatusToHttpCode(grpcStatus: Int?): Int? {
     // This is copied from the armeria codebase at
     // https://github.com/line/armeria/blob/b9dc1ad1c6f4cfee8aba8e50a61d203c37eb94cc/grpc/src/main/java/com/linecorp/armeria/internal/common/grpc/GrpcStatus.java#L197-L236
@@ -77,13 +106,16 @@ class ClientMetricsInterceptor private constructor(
       GrpcStatus.UNKNOWN.code,
       GrpcStatus.INTERNAL.code,
       GrpcStatus.DATA_LOSS.code -> HTTP_INTERNAL_SERVER_ERROR
+
       GrpcStatus.INVALID_ARGUMENT.code,
       GrpcStatus.FAILED_PRECONDITION.code,
       GrpcStatus.OUT_OF_RANGE.code -> HTTP_BAD_REQUEST
+
       GrpcStatus.DEADLINE_EXCEEDED.code -> HTTP_GATEWAY_TIMEOUT
       GrpcStatus.NOT_FOUND.code -> HTTP_NOT_FOUND
       GrpcStatus.ALREADY_EXISTS.code,
       GrpcStatus.ABORTED.code -> HTTP_CONFLICT
+
       GrpcStatus.PERMISSION_DENIED.code -> HTTP_FORBIDDEN
       GrpcStatus.UNAUTHENTICATED.code -> HTTP_UNAUTHORIZED
       GrpcStatus.RESOURCE_EXHAUSTED.code -> HTTP_TOO_MANY_REQUESTS
@@ -110,8 +142,26 @@ class ClientMetricsInterceptor private constructor(
       labelNames = listOf("action", "code")
     )
 
-    fun create(clientName: String) = ClientMetricsInterceptor(clientName, requestDuration, requestDurationHistogram)
+    fun create(clientName: String) = ClientMetricsInterceptor(
+      clientName,
+      requestDuration,
+      requestDurationHistogram
+    )
   }
+
+  private class TrailerAwareResponseBody(
+    private val responseBody: ResponseBody,
+    private val func: () -> Unit
+  ) : ResponseBody() {
+    override fun contentLength() = responseBody.contentLength()
+    override fun contentType() = responseBody.contentType()
+    override fun source() = responseBody.source()
+    override fun close() {
+      responseBody.close()
+      func.invoke()
+    }
+  }
+
 }
 
 internal const val HTTP_OK = 200
@@ -126,3 +176,4 @@ internal const val HTTP_INTERNAL_SERVER_ERROR = 500
 internal const val HTTP_NOT_IMPLEMENTED = 501
 internal const val HTTP_SERVICE_UNAVAILABLE = 503
 internal const val HTTP_GATEWAY_TIMEOUT = 504
+internal const val GRPC_STATUS_HEADER = "grpc-status"
