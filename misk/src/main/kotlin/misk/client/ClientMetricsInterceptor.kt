@@ -148,14 +148,14 @@ class ClientMetricsInterceptor private constructor(
   }
 
   private class TrailerAwareResponseBody(
-    private val responseBody: ResponseBody,
+    private val delegate: ResponseBody,
     private val func: () -> Unit
   ) : ResponseBody() {
-    override fun contentLength() = responseBody.contentLength()
-    override fun contentType() = responseBody.contentType()
-    override fun source() = responseBody.source()
+    override fun contentLength() = delegate.contentLength()
+    override fun contentType() = delegate.contentType()
+    override fun source() = delegate.source()
     override fun close() {
-      responseBody.close()
+      delegate.close()
       func.invoke()
     }
   }
