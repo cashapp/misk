@@ -27,6 +27,9 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
+import misk.healthchecks.HealthCheck
+import misk.web.actions.ReadinessCheckAction
+import misk.web.jetty.JettyThreadPoolHealthCheck
 
 @MiskTest(startService = true)
 internal class JettyHealthCheckTest {
@@ -49,6 +52,14 @@ internal class JettyHealthCheckTest {
       .get()
       .url(healthUrlBuilder().encodedPath("/health").build())
       .build()
+    val readinessRequest = Request.Builder()
+      .get()
+      .url(healthUrlBuilder().encodedPath("/_readiness").build())
+      .build()
+
+    // make sure readiness passes when the threadpool is not low
+    var readinessResponse = executor.submit(Callable { httpClient.newCall(readinessRequest).execute() }).get(5, TimeUnit.SECONDS)
+    assertThat(readinessResponse.code).isEqualTo(200)
 
     // exhaust the thread pool
     val responses = mutableListOf<Future<Response>>()
@@ -81,6 +92,10 @@ internal class JettyHealthCheckTest {
       assertThat(r.body?.string()).isEqualTo("healthy")
     }
 
+    // make sure readiness fails when the threadpool is low
+    readinessResponse = executor.submit(Callable { httpClient.newCall(readinessRequest).execute() }).get(5, TimeUnit.SECONDS)
+    assertThat(readinessResponse.code).isEqualTo(503)
+
     // release the blocking threads
     requestsPhaser.arrive()
 
@@ -100,6 +115,10 @@ internal class JettyHealthCheckTest {
       assertThat(it.body?.string()).isEqualTo("done")
     }
     assertThat(successes).hasSize(parallelRequests)
+
+    // make sure readiness passes when the threadpool is not low
+    readinessResponse = executor.submit(Callable { httpClient.newCall(readinessRequest).execute() }).get(5, TimeUnit.SECONDS)
+    assertThat(readinessResponse.code).isEqualTo(200)
 
     executor.shutdown()
   }
@@ -130,8 +149,10 @@ internal class JettyHealthCheckTest {
 
       install(WebActionModule.create<BlockingAction>())
       install(WebActionModule.create<HealthAction>())
+      install(WebActionModule.create<ReadinessCheckAction>())
       bind<Phaser>().annotatedWith<Requests>().toInstance(Phaser())
       bind<Phaser>().annotatedWith<Health>().toInstance(Phaser())
+      multibind<HealthCheck>().to<JettyThreadPoolHealthCheck>()
     }
   }
 
