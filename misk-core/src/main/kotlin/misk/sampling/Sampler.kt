@@ -37,7 +37,7 @@ class RateLimitingSampler(
     RateLimiter.Factory(
       Ticker.systemTicker(),
       Sleeper.DEFAULT
-    ).create(1)
+    ).create(ratePerSecond)
   )
 
   override fun sample(): Boolean {
