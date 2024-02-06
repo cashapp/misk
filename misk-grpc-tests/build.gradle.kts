@@ -73,6 +73,7 @@ dependencies {
   api(libs.protobufJava)
   api(project(":misk"))
   api(project(":misk-actions"))
+  api(project(":misk-api"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
   implementation(libs.grpcNetty)
