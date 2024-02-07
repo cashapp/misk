@@ -141,6 +141,12 @@ data class WebConfig @JvmOverloads constructor(
 
   /** The output buffer size of Jetty (default is 32KB). */
   val jetty_output_buffer_size: Int? = null,
+
+  /** The initial size of session's flow control receive window. */
+  val jetty_initial_session_recv_window: Int? = null,
+
+  /** The initial size of stream's flow control receive window. */
+  val jetty_initial_stream_recv_window: Int? = null,
   ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
