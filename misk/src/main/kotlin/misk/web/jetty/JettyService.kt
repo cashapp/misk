@@ -115,6 +115,12 @@ class JettyService @Inject internal constructor(
       if (webConfig.jetty_max_concurrent_streams != null) {
         http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
       }
+      if (webConfig.jetty_initial_session_recv_window != null) {
+        http2.initialSessionRecvWindow = webConfig.jetty_initial_session_recv_window
+      }
+      if (webConfig.jetty_initial_stream_recv_window != null) {
+        http2.initialStreamRecvWindow = webConfig.jetty_initial_stream_recv_window
+      }
       httpConnectionFactories += HTTP2CServerConnectionFactory(httpConfig)
     }
 
