@@ -47,10 +47,15 @@ public final class misk/client/NetworkInterceptorWrapper : okhttp3/Interceptor {
 public abstract interface class misk/scope/ActionScoped {
 	public static final field Companion Lmisk/scope/ActionScoped$Companion;
 	public abstract fun get ()Ljava/lang/Object;
+	public abstract fun getIfInScope ()Ljava/lang/Object;
 }
 
 public final class misk/scope/ActionScoped$Companion {
 	public final fun of (Ljava/lang/Object;)Lmisk/scope/ActionScoped;
+}
+
+public final class misk/scope/ActionScoped$DefaultImpls {
+	public static fun getIfInScope (Lmisk/scope/ActionScoped;)Ljava/lang/Object;
 }
 
 public abstract interface class misk/scope/ActionScopedProvider {

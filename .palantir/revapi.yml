@@ -599,6 +599,11 @@ acceptedBreaks:
       new: "method misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisClientMetrics,\
         \ redis.clients.jedis.UnifiedJedis)"
       justification: "Only breaks one client, which is owned by the author"
+  "2024.02.06.235139-89b7018":
+    com.squareup.misk:misk-api:
+    - code: "java.method.addedToInterface"
+      new: "method T misk.scope.ActionScoped<T>::getIfInScope()"
+      justification: "{there is a default implementation for the method}"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
