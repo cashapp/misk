@@ -19,6 +19,7 @@ import okhttp3.MediaType
 import org.slf4j.MDC
 import java.util.regex.Matcher
 import com.google.inject.Provider
+import misk.api.HttpRequest
 import javax.servlet.http.HttpServletRequest
 import kotlin.reflect.KType
 
@@ -110,6 +111,7 @@ internal class BoundAction<A : WebAction>(
     val initialSeedData = mapOf<Key<*>, Any?>(
       keyOf<HttpServletRequest>() to request,
       keyOf<HttpCall>() to httpCall,
+      keyOf<HttpRequest>() to httpCall,
       keyOf<Action>() to action,
     )
     val seedData =
