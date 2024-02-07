@@ -600,6 +600,23 @@ acceptedBreaks:
         \ redis.clients.jedis.UnifiedJedis)"
       justification: "Only breaks one client, which is owned by the author"
   "2024.02.06.235139-89b7018":
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer)"
+      justification: "New vals in WebConfig have default values"
     com.squareup.misk:misk-api:
     - code: "java.method.addedToInterface"
       new: "method T misk.scope.ActionScoped<T>::getIfInScope()"
