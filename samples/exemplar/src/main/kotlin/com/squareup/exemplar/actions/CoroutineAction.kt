@@ -24,7 +24,7 @@ class CoroutineAction : WebAction {
     @RequestHeaders header: Headers
   ): Response {
     return runBlocking(Dispatchers.IO) {
-      Thread.sleep(10)
+      Thread.sleep(100)
       Response(id, "message")
     }
   }

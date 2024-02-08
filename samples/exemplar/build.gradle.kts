@@ -6,7 +6,12 @@ plugins {
 
 val applicationMainClass = "com.squareup.exemplar.ExemplarServiceKt"
 application {
-  mainClass.set(applicationMainClass)
+    mainClass.set(applicationMainClass)
+    run {
+        val defaultJvmArgs = applicationDefaultJvmArgs.toMutableList()
+        defaultJvmArgs.add("-Dkotlinx.coroutines.io.parallelism=5000")
+        setApplicationDefaultJvmArgs(defaultJvmArgs)
+    }
 }
 
 dependencies {
