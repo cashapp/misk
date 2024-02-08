@@ -1,6 +1,7 @@
 package com.squareup.exemplar
 
 import com.squareup.exemplar.dashboard.ExemplarDashboardModule
+import com.squareup.exemplar.events.EventServiceModule
 import misk.MiskApplication
 import misk.MiskRealServiceModule
 import misk.config.ConfigModule
@@ -22,6 +23,7 @@ fun main(args: Array<String>) {
     ExemplarDashboardModule(),
     ExemplarWebActionsModule(),
     MiskRealServiceModule(),
+    EventServiceModule(),
     MiskWebModule(config.web),
     PrometheusMetricsServiceModule(config.prometheus),
     MonitoringModule(),

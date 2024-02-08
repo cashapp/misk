@@ -30,7 +30,10 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-hotwire"))
+  implementation(project(":misk-metrics"))
   implementation(project(":misk-prometheus"))
+  implementation(project(":wisp:wisp-logging"))
+  implementation(project(mapOf("path" to ":misk-service")))
 
   testImplementation(libs.assertj)
   testImplementation(libs.awsDynamodb)
