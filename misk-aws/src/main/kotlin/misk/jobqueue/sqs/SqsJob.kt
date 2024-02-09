@@ -1,5 +1,6 @@
 package misk.jobqueue.sqs
 
+import com.amazonaws.services.sqs.model.ChangeMessageVisibilityRequest
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.squareup.moshi.Moshi
@@ -7,6 +8,8 @@ import misk.jobqueue.Job
 import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
+import kotlin.math.pow
+import kotlin.random.Random
 
 internal class SqsJob(
   override val queueName: QueueName,
@@ -53,6 +56,31 @@ internal class SqsJob(
     }
     deleteMessage(queue, message)
     metrics.jobsDeadLettered.labels(queueName.value, queueName.value).inc()
+  }
+
+   fun setVisibilityTimeout(maxRetryCount: Int = 10) {
+    val visibilityTime = calculateVisibilityTimeOut(maxRetryCount)
+    queue.call { client ->
+      client.changeMessageVisibility(
+        ChangeMessageVisibilityRequest()
+          .withQueueUrl(queue.url)
+          .withReceiptHandle(message.receiptHandle)
+          .withVisibilityTimeout(visibilityTime)
+      )
+    }
+    metrics.visibilityTime.labels(queueName.value, queueName.value).set(visibilityTime.toDouble())
+  }
+
+  private fun calculateVisibilityTimeOut(maxReceiveCount: Int): Int {
+    val currentReceiveCount = attributes["ApproximateReceiveCount"]?.toInt() ?: 1
+
+    val consecutiveRetryCount = (currentReceiveCount + 1).coerceAtMost(maxReceiveCount)
+    val backoff = 2.0.pow((consecutiveRetryCount - 1).toDouble()).toLong()
+    val maxDelay = 10 * 60 * 60L // We are limited with 12hrs so let's just limit it to 10hrs
+
+    val backoffWithJitter = maxDelay.coerceAtMost((backoff / 2 + Random.nextLong(0, backoff / 2)))
+
+    return backoffWithJitter.toInt()
   }
 
   private fun deleteMessage(queue: ResolvedQueue, message: Message) {

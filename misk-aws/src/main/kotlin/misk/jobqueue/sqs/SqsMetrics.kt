@@ -56,6 +56,12 @@ internal class SqsMetrics @Inject internal constructor(metrics: Metrics) {
     listOf("queueName", "QueueName")
   )
 
+  val visibilityTime = metrics.gauge(
+    "jobs_visibility_time",
+    "time that is spent unavailable for the pick-up from the consumer",
+    listOf("queueName", "QueueName")
+  )
+
   val sqsSendTime = metrics.histogram(
     "jobs_sqs_send_latency",
     "the round trip time to send messages to SQS",
