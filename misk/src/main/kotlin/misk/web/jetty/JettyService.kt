@@ -14,6 +14,7 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
 import org.eclipse.jetty.http.UriCompliance
+import org.eclipse.jetty.http2.server.AbstractHTTP2ServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
 import org.eclipse.jetty.io.ConnectionStatistics
@@ -111,17 +112,9 @@ class JettyService @Inject internal constructor(
     }
     httpConnectionFactories += HttpConnectionFactory(httpConfig)
     if (webConfig.http2) {
-      val http2 = HTTP2ServerConnectionFactory(httpConfig)
-      if (webConfig.jetty_max_concurrent_streams != null) {
-        http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
-      }
-      if (webConfig.jetty_initial_session_recv_window != null) {
-        http2.initialSessionRecvWindow = webConfig.jetty_initial_session_recv_window
-      }
-      if (webConfig.jetty_initial_stream_recv_window != null) {
-        http2.initialStreamRecvWindow = webConfig.jetty_initial_stream_recv_window
-      }
-      httpConnectionFactories += HTTP2CServerConnectionFactory(httpConfig)
+      val http2 = HTTP2CServerConnectionFactory(httpConfig)
+      http2.customize(webConfig)
+      httpConnectionFactories += http2
     }
 
     // TODO(mmihic): Allow require running only on HTTPS?
@@ -204,9 +197,7 @@ class JettyService @Inject internal constructor(
 
       if (webConfig.http2) {
         val http2 = HTTP2ServerConnectionFactory(httpsConfig)
-        if (webConfig.jetty_max_concurrent_streams != null) {
-          http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
-        }
+        http2.customize(webConfig)
         httpsConnectionFactories += http2
       }
 
@@ -421,4 +412,16 @@ private fun NetworkConnector.toHttpUrl(): HttpUrl {
  */
 private fun HttpConfiguration.customizeForGrpc() {
   isDelayDispatchUntilContent = false
+}
+
+private fun AbstractHTTP2ServerConnectionFactory.customize(webConfig: WebConfig) {
+  if (webConfig.jetty_max_concurrent_streams != null) {
+    maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
+  }
+  if (webConfig.jetty_initial_session_recv_window != null) {
+    initialSessionRecvWindow = webConfig.jetty_initial_session_recv_window
+  }
+  if (webConfig.jetty_initial_stream_recv_window != null) {
+    initialStreamRecvWindow = webConfig.jetty_initial_stream_recv_window
+  }
 }
