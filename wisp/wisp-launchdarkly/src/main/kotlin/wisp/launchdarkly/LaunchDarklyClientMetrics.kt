@@ -1,19 +1,15 @@
 package wisp.launchdarkly
 
-import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 
 class LaunchDarklyClientMetrics(
   private val meterRegistry: MeterRegistry) {
-
-  private var initSuccess: Counter = meterRegistry
-    .counter(SUCCESS_COUNTER_NAME)
-
-  private var initFailure: Counter = meterRegistry
-    .counter(FAILED_COUNTER_NAME)
-
   fun onInitSuccess(duration: Long) {
-    initSuccess.increment()
+    // Counter metric do not work during the ld client startup
+    meterRegistry.gauge(
+      INITIALIZATION_SUCCESS_NAME,
+      1.0
+    )
     meterRegistry.gauge(
       INITIALIZATION_DURATION_NAME,
       duration,
@@ -21,12 +17,15 @@ class LaunchDarklyClientMetrics(
   }
 
   fun onInitFailure() {
-    initFailure.increment()
+    meterRegistry.gauge(
+      INITIALIZATION_FAILED_NAME,
+      1.0
+    )
   }
 
   companion object {
     const val INITIALIZATION_DURATION_NAME = "ld_initialization_duration_ms"
-    const val SUCCESS_COUNTER_NAME = "ld_initialization_success_total"
-    const val FAILED_COUNTER_NAME = "ld_initialization_failed_total"
+    const val INITIALIZATION_SUCCESS_NAME = "ld_initialization_success"
+    const val INITIALIZATION_FAILED_NAME = "ld_initialization_failed"
   }
 }
