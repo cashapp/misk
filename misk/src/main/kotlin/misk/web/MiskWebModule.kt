@@ -300,6 +300,8 @@ class MiskWebModule @JvmOverloads constructor(
       }
       bind<ThreadPool>().toInstance(threadPool)
       bind<MeasuredThreadPool>().toInstance(MeasuredThreadPoolExecutor(executor))
+    }
+    if (config.enable_thread_pool_health_check) {
       multibind<HealthCheck>().to<JettyThreadPoolHealthCheck>()
     }
   }

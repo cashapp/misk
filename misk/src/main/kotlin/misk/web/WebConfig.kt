@@ -68,6 +68,9 @@ data class WebConfig @JvmOverloads constructor(
   // TODO make this true by default
   val enable_thread_pool_queue_metrics: Boolean = false,
 
+  /** Wires up health checks on whether Jetty's thread pool is low on threads. */
+  val enable_thread_pool_health_check: Boolean = false,
+
   val action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
 
   /** The maximum number of streams per HTTP/2 connection. */
