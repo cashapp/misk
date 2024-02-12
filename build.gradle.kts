@@ -11,7 +11,7 @@ import java.net.Socket
 
 buildscript {
   repositories {
-    mavenCentral()
+    mavenLocal()
     maven(url = "https://plugins.gradle.org/m2/")
   }
 

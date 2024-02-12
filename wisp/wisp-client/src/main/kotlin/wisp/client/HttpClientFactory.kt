@@ -7,6 +7,7 @@ import wisp.resources.ResourceLoader
 import wisp.security.ssl.SslContextFactory
 import wisp.security.ssl.SslLoader
 import java.io.File
+import java.net.InetSocketAddress
 import java.net.Proxy
 import javax.net.ssl.X509TrustManager
 
@@ -22,6 +23,7 @@ class HttpClientFactory @JvmOverloads constructor(
         // TODO(mmihic): Cache, proxy, etc
         val builder = unconfiguredClient.newBuilder()
         okHttpClientCommonConfigurator.configure(builder = builder, config = config)
+        // builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress("127.0.0.1", 8800)))
         config.clientConfig.ssl?.let {
             val trustStore = sslLoader.loadTrustStore(it.trust_store)!!
             val trustManagers = sslContextFactory.loadTrustManagers(trustStore.keyStore)
@@ -58,7 +60,7 @@ class HttpClientFactory @JvmOverloads constructor(
             // No DNS lookup needed since we're just sending the request over a socket.
             builder.dns(NoOpDns)
             // Proxy config not supported
-            builder.proxy(Proxy.NO_PROXY)
+            // builder.proxy(Proxy.NO_PROXY)
             // OkHttp <=> envoy over h2 has bad interactions, and benefit is marginal
             builder.protocols(listOf(Protocol.HTTP_1_1))
         }

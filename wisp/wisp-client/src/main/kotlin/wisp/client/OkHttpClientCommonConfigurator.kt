@@ -3,6 +3,8 @@ package wisp.client
 import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient.Builder
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -16,7 +18,17 @@ class OkHttpClientCommonConfigurator {
         configureReadTimeout(builder = builder, config = config)
         configureWriteTimeout(builder = builder, config = config)
         configureRetryOnConnectionFailure(builder = builder, config = config)
+        configureProxy(builder = builder, config = config)
         return builder
+    }
+    private fun configureProxy(builder: Builder, config: HttpClientEndpointConfig) {
+      config.clientConfig.proxy?.let {
+        val proxy = when (it.type) {
+          "http" -> Proxy(Proxy.Type.HTTP, InetSocketAddress(it.hostName, it.port))
+          else -> throw IllegalArgumentException("Unknown proxy type ${it.type}") // Or just log an error/warning instead of failing loudly?
+        }
+        builder.proxy(proxy)
+      }
     }
 
     private fun configureCallTimeout(builder: Builder, config: HttpClientEndpointConfig) {
