@@ -19,7 +19,7 @@ class HttpClientFactory @JvmOverloads constructor(
 ) {
     /** Returns a client initialized based on `config`. */
     fun create(config: HttpClientEndpointConfig): OkHttpClient {
-        // TODO(mmihic): Cache, proxy, etc
+        // TODO(mmihic): Cache, proxy for envoy or unixSocketFile endpoints, etc
         val builder = unconfiguredClient.newBuilder()
         okHttpClientCommonConfigurator.configure(builder = builder, config = config)
         config.clientConfig.ssl?.let {
@@ -44,6 +44,7 @@ class HttpClientFactory @JvmOverloads constructor(
             // No DNS lookup needed since we're just sending the request over a socket.
             builder.dns(NoOpDns)
             // Proxy config not supported
+            // This will override any base proxy covered by the okHttpClientCommonConfigurator
             builder.proxy(Proxy.NO_PROXY)
         }
 
@@ -58,6 +59,7 @@ class HttpClientFactory @JvmOverloads constructor(
             // No DNS lookup needed since we're just sending the request over a socket.
             builder.dns(NoOpDns)
             // Proxy config not supported
+            // This will override any base proxy covered by the okHttpClientCommonConfigurator
             builder.proxy(Proxy.NO_PROXY)
             // OkHttp <=> envoy over h2 has bad interactions, and benefit is marginal
             builder.protocols(listOf(Protocol.HTTP_1_1))
