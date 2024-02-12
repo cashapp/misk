@@ -10,6 +10,7 @@ data class MiskCaller @JvmOverloads constructor(
 
   /** Set of capabilities given to a human user, typically provided by the SSO infrastructure */
   val capabilities: Set<String> = setOf()
+  asdasdasd
 ) {
   init {
     require(service != null || user != null) { "one of service or user is required" }
