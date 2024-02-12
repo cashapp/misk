@@ -58,6 +58,11 @@ internal class SqsJob(
     metrics.jobsDeadLettered.labels(queueName.value, queueName.value).inc()
   }
 
+  /**
+   *  Assign a visibility timeout for some duration X making the job invisible to the consumers for
+   *  that duration. With every subsequent retry the duration becomes longer until it hits the max
+   *  value of 10hrs.
+   */
    fun setVisibilityTimeout(maxRetryCount: Int = 10) {
     val visibilityTime = calculateVisibilityTimeOut(maxRetryCount)
     queue.call { client ->
