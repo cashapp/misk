@@ -19,11 +19,9 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import java.lang.annotation.ElementType
 import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -199,7 +197,7 @@ internal class SqsJobQueueTest {
       handledJobs.add(sqsJob)
       // Only acknowledge third attempt
       if (jobsReceived.getAndIncrement() == 2) sqsJob.acknowledge()
-      else sqsJob.setVisibilityTimeout()
+      else sqsJob.delayForFailure()
 
       allJobsCompleted.countDown()
     }

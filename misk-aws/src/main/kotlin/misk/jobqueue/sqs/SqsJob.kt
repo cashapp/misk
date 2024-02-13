@@ -63,7 +63,7 @@ internal class SqsJob(
    *  that duration. With every subsequent retry the duration becomes longer until it hits the max
    *  value of 10hrs.
    */
-   fun setVisibilityTimeout(maxRetryCount: Int = 10) {
+   fun delayForFailure(maxRetryCount: Int = 10) {
     val visibilityTime = calculateVisibilityTimeOut(maxRetryCount)
     queue.call { client ->
       client.changeMessageVisibility(
@@ -81,7 +81,7 @@ internal class SqsJob(
 
     val consecutiveRetryCount = (currentReceiveCount + 1).coerceAtMost(maxReceiveCount)
     val backoff = 2.0.pow((consecutiveRetryCount - 1).toDouble()).toLong()
-    val maxDelay = 10 * 60 * 60L // We are limited with 12hrs so let's just limit it to 10hrs
+    val maxDelay = 10 * 60 * 60L // We are limited with 12hrs after which SQS would thrown an exception so let's just put the highest timeout to 10hrs
 
     val backoffWithJitter = maxDelay.coerceAtMost((backoff / 2 + Random.nextLong(0, backoff / 2)))
 
