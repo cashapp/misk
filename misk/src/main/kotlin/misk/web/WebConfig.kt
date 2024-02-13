@@ -68,9 +68,6 @@ data class WebConfig @JvmOverloads constructor(
   // TODO make this true by default
   val enable_thread_pool_queue_metrics: Boolean = false,
 
-  /** Wires up health checks on whether Jetty's thread pool is low on threads. */
-  val enable_thread_pool_health_check: Boolean = false,
-
   val action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
 
   /** The maximum number of streams per HTTP/2 connection. */
@@ -150,6 +147,9 @@ data class WebConfig @JvmOverloads constructor(
 
   /** The initial size of stream's flow control receive window. */
   val jetty_initial_stream_recv_window: Int? = null,
+
+  /** Wires up health checks on whether Jetty's thread pool is low on threads. */
+  val enable_thread_pool_health_check: Boolean = false,
   ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
