@@ -20,5 +20,8 @@ internal class MdcModuleTest {
   fun mdcIsInstalled() {
     mdc.put("some-key", "some-value")
     assertThat(mdc.get("some-key")).isEqualTo("some-value")
+
+    mdc.clear()
+    assertThat(mdc.get("some-key")).isNull()
   }
 }

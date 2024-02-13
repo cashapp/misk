@@ -12,4 +12,8 @@ internal class MiskMdc @Inject constructor(): Mdc {
   }
 
   override fun get(key: String): String? = MDC.get(key)
+
+  override fun clear() {
+    MDC.clear()
+  }
 }
