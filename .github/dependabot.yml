@@ -4,6 +4,9 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "com.datadoghq:dd-trace-ot"
+        versions: [ "1.29.x" ]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
