@@ -6,6 +6,7 @@ import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.jvm.JvmManagementFactoryModule
+import misk.logging.MdcModule
 import misk.metrics.backends.prometheus.PrometheusMetricsClientModule
 import misk.moshi.MoshiModule
 import misk.resources.ResourceLoaderModule
@@ -39,6 +40,7 @@ class MiskCommonServiceModule : KAbstractModule() {
   override fun configure() {
     binder().disableCircularProxies()
     binder().requireExactBindingAnnotations()
+    install(MdcModule())
     install(ExecutorsModule())
     install(ServiceManagerModule())
     install(PrometheusMetricsClientModule())
