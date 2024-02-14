@@ -14,11 +14,13 @@ import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
+import javax.xml.crypto.Data
 import kotlin.reflect.KClass
 
 /**
- * Builds a connection pool to a JDBC database. Doesn't do any schema migration or validation.
+ * Periodically tries to build a connection to the JDBC database. Doesn't do any schema migration or validation.
  *
  * @param baseConfig the configuration to connect to. The actual database name used may vary as
  *     the [databasePool] can pick an alternate database name for testing.
@@ -61,22 +63,35 @@ class DataSourceScheduledService @JvmOverloads constructor(
     }
   }
 
+  override fun scheduler(): Scheduler {
+    return Scheduler.newFixedDelaySchedule(0, 5, TimeUnit.SECONDS)
+  }
+
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting @${qualifier.simpleName} connection pool")
 
     require(_dataSource == null)
-    try {
-      createDataSource(baseConfig)
-    } catch (e: Exception) {
-      logger.error(e) { "Fail to start the data source, trying to do it with replica" }
-      if (!baseConfig.canRecoverOnReplica()) {
-        throw e
-      }
-      createDataSource(baseConfig.asReplica())
 
+    val success = tryConnectDataSource(baseConfig, "primary", stopwatch)
+
+    if (!success) {
+        tryConnectDataSource(baseConfig.asReplica(), "replica", stopwatch)
     }
-    logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")
+  }
+
+  /**
+   * Attempts to connect to a data source. Returns true if successful, false otherwise.
+   */
+  private fun tryConnectDataSource(config: DataSourceConfig, instance: String, stopwatch: Stopwatch): Boolean {
+    return try {
+      createDataSource(config)
+      logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")
+      true
+    } catch (e: Exception) {
+      logger.error(e) { "Failed to start the $instance data source." }
+      false
+    }
   }
 
   private fun createDataSource(baseConfig: DataSourceConfig) {
@@ -177,10 +192,6 @@ class DataSourceScheduledService @JvmOverloads constructor(
     databasePool.releaseDatabase(config)
 
     logger.info("Stopped @${qualifier.simpleName} connection pool in $stopwatch")
-  }
-
-  override fun scheduler(): Scheduler {
-    TODO("Not yet implemented")
   }
 
   companion object {
