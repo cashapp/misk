@@ -19,6 +19,7 @@ import misk.api.HttpRequest
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
+import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.queuing.TimedBlockingQueue
@@ -68,6 +69,7 @@ import misk.web.interceptors.RequestLoggingTransformer
 import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
+import misk.web.jetty.JettyThreadPoolHealthCheck
 import misk.web.jetty.JettyThreadPoolMetricsCollector
 import misk.web.jetty.MeasuredQueuedThreadPool
 import misk.web.jetty.MeasuredThreadPool
@@ -298,6 +300,9 @@ class MiskWebModule @JvmOverloads constructor(
       }
       bind<ThreadPool>().toInstance(threadPool)
       bind<MeasuredThreadPool>().toInstance(MeasuredThreadPoolExecutor(executor))
+    }
+    if (config.enable_thread_pool_health_check) {
+      multibind<HealthCheck>().to<JettyThreadPoolHealthCheck>()
     }
   }
 

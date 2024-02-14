@@ -643,6 +643,24 @@ acceptedBreaks:
         \ extends misk.web.interceptors.RequestLoggingTransformer>, misk.web.interceptors.RequestLoggingMode)"
       justification: "{Adding a new backwards compatible option to the request logging\
         \ interceptor}"
+  "2024.02.14.033633-b653902":
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      justification: "new parameter has a default value"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"

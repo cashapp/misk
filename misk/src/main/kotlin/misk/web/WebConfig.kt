@@ -147,6 +147,9 @@ data class WebConfig @JvmOverloads constructor(
 
   /** The initial size of stream's flow control receive window. */
   val jetty_initial_stream_recv_window: Int? = null,
+
+  /** Wires up health checks on whether Jetty's thread pool is low on threads. */
+  val enable_thread_pool_health_check: Boolean = false,
   ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
