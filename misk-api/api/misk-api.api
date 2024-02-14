@@ -44,6 +44,12 @@ public final class misk/client/NetworkInterceptorWrapper : okhttp3/Interceptor {
 	public fun intercept (Lokhttp3/Interceptor$Chain;)Lokhttp3/Response;
 }
 
+public abstract interface class misk/logging/Mdc {
+	public abstract fun clear ()V
+	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun put (Ljava/lang/String;Ljava/lang/String;)V
+}
+
 public abstract interface class misk/scope/ActionScoped {
 	public static final field Companion Lmisk/scope/ActionScoped$Companion;
 	public abstract fun get ()Ljava/lang/Object;
