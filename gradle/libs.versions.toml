@@ -102,6 +102,7 @@ jettyServer = { module = "org.eclipse.jetty:jetty-server" }
 jettyServlet = { module = "org.eclipse.jetty:jetty-servlet" }
 jettyServletApi = { module = "org.eclipse.jetty.toolchain:jetty-servlet-api", version = "4.0.6" }
 jettyServlets = { module = "org.eclipse.jetty:jetty-servlets" }
+jettyUds = { module = "org.eclipse.jetty:jetty-unixdomain-server" }
 jettyUnixSocket = { module = "org.eclipse.jetty:jetty-unixsocket-server" }
 jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
 jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api" }

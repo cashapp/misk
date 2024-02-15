@@ -35,6 +35,7 @@ class WebActionsServletTest {
   internal lateinit var jettyService: JettyService
 
   private var socketName: String = "@udstest" + UUID.randomUUID().toString()
+  private var fileSocketName: String = System.getProperty("java.io.tmpdir") + "udstest" + UUID.randomUUID().toString()
 
   @Test
   fun networkSocketSuccess() {
@@ -47,7 +48,7 @@ class WebActionsServletTest {
   @Test
   fun parseNonAsciiHeaders() {
     val response = get(
-      "/potato", false,
+      "/potato", false, false,
       Headers.Builder()
         .addUnsafeNonAscii("X-device-name", "Walé Iphone")
         .build()
@@ -60,6 +61,12 @@ class WebActionsServletTest {
   fun udsSocketSuccess() {
     val response = get("/potato", true)
     assertThat(response.header("ActualSocketName")).isEqualTo(socketName)
+  }
+
+  @Test
+  fun fileUdsSocketSuccess() {
+    val response = get("/potato", false, true)
+    assertThat(response.header("ActualSocketName")).isEqualTo(fileSocketName)
   }
 
   @Test
@@ -109,6 +116,7 @@ class WebActionsServletTest {
   private fun get(
     path: String,
     viaUDS: Boolean,
+    viaFileUDS: Boolean = false,
     headers: Headers = Headers.headersOf()
   ): okhttp3.Response =
     with(
@@ -123,7 +131,9 @@ class WebActionsServletTest {
         viaUDS -> {
           udsCall(get())
         }
-
+        viaFileUDS -> {
+          fileUdsCall(get())
+        }
         else -> {
           call(get())
         }
@@ -141,13 +151,22 @@ class WebActionsServletTest {
       .newCall(request.build())
       .execute()
   }
+  private fun fileUdsCall(request: Request.Builder): okhttp3.Response {
+    return OkHttpClient().newBuilder()
+      .socketFactory(UnixDomainSocketFactory(File(fileSocketName)))
+      .build()
+      .newCall(request.build())
+      .execute()
+  }
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
       install(
         WebServerTestingModule(
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            unix_domain_socket = WebUnixDomainSocketConfig(path = socketName)
+            unix_domain_sockets = arrayOf(
+              WebUnixDomainSocketConfig(path = socketName),
+              WebUnixDomainSocketConfig(path = fileSocketName))
           )
         )
       )

@@ -1,8 +1,10 @@
 package misk.web.jetty
 
 import com.google.common.base.Stopwatch
+import com.google.common.base.Strings
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import com.squareup.wire.internal.newMutableList
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.security.ssl.CipherSuites
@@ -10,6 +12,7 @@ import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
 import misk.web.WebConfig
 import misk.web.WebSslConfig
+import misk.web.WebUnixDomainSocketConfig
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
@@ -33,11 +36,14 @@ import org.eclipse.jetty.servlet.FilterHolder
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.servlets.CrossOriginFilter
+import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
 import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
+import org.eclipse.jetty.util.JavaVersion
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import wisp.logging.getLogger
+import java.io.File
 import java.lang.Thread.sleep
 import java.net.InetAddress
 import java.nio.file.InvalidPathException
@@ -45,6 +51,7 @@ import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import java.util.regex.Pattern
 import javax.servlet.DispatcherType
 
 @Singleton
@@ -230,25 +237,49 @@ class JettyService @Inject internal constructor(
       server.addConnector(httpsConnector)
     }
 
+    var socketConfigs = newMutableList<WebUnixDomainSocketConfig>()
     if (webConfig.unix_domain_socket != null) {
+      socketConfigs.add(webConfig.unix_domain_socket)
+    }
+    if (webConfig.unix_domain_sockets != null) {
+      socketConfigs.addAll(webConfig.unix_domain_sockets)
+    }
+    socketConfigs.stream().forEach() { socketConfig ->
       val udsConnFactories = mutableListOf<ConnectionFactory>()
       udsConnFactories.add(HttpConnectionFactory(httpConfig))
-      if (webConfig.unix_domain_socket.h2c == true) {
+      if (socketConfig.h2c == true) {
         udsConnFactories.add(HTTP2CServerConnectionFactory(httpConfig))
       }
 
-      val udsConnector = UnixSocketConnector(
-        server,
-        null /* executor */,
-        null /* scheduler */,
-        null /* buffer pool */,
-        webConfig.selectors ?: -1,
-        *udsConnFactories.toTypedArray()
-      )
-      udsConnector.setUnixSocket(webConfig.unix_domain_socket.path)
-      udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
-      udsConnector.name = "uds"
-      server.addConnector(udsConnector)
+      if (isJEP380Supported(socketConfig.path)) {
+        logger.info("Using UnixDomainServerConnector for ${socketConfig.path}")
+        val udsConnector = UnixDomainServerConnector(
+          server,
+          null /* executor */,
+          null /* scheduler */,
+          null /* buffer pool */,
+          webConfig.acceptors ?: -1 ,
+          webConfig.selectors ?: -1,
+          *udsConnFactories.toTypedArray()
+        )
+        udsConnector.unixDomainPath = File(socketConfig.path).toPath()
+        udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
+        udsConnector.name = "uds"
+        server.addConnector(udsConnector)
+      } else {
+        val udsConnector = UnixSocketConnector(
+          server,
+          null /* executor */,
+          null /* scheduler */,
+          null /* buffer pool */,
+          webConfig.selectors ?: -1,
+          *udsConnFactories.toTypedArray()
+        )
+        udsConnector.setUnixSocket(socketConfig.path)
+        udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
+        udsConnector.name = "uds"
+        server.addConnector(udsConnector)
+      }
     }
 
     // TODO(mmihic): Force security handler?
@@ -424,4 +455,10 @@ private fun AbstractHTTP2ServerConnectionFactory.customize(webConfig: WebConfig)
   if (webConfig.jetty_initial_stream_recv_window != null) {
     initialStreamRecvWindow = webConfig.jetty_initial_stream_recv_window
   }
+}
+
+private fun isJEP380Supported(path: String) : Boolean {
+  return JavaVersion.VERSION.major >= 16 &&
+    !Strings.isNullOrEmpty(path) &&
+    !Pattern.compile("^@|\u0000").matcher(path).find()
 }
