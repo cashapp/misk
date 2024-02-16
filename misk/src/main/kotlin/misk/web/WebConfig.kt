@@ -34,7 +34,6 @@ data class WebConfig @JvmOverloads constructor(
 
   /** Configuration to enable Jetty to listen for traffic on a unix domain socket being proxied through a sidecar
    * (like Envoy). */
-  @Deprecated("Use unix_domain_sockets instead")
   val unix_domain_socket: WebUnixDomainSocketConfig? = null,
 
   /** HTTP/2 support is currently opt-in because we can't load balance it dynamically. */
@@ -188,7 +187,7 @@ data class WebUnixDomainSocketConfig @JvmOverloads constructor(
   /** The Unix Domain Socket to listen on. Will attempt to use the JEP-380 connector when supported (using Java 16+ and file path) */
   val path: String,
   /** If true, the listener will support H2C. */
-  val h2c: Boolean? = true,
+  val h2c: Boolean? = true
 )
 
 data class CorsConfig @JvmOverloads constructor(

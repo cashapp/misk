@@ -35,7 +35,7 @@ class WebActionsServletTest {
   internal lateinit var jettyService: JettyService
 
   private var socketName: String = "@udstest" + UUID.randomUUID().toString()
-  private var fileSocketName: String = System.getProperty("java.io.tmpdir") + "udstest" + UUID.randomUUID().toString()
+  private var fileSocketName: String = "/tmp/udstest" + UUID.randomUUID().toString()
 
   @Test
   fun networkSocketSuccess() {

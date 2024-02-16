@@ -457,6 +457,10 @@ private fun AbstractHTTP2ServerConnectionFactory.customize(webConfig: WebConfig)
   }
 }
 
+/**
+ * JEP-380 is supported when running Java 16+ and the provided socket path is non-abstract. Abstract
+ * socket paths are identified by paths prefixed with an `@` symbol or a null byte.
+ */
 private fun isJEP380Supported(path: String) : Boolean {
   return JavaVersion.VERSION.major >= 16 &&
     !Strings.isNullOrEmpty(path) &&
