@@ -20,7 +20,7 @@ import wisp.logging.getLogger
 /**
  * A test SQS Service. Tests can connect to the service at 127.0.0.1:[clientPort]
  */
-internal object DockerSqs : ExternalDependency {
+object DockerSqs : ExternalDependency {
 
   private val log = getLogger<DockerSqs>()
   private const val clientPort = 9324
