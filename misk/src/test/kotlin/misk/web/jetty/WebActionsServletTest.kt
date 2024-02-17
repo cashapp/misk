@@ -25,6 +25,8 @@ import wisp.client.UnixDomainSocketFactory
 import java.io.File
 import java.util.UUID
 import jakarta.inject.Inject
+import org.eclipse.jetty.util.JavaVersion
+import org.junit.jupiter.api.Assumptions
 
 @MiskTest(startService = true)
 class WebActionsServletTest {
@@ -65,6 +67,7 @@ class WebActionsServletTest {
 
   @Test
   fun fileUdsSocketSuccess() {
+    Assumptions.assumeTrue(isJEP380Supported(fileSocketName))
     val response = get("/potato", false, true)
     assertThat(response.header("ActualSocketName")).isEqualTo(fileSocketName)
   }
