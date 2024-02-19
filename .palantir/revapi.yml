@@ -645,6 +645,10 @@ acceptedBreaks:
         \ interceptor}"
   "2024.02.14.033633-b653902":
     com.squareup.misk:misk:
+    - code: "java.annotation.removed"
+      old: "method void misk.logging.MiskMdc::<init>()"
+      new: "method void misk.logging.MiskMdc::<init>()"
+      justification: "Not used anywhere"
     - code: "java.method.numberOfParametersChanged"
       old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
         \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
@@ -661,6 +665,10 @@ acceptedBreaks:
         \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
         \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
       justification: "new parameter has a default value"
+    - code: "java.method.visibilityReduced"
+      old: "method void misk.logging.MiskMdc::<init>()"
+      new: "method void misk.logging.MiskMdc::<init>()"
+      justification: "Not used anywhere yet"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"

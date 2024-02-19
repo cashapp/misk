@@ -835,6 +835,13 @@ public final class misk/jvm/JvmManagementFactoryModule : misk/inject/KInstallOnc
 	public final fun provideRuntimeMxBean ()Ljava/lang/management/RuntimeMXBean;
 }
 
+public final class misk/logging/MiskMdc : misk/logging/Mdc {
+	public static final field INSTANCE Lmisk/logging/MiskMdc;
+	public fun clear ()V
+	public fun get (Ljava/lang/String;)Ljava/lang/String;
+	public fun put (Ljava/lang/String;Ljava/lang/String;)V
+}
+
 public final class misk/monitoring/JvmMetrics {
 	public fun <init> (Ljava/lang/management/RuntimeMXBean;Lmisk/metrics/v2/Metrics;)V
 }
