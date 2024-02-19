@@ -1,8 +1,8 @@
 package misk.logging
 
-import misk.inject.KAbstractModule
+import misk.inject.KInstallOnceModule
 
-internal class MdcModule : KAbstractModule() {
+class MdcModule : KInstallOnceModule() {
 
   override fun configure() {
     bind<Mdc>().toInstance(MiskMdc)
