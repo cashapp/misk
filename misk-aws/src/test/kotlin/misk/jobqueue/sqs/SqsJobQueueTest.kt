@@ -1,6 +1,7 @@
 package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.amazonaws.services.sqs.model.ChangeMessageVisibilityRequest
 import com.amazonaws.services.sqs.model.CreateQueueRequest
 import misk.clustering.fake.lease.FakeLeaseManager
 import misk.feature.testing.FakeFeatureFlags
@@ -43,6 +44,7 @@ internal class SqsJobQueueTest {
   @Inject @ForSqsHandling lateinit var taskQueue: RepeatedTaskQueue
   @Inject private lateinit var fakeFeatureFlags: FakeFeatureFlags
   @Inject private lateinit var fakeLeaseManager: FakeLeaseManager
+  @Inject private lateinit var queueResolver: QueueResolver
 
   private lateinit var queueName: QueueName
   private lateinit var deadLetterQueueName: QueueName
@@ -181,6 +183,17 @@ internal class SqsJobQueueTest {
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
       0.0
     )
+  }
+
+  @TestAllReceiverPolicies
+  fun checkThatMaxDelayIsLessThanTenHours(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
+    // 2^20 is ~1m seconds or ~290 hours
+    var maxDelay = 0
+    for (i in 1..20) {
+      maxDelay = SqsJob.calculateVisibilityTimeOut(i, 20)
+    }
+    assertThat(maxDelay.toLong()).isEqualTo(SqsJob.MAX_JOB_DELAY)
   }
 
   @TestAllReceiverPolicies

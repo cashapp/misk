@@ -64,7 +64,11 @@ internal class SqsJob(
    *  value of 10hrs.
    */
    fun delayForFailure(maxRetryCount: Int = 10) {
-    val visibilityTime = calculateVisibilityTimeOut(maxRetryCount)
+    val visibilityTime = calculateVisibilityTimeOut(
+      currentReceiveCount = attributes[RECEIVE_COUNT]?.toInt()  ?: 1,
+      maxReceiveCount = maxRetryCount,
+    )
+
     queue.call { client ->
       client.changeMessageVisibility(
         ChangeMessageVisibilityRequest()
@@ -75,19 +79,6 @@ internal class SqsJob(
     }
     metrics.visibilityTime.labels(queueName.value, queueName.value).set(visibilityTime.toDouble())
   }
-
-  private fun calculateVisibilityTimeOut(maxReceiveCount: Int): Int {
-    val currentReceiveCount = attributes["ApproximateReceiveCount"]?.toInt() ?: 1
-
-    val consecutiveRetryCount = (currentReceiveCount + 1).coerceAtMost(maxReceiveCount)
-    val backoff = 2.0.pow((consecutiveRetryCount - 1).toDouble()).toLong()
-    val maxDelay = 10 * 60 * 60L // We are limited with 12hrs after which SQS would thrown an exception so let's just put the highest timeout to 10hrs
-
-    val backoffWithJitter = maxDelay.coerceAtMost((backoff / 2 + Random.nextLong(0, backoff / 2)))
-
-    return backoffWithJitter.toInt()
-  }
-
   private fun deleteMessage(queue: ResolvedQueue, message: Message) {
     val (deleteDuration, _) = queue.call {
       timed { it.deleteMessage(queue.url, message.receiptHandle) }
@@ -100,6 +91,9 @@ internal class SqsJob(
   }
 
   companion object {
+    /** We are limited with 12hrs after which SQS would thrown an exception - to be safe we set it to 10hrs. */
+    const val MAX_JOB_DELAY = 10 * 60 * 60L
+    const val RECEIVE_COUNT = "ApproximateReceiveCount"
     /** Message attribute that captures original trace id for a job, when available. */
     const val ORIGINAL_TRACE_ID_ATTR = "x-original-trace-id"
 
@@ -118,5 +112,14 @@ internal class SqsJob(
     /** Client-assigned identifier, useful to detect duplicate messages. */
     const val JOBQUEUE_METADATA_IDEMPOTENCE_KEY = "idempotence_key"
     const val JOBQUEUE_METADATA_ORIGINAL_TRACE_ID = "original_trace_id"
+
+    /** Estimates the current visibility timeout*/
+    fun calculateVisibilityTimeOut(currentReceiveCount: Int, maxReceiveCount: Int): Int {
+      val consecutiveRetryCount = (currentReceiveCount + 1).coerceAtMost(maxReceiveCount)
+      val backoff = 2.0.pow((consecutiveRetryCount - 1).toDouble()).toLong()
+      val backoffWithJitter = MAX_JOB_DELAY.coerceAtMost((backoff / 2 + Random.nextLong(0, backoff / 2)))
+
+      return backoffWithJitter.toInt()
+    }
   }
 }
