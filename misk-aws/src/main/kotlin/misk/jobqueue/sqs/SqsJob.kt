@@ -3,6 +3,7 @@ package misk.jobqueue.sqs
 import com.amazonaws.services.sqs.model.ChangeMessageVisibilityRequest
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.SendMessageRequest
+import com.google.common.annotations.VisibleForTesting
 import com.squareup.moshi.Moshi
 import misk.jobqueue.Job
 import misk.jobqueue.QueueName
@@ -115,6 +116,7 @@ internal class SqsJob(
     const val JOBQUEUE_METADATA_ORIGINAL_TRACE_ID = "original_trace_id"
 
     /** Estimates the current visibility timeout*/
+    @VisibleForTesting
     fun calculateVisibilityTimeOut(currentReceiveCount: Int, maxReceiveCount: Int): Int {
       val consecutiveRetryCount = (currentReceiveCount + 1).coerceAtMost(maxReceiveCount)
       val backoff = BigInteger.TWO.pow(consecutiveRetryCount - 1).toLong()
