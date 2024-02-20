@@ -150,6 +150,9 @@ data class WebConfig @JvmOverloads constructor(
 
   /** Wires up health checks on whether Jetty's thread pool is low on threads. */
   val enable_thread_pool_health_check: Boolean = false,
+
+  /** Configurations to enable Jetty to listen for traffic on a unix domain socket being proxied through a sidecar (e.g. envoy, istio) */
+  val unix_domain_sockets: Array<WebUnixDomainSocketConfig>? = null,
   ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
@@ -181,7 +184,7 @@ data class WebSslConfig @JvmOverloads constructor(
 }
 
 data class WebUnixDomainSocketConfig @JvmOverloads constructor(
-  /** The Unix Domain Socket to listen on. */
+  /** The Unix Domain Socket to listen on. Will attempt to use the JEP-380 connector when supported (using Java 16+ and file path) */
   val path: String,
   /** If true, the listener will support H2C. */
   val h2c: Boolean? = true
