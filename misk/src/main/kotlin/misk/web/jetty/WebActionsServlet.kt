@@ -24,6 +24,7 @@ import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.server.ServerConnector
+import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
 import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
@@ -119,6 +120,10 @@ internal class WebActionsServlet @Inject constructor(
         request = request,
         linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
           when (this?.connector) {
+            is UnixDomainServerConnector -> SocketAddress.Unix(
+              (this.connector as UnixDomainServerConnector).unixDomainPath.toString()
+            )
+
             is UnixSocketConnector -> SocketAddress.Unix(
               (this.connector as UnixSocketConnector).unixSocket
             )

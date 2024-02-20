@@ -45,6 +45,7 @@ dependencies {
   implementation(libs.jettyIo)
   implementation(libs.jettyServlet)
   implementation(libs.jettyServlets)
+  implementation(libs.jettyUds)
   implementation(libs.jettyUnixSocket)
   implementation(libs.jettyWebsocketApi)
   implementation(libs.jettyWebsocketServer)

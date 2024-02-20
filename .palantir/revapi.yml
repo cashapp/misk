@@ -669,6 +669,1508 @@ acceptedBreaks:
       old: "method void misk.logging.MiskMdc::<init>()"
       new: "method void misk.logging.MiskMdc::<init>()"
       justification: "Not used anywhere yet"
+  "2024.02.19.234124-880f387":
+    app.cash.wisp:bucket4j:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-aws-environment:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-client:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-config:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-containers-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-deployment:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-deployment-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-feature:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-feature-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-launchdarkly:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-lease:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-lease-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-logging:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-logging-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-moshi:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-rate-limiting:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-resource-loader:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-resource-loader-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-sampling:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-ssl:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-task:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-time-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-token:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-token-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    app.cash.wisp:wisp-tracing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-action-scopes:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-actions:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-admin:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-api:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-aws:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-aws-dynamodb:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-aws2-dynamodb:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-clustering:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-clustering-dynamodb:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-config:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-core:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-cron:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-crypto:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-datadog:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-events:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-events-core:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-events-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-exceptions-dynamodb:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-feature:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-feature-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-gcp:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-grpc-reflect:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-grpc-tests:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-hibernate:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-hibernate-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-hotwire:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-inject:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-inject-guice7-test:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-jdbc:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-jobqueue:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-jooq:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-launchdarkly:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-launchdarkly-core:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-lease:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-metrics:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-metrics-digester:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-policy:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-prometheus:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-proto:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-rate-limiting-bucket4j-dynamodb-v1:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-rate-limiting-bucket4j-mysql:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-rate-limiting-bucket4j-redis:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-redis:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-service:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-slack:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-sqldelight:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-sqldelight-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-tailwind:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-testing:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-transactional-jobqueue:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:misk-warmup:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
+    com.squareup.misk:samples:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean)"
+      new: "method misk.web.WebConfig misk.web.WebConfig::copy(int, long, int, java.lang.String,\
+        \ misk.web.WebSslConfig, misk.web.WebUnixDomainSocketConfig, boolean, java.lang.Integer,\
+        \ java.lang.Integer, java.lang.Integer, int, int, int, boolean, misk.web.exceptions.ActionExceptionLogLevelConfig,\
+        \ java.lang.Integer, double, boolean, int, java.util.Map<java.lang.String,\
+        \ misk.web.CorsConfig>, boolean, org.slf4j.event.Level, misk.web.ConcurrencyLimiterConfig,\
+        \ int, java.lang.Integer, java.lang.Integer, java.lang.Long, int, int, boolean,\
+        \ boolean, java.lang.Integer, java.lang.Integer, java.lang.Integer, boolean,\
+        \ misk.web.WebUnixDomainSocketConfig[])"
+      justification: "Added new unix_domain_sockets to WebConfig with default null\
+        \ value"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
