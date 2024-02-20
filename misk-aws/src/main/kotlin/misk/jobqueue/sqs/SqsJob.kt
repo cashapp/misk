@@ -8,6 +8,7 @@ import misk.jobqueue.Job
 import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
+import java.math.BigInteger
 import kotlin.math.pow
 import kotlin.random.Random
 
@@ -116,7 +117,7 @@ internal class SqsJob(
     /** Estimates the current visibility timeout*/
     fun calculateVisibilityTimeOut(currentReceiveCount: Int, maxReceiveCount: Int): Int {
       val consecutiveRetryCount = (currentReceiveCount + 1).coerceAtMost(maxReceiveCount)
-      val backoff = 2.0.pow((consecutiveRetryCount - 1).toDouble()).toLong()
+      val backoff = BigInteger.TWO.pow(consecutiveRetryCount - 1).toLong()
       val backoffWithJitter = MAX_JOB_DELAY.coerceAtMost((backoff / 2 + Random.nextLong(0, backoff / 2)))
 
       return backoffWithJitter.toInt()
