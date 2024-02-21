@@ -128,7 +128,7 @@ data class DataSourceConfig @JvmOverloads constructor(
       DataSourceType.MYSQL -> {
         copy(
           port = port ?: 3306,
-          host = host ?: "127.0.0.1",
+          host = host ?: System.getenv("MYSQL_HOST") ?: "127.0.0.1",
           database = database ?: ""
         )
       }
