@@ -22,6 +22,7 @@ import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
 import org.eclipse.jetty.io.ConnectionStatistics
 import org.eclipse.jetty.server.ConnectionFactory
+import org.eclipse.jetty.server.Connector
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.NetworkConnector
@@ -44,9 +45,13 @@ import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import wisp.logging.getLogger
 import java.io.File
+import java.io.IOException
+import java.lang.RuntimeException
 import java.lang.Thread.sleep
 import java.net.InetAddress
+import java.nio.file.Files
 import java.nio.file.InvalidPathException
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -262,9 +267,18 @@ class JettyService @Inject internal constructor(
           webConfig.selectors ?: -1,
           *udsConnFactories.toTypedArray()
         )
-        udsConnector.unixDomainPath = File(socketConfig.path).toPath()
+        val socketFile = File(socketConfig.path)
+        udsConnector.unixDomainPath = socketFile.toPath()
         udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
         udsConnector.name = "uds"
+
+        // set file permissions after socket creation so sidecars (e.g. envoy, istio) have access
+        try {
+          udsConnector.start();
+          setFilePermissions(socketFile)
+        } catch (e: Exception) {
+          cleanAndThrow(udsConnector, e)
+        }
         server.addConnector(udsConnector)
       } else {
         val udsConnector = UnixSocketConnector(
@@ -468,4 +482,24 @@ internal fun isJEP380Supported(
   return javaVersion >= 16 &&
     !Strings.isNullOrEmpty(path) &&
     !Pattern.compile("^@|\u0000").matcher(path).find()
+}
+
+private fun setFilePermissions(file: File) {
+  try {
+    Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rw-rw-rw-"))
+  } catch (e: IOException) {
+    throw RuntimeException(e);
+  }
+}
+
+private fun cleanAndThrow(connector: Connector, exception: Exception){
+  var runtimeException = RuntimeException(exception);
+  if (connector.isStarted()){
+    try {
+      connector.stop();
+    } catch (e: Exception) {
+      runtimeException.addSuppressed(e);
+    }
+  }
+  throw runtimeException
 }
