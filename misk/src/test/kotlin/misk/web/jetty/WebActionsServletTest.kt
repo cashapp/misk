@@ -1,5 +1,6 @@
 package misk.web.jetty
 
+import jakarta.inject.Inject
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -20,13 +21,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
 import wisp.client.UnixDomainSocketFactory
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.UUID
-import jakarta.inject.Inject
-import org.eclipse.jetty.util.JavaVersion
-import org.junit.jupiter.api.Assumptions
 
 @MiskTest(startService = true)
 class WebActionsServletTest {
@@ -68,6 +70,7 @@ class WebActionsServletTest {
   @Test
   fun fileUdsSocketSuccess() {
     Assumptions.assumeTrue(isJEP380Supported(fileSocketName))
+    assertFilePermissions(fileSocketName)
     val response = get("/potato", false, true)
     assertThat(response.header("ActualSocketName")).isEqualTo(fileSocketName)
   }
@@ -154,12 +157,18 @@ class WebActionsServletTest {
       .newCall(request.build())
       .execute()
   }
+
   private fun fileUdsCall(request: Request.Builder): okhttp3.Response {
     return OkHttpClient().newBuilder()
       .socketFactory(UnixDomainSocketFactory(File(fileSocketName)))
       .build()
       .newCall(request.build())
       .execute()
+  }
+
+  private fun assertFilePermissions(path: String) {
+    val perm = Files.getPosixFilePermissions(Paths.get(path))
+    assertThat(PosixFilePermissions.toString(perm)).isEqualTo("rw-rw-rw-")
   }
 
   inner class TestModule : KAbstractModule() {
