@@ -88,16 +88,33 @@ public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstra
 	protected final fun installHibernateAdminDashboardWebActions ()V
 }
 
+public final class misk/hibernate/HibernateExceptionLogLevelConfig : wisp/config/Config {
+	public fun <init> ()V
+	public fun <init> (Lorg/slf4j/event/Level;)V
+	public synthetic fun <init> (Lorg/slf4j/event/Level;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/slf4j/event/Level;
+	public final fun copy (Lorg/slf4j/event/Level;)Lmisk/hibernate/HibernateExceptionLogLevelConfig;
+	public static synthetic fun copy$default (Lmisk/hibernate/HibernateExceptionLogLevelConfig;Lorg/slf4j/event/Level;ILjava/lang/Object;)Lmisk/hibernate/HibernateExceptionLogLevelConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLog_level ()Lorg/slf4j/event/Level;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/hibernate/HibernateModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
 	public final fun getDatabasePool ()Lmisk/jdbc/DatabasePool;
+	public final fun getLogLevelConfig ()Lmisk/hibernate/HibernateExceptionLogLevelConfig;
 	public final fun getReaderConfig ()Lmisk/jdbc/DataSourceConfig;
 }
 

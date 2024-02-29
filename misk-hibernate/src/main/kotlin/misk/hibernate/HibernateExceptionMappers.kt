@@ -14,29 +14,35 @@ import org.slf4j.event.Level
 import jakarta.inject.Inject
 import javax.persistence.OptimisticLockException
 
-internal class RetryTransactionExceptionMapper @Inject internal constructor() :
+internal class RetryTransactionExceptionMapper @Inject internal constructor(
+  val config: HibernateExceptionLogLevelConfig? = null,
+) :
   ExceptionMapper<RetryTransactionException> {
 
   override fun toResponse(th: RetryTransactionException): Response<ResponseBody> =
     ConflictExceptionResponder.toResponse()
 
-  override fun loggingLevel(th: RetryTransactionException) = Level.WARN
+  override fun loggingLevel(th: RetryTransactionException) = config?.log_level ?: Level.WARN
 }
 
-internal class ConstraintViolationExceptionMapper @Inject internal constructor() :
+internal class ConstraintViolationExceptionMapper @Inject internal constructor(
+  val config: HibernateExceptionLogLevelConfig? = null,
+) :
   ExceptionMapper<ConstraintViolationException> {
   override fun toResponse(th: ConstraintViolationException): Response<ResponseBody> =
     ConflictExceptionResponder.toResponse()
 
-  override fun loggingLevel(th: ConstraintViolationException) = Level.WARN
+  override fun loggingLevel(th: ConstraintViolationException) = config?.log_level ?: Level.WARN
 }
 
-internal class OptimisticLockExceptionMapper @Inject internal constructor() :
+internal class OptimisticLockExceptionMapper @Inject internal constructor(
+  val config: HibernateExceptionLogLevelConfig? = null,
+) :
   ExceptionMapper<OptimisticLockException> {
   override fun toResponse(th: OptimisticLockException): Response<ResponseBody> =
     ConflictExceptionResponder.toResponse()
 
-  override fun loggingLevel(th: OptimisticLockException) = Level.WARN
+  override fun loggingLevel(th: OptimisticLockException) = config?.log_level ?: Level.WARN
 }
 
 internal class ResourceExhaustedExceptionMapper @Inject internal constructor() :

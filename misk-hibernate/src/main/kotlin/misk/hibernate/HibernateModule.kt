@@ -56,6 +56,7 @@ class HibernateModule @JvmOverloads constructor(
   private val readerQualifier: KClass<out Annotation>?,
   readerConfig: DataSourceConfig?,
   val databasePool: DatabasePool = RealDatabasePool,
+  logLevelConfig: HibernateExceptionLogLevelConfig? = null,
 ) : KAbstractModule() {
 
   // Make sure Hibernate logs use slf4j. Otherwise, it will base its decision on the classpath and
@@ -66,12 +67,20 @@ class HibernateModule @JvmOverloads constructor(
 
   val config = config.withDefaults()
   val readerConfig = readerConfig?.withDefaults()
+  val logLevelConfig = logLevelConfig ?: HibernateExceptionLogLevelConfig() // Default to WARN
 
   constructor(
     qualifier: KClass<out Annotation>,
     config: DataSourceConfig,
     databasePool: DatabasePool = RealDatabasePool,
   ) : this(qualifier, config, null, null, databasePool)
+
+  constructor(
+    qualifier: KClass<out Annotation>,
+    config: DataSourceConfig,
+    databasePool: DatabasePool = RealDatabasePool,
+    logLevelConfig: HibernateExceptionLogLevelConfig,
+  ) : this(qualifier, config, null, null, databasePool, logLevelConfig)
 
   constructor(
     qualifier: KClass<out Annotation>,
@@ -92,6 +101,7 @@ class HibernateModule @JvmOverloads constructor(
     bind<Query.Factory>().to<ReflectionQuery.Factory>()
     bind<QueryLimitsConfig>()
       .toInstance(QueryLimitsConfig(MAX_MAX_ROWS, ROW_COUNT_ERROR_LIMIT, ROW_COUNT_WARNING_LIMIT))
+    bind<HibernateExceptionLogLevelConfig>().toInstance(logLevelConfig)
 
     bindDataSource(qualifier, config, true)
     if (readerQualifier != null && readerConfig != null) {
