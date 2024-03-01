@@ -8,11 +8,12 @@ import java.util.concurrent.ThreadLocalRandom
  * functions, so that they can change dynamically as the system is running (e.g.
  * in response to changes in dynamic flags)
  */
-class ExponentialBackoff(
+open class ExponentialBackoff(
   private val baseDelay: () -> Duration,
   private val maxDelay: () -> Duration,
-  private val jitter: () -> Duration // TODO(mmihic): Consider making jitter a %
-
+  private val jitter: () -> Duration,
+  // Takes the next retry delay as an argument and returns the amount of jitter to introduce
+  private val jitterFromNextDelay: (Long) -> Duration = { jitter() },
 ) : Backoff {
   private var consecutiveRetryCount: Int = 0
   private var maxRetryCount = Integer.MAX_VALUE
@@ -25,7 +26,37 @@ class ExponentialBackoff(
    * @param maxDelay The [Supplier] for maximum amount of time to wait between retries
    */
   constructor(baseDelay: () -> Duration, maxDelay: () -> Duration) :
-    this(baseDelay, maxDelay, { Duration.ofMillis(0) })
+    this(baseDelay, maxDelay, { Duration.ZERO }, { Duration.ZERO })
+
+  /**
+   * Creates a new jittered [ExponentialBackoff] using a function for the base
+   * and max retry delays, and a function for the jitter amount.
+   *
+   * @param baseDelay The [Supplier] for the base delay
+   * @param maxDelay The [Supplier] for maximum amount of time to wait between retries
+   * @param jitterFromNextDelay The [Supplier] for maximum amount of time to wait between retries
+   */
+  constructor(
+    baseDelay: () -> Duration,
+    maxDelay: () -> Duration,
+    jitterFromNextDelay: (Long) -> Duration
+  ) :
+    this(baseDelay, maxDelay, { Duration.ZERO }, jitterFromNextDelay)
+
+  /**
+   * Creates a new jittered [ExponentialBackoff] from fixed delays and jitter amounts and a function
+   * for the jitter.
+   *
+   * @param baseDelay The base retry delay
+   * @param maxDelay The max amount of time to delay
+   * @param jitterFromNextDelay The [Supplier] for maximum amount of time to wait between retries
+   */
+  constructor(
+    baseDelay: Duration,
+    maxDelay: Duration,
+    jitterFromNextDelay: (Long) -> Duration
+  ) :
+    this({ baseDelay }, { maxDelay }, { Duration.ZERO }, jitterFromNextDelay)
 
   /**
    * Creates a new [ExponentialBackoff] from fixed delays and jitter amounts
@@ -35,7 +66,7 @@ class ExponentialBackoff(
    * @param jitter The amount of jitter to introduce
    */
   constructor(baseDelay: Duration, maxDelay: Duration, jitter: Duration) :
-    this({ baseDelay }, { maxDelay }, { jitter })
+    this({ baseDelay }, { maxDelay }, { jitter }, { jitter })
 
   /**
    * Creates a new [ExponentialBackoff] from fixed delays, without jitter
@@ -60,11 +91,11 @@ class ExponentialBackoff(
     if (delayMs == maxDelayMs) {
       maxRetryCount = consecutiveRetryCount
     }
-    return Duration.ofMillis(delayMs + randomJitter())
+    return Duration.ofMillis(delayMs + randomJitter(delayMs))
   }
 
-  private fun randomJitter(): Long {
-    val maxJitterMs = jitter().toMillis()
+  private fun randomJitter(curDelayMs: Long): Long {
+    val maxJitterMs = jitterFromNextDelay(curDelayMs).toMillis()
     return if (maxJitterMs == 0L) 0
     else Math.floorMod(ThreadLocalRandom.current().nextLong(), maxJitterMs)
   }
