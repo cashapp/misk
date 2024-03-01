@@ -18,6 +18,6 @@ data class RedisReplicationGroupConfig @JvmOverloads constructor(
 )
 
 data class RedisNodeConfig(
-  val hostname: String,
+  val hostname: String = System.getenv("REDIS_HOST"),
   val port: Int
 )
