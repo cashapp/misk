@@ -6,7 +6,12 @@ plugins {
 
 val applicationMainClass = "com.squareup.exemplar.ExemplarServiceKt"
 application {
-  mainClass.set(applicationMainClass)
+    mainClass.set(applicationMainClass)
+    run {
+        val defaultJvmArgs = applicationDefaultJvmArgs.toMutableList()
+        defaultJvmArgs.add("-Dkotlinx.coroutines.io.parallelism=5000")
+        setApplicationDefaultJvmArgs(defaultJvmArgs)
+    }
 }
 
 dependencies {
@@ -30,7 +35,10 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-hotwire"))
+  implementation(project(":misk-metrics"))
   implementation(project(":misk-prometheus"))
+  implementation(project(":wisp:wisp-logging"))
+  implementation(project(mapOf("path" to ":misk-service")))
 
   testImplementation(libs.assertj)
   testImplementation(libs.awsDynamodb)
