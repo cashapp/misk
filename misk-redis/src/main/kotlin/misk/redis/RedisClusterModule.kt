@@ -13,6 +13,7 @@ import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.UnifiedJedis
 import wisp.deployment.Deployment
+import wisp.logging.getLogger
 
 /**
  * Configures a [Redis] client that interacts with a Redis cluster. This also installs a
@@ -69,10 +70,13 @@ class RedisClusterModule @JvmOverloads constructor(
     config: RedisClusterConfig,
     deployment: Deployment
   ): UnifiedJedis {
+
     // Get the first replication group, we only support 1 replication group per service.
     val replicationGroup = config[config.keys.first()]
       ?: throw RuntimeException("At least 1 replication group must be specified")
-
+    // We're doing this given that the hostname is can be either localhost or docker hostname when running locally, and we want to be able to support that.
+    // If a hostname is provided this will always take precedence over the environment variable.
+    val redisHost = replicationGroup.configuration_endpoint.hostname?.takeUnless { it.isNullOrBlank() } ?: System.getenv("REDIS_HOST") ?: "127.0.0.1"
     // Create our jedis pool with client-side metrics.
     val jedisClientConfig = DefaultJedisClientConfig.builder()
       .connectionTimeoutMillis(replicationGroup.timeout_ms)
@@ -93,7 +97,7 @@ class RedisClusterModule @JvmOverloads constructor(
     return JedisCluster(
       setOf(
         HostAndPort(
-          replicationGroup.configuration_endpoint.hostname,
+          redisHost,
           replicationGroup.configuration_endpoint.port
         )
       ),
