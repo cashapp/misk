@@ -12,6 +12,7 @@ import wisp.config.ConfigSource
 import wisp.config.WispConfig
 import wisp.config.addWispConfigSources
 import wisp.feature.Attributes
+import wisp.feature.BooleanFeatureFlag
 import wisp.feature.Feature
 import wisp.feature.getEnum
 import wisp.feature.getJson
@@ -20,6 +21,13 @@ internal class FakeFeatureFlagsTest {
     val FEATURE = Feature("foo")
     val OTHER_FEATURE = Feature("bar")
     val TOKEN = "cust_abcdef123"
+
+    data class TestNoAttributeBooleanFlag(
+      val username: String = "test-boolean-username",
+    ) : BooleanFeatureFlag {
+      override val feature = Feature("test-boolean-default-attributes-flag")
+      override val key = username
+    }
 
     lateinit var subject: FakeFeatureFlags
 
@@ -353,6 +361,16 @@ internal class FakeFeatureFlagsTest {
 
         assertThat(subject.getInt(Feature("foo1"))).isEqualTo(1)
         assertThat(subject.getJson<JsonFeature>(Feature("fooJson")).optional).isEqualTo("value")
+    }
+
+    @Test
+    fun `strongly typed feature flags do not need to override attributes`() {
+      val booleanFlag = TestNoAttributeBooleanFlag("username")
+      subject.strongFeatureFlags.override<TestNoAttributeBooleanFlag>(true) { flag ->
+        flag.attributes == Attributes()
+      }
+      assertThat(subject.strongFeatureFlags.get(booleanFlag))
+        .isEqualTo(true)
     }
 
     /**
