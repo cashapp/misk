@@ -2171,6 +2171,23 @@ acceptedBreaks:
         \ misk.web.WebUnixDomainSocketConfig[])"
       justification: "Added new unix_domain_sockets to WebConfig with default null\
         \ value"
+  "2024.02.27.004227-d338390":
+    com.squareup.misk:misk-hibernate:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.hibernate.ConstraintViolationExceptionMapper::<init>()"
+      new: "method void misk.hibernate.ConstraintViolationExceptionMapper::<init>(misk.hibernate.HibernateExceptionLogLevelConfig)"
+      justification: "{these exception mapper should only be installed through ExceptionMapper.create,\
+        \ not manually instantiated}"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.hibernate.OptimisticLockExceptionMapper::<init>()"
+      new: "method void misk.hibernate.OptimisticLockExceptionMapper::<init>(misk.hibernate.HibernateExceptionLogLevelConfig)"
+      justification: "{these exception mapper should only be installed through ExceptionMapper.create,\
+        \ not manually instantiated}"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.hibernate.RetryTransactionExceptionMapper::<init>()"
+      new: "method void misk.hibernate.RetryTransactionExceptionMapper::<init>(misk.hibernate.HibernateExceptionLogLevelConfig)"
+      justification: "{these exception mapper should only be installed through ExceptionMapper.create,\
+        \ not manually instantiated}"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
