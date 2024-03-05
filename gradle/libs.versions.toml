@@ -63,7 +63,7 @@ grpcNetty = { module = "io.grpc:grpc-netty", version = "1.58.0" }
 grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.58.0" }
 grpcStub = { module = "io.grpc:grpc-stub", version = "1.58.0" }
 guava = { module = "com.google.guava:guava" }
-guavaBom = { module = "com.google.guava:guava-bom", version = "32.1.1-jre" }
+guavaBom = { module = "com.google.guava:guava-bom", version = "33.0.0-jre" }
 guavaTestLib = { module = "com.google.guava:guava-testlib" }
 guice = { module = "com.google.inject:guice" }
 guiceBom = { module = "com.google.inject:guice-bom", version = "6.0.0" }
