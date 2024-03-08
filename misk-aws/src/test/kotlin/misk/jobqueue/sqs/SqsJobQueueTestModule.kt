@@ -33,7 +33,8 @@ class SqsJobQueueTestModule(
         AwsSqsJobQueueModule(
           AwsSqsJobQueueConfig(
             task_queue = RepeatedTaskQueueConfig(default_jitter_ms = 0),
-            queue_attribute_importer_frequency_ms = 0
+            queue_attribute_importer_frequency_ms = 0,
+            pod_consumers_queue_feature_flag = null
           )
         )
       )
