@@ -38,6 +38,7 @@ class SchemaMigratorService internal constructor(
         migrationState = MigrationState(emptyMap())
       }
     } else {
+      //TODO: update this as a part of the changes to the DataSourceService
       migrationState = schemaMigrator.requireAll()
     }
   }
