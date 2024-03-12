@@ -1,0 +1,24 @@
+web:
+  port: 1234
+  idle_timeout: 30000
+
+consumer_a: &consumer1
+  min_items: 1
+  max_items: 2
+
+consumer_b: *consumer1
+
+duration:
+  interval: "PT1S"
+
+action_exception_log_level:
+  client_error_level: INFO
+
+nested:
+  child_nested:
+    nested_value: nested value
+
+collection:
+  - name: "First Item"
+  - name: "Second Item"
+    optional: 100
