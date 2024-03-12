@@ -7,4 +7,5 @@ data class DynamoClusterConfig @JvmOverloads constructor(
   var table_name: String = "$appName.misk-cluster-members",
   val update_frequency_seconds: Long = 30,
   val stale_threshold_seconds: Long = 60,
+  val log_updates: Boolean = true,
 ) : Config

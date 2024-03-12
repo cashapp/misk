@@ -66,7 +66,9 @@ internal class DynamoClusterWatcherTask @Inject constructor(
       table.putItem(member)
     }
 
-    logger.info { "Updated dynamodb with my information in ${duration.toMillis()}ms" }
+    if (dynamoClusterConfig.log_updates) {
+      logger.info { "Updated dynamodb with my information in ${duration.toMillis()}ms" }
+    }
   }
 
   internal fun recordCurrentDynamoCluster() {
@@ -91,7 +93,9 @@ internal class DynamoClusterWatcherTask @Inject constructor(
       prevMembers = members
     }
 
-    logger.info { "Updated cluster information from dynamodb in ${duration.toMillis()}ms" }
+    if (dynamoClusterConfig.log_updates) {
+      logger.info { "Updated cluster information from dynamodb in ${duration.toMillis()}ms" }
+    }
   }
 
   override fun shutDown() {}
