@@ -133,6 +133,13 @@ kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", 
 kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.8.1" }
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "18.0.1" }
+# CAUTION: When updating launchdarkly SDK to a new version, ensure that:
+# 1. ld-relay is upgraded to the appropriate version
+# 2. the ld-SDK instance in the java monorepo is also upgraded to the latest version. This is
+#    required because some services depend on both the misk *and* the java monorepo. Those services
+#    will fail to start if the java monorep isn't upgraded at the same time.
+#    Prior incident: #cash-inc-4423_franklin-staging-deployment-is-failing
+#    Example PR from java monorepo: https://github.com/squareup/java/pull/322668
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "6.3.0" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.4.8" }
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.4.8" }
