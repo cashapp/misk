@@ -152,7 +152,7 @@ data class WebConfig @JvmOverloads constructor(
   val enable_thread_pool_health_check: Boolean = false,
 
   /** Configurations to enable Jetty to listen for traffic on a unix domain socket being proxied through a sidecar (e.g. envoy, istio) */
-  val unix_domain_sockets: List<WebUnixDomainSocketConfig>? = null,
+  val unix_domain_sockets: Array<WebUnixDomainSocketConfig>? = null,
   ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(

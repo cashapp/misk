@@ -176,7 +176,7 @@ class WebActionsServletTest {
       install(
         WebServerTestingModule(
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            unix_domain_sockets = listOf(
+            unix_domain_sockets = arrayOf(
               WebUnixDomainSocketConfig(path = socketName),
               WebUnixDomainSocketConfig(path = fileSocketName))
           )
