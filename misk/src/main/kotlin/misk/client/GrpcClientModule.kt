@@ -22,7 +22,17 @@ class GrpcClientModule<T : Service, G : T> @JvmOverloads constructor(
   private val name: String,
 
   /** Qualifier annotation on the bound service. If null the service will be bound unannotated. */
-  private val annotation: Annotation? = null
+  private val annotation: Annotation? = null,
+
+  /**
+   * Sets the minimum outbound message size (in bytes) that will be compressed.
+   *
+   * Set this to 0 to enable compression for all outbound messages. Set to [Long.MAX_VALUE] to
+   * disable compression.
+   *
+   * This is 0 by default.
+   */
+  private val minMessageToCompress: Long = 0L
 ) : KAbstractModule() {
   private val httpClientAnnotation = annotation ?: Names.named(kclass.qualifiedName)
 
@@ -34,7 +44,7 @@ class GrpcClientModule<T : Service, G : T> @JvmOverloads constructor(
 
     val key = if (annotation == null) Key.get(kclass.java) else Key.get(kclass.java, annotation)
     bind(key)
-      .toProvider(GrpcClientProvider(kclass, grpcClientClass, name, httpClientProvider))
+      .toProvider(GrpcClientProvider(kclass, grpcClientClass, name, httpClientProvider, minMessageToCompress))
       .`in`(Singleton::class.java)
 
     // Initialize empty sets for our multibindings.
