@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom
  * functions, so that they can change dynamically as the system is running (e.g.
  * in response to changes in dynamic flags)
  */
-open class ExponentialBackoff(
+open class ExponentialBackoff @JvmOverloads constructor(
   private val baseDelay: () -> Duration,
   private val maxDelay: () -> Duration,
   private val jitter: () -> Duration,

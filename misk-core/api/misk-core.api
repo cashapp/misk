@@ -8,11 +8,14 @@ public final class misk/backoff/DontRetryException : java/lang/Exception {
 	public fun <init> (Ljava/lang/String;Ljava/lang/Exception;)V
 }
 
-public final class misk/backoff/ExponentialBackoff : misk/backoff/Backoff {
+public class misk/backoff/ExponentialBackoff : misk/backoff/Backoff {
 	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;)V
 	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;)V
+	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Lkotlin/jvm/functions/Function1;)V
 	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
-	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)V
 	public fun nextRetry ()Ljava/time/Duration;
 	public fun reset ()V
 }
@@ -24,6 +27,10 @@ public final class misk/backoff/FlatBackoff : misk/backoff/Backoff {
 	public final fun getDuration ()Ljava/time/Duration;
 	public fun nextRetry ()Ljava/time/Duration;
 	public fun reset ()V
+}
+
+public final class misk/backoff/FullJitterBackoff : misk/backoff/ExponentialBackoff {
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
 }
 
 public final class misk/backoff/RetriesKt {
