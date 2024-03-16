@@ -90,10 +90,15 @@ class RedisClusterModule @JvmOverloads constructor(
       //CLIENT SETINFO is only supported in Redis v7.2+
       .clientSetInfoConfig(ClientSetInfoConfig.DISABLED)
       .build()
+
+    // We want to support services running both under docker and localhost when running locally and this is a way to support that.
+    // If a hostname is provided, it will always take precedence over the environment variable.
+    val redisHost = replicationGroup.configuration_endpoint.hostname?.takeUnless { it.isNullOrBlank() } ?: System.getenv("REDIS_HOST") ?: "127.0.0.1"
+
     return JedisCluster(
       setOf(
         HostAndPort(
-          replicationGroup.configuration_endpoint.hostname,
+          redisHost,
           replicationGroup.configuration_endpoint.port
         )
       ),

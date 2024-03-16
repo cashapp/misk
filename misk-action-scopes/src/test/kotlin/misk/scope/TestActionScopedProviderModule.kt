@@ -3,8 +3,8 @@ package misk.scope
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
-import java.util.Optional
 import jakarta.inject.Inject
+import java.util.Optional
 
 internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
   override fun configureProviders() {
@@ -25,6 +25,7 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
       nullableStringTypeLiteral, NullableBasedOnFooProvider::class,
       Names.named("nullable-based-on-foo")
     )
+    bindProvider(String::class, CountingProvider::class, Names.named(("counting")))
   }
 
   class BarProvider @Inject internal constructor(
@@ -76,6 +77,11 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
     override fun get(): String? {
       return nullableFoo.get()?.let { "from foo $it" }
     }
+  }
+
+  class CountingProvider @Inject internal constructor() : ActionScopedProvider<String> {
+    private var callCount = 0
+    override fun get(): String = "Called CountingProvider ${++callCount} time(s)"
   }
 
   companion object {
