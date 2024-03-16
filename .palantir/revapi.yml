@@ -6060,6 +6060,17 @@ acceptedBreaks:
       new: "method java.util.List<misk.web.WebUnixDomainSocketConfig> misk.web.WebConfig::getUnix_domain_sockets()"
       justification: "Changing the return type from Array to List. Barely anyone uses\
         \ this config at this point"
+  "2024.03.12.191907-bc64606":
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.client.GrpcClientProvider<T extends com.squareup.wire.Service,\
+        \ G extends T extends com.squareup.wire.Service>::<init>(kotlin.reflect.KClass<T>,\
+        \ kotlin.reflect.KClass<G>, java.lang.String, com.google.inject.Provider<okhttp3.OkHttpClient>)"
+      new: "method void misk.client.GrpcClientProvider<T extends com.squareup.wire.Service,\
+        \ G extends T extends com.squareup.wire.Service>::<init>(kotlin.reflect.KClass<T>,\
+        \ kotlin.reflect.KClass<G>, java.lang.String, com.google.inject.Provider<okhttp3.OkHttpClient>,\
+        \ long)"
+      justification: "Internal consturctor only called within misk."
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
