@@ -123,11 +123,7 @@ class ExceptionHandlingInterceptor(
     }
 
     // Fall back to a default mapping.
-    return when (th) {
-      is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
-      is UnauthorizedException -> UNAUTHORIZED_RESPONSE
-      else -> toInternalServerError(th)
-    }
+    return toInternalServerError(th)
   }
 
   private fun toGrpcResponse(th: Throwable): GrpcErrorResponse = when (th) {
@@ -165,18 +161,6 @@ class ExceptionHandlingInterceptor(
       "internal server error".toResponseBody(),
       listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
       HttpURLConnection.HTTP_INTERNAL_ERROR
-    )
-
-    val UNAUTHENTICATED_RESPONSE = Response(
-      "unauthenticated".toResponseBody(),
-      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      HttpURLConnection.HTTP_UNAUTHORIZED
-    )
-
-    val UNAUTHORIZED_RESPONSE = Response(
-      "unauthorized".toResponseBody(),
-      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      HttpURLConnection.HTTP_FORBIDDEN
     )
   }
 }
