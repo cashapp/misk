@@ -43,6 +43,6 @@ fun <A> retry(
   throw lastException!!
 }
 
-class DontRetryException(message: String, exception: Exception?) : Exception(message, exception) {
-  constructor(message: String) : this(message, null)
+class DontRetryException(message: String?, exception: Exception?) : Exception(message, exception) {
+  constructor(message: String? = null) : this(message, null)
 }
