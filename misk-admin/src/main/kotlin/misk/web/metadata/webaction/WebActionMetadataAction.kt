@@ -11,7 +11,7 @@ import jakarta.inject.Singleton
 
 @Singleton
 class WebActionMetadataAction @Inject constructor(
-  val webActionMetadataLoader: WebActionMetadataLoader
+  val webActionMetadataProvider: WebActionMetadataProvider
 ) : WebAction {
   @Get("/api/webaction/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -19,7 +19,7 @@ class WebActionMetadataAction @Inject constructor(
   @AdminDashboardAccess
   fun getAll(): Response {
     return Response(
-      webActionMetadata = webActionMetadataLoader.get()
+      webActionMetadata = webActionMetadataProvider.get()
     )
   }
 

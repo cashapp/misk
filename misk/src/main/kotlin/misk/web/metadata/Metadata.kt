@@ -1,8 +1,18 @@
 package misk.web.metadata
 
-/** Metadata is a generic interface for associating metadata with a resource. */
-interface Metadata<T : Any> {
-  val id: String
-  val metadata: T
-  val metadataClass: Class<T>
+import javax.inject.Inject
+import javax.inject.Provider
+
+data class Metadata(
+  /** Unique identifier for the type of metadata. Ie. "web-action" or "service-config" */
+  val id: String,
+  val metadata: Any,
+)
+
+class MetadataProvider<T>(
+  private val id: String,
+) : Provider<Metadata> {
+  @Inject lateinit var provider: Provider<T>
+
+  override fun get() = Metadata(id, provider.get() as Any)
 }
