@@ -24,7 +24,7 @@ class MetadataTestingModule : KAbstractModule() {
     install(TestWebActionModule())
     install(AdminDashboardTestingModule())
 
-//    install(AllMetadataModule())
+    install(AllMetadataModule())
 
     val testConfig = TestConfig(
       IncludedConfig("foo"),
