@@ -3,6 +3,7 @@ package misk.web.metadata.config
 import misk.config.AppName
 import misk.config.MiskConfig
 import misk.resources.ResourceLoader
+import misk.web.metadata.Metadata
 import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.deployment.Deployment
 import javax.inject.Inject
@@ -10,7 +11,7 @@ import javax.inject.Provider
 
 data class ConfigMetadata(
   val resources: Map<String, String?>
-)
+): Metadata(id = "config", metadata = resources)
 
 class ConfigMetadataProvider @Inject constructor() : Provider<ConfigMetadata> {
   @Inject @AppName private lateinit var appName: String

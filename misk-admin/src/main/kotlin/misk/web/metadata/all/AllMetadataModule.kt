@@ -1,23 +1,28 @@
 package misk.web.metadata.all
 
 import misk.inject.KAbstractModule
+import misk.security.authz.AccessAnnotationEntry
 import misk.web.WebActionModule
-import misk.web.metadata.MetadataProvider
+import misk.web.dashboard.AdminDashboardAccess
 import misk.web.metadata.Metadata
-import misk.web.metadata.config.ConfigMetadata
-import misk.web.metadata.database.DatabaseQueryMetadata
-import misk.web.metadata.webaction.WebActionMetadata
+import misk.web.metadata.config.ConfigMetadataProvider
+import misk.web.metadata.database.DatabaseMetadataProvider
 
 class AllMetadataModule : KAbstractModule() {
   override fun configure() {
+    // Dummy binding
+    multibind<AccessAnnotationEntry>().toInstance(
+      AccessAnnotationEntry<AllMetadataAccess>()
+    )
+
     install(WebActionModule.create<AllMetadataAction>())
 
     // Any module can bind metadata to be exposed by the AllMetadataAction
-    multibind<Metadata>()
+    newMultibinder<Metadata>()
 
     // Built in metadata
-    multibind<Metadata>().toProvider(MetadataProvider<ConfigMetadata>("config"))
-    multibind<Metadata>().toProvider(MetadataProvider<List<DatabaseQueryMetadata>>("database-hibernate"))
-    multibind<Metadata>().toProvider(MetadataProvider<List<WebActionMetadata>>("web-action"))
+    multibind<Metadata>().toProvider(ConfigMetadataProvider())
+    multibind<Metadata>().toProvider(DatabaseMetadataProvider())
+//    multibind<Metadata>().toProvider(MetadataProvider<List<WebActionMetadata>>("web-action"))
   }
 }
