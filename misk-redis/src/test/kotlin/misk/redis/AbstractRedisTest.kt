@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.exceptions.JedisDataException
+import java.util.function.Supplier
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -763,6 +764,29 @@ abstract class AbstractRedisTest {
     // Verify
     assertNull(redis.hget("foo", "bar"))
     assertNull(redis["foo"])
+  }
+
+  @Test
+  fun `pipelining works`() {
+    val suppliers = mutableListOf<Supplier<*>>()
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          set("key7", "value7".encodeUtf8()),
+          get("key7"),
+          hset("key8", "field8", "value8".encodeUtf8()),
+          hget("key8", "field8"),
+          hget("key8", "field9"),
+        )
+      )
+    }
+    assertThat(suppliers.map { it.get() }).containsExactly(
+      Unit,
+      "value7".encodeUtf8(),
+      1L,
+      "value8".encodeUtf8(),
+      null,
+      )
   }
 
   @Test fun `zAdd no option or only CH tests`() {
