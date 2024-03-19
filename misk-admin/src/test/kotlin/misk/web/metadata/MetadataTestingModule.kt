@@ -13,15 +13,29 @@ import misk.web.dashboard.DashboardTheme
 import misk.web.dashboard.MiskWebTheme
 import wisp.config.Config
 import jakarta.inject.Qualifier
+import misk.config.MiskConfig
+import misk.config.Redact
+import misk.config.Secret
+import misk.web.metadata.all.AllMetadataModule
 
 // Common test module used to be able to test admin dashboard WebActions
 class MetadataTestingModule : KAbstractModule() {
   override fun configure() {
     install(TestWebActionModule())
     install(AdminDashboardTestingModule())
-    bind<Config>().toInstance(TestAdminDashboardConfig())
+
+//    install(AllMetadataModule())
+
+    val testConfig = TestConfig(
+      IncludedConfig("foo"),
+      OverriddenConfig("bar"),
+      PasswordConfig("pass1", "phrase2", "custom3"),
+      SecretConfig(MiskConfig.RealSecret("value", "reference")),
+      RedactedConfig("baz")
+    )
+    bind<Config>().toInstance(testConfig)
     // TODO(wesley): Remove requirement for AppName to bind AdminDashboard APIs
-    bind<String>().annotatedWith<AppName>().toInstance("testApp")
+    bind<String>().annotatedWith<AppName>().toInstance("admin-dashboard-app")
 
     // Bind test dashboard tab, navbar_items, navbar_status
     multibind<DashboardTab>().toProvider(
@@ -61,7 +75,32 @@ class MetadataTestingModule : KAbstractModule() {
   }
 }
 
-class TestAdminDashboardConfig : Config
+data class TestConfig(
+  val included: IncludedConfig,
+  val overridden: OverriddenConfig,
+  val password: PasswordConfig,
+  val secret: SecretConfig,
+  val redacted: RedactedConfig
+) : Config
+
+data class IncludedConfig(val key: String) : Config
+data class OverriddenConfig(val key: String) : Config
+
+data class PasswordConfig(
+  @Redact
+  val password: String,
+  @Redact
+  val passphrase: String,
+  @Redact
+  val custom: String
+) : Config
+
+@Redact
+data class RedactedConfig(
+  val key: String
+)
+
+data class SecretConfig(val secret_key: Secret<String>) : Config
 
 @Qualifier
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
