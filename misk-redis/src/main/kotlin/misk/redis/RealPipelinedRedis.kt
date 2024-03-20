@@ -2,14 +2,37 @@ package misk.redis
 
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import redis.clients.jedis.Response
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
+import redis.clients.jedis.util.JedisClusterCRC16
 import java.time.Duration
 import java.util.function.Supplier
 
 internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : DeferredRedis {
+  private fun checkSlot(op: String, keys: List<ByteArray>): Throwable? {
+    if (pipeline !is JedisPipeline.ClusterJedisPipeline) {
+      return null
+    }
+    val slots = keys.map { JedisClusterCRC16.getSlot(it) }.distinct()
+    return if (slots.size == 1) {
+      null
+    } else {
+      RuntimeException(
+        """
+          |When using clustered Redis, keys used by one $op command in a pipeline must always map to the same slot, but mapped to slots $slots.
+          |You can use {hashtags} in your key name to control how Redis hashes keys to slots.
+          |For example, keys: `{customer9001}.contacts` and `{customer9001}.payments` will  hash to the same slot.
+          |
+          |See https://redis.io/topics/cluster-spec#hash-tags for more information.
+          |
+          """.trimMargin()
+      )
+    }
+  }
+
   override fun del(key: String): Supplier<Boolean> {
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.del(keyBytes)
@@ -24,14 +47,41 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
 
   override fun mget(vararg keys: String): Supplier<List<ByteString?>> {
     val keysBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
-    val response = pipeline.mget(*keysBytes)
-    return Supplier { response.get().map { it?.toByteString() } }
+
+    val responses = when (pipeline) {
+      is JedisPipeline.PooledPipeline -> listOf(pipeline.mget(*keysBytes))
+      is JedisPipeline.ClusterJedisPipeline -> {
+        keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
+          .map { (_, slottedKeys) ->
+            pipeline.mget(*slottedKeys.toTypedArray())
+          }
+      }
+    }
+    val supplier: Supplier<List<ByteString?>> = Supplier {
+      responses.map { response ->
+        response.get()?.map { it?.toByteString() } ?: emptyList()
+      }.flatten()
+    }
+    return supplier
   }
 
   override fun mset(vararg keyValues: ByteString): Supplier<Unit> {
-    val keyValuePairs = keyValues.map { it.toByteArray() }.toTypedArray()
-    val response = pipeline.mset(*keyValuePairs)
-    return Supplier { response.get() }
+    require(keyValues.size % 2 == 0) {
+      "Wrong number of arguments to mset (must be a multiple of 2, alternating keys and values)"
+    }
+
+    val keyValuePairs = keyValues.map { it.toByteArray() }
+
+    val responses = when (pipeline) {
+      is JedisPipeline.PooledPipeline -> listOf(pipeline.mset(*keyValuePairs.toTypedArray()))
+      is JedisPipeline.ClusterJedisPipeline -> {
+        keyValuePairs.chunked(2).groupBy { JedisClusterCRC16.getSlot(it.first()) }
+          .map { (_, slottedKeyValues) ->
+            pipeline.mset(*slottedKeyValues.flatten().toTypedArray())
+          }
+      }
+    }
+    return Supplier { responses.map { it.get() } }
   }
 
   override fun get(key: String): Supplier<ByteString?> {
@@ -167,6 +217,10 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
   ): Supplier<ByteString?> {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
     val destKeyBytes = destinationKey.toByteArray(charset)
+    checkSlot("BLMOVE", listOf(sourceKeyBytes, destKeyBytes))?.let {
+      return Supplier { throw it }
+    }
+
     val response = pipeline.blmove(sourceKeyBytes, destKeyBytes, from, to, timeoutSeconds)
     return Supplier { response.get()?.toByteString() }
   }
@@ -178,6 +232,10 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
   ): Supplier<ByteString?> {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
     val destinationKeyBytes = destinationKey.toByteArray(charset)
+    checkSlot("BRPOPLPUSH", listOf(sourceKeyBytes, destinationKeyBytes))?.let {
+      return Supplier { throw it }
+    }
+
     val response = pipeline.brpoplpush(sourceKeyBytes, destinationKeyBytes, timeoutSeconds)
     return Supplier { response.get()?.toByteString() }
   }
@@ -190,6 +248,10 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
   ): Supplier<ByteString?> {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
     val destKeyBytes = destinationKey.toByteArray(charset)
+    checkSlot("LMOVE", listOf(sourceKeyBytes, destKeyBytes))?.let {
+      return Supplier { throw it }
+    }
+
     val response = pipeline.lmove(sourceKeyBytes, destKeyBytes, from, to)
     return Supplier { response.get()?.toByteString() }
   }
@@ -248,6 +310,10 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
   override fun rpoplpush(sourceKey: String, destinationKey: String): Supplier<ByteString?> {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
     val destinationKeyBytes = destinationKey.toByteArray(charset)
+    checkSlot("RPOPLPUSH", listOf(sourceKeyBytes, destinationKeyBytes))?.let {
+      return Supplier { throw it }
+    }
+
     val response = pipeline.rpoplpush(sourceKeyBytes, destinationKeyBytes)
     return Supplier { response.get()?.toByteString() }
   }
@@ -320,13 +386,12 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
     reverse: Boolean,
     limit: Redis.ZRangeLimit?
   ): Supplier<List<ByteString?>> {
+    val response =
+      zrangeBase(key, type, start, stop, reverse, false, limit).noScore
     return Supplier {
-      zrangeBase(key, type, start, stop, reverse, false, limit)
-        .get().let { response ->
-          response?.noScore?.map { bytes ->
-            bytes?.toByteString()
-          } ?: listOf()
-        }
+      response?.get()?.map { bytes ->
+        bytes?.toByteString()
+      } ?: listOf()
     }
   }
 
@@ -338,13 +403,12 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
     reverse: Boolean,
     limit: Redis.ZRangeLimit?
   ): Supplier<List<Pair<ByteString?, Double>>> {
+    val response =
+      zrangeBase(key, type, start, stop, reverse, true, limit).withScore
     return Supplier {
-      zrangeBase(key, type, start, stop, reverse, true, limit)
-        .get().let { response ->
-          response?.withScore?.map { tuple ->
-            Pair(tuple.binaryElement?.toByteString(), tuple.score)
-          } ?: listOf()
-        }
+      response?.get()?.map { tuple ->
+        Pair(tuple.binaryElement?.toByteString(), tuple.score)
+      } ?: listOf()
     }
   }
 
@@ -370,7 +434,7 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
     reverse: Boolean,
     withScore: Boolean,
     limit: Redis.ZRangeLimit?,
-  ): Supplier<ZRangeResponse?> {
+  ): ZRangeResponse {
     return when (type) {
       Redis.ZRangeType.INDEX ->
         zrangeByIndex(
@@ -392,24 +456,22 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
     stop: Redis.ZRangeIndexMarker,
     reverse: Boolean,
     withScore: Boolean
-  ): Supplier<ZRangeResponse?> {
+  ): ZRangeResponse {
     val params = ZRangeParams(
       start.intValue,
       stop.intValue
     )
     if (reverse) params.rev()
 
-    return Supplier {
-      if (withScore) {
-        ZRangeResponse.withScore(
-          pipeline.zrangeWithScores(
-            key.toByteArray(charset),
-            params
-          ).get()
+    return if (withScore) {
+      ZRangeResponse.withScore(
+        pipeline.zrangeWithScores(
+          key.toByteArray(charset),
+          params
         )
-      } else {
-        ZRangeResponse.noScore(pipeline.zrange(key.toByteArray(charset), params).get())
-      }
+      )
+    } else {
+      ZRangeResponse.noScore(pipeline.zrange(key.toByteArray(charset), params))
     }
   }
 
@@ -420,84 +482,82 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
     reverse: Boolean,
     withScore: Boolean,
     limit: Redis.ZRangeLimit?,
-  ): Supplier<ZRangeResponse?> {
+  ): ZRangeResponse {
     val minString = start.toString()
     val maxString = stop.toString()
 
-    return Supplier {
-      if (limit == null && !reverse && !withScore) {
-        ZRangeResponse.noScore(
-          pipeline.zrangeByScore(
-            key.toByteArray(charset),
-            minString.toByteArray(charset),
-            maxString.toByteArray(charset)
-          ).get()
+    return if (limit == null && !reverse && !withScore) {
+      ZRangeResponse.noScore(
+        pipeline.zrangeByScore(
+          key.toByteArray(charset),
+          minString.toByteArray(charset),
+          maxString.toByteArray(charset)
         )
-      } else if (limit == null && !reverse) {
-        ZRangeResponse.withScore(
-          pipeline.zrangeByScoreWithScores(
-            key.toByteArray(charset),
-            minString.toByteArray(charset),
-            maxString.toByteArray(charset)
-          ).get()
+      )
+    } else if (limit == null && !reverse) {
+      ZRangeResponse.withScore(
+        pipeline.zrangeByScoreWithScores(
+          key.toByteArray(charset),
+          minString.toByteArray(charset),
+          maxString.toByteArray(charset)
         )
-      } else if (limit == null && !withScore) {
-        ZRangeResponse.noScore(
-          pipeline.zrevrangeByScore(
-            key.toByteArray(charset),
-            maxString.toByteArray(charset),
-            minString.toByteArray(charset)
-          ).get()
+      )
+    } else if (limit == null && !withScore) {
+      ZRangeResponse.noScore(
+        pipeline.zrevrangeByScore(
+          key.toByteArray(charset),
+          maxString.toByteArray(charset),
+          minString.toByteArray(charset)
         )
-      } else if (limit == null) {
-        ZRangeResponse.withScore(
-          pipeline.zrevrangeByScoreWithScores(
-            key.toByteArray(charset),
-            maxString.toByteArray(charset),
-            minString.toByteArray(charset)
-          ).get()
+      )
+    } else if (limit == null) {
+      ZRangeResponse.withScore(
+        pipeline.zrevrangeByScoreWithScores(
+          key.toByteArray(charset),
+          maxString.toByteArray(charset),
+          minString.toByteArray(charset)
         )
-      } else if (!reverse && !withScore) {
-        ZRangeResponse.noScore(
-          pipeline.zrangeByScore(
-            key.toByteArray(charset),
-            minString.toByteArray(charset),
-            maxString.toByteArray(charset),
-            limit.offset,
-            limit.count
-          ).get()
+      )
+    } else if (!reverse && !withScore) {
+      ZRangeResponse.noScore(
+        pipeline.zrangeByScore(
+          key.toByteArray(charset),
+          minString.toByteArray(charset),
+          maxString.toByteArray(charset),
+          limit.offset,
+          limit.count
         )
-      } else if (!reverse) {
-        ZRangeResponse.withScore(
-          pipeline.zrangeByScoreWithScores(
-            key.toByteArray(charset),
-            minString.toByteArray(charset),
-            maxString.toByteArray(charset),
-            limit.offset,
-            limit.count
-          ).get()
+      )
+    } else if (!reverse) {
+      ZRangeResponse.withScore(
+        pipeline.zrangeByScoreWithScores(
+          key.toByteArray(charset),
+          minString.toByteArray(charset),
+          maxString.toByteArray(charset),
+          limit.offset,
+          limit.count
         )
-      } else if (!withScore) {
-        ZRangeResponse.noScore(
-          pipeline.zrevrangeByScore(
-            key.toByteArray(charset),
-            maxString.toByteArray(charset),
-            minString.toByteArray(charset),
-            limit.offset,
-            limit.count
-          ).get()
+      )
+    } else if (!withScore) {
+      ZRangeResponse.noScore(
+        pipeline.zrevrangeByScore(
+          key.toByteArray(charset),
+          maxString.toByteArray(charset),
+          minString.toByteArray(charset),
+          limit.offset,
+          limit.count
         )
-      } else {
-        ZRangeResponse.withScore(
-          pipeline.zrevrangeByScoreWithScores(
-            key.toByteArray(charset),
-            maxString.toByteArray(charset),
-            minString.toByteArray(charset),
-            limit.offset,
-            limit.count
-          ).get()
+      )
+    } else {
+      ZRangeResponse.withScore(
+        pipeline.zrevrangeByScoreWithScores(
+          key.toByteArray(charset),
+          maxString.toByteArray(charset),
+          minString.toByteArray(charset),
+          limit.offset,
+          limit.count
         )
-      }
+      )
     }
   }
 
@@ -505,13 +565,13 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
    * A wrapper class for handling response from zrange* methods.
    */
   private class ZRangeResponse private constructor(
-    val noScore: List<ByteArray?>?,
-    val withScore: List<Tuple>?
+    val noScore: Response<List<ByteArray?>>?,
+    val withScore: Response<List<Tuple>>?
   ) {
     companion object {
-      fun noScore(ans: List<ByteArray?>): ZRangeResponse = ZRangeResponse(ans, null)
+      fun noScore(ans: Response<List<ByteArray?>>?): ZRangeResponse = ZRangeResponse(ans, null)
 
-      fun withScore(ans: List<Tuple>): ZRangeResponse = ZRangeResponse(null, ans)
+      fun withScore(ans: Response<List<Tuple>>?): ZRangeResponse = ZRangeResponse(null, ans)
     }
   }
 

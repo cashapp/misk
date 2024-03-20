@@ -502,28 +502,25 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.hrandField(key, count)
     }
 
-    override fun set(key: String, value: ByteString): Supplier<Unit> = Supplier {
-      this@FakeRedis[key] = value
+    override fun set(key: String, value: ByteString, expiryDuration: Duration?): Supplier<Unit> = Supplier {
+      if (expiryDuration == null) {
+        this@FakeRedis[key] = value
+      } else {
+        this@FakeRedis[key, expiryDuration] = value
+      }
     }
 
-    override fun set(
-      key: String,
-      expiryDuration: Duration,
-      value: ByteString
-    ): Supplier<Unit> = Supplier {
-      this@FakeRedis[key, expiryDuration] = value
-    }
-
-    override fun setnx(key: String, value: ByteString): Supplier<Boolean> = Supplier {
-      this@FakeRedis.setnx(key, value)
-    }
 
     override fun setnx(
       key: String,
-      expiryDuration: Duration,
-      value: ByteString
+      value: ByteString,
+      expiryDuration: Duration?
     ): Supplier<Boolean> = Supplier {
-      this@FakeRedis.setnx(key, expiryDuration, value)
+      if (expiryDuration == null) {
+        this@FakeRedis.setnx(key, value)
+      } else {
+        this@FakeRedis.setnx(key, expiryDuration, value)
+      }
     }
 
     override fun hset(key: String, field: String, value: ByteString): Supplier<Long> = Supplier {

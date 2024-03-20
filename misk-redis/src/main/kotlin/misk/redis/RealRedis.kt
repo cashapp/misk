@@ -9,7 +9,6 @@ import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import okio.use
 import redis.clients.jedis.ClusterPipeline
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.JedisPooled
@@ -87,7 +86,9 @@ class RealRedis(
   }
 
   override fun mset(vararg keyValues: ByteString) {
-    require(keyValues.size % 2 == 0) { "Wrong number of arguments to mset" }
+    require(keyValues.size % 2 == 0) {
+      "Wrong number of arguments to mset (must be a multiple of 2, alternating keys and values)"
+    }
     when (unifiedJedis) {
       is JedisPooled -> {
         val byteArrays = keyValues.map { it.toByteArray() }.toTypedArray()
