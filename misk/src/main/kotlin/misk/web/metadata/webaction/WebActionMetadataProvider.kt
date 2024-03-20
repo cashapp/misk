@@ -4,10 +4,14 @@ import com.google.inject.Provider
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.web.jetty.WebActionsServlet
+import misk.web.metadata.Metadata
+
+data class WebActionsMetadata(
+  val webActions: List<WebActionMetadata>
+) : Metadata(id = "web-actions", metadata = webActions)
 
 @Singleton
-class WebActionMetadataProvider @Inject internal constructor(
-  private val servletProvider: Provider<WebActionsServlet>
-) : Provider<List<WebActionMetadata>> {
-  override fun get() = servletProvider.get().webActionsMetadata
+class WebActionMetadataProvider @Inject constructor() : Provider<WebActionsMetadata> {
+  @Inject private lateinit var servletProvider: Provider<WebActionsServlet>
+  override fun get() = WebActionsMetadata(servletProvider.get().webActionsMetadata)
 }

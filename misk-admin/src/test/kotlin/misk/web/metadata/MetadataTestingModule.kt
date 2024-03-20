@@ -16,6 +16,8 @@ import jakarta.inject.Qualifier
 import misk.config.MiskConfig
 import misk.config.Redact
 import misk.config.Secret
+import misk.security.authz.AccessAnnotationEntry
+import misk.web.metadata.all.AllMetadataAccess
 import misk.web.metadata.all.AllMetadataModule
 
 // Common test module used to be able to test admin dashboard WebActions
@@ -25,6 +27,9 @@ class MetadataTestingModule : KAbstractModule() {
     install(AdminDashboardTestingModule())
 
     install(AllMetadataModule())
+    multibind<AccessAnnotationEntry>().toInstance(
+      AccessAnnotationEntry<AllMetadataAccess>()
+    )
 
     val testConfig = TestConfig(
       IncludedConfig("foo"),

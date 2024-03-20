@@ -1,20 +1,24 @@
 package misk.web.metadata.all
 
 import misk.inject.KAbstractModule
-import misk.security.authz.AccessAnnotationEntry
 import misk.web.WebActionModule
-import misk.web.dashboard.AdminDashboardAccess
 import misk.web.metadata.Metadata
 import misk.web.metadata.config.ConfigMetadataProvider
-import misk.web.metadata.database.DatabaseMetadataProvider
+import misk.web.metadata.database.DatabaseHibernateMetadataProvider
+import misk.web.metadata.webaction.WebActionMetadataProvider
 
+/**
+ * To install and use, ensure you also add an AccessAnnotationEntry to grant endpoint access.
+ *
+ * ```kt
+ * multibind<AccessAnnotationEntry>().toInstance(
+ *   AccessAnnotationEntry<AllMetadataAccess>(
+ *     services = listOf("security-service")
+ *   )
+ * )
+ */
 class AllMetadataModule : KAbstractModule() {
   override fun configure() {
-    // Dummy binding
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<AllMetadataAccess>()
-    )
-
     install(WebActionModule.create<AllMetadataAction>())
 
     // Any module can bind metadata to be exposed by the AllMetadataAction
@@ -22,7 +26,7 @@ class AllMetadataModule : KAbstractModule() {
 
     // Built in metadata
     multibind<Metadata>().toProvider(ConfigMetadataProvider())
-    multibind<Metadata>().toProvider(DatabaseMetadataProvider())
-//    multibind<Metadata>().toProvider(MetadataProvider<List<WebActionMetadata>>("web-action"))
+    multibind<Metadata>().toProvider(DatabaseHibernateMetadataProvider())
+    multibind<Metadata>().toProvider(WebActionMetadataProvider())
   }
 }
