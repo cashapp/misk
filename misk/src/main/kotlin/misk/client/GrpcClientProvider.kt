@@ -50,7 +50,8 @@ internal class GrpcClientProvider<T : Service, G : T>(
   private val kclass: KClass<T>,
   private val grpcClientClass: KClass<G>,
   private val name: String,
-  private val httpClientProvider: Provider<OkHttpClient>
+  private val httpClientProvider: Provider<OkHttpClient>,
+  private val minMessageToCompress: Long
 ) : Provider<T> {
   /** Use a provider because we don't know the test client's URL until its test server starts. */
   @Inject private lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
@@ -190,6 +191,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
     val grpcClient = GrpcClient.Builder()
       .callFactory(callFactoryWrapped)
       .baseUrl(baseUrl)
+      .minMessageToCompress(minMessageToCompress)
       .build()
 
     // There should be *exactly one constructor* that takes in a grpcClient
