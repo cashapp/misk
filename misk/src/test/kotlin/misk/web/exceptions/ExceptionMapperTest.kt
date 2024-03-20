@@ -4,7 +4,10 @@ import ch.qos.logback.classic.Level
 import com.squareup.moshi.Moshi
 import com.squareup.wire.GrpcException
 import com.squareup.wire.GrpcStatus
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
+import misk.exceptions.UnauthenticatedException
+import misk.exceptions.UnauthorizedException
 import misk.exceptions.WebActionException
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
@@ -27,7 +30,6 @@ import wisp.logging.LogCollector
 import java.net.HttpURLConnection.HTTP_FORBIDDEN
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class ExceptionMapperTest {
@@ -81,6 +83,20 @@ internal class ExceptionMapperTest {
     assertThat(loggedError).isEqualTo("exception dispatching to ExceptionMapperTest.ThrowsGrpcError")
   }
 
+  @Test
+  fun returnsMessageOnUnauthenticated() {
+    val response = get("/unauthenticated")
+    assertThat(response.code).isEqualTo(misk.client.HTTP_UNAUTHORIZED)
+    assertThat(response.body?.string()).isEqualTo("unauthenticated")
+  }
+
+  @Test
+  fun returnsMessageOnUnauthorized() {
+    val response = get("/unauthorized")
+    assertThat(response.code).isEqualTo(misk.client.HTTP_FORBIDDEN)
+    assertThat(response.body?.string()).isEqualTo("unauthorized")
+  }
+
   fun get(path: String): okhttp3.Response {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
@@ -95,6 +111,22 @@ internal class ExceptionMapperTest {
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsActionException(@PathParam statusCode: Int): String {
       throw WebActionException(statusCode, "you asked for an error", "log message")
+    }
+  }
+
+  class ThrowsUnauthenticated @Inject constructor() : WebAction {
+    @Get("/unauthenticated")
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun throwsUnauthenticated(): String {
+      throw UnauthenticatedException()
+    }
+  }
+
+  class ThrowsUnauthorized @Inject constructor() : WebAction {
+    @Get("/unauthorized")
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun throwsUnauthorized(): String {
+      throw UnauthorizedException()
     }
   }
 
@@ -124,6 +156,8 @@ internal class ExceptionMapperTest {
       install(WebActionModule.create<ThrowsActionException>())
       install(WebActionModule.create<ThrowsUnmappedError>())
       install(WebActionModule.create<ThrowsGrpcError>())
+      install(WebActionModule.create<ThrowsUnauthenticated>())
+      install(WebActionModule.create<ThrowsUnauthorized>())
       install(LogCollectorModule())
     }
   }

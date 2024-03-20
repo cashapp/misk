@@ -3,6 +3,7 @@ package misk.web.exceptions
 import com.google.common.util.concurrent.UncheckedExecutionException
 import com.squareup.wire.GrpcStatus
 import com.squareup.wire.ProtoAdapter
+import jakarta.inject.Inject
 import misk.Action
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
@@ -14,7 +15,6 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
 import misk.web.ResponseBody
-import misk.web.extractors.RequestBodyException
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers.Companion.toHeaders
@@ -27,7 +27,6 @@ import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
 import java.util.Base64
-import jakarta.inject.Inject
 
 /**
  * Converts and logs application and component level dispatch exceptions into the appropriate
@@ -107,17 +106,24 @@ class ExceptionHandlingInterceptor(
     return buffer.readUtf8()
   }
 
-  private fun toResponse(th: Throwable, suppressLog: Boolean): Response<*> = when (th) {
-    is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
-    is UnauthorizedException -> UNAUTHORIZED_RESPONSE
-    is InvocationTargetException -> toResponse(th.targetException, suppressLog = suppressLog)
-    is UncheckedExecutionException -> toResponse(th.cause!!, suppressLog = suppressLog)
-    else -> mapperResolver.mapperFor(th)?.let {
+  private fun toResponse(th: Throwable, suppressLog: Boolean): Response<*> {
+    // If the exception is a reflection wrapper, unwrap first.
+    when (th) {
+      is InvocationTargetException -> return toResponse(th.targetException, suppressLog)
+      is UncheckedExecutionException -> return toResponse(th.cause!!, suppressLog)
+    }
+
+    // Prefer the mapper's response, if one exists.
+    val mapper = mapperResolver.mapperFor(th)
+    if (mapper != null) {
       if (!suppressLog) {
-        log.log(it.loggingLevel(th), th) { "exception dispatching to $actionName" }
+        log.log(mapper.loggingLevel(th), th) { "exception dispatching to $actionName" }
       }
-      it.toResponse(th)
-    } ?: toInternalServerError(th)
+      return mapper.toResponse(th)
+    }
+
+    // Fall back to a default mapping.
+    return toInternalServerError(th)
   }
 
   private fun toGrpcResponse(th: Throwable): GrpcErrorResponse = when (th) {
@@ -155,18 +161,6 @@ class ExceptionHandlingInterceptor(
       "internal server error".toResponseBody(),
       listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
       HttpURLConnection.HTTP_INTERNAL_ERROR
-    )
-
-    val UNAUTHENTICATED_RESPONSE = Response(
-      "unauthenticated".toResponseBody(),
-      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      HttpURLConnection.HTTP_UNAUTHORIZED
-    )
-
-    val UNAUTHORIZED_RESPONSE = Response(
-      "unauthorized".toResponseBody(),
-      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      HttpURLConnection.HTTP_FORBIDDEN
     )
   }
 }
