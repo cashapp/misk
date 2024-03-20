@@ -3,6 +3,8 @@ package misk.web.dashboard
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.metadata.webaction.WebActionMetadataAction
+import misk.web.metadata.webaction.WebActionMetadataProvider
+import misk.web.metadata.webaction.WebActionsMetadata
 
 /**
  * Installs WebActions dashboard tab which allows introspection
@@ -13,6 +15,7 @@ import misk.web.metadata.webaction.WebActionMetadataAction
 class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstractModule() {
   override fun configure() {
     // Web Actions v2
+    bind<WebActionsMetadata>().toProvider(WebActionMetadataProvider())
     install(WebActionModule.create<WebActionMetadataAction>())
 
     // Web Actions v2

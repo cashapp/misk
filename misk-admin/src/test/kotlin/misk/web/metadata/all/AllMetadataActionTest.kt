@@ -3,9 +3,7 @@ package misk.web.metadata.all
 import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.dashboard.AdminDashboardModule
 import misk.web.metadata.MetadataTestingModule
-import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.metadata.database.DatabaseQueryMetadata
 import misk.web.metadata.webaction.WebActionMetadata
 import org.junit.jupiter.api.Test

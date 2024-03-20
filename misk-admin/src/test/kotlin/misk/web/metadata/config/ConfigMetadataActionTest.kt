@@ -1,7 +1,9 @@
 package misk.web.metadata.config
 
+import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import misk.config.MiskConfig
+import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.metadata.MetadataTestingModule
@@ -16,14 +18,6 @@ import kotlin.test.assertEquals
 class ConfigMetadataActionTest {
   @MiskTestModule
   val module = MetadataTestingModule()
-
-//  val testConfig = TestConfig(
-//    IncludedConfig("foo"),
-//    OverriddenConfig("bar"),
-//    PasswordConfig("pass1", "phrase2", "custom3"),
-//    SecretConfig(MiskConfig.RealSecret("value", "reference")),
-//    RedactedConfig("baz")
-//  )
 
   @Inject lateinit var jvmMetadataAction: JvmMetadataAction
   @Inject lateinit var configMetadataAction: ConfigMetadataAction
@@ -106,38 +100,46 @@ class ConfigMetadataActionTest {
     assertThat(configJvm).contains("vm_vendor")
     assertThat(configJvm).contains("class_path")
   }
+}
 
-//  @Test fun secureModeDoesNotIncludeEffectiveConfigOrRawYamlFiles() {
-//    configMetadataAction = ConfigMetadataAction(
-//      appName = "admin-dashboard-app",
-//      deployment = TESTING,
-//      config = testConfig,
-//      jvmMetadataAction = jvmMetadataAction,
-//      mode = ConfigMetadataAction.ConfigTabMode.SAFE
-//    )
-//
-//    val response = configMetadataAction.getAll()
-//    assertThat(response.resources).doesNotContainKey("Effective Config")
-//    assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-common.yaml")
-//    assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-testing.yaml")
-//    assertThat(response.resources).containsKey("JVM")
-//  }
-//
-//  @Test fun showEffectiveConfigModeDoesNotIncludeRawYamlFiles() {
-//    configMetadataAction = ConfigMetadataAction(
-//      appName = "admin-dashboard-app",
-//      deployment = TESTING,
-//      config = testConfig,
-//      jvmMetadataAction = jvmMetadataAction,
-//      mode = ConfigMetadataAction.ConfigTabMode.SHOW_REDACTED_EFFECTIVE_CONFIG
-//    )
-//
-//    val response = configMetadataAction.getAll()
-//    assertThat(response.resources).containsKey("Effective Config")
-//    assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-common.yaml")
-//    assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-testing.yaml")
-//    assertThat(response.resources).containsKey("JVM")
-//  }
-//
+class ConfigTabModeModule(private val mode: ConfigMetadataAction.ConfigTabMode) : KAbstractModule() {
+  override fun configure() {
+    bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
+  }
+}
 
+@MiskTest(startService = true)
+class ConfigMetadataActionSafeTest {
+  @MiskTestModule
+  val module = Modules.override(MetadataTestingModule()).with(
+    ConfigTabModeModule(ConfigMetadataAction.ConfigTabMode.SAFE)
+  )
+
+  @Inject lateinit var configMetadataAction: ConfigMetadataAction
+
+  @Test fun secureModeDoesNotIncludeEffectiveConfigOrRawYamlFiles() {
+    val response = configMetadataAction.getAll()
+    assertThat(response.resources).doesNotContainKey("Effective Config")
+    assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-common.yaml")
+    assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-testing.yaml")
+    assertThat(response.resources).containsKey("JVM")
+  }
+}
+
+@MiskTest(startService = true)
+class ConfigMetadataActionRedactedTest {
+  @MiskTestModule
+  val module = Modules.override(MetadataTestingModule()).with(
+    ConfigTabModeModule(ConfigMetadataAction.ConfigTabMode.SHOW_REDACTED_EFFECTIVE_CONFIG)
+  )
+
+  @Inject lateinit var configMetadataAction: ConfigMetadataAction
+
+  @Test fun showEffectiveConfigModeDoesNotIncludeRawYamlFiles() {
+    val response = configMetadataAction.getAll()
+    assertThat(response.resources).containsKey("Effective Config")
+    assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-common.yaml")
+    assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-testing.yaml")
+    assertThat(response.resources).containsKey("JVM")
+  }
 }
