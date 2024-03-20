@@ -11,7 +11,7 @@ data class WebActionsMetadata(
 ) : Metadata(id = "web-actions", metadata = webActions)
 
 @Singleton
-class WebActionMetadataProvider @Inject constructor() : Provider<WebActionsMetadata> {
+class WebActionsMetadataProvider : Provider<WebActionsMetadata> {
   @Inject private lateinit var servletProvider: Provider<WebActionsServlet>
   override fun get() = WebActionsMetadata(servletProvider.get().webActionsMetadata)
 }

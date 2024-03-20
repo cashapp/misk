@@ -6075,6 +6075,25 @@ acceptedBreaks:
     - code: "java.method.addedToInterface"
       new: "method okio.ByteString misk.redis.Redis::getDel(java.lang.String)"
       justification: "Change is additive and implements a standard Redis command"
+  "2024.03.19.014401-ee14b0c":
+    com.squareup.misk:misk:
+    - code: "java.class.removed"
+      old: "class misk.web.metadata.webaction.WebActionMetadataList"
+      justification: "Metadata actions and providers only have internal usage"
+    com.squareup.misk:misk-admin:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.web.metadata.config.ConfigMetadataAction::<init>(java.lang.String,\
+        \ wisp.deployment.Deployment, wisp.config.Config, misk.web.metadata.jvm.JvmMetadataAction,\
+        \ misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode)"
+      new: "method void misk.web.metadata.config.ConfigMetadataAction::<init>(com.google.inject.Provider<misk.web.metadata.config.ConfigMetadata>)"
+      justification: "Metadata actions and providers only have internal usage"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.web.metadata.webaction.WebActionMetadataAction::<init>(===misk.web.metadata.webaction.WebActionMetadataList===)"
+      new: "parameter void misk.web.metadata.webaction.WebActionMetadataAction::<init>(===com.google.inject.Provider<misk.web.metadata.webaction.WebActionsMetadata>===)"
+      justification: "Metadata actions and providers only have internal usage"
+    - code: "java.method.removed"
+      old: "method misk.web.metadata.webaction.WebActionMetadataList misk.web.metadata.webaction.WebActionMetadataAction::getWebActionMetadataList()"
+      justification: "Metadata actions and providers only have internal usage"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"

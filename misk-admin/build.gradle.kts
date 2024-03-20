@@ -12,7 +12,6 @@ plugins {
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
-  api(libs.javaxInject)
   api(libs.kotlinxHtml)
   api(libs.moshi)
   api(libs.okio)

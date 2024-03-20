@@ -3,7 +3,7 @@ package misk.web.dashboard
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.metadata.webaction.WebActionMetadataAction
-import misk.web.metadata.webaction.WebActionMetadataProvider
+import misk.web.metadata.webaction.WebActionsMetadataProvider
 import misk.web.metadata.webaction.WebActionsMetadata
 
 /**
@@ -15,7 +15,7 @@ import misk.web.metadata.webaction.WebActionsMetadata
 class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstractModule() {
   override fun configure() {
     // Web Actions v2
-    bind<WebActionsMetadata>().toProvider(WebActionMetadataProvider())
+    bind<WebActionsMetadata>().toProvider(WebActionsMetadataProvider())
     install(WebActionModule.create<WebActionMetadataAction>())
 
     // Web Actions v2

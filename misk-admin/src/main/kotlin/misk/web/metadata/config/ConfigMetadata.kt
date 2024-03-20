@@ -1,19 +1,19 @@
 package misk.web.metadata.config
 
+import com.google.inject.Provider
+import jakarta.inject.Inject
 import misk.config.AppName
 import misk.config.MiskConfig
 import misk.resources.ResourceLoader
 import misk.web.metadata.Metadata
 import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.deployment.Deployment
-import javax.inject.Inject
-import javax.inject.Provider
 
 data class ConfigMetadata(
   val resources: Map<String, String?>
-): Metadata(id = "config", metadata = resources)
+) : Metadata(id = "config", metadata = resources)
 
-class ConfigMetadataProvider @Inject constructor() : Provider<ConfigMetadata> {
+class ConfigMetadataProvider : Provider<ConfigMetadata> {
   @Inject @AppName private lateinit var appName: String
   @Inject private lateinit var deployment: Deployment
   @Inject private lateinit var config: wisp.config.Config

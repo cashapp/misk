@@ -5,12 +5,12 @@ import misk.web.WebActionModule
 import misk.web.metadata.Metadata
 import misk.web.metadata.config.ConfigMetadataProvider
 import misk.web.metadata.database.DatabaseHibernateMetadataProvider
-import misk.web.metadata.webaction.WebActionMetadataProvider
+import misk.web.metadata.webaction.WebActionsMetadataProvider
 
 /**
  * To install and use, ensure you also add an AccessAnnotationEntry to grant endpoint access.
  *
- * ```kt
+ * ```kotlin
  * multibind<AccessAnnotationEntry>().toInstance(
  *   AccessAnnotationEntry<AllMetadataAccess>(
  *     services = listOf("security-service")
@@ -27,6 +27,6 @@ class AllMetadataModule : KAbstractModule() {
     // Built in metadata
     multibind<Metadata>().toProvider(ConfigMetadataProvider())
     multibind<Metadata>().toProvider(DatabaseHibernateMetadataProvider())
-    multibind<Metadata>().toProvider(WebActionMetadataProvider())
+    multibind<Metadata>().toProvider(WebActionsMetadataProvider())
   }
 }

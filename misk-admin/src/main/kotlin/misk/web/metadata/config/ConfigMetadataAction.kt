@@ -1,7 +1,7 @@
 package misk.web.metadata.config
 
+import com.google.inject.Provider
 import jakarta.inject.Inject
-import jakarta.inject.Provider
 import jakarta.inject.Singleton
 import misk.web.Get
 import misk.web.RequestContentType
