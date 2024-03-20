@@ -46,6 +46,27 @@ class ExponentialBackoffTest {
     assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L)
   }
 
+  @Test fun dynamicJitteredExponentialBackoffUsingNextDelay() {
+    val backoff = ExponentialBackoff(
+      Duration.ofMillis(10),
+      Duration.ofSeconds(1)
+    ) { curDelayMs: Long -> Duration.ofMillis(curDelayMs / 2 + 1) }
+
+    assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L + 5L)
+    assertThat(backoff.nextRetry().toMillis()).isBetween(20L, 30L + 10L)
+    assertThat(backoff.nextRetry().toMillis()).isBetween(40L, 50L + 20L)
+    assertThat(backoff.nextRetry().toMillis()).isBetween(80L, 90L + 40L)
+    assertThat(backoff.nextRetry().toMillis()).isBetween(160L, 170L + 80L)
+    assertThat(backoff.nextRetry().toMillis()).isBetween(320L, 330L + 160L)
+    assertThat(backoff.nextRetry().toMillis()).isBetween(640L, 650L + 320L)
+    assertThat(backoff.nextRetry().toMillis()).isBetween(1000L, 1010L + 500L)
+    assertThat(backoff.nextRetry().toMillis()).isBetween(1000L, 1010L + 500L)
+    assertThat(backoff.nextRetry().toMillis()).isBetween(1000L, 1010L + 500L)
+
+    backoff.reset()
+    assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L + 5L)
+  }
+
   @Test fun dynamicJitteredExponentialBackoff() {
     val baseDelay = AtomicLong(10)
     val maxDelay = AtomicLong(1000L)
