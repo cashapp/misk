@@ -6071,6 +6071,10 @@ acceptedBreaks:
         \ kotlin.reflect.KClass<G>, java.lang.String, com.google.inject.Provider<okhttp3.OkHttpClient>,\
         \ long)"
       justification: "Internal consturctor only called within misk."
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method okio.ByteString misk.redis.Redis::getDel(java.lang.String)"
+      justification: "Change is additive and implements a standard Redis command"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
