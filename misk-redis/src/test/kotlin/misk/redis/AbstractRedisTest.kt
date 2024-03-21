@@ -1332,15 +1332,15 @@ abstract class AbstractRedisTest {
         listOf(
           set("test key", "test value".encodeUtf8()),
           get("test key"),
+          del("test key"),
           setnx("keynx", "valuenx".encodeUtf8()),
           setnx("keynx", "valuenx2".encodeUtf8()),
+          get("keynx"),
+          getDel("keynx"),
           get("keynx"),
           incr("incr"),
           incrBy("incr", 3),
           get("incr"),
-          del("test key"),
-          getDel("keynx"),
-          get("keynx"),
         )
       )
     }
@@ -1348,14 +1348,14 @@ abstract class AbstractRedisTest {
       Unit,
       "test value".encodeUtf8(),
       true,
+      true,
       false,
       "valuenx".encodeUtf8(),
+      "valuenx".encodeUtf8(),
+      null,
       1L,
       4L,
       "4".encodeUtf8(),
-      true,
-      "valuenx".encodeUtf8(),
-      null,
     )
   }
 
