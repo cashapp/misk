@@ -496,7 +496,7 @@ class RealRedis(
 
   /** Closes the connection to Redis. */
   override fun close() {
-    return unifiedJedis.close()
+    unifiedJedis.close()
   }
 
   override fun subscribe(jedisPubSub: JedisPubSub, channel: String) {
