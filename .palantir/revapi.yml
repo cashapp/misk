@@ -6094,6 +6094,11 @@ acceptedBreaks:
     - code: "java.method.removed"
       old: "method misk.web.metadata.webaction.WebActionMetadataList misk.web.metadata.webaction.WebActionMetadataAction::getWebActionMetadataList()"
       justification: "Metadata actions and providers only have internal usage"
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method void misk.redis.Redis::pipelining(kotlin.jvm.functions.Function1<?\
+        \ super misk.redis.DeferredRedis, kotlin.Unit>)"
+      justification: "Adds proper support for pipelining Redis commands"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"

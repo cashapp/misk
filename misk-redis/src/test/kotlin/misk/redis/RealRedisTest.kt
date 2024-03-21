@@ -27,12 +27,12 @@ class RealRedisTest : AbstractRedisTest() {
     }
   }
 
+  @Inject override lateinit var redis: Redis
+
   @BeforeEach
   fun setUp() {
     redis.flushAll()
   }
-
-  @Inject override lateinit var redis: Redis
 
   @Test
   fun `watch and unwatch succeeds`() {
@@ -70,5 +70,4 @@ class RealRedisTest : AbstractRedisTest() {
     assertThat(redis["key5"]).isEqualTo("value5".encodeUtf8())
     assertThat(redis["key6"]).isNull()
   }
-
 }

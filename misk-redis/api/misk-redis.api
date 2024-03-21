@@ -1,3 +1,57 @@
+public abstract interface class misk/redis/DeferredRedis {
+	public abstract fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Ljava/util/function/Supplier;
+	public abstract fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Ljava/util/function/Supplier;
+	public abstract fun close ()V
+	public abstract fun del (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun del ([Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun expire (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun expireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun get (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun getDel (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun hdel (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun hget (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun hlen (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun hrandField (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun hrandFieldWithValues (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)Ljava/util/function/Supplier;
+	public abstract fun hset (Ljava/lang/String;Ljava/util/Map;)Ljava/util/function/Supplier;
+	public abstract fun incr (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun incrBy (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Ljava/util/function/Supplier;
+	public abstract fun lpop (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun lpop (Ljava/lang/String;I)Ljava/util/function/Supplier;
+	public abstract fun lpush (Ljava/lang/String;[Lokio/ByteString;)Ljava/util/function/Supplier;
+	public abstract fun lrange (Ljava/lang/String;JJ)Ljava/util/function/Supplier;
+	public abstract fun lrem (Ljava/lang/String;JLokio/ByteString;)Ljava/util/function/Supplier;
+	public abstract fun mget ([Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun mset ([Lokio/ByteString;)Ljava/util/function/Supplier;
+	public abstract fun pExpire (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun pExpireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun rpop (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun rpop (Ljava/lang/String;I)Ljava/util/function/Supplier;
+	public abstract fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun rpush (Ljava/lang/String;[Lokio/ByteString;)Ljava/util/function/Supplier;
+	public abstract fun set (Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;)Ljava/util/function/Supplier;
+	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;)Ljava/util/function/Supplier;
+	public abstract fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)Ljava/util/function/Supplier;
+	public abstract fun zadd (Ljava/lang/String;Ljava/util/Map;[Lmisk/redis/Redis$ZAddOptions;)Ljava/util/function/Supplier;
+	public abstract fun zcard (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/function/Supplier;
+	public abstract fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/function/Supplier;
+	public abstract fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)Ljava/util/function/Supplier;
+	public abstract fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
+}
+
+public final class misk/redis/DeferredRedis$DefaultImpls {
+	public static synthetic fun set$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;ILjava/lang/Object;)Ljava/util/function/Supplier;
+	public static synthetic fun setnx$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;ILjava/lang/Object;)Ljava/util/function/Supplier;
+	public static synthetic fun zrange$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/function/Supplier;
+	public static synthetic fun zrangeWithScores$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/function/Supplier;
+}
+
 public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public field clock Ljava/time/Clock;
 	public field random Lkotlin/random/Random;
@@ -38,6 +92,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun pipelining (Lkotlin/jvm/functions/Function1;)V
 	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
 	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
@@ -114,6 +169,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun pipelining (Lkotlin/jvm/functions/Function1;)V
 	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
 	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
@@ -136,6 +192,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 }
 
 public final class misk/redis/RealRedis$Companion {
+	public final fun getCharset ()Ljava/nio/charset/Charset;
 }
 
 public abstract interface class misk/redis/Redis {
@@ -173,6 +230,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun pExpire (Ljava/lang/String;J)Z
 	public abstract fun pExpireAt (Ljava/lang/String;J)Z
 	public abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public abstract fun pipelining (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun publish (Ljava/lang/String;Ljava/lang/String;)V
 	public abstract fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun rpop (Ljava/lang/String;I)Ljava/util/List;
@@ -201,6 +259,7 @@ public final class misk/redis/Redis$DefaultImpls {
 
 public final class misk/redis/Redis$ZAddOptions : java/lang/Enum {
 	public static final field CH Lmisk/redis/Redis$ZAddOptions;
+	public static final field Companion Lmisk/redis/Redis$ZAddOptions$Companion;
 	public static final field GT Lmisk/redis/Redis$ZAddOptions;
 	public static final field LT Lmisk/redis/Redis$ZAddOptions;
 	public static final field NX Lmisk/redis/Redis$ZAddOptions;
@@ -208,6 +267,10 @@ public final class misk/redis/Redis$ZAddOptions : java/lang/Enum {
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/Redis$ZAddOptions;
 	public static fun values ()[Lmisk/redis/Redis$ZAddOptions;
+}
+
+public final class misk/redis/Redis$ZAddOptions$Companion {
+	public final fun getZAddParams ([Lmisk/redis/Redis$ZAddOptions;)Lredis/clients/jedis/params/ZAddParams;
 }
 
 public final class misk/redis/Redis$ZRangeIndexMarker : misk/redis/Redis$ZRangeMarker {
@@ -490,6 +553,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
+	public fun pipelining (Lkotlin/jvm/functions/Function1;)V
 	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
 	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
@@ -509,6 +573,54 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
 	public fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)J
 	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
+}
+
+public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/DeferredRedis {
+	public fun <init> (Lmisk/redis/testing/FakeRedis;)V
+	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Ljava/util/function/Supplier;
+	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Ljava/util/function/Supplier;
+	public fun close ()V
+	public fun del (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun del ([Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun expire (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun expireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun get (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun getDel (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun hget (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun hgetAll (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun hlen (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun hrandField (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun hrandFieldWithValues (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun hset (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)Ljava/util/function/Supplier;
+	public fun hset (Ljava/lang/String;Ljava/util/Map;)Ljava/util/function/Supplier;
+	public fun incr (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun incrBy (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Ljava/util/function/Supplier;
+	public fun lpop (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun lpop (Ljava/lang/String;I)Ljava/util/function/Supplier;
+	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)Ljava/util/function/Supplier;
+	public fun lrange (Ljava/lang/String;JJ)Ljava/util/function/Supplier;
+	public fun lrem (Ljava/lang/String;JLokio/ByteString;)Ljava/util/function/Supplier;
+	public fun mget ([Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun mset ([Lokio/ByteString;)Ljava/util/function/Supplier;
+	public fun pExpire (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun pExpireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun rpop (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun rpop (Ljava/lang/String;I)Ljava/util/function/Supplier;
+	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun rpush (Ljava/lang/String;[Lokio/ByteString;)Ljava/util/function/Supplier;
+	public fun set (Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;)Ljava/util/function/Supplier;
+	public fun setnx (Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;)Ljava/util/function/Supplier;
+	public fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)Ljava/util/function/Supplier;
+	public fun zadd (Ljava/lang/String;Ljava/util/Map;[Lmisk/redis/Redis$ZAddOptions;)Ljava/util/function/Supplier;
+	public fun zcard (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/function/Supplier;
+	public fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/function/Supplier;
+	public fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)Ljava/util/function/Supplier;
+	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
 }
 
 public abstract interface annotation class misk/redis/testing/ForFakeRedis : java/lang/annotation/Annotation {
