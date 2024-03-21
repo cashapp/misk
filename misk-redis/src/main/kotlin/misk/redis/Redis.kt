@@ -58,6 +58,14 @@ interface Redis {
   operator fun get(key: String): ByteString?
 
   /**
+   * Retrieves the value for the given key as a [ByteString] and deletes the key.
+   *
+   * @param key the key to retrieve
+   * @return a [ByteString] if the key was found, null if the key was not found
+   */
+  fun getDel(key: String): ByteString?
+
+  /**
    * Delete one or more hash [fields] stored at [key].
    * Specified fields that do not exist are ignored.
    *

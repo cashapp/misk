@@ -104,6 +104,13 @@ class FakeRedis @Inject constructor(
   }
 
   @Synchronized
+  override fun getDel(key: String): ByteString? {
+    val value = get(key);
+    keyValueStore.remove(key);
+    return value
+  }
+
+  @Synchronized
   override fun hdel(key: String, vararg fields: String): Long {
     val value = hKeyValueStore[key] ?: return 0L
 

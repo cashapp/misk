@@ -112,6 +112,11 @@ class RealRedis(
     return jedis { get(keyBytes) }?.toByteString()
   }
 
+  override fun getDel(key: String): ByteString? {
+    val keyBytes = key.toByteArray(charset)
+    return jedis { getDel(keyBytes) }?.toByteString()
+  }
+
   override fun hdel(key: String, vararg fields: String): Long {
     val fieldsAsByteArrays = fields.map { it.toByteArray(charset) }.toTypedArray()
     val keyBytes = key.toByteArray(charset)
