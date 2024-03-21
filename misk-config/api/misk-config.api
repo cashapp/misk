@@ -91,3 +91,9 @@ public final class misk/resources/TestingResourceLoaderModule : misk/inject/KAbs
 	public fun <init> ()V
 }
 
+public class misk/web/metadata/Metadata {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;)V
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMetadata ()Ljava/lang/Object;
+}
+

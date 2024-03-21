@@ -15,7 +15,6 @@ dependencies {
   api(libs.kotlinxHtml)
   api(libs.moshi)
   api(libs.okio)
-  api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   api(project(":misk"))
   api(project(":misk-api"))
@@ -27,6 +26,7 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-tailwind"))
+  implementation(project(":wisp:wisp-config"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
