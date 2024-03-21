@@ -1265,6 +1265,18 @@ abstract class AbstractRedisTest {
     assertEquals(0, redis.zcard(key))
   }
 
+  @Test fun `getDel`() {
+    val key = "key"
+    val value = "value".encodeUtf8()
+
+    redis[key] = value
+
+    assertEquals(redis[key], value)
+    assertEquals(redis.getDel(key), value)
+
+    assertNull(redis[key])
+    assertNull(redis.getDel(key))
+  }
 
   private fun checkZRemRangeByRankResponse(
     start: Long,
