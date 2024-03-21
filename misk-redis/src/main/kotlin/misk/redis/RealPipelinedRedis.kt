@@ -2,6 +2,7 @@ package misk.redis
 
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import redis.clients.jedis.Jedis
 import redis.clients.jedis.Response
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.SetParams
@@ -41,8 +42,20 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
 
   override fun del(vararg keys: String): Supplier<Int> {
     val keysBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
-    val response = pipeline.del(*keysBytes)
-    return Supplier { response.get().toInt() }
+    val responses = when (pipeline) {
+      is JedisPipeline.PooledPipeline -> listOf(pipeline.del(*keysBytes))
+      is JedisPipeline.ClusterJedisPipeline -> {
+        keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
+          .map { (_, slottedKeys) ->
+            pipeline.del(*slottedKeys.toTypedArray())
+          }
+      }
+    }
+    return Supplier {
+      responses.fold(0) { acc, response ->
+        acc + response.get().toInt()
+      }
+    }
   }
 
   override fun mget(vararg keys: String): Supplier<List<ByteString?>> {

@@ -1373,6 +1373,7 @@ abstract class AbstractRedisTest {
             "mval2".encodeUtf8()
           ),
           mget("mkey1", "mkey2"),
+          del("mkey1", "mkey2"),
         )
       )
     }
@@ -1381,7 +1382,8 @@ abstract class AbstractRedisTest {
       listOf(
         "mval1".encodeUtf8(),
         "mval2".encodeUtf8(),
-      )
+      ),
+      2
     )
   }
 
