@@ -9,7 +9,6 @@ import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
@@ -17,10 +16,8 @@ import redis.clients.jedis.Transaction
 import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.commands.JedisBinaryCommands
-import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
-import redis.clients.jedis.util.JedisClusterCRC16
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -29,128 +26,65 @@ import java.time.Duration
 import kotlin.reflect.cast
 
 /**
- * For each command, a Jedis instance is retrieved from the pool and returned once the command has
- * been issued.
+ * A Redis client implementation with metrics. Supports pooled connections and clustered Redis.
+ *
+ * Install this to your service using the [RedisModule], and configure it with a [RedisConfig].
+ *
+ * Note: To keep the implementation simple, this client always defers to [RealPipelinedRedis],
+ * even if there is only one command.
+ *
+ * If you have to issue multiple commands in a row, use [pipelining] to batch them together.
  */
 class RealRedis(
   private val unifiedJedis: UnifiedJedis,
   private val clientMetrics: RedisClientMetrics,
 ) : Redis {
-  override fun del(key: String): Boolean {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { del(keyBytes) == 1L }
+  override fun del(key: String): Boolean = withMetrics("del") {
+    runPipeline { del(key) }.get()
   }
 
-  override fun del(vararg keys: String): Int {
-    return when (unifiedJedis) {
-      is JedisPooled -> {
-        val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
-        jedis { unifiedJedis.del(*keysAsBytes) }.toInt()
-      }
-
-      is JedisCluster -> {
-        // JedisCluster does not support multi-key del, so we need to group by slot and perform del for each slot
-        keys.groupBy { JedisClusterCRC16.getSlot(it) }
-          .map { (_, slotKeys) -> jedis { unifiedJedis.del(*slotKeys.toTypedArray()) } }
-          .sumOf { it.toInt() }
-      }
-
-      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
-    }
+  override fun del(vararg keys: String): Int = withMetrics("del") {
+    runPipeline { del(*keys) }.get()
   }
 
-  override fun mget(vararg keys: String): List<ByteString?> {
-    return when (unifiedJedis) {
-      is JedisPooled -> {
-        val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
-        jedis { unifiedJedis.mget(*keysAsBytes) }.map { it?.toByteString() }
-      }
-
-      is JedisCluster -> {
-        // JedisCluster does not support multi-key mget, so we need to group by slot and perform mget for each slot
-        val keyToValueMap = mutableMapOf<String, ByteString?>()
-        keys.groupBy { JedisClusterCRC16.getSlot(it) }
-          .flatMap { (_, slotKeys) ->
-            val result = jedis { unifiedJedis.mget(*slotKeys.toTypedArray()) }
-            slotKeys.zip(result)
-          }.forEach { (key, value) ->
-            keyToValueMap[key] = value?.toByteArray(charset)?.toByteString()
-          }
-        keys.map { keyToValueMap[it] }
-      }
-
-      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
-    }
-
+  override fun mget(vararg keys: String): List<ByteString?> = withMetrics("mget") {
+    runPipeline { mget(*keys) }.get()
   }
 
-  override fun mset(vararg keyValues: ByteString) {
-    require(keyValues.size % 2 == 0) {
-      "Wrong number of arguments to mset (must be a multiple of 2, alternating keys and values)"
-    }
-    when (unifiedJedis) {
-      is JedisPooled -> {
-        val byteArrays = keyValues.map { it.toByteArray() }.toTypedArray()
-        return jedis { unifiedJedis.mset(*byteArrays) }
-      }
-
-      is JedisCluster -> {
-        // JedisCluster does not support multi-key mset, so we need to group by slot and perform mset for each slot
-        keyValues.toList().chunked(2).groupBy { JedisClusterCRC16.getSlot(it[0].toByteArray()) }
-          .forEach { (_, slotKeys) ->
-            jedis { unifiedJedis.mset(*slotKeys.flatten().map { it.toByteArray() }.toTypedArray()) }
-          }
-      }
-
-      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
-    }
+  override fun mset(vararg keyValues: ByteString) = withMetrics("mset") {
+    runPipeline { mset(*keyValues) }.get()
   }
 
-  override fun get(key: String): ByteString? {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { get(keyBytes) }?.toByteString()
+  override fun get(key: String): ByteString? = withMetrics("get") {
+    runPipeline { get(key) }.get()
   }
 
-  override fun getDel(key: String): ByteString? {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { getDel(keyBytes) }?.toByteString()
+  override fun getDel(key: String): ByteString? = withMetrics("getDel") {
+    runPipeline { getDel(key) }.get()
   }
 
-  override fun hdel(key: String, vararg fields: String): Long {
-    val fieldsAsByteArrays = fields.map { it.toByteArray(charset) }.toTypedArray()
-    val keyBytes = key.toByteArray(charset)
-    return jedis { hdel(keyBytes, *fieldsAsByteArrays) }
+  override fun hdel(key: String, vararg fields: String): Long = withMetrics("hdel") {
+    runPipeline { hdel(key, *fields) }.get()
   }
 
-  override fun hgetAll(key: String): Map<String, ByteString>? {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { hgetAll(keyBytes) }
-      ?.mapKeys { it.key.toString(charset) }
-      ?.mapValues { it.value.toByteString() }
+  override fun hgetAll(key: String): Map<String, ByteString>? = withMetrics("hgetAll") {
+    runPipeline { hgetAll(key) }.get()
   }
 
-  override fun hlen(key: String): Long {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { hlen(keyBytes) }
+  override fun hlen(key: String): Long = withMetrics("hlen") {
+    runPipeline { hlen(key) }.get()
   }
 
-  override fun hmget(key: String, vararg fields: String): List<ByteString?> {
-    val fieldsAsByteArrays = fields.map { it.toByteArray(charset) }.toTypedArray()
-    val keyBytes = key.toByteArray(charset)
-    return jedis { hmget(keyBytes, *fieldsAsByteArrays) ?: emptyList() }
-      .map { it?.toByteString() }
+  override fun hmget(key: String, vararg fields: String): List<ByteString?> = withMetrics("hmget") {
+    runPipeline { hmget(key, *fields) }.get()
   }
 
-  override fun hget(key: String, field: String): ByteString? {
-    val keyBytes = key.toByteArray(charset)
-    val fieldBytes = field.toByteArray(charset)
-    return jedis { hget(keyBytes, fieldBytes) }?.toByteString()
+  override fun hget(key: String, field: String): ByteString? = withMetrics("hget") {
+    runPipeline { hget(key, field) }.get()
   }
 
-  override fun hincrBy(key: String, field: String, increment: Long): Long {
-    val keyBytes = key.toByteArray(charset)
-    val fieldBytes = field.toByteArray(charset)
-    return jedis { hincrBy(keyBytes, fieldBytes, increment) }
+  override fun hincrBy(key: String, field: String, increment: Long): Long = withMetrics("hincrBy") {
+    runPipeline { hincrBy(key, field, increment) }.get()
   }
 
   /**
@@ -158,11 +92,11 @@ class RealRedis(
    *
    * See [misk.redis.Redis.hrandFieldWithValues].
    */
-  override fun hrandFieldWithValues(key: String, count: Long): Map<String, ByteString>? {
-    checkHrandFieldCount(count)
-    val keyBytes = key.toByteArray(charset)
-    return jedis { hrandfieldWithValues(keyBytes, count) }
-      .associate { it.key.toString(charset) to it.value.toByteString() }
+  override fun hrandFieldWithValues(
+    key: String,
+    count: Long
+  ): Map<String, ByteString>? = withMetrics("hrandFieldWithValues") {
+    runPipeline { hrandFieldWithValues(key, count) }.get()
   }
 
   /**
@@ -170,59 +104,44 @@ class RealRedis(
    *
    * See [misk.redis.Redis.hrandField].
    */
-  override fun hrandField(key: String, count: Long): List<String> {
-    checkHrandFieldCount(count)
-    val keyBytes = key.toByteArray(charset)
-    return jedis { hrandfield(keyBytes, count) }
-      .map { it.toString(charset) }
+  override fun hrandField(key: String, count: Long): List<String> = withMetrics("hrandField") {
+    runPipeline { hrandField(key, count) }.get()
   }
 
-  override fun set(key: String, value: ByteString) {
-    val keyBytes = key.toByteArray(charset)
-    val valueBytes = value.toByteArray()
-    jedis { set(keyBytes, valueBytes) }
+  override fun set(key: String, value: ByteString) = withMetrics("set") {
+    runPipeline { set(key, value) }.get()
   }
 
-  override fun set(key: String, expiryDuration: Duration, value: ByteString) {
-    val keyBytes = key.toByteArray(charset)
-    val valueBytes = value.toByteArray()
-    jedis { setex(keyBytes, expiryDuration.seconds, valueBytes) }
+  override fun set(key: String, expiryDuration: Duration, value: ByteString) = withMetrics("set") {
+    runPipeline { set(key, value, expiryDuration) }.get()
   }
 
-  override fun setnx(key: String, value: ByteString): Boolean {
-    val keyBytes = key.toByteArray(charset)
-    val valueBytes = value.toByteArray()
-    return jedis { setnx(keyBytes, valueBytes) == 1L }
+  override fun setnx(key: String, value: ByteString): Boolean = withMetrics("setnx") {
+    runPipeline { setnx(key, value) }.get()
   }
 
-  override fun setnx(key: String, expiryDuration: Duration, value: ByteString): Boolean {
-    val keyBytes = key.toByteArray(charset)
-    val valueBytes = value.toByteArray()
-    val params = SetParams().nx().px(expiryDuration.toMillis())
-    return jedis { set(keyBytes, valueBytes, params) == "OK" }
+  override fun setnx(
+    key: String,
+    expiryDuration: Duration,
+    value: ByteString
+  ): Boolean = withMetrics("setnx") {
+    runPipeline { setnx(key, value, expiryDuration) }.get()
   }
 
-  override fun hset(key: String, field: String, value: ByteString): Long {
-    val keyBytes = key.toByteArray(charset)
-    val fieldBytes = field.toByteArray(charset)
-    val valueBytes = value.toByteArray()
-    return jedis { hset(keyBytes, fieldBytes, valueBytes) }
+  override fun hset(key: String, field: String, value: ByteString): Long = withMetrics("hset") {
+    runPipeline { hset(key, field, value) }.get()
   }
 
-  override fun hset(key: String, hash: Map<String, ByteString>): Long {
-    val hashBytes = hash.entries.associate { it.key.toByteArray(charset) to it.value.toByteArray() }
-    val keyBytes = key.toByteArray(charset)
-    return jedis { hset(keyBytes, hashBytes) }
+  override fun hset(key: String, hash: Map<String, ByteString>): Long = withMetrics("hset") {
+    runPipeline { hset(key, hash) }.get()
   }
 
-  override fun incr(key: String): Long {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { incr(keyBytes) }
+  override fun incr(key: String): Long = withMetrics("incr") {
+    runPipeline { incr(key) }.get()
   }
 
-  override fun incrBy(key: String, increment: Long): Long {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { incrBy(keyBytes, increment) }
+  override fun incrBy(key: String, increment: Long): Long = withMetrics("incrBy") {
+    runPipeline { incrBy(key, increment) }.get()
   }
 
   override fun blmove(
@@ -231,20 +150,16 @@ class RealRedis(
     from: ListDirection,
     to: ListDirection,
     timeoutSeconds: Double
-  ): ByteString? {
-    val sourceKeyBytes = sourceKey.toByteArray(charset)
-    val destKeyBytes = destinationKey.toByteArray(charset)
-    return jedis { blmove(sourceKeyBytes, destKeyBytes, from, to, timeoutSeconds) }?.toByteString()
+  ): ByteString? = withMetrics("blmove") {
+    runPipeline { blmove(sourceKey, destinationKey, from, to, timeoutSeconds) }.get()
   }
 
   override fun brpoplpush(
     sourceKey: String,
     destinationKey: String,
     timeoutSeconds: Int
-  ): ByteString? {
-    val sourceKeyBytes = sourceKey.toByteArray(charset)
-    val destinationKeyBytes = destinationKey.toByteArray(charset)
-    return jedis { brpoplpush(sourceKeyBytes, destinationKeyBytes, timeoutSeconds) }?.toByteString()
+  ): ByteString? = withMetrics("brpoplpush") {
+    runPipeline { brpoplpush(sourceKey, destinationKey, timeoutSeconds) }.get()
   }
 
   override fun lmove(
@@ -252,141 +167,70 @@ class RealRedis(
     destinationKey: String,
     from: ListDirection,
     to: ListDirection
-  ): ByteString? {
-    val sourceKeyBytes = sourceKey.toByteArray(charset)
-    val destKeyBytes = destinationKey.toByteArray(charset)
-    return jedis { lmove(sourceKeyBytes, destKeyBytes, from, to) }?.toByteString()
+  ): ByteString? = withMetrics("lmove") {
+    runPipeline { lmove(sourceKey, destinationKey, from, to) }.get()
   }
 
-  override fun lpush(key: String, vararg elements: ByteString): Long {
-    val keyBytes = key.toByteArray(charset)
-    val byteArrays = elements.map { it.toByteArray() }.toTypedArray()
-    return jedis { lpush(keyBytes, *byteArrays) }
+  override fun lpush(key: String, vararg elements: ByteString): Long = withMetrics("lpush") {
+    runPipeline { lpush(key, *elements) }.get()
   }
 
-  override fun rpush(key: String, vararg elements: ByteString): Long {
-    val keyBytes = key.toByteArray(charset)
-    val byteArrays = elements.map { it.toByteArray() }.toTypedArray()
-    return jedis { rpush(keyBytes, *byteArrays) }
+  override fun rpush(key: String, vararg elements: ByteString): Long = withMetrics("rpush") {
+    runPipeline { rpush(key, *elements) }.get()
   }
 
-  override fun lpop(key: String, count: Int): List<ByteString?> {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { lpop(keyBytes, count) ?: emptyList() }
-      .map { it?.toByteString() }
+  override fun lpop(key: String, count: Int): List<ByteString?> = withMetrics("lpop") {
+    runPipeline { lpop(key, count) }.get()
   }
 
-  override fun lpop(key: String): ByteString? {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { lpop(keyBytes) }?.toByteString()
+  override fun lpop(key: String): ByteString? = withMetrics("lpop") {
+    runPipeline { lpop(key) }.get()
   }
 
-  override fun rpop(key: String, count: Int): List<ByteString?> {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { rpop(keyBytes, count) ?: emptyList() }
-      .map { it?.toByteString() }
+  override fun rpop(key: String, count: Int): List<ByteString?> = withMetrics("rpop") {
+    runPipeline { rpop(key, count) }.get()
   }
 
-  override fun rpop(key: String): ByteString? {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { rpop(keyBytes) }?.toByteString()
+  override fun rpop(key: String): ByteString? = withMetrics("rpop") {
+    runPipeline { rpop(key) }.get()
   }
 
-  override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { lrange(keyBytes, start, stop) ?: emptyList() }
-      .map { it?.toByteString() }
+  override fun lrange(
+    key: String,
+    start: Long,
+    stop: Long
+  ): List<ByteString?> = withMetrics("lrange") {
+    runPipeline { lrange(key, start, stop) }.get()
   }
 
-  override fun lrem(key: String, count: Long, element: ByteString): Long {
-    val keyBytes = key.toByteArray(charset)
-    val elementBytes = element.toByteArray()
-    return jedis { lrem(keyBytes, count, elementBytes) }
+  override fun lrem(key: String, count: Long, element: ByteString): Long = withMetrics("lrem") {
+    runPipeline { lrem(key, count, element) }.get()
   }
 
-  override fun rpoplpush(sourceKey: String, destinationKey: String): ByteString? {
-    val sourceKeyBytes = sourceKey.toByteArray(charset)
-    val destinationKeyBytes = destinationKey.toByteArray(charset)
-    return jedis { rpoplpush(sourceKeyBytes, destinationKeyBytes) }?.toByteString()
+  override fun rpoplpush(
+    sourceKey: String,
+    destinationKey: String
+  ): ByteString? = withMetrics("rpoplpush") {
+    runPipeline { rpoplpush(sourceKey, destinationKey) }.get()
   }
 
-  override fun expire(key: String, seconds: Long): Boolean {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { expire(keyBytes, seconds) == 1L }
+  override fun expire(key: String, seconds: Long): Boolean = withMetrics("expire") {
+    runPipeline { expire(key, seconds) }.get()
   }
 
-  override fun expireAt(key: String, timestampSeconds: Long): Boolean {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { expireAt(keyBytes, timestampSeconds) == 1L }
+  override fun expireAt(key: String, timestampSeconds: Long): Boolean = withMetrics("expireAt") {
+    runPipeline { expireAt(key, timestampSeconds) }.get()
   }
 
-  override fun pExpire(key: String, milliseconds: Long): Boolean {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { pexpire(keyBytes, milliseconds) == 1L }
+  override fun pExpire(key: String, milliseconds: Long): Boolean = withMetrics("pExpire") {
+    runPipeline { pExpire(key, milliseconds) }.get()
   }
 
-  override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
-    val keyBytes = key.toByteArray(charset)
-    return jedis { pexpireAt(keyBytes, timestampMilliseconds) == 1L }
-  }
-
-  override fun watch(vararg keys: String) {
-    val keysAsBytes = keys.map { it.toByteArray() }.toTypedArray()
-    invokeTransactionOp { watch(*keysAsBytes) }
-  }
-
-  override fun unwatch(vararg keys: String) {
-    invokeTransactionOp { unwatch() }
-  }
-
-  private fun invokeTransactionOp(op: Transaction.() -> Unit) {
-    when (unifiedJedis) {
-      is JedisPooled -> unifiedJedis.pool.resource.use { connection ->
-        val transaction = Transaction(connection, false)
-        transaction.op()
-      }
-
-      else -> error("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
-    }
-  }
-
-  // Transactions do not get client histogram metrics right now.
-  // multi() returns the jedis to the pool, despite returning a Transaction that holds a reference.
-  // This is a bug, and will be fixed in a follow-up.
-  override fun multi(): Transaction {
-    return unifiedJedis.multi() as? Transaction ?: error("Transactions aren't supported in misk-redis with ${unifiedJedis.javaClass} at this time.")
-  }
-
-  // Pipelined requests do not get client histogram metrics right now.
-  // pipelined() returns the jedis to the pool, despite returning a Pipeline that holds a reference
-  // to the borrowed jedis connection.
-  // This is a bug, and will be fixed in a follow-up.
-  @Deprecated("Use pipelining instead.")
-  override fun pipelined(): Pipeline {
-    return unifiedJedis.pipelined() as Pipeline
-  }
-
-  override fun pipelining(block: DeferredRedis.() -> Unit) {
-      unifiedJedis.pipelined().use { pipeline ->
-      block(RealPipelinedRedis(pipeline))
-    }
-  }
-
-  /** Closes the connection to Redis. */
-  override fun close() {
-    return unifiedJedis.close()
-  }
-
-  override fun subscribe(jedisPubSub: JedisPubSub, channel: String) {
-    unifiedJedis.subscribe(jedisPubSub, channel)
-  }
-
-  override fun publish(channel: String, message: String) {
-    unifiedJedis.publish(channel, message)
-  }
-
-  override fun flushAll() {
-    unifiedJedis.flushAll()
+  override fun pExpireAt(
+    key: String,
+    timestampMilliseconds: Long
+  ): Boolean = withMetrics("pExpireAt") {
+    runPipeline { pExpireAt(key, timestampMilliseconds) }.get()
   }
 
   override fun zadd(
@@ -610,20 +454,67 @@ class RealRedis(
     }
   }
 
-  // Gets a Jedis instance from the pool, and times the requested method invocations.
-  private fun <T> jedis(op: JedisBinaryCommands.() -> T): T {
+  override fun watch(vararg keys: String) {
+    val keysAsBytes = keys.map { it.toByteArray() }.toTypedArray()
+    invokeTransactionOp { watch(*keysAsBytes) }
+  }
+
+  override fun unwatch(vararg keys: String) {
+    invokeTransactionOp { unwatch() }
+  }
+
+  private fun invokeTransactionOp(op: Transaction.() -> Unit) {
+    when (unifiedJedis) {
+      is JedisPooled -> unifiedJedis.pool.resource.use { connection ->
+        val transaction = Transaction(connection, false)
+        transaction.op()
+      }
+
+      else -> error("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+    }
+  }
+
+  // Transactions do not get client histogram metrics right now.
+  override fun multi(): Transaction {
+    return unifiedJedis.multi() as? Transaction ?: error("Transactions aren't supported in misk-redis with ${unifiedJedis.javaClass} at this time.")
+  }
+
+  @Deprecated("Use pipelining instead.")
+  override fun pipelined(): Pipeline {
+    return unifiedJedis.pipelined() as? Pipeline ?: error("pipelined() isn't supported in misk-redis with ${unifiedJedis.javaClass}. Use pipelining instead.")
+  }
+
+  private fun <T> runPipeline(block: DeferredRedis.() -> T): T = withMetrics("pipelining") {
+    unifiedJedis.pipelined().use { pipeline ->
+      block(RealPipelinedRedis(pipeline))
+    }
+  }
+
+  override fun pipelining(block: DeferredRedis.() -> Unit) {
+    runPipeline(block)
+  }
+
+  /** Closes the connection to Redis. */
+  override fun close() {
+    return unifiedJedis.close()
+  }
+
+  override fun subscribe(jedisPubSub: JedisPubSub, channel: String) {
+    unifiedJedis.subscribe(jedisPubSub, channel)
+  }
+
+  override fun publish(channel: String, message: String) {
+    unifiedJedis.publish(channel, message)
+  }
+
+  override fun flushAll() {
+    unifiedJedis.flushAll()
+  }
+
+  private fun <T> withMetrics(commandName: String, op: () -> T): T {
     updateMetrics()
-    val invocationHandler = JedisTimedInvocationHandler(unifiedJedis, clientMetrics)
-    val timedProxy = JedisBinaryCommands::class.cast(
-      Proxy.newProxyInstance(
-        ClassLoader.getSystemClassLoader(),
-        arrayOf(JedisBinaryCommands::class.java),
-        invocationHandler
-      )
-    )
-    val response = timedProxy.op()
-    updateMetrics()
-    return response
+    return clientMetrics.timed(commandName, op)
+      .also { updateMetrics() }
   }
 
   private fun updateMetrics() {

@@ -4,9 +4,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.AbstractPipeline
 import redis.clients.jedis.ClusterPipeline
-import redis.clients.jedis.Jedis
 import redis.clients.jedis.Pipeline
-import redis.clients.jedis.PipelineBase
 import redis.clients.jedis.Response
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.SetParams
@@ -54,6 +52,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
             pipeline.del(*slottedKeys.toTypedArray())
           }
       }
+
       else -> error("Unknown pipeline type: $pipeline")
     }
     return Supplier {
@@ -71,6 +70,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
         val response = pipeline.mget(*keysBytes)
         Supplier { response.get().map { it?.toByteString() } }
       }
+
       is ClusterPipeline -> {
         val responses = keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
           .mapValues { (_, slottedKeys) ->
@@ -90,6 +90,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
           keys.map { keyToValueMap[it] }
         }
       }
+
       else -> error("Unknown pipeline type: $pipeline")
     }
   }
@@ -109,6 +110,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
             pipeline.mset(*slottedKeyValues.flatten().toTypedArray())
           }
       }
+
       else -> error("Unknown pipeline type: $pipeline")
     }
     return Supplier { responses.map { it.get() } }
