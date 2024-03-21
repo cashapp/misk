@@ -1,10 +1,6 @@
 package misk.redis
 
-import misk.redis.Redis.ZAddOptions.CH
-import misk.redis.Redis.ZAddOptions.GT
-import misk.redis.Redis.ZAddOptions.LT
-import misk.redis.Redis.ZAddOptions.NX
-import misk.redis.Redis.ZAddOptions.XX
+import misk.redis.Redis.ZAddOptions
 import misk.redis.Redis.ZRangeIndexMarker
 import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
@@ -13,6 +9,7 @@ import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import redis.clients.jedis.ClusterPipeline
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.JedisPubSub
@@ -22,7 +19,6 @@ import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.commands.JedisBinaryCommands
 import redis.clients.jedis.params.SetParams
-import redis.clients.jedis.params.ZAddParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
@@ -47,7 +43,7 @@ class RealRedis(
   }
 
   override fun del(vararg keys: String): Int {
-    return when(unifiedJedis) {
+    return when (unifiedJedis) {
       is JedisPooled -> {
         val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
         jedis { unifiedJedis.del(*keysAsBytes) }.toInt()
@@ -65,11 +61,12 @@ class RealRedis(
   }
 
   override fun mget(vararg keys: String): List<ByteString?> {
-    return when(unifiedJedis) {
+    return when (unifiedJedis) {
       is JedisPooled -> {
         val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
         jedis { unifiedJedis.mget(*keysAsBytes) }.map { it?.toByteString() }
       }
+
       is JedisCluster -> {
         // JedisCluster does not support multi-key mget, so we need to group by slot and perform mget for each slot
         val keyToValueMap = mutableMapOf<String, ByteString?>()
@@ -77,10 +74,10 @@ class RealRedis(
           .flatMap { (_, slotKeys) ->
             val result = jedis { unifiedJedis.mget(*slotKeys.toTypedArray()) }
             slotKeys.zip(result)
-        }.forEach { (key, value) ->
-          keyToValueMap[key] = value?.toByteArray(charset)?.toByteString()
-        }
-        keys.map{keyToValueMap[it]}
+          }.forEach { (key, value) ->
+            keyToValueMap[key] = value?.toByteArray(charset)?.toByteString()
+          }
+        keys.map { keyToValueMap[it] }
       }
 
       else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
@@ -89,17 +86,20 @@ class RealRedis(
   }
 
   override fun mset(vararg keyValues: ByteString) {
-    require(keyValues.size % 2 == 0) { "Wrong number of arguments to mset" }
-    when(unifiedJedis) {
+    require(keyValues.size % 2 == 0) {
+      "Wrong number of arguments to mset (must be a multiple of 2, alternating keys and values)"
+    }
+    when (unifiedJedis) {
       is JedisPooled -> {
         val byteArrays = keyValues.map { it.toByteArray() }.toTypedArray()
         return jedis { unifiedJedis.mset(*byteArrays) }
       }
+
       is JedisCluster -> {
         // JedisCluster does not support multi-key mset, so we need to group by slot and perform mset for each slot
         keyValues.toList().chunked(2).groupBy { JedisClusterCRC16.getSlot(it[0].toByteArray()) }
           .forEach { (_, slotKeys) ->
-            jedis { unifiedJedis.mset(*slotKeys.flatten().map{it.toByteArray()}.toTypedArray())}
+            jedis { unifiedJedis.mset(*slotKeys.flatten().map { it.toByteArray() }.toTypedArray()) }
           }
       }
 
@@ -347,6 +347,7 @@ class RealRedis(
         val transaction = Transaction(connection, false)
         transaction.op()
       }
+
       else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
     }
   }
@@ -362,8 +363,20 @@ class RealRedis(
   // pipelined() returns the jedis to the pool, despite returning a Pipeline that holds a reference
   // to the borrowed jedis connection.
   // This is a bug, and will be fixed in a follow-up.
+  @Deprecated("Use pipelining instead.")
   override fun pipelined(): Pipeline {
     return unifiedJedis.pipelined() as Pipeline
+  }
+
+  override fun pipelining(block: DeferredRedis.() -> Unit) {
+    val pipeline: JedisPipeline = when (unifiedJedis) {
+      is JedisPooled -> JedisPipeline.PooledPipeline(unifiedJedis.pipelined() as Pipeline)
+      is JedisCluster -> JedisPipeline.ClusterJedisPipeline(unifiedJedis.pipelined() as ClusterPipeline)
+      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+    }
+    pipeline.use {
+      block(RealPipelinedRedis(pipeline))
+    }
   }
 
   /** Closes the connection to Redis. */
@@ -387,38 +400,22 @@ class RealRedis(
     key: String,
     score: Double,
     member: String,
-    vararg options: Redis.ZAddOptions,
+    vararg options: ZAddOptions,
   ): Long {
     return unifiedJedis.zadd(
       key.toByteArray(charset),
       score,
       member.toByteArray(charset),
-      getZAddParams(options)
+      ZAddOptions.getZAddParams(options)
     )
-  }
-
-  private fun getZAddParams(options: Array<out Redis.ZAddOptions>): ZAddParams {
-    val params = ZAddParams()
-
-    options.forEach {
-      when (it) {
-        XX -> params.xx()
-        NX -> params.nx()
-        LT -> params.lt()
-        GT -> params.gt()
-        CH -> params.ch()
-      }
-    }
-
-    return params
   }
 
   override fun zadd(
     key: String,
     scoreMembers: Map<String, Double>,
-    vararg options: Redis.ZAddOptions,
+    vararg options: ZAddOptions,
   ): Long {
-    val params = getZAddParams(options)
+    val params = ZAddOptions.getZAddParams(options)
     val keyBytes = key.toByteArray(charset)
     val scoreMembersBytes =
       scoreMembers.entries.associate { it.key.toByteArray(charset) to it.value }
@@ -464,7 +461,7 @@ class RealRedis(
     key: String,
     start: ZRangeRankMarker,
     stop: ZRangeRankMarker
-  ) : Long {
+  ): Long {
     return unifiedJedis.zremrangeByRank(key, start.longValue, stop.longValue)
   }
 
@@ -485,12 +482,16 @@ class RealRedis(
   ): ZRangeResponse {
     return when (type) {
       ZRangeType.INDEX ->
-        zrangeByIndex(key, start as ZRangeIndexMarker, stop as ZRangeIndexMarker, reverse,
-                      withScore)
+        zrangeByIndex(
+          key, start as ZRangeIndexMarker, stop as ZRangeIndexMarker, reverse,
+          withScore
+        )
 
       ZRangeType.SCORE ->
-        zrangeByScore(key, start as ZRangeScoreMarker, stop as ZRangeScoreMarker, reverse,
-                      withScore, limit)
+        zrangeByScore(
+          key, start as ZRangeScoreMarker, stop as ZRangeScoreMarker, reverse,
+          withScore, limit
+        )
     }
   }
 
@@ -506,45 +507,77 @@ class RealRedis(
     val maxString = stop.toString()
 
     return if (limit == null && !reverse && !withScore) {
-      ZRangeResponse.noScore(unifiedJedis.zrangeByScore(key.toByteArray(charset),
-                                                     minString.toByteArray(charset),
-                                                     maxString.toByteArray(charset)))
+      ZRangeResponse.noScore(
+        unifiedJedis.zrangeByScore(
+          key.toByteArray(charset),
+          minString.toByteArray(charset),
+          maxString.toByteArray(charset)
+        )
+      )
     } else if (limit == null && !reverse) {
-      ZRangeResponse.withScore(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
-                                                               minString.toByteArray(charset),
-                                                               maxString.toByteArray(charset)))
+      ZRangeResponse.withScore(
+        unifiedJedis.zrangeByScoreWithScores(
+          key.toByteArray(charset),
+          minString.toByteArray(charset),
+          maxString.toByteArray(charset)
+        )
+      )
     } else if (limit == null && !withScore) {
-      ZRangeResponse.noScore(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
-                                             maxString.toByteArray(charset),
-                                             minString.toByteArray(charset)))
-    } else if (limit == null){
-      ZRangeResponse.withScore(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
-                                                        maxString.toByteArray(charset),
-                                                        minString.toByteArray(charset)))
+      ZRangeResponse.noScore(
+        unifiedJedis.zrevrangeByScore(
+          key.toByteArray(charset),
+          maxString.toByteArray(charset),
+          minString.toByteArray(charset)
+        )
+      )
+    } else if (limit == null) {
+      ZRangeResponse.withScore(
+        unifiedJedis.zrevrangeByScoreWithScores(
+          key.toByteArray(charset),
+          maxString.toByteArray(charset),
+          minString.toByteArray(charset)
+        )
+      )
     } else if (!reverse && !withScore) {
-      ZRangeResponse.noScore(unifiedJedis.zrangeByScore(key.toByteArray(charset),
-                                             minString.toByteArray(charset),
-                                             maxString.toByteArray(charset),
-                                             limit.offset,
-                                             limit.count))
+      ZRangeResponse.noScore(
+        unifiedJedis.zrangeByScore(
+          key.toByteArray(charset),
+          minString.toByteArray(charset),
+          maxString.toByteArray(charset),
+          limit.offset,
+          limit.count
+        )
+      )
     } else if (!reverse) {
-      ZRangeResponse.withScore(unifiedJedis.zrangeByScoreWithScores(key.toByteArray(charset),
-                                                        minString.toByteArray(charset),
-                                                        maxString.toByteArray(charset),
-                                                        limit.offset,
-                                                        limit.count))
+      ZRangeResponse.withScore(
+        unifiedJedis.zrangeByScoreWithScores(
+          key.toByteArray(charset),
+          minString.toByteArray(charset),
+          maxString.toByteArray(charset),
+          limit.offset,
+          limit.count
+        )
+      )
     } else if (!withScore) {
-      ZRangeResponse.noScore(unifiedJedis.zrevrangeByScore(key.toByteArray(charset),
-                                             maxString.toByteArray(charset),
-                                             minString.toByteArray(charset),
-                                             limit.offset,
-                                             limit.count))
+      ZRangeResponse.noScore(
+        unifiedJedis.zrevrangeByScore(
+          key.toByteArray(charset),
+          maxString.toByteArray(charset),
+          minString.toByteArray(charset),
+          limit.offset,
+          limit.count
+        )
+      )
     } else {
-      ZRangeResponse.withScore(unifiedJedis.zrevrangeByScoreWithScores(key.toByteArray(charset),
-                                                        maxString.toByteArray(charset),
-                                                        minString.toByteArray(charset),
-                                                        limit.offset,
-                                                        limit.count))
+      ZRangeResponse.withScore(
+        unifiedJedis.zrevrangeByScoreWithScores(
+          key.toByteArray(charset),
+          maxString.toByteArray(charset),
+          minString.toByteArray(charset),
+          limit.offset,
+          limit.count
+        )
+      )
     }
   }
 
@@ -556,9 +589,9 @@ class RealRedis(
     val withScore: List<Tuple>?
   ) {
     companion object {
-      fun noScore(ans: List<ByteArray?>) : ZRangeResponse = ZRangeResponse(ans, null)
+      fun noScore(ans: List<ByteArray?>): ZRangeResponse = ZRangeResponse(ans, null)
 
-      fun withScore(ans: List<Tuple>) : ZRangeResponse = ZRangeResponse(null, ans)
+      fun withScore(ans: List<Tuple>): ZRangeResponse = ZRangeResponse(null, ans)
     }
   }
 
@@ -619,7 +652,6 @@ class RealRedis(
   }
 
   companion object {
-    /** The charset used to convert String keys to ByteArrays for Jedis commands. */
-    private val charset = Charsets.UTF_8
+    val charset = charset("UTF-8")
   }
 }
