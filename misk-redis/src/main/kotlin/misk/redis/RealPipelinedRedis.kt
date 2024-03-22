@@ -61,21 +61,31 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
   override fun mget(vararg keys: String): Supplier<List<ByteString?>> {
     val keysBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
 
-    val responses = when (pipeline) {
-      is JedisPipeline.PooledPipeline -> listOf(pipeline.mget(*keysBytes))
+    return when (pipeline) {
+      is JedisPipeline.PooledPipeline -> {
+        val response = pipeline.mget(*keysBytes)
+        Supplier { response.get().map { it?.toByteString() } }
+      }
       is JedisPipeline.ClusterJedisPipeline -> {
-        keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
-          .map { (_, slottedKeys) ->
+        val responses = keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
+          .mapValues { (_, slottedKeys) ->
             pipeline.mget(*slottedKeys.toTypedArray())
           }
+        Supplier {
+          // Stitch together the responses in the order of the original keys, as we may have run
+          // multiple mgets out of order.
+          val keyToValueMap = mutableMapOf<String, ByteString?>()
+          keys.groupBy { JedisClusterCRC16.getSlot(it.toByteArray(charset)) }
+            .flatMap { (slot, slotKeys) ->
+              val result = responses[slot]?.get() ?: listOf(null)
+              slotKeys.zip(result)
+            }.forEach { (key, value) ->
+              keyToValueMap[key] = value?.toByteString()
+            }
+          keys.map { keyToValueMap[it] }
+        }
       }
     }
-    val supplier: Supplier<List<ByteString?>> = Supplier {
-      responses.map { response ->
-        response.get()?.map { it?.toByteString() } ?: emptyList()
-      }.flatten()
-    }
-    return supplier
   }
 
   override fun mset(vararg keyValues: ByteString): Supplier<Unit> {
@@ -357,235 +367,6 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
 
   override fun close() {
     pipeline.close()
-  }
-
-  override fun zadd(
-    key: String,
-    score: Double,
-    member: String,
-    vararg options: Redis.ZAddOptions,
-  ): Supplier<Long> {
-    val keyBytes = key.toByteArray(charset)
-    val memberBytes = member.toByteArray(charset)
-    val params = Redis.ZAddOptions.getZAddParams(options)
-    val response = pipeline.zadd(keyBytes, score, memberBytes, params)
-    return Supplier { response.get() }
-  }
-
-  override fun zadd(
-    key: String,
-    scoreMembers: Map<String, Double>,
-    vararg options: Redis.ZAddOptions,
-  ): Supplier<Long> {
-    val keyBytes = key.toByteArray(charset)
-    val scoreMembersBytes = scoreMembers.mapKeys { it.key.toByteArray(charset) }
-    val params = Redis.ZAddOptions.getZAddParams(options)
-    val response = pipeline.zadd(keyBytes, scoreMembersBytes, params)
-    return Supplier { response.get() }
-  }
-
-  override fun zscore(key: String, member: String): Supplier<Double?> {
-    val keyBytes = key.toByteArray(charset)
-    val memberBytes = member.toByteArray(charset)
-    val response = pipeline.zscore(keyBytes, memberBytes)
-    return Supplier { response.get() }
-  }
-
-  override fun zrange(
-    key: String,
-    type: Redis.ZRangeType,
-    start: Redis.ZRangeMarker,
-    stop: Redis.ZRangeMarker,
-    reverse: Boolean,
-    limit: Redis.ZRangeLimit?
-  ): Supplier<List<ByteString?>> {
-    val response =
-      zrangeBase(key, type, start, stop, reverse, false, limit).noScore
-    return Supplier {
-      response?.get()?.map { bytes ->
-        bytes?.toByteString()
-      } ?: listOf()
-    }
-  }
-
-  override fun zrangeWithScores(
-    key: String,
-    type: Redis.ZRangeType,
-    start: Redis.ZRangeMarker,
-    stop: Redis.ZRangeMarker,
-    reverse: Boolean,
-    limit: Redis.ZRangeLimit?
-  ): Supplier<List<Pair<ByteString?, Double>>> {
-    val response =
-      zrangeBase(key, type, start, stop, reverse, true, limit).withScore
-    return Supplier {
-      response?.get()?.map { tuple ->
-        Pair(tuple.binaryElement?.toByteString(), tuple.score)
-      } ?: listOf()
-    }
-  }
-
-  override fun zremRangeByRank(
-    key: String,
-    start: Redis.ZRangeRankMarker,
-    stop: Redis.ZRangeRankMarker
-  ): Supplier<Long> {
-    val response = pipeline.zremrangeByRank(key, start.longValue, stop.longValue)
-    return Supplier { response.get() }
-  }
-
-  override fun zcard(key: String): Supplier<Long> {
-    val response = pipeline.zcard(key)
-    return Supplier { response.get() }
-  }
-
-  private fun zrangeBase(
-    key: String,
-    type: Redis.ZRangeType,
-    start: Redis.ZRangeMarker,
-    stop: Redis.ZRangeMarker,
-    reverse: Boolean,
-    withScore: Boolean,
-    limit: Redis.ZRangeLimit?,
-  ): ZRangeResponse {
-    return when (type) {
-      Redis.ZRangeType.INDEX ->
-        zrangeByIndex(
-          key, start as Redis.ZRangeIndexMarker, stop as Redis.ZRangeIndexMarker, reverse,
-          withScore
-        )
-
-      Redis.ZRangeType.SCORE ->
-        zrangeByScore(
-          key, start as Redis.ZRangeScoreMarker, stop as Redis.ZRangeScoreMarker, reverse,
-          withScore, limit
-        )
-    }
-  }
-
-  private fun zrangeByIndex(
-    key: String,
-    start: Redis.ZRangeIndexMarker,
-    stop: Redis.ZRangeIndexMarker,
-    reverse: Boolean,
-    withScore: Boolean
-  ): ZRangeResponse {
-    val params = ZRangeParams(
-      start.intValue,
-      stop.intValue
-    )
-    if (reverse) params.rev()
-
-    return if (withScore) {
-      ZRangeResponse.withScore(
-        pipeline.zrangeWithScores(
-          key.toByteArray(charset),
-          params
-        )
-      )
-    } else {
-      ZRangeResponse.noScore(pipeline.zrange(key.toByteArray(charset), params))
-    }
-  }
-
-  private fun zrangeByScore(
-    key: String,
-    start: Redis.ZRangeScoreMarker,
-    stop: Redis.ZRangeScoreMarker,
-    reverse: Boolean,
-    withScore: Boolean,
-    limit: Redis.ZRangeLimit?,
-  ): ZRangeResponse {
-    val minString = start.toString()
-    val maxString = stop.toString()
-
-    return if (limit == null && !reverse && !withScore) {
-      ZRangeResponse.noScore(
-        pipeline.zrangeByScore(
-          key.toByteArray(charset),
-          minString.toByteArray(charset),
-          maxString.toByteArray(charset)
-        )
-      )
-    } else if (limit == null && !reverse) {
-      ZRangeResponse.withScore(
-        pipeline.zrangeByScoreWithScores(
-          key.toByteArray(charset),
-          minString.toByteArray(charset),
-          maxString.toByteArray(charset)
-        )
-      )
-    } else if (limit == null && !withScore) {
-      ZRangeResponse.noScore(
-        pipeline.zrevrangeByScore(
-          key.toByteArray(charset),
-          maxString.toByteArray(charset),
-          minString.toByteArray(charset)
-        )
-      )
-    } else if (limit == null) {
-      ZRangeResponse.withScore(
-        pipeline.zrevrangeByScoreWithScores(
-          key.toByteArray(charset),
-          maxString.toByteArray(charset),
-          minString.toByteArray(charset)
-        )
-      )
-    } else if (!reverse && !withScore) {
-      ZRangeResponse.noScore(
-        pipeline.zrangeByScore(
-          key.toByteArray(charset),
-          minString.toByteArray(charset),
-          maxString.toByteArray(charset),
-          limit.offset,
-          limit.count
-        )
-      )
-    } else if (!reverse) {
-      ZRangeResponse.withScore(
-        pipeline.zrangeByScoreWithScores(
-          key.toByteArray(charset),
-          minString.toByteArray(charset),
-          maxString.toByteArray(charset),
-          limit.offset,
-          limit.count
-        )
-      )
-    } else if (!withScore) {
-      ZRangeResponse.noScore(
-        pipeline.zrevrangeByScore(
-          key.toByteArray(charset),
-          maxString.toByteArray(charset),
-          minString.toByteArray(charset),
-          limit.offset,
-          limit.count
-        )
-      )
-    } else {
-      ZRangeResponse.withScore(
-        pipeline.zrevrangeByScoreWithScores(
-          key.toByteArray(charset),
-          maxString.toByteArray(charset),
-          minString.toByteArray(charset),
-          limit.offset,
-          limit.count
-        )
-      )
-    }
-  }
-
-  /**
-   * A wrapper class for handling response from zrange* methods.
-   */
-  private class ZRangeResponse private constructor(
-    val noScore: Response<List<ByteArray?>>?,
-    val withScore: Response<List<Tuple>>?
-  ) {
-    companion object {
-      fun noScore(ans: Response<List<ByteArray?>>?): ZRangeResponse = ZRangeResponse(ans, null)
-
-      fun withScore(ans: Response<List<Tuple>>?): ZRangeResponse = ZRangeResponse(null, ans)
-    }
   }
 
   companion object {
