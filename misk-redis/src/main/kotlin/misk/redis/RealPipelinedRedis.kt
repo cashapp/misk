@@ -61,21 +61,31 @@ internal class RealPipelinedRedis(private val pipeline: JedisPipeline) : Deferre
   override fun mget(vararg keys: String): Supplier<List<ByteString?>> {
     val keysBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
 
-    val responses = when (pipeline) {
-      is JedisPipeline.PooledPipeline -> listOf(pipeline.mget(*keysBytes))
+    return when (pipeline) {
+      is JedisPipeline.PooledPipeline -> {
+        val response = pipeline.mget(*keysBytes)
+        Supplier { response.get().map { it?.toByteString() } }
+      }
       is JedisPipeline.ClusterJedisPipeline -> {
-        keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
-          .map { (_, slottedKeys) ->
+        val responses = keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
+          .mapValues { (_, slottedKeys) ->
             pipeline.mget(*slottedKeys.toTypedArray())
           }
+        Supplier {
+          // Stitch together the responses in the order of the original keys, as we may have run
+          // multiple mgets out of order.
+          val keyToValueMap = mutableMapOf<String, ByteString?>()
+          keys.groupBy { JedisClusterCRC16.getSlot(it.toByteArray(charset)) }
+            .flatMap { (slot, slotKeys) ->
+              val result = responses[slot]?.get() ?: listOf(null)
+              slotKeys.zip(result)
+            }.forEach { (key, value) ->
+              keyToValueMap[key] = value?.toByteString()
+            }
+          keys.map { keyToValueMap[it] }
+        }
       }
     }
-    val supplier: Supplier<List<ByteString?>> = Supplier {
-      responses.map { response ->
-        response.get()?.map { it?.toByteString() } ?: emptyList()
-      }.flatten()
-    }
-    return supplier
   }
 
   override fun mset(vararg keyValues: ByteString): Supplier<Unit> {
