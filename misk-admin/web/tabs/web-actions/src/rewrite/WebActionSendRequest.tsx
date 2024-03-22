@@ -41,10 +41,15 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
     setLoading(true)
     let axiosRequest
 
+    const headers = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
     if (webActionMetadata.httpMethod === "POST") {
-      axiosRequest = axios.post(url, requestRaw)
+      axiosRequest = axios.post(url, requestRaw, headers)
     } else if (webActionMetadata.httpMethod === "GET") {
-      axiosRequest = axios.get(url)
+      axiosRequest = axios.get(url, headers)
     } else {
       AppToaster.show({
         message: `Unsupported request type: ${webActionMetadata.httpMethod}`,
