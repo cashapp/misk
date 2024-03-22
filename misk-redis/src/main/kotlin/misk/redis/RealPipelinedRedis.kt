@@ -25,7 +25,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     } else {
       RuntimeException(
         """
-          |When using clustered Redis, keys used by one $op command in a pipeline must always map to the same slot, but mapped to slots $slots.
+          |When using clustered Redis, keys used by one $op command must always map to the same slot, but mapped to slots $slots.
           |You can use {hashtags} in your key name to control how Redis hashes keys to slots.
           |For example, keys: `{customer9001}.contacts` and `{customer9001}.payments` will  hash to the same slot.
           |

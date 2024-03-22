@@ -103,7 +103,7 @@ class RealRedisClusterTest : AbstractRedisTest() {
   @Test
   fun `atomic rpoplpush throws cross-cluster error for keys not in the same slot`() {
 
-    assertFailsOnKeysInNotSameSlot {
+    assertFailsOnKeysInNotSameSlot("RPOPLPUSH") {
       redis.rpoplpush(
         sourceKey = "{pop}1",
         destinationKey = "{push}1",
@@ -113,7 +113,7 @@ class RealRedisClusterTest : AbstractRedisTest() {
 
   @Test
   fun `atomic lmove throws cross-cluster error for keys not in the same slot`() {
-    assertFailsOnKeysInNotSameSlot {
+    assertFailsOnKeysInNotSameSlot("LMOVE") {
       redis.lmove(
         sourceKey = "{k}1",
         destinationKey = "{t}1",
@@ -123,10 +123,10 @@ class RealRedisClusterTest : AbstractRedisTest() {
     }
   }
 
-  private fun assertFailsOnKeysInNotSameSlot(block: () -> Unit) {
+  private fun assertFailsOnKeysInNotSameSlot(command: String, block: () -> Unit) {
     assertThatThrownBy { block() }
-      .isInstanceOf(JedisClusterOperationException::class.java)
-      .hasMessage("Keys must belong to same hashslot.")
+      .isInstanceOf(RuntimeException::class.java)
+      .hasMessageStartingWith("When using clustered Redis, keys used by one $command command must always map to the same slot, but mapped to slots [")
   }
 
 }
