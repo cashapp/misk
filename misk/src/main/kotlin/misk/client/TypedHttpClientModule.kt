@@ -216,6 +216,7 @@ class TypedClientFactory @Inject constructor() {
     retrofitBuilderProvider: Provider<Retrofit.Builder>?
   ): T {
     val retrofit = (retrofitBuilderProvider?.get() ?: Retrofit.Builder())
+      .validateEagerly(true)
       .baseUrl(baseUrl)
       .build()
 

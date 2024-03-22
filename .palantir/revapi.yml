@@ -6094,6 +6094,87 @@ acceptedBreaks:
     - code: "java.method.removed"
       old: "method misk.web.metadata.webaction.WebActionMetadataList misk.web.metadata.webaction.WebActionMetadataAction::getWebActionMetadataList()"
       justification: "Metadata actions and providers only have internal usage"
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method void misk.redis.Redis::pipelining(kotlin.jvm.functions.Function1<?\
+        \ super misk.redis.DeferredRedis, kotlin.Unit>)"
+      justification: "Adds proper support for pipelining Redis commands"
+  "2024.03.21.215044-46aa7f0":
+    com.squareup.misk:misk-redis:
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Double> misk.redis.DeferredRedis::zscore(java.lang.String,\
+        \ java.lang.String)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Double> misk.redis.RealPipelinedRedis::zscore(java.lang.String,\
+        \ java.lang.String)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zadd(java.lang.String,\
+        \ double, java.lang.String, misk.redis.Redis.ZAddOptions[])"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zadd(java.lang.String,\
+        \ java.util.Map<java.lang.String, java.lang.Double>, misk.redis.Redis.ZAddOptions[])"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zcard(java.lang.String)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zremRangeByRank(java.lang.String,\
+        \ misk.redis.Redis.ZRangeRankMarker, misk.redis.Redis.ZRangeRankMarker)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Long> misk.redis.RealPipelinedRedis::zadd(java.lang.String,\
+        \ double, java.lang.String, misk.redis.Redis.ZAddOptions[])"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Long> misk.redis.RealPipelinedRedis::zadd(java.lang.String,\
+        \ java.util.Map<java.lang.String, java.lang.Double>, misk.redis.Redis.ZAddOptions[])"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Long> misk.redis.RealPipelinedRedis::zcard(java.lang.String)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.lang.Long> misk.redis.RealPipelinedRedis::zremRangeByRank(java.lang.String,\
+        \ misk.redis.Redis.ZRangeRankMarker, misk.redis.Redis.ZRangeRankMarker)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.util.List<kotlin.Pair<okio.ByteString,\
+        \ java.lang.Double>>> misk.redis.DeferredRedis::zrangeWithScores(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.util.List<kotlin.Pair<okio.ByteString,\
+        \ java.lang.Double>>> misk.redis.RealPipelinedRedis::zrangeWithScores(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.util.List<okio.ByteString>> misk.redis.DeferredRedis::zrange(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
+    - code: "java.method.removed"
+      old: "method java.util.function.Supplier<java.util.List<okio.ByteString>> misk.redis.RealPipelinedRedis::zrange(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "pipelining is new and sorted set methods are broken in pipelines\
+        \ running in cluster mode"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
