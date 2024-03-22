@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.exceptions.JedisDataException
+import java.util.function.Supplier
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -72,6 +73,44 @@ abstract class AbstractRedisTest {
     assertThat(redis[key]).isEqualTo(value)
     assertThat(redis[key2]).isEqualTo(value2)
     assertThat(redis[unknownKey]).isNull()
+  }
+
+  @Test
+  fun batchGetAndSetPipelined()  {
+    val key = "key"
+    val key2 = "key2"
+    val firstValue = "firstValue".encodeUtf8()
+    val value = "value".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val unknownKey = "this key doesn't exist"
+
+    val suppliers = mutableListOf<Supplier<*>>()
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          mget(key),
+          mget(key, key2),
+          mset(key.encodeUtf8(), firstValue),
+          mget(key),
+          mset(key.encodeUtf8(), value, key2.encodeUtf8(), value2),
+          mget(key),
+          mget(key, key2),
+          mget(key2, key),
+          mget(key, unknownKey, key2, key),
+        )
+      )
+    }
+    assertThat(suppliers.map { it.get() }).containsExactly(
+      listOf(null),
+      listOf(null, null),
+      Unit,
+      listOf(firstValue),
+      Unit,
+      listOf(value),
+      listOf(value, value2),
+      listOf(value2, value),
+      listOf(value, null, value2, value),
+    )
   }
 
   @Test fun hsetReturnsCorrectValues() {
@@ -897,7 +936,6 @@ abstract class AbstractRedisTest {
     assertEquals(1L, redis.zadd("bar", 1.0, cMember, LT, XX, CH))
     assertEquals(1.0, redis.zscore("bar", "c"))
 
-
     // GT XX
     // GT modifies existing if score is more than current. XX prevents adding new
 
@@ -964,8 +1002,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by index test - happy case`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse =
       mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair)
@@ -979,8 +1019,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by index test - stop index exceeds the size`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse =
       mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
@@ -993,8 +1035,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by index test - start is greater than stop`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse = mapOf<String, Double>()
     val expectedMapForReverse = mapOf<String, Double>()
@@ -1006,8 +1050,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by index test - negative indices - get second last to last`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse = mapOf(yy_6_7Pair, ad_9Pair)
     val expectedMapForReverse = mapOf(bz_2_3Pair, ba_2_3Pair)
@@ -1019,8 +1065,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by index test - negative indices - get last 100 or as many as there are`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse =
       mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
@@ -1034,8 +1082,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by index test - mixed indices - get from second last to second`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse = mapOf<String, Double>()
     val expectedMapForReverse = mapOf<String, Double>()
@@ -1047,8 +1097,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by index test - mixed indices - get from second to second last`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse =
       mapOf(bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair)
@@ -1062,8 +1114,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by score test - happy case`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse =
       mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
@@ -1076,8 +1130,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by score test - infinity cases`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse =
       mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
@@ -1090,8 +1146,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by score test - start score exceeds stop`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse = mapOf<String, Double>()
     val expectedMapForReverse = mapOf<String, Double>()
@@ -1102,8 +1160,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by score test - start included, stop included`() {
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse = mapOf(bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair)
     val expectedMapForReverse = mapOf(yy_6_7Pair, c_5Pair, b_5Pair, bb_4_5Pair)
@@ -1114,8 +1174,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by score test - start not included, stop included`() {
-    redis.zadd(key,
-          mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse = mapOf(b_5Pair, c_5Pair, yy_6_7Pair)
     val expectedMapForReverse = mapOf(yy_6_7Pair, c_5Pair, b_5Pair)
@@ -1126,8 +1188,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by score test - start not included, stop not included`() {
-    redis.zadd(key,
-          mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse = mapOf(b_5Pair, c_5Pair)
     val expectedMapForReverse = mapOf(c_5Pair, b_5Pair)
@@ -1138,8 +1202,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by score test - start included, stop not included`() {
-    redis.zadd(key,
-          mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedMapForNonReverse = mapOf(bb_4_5Pair, b_5Pair, c_5Pair)
     val expectedMapForReverse = mapOf(c_5Pair, b_5Pair, bb_4_5Pair)
@@ -1150,8 +1216,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun `zrange by score test - limit cases`() {
-    redis.zadd(key,
-        mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val m2 = mapOf(bz_2_3Pair, bb_4_5Pair, b_5Pair)
     val m3 = mapOf(yy_6_7Pair, c_5Pair, b_5Pair)
@@ -1163,8 +1231,10 @@ abstract class AbstractRedisTest {
   @Test fun `zrange by score test - limit cases negative count`() {
 
     // The members with same score are lex arranged.
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val m2 = mapOf(b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
     val m3 = mapOf(b_5Pair, bb_4_5Pair, bz_2_3Pair, ba_2_3Pair)
@@ -1177,8 +1247,10 @@ abstract class AbstractRedisTest {
 
   @Test fun `zremRangeByRank - both ranks positive`() {
     // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedZRangeMap = mapOf(b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
 
@@ -1187,8 +1259,10 @@ abstract class AbstractRedisTest {
 
   @Test fun `zremRangeByRank - start positive, stop negative`() {
     // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedZRangeMap = mapOf(yy_6_7Pair, ad_9Pair)
 
@@ -1197,8 +1271,10 @@ abstract class AbstractRedisTest {
 
   @Test fun `zremRangeByRank - both rank negative`() {
     // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedZRangeMap = mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair)
 
@@ -1207,8 +1283,10 @@ abstract class AbstractRedisTest {
 
   @Test fun `zremRangeByRank - start negative stop positive`() {
     // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedZRangeMap = mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair)
 
@@ -1217,8 +1295,10 @@ abstract class AbstractRedisTest {
 
   @Test fun `zremRangeByRank - start rank after stop`() {
     // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedZRangeMap =
       mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
@@ -1231,8 +1311,10 @@ abstract class AbstractRedisTest {
 
   @Test fun `zremRangeByRank - multiple removes`() {
     // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
 
     val expectedZRangeMap1 =
       mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair)
@@ -1250,8 +1332,10 @@ abstract class AbstractRedisTest {
 
   @Test fun `zcard`() {
     assertEquals(0, redis.zcard(key))
-    redis.zadd(key,
-               mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+    redis.zadd(
+      key,
+      mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair)
+    )
     assertEquals(7, redis.zcard(key))
 
     redis.zadd("foo", 4.0, "d")
@@ -1276,6 +1360,179 @@ abstract class AbstractRedisTest {
 
     assertNull(redis[key])
     assertNull(redis.getDel(key))
+  }
+
+  @Test
+  fun `pipelining works - regular keys`() {
+    val suppliers = mutableListOf<Supplier<*>>()
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          set("test key", "test value".encodeUtf8()),
+          get("test key"),
+          del("test key"),
+          setnx("keynx", "valuenx".encodeUtf8()),
+          setnx("keynx", "valuenx2".encodeUtf8()),
+          get("keynx"),
+          getDel("keynx"),
+          get("keynx"),
+          incr("incr"),
+          incrBy("incr", 3),
+          get("incr"),
+        )
+      )
+    }
+    assertThat(suppliers.map { it.get() }).containsExactly(
+      Unit,
+      "test value".encodeUtf8(),
+      true,
+      true,
+      false,
+      "valuenx".encodeUtf8(),
+      "valuenx".encodeUtf8(),
+      null,
+      1L,
+      4L,
+      "4".encodeUtf8(),
+    )
+  }
+
+  @Test
+  fun `pipelining works - multikey commands`() {
+    val suppliers = mutableListOf<Supplier<*>>()
+
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          mset(
+            "mkey1".encodeUtf8(),
+            "mval1".encodeUtf8(),
+            "mkey2".encodeUtf8(),
+            "mval2".encodeUtf8()
+          ),
+          mget("mkey1", "mkey2"),
+          del("mkey1", "mkey2"),
+        )
+      )
+    }
+    assertThat(suppliers.map { it.get() }).containsExactly(
+      Unit,
+      listOf(
+        "mval1".encodeUtf8(),
+        "mval2".encodeUtf8(),
+      ),
+      2
+    )
+  }
+
+  @Test
+  fun `pipelining works - hash keys`() {
+    val suppliers = mutableListOf<Supplier<*>>()
+
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          hset("hkey", "f1", "v1".encodeUtf8()),
+          hget("hkey", "f1"),
+          hget("hkey", "f_dne"),
+          hgetAll("hkey"),
+          hlen("hkey"),
+          hmget("hkey", "f1", "f_dne"),
+          hincrBy("hkey", "f2", 3),
+          hdel("hkey", "f2"),
+          hrandField("hkey", 1),
+          hrandFieldWithValues("hkey", 1),
+        )
+      )
+    }
+    assertThat(suppliers.map { it.get() }).containsExactly(
+      1L,
+      "v1".encodeUtf8(),
+      null,
+      mapOf("f1" to "v1".encodeUtf8()),
+      1L,
+      listOf("v1".encodeUtf8(), null),
+      3L,
+      1L,
+      listOf("f1"),
+      mapOf("f1" to "v1".encodeUtf8()),
+    )
+  }
+
+  @Test
+  fun `pipelining works - list keys`() {
+    val suppliers = mutableListOf<Supplier<*>>()
+
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          lpush("{same-slot-key}1", "lval1".encodeUtf8(), "lval2".encodeUtf8()),
+          rpush("{same-slot-key}1", "lval3".encodeUtf8(), "lval4".encodeUtf8()),
+          lrange("{same-slot-key}1", 0, -1),
+          lrem("{same-slot-key}1", 1, "lval1".encodeUtf8()),
+          lmove("{same-slot-key}1", "{same-slot-key}2", ListDirection.LEFT, ListDirection.RIGHT),
+          rpoplpush("{same-slot-key}1", "{same-slot-key}2"),
+          lpop("{same-slot-key}1"),
+          rpop("{same-slot-key}2"),
+        )
+      )
+    }
+    assertThat(suppliers.map { it.get() }).containsExactly(
+      2L,
+      4L,
+      listOf(
+        "lval2".encodeUtf8(),
+        "lval1".encodeUtf8(),
+        "lval3".encodeUtf8(),
+        "lval4".encodeUtf8()
+      ),
+      1L,
+      "lval2".encodeUtf8(),
+      "lval4".encodeUtf8(),
+      "lval3".encodeUtf8(),
+      "lval2".encodeUtf8()
+    )
+  }
+
+  @Test
+  fun `pipelining works - blocking operations`() {
+    val suppliers = mutableListOf<Supplier<*>>()
+
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          // Blocking operations work best under scenarios where there are multiple clients writing to the same key.
+          // This is really hard to test, so we just test the commands are accepted under situations where they are guaranteed
+          // not to block.
+          lpush("{same-slot-key}1", "lval1".encodeUtf8(), "lval2".encodeUtf8()),
+          lpush("{same-slot-key}2", "lval3".encodeUtf8(), "lval4".encodeUtf8()),
+          blmove("{same-slot-key}1", "{same-slot-key}2", ListDirection.LEFT, ListDirection.RIGHT, 0.0),
+          brpoplpush("{same-slot-key}1", "{same-slot-key}2", 0),
+        )
+      )
+    }
+
+    assertThat(suppliers.map { it.get() }).containsExactly(
+      2L,
+      2L,
+      "lval2".encodeUtf8(),
+      "lval1".encodeUtf8()
+    )
+  }
+
+  @Test
+  fun `pipelining captures errors`() {
+    val suppliers = mutableListOf<Supplier<*>>()
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          set("string key", "string value".encodeUtf8()),
+          incr("string key"), // Not a number.
+        )
+      )
+    }
+    assertThat(suppliers.first().get()).isEqualTo(Unit)
+    assertThrows<RuntimeException> { suppliers.last().get() }
   }
 
   private fun checkZRemRangeByRankResponse(
@@ -1348,10 +1605,11 @@ abstract class AbstractRedisTest {
     stop: Double,
     limit: ZRangeLimit? = null
   ) {
-    checkZRangeScoreResponse(expectedMapForNonReverse, expectedMapForReverse,
-                             ZRangeScoreMarker(start), ZRangeScoreMarker(stop), limit)
+    checkZRangeScoreResponse(
+      expectedMapForNonReverse, expectedMapForReverse,
+      ZRangeScoreMarker(start), ZRangeScoreMarker(stop), limit
+    )
   }
-
 
   private fun checkZRangeScoreResponse(
     expectedMapForNonReverse: Map<String, Double>,
@@ -1457,12 +1715,12 @@ abstract class AbstractRedisTest {
     val key = "foo"
   }
 
-  private fun Map<String, Double>.toEncodedListOfPairs() : List<Pair<ByteString, Double>> =
+  private fun Map<String, Double>.toEncodedListOfPairs(): List<Pair<ByteString, Double>> =
     this.entries.map { Pair(it.key.encodeUtf8(), it.value) }.toList()
 
   private fun List<String>.encoded(): List<ByteString> = this.map { it.encodeUtf8() }.toList()
 
-  private fun Map<String, Double>.encodedKeys() : List<ByteString> =
+  private fun Map<String, Double>.encodedKeys(): List<ByteString> =
     this.entries.map { it.key.encodeUtf8() }.toList()
 
 }
