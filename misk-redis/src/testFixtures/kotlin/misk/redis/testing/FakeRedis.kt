@@ -26,7 +26,6 @@ import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString.Companion.encodeUtf8
-import redis.clients.jedis.exceptions.JedisDataException
 import java.util.SortedMap
 import java.util.function.Supplier
 import kotlin.math.max
@@ -651,13 +650,13 @@ class FakeRedis @Inject constructor(
     lKeyValueStore.clear()
   }
 
-  private fun zadd(
+  private fun zaddInternal(
     key: String,
     score: Double,
     member: String,
-    options: Set<Redis.ZAddOptions>,
+    options: Array<out Redis.ZAddOptions>,
   ): Long {
-    verifyZAddOptions(options)
+    Redis.ZAddOptions.verify(options)
     var newFieldCount = 0L
     var elementsChanged = 0L
     val trackChange = options.contains(CH)
@@ -707,7 +706,7 @@ class FakeRedis @Inject constructor(
     currentScore: Double?,
     score: Double,
     exists: Boolean,
-    zaddOptions: Set<Redis.ZAddOptions>
+    zaddOptions: Array<out Redis.ZAddOptions>
   ): Boolean {
     val options = zaddOptions.filter { it != CH }
     // default without any options
@@ -740,30 +739,13 @@ class FakeRedis @Inject constructor(
     return false
   }
 
-  private fun verifyZAddOptions(options: Set<Redis.ZAddOptions>) {
-    // zadd syntax
-    // zadd key [NX|XX] [GT|LT] CH score member [score member ...]
-
-    // NX and XX are mutually exclusive
-    if ((options.contains(NX) && options.contains(XX))) {
-      throw JedisDataException("ERR XX and NX options at the same time are not compatible")
-    }
-
-    // GT, LT, NX are mutually exclusive
-    if ((options.contains(NX) && options.contains(LT)) ||
-      (options.contains(NX) && options.contains(GT)) ||
-      (options.contains(GT) && options.contains(LT))) {
-      throw JedisDataException("ERR GT, LT, and/or NX options at the same time are not compatible")
-    }
-  }
-
   override fun zadd(
     key: String,
     score: Double,
     member: String,
     vararg options: Redis.ZAddOptions,
   ): Long {
-    return zadd(key, score, member, options.toSet())
+    return zaddInternal(key, score, member, options)
   }
 
   override fun zadd(
@@ -772,7 +754,7 @@ class FakeRedis @Inject constructor(
     vararg options: Redis.ZAddOptions
   ): Long {
     return scoreMembers.entries.sumOf { (member, score) ->
-      zadd(key, score, member, options.toSet())
+      zaddInternal(key, score, member, options)
     }
   }
 

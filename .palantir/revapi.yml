@@ -6175,6 +6175,23 @@ acceptedBreaks:
         \ boolean, misk.redis.Redis.ZRangeLimit)"
       justification: "pipelining is new and sorted set methods are broken in pipelines\
         \ running in cluster mode"
+  "2024.03.22.013217-75ab9ad":
+    com.squareup.misk:misk-redis:
+    - code: "java.class.noLongerImplementsInterface"
+      old: "class misk.redis.JedisPooledWithMetrics"
+      new: "class misk.redis.JedisPooledWithMetrics"
+      justification: "JedisPooledWithMetrics is an internal class"
+    - code: "java.class.removed"
+      old: "class misk.redis.JedisPipeline"
+      justification: "JedisPipeline is an internal class which is replaced by Jedis\
+        \ 5.x's AbstractPipeline which serves the same purpose"
+    - code: "java.class.removed"
+      old: "class misk.redis.JedisPoolWithMetrics"
+      justification: "JedisPoolWithMetrics is an unused internal class"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.redis.RealPipelinedRedis::<init>(===misk.redis.JedisPipeline===)"
+      new: "parameter void misk.redis.RealPipelinedRedis::<init>(===redis.clients.jedis.AbstractPipeline===)"
+      justification: "RealPipelinedRedis is internal"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
