@@ -1495,6 +1495,30 @@ abstract class AbstractRedisTest {
   }
 
   @Test
+  fun `pipelining works - sorted sets`() {
+    val suppliers = mutableListOf<Supplier<*>>()
+
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          zadd("zkey", 1.0, "a"),
+          zscore("zkey", "a"),
+          zrangeWithScores("zkey", start = ZRangeIndexMarker(0), stop = ZRangeIndexMarker(-1)),
+          zremRangeByRank("zkey", start = ZRangeRankMarker(0), stop = ZRangeRankMarker(-1)),
+          zcard("zkey")
+        )
+      )
+    }
+    assertThat(suppliers.map { it.get() }).containsExactly(
+      1L,
+      1.0,
+      listOf("a".encodeUtf8() to 1.0),
+      1L,
+      0L,
+    )
+  }
+
+  @Test
   fun `pipelining works - blocking operations`() {
     val suppliers = mutableListOf<Supplier<*>>()
 
