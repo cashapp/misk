@@ -9,7 +9,6 @@ import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import redis.clients.jedis.ClusterPipeline
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.JedisPubSub
@@ -163,8 +162,7 @@ class RealRedis(
     checkHrandFieldCount(count)
     val keyBytes = key.toByteArray(charset)
     return jedis { hrandfieldWithValues(keyBytes, count) }
-      ?.mapKeys { (key, _) -> key.toString(charset) }
-      ?.mapValues { (_, value) -> value.toByteString() }
+      .associate { it.key.toString(charset) to it.value.toByteString() }
   }
 
   /**
@@ -348,7 +346,7 @@ class RealRedis(
         transaction.op()
       }
 
-      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
+      else -> error("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
     }
   }
 
@@ -356,7 +354,7 @@ class RealRedis(
   // multi() returns the jedis to the pool, despite returning a Transaction that holds a reference.
   // This is a bug, and will be fixed in a follow-up.
   override fun multi(): Transaction {
-    return unifiedJedis.multi()
+    return unifiedJedis.multi() as? Transaction ?: error("Transactions aren't supported in misk-redis with ${unifiedJedis.javaClass} at this time.")
   }
 
   // Pipelined requests do not get client histogram metrics right now.
@@ -369,12 +367,7 @@ class RealRedis(
   }
 
   override fun pipelining(block: DeferredRedis.() -> Unit) {
-    val pipeline: JedisPipeline = when (unifiedJedis) {
-      is JedisPooled -> JedisPipeline.PooledPipeline(unifiedJedis.pipelined() as Pipeline)
-      is JedisCluster -> JedisPipeline.ClusterJedisPipeline(unifiedJedis.pipelined() as ClusterPipeline)
-      else -> throw RuntimeException("Unsupported UnifiedJedis implementation ${unifiedJedis.javaClass}")
-    }
-    pipeline.use {
+      unifiedJedis.pipelined().use { pipeline ->
       block(RealPipelinedRedis(pipeline))
     }
   }
@@ -402,6 +395,8 @@ class RealRedis(
     member: String,
     vararg options: ZAddOptions,
   ): Long {
+    ZAddOptions.verify(options)
+
     return unifiedJedis.zadd(
       key.toByteArray(charset),
       score,

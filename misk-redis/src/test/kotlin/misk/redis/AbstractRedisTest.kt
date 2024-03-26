@@ -965,7 +965,7 @@ abstract class AbstractRedisTest {
   @Test fun `zAdd invalid multiple options test`() {
     val aMember = "a"
 
-    assertFailsWith<JedisDataException>(
+    assertFailsWith<IllegalArgumentException>(
       message = "ERR XX and NX options at the same time are not compatible",
       block = { redis.zadd("foo", 2.0, aMember, NX, XX) }
     )
@@ -977,7 +977,7 @@ abstract class AbstractRedisTest {
       { redis.zadd("foo", 2.0, aMember, NX, LT, GT) },
       { redis.zadd("foo", 2.0, aMember, XX, LT, GT) },
     ).forEach {
-      assertFailsWith<JedisDataException>(
+      assertFailsWith<IllegalArgumentException>(
         message = "ERR GT, LT, and/or NX options at the same time are not compatible",
         block = { it.invoke() }
       )
