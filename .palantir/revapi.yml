@@ -6192,6 +6192,38 @@ acceptedBreaks:
       old: "parameter void misk.redis.RealPipelinedRedis::<init>(===misk.redis.JedisPipeline===)"
       new: "parameter void misk.redis.RealPipelinedRedis::<init>(===redis.clients.jedis.AbstractPipeline===)"
       justification: "RealPipelinedRedis is internal"
+  "2024.03.26.112919-01b20b7":
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Double> misk.redis.DeferredRedis::zscore(java.lang.String,\
+        \ java.lang.String)"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zadd(java.lang.String,\
+        \ double, java.lang.String, misk.redis.Redis.ZAddOptions[])"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zadd(java.lang.String,\
+        \ java.util.Map<java.lang.String, java.lang.Double>, misk.redis.Redis.ZAddOptions[])"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zcard(java.lang.String)"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zremRangeByRank(java.lang.String,\
+        \ misk.redis.Redis.ZRangeRankMarker, misk.redis.Redis.ZRangeRankMarker)"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.util.List<kotlin.Pair<okio.ByteString,\
+        \ java.lang.Double>>> misk.redis.DeferredRedis::zrangeWithScores(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.util.List<okio.ByteString>> misk.redis.DeferredRedis::zrange(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "Additive change only"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"

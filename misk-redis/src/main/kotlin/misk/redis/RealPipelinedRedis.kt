@@ -4,9 +4,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.AbstractPipeline
 import redis.clients.jedis.ClusterPipeline
-import redis.clients.jedis.Jedis
 import redis.clients.jedis.Pipeline
-import redis.clients.jedis.PipelineBase
 import redis.clients.jedis.Response
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.SetParams
@@ -27,7 +25,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     } else {
       RuntimeException(
         """
-          |When using clustered Redis, keys used by one $op command in a pipeline must always map to the same slot, but mapped to slots $slots.
+          |When using clustered Redis, keys used by one $op command must always map to the same slot, but mapped to slots $slots.
           |You can use {hashtags} in your key name to control how Redis hashes keys to slots.
           |For example, keys: `{customer9001}.contacts` and `{customer9001}.payments` will  hash to the same slot.
           |
@@ -54,6 +52,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
             pipeline.del(*slottedKeys.toTypedArray())
           }
       }
+
       else -> error("Unknown pipeline type: $pipeline")
     }
     return Supplier {
@@ -71,6 +70,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
         val response = pipeline.mget(*keysBytes)
         Supplier { response.get().map { it?.toByteString() } }
       }
+
       is ClusterPipeline -> {
         val responses = keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
           .mapValues { (_, slottedKeys) ->
@@ -90,6 +90,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
           keys.map { keyToValueMap[it] }
         }
       }
+
       else -> error("Unknown pipeline type: $pipeline")
     }
   }
@@ -109,6 +110,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
             pipeline.mset(*slottedKeyValues.flatten().toTypedArray())
           }
       }
+
       else -> error("Unknown pipeline type: $pipeline")
     }
     return Supplier { responses.map { it.get() } }
@@ -368,6 +370,188 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.pexpireAt(keyBytes, timestampMilliseconds)
     return Supplier { response.get() == 1L }
+  }
+
+  override fun zadd(
+    key: String,
+    score: Double,
+    member: String,
+    vararg options: Redis.ZAddOptions,
+  ): Supplier<Long> {
+    Redis.ZAddOptions.verify(options)
+    val keyBytes = key.toByteArray(charset)
+    val memberBytes = member.toByteArray(charset)
+    val params = Redis.ZAddOptions.getZAddParams(options)
+    val response = pipeline.zadd(keyBytes, score, memberBytes, params)
+    return Supplier { response.get() }
+  }
+
+  override fun zadd(
+    key: String,
+    scoreMembers: Map<String, Double>,
+    vararg options: Redis.ZAddOptions,
+  ): Supplier<Long> {
+    Redis.ZAddOptions.verify(options)
+    val keyBytes = key.toByteArray(charset)
+    val scoreMembersBytes = scoreMembers.mapKeys { it.key.toByteArray(charset) }
+    val params = Redis.ZAddOptions.getZAddParams(options)
+    val response = pipeline.zadd(keyBytes, scoreMembersBytes, params)
+    return Supplier { response.get() }
+  }
+
+  override fun zscore(key: String, member: String): Supplier<Double?> {
+    val keyBytes = key.toByteArray(charset)
+    val memberBytes = member.toByteArray(charset)
+    val response = pipeline.zscore(keyBytes, memberBytes)
+    return Supplier { response.get() }
+  }
+
+  override fun zrange(
+    key: String,
+    type: Redis.ZRangeType,
+    start: Redis.ZRangeMarker,
+    stop: Redis.ZRangeMarker,
+    reverse: Boolean,
+    limit: Redis.ZRangeLimit?
+  ): Supplier<List<ByteString?>> {
+    val response = zrangeBase(key, type, start, stop, reverse, false, limit).noScore
+    return Supplier {
+      response?.get()?.map { bytes -> bytes?.toByteString() } ?: listOf()
+    }
+  }
+
+  override fun zrangeWithScores(
+    key: String,
+    type: Redis.ZRangeType,
+    start: Redis.ZRangeMarker,
+    stop: Redis.ZRangeMarker,
+    reverse: Boolean,
+    limit: Redis.ZRangeLimit?
+  ): Supplier<List<Pair<ByteString?, Double>>> {
+    val response = zrangeBase(key, type, start, stop, reverse, true, limit).withScore
+    return Supplier {
+      response?.get()?.map { tuple -> Pair(tuple.binaryElement?.toByteString(), tuple.score) } ?: listOf()
+    }
+  }
+
+  override fun zremRangeByRank(
+    key: String,
+    start: Redis.ZRangeRankMarker,
+    stop: Redis.ZRangeRankMarker
+  ): Supplier<Long> {
+    val response = pipeline.zremrangeByRank(key, start.longValue, stop.longValue)
+    return Supplier { response.get() }
+  }
+
+  override fun zcard(key: String): Supplier<Long> {
+    val response = pipeline.zcard(key)
+    return Supplier { response.get() }
+  }
+
+  private fun zrangeBase(
+    key: String,
+    type: Redis.ZRangeType,
+    start: Redis.ZRangeMarker,
+    stop: Redis.ZRangeMarker,
+    reverse: Boolean,
+    withScore: Boolean,
+    limit: Redis.ZRangeLimit?,
+  ): ZRangeResponse {
+    return when (type) {
+      Redis.ZRangeType.INDEX ->
+        zrangeByIndex(
+          key = key,
+          start = start as Redis.ZRangeIndexMarker,
+          stop = stop as Redis.ZRangeIndexMarker,
+          reverse = reverse,
+          withScore = withScore
+        )
+
+      Redis.ZRangeType.SCORE ->
+        zrangeByScore(
+          key = key,
+          start = start as Redis.ZRangeScoreMarker,
+          stop = stop as Redis.ZRangeScoreMarker,
+          reverse = reverse,
+          withScore = withScore,
+          limit = limit
+        )
+    }
+  }
+
+  private fun zrangeByIndex(
+    key: String,
+    start: Redis.ZRangeIndexMarker,
+    stop: Redis.ZRangeIndexMarker,
+    reverse: Boolean,
+    withScore: Boolean
+  ): ZRangeResponse {
+    val params = ZRangeParams(
+      start.intValue,
+      stop.intValue
+    )
+    if (reverse) params.rev()
+
+    return if (withScore) {
+      ZRangeResponse.withScore(pipeline.zrangeWithScores(key.toByteArray(charset), params))
+    } else {
+      ZRangeResponse.noScore(pipeline.zrange(key.toByteArray(charset), params))
+    }
+  }
+
+  private fun zrangeByScore(
+    key: String,
+    start: Redis.ZRangeScoreMarker,
+    stop: Redis.ZRangeScoreMarker,
+    reverse: Boolean,
+    withScore: Boolean,
+    limit: Redis.ZRangeLimit?,
+  ): ZRangeResponse {
+    val min = start.toString().toByteArray(charset)
+    val max = stop.toString().toByteArray(charset)
+    val keyBytes = key.toByteArray(charset)
+
+    return if (limit == null && !reverse && !withScore) {
+      ZRangeResponse.noScore(pipeline.zrangeByScore(keyBytes, min, max))
+    } else if (limit == null && !reverse) {
+      ZRangeResponse.withScore(pipeline.zrangeByScoreWithScores(keyBytes, min, max)
+      )
+    } else if (limit == null && !withScore) {
+      ZRangeResponse.noScore(pipeline.zrevrangeByScore(keyBytes, max, min)
+      )
+    } else if (limit == null) {
+      ZRangeResponse.withScore(pipeline.zrevrangeByScoreWithScores(keyBytes, max, min)
+      )
+    } else if (!reverse && !withScore) {
+      ZRangeResponse.noScore(pipeline.zrangeByScore(keyBytes, min, max, limit.offset, limit.count)
+      )
+    } else if (!reverse) {
+      ZRangeResponse.withScore(
+        pipeline.zrangeByScoreWithScores(keyBytes, min, max, limit.offset, limit.count)
+      )
+    } else if (!withScore) {
+      ZRangeResponse.noScore(
+        pipeline.zrevrangeByScore(keyBytes, max, min, limit.offset, limit.count)
+      )
+    } else {
+      ZRangeResponse.withScore(
+        pipeline.zrevrangeByScoreWithScores(keyBytes, max, min, limit.offset, limit.count)
+      )
+    }
+  }
+
+  /**
+   * A wrapper class for handling response from zrange* methods.
+   */
+  private class ZRangeResponse private constructor(
+    val noScore: Response<List<ByteArray?>>?,
+    val withScore: Response<List<Tuple>>?
+  ) {
+    companion object {
+      fun noScore(ans: Response<List<ByteArray?>>?): ZRangeResponse = ZRangeResponse(ans, null)
+
+      fun withScore(ans: Response<List<Tuple>>?): ZRangeResponse = ZRangeResponse(null, ans)
+    }
   }
 
   override fun close() {
