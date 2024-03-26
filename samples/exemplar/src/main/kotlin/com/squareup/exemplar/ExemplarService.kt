@@ -20,6 +20,7 @@ fun main(args: Array<String>) {
     DeploymentModule(deployment),
     ExemplarAccessModule(),
     ExemplarDashboardModule(),
+    ExemplarMetadataModule(),
     ExemplarWebActionsModule(),
     MiskRealServiceModule(),
     MiskWebModule(config.web),
