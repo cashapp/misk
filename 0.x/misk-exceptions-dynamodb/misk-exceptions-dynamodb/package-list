@@ -1,0 +1,14 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.exceptions.dynamodb////PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/index.md
+$dokka.location:misk.exceptions.dynamodb/ClientExecutionTimeoutExceptionMapper///PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/-client-execution-timeout-exception-mapper/index.md
+$dokka.location:misk.exceptions.dynamodb/ClientExecutionTimeoutExceptionMapper/ClientExecutionTimeoutExceptionMapper/#/PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/-client-execution-timeout-exception-mapper/-client-execution-timeout-exception-mapper.md
+$dokka.location:misk.exceptions.dynamodb/ClientExecutionTimeoutExceptionMapper/toResponse/#com.amazonaws.http.timers.client.ClientExecutionTimeoutException/PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/-client-execution-timeout-exception-mapper/to-response.md
+$dokka.location:misk.exceptions.dynamodb/DynamoDbExceptionMapperModule///PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/-dynamo-db-exception-mapper-module/index.md
+$dokka.location:misk.exceptions.dynamodb/DynamoDbExceptionMapperModule/DynamoDbExceptionMapperModule/#/PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/-dynamo-db-exception-mapper-module/-dynamo-db-exception-mapper-module.md
+$dokka.location:misk.exceptions.dynamodb/TransactionCanceledExceptionMapper///PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/-transaction-canceled-exception-mapper/index.md
+$dokka.location:misk.exceptions.dynamodb/TransactionCanceledExceptionMapper/TransactionCanceledExceptionMapper/#/PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/-transaction-canceled-exception-mapper/-transaction-canceled-exception-mapper.md
+$dokka.location:misk.exceptions.dynamodb/TransactionCanceledExceptionMapper/loggingLevel/#com.amazonaws.services.dynamodbv2.model.TransactionCanceledException/PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/-transaction-canceled-exception-mapper/logging-level.md
+$dokka.location:misk.exceptions.dynamodb/TransactionCanceledExceptionMapper/toResponse/#com.amazonaws.services.dynamodbv2.model.TransactionCanceledException/PointingToDeclaration/misk-exceptions-dynamodb/misk.exceptions.dynamodb/-transaction-canceled-exception-mapper/to-response.md
+misk.exceptions.dynamodb
+

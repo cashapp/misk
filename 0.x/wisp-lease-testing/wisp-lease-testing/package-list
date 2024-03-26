@@ -1,0 +1,21 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.lease////PointingToDeclaration/wisp-lease-testing/wisp.lease/index.md
+$dokka.location:wisp.lease/FakeLease///PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease/index.md
+$dokka.location:wisp.lease/FakeLease/FakeLease/#kotlin.String#wisp.lease.FakeLeaseManager/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease/-fake-lease.md
+$dokka.location:wisp.lease/FakeLease/acquire/#/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease/acquire.md
+$dokka.location:wisp.lease/FakeLease/addListener/#wisp.lease.Lease.StateChangeListener/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease/add-listener.md
+$dokka.location:wisp.lease/FakeLease/checkHeld/#/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease/check-held.md
+$dokka.location:wisp.lease/FakeLease/name/#/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease/name.md
+$dokka.location:wisp.lease/FakeLease/notifyAfterAcquire/#/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease/notify-after-acquire.md
+$dokka.location:wisp.lease/FakeLease/notifyBeforeRelease/#/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease/notify-before-release.md
+$dokka.location:wisp.lease/FakeLease/release/#/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease/release.md
+$dokka.location:wisp.lease/FakeLeaseManager///PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease-manager/index.md
+$dokka.location:wisp.lease/FakeLeaseManager/FakeLeaseManager/#/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease-manager/-fake-lease-manager.md
+$dokka.location:wisp.lease/FakeLeaseManager/isLeaseHeld/#kotlin.String/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease-manager/is-lease-held.md
+$dokka.location:wisp.lease/FakeLeaseManager/markLeaseHeld/#kotlin.String/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease-manager/mark-lease-held.md
+$dokka.location:wisp.lease/FakeLeaseManager/markLeaseHeldElsewhere/#kotlin.String/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease-manager/mark-lease-held-elsewhere.md
+$dokka.location:wisp.lease/FakeLeaseManager/releaseAll/#/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease-manager/release-all.md
+$dokka.location:wisp.lease/FakeLeaseManager/requestLease/#kotlin.String/PointingToDeclaration/wisp-lease-testing/wisp.lease/-fake-lease-manager/request-lease.md
+wisp.lease
+

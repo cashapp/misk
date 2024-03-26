@@ -1,0 +1,36 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.lease.pool////PointingToDeclaration/wisp-lease/wisp.lease.pool/index.md
+$dokka.location:wisp.lease.pool/PoolLease///PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease/index.md
+$dokka.location:wisp.lease.pool/PoolLease/PoolLease/#wisp.lease.Lease#wisp.lease.pool.PoolLeaseManager/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease/-pool-lease.md
+$dokka.location:wisp.lease.pool/PoolLease/acquire/#/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease/acquire.md
+$dokka.location:wisp.lease.pool/PoolLease/checkHeld/#/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease/check-held.md
+$dokka.location:wisp.lease.pool/PoolLease/release/#/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease/release.md
+$dokka.location:wisp.lease.pool/PoolLeaseConfig///PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease-config/index.md
+$dokka.location:wisp.lease.pool/PoolLeaseConfig/PoolLeaseConfig/#kotlin.String#kotlin.collections.List[kotlin.String]/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease-config/-pool-lease-config.md
+$dokka.location:wisp.lease.pool/PoolLeaseConfig/leaseNames/#/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease-config/lease-names.md
+$dokka.location:wisp.lease.pool/PoolLeaseConfig/name/#/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease-config/name.md
+$dokka.location:wisp.lease.pool/PoolLeaseManager///PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease-manager/index.md
+$dokka.location:wisp.lease.pool/PoolLeaseManager/PoolLeaseManager/#wisp.lease.LeaseManager#wisp.deployment.Deployment#kotlin.collections.List[wisp.lease.pool.PoolLeaseConfig]/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease-manager/-pool-lease-manager.md
+$dokka.location:wisp.lease.pool/PoolLeaseManager/releaseAll/#/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease-manager/release-all.md
+$dokka.location:wisp.lease.pool/PoolLeaseManager/requestLease/#kotlin.String/PointingToDeclaration/wisp-lease/wisp.lease.pool/-pool-lease-manager/request-lease.md
+$dokka.location:wisp.lease////PointingToDeclaration/wisp-lease/wisp.lease/index.md
+$dokka.location:wisp.lease//acquireOrNull/wisp.lease.LeaseManager#kotlin.String/PointingToDeclaration/wisp-lease/wisp.lease/acquire-or-null.md
+$dokka.location:wisp.lease/AutoCloseableLease///PointingToDeclaration/wisp-lease/wisp.lease/-auto-closeable-lease/index.md
+$dokka.location:wisp.lease/AutoCloseableLease/AutoCloseableLease/#wisp.lease.Lease/PointingToDeclaration/wisp-lease/wisp.lease/-auto-closeable-lease/-auto-closeable-lease.md
+$dokka.location:wisp.lease/AutoCloseableLease/close/#/PointingToDeclaration/wisp-lease/wisp.lease/-auto-closeable-lease/close.md
+$dokka.location:wisp.lease/Lease.StateChangeListener///PointingToDeclaration/wisp-lease/wisp.lease/-lease/-state-change-listener/index.md
+$dokka.location:wisp.lease/Lease.StateChangeListener/afterAcquire/#wisp.lease.Lease/PointingToDeclaration/wisp-lease/wisp.lease/-lease/-state-change-listener/after-acquire.md
+$dokka.location:wisp.lease/Lease.StateChangeListener/beforeRelease/#wisp.lease.Lease/PointingToDeclaration/wisp-lease/wisp.lease/-lease/-state-change-listener/before-release.md
+$dokka.location:wisp.lease/Lease///PointingToDeclaration/wisp-lease/wisp.lease/-lease/index.md
+$dokka.location:wisp.lease/Lease/acquire/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease/acquire.md
+$dokka.location:wisp.lease/Lease/addListener/#wisp.lease.Lease.StateChangeListener/PointingToDeclaration/wisp-lease/wisp.lease/-lease/add-listener.md
+$dokka.location:wisp.lease/Lease/checkHeld/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease/check-held.md
+$dokka.location:wisp.lease/Lease/name/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease/name.md
+$dokka.location:wisp.lease/Lease/release/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease/release.md
+$dokka.location:wisp.lease/LeaseManager///PointingToDeclaration/wisp-lease/wisp.lease/-lease-manager/index.md
+$dokka.location:wisp.lease/LeaseManager/releaseAll/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease-manager/release-all.md
+$dokka.location:wisp.lease/LeaseManager/requestLease/#kotlin.String/PointingToDeclaration/wisp-lease/wisp.lease/-lease-manager/request-lease.md
+wisp.lease
+wisp.lease.pool
+

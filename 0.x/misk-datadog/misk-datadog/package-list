@@ -1,0 +1,19 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:com.squareup.cash.tracing.datadog////PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/index.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener.Companion///PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/-companion/index.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener.Companion/MDC_DD_SPAN_ID/#/PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/-companion/-m-d-c_-d-d_-s-p-a-n_-i-d.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener.Companion/MDC_DD_TRACE_ID/#/PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/-companion/-m-d-c_-d-d_-t-r-a-c-e_-i-d.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener.Companion/MDC_SPAN_ID/#/PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/-companion/-m-d-c_-s-p-a-n_-i-d.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener.Companion/MDC_TRACE_ID/#/PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/-companion/-m-d-c_-t-r-a-c-e_-i-d.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener.Companion/log/#/PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/-companion/log.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener///PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/index.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener/MDCScopeListener/#/PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/-m-d-c-scope-listener.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener/afterScopeActivated/#/PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/after-scope-activated.md
+$dokka.location:com.squareup.cash.tracing.datadog/MDCScopeListener/afterScopeClosed/#/PointingToDeclaration/misk-datadog/com.squareup.cash.tracing.datadog/-m-d-c-scope-listener/after-scope-closed.md
+$dokka.location:misk.tracing.backends.datadog////PointingToDeclaration/misk-datadog/misk.tracing.backends.datadog/index.md
+$dokka.location:misk.tracing.backends.datadog/DatadogTracingBackendModule///PointingToDeclaration/misk-datadog/misk.tracing.backends.datadog/-datadog-tracing-backend-module/index.md
+$dokka.location:misk.tracing.backends.datadog/DatadogTracingBackendModule/DatadogTracingBackendModule/#/PointingToDeclaration/misk-datadog/misk.tracing.backends.datadog/-datadog-tracing-backend-module/-datadog-tracing-backend-module.md
+com.squareup.cash.tracing.datadog
+misk.tracing.backends.datadog
+

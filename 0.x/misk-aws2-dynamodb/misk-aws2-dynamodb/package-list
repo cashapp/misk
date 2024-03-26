@@ -1,0 +1,18 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.aws2.dynamodb////PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/index.md
+$dokka.location:misk.aws2.dynamodb/DynamoDbService///PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-dynamo-db-service/index.md
+$dokka.location:misk.aws2.dynamodb/RealDynamoDbModule///PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-real-dynamo-db-module/index.md
+$dokka.location:misk.aws2.dynamodb/RealDynamoDbModule/RealDynamoDbModule/#software.amazon.awssdk.core.client.config.ClientOverrideConfiguration#kotlin.collections.List[misk.aws2.dynamodb.RequiredDynamoDbTable]#java.net.URI?/PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-real-dynamo-db-module/-real-dynamo-db-module.md
+$dokka.location:misk.aws2.dynamodb/RealDynamoDbModule/configureClient/#software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder/PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-real-dynamo-db-module/configure-client.md
+$dokka.location:misk.aws2.dynamodb/RealDynamoDbModule/configureClient/#software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClientBuilder/PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-real-dynamo-db-module/configure-client.md
+$dokka.location:misk.aws2.dynamodb/RealDynamoDbModule/provideRequiredTables/#/PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-real-dynamo-db-module/provide-required-tables.md
+$dokka.location:misk.aws2.dynamodb/RealDynamoDbModule/providesDynamoDbClient/#misk.cloud.aws.AwsRegion#software.amazon.awssdk.auth.credentials.AwsCredentialsProvider/PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-real-dynamo-db-module/provides-dynamo-db-client.md
+$dokka.location:misk.aws2.dynamodb/RealDynamoDbModule/providesDynamoDbStreamsClient/#misk.cloud.aws.AwsRegion#software.amazon.awssdk.auth.credentials.AwsCredentialsProvider/PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-real-dynamo-db-module/provides-dynamo-db-streams-client.md
+$dokka.location:misk.aws2.dynamodb/RealDynamoDbService///PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-real-dynamo-db-service/index.md
+$dokka.location:misk.aws2.dynamodb/RealDynamoDbService/RealDynamoDbService/#software.amazon.awssdk.services.dynamodb.DynamoDbClient#kotlin.collections.List[misk.aws2.dynamodb.RequiredDynamoDbTable]/PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-real-dynamo-db-service/-real-dynamo-db-service.md
+$dokka.location:misk.aws2.dynamodb/RequiredDynamoDbTable///PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-required-dynamo-db-table/index.md
+$dokka.location:misk.aws2.dynamodb/RequiredDynamoDbTable/RequiredDynamoDbTable/#kotlin.String/PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-required-dynamo-db-table/-required-dynamo-db-table.md
+$dokka.location:misk.aws2.dynamodb/RequiredDynamoDbTable/name/#/PointingToDeclaration/misk-aws2-dynamodb/misk.aws2.dynamodb/-required-dynamo-db-table/name.md
+misk.aws2.dynamodb
+

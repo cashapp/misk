@@ -1,0 +1,34 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.inject////PointingToDeclaration/misk-inject/misk.inject/index.md
+$dokka.location:misk.inject//asSingleton/com.google.inject.binder.ScopedBindingBuilder#/PointingToDeclaration/misk-inject/misk.inject/as-singleton.md
+$dokka.location:misk.inject//getInstance/com.google.inject.Injector#kotlin.Annotation?/PointingToDeclaration/misk-inject/misk.inject/get-instance.md
+$dokka.location:misk.inject//getSetOf/com.google.inject.Injector#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-inject/misk.inject/get-set-of.md
+$dokka.location:misk.inject//keyOf/#/PointingToDeclaration/misk-inject/misk.inject/key-of.md
+$dokka.location:misk.inject//keyOf/#kotlin.Annotation/PointingToDeclaration/misk-inject/misk.inject/key-of.md
+$dokka.location:misk.inject//keyOf/#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-inject/misk.inject/key-of.md
+$dokka.location:misk.inject//listOfType/#/PointingToDeclaration/misk-inject/misk.inject/list-of-type.md
+$dokka.location:misk.inject//listOfType/#com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-inject/misk.inject/list-of-type.md
+$dokka.location:misk.inject//listOfType/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/misk-inject/misk.inject/list-of-type.md
+$dokka.location:misk.inject//mapOfType/#/PointingToDeclaration/misk-inject/misk.inject/map-of-type.md
+$dokka.location:misk.inject//mapOfType/#com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any?])]#com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-inject/misk.inject/map-of-type.md
+$dokka.location:misk.inject//mapOfType/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/misk-inject/misk.inject/map-of-type.md
+$dokka.location:misk.inject//parameterizedType/#kotlin.Array[java.lang.reflect.Type]/PointingToDeclaration/misk-inject/misk.inject/parameterized-type.md
+$dokka.location:misk.inject//setOfType/#/PointingToDeclaration/misk-inject/misk.inject/set-of-type.md
+$dokka.location:misk.inject//setOfType/#com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-inject/misk.inject/set-of-type.md
+$dokka.location:misk.inject//setOfType/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/misk-inject/misk.inject/set-of-type.md
+$dokka.location:misk.inject//subtypeOf/#/PointingToDeclaration/misk-inject/misk.inject/subtype-of.md
+$dokka.location:misk.inject//toKey/com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any])]#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-inject/misk.inject/to-key.md
+$dokka.location:misk.inject//toKey/kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-inject/misk.inject/to-key.md
+$dokka.location:misk.inject//typeLiteral/java.lang.reflect.Type#/PointingToDeclaration/misk-inject/misk.inject/type-literal.md
+$dokka.location:misk.inject//typeLiteral/kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#/PointingToDeclaration/misk-inject/misk.inject/type-literal.md
+$dokka.location:misk.inject//typeLiteral/kotlin.reflect.KType#/PointingToDeclaration/misk-inject/misk.inject/type-literal.md
+$dokka.location:misk.inject//uninject/#kotlin.Any/PointingToDeclaration/misk-inject/misk.inject/uninject.md
+$dokka.location:misk.inject/KAbstractModule///PointingToDeclaration/misk-inject/misk.inject/-k-abstract-module/index.md
+$dokka.location:misk.inject/KAbstractModule/KAbstractModule/#/PointingToDeclaration/misk-inject/misk.inject/-k-abstract-module/-k-abstract-module.md
+$dokka.location:misk.inject/KInstallOnceModule///PointingToDeclaration/misk-inject/misk.inject/-k-install-once-module/index.md
+$dokka.location:misk.inject/KInstallOnceModule/KInstallOnceModule/#/PointingToDeclaration/misk-inject/misk.inject/-k-install-once-module/-k-install-once-module.md
+$dokka.location:misk.inject/KInstallOnceModule/equals/#kotlin.Any?/PointingToDeclaration/misk-inject/misk.inject/-k-install-once-module/equals.md
+$dokka.location:misk.inject/KInstallOnceModule/hashCode/#/PointingToDeclaration/misk-inject/misk.inject/-k-install-once-module/hash-code.md
+misk.inject
+

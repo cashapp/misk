@@ -1,0 +1,54 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.concurrent////PointingToDeclaration/misk-action-scopes/misk.concurrent/index.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService///PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/index.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService/WrappingListeningExecutorService/#/PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/-wrapping-listening-executor-service.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService/execute/#java.lang.Runnable/PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/execute.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService/invokeAll/#kotlin.collections.Collection[java.util.concurrent.Callable[TypeParam(bounds=[kotlin.Any?])]]#kotlin.Long#java.util.concurrent.TimeUnit/PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/invoke-all.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService/invokeAll/#kotlin.collections.Collection[java.util.concurrent.Callable[TypeParam(bounds=[kotlin.Any?])]]/PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/invoke-all.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService/invokeAny/#kotlin.collections.Collection[java.util.concurrent.Callable[TypeParam(bounds=[kotlin.Any?])]]#kotlin.Long#java.util.concurrent.TimeUnit/PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/invoke-any.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService/invokeAny/#kotlin.collections.Collection[java.util.concurrent.Callable[TypeParam(bounds=[kotlin.Any?])]]/PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/invoke-any.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService/submit/#java.lang.Runnable#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/submit.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService/submit/#java.lang.Runnable/PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/submit.md
+$dokka.location:misk.concurrent/WrappingListeningExecutorService/submit/#java.util.concurrent.Callable[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-action-scopes/misk.concurrent/-wrapping-listening-executor-service/submit.md
+$dokka.location:misk.scope.executor////PointingToDeclaration/misk-action-scopes/misk.scope.executor/index.md
+$dokka.location:misk.scope.executor/ActionScopedExecutorService///PointingToDeclaration/misk-action-scopes/misk.scope.executor/-action-scoped-executor-service/index.md
+$dokka.location:misk.scope.executor/ActionScopedExecutorService/ActionScopedExecutorService/#java.util.concurrent.ExecutorService#misk.scope.ActionScope/PointingToDeclaration/misk-action-scopes/misk.scope.executor/-action-scoped-executor-service/-action-scoped-executor-service.md
+$dokka.location:misk.scope////PointingToDeclaration/misk-action-scopes/misk.scope/index.md
+$dokka.location:misk.scope/ActionScope.Companion///PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/-companion/index.md
+$dokka.location:misk.scope/ActionScope.Instance///PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/-instance/index.md
+$dokka.location:misk.scope/ActionScope.Instance/enter/#/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/-instance/enter.md
+$dokka.location:misk.scope/ActionScope.Instance/inScope/#kotlin.Function0[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/-instance/in-scope.md
+$dokka.location:misk.scope/ActionScope///PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/index.md
+$dokka.location:misk.scope/ActionScope/asContextElement/#/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/as-context-element.md
+$dokka.location:misk.scope/ActionScope/close/#/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/close.md
+$dokka.location:misk.scope/ActionScope/create/#kotlin.collections.Map[com.google.inject.Key[*],kotlin.Any?]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/create.md
+$dokka.location:misk.scope/ActionScope/get/#com.google.inject.Key[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/get.md
+$dokka.location:misk.scope/ActionScope/inScope/#/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/in-scope.md
+$dokka.location:misk.scope/ActionScope/propagate/#java.util.concurrent.Callable[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/propagate.md
+$dokka.location:misk.scope/ActionScope/propagate/#kotlin.Function0[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/propagate.md
+$dokka.location:misk.scope/ActionScope/propagate/#kotlin.reflect.KFunction[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/propagate.md
+$dokka.location:misk.scope/ActionScope/runBlocking/#kotlin.coroutines.CoroutineContext#kotlin.coroutines.SuspendFunction1[kotlinx.coroutines.CoroutineScope,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/run-blocking.md
+$dokka.location:misk.scope/ActionScope/runBlocking/#kotlin.coroutines.SuspendFunction1[kotlinx.coroutines.CoroutineScope,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/run-blocking.md
+$dokka.location:misk.scope/ActionScope/snapshotActionScopeInstance/#/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scope/snapshot-action-scope-instance.md
+$dokka.location:misk.scope/ActionScopedProviderModule.Companion///PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/-companion/index.md
+$dokka.location:misk.scope/ActionScopedProviderModule///PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/index.md
+$dokka.location:misk.scope/ActionScopedProviderModule/ActionScopedProviderModule/#/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/-action-scoped-provider-module.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindConstant/#com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any])]#TypeParam(bounds=[kotlin.Any])#kotlin.Annotation?/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-constant.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindConstant/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#TypeParam(bounds=[kotlin.Any])#kotlin.Annotation?/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-constant.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindProvider/#com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any?])]#kotlin.reflect.KClass[misk.scope.ActionScopedProvider[TypeParam(bounds=[kotlin.Any?])]]#java.lang.Class[TypeParam(bounds=[kotlin.Annotation])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-provider.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindProvider/#com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any?])]#kotlin.reflect.KClass[misk.scope.ActionScopedProvider[TypeParam(bounds=[kotlin.Any?])]]#kotlin.Annotation?/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-provider.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindProvider/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#kotlin.reflect.KClass[misk.scope.ActionScopedProvider[TypeParam(bounds=[kotlin.Any])]]#java.lang.Class[TypeParam(bounds=[kotlin.Annotation])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-provider.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindProvider/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#kotlin.reflect.KClass[misk.scope.ActionScopedProvider[TypeParam(bounds=[kotlin.Any])]]#kotlin.Annotation?/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-provider.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindSeedData/#com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any])]#kotlin.Annotation/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-seed-data.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindSeedData/#com.google.inject.TypeLiteral[TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-seed-data.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindSeedData/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#kotlin.Annotation/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-seed-data.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindSeedData/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Annotation])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-seed-data.md
+$dokka.location:misk.scope/ActionScopedProviderModule/bindSeedData/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/bind-seed-data.md
+$dokka.location:misk.scope/ActionScopedProviderModule/configureProviders/#/PointingToDeclaration/misk-action-scopes/misk.scope/-action-scoped-provider-module/configure-providers.md
+$dokka.location:misk.scope/SeedDataTransformer///PointingToDeclaration/misk-action-scopes/misk.scope/-seed-data-transformer/index.md
+$dokka.location:misk.scope/SeedDataTransformer/transform/#kotlin.collections.Map[com.google.inject.Key[*],kotlin.Any?]/PointingToDeclaration/misk-action-scopes/misk.scope/-seed-data-transformer/transform.md
+misk.concurrent
+misk.scope
+misk.scope.executor
+

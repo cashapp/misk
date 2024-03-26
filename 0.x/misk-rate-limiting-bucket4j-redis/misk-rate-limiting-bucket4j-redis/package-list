@@ -1,0 +1,8 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.ratelimiting.bucket4j.redis////PointingToDeclaration/misk-rate-limiting-bucket4j-redis/misk.ratelimiting.bucket4j.redis/index.md
+$dokka.location:misk.ratelimiting.bucket4j.redis/RedisBucket4jRateLimiterModule///PointingToDeclaration/misk-rate-limiting-bucket4j-redis/misk.ratelimiting.bucket4j.redis/-redis-bucket4j-rate-limiter-module/index.md
+$dokka.location:misk.ratelimiting.bucket4j.redis/RedisBucket4jRateLimiterModule/RedisBucket4jRateLimiterModule/#java.time.Duration/PointingToDeclaration/misk-rate-limiting-bucket4j-redis/misk.ratelimiting.bucket4j.redis/-redis-bucket4j-rate-limiter-module/-redis-bucket4j-rate-limiter-module.md
+$dokka.location:misk.ratelimiting.bucket4j.redis/RedisBucket4jRateLimiterModule/providedRateLimiter/#java.time.Clock#io.micrometer.core.instrument.MeterRegistry#redis.clients.jedis.UnifiedJedis/PointingToDeclaration/misk-rate-limiting-bucket4j-redis/misk.ratelimiting.bucket4j.redis/-redis-bucket4j-rate-limiter-module/provided-rate-limiter.md
+misk.ratelimiting.bucket4j.redis
+

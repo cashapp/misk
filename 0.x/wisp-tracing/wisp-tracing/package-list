@@ -1,0 +1,20 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.tracing////PointingToDeclaration/wisp-tracing/wisp.tracing/index.md
+$dokka.location:wisp.tracing//setBaggageItems/io.opentracing.Span#kotlin.collections.Map[kotlin.String,kotlin.Any]/PointingToDeclaration/wisp-tracing/wisp.tracing/set-baggage-items.md
+$dokka.location:wisp.tracing//setTag/io.opentracing.Span#wisp.tracing.Tag[*]/PointingToDeclaration/wisp-tracing/wisp.tracing/set-tag.md
+$dokka.location:wisp.tracing//setTags/io.opentracing.Span#kotlin.collections.Collection[wisp.tracing.Tag[*]]/PointingToDeclaration/wisp-tracing/wisp.tracing/set-tags.md
+$dokka.location:wisp.tracing//trace/io.opentracing.Tracer#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.String]#kotlin.Function0[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/wisp-tracing/wisp.tracing/trace.md
+$dokka.location:wisp.tracing//traceWithNewRootSpan/io.opentracing.Tracer#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.String]#kotlin.Boolean#kotlin.Function1[io.opentracing.Span,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/wisp-tracing/wisp.tracing/trace-with-new-root-span.md
+$dokka.location:wisp.tracing//traceWithSpan/io.opentracing.Tracer#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.String]#kotlin.Function1[io.opentracing.Span,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/wisp-tracing/wisp.tracing/trace-with-span.md
+$dokka.location:wisp.tracing//withNewScope/io.opentracing.Tracer#io.opentracing.Span#kotlin.Function0[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/wisp-tracing/wisp.tracing/with-new-scope.md
+$dokka.location:wisp.tracing/SpanAndScope///PointingToDeclaration/wisp-tracing/wisp.tracing/-span-and-scope/index.md
+$dokka.location:wisp.tracing/SpanAndScope/SpanAndScope/#io.opentracing.Span#io.opentracing.Scope/PointingToDeclaration/wisp-tracing/wisp.tracing/-span-and-scope/-span-and-scope.md
+$dokka.location:wisp.tracing/SpanAndScope/scope/#/PointingToDeclaration/wisp-tracing/wisp.tracing/-span-and-scope/scope.md
+$dokka.location:wisp.tracing/SpanAndScope/span/#/PointingToDeclaration/wisp-tracing/wisp.tracing/-span-and-scope/span.md
+$dokka.location:wisp.tracing/Tag///PointingToDeclaration/wisp-tracing/wisp.tracing/-tag/index.md
+$dokka.location:wisp.tracing/Tag/Tag/#kotlin.String#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/wisp-tracing/wisp.tracing/-tag/-tag.md
+$dokka.location:wisp.tracing/Tag/name/#/PointingToDeclaration/wisp-tracing/wisp.tracing/-tag/name.md
+$dokka.location:wisp.tracing/Tag/value/#/PointingToDeclaration/wisp-tracing/wisp.tracing/-tag/value.md
+wisp.tracing
+

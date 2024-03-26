@@ -1,0 +1,33 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.deployment////PointingToDeclaration/wisp-deployment/wisp.deployment/index.md
+$dokka.location:wisp.deployment//DEVELOPMENT/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-d-e-v-e-l-o-p-m-e-n-t.md
+$dokka.location:wisp.deployment//PRODUCTION/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-p-r-o-d-u-c-t-i-o-n.md
+$dokka.location:wisp.deployment//STAGING/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-s-t-a-g-i-n-g.md
+$dokka.location:wisp.deployment//TESTING/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-t-e-s-t-i-n-g.md
+$dokka.location:wisp.deployment//deployments/#/PointingToDeclaration/wisp-deployment/wisp.deployment/deployments.md
+$dokka.location:wisp.deployment//getDeploymentFromEnvironmentVariable/#wisp.deployment.Deployment#wisp.deployment.EnvironmentVariableLoader/PointingToDeclaration/wisp-deployment/wisp.deployment/get-deployment-from-environment-variable.md
+$dokka.location:wisp.deployment/Deployment///PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/index.md
+$dokka.location:wisp.deployment/Deployment/Deployment/#kotlin.String#kotlin.Boolean#kotlin.Boolean#kotlin.Boolean#kotlin.Boolean/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/-deployment.md
+$dokka.location:wisp.deployment/Deployment/isFake/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/is-fake.md
+$dokka.location:wisp.deployment/Deployment/isLocalDevelopment/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/is-local-development.md
+$dokka.location:wisp.deployment/Deployment/isProduction/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/is-production.md
+$dokka.location:wisp.deployment/Deployment/isReal/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/is-real.md
+$dokka.location:wisp.deployment/Deployment/isStaging/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/is-staging.md
+$dokka.location:wisp.deployment/Deployment/isTest/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/is-test.md
+$dokka.location:wisp.deployment/Deployment/mapToEnvironmentName/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/map-to-environment-name.md
+$dokka.location:wisp.deployment/Deployment/name/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment/name.md
+$dokka.location:wisp.deployment/DeploymentLocation///PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment-location/index.md
+$dokka.location:wisp.deployment/DeploymentLocation/id/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-deployment-location/id.md
+$dokka.location:wisp.deployment/EnvironmentVariableDeploymentLocation///PointingToDeclaration/wisp-deployment/wisp.deployment/-environment-variable-deployment-location/index.md
+$dokka.location:wisp.deployment/EnvironmentVariableDeploymentLocation/EnvironmentVariableDeploymentLocation/#kotlin.String#wisp.deployment.EnvironmentVariableLoader/PointingToDeclaration/wisp-deployment/wisp.deployment/-environment-variable-deployment-location/-environment-variable-deployment-location.md
+$dokka.location:wisp.deployment/EnvironmentVariableDeploymentLocation/id/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-environment-variable-deployment-location/id.md
+$dokka.location:wisp.deployment/EnvironmentVariableLoader.Companion///PointingToDeclaration/wisp-deployment/wisp.deployment/-environment-variable-loader/-companion/index.md
+$dokka.location:wisp.deployment/EnvironmentVariableLoader.Companion/real/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-environment-variable-loader/-companion/real.md
+$dokka.location:wisp.deployment/EnvironmentVariableLoader///PointingToDeclaration/wisp-deployment/wisp.deployment/-environment-variable-loader/index.md
+$dokka.location:wisp.deployment/EnvironmentVariableLoader/getEnvironmentVariable/#kotlin.String/PointingToDeclaration/wisp-deployment/wisp.deployment/-environment-variable-loader/get-environment-variable.md
+$dokka.location:wisp.deployment/EnvironmentVariableLoader/getEnvironmentVariableOrDefault/#kotlin.String#kotlin.String/PointingToDeclaration/wisp-deployment/wisp.deployment/-environment-variable-loader/get-environment-variable-or-default.md
+$dokka.location:wisp.deployment/RealEnvironmentVariableLoader///PointingToDeclaration/wisp-deployment/wisp.deployment/-real-environment-variable-loader/index.md
+$dokka.location:wisp.deployment/RealEnvironmentVariableLoader/RealEnvironmentVariableLoader/#/PointingToDeclaration/wisp-deployment/wisp.deployment/-real-environment-variable-loader/-real-environment-variable-loader.md
+wisp.deployment
+

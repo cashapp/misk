@@ -1,0 +1,12 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.feature.launchdarkly////PointingToDeclaration/misk-launchdarkly/misk.feature.launchdarkly/index.md
+$dokka.location:misk.feature.launchdarkly/LaunchDarklyConfig///PointingToDeclaration/misk-launchdarkly/misk.feature.launchdarkly/-launch-darkly-config/index.md
+$dokka.location:misk.feature.launchdarkly/LaunchDarklyConfig/LaunchDarklyConfig/#kotlin.String#kotlin.String#misk.client.HttpClientSSLConfig?/PointingToDeclaration/misk-launchdarkly/misk.feature.launchdarkly/-launch-darkly-config/-launch-darkly-config.md
+$dokka.location:misk.feature.launchdarkly/LaunchDarklyConfig/base_uri/#/PointingToDeclaration/misk-launchdarkly/misk.feature.launchdarkly/-launch-darkly-config/base_uri.md
+$dokka.location:misk.feature.launchdarkly/LaunchDarklyConfig/sdk_key/#/PointingToDeclaration/misk-launchdarkly/misk.feature.launchdarkly/-launch-darkly-config/sdk_key.md
+$dokka.location:misk.feature.launchdarkly/LaunchDarklyConfig/ssl/#/PointingToDeclaration/misk-launchdarkly/misk.feature.launchdarkly/-launch-darkly-config/ssl.md
+$dokka.location:misk.feature.launchdarkly/LaunchDarklyModule///PointingToDeclaration/misk-launchdarkly/misk.feature.launchdarkly/-launch-darkly-module/index.md
+$dokka.location:misk.feature.launchdarkly/LaunchDarklyModule/LaunchDarklyModule/#misk.feature.launchdarkly.LaunchDarklyConfig#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-launchdarkly/misk.feature.launchdarkly/-launch-darkly-module/-launch-darkly-module.md
+misk.feature.launchdarkly
+

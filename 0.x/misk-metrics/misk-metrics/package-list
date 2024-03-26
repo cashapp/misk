@@ -1,0 +1,44 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.metrics.v2////PointingToDeclaration/misk-metrics/misk.metrics.v2/index.md
+$dokka.location:misk.metrics.v2//defaultBuckets/#/PointingToDeclaration/misk-metrics/misk.metrics.v2/default-buckets.md
+$dokka.location:misk.metrics.v2//defaultQuantiles/#/PointingToDeclaration/misk-metrics/misk.metrics.v2/default-quantiles.md
+$dokka.location:misk.metrics.v2//defaultSparseBuckets/#/PointingToDeclaration/misk-metrics/misk.metrics.v2/default-sparse-buckets.md
+$dokka.location:misk.metrics.v2//exponentialBuckets/#kotlin.Double#kotlin.Double#kotlin.Int/PointingToDeclaration/misk-metrics/misk.metrics.v2/exponential-buckets.md
+$dokka.location:misk.metrics.v2//linearBuckets/#kotlin.Double#kotlin.Double#kotlin.Int/PointingToDeclaration/misk-metrics/misk.metrics.v2/linear-buckets.md
+$dokka.location:misk.metrics.v2/Metrics.Companion///PointingToDeclaration/misk-metrics/misk.metrics.v2/-metrics/-companion/index.md
+$dokka.location:misk.metrics.v2/Metrics.Companion/factory/#io.prometheus.client.CollectorRegistry/PointingToDeclaration/misk-metrics/misk.metrics.v2/-metrics/-companion/factory.md
+$dokka.location:misk.metrics.v2/Metrics///PointingToDeclaration/misk-metrics/misk.metrics.v2/-metrics/index.md
+$dokka.location:misk.metrics.v2/Metrics/counter/#kotlin.String#kotlin.String#kotlin.collections.List[kotlin.String]/PointingToDeclaration/misk-metrics/misk.metrics.v2/-metrics/counter.md
+$dokka.location:misk.metrics.v2/Metrics/gauge/#kotlin.String#kotlin.String#kotlin.collections.List[kotlin.String]/PointingToDeclaration/misk-metrics/misk.metrics.v2/-metrics/gauge.md
+$dokka.location:misk.metrics.v2/Metrics/getRegistry/#/PointingToDeclaration/misk-metrics/misk.metrics.v2/-metrics/get-registry.md
+$dokka.location:misk.metrics.v2/Metrics/histogram/#kotlin.String#kotlin.String#kotlin.collections.List[kotlin.String]#kotlin.collections.List[kotlin.Double]/PointingToDeclaration/misk-metrics/misk.metrics.v2/-metrics/histogram.md
+$dokka.location:misk.metrics.v2/Metrics/peakGauge/#kotlin.String#kotlin.String#kotlin.collections.List[kotlin.String]/PointingToDeclaration/misk-metrics/misk.metrics.v2/-metrics/peak-gauge.md
+$dokka.location:misk.metrics.v2/Metrics/summary/#kotlin.String#kotlin.String#kotlin.collections.List[kotlin.String]#kotlin.collections.Map[kotlin.Double,kotlin.Double]#kotlin.Long?/PointingToDeclaration/misk-metrics/misk.metrics.v2/-metrics/summary.md
+$dokka.location:misk.metrics.v2/PeakGauge.Builder///PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-builder/index.md
+$dokka.location:misk.metrics.v2/PeakGauge.Builder/Builder/#/PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-builder/-builder.md
+$dokka.location:misk.metrics.v2/PeakGauge.Builder/create/#/PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-builder/create.md
+$dokka.location:misk.metrics.v2/PeakGauge.Child///PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-child/index.md
+$dokka.location:misk.metrics.v2/PeakGauge.Child/Child/#/PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-child/-child.md
+$dokka.location:misk.metrics.v2/PeakGauge.Child/getAndClear/#/PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-child/get-and-clear.md
+$dokka.location:misk.metrics.v2/PeakGauge.Child/record/#kotlin.Double/PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-child/record.md
+$dokka.location:misk.metrics.v2/PeakGauge.Companion///PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-companion/index.md
+$dokka.location:misk.metrics.v2/PeakGauge.Companion/builder/#kotlin.String#kotlin.String/PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-companion/builder.md
+$dokka.location:misk.metrics.v2/PeakGauge///PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/index.md
+$dokka.location:misk.metrics.v2/PeakGauge/PeakGauge/#misk.metrics.v2.PeakGauge.Builder/PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/-peak-gauge.md
+$dokka.location:misk.metrics.v2/PeakGauge/collect/#/PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/collect.md
+$dokka.location:misk.metrics.v2/PeakGauge/record/#kotlin.Double/PointingToDeclaration/misk-metrics/misk.metrics.v2/-peak-gauge/record.md
+$dokka.location:misk.metrics////PointingToDeclaration/misk-metrics/misk.metrics/index.md
+$dokka.location:misk.metrics//defaultQuantiles/#/PointingToDeclaration/misk-metrics/misk.metrics/default-quantiles.md
+$dokka.location:misk.metrics/Histogram.Companion///PointingToDeclaration/misk-metrics/misk.metrics/-histogram/-companion/index.md
+$dokka.location:misk.metrics/Histogram.Companion/factory/#io.prometheus.client.Summary/PointingToDeclaration/misk-metrics/misk.metrics/-histogram/-companion/factory.md
+$dokka.location:misk.metrics/Histogram///PointingToDeclaration/misk-metrics/misk.metrics/-histogram/index.md
+$dokka.location:misk.metrics/Histogram/count/#kotlin.Array[kotlin.String]/PointingToDeclaration/misk-metrics/misk.metrics/-histogram/count.md
+$dokka.location:misk.metrics/Histogram/getHistogram/#/PointingToDeclaration/misk-metrics/misk.metrics/-histogram/get-histogram.md
+$dokka.location:misk.metrics/Histogram/record/#kotlin.Double#kotlin.Array[kotlin.String]/PointingToDeclaration/misk-metrics/misk.metrics/-histogram/record.md
+$dokka.location:misk.metrics/Histogram/timedMills/#kotlin.Array[kotlin.String]#kotlin.Function0[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-metrics/misk.metrics/-histogram/timed-mills.md
+$dokka.location:misk.metrics/MetricsModule///PointingToDeclaration/misk-metrics/misk.metrics/-metrics-module/index.md
+$dokka.location:misk.metrics/MetricsModule/MetricsModule/#/PointingToDeclaration/misk-metrics/misk.metrics/-metrics-module/-metrics-module.md
+misk.metrics
+misk.metrics.v2
+
