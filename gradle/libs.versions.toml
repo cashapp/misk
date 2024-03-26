@@ -27,7 +27,7 @@ bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version = "8.7.0" }
 bucket4jRedis = { module = "com.bucket4j:bucket4j-redis", version = "8.7.0" }
 concurrencyLimitsCore = { module = "com.netflix.concurrency-limits:concurrency-limits-core", version = "0.3.6" }
 cronUtils = { module = "com.cronutils:cron-utils", version = "9.2.1" }
-datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.7" }
+datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.10" }
 detektApi = { module = "io.gitlab.arturbosch.detekt:detekt-api", version = "1.23.1" }
 detektParser = { module = "io.gitlab.arturbosch.detekt:detekt-parser", version = "1.23.1" }
 detektGradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version = "1.23.1" }
