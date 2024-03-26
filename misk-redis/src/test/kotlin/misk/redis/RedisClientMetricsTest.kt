@@ -18,7 +18,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
-import org.junit.jupiter.api.BeforeEach
 import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest
@@ -32,26 +31,18 @@ class RedisClientMetricsTest {
     }
   }
 
-  @BeforeEach
-  fun setUp() {
-    redis.flushAll()
-  }
-
   @Inject private lateinit var collectorRegistry: CollectorRegistry
   @Inject private lateinit var redis: Redis
 
   @Test fun `connections are counted`() {
-    // No connections are created or used yet.
-    assertThat(collectorRegistry[ACTIVE_CONNECTIONS]).isEqualTo(0.0)
+    // Creating a redis client creates a connection.
+    assertThat(collectorRegistry[ACTIVE_CONNECTIONS]).isEqualTo(1.0)
     assertThat(collectorRegistry[IDLE_CONNECTIONS]).isEqualTo(0.0)
     assertThat(collectorRegistry[MAX_TOTAL_CONNECTIONS]).isEqualTo(8.0)
     assertThat(collectorRegistry[MAX_IDLE_CONNECTIONS]).isEqualTo(8.0)
 
-    // Take a connection. The connection should be counted as active while it is held.
-    // FIXME: Testing active connection count in a single-threaded testing environment is impossible
-    //   without proper Transaction or Pipeline support. Presently misk-redis will return a jedis
-    //   that yields a transaction to the pool, which will result in wrong metrics.
-    assertThat(redis["hello"]).isNull()
+    // Use the connection.
+    assertThat(redis["no-value"]).isNull()
 
     // The connection is returned to idle, once it is used.
     assertThat(collectorRegistry[ACTIVE_CONNECTIONS]).isEqualTo(0.0)

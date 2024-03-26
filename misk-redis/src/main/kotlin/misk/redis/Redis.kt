@@ -5,6 +5,7 @@ import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.args.ListDirection
+import redis.clients.jedis.exceptions.JedisDataException
 import redis.clients.jedis.params.ZAddParams
 import java.time.Duration
 import java.util.function.Supplier
@@ -511,7 +512,7 @@ interface Redis {
    * an error is returned.
    *
    * ZADD supports a list of [options], specified after the name of the key and before the first
-   * score argument. The complete list of options can be found in [ZAddOptions]
+   * score argument. The complete list of options can be found in [ZAddOptions].
    */
   fun zadd(
     key: String,
@@ -697,6 +698,12 @@ interface Redis {
     val count: Int
   )
 
+  /**
+   * Options for ZADD. Not all options are compatible with one another.
+   * See the [ZADD command documentation](https://redis.io/commands/zadd/) for more information.
+   *
+   * Note: misk-redis does not currently support the INCR option.
+   */
   enum class ZAddOptions {
     /**
      * Only update elements that already exist. Don't add new elements.
@@ -745,6 +752,30 @@ interface Redis {
         }
 
         return params
+      }
+
+      /**
+       * Checks that options will result in a valid ZADD command, conforming to the following:
+       *
+       * ```
+       * zadd key [NX|XX] [GT|LT] [CH] score member [score member ...]
+       * ```
+       *
+       * See the [ZADD command documentation](https://redis.io/commands/zadd) for more information.
+       */
+      internal fun verify(options: Array<out ZAddOptions>) {
+        // NX and XX are mutually exclusive.
+        require(!options.contains(NX) || !options.contains(XX)) {
+          "ERR XX and NX options at the same time are not compatible"
+        }
+        // GT, LT, NX are mutually exclusive.
+        require(
+          !(options.contains(NX) && options.contains(LT))
+            && !(options.contains(NX) && options.contains(GT))
+            && !(options.contains(GT) && options.contains(LT))
+        ) {
+          "ERR GT, LT, and/or NX options at the same time are not compatible"
+        }
       }
     }
   }
