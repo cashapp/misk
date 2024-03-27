@@ -43,7 +43,7 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
 
     const headers = {
       headers: {
-        "Content-Type": "application/json"
+        "Accept": "application/json",
       }
     }
     if (webActionMetadata.httpMethod === "POST") {
