@@ -1,5 +1,8 @@
 package misk.scope
 
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
+
 private object UNINITIALIZED_VALUE
 
 internal class SynchronizedLazy(
@@ -8,13 +11,15 @@ internal class SynchronizedLazy(
   @Volatile
   private var _value: Any? = UNINITIALIZED_VALUE
 
+  private val lock = ReentrantLock()
+
   override val value: Any?
     get() {
       if (_value !== UNINITIALIZED_VALUE) {
         return _value
       }
 
-      return synchronized(this) {
+      return lock.withLock {
         val existingValue = _value
         if (existingValue != UNINITIALIZED_VALUE) {
           existingValue
