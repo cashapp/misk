@@ -32,6 +32,8 @@ dependencies {
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-prometheus"))
 
+  implementation("com.cedarpolicy:cedar-java:2.3.5")
+
   testImplementation(libs.assertj)
   testImplementation(libs.awsDynamodb)
   testImplementation(libs.jedis)
