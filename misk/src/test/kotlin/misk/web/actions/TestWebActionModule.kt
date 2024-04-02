@@ -28,6 +28,7 @@ import misk.web.toResponseBody
 import jakarta.inject.Inject
 import misk.logging.LogCollectorModule
 import misk.security.authz.AllowAnyService
+import misk.security.authz.AllowAnyUser
 import misk.security.authz.Authenticated
 import misk.security.authz.ExcludeFromAllowAnyService
 
@@ -49,6 +50,7 @@ class TestWebActionModule : KAbstractModule() {
     install(WebActionModule.create<EmptyAuthenticatedAccessAction>())
     install(WebActionModule.create<AllowAnyServiceAccessAction>())
     install(WebActionModule.create<AllowAnyServicePlusAuthenticatedAccessAction>())
+    install(WebActionModule.create<AllowAnyUserAccessAction>())
 
     multibind<AccessAnnotationEntry>().toInstance(
       AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments"))
@@ -185,5 +187,15 @@ class AllowAnyServicePlusAuthenticatedAccessAction @Inject constructor() : WebAc
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
   @AllowAnyService
   @Authenticated(services = ["web-proxy"], capabilities = ["admin"])
+  fun get() = "${scopedCaller.get()} authorized as any service".toResponseBody()
+}
+
+class AllowAnyUserAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/allow_any_user_access")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @AllowAnyUser
   fun get() = "${scopedCaller.get()} authorized as any service".toResponseBody()
 }

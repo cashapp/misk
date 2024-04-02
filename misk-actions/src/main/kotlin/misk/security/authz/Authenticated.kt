@@ -27,3 +27,10 @@ annotation class Unauthenticated
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class AllowAnyService
+
+/**
+ * Annotation indicating that any authenticated service is allowed to access this endpoint.
+ */
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class AllowAnyUser
