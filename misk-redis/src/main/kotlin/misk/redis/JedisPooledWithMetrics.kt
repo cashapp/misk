@@ -34,7 +34,10 @@ private class ConnectionFactoryWithMetrics(
   requiresPassword: Boolean = true,
 ) : ConnectionFactory(
   HostAndPort(
-    replicationGroupConfig.writer_endpoint.hostname?.takeUnless { it.isBlank() } ?: System.getenv("REDIS_HOST") ?: "127.0.0.1",
+    replicationGroupConfig.writer_endpoint.hostname?.takeUnless {
+      @Suppress("UselessCallOnNotNull")
+      it.isNullOrBlank() // This might actually be nullable?
+    } ?: System.getenv("REDIS_HOST") ?: "127.0.0.1",
     replicationGroupConfig.writer_endpoint.port
   ),
   createJedisClientConfig(replicationGroupConfig, ssl, requiresPassword),
