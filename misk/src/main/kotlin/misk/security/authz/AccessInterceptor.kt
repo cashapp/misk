@@ -75,8 +75,8 @@ class AccessInterceptor private constructor(
         return null
       }
 
-      val allowAnyService = action.hasAnnotation<AllowAnyService>()
-      val allowAnyUser = action.hasAnnotation<AllowAnyUser>()
+      val allowAnyService = action.hasAnnotation<AllowAnyService>() || actionEntries.any { it.allowAnyService }
+      val allowAnyUser = actionEntries.any { it.allowAnyUser }
 
       // No access annotations. Fail with a useful message.
       check(allowAnyService || allowAnyUser || actionEntries.isNotEmpty()) {
@@ -84,7 +84,6 @@ class AccessInterceptor private constructor(
         requiredAnnotations += Authenticated::class
         requiredAnnotations += Unauthenticated::class
         requiredAnnotations += AllowAnyService::class
-        requiredAnnotations += AllowAnyUser::class
         requiredAnnotations += registeredEntries.map { it.annotation }
         """You need to register an AccessAnnotationEntry to tell the authorization system which capabilities and services are allowed to access ${action.name}::${action.function.name}(). You can either:
           |
@@ -129,14 +128,18 @@ class AccessInterceptor private constructor(
         allowedServices,
         allowedCapabilities,
         caller,
-        allowAnyService || allowedServices.contains("*"),
+        allowAnyService,
         excludeFromAllowAnyService.toSet(),
-        allowAnyUser || allowedCapabilities.contains("*"),
+        allowAnyUser,
       )
     }
 
     private fun Authenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
-      Authenticated::class, services.toList(), capabilities.toList()
+      annotation = Authenticated::class,
+      services = services.toList(),
+      capabilities = capabilities.toList(),
+      allowAnyService = allowAnyService,
+      allowAnyUser = allowAnyUser
     )
 
     private inline fun <reified T : Annotation> Action.hasAnnotation() =
