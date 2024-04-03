@@ -32,7 +32,7 @@ internal class HibernateHealthCheck(
         session.createNativeQuery("SELECT NOW()").uniqueResult() as Timestamp
       }.toInstant()
     } catch (e: Exception) {
-      logger.error(e) { "error performing hibernate health check" }
+      logger.warn(e) { "error performing hibernate health check" }
       return HealthStatus.unhealthy("Hibernate: failed to query ${qualifier.simpleName} database")
     }
 
