@@ -75,44 +75,6 @@ abstract class AbstractRedisTest {
     assertThat(redis[unknownKey]).isNull()
   }
 
-  @Test
-  fun batchGetAndSetPipelined()  {
-    val key = "key"
-    val key2 = "key2"
-    val firstValue = "firstValue".encodeUtf8()
-    val value = "value".encodeUtf8()
-    val value2 = "value2".encodeUtf8()
-    val unknownKey = "this key doesn't exist"
-
-    val suppliers = mutableListOf<Supplier<*>>()
-    redis.pipelining {
-      suppliers.addAll(
-        listOf(
-          mget(key),
-          mget(key, key2),
-          mset(key.encodeUtf8(), firstValue),
-          mget(key),
-          mset(key.encodeUtf8(), value, key2.encodeUtf8(), value2),
-          mget(key),
-          mget(key, key2),
-          mget(key2, key),
-          mget(key, unknownKey, key2, key),
-        )
-      )
-    }
-    assertThat(suppliers.map { it.get() }).containsExactly(
-      listOf(null),
-      listOf(null, null),
-      Unit,
-      listOf(firstValue),
-      Unit,
-      listOf(value),
-      listOf(value, value2),
-      listOf(value2, value),
-      listOf(value, null, value2, value),
-    )
-  }
-
   @Test fun hsetReturnsCorrectValues() {
     val key = "prehistoric_life"
     // Add one get one.
@@ -1491,6 +1453,30 @@ abstract class AbstractRedisTest {
       "lval4".encodeUtf8(),
       "lval3".encodeUtf8(),
       "lval2".encodeUtf8()
+    )
+  }
+
+  @Test
+  fun `pipelining works - sorted sets`() {
+    val suppliers = mutableListOf<Supplier<*>>()
+
+    redis.pipelining {
+      suppliers.addAll(
+        listOf(
+          zadd("zkey", 1.0, "a"),
+          zscore("zkey", "a"),
+          zrangeWithScores("zkey", start = ZRangeIndexMarker(0), stop = ZRangeIndexMarker(-1)),
+          zremRangeByRank("zkey", start = ZRangeRankMarker(0), stop = ZRangeRankMarker(-1)),
+          zcard("zkey")
+        )
+      )
+    }
+    assertThat(suppliers.map { it.get() }).containsExactly(
+      1L,
+      1.0,
+      listOf("a".encodeUtf8() to 1.0),
+      1L,
+      0L,
     )
   }
 
