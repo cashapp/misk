@@ -97,49 +97,5 @@ interface DeferredRedis {
 
   fun pExpireAt(key: String, timestampMilliseconds: Long): Supplier<Boolean>
 
-  fun zadd(
-    key: String,
-    score: Double,
-    member: String,
-    vararg options: Redis.ZAddOptions
-  ): Supplier<Long>
-
-  fun zadd(
-    key: String,
-    scoreMembers: Map<String, Double>,
-    vararg options: Redis.ZAddOptions
-  ): Supplier<Long>
-
-  fun zscore(
-    key: String,
-    member: String
-  ): Supplier<Double?>
-
-  fun zrange(
-    key: String,
-    type: Redis.ZRangeType = Redis.ZRangeType.INDEX,
-    start: Redis.ZRangeMarker,
-    stop: Redis.ZRangeMarker,
-    reverse: Boolean = false,
-    limit: Redis.ZRangeLimit? = null,
-  ): Supplier<List<ByteString?>>
-
-  fun zrangeWithScores(
-    key: String,
-    type: Redis.ZRangeType = Redis.ZRangeType.INDEX,
-    start: Redis.ZRangeMarker,
-    stop: Redis.ZRangeMarker,
-    reverse: Boolean = false,
-    limit: Redis.ZRangeLimit? = null,
-  ): Supplier<List<Pair<ByteString?, Double>>>
-
-  fun zremRangeByRank(
-    key: String,
-    start: Redis.ZRangeRankMarker,
-    stop: Redis.ZRangeRankMarker,
-  ): Supplier<Long>
-
-  fun zcard(key: String): Supplier<Long>
-
   fun close()
 }

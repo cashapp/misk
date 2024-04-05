@@ -5,6 +5,7 @@ import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.args.ListDirection
+import redis.clients.jedis.exceptions.JedisDataException
 import redis.clients.jedis.params.ZAddParams
 import java.time.Duration
 import java.util.function.Supplier
@@ -449,95 +450,6 @@ interface Redis {
   fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean
 
   /**
-   * Adds the specified [member] with the specified [score] to the sorted set at the [key].
-   * If a specified [member] is already a member of the sorted set, the [score] is updated and the
-   * element reinserted at the right position to ensure the correct ordering.
-   *
-   * If [key] does not exist, a new sorted set with the specified [member] as sole member is
-   * created, like if the sorted set was empty. If the [key] exists but does not hold a sorted set,
-   * an error is returned.
-   *
-   * ZADD supports a list of [options], specified after the name of the key and before the first
-   * score argument. The complete list of options can be found in [ZAddOptions].
-   */
-  fun zadd(key: String, score: Double, member: String, vararg options: ZAddOptions): Long
-
-  /**
-   * Adds all the specified members with the specified scores in [scoreMembers] to the sorted set
-   * at the [key]. If a specified [member] is already a member of the sorted set, the [score] is
-   * updated and the element reinserted at the right position to ensure the correct ordering.
-   *
-   * If [key] does not exist, a new sorted set with the specified [member] as sole member is
-   * created, like if the sorted set was empty. If the [key] exists but does not hold a sorted set,
-   * an error is returned.
-   *
-   * ZADD supports a list of [options], specified after the name of the key and before the first
-   * score argument. The complete list of options can be found in [ZAddOptions]
-   */
-  fun zadd(key: String, scoreMembers: Map<String, Double>, vararg options: ZAddOptions): Long
-
-  /**
-   * Returns the score of [member] in the sorted set at [key].
-   *
-   * If [member] does not exist in the sorted set, or [key] does not exist, nil is returned.
-   */
-  fun zscore(key: String, member: String): Double?
-
-  /**
-   * Returns the specified range of elements in the sorted set stored at [key].
-   *
-   * ZRANGE can perform different [type]s of range queries: by index (rank), by the score, or by
-   * lexicographical order. Currently only index and score type range queries are supported.
-   * See [ZRangeType] for different types of range queries.
-   *
-   * You can specify the [start] and [stop] of the range you want to filter by.
-   * Depending on the [type] you will have to use the appropriate type of [ZRangeMarker].
-   *
-   * The order of elements is from the lowest to the highest score.
-   * Elements with the same score are ordered lexicographically.
-   *
-   * Setting [reverse] reverses the ordering, so elements are ordered from highest to lowest score,
-   * and score ties are resolved by reverse lexicographical ordering.
-   *
-   * The [limit] argument can be used to obtain a sub-range from the matching elements.
-   * See [ZRangeLimit] for more info.
-   */
-  fun zrange(
-    key: String,
-    type: ZRangeType = ZRangeType.INDEX,
-    start: ZRangeMarker,
-    stop: ZRangeMarker,
-    reverse: Boolean = false,
-    limit: ZRangeLimit? = null,
-  ): List<ByteString?>
-
-  /**
-   * This is similar to [zrange] but returns the scores along with the members.
-   */
-  fun zrangeWithScores(
-    key: String,
-    type: ZRangeType = ZRangeType.INDEX,
-    start: ZRangeMarker,
-    stop: ZRangeMarker,
-    reverse: Boolean = false,
-    limit: ZRangeLimit? = null,
-  ): List<Pair<ByteString?, Double>>
-
-  /**
-   * Removes all elements in the sorted set stored at [key] with rank between [start] and [stop].
-   * Both start and stop are 0 -based indexes with 0 being the element with the lowest score.
-   * These indexes can be negative numbers, where they indicate offsets starting at the element
-   * with the highest score. For example: -1 is the element with the highest score, -2 the element
-   * with the second-highest score and so forth.
-   */
-  fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long
-
-  /**
-   * Returns the sorted set cardinality (number of elements) of the sorted set stored at [key]
-   */
-  fun zcard(key: String): Long
-
-  /**
    * Marks the given keys to be watched for conditional execution of a transaction.
    */
   fun watch(vararg keys: String)
@@ -589,6 +501,113 @@ interface Redis {
    * Flushes all keys from all databases.
    */
   fun flushAll()
+
+  /**
+   * Adds the specified [member] with the specified [score] to the sorted set at the [key].
+   * If a specified [member] is already a member of the sorted set, the [score] is updated and the
+   * element reinserted at the right position to ensure the correct ordering.
+   *
+   * If [key] does not exist, a new sorted set with the specified [member] as sole member is
+   * created, like if the sorted set was empty. If the [key] exists but does not hold a sorted set,
+   * an error is returned.
+   *
+   * ZADD supports a list of [options], specified after the name of the key and before the first
+   * score argument. The complete list of options can be found in [ZAddOptions].
+   */
+  fun zadd(
+    key: String,
+    score: Double,
+    member: String,
+    vararg options: ZAddOptions
+  ): Long
+
+  /**
+   * Adds all the specified members with the specified scores in [scoreMembers] to the sorted set
+   * at the [key]. If a specified [member] is already a member of the sorted set, the [score] is
+   * updated and the element reinserted at the right position to ensure the correct ordering.
+   *
+   * If [key] does not exist, a new sorted set with the specified [member] as sole member is
+   * created, like if the sorted set was empty. If the [key] exists but does not hold a sorted set,
+   * an error is returned.
+   *
+   * ZADD supports a list of [options], specified after the name of the key and before the first
+   * score argument. The complete list of options can be found in [ZAddOptions]
+   */
+  fun zadd(
+    key: String,
+    scoreMembers: Map<String, Double>,
+    vararg options: ZAddOptions
+  ): Long
+
+  /**
+   * Returns the score of [member] in the sorted set at [key].
+   *
+   * If [member] does not exist in the sorted set, or [key] does not exist, nil is returned.
+   */
+  fun zscore(
+    key: String,
+    member: String
+  ): Double?
+
+  /**
+   * Returns the specified range of elements in the sorted set stored at [key].
+   *
+   * ZRANGE can perform different [type]s of range queries: by index (rank), by the score, or by
+   * lexicographical order. Currently only index and score type range queries are supported.
+   * See [ZRangeType] for different types of range queries.
+   *
+   * You can specify the [start] and [stop] of the range you want to filter by.
+   * Depending on the [type] you will have to use the appropriate type of [ZRangeMarker].
+   *
+   * The order of elements is from the lowest to the highest score.
+   * Elements with the same score are ordered lexicographically.
+   *
+   * Setting [reverse] reverses the ordering, so elements are ordered from highest to lowest score,
+   * and score ties are resolved by reverse lexicographical ordering.
+   *
+   * The [limit] argument can be used to obtain a sub-range from the matching elements.
+   * See [ZRangeLimit] for more info.
+   */
+  fun zrange(
+    key: String,
+    type: ZRangeType = ZRangeType.INDEX,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean = false,
+    limit: ZRangeLimit? = null,
+  ): List<ByteString?>
+
+  /**
+   * This is similar to [zrange] but returns the scores along with the members.
+   */
+  fun zrangeWithScores(
+    key: String,
+    type: ZRangeType = ZRangeType.INDEX,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean = false,
+    limit: ZRangeLimit? = null,
+  ): List<Pair<ByteString?, Double>>
+
+  /**
+   * Removes all elements in the sorted set stored at [key] with rank between [start] and [stop].
+   * Both start and stop are 0 -based indexes with 0 being the element with the lowest score.
+   * These indexes can be negative numbers, where they indicate offsets starting at the element
+   * with the highest score. For example: -1 is the element with the highest score, -2 the element
+   * with the second-highest score and so forth.
+   */
+  fun zremRangeByRank(
+    key: String,
+    start: ZRangeRankMarker,
+    stop: ZRangeRankMarker,
+  ): Long
+
+  /**
+   * Returns the sorted set cardinality (number of elements) of the sorted set stored at [key]
+   */
+  fun zcard(
+    key: String
+  ): Long
 
   /**
    * Different types of range queries.
