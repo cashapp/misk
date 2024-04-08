@@ -266,4 +266,11 @@ class MiskConfigTest {
     val config = MiskConfig.load<DurationConfig>("no_common_config_app", TESTING, listOf<File>())
     assertThat(config.interval).isEqualTo(Duration.ofSeconds(23))
   }
+
+  @Test
+  fun `is able to use anchor and alias`() {
+    val config = MiskConfig.load<TestConfig>("anchor_app", TESTING)
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(1, 2))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(1, 2))
+  }
 }
