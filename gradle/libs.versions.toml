@@ -5,7 +5,7 @@ kotlinBinaryCompatibilityPlugin = "0.13.1"
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.11" }
 apacheCommonsPool2 = { module = "org.apache.commons:commons-pool2", version = "2.11.1" }
-assertj = { module = "org.assertj:assertj-core", version = "3.24.2" }
+assertj = { module = "org.assertj:assertj-core", version = "3.25.3" }
 awaitility = { module = "org.awaitility:awaitility", version = "4.1.0" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version = "4.1.0" }
 aws2Bom = { module = "software.amazon.awssdk:bom", version = "2.21.24" }
