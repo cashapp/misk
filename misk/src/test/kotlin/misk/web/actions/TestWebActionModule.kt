@@ -28,7 +28,6 @@ import misk.web.toResponseBody
 import jakarta.inject.Inject
 import misk.logging.LogCollectorModule
 import misk.security.authz.AllowAnyService
-import misk.security.authz.AllowAnyUser
 import misk.security.authz.Authenticated
 import misk.security.authz.ExcludeFromAllowAnyService
 
@@ -196,6 +195,6 @@ class AllowAnyUserAccessAction @Inject constructor() : WebAction {
 
   @Get("/allow_any_user_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-  @AllowAnyUser
-  fun get() = "${scopedCaller.get()} authorized as any service".toResponseBody()
+  @Authenticated(allowAnyUser = true)
+  fun get() = "${scopedCaller.get()} authorized as any user".toResponseBody()
 }
