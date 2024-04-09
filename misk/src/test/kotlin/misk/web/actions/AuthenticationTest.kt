@@ -249,6 +249,28 @@ class AuthenticationTest {
       .isEqualTo("unauthorized")
   }
 
+  @Test fun testAllowAnyUser() {
+    val caller = MiskCaller(user = "sandy")
+    assertThat(
+      executeRequest(
+        path = "/allow_any_user_access",
+        user = caller.user
+      )
+    )
+      .isEqualTo("$caller authorized as any user")
+  }
+
+  @Test fun testAllowAnyUserDenyServiceOnly() {
+    val caller = MiskCaller(service = "test")
+    assertThat(
+      executeRequest(
+        path = "/allow_any_user_access",
+        user = caller.user
+      )
+    )
+      .isEqualTo("unauthenticated")
+  }
+
   private class MixesUnauthenticatedWithOtherAnnotations @Inject constructor() : WebAction {
     @Get("/oops")
     @Unauthenticated

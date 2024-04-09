@@ -42,7 +42,9 @@ import kotlin.reflect.KClass
 data class AccessAnnotationEntry @JvmOverloads constructor(
   val annotation: KClass<out Annotation>,
   val services: List<String> = listOf(),
-  val capabilities: List<String> = listOf()
+  val capabilities: List<String> = listOf(),
+  val allowAnyService: Boolean = false,
+  val allowAnyUser: Boolean = false,
 )
 
 inline fun <reified T : Annotation> AccessAnnotationEntry(
