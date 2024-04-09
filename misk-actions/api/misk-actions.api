@@ -135,6 +135,8 @@ public abstract interface annotation class misk/security/authz/AllowAnyService :
 }
 
 public abstract interface annotation class misk/security/authz/Authenticated : java/lang/annotation/Annotation {
+	public abstract fun allowAnyService ()Z
+	public abstract fun allowAnyUser ()Z
 	public abstract fun capabilities ()[Ljava/lang/String;
 	public abstract fun services ()[Ljava/lang/String;
 }
