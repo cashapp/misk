@@ -29,7 +29,8 @@ export function FormComponent(props: FormComponentProps<any>) {
     delegate = <FormRepeatedComponent {...props} />
   } else if (field.type === "String" || field.type === "ByteString") {
     delegate = <FormTextComponent {...props} />
-  } else if (field.type === "Int" || field.type === "Long") {
+  } else if (field.type === "Int" || field.type === "Long"
+      || field.type == "Float" || field.type == "Double") {
     delegate = <FormNumberComponent {...props} />
   } else if (field.type === "Boolean") {
     delegate = <FormBoolComponent {...props} />
