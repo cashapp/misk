@@ -1,6 +1,7 @@
 package misk.redis
 
 import com.google.inject.Module
+import com.google.inject.Provider
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
@@ -12,7 +13,6 @@ import misk.testing.MiskTestModule
 import redis.clients.jedis.ConnectionPoolConfig
 import redis.clients.jedis.UnifiedJedis
 import wisp.deployment.TESTING
-import javax.inject.Provider
 
 /**
  * Provides test coverage/parity for pipelined operations on a connection-pooled Redis client.
@@ -28,9 +28,9 @@ class PipelinedRedisTest : AbstractRedisTest() {
       install(DeploymentModule(TESTING))
 
       val jedisProvider = getProvider(UnifiedJedis::class.java)
-      bind<Redis>().annotatedWith<AlwaysPipelined>().toProvider(Provider {
+      bind<Redis>().annotatedWith<AlwaysPipelined>().toProvider {
         TestAlwaysPipelinedRedis(jedisProvider.get())
-      }).asSingleton()
+      }.asSingleton()
     }
   }
 
