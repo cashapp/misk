@@ -15,10 +15,10 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.args.ListDirection
-import redis.clients.jedis.exceptions.JedisDataException
 import java.util.function.Supplier
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -28,6 +28,9 @@ import kotlin.test.assertTrue
 
 abstract class AbstractRedisTest {
   abstract var redis: Redis
+
+  @BeforeEach
+  fun setUp() = redis.flushAll()
 
   @Test
   fun simpleStringSetGet() {
