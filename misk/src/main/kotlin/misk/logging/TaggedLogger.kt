@@ -109,8 +109,6 @@ open class TaggedLogger<L:Any, out R: TaggedLogger<L, R>> private constructor(
         threadLocalMdcContext.set(ThreadLocalTaggedLoggerMdcContext.createWithMdcSnapshot(th))
       }
       throw th
-      // Will be caught by misk, unwrapped and the original exception logged with tags
-//      throw TaggedException(originalThrowable = th, MDC.getCopyOfContextMap().map { Tag(it.key, it.value) }.toSet())
     } finally {
       MDC.setContextMap(priorMDC ?: emptyMap())
     }
@@ -159,5 +157,3 @@ open class TaggedLogger<L:Any, out R: TaggedLogger<L, R>> private constructor(
     }
   }
 }
-
-

@@ -5,10 +5,10 @@ import com.squareup.wire.GrpcStatus
 import com.squareup.wire.ProtoAdapter
 import jakarta.inject.Inject
 import misk.Action
-import misk.logging.TaggedLogger
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.grpc.GrpcMessageSink
+import misk.logging.TaggedLogger
 import misk.proto.Status
 import misk.web.DispatchMechanism
 import misk.web.HttpCall
