@@ -21,7 +21,7 @@ import jakarta.inject.Singleton
 import misk.clustering.weights.FakeClusterWeightModule
 
 @MiskTest(startService = true)
-class CronModuleTest {
+class FakeCronModuleTest {
   @Suppress("unused")
   @MiskTestModule
   val module = object : KAbstractModule() {
@@ -29,15 +29,12 @@ class CronModuleTest {
       install(FakeLeaseModule())
       install(MiskTestingServiceModule())
       install(LogCollectorModule())
+
       install(ServiceModule<DependentService>().enhancedBy<ReadyService>())
       install(FakeClusterWeightModule())
       install(
-        CronModule(ZoneId.of("America/Toronto"),
-          dependencies = listOf(DependentService::class.toKey())
-        )
-      )
-      install(
-        CronModule(ZoneId.of("America/Toronto"),
+        FakeCronModule(
+          ZoneId.of("America/Toronto"),
           dependencies = listOf(DependentService::class.toKey())
         )
       )
@@ -48,7 +45,7 @@ class CronModuleTest {
   @Inject private lateinit var logCollector: LogCollector
 
   @Test fun dependentServicesStartUpBeforeCron() {
-    assertThat(logCollector.takeMessages()).contains(
+    assertThat(logCollector.takeMessages()).containsExactly(
       "DependentService started",
       "Starting ready service",
       "CronService started",
