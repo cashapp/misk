@@ -94,7 +94,7 @@ object GenericMarshallers {
 
   class ToUnit(private val contentType: MediaType?) : Marshaller<Unit> {
     override fun contentType(): MediaType? = contentType
-    override fun responseBody(o: Nothing) = object : ResponseBody {
+    override fun responseBody(o: Unit) = object : ResponseBody {
       override fun writeTo(sink: BufferedSink) {}
     }
   }
