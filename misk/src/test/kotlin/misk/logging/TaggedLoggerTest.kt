@@ -1,14 +1,14 @@
-package misk.web.exceptions
+package misk.logging
 
 import ch.qos.logback.classic.Level
 import com.google.common.testing.FakeTicker
-import com.squareup.moshi.Moshi
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
-import misk.TaggedLogger
 import misk.inject.KAbstractModule
-import misk.logging.LogCollectorModule
-import misk.random.FakeRandom
+import misk.logging.RequestLogContextInterceptorTest.LogMDCContextTestAction.LogMDCContextTestActionLogger.Companion.getTaggedLogger
+import misk.logging.RequestLogContextInterceptorTest.NestedLoggersOuterExceptionHandled.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrown
+import misk.logging.RequestLogContextInterceptorTest.NestedLoggersOuterExceptionHandledNoneThrown.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrownThenNone
+import misk.logging.RequestLogContextInterceptorTest.NestedTaggedLoggers.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNested
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
@@ -19,10 +19,8 @@ import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestClient
 import misk.web.actions.WebAction
-import misk.web.exceptions.RequestLogContextInterceptorTest.LogMDCContextTestAction.LogMDCContextTestActionLogger.Companion.getTaggedLogger
-import misk.web.exceptions.RequestLogContextInterceptorTest.NestedTaggedLoggers.NestedTaggedLoggersLogger.Companion.getTaggedLoggerNested
+import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import mu.KLogger
@@ -53,22 +51,21 @@ internal class RequestLogContextInterceptorTest {
       install(WebActionModule.create<ServiceUsingLegacyTaggedLoggerShouldLogExceptionWithoutMdcContext>())
       install(WebActionModule.create<LogMDCContextTestAction>())
       install(WebActionModule.create<NestedTaggedLoggers>())
+      install(WebActionModule.create<NestedLoggersOuterExceptionHandled>())
+      install(WebActionModule.create<NestedLoggersOuterExceptionHandledNoneThrown>())
     }
   }
   val httpClient = OkHttpClient()
 
-  @Inject private lateinit var moshi: Moshi
-
-  @Inject private lateinit var webTestClient: WebTestClient
   @Inject private lateinit var jettyService: JettyService
   @Inject private lateinit var logCollector: LogCollector
   @Inject private lateinit var fakeTicker: FakeTicker
-  @Inject private lateinit var fakeRandom: FakeRandom
 
   @BeforeEach
   fun setUp() {
     fakeTicker.setAutoIncrementStep(100L, TimeUnit.MILLISECONDS)
   }
+
 
   @Test
   fun serviceNotUsingTaggedLoggerShouldLogWithMdcContext() {
@@ -104,7 +101,8 @@ internal class RequestLogContextInterceptorTest {
     val response = invoke(ServiceUsingLegacyTaggedLoggerShouldLogExceptionWithoutMdcContext.URL, "caller")
     assertThat(response.code).isEqualTo(500)
 
-    val serviceLogs = logCollector.takeEvents(ServiceUsingLegacyTaggedLoggerShouldLogExceptionWithoutMdcContext::class, consumeUnmatchedLogs = false)
+    val serviceLogs = logCollector.takeEvents(
+      ServiceUsingLegacyTaggedLoggerShouldLogExceptionWithoutMdcContext::class, consumeUnmatchedLogs = false)
     val miskLogs = logCollector.takeEvents(ExceptionHandlingInterceptor::class)
 
     // The service info log had a legacy style TaggedLogger defined within the service using asContext
@@ -170,7 +168,6 @@ internal class RequestLogContextInterceptorTest {
   }
 
 
-
   @Test
   fun shouldHaveLogAndExceptionFromServiceWithMdcContext() {
     val response = invoke(LogMDCContextTestAction.URL, "caller")
@@ -211,11 +208,8 @@ internal class RequestLogContextInterceptorTest {
       const val URL = "/log/LogMDCContextTestAction/test"
     }
 
-    class LogMDCContextTestActionLogger<L: Any>(logClass: KClass<L>): TaggedLogger<L>(logClass) {
-      fun testTag(value: String): LogMDCContextTestActionLogger<L> {
-        tag(Tag("testTag", value))
-        return this
-      }
+    class LogMDCContextTestActionLogger<L: Any>(logClass: KClass<L>): TaggedLogger<L, LogMDCContextTestActionLogger<L>>(logClass) {
+      fun testTag(value: String) = tag(Tag("testTag", value))
 
       companion object {
         fun <T : Any> KClass<T>.getTaggedLogger(): LogMDCContextTestActionLogger<T> {
@@ -282,20 +276,152 @@ internal class RequestLogContextInterceptorTest {
       const val URL = "/log/NestedTaggedLoggersLogger/test"
     }
 
-    class NestedTaggedLoggersLogger<L: Any>(logClass: KClass<L>): TaggedLogger<L>(logClass) {
-      fun testTag(value: String): NestedTaggedLoggersLogger<L> {
-        tag(Tag("testTag", value))
-        return this
-      }
-
-      fun testTagNested(value: String): NestedTaggedLoggersLogger<L> {
-        tag(Tag("testTagNested", value))
-        return this
-      }
+    class ServiceExtendedTaggedLogger<L: Any>(logClass: KClass<L>): TaggedLogger<L, ServiceExtendedTaggedLogger<L>>(logClass) {
+      fun testTag(value: String) = tag(Tag("testTag", value))
+      fun testTagNested(value: String) = tag(Tag("testTagNested", value))
 
       companion object {
-        fun <T : Any> KClass<T>.getTaggedLoggerNested(): NestedTaggedLoggersLogger<T> {
-          return NestedTaggedLoggersLogger(this)
+        fun <T : Any> KClass<T>.getTaggedLoggerNested(): ServiceExtendedTaggedLogger<T> {
+          return ServiceExtendedTaggedLogger(this)
+        }
+      }
+    }
+  }
+
+
+  @Test
+  fun shouldCorrectlyLogOuterMdcOnlyWhenNestedLoggerExceptionIsCaughtAndAnotherThrown() {
+    val response = invoke(NestedLoggersOuterExceptionHandled.URL, "caller")
+    assertThat(response.code).isEqualTo(500)
+
+    val serviceLogs = logCollector.takeEvents(NestedLoggersOuterExceptionHandled::class, consumeUnmatchedLogs = false)
+    val miskExceptionLogs = logCollector.takeEvents(ExceptionHandlingInterceptor::class)
+
+    assertThat(serviceLogs).hasSize(1)
+    assertThat(serviceLogs.single().message).isEqualTo("Exception caught and handled")
+    assertThat(serviceLogs.single().level).isEqualTo(Level.WARN)
+    assertThat(serviceLogs.single().mdcPropertyMap).containsEntry("testTag", "SpecialTagValue123")
+    assertThat(serviceLogs.single().mdcPropertyMap).doesNotContainKey("testTagNested")
+
+    assertThat(miskExceptionLogs).hasSize(1)
+    with(miskExceptionLogs.single()) {
+      assertThat(throwableProxy.message).isEqualTo("Should not log MDC from nested tagged logger")
+      assertThat(message).contains("unexpected error dispatching to")
+      assertThat(level).isEqualTo(Level.ERROR)
+      assertThat(mdcPropertyMap).containsEntry("testTag", "SpecialTagValue123")
+      assertThat(mdcPropertyMap).doesNotContainKey("testTagNested")
+    }
+  }
+
+  class NestedLoggersOuterExceptionHandled @Inject constructor() : WebAction {
+    @Get(URL)
+    @Unauthenticated
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun call(): String {
+      return logger
+        .testTag("SpecialTagValue123")
+        .asContext {
+          try {
+            functionWithNestedTaggedLogger()
+          } catch (e: NestedTaggedLoggerException) {
+            logger.warn { "Exception caught and handled" }
+          }
+
+          throw OuterTaggedLoggerException("Should not log MDC from nested tagged logger")
+        }
+    }
+
+    private fun functionWithNestedTaggedLogger(): String {
+      return logger
+        .testTagNested("NestedTagValue123")
+        .asContext {
+          throw NestedTaggedLoggerException("Nested logger test exception")
+        }
+    }
+
+    class NestedTaggedLoggerException(message: String) : Throwable(message)
+    class OuterTaggedLoggerException(message: String) : Throwable(message)
+
+    companion object {
+      val logger = this::class.getTaggedLoggerNestedOuterExceptionThrown()
+      const val URL = "/log/NestedLoggersOuterExceptionHandled/test"
+    }
+
+    class ServiceExtendedTaggedLogger<L: Any>(logClass: KClass<L>): TaggedLogger<L, ServiceExtendedTaggedLogger<L>>(logClass) {
+      fun testTag(value: String)= tag("testTag" to value)
+      fun testTagNested(value: String) = tag("testTagNested" to value)
+
+      companion object {
+        fun <T : Any> KClass<T>.getTaggedLoggerNestedOuterExceptionThrown(): ServiceExtendedTaggedLogger<T> {
+          return ServiceExtendedTaggedLogger(this)
+        }
+      }
+    }
+  }
+
+
+  @Test
+  fun shouldCorrectlyResetThreadLocalWhenExceptionCaughtAndNoneThrown() {
+    val response = invoke(NestedLoggersOuterExceptionHandledNoneThrown.URL, "caller")
+    assertThat(response.code).isEqualTo(200)
+
+    val serviceLogs = logCollector.takeEvents(NestedLoggersOuterExceptionHandledNoneThrown::class, consumeUnmatchedLogs = false)
+    val miskExceptionLogs = logCollector.takeEvents(ExceptionHandlingInterceptor::class)
+
+    assertThat(serviceLogs).hasSize(1)
+    assertThat(serviceLogs.single().message).isEqualTo("Should be zero size and log with no MDC context: 0")
+    assertThat(serviceLogs.single().level).isEqualTo(Level.INFO)
+    assertThat(serviceLogs.single().mdcPropertyMap).doesNotContainKey("testTag")
+    assertThat(serviceLogs.single().mdcPropertyMap).doesNotContainKey("testTagNested")
+
+    assertThat(miskExceptionLogs).hasSize(0)
+  }
+
+  class NestedLoggersOuterExceptionHandledNoneThrown @Inject constructor() : WebAction {
+    @Get(URL)
+    @Unauthenticated
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun call(): String {
+      logger
+        .testTag("SpecialTagValue123")
+        .asContext {
+          try {
+            functionWithNestedTaggedLogger()
+          } catch (_: NestedTaggedLoggerException) {
+            // Just squash for this test
+          }
+        }
+
+      // This is testing the ThreadLocal cleanup function within TaggedLogger when asContext() exits
+      // without throwing an exception
+      val shouldBeEmptySet = TaggedLogger.getThreadLocalMdcContext()
+      logger.info { "Should be zero size and log with no MDC context: ${shouldBeEmptySet.size}" }
+      return ""
+    }
+
+    private fun functionWithNestedTaggedLogger(): String {
+      return logger
+        .testTagNested("NestedTagValue123")
+        .asContext {
+          throw NestedTaggedLoggerException("Nested logger test exception")
+        }
+    }
+
+    class NestedTaggedLoggerException(message: String) : Throwable(message)
+    class OuterTaggedLoggerException(message: String) : Throwable(message)
+
+    companion object {
+      val logger = this::class.getTaggedLoggerNestedOuterExceptionThrownThenNone()
+      const val URL = "/log/NestedLoggersOuterExceptionHandledNoneThrown/test"
+    }
+
+    class ServiceExtendedTaggedLogger<L: Any>(logClass: KClass<L>): TaggedLogger<L, ServiceExtendedTaggedLogger<L>>(logClass) {
+      fun testTag(value: String)= tag("testTag" to value)
+      fun testTagNested(value: String) = tag("testTagNested" to value)
+
+      companion object {
+        fun <T : Any> KClass<T>.getTaggedLoggerNestedOuterExceptionThrownThenNone(): ServiceExtendedTaggedLogger<T> {
+          return ServiceExtendedTaggedLogger(this)
         }
       }
     }

@@ -5,7 +5,7 @@ import com.squareup.wire.GrpcStatus
 import com.squareup.wire.ProtoAdapter
 import jakarta.inject.Inject
 import misk.Action
-import misk.TaggedLogger
+import misk.logging.TaggedLogger
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.grpc.GrpcMessageSink

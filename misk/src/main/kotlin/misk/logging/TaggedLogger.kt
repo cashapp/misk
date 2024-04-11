@@ -1,13 +1,9 @@
-package misk
+package misk.logging
 
 import mu.KLogger
 import mu.KotlinLogging
 import org.slf4j.MDC
 import wisp.logging.Tag
-import wisp.logging.debug
-import wisp.logging.error
-import wisp.logging.info
-import wisp.logging.warn
 import kotlin.reflect.KClass
 
 /**
@@ -24,7 +20,7 @@ import kotlin.reflect.KClass
  *
  * First set up a logger class with relevant MDC functions for the code base:
  *
- * class MyServiceLogger<T: Any>(loggerClass: KClass<T>): TaggedLogger<T>(loggerClass) {
+ * class MyServiceLogger<T: Any>(loggerClass: KClass<T>): TaggedLogger<T, MyServiceLogger<T>>(loggerClass) {
  *   fun processValue(value: String?) = tag("process_value" to value)
  * }
  *
@@ -70,39 +66,22 @@ import kotlin.reflect.KClass
  *
  */
 
-open class TaggedLogger<L:Any> private constructor(
+open class TaggedLogger<L:Any, out R: TaggedLogger<L, R>> private constructor(
   private val kLogger: KLogger,
   private val tags: MutableSet<Tag>
-) {
+): KLogger by kLogger {
+
   constructor(loggerClass: KClass<L>, tags: Set<Tag> = emptySet()) : this(
     getLogger(loggerClass),
     tags.toMutableSet()
   )
 
-  fun tag(vararg newTags: Tag) {
+  // Add tags to the list of MDC tags for the current logger in context, including any other nested TaggedLoggers
+  fun tag(vararg newTags: Tag): R {
     tags.addAll(newTags)
+    @Suppress("UNCHECKED_CAST")
+    return this as R
   }
-
-  fun info(message: () -> Any?) =
-    kLogger.info(*tags.toTypedArray(), message = message)
-
-  fun debug(message: () -> Any?) =
-    kLogger.debug(*tags.toTypedArray(), message = message)
-
-  fun warn(message: () -> Any?) =
-    kLogger.warn(*tags.toTypedArray(), message = message)
-
-  fun error(message: () -> Any?) =
-    kLogger.error(*tags.toTypedArray(), message = message)
-
-  fun info(th: Throwable, message: () -> Any?) =
-    kLogger.info(th, *tags.toTypedArray(), message = message)
-
-  fun warn(th: Throwable, message: () -> Any?) =
-    kLogger.warn(th, *tags.toTypedArray(), message = message)
-
-  fun error(th: Throwable, message: () -> Any?) =
-    kLogger.error(th, *tags.toTypedArray(), message = message)
 
   // Adds the tags to the Mapped Diagnostic Context for the current thread for the duration of the block.
   fun <T> asContext(f: () -> T): T {
@@ -116,9 +95,9 @@ open class TaggedLogger<L:Any> private constructor(
 
     try {
       return f().also {
-        // Exiting this TaggedLogger gracefully: Lets do some cleanup to keep the ThreadLocal clear
-        // The possible scenario here is that a nested TaggedLogger threw an exception, and it was
-        // caught and handled by this TaggedLogger thus should clean up the unused context.
+        // Exiting this TaggedLogger gracefully: Lets do some cleanup to keep the ThreadLocal clear.
+        // The scenario here is that a nested TaggedLogger threw an exception, it was
+        // caught and handled by this TaggedLogger, so it should clean up the unused context.
         threadLocalMdcContext.remove()
       }
     } catch (th: Throwable) {
