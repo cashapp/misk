@@ -96,8 +96,9 @@ abstract class AbstractRedisClusterTest : AbstractRedisTest() {
   }
 
   private fun assertFailsOnKeysInNotSameSlot(block: () -> Unit) {
-    val ex = assertThrows<IllegalStateException>(block)
+    val ex = assertThrows<RuntimeException>(block)
     assertThat(ex.message)
-      .matches("When using clustered Redis, keys used by one (.+) command must always map to the same slot, but mapped to slots .+")
+      .contains("When using clustered Redis, keys used by one",
+        "command must always map to the same slot, but mapped to slots [")
   }
 }

@@ -7,6 +7,7 @@ import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
+import wisp.logging.getLogger
 import java.time.Duration
 import java.util.function.Supplier
 
@@ -169,7 +170,7 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
   }
 
   override fun flushAll() {
-    unifiedJedis.flushAll()
+    unifiedJedis.flushAllWithClusterSupport(logger)
   }
 
   override fun zadd(
@@ -214,4 +215,8 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
   ): Long = runPipeline { zremRangeByRank(key, start, stop) }
 
   override fun zcard(key: String): Long = runPipeline { zcard(key) }
+
+  companion object {
+    private val logger = getLogger<TestAlwaysPipelinedRedis>()
+  }
 }

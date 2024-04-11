@@ -9,6 +9,7 @@ import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.JedisPubSub
@@ -21,6 +22,7 @@ import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
+import wisp.logging.getLogger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -390,7 +392,7 @@ class RealRedis(
   }
 
   override fun flushAll() {
-    unifiedJedis.flushAll()
+    unifiedJedis.flushAllWithClusterSupport(logger)
   }
 
   override fun zadd(
@@ -660,5 +662,7 @@ class RealRedis(
 
   companion object {
     val charset = charset("UTF-8")
+
+    private val logger = getLogger<RealRedis>()
   }
 }
