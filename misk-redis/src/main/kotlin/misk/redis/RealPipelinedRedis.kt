@@ -4,9 +4,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.AbstractPipeline
 import redis.clients.jedis.ClusterPipeline
-import redis.clients.jedis.Jedis
 import redis.clients.jedis.Pipeline
-import redis.clients.jedis.PipelineBase
 import redis.clients.jedis.Response
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.SetParams
@@ -21,21 +19,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     if (pipeline !is ClusterPipeline) {
       return null
     }
-    val slots = keys.map { JedisClusterCRC16.getSlot(it) }.distinct()
-    return if (slots.size == 1) {
-      null
-    } else {
-      RuntimeException(
-        """
-          |When using clustered Redis, keys used by one $op command in a pipeline must always map to the same slot, but mapped to slots $slots.
-          |You can use {hashtags} in your key name to control how Redis hashes keys to slots.
-          |For example, keys: `{customer9001}.contacts` and `{customer9001}.payments` will  hash to the same slot.
-          |
-          |See https://redis.io/topics/cluster-spec#hash-tags for more information.
-          |
-          """.trimMargin()
-      )
-    }
+    return getSlotErrorOrNull(op, keys)
   }
 
   override fun del(key: String): Supplier<Boolean> {

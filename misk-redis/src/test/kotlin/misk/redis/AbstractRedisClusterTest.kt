@@ -4,6 +4,7 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.exceptions.JedisClusterOperationException
 import kotlin.test.assertEquals
@@ -95,8 +96,8 @@ abstract class AbstractRedisClusterTest : AbstractRedisTest() {
   }
 
   private fun assertFailsOnKeysInNotSameSlot(block: () -> Unit) {
-    assertThatThrownBy { block() }
-      .isInstanceOf(JedisClusterOperationException::class.java)
-      .hasMessage("Keys must belong to same hashslot.")
+    val ex = assertThrows<IllegalStateException>(block)
+    assertThat(ex.message)
+      .matches("When using clustered Redis, keys used by one (.+) command must always map to the same slot, but mapped to slots .+")
   }
 }
