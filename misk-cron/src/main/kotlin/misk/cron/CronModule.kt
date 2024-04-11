@@ -12,6 +12,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import java.time.ZoneId
 import jakarta.inject.Qualifier
+import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
 
 class CronModule @JvmOverloads constructor(
@@ -41,7 +42,7 @@ class FakeCronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf()
-) : KInstallOnceModule() {
+) : KAbstractModule() {
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
     install(
