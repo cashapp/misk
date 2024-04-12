@@ -1984,6 +1984,13 @@ public final class misk/web/marshal/GenericMarshallers$ToNothing : misk/web/mars
 	public fun responseBody (Ljava/lang/Void;)Lmisk/web/ResponseBody;
 }
 
+public final class misk/web/marshal/GenericMarshallers$ToUnit : misk/web/marshal/Marshaller {
+	public fun <init> (Lokhttp3/MediaType;)V
+	public fun contentType ()Lokhttp3/MediaType;
+	public synthetic fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public fun responseBody (Lkotlin/Unit;)Lmisk/web/ResponseBody;
+}
+
 public final class misk/web/marshal/GenericUnmarshallers {
 	public static final field INSTANCE Lmisk/web/marshal/GenericUnmarshallers;
 	public final fun canHandle (Ljava/lang/reflect/Type;)Z
