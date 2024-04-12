@@ -627,6 +627,61 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.pExpireAt(key, timestampMilliseconds)
     }
 
+    override fun zadd(
+      key: String,
+      score: Double,
+      member: String,
+      vararg options: Redis.ZAddOptions
+    ): Supplier<Long> = Supplier {
+      this@FakeRedis.zadd(key, score, member, *options)
+    }
+
+    override fun zadd(
+      key: String,
+      scoreMembers: Map<String, Double>,
+      vararg options: Redis.ZAddOptions
+    ): Supplier<Long> = Supplier {
+      this@FakeRedis.zadd(key, scoreMembers, *options)
+    }
+
+    override fun zscore(key: String, member: String): Supplier<Double?> = Supplier {
+      this@FakeRedis.zscore(key, member)
+    }
+
+    override fun zrange(
+      key: String,
+      type: ZRangeType,
+      start: ZRangeMarker,
+      stop: ZRangeMarker,
+      reverse: Boolean,
+      limit: ZRangeLimit?
+    ): Supplier<List<ByteString?>> = Supplier {
+      this@FakeRedis.zrange(key, type, start, stop, reverse, limit)
+    }
+
+    override fun zrangeWithScores(
+      key: String,
+      type: ZRangeType,
+      start: ZRangeMarker,
+      stop: ZRangeMarker,
+      reverse: Boolean,
+      limit: ZRangeLimit?
+    ): Supplier<List<Pair<ByteString?, Double>>> = Supplier {
+      this@FakeRedis.zrangeWithScores(key, type, start, stop, reverse, limit)
+    }
+
+    override fun zremRangeByRank(
+      key: String,
+      start: ZRangeRankMarker,
+      stop: ZRangeRankMarker
+    ): Supplier<Long> = Supplier {
+      this@FakeRedis.zremRangeByRank(key, start, stop)
+    }
+
+    override fun zcard(key: String): Supplier<Long> = Supplier {
+      this@FakeRedis.zcard(key)
+    }
+
     override fun close() {
       // No-op.
     }
