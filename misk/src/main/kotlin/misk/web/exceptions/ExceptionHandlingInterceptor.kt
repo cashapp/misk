@@ -8,7 +8,6 @@ import misk.Action
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.grpc.GrpcMessageSink
-import misk.logging.TaggedLogger
 import misk.proto.Status
 import misk.web.DispatchMechanism
 import misk.web.HttpCall
@@ -23,6 +22,7 @@ import okio.Buffer
 import okio.BufferedSink
 import okio.ByteString
 import wisp.logging.Tag
+import wisp.logging.TaggedLogger
 import wisp.logging.error
 import wisp.logging.getLogger
 import wisp.logging.log

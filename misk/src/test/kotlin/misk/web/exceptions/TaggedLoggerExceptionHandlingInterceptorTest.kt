@@ -1,14 +1,15 @@
-package misk.logging
+package misk.web.exceptions
 
 import ch.qos.logback.classic.Level
 import com.google.common.testing.FakeTicker
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
-import misk.logging.TaggedLoggerActionTest.LogMDCContextTestAction.LogMDCContextTestActionLogger.Companion.getTaggedLogger
-import misk.logging.TaggedLoggerActionTest.NestedLoggersOuterExceptionHandled.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrown
-import misk.logging.TaggedLoggerActionTest.NestedLoggersOuterExceptionHandledNoneThrown.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrownThenNone
-import misk.logging.TaggedLoggerActionTest.NestedTaggedLoggers.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNested
+import misk.logging.LogCollectorModule
+import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.LogMDCContextTestAction.LogMDCContextTestActionLogger.Companion.getTaggedLogger
+import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.NestedLoggersOuterExceptionHandled.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrown
+import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.NestedLoggersOuterExceptionHandledNoneThrown.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrownThenNone
+import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.NestedTaggedLoggers.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNested
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
@@ -20,7 +21,6 @@ import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.actions.WebAction
-import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import mu.KLogger
@@ -31,13 +31,14 @@ import org.junit.jupiter.api.Test
 import org.slf4j.MDC
 import wisp.logging.LogCollector
 import wisp.logging.Tag
+import wisp.logging.TaggedLogger
 import wisp.logging.getLogger
 import wisp.logging.info
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 @MiskTest(startService = true)
-internal class TaggedLoggerActionTest {
+internal class TaggedLoggerExceptionHandlingInterceptorTest {
   @MiskTestModule
   val module = object :KAbstractModule() {
     override fun configure() {

@@ -13,7 +13,6 @@ import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_BATCH_SIZE
 import misk.jobqueue.sqs.TaggedLoggerJobQueueTest.SqsJobQueueTestTaggedLogger.Companion.getTaggedLogger
 import misk.jobqueue.subscribe
 import misk.logging.LogCollectorModule
-import misk.logging.TaggedLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Test
 import wisp.feature.testing.FakeFeatureFlags
 import wisp.logging.LogCollector
 import wisp.logging.Tag
+import wisp.logging.TaggedLogger
 import wisp.logging.getLogger
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit

@@ -1,9 +1,8 @@
-package misk.logging
+package wisp.logging
 
 import mu.KLogger
 import mu.KotlinLogging
 import org.slf4j.MDC
-import wisp.logging.Tag
 import kotlin.reflect.KClass
 
 /**

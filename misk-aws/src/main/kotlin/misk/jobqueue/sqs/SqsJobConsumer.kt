@@ -16,12 +16,12 @@ import misk.feature.FeatureFlags
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
-import misk.logging.TaggedLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import org.slf4j.MDC
 import org.slf4j.event.Level
+import wisp.logging.TaggedLogger
 import wisp.logging.getLogger
 import wisp.logging.log
 import wisp.tracing.traceWithNewRootSpan
