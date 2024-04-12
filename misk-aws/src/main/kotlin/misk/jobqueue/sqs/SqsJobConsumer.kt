@@ -4,20 +4,26 @@ import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provider
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
+import misk.logging.TaggedLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import org.slf4j.MDC
+import org.slf4j.event.Level
 import wisp.logging.getLogger
+import wisp.logging.log
 import wisp.tracing.traceWithNewRootSpan
 import java.time.Clock
 import java.time.Duration
@@ -26,9 +32,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
 @Singleton
 internal class SqsJobConsumer @Inject internal constructor(
@@ -208,7 +211,12 @@ internal class SqsJobConsumer @Inject internal constructor(
                 )
                 Status.OK
               } catch (th: Throwable) {
-                log.error(th) { "error handling job from ${queue.queueName}" }
+                val mdcTags = TaggedLogger.getThreadLocalMdcContext()
+                  .also { TaggedLogger.resetThreadLocalMdcContext() }
+
+                // The underlying logger takes care of adding the mdc tags and cleaning them up when calling this way
+                log.log(Level.ERROR, th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
+
                 metrics.handlerFailures.labels(queue.queueName, queue.queueName).inc()
                 Tags.ERROR.set(span, true)
                 Status.FAILED

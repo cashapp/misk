@@ -5,10 +5,10 @@ import com.google.common.testing.FakeTicker
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
-import misk.logging.RequestLogContextInterceptorTest.LogMDCContextTestAction.LogMDCContextTestActionLogger.Companion.getTaggedLogger
-import misk.logging.RequestLogContextInterceptorTest.NestedLoggersOuterExceptionHandled.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrown
-import misk.logging.RequestLogContextInterceptorTest.NestedLoggersOuterExceptionHandledNoneThrown.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrownThenNone
-import misk.logging.RequestLogContextInterceptorTest.NestedTaggedLoggers.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNested
+import misk.logging.TaggedLoggerActionTest.LogMDCContextTestAction.LogMDCContextTestActionLogger.Companion.getTaggedLogger
+import misk.logging.TaggedLoggerActionTest.NestedLoggersOuterExceptionHandled.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrown
+import misk.logging.TaggedLoggerActionTest.NestedLoggersOuterExceptionHandledNoneThrown.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrownThenNone
+import misk.logging.TaggedLoggerActionTest.NestedTaggedLoggers.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNested
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 @MiskTest(startService = true)
-internal class RequestLogContextInterceptorTest {
+internal class TaggedLoggerActionTest {
   @MiskTestModule
   val module = object :KAbstractModule() {
     override fun configure() {
@@ -66,20 +66,24 @@ internal class RequestLogContextInterceptorTest {
     fakeTicker.setAutoIncrementStep(100L, TimeUnit.MILLISECONDS)
   }
 
-
   @Test
   fun serviceNotUsingTaggedLoggerShouldLogWithMdcContext() {
     val response = invoke(ServiceNotUsingTaggedLoggerShouldLogWithHandRolledMdcContext.URL, "caller")
     assertThat(response.code).isEqualTo(200)
 
-    val logs = logCollector.takeEvents(ServiceNotUsingTaggedLoggerShouldLogWithHandRolledMdcContext::class)
+    val logs =
+      logCollector.takeEvents(ServiceNotUsingTaggedLoggerShouldLogWithHandRolledMdcContext::class)
     assertThat(logs).hasSize(1)
     assertThat(logs.single().message).isEqualTo("Start Test Process")
     assertThat(logs.single().level).isEqualTo(Level.INFO)
-    assertThat(logs.single().mdcPropertyMap).containsEntry("HandRolledLoggerTag", "handRolledLoggerTagValue")
+    assertThat(logs.single().mdcPropertyMap).containsEntry(
+      "HandRolledLoggerTag",
+      "handRolledLoggerTagValue"
+    )
   }
 
-  class ServiceNotUsingTaggedLoggerShouldLogWithHandRolledMdcContext @Inject constructor() : WebAction {
+  class ServiceNotUsingTaggedLoggerShouldLogWithHandRolledMdcContext @Inject constructor() :
+    WebAction {
     @Get(URL)
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
