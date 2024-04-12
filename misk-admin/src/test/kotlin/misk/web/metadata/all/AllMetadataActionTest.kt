@@ -97,6 +97,5 @@ class AllMetadataActionTest {
       """.trimIndent(),
       (actualWebActionsMetadata.metadata as List<WebActionMetadata>).first().toString()
     )
-
   }
 }
