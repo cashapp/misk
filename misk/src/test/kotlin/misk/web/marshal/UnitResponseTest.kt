@@ -7,12 +7,18 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.Response
+import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.WebTestClient
 import misk.web.actions.WebAction
-import okhttp3.ResponseBody
+import misk.web.mediatype.MediaTypes
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
@@ -26,7 +32,25 @@ internal class UnitResponseTest {
   fun returnUnitResponseBody() {
     with(webTestClient.get("/response/as-unit-response-body")) {
       assertThat(response.code).isEqualTo(200)
-      assertThat(response.headers.toMap()).doesNotContainKey("Content-Type")
+      assertThat(response.headers["Content-Type"]).isNull()
+      assertThat(response.body!!.bytes()).isEmpty()
+    }
+  }
+
+  @Test
+  fun returnEmptyStringResponseBody() {
+    with(webTestClient.get("/response/as-no-response-content-type")) {
+      assertThat(response.code).isEqualTo(200)
+      assertThat(response.headers["Content-Type"]).isNull()
+      assertThat(response.body!!.bytes()).isEmpty()
+    }
+  }
+
+  @Test
+  fun returnWithContentType() {
+    with(webTestClient.get("/response/as-application-json")) {
+      assertThat(response.code).isEqualTo(200)
+      assertThat(response.headers["Content-Type"]).isEqualTo(MediaTypes.APPLICATION_JSON)
       assertThat(response.body!!.bytes()).isEmpty()
     }
   }
@@ -36,11 +60,24 @@ internal class UnitResponseTest {
     fun call() = Response(Unit)
   }
 
+  class ReturnAsEmptyStringResponseBody @Inject constructor() : WebAction {
+    @Get("/response/as-no-response-content-type")
+    fun call() = ""
+  }
+
+  class ReturnWithContentType @Inject constructor() : WebAction {
+    @Get("/response/as-application-json")
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun call() = Response(Unit)
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       install(WebActionModule.create<ReturnAsUnitResponseBody>())
+      install(WebActionModule.create<ReturnAsEmptyStringResponseBody>())
+      install(WebActionModule.create<ReturnWithContentType>())
     }
   }
 }
