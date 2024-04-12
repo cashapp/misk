@@ -21,6 +21,8 @@ dependencies {
   implementation(libs.guice)
   implementation(libs.okio)
   implementation(libs.prometheusClient)
+  implementation(project(":wisp:wisp-logging"))
+  implementation(libs.kotlinLogging)
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-service"))
 
