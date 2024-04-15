@@ -39,9 +39,7 @@ class DataSourceService @JvmOverloads constructor(
   /** The decorated data source */
   private var _dataSource: DataSource? = null
 
-  val dataSource: DataSource
-    get() = _dataSource
-      ?: error("@${qualifier.simpleName} DataSource not created: did you forget to start the service?")
+  val dataSource: DataSource = DataSourceWrapper(qualifier.simpleName)
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
@@ -143,6 +141,7 @@ class DataSourceService @JvmOverloads constructor(
 
     hikariDataSource = HikariDataSource(hikariConfig)
     _dataSource = decorate(hikariDataSource!!)
+    (dataSource as DataSourceWrapper).initialize(_dataSource!!)
   }
 
   private fun decorate(dataSource: DataSource): DataSource =
