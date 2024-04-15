@@ -13,7 +13,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 
 @Singleton
-internal class QueueResolver @Inject internal constructor(
+class QueueResolver @Inject internal constructor(
   private val currentRegion: AwsRegion,
   private val currentAccount: AwsAccountId,
   private val defaultSQS: AmazonSQS,

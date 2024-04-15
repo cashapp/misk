@@ -31,7 +31,7 @@ import com.google.inject.Provider
 import jakarta.inject.Singleton
 
 @Singleton
-internal class SqsJobConsumer @Inject internal constructor(
+class SqsJobConsumer @Inject internal constructor(
   @ForSqsHandling private val handlingThreads: ExecutorService,
   @ForSqsHandling private val taskQueue: RepeatedTaskQueue,
   @ForSqsReceiving private val receivingThreads: ExecutorService,

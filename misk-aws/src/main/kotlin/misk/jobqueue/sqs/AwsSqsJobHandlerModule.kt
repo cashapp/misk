@@ -72,7 +72,7 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
 }
 
 @Singleton
-internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
+class AwsSqsJobHandlerSubscriptionService @Inject internal constructor(
   private val attributeImporter: AwsSqsQueueAttributeImporter,
   private val consumer: SqsJobConsumer,
   private val consumerMapping: Map<QueueName, JobHandler>,
