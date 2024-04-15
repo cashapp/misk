@@ -11,7 +11,7 @@ import misk.web.metadata.Metadata
 
 @Singleton
 class AllMetadataAction @Inject constructor(
-  private val metadata: List<Metadata>
+  private val metadata: Map<String, Metadata>
 ) : WebAction {
   @Get("/api/all/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -21,5 +21,5 @@ class AllMetadataAction @Inject constructor(
     return Response(all = metadata)
   }
 
-  data class Response(val all: List<Metadata>)
+  data class Response(val all: Map<String, Metadata>)
 }

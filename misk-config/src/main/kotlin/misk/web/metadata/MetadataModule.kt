@@ -1,11 +1,11 @@
 package misk.web.metadata
 
-import javax.inject.Provider
 import misk.inject.KAbstractModule
 
-class MetadataModule(private val provider: Provider<Metadata>): KAbstractModule() {
+/** Installs a new Metadata type with associated provider to expose in [AllMetadataAction]. */
+class MetadataModule<T: Metadata>(private val provider: MetadataProvider<T>): KAbstractModule() {
   override fun configure() {
-    // TODO change this to mapbinder
-    multibind<Metadata>().toProvider(provider)
+    val binder = newMapBinder<String, Metadata>()
+    binder.addBinding(provider.id).toProvider(provider)
   }
 }
