@@ -140,6 +140,7 @@ mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugi
 micrometerCore = { module = "io.micrometer:micrometer-core", version = "1.11.1" }
 micrometerPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.1" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.4.0" }
+mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.3.1" }
 moshi = { module = "com.squareup.moshi:moshi", version = "1.15.1" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.1" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.1" }

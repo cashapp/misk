@@ -2,6 +2,8 @@ package misk.jdbc
 
 import java.io.PrintWriter
 import java.sql.Connection
+import java.sql.ConnectionBuilder
+import java.sql.ShardingKeyBuilder
 import java.util.logging.Logger
 import javax.sql.DataSource
 
@@ -59,5 +61,15 @@ internal class DataSourceWrapper(private val simpleName : String?): DataSource {
   override fun getConnection(username: String?, password: String?): Connection {
     verifyInitialized()
     return delegate!!.getConnection(username, password)
+  }
+
+  override fun createShardingKeyBuilder(): ShardingKeyBuilder {
+    verifyInitialized()
+    return delegate!!.createShardingKeyBuilder()
+  }
+
+  override fun createConnectionBuilder(): ConnectionBuilder {
+    verifyInitialized()
+    return delegate!!.createConnectionBuilder()
   }
 }
