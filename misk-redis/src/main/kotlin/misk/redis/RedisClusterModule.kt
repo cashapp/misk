@@ -1,5 +1,6 @@
 package misk.redis
 
+import com.google.inject.Provider
 import com.google.inject.Provides
 import jakarta.inject.Singleton
 import misk.ReadyService
@@ -61,10 +62,10 @@ class RedisClusterModule @JvmOverloads constructor(
   @Provides @Singleton
   internal fun provideRedisClusterClient(
     clientMetrics: RedisClientMetrics,
-    unifiedJedis: UnifiedJedis
-  ): Redis = RealRedis(unifiedJedis, clientMetrics)
+    unifiedJedisProvider: Provider<UnifiedJedis>
+  ): Redis = RealRedis(unifiedJedisProvider, clientMetrics)
 
-  @Provides @Singleton
+  @Provides
   internal fun provideUnifiedJedis(
     config: RedisClusterConfig,
     deployment: Deployment

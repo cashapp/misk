@@ -16,6 +16,7 @@ import wisp.deployment.PRODUCTION
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import redis.clients.jedis.ConnectionPoolConfig
+import redis.clients.jedis.UnifiedJedis
 
 @MiskTest
 class RedisAuthPasswordEnvTest {
@@ -31,7 +32,7 @@ class RedisAuthPasswordEnvTest {
   @Test fun `injection fails with password-less config in real environments`() {
     assertThat(DockerRedis.config.values.first().redis_auth_password).isEmpty()
     val injector = createInjector(realEnv, realRedisModule)
-    val ex = assertThrows<ProvisionException> { injector.getInstance(keyOf<RedisConsumer>()) }
+    val ex = assertThrows<ProvisionException> { injector.getInstance(keyOf<UnifiedJedis>()) }
     assertThat(ex).hasCauseInstanceOf(IllegalStateException::class.java)
     assertThat(ex.cause)
       .hasMessage("This Redis client is configured to require an auth password, but none was provided!")

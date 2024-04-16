@@ -6234,6 +6234,38 @@ acceptedBreaks:
         \ extends java.lang.annotation.Annotation>, java.util.List<java.lang.String>,\
         \ java.util.List<java.lang.String>, boolean, boolean)"
       justification: "New parameters are optional"
+  "2024.04.12.171745-81ea336":
+    com.squareup.misk:misk-redis:
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter misk.redis.Redis misk.redis.RedisClusterModule::provideRedisClusterClient$misk_redis(misk.redis.RedisClientMetrics,\
+        \ ===redis.clients.jedis.UnifiedJedis===)"
+      new: "parameter misk.redis.Redis misk.redis.RedisClusterModule::provideRedisClusterClient$misk_redis(misk.redis.RedisClientMetrics,\
+        \ ===com.google.inject.Provider<redis.clients.jedis.UnifiedJedis>===)"
+      justification: "RealRedis is not constructed directly outside of Misk"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter misk.redis.Redis misk.redis.RedisClusterModule::provideRedisClusterClient(misk.redis.RedisClientMetrics,\
+        \ ===redis.clients.jedis.UnifiedJedis===)"
+      new: "parameter misk.redis.Redis misk.redis.RedisClusterModule::provideRedisClusterClient(misk.redis.RedisClientMetrics,\
+        \ ===com.google.inject.Provider<redis.clients.jedis.UnifiedJedis>===)"
+      justification: "RealRedis is not constructed directly outside of Misk"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisClientMetrics,\
+        \ ===redis.clients.jedis.UnifiedJedis===)"
+      new: "parameter misk.redis.Redis misk.redis.RedisModule::provideRedisClient$misk_redis(misk.redis.RedisClientMetrics,\
+        \ ===com.google.inject.Provider<redis.clients.jedis.UnifiedJedis>===)"
+      justification: "RealRedis is not constructed directly outside of Misk"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter misk.redis.Redis misk.redis.RedisModule::provideRedisClient(misk.redis.RedisClientMetrics,\
+        \ ===redis.clients.jedis.UnifiedJedis===)"
+      new: "parameter misk.redis.Redis misk.redis.RedisModule::provideRedisClient(misk.redis.RedisClientMetrics,\
+        \ ===com.google.inject.Provider<redis.clients.jedis.UnifiedJedis>===)"
+      justification: "RealRedis is not constructed directly outside of Misk"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.redis.RealRedis::<init>(===redis.clients.jedis.UnifiedJedis===,\
+        \ misk.redis.RedisClientMetrics)"
+      new: "parameter void misk.redis.RealRedis::<init>(===com.google.inject.Provider<redis.clients.jedis.UnifiedJedis>===,\
+        \ misk.redis.RedisClientMetrics)"
+      justification: "RealRedis is not used directly outside of Misk"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"

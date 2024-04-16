@@ -121,7 +121,7 @@ public abstract interface annotation class misk/redis/ForFakeRedis : java/lang/a
 
 public final class misk/redis/RealRedis : misk/redis/Redis {
 	public static final field Companion Lmisk/redis/RealRedis$Companion;
-	public fun <init> (Lredis/clients/jedis/UnifiedJedis;Lmisk/redis/RedisClientMetrics;)V
+	public fun <init> (Lcom/google/inject/Provider;Lmisk/redis/RedisClientMetrics;)V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public fun close ()V

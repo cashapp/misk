@@ -35,18 +35,13 @@ class RedisClientMetricsTest {
   @Inject private lateinit var redis: Redis
 
   @Test fun `connections are counted`() {
-    // Creating a redis client creates a connection.
-    assertThat(collectorRegistry[ACTIVE_CONNECTIONS]).isEqualTo(1.0)
-    assertThat(collectorRegistry[IDLE_CONNECTIONS]).isEqualTo(0.0)
-    assertThat(collectorRegistry[MAX_TOTAL_CONNECTIONS]).isEqualTo(8.0)
-    assertThat(collectorRegistry[MAX_IDLE_CONNECTIONS]).isEqualTo(8.0)
-
-    // Use the connection.
+    // Running an operation to ensure the connection is established.
     assertThat(redis["no-value"]).isNull()
 
-    // The connection is returned to idle, once it is used.
     assertThat(collectorRegistry[ACTIVE_CONNECTIONS]).isEqualTo(0.0)
     assertThat(collectorRegistry[IDLE_CONNECTIONS]).isEqualTo(1.0)
+    assertThat(collectorRegistry[MAX_TOTAL_CONNECTIONS]).isEqualTo(8.0)
+    assertThat(collectorRegistry[MAX_IDLE_CONNECTIONS]).isEqualTo(8.0)
 
     // No connections are destroyed, because this is exceptional unless we close the client.
     assertThat(collectorRegistry[DESTROYED_CONNECTIONS_TOTAL]).isZero()

@@ -1,5 +1,6 @@
 package misk.redis
 
+import com.google.inject.Provider
 import misk.redis.Redis.ZAddOptions
 import misk.redis.Redis.ZRangeIndexMarker
 import misk.redis.Redis.ZRangeLimit
@@ -9,7 +10,6 @@ import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.JedisPubSub
@@ -35,9 +35,11 @@ import kotlin.reflect.cast
  * been issued.
  */
 class RealRedis(
-  private val unifiedJedis: UnifiedJedis,
+  private val unifiedJedisProvider: Provider<UnifiedJedis>,
   private val clientMetrics: RedisClientMetrics,
 ) : Redis {
+  private val unifiedJedis: UnifiedJedis by lazy { unifiedJedisProvider.get() }
+
   override fun del(key: String): Boolean {
     val keyBytes = key.toByteArray(charset)
     return jedis { del(keyBytes) == 1L }
@@ -347,7 +349,7 @@ class RealRedis(
 
   private fun invokeTransactionOp(op: Transaction.() -> Unit) {
     when (unifiedJedis) {
-      is JedisPooled -> unifiedJedis.pool.resource.use { connection ->
+      is JedisPooled -> (unifiedJedis as JedisPooled).pool.resource.use { connection ->
         val transaction = Transaction(connection, false)
         transaction.op()
       }
@@ -373,7 +375,7 @@ class RealRedis(
   }
 
   override fun pipelining(block: DeferredRedis.() -> Unit) {
-      unifiedJedis.pipelined().use { pipeline ->
+    unifiedJedis.pipelined().use { pipeline ->
       block(RealPipelinedRedis(pipeline))
     }
   }
@@ -634,7 +636,7 @@ class RealRedis(
 
   private fun updateMetrics() {
     when (unifiedJedis) {
-      is JedisPooled -> clientMetrics.setActiveIdleConnectionMetrics(unifiedJedis.pool)
+      is JedisPooled -> clientMetrics.setActiveIdleConnectionMetrics((unifiedJedis as JedisPooled).pool)
     }
   }
 
