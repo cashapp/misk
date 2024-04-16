@@ -1,7 +1,5 @@
 package misk.jdbc
 
-import misk.mockito.Mockito.whenever
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.anyInt
@@ -10,7 +8,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import java.io.PrintWriter
 import java.sql.ConnectionBuilder
@@ -26,7 +23,7 @@ import kotlin.reflect.jvm.isAccessible
 
 class DataSourceWrapperTest {
   @Test
-  fun `wrap a data source`() {
+  fun `delegates all methods to the real DataSource`() {
     val dataSource = mock<DataSource> {
       on { getLogWriter() } doReturn mock<PrintWriter>()
       on { getLoginTimeout() } doReturn 10
