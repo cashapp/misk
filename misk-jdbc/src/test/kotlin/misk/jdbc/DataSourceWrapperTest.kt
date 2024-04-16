@@ -3,6 +3,7 @@ package misk.jdbc
 import misk.mockito.Mockito.whenever
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
@@ -52,6 +53,12 @@ class DataSourceWrapperTest {
         function.call(it, *verifyArgs)
       }
     }
+  }
+
+  @Test
+  fun `throws when not initialized`() {
+    val wrapper = DataSourceWrapper("qualifier")
+    assertThrows<IllegalStateException> { wrapper.getLogWriter() }
   }
 
   private fun provideMatcher(clazz: KClass<*>): Any {

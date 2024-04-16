@@ -11,12 +11,12 @@ internal class DataSourceWrapper(private val simpleName : String?): DataSource {
   private var delegate: DataSource? = null
 
   fun initialize(delegate: DataSource) {
-    require(this.delegate == null) { "@${simpleName} DataSource already created" }
+    check(this.delegate == null) { "@${simpleName} DataSource already created" }
     this.delegate = delegate
   }
 
   private fun verifyInitialized() {
-    requireNotNull(delegate) { "@${simpleName} DataSource not created: did you forget to start the service?" }
+    checkNotNull(delegate) { "@${simpleName} DataSource not created: did you forget to start the service?" }
   }
   override fun getLogWriter(): PrintWriter {
     verifyInitialized()
