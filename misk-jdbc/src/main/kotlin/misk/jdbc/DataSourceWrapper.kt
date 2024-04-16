@@ -8,6 +8,12 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Logger
 import javax.sql.DataSource
 
+/**
+ * Wraps a DataSource to allow it to be lazily initialized.
+ * This is useful for wiring objects that depend on a DataSource in Guice modules.
+ * The DataSource is lazily initialized to avoid creating a connection pool before the service is started.
+ * Note that using the DataSource before the service is started will throw an exception.
+ */
 internal class DataSourceWrapper(private val simpleName : String?): DataSource {
   private var delegate: AtomicReference<DataSource?> = AtomicReference(null)
 

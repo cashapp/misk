@@ -36,16 +36,12 @@ class DataSourceService @JvmOverloads constructor(
   /** The backing connection pool */
   private var hikariDataSource: HikariDataSource? = null
 
-  /** The decorated data source */
-  private var _dataSource: DataSource? = null
-
   val dataSource: DataSource = DataSourceWrapper(qualifier.simpleName)
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting @${qualifier.simpleName} connection pool")
 
-    require(_dataSource == null)
     try {
       createDataSource(baseConfig)
     } catch (e: Exception) {
@@ -140,8 +136,8 @@ class DataSourceService @JvmOverloads constructor(
     }
 
     hikariDataSource = HikariDataSource(hikariConfig)
-    _dataSource = decorate(hikariDataSource!!)
-    (dataSource as DataSourceWrapper).initialize(_dataSource!!)
+    val realDataSource = decorate(hikariDataSource!!)
+    (dataSource as DataSourceWrapper).initialize(realDataSource)
   }
 
   private fun decorate(dataSource: DataSource): DataSource =
