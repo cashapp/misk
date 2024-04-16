@@ -197,7 +197,8 @@ enum class Operator {
  * a unique result.
  */
 annotation class Select(
-  val path: String = ""
+  val path: String = "",
+  val aggregation: AggregationType = AggregationType.NONE
 )
 
 /**
@@ -218,3 +219,24 @@ annotation class Fetch(
   val path: String = "",
   val joinType: JoinType = LEFT
 )
+
+/**
+ * Available aggregations which can be applied to a single value [Select] query,
+ * or a [Property] of a projection.
+ */
+enum class AggregationType {
+  /** No aggregation is applied. Like `select column`. */
+  NONE,
+  /** Like `select avg(column)`. */
+  AVG,
+  /** Like `select count(column)`. */
+  COUNT,
+  /** Like `select count(distinct column)`. */
+  COUNT_DISTINCT,
+  /** Like `select max(column)`. */
+  MAX,
+  /** Like `select min(column)`. */
+  MIN,
+  /** Like `select sum(column)`. */
+  SUM,
+}

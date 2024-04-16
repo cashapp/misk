@@ -59,4 +59,17 @@ interface OperatorsMovieQuery : Query<DbMovie> {
 
   @Select("name")
   fun listAsNames(session: Session): List<String>
+
+  @Select(path = "release_date", aggregation = AggregationType.MAX)
+  fun releaseDateMax(session: Session): LocalDate?
+
+  @Select
+  fun latestReleasedMovie(session: Session): LatestReleasedMovie?
 }
+
+data class LatestReleasedMovie(
+  @Property(path = "name")
+  val name: String,
+  @Property(path = "release_date", aggregation = AggregationType.MAX)
+  val release_date: LocalDate
+): Projection

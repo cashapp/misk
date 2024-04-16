@@ -3,6 +3,8 @@ package misk.hibernate
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.inject.TypeLiteral
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.inject.typeLiteral
 import wisp.logging.getLogger
 import java.lang.reflect.InvocationHandler
@@ -10,9 +12,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
-import java.util.*
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import java.util.EnumSet
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.Path
@@ -465,10 +465,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     var rowCountWarningLimit: Int
   )
 
+  data class ParsedProperty(val path: List<String>, val aggregation: AggregationType)
+
   class SelectMethodHandler(
     private val returnList: Boolean,
     private val constructor: KFunction<*>?,
-    private val properties: List<List<String>>
+    private val properties: List<ParsedProperty>
   ) : QueryMethodHandler {
 
     override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
@@ -501,7 +503,17 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     private fun select(
       criteriaBuilder: CriteriaBuilder,
       queryRoot: Root<*>
-    ) = criteriaBuilder.array(*properties.map { queryRoot.traverse<Any?>(it) }.toTypedArray())
+    ) = criteriaBuilder.array(*properties.map {
+      when (it.aggregation) {
+        AggregationType.NONE -> queryRoot.traverse<Any?>(it.path)
+        AggregationType.AVG -> criteriaBuilder.avg(queryRoot.traverse<Number?>(it.path))
+        AggregationType.COUNT -> criteriaBuilder.count(queryRoot.traverse<Any?>(it.path))
+        AggregationType.COUNT_DISTINCT -> criteriaBuilder.countDistinct(queryRoot.traverse<Any?>(it.path))
+        AggregationType.MAX -> criteriaBuilder.max(queryRoot.traverse<Number?>(it.path))
+        AggregationType.MIN -> criteriaBuilder.min(queryRoot.traverse<Number?>(it.path))
+        AggregationType.SUM -> criteriaBuilder.sum(queryRoot.traverse<Number?>(it.path))
+      }
+    }.toTypedArray())
 
     private fun toValue(row: Any): Any? {
       return when {
@@ -821,7 +833,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           }
 
           val pathPrefix = if (select.path.isEmpty()) "" else "${select.path}."
-          val properties = mutableListOf<List<String>>()
+          val properties = mutableListOf<ParsedProperty>()
           for (parameter in parameters) {
             val property = parameter.findAnnotation<Property>()
             if (property == null) {
@@ -841,11 +853,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
             }
 
             val path = (pathPrefix + property.path).split('.')
-            properties.add(path)
+            properties.add(ParsedProperty(path, property.aggregation))
           }
           selectMethodHandler = SelectMethodHandler(isList, constructor, properties)
         } else {
-          val onlyPath = select.path.split('.')
+          val onlyPath = ParsedProperty(select.path.split('.'), select.aggregation)
           selectMethodHandler = SelectMethodHandler(isList, null, listOf(onlyPath))
         }
 

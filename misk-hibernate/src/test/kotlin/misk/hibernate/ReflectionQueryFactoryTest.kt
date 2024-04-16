@@ -1211,6 +1211,40 @@ class ReflectionQueryFactoryTest {
       }
     }
   }
+
+  @Test
+  fun aggregationInQueries() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      session.save(DbMovie("Rocky", LocalDate.of(1976, 11, 21)))
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+    }
+    // Find the latest movie.
+    val latestMovieReleaseDate = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowFullScatter().allowTableScan()
+        .releaseDateMax(session)
+    }
+    assertThat(latestMovieReleaseDate).isEqualTo(LocalDate.of(1993, 6, 9))
+  }
+
+  @Test
+  fun aggregationInProjections() {
+    val jurassicPark = DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
+    val rocky = DbMovie("Rocky", LocalDate.of(1976, 11, 21))
+    val starWars = DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
+    transacter.transaction { session ->
+      session.save(jurassicPark)
+      session.save(rocky)
+      session.save(starWars)
+    }
+    // Find the latest movie.
+    val latestMovie = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .latestReleasedMovie(session)
+    }
+    assertThat(latestMovie).isEqualTo(LatestReleasedMovie(jurassicPark.name, jurassicPark.release_date!!))
+  }
 }
 
 inline fun withSqlLogging(work: () -> Unit) {
