@@ -52,7 +52,7 @@ internal class ActionScopedTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
-    scope.enter(seedData).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+    scope.create(seedData).inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
   }
 
   @Test
@@ -78,7 +78,7 @@ internal class ActionScopedTest {
       val injector = Guice.createInjector(TestActionScopedProviderModule())
       injector.injectMembers(this)
 
-      scope.enter(mapOf()).use { scope.enter(mapOf()).use {} }
+      scope.create(mapOf()).inScope { scope.create(mapOf()) }
     }
   }
 
@@ -99,7 +99,7 @@ internal class ActionScopedTest {
       injector.injectMembers(this)
 
       // NB(mmihic): Seed data not specified
-      scope.enter(mapOf()).use { foo.get() }
+      scope.create(mapOf()).inScope { foo.get() }
     }
   }
 
@@ -109,7 +109,7 @@ internal class ActionScopedTest {
     injector.injectMembers(this)
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "null")
-    val result = scope.enter(seedData).use { nullableFoo.get() }
+    val result = scope.create(seedData).inScope { nullableFoo.get() }
     assertThat(result).isNull()
   }
 
@@ -118,7 +118,7 @@ internal class ActionScopedTest {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)
 
-    scope.enter(mapOf()).use {
+    scope.create(mapOf()).inScope {
       assertThat(constantString.get()).isEqualTo("constant-value")
       assertThat(optionalConstantString.get()).isEqualTo(Optional.of("constant-value"))
 
@@ -136,11 +136,11 @@ internal class ActionScopedTest {
     val optionalStringKey = object : TypeLiteral<Optional<String>>() {}.toKey()
 
     val emptyOptionalSeedData: Map<Key<*>, Any> = mapOf(optionalStringKey to Optional.empty<String>())
-    val emptyOptionalResult = scope.enter(emptyOptionalSeedData).use { optional.get() }
+    val emptyOptionalResult = scope.create(emptyOptionalSeedData).inScope { optional.get() }
     assertThat(emptyOptionalResult).isEqualTo("empty")
 
     val presentOptionalSeedData: Map<Key<*>, Any> = mapOf(optionalStringKey to Optional.of("present"))
-    val presentOptionalResult = scope.enter(presentOptionalSeedData).use { optional.get() }
+    val presentOptionalResult = scope.create(presentOptionalSeedData).inScope { optional.get() }
     assertThat(presentOptionalResult).isEqualTo("present")
   }
 
@@ -150,7 +150,7 @@ internal class ActionScopedTest {
     injector.injectMembers(this)
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "null")
-    val result = scope.enter(seedData).use { nullableBasedOnFoo.get() }
+    val result = scope.create(seedData).inScope { nullableBasedOnFoo.get() }
     assertThat(result).isNull()
   }
 
@@ -163,7 +163,7 @@ internal class ActionScopedTest {
       // NB(mmihic): Seed data set to a value that causes zed resolution to fail
       // with a user-defined exception
       val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "illegal-state")
-      scope.enter(seedData).use { zed.get() }
+      scope.create(seedData).inScope { zed.get() }
     }
   }
 
@@ -174,8 +174,10 @@ internal class ActionScopedTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
-    scope.enter(seedData).use { actionScope ->
-      runBlocking(actionScope.asContextElement()) { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+    scope.create(seedData).inScope {
+      runBlocking(scope.asContextElement()) {
+        assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+      }
     }
   }
 
@@ -195,7 +197,7 @@ internal class ActionScopedTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
     // exhibit A: trying to access scoped things in a new thread results in exceptions
-    scope.enter(seedData).use { _ ->
+    scope.create(seedData).inScope {
       var thrown: Throwable? = null
 
       thread {
@@ -211,17 +213,19 @@ internal class ActionScopedTest {
 
     // exhibit B: trying to access scoped things in a new thread can work, if you take
     // a snapshot of the scope and use it to instantiate a scope in the new thread.
-    scope.enter(seedData).use { actionScope ->
+    scope.create(seedData).inScope {
       var thrown: Throwable? = null
 
-      val snapshot = actionScope.snapshotActionScope()
+      val instance = scope.snapshotActionScopeInstance()
       thread {
-          try {
-            actionScope.enter(snapshot).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
-          } catch (t: Throwable) {
-            thrown = t
+        try {
+          instance.inScope {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
           }
+        } catch (t: Throwable) {
+          thrown = t
         }
+      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -235,7 +239,7 @@ internal class ActionScopedTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
     // exhibit A: trying to access scoped things in a new thread results in exceptions
-    scope.enter(seedData).use { _ ->
+    scope.create(seedData).inScope {
       var thrown: Throwable? = null
 
       thread {
@@ -251,17 +255,19 @@ internal class ActionScopedTest {
 
     // exhibit B: trying to access scoped things in a new thread can work, if you take
     // a snapshot of the scope and use it to instantiate a scope in the new thread.
-    scope.enter(seedData).use { actionScope ->
+    scope.create(seedData).inScope {
       var thrown: Throwable? = null
 
-      val instance = actionScope.snapshotActionScopeInstance()
+      val instance = scope.snapshotActionScopeInstance()
       thread {
-          try {
-            actionScope.enter(instance).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
-          } catch (t: Throwable) {
-            thrown = t
+        try {
+          instance.inScope {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
           }
+        } catch (t: Throwable) {
+          thrown = t
         }
+      }
         .join()
       assertThat(thrown).isNull()
     }
