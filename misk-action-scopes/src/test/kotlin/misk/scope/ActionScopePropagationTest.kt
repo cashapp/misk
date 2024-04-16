@@ -34,11 +34,11 @@ internal class ActionScopePropagationTest {
       keyOf<String>(Names.named("from-seed")) to "my seed data"
     )
 
-    val callable = scope.enter(seedData).use {
+    val callable = scope.create(seedData).inScope {
       scope.propagate(Callable { tester.fooValue() })
     }
 
-    scope.enter(seedData).use {
+    scope.create(seedData).inScope {
       // Submit to same thread after we've already entered the scope
       val result = directExecutor.submit(callable).get()
       assertThat(result).isEqualTo("my seed data and bar and foo!")
@@ -55,7 +55,7 @@ internal class ActionScopePropagationTest {
       keyOf<String>(Names.named("from-seed")) to "my seed data"
     )
 
-    val callable = scope.enter(seedData).use {
+    val callable = scope.create(seedData).inScope {
       scope.propagate(Callable { tester.fooValue() })
     }
 
@@ -76,11 +76,11 @@ internal class ActionScopePropagationTest {
 
     // Propagate on the the KCallable directly
     val f: KFunction<String> = tester::fooValue
-    val callable = scope.enter(seedData).use {
+    val callable = scope.create(seedData).inScope {
       scope.propagate(f)
     }
 
-    scope.enter(seedData).use {
+    scope.create(seedData).inScope {
       // Submit to same thread after we've already entered the scope
       val result = directExecutor.submit(
         Callable {
@@ -103,7 +103,7 @@ internal class ActionScopePropagationTest {
 
     // Propagate on the the KCallable directly
     val f: KFunction<String> = tester::fooValue
-    val callable = scope.enter(seedData).use {
+    val callable = scope.create(seedData).inScope {
       scope.propagate(f)
     }
 
@@ -127,11 +127,11 @@ internal class ActionScopePropagationTest {
     )
 
     // Propagate on a lambda directly
-    val function = scope.enter(seedData).use {
+    val function = scope.create(seedData).inScope {
       scope.propagate { tester.fooValue() }
     }
 
-    scope.enter(seedData).use {
+    scope.create(seedData).inScope {
       // Submit to same thread after we've already entered the scope
       val result = directExecutor.submit(Callable { function() }).get()
       assertThat(result).isEqualTo("my seed data and bar and foo!")
@@ -149,7 +149,7 @@ internal class ActionScopePropagationTest {
     )
 
     // Propagate on a lambda directly
-    val function = scope.enter(seedData).use {
+    val function = scope.create(seedData).inScope {
       scope.propagate { tester.fooValue() }
     }
 

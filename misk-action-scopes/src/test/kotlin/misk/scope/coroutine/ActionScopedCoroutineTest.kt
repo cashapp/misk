@@ -35,7 +35,7 @@ internal class ActionScopedCoroutineTest {
       keyOf<String>(Names.named("from-seed")) to "my seed data"
     )
 
-    val value = scope.enter(seedData).use {
+    val value = scope.create(seedData).inScope {
       scope.runBlocking {
         tester.fooValue()
       }
@@ -57,7 +57,7 @@ internal class ActionScopedCoroutineTest {
       keyOf<String>(Names.named("from-seed")) to "my seed data"
     )
 
-    val value = scope.enter(seedData).use {
+    val value = scope.create(seedData).inScope {
       scope.runBlocking(Dispatchers.IO) {
         tester.fooValue()
       }

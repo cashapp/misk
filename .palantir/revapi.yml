@@ -6300,6 +6300,18 @@ acceptedBreaks:
     - code: "java.method.removed"
       old: "method java.lang.String misk.web.metadata.Metadata::getId()"
       justification: "API is unused so change is safe"
+  "2024.04.22.213320-ac881d1":
+    com.squareup.misk:misk-action-scopes:
+    - code: "java.method.removed"
+      old: "method java.util.Map<com.google.inject.Key<?>, java.lang.Object> misk.scope.ActionScope.Instance::asImmediateValues$misk_action_scopes()"
+      justification: "Removed ActionScope methods that had been deprecated for a month"
+    - code: "java.method.removed"
+      old: "method java.util.Map<com.google.inject.Key<?>, java.lang.Object> misk.scope.ActionScope::snapshotActionScope()"
+      justification: "Removed ActionScope methods that had been deprecated for a month"
+    - code: "java.method.removed"
+      old: "method misk.scope.ActionScope misk.scope.ActionScope::enter(java.util.Map<com.google.inject.Key<?>,\
+        \ ? extends java.lang.Object>)"
+      justification: "Removed ActionScope methods that had been deprecated for a month"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"

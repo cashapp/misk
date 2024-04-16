@@ -15,11 +15,11 @@ class MiskCallerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallb
     val injector = context.retrieve<Injector>("injector")
     val actionScopeProvider = injector.getBinding(ActionScope::class.java)
     val actionScope = actionScopeProvider.provider.get()
-    actionScope.enter(
+    actionScope.create(
       mapOf(
         keyOf<MiskCaller>() to context.getPrincipal()
       )
-    )
+    ).enter()
   }
 
   override fun afterTestExecution(context: ExtensionContext) {
