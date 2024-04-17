@@ -812,6 +812,45 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           errors.add("${function.name}() return type must be a non-null List or a nullable value")
           return
         }
+        if (select.aggregation != AggregationType.NONE) {
+          val nullableDouble = Double::class.createType(nullable = true).typeLiteral().rawType
+          val nullableLong = Long::class.createType(nullable = true).typeLiteral().rawType
+          val nullableNumber = Number::class.createType(nullable = true).typeLiteral().rawType
+          when (select.aggregation) {
+            AggregationType.AVG -> {
+              if (!nullableDouble.isAssignableFrom(elementType.rawType)) {
+                errors.add("${function.name}() return element type must be Double? for AVG aggregations, but was $elementType")
+              }
+            }
+            AggregationType.COUNT -> {
+              if (!nullableLong.isAssignableFrom(elementType.rawType)) {
+                errors.add("${function.name}() return element type must be Long? for COUNT aggregations, but was $elementType")
+              }
+            }
+            AggregationType.COUNT_DISTINCT -> {
+              if (!nullableLong.isAssignableFrom(elementType.rawType)) {
+                errors.add("${function.name}() return element type must be Long? for COUNT_DISTINCT aggregations, but was $elementType")
+              }
+            }
+            AggregationType.MAX -> {
+              if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
+                errors.add("${function.name}() return element type must be out Comparable? for MAX aggregations, but was $elementType")
+              }
+            }
+            AggregationType.MIN -> {
+              if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
+                errors.add("${function.name}() return element type must be out Comparable? for MIN aggregations, but was $elementType")
+              }
+            }
+            AggregationType.SUM -> {
+              if (!nullableNumber.isAssignableFrom(elementType.rawType)) {
+                errors.add("${function.name}() return element type must be out Number? for SUM aggregations, but was $elementType")
+              }
+            }
+            else -> error("Unexpected AggregationType: ${select.aggregation} on ${function.name}()")
+          }
+          if (errors.isNotEmpty()) return
+        }
 
         val isProjection = Projection::class.java.isAssignableFrom(elementType.rawType)
 

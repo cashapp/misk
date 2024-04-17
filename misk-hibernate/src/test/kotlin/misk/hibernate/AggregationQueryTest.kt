@@ -9,8 +9,10 @@ import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.JdbcTestingModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import wisp.deployment.TESTING
 import java.time.LocalDate
 
@@ -22,18 +24,38 @@ class AggregationQueryTest {
   @Inject @Movies lateinit var movieTransacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
 
+  private val christmas23 = LocalDate.of(2023, 12, 25)
+
   private val jurassicPark = DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
   private val rocky = DbMovie("Rocky", LocalDate.of(1976, 11, 21))
   private val starWars = DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
+  private val theColorPurple = DbMovie("The Color Purple", christmas23)
+  private val ferrari = DbMovie("Ferrari", christmas23)
+  private val theBoysInTheBoat = DbMovie("The Boys in the Boat", christmas23)
+
+  @BeforeEach fun setup() = seedData()
 
   @Test fun aggregationInQueries() {
-    seedData()
-
     // Find the average of some numbers (AVG).
+    val average = primitiveTransacter.transaction { session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .averageI64(session)
+    }
+    assertThat(average).isEqualTo(5.25)
 
-    // Find the count of movies (COUNT).
+    // Find the count of some numbers (COUNT).
+    val count = primitiveTransacter.transaction { session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .countI64(session)
+    }
+    assertThat(count).isEqualTo(4L)
 
     // Find the count of distinct movie titles (COUNT_DISTINCT).
+    val uniqueMovieTitles = movieTransacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .distinctMovieTitles(session)
+    }
+    assertThat(uniqueMovieTitles).isEqualTo(6)
 
     // Find the latest movie (MAX).
     val latestMovieReleaseDate = movieTransacter.transaction { session ->
@@ -41,33 +63,88 @@ class AggregationQueryTest {
         .allowFullScatter().allowTableScan()
         .releaseDateMax(session)
     }
-    Assertions.assertThat(latestMovieReleaseDate).isEqualTo(LocalDate.of(1993, 6, 9))
+    assertThat(latestMovieReleaseDate).isEqualTo(christmas23)
 
     // Find the oldest movie (MIN).
+    val oldestMovieReleaseDate = movieTransacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .releaseDateMin(session)
+    }
+    assertThat(oldestMovieReleaseDate).isEqualTo(rocky.release_date!!)
 
-    // Find the sum of all movie ids (SUM). [Useless query but demonstrates the concept.]
-
+    // Find the sum of some numbers (SUM).
+    val sum = primitiveTransacter.transaction { session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .sumI64(session)
+    }
+    assertThat(sum).isEqualTo(21)
   }
 
   @Test fun aggregationInProjections() {
-    seedData()
+    // Find the average of some numbers (AVG).
+    val average = primitiveTransacter.transaction { session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .averageAll(session)
+    }
+    assertThat(average)
+      .isEqualTo(AveragePrimitiveTour(3.75, 4.25, 4.75, 5.25, 6.25, 6.75))
 
-    // Find the average movie id (AVG). [Useless query but demonstrates the concept.]
+    // Find the count of some numbers (COUNT).
+    val count = primitiveTransacter.transaction { session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .countAll(session)
+    }
+    assertThat(count)
+      .isEqualTo(CountPrimitiveTour(4, 4, 4, 4, 4, 4, 4, 4))
 
-    // Find the count of movies (COUNT).
-
-    // Find the count of distinct movie titles (COUNT_DISTINCT).
+    // Find the count of distinct numbers (COUNT_DISTINCT).
+    val countDistinct = primitiveTransacter.transaction { session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .countDistinctAll(session)
+    }
+    assertThat(countDistinct)
+      .isEqualTo(CountDistinctPrimitiveTour(2, 2, 2, 2, 2, 2, 2, 2))
 
     // Find the latest movie (MAX).
     val latestMovie = movieTransacter.transaction { session ->
       queryFactory.newQuery<OperatorsMovieQuery>()
         .latestReleasedMovie(session)
     }
-    Assertions.assertThat(latestMovie).isEqualTo(LatestReleasedMovie(jurassicPark.name, jurassicPark.release_date!!))
+    assertThat(latestMovie).isEqualTo(LatestReleaseDate(christmas23))
 
     // Find the oldest movie (MIN).
+    val oldestMovie = movieTransacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .oldestReleasedMovie(session)
+    }
+    assertThat(oldestMovie).isEqualTo(OldestReleaseDate(rocky.release_date!!))
 
-    // Find the sum of all movie ids (SUM). [Useless query but demonstrates the concept.]
+    // Find the sum of some numbers (SUM).
+    val sum = primitiveTransacter.transaction { session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .sumAll(session)
+    }
+    assertThat(sum).isEqualTo(SumPrimitiveTour(15, 17, 19, 21, 25.0, 27.0))
+  }
+
+  @Test fun `finds errors in query interfaces`() {
+    val ex = assertThrows<RuntimeException> {
+      primitiveTransacter.transaction { session ->
+        queryFactory.newQuery<WrongTypesPrimitiveTourQuery>()
+          .averageI64(session)
+      }
+    }
+
+    assertThat(ex).hasMessage(
+      """
+      |java.lang.IllegalArgumentException: Query class misk.hibernate.WrongTypesPrimitiveTourQuery has problems:
+      |  averageI64() return element type must be Double? for AVG aggregations, but was java.lang.Long
+      |  countDistinctI64() return element type must be Long? for COUNT_DISTINCT aggregations, but was java.lang.String
+      |  countI64() return element type must be Long? for COUNT aggregations, but was java.lang.Double
+      |  maxI64() return element type must be out Comparable? for MAX aggregations, but was java.lang.Object
+      |  minI64() return element type must be out Comparable? for MIN aggregations, but was java.lang.Object
+      |  sumI64() return element type must be out Number? for SUM aggregations, but was java.time.LocalDate""".trimMargin()
+    )
   }
 
   private fun seedData() {
@@ -75,9 +152,13 @@ class AggregationQueryTest {
       session.save(jurassicPark)
       session.save(rocky)
       session.save(starWars)
+      session.save(theColorPurple)
+      session.save(ferrari)
+      session.save(theBoysInTheBoat)
     }
     primitiveTransacter.transaction { session ->
       session.save(DbPrimitiveTour(false, 9, 8, 7, 6, '5', 4.0f, 3.0))
+      session.save(DbPrimitiveTour(true, 2, 3, 4, 5, '6', 7.0f, 8.0))
       session.save(DbPrimitiveTour(true, 2, 3, 4, 5, '6', 7.0f, 8.0))
       session.save(DbPrimitiveTour(true, 2, 3, 4, 5, '6', 7.0f, 8.0))
     }
@@ -99,7 +180,7 @@ class AggregationQueryTestModule : KAbstractModule() {
     })
 
     val moviesConfig = MiskConfig.load<MoviesConfig>("moviestestmodule", TESTING)
-    val dataSourceConfig = moviesConfig.vitess_mysql_data_source
+    val dataSourceConfig = moviesConfig.mysql_data_source
     install(JdbcTestingModule(Movies::class, scaleSafetyChecks = false))
     install(
       HibernateModule(
@@ -115,3 +196,22 @@ class AggregationQueryTestModule : KAbstractModule() {
   }
 }
 
+private interface WrongTypesPrimitiveTourQuery : Query<DbPrimitiveTour> {
+  @Select(path = "i64", aggregation = AggregationType.AVG)
+  fun averageI64(session: Session): Long?
+
+  @Select(path = "i64", aggregation = AggregationType.COUNT)
+  fun countI64(session: Session): Double?
+
+  @Select(path = "i64", aggregation = AggregationType.COUNT_DISTINCT)
+  fun countDistinctI64(session: Session): String?
+
+  @Select(path = "i64", aggregation = AggregationType.MAX)
+  fun maxI64(session: Session): Any?
+
+  @Select(path = "i64", aggregation = AggregationType.MIN)
+  fun minI64(session: Session): Any?
+
+  @Select(path = "i64", aggregation = AggregationType.SUM)
+  fun sumI64(session: Session): LocalDate?
+}

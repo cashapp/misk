@@ -63,13 +63,25 @@ interface OperatorsMovieQuery : Query<DbMovie> {
   @Select(path = "release_date", aggregation = AggregationType.MAX)
   fun releaseDateMax(session: Session): LocalDate?
 
+  @Select(path = "release_date", aggregation = AggregationType.MIN)
+  fun releaseDateMin(session: Session): LocalDate?
+
+  @Select(path = "name", aggregation = AggregationType.COUNT_DISTINCT)
+  fun distinctMovieTitles(session: Session): Long?
+
   @Select
-  fun latestReleasedMovie(session: Session): LatestReleasedMovie?
+  fun latestReleasedMovie(session: Session): LatestReleaseDate?
+
+  @Select
+  fun oldestReleasedMovie(session: Session): OldestReleaseDate?
 }
 
-data class LatestReleasedMovie(
-  @Property(path = "name")
-  val name: String,
+data class LatestReleaseDate(
   @Property(path = "release_date", aggregation = AggregationType.MAX)
+  val release_date: LocalDate
+): Projection
+
+data class OldestReleaseDate(
+  @Property(path = "release_date", aggregation = AggregationType.MIN)
   val release_date: LocalDate
 ): Projection
