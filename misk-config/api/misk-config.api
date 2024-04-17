@@ -102,7 +102,7 @@ public final class misk/web/metadata/MetadataModule : misk/inject/KAbstractModul
 	public fun <init> (Lmisk/web/metadata/MetadataProvider;)V
 }
 
-public abstract interface class misk/web/metadata/MetadataProvider : javax/inject/Provider {
+public abstract interface class misk/web/metadata/MetadataProvider : com/google/inject/Provider {
 	public abstract fun getId ()Ljava/lang/String;
 }
 
