@@ -41,14 +41,14 @@ class AggregationQueryTest {
       queryFactory.newQuery<PrimitiveTourQuery>()
         .averageI64(session)
     }
-    assertThat(average).isEqualTo(5.25)
+    assertThat(average).isEqualTo(5.5)
 
     // Find the count of some numbers (COUNT).
     val count = primitiveTransacter.transaction { session ->
       queryFactory.newQuery<PrimitiveTourQuery>()
         .countI64(session)
     }
-    assertThat(count).isEqualTo(4L)
+    assertThat(count).isEqualTo(6L)
 
     // Find the count of distinct movie titles (COUNT_DISTINCT).
     val uniqueMovieTitles = movieTransacter.transaction { session ->
@@ -77,7 +77,7 @@ class AggregationQueryTest {
       queryFactory.newQuery<PrimitiveTourQuery>()
         .sumI64(session)
     }
-    assertThat(sum).isEqualTo(21)
+    assertThat(sum).isEqualTo(33)
   }
 
   @Test fun aggregationInProjections() {
@@ -86,8 +86,9 @@ class AggregationQueryTest {
       queryFactory.newQuery<PrimitiveTourQuery>()
         .averageAll(session)
     }
+    // Yes, the average of all the numbers is really 5.5; 6 rows which all sum to 33.
     assertThat(average)
-      .isEqualTo(AveragePrimitiveTour(3.75, 4.25, 4.75, 5.25, 6.25, 6.75))
+      .isEqualTo(AveragePrimitiveTour(5.5, 5.5, 5.5, 5.5, 5.5, 5.5))
 
     // Find the count of some numbers (COUNT).
     val count = primitiveTransacter.transaction { session ->
@@ -95,7 +96,7 @@ class AggregationQueryTest {
         .countAll(session)
     }
     assertThat(count)
-      .isEqualTo(CountPrimitiveTour(4, 4, 4, 4, 4, 4, 4, 4))
+      .isEqualTo(CountPrimitiveTour(6, 6, 6, 6, 6, 6, 6, 6))
 
     // Find the count of distinct numbers (COUNT_DISTINCT).
     val countDistinct = primitiveTransacter.transaction { session ->
@@ -103,7 +104,7 @@ class AggregationQueryTest {
         .countDistinctAll(session)
     }
     assertThat(countDistinct)
-      .isEqualTo(CountDistinctPrimitiveTour(2, 2, 2, 2, 2, 2, 2, 2))
+      .isEqualTo(CountDistinctPrimitiveTour(2, 6, 2, 2, 2, 2, 2, 2))
 
     // Find the latest movie (MAX).
     val latestMovie = movieTransacter.transaction { session ->
@@ -124,8 +125,36 @@ class AggregationQueryTest {
       queryFactory.newQuery<PrimitiveTourQuery>()
         .sumAll(session)
     }
-    assertThat(sum).isEqualTo(SumPrimitiveTour(15, 17, 19, 21, 25.0, 27.0))
+    // Once again, yes, the sum of all the numbers is really 33.
+    assertThat(sum).isEqualTo(SumPrimitiveTour(33, 33, 33, 33, 33.0, 33.0))
   }
+
+  @Test fun `aggregations in projections work with groups`() {
+    val releaseCountByDate = movieTransacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowFullScatter().allowTableScan()
+        .groupByReleaseDate()
+        .datesWithReleaseCount(session)
+    }
+
+    assertThat(releaseCountByDate).containsExactlyInAnyOrder(
+      DateWithReleaseCount(jurassicPark.release_date!!, 1),
+      DateWithReleaseCount(rocky.release_date!!, 1),
+      DateWithReleaseCount(starWars.release_date!!, 1),
+      DateWithReleaseCount(christmas23, 3)
+    )
+
+    val numbersFromMaxi8 = primitiveTransacter.transaction { session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .groupByI1AndC16()
+        .listI1C16AndMaxI8(session)
+    }
+    assertThat(numbersFromMaxi8).containsExactlyInAnyOrder(
+      I1C16AndMaxI8(true, '6', 2),
+      I1C16AndMaxI8(false, '5', 11),
+    )
+  }
+
 
   @Test fun `finds errors in query interfaces`() {
     val ex = assertThrows<RuntimeException> {
@@ -158,8 +187,10 @@ class AggregationQueryTest {
     }
     primitiveTransacter.transaction { session ->
       session.save(DbPrimitiveTour(false, 9, 8, 7, 6, '5', 4.0f, 3.0))
-      session.save(DbPrimitiveTour(true, 2, 3, 4, 5, '6', 7.0f, 8.0))
-      session.save(DbPrimitiveTour(true, 2, 3, 4, 5, '6', 7.0f, 8.0))
+      session.save(DbPrimitiveTour(false, 10, 8, 7, 6, '5', 4.0f, 3.0))
+      session.save(DbPrimitiveTour(false, 11, 8, 7, 6, '5', 4.0f, 3.0))
+      session.save(DbPrimitiveTour(true, 0, 3, 4, 5, '6', 7.0f, 8.0))
+      session.save(DbPrimitiveTour(true, 1, 3, 4, 5, '6', 7.0f, 8.0))
       session.save(DbPrimitiveTour(true, 2, 3, 4, 5, '6', 7.0f, 8.0))
     }
   }

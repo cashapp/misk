@@ -42,6 +42,12 @@ interface PrimitiveTourQuery : Query<DbPrimitiveTour> {
 
   @Select
   fun sumAll(session: Session): SumPrimitiveTour?
+
+  @Group(paths = ["i1", "c16"])
+  fun groupByI1AndC16(): PrimitiveTourQuery
+
+  @Select
+  fun listI1C16AndMaxI8(session: Session): List<I1C16AndMaxI8>
 }
 
 data class PrimitiveTour(
@@ -115,4 +121,11 @@ data class SumPrimitiveTour(
   @Property("i64", aggregation = AggregationType.SUM) var i64: Long,
   @Property("f32", aggregation = AggregationType.SUM) var f32: Double,
   @Property("f64", aggregation = AggregationType.SUM) var f64: Double
+) : Projection
+
+
+data class I1C16AndMaxI8(
+  @Property("i1") var i1: Boolean,
+  @Property("c16") var c16: Char,
+  @Property("i8", aggregation = AggregationType.MAX) var i8: Long
 ) : Projection

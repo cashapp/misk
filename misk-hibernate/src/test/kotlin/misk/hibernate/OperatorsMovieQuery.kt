@@ -74,6 +74,12 @@ interface OperatorsMovieQuery : Query<DbMovie> {
 
   @Select
   fun oldestReleasedMovie(session: Session): OldestReleaseDate?
+
+  @Group(paths = ["release_date"])
+  fun groupByReleaseDate(): OperatorsMovieQuery
+
+  @Select
+  fun datesWithReleaseCount(session: Session): List<DateWithReleaseCount>
 }
 
 data class LatestReleaseDate(
@@ -84,4 +90,11 @@ data class LatestReleaseDate(
 data class OldestReleaseDate(
   @Property(path = "release_date", aggregation = AggregationType.MIN)
   val release_date: LocalDate
+): Projection
+
+data class DateWithReleaseCount(
+  @Property(path = "release_date")
+  val release_date: LocalDate,
+  @Property(path = "name", aggregation = AggregationType.COUNT)
+  val count: Long
 ): Projection

@@ -14,6 +14,7 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
 import java.util.EnumSet
 import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.Expression
 import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
@@ -24,6 +25,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.allSupertypes
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.primaryConstructor
@@ -58,6 +60,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   private val constraints = mutableListOf<PredicateFactory>()
   private val orderFactories = mutableListOf<OrderFactory>()
+  private val groupFactories = mutableListOf<GroupFactory>()
   private val fetchFactories = mutableListOf<FetchFactory>()
   private val hints = mutableListOf<String>()
 
@@ -185,7 +188,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   override fun dynamicUniqueResult(session: Session, projectedPaths: List<String>): List<Any?>? {
-    val list = select(false, session, projectedPaths)
+    val list = dynamicSelectWithProjectedPaths(false, session, projectedPaths)
     return list.firstOrNull()
   }
 
@@ -193,7 +196,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     session: Session,
     selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
   ): List<Any?>? {
-    val list = select(false, session, selection)
+    val list = dynamicSelect(false, session, selection)
     return list.firstOrNull()
   }
 
@@ -222,23 +225,23 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   override fun dynamicList(session: Session, projectedPaths: List<String>): List<List<Any?>> {
-    return select(true, session, projectedPaths)
+    return dynamicSelectWithProjectedPaths(true, session, projectedPaths)
   }
 
   override fun dynamicList(
     session: Session,
     selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
   ): List<List<Any?>> {
-    return select(true, session, selection)
+    return dynamicSelect(true, session, selection)
   }
 
-  private fun select(
+  private fun dynamicSelectWithProjectedPaths(
     returnList: Boolean,
     session: Session,
     projectedPaths: List<String>
   ): List<List<Any?>> {
     val splitProjectedPaths = projectedPaths.map { it.split('.') }
-    return select(returnList, session) { criteriaBuilder, queryRoot ->
+    return dynamicSelect(returnList, session) { criteriaBuilder, queryRoot ->
       criteriaBuilder.array(
         *splitProjectedPaths.map {
           queryRoot.traverse<Any?>(it)
@@ -248,7 +251,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun select(
+  private fun dynamicSelect(
     returnList: Boolean,
     session: Session,
     selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
@@ -262,6 +265,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
     query.where(predicate)
 
+    check(groupFactories.size == 0) {
+      "@Group methods shouldn't be used with dynamicUniqueResult or dynamicList, use a @Select projection with aggregation instead"
+    }
     query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
 
     fetchFactories.forEach { it(queryRoot) }
@@ -295,6 +301,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
     query.where(predicate)
 
+    check(groupFactories.size == 0) {
+      "@Group methods shouldn't be used with uniqueResult or list, use a @Select projection with aggregation instead"
+    }
     query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
 
     fetchFactories.forEach { it(queryRoot) }
@@ -313,6 +322,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   override fun count(session: Session): Long {
     check(!predicatesOnly) { "cannot select on this query" }
 
+    check(groupFactories.size == 0) {
+      "@Group methods shouldn't be used for a count, use a @Select projection with aggregation instead"
+    }
     check(orderFactories.size == 0) { "orderBy shouldn't be used for a count" }
     check(firstResult == 0) { "firstResult shouldn't be used for a count" }
     check(maxRows == -1) { "maxRows shouldn't be used for a count" }
@@ -485,6 +497,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       query.select(select(criteriaBuilder, root))
       query.where(reflectionQuery.buildWherePredicate(root, criteriaBuilder))
       query.orderBy(reflectionQuery.buildOrderBys(root, criteriaBuilder))
+      query.groupBy(reflectionQuery.buildGroupBys(root, criteriaBuilder).flatten())
 
       reflectionQuery.fetchFactories.forEach { it(root) }
 
@@ -538,6 +551,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         val select = function.findAnnotation<Select>()
         val order = function.findAnnotation<Order>()
         val fetch = function.findAnnotation<Fetch>()
+        val group = function.findAnnotation<Group>()
 
         if (listOfNotNull(constraint, select, order, fetch).size > 1) {
           errors.add("${function.name}() has too many annotations")
@@ -559,12 +573,17 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
 
+        if (group != null) {
+          createGroup(errors, function, result, group)
+          return
+        }
+
         if (select != null) {
           createSelect(errors, function, result, select)
           return
         }
 
-        errors.add("${function.name}() must be annotated @Constraint, @Fetch, @Order, or @Select")
+        errors.add("${function.name}() must be annotated @Constraint, @Fetch, @Order, @Group, or @Select")
       }
 
       private fun createOrder(
@@ -603,6 +622,38 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           }
         }
       }
+
+      private fun createGroup(
+        errors: MutableList<String>,
+        function: KFunction<*>,
+        result: MutableMap<Method, QueryMethodHandler>,
+        group: Group
+      ) {
+        if (!group.paths.all { it.matches(PATH_PATTERN) }) {
+          errors.add("${function.name}() paths are not valid: '${group.paths}'")
+          return
+        }
+
+        val paths = group.paths.map { it.split('.') }
+
+        val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
+        if (javaMethod.returnType != javaMethod.declaringClass) {
+          errors.add(
+            "${function.name}() returns ${javaMethod.returnType.name} but " +
+              "@Group methods must return this (${javaMethod.declaringClass.name})"
+          )
+          return
+        }
+
+        result[javaMethod] = object : QueryMethodHandler {
+          override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+            return reflectionQuery.addGroupBy { root, _ ->
+              paths.map { root.traverse<Any?>(it) }
+            }
+          }
+        }
+      }
+
 
       private fun createFetch(
         errors: MutableList<String>,
@@ -930,6 +981,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return this
   }
 
+  internal fun addGroupBy(groupFactory: GroupFactory): ReflectionQuery<T> {
+    groupFactories.add(groupFactory)
+    return this
+  }
+
   /**
    * Root: the table root, like 'm' in 'SELECT * FROM movies m ORDER BY m.release_date'
    * CriteriaBuilder: factory for asc, desc
@@ -939,6 +995,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     criteriaBuilder: CriteriaBuilder
   ): List<javax.persistence.criteria.Order> {
     return orderFactories.map { it(root, criteriaBuilder) }
+  }
+
+  private fun buildGroupBys(
+    root: Root<*>,
+    criteriaBuilder: CriteriaBuilder
+  ): List<List<Expression<*>>> {
+    return groupFactories.map { it(root, criteriaBuilder) }
   }
 
   internal fun addFetch(fetchFactory: FetchFactory): ReflectionQuery<T> {
@@ -1002,6 +1065,8 @@ private typealias PredicateFactory = (root: Root<*>, criteriaBuilder: CriteriaBu
 
 private typealias OrderFactory =
   (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
+
+private typealias GroupFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> List<Expression<*>>
 
 private typealias FetchFactory = (root: Root<*>) -> javax.persistence.criteria.Fetch<*, *>
 

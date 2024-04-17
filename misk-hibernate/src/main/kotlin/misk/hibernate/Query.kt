@@ -236,6 +236,14 @@ annotation class Fetch(
 )
 
 /**
+ * Annotates a function on a subinterface of [Query] to indicate that the results should be
+ * grouped by the given [paths].
+ */
+annotation class Group(
+  val paths: Array<String> = []
+)
+
+/**
  * Available aggregations which can be applied to a single value [Select] query,
  * or a [Property] of a projection.
  */
