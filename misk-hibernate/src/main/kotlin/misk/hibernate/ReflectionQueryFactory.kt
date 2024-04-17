@@ -864,42 +864,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
         if (select.aggregation != AggregationType.NONE) {
-          val nullableDouble = Double::class.createType(nullable = true).typeLiteral().rawType
-          val nullableLong = Long::class.createType(nullable = true).typeLiteral().rawType
-          val nullableNumber = Number::class.createType(nullable = true).typeLiteral().rawType
-          when (select.aggregation) {
-            AggregationType.AVG -> {
-              if (!nullableDouble.isAssignableFrom(elementType.rawType)) {
-                errors.add("${function.name}() return element type must be Double? for AVG aggregations, but was $elementType")
-              }
-            }
-            AggregationType.COUNT -> {
-              if (!nullableLong.isAssignableFrom(elementType.rawType)) {
-                errors.add("${function.name}() return element type must be Long? for COUNT aggregations, but was $elementType")
-              }
-            }
-            AggregationType.COUNT_DISTINCT -> {
-              if (!nullableLong.isAssignableFrom(elementType.rawType)) {
-                errors.add("${function.name}() return element type must be Long? for COUNT_DISTINCT aggregations, but was $elementType")
-              }
-            }
-            AggregationType.MAX -> {
-              if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
-                errors.add("${function.name}() return element type must be out Comparable? for MAX aggregations, but was $elementType")
-              }
-            }
-            AggregationType.MIN -> {
-              if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
-                errors.add("${function.name}() return element type must be out Comparable? for MIN aggregations, but was $elementType")
-              }
-            }
-            AggregationType.SUM -> {
-              if (!nullableNumber.isAssignableFrom(elementType.rawType)) {
-                errors.add("${function.name}() return element type must be out Number? for SUM aggregations, but was $elementType")
-              }
-            }
-            else -> error("Unexpected AggregationType: ${select.aggregation} on ${function.name}()")
-          }
+          errors.addAll(
+            collectAggregationTypeErrors(
+              aggregation = select.aggregation,
+              elementType = elementType,
+              propertyName = "${function.name}() return",
+            ))
           if (errors.isNotEmpty()) return
         }
 
@@ -942,9 +912,22 @@ internal class ReflectionQuery<T : DbEntity<T>>(
               continue
             }
 
+            if (property.aggregation != AggregationType.NONE) {
+              errors.addAll(
+                collectAggregationTypeErrors(
+                  aggregation = property.aggregation,
+                  elementType = parameter.type.typeLiteral(),
+                  propertyName = "${projectionClass.java.name}#${parameter.name}",
+                ))
+              if (errors.isNotEmpty()) {
+                continue
+              }
+            }
+
             val path = (pathPrefix + property.path).split('.')
             properties.add(ParsedProperty(path, property.aggregation))
           }
+          if (errors.isNotEmpty()) return
           selectMethodHandler = SelectMethodHandler(isList, constructor, properties)
         } else {
           val onlyPath = ParsedProperty(select.path.split('.'), select.aggregation)
@@ -953,6 +936,55 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
         val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
         result[javaMethod] = selectMethodHandler
+      }
+
+      private fun collectAggregationTypeErrors(
+        aggregation: AggregationType,
+        elementType: TypeLiteral<*>,
+        propertyName: String,
+      ) : MutableList<String> {
+        // Primitives are special. We have to ensure we are using the boxed types.
+        val doubleType = Double::class.createType(nullable = true).typeLiteral().rawType
+        val longType = Long::class.createType(nullable = true).typeLiteral().rawType
+        val numberType = Number::class.createType(nullable = true).typeLiteral().rawType
+
+        fun typeToString(type: Class<*>): String = "${type.simpleName}?"
+
+        val errors = mutableListOf<String>()
+        when (aggregation) {
+          AggregationType.AVG -> {
+            if (!doubleType.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be ${typeToString(doubleType)} for AVG aggregations, but was $elementType")
+            }
+          }
+          AggregationType.COUNT -> {
+            if (!longType.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be ${typeToString(longType)} for COUNT aggregations, but was $elementType")
+            }
+          }
+          AggregationType.COUNT_DISTINCT -> {
+            if (!longType.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be ${typeToString(longType)} for COUNT_DISTINCT aggregations, but was $elementType")
+            }
+          }
+          AggregationType.MAX -> {
+            if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be out ${typeToString(Comparable::class.java)} for MAX aggregations, but was $elementType")
+            }
+          }
+          AggregationType.MIN -> {
+            if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be out ${typeToString(Comparable::class.java)} for MIN aggregations, but was $elementType")
+            }
+          }
+          AggregationType.SUM -> {
+            if (!numberType.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be out ${typeToString(Number::class.java)} for SUM aggregations, but was $elementType")
+            }
+          }
+          else -> error("Unexpected AggregationType: $aggregation on $propertyName")
+        }
+        return errors
       }
     }
   }

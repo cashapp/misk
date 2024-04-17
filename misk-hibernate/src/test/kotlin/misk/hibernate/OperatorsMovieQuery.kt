@@ -96,5 +96,5 @@ data class DateWithReleaseCount(
   @Property(path = "release_date")
   val release_date: LocalDate,
   @Property(path = "name", aggregation = AggregationType.COUNT)
-  val count: Long
+  val count: Long?
 ): Projection

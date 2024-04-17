@@ -155,7 +155,6 @@ class AggregationQueryTest {
     )
   }
 
-
   @Test fun `finds errors in query interfaces`() {
     val ex = assertThrows<RuntimeException> {
       primitiveTransacter.transaction { session ->
@@ -173,6 +172,26 @@ class AggregationQueryTest {
       |  maxI64() return element type must be out Comparable? for MAX aggregations, but was java.lang.Object
       |  minI64() return element type must be out Comparable? for MIN aggregations, but was java.lang.Object
       |  sumI64() return element type must be out Number? for SUM aggregations, but was java.time.LocalDate""".trimMargin()
+    )
+  }
+
+  @Test fun `finds errors in projections with aggregated properties`() {
+    val ex = assertThrows<RuntimeException> {
+      primitiveTransacter.transaction { session ->
+        queryFactory.newQuery<WrongAggregatedProjectionQuery>()
+          .wrongAggregation(session)
+      }
+    }
+
+    assertThat(ex).hasMessage(
+      """
+      |java.lang.IllegalArgumentException: Query class misk.hibernate.WrongAggregatedProjectionQuery has problems:
+      |  misk.hibernate.WrongAggregatedProjection#average element type must be Double? for AVG aggregations, but was java.lang.Object
+      |  misk.hibernate.WrongAggregatedProjection#count element type must be Long? for COUNT aggregations, but was java.lang.Object
+      |  misk.hibernate.WrongAggregatedProjection#countDistinct element type must be Long? for COUNT_DISTINCT aggregations, but was java.lang.Object
+      |  misk.hibernate.WrongAggregatedProjection#max element type must be out Comparable? for MAX aggregations, but was java.lang.Object
+      |  misk.hibernate.WrongAggregatedProjection#min element type must be out Comparable? for MIN aggregations, but was java.lang.Object
+      |  misk.hibernate.WrongAggregatedProjection#sum element type must be out Number? for SUM aggregations, but was java.lang.Object""".trimMargin()
     )
   }
 
@@ -246,3 +265,18 @@ private interface WrongTypesPrimitiveTourQuery : Query<DbPrimitiveTour> {
   @Select(path = "i64", aggregation = AggregationType.SUM)
   fun sumI64(session: Session): LocalDate?
 }
+
+
+interface WrongAggregatedProjectionQuery : Query<DbPrimitiveTour> {
+  @Select
+  fun wrongAggregation(session: Session): WrongAggregatedProjection?
+}
+
+data class WrongAggregatedProjection(
+  @Property(path = "i64", aggregation = AggregationType.AVG) val average: Any,
+  @Property(path = "i64", aggregation = AggregationType.COUNT) val count: Any,
+  @Property(path = "i64", aggregation = AggregationType.COUNT_DISTINCT) val countDistinct: Any,
+  @Property(path = "i64", aggregation = AggregationType.MAX) val max: Any,
+  @Property(path = "i64", aggregation = AggregationType.MIN) val min: Any,
+  @Property(path = "i64", aggregation = AggregationType.SUM) val sum: Any,
+) : Projection
