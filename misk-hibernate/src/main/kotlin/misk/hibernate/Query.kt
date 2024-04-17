@@ -150,6 +150,19 @@ fun <T, Q : Query<T>> Q.queryHint(hint: String): Q {
 /**
  * Annotates a function on a subinterface of [Query] to indicate which column (or path of columns)
  * it constrains and using which operator.
+ *
+ * You can think of Constraints as the rules used to build the `where` clause of a SQL query.
+ *
+ * For example, you can query movies by title with a method like this:
+ * ```
+ * @Constraint(path = "name")
+ * fun matchesTitle(title: String): MovieQuery
+ * ```
+ * Or query for movies released after a certain date with a method like this:
+ * ```
+ * @Constraint(path = "release_date", operator = Operator.GT)
+ * fun releasedAfter(date: LocalDate): MovieQuery
+ * ```
  */
 annotation class Constraint(
   val path: String,
@@ -192,9 +205,11 @@ enum class Operator {
 }
 
 /**
- * Annotates a function on a subinterface of [Query] to execute a `SELECT` query. Functions with
+ * Annotates a function on a [Query] interface to execute a `SELECT` query. Functions with
  * this annotation must return a `List` to fetch multiple rows results, or a regular type to fetch
  * a unique result.
+ *
+ * [Select] annotated methods may return single column values, or [Projection]s of multiple columns.
  */
 annotation class Select(
   val path: String = "",
@@ -202,8 +217,8 @@ annotation class Select(
 )
 
 /**
- * Annotates a function on a subinterface of [Query] to indicate which columns to order the
- * the selected columns.
+ * Annotates a function on a [Query] interface to indicate by which columns to order the
+ * results. Defaults to ascending order.
  */
 annotation class Order(
   val path: String,
@@ -211,9 +226,9 @@ annotation class Order(
 )
 
 /**
- * Annotates a function on a subinterface of [Query] to specify that the association at
- * the given `path` should be fetched in a single query. The type of join used will be
- * specified by `joinType`.
+ * Annotates a function on a [Query] interface to specify that the association at
+ * the given [path] should be fetched in a single query. The type of join used will be
+ * specified by [joinType].
  */
 annotation class Fetch(
   val path: String = "",

@@ -1,5 +1,21 @@
 package misk.hibernate
 
+/**
+ * Marker interface for query projections.
+ *
+ * Projections are used to define the shape of the result set of a query, often as a subset of
+ * the properties of the entity or entities being queried.
+ *
+ * For example, if we have a `DbMovie` entity with a `name`, `release_date`, and other properties
+ * we could use a projection to only select the `name` and `release_date` properties:
+ *
+ * ```
+ * data class NameAndReleaseDate(
+ *  @Property("name") var name: String,
+ *  @Property("release_date") var releaseDate: LocalDate?
+ * ) : Projection
+ * ```
+ */
 interface Projection
 
 /**
