@@ -100,7 +100,10 @@ class DynamoClusterTest {
     val enhancedClient = DynamoDbEnhancedClient.builder()
       .dynamoDbClient(ddb)
       .build()
-    val table = enhancedClient.table("$TEST_SERVICE_NAME.misk-cluster-members", DynamoClusterWatcherTask.TABLE_SCHEMA)
+    val table = enhancedClient.table(
+      "$TEST_SERVICE_NAME.misk-cluster-members",
+      DynamoClusterWatcherTask.TABLE_SCHEMA
+    )
 
     waitFor { dynamoClusterWatcherTask.run() }
     assertThat(cluster.snapshot.readyMembers).hasSize(1)
@@ -108,7 +111,9 @@ class DynamoClusterTest {
     val expiredTimeUnit = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
 
     // Verify that all records expire in 24 hours!
-    assertTrue(table.scan().items().all { m -> m.expires_at!! <= expiredTimeUnit })
+    assertTrue(
+      table.scan().items()
+        .all { m -> m.expires_at!! <= expiredTimeUnit && m.expires_at!! > m.updated_at!! / 1000 })
   }
 
   @Test
