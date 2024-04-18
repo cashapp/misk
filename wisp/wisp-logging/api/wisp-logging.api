@@ -204,7 +204,6 @@ public class wisp/logging/TaggedLogger : mu/KLogger {
 }
 
 public final class wisp/logging/TaggedLogger$Companion {
-	public final fun getThreadLocalMdcContext ()Ljava/util/Set;
-	public final fun resetThreadLocalMdcContext ()V
+	public final fun popThreadLocalMdcContext ()Ljava/util/Set;
 }
 
