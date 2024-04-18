@@ -15,6 +15,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
@@ -91,6 +92,30 @@ class DynamoClusterTest {
     }
     waitFor { dynamoClusterWatcherTask.run() }
     assertThat(cluster.snapshot.readyMembers).hasSize(152)
+  }
+
+  @Test
+  fun inspectAddedRecords() {
+    // Testing pagination
+    val enhancedClient = DynamoDbEnhancedClient.builder()
+      .dynamoDbClient(ddb)
+      .build()
+    val table = enhancedClient.table("$TEST_SERVICE_NAME.misk-cluster-members", DynamoClusterWatcherTask.TABLE_SCHEMA)
+
+    for (i in 0..5) {
+      val member = DyClusterMember()
+      member.name = "pod-${i}"
+      member.updated_at = clock.instant().toEpochMilli()
+      member.expires_at = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
+      table.putItem(member)
+    }
+    waitFor { dynamoClusterWatcherTask.run() }
+    assertThat(cluster.snapshot.readyMembers).hasSize(7)
+
+    val expiredTimeUnit = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
+
+    // Verify that all records expire in 24 hours!
+    assertTrue(table.scan().items().all { m -> m.expires_at!! <= expiredTimeUnit })
   }
 
   @Test
