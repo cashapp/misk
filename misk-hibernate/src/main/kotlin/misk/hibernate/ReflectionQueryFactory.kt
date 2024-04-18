@@ -542,6 +542,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any?
 
     companion object {
+      // Primitives are special. We have to ensure we are using the boxed types.
+      private val doubleType = Double::class.createType(nullable = true).typeLiteral().rawType
+      private val longType = Long::class.createType(nullable = true).typeLiteral().rawType
+      private val numberType = Number::class.createType(nullable = true).typeLiteral().rawType
+
+      private fun typeToString(type: Class<*>): String = "${type.simpleName}?"
+
       fun create(
         errors: MutableList<String>,
         function: KFunction<*>,
@@ -947,13 +954,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         elementType: TypeLiteral<*>,
         propertyName: String,
       ) : MutableList<String> {
-        // Primitives are special. We have to ensure we are using the boxed types.
-        val doubleType = Double::class.createType(nullable = true).typeLiteral().rawType
-        val longType = Long::class.createType(nullable = true).typeLiteral().rawType
-        val numberType = Number::class.createType(nullable = true).typeLiteral().rawType
-
-        fun typeToString(type: Class<*>): String = "${type.simpleName}?"
-
         val errors = mutableListOf<String>()
         when (aggregation) {
           AggregationType.AVG -> {
