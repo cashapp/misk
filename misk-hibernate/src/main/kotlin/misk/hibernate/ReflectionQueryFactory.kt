@@ -412,8 +412,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   @Singleton
   internal class Factory @Inject internal constructor(
     private var queryLimitsConfig: QueryLimitsConfig
-  ) :
-    Query.Factory {
+  ) : Query.Factory {
     private val queryMethodHandlersCache = CacheBuilder.newBuilder()
       .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
         override fun load(key: KClass<*>) = queryMethodHandlers(key)
@@ -509,7 +508,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         typedQuery.list()
       }
       reflectionQuery.checkRowCount(returnList, rows.size)
-      val list = rows.map { toValue(it) }
+      val list = rows.mapNotNull { toValue(it) }
       return if (returnList) list else list.firstOrNull()
     }
 
@@ -533,7 +532,32 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         row == null -> null
         constructor == null -> row
         properties.size == 1 -> constructor.call(row)
-        else -> constructor.call(*(row as Array<*>))
+        else -> {
+          val args = row as Array<*>
+          // If we got back an array of null values, which can't be assigned to the constructor,
+          // then we should return null.
+          if (args.all { it == null } && !constructor.parameters.all { it.type.isMarkedNullable } ) return null
+          // Otherwise, we should check if we *can* assign the null values to the constructor.
+          checkNullability(constructor, args)
+          // Now it's (probably!) safe to call the constructor.
+          constructor.call(*args)
+        }
+      }
+    }
+
+    private fun checkNullability(constructor: KFunction<*>, args: Array<*>) {
+      val errors = mutableListOf<String>()
+      for ((index, arg) in args.withIndex()) {
+        val parameter = constructor.parameters[index]
+        if (arg == null && !parameter.type.isMarkedNullable) {
+          errors.add("Constructor parameter ${parameter.name} is not nullable, but query returned null for ${parameter.name}. Mark this parameter as nullable to avoid this error.")
+        }
+      }
+      if (errors.isNotEmpty()) {
+        throw IllegalArgumentException(
+          "There were problems with your Projection class:\n" +
+            errors.joinToString("\n")
+        )
       }
     }
   }
@@ -661,7 +685,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           }
         }
       }
-
 
       private fun createFetch(
         errors: MutableList<String>,
@@ -1147,3 +1170,4 @@ private fun CriteriaBuilder.addInClause(
     }
   }
 }
+
