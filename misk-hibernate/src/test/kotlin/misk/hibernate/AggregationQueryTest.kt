@@ -232,6 +232,10 @@ class AggregationQueryTest {
       queryFactory.newQuery<PrimitiveTourQuery>()
         .averageI64(session)
         .let { assertThat(it).isNull() }
+
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .listI1C16AndMaxI8(session)
+        .let { assertThat(it).isEmpty()}
     }
   }
 
