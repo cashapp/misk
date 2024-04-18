@@ -86,6 +86,7 @@ class DynamoClusterTest {
       val member = DyClusterMember()
       member.name = "pod-${i}"
       member.updated_at = clock.instant().toEpochMilli()
+      member.expires_at = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
       table.putItem(member)
     }
     waitFor { dynamoClusterWatcherTask.run() }
