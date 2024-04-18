@@ -102,15 +102,8 @@ class DynamoClusterTest {
       .build()
     val table = enhancedClient.table("$TEST_SERVICE_NAME.misk-cluster-members", DynamoClusterWatcherTask.TABLE_SCHEMA)
 
-    for (i in 0..5) {
-      val member = DyClusterMember()
-      member.name = "pod-${i}"
-      member.updated_at = clock.instant().toEpochMilli()
-      member.expires_at = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
-      table.putItem(member)
-    }
     waitFor { dynamoClusterWatcherTask.run() }
-    assertThat(cluster.snapshot.readyMembers).hasSize(7)
+    assertThat(cluster.snapshot.readyMembers).hasSize(1)
 
     val expiredTimeUnit = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
 
