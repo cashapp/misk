@@ -15,4 +15,8 @@ internal class DyClusterMember {
 
   @get:DynamoDbAttribute("pod_name")
   var pod_name: String? = null
+
+  // Stored as epoch sec
+  @get:DynamoDbAttribute("expires_at")
+  var expires_at: Long? = null
 }
