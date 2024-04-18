@@ -103,6 +103,15 @@ interface CharacterQuery : Query<DbCharacter> {
 
   @Fetch(path = "actor")
   fun withActor(): CharacterQuery
+
+  @Fetch(path = "actor", forProjection = true)
+  fun withActorForProjection(): CharacterQuery
+
+  @Group(paths = ["actor.name"])
+  fun groupByActorName(): CharacterQuery
+
+  @Select
+  fun listAsActorAndCharacterCount(session: Session): List<ActorAndCharacterCount>
 }
 
 data class NameAndReleaseDate(
@@ -113,4 +122,9 @@ data class NameAndReleaseDate(
 data class ActorAndReleaseDate(
   @Property("actor.name") var actorName: String,
   @Property("movie.release_date") var movieReleaseDate: LocalDate?
+) : Projection
+
+data class ActorAndCharacterCount(
+  @Property("actor.name") var actorName: String,
+  @Property("name", aggregation = AggregationType.COUNT) var characterCount: Long?
 ) : Projection

@@ -62,6 +62,8 @@ internal class DynamoClusterWatcherTask @Inject constructor(
       val member = DyClusterMember()
       member.name = self
       member.updated_at = clock.instant().toEpochMilli()
+      // TTL should be in seconds
+      member.expires_at = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
       podName?.let { member.pod_name = it }
       table.putItem(member)
     }
