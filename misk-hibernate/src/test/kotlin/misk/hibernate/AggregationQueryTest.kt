@@ -223,6 +223,18 @@ class AggregationQueryTest {
     )
   }
 
+  @Test fun `aggregations work when there are no matching rows`() {
+    primitiveTransacter.transaction {session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .delete(session)
+    }
+    primitiveTransacter.transaction { session ->
+      queryFactory.newQuery<PrimitiveTourQuery>()
+        .averageI64(session)
+        .let { assertThat(it).isNull() }
+    }
+  }
+
   private fun seedData() {
     movieTransacter.transaction { session ->
       val dbRocky = session.save(rocky).let { session.load(it) }
