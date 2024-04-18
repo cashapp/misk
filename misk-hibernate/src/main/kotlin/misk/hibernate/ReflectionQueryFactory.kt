@@ -528,8 +528,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       }
     }.toTypedArray())
 
-    private fun toValue(row: Any): Any? {
+    private fun toValue(row: Any?): Any? {
       return when {
+        row == null -> null
         constructor == null -> row
         properties.size == 1 -> constructor.call(row)
         else -> constructor.call(*(row as Array<*>))
