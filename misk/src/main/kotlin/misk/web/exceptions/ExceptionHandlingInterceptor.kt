@@ -21,6 +21,9 @@ import okhttp3.Headers.Companion.toHeaders
 import okio.Buffer
 import okio.BufferedSink
 import okio.ByteString
+import wisp.logging.Tag
+import wisp.logging.TaggedLogger
+import wisp.logging.error
 import wisp.logging.getLogger
 import wisp.logging.log
 import java.io.IOException
@@ -47,13 +50,15 @@ class ExceptionHandlingInterceptor(
       chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
       try {
+        val mdcTags = TaggedLogger.popThreadLocalMdcContext()
+
         if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
           // This response object is only used for determining the status code. toGrpcResponse
           // will provide a more useful log instead.
-          val response = toResponse(th, suppressLog = true)
-          sendGrpcFailure(chain.httpCall, response.statusCode, toGrpcResponse(th))
+          val response = toResponse(th, suppressLog = true, mdcTags)
+          sendGrpcFailure(chain.httpCall, response.statusCode, toGrpcResponse(th, mdcTags))
         } else {
-          val response = toResponse(th, suppressLog = false)
+          val response = toResponse(th, suppressLog = false, mdcTags)
           chain.httpCall.statusCode = response.statusCode
           sendHttpFailure(chain.httpCall, response)
         }
@@ -106,36 +111,36 @@ class ExceptionHandlingInterceptor(
     return buffer.readUtf8()
   }
 
-  private fun toResponse(th: Throwable, suppressLog: Boolean): Response<*> {
+  private fun toResponse(th: Throwable, suppressLog: Boolean, mdcTags: Set<Tag>): Response<*> {
     // If the exception is a reflection wrapper, unwrap first.
     when (th) {
-      is InvocationTargetException -> return toResponse(th.targetException, suppressLog)
-      is UncheckedExecutionException -> return toResponse(th.cause!!, suppressLog)
+      is InvocationTargetException -> return toResponse(th.targetException, suppressLog, mdcTags)
+      is UncheckedExecutionException -> return toResponse(th.cause!!, suppressLog, mdcTags)
     }
 
     // Prefer the mapper's response, if one exists.
     val mapper = mapperResolver.mapperFor(th)
     if (mapper != null) {
       if (!suppressLog) {
-        log.log(mapper.loggingLevel(th), th) { "exception dispatching to $actionName" }
+        log.log(mapper.loggingLevel(th), th, *mdcTags.toTypedArray()) { "exception dispatching to $actionName" }
       }
       return mapper.toResponse(th)
     }
 
     // Fall back to a default mapping.
-    return toInternalServerError(th)
+    return toInternalServerError(th, mdcTags)
   }
 
-  private fun toGrpcResponse(th: Throwable): GrpcErrorResponse = when (th) {
+  private fun toGrpcResponse(th: Throwable, mdcTags: Set<Tag>): GrpcErrorResponse = when (th) {
     is UnauthenticatedException -> GrpcErrorResponse(GrpcStatus.UNAUTHENTICATED, th.message)
     is UnauthorizedException -> GrpcErrorResponse(GrpcStatus.PERMISSION_DENIED, th.message)
-    is InvocationTargetException -> toGrpcResponse(th.targetException)
-    is UncheckedExecutionException -> toGrpcResponse(th.cause!!)
+    is InvocationTargetException -> toGrpcResponse(th.targetException, mdcTags)
+    is UncheckedExecutionException -> toGrpcResponse(th.cause!!, mdcTags)
     else -> mapperResolver.mapperFor(th)?.let {
-      log.log(it.loggingLevel(th), th) { "exception dispatching to $actionName" }
+      log.log(it.loggingLevel(th), th, *mdcTags.toTypedArray()) { "exception dispatching to $actionName" }
       val grpcResponse = it.toGrpcResponse(th)
       if (grpcResponse == null) {
-        val httpResponse = toResponse(th, suppressLog = true)
+        val httpResponse = toResponse(th, suppressLog = true, mdcTags)
         GrpcErrorResponse(toGrpcStatus(httpResponse.statusCode), grpcMessage(httpResponse))
       } else {
         grpcResponse
@@ -143,8 +148,8 @@ class ExceptionHandlingInterceptor(
     } ?: GrpcErrorResponse.INTERNAL_SERVER_ERROR
   }
 
-  private fun toInternalServerError(th: Throwable): Response<*> {
-    log.error(th) { "unexpected error dispatching to $actionName" }
+  private fun toInternalServerError(th: Throwable, mdcTags: Set<Tag>): Response<*> {
+    log.error(th, *mdcTags.toTypedArray()) { "unexpected error dispatching to $actionName" }
     return INTERNAL_SERVER_ERROR_RESPONSE
   }
 
