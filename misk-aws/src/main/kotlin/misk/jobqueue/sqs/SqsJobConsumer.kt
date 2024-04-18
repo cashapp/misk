@@ -20,10 +20,9 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import org.slf4j.MDC
-import org.slf4j.event.Level
 import wisp.logging.TaggedLogger
+import wisp.logging.error
 import wisp.logging.getLogger
-import wisp.logging.log
 import wisp.tracing.traceWithNewRootSpan
 import java.time.Clock
 import java.time.Duration
@@ -211,11 +210,9 @@ internal class SqsJobConsumer @Inject internal constructor(
                 )
                 Status.OK
               } catch (th: Throwable) {
-                val mdcTags = TaggedLogger.getThreadLocalMdcContext()
-                  .also { TaggedLogger.resetThreadLocalMdcContext() }
+                val mdcTags = TaggedLogger.popThreadLocalMdcContext()
 
-                // The underlying logger takes care of adding the mdc tags and cleaning them up when calling this way
-                log.log(Level.ERROR, th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
+                log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
 
                 metrics.handlerFailures.labels(queue.queueName, queue.queueName).inc()
                 Tags.ERROR.set(span, true)

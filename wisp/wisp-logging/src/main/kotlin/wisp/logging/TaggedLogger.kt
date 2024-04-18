@@ -16,7 +16,6 @@ import kotlin.reflect.KClass
  *
  * Usage:
  *
- *
  * First set up a logger class with relevant MDC functions for the code base:
  *
  * class MyServiceLogger<T: Any>(loggerClass: KClass<T>): TaggedLogger<T, MyServiceLogger<T>>(loggerClass) {
@@ -140,8 +139,11 @@ open class TaggedLogger<L:Any, out R: TaggedLogger<L, R>> private constructor(
   companion object {
     private val threadLocalMdcContext = ThreadLocal<ThreadLocalTaggedLoggerMdcContext>()
 
-    fun getThreadLocalMdcContext() = threadLocalMdcContext.get()?.tags ?: emptySet()
-    fun resetThreadLocalMdcContext() { threadLocalMdcContext.remove() }
+    fun popThreadLocalMdcContext() = threadLocalMdcContext
+      .get()
+      ?.tags
+      ?.also { threadLocalMdcContext.remove() }
+      ?: emptySet()
 
     private fun <T : Any> getLogger(loggerClass: KClass<T>): KLogger {
       return when {

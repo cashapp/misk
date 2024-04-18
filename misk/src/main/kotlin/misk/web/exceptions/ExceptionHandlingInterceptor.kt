@@ -50,8 +50,7 @@ class ExceptionHandlingInterceptor(
       chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
       try {
-        val mdcTags = TaggedLogger.getThreadLocalMdcContext()
-          .also { TaggedLogger.resetThreadLocalMdcContext() }
+        val mdcTags = TaggedLogger.popThreadLocalMdcContext()
 
         if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
           // This response object is only used for determining the status code. toGrpcResponse

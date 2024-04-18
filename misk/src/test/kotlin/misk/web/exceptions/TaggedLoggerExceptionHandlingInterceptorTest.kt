@@ -399,7 +399,7 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
 
       // This is testing the ThreadLocal cleanup function within TaggedLogger when asContext() exits
       // without throwing an exception
-      val shouldBeEmptySet = TaggedLogger.getThreadLocalMdcContext()
+      val shouldBeEmptySet = TaggedLogger.popThreadLocalMdcContext()
       logger.info { "Should be zero size and log with no MDC context: ${shouldBeEmptySet.size}" }
       return ""
     }
