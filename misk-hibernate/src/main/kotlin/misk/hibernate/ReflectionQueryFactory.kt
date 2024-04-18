@@ -556,7 +556,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       if (errors.isNotEmpty()) {
         throw IllegalArgumentException(
           "There were problems with your Projection class:\n" +
-            errors.joinToString("\n")
+            errors.joinToString("\n", prefix = "  ")
         )
       }
     }

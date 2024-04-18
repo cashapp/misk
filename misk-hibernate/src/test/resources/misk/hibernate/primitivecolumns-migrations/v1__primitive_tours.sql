@@ -7,5 +7,6 @@ CREATE TABLE primitive_tours (
     i64 bigint NOT NULL,
     c16 char(1) NOT NULL,
     f32 float NOT NULL,
-    f64 double NOT NULL
+    f64 double NOT NULL,
+    maybe_i1 tinyint(1) DEFAULT NULL
 );

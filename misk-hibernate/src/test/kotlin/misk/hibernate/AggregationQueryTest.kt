@@ -224,18 +224,32 @@ class AggregationQueryTest {
   }
 
   @Test fun `aggregations work when there are no matching rows`() {
-    primitiveTransacter.transaction {session ->
+    primitiveTransacter.transaction { session ->
       queryFactory.newQuery<PrimitiveTourQuery>()
         .delete(session)
     }
     primitiveTransacter.transaction { session ->
+      // If the query returns no rows, the result should be null.
       queryFactory.newQuery<PrimitiveTourQuery>()
         .averageI64(session)
         .let { assertThat(it).isNull() }
 
+      // If the query returns all null, and the projection cannot accept all nulls, it should
+      // return an empty list.
       queryFactory.newQuery<PrimitiveTourQuery>()
+        .groupByI1AndC16()
         .listI1C16AndMaxI8(session)
         .let { assertThat(it).isEmpty()}
+
+      // If the query returns all nulls and the projection can accept all nulls, it should return
+      // an instance of the projection.
+      queryFactory.newQuery<NoDataPrimitivesQuery>()
+        .listAllNullsAreOk(session)
+        .let { assertThat(it).containsExactly(AllNullsAreOk(null, null)) }
+
+      queryFactory.newQuery<NoDataPrimitivesQuery>()
+        .allNullsAreOk(session)
+        .let { assertThat(it).isEqualTo(AllNullsAreOk(null, null)) }
     }
   }
 
@@ -331,6 +345,19 @@ interface WrongAggregatedProjectionQuery : Query<DbPrimitiveTour> {
   @Select
   fun wrongAggregation(session: Session): WrongAggregatedProjection?
 }
+
+interface NoDataPrimitivesQuery: Query<DbPrimitiveTour> {
+  @Select
+  fun listAllNullsAreOk(session: Session): List<AllNullsAreOk>
+
+  @Select
+  fun allNullsAreOk(session: Session): AllNullsAreOk?
+}
+
+data class AllNullsAreOk(
+  @Property(path = "i1", aggregation = AggregationType.MAX) val maxi1: Long?,
+  @Property(path = "i8", aggregation = AggregationType.MAX) val maxi8: Long?
+): Projection
 
 data class WrongAggregatedProjection(
   @Property(path = "i64", aggregation = AggregationType.AVG) val average: Any,
