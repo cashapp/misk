@@ -6234,6 +6234,13 @@ acceptedBreaks:
         \ extends java.lang.annotation.Annotation>, java.util.List<java.lang.String>,\
         \ java.util.List<java.lang.String>, boolean, boolean)"
       justification: "New parameters are optional"
+  "2024.04.10.210352-9854ef3":
+    com.squareup.misk:misk-aws:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.jobqueue.sqs.SqsJob::delayForFailure(int)"
+      new: "method void misk.jobqueue.sqs.SqsJob::delayForFailure()"
+      justification: "{SqsJob is an internal class and there seem to be no references\
+        \ to this function}"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
