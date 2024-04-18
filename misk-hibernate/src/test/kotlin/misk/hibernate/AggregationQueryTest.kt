@@ -29,9 +29,17 @@ class AggregationQueryTest {
   private val jurassicPark = DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
   private val rocky = DbMovie("Rocky", LocalDate.of(1976, 11, 21))
   private val starWars = DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
+  private val indianaJones = DbMovie("Raiders of the Lost Ark", LocalDate.of(1981, 6, 12))
   private val theColorPurple = DbMovie("The Color Purple", christmas23)
   private val ferrari = DbMovie("Ferrari", christmas23)
   private val theBoysInTheBoat = DbMovie("The Boys in the Boat", christmas23)
+
+  val harrisonFord = DbActor("Harrison Ford")
+  val markHamill = DbActor("Mark Hamill")
+  val carrieFisher = DbActor("Carrie Fisher")
+  val jeffGoldblum = DbActor("Jeff Goldblum")
+  val samuelLJackson = DbActor("Samuel L. Jackson")
+  val anthonyDaniels = DbActor("Anthony Daniels")
 
   @BeforeEach fun setup() = seedData()
 
@@ -55,7 +63,7 @@ class AggregationQueryTest {
       queryFactory.newQuery<OperatorsMovieQuery>()
         .distinctMovieTitles(session)
     }
-    assertThat(uniqueMovieTitles).isEqualTo(6)
+    assertThat(uniqueMovieTitles).isEqualTo(7)
 
     // Find the latest movie (MAX).
     val latestMovieReleaseDate = movieTransacter.transaction { session ->
@@ -130,6 +138,7 @@ class AggregationQueryTest {
   }
 
   @Test fun `aggregations in projections work with groups`() {
+    // Simple count in one table.
     val releaseCountByDate = movieTransacter.transaction { session ->
       queryFactory.newQuery<OperatorsMovieQuery>()
         .allowFullScatter().allowTableScan()
@@ -141,9 +150,11 @@ class AggregationQueryTest {
       DateWithReleaseCount(jurassicPark.release_date!!, 1),
       DateWithReleaseCount(rocky.release_date!!, 1),
       DateWithReleaseCount(starWars.release_date!!, 1),
+      DateWithReleaseCount(indianaJones.release_date!!, 1),
       DateWithReleaseCount(christmas23, 3)
     )
 
+    // Simple max in one table.
     val numbersFromMaxi8 = primitiveTransacter.transaction { session ->
       queryFactory.newQuery<PrimitiveTourQuery>()
         .groupByI1AndC16()
@@ -152,6 +163,23 @@ class AggregationQueryTest {
     assertThat(numbersFromMaxi8).containsExactlyInAnyOrder(
       I1C16AndMaxI8(true, '6', 2),
       I1C16AndMaxI8(false, '5', 11),
+    )
+
+    // Count with a join.
+    val charactersPerActor = movieTransacter.transaction { session ->
+      queryFactory.newQuery<CharacterQuery>()
+        .allowFullScatter().allowTableScan()
+        .withActorForProjection()
+        .groupByActorName()
+        .listAsActorAndCharacterCount(session)
+    }
+    assertThat(charactersPerActor).containsExactlyInAnyOrder(
+      ActorAndCharacterCount(harrisonFord.name, 2),
+      ActorAndCharacterCount(markHamill.name, 1),
+      ActorAndCharacterCount(carrieFisher.name, 1),
+      ActorAndCharacterCount(jeffGoldblum.name, 1),
+      ActorAndCharacterCount(samuelLJackson.name, 1),
+      ActorAndCharacterCount(anthonyDaniels.name, 1),
     )
   }
 
@@ -197,12 +225,28 @@ class AggregationQueryTest {
 
   private fun seedData() {
     movieTransacter.transaction { session ->
-      session.save(jurassicPark)
-      session.save(rocky)
-      session.save(starWars)
+      val dbRocky = session.save(rocky).let { session.load(it) }
+      val dbJurassicPark = session.save(jurassicPark).let { session.load(it) }
+      val dbStarWars = session.save(starWars).let { session.load(it) }
+      val dbIndianaJones = session.save(indianaJones).let { session.load(it) }
       session.save(theColorPurple)
       session.save(ferrari)
       session.save(theBoysInTheBoat)
+
+      val dbJeffGoldbum = session.save(jeffGoldblum).let { session.load(it) }
+      val dbSamuelLJackson = session.save(samuelLJackson).let { session.load(it) }
+      val dbHarrisonFord = session.save(harrisonFord).let { session.load(it) }
+      val dbMarkHamill = session.save(markHamill).let { session.load(it) }
+      val dbCarrieFisher = session.save(carrieFisher).let { session.load(it) }
+      val dbAnthonyDaniels = session.save(anthonyDaniels).let { session.load(it) }
+
+      session.save(DbCharacter("Dr. Ian Malcolm", dbJurassicPark, dbJeffGoldbum))
+      session.save(DbCharacter("Ray Arnold", dbJurassicPark, dbSamuelLJackson))
+      session.save(DbCharacter("Han Solo", dbStarWars, dbHarrisonFord))
+      session.save(DbCharacter("Luke Skywalker", dbStarWars, dbMarkHamill))
+      session.save(DbCharacter("Princess Leia", dbStarWars, dbCarrieFisher))
+      session.save(DbCharacter("C-3P0", dbStarWars, dbAnthonyDaniels))
+      session.save(DbCharacter("Indiana Jones", dbIndianaJones, dbHarrisonFord))
     }
     primitiveTransacter.transaction { session ->
       session.save(DbPrimitiveTour(false, 9, 8, 7, 6, '5', 4.0f, 3.0))

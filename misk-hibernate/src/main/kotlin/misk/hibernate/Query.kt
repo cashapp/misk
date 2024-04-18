@@ -229,10 +229,15 @@ annotation class Order(
  * Annotates a function on a [Query] interface to specify that the association at
  * the given [path] should be fetched in a single query. The type of join used will be
  * specified by [joinType].
+ *
+ * If the query is a projection, and does not need to get the entire entity graph, set
+ * [forProjection] to true. This will make the query operate as a regular JOIN query, instead
+ * of a JOIN FETCH query.
  */
 annotation class Fetch(
   val path: String = "",
-  val joinType: JoinType = LEFT
+  val joinType: JoinType = LEFT,
+  val forProjection: Boolean = false,
 )
 
 /**

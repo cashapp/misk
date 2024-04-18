@@ -678,7 +678,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         result[javaMethod] = object : QueryMethodHandler {
           override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
             return reflectionQuery.addFetch { root ->
-              root.fetch<Any?, Any?>(fetch.path, fetch.joinType)
+              if (fetch.forProjection) {
+                root.join<Any?, Any?>(fetch.path, fetch.joinType)
+              } else {
+                root.fetch<Any?, Any?>(fetch.path, fetch.joinType)
+              }
             }
           }
         }
@@ -1100,7 +1104,7 @@ private typealias OrderFactory =
 
 private typealias GroupFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> List<Expression<*>>
 
-private typealias FetchFactory = (root: Root<*>) -> javax.persistence.criteria.Fetch<*, *>
+private typealias FetchFactory = (root: Root<*>) -> javax.persistence.criteria.FetchParent<*, *>
 
 private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
 
