@@ -148,14 +148,14 @@ fun <T, Q : Query<T>> Q.queryHint(hint: String): Q {
 }
 
 /**
- * Annotates a function on a subinterface of [Query] to indicate which column (or path of columns)
- * it constrains and using which operator.
+ * Annotates a function on a [Query] interface to indicate which column (or path of columns)
+ * it constrains and using which [Operator].
  *
  * You can think of Constraints as the rules used to build the `where` clause of a SQL query.
  *
  * For example, you can query movies by title with a method like this:
  * ```
- * @Constraint(path = "name")
+ * @Constraint(path = "name") // Uses EQ as the default operator.
  * fun matchesTitle(title: String): MovieQuery
  * ```
  * Or query for movies released after a certain date with a method like this:
@@ -228,9 +228,9 @@ annotation class Order(
 /**
  * Annotates a function on a [Query] interface to specify that the association at
  * the given [path] should be fetched in a single query. The type of join used will be
- * specified by [joinType].
+ * specified by [joinType], and defaults to a LEFT JOIN.
  *
- * If the query is a projection, and does not need to get the entire entity graph, set
+ * If the query will result in a [Projection], and does not need to get the entire entity graph, set
  * [forProjection] to true. This will make the query operate as a regular JOIN query, instead
  * of a JOIN FETCH query.
  */
@@ -241,8 +241,8 @@ annotation class Fetch(
 )
 
 /**
- * Annotates a function on a subinterface of [Query] to indicate that the results should be
- * grouped by the given [paths].
+ * Annotates a function on a [Query] interface to indicate that the results should be
+ * grouped by the given [paths]. This is most useful with [Projection]s and aggregations.
  */
 annotation class Group(
   val paths: Array<String> = []
