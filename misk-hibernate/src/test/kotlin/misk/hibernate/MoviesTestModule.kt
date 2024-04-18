@@ -52,7 +52,7 @@ class MoviesTestModule(
     install(entitiesModule)
   }
 
-  private fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
+  internal fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
     return when (type) {
       DataSourceType.VITESS_MYSQL -> config.vitess_mysql_data_source
       DataSourceType.MYSQL -> config.mysql_data_source

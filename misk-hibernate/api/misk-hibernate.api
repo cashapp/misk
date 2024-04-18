@@ -1,3 +1,16 @@
+public final class misk/hibernate/AggregationType : java/lang/Enum {
+	public static final field AVG Lmisk/hibernate/AggregationType;
+	public static final field COUNT Lmisk/hibernate/AggregationType;
+	public static final field COUNT_DISTINCT Lmisk/hibernate/AggregationType;
+	public static final field MAX Lmisk/hibernate/AggregationType;
+	public static final field MIN Lmisk/hibernate/AggregationType;
+	public static final field NONE Lmisk/hibernate/AggregationType;
+	public static final field SUM Lmisk/hibernate/AggregationType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/hibernate/AggregationType;
+	public static fun values ()[Lmisk/hibernate/AggregationType;
+}
+
 public final class misk/hibernate/BindPolicy : java/lang/Enum {
 	public static final field APPEND Lmisk/hibernate/BindPolicy;
 	public static final field PREPEND Lmisk/hibernate/BindPolicy;
@@ -50,6 +63,7 @@ public abstract interface class misk/hibernate/DbUnsharded : misk/hibernate/DbEn
 }
 
 public abstract interface annotation class misk/hibernate/Fetch : java/lang/annotation/Annotation {
+	public abstract fun forProjection ()Z
 	public abstract fun joinType ()Ljavax/persistence/criteria/JoinType;
 	public abstract fun path ()Ljava/lang/String;
 }
@@ -73,6 +87,10 @@ public final class misk/hibernate/GidGenerator : org/hibernate/id/AbstractPostIn
 	public fun <init> ()V
 	public fun configure (Lorg/hibernate/type/Type;Ljava/util/Properties;Lorg/hibernate/service/ServiceRegistry;)V
 	public fun getInsertGeneratedIdentifierDelegate (Lorg/hibernate/id/PostInsertIdentityPersister;Lorg/hibernate/dialect/Dialect;Z)Lorg/hibernate/id/insert/InsertGeneratedIdentifierDelegate;
+}
+
+public abstract interface annotation class misk/hibernate/Group : java/lang/annotation/Annotation {
+	public abstract fun paths ()[Ljava/lang/String;
 }
 
 public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstractModule {
@@ -200,6 +218,7 @@ public abstract interface class misk/hibernate/Projection {
 }
 
 public abstract interface annotation class misk/hibernate/Property : java/lang/annotation/Annotation {
+	public abstract fun aggregation ()Lmisk/hibernate/AggregationType;
 	public abstract fun path ()Ljava/lang/String;
 }
 
@@ -256,6 +275,7 @@ public abstract interface annotation class misk/hibernate/SecretColumn : java/la
 }
 
 public abstract interface annotation class misk/hibernate/Select : java/lang/annotation/Annotation {
+	public abstract fun aggregation ()Lmisk/hibernate/AggregationType;
 	public abstract fun path ()Ljava/lang/String;
 }
 
