@@ -96,7 +96,6 @@ class DynamoClusterTest {
 
   @Test
   fun inspectAddedRecords() {
-    // Testing pagination
     val enhancedClient = DynamoDbEnhancedClient.builder()
       .dynamoDbClient(ddb)
       .build()
