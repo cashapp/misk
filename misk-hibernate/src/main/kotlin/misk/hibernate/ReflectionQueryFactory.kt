@@ -412,8 +412,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   @Singleton
   internal class Factory @Inject internal constructor(
     private var queryLimitsConfig: QueryLimitsConfig
-  ) :
-    Query.Factory {
+  ) : Query.Factory {
     private val queryMethodHandlersCache = CacheBuilder.newBuilder()
       .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
         override fun load(key: KClass<*>) = queryMethodHandlers(key)
@@ -509,7 +508,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         typedQuery.list()
       }
       reflectionQuery.checkRowCount(returnList, rows.size)
-      val list = rows.map { toValue(it) }
+      val list = rows.mapNotNull { toValue(it) }
       return if (returnList) list else list.firstOrNull()
     }
 
@@ -528,11 +527,23 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       }
     }.toTypedArray())
 
-    private fun toValue(row: Any): Any? {
+    private fun toValue(row: Any?): Any? {
       return when {
+        row == null -> null
         constructor == null -> row
         properties.size == 1 -> constructor.call(row)
-        else -> constructor.call(*(row as Array<*>))
+        else -> {
+          val args = row as Array<*>
+          // If we got back an array of null values, which can't be assigned to the constructor,
+          // then we should return null.
+          if (args.all { it == null } && constructor.parameters.none { it.type.isMarkedNullable } ) return null
+          // Now it's (probably!) safe to call the constructor.
+          // There are very rare cases where this could still fail if the constructor is
+          // expecting a non-nullable type for the property, but the query returned null.
+          // This will probably only happen if the mysql isn't running in strict mode, and the
+          // query author forgot to add a group to their aggregation query.
+          constructor.call(*args)
+        }
       }
     }
   }
@@ -660,7 +671,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           }
         }
       }
-
 
       private fun createFetch(
         errors: MutableList<String>,
@@ -1146,3 +1156,4 @@ private fun CriteriaBuilder.addInClause(
     }
   }
 }
+
