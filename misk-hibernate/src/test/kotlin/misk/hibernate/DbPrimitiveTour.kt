@@ -30,7 +30,10 @@ class DbPrimitiveTour(
   var f32: Float = 0.0f,
 
   @Column(nullable = false)
-  var f64: Double = 0.0
+  var f64: Double = 0.0,
+
+  @Column(nullable = true)
+  var maybe_i1: Boolean? = null,
 
 ) : DbUnsharded<DbPrimitiveTour> {
   @javax.persistence.Id @GeneratedValue
