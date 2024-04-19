@@ -185,10 +185,10 @@ tempestTestingDocker = { module = "app.cash.tempest:tempest-testing-docker" }
 tempestTestingInternal = { module = "app.cash.tempest:tempest-testing-internal" }
 tempestTestingJvm = { module = "app.cash.tempest:tempest-testing-jvm" }
 threeTenBp = { module = "org.threeten:threetenbp", version = "1.6.8" }
-sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version = "2.0.0" }
-sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version = "2.0.0" }
+sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version = "2.0.2" }
+sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version = "2.0.2" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version = "2.0.2" }
-sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version = "2.0.0" }
+sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version = "2.0.2" }
 tink = { module = "com.google.crypto.tink:tink", version = "1.6.1" }
 tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.6.1" }
 tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.6.1" }
