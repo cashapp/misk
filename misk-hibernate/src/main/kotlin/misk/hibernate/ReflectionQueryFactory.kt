@@ -537,27 +537,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           // If we got back an array of null values, which can't be assigned to the constructor,
           // then we should return null.
           if (args.all { it == null } && constructor.parameters.none { it.type.isMarkedNullable } ) return null
-          // Otherwise, we should check if we *can* assign the null values to the constructor.
-          checkNullability(constructor, args)
           // Now it's (probably!) safe to call the constructor.
+          // There are very rare cases where this could still fail if the constructor is
+          // expecting a non-nullable type for the property, but the query returned null.
+          // This will probably only happen if the mysql isn't running in strict mode, and the
+          // query author forgot to add a group to their aggregation query.
           constructor.call(*args)
         }
-      }
-    }
-
-    private fun checkNullability(constructor: KFunction<*>, args: Array<*>) {
-      val errors = mutableListOf<String>()
-      for ((index, arg) in args.withIndex()) {
-        val parameter = constructor.parameters[index]
-        if (arg == null && !parameter.type.isMarkedNullable) {
-          errors.add("Constructor parameter ${parameter.name} is not nullable, but query returned null for ${parameter.name}. Mark this parameter as nullable to avoid this error.")
-        }
-      }
-      if (errors.isNotEmpty()) {
-        throw IllegalArgumentException(
-          "There were problems with your Projection class:\n" +
-            errors.joinToString("\n", prefix = "  ")
-        )
       }
     }
   }
