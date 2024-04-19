@@ -536,7 +536,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           val args = row as Array<*>
           // If we got back an array of null values, which can't be assigned to the constructor,
           // then we should return null.
-          if (args.all { it == null } && !constructor.parameters.all { it.type.isMarkedNullable } ) return null
+          if (args.all { it == null } && constructor.parameters.none { it.type.isMarkedNullable } ) return null
           // Otherwise, we should check if we *can* assign the null values to the constructor.
           checkNullability(constructor, args)
           // Now it's (probably!) safe to call the constructor.
