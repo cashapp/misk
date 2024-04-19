@@ -5,8 +5,8 @@ import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.args.ListDirection
-import redis.clients.jedis.exceptions.JedisDataException
 import redis.clients.jedis.params.ZAddParams
+import redis.clients.jedis.util.JedisClusterCRC16
 import java.time.Duration
 import java.util.function.Supplier
 
@@ -800,3 +800,20 @@ inline fun checkHrandFieldCount(count: Long) {
   }
 }
 
+internal fun getSlotErrorOrNull(op: String, keys: List<ByteArray>): Throwable? {
+  val slots = keys.map { JedisClusterCRC16.getSlot(it) }.distinct()
+  return if (slots.size == 1) {
+    null
+  } else {
+    RuntimeException(
+      """
+      |When using clustered Redis, keys used by one $op command must always map to the same slot, but mapped to slots $slots.
+      |You can use {hashtags} in your key name to control how Redis hashes keys to slots.
+      |For example, keys: `{customer9001}.contacts` and `{customer9001}.payments` will  hash to the same slot.
+      |
+      |See https://redis.io/topics/cluster-spec#hash-tags for more information.
+      |
+      """.trimMargin()
+    )
+  }
+}
