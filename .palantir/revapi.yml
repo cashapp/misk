@@ -6241,6 +6241,32 @@ acceptedBreaks:
       new: "method void misk.jobqueue.sqs.SqsJob::delayForFailure()"
       justification: "{SqsJob is an internal class and there seem to be no references\
         \ to this function}"
+  "2024.04.12.171745-81ea336":
+    com.squareup.misk:misk-aws:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.jobqueue.sqs.QueueResolver::<init>(misk.cloud.aws.AwsRegion,\
+        \ misk.cloud.aws.AwsAccountId, com.amazonaws.services.sqs.AmazonSQS, java.util.Map<misk.cloud.aws.AwsRegion,\
+        \ ? extends com.amazonaws.services.sqs.AmazonSQS>, com.amazonaws.services.sqs.AmazonSQS,\
+        \ java.util.Map<misk.cloud.aws.AwsRegion, ? extends com.amazonaws.services.sqs.AmazonSQS>,\
+        \ java.util.Map<misk.jobqueue.QueueName, misk.jobqueue.sqs.AwsSqsQueueConfig>,\
+        \ misk.jobqueue.sqs.DeadLetterQueueProvider)"
+      new: "method void misk.jobqueue.sqs.QueueResolver::<init>(misk.cloud.aws.AwsRegion,\
+        \ misk.cloud.aws.AwsAccountId, com.amazonaws.services.sqs.AmazonSQS, java.util.Map<misk.cloud.aws.AwsRegion,\
+        \ ? extends com.amazonaws.services.sqs.AmazonSQS>, com.amazonaws.services.sqs.AmazonSQS,\
+        \ java.util.Map<misk.cloud.aws.AwsRegion, ? extends com.amazonaws.services.sqs.AmazonSQS>,\
+        \ java.util.Map<misk.jobqueue.QueueName, misk.jobqueue.sqs.AwsSqsQueueConfig>,\
+        \ misk.jobqueue.sqs.DeadLetterQueueProvider, com.squareup.moshi.Moshi)"
+      justification: "SQSJob is an internal class and is not exposed to the clients\
+        \ of Misk"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.jobqueue.sqs.ResolvedQueue::<init>(misk.jobqueue.QueueName,\
+        \ misk.jobqueue.QueueName, java.lang.String, misk.cloud.aws.AwsRegion, misk.cloud.aws.AwsAccountId,\
+        \ com.amazonaws.services.sqs.AmazonSQS)"
+      new: "method void misk.jobqueue.sqs.ResolvedQueue::<init>(misk.jobqueue.QueueName,\
+        \ misk.jobqueue.QueueName, java.lang.String, misk.cloud.aws.AwsRegion, misk.cloud.aws.AwsAccountId,\
+        \ com.amazonaws.services.sqs.AmazonSQS, int)"
+      justification: "SQSJob is an internal class and is not exposed to the clients\
+        \ of Misk"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
