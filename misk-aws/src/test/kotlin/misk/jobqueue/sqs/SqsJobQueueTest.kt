@@ -1,8 +1,9 @@
 package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.model.ChangeMessageVisibilityRequest
 import com.amazonaws.services.sqs.model.CreateQueueRequest
+import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
+import com.amazonaws.services.sqs.model.QueueAttributeName
 import misk.clustering.fake.lease.FakeLeaseManager
 import misk.feature.testing.FakeFeatureFlags
 import misk.jobqueue.Job
@@ -30,6 +31,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
+import com.squareup.moshi.Moshi
 
 @MiskTest(startService = true)
 internal class SqsJobQueueTest {
@@ -44,10 +46,11 @@ internal class SqsJobQueueTest {
   @Inject @ForSqsHandling lateinit var taskQueue: RepeatedTaskQueue
   @Inject private lateinit var fakeFeatureFlags: FakeFeatureFlags
   @Inject private lateinit var fakeLeaseManager: FakeLeaseManager
-  @Inject private lateinit var queueResolver: QueueResolver
+  @Inject private lateinit var moshi: Moshi
 
   private lateinit var queueName: QueueName
   private lateinit var deadLetterQueueName: QueueName
+
 
   /**
    * Make sure all tests pass regardless of the receiver policy.
@@ -183,6 +186,107 @@ internal class SqsJobQueueTest {
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
       0.0
     )
+  }
+
+  private fun createDeadLetterQueue(queueName: String): String?{
+    val dlqName = "${queueName}_dlq"
+
+    val createQueueRequest = CreateQueueRequest()
+      .withQueueName(dlqName)
+      .withAttributes(mapOf(
+        "MessageRetentionPeriod" to "10"
+      ))
+
+    val dlqUrl = sqs.createQueue(createQueueRequest).queueUrl
+    return sqs.getQueueAttributes(dlqUrl, listOf("QueueArn")).attributes["QueueArn"]
+  }
+  @TestAllReceiverPolicies
+  fun usingRedrivePolicyTheMaxNumberOfReceivesCouldBeAchieved(receiverPolicy: String) {
+    setupReceiverPolicy(receiverPolicy)
+    val handledJobs = CopyOnWriteArrayList<Job>()
+
+    val queueNameWithRedrive = QueueName("sqs_job_queue_test_redrive")
+    val maxReceiveCount = 2
+    val deadLetterQueueArn = createDeadLetterQueue(queueNameWithRedrive.value)
+
+    assertThat(deadLetterQueueArn).isNotNull()
+
+    val redrivePolicyQueueUrl = sqs.createQueue(
+      CreateQueueRequest()
+        .withQueueName(queueNameWithRedrive.value)
+        .withAttributes(
+          mapOf(
+            // 1 second visibility timeout
+            "VisibilityTimeout" to 1.toString(),
+            "RedrivePolicy" to """{"maxReceiveCount":"$maxReceiveCount", "deadLetterTargetArn":"$deadLetterQueueArn"}"""
+          )
+        )
+    ).queueUrl
+
+    queue.enqueue(queueNameWithRedrive, "this is my job")
+
+    val jobsReceived = AtomicInteger()
+    val allJobsCompleted = CountDownLatch(2)
+    consumer.subscribe(queueNameWithRedrive) {
+      val sqsJob = it as SqsJob
+      handledJobs.add(sqsJob)
+      // Only acknowledge third attempt
+      if (jobsReceived.getAndIncrement() == 1) sqsJob.acknowledge()
+      else sqsJob.delayForFailure()
+
+      allJobsCompleted.countDown()
+    }
+
+    assertThat(allJobsCompleted.await(10, TimeUnit.SECONDS)).isTrue()
+
+    // Should have processed the same job twice
+    val messageId = handledJobs[0].id
+    assertThat(handledJobs.map { it.body }).containsExactly("this is my job", "this is my job")
+    assertThat(handledJobs).allSatisfy { assertThat(it.id).isEqualTo(messageId) }
+
+    // Confirm metrics
+    assertThat(
+      sqsMetrics.jobsEnqueued.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+    ).isEqualTo(1.0)
+    assertThat(
+      sqsMetrics.jobEnqueueFailures.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+    ).isEqualTo(0.0)
+    assertThat(sqsMetrics.sqsSendTime.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isEqualTo(1)
+
+    assertThat(
+      sqsMetrics.jobsReceived.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+    ).isEqualTo(2.0)
+    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+    // messages in varying batches
+    assertThat(sqsMetrics.sqsReceiveTime.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isNotZero()
+
+    // Since we are using jitter, we can't predict what would be the exact timeout time assigned
+    assertThat(sqsMetrics.visibilityTime.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()).isGreaterThanOrEqualTo(1.0)
+
+    assertThat(
+      sqsMetrics.jobsAcknowledged.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+    ).isEqualTo(1.0)
+    assertThat(sqsMetrics.sqsDeleteTime.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isEqualTo(1)
+    assertThat(sqsMetrics.queueProcessingLag.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isEqualTo(1)
+
+    assertThat(sqsMetrics.handlerFailures.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()).isEqualTo(
+      0.0
+    )
+
+    // now assert the redrive policy has been applied correctly
+    val redrivePolicyJson = sqs.getQueueAttributes(
+      GetQueueAttributesRequest()
+        .withQueueUrl(redrivePolicyQueueUrl)
+        .withAttributeNames(
+          QueueAttributeName.RedrivePolicy
+        )
+    ).attributes["RedrivePolicy"]
+
+    assertThat(redrivePolicyJson).isNotNull()
+
+    // assert that the redrive policy has been applied correctly
+    val redrivePolicyAdapter = moshi.adapter(QueueResolver.RedrivePolicy::class.java)
+    assertThat(redrivePolicyAdapter.fromJson(redrivePolicyJson!!)?.maxReceiveCount).isEqualTo(2)
   }
 
   @TestAllReceiverPolicies

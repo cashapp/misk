@@ -13,7 +13,8 @@ internal class ResolvedQueue(
   val url: String,
   val region: AwsRegion,
   val accountId: AwsAccountId,
-  val client: AmazonSQS
+  val client: AmazonSQS,
+  val maxRetries: Int = 10,
 ) {
 
   val queueName: String
