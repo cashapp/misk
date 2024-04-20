@@ -275,7 +275,6 @@ data class FakeJob(
   override fun deadLetter() {
     deadLettered = true
   }
-
   override fun compareTo(other: FakeJob): Int {
     val result = deliverAt.compareTo(other.deliverAt)
     if (result == 0) {
