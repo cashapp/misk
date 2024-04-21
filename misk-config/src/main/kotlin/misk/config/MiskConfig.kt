@@ -87,6 +87,27 @@ object MiskConfig {
     overrideValues: JsonNode? = null,
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
+    return load(
+      configClass,
+      appName,
+      deployment,
+      overrideResources,
+      overrideValues,
+      resourceLoader,
+      failOnUnknownProperties = false
+    )
+  }
+
+  @JvmStatic
+  fun <T : Config> load(
+    configClass: Class<out Config>,
+    appName: String,
+    deployment: Deployment,
+    overrideResources: List<String> = listOf(),
+    overrideValues: JsonNode? = null,
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
+    failOnUnknownProperties: Boolean
+  ): T {
     check(!Secret::class.java.isAssignableFrom(configClass)) {
       "Top level service config cannot be a Secret<*>"
     }
@@ -108,9 +129,11 @@ object MiskConfig {
       configClass,
       configFile,
       appName,
-      configEnvironmentName
+      configEnvironmentName,
+      failOnUnknownProperties
     )
   }
+
 
   private fun <T : Config> readFlattenedYaml(
     mapper: ObjectMapper,
@@ -118,12 +141,19 @@ object MiskConfig {
     configClass: Class<out Config>,
     configFile: String,
     appName: String,
-    configEnvironmentName: String
+    configEnvironmentName: String,
+    failOnUnknownProperties: Boolean
   ): T {
     try {
       @Suppress("UNCHECKED_CAST")
       return mapper.readValue(jsonNode.toString(), configClass) as T
     } catch (e: UnrecognizedPropertyException) {
+      if (failOnUnknownProperties) {
+        throw IllegalStateException(
+          "failed to load configuration for $appName $configEnvironmentName: ${e.message}", e
+        )
+      }
+
       val path = Joiner.on('.').join(e.path.map { it.fieldName ?: it.index })
       logger.warn(e) {
         "$configFile: '$path' not found in '${configClass.simpleName}', ignoring " +
@@ -138,7 +168,8 @@ object MiskConfig {
         configClass,
         configFile,
         appName,
-        configEnvironmentName
+        configEnvironmentName,
+        false
       )
     } catch (e: MissingKotlinParameterException) {
       throwMissingPropertyException(e, configClass, configFile, jsonNode)
