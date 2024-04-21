@@ -148,8 +148,21 @@ fun <T, Q : Query<T>> Q.queryHint(hint: String): Q {
 }
 
 /**
- * Annotates a function on a subinterface of [Query] to indicate which column (or path of columns)
- * it constrains and using which operator.
+ * Annotates a function on a [Query] interface to indicate which column (or path of columns)
+ * it constrains and using which [Operator].
+ *
+ * You can think of Constraints as the rules used to build the `where` clause of a SQL query.
+ *
+ * For example, you can query movies by title with a method like this:
+ * ```
+ * @Constraint(path = "name") // Uses EQ as the default operator.
+ * fun matchesTitle(title: String): MovieQuery
+ * ```
+ * Or query for movies released after a certain date with a method like this:
+ * ```
+ * @Constraint(path = "release_date", operator = Operator.GT)
+ * fun releasedAfter(date: LocalDate): MovieQuery
+ * ```
  */
 annotation class Constraint(
   val path: String,
@@ -192,17 +205,20 @@ enum class Operator {
 }
 
 /**
- * Annotates a function on a subinterface of [Query] to execute a `SELECT` query. Functions with
+ * Annotates a function on a [Query] interface to execute a `SELECT` query. Functions with
  * this annotation must return a `List` to fetch multiple rows results, or a regular type to fetch
  * a unique result.
+ *
+ * [Select] annotated methods may return single column values, or [Projection]s of multiple columns.
  */
 annotation class Select(
-  val path: String = ""
+  val path: String = "",
+  val aggregation: AggregationType = AggregationType.NONE
 )
 
 /**
- * Annotates a function on a subinterface of [Query] to indicate which columns to order the
- * the selected columns.
+ * Annotates a function on a [Query] interface to indicate by which columns to order the
+ * results. Defaults to ascending order.
  */
 annotation class Order(
   val path: String,
@@ -210,11 +226,45 @@ annotation class Order(
 )
 
 /**
- * Annotates a function on a subinterface of [Query] to specify that the association at
- * the given `path` should be fetched in a single query. The type of join used will be
- * specified by `joinType`.
+ * Annotates a function on a [Query] interface to specify that the association at
+ * the given [path] should be fetched in a single query. The type of join used will be
+ * specified by [joinType], and defaults to a LEFT JOIN.
+ *
+ * If the query will result in a [Projection], and does not need to get the entire entity graph, set
+ * [forProjection] to true. This will make the query operate as a regular JOIN query, instead
+ * of a JOIN FETCH query.
  */
 annotation class Fetch(
   val path: String = "",
-  val joinType: JoinType = LEFT
+  val joinType: JoinType = LEFT,
+  val forProjection: Boolean = false,
 )
+
+/**
+ * Annotates a function on a [Query] interface to indicate that the results should be
+ * grouped by the given [paths]. This is most useful with [Projection]s and aggregations.
+ */
+annotation class Group(
+  val paths: Array<String> = []
+)
+
+/**
+ * Available aggregations which can be applied to a single value [Select] query,
+ * or a [Property] of a projection.
+ */
+enum class AggregationType {
+  /** No aggregation is applied. Like `select column`. */
+  NONE,
+  /** Like `select avg(column)`. */
+  AVG,
+  /** Like `select count(column)`. */
+  COUNT,
+  /** Like `select count(distinct column)`. */
+  COUNT_DISTINCT,
+  /** Like `select max(column)`. */
+  MAX,
+  /** Like `select min(column)`. */
+  MIN,
+  /** Like `select sum(column)`. */
+  SUM,
+}

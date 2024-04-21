@@ -10,7 +10,6 @@ import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
 import java.math.BigInteger
-import kotlin.math.pow
 import kotlin.random.Random
 
 internal class SqsJob(
@@ -65,10 +64,11 @@ internal class SqsJob(
    *  that duration. With every subsequent retry the duration becomes longer until it hits the max
    *  value of 10hrs.
    */
-   fun delayForFailure(maxRetryCount: Int = 10) {
+  fun delayForFailure() {
+    val maxReceiveCount = queue.maxRetries
     val visibilityTime = calculateVisibilityTimeOut(
       currentReceiveCount = attributes[RECEIVE_COUNT]?.toInt()  ?: 1,
-      maxReceiveCount = maxRetryCount,
+      maxReceiveCount = maxReceiveCount,
     )
 
     queue.call { client ->
