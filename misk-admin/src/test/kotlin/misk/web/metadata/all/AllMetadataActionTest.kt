@@ -19,11 +19,11 @@ class AllMetadataActionTest {
   @Test
   fun `happy path`() {
     val actual = action.getAll()
-    val actualIds = actual.all.map { it.id }
-    assertEquals(listOf("config", "database-hibernate", "web-actions"), actualIds)
+    val actualIds = actual.all.keys
+    assertEquals(setOf("config", "database-hibernate", "web-actions"), actualIds)
 
     // Config
-    val actualConfig = actual.all.single { it.id == "config" }
+    val actualConfig = actual.all["config"]!!
     assert((actualConfig.metadata as Map<String, String?>).contains("JVM"))
     assert((actualConfig.metadata as Map<String, String?>).contains("Effective Config"))
     assertEquals(
@@ -86,11 +86,11 @@ class AllMetadataActionTest {
 
     // Database Hibernate Metadata
     // TODO maybe add a DB to the test so that assertions can confirm Database Hibernate metadata is included
-    val actualDatabaseHibernate = actual.all.single { it.id == "database-hibernate" }
+    val actualDatabaseHibernate = actual.all["database-hibernate"]!!
     assertEquals(listOf(), (actualDatabaseHibernate.metadata as List<DatabaseQueryMetadata>))
 
     // Web Action Metadata
-    val actualWebActionsMetadata = actual.all.single { it.id == "web-actions" }
+    val actualWebActionsMetadata = actual.all["web-actions"]!!
     assertEquals(
       """
         WebActionMetadata(name=StatusAction, function=fun misk.web.actions.StatusAction.getStatus(): misk.web.actions.StatusAction.ServerStatus, packageName=misk.web.actions, description=null, functionAnnotations=[@misk.web.Get(pathPattern="/_status"), @misk.web.ResponseContentType({"application/json;charset=utf-8"}), @misk.security.authz.Unauthenticated(), @misk.web.AvailableWhenDegraded()], requestMediaTypes=[*/*], responseMediaType=application/json;charset=utf-8, parameterTypes=[], parameters=[], requestType=null, returnType=misk.web.actions.StatusAction.ServerStatus, responseType=null, types={}, responseTypes={}, pathPattern=/_status, applicationInterceptors=[], networkInterceptors=[misk.web.interceptors.GunzipRequestBodyInterceptor, misk.web.interceptors.InternalErrorInterceptorFactory${'$'}Companion${'$'}INTERCEPTOR${'$'}1, misk.web.interceptors.RequestLogContextInterceptor, misk.web.interceptors.MetricsInterceptor, misk.web.exceptions.ExceptionHandlingInterceptor], httpMethod=GET, allowedServices=[], allowedCapabilities=[])

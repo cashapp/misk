@@ -630,17 +630,17 @@ public abstract interface annotation class misk/web/metadata/all/AllMetadataAcce
 }
 
 public final class misk/web/metadata/all/AllMetadataAction : misk/web/actions/WebAction {
-	public fun <init> (Ljava/util/List;)V
+	public fun <init> (Ljava/util/Map;)V
 	public final fun getAll ()Lmisk/web/metadata/all/AllMetadataAction$Response;
 }
 
 public final class misk/web/metadata/all/AllMetadataAction$Response {
-	public fun <init> (Ljava/util/List;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;)Lmisk/web/metadata/all/AllMetadataAction$Response;
-	public static synthetic fun copy$default (Lmisk/web/metadata/all/AllMetadataAction$Response;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/metadata/all/AllMetadataAction$Response;
+	public fun <init> (Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lmisk/web/metadata/all/AllMetadataAction$Response;
+	public static synthetic fun copy$default (Lmisk/web/metadata/all/AllMetadataAction$Response;Ljava/util/Map;ILjava/lang/Object;)Lmisk/web/metadata/all/AllMetadataAction$Response;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAll ()Ljava/util/List;
+	public final fun getAll ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -685,10 +685,11 @@ public final class misk/web/metadata/config/ConfigMetadataAction$Response {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/metadata/config/ConfigMetadataProvider : com/google/inject/Provider {
+public final class misk/web/metadata/config/ConfigMetadataProvider : misk/web/metadata/MetadataProvider {
 	public fun <init> ()V
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lmisk/web/metadata/config/ConfigMetadata;
+	public fun getId ()Ljava/lang/String;
 }
 
 public final class misk/web/metadata/database/DatabaseHibernateMetadata : misk/web/metadata/Metadata {
@@ -702,11 +703,12 @@ public final class misk/web/metadata/database/DatabaseHibernateMetadata : misk/w
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/metadata/database/DatabaseHibernateMetadataProvider : com/google/inject/Provider {
+public final class misk/web/metadata/database/DatabaseHibernateMetadataProvider : misk/web/metadata/MetadataProvider {
 	public field metadata Ljava/util/List;
 	public fun <init> ()V
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lmisk/web/metadata/database/DatabaseHibernateMetadata;
+	public fun getId ()Ljava/lang/String;
 	public final fun getMetadata ()Ljava/util/List;
 	public final fun setMetadata (Ljava/util/List;)V
 }

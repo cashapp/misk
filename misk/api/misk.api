@@ -2189,10 +2189,11 @@ public final class misk/web/metadata/webaction/WebActionsMetadata : misk/web/met
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/metadata/webaction/WebActionsMetadataProvider : com/google/inject/Provider {
+public final class misk/web/metadata/webaction/WebActionsMetadataProvider : misk/web/metadata/MetadataProvider {
 	public fun <init> ()V
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lmisk/web/metadata/webaction/WebActionsMetadata;
+	public fun getId ()Ljava/lang/String;
 }
 
 public final class misk/web/proxy/OptionalBinder {

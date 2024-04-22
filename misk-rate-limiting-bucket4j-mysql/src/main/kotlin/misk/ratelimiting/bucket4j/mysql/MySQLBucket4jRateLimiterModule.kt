@@ -37,7 +37,7 @@ class MySQLBucket4jRateLimiterModule @JvmOverloads constructor(
   fun providedRateLimiter(
     clock: Clock,
     injector: Injector,
-    meterRegistry: MeterRegistry
+    meterRegistry: MeterRegistry,
   ): RateLimiter {
     val dataSourceService = injector.getInstance(keyOf<DataSourceService>(qualifier))
     val sqlConfiguration = SQLProxyConfiguration.builder()
