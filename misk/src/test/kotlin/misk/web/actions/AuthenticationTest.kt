@@ -152,7 +152,7 @@ class AuthenticationTest {
 
     assertThat(logCollector.takeEvents(AccessInterceptor::class).map { it.message }).containsExactlyInAnyOrder(
       "Conflicting auth annotations on EmptyAuthenticatedWithCustomAnnototationAccessAction::get(), @Authenticated won't have any effect due to @CustomCapabilityAccess",
-      "EmptyAuthenticatedAccessAction::get() has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated."
+      "EmptyAuthenticatedAccessAction::get() has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated, use explicit boolean parameters allowAnyService or allowAnyUser instead."
     )
   }
 
