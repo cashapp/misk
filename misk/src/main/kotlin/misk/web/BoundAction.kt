@@ -122,7 +122,7 @@ internal class BoundAction<A : WebAction>(
     MDC.clear() // MDC should already be empty, but clear it again just in case
     
     try {
-      scope.enter(seedData).use {
+      scope.create(seedData).inScope {
         handle(httpCall, pathMatcher)
       }
     } finally {

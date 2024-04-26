@@ -19,7 +19,6 @@ public final class misk/scope/ActionScope : java/lang/AutoCloseable {
 	public final fun asContextElement ()Lkotlin/coroutines/CoroutineContext$Element;
 	public fun close ()V
 	public final fun create (Ljava/util/Map;)Lmisk/scope/ActionScope$Instance;
-	public final fun enter (Ljava/util/Map;)Lmisk/scope/ActionScope;
 	public final fun get (Lcom/google/inject/Key;)Ljava/lang/Object;
 	public final fun inScope ()Z
 	public final fun propagate (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;
@@ -27,7 +26,6 @@ public final class misk/scope/ActionScope : java/lang/AutoCloseable {
 	public final fun propagate (Lkotlin/reflect/KFunction;)Lkotlin/reflect/KFunction;
 	public final fun runBlocking (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public final fun runBlocking (Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public final fun snapshotActionScope ()Ljava/util/Map;
 	public final fun snapshotActionScopeInstance ()Lmisk/scope/ActionScope$Instance;
 }
 

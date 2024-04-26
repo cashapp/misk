@@ -69,7 +69,7 @@ class PropagatingScopeActionInInterceptorsTest {
 
   @Test
   fun `propagate action scoped using typed http client`() {
-    val response = scope.enter(seedData).use {
+    val response = scope.create(seedData).inScope {
       client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
     }
     assertThat(response.body()!!.name).isEqualTo("es-US")
@@ -77,8 +77,8 @@ class PropagatingScopeActionInInterceptorsTest {
 
   @Test
   fun `propagate action scoped using typed http client with suspended calls`() {
-    val response = scope.enter(seedData).use {
-      runBlocking(Dispatchers.IO + it.asContextElement()) {
+    val response = scope.create(seedData).inScope {
+      runBlocking(Dispatchers.IO + scope.asContextElement()) {
         client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
       }
     }
@@ -87,7 +87,7 @@ class PropagatingScopeActionInInterceptorsTest {
 
   @Test
   fun `propagate action scoped using gRPC client`() {
-    val response = scope.enter(seedData).use {
+    val response = scope.create(seedData).inScope {
       dinoService.GetDinosour().executeBlocking(Dinosaur.Builder().name("trex").build())
     }
     assertThat(response.name).isEqualTo("es-US")
@@ -95,8 +95,8 @@ class PropagatingScopeActionInInterceptorsTest {
 
   @Test
   fun `propagate action scoped using gRPC client with suspended calls`() {
-    val response = scope.enter(seedData).use {
-      runBlocking(Dispatchers.IO +  it.asContextElement()) {
+    val response = scope.create(seedData).inScope {
+      runBlocking(Dispatchers.IO +  scope.asContextElement()) {
         dinoService.GetDinosour().execute(Dinosaur.Builder().name("trex").build())
       }
     }

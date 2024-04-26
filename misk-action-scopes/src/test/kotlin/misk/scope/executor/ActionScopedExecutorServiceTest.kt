@@ -42,7 +42,7 @@ internal class ActionScopedExecutorServiceTest {
       keyOf<String>(Names.named("from-seed")) to "my seed data"
     )
 
-    val future = scope.enter(seedData).use {
+    val future = scope.create(seedData).inScope {
       executor.submit(Callable { tester.fooValue() })
     }
 
