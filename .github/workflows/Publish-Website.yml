@@ -34,7 +34,7 @@ jobs:
       - name: Build mkdocs
         run: |
           pip3 install mkdocs mkdocs-material mkdocs-macros-plugin
-          mkdocs build
+          mkdocs build --strict
 
       - name: Deploy 🚀
         if: success() && github.ref == 'refs/heads/master'

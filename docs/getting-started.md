@@ -201,7 +201,7 @@ class MovieServiceModule : KAbstractModule() {
   }
 }
 ```
-See [`ServiceModule`](0.x/misk-service/misk/-service-module/index.md) for more details about the 
+See [`ServiceModule`](./0.x/misk-service/misk-service/misk/-service-module/index.md) for more details about the 
 service graph.
 
 When writing `Services`, always prefer to inherit from one of the common base classes:

@@ -32,3 +32,5 @@ set -x
 cat README.md | grep -v 'project website' > docs/index.md
 cp CHANGELOG.md docs/changelog.md
 cp CONTRIBUTING.md docs/contributing.md
+mkdir -p wisp
+cp wisp/README.md docs/wisp/readme.md
