@@ -1,6 +1,8 @@
 package misk.backoff
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import kotlin.test.assertFailsWith
@@ -123,5 +125,12 @@ internal class RetryTest {
     }
   }
 
+  @Test
+fun dontRetryExceptionCanBeInstantiatedWithNoMessage() {
+    // needed to ensure backwards compat with 2 services
+    val exception = DontRetryException()
+    assertNotNull(exception)
+    assertNull(exception.message)
+}
 
 }
