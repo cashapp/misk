@@ -192,7 +192,7 @@ class FakeJobQueue @Inject constructor(
   ): List<FakeJob> {
     val jobHandlers = jobHandlers.get()
     val resultedJobs = mutableListOf<FakeJob>()
-    val jobsToQueueBack = mutableListOf<FakeJob>()
+    val jobsToQueueBack = mutableSetOf<FakeJob>()
     // Used to prevent an infinite loop by mistake in supplier.
     val touchedJobs = mutableSetOf<FakeJob>()
     while (true) {
@@ -221,7 +221,7 @@ class FakeJobQueue @Inject constructor(
         throw e
       }
       // validate that the job has been added to jobsToQueueBack
-      if (job.backoffDelayedTime != null && job.backoffDelayedTime!!.isAfter(clock.instant())) {
+      if (jobsToQueueBack.contains(job)) {
         continue
       } else {
         resultedJobs += job
