@@ -54,7 +54,7 @@ Want to jump right into it? Check out our [Getting Started Guide](./docs/getting
 
 What to know more about each module, see [Developer Guide](./docs/developer-guide.md).
 
-[changelog]: http://cashapp.github.io/misk/changelog/
+[changelog]: https://cashapp.github.io/misk/changelog/
 [misk]: https://cashapp.github.io/misk/
 [miskweb]: https://github.com/cashapp/misk-web/
 [snap]: https://mvnrepository.com/artifact/com.squareup.misk/misk
