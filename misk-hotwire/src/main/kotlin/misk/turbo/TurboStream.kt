@@ -43,5 +43,7 @@ enum class TurboStreamAction {
   UPDATE,
   REMOVE,
   BEFORE,
-  AFTER
+  AFTER,
+  REFRESH,
+  MORPH,
 }
