@@ -47,3 +47,6 @@ enum class TurboStreamAction {
   REFRESH,
   MORPH,
 }
+
+// Content Type header needed for https://turbo.hotwired.dev/handbook/drive#streaming-after-a-form-submission
+val TURBO_STREAM_CONTENT_TYPE = "text/vnd.turbo-stream.html"
