@@ -87,7 +87,7 @@ data class WebConfig @JvmOverloads constructor(
   val cors: Map<String, CorsConfig> = mapOf(),
 
   /** If true, disables automatic load shedding when degraded. */
-  val concurrency_limiter_disabled: Boolean = false,
+  val concurrency_limiter_disabled: Boolean = true,
 
   /** The level of log when concurrency shedding. */
   val concurrency_limiter_log_level: Level = Level.ERROR,
