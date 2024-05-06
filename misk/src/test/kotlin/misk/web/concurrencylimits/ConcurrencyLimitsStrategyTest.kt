@@ -43,6 +43,7 @@ class ConcurrencyLimitsStrategyTest {
         MiskWebModule(
           WebConfig(
             port = 0,
+            concurrency_limiter_disabled = false,
             concurrency_limiter = ConcurrencyLimiterConfig(
               strategy = strategy,
               max_concurrency = maxConcurrency,
