@@ -139,6 +139,7 @@ internal class DegradedHealthStressTest {
       install(
         WebServerTestingModule(
           TESTING_WEB_CONFIG.copy(
+            concurrency_limiter_disabled = false,
             concurrency_limiter = ConcurrencyLimiterConfig(
               // We use VEGAS here to make testing easier (VEGAS cares about errors, GRADIENT2
               // doesn't). The main purpose of this test is to make sure we have everything wired
