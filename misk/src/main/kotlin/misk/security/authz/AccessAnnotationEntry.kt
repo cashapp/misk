@@ -49,9 +49,11 @@ data class AccessAnnotationEntry @JvmOverloads constructor(
 
 inline fun <reified T : Annotation> AccessAnnotationEntry(
   services: List<String> = listOf(),
-  capabilities: List<String> = listOf()
+  capabilities: List<String> = listOf(),
+  allowAnyService: Boolean = false,
+  allowAnyUser: Boolean = false
 ): AccessAnnotationEntry {
-  return AccessAnnotationEntry(T::class, services, capabilities)
+  return AccessAnnotationEntry(T::class, services, capabilities, allowAnyService, allowAnyUser)
 }
 
 /**
