@@ -42,6 +42,8 @@ vitess/base
 
 ## Breaking changes
 
+**Note:** Remember to document breaking changes in [BREAKING_CHANGES.md](BREAKING_CHANGES.md).
+
 We integrate both [Kotlin Binary Compatibility Validator][2] and [Revapi][3] into our build 
 pipeline to automatically detect breaking changes that could affect existing clients.
 
@@ -73,3 +75,5 @@ This will add an entry in [.plantir/revapi.yml](.palantir/revapi.yml) to ignore 
  [1]: https://spreadsheets.google.com/spreadsheet/viewform?formkey=dDViT2xzUHAwRkI3X3k5Z0lQM091OGc6MQ&ndplr=1
  [2]: https://github.com/Kotlin/binary-compatibility-validator
  [3]: https://github.com/palantir/gradle-revapi
+
+
