@@ -232,7 +232,7 @@ internal class SqsJobQueueTest {
       handledJobs.add(sqsJob)
       // Only acknowledge third attempt
       if (jobsReceived.getAndIncrement() == 1) sqsJob.acknowledge()
-      else sqsJob.backOffDelay()
+      else sqsJob.delayWithBackoff()
 
       allJobsCompleted.countDown()
     }
@@ -314,7 +314,7 @@ internal class SqsJobQueueTest {
       handledJobs.add(sqsJob)
       // Only acknowledge third attempt
       if (jobsReceived.getAndIncrement() == 2) sqsJob.acknowledge()
-      else sqsJob.backOffDelay()
+      else sqsJob.delayWithBackoff()
 
       allJobsCompleted.countDown()
     }

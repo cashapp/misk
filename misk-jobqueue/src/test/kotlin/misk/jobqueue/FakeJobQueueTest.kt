@@ -366,11 +366,11 @@ internal class FakeJobQueueTest {
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(3)
 
-    fakeClock.add(Duration.ofMillis(5000))
+    fakeClock.add(Duration.ofSeconds(5))
     val jobsAfter5s = fakeJobQueue.handleJobs(GREEN_QUEUE, considerDelays = true, retries = 2, assertAcknowledged = false)
     assertThat(jobsAfter5s.size).isEqualTo(2)
 
-    // there are still 3 jobs that are yet to be processed
+    // there is only 1 job that is yet to be processed
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(1)
   }
 
@@ -650,7 +650,7 @@ internal class ExampleJobHandler @Inject private constructor(moshi: Moshi) : Job
         throw ColorException()
       }
       ExampleJobHint.DELAY_ONCE -> if (!jobExecutedBefore) {
-        job.backOffDelay()
+        job.delayWithBackoff()
         throw ColorException()
       }
       else -> Unit

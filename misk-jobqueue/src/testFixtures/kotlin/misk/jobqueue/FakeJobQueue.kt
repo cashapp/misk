@@ -17,6 +17,7 @@ import jakarta.inject.Singleton
 import java.lang.Long.max
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.jvm.Throws
+import kotlin.math.min
 
 /**
  * A fake implementation of [JobQueue] and [FakeTransactionalJobQueue] intended for testing.
@@ -209,7 +210,7 @@ class FakeJobQueue @Inject constructor(
       try {
         retry(retries, FlatBackoff(Duration.ofMillis(20))) {
           // we re-enqueue the job if the backoff delayed time was called
-          if (job.backoffDelayedTime != null && job.backoffDelayedTime!!.isAfter(clock.instant())) {
+          if (job.delayedForBackoff) {
             jobsToQueueBack += job
           } else {
             jobHandler.handleJob(job)
@@ -241,7 +242,8 @@ class FakeJobQueue @Inject constructor(
     }
     // Similarly to above re-enqueue jobs that have been called to have the visibility timeout.
     jobsToQueueBack.forEach { job ->
-      if (job.backoffDelayedTime != null && !job.acknowledged) {
+      if (job.delayedForBackoff && !job.acknowledged) {
+        job.delayedForBackoff = false
         jobQueues.getOrPut(job.queueName, ::PriorityBlockingQueue).add(job)
       }
     }
@@ -258,8 +260,7 @@ class FakeJobQueue @Inject constructor(
       // [jobs] queue is sorted by [deliverAt].
       val job = jobs.peek()
       if (job == null
-        || (job.deliveryDelay != null && job.deliverAt.isAfter(now))
-        || (job.backoffDelayedTime != null && job.backoffDelayedTime!!.isAfter(now))) {
+        || (job.deliveryDelay != null && job.deliverAt.isAfter(now))) {
         return null
       }
       // If remove() is false, then we lost race to another worker and should retry.
@@ -277,7 +278,7 @@ data class FakeJob(
   override val body: String,
   override val attributes: Map<String, String>,
   val enqueuedAt: Instant,
-  val deliveryDelay: Duration? = null,
+  var deliveryDelay: Duration? = null,
   val clock: Clock,
 ) : Job, Comparable<FakeJob> {
   val deliverAt: Instant
@@ -290,7 +291,7 @@ data class FakeJob(
   var deadLettered: Boolean = false
     internal set
 
-  var backoffDelayedTime: Instant? = null
+  var delayedForBackoff: Boolean = false
     internal set
 
   var delayDuration: Long? = null
@@ -303,20 +304,11 @@ data class FakeJob(
   override fun deadLetter() {
     deadLettered = true
   }
-  override fun backOffDelay() {
-    delayDuration = if (delayDuration == null) {
-      1000L
-    }  else {
-      max(delayDuration!! * 2, 10_000L)
-    }
+  override fun delayWithBackoff() {
+    delayedForBackoff  = true
 
-    val deliveryTime = if (clock.instant().isAfter(deliverAt)) {
-      clock.instant()
-    } else {
-      deliverAt
-    }
-
-    backoffDelayedTime = deliveryTime.plus(Duration.ofMillis(delayDuration!!))
+    delayDuration = min((delayDuration ?: MIN_DElAY_DURATION) * 2, MAX_DELAY_DURATION)
+    deliveryDelay = Duration.ofMillis(delayDuration!!)
   }
   override fun compareTo(other: FakeJob): Int {
     val result = deliverAt.compareTo(other.deliverAt)
@@ -325,5 +317,10 @@ data class FakeJob(
       return id.compareTo(other.id)
     }
     return result
+  }
+
+  companion object {
+    const val MIN_DElAY_DURATION = 1_000L
+    const val MAX_DELAY_DURATION = 10_000L
   }
 }

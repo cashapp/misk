@@ -64,7 +64,7 @@ internal class SqsJob(
    *  that duration. With every subsequent retry the duration becomes longer until it hits the max
    *  value of 10hrs.
    */
-  override fun backOffDelay() {
+  override fun delayWithBackoff() {
     val maxReceiveCount = queue.maxRetries
     val visibilityTime = calculateVisibilityTimeOut(
       currentReceiveCount = attributes[RECEIVE_COUNT]?.toInt()  ?: 1,
