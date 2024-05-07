@@ -13,12 +13,9 @@ set -ex
 # https://www.mkdocs.org/user-guide/writing-your-docs/#meta-data
 title_markdown_file() {
   TITLE_PATTERN="s/^[#]+ *(.*)/title: \1 - Misk/"
-  echo "---"                                                     > "$1.fixed"
-  cat $1 | sed -E "$TITLE_PATTERN" | grep "title: " | head -n 1 >> "$1.fixed"
-  echo "---"                                                    >> "$1.fixed"
-  echo                                                          >> "$1.fixed"
-  cat $1                                                        >> "$1.fixed"
-  mv "$1.fixed" "$1"
+  TITLE=$(cat $1 | sed -E "$TITLE_PATTERN" | grep "title: " | head -n 1)
+  CONTENT=$(cat $1)
+  echo -e "---\n$TITLE\n---\n\n$CONTENT" > "$1"
 }
 
 set +x
@@ -32,5 +29,19 @@ set -x
 cat README.md | grep -v 'project website' > docs/index.md
 cp CHANGELOG.md docs/changelog.md
 cp CONTRIBUTING.md docs/contributing.md
-mkdir -p wisp
+
+# Copy in Wisp docs
+mkdir -p docs/wisp
 cp wisp/README.md docs/wisp/readme.md
+
+# Define the source and target directories
+src_dir="wisp"
+target_dir="docs"
+
+# Use find to locate all README.md files in all subdirectories
+find "$src_dir" -name 'README.md' -print0 | while IFS= read -r -d '' file; do
+    # Create the target directory, preserving the directory structure
+    mkdir -p "$target_dir/$(dirname "$file")"
+    # Copy the file
+    cp "$file" "$target_dir/$(dirname "$file")/readme.md"
+done

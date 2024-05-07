@@ -28,4 +28,4 @@ docs/index.md
 docs/changelog.md
 docs/contributing.md
 docs/releasing.md
-docs/wisp/readme.md
+docs/wisp/**
