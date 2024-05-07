@@ -51,6 +51,7 @@ public class misk/exceptions/ConflictException : misk/exceptions/WebActionExcept
 
 public final class misk/exceptions/ExceptionsKt {
 	public static final fun requireRequest (ZLkotlin/jvm/functions/Function0;)V
+	public static final fun requireRequestNotNull (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
 public class misk/exceptions/GatewayTimeoutException : misk/exceptions/WebActionException {
