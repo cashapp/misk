@@ -12,6 +12,8 @@ import java.net.HttpURLConnection.HTTP_NOT_FOUND
 import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 import java.net.HttpURLConnection.HTTP_UNSUPPORTED_TYPE
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 /**
  * Even though all kotlin exceptions are runtime exceptions.
@@ -124,6 +126,20 @@ open class UnsupportedMediaTypeException @JvmOverloads constructor(message: Stri
 /** Similar to [kotlin.require], but throws [BadRequestException] if the check fails */
 inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {
   if (!check) throw BadRequestException(lazyMessage())
+}
+
+/** Similar to [kotlin.requireNotNull], but throws [BadRequestException] if the check fails */
+@OptIn(ExperimentalContracts::class)
+public inline fun <T : Any> requireRequestNotNull(value: T?, lazyMessage: () -> String): T {
+  contract {
+    returns() implies (value != null)
+  }
+
+  if (value == null) {
+    throw BadRequestException(lazyMessage())
+  } else {
+    return value
+  }
 }
 
 private val GrpcStatus.isGrpcServerCode
