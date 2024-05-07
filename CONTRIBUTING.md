@@ -42,7 +42,7 @@ vitess/base
 
 ## Breaking changes
 
-**Note:** Remember to document breaking changes in [BREAKING_CHANGES.md](BREAKING_CHANGES.md).
+**Note:** Remember to document breaking changes in [CHANGELOG.md](CHANGELOG.md).
 
 We integrate both [Kotlin Binary Compatibility Validator][2] and [Revapi][3] into our build 
 pipeline to automatically detect breaking changes that could affect existing clients.

@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 2024.05.06
+---------------------------------
+Breaking changes:
+- Concurrency limiter is now disabled by default ([#3256](https://github.com/cashapp/misk/pull/3256))
+
 Version 0.24.0 *(2022-04-13)*
 ----------------------------
 
