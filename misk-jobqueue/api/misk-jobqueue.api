@@ -4,8 +4,11 @@ public final class misk/jobqueue/DevelopmentJobProcessorModule : misk/inject/KAb
 }
 
 public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/Job {
-	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)V
-	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final field Companion Lmisk/jobqueue/FakeJob$Companion;
+	public static final field MAX_DELAY_DURATION J
+	public static final field MIN_DElAY_DURATION J
+	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;)V
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun acknowledge ()V
 	public synthetic fun compareTo (Ljava/lang/Object;)I
 	public fun compareTo (Lmisk/jobqueue/FakeJob;)I
@@ -16,14 +19,19 @@ public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/J
 	public final fun component5 ()Ljava/util/Map;
 	public final fun component6 ()Ljava/time/Instant;
 	public final fun component7 ()Ljava/time/Duration;
-	public final fun copy (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)Lmisk/jobqueue/FakeJob;
-	public static synthetic fun copy$default (Lmisk/jobqueue/FakeJob;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILjava/lang/Object;)Lmisk/jobqueue/FakeJob;
+	public final fun component8 ()Ljava/time/Clock;
+	public final fun copy (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;)Lmisk/jobqueue/FakeJob;
+	public static synthetic fun copy$default (Lmisk/jobqueue/FakeJob;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;ILjava/lang/Object;)Lmisk/jobqueue/FakeJob;
 	public fun deadLetter ()V
+	public fun delayWithBackoff ()V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcknowledged ()Z
 	public fun getAttributes ()Ljava/util/Map;
 	public fun getBody ()Ljava/lang/String;
+	public final fun getClock ()Ljava/time/Clock;
 	public final fun getDeadLettered ()Z
+	public final fun getDelayDuration ()Ljava/lang/Long;
+	public final fun getDelayedForBackoff ()Z
 	public final fun getDeliverAt ()Ljava/time/Instant;
 	public final fun getDeliveryDelay ()Ljava/time/Duration;
 	public final fun getEnqueuedAt ()Ljava/time/Instant;
@@ -31,7 +39,11 @@ public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/J
 	public fun getIdempotenceKey ()Ljava/lang/String;
 	public fun getQueueName ()Lmisk/jobqueue/QueueName;
 	public fun hashCode ()I
+	public final fun setDeliveryDelay (Ljava/time/Duration;)V
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jobqueue/FakeJob$Companion {
 }
 
 public final class misk/jobqueue/FakeJobHandlerModule : misk/inject/KAbstractModule {
@@ -75,6 +87,7 @@ public final class misk/jobqueue/FakeJobQueueModule : misk/inject/KAbstractModul
 public abstract interface class misk/jobqueue/Job {
 	public abstract fun acknowledge ()V
 	public abstract fun deadLetter ()V
+	public abstract fun delayWithBackoff ()V
 	public abstract fun getAttributes ()Ljava/util/Map;
 	public abstract fun getBody ()Ljava/lang/String;
 	public abstract fun getId ()Ljava/lang/String;
