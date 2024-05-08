@@ -279,7 +279,7 @@ data class FakeJob(
   override val attributes: Map<String, String>,
   val enqueuedAt: Instant,
   var deliveryDelay: Duration? = null,
-  val clock: Clock,
+  private val clock: Clock,
 ) : Job, Comparable<FakeJob> {
   val deliverAt: Instant
     get() = when (deliveryDelay) {
