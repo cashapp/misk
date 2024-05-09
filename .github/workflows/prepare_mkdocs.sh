@@ -20,6 +20,8 @@ title_markdown_file() {
 
 echo "Prepare Misk Docs Site"
 
+# TODO automatically parse 0.x docs and add to nav in mkdocs.yml
+
 echo "Add titles to Dokka Markdown files"
 for MARKDOWN_FILE in $(find docs/0.x/ -name '*.md'); do
   if grep -q "title:" $MARKDOWN_FILE; then
@@ -34,11 +36,11 @@ echo "Copy in special files that GitHub wants in the project root"
 cat README.md | grep -v 'project website' > docs/index.md
 cp CHANGELOG.md docs/changelog.md
 cp CONTRIBUTING.md docs/contributing.md
+cp RELEASING.md docs/releasing.md
 
 echo "Copy in Wisp docs"
 src_dir="wisp"
 target_dir="docs"
-
 # Use find to locate all README.md files in all subdirectories
 find "$src_dir" -name 'README.md' -print0 | while IFS= read -r -d '' file; do
     # Create the target directory, preserving the directory structure
