@@ -56,6 +56,15 @@ find "$dir" -name '*.md' -print0 | while IFS= read -r -d '' file; do
   echo "$modified_content" > "$file"
 done
 
+echo "Fix wisp/ relative links in special files"
+dir="docs"
+find "$dir" -name '*.md' -print0 | while IFS= read -r -d '' file; do
+  # Use sed to replace the links and store the result in a variable
+  modified_content=$(sed -E 's|\(\.*/wisp/(.*).md\)|(\wisp/index.md)|g' "$file")
+  # Echo the modified content back into the file
+  echo "$modified_content" > "$file"
+done
+
 echo "Fix wisp/ relative links"
 dir="docs/wisp"
 # Use find to locate all files in the directory

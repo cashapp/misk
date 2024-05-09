@@ -76,4 +76,5 @@ nav:
   - 'Releasing': releasing.md
   - 'Manual Releasing': releasing-manual.md
   - 'Contributing': contributing.md
+  - 'Developer Guide': developer-guide.md
   - 'Stack Overflow ⏏': https://stackoverflow.com/questions/tagged/misk?sort=active
