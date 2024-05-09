@@ -35,8 +35,8 @@ cp CHANGELOG.md docs/changelog.md
 cp CONTRIBUTING.md docs/contributing.md
 
 # Copy in Wisp docs
-mkdir -p docs/wisp
-cp wisp/README.md docs/wisp/readme.md
+#mkdir -p docs/wisp
+#cp wisp/README.md docs/wisp/readme.md
 
 # Define the source and target directories
 src_dir="wisp"
@@ -48,12 +48,11 @@ find "$src_dir" -name 'README.md' -print0 | while IFS= read -r -d '' file; do
     # Create the target directory, preserving the directory structure
     mkdir -p "$target_dir/$(dirname "$file")"
     # Copy the file
-    cp "$file" "$target_dir/$(dirname "$file")/readme.md"
+    cp "$file" "$target_dir/$(dirname "$file")/index.md"
 done
 set -x
 
 # Fix docs/ relative links in special files
-
 dir="docs"
 set +x
 find "$dir" -name '*.md' -print0 | while IFS= read -r -d '' file; do
@@ -63,12 +62,16 @@ find "$dir" -name '*.md' -print0 | while IFS= read -r -d '' file; do
   echo "$modified_content" > "$file"
 done
 set -x
+
+# Fix wisp/ relative links
+dir="docs/wisp"
+set +x
 # Use find to locate all files in the directory
-#find "$dir" -type f -print0 | while IFS= read -r -d '' file; do
-#  # Use sed to replace the links and store the result in a variable
-#  modified_content=$(sed -E 's|\(\./wisp/(.*).md\)|(\1/)|g' "$file")
-#  # Echo the modified content back into the file
-#  set +x
-#  echo "$modified_content" > "$file"
-#  set -x
-#done
+find "$dir" -type f -print0 | while IFS= read -r -d '' file; do
+  # Use sed to replace the links and store the result in a variable
+  modified_content=$(sed -E 's|\(\wisp-(.*)/(.*).md\)|(/wisp/wisp-\1/)|g' "$file")
+  # Echo the modified content back into the file
+  echo "$modified_content" > "$file"
+done
+set -x
+

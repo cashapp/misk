@@ -69,6 +69,7 @@ nav:
   - 'Internals':
       - 'Graceful Shutdown': internals/graceful-shutdown.md
       - 'Service Management': internals/service-management.md
+      - 'Wisp': wisp/
   - 'Migrations':
       - 'Misk Metrics': migrations/misk-metrics.md
   - 'Change Log': changelog.md
