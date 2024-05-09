@@ -2,6 +2,7 @@ package misk.web.v2
 
 import jakarta.inject.Inject
 import kotlinx.html.TagConsumer
+import misk.MiskCaller
 import misk.config.AppName
 import misk.hotwire.buildHtml
 import misk.scope.ActionScoped
@@ -26,6 +27,7 @@ class DashboardPageLayout @Inject constructor(
   @AppName private val appName: String,
   private val allNavbarItem: List<DashboardNavbarItem>,
   private val allTabs: List<DashboardTab>,
+  private val callerProvider: ActionScoped<MiskCaller?>,
   private val deployment: Deployment,
   private val clientHttpCall: ActionScoped<HttpCall>,
 ) {
@@ -34,6 +36,16 @@ class DashboardPageLayout @Inject constructor(
   private var title: (appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab?) -> String =
     { appName: String, dashboardHomeUrl: DashboardHomeUrl?, dashboardTab: DashboardTab? -> "${dashboardTab?.menuLabel?.let { "$it | " } ?: ""}${dashboardTab?.menuCategory} on $appName ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase() ?: ""}" }
 
+  private val path by lazy {
+    clientHttpCall.get().url.encodedPath
+  }
+  private val dashboardHomeUrl by lazy {
+    allHomeUrls.firstOrNull { path.startsWith(it.url) }
+  }
+  private val homeUrl by lazy {
+    dashboardHomeUrl?.url ?: "/"
+  }
+
   private fun setNewBuilder() = apply { newBuilder = true }
 
   fun newBuilder(): DashboardPageLayout = DashboardPageLayout(
@@ -41,6 +53,7 @@ class DashboardPageLayout @Inject constructor(
     appName = appName,
     allNavbarItem = allNavbarItem,
     allTabs = allTabs,
+    callerProvider = callerProvider,
     deployment = deployment,
     clientHttpCall = clientHttpCall,
   ).setNewBuilder()
@@ -59,16 +72,13 @@ class DashboardPageLayout @Inject constructor(
     }
     newBuilder = false
 
-    val path = clientHttpCall.get().url.encodedPath
-    val dashboardHomeUrl = allHomeUrls.firstOrNull { path.startsWith(it.url) }
-    val homeUrl = dashboardHomeUrl?.url ?: "/"
     val dashboardTab = allTabs
       // TODO make this startsWith after v2 lands
       .firstOrNull { path.contains(it.url_path_prefix) }
     val menuSections = buildMenuSections(
-      allNavbarItem.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
-      allTabs.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
-      path
+      navbarItems = allNavbarItem.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
+      dashboardTabs = allTabs.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
+      currentPath = path
     )
 
     return buildHtml {
@@ -121,12 +131,14 @@ class DashboardPageLayout @Inject constructor(
       title = sectionTitle,
       links = dashboardTabs.map {
         val isExternalLink = it.menuUrl.startsWith("https://")
+        val isAuthorized = callerProvider.get()?.hasCapability(it.capabilities) == true
         Link(
           label = it.menuLabel,
-          href = it.menuUrl,
+          href = if (isAuthorized) it.menuUrl else homeUrl,
           isSelected = currentPath.startsWith(it.menuUrl),
           openInNewTab = isExternalLink,
           dataTurbo = !isExternalLink,
+          hoverText = if (!isAuthorized) "You do not have access to this tab." else null,
         )
       }
     )
