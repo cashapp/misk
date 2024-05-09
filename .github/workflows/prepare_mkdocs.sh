@@ -51,7 +51,7 @@ echo "Fix docs/ relative links in special files"
 dir="docs"
 find "$dir" -name '*.md' -print0 | while IFS= read -r -d '' file; do
   # Use sed to replace the links and store the result in a variable
-  modified_content=$(sed -E 's|\(\./docs/(.*).md\)|(\1/)|g' "$file")
+  modified_content=$(sed -E 's|\(\./docs/(.*).md\)|(\1.md)|g' "$file")
   # Echo the modified content back into the file
   echo "$modified_content" > "$file"
 done
@@ -61,7 +61,7 @@ dir="docs/wisp"
 # Use find to locate all files in the directory
 find "$dir" -type f -print0 | while IFS= read -r -d '' file; do
   # Use sed to replace the links and store the result in a variable
-  modified_content=$(sed -E 's|\(\wisp-(.*)/(.*).md\)|(/wisp/wisp-\1/)|g' "$file")
+  modified_content=$(sed -E 's|\(\wisp-(.*)/(.*).md\)|(wisp-\1/index.md)|g' "$file")
   # Echo the modified content back into the file
   echo "$modified_content" > "$file"
 done
