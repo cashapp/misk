@@ -6300,6 +6300,15 @@ acceptedBreaks:
     - code: "java.method.removed"
       old: "method java.lang.String misk.web.metadata.Metadata::getId()"
       justification: "API is unused so change is safe"
+  "2024.05.07.104226-502a4b6":
+    com.squareup.misk:misk-aws:
+    - code: "java.method.removed"
+      old: "method void misk.jobqueue.sqs.SqsJob::delayForFailure()"
+      justification: "updating job interface to include backoff function"
+    com.squareup.misk:misk-jobqueue:
+    - code: "java.method.addedToInterface"
+      new: "method void misk.jobqueue.Job::delayWithBackoff()"
+      justification: "updating job interface to include backoff"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"
