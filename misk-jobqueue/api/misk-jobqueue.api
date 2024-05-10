@@ -19,7 +19,6 @@ public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/J
 	public final fun component5 ()Ljava/util/Map;
 	public final fun component6 ()Ljava/time/Instant;
 	public final fun component7 ()Ljava/time/Duration;
-	public final fun component8 ()Ljava/time/Clock;
 	public final fun copy (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;)Lmisk/jobqueue/FakeJob;
 	public static synthetic fun copy$default (Lmisk/jobqueue/FakeJob;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;ILjava/lang/Object;)Lmisk/jobqueue/FakeJob;
 	public fun deadLetter ()V
@@ -28,7 +27,6 @@ public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/J
 	public final fun getAcknowledged ()Z
 	public fun getAttributes ()Ljava/util/Map;
 	public fun getBody ()Ljava/lang/String;
-	public final fun getClock ()Ljava/time/Clock;
 	public final fun getDeadLettered ()Z
 	public final fun getDelayDuration ()Ljava/lang/Long;
 	public final fun getDelayedForBackoff ()Z
