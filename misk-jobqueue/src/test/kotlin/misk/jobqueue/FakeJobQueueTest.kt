@@ -346,6 +346,35 @@ internal class FakeJobQueueTest {
   }
 
   @Test
+  fun jobsDoNotStartUntilBackoffDelayElapses() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    // Setup jobs.
+    exampleJobEnqueuer.enqueueGreen("J1:0s")
+    exampleJobEnqueuer.enqueueGreen("J2:0s + 1s", hint = ExampleJobHint.DELAY_ONCE)
+    exampleJobEnqueuer.enqueueGreen("J3:0s")
+    exampleJobEnqueuer.enqueueGreen("J4:0s + 5s", Duration.ofSeconds(5))
+    exampleJobEnqueuer.enqueueGreen("J5:0s + 5s + 1s", Duration.ofSeconds(5), hint = ExampleJobHint.DELAY_ONCE)
+
+    fakeClock.add(Duration.ofMillis(500))
+    val jobs = fakeJobQueue.handleJobs(GREEN_QUEUE, considerDelays = true, retries = 2, assertAcknowledged = false)
+    assertThat(jobs.size).isEqualTo(2)
+
+    // there are still 3 jobs that are yet to be processed
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(3)
+    // Repeating processing does not change anything.
+    fakeJobQueue.handleJobs(considerDelays = true)
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(3)
+
+    fakeClock.add(Duration.ofSeconds(5))
+    val jobsAfter5s = fakeJobQueue.handleJobs(GREEN_QUEUE, considerDelays = true, retries = 2, assertAcknowledged = false)
+    assertThat(jobsAfter5s.size).isEqualTo(2)
+
+    // there is only 1 job that is yet to be processed
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(1)
+  }
+
+  @Test
   fun jobsStartOnDeliveryDelayPassed() {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
 
@@ -504,7 +533,7 @@ internal class FakeJobQueueTest {
     // Process an unknown job.
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
     val unknownJob =
-      FakeJob(GREEN_QUEUE, "unknown", "idempotenceKey", "body", mapOf(), fakeClock.instant())
+      FakeJob(GREEN_QUEUE, "unknown", "idempotenceKey", "body", mapOf(), fakeClock.instant(), clock = fakeClock)
     assertThat(fakeJobQueue.handleJob(unknownJob)).isFalse()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).isEmpty()
 
@@ -539,7 +568,7 @@ internal enum class Color {
   GREEN
 }
 
-internal class ColorException : Throwable()
+internal class ColorException : Exception()
 
 internal data class ExampleJob(
   val color: Color,
@@ -552,7 +581,8 @@ internal enum class ExampleJobHint {
   THROW,
   THROW_ONCE,
   DEAD_LETTER,
-  DEAD_LETTER_ONCE
+  DEAD_LETTER_ONCE,
+  DELAY_ONCE,
 }
 
 internal class ExampleJobEnqueuer @Inject private constructor(
@@ -617,6 +647,10 @@ internal class ExampleJobHandler @Inject private constructor(moshi: Moshi) : Job
       }
       ExampleJobHint.THROW -> throw ColorException()
       ExampleJobHint.THROW_ONCE -> if (!jobExecutedBefore) {
+        throw ColorException()
+      }
+      ExampleJobHint.DELAY_ONCE -> if (!jobExecutedBefore) {
+        job.delayWithBackoff()
         throw ColorException()
       }
       else -> Unit
