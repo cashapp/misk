@@ -1,5 +1,11 @@
-Change Log
+Changelog
 ==========
+
+Misk releases since 2023-05-27 have been automatically published to Maven on PR merge to master.
+
+The Changelog consequently will not be updated regularly since releases only include the changes of the last PR so the Changelog is now equivalent to the git commit history.
+
+Major and breaking changes will still be documented in the Changelog.
 
 Version 0.24.0 *(2022-04-13)*
 ----------------------------
