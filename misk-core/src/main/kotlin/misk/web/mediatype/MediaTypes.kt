@@ -49,6 +49,7 @@ object MediaTypes {
       "js" -> APPLICATION_JAVASCRIPT_MEDIA_TYPE
       "png" -> IMAGE_PNG_MEDIA_TYPE
       "svg" -> IMAGE_SVG_MEDIA_TYPE
+      "txt" -> TEXT_PLAIN_UTF8_MEDIA_TYPE
       else -> APPLICATION_OCTETSTREAM_MEDIA_TYPE
     }
   }
