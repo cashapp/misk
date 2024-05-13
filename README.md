@@ -1,18 +1,20 @@
 <img src="https://github.com/cashapp/misk/raw/master/misk.png" width="300">
 
+[<img src="https://img.shields.io/maven-central/v/com.squareup.misk/misk.svg?label=latest%20release"/>](http://search.maven.org/#search%7Cga%7C1%7Ccom.squareup.misk)
+
 * Releases
-  * See most recent [public build][snap]
-  * [change log][changelog]
-  * API is subject to change
+    * See most recent [public build][snap]
+    * [change log][changelog]
+    * API is subject to change
 
 * Documentation
-  * [Project Website][misk]
-  * [Getting Started](./docs/getting-started.md)
-  * [Developer Guide](./docs/developer-guide.md)
+    * [Project Website][misk]
+    * [Getting Started](./docs/getting-started.md)
+    * [Developer Guide](./docs/developer-guide.md)
 
-* Related Projects
-  * [misk-web][miskweb]
-  * [wisp](./wisp/README.md): wisp is now a part of Misk
+* Related
+    * [misk-web][miskweb]: a now deprecated React framework used for the Misk Admin Dashboard v1
+    * [wisp](./wisp/README.md): some Misk artifacts that are published without use of the Guice Direct Injection library
 
 # Overview
 ## What is Misk
@@ -54,7 +56,7 @@ Want to jump right into it? Check out our [Getting Started Guide](./docs/getting
 
 What to know more about each module, see [Developer Guide](./docs/developer-guide.md).
 
-[changelog]: http://cashapp.github.io/misk/changelog/
+[changelog]: ./docs/changelog.md
 [misk]: https://cashapp.github.io/misk/
 [miskweb]: https://github.com/cashapp/misk-web/
 [snap]: https://mvnrepository.com/artifact/com.squareup.misk/misk
