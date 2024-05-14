@@ -1,5 +1,10 @@
-Change Log
+(Deprecated) Wisp Changelog
 ==========
+
+Wisp for some versions between 2022-06-17 and 2023-07-31 were published separately from Misk modules. This changelog is included for posterity but is no longer updated.
+
+Wisp modules are published automatically on every commit with Misk artifacts with a timestamp-Git SHA versioning scheme.
+
 Version 1.4.12 *(2023-07-31)*
 ----------------------------
 * Fixed certificate error. While parsing certificates, all fields except the part between BEGIN and END lines will be ignored.

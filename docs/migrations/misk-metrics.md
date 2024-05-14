@@ -2,10 +2,11 @@
 
 ## Misk Metrics V1 to V2
 
-To migrate from misk metrics v1 to v2, please apply the following openrewrite recipe:
+To migrate from Misk Metrics v1 to v2, please apply the following openrewrite recipe:
 
-TODO: small guide on how to use open rewrite or good doc links
-TODO: put the recipe somewhere so it's ready to use
+[//]: # (TODO: small guide on how to use open rewrite or good doc links)
+
+[//]: # (TODO: put the recipe somewhere so it's ready to use)
 
 ```yaml
 type: specs.openrewrite.org/v1beta/recipe
