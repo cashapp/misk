@@ -1,6 +1,8 @@
 package misk.backoff
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import kotlin.test.assertFailsWith
@@ -81,4 +83,54 @@ internal class RetryTest {
 
     assertThat(retried).isEqualTo(2)
   }
+
+  @Test
+  fun throwsDontRetryExceptionWithMessage() {
+    val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
+    val customMessage = "Custom message for DontRetryException"
+    assertFailsWith<DontRetryException> {
+      retry(3, backoff) {
+        throw DontRetryException(customMessage)
+      }
+    }.also { exception ->
+      assertThat(exception.message).isEqualTo(customMessage)
+    }
+  }
+
+  @Test
+  fun throwsDontRetryExceptionWithCause() {
+    val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
+    val cause = IllegalStateException("Underlying exception")
+    assertFailsWith<DontRetryException> {
+      retry(3, backoff) {
+        throw DontRetryException(cause)
+      }
+    }.also { exception ->
+      assertThat(exception.cause).isEqualTo(cause)
+    }
+  }
+
+  @Test
+  fun throwsDontRetryExceptionWithMessageAndCause() {
+    val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
+    val customMessage = "Custom message for DontRetryException"
+    val cause = IllegalStateException("Underlying exception")
+    assertFailsWith<DontRetryException> {
+      retry(3, backoff) {
+        throw DontRetryException(customMessage, cause)
+      }
+    }.also { exception ->
+      assertThat(exception.message).isEqualTo(customMessage)
+      assertThat(exception.cause).isEqualTo(cause)
+    }
+  }
+
+  @Test
+fun dontRetryExceptionCanBeInstantiatedWithNoMessage() {
+    // needed to ensure backwards compat with 2 services
+    val exception = DontRetryException()
+    assertNotNull(exception)
+    assertNull(exception.message)
+}
+
 }

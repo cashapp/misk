@@ -6192,6 +6192,123 @@ acceptedBreaks:
       old: "parameter void misk.redis.RealPipelinedRedis::<init>(===misk.redis.JedisPipeline===)"
       new: "parameter void misk.redis.RealPipelinedRedis::<init>(===redis.clients.jedis.AbstractPipeline===)"
       justification: "RealPipelinedRedis is internal"
+  "2024.03.26.112919-01b20b7":
+    com.squareup.misk:misk-redis:
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Double> misk.redis.DeferredRedis::zscore(java.lang.String,\
+        \ java.lang.String)"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zadd(java.lang.String,\
+        \ double, java.lang.String, misk.redis.Redis.ZAddOptions[])"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zadd(java.lang.String,\
+        \ java.util.Map<java.lang.String, java.lang.Double>, misk.redis.Redis.ZAddOptions[])"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zcard(java.lang.String)"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.lang.Long> misk.redis.DeferredRedis::zremRangeByRank(java.lang.String,\
+        \ misk.redis.Redis.ZRangeRankMarker, misk.redis.Redis.ZRangeRankMarker)"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.util.List<kotlin.Pair<okio.ByteString,\
+        \ java.lang.Double>>> misk.redis.DeferredRedis::zrangeWithScores(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "Additive change only"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.function.Supplier<java.util.List<okio.ByteString>> misk.redis.DeferredRedis::zrange(java.lang.String,\
+        \ misk.redis.Redis.ZRangeType, misk.redis.Redis.ZRangeMarker, misk.redis.Redis.ZRangeMarker,\
+        \ boolean, misk.redis.Redis.ZRangeLimit)"
+      justification: "Additive change only"
+  "2024.04.05.204820-9331701":
+    com.squareup.misk:misk:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method misk.security.authz.AccessAnnotationEntry misk.security.authz.AccessAnnotationEntry::copy(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, java.util.List<java.lang.String>,\
+        \ java.util.List<java.lang.String>)"
+      new: "method misk.security.authz.AccessAnnotationEntry misk.security.authz.AccessAnnotationEntry::copy(kotlin.reflect.KClass<?\
+        \ extends java.lang.annotation.Annotation>, java.util.List<java.lang.String>,\
+        \ java.util.List<java.lang.String>, boolean, boolean)"
+      justification: "New parameters are optional"
+  "2024.04.12.171745-81ea336":
+    com.squareup.misk:misk-aws:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.jobqueue.sqs.QueueResolver::<init>(misk.cloud.aws.AwsRegion,\
+        \ misk.cloud.aws.AwsAccountId, com.amazonaws.services.sqs.AmazonSQS, java.util.Map<misk.cloud.aws.AwsRegion,\
+        \ ? extends com.amazonaws.services.sqs.AmazonSQS>, com.amazonaws.services.sqs.AmazonSQS,\
+        \ java.util.Map<misk.cloud.aws.AwsRegion, ? extends com.amazonaws.services.sqs.AmazonSQS>,\
+        \ java.util.Map<misk.jobqueue.QueueName, misk.jobqueue.sqs.AwsSqsQueueConfig>,\
+        \ misk.jobqueue.sqs.DeadLetterQueueProvider)"
+      new: "method void misk.jobqueue.sqs.QueueResolver::<init>(misk.cloud.aws.AwsRegion,\
+        \ misk.cloud.aws.AwsAccountId, com.amazonaws.services.sqs.AmazonSQS, java.util.Map<misk.cloud.aws.AwsRegion,\
+        \ ? extends com.amazonaws.services.sqs.AmazonSQS>, com.amazonaws.services.sqs.AmazonSQS,\
+        \ java.util.Map<misk.cloud.aws.AwsRegion, ? extends com.amazonaws.services.sqs.AmazonSQS>,\
+        \ java.util.Map<misk.jobqueue.QueueName, misk.jobqueue.sqs.AwsSqsQueueConfig>,\
+        \ misk.jobqueue.sqs.DeadLetterQueueProvider, com.squareup.moshi.Moshi)"
+      justification: "SQSJob is an internal class and is not exposed to the clients\
+        \ of Misk"
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.jobqueue.sqs.ResolvedQueue::<init>(misk.jobqueue.QueueName,\
+        \ misk.jobqueue.QueueName, java.lang.String, misk.cloud.aws.AwsRegion, misk.cloud.aws.AwsAccountId,\
+        \ com.amazonaws.services.sqs.AmazonSQS)"
+      new: "method void misk.jobqueue.sqs.ResolvedQueue::<init>(misk.jobqueue.QueueName,\
+        \ misk.jobqueue.QueueName, java.lang.String, misk.cloud.aws.AwsRegion, misk.cloud.aws.AwsAccountId,\
+        \ com.amazonaws.services.sqs.AmazonSQS, int)"
+      justification: "SQSJob is an internal class and is not exposed to the clients\
+        \ of Misk"
+  "2024.04.21.232758-20ad049":
+    com.squareup.misk:misk:
+    - code: "java.method.removed"
+      old: "method java.lang.String misk.web.metadata.Metadata::getId() @ misk.web.metadata.webaction.WebActionsMetadata"
+      justification: "API is unused so change is safe"
+    com.squareup.misk:misk-admin:
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter misk.web.metadata.all.AllMetadataAction.Response misk.web.metadata.all.AllMetadataAction.Response::copy(===java.util.List<?\
+        \ extends misk.web.metadata.Metadata>===)"
+      new: "parameter misk.web.metadata.all.AllMetadataAction.Response misk.web.metadata.all.AllMetadataAction.Response::copy(===java.util.Map<java.lang.String,\
+        \ ? extends misk.web.metadata.Metadata>===)"
+      justification: "API is unused so change is safe"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.web.metadata.all.AllMetadataAction.Response::<init>(===java.util.List<?\
+        \ extends misk.web.metadata.Metadata>===)"
+      new: "parameter void misk.web.metadata.all.AllMetadataAction.Response::<init>(===java.util.Map<java.lang.String,\
+        \ ? extends misk.web.metadata.Metadata>===)"
+      justification: "API is unused so change is safe"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void misk.web.metadata.all.AllMetadataAction::<init>(===java.util.List<?\
+        \ extends misk.web.metadata.Metadata>===)"
+      new: "parameter void misk.web.metadata.all.AllMetadataAction::<init>(===java.util.Map<java.lang.String,\
+        \ ? extends misk.web.metadata.Metadata>===)"
+      justification: "API is unused so change is safe"
+    - code: "java.method.returnTypeChanged"
+      old: "method java.util.List<misk.web.metadata.Metadata> misk.web.metadata.all.AllMetadataAction.Response::component1()"
+      new: "method java.util.Map<java.lang.String, misk.web.metadata.Metadata> misk.web.metadata.all.AllMetadataAction.Response::component1()"
+      justification: "API is unused so change is safe"
+    - code: "java.method.returnTypeChanged"
+      old: "method java.util.List<misk.web.metadata.Metadata> misk.web.metadata.all.AllMetadataAction.Response::getAll()"
+      new: "method java.util.Map<java.lang.String, misk.web.metadata.Metadata> misk.web.metadata.all.AllMetadataAction.Response::getAll()"
+      justification: "API is unused so change is safe"
+    com.squareup.misk:misk-config:
+    - code: "java.method.numberOfParametersChanged"
+      old: "method void misk.web.metadata.Metadata::<init>(java.lang.String, java.lang.Object)"
+      new: "method void misk.web.metadata.Metadata::<init>(java.lang.Object)"
+      justification: "API is unused so change is safe"
+    - code: "java.method.removed"
+      old: "method java.lang.String misk.web.metadata.Metadata::getId()"
+      justification: "API is unused so change is safe"
+  "2024.05.07.104226-502a4b6":
+    com.squareup.misk:misk-aws:
+    - code: "java.method.removed"
+      old: "method void misk.jobqueue.sqs.SqsJob::delayForFailure()"
+      justification: "updating job interface to include backoff function"
+    com.squareup.misk:misk-jobqueue:
+    - code: "java.method.addedToInterface"
+      new: "method void misk.jobqueue.Job::delayWithBackoff()"
+      justification: "updating job interface to include backoff"
   misk-0.18.0:
     com.squareup.misk:misk-gcp:
     - code: "java.method.numberOfParametersChanged"

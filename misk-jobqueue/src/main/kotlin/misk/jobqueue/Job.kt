@@ -29,4 +29,10 @@ interface Job {
 
   /** Moves the job from the main queue onto the associated dead letter queue. May perform an RPC */
   fun deadLetter()
+
+  /**
+   * Assigns and applies a visibility timeout for the job by making it unreachable for some time duration.
+   * The timeout increases after each retry. May perform an RPC.
+   * */
+  fun delayWithBackoff()
 }

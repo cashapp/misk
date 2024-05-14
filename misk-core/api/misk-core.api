@@ -4,6 +4,7 @@ public abstract interface class misk/backoff/Backoff {
 }
 
 public final class misk/backoff/DontRetryException : java/lang/Exception {
+	public fun <init> (Ljava/lang/Exception;)V
 	public fun <init> (Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Exception;)V

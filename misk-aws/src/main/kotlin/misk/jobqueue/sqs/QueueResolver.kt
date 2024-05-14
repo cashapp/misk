@@ -1,8 +1,11 @@
 package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
 import com.amazonaws.services.sqs.model.GetQueueUrlRequest
+import com.amazonaws.services.sqs.model.QueueAttributeName
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException
+import com.squareup.moshi.Moshi
 import misk.cloud.aws.AwsAccountId
 import misk.cloud.aws.AwsRegion
 import misk.jobqueue.QueueName
@@ -11,6 +14,7 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.moshi.adapter
 
 @Singleton
 internal class QueueResolver @Inject internal constructor(
@@ -21,11 +25,13 @@ internal class QueueResolver @Inject internal constructor(
   @ForSqsReceiving private val defaultForReceivingSQS: AmazonSQS,
   @ForSqsReceiving private val crossRegionForReceivingSQS: Map<AwsRegion, AmazonSQS>,
   private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
-  private val dlqProvider: DeadLetterQueueProvider
+  private val dlqProvider: DeadLetterQueueProvider,
+  private val moshi: Moshi,
 ) {
   private val forSendingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
   private val forReceivingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
   private val hostInternalTarget = "host.docker.internal"
+  private val redrivePolicyAdapter = moshi.adapter(RedrivePolicy::class.java)
 
   fun getForSending(q: QueueName): ResolvedQueue {
     return forSendingMapping.computeIfAbsent(q) { resolve(it, false) }
@@ -53,7 +59,6 @@ internal class QueueResolver @Inject internal constructor(
     }
 
     checkNotNull(sqs) { "could not find SQS client for ${region.name}" }
-
     val queueUrl = try {
       val queue_url = sqs.getQueueUrl(
         GetQueueUrlRequest().apply {
@@ -67,7 +72,29 @@ internal class QueueResolver @Inject internal constructor(
       throw e
     }
 
-    return ResolvedQueue(q, sqsQueueName, queueUrl, region, accountId, sqs)
+    val queueMaxRetries = extractMaxReceiveCount(sqs, queueUrl)
+    return ResolvedQueue(q, sqsQueueName, queueUrl, region, accountId, sqs, queueMaxRetries)
+  }
+
+  data class RedrivePolicy(val maxReceiveCount: Int, val deadLetterTargetArn: String)
+  private fun extractMaxReceiveCount(sqs: AmazonSQS, queueUrl: String): Int {
+    return try {
+      val redrivePolicyJson = sqs.getQueueAttributes(
+        GetQueueAttributesRequest()
+          .withQueueUrl(queueUrl)
+          .withAttributeNames(
+            QueueAttributeName.RedrivePolicy
+          )
+      ).attributes["RedrivePolicy"]
+
+      if (redrivePolicyJson.isNullOrEmpty()) {
+        return 10
+      }
+
+      redrivePolicyAdapter.fromJson(redrivePolicyJson)?.maxReceiveCount ?: 10
+    } catch(e: Exception) {
+      10
+    }
   }
 
   private fun isRunningInDocker() = File("/proc/1/cgroup")

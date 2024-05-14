@@ -2,6 +2,7 @@ package misk.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
 import misk.environment.DeploymentModule
 import misk.logging.LogCollectorModule
 import misk.logging.LogCollectorService
@@ -18,7 +19,7 @@ import wisp.deployment.TESTING
 import wisp.logging.LogCollector
 import java.io.File
 import java.time.Duration
-import jakarta.inject.Inject
+import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 
 @MiskTest
@@ -118,7 +119,7 @@ class MiskConfigTest {
 
   @Test
   fun friendlyLogsWhenPropertiesNotFound() {
-    // Unknown properties don't cause an exception. If a missing property were misspelled, it
+    // By default, unknown properties don't cause an exception. If a missing property were misspelled, it
     // would fail because of it being a missing property, rather than due to a new property being
     // present.
     MiskConfig.load<TestConfig>("unknownproperty", TESTING)
@@ -126,6 +127,19 @@ class MiskConfigTest {
     assertThat(logCollector.takeMessages(MiskConfig::class))
       .hasSize(1)
       .allMatch { it.contains("'consumer_b.blue_items' not found") }
+  }
+
+  @Test
+  fun failsWhenPropertiesNotFoundAndFailOnUnknownPropertiesIsEnabled() {
+    val exception = assertFailsWith<IllegalStateException> {
+      MiskConfig.load<TestConfig>(
+        TestConfig::class.java,
+        "unknownproperty",
+        TESTING,
+        failOnUnknownProperties = true
+      )
+    }
+    assertThat(exception).hasMessageContaining("Unrecognized field \"blue_items\"")
   }
 
   @Test

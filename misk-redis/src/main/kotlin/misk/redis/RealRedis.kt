@@ -9,6 +9,7 @@ import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.JedisPubSub
@@ -21,6 +22,7 @@ import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
+import wisp.logging.getLogger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -234,6 +236,7 @@ class RealRedis(
   ): ByteString? {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
     val destKeyBytes = destinationKey.toByteArray(charset)
+    checkSlot("BLMOVE", listOf(sourceKeyBytes, destKeyBytes))
     return jedis { blmove(sourceKeyBytes, destKeyBytes, from, to, timeoutSeconds) }?.toByteString()
   }
 
@@ -243,8 +246,9 @@ class RealRedis(
     timeoutSeconds: Int
   ): ByteString? {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
-    val destinationKeyBytes = destinationKey.toByteArray(charset)
-    return jedis { brpoplpush(sourceKeyBytes, destinationKeyBytes, timeoutSeconds) }?.toByteString()
+    val destKeyBytes = destinationKey.toByteArray(charset)
+    checkSlot("BRPOPLPUSH", listOf(sourceKeyBytes, destKeyBytes))
+    return jedis { brpoplpush(sourceKeyBytes, destKeyBytes, timeoutSeconds) }?.toByteString()
   }
 
   override fun lmove(
@@ -255,6 +259,7 @@ class RealRedis(
   ): ByteString? {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
     val destKeyBytes = destinationKey.toByteArray(charset)
+    checkSlot("LMOVE", listOf(sourceKeyBytes, destKeyBytes))
     return jedis { lmove(sourceKeyBytes, destKeyBytes, from, to) }?.toByteString()
   }
 
@@ -306,8 +311,9 @@ class RealRedis(
 
   override fun rpoplpush(sourceKey: String, destinationKey: String): ByteString? {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
-    val destinationKeyBytes = destinationKey.toByteArray(charset)
-    return jedis { rpoplpush(sourceKeyBytes, destinationKeyBytes) }?.toByteString()
+    val destKeyBytes = destinationKey.toByteArray(charset)
+    checkSlot("RPOPLPUSH", listOf(sourceKeyBytes, destKeyBytes))
+    return jedis { rpoplpush(sourceKeyBytes, destKeyBytes) }?.toByteString()
   }
 
   override fun expire(key: String, seconds: Long): Boolean {
@@ -386,7 +392,7 @@ class RealRedis(
   }
 
   override fun flushAll() {
-    unifiedJedis.flushAll()
+    unifiedJedis.flushAllWithClusterSupport(logger)
   }
 
   override fun zadd(
@@ -646,7 +652,17 @@ class RealRedis(
       }
   }
 
+  private fun checkSlot(op: String, keys: List<ByteArray>) {
+    if (unifiedJedis !is JedisCluster) {
+      return
+    }
+    val error = getSlotErrorOrNull(op, keys) ?: return
+    throw error
+  }
+
   companion object {
     val charset = charset("UTF-8")
+
+    private val logger = getLogger<RealRedis>()
   }
 }

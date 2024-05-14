@@ -12,13 +12,10 @@ fun <A> retry(
   withBackoff: Backoff,
   onRetry: ((retryCount: Int, exception: Exception) -> Unit)? = null,
   block: (retryCount: Int) -> A,
-  ): A {
+): A {
   require(upTo > 0) { "must support at least one call" }
-
   withBackoff.reset()
-
   var lastException: Exception? = null
-
   for (i in 0 until upTo) {
     try {
       val result = block(i)
@@ -29,7 +26,6 @@ fun <A> retry(
     } catch (e: Exception) {
       onRetry?.invoke(i + 1, e)
       lastException = e
-
       if (i + 1 < upTo) {
         try {
           Thread.sleep(withBackoff.nextRetry().toMillis())
@@ -39,10 +35,11 @@ fun <A> retry(
       }
     }
   }
-
   throw lastException!!
 }
 
-class DontRetryException(message: String?, exception: Exception?) : Exception(message, exception) {
-  constructor(message: String? = null) : this(message, null)
+class DontRetryException : Exception {
+  constructor(message: String? = null) : super(message)
+  constructor(cause: Exception?) : super(cause)
+  constructor(message: String?, cause: Exception?) : super(message, cause)
 }
