@@ -51,12 +51,12 @@ class DataSourceService @JvmOverloads constructor(
     try {
       createDataSource(baseConfig)
     } catch (e: Exception) {
-      logger.error(e) { "Fail to start the data source, trying to do it with replica" }
       if (!baseConfig.canRecoverOnReplica()) {
+        logger.error(e) { "Failed to start the data source." }
         throw e
       }
+      logger.error(e) { "Failed to start the data source, trying to do it with replica." }
       createDataSource(baseConfig.asReplica())
-
     }
     logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")
   }
