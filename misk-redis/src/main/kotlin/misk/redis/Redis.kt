@@ -5,9 +5,22 @@ import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.args.ListDirection
+import redis.clients.jedis.params.ZAddParams
+import redis.clients.jedis.util.JedisClusterCRC16
 import java.time.Duration
+import java.util.function.Supplier
 
-/** A Redis client. */
+/**
+ * A Redis client.
+ *
+ * Note: special care must be taken if your Redis is running in cluster mode,
+ * as keys **must** belong to the same slot in a single command operation like [lmove].
+ * You can control which hash slot a key belongs to a certain degree by making use of
+ * `{hashtags}` in the key name.
+ *
+ * See the [Redis Cluster Spec](https://redis.io/docs/reference/cluster-spec/#hash-tags) for more
+ * information.
+ */
 interface Redis {
   /**
    * Deletes a single key.
@@ -56,6 +69,14 @@ interface Redis {
    * @return a [ByteString] if the key was found, null if the key was not found
    */
   operator fun get(key: String): ByteString?
+
+  /**
+   * Retrieves the value for the given key as a [ByteString] and deletes the key.
+   *
+   * @param key the key to retrieve
+   * @return a [ByteString] if the key was found, null if the key was not found
+   */
+  fun getDel(key: String): ByteString?
 
   /**
    * Delete one or more hash [fields] stored at [key].
@@ -246,9 +267,9 @@ interface Redis {
   fun brpoplpush(sourceKey: String, destinationKey: String, timeoutSeconds: Int): ByteString?
 
   /**
-   * Atomically returns and removes the first/last element (head/tail depending on the wherefrom
+   * Atomically returns and removes the first/last element (head/tail depending on the [from]
    * argument) of the list stored at source, and pushes the element at the first/last element
-   * (head/tail depending on the whereto argument) of the list stored at destination.
+   * (head/tail depending on the [to] argument) of the list stored at destination.
    *
    * For example: consider source holding the list a,b,c, and destination holding the list x,y,z.
    * Executing LMOVE source destination RIGHT LEFT results in source holding a,b and destination
@@ -257,7 +278,7 @@ interface Redis {
    * If source does not exist, the value nil is returned and no operation is performed. If source
    * and destination are the same, the operation is equivalent to removing the first/last element
    * from the list and pushing it as first/last element of the list, so it can be considered as a
-   * list rotation command (or a no-op if wherefrom is the same as whereto).
+   * list rotation command (or a no-op if [from] is the same as [to]).
    *
    * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
    *
@@ -448,7 +469,18 @@ interface Redis {
   /**
    * Begin a pipeline operation to batch together several updates for optimal performance
    */
+  @Deprecated("Use pipelining instead.")
   fun pipelined(): Pipeline
+
+  /**
+   * Runs a block of Redis commands in a pipeline, for better performance.
+   * Pipelined command responses are not returned until the block completes.
+   * If you need to use the results of each command immediately, either save the [Supplier]s and call
+   * them later, or use non-pipelined operations.
+   *
+   * See [Redis pipelining](https://redis.io/docs/manual/pipelining/) for more information.
+   */
+  fun pipelining(block: DeferredRedis.() -> Unit)
 
   /**
    * Closes the client, so it may not be used further.
@@ -480,7 +512,7 @@ interface Redis {
    * an error is returned.
    *
    * ZADD supports a list of [options], specified after the name of the key and before the first
-   * score argument. The complete list of options can be found in [ZAddOptions]
+   * score argument. The complete list of options can be found in [ZAddOptions].
    */
   fun zadd(
     key: String,
@@ -515,7 +547,7 @@ interface Redis {
   fun zscore(
     key: String,
     member: String
-  ) : Double?
+  ): Double?
 
   /**
    * Returns the specified range of elements in the sorted set stored at [key].
@@ -562,7 +594,7 @@ interface Redis {
    * Both start and stop are 0 -based indexes with 0 being the element with the lowest score.
    * These indexes can be negative numbers, where they indicate offsets starting at the element
    * with the highest score. For example: -1 is the element with the highest score, -2 the element
-   * with the second highest score and so forth.
+   * with the second-highest score and so forth.
    */
   fun zremRangeByRank(
     key: String,
@@ -619,12 +651,9 @@ interface Redis {
     val included: Boolean
   )
 
-  /**
-   *
-   */
   data class ZRangeRankMarker(
     val longValue: Long
-  ): ZRangeMarker(longValue, true)
+  ) : ZRangeMarker(longValue, true)
 
   /**
    * To be used when [ZRangeType] is [ZRangeType.INDEX].
@@ -632,7 +661,7 @@ interface Redis {
    */
   data class ZRangeIndexMarker(
     val intValue: Int
-  ): ZRangeMarker(intValue, true)
+  ) : ZRangeMarker(intValue, true)
 
   /**
    * To be used when [ZRangeType] is [ZRangeType.SCORE].
@@ -643,7 +672,7 @@ interface Redis {
   data class ZRangeScoreMarker(
     val doubleValue: Double,
     val isIncluded: Boolean = true,
-  ): ZRangeMarker(doubleValue, isIncluded) {
+  ) : ZRangeMarker(doubleValue, isIncluded) {
     override fun toString(): String {
       var ans = when (this.doubleValue) {
         Double.MAX_VALUE -> "+inf"
@@ -669,6 +698,12 @@ interface Redis {
     val count: Int
   )
 
+  /**
+   * Options for ZADD. Not all options are compatible with one another.
+   * See the [ZADD command documentation](https://redis.io/commands/zadd/) for more information.
+   *
+   * Note: misk-redis does not currently support the INCR option.
+   */
   enum class ZAddOptions {
     /**
      * Only update elements that already exist. Don't add new elements.
@@ -699,7 +734,50 @@ interface Redis {
      * in the command line having the same score as they had in the past are not counted.
      * Note: normally the return value of ZADD only counts the number of new elements added.
      */
-    CH
+    CH,
+    ;
+
+    companion object {
+      fun getZAddParams(options: Array<out ZAddOptions>): ZAddParams {
+        val params = ZAddParams()
+
+        options.forEach {
+          when (it) {
+            XX -> params.xx()
+            NX -> params.nx()
+            LT -> params.lt()
+            GT -> params.gt()
+            CH -> params.ch()
+          }
+        }
+
+        return params
+      }
+
+      /**
+       * Checks that options will result in a valid ZADD command, conforming to the following:
+       *
+       * ```
+       * zadd key [NX|XX] [GT|LT] [CH] score member [score member ...]
+       * ```
+       *
+       * See the [ZADD command documentation](https://redis.io/commands/zadd) for more information.
+       */
+      internal fun verify(options: Array<out ZAddOptions>) {
+        // NX and XX are mutually exclusive.
+        require(!options.contains(NX) || !options.contains(XX)) {
+          "ERR XX and NX options at the same time are not compatible"
+        }
+        // GT, LT, NX are mutually exclusive.
+        require(
+          !(options.contains(NX) && options.contains(LT))
+            && !(options.contains(NX) && options.contains(GT))
+            && !(options.contains(GT) && options.contains(LT))
+        ) {
+          "ERR GT, LT, and/or NX options at the same time are not compatible"
+        }
+      }
+    }
   }
 }
 
@@ -719,5 +797,23 @@ inline fun checkHrandFieldCount(count: Long) {
   }
   require(count > 0) {
     "You must request at least 1 field."
+  }
+}
+
+internal fun getSlotErrorOrNull(op: String, keys: List<ByteArray>): Throwable? {
+  val slots = keys.map { JedisClusterCRC16.getSlot(it) }.distinct()
+  return if (slots.size == 1) {
+    null
+  } else {
+    RuntimeException(
+      """
+      |When using clustered Redis, keys used by one $op command must always map to the same slot, but mapped to slots $slots.
+      |You can use {hashtags} in your key name to control how Redis hashes keys to slots.
+      |For example, keys: `{customer9001}.contacts` and `{customer9001}.payments` will  hash to the same slot.
+      |
+      |See https://redis.io/topics/cluster-spec#hash-tags for more information.
+      |
+      """.trimMargin()
+    )
   }
 }

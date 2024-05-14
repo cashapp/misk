@@ -626,8 +626,42 @@ public final class misk/web/metadata/ServiceMetadataAction$ServiceMetadata {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface annotation class misk/web/metadata/all/AllMetadataAccess : java/lang/annotation/Annotation {
+}
+
+public final class misk/web/metadata/all/AllMetadataAction : misk/web/actions/WebAction {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun getAll ()Lmisk/web/metadata/all/AllMetadataAction$Response;
+}
+
+public final class misk/web/metadata/all/AllMetadataAction$Response {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lmisk/web/metadata/all/AllMetadataAction$Response;
+	public static synthetic fun copy$default (Lmisk/web/metadata/all/AllMetadataAction$Response;Ljava/util/Map;ILjava/lang/Object;)Lmisk/web/metadata/all/AllMetadataAction$Response;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAll ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/all/AllMetadataModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/web/metadata/config/ConfigMetadata : misk/web/metadata/Metadata {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lmisk/web/metadata/config/ConfigMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/config/ConfigMetadata;Ljava/util/Map;ILjava/lang/Object;)Lmisk/web/metadata/config/ConfigMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResources ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/metadata/config/ConfigMetadataAction : misk/web/actions/WebAction {
-	public fun <init> (Ljava/lang/String;Lwisp/deployment/Deployment;Lwisp/config/Config;Lmisk/web/metadata/jvm/JvmMetadataAction;Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;)V
+	public fun <init> (Lcom/google/inject/Provider;)V
 	public final fun getAll ()Lmisk/web/metadata/config/ConfigMetadataAction$Response;
 }
 
@@ -649,6 +683,34 @@ public final class misk/web/metadata/config/ConfigMetadataAction$Response {
 	public final fun getResources ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/config/ConfigMetadataProvider : misk/web/metadata/MetadataProvider {
+	public fun <init> ()V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/web/metadata/config/ConfigMetadata;
+	public fun getId ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/database/DatabaseHibernateMetadata : misk/web/metadata/Metadata {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lmisk/web/metadata/database/DatabaseHibernateMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/database/DatabaseHibernateMetadata;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/metadata/database/DatabaseHibernateMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHibernate ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/database/DatabaseHibernateMetadataProvider : misk/web/metadata/MetadataProvider {
+	public field metadata Ljava/util/List;
+	public fun <init> ()V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/web/metadata/database/DatabaseHibernateMetadata;
+	public fun getId ()Ljava/lang/String;
+	public final fun getMetadata ()Ljava/util/List;
+	public final fun setMetadata (Ljava/util/List;)V
 }
 
 public abstract interface class misk/web/metadata/database/DatabaseQueryFunctionMetadata {
@@ -822,9 +884,9 @@ public final class misk/web/metadata/jvm/JvmMetadataAction$JvmRuntimeResponse$Co
 }
 
 public final class misk/web/metadata/webaction/WebActionMetadataAction : misk/web/actions/WebAction {
-	public fun <init> (Lmisk/web/metadata/webaction/WebActionMetadataList;)V
+	public fun <init> (Lcom/google/inject/Provider;)V
 	public final fun getAll ()Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;
-	public final fun getWebActionMetadataList ()Lmisk/web/metadata/webaction/WebActionMetadataList;
+	public final fun getProvider ()Lcom/google/inject/Provider;
 }
 
 public final class misk/web/metadata/webaction/WebActionMetadataAction$Response {

@@ -77,6 +77,13 @@ class FakeRedis : Redis {
   }
 
   @Synchronized
+  override fun getDel(key: String): ByteString? {
+    val value = get(key);
+    keyValueStore.remove(key);
+    return value
+  }
+
+  @Synchronized
   override fun hdel(key: String, vararg fields: String): Long {
     val value = hKeyValueStore[key] ?: return 0L
 
@@ -387,8 +394,13 @@ class FakeRedis : Redis {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 
+  @Deprecated("Use pipelining instead.")
   override fun pipelined(): Pipeline {
     throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun pipelining(block: DeferredRedis.() -> Unit) {
+    throw NotImplementedError("Use the fake from misk.redis.testing instead.")
   }
 
   override fun close() {

@@ -10,7 +10,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
@@ -27,12 +26,12 @@ class RealRedisTest : AbstractRedisTest() {
     }
   }
 
-  @BeforeEach
-  fun setUp() {
-    redis.flushAll()
-  }
-
   @Inject override lateinit var redis: Redis
+
+  // The following tests are not part of the AbstractRedisTest because as implemented right now,
+  // Redis transactions are not supported in Cluster mode. This is because the Redis interface
+  // leaks Jedis implementation details, and exposes the wrong type for Transactions when
+  // Jedis is configured to use a cluster.
 
   @Test
   fun `watch and unwatch succeeds`() {
@@ -70,5 +69,4 @@ class RealRedisTest : AbstractRedisTest() {
     assertThat(redis["key5"]).isEqualTo("value5".encodeUtf8())
     assertThat(redis["key6"]).isNull()
   }
-
 }

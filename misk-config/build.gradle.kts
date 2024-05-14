@@ -9,6 +9,7 @@ plugins {
 }
 
 dependencies {
+  api(libs.guice)
   api(libs.jacksonAnotations)
   api(libs.jacksonDatabind)
   api(libs.jakartaInject)
@@ -18,7 +19,6 @@ dependencies {
   api(project(":misk-inject"))
   implementation(libs.apacheCommonsLang3)
   implementation(libs.guava)
-  implementation(libs.guice)
   implementation(libs.jacksonCore)
   implementation(libs.jacksonDataformatYaml)
   implementation(libs.jacksonJsr310)

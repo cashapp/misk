@@ -283,7 +283,9 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
       )
     }
 
-    throw IllegalStateException("Feature flag $feature is off but no off variation is specified")
+    throw IllegalStateException(
+      "Feature flag $feature is off but no off variation is specified, evaluation reason: ${detail.reason}"
+    )
   }
 
   private fun buildUser(feature: Feature, key: String, attributes: Attributes): LDUser {

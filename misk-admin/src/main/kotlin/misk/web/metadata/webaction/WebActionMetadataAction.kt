@@ -1,17 +1,18 @@
 package misk.web.metadata.webaction
 
+import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @Singleton
 class WebActionMetadataAction @Inject constructor(
-  val webActionMetadataList: WebActionMetadataList
+  val provider: Provider<WebActionsMetadata>
 ) : WebAction {
   @Get("/api/webaction/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -19,7 +20,7 @@ class WebActionMetadataAction @Inject constructor(
   @AdminDashboardAccess
   fun getAll(): Response {
     return Response(
-      webActionMetadata = webActionMetadataList.get()
+      webActionMetadata = provider.get().webActions
     )
   }
 

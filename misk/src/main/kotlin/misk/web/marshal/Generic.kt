@@ -58,7 +58,8 @@ object GenericMarshallers {
     String::class.java,
     ResponseBody::class.java,
     ByteString::class.java,
-    Nothing::class.java
+    Nothing::class.java,
+    Unit::class.java,
   )
 
   private class FromResponseBody(private val contentType: MediaType?) : Marshaller<ResponseBody> {
@@ -91,6 +92,13 @@ object GenericMarshallers {
     }
   }
 
+  class ToUnit(private val contentType: MediaType?) : Marshaller<Unit> {
+    override fun contentType(): MediaType? = contentType
+    override fun responseBody(o: Unit) = object : ResponseBody {
+      override fun writeTo(sink: BufferedSink) {}
+    }
+  }
+
   fun from(contentType: MediaType?, returnType: KType): Marshaller<Any>? {
     @Suppress("UNCHECKED_CAST")
     return when (actualResponseType(returnType)) {
@@ -98,6 +106,7 @@ object GenericMarshallers {
       ByteString::class.java -> FromByteString(contentType)
       ResponseBody::class.java -> FromResponseBody(contentType)
       Nothing::class.java -> ToNothing(contentType)
+      Unit::class.java -> ToUnit(contentType)
       else -> null
     } as Marshaller<Any>?
   }
