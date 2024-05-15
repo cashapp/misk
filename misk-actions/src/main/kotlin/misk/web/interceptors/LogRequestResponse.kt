@@ -27,7 +27,7 @@ package misk.web.interceptors
  * methods of these objects will redact it.
  */
 @Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
+@Target(AnnotationTarget.FUNCTION)
 annotation class LogRequestResponse(
   val ratePerSecond: Long = 10,
   /** By default, rate limiting is off for error logs **/

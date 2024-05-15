@@ -332,7 +332,6 @@ data class DataSourceConfig @JvmOverloads constructor(
   fun canRecoverOnReplica() = this.type in listOf(
     DataSourceType.COCKROACHDB,
     DataSourceType.TIDB,
-    DataSourceType.VITESS_MYSQL
   )
 
 }
