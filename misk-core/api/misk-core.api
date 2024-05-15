@@ -420,6 +420,10 @@ public final class misk/web/mediatype/MediaTypes {
 	public static final field APPLICATION_JSON Ljava/lang/String;
 	public static final field APPLICATION_OCTETSTREAM Ljava/lang/String;
 	public static final field APPLICATION_PROTOBUF Ljava/lang/String;
+	public static final field APPLICATION_XML Ljava/lang/String;
+	public static final field IMAGE_GIF Ljava/lang/String;
+	public static final field IMAGE_ICO Ljava/lang/String;
+	public static final field IMAGE_JPEG Ljava/lang/String;
 	public static final field IMAGE_PNG Ljava/lang/String;
 	public static final field IMAGE_SVG Ljava/lang/String;
 	public static final field INSTANCE Lmisk/web/mediatype/MediaTypes;
@@ -434,6 +438,10 @@ public final class misk/web/mediatype/MediaTypes {
 	public final fun getAPPLICATION_JSON_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getAPPLICATION_OCTETSTREAM_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getAPPLICATION_PROTOBUF_MEDIA_TYPE ()Lokhttp3/MediaType;
+	public final fun getAPPLICATION_XML_MEDIA_TYPE ()Lokhttp3/MediaType;
+	public final fun getIMAGE_GIF_MEDIA_TYPE ()Lokhttp3/MediaType;
+	public final fun getIMAGE_ICO_MEDIA_TYPE ()Lokhttp3/MediaType;
+	public final fun getIMAGE_JPEG_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getIMAGE_PNG_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getIMAGE_SVG_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getTEXT_CSS_MEDIA_TYPE ()Lokhttp3/MediaType;
