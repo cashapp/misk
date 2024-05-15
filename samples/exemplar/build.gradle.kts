@@ -56,7 +56,7 @@ val jar by tasks.getting(Jar::class) {
   manifest {
     attributes("Main-Class" to "com.squareup.exemplar.ExemplarServiceKt")
   }
-  classifier = "unshaded"
+  archiveClassifier.set("unshaded")
 }
 
 sourceSets {
