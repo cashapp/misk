@@ -7,6 +7,11 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+Version 2024.05.14
+---------------------------------
+Breaking changes:
+- LogRequestResponse can't be target to classes ([#3225](https://github.com/cashapp/misk/pull/3225))
+
 Version 2024.05.06
 ---------------------------------
 Breaking changes:
