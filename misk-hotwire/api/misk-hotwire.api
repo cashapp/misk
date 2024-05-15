@@ -3,6 +3,15 @@ public final class misk/hotwire/BuildHtmlKt {
 	public static final fun buildHtmlResponseBody (Lkotlin/jvm/functions/Function1;)Lmisk/web/ResponseBody;
 }
 
+public final class misk/turbo/Template : kotlinx/html/HTMLTag, kotlinx/html/HtmlInlineTag {
+	public fun <init> (Lkotlinx/html/TagConsumer;)V
+}
+
+public final class misk/turbo/TemplateKt {
+	public static final fun template (Lkotlinx/html/TagConsumer;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun template$default (Lkotlinx/html/TagConsumer;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
 public final class misk/turbo/TurboFrame : kotlinx/html/HTMLTag, kotlinx/html/HtmlInlineTag {
 	public fun <init> (Ljava/lang/String;Lkotlinx/html/TagConsumer;)V
 }
