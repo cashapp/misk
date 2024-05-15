@@ -26,7 +26,6 @@ buildscript {
     classpath(libs.protobufGradlePlugin)
     classpath(libs.jgit)
     classpath(libs.wireGradlePlugin)
-    classpath(libs.revapiGradlePlugin)
     classpath(libs.sqldelightGradlePlugin)
   }
 }
@@ -171,8 +170,6 @@ subprojects {
       "misk-bom"
     ).contains(name)
   ) {
-    apply(plugin = "com.palantir.revapi")
-
     extensions.configure(DetektExtension::class) {
       parallel = true
       buildUponDefaultConfig = false
