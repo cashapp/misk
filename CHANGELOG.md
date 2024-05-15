@@ -1,5 +1,21 @@
-Change Log
+Changelog
 ==========
+
+Misk releases since 2023-05-27 have been automatically published to Maven on PR merge to master.
+
+The Changelog consequently will not be updated regularly since releases only include the changes of the last PR so the Changelog is now equivalent to the git commit history.
+
+Major and breaking changes will still be documented in the Changelog.
+
+Version 2024.05.14
+---------------------------------
+Breaking changes:
+- LogRequestResponse can't be target to classes ([#3225](https://github.com/cashapp/misk/pull/3225))
+
+Version 2024.05.06
+---------------------------------
+Breaking changes:
+- Concurrency limiter is now disabled by default ([#3256](https://github.com/cashapp/misk/pull/3256))
 
 Version 0.24.0 *(2022-04-13)*
 ----------------------------
