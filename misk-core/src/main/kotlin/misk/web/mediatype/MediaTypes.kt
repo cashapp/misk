@@ -42,13 +42,30 @@ object MediaTypes {
   const val TURBO_STREAM = "text/vnd.turbo-stream.html"
   val TURBO_STREAM_MEDIA_TYPE = TURBO_STREAM.asMediaType()
 
+  const val IMAGE_JPEG = "image/jpeg"
+  val IMAGE_JPEG_MEDIA_TYPE = IMAGE_JPEG.asMediaType()
+
+  const val IMAGE_GIF = "image/gif"
+  val IMAGE_GIF_MEDIA_TYPE = IMAGE_GIF.asMediaType()
+
+  const val IMAGE_ICO = "image/x-icon"
+  val IMAGE_ICO_MEDIA_TYPE = IMAGE_ICO.asMediaType()
+
+  const val APPLICATION_XML = "application/xml"
+  val APPLICATION_XML_MEDIA_TYPE = APPLICATION_XML.asMediaType()
+
   fun fromFileExtension(ext: String): MediaType {
     return when (ext) {
       "css" -> TEXT_CSS_MEDIA_TYPE
+      "gif" -> IMAGE_GIF_MEDIA_TYPE
       "html", "htm" -> TEXT_HTML_MEDIA_TYPE
+      "ico" -> IMAGE_ICO_MEDIA_TYPE
+      "jpeg", "jpg" -> IMAGE_JPEG_MEDIA_TYPE
       "js" -> APPLICATION_JAVASCRIPT_MEDIA_TYPE
+      "json" -> APPLICATION_JSON_MEDIA_TYPE
       "png" -> IMAGE_PNG_MEDIA_TYPE
       "svg" -> IMAGE_SVG_MEDIA_TYPE
+      "xml" -> APPLICATION_XML_MEDIA_TYPE
       else -> APPLICATION_OCTETSTREAM_MEDIA_TYPE
     }
   }
