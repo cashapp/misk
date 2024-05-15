@@ -38,7 +38,7 @@ dockerApi = { module = "com.github.docker-java:docker-java-api", version = "3.3.
 dockerCore = { module = "com.github.docker-java:docker-java-core", version = "3.3.1" }
 dockerTransport = { module = "com.github.docker-java:docker-java-transport", version = "3.3.1" }
 dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version = "3.3.1" }
-dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.10" }
+dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.20" }
 errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.20.0" }
 findBugs = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.5.0" }
