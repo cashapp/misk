@@ -4,7 +4,6 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
   kotlin("jvm")
-  `java-library`
   id("com.vanniktech.maven.publish.base")
   
   id("com.squareup.wire")

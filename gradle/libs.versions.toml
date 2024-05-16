@@ -38,7 +38,7 @@ dockerApi = { module = "com.github.docker-java:docker-java-api", version = "3.3.
 dockerCore = { module = "com.github.docker-java:docker-java-core", version = "3.3.1" }
 dockerTransport = { module = "com.github.docker-java:docker-java-transport", version = "3.3.1" }
 dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version = "3.3.1" }
-dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.10" }
+dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.20" }
 errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.20.0" }
 findBugs = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.5.0" }
@@ -172,7 +172,6 @@ retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version = "
 retrofitProtobuf = { module = "com.squareup.retrofit2:converter-protobuf", version = "2.10.0" }
 retrofitScalars = { module = "com.squareup.retrofit2:converter-scalars", version = "2.10.0" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version = "2.10.0" }
-revapiGradlePlugin = { module = "com.palantir.gradle.revapi:gradle-revapi", version = "1.7.0" }
 servletApi = { module = "javax.servlet:javax.servlet-api", version = "3.1.0" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.7" }
 tempest2Testing = { module = "app.cash.tempest:tempest2-testing" }
