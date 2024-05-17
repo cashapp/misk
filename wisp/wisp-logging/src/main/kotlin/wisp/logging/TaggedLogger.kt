@@ -64,26 +64,41 @@ import kotlin.reflect.KClass
  *
  */
 
-open class TaggedLogger<L:Any, out R: TaggedLogger<L, R>> private constructor(
-  private val kLogger: KLogger,
-  private val tags: MutableSet<Tag>
-): KLogger by kLogger {
+interface Copyable<out T> where T: Copyable<T> {
+  fun copyWithNewTags(setNewTags: Set<Tag>): T
+}
 
-  constructor(loggerClass: KClass<L>, tags: Set<Tag> = emptySet()) : this(
+abstract class TaggedLogger<L:Any, out R> (
+  private val kLogger: KLogger,
+  private val tags: Set<Tag>
+): KLogger by kLogger, Copyable<R> where R: TaggedLogger<L, R>, R: Copyable<R> {
+
+
+  private var threadLocalMdcSnapshotField: Set<Tag> = emptySet()
+  val threadLocalMdcSnapshot: Set<Tag> get() = threadLocalMdcSnapshotField
+
+  constructor(loggerClass: KClass<L>, tags: Set<Tag>) : this(
     getLogger(loggerClass),
     tags.toMutableSet()
   )
 
+  fun inheritContextFrom(logger: TaggedLogger<*, *>): R {
+    return tag(logger.threadLocalMdcSnapshotField)
+  }
+
   // Add tags to the list of MDC tags for the current logger in context, including any other nested TaggedLoggers
   fun tag(vararg newTags: Tag): R {
-    tags.addAll(newTags)
-    @Suppress("UNCHECKED_CAST")
-    return this as R
+    return tag(newTags.toList())
+  }
+
+  fun tag(newTags: Collection<Tag>): R {
+    return this.copyWithNewTags(tags.plus(newTags))
   }
 
   // Adds the tags to the Mapped Diagnostic Context for the current thread for the duration of the block.
   fun <T> asContext(f: () -> T): T {
-    val priorMDC = MDC.getCopyOfContextMap()
+    val priorMDC = MDC.getCopyOfContextMap() ?: emptyMap()
+    threadLocalMdcSnapshotField = priorMDC.mapTo(mutableSetOf()) { Tag(it.key, it.value) }.plus(tags)
 
     tags.forEach { (k, v) ->
       if (v != null) {
@@ -94,8 +109,8 @@ open class TaggedLogger<L:Any, out R: TaggedLogger<L, R>> private constructor(
     try {
       return f().also {
         // Exiting this TaggedLogger gracefully: Lets do some cleanup to keep the ThreadLocal clear.
-        // The scenario here is that a nested TaggedLogger threw an exception, it was
-        // caught and handled by this TaggedLogger, so it should clean up the unused context.
+        // The scenario here is that when nested TaggedLogger threw an exception and it was
+        // caught and handled by this TaggedLogger, it should clean up the unused and unneeded context.
         threadLocalMdcContext.remove()
       }
     } catch (th: Throwable) {
@@ -108,7 +123,7 @@ open class TaggedLogger<L:Any, out R: TaggedLogger<L, R>> private constructor(
       }
       throw th
     } finally {
-      MDC.setContextMap(priorMDC ?: emptyMap())
+      MDC.setContextMap(priorMDC)
     }
   }
 

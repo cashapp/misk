@@ -21,6 +21,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.feature.testing.FakeFeatureFlags
+import wisp.logging.Copyable
 import wisp.logging.LogCollector
 import wisp.logging.Tag
 import wisp.logging.TaggedLogger
@@ -159,11 +160,16 @@ internal class TaggedLoggerJobQueueTest {
     val normalLogger = getLogger<TaggedLoggerJobQueueTest>()
   }
 
-  class SqsJobQueueTestTaggedLogger<L: Any>(logClass: KClass<L>): TaggedLogger<L, SqsJobQueueTestTaggedLogger<L>>(logClass) {
+  data class SqsJobQueueTestTaggedLogger<L: Any>(val logClass: KClass<L>, val tags: Set<Tag> = emptySet()): TaggedLogger<L, SqsJobQueueTestTaggedLogger<L>>(logClass, tags),
+    Copyable<SqsJobQueueTestTaggedLogger<L>> {
     fun testTag(value: String) = tag(Tag("testTag", value))
 
     companion object {
       fun <T : Any> KClass<T>.getTaggedLogger() = SqsJobQueueTestTaggedLogger(this)
+    }
+
+    override fun copyWithNewTags(setNewTags: Set<Tag>): SqsJobQueueTestTaggedLogger<L> {
+      return copy(tags = setNewTags)
     }
   }
 }
