@@ -168,8 +168,8 @@ internal class TaggedLoggerJobQueueTest {
       fun <T : Any> KClass<T>.getTaggedLogger() = SqsJobQueueTestTaggedLogger(this)
     }
 
-    override fun copyWithNewTags(setNewTags: Set<Tag>): SqsJobQueueTestTaggedLogger<L> {
-      return copy(tags = setNewTags)
+    override fun copyWithNewTags(newTags: Set<Tag>): SqsJobQueueTestTaggedLogger<L> {
+      return copy(tags = newTags)
     }
   }
 }

@@ -230,8 +230,8 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
         }
       }
 
-      override fun copyWithNewTags(setNewTags: Set<Tag>): LogMDCContextTestActionLogger<L> {
-        return this.copy(tags = setNewTags)
+      override fun copyWithNewTags(newTags: Set<Tag>): LogMDCContextTestActionLogger<L> {
+        return this.copy(tags = newTags)
       }
     }
   }
@@ -359,8 +359,8 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
         }
       }
 
-      override fun copyWithNewTags(setNewTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
-        return this.copy(tags = setNewTags)
+      override fun copyWithNewTags(newTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
+        return this.copy(tags = newTags)
       }
     }
 
@@ -448,8 +448,8 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
         }
       }
 
-      override fun copyWithNewTags(setNewTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
-        return this.copy(tags = setNewTags)
+      override fun copyWithNewTags(newTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
+        return this.copy(tags = newTags)
       }
     }
   }
@@ -524,8 +524,8 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
         }
       }
 
-      override fun copyWithNewTags(setNewTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
-        return this.copy(tags = setNewTags)
+      override fun copyWithNewTags(newTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
+        return this.copy(tags = newTags)
       }
     }
   }
@@ -597,8 +597,8 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
         }
       }
 
-      override fun copyWithNewTags(setNewTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
-        return this.copy(tags = setNewTags)
+      override fun copyWithNewTags(newTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
+        return this.copy(tags = newTags)
       }
     }
   }
