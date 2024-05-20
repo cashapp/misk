@@ -134,8 +134,5 @@ class DashboardPageLayout @Inject constructor(
 
   companion object {
     const val ADMIN_DASHBOARD_PATH = "/_admin"
-
-    @Deprecated("v2 dashboard is now available at /_admin/ so BETA_PREFIX variable will be removed in a future release")
-    const val BETA_PREFIX = "/v2"
   }
 }
