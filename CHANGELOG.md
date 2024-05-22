@@ -7,6 +7,11 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+Version 2024.05.22
+---------------------------------
+Breaking changes:
+- Added `@ExperimentalMiskApi` to `TaggedLogger`. Any code that uses this class will need to `@OptIn(ExperimentalMiskApi::class)`.
+
 Version 2024.05.16
 ---------------------------------
 Breaking changes:
