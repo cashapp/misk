@@ -26,7 +26,6 @@ buildscript {
     classpath(libs.protobufGradlePlugin)
     classpath(libs.jgit)
     classpath(libs.wireGradlePlugin)
-    classpath(libs.revapiGradlePlugin)
     classpath(libs.sqldelightGradlePlugin)
   }
 }
@@ -171,8 +170,6 @@ subprojects {
       "misk-bom"
     ).contains(name)
   ) {
-    apply(plugin = "com.palantir.revapi")
-
     extensions.configure(DetektExtension::class) {
       parallel = true
       buildUponDefaultConfig = false
@@ -333,11 +330,15 @@ allprojects {
   }
 }
 
-tasks.register("startRedis") {
-  group = "other"
-  description = "Ensures a Redis instance is available; " +
-    "starts a redis docker container if there isn't something already there."
-  doLast {
+abstract class StartRedisTask @Inject constructor(
+  @get:Internal
+  val execOperations: ExecOperations
+) : DefaultTask() {
+  @get:Internal
+  abstract val rootDir: DirectoryProperty
+
+  @TaskAction
+  fun startRedis() {
     val redisVersion = "6.2"
     val redisPort = System.getenv("REDIS_PORT") ?: "6379"
     val redisContainerName = "miskTestRedis-$redisPort"
@@ -351,7 +352,7 @@ tasks.register("startRedis") {
     }
     if (portIsOccupied) {
       logger.info("Port $redisPort is bound, assuming Redis is already running")
-      return@doLast
+      return
     }
 
     logger.info("Attempting to start Redis docker image $redisImage on port $redisPort...")
@@ -365,10 +366,17 @@ tasks.register("startRedis") {
       "redis-server",
       "--loglevel debug"
     )
-    exec {
-      workingDir(project.rootProject.rootDir.toPath())
+    execOperations.exec {
+      workingDir(rootDir.get().asFile)
       commandLine(*dockerArguments)
     }
     logger.info("Started Redis docker image $redisImage on port $redisPort")
   }
+}
+
+tasks.register("startRedis", StartRedisTask::class.java) {
+  group = "other"
+  description = "Ensures a Redis instance is available; " +
+    "starts a redis docker container if there isn't something already there."
+  rootDir.set(project.rootDir)
 }

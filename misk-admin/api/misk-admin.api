@@ -948,7 +948,6 @@ public final class misk/web/v2/DashboardIndexBlock {
 
 public final class misk/web/v2/DashboardPageLayout {
 	public static final field ADMIN_DASHBOARD_PATH Ljava/lang/String;
-	public static final field BETA_PREFIX Ljava/lang/String;
 	public static final field Companion Lmisk/web/v2/DashboardPageLayout$Companion;
 	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lmisk/scope/ActionScoped;Lwisp/deployment/Deployment;Lmisk/scope/ActionScoped;)V
 	public final fun build ()Ljava/lang/String;
