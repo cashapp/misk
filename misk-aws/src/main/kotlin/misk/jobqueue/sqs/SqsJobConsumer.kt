@@ -11,6 +11,7 @@ import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.annotation.ExperimentalMiskApi
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.jobqueue.JobConsumer
@@ -182,6 +183,7 @@ internal class SqsJobConsumer @Inject internal constructor(
       }.join()
     }
 
+    @OptIn(ExperimentalMiskApi::class)
     private fun handleMessages(messages: List<SqsJob>): List<CompletableFuture<Status>> {
       return messages.map { message ->
         CompletableFuture.supplyAsync(
