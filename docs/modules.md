@@ -1,6 +1,18 @@
 Misk Modules
 ===============
 Misk is split into many Gradle subprojects to organize functionality. The below is an overview of some of the modules.
+
+In general, our module strategy is **TODO**
+
+We use testfixtures **TODO*
+
+
+## misk
+
+Most of the implementation of Misk's web server components.
+There is a lot of stuff in this module. Pieces are occasionally extracted into new modules.
+
+
 ## misk-actions
 
 The core annotations and interfaces necessary to define actions that can be hosted in Misk.
@@ -10,6 +22,11 @@ used in other environments without any heavy dependencies.
 Actions should extend `WebAction`, be annotated with a HTTP method like `@Post`, accept a
 request object and return a response object. Throw an exception like `BadRequestException` to
 fail the request without much boilerplate.
+
+
+## misk-api
+
+High level interfaces and data classes. This module is agnostic to implementation details.
 
 
 ## misk-aws
@@ -59,6 +76,11 @@ Installing `DockerDynamoDbModule` runs a DynamoDB Local instance in Docker for y
 against.
 
 
+## misk-core
+
+A collection of utility functions and interfaces that are used in many places.
+
+
 ## misk-service
 
 Bind Guava services with inter-service dependencies.
@@ -89,3 +111,12 @@ implementation.
 ## misk-events
 
 An event publisher + consumer. There is no open source reference implementation at this time.
+
+
+## wisp.*
+
+These modules were created to extract specific pieces of functionality out of the `misk*` modules
+into new, low-dependency modules. They were especially focused on having no Guice dependencies.
+Some of these modules duplicate existing Misk functionality.
+
+Now, a few of these modules are starting to be folded back into `misk*`, or at least deduplicated.
