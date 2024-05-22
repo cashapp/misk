@@ -15,7 +15,8 @@ data class Link @JvmOverloads constructor(
    */
   val dataTurbo: Boolean? = true,
   val openInNewTab: Boolean = false,
-  val rawHtml: String? = null
+  val rawHtml: String? = null,
+  val hoverText: String? = null,
 )
 
 interface Style {
