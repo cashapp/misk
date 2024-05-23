@@ -11,15 +11,15 @@ plugins {
 
 dependencies {
   api(libs.aws2Dynamodb)
-  api(libs.awsAuth)
-  api(libs.awsSdkCore)
+  api(libs.aws2Auth)
+  api(libs.awsSdkSdkCore)
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
   api(project(":misk-aws"))
   api(project(":misk-inject"))
-  implementation(libs.awsCore)
-  implementation(libs.awsRegions)
+  implementation(libs.awsSdkAwsCore)
+  implementation(libs.aws2Regions)
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
 

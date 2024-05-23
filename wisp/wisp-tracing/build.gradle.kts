@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    api(libs.openTracingApi)
+    api(libs.openTracing)
 
     testFixturesImplementation(libs.openTracingMock)
 

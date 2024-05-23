@@ -22,7 +22,7 @@ dependencies {
   api(project(":misk-jdbc"))
   implementation(libs.jakartaInject)
   implementation(libs.kotlinRetry)
-  implementation(libs.kotlinxCoroutines)
+  implementation(libs.kotlinxCoroutinesCore)
   implementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)
