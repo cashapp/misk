@@ -22,7 +22,7 @@ dependencies {
   testImplementation(libs.logbackClassic)
   testImplementation(libs.micrometerCore)
   testImplementation(libs.mockitoCore)
-  testImplementation(libs.moshi)
+  testImplementation(libs.moshiCore)
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-moshi"))
 }

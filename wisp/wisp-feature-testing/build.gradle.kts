@@ -9,7 +9,7 @@ sourceSets {
 }
 
 dependencies {
-    api(libs.moshi)
+    api(libs.moshiCore)
     api(project(":wisp:wisp-config"))
     api(project(":wisp:wisp-feature"))
     implementation(project(":wisp:wisp-moshi"))
