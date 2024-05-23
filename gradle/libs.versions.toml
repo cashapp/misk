@@ -8,15 +8,15 @@ apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.
 assertj = { module = "org.assertj:assertj-core", version = "3.25.3" }
 awaitility = { module = "org.awaitility:awaitility", version = "4.1.0" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version = "4.1.0" }
+aws2Auth = { module = "software.amazon.awssdk:auth", version = "2.21.24" }
 aws2Bom = { module = "software.amazon.awssdk:bom", version = "2.21.24" }
 aws2Dynamodb = { module = "software.amazon.awssdk:dynamodb", version = "2.21.24" }
 aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", version = "2.21.24" }
-aws2Auth = { module = "software.amazon.awssdk:auth", version = "2.21.24" }
-awsSdkAwsCore= { module = "software.amazon.awssdk:aws-core", version = "2.21.24" }
-awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.12.576" }
-awsSdkCore = { module = "com.amazonaws:aws-java-sdk-core", version = "1.12.576" }
 aws2Regions = { module = "software.amazon.awssdk:regions", version = "2.21.24" }
+awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.12.576" }
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version = "1.12.576" }
+awsSdkAwsCore= { module = "software.amazon.awssdk:aws-core", version = "2.21.24" }
+awsSdkCore = { module = "com.amazonaws:aws-java-sdk-core", version = "1.12.576" }
 awsSdkSdkCore = { module = "software.amazon.awssdk:sdk-core", version = "2.21.24" }
 awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version = "1.12.576" }
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk15on", version = "1.70" }
@@ -140,8 +140,8 @@ mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugi
 micrometerCore = { module = "io.micrometer:micrometer-core", version = "1.11.1" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.1" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.4.0" }
-moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.1" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.1" }
+moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.1" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.1" }
 mysql = { module = "com.mysql:mysql-connector-j", version = "8.0.33" }
 nettyBom = { module = "io.netty:netty-bom", version = "4.1.92.Final" }
