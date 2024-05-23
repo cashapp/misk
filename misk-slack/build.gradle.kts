@@ -11,7 +11,7 @@ plugins {
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
-  api(libs.moshi)
+  api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.retrofit)
   api(project(":misk"))

@@ -16,8 +16,8 @@ dependencies {
   api(project(":misk-inject"))
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
-  implementation(libs.kotlinxCoroutines)
-  implementation(libs.moshi)
+  implementation(libs.kotlinxCoroutinesCore)
+  implementation(libs.moshiCore)
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)

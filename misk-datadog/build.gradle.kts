@@ -12,7 +12,7 @@ dependencies {
   api(libs.kotlinLogging)
   api(project(":misk-inject"))
   implementation(libs.guice)
-  implementation(libs.openTracingApi)
+  implementation(libs.openTracing)
   implementation(libs.openTracingUtil)
   implementation(libs.slf4jApi)
   implementation(libs.tracingDatadog)

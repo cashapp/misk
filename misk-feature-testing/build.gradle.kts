@@ -17,7 +17,7 @@ dependencies {
   api(project(":misk-inject"))
   implementation(libs.guice)
   implementation(libs.kotlinStdLibJdk8)
-  implementation(libs.moshi)
+  implementation(libs.moshiCore)
   implementation(project(":misk-service"))
 }
 

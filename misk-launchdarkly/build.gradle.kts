@@ -18,7 +18,7 @@ dependencies {
   implementation(libs.kotlinStdLibJdk8)
   implementation(libs.launchDarkly)
   implementation(libs.micrometerCore)
-  implementation(libs.moshi)
+  implementation(libs.moshiCore)
   implementation(project(":misk-core"))
   implementation(project(":misk-feature"))
   implementation(project(":misk-launchdarkly-core"))

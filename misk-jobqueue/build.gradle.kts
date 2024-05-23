@@ -28,7 +28,7 @@ dependencies {
   testImplementation(libs.kotlinLogging)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.logbackClassic)
-  testImplementation(libs.moshi)
+  testImplementation(libs.moshiCore)
   testImplementation(project(":wisp:wisp-logging"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-time-testing"))
