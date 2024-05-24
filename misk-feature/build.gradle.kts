@@ -21,7 +21,7 @@ dependencies {
   testFixturesApi(project(":misk-inject"))
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.kotlinStdLibJdk8)
-  testFixturesImplementation(libs.moshi)
+  testFixturesImplementation(libs.moshiCore)
   testFixturesImplementation(project(":misk-service"))
 
   testImplementation(libs.assertj)
@@ -29,7 +29,7 @@ dependencies {
   testImplementation(libs.jakartaInject)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
-  testImplementation(libs.moshi)
+  testImplementation(libs.moshiCore)
   testImplementation(project(":wisp:wisp-feature-testing"))
   testImplementation(project(":wisp:wisp-moshi"))
   testImplementation(project(":misk-feature"))

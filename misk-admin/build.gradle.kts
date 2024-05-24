@@ -13,7 +13,7 @@ dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
   api(libs.kotlinxHtml)
-  api(libs.moshi)
+  api(libs.moshiCore)
   api(libs.okio)
   api(project(":wisp:wisp-deployment"))
   api(project(":misk"))

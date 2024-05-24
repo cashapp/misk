@@ -7,7 +7,7 @@ dependencies {
     api(libs.kotlinLogging)
     implementation(libs.dockerCore)
     implementation(libs.dockerTransport)
-    implementation(libs.dockerTransportHttpClient)
+    implementation(libs.dockerTransportCore)
     implementation(project(":wisp:wisp-logging"))
     runtimeOnly(libs.logbackClassic)
 

@@ -10,7 +10,7 @@ plugins {
 
 dependencies {
   api(libs.awsDynamodb)
-  api(libs.awsJavaSdkCore)
+  api(libs.awsSdkCore)
   api(libs.jakartaInject)
   api(libs.slf4jApi)
   api(project(":misk"))
