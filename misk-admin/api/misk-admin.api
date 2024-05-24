@@ -1,3 +1,7 @@
+public abstract interface annotation class com/squareup/protos/test/SemanticDataTypeOption : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/squareup/protos/test/Type;
+}
+
 public final class com/squareup/protos/test/Type : java/lang/Enum, com/squareup/wire/WireEnum {
 	public static final field ACCOUNT_TOKEN Lcom/squareup/protos/test/Type;
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
@@ -13,10 +17,6 @@ public final class com/squareup/protos/test/Type : java/lang/Enum, com/squareup/
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/protos/test/Type;
 	public static fun values ()[Lcom/squareup/protos/test/Type;
-}
-
-public abstract interface annotation class com/squareup/protos/test/TypeOption : java/lang/annotation/Annotation {
-	public abstract fun value ()[Lcom/squareup/protos/test/Type;
 }
 
 public final class com/squareup/protos/test/grpc/HelloReply : com/squareup/wire/Message {

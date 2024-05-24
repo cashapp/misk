@@ -18,5 +18,5 @@ enum Type {
 }
 
 extend google.protobuf.FieldOptions {
-  repeated Type type = 13001;
+  repeated Type semantic_data_type = 13001;
 }

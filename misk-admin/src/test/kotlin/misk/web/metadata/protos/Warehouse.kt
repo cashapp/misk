@@ -35,7 +35,7 @@ public class Warehouse(
     schemaIndex = 0,
   )
   public val warehouse_id: Long? = null,
-  @TypeOption([
+  @SemanticDataTypeOption([
     Type.WAREHOUSE_TOKEN
   ])
   @field:WireField(

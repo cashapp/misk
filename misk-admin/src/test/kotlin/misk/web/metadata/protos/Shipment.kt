@@ -31,7 +31,7 @@ import kotlin.collections.List
 import okio.ByteString
 
 public class Shipment(
-  @TypeOption([
+  @SemanticDataTypeOption([
     Type.SHIPMENT_ID
   ])
   @field:WireField(
@@ -58,7 +58,7 @@ public class Shipment(
     schemaIndex = 3,
   )
   public val destination: Warehouse? = null,
-  @TypeOption([
+  @SemanticDataTypeOption([
     Type.STATUS
   ])
   @field:WireField(
@@ -92,7 +92,7 @@ public class Shipment(
   )
   public val destination_signature: ByteString? = null,
   notes: List<String> = emptyList(),
-  @TypeOption([
+  @SemanticDataTypeOption([
     Type.ACCOUNT_TOKEN
   ])
   @field:WireField(
@@ -102,7 +102,7 @@ public class Shipment(
     schemaIndex = 10,
   )
   public val account_token: String? = null,
-  @TypeOption([
+  @SemanticDataTypeOption([
     Type.CARD_TOKEN
   ])
   @field:WireField(
@@ -112,7 +112,7 @@ public class Shipment(
     schemaIndex = 11,
   )
   public val card_token: String? = null,
-  @TypeOption([
+  @SemanticDataTypeOption([
     Type.TRANSFER_ID
   ])
   @field:WireField(
@@ -124,7 +124,7 @@ public class Shipment(
   public val transfer_id: String? = null,
   unknownFields: ByteString = ByteString.EMPTY,
 ) : Message<Shipment, Nothing>(ADAPTER, unknownFields) {
-  @TypeOption([
+  @SemanticDataTypeOption([
     Type.NOTE_TYPE_1,
     Type.NOTE_TYPE_2
   ])

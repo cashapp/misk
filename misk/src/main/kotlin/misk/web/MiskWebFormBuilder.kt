@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.util.LinkedList
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.javaField
 
@@ -51,7 +51,7 @@ class MiskWebFormBuilder {
 
       val fields = mutableListOf<Field>()
 
-      for (property in clazz.memberProperties) {
+      for (property in clazz.declaredMemberProperties) {
         val field = property.javaField
         // Use the WireField annotation to identify fields of our proto.
         if (field?.annotations?.any { it is WireField } == true) {
