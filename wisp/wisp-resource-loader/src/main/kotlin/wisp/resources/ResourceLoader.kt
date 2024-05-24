@@ -118,6 +118,23 @@ open class ResourceLoader(
         return utf8(address) ?: error("could not load resource $address")
     }
 
+    /**
+     * Return the contents of `address` as bytes, or null if no such resource exists. Note that
+     * this method decodes the resource on every use. It is the caller's responsibility to cache the
+     * result if it is to be loaded frequently.
+     */
+    fun bytes(address: String): ByteArray? {
+      val source = open(address) ?: return null
+      return source.use { it.readByteArray() }
+    }
+
+    /**
+     * Like [bytes], but throws [IllegalStateException] if the resource is missing.
+     */
+    fun requireBytes(address: String): ByteArray {
+      return bytes(address) ?: error("could not load resource $address")
+    }
+
     private fun checkAddress(address: String) {
         require(address.matches(Regex("([^/:]+:)(/[^/]+)+/?"))) { "unexpected address $address" }
     }

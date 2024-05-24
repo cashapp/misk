@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.lang.IllegalStateException
 import java.net.URLClassLoader
 import java.nio.file.Files
 import kotlin.test.assertEquals
@@ -47,6 +48,18 @@ class ResourceLoaderTest {
     }
 
     @Test
+    fun loadResourceBytes() {
+      val resource = resourceLoader.bytes("classpath:/wisp/resources/ResourceLoaderTest.dat")!!
+      assertThat(resource).isEqualTo(byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05))
+    }
+
+    @Test
+    fun loadResourceRequireBytes() {
+      val resource = resourceLoader.requireBytes("classpath:/wisp/resources/ResourceLoaderTest.dat")
+      assertThat(resource).isEqualTo(byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05))
+    }
+
+    @Test
     fun loadResourceWithSystemClassLoader() {
         withContextClassLoader(null) {
           val resource = resourceLoader.utf8("classpath:/wisp/resources/ResourceLoaderTest.txt")!!
@@ -57,6 +70,18 @@ class ResourceLoaderTest {
     @Test
     fun absentResource() {
         assertThat(resourceLoader.utf8("classpath:/wisp/resources/NoSuchResource.txt")).isNull()
+    }
+
+    @Test
+    fun absentResourceBytes() {
+      assertThat(resourceLoader.bytes("classpath:/wisp/resources/NoSuchResource.dat")).isNull()
+    }
+
+    @Test
+    fun absentResourceRequireBytes() {
+      assertFailsWith<IllegalStateException> {
+        resourceLoader.requireBytes("classpath:/wisp/resources/NoSuchResource.dat")
+      }
     }
 
     @Test
