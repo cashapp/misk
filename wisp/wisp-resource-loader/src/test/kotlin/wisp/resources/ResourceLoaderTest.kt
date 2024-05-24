@@ -1,5 +1,6 @@
 package wisp.resources
 
+import okio.ByteString.Companion.decodeHex
 import okio.buffer
 import okio.sink
 import org.assertj.core.api.Assertions.assertThat
@@ -50,13 +51,13 @@ class ResourceLoaderTest {
     @Test
     fun loadResourceBytes() {
       val resource = resourceLoader.bytes("classpath:/wisp/resources/ResourceLoaderTest.dat")!!
-      assertThat(resource).isEqualTo(byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05))
+      assertThat(resource).isEqualTo("0102030405".decodeHex())
     }
 
     @Test
     fun loadResourceRequireBytes() {
       val resource = resourceLoader.requireBytes("classpath:/wisp/resources/ResourceLoaderTest.dat")
-      assertThat(resource).isEqualTo(byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05))
+      assertThat(resource).isEqualTo("0102030405".decodeHex())
     }
 
     @Test

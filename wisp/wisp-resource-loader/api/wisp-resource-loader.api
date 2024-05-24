@@ -34,14 +34,14 @@ public final class wisp/resources/MemoryResourceLoaderBackend$Companion {
 public class wisp/resources/ResourceLoader {
 	public static final field Companion Lwisp/resources/ResourceLoader$Companion;
 	public fun <init> (Ljava/util/Map;)V
-	public final fun bytes (Ljava/lang/String;)[B
+	public final fun bytes (Ljava/lang/String;)Lokio/ByteString;
 	public final fun copyTo (Ljava/lang/String;Ljava/nio/file/Path;)V
 	public final fun exists (Ljava/lang/String;)Z
 	public final fun list (Ljava/lang/String;)Ljava/util/List;
 	public final fun open (Ljava/lang/String;)Lokio/BufferedSource;
 	public final fun put (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun put (Ljava/lang/String;Lokio/ByteString;)V
-	public final fun requireBytes (Ljava/lang/String;)[B
+	public final fun requireBytes (Ljava/lang/String;)Lokio/ByteString;
 	public final fun requireUtf8 (Ljava/lang/String;)Ljava/lang/String;
 	public final fun unwatch (Ljava/lang/String;)V
 	public final fun utf8 (Ljava/lang/String;)Ljava/lang/String;
