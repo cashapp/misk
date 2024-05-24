@@ -120,7 +120,7 @@ open class ResourceLoader(
 
     /**
      * Return the contents of `address` as bytes, or null if no such resource exists. Note that
-     * this method decodes the resource on every use. It is the caller's responsibility to cache the
+     * this method reads the resource on every use. It is the caller's responsibility to cache the
      * result if it is to be loaded frequently.
      */
     fun bytes(address: String): ByteArray? {
