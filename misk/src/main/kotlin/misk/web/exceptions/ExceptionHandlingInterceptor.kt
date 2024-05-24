@@ -5,6 +5,7 @@ import com.squareup.wire.GrpcStatus
 import com.squareup.wire.ProtoAdapter
 import jakarta.inject.Inject
 import misk.Action
+import misk.annotation.ExperimentalMiskApi
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.grpc.GrpcMessageSink
@@ -45,6 +46,7 @@ class ExceptionHandlingInterceptor(
   private val mapperResolver: ExceptionMapperResolver
 ) : NetworkInterceptor {
 
+  @OptIn(ExperimentalMiskApi::class)
   override fun intercept(chain: NetworkChain) {
     try {
       chain.proceed(chain.httpCall)

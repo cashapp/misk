@@ -1,3 +1,6 @@
+public abstract interface annotation class misk/annotation/ExperimentalMiskApi : java/lang/annotation/Annotation {
+}
+
 public abstract interface class misk/api/HttpRequest {
 	public abstract fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
 	public abstract fun getRequestHeaders ()Lokhttp3/Headers;
