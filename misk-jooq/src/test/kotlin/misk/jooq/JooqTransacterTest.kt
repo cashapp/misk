@@ -21,6 +21,10 @@ import wisp.time.FakeClock
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
+import misk.jooq.JooqTransacter.TransacterOptions
+import misk.jooq.testgen.tables.records.MovieRecord
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 
 @MiskTest(startService = true)
 internal class JooqTransacterTest {
@@ -284,7 +288,7 @@ internal class JooqTransacterTest {
     assertThat(sessionCloseHook2Called).isTrue
   }
 
-  @Test fun `make sure read and write transacters connect to different dbs`(){
+  @Test fun `make sure read and write transacters connect to different dbs`() {
     transacter.transaction(noRetriesOptions) {
       transacter.transaction(noRetriesOptions) { (ctx) ->
         ctx.newRecord(MOVIE).apply {
@@ -334,4 +338,107 @@ internal class JooqTransacterTest {
     }
   }
 
+  @Nested
+  inner class IsolationLevelTests {
+
+    @Nested
+    inner class CheckIsolationLevel {
+      @Test fun `check isolation level is set to repeatable read by default`() {
+        transacter.transaction { (ctx) ->
+          ctx.connection {
+            assertThat(it.transactionIsolation).isEqualTo(TransactionIsolationLevel.REPEATABLE_READ.value)
+          }
+        }
+      }
+
+      @Test fun `check isolation level is set to read committed when explicitly set`() {
+        transacter.transaction(
+          options = TransacterOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
+        ) { (ctx) ->
+          ctx.connection {
+            assertThat(it.transactionIsolation).isEqualTo(TransactionIsolationLevel.READ_COMMITTED.value)
+          }
+        }
+      }
+    }
+
+    @Nested
+    inner class EnsureIsolationLevelsWorkCorrectly {
+      lateinit var savedMovieRecord: MovieRecord
+      @BeforeEach
+      fun insertRecord() {
+        savedMovieRecord = transacter.transaction { (ctx) ->
+          ctx.newRecord(MOVIE).apply {
+            this.genre = Genre.COMEDY.name
+            this.name = "Dumb and dumber"
+          }.also { it.store() }
+        }
+      }
+
+      @Test fun `should see the same record as previously read - repeatable read`() {
+        transacter.transaction(
+          options = TransacterOptions(
+            isolationLevel = TransactionIsolationLevel.REPEATABLE_READ // this is default
+          )
+        ) { (ctx) ->
+          var movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.COMEDY.name)
+
+          transacter.transaction { (ctx) ->
+            ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id))
+              .fetchOne()
+              ?.apply { this.genre = Genre.HORROR.name }
+              ?.also { it.store() }
+          }
+
+          movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.COMEDY.name)
+        }
+      }
+
+      @Test fun `should see the updated record - read committed`() {
+        transacter.transaction(
+          options = TransacterOptions(
+            isolationLevel = TransactionIsolationLevel.READ_COMMITTED
+          )
+        ) { (ctx) ->
+          var movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.COMEDY.name)
+
+          transacter.transaction { (ctx) ->
+            ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id))
+              .fetchOne()
+              ?.apply { this.genre = Genre.HORROR.name }
+              ?.also { it.store() }
+          }
+
+          movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.HORROR.name)
+        }
+      }
+
+      @Test fun `should see the updated record - read uncommitted`() {
+        transacter.transaction(
+          options = TransacterOptions(
+            isolationLevel = TransactionIsolationLevel.READ_UNCOMMITTED
+          )
+        ) { (ctx) ->
+          var movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.COMEDY.name)
+          val context1 = ctx
+
+          transacter.transaction { (ctx) ->
+            ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id))
+              .fetchOne()
+              ?.apply { this.genre = Genre.HORROR.name }
+              ?.also { it.store() }
+
+            // txn is still un-committed here
+            movie = context1.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+            assertThat(movie.genre).isEqualTo(Genre.HORROR.name)
+          }
+        }
+      }
+    }
+  }
 }
