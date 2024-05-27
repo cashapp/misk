@@ -5,6 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.CreateQueueRequest
 import jakarta.inject.Inject
+import misk.annotation.ExperimentalMiskApi
 import misk.clustering.fake.lease.FakeLeaseManager
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobQueue
@@ -160,6 +161,7 @@ internal class TaggedLoggerJobQueueTest {
     val normalLogger = getLogger<TaggedLoggerJobQueueTest>()
   }
 
+  @OptIn(ExperimentalMiskApi::class)
   data class SqsJobQueueTestTaggedLogger<L: Any>(val logClass: KClass<L>, val tags: Set<Tag> = emptySet()): TaggedLogger<L, SqsJobQueueTestTaggedLogger<L>>(logClass, tags),
     Copyable<SqsJobQueueTestTaggedLogger<L>> {
     fun testTag(value: String) = tag(Tag("testTag", value))

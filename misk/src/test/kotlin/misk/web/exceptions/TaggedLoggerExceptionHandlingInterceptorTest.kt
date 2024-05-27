@@ -1,9 +1,12 @@
+@file:OptIn(ExperimentalMiskApi::class)
+
 package misk.web.exceptions
 
 import ch.qos.logback.classic.Level
 import com.google.common.testing.FakeTicker
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
+import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
 import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.LogMDCContextTestAction.LogMDCContextTestActionLogger.Companion.getTaggedLogger

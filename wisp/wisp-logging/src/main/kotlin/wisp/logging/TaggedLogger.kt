@@ -1,5 +1,6 @@
 package wisp.logging
 
+import misk.annotation.ExperimentalMiskApi
 import mu.KLogger
 import mu.KotlinLogging
 import org.slf4j.MDC
@@ -74,7 +75,7 @@ import kotlin.reflect.KClass
  *
  */
 
-
+@ExperimentalMiskApi
 abstract class TaggedLogger<L:Any, out R> (
   private val kLogger: KLogger,
   private val tags: Set<Tag>
