@@ -1,5 +1,6 @@
 package wisp.resources
 
+import okio.ByteString.Companion.decodeHex
 import okio.buffer
 import okio.sink
 import org.assertj.core.api.Assertions.assertThat
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.lang.IllegalStateException
 import java.net.URLClassLoader
 import java.nio.file.Files
 import kotlin.test.assertEquals
@@ -47,6 +49,18 @@ class ResourceLoaderTest {
     }
 
     @Test
+    fun loadResourceBytes() {
+      val resource = resourceLoader.bytes("classpath:/wisp/resources/ResourceLoaderTest.dat")!!
+      assertThat(resource).isEqualTo("0102030405".decodeHex())
+    }
+
+    @Test
+    fun loadResourceRequireBytes() {
+      val resource = resourceLoader.requireBytes("classpath:/wisp/resources/ResourceLoaderTest.dat")
+      assertThat(resource).isEqualTo("0102030405".decodeHex())
+    }
+
+    @Test
     fun loadResourceWithSystemClassLoader() {
         withContextClassLoader(null) {
           val resource = resourceLoader.utf8("classpath:/wisp/resources/ResourceLoaderTest.txt")!!
@@ -57,6 +71,18 @@ class ResourceLoaderTest {
     @Test
     fun absentResource() {
         assertThat(resourceLoader.utf8("classpath:/wisp/resources/NoSuchResource.txt")).isNull()
+    }
+
+    @Test
+    fun absentResourceBytes() {
+      assertThat(resourceLoader.bytes("classpath:/wisp/resources/NoSuchResource.dat")).isNull()
+    }
+
+    @Test
+    fun absentResourceRequireBytes() {
+      assertFailsWith<IllegalStateException> {
+        resourceLoader.requireBytes("classpath:/wisp/resources/NoSuchResource.dat")
+      }
     }
 
     @Test
