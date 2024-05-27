@@ -89,62 +89,15 @@ class JooqModule @JvmOverloads constructor(
 
       override fun get(): JooqTransacter {
         return JooqTransacter(
-          dslContext = lazy { dslContext(dataSourceServiceProvider.get(), clock, datasourceConfig) }
+          dataSourceService = dataSourceServiceProvider.get(),
+          dataSourceConfig = datasourceConfig,
+          jooqCodeGenSchemaName = jooqCodeGenSchemaName,
+          jooqTimestampRecordListenerOptions = jooqTimestampRecordListenerOptions,
+          clock = clock,
+          jooqConfigExtension = jooqConfigExtension
         )
       }
     }).asSingleton()
-  }
-
-  private fun dslContext(
-    dataSourceService: DataSourceService,
-    clock: Clock,
-    datasourceConfig: DataSourceConfig,
-  ): DSLContext {
-    val settings = Settings()
-      .withExecuteWithOptimisticLocking(true)
-      .withRenderMapping(
-        RenderMapping().withSchemata(
-          MappedSchema()
-            .withInput(jooqCodeGenSchemaName)
-            .withOutput(datasourceConfig.database)
-        )
-      )
-    return DSL.using(dataSourceService.dataSource, datasourceConfig.type.toSqlDialect(), settings)
-      .apply {
-        configuration().set(
-          DefaultTransactionProvider(
-            configuration().connectionProvider(),
-            false
-          )
-        ).apply {
-          val executeListeners = mutableListOf(
-            DefaultExecuteListenerProvider(AvoidUsingSelectStarListener())
-          )
-          if ("true" == datasourceConfig.show_sql) {
-            executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
-          }
-          set(*executeListeners.toTypedArray())
-
-          if (jooqTimestampRecordListenerOptions.install) {
-            set(
-              JooqTimestampRecordListener(
-                clock = clock,
-                createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
-                updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
-              )
-            )
-          }
-        }.apply(jooqConfigExtension)
-      }
-  }
-
-  private fun DataSourceType.toSqlDialect() = when (this) {
-    DataSourceType.MYSQL -> SQLDialect.MYSQL
-    DataSourceType.HSQLDB -> SQLDialect.HSQLDB
-    DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
-    DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
-    DataSourceType.TIDB -> SQLDialect.MYSQL
-    else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
   }
 }
 
