@@ -1,3 +1,24 @@
+public abstract interface annotation class com/squareup/protos/test/SemanticDataTypeOption : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/squareup/protos/test/Type;
+}
+
+public final class com/squareup/protos/test/Type : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ACCOUNT_TOKEN Lcom/squareup/protos/test/Type;
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field CARD_TOKEN Lcom/squareup/protos/test/Type;
+	public static final field NOTE_TYPE_1 Lcom/squareup/protos/test/Type;
+	public static final field NOTE_TYPE_2 Lcom/squareup/protos/test/Type;
+	public static final field SHIPMENT_ID Lcom/squareup/protos/test/Type;
+	public static final field SHIPMENT_TOKEN Lcom/squareup/protos/test/Type;
+	public static final field STATUS Lcom/squareup/protos/test/Type;
+	public static final field TRANSFER_ID Lcom/squareup/protos/test/Type;
+	public static final field WAREHOUSE_TOKEN Lcom/squareup/protos/test/Type;
+	public static fun fromValue (I)Lcom/squareup/protos/test/Type;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/protos/test/Type;
+	public static fun values ()[Lcom/squareup/protos/test/Type;
+}
+
 public final class com/squareup/protos/test/grpc/HelloReply : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field DEFAULT_MESSAGE Ljava/lang/String;
@@ -948,9 +969,8 @@ public final class misk/web/v2/DashboardIndexBlock {
 
 public final class misk/web/v2/DashboardPageLayout {
 	public static final field ADMIN_DASHBOARD_PATH Ljava/lang/String;
-	public static final field BETA_PREFIX Ljava/lang/String;
 	public static final field Companion Lmisk/web/v2/DashboardPageLayout$Companion;
-	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lwisp/deployment/Deployment;Lmisk/scope/ActionScoped;)V
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lmisk/scope/ActionScoped;Lwisp/deployment/Deployment;Lmisk/scope/ActionScoped;)V
 	public final fun build ()Ljava/lang/String;
 	public final fun build (Lkotlin/jvm/functions/Function4;)Ljava/lang/String;
 	public static synthetic fun build$default (Lmisk/web/v2/DashboardPageLayout;Lkotlin/jvm/functions/Function4;ILjava/lang/Object;)Ljava/lang/String;

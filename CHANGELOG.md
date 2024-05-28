@@ -7,6 +7,16 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+Version 2024.05.22
+---------------------------------
+Breaking changes:
+- Added `@ExperimentalMiskApi` to `TaggedLogger`. Any code that uses this class will need to `@OptIn(ExperimentalMiskApi::class)`.
+
+Version 2024.05.16
+---------------------------------
+Breaking changes:
+- Remove the deprecated `BETA_PREFIX` val which was used to gate development of the new v2 admin dashboard. It has been deprecated since 2023-06-30 when the v2 admin dashboard was promoted to `/_admin/`.
+
 Version 2024.05.14
 ---------------------------------
 Breaking changes:

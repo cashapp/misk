@@ -1,0 +1,22 @@
+syntax = "proto2";
+package test;
+
+option java_package = "com.squareup.protos.test";
+
+import "google/protobuf/descriptor.proto";
+
+enum Type {
+  SHIPMENT_ID = 1;
+  SHIPMENT_TOKEN = 2;
+  ACCOUNT_TOKEN = 3;
+  CARD_TOKEN = 4;
+  TRANSFER_ID = 5;
+  NOTE_TYPE_1 = 6;
+  NOTE_TYPE_2 = 7;
+  STATUS = 8;
+  WAREHOUSE_TOKEN = 9;
+}
+
+extend google.protobuf.FieldOptions {
+  repeated Type semantic_data_type = 13001;
+}

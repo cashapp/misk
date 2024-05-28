@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-  api(libs.awsJavaSdkCore)
+  api(libs.awsSdkCore)
   api(libs.awsS3)
   api(libs.awsSqs)
   api(libs.guava)
@@ -24,12 +24,13 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-jobqueue"))
   implementation(libs.kotlinLogging)
-  implementation(libs.moshi)
-  implementation(libs.openTracingApi)
+  implementation(libs.moshiCore)
+  implementation(libs.openTracing)
   implementation(libs.openTracingDatadog)
   implementation(libs.prometheusClient)
   implementation(libs.slf4jApi)
   implementation(libs.tracingDatadog)
+  implementation(project(":misk-api"))
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-tracing"))

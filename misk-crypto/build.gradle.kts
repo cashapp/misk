@@ -10,7 +10,7 @@ plugins {
 }
 
 dependencies {
-  api(libs.awsJavaSdkCore)
+  api(libs.awsSdkCore)
   api(libs.awsS3)
   api(libs.guice)
   api(libs.jakartaInject)
@@ -25,7 +25,7 @@ dependencies {
   implementation(libs.bouncycastlePgp)
   implementation(libs.guava)
   implementation(libs.kotlinLogging)
-  implementation(libs.moshi)
+  implementation(libs.moshiCore)
   implementation(libs.okio)
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk"))

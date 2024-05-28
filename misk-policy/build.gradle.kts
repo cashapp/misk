@@ -12,7 +12,7 @@ plugins {
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
-  api(libs.moshi)
+  api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.retrofit)
   api(project(":misk-core"))
@@ -29,7 +29,7 @@ dependencies {
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-policy"))
   testFixturesImplementation(libs.dockerTransport)
-  testFixturesImplementation(libs.dockerTransportHttpClient)
+  testFixturesImplementation(libs.dockerTransportCore)
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.kotlinLogging)
   testFixturesImplementation(libs.okHttp)

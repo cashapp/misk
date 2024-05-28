@@ -36,7 +36,7 @@ dependencies {
   api(project(":wisp:wisp-config"))
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinReflect)
-  implementation(libs.moshi)
+  implementation(libs.moshiCore)
   implementation(libs.okHttp)
   implementation(libs.okio)
   implementation(libs.tink)

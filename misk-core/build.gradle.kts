@@ -28,7 +28,7 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
-  testImplementation(libs.kotlinxCoroutines)
+  testImplementation(libs.kotlinxCoroutinesCore)
   testImplementation(libs.logbackClassic)
   testImplementation(project(":wisp:wisp-logging"))
   testImplementation(project(":wisp:wisp-logging-testing"))
