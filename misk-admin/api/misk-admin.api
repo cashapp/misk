@@ -1,3 +1,24 @@
+public abstract interface annotation class com/squareup/protos/test/SemanticDataTypeOption : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/squareup/protos/test/Type;
+}
+
+public final class com/squareup/protos/test/Type : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ACCOUNT_TOKEN Lcom/squareup/protos/test/Type;
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field CARD_TOKEN Lcom/squareup/protos/test/Type;
+	public static final field NOTE_TYPE_1 Lcom/squareup/protos/test/Type;
+	public static final field NOTE_TYPE_2 Lcom/squareup/protos/test/Type;
+	public static final field SHIPMENT_ID Lcom/squareup/protos/test/Type;
+	public static final field SHIPMENT_TOKEN Lcom/squareup/protos/test/Type;
+	public static final field STATUS Lcom/squareup/protos/test/Type;
+	public static final field TRANSFER_ID Lcom/squareup/protos/test/Type;
+	public static final field WAREHOUSE_TOKEN Lcom/squareup/protos/test/Type;
+	public static fun fromValue (I)Lcom/squareup/protos/test/Type;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/protos/test/Type;
+	public static fun values ()[Lcom/squareup/protos/test/Type;
+}
+
 public final class com/squareup/protos/test/grpc/HelloReply : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field DEFAULT_MESSAGE Ljava/lang/String;

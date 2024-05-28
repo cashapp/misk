@@ -33,16 +33,20 @@ internal class MiskWebFormBuilderTest {
     val warehouseType = types[Warehouse::class.qualifiedName]!!
 
     // Check primitive types
-    assertThat(shipmentType.fields).contains(Field("shipment_id", "Long", false))
-    assertThat(warehouseType.fields).contains(Field("warehouse_token", "String", false))
+    assertThat(shipmentType.fields).contains(Field("shipment_id", "Long", false,
+      listOf("@com.squareup.protos.test.SemanticDataTypeOption({SHIPMENT_ID})")))
+    assertThat(warehouseType.fields).contains(Field("warehouse_token", "String", false,
+      listOf("@com.squareup.protos.test.SemanticDataTypeOption({WAREHOUSE_TOKEN})")))
 
     // Check repeated types
-    assertThat(shipmentType.fields).contains(Field("notes", "String", true))
+    assertThat(shipmentType.fields).contains(Field("notes", "String", true,
+      listOf("@com.squareup.protos.test.SemanticDataTypeOption({NOTE_TYPE_1, NOTE_TYPE_2})")))
     assertThat(warehouseType.fields).contains(
       Field(
         name = "alternates",
         type = Warehouse::class.qualifiedName!!,
-        repeated = true
+        repeated = true,
+        annotations = emptyList()
       )
     )
 
@@ -52,7 +56,18 @@ internal class MiskWebFormBuilderTest {
         name = "status",
         type = "Enum<com.squareup.protos.test.parsing.Shipment.State,VALIDATING,PICKING_UP," +
           "DELIVERING,CONSUMING>",
-        repeated = false
+        repeated = false,
+        listOf("@com.squareup.protos.test.SemanticDataTypeOption({STATUS})")
+      )
+    )
+
+    // Check oneof types
+    assertThat(shipmentType.fields).contains(
+      Field(
+        name = "account_token",
+        type = "String",
+        repeated = false,
+        annotations = listOf("@com.squareup.protos.test.SemanticDataTypeOption({ACCOUNT_TOKEN})")
       )
     )
   }
@@ -70,16 +85,20 @@ internal class MiskWebFormBuilderTest {
     val warehouseType = types[KotlinProtoWarehouse::class.qualifiedName]!!
 
     // Check primitive types
-    assertThat(shipmentType.fields).contains(Field("shipment_id", "Long", false))
-    assertThat(warehouseType.fields).contains(Field("warehouse_token", "String", false))
+    assertThat(shipmentType.fields).contains(Field("shipment_id", "Long",false,
+      listOf("@misk.web.metadata.protos.SemanticDataTypeOption({SHIPMENT_ID})")))
+    assertThat(warehouseType.fields).contains(Field("warehouse_token", "String", false,
+      listOf("@misk.web.metadata.protos.SemanticDataTypeOption({WAREHOUSE_TOKEN})")))
 
     // Check repeated types
-    assertThat(shipmentType.fields).contains(Field("notes", "String", true))
+    assertThat(shipmentType.fields).contains(Field("notes", "String",true,
+      listOf("@misk.web.metadata.protos.SemanticDataTypeOption({NOTE_TYPE_1, NOTE_TYPE_2})")))
     assertThat(warehouseType.fields).contains(
       Field(
         name = "alternates",
         type = KotlinProtoWarehouse::class.qualifiedName!!,
-        repeated = true
+        repeated = true,
+        annotations = emptyList()
       )
     )
 
@@ -89,7 +108,18 @@ internal class MiskWebFormBuilderTest {
         name = "status",
         type = "Enum<misk.web.metadata.protos.Shipment.State,VALIDATING,PICKING_UP," +
           "DELIVERING,CONSUMING>",
-        repeated = false
+        repeated = false,
+        annotations = listOf("@misk.web.metadata.protos.SemanticDataTypeOption({STATUS})")
+      )
+    )
+
+    // Check oneof types
+    assertThat(shipmentType.fields).contains(
+      Field(
+        name = "account_token",
+        type = "String",
+        repeated = false,
+        annotations = listOf("@misk.web.metadata.protos.SemanticDataTypeOption({ACCOUNT_TOKEN})")
       )
     )
   }
