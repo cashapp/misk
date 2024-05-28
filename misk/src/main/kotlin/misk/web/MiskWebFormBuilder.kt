@@ -207,11 +207,12 @@ class MiskWebFormBuilder {
       fieldName: String,
       enumValues: List<String>,
       repeated: Boolean,
-      annotations: List<Annotation> = emptyList()
+      annotations: List<Annotation> = listOf()
     ) = Field(
-      fieldName, "Enum<$fieldClassName,${enumValues.joinToString(",")}>",
-      repeated, annotations.toStrings(),
-
+      fieldName,
+      "Enum<$fieldClassName,${enumValues.joinToString(",")}>",
+      repeated, 
+      annotations.toStrings()
     )
 
     private fun List<Annotation>.toStrings(): List<String> = this.map { it.toString() }
@@ -231,5 +232,5 @@ class MiskWebFormBuilder {
     val name: String,
     val type: String,
     val repeated: Boolean,
-    val annotations: List<String> = emptyList())
+    val annotations: List<String> = listOf())
 }

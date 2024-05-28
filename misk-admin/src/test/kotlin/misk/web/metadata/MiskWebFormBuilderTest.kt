@@ -46,7 +46,7 @@ internal class MiskWebFormBuilderTest {
         name = "alternates",
         type = Warehouse::class.qualifiedName!!,
         repeated = true,
-        emptyList()
+        annotations = emptyList()
       )
     )
 
@@ -67,7 +67,7 @@ internal class MiskWebFormBuilderTest {
         name = "account_token",
         type = "String",
         repeated = false,
-        listOf("@com.squareup.protos.test.SemanticDataTypeOption({ACCOUNT_TOKEN})")
+        annotations = listOf("@com.squareup.protos.test.SemanticDataTypeOption({ACCOUNT_TOKEN})")
       )
     )
   }
@@ -98,7 +98,7 @@ internal class MiskWebFormBuilderTest {
         name = "alternates",
         type = KotlinProtoWarehouse::class.qualifiedName!!,
         repeated = true,
-        emptyList()
+        annotations = emptyList()
       )
     )
 
@@ -109,7 +109,7 @@ internal class MiskWebFormBuilderTest {
         type = "Enum<misk.web.metadata.protos.Shipment.State,VALIDATING,PICKING_UP," +
           "DELIVERING,CONSUMING>",
         repeated = false,
-        listOf("@misk.web.metadata.protos.SemanticDataTypeOption({STATUS})")
+        annotations = listOf("@misk.web.metadata.protos.SemanticDataTypeOption({STATUS})")
       )
     )
 
@@ -119,7 +119,7 @@ internal class MiskWebFormBuilderTest {
         name = "account_token",
         type = "String",
         repeated = false,
-        listOf("@misk.web.metadata.protos.SemanticDataTypeOption({ACCOUNT_TOKEN})")
+        annotations = listOf("@misk.web.metadata.protos.SemanticDataTypeOption({ACCOUNT_TOKEN})")
       )
     )
   }
