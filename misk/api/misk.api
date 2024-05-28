@@ -1315,19 +1315,25 @@ public final class misk/web/MiskWebFormBuilder {
 }
 
 public final class misk/web/MiskWebFormBuilder$Companion {
-	public final fun createEnumField (Ljava/lang/Class;Ljava/lang/String;Z)Lmisk/web/MiskWebFormBuilder$Field;
-	public final fun createSyntheticEnumField (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Z)Lmisk/web/MiskWebFormBuilder$Field;
-	public final fun maybeCreatePrimitiveField (Ljava/lang/Class;Ljava/lang/String;Z)Lmisk/web/MiskWebFormBuilder$Field;
+	public final fun createEnumField (Ljava/lang/Class;Ljava/lang/String;ZLjava/util/List;)Lmisk/web/MiskWebFormBuilder$Field;
+	public static synthetic fun createEnumField$default (Lmisk/web/MiskWebFormBuilder$Companion;Ljava/lang/Class;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
+	public final fun createSyntheticEnumField (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLjava/util/List;)Lmisk/web/MiskWebFormBuilder$Field;
+	public static synthetic fun createSyntheticEnumField$default (Lmisk/web/MiskWebFormBuilder$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLjava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
+	public final fun maybeCreatePrimitiveField (Ljava/lang/Class;Ljava/lang/String;ZLjava/util/List;)Lmisk/web/MiskWebFormBuilder$Field;
+	public static synthetic fun maybeCreatePrimitiveField$default (Lmisk/web/MiskWebFormBuilder$Companion;Ljava/lang/Class;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
 }
 
 public final class misk/web/MiskWebFormBuilder$Field {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Lmisk/web/MiskWebFormBuilder$Field;
-	public static synthetic fun copy$default (Lmisk/web/MiskWebFormBuilder$Field;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;)Lmisk/web/MiskWebFormBuilder$Field;
+	public static synthetic fun copy$default (Lmisk/web/MiskWebFormBuilder$Field;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnnotations ()Ljava/util/List;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getRepeated ()Z
 	public final fun getType ()Ljava/lang/String;
