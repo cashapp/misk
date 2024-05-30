@@ -10,16 +10,28 @@ import kotlinx.html.visit
  *
  * Follows the spec from Hotwire docs: https://turbo.hotwired.dev/handbook/frames
  */
-class TurboFrame(id: String, consumer: TagConsumer<*>) : HTMLTag(
+class TurboFrame(
+  id: String,
+  src: String? = null,
+  lazy: Boolean = false,
+  consumer: TagConsumer<*>
+) : HTMLTag(
   tagName = "turbo-frame",
   consumer = consumer,
-  initialAttributes = mapOf(
-    "id" to id
-  ),
   inlineTag = true,
-  emptyTag = false
+  emptyTag = false,
+  initialAttributes = mapOf(
+    "id" to id,
+    "src" to src.orEmpty(),
+    "loading" to (if (lazy) "lazy" else ""),
+  ),
 ), HtmlInlineTag
 
-fun TagConsumer<*>.turbo_frame(id: String, block: TurboFrame.() -> Unit = {}) {
-  TurboFrame(id, this).visit(block)
+fun TagConsumer<*>.turbo_frame(
+  id: String,
+  src: String? = null,
+  lazy: Boolean = false,
+  block: TurboFrame.() -> Unit = {}
+) {
+  TurboFrame(id, src, lazy, this).visit(block)
 }
