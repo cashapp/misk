@@ -102,7 +102,7 @@ class FakeJobQueue @Inject constructor(
     throwIfQueuedFailure(queueName)
     val id = tokenGenerator.generate("fakeJobQueue")
     val job =
-      FakeJob(queueName, id, idempotenceKey, body, attributes, clock.instant(), deliveryDelay, clock)
+      FakeJob(queueName, id, idempotenceKey, body, attributes, clock.instant(), deliveryDelay)
     jobQueues.getOrPut(queueName, ::PriorityBlockingQueue).add(job)
   }
 
@@ -279,7 +279,6 @@ data class FakeJob(
   override val attributes: Map<String, String>,
   val enqueuedAt: Instant,
   var deliveryDelay: Duration? = null,
-  private val clock: Clock,
 ) : Job, Comparable<FakeJob> {
   val deliverAt: Instant
     get() = when (deliveryDelay) {
