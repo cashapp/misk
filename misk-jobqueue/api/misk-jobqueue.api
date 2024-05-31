@@ -7,8 +7,8 @@ public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/J
 	public static final field Companion Lmisk/jobqueue/FakeJob$Companion;
 	public static final field MAX_DELAY_DURATION J
 	public static final field MIN_DElAY_DURATION J
-	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;)V
-	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)V
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun acknowledge ()V
 	public synthetic fun compareTo (Ljava/lang/Object;)I
 	public fun compareTo (Lmisk/jobqueue/FakeJob;)I
@@ -19,8 +19,8 @@ public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/J
 	public final fun component5 ()Ljava/util/Map;
 	public final fun component6 ()Ljava/time/Instant;
 	public final fun component7 ()Ljava/time/Duration;
-	public final fun copy (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;)Lmisk/jobqueue/FakeJob;
-	public static synthetic fun copy$default (Lmisk/jobqueue/FakeJob;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;ILjava/lang/Object;)Lmisk/jobqueue/FakeJob;
+	public final fun copy (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)Lmisk/jobqueue/FakeJob;
+	public static synthetic fun copy$default (Lmisk/jobqueue/FakeJob;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILjava/lang/Object;)Lmisk/jobqueue/FakeJob;
 	public fun deadLetter ()V
 	public fun delayWithBackoff ()V
 	public fun equals (Ljava/lang/Object;)Z

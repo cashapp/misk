@@ -533,7 +533,7 @@ internal class FakeJobQueueTest {
     // Process an unknown job.
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
     val unknownJob =
-      FakeJob(GREEN_QUEUE, "unknown", "idempotenceKey", "body", mapOf(), fakeClock.instant(), clock = fakeClock)
+      FakeJob(GREEN_QUEUE, "unknown", "idempotenceKey", "body", mapOf(), fakeClock.instant())
     assertThat(fakeJobQueue.handleJob(unknownJob)).isFalse()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).isEmpty()
 
