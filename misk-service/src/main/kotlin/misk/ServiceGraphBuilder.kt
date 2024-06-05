@@ -15,7 +15,7 @@ internal class ServiceGraphBuilder {
   private val serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
   private val serviceNames = mutableMapOf<Key<*>, String>()
 
-  // A map of downstream services -> their upstreams.
+  /** A map of downstream services -> their upstreams. */
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
 
   /**
