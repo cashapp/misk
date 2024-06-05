@@ -53,7 +53,7 @@ class ServiceManagerModule : KAbstractModule() {
       if (!Scopes.isSingleton(injector.getBinding(entry.key))) {
         invalidServices += entry.key.typeLiteral.type.typeName
       }
-      builder.addService(entry.key, injector.getProvider(entry.key))
+      builder.addService(entry.key, entry.key.typeLiteral.toString(), injector.getProvider(entry.key))
     }
     for (edge in dependencies) {
       builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
@@ -76,6 +76,7 @@ class ServiceManagerModule : KAbstractModule() {
     }
 
     val serviceManager = builder.build()
+    log.info { "Starting misk services. Service dependency graph:\n$builder" }
     listeners.forEach { serviceManager.addListener(it, directExecutor()) }
     return serviceManager
   }

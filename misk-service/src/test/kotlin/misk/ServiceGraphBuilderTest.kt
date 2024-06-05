@@ -16,6 +16,8 @@ class ServiceGraphBuilderTest {
   private val keyC = key("Service C")
   private val keyD = key("Service D")
   private val keyE = key("Service E")
+  private val keyF = key("Service F")
+  private val keyG = key("Service G")
   private val unregistered = key("Unregistered Service")
   private val enhancementA = key("Enhancement A")
 
@@ -366,6 +368,36 @@ class ServiceGraphBuilderTest {
         |stopping Service D
         |stopping Service A
         |""".trimMargin()
+    )
+  }
+
+  @Test
+  fun canPrettyPrintTheGraphForDebugging() {
+    val graph = ServiceGraphBuilder().apply {
+      addService(keyA, AppendingService(StringBuilder(), keyA.name))
+      addService(keyB, AppendingService(StringBuilder(), keyB.name))
+      addService(keyC, AppendingService(StringBuilder(), keyC.name))
+      addService(keyD, AppendingService(StringBuilder(), keyD.name))
+      addService(keyE, AppendingService(StringBuilder(), keyE.name))
+      addService(keyF, AppendingService(StringBuilder(), keyF.name))
+      addService(keyG, AppendingService(StringBuilder(), keyG.name))
+      addDependency(keyA, keyB)
+      addDependency(keyB, keyC)
+      addDependency(keyB, keyD)
+      addDependency(keyD, keyE)
+      addDependency(keyA, keyF)
+    }.toString()
+
+    assertThat(graph).isEqualTo(
+      """
+      |@com.google.inject.name.Named("Service A") misk.ServiceGraphBuilderTest.AppendingService
+      |    |__ @com.google.inject.name.Named("Service B") misk.ServiceGraphBuilderTest.AppendingService
+      |    |   |__ @com.google.inject.name.Named("Service C") misk.ServiceGraphBuilderTest.AppendingService
+      |    |    \__ @com.google.inject.name.Named("Service D") misk.ServiceGraphBuilderTest.AppendingService
+      |    |        \__ @com.google.inject.name.Named("Service E") misk.ServiceGraphBuilderTest.AppendingService
+      |     \__ @com.google.inject.name.Named("Service F") misk.ServiceGraphBuilderTest.AppendingService
+      |@com.google.inject.name.Named("Service G") misk.ServiceGraphBuilderTest.AppendingService
+      |""".trimMargin()
     )
   }
 
