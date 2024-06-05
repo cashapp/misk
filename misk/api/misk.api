@@ -308,10 +308,12 @@ public abstract class misk/MiskCommand : java/lang/Runnable {
 
 public final class misk/MiskCommonServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Lmisk/ServiceManagerConfig;)V
 }
 
 public final class misk/MiskRealServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Lmisk/ServiceManagerConfig;)V
 }
 
 public final class misk/client/BackwardsCompatibleClientsConfig {
