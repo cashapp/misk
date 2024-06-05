@@ -17,7 +17,7 @@ import jakarta.inject.Singleton
 import misk.moshi.adapter
 
 @Singleton
-internal class QueueResolver @Inject internal constructor(
+class QueueResolver @Inject internal constructor(
   private val currentRegion: AwsRegion,
   private val currentAccount: AwsAccountId,
   private val defaultSQS: AmazonSQS,
