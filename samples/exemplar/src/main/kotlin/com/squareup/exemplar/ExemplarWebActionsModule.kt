@@ -1,5 +1,6 @@
 package com.squareup.exemplar
 
+import com.squareup.exemplar.actions.CoroutineAction
 import com.squareup.exemplar.actions.DownloadAFileWebAction
 import com.squareup.exemplar.actions.EchoFormAction
 import com.squareup.exemplar.actions.HelloWebAction
@@ -11,6 +12,7 @@ import misk.web.WebActionModule
 class ExemplarWebActionsModule : KAbstractModule() {
   override fun configure() {
     install(WebActionModule.create<HelloWebAction>())
+    install(WebActionModule.create<CoroutineAction>())
     install(WebActionModule.create<HelloWebPostAction>())
     install(WebActionModule.create<EchoFormAction>())
     install(WebActionModule.create<HelloWebProtoAction>())
