@@ -15,6 +15,7 @@ dependencies {
   api(project(":misk-inject"))
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinStdLibJdk8)
+  implementation(project(":wisp:wisp-config"))
   implementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)

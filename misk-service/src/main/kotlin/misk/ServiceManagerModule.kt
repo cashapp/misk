@@ -11,7 +11,10 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import wisp.logging.getLogger
 
-class ServiceManagerModule : KAbstractModule() {
+class ServiceManagerModule(private val serviceManagerConfig: ServiceManagerConfig) : KAbstractModule() {
+
+  constructor(): this(ServiceManagerConfig())
+
   companion object {
     private val log = getLogger<ServiceManagerModule>()
   }
@@ -73,7 +76,9 @@ class ServiceManagerModule : KAbstractModule() {
     }
 
     val serviceManager = builder.build()
-    log.info { "Starting misk services. Service dependency graph:\n$builder" }
+    if (serviceManagerConfig.debug_service_graph) {
+      log.info { "Service dependency graph:\n$builder" }
+    }
     listeners.forEach { serviceManager.addListener(it, directExecutor()) }
     return serviceManager
   }

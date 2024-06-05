@@ -21,7 +21,11 @@ import misk.tokens.TokenGeneratorModule
  * with [MiskTestingServiceModule]. Only bindings that are not suitable for a unit testing
  * environment belong here.
  */
-class MiskRealServiceModule : KAbstractModule() {
+class MiskRealServiceModule(
+  private val serviceManagerConfig: ServiceManagerConfig,
+) : KAbstractModule() {
+  constructor(): this(ServiceManagerConfig())
+
   override fun configure() {
     install(ResourceLoaderModule())
     install(RealEnvVarModule())
@@ -29,20 +33,23 @@ class MiskRealServiceModule : KAbstractModule() {
     install(SleeperModule())
     install(TickerModule())
     install(TokenGeneratorModule())
-    install(MiskCommonServiceModule())
+    install(MiskCommonServiceModule(serviceManagerConfig))
   }
 }
 
 /**
  * This module has common bindings for all environments (both real and testing).
  */
-class MiskCommonServiceModule : KAbstractModule() {
+class MiskCommonServiceModule(
+  private val serviceManagerConfig: ServiceManagerConfig,
+) : KAbstractModule() {
+  constructor(): this(ServiceManagerConfig())
   override fun configure() {
     binder().disableCircularProxies()
     binder().requireExactBindingAnnotations()
     install(MdcModule())
     install(ExecutorsModule())
-    install(ServiceManagerModule())
+    install(ServiceManagerModule(serviceManagerConfig))
     install(PrometheusMetricsClientModule())
     install(MoshiModule(useWireToRead = true, useWireToWrite = true))
     install(JvmManagementFactoryModule())
