@@ -72,7 +72,7 @@ internal class ServiceGraphBuilder {
    */
   private fun linkDependencies() {
     for ((key, service) in serviceMap) {
-      val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
+      val dependencies = dependencyMap[key].map { serviceMap[it]!! }
       service.addDependentServices(*dependencies.toTypedArray())
     }
   }

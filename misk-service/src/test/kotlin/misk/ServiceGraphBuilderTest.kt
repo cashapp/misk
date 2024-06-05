@@ -318,16 +318,9 @@ class ServiceGraphBuilderTest {
     val builder = newBuilderWithServices(target, listOf(keyA))
     val serviceManager = builder.build()
     serviceManager.startAsync()
-    val badEnhancer = CoordinatedService(
-      Provider<Service> {
-        AppendingService(target, "bad enhancement")
-      }
-    )
-    val badDependency = CoordinatedService(
-      Provider<Service> {
-        AppendingService(target, "bad dependency")
-      }
-    )
+    val badDependency = CoordinatedService {
+      AppendingService(target, "bad dependency")
+    }
 
     serviceManager.awaitHealthy()
 

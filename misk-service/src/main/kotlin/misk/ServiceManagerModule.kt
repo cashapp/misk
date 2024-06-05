@@ -6,11 +6,10 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Injector
 import com.google.inject.Provides
 import com.google.inject.Scopes
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import wisp.logging.getLogger
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
 class ServiceManagerModule : KAbstractModule() {
   companion object {
@@ -21,15 +20,13 @@ class ServiceManagerModule : KAbstractModule() {
     newMultibinder<Service>()
     newMultibinder<ServiceManager.Listener>()
 
-    multibind<ServiceManager.Listener>().toProvider(
-      Provider<ServiceManager.Listener> {
-        object : ServiceManager.Listener() {
-          override fun failure(service: Service) {
-            log.error(service.failureCause()) { "Service $service failed" }
-          }
+    multibind<ServiceManager.Listener>().toProvider {
+      object : ServiceManager.Listener() {
+        override fun failure(service: Service) {
+          log.error(service.failureCause()) { "Service $service failed" }
         }
       }
-    ).asSingleton()
+    }.asSingleton()
     newMultibinder<ServiceEntry>()
     newMultibinder<DependencyEdge>()
     newMultibinder<EnhancementEdge>()
