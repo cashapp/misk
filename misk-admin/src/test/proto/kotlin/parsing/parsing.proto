@@ -1,10 +1,10 @@
 syntax = "proto2";
 
-package test;
+package test.kt;
 
-option java_package = "com.squareup.protos.test.parsing";
+option java_package = "com.squareup.protos.test.kt.parsing";
 
-import "customoption.proto";
+import "kotlin/customoption.proto";
 
 message Robot {
   optional int32 robot_id = 1;

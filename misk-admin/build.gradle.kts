@@ -55,6 +55,12 @@ wire {
   sourcePath {
     srcDir("src/test/proto/")
   }
+  kotlin {
+    out = generatedSourceDir
+    includes = listOf(
+      "test.kt.*",
+    )
+  }
   java {
     out = generatedSourceDir
   }

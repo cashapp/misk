@@ -92,8 +92,13 @@ class MiskWebFormBuilder {
         handleField(TypeLiteral.get(listType), fieldName, fields, stack, true, annotations)
       }
       fieldClass == Map::class.java -> {
-        // TODO: Support maps
-        fields.add(Field(fieldName, fieldClass.canonicalName!!, repeated, annotations.toStrings()))
+        val fieldClassArguments = (fieldType.type as ParameterizedType).actualTypeArguments
+        check(fieldClassArguments.size == 2) {
+          "Encountered Wire-generated Map without 2 type parameters: $fieldType"
+        }
+        // key type can never be a Message so we skip it
+        val valueType = fieldClassArguments[1]
+        handleField(TypeLiteral.get(valueType), fieldName, fields, stack, true, annotations)
       }
       else -> {
         fields.add(Field(fieldName, fieldClass.canonicalName!!, repeated, annotations.toStrings()))
