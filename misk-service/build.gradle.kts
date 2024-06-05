@@ -13,9 +13,9 @@ dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
   api(project(":misk-inject"))
+  api(project(":wisp:wisp-config"))
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinStdLibJdk8)
-  implementation(project(":wisp:wisp-config"))
   implementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)
