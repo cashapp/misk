@@ -12,7 +12,10 @@ import com.google.inject.Provider
  * services are ready.
  */
 internal class ServiceGraphBuilder {
-  private var serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
+  private val serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
+  private val serviceNames = mutableMapOf<Key<*>, String>()
+
+  /** A map of downstream services -> their upstreams. */
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
 
   /**
@@ -22,14 +25,15 @@ internal class ServiceGraphBuilder {
    * Keys must be unique. If a key is reused, then the original key-service pair will be replaced.
    */
   fun addService(key: Key<*>, service: Service) {
-    addService(key) { service }
+    addService(key, service::class.qualifiedName) { service }
   }
 
-  fun addService(key: Key<*>, serviceProvider: Provider<out Service>) {
+  fun addService(key: Key<*>, serviceName: String?, serviceProvider: Provider<out Service>) {
     check(serviceMap[key] == null) {
       "Service $key cannot be registered more than once"
     }
     serviceMap[key] = CoordinatedService(serviceProvider)
+    serviceNames[key] = serviceName ?: "Anonymous Service(${key.typeLiteral.type.typeName})"
   }
 
   /**
@@ -68,7 +72,7 @@ internal class ServiceGraphBuilder {
    */
   private fun linkDependencies() {
     for ((key, service) in serviceMap) {
-      val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
+      val dependencies = dependencyMap[key].map { serviceMap[it]!! }
       service.addDependentServices(*dependencies.toTypedArray())
     }
   }
@@ -99,5 +103,54 @@ internal class ServiceGraphBuilder {
         "$stringBuilder requires $service but no such service was registered with the builder"
       }
     }
+  }
+
+  override fun toString(): String = buildString {
+    val visited = mutableSetOf<Key<*>>()
+    val allServices = serviceMap.keys
+    val serviceRoots = allServices.filterNot { it in dependencyMap.keys() }
+
+    for (root in serviceRoots) {
+      if (root !in visited) {
+        depthFirst(serviceKey = root, visited = visited, prefix = "", isLast = true, isRoot = true)
+      }
+    }
+  }
+
+  private fun StringBuilder.depthFirst(
+    serviceKey: Key<*>,
+    visited: MutableSet<Key<*>>,
+    prefix: String,
+    isLast: Boolean,
+    isRoot: Boolean
+  ) {
+    if (serviceKey in visited) return
+
+    if (!isRoot) {
+      append(prefix)
+      append(if (isLast) " \\__ " else "|__ ")
+    }
+    append(serviceNameOf(serviceKey))
+    append("\n")
+    visited.add(serviceKey)
+
+    val downstreamServices = dependencyMap.asMap().filter { it.value.contains(serviceKey) }.keys.toList()
+    for ((index, downstreamService) in downstreamServices.withIndex()) {
+      val newPrefix = prefix + if (isLast) "    " else "|   "
+      depthFirst(
+        serviceKey = downstreamService,
+        visited = visited,
+        prefix = newPrefix,
+        isLast = (index == downstreamServices.size - 1),
+        isRoot = false
+      )
+    }
+  }
+
+  private fun serviceNameOf(key: Key<*>): String = buildString {
+    if (key.annotation != null) {
+      append("${key.annotation} ")
+    }
+    append(serviceNames[key])
   }
 }

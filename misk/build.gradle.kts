@@ -38,6 +38,7 @@ dependencies {
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
+  api(project(":misk-service"))
   implementation(libs.jCommander)
   implementation(libs.jettyAlpnServer)
   implementation(libs.jettyHttp)
@@ -69,7 +70,6 @@ dependencies {
   implementation(project(":wisp:wisp-tracing"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-proto"))
-  implementation(project(":misk-service"))
   runtimeOnly(libs.jettyAlpnServerJava)
 
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
