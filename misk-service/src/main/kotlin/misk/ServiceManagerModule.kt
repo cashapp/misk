@@ -6,13 +6,15 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Injector
 import com.google.inject.Provides
 import com.google.inject.Scopes
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import wisp.logging.getLogger
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
-class ServiceManagerModule : KAbstractModule() {
+class ServiceManagerModule @JvmOverloads constructor(
+  private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig()
+) : KAbstractModule() {
+
   companion object {
     private val log = getLogger<ServiceManagerModule>()
   }
@@ -21,15 +23,13 @@ class ServiceManagerModule : KAbstractModule() {
     newMultibinder<Service>()
     newMultibinder<ServiceManager.Listener>()
 
-    multibind<ServiceManager.Listener>().toProvider(
-      Provider<ServiceManager.Listener> {
-        object : ServiceManager.Listener() {
-          override fun failure(service: Service) {
-            log.error(service.failureCause()) { "Service $service failed" }
-          }
+    multibind<ServiceManager.Listener>().toProvider {
+      object : ServiceManager.Listener() {
+        override fun failure(service: Service) {
+          log.error(service.failureCause()) { "Service $service failed" }
         }
       }
-    ).asSingleton()
+    }.asSingleton()
     newMultibinder<ServiceEntry>()
     newMultibinder<DependencyEdge>()
     newMultibinder<EnhancementEdge>()
@@ -53,7 +53,7 @@ class ServiceManagerModule : KAbstractModule() {
       if (!Scopes.isSingleton(injector.getBinding(entry.key))) {
         invalidServices += entry.key.typeLiteral.type.typeName
       }
-      builder.addService(entry.key, injector.getProvider(entry.key))
+      builder.addService(entry.key, entry.key.typeLiteral.toString(), injector.getProvider(entry.key))
     }
     for (edge in dependencies) {
       builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
@@ -76,6 +76,9 @@ class ServiceManagerModule : KAbstractModule() {
     }
 
     val serviceManager = builder.build()
+    if (serviceManagerConfig.debug_service_graph) {
+      log.info { "Service dependency graph:\n$builder" }
+    }
     listeners.forEach { serviceManager.addListener(it, directExecutor()) }
     return serviceManager
   }

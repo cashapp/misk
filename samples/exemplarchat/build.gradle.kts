@@ -20,6 +20,7 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-redis"))
+  implementation(project(":misk-service"))
   implementation(libs.guice)
   implementation(libs.jedis)
   implementation(libs.logbackClassic)
