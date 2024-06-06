@@ -2120,7 +2120,7 @@ public abstract interface class misk/web/mdc/LogContextProvider {
 }
 
 public final class misk/web/metadata/webaction/WebActionMetadata {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KFunction;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lokhttp3/MediaType;Ljava/util/List;Ljava/util/List;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lmisk/web/PathPattern;Ljava/util/List;Ljava/util/List;Lmisk/web/DispatchMechanism;Ljava/util/Set;Ljava/util/Set;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()Ljava/lang/String;
@@ -2128,13 +2128,14 @@ public final class misk/web/metadata/webaction/WebActionMetadata {
 	public final fun component12 ()Ljava/lang/String;
 	public final fun component13 ()Ljava/util/Map;
 	public final fun component14 ()Ljava/util/Map;
-	public final fun component15 ()Ljava/lang/String;
-	public final fun component16 ()Ljava/util/List;
+	public final fun component15 ()Ljava/util/Map;
+	public final fun component16 ()Ljava/lang/String;
 	public final fun component17 ()Ljava/util/List;
-	public final fun component18 ()Ljava/lang/String;
-	public final fun component19 ()Ljava/util/Set;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component20 ()Ljava/util/Set;
+	public final fun component21 ()Ljava/util/Set;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/util/List;
@@ -2142,8 +2143,8 @@ public final class misk/web/metadata/webaction/WebActionMetadata {
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/util/List;
 	public final fun component9 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)Lmisk/web/metadata/webaction/WebActionMetadata;
-	public static synthetic fun copy$default (Lmisk/web/metadata/webaction/WebActionMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)Lmisk/web/metadata/webaction/WebActionMetadata;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)Lmisk/web/metadata/webaction/WebActionMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/webaction/WebActionMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)Lmisk/web/metadata/webaction/WebActionMetadata;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowedCapabilities ()Ljava/util/Set;
 	public final fun getAllowedServices ()Ljava/util/Set;
@@ -2164,6 +2165,7 @@ public final class misk/web/metadata/webaction/WebActionMetadata {
 	public final fun getResponseType ()Ljava/lang/String;
 	public final fun getResponseTypes ()Ljava/util/Map;
 	public final fun getReturnType ()Ljava/lang/String;
+	public final fun getReturnTypes ()Ljava/util/Map;
 	public final fun getTypes ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
