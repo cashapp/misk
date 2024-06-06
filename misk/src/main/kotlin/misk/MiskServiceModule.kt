@@ -21,11 +21,9 @@ import misk.tokens.TokenGeneratorModule
  * with [MiskTestingServiceModule]. Only bindings that are not suitable for a unit testing
  * environment belong here.
  */
-class MiskRealServiceModule(
-  private val serviceManagerConfig: ServiceManagerConfig,
+class MiskRealServiceModule @JvmOverloads constructor(
+  private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig(),
 ) : KAbstractModule() {
-  constructor(): this(ServiceManagerConfig())
-
   override fun configure() {
     install(ResourceLoaderModule())
     install(RealEnvVarModule())
@@ -40,10 +38,9 @@ class MiskRealServiceModule(
 /**
  * This module has common bindings for all environments (both real and testing).
  */
-class MiskCommonServiceModule(
-  private val serviceManagerConfig: ServiceManagerConfig,
+class MiskCommonServiceModule @JvmOverloads constructor(
+  private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig(),
 ) : KAbstractModule() {
-  constructor(): this(ServiceManagerConfig())
   override fun configure() {
     binder().disableCircularProxies()
     binder().requireExactBindingAnnotations()

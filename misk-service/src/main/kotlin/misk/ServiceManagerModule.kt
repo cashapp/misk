@@ -11,9 +11,9 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import wisp.logging.getLogger
 
-class ServiceManagerModule(private val serviceManagerConfig: ServiceManagerConfig) : KAbstractModule() {
-
-  constructor(): this(ServiceManagerConfig())
+class ServiceManagerModule @JvmOverloads constructor(
+  private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig()
+) : KAbstractModule() {
 
   companion object {
     private val log = getLogger<ServiceManagerModule>()
