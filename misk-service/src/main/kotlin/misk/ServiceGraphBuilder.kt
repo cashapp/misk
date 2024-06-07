@@ -106,40 +106,32 @@ internal class ServiceGraphBuilder {
   }
 
   override fun toString(): String = buildString {
-    val visited = mutableSetOf<Key<*>>()
     val allServices = serviceMap.keys
     val serviceRoots = allServices.filterNot { it in dependencyMap.keys() }
-
     for (root in serviceRoots) {
-      if (root !in visited) {
-        depthFirst(serviceKey = root, visited = visited, prefix = "", isLast = true, isRoot = true)
-      }
+      depthFirst(serviceKey = root, prefix = "", isLast = true, isRoot = true)
     }
   }
 
   private fun StringBuilder.depthFirst(
     serviceKey: Key<*>,
-    visited: MutableSet<Key<*>>,
     prefix: String,
     isLast: Boolean,
     isRoot: Boolean
   ) {
-    if (serviceKey in visited) return
-
     if (!isRoot) {
       append(prefix)
-      append(if (isLast) " \\__ " else "|__ ")
+      append(if (isLast) "\\__ " else "|__ ")
     }
     append(serviceNameOf(serviceKey))
     append("\n")
-    visited.add(serviceKey)
 
-    val downstreamServices = dependencyMap.asMap().filter { it.value.contains(serviceKey) }.keys.toList()
+    val downstreamServices =
+      dependencyMap.asMap().filter { it.value.contains(serviceKey) }.keys.toList()
     for ((index, downstreamService) in downstreamServices.withIndex()) {
       val newPrefix = prefix + if (isLast) "    " else "|   "
       depthFirst(
         serviceKey = downstreamService,
-        visited = visited,
         prefix = newPrefix,
         isLast = (index == downstreamServices.size - 1),
         isRoot = false
