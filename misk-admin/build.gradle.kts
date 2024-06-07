@@ -35,6 +35,7 @@ dependencies {
   testImplementation(libs.wireRuntime)
   testImplementation(project(":misk-api"))
   testImplementation(project(":misk-action-scopes"))
+  testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
 }
 
