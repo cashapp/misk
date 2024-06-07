@@ -108,6 +108,7 @@ apiValidation {
     "exemplar",
     "exemplarchat",
     "detektive",
+    "misk-schema-migrator-gradle-plugin"
   )
   ignoredProjects.addAll(subprojects.map { it.name }.filter { it in ignorable })
   additionalSourceSets.add("testFixtures")
