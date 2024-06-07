@@ -386,10 +386,33 @@ class ServiceGraphBuilderTest {
       |@com.google.inject.name.Named("Service A") misk.ServiceGraphBuilderTest.AppendingService
       |    |__ @com.google.inject.name.Named("Service B") misk.ServiceGraphBuilderTest.AppendingService
       |    |   |__ @com.google.inject.name.Named("Service C") misk.ServiceGraphBuilderTest.AppendingService
-      |    |    \__ @com.google.inject.name.Named("Service D") misk.ServiceGraphBuilderTest.AppendingService
-      |    |        \__ @com.google.inject.name.Named("Service E") misk.ServiceGraphBuilderTest.AppendingService
-      |     \__ @com.google.inject.name.Named("Service F") misk.ServiceGraphBuilderTest.AppendingService
+      |    |   \__ @com.google.inject.name.Named("Service D") misk.ServiceGraphBuilderTest.AppendingService
+      |    |       \__ @com.google.inject.name.Named("Service E") misk.ServiceGraphBuilderTest.AppendingService
+      |    \__ @com.google.inject.name.Named("Service F") misk.ServiceGraphBuilderTest.AppendingService
       |@com.google.inject.name.Named("Service G") misk.ServiceGraphBuilderTest.AppendingService
+      |""".trimMargin()
+    )
+  }
+
+  @Test fun `debug graph shows all dependencies, including repeated subtrees`() {
+    val graph = ServiceGraphBuilder().apply {
+      addService(keyA, AppendingService(StringBuilder(), keyA.name))
+      addService(keyB, AppendingService(StringBuilder(), keyB.name))
+      addService(keyC, AppendingService(StringBuilder(), keyC.name))
+      addService(keyD, AppendingService(StringBuilder(), keyD.name))
+      addDependency(keyA, keyB)
+      addDependency(keyA, keyD)
+      addDependency(keyB, keyC)
+      addDependency(keyD, keyC)
+    }.toString()
+
+    assertThat(graph).isEqualTo(
+      """
+      |@com.google.inject.name.Named("Service A") misk.ServiceGraphBuilderTest.AppendingService
+      |    |__ @com.google.inject.name.Named("Service B") misk.ServiceGraphBuilderTest.AppendingService
+      |    |   \__ @com.google.inject.name.Named("Service C") misk.ServiceGraphBuilderTest.AppendingService
+      |    \__ @com.google.inject.name.Named("Service D") misk.ServiceGraphBuilderTest.AppendingService
+      |        \__ @com.google.inject.name.Named("Service C") misk.ServiceGraphBuilderTest.AppendingService
       |""".trimMargin()
     )
   }
