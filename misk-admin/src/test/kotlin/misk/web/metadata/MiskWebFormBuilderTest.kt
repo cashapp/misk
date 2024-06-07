@@ -54,7 +54,10 @@ internal class MiskWebFormBuilderTest {
       )
     )
 
-    // Check map value types
+    // Check map value types are included
+    assertThat(warehouseType.fields).contains(Field("robots", "com.squareup.protos.test.parsing.Robot",
+      true, listOf("@com.squareup.protos.test.SemanticDataTypeOption({ROBOTS})")))
+    // Check that we recurse into value types in Maps
     assertThat(robotType.fields).contains(Field("robot_token", "String", false,
       listOf("@com.squareup.protos.test.SemanticDataTypeOption({ROBOT_TOKEN})")))
 
@@ -112,7 +115,10 @@ internal class MiskWebFormBuilderTest {
       )
     )
 
-    // Check map value types
+    // Check map value types are included
+    assertThat(warehouseType.fields).contains(Field("robots", "com.squareup.protos.test.kt.parsing.Robot",
+      true, listOf("@com.squareup.protos.test.kt.SemanticDataTypeOption({ROBOTS})")))
+    // Check that we recurse into value types in Maps
     assertThat(robotType.fields).contains(Field("robot_token", "String", false,
       listOf("@com.squareup.protos.test.kt.SemanticDataTypeOption({ROBOT_TOKEN})")))
 

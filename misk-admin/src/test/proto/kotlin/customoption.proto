@@ -16,6 +16,7 @@ enum Type {
   STATUS = 8;
   WAREHOUSE_TOKEN = 9;
   ROBOT_TOKEN = 10;
+  ROBOTS = 11;
 }
 
 extend google.protobuf.FieldOptions {

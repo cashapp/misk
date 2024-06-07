@@ -8,6 +8,7 @@ public final class com/squareup/protos/test/Type : java/lang/Enum, com/squareup/
 	public static final field CARD_TOKEN Lcom/squareup/protos/test/Type;
 	public static final field NOTE_TYPE_1 Lcom/squareup/protos/test/Type;
 	public static final field NOTE_TYPE_2 Lcom/squareup/protos/test/Type;
+	public static final field ROBOTS Lcom/squareup/protos/test/Type;
 	public static final field ROBOT_TOKEN Lcom/squareup/protos/test/Type;
 	public static final field SHIPMENT_ID Lcom/squareup/protos/test/Type;
 	public static final field SHIPMENT_TOKEN Lcom/squareup/protos/test/Type;
@@ -73,6 +74,7 @@ public final class com/squareup/protos/test/kt/Type : java/lang/Enum, com/square
 	public static final field Companion Lcom/squareup/protos/test/kt/Type$Companion;
 	public static final field NOTE_TYPE_1 Lcom/squareup/protos/test/kt/Type;
 	public static final field NOTE_TYPE_2 Lcom/squareup/protos/test/kt/Type;
+	public static final field ROBOTS Lcom/squareup/protos/test/kt/Type;
 	public static final field ROBOT_TOKEN Lcom/squareup/protos/test/kt/Type;
 	public static final field SHIPMENT_ID Lcom/squareup/protos/test/kt/Type;
 	public static final field SHIPMENT_TOKEN Lcom/squareup/protos/test/kt/Type;
