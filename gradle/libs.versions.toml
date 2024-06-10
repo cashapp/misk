@@ -199,3 +199,7 @@ wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version = 
 wireReflector = { module = "com.squareup.wire:wire-reflector", version = "4.9.3" }
 wireRuntime = { module = "com.squareup.wire:wire-runtime", version = "4.9.3" }
 wireSchema = { module = "com.squareup.wire:wire-schema", version = "4.9.3" }
+
+[plugins]
+dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
+binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompatibilityPlugin" }

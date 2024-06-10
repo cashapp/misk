@@ -31,8 +31,8 @@ buildscript {
 }
 
 plugins {
-  id("com.autonomousapps.dependency-analysis") version libs.versions.dependencyAnalysisPlugin.get()
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version libs.versions.kotlinBinaryCompatibilityPlugin.get()
+  alias(libs.plugins.dependencyAnalysis)
+  alias(libs.plugins.binaryCompatibilityValidator)
 }
 
 apply(plugin = "com.vanniktech.maven.publish.base")
