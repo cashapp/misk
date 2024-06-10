@@ -129,22 +129,27 @@ class ResourceLoaderTest {
 
     val resource3 = "filesystem:$tempRoot/data3.txt"
 
+    val resource4 = "filesystem:$tempRoot/data4/data4.txt"
+    File(tempRoot, "data4/").mkdirs()
+    File(tempRoot, "data4/data4.txt").sink().buffer().use {
+      it.writeUtf8("baz")
+    }
+
     assertThat(resourceLoader.exists(resource1)).isTrue()
     assertThat(resourceLoader.exists(resource2)).isTrue()
     assertThat(resourceLoader.exists(resource3)).isFalse()
+    assertThat(resourceLoader.exists(resource4)).isTrue()
 
     resourceLoader.open(resource1)!!.use {
       assertThat(it.readUtf8()).isEqualTo("foo")
     }
     assertThat(resourceLoader.utf8(resource2)).isEqualTo("bar")
 
-    assertFailsWith<UnsupportedOperationException> {
-      resourceLoader.list("filesystem:$tempRoot")
-    }
+    val topLevelResources = resourceLoader.list("filesystem:$tempRoot")
+    assertThat(topLevelResources).containsExactlyInAnyOrder(resource1, resource2, "filesystem:$tempRoot/data4")
 
-    assertFailsWith<UnsupportedOperationException> {
-      resourceLoader.walk("filesystem:$tempRoot")
-    }
+    val allResources = resourceLoader.walk("filesystem:$tempRoot")
+    assertThat(allResources).containsExactlyInAnyOrder(resource1, resource2, resource4)
   }
 
   @Test
