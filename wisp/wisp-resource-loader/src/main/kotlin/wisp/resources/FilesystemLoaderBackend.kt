@@ -51,7 +51,7 @@ object FilesystemLoaderBackend : ResourceLoader.Backend() {
     override fun exists(path: String) = File(path).exists()
 
     override fun list(path: String): List<String> {
-      return File(path).listFiles()?.map { "$path/${it.name}" }?.toList() ?: emptyList()
+      return File(path).listFiles()?.map { "$path/${it.name}" }?.toList().orEmpty()
     }
 
     /**

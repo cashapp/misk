@@ -9,12 +9,14 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.register
 
 class MiskSchemaMigratorPlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val extension = project.extensions.create("miskSchemaMigrator", MiskSchemaMigratorExtension::class.java)
+    val extension = create(project)
 
     project.tasks.register<SchemaMigratorTask>("migrateSchema") {
       database.set(extension.database)
@@ -22,6 +24,12 @@ class MiskSchemaMigratorPlugin : Plugin<Project> {
       username.set(extension.username)
       password.set(extension.password)
       migrationsDir.set(extension.migrationsDir)
+    }
+  }
+
+  internal companion object {
+    fun create(project: Project): MiskSchemaMigratorExtension {
+      return project.extensions.create("miskSchemaMigrator", MiskSchemaMigratorExtension::class.java)
     }
   }
 }
@@ -39,6 +47,7 @@ abstract class SchemaMigratorTask : DefaultTask() {
   @get:Input
   abstract val password: Property<String>
 
+  @get:PathSensitive(PathSensitivity.RELATIVE)
   @get:InputDirectory
   abstract val migrationsDir: DirectoryProperty
 

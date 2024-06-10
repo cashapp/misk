@@ -1,5 +1,6 @@
 package misk.gradle.schemamigrator
 
+import org.assertj.core.api.Assertions.assertThat
 import org.gradle.internal.impldep.com.zaxxer.hikari.HikariConfig
 import org.gradle.internal.impldep.com.zaxxer.hikari.HikariDataSource
 import org.gradle.testkit.runner.GradleRunner
@@ -35,14 +36,14 @@ class SchemaMigratorPluginTest {
       .withPluginClasspath()
       .build()
 
-    assertTrue(result.task(":migrateSchema")!!.outcome == TaskOutcome.SUCCESS)
+    assertThat(result.task(":migrateSchema")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
 
     datasource.connection.use { connection ->
       connection.createStatement().use { statement ->
         statement.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '${config.schema}' AND TABLE_NAME = 'people' AND COLUMN_NAME = 'nickname'")
         statement.resultSet.use { resultSet ->
           resultSet.next()
-          assertTrue(resultSet.getInt(1) == 1)
+          assertThat(resultSet.getInt(1)).isEqualTo(1)
         }
       }
     }

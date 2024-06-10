@@ -10,7 +10,7 @@ Flyway.
 
 ```
 plugins {
-  id("misk.schemamigratorgradleplugin")
+  id("misk.schemamigratorgradleplugin") version <<latest version>>
 }
 
 val dbConfig = mapOf(
@@ -28,7 +28,7 @@ miskSchemaMigrator {
 }
 
 // If you want to integrate with JOOQ
-// withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
+// tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
 //   dependsOn("migrateSchemas")
 // }
 ```

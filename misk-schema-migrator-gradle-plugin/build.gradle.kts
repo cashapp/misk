@@ -3,7 +3,6 @@ import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  `kotlin-dsl`
   `java-gradle-plugin`
   id("com.vanniktech.maven.publish.base")
   `java-test-fixtures`
