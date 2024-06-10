@@ -1,6 +1,10 @@
 [versions]
 dependencyAnalysisPlugin = "1.29.0"
+kotlin = "1.9.21"
 kotlinBinaryCompatibilityPlugin = "0.13.1"
+mavenPublish = "0.27.0"
+protobufPlugin = "0.9.3"
+wire = "4.9.3"
 
 [libraries]
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.11" }
@@ -112,23 +116,22 @@ jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.20" 
 jooq = { module = "org.jooq:jooq", version = "3.18.2" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.9.3" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.9.3" }
-junitGradlePlugin = { module = "org.junit.platform:junit-platform-gradle-plugin", version = "1.2.0" }
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.9.3" }
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version = "5.6.2" }
 kotestAssertionsShared = { module = "io.kotest:kotest-assertions-shared", version = "5.6.2" }
 kotestCommon = { module = "io.kotest:kotest-common", version = "5.6.2" }
 kotestFrameworkApi = { module = "io.kotest:kotest-framework-api", version = "5.6.2" }
 kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version = "5.6.2" }
-kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version = "1.9.21" }
-kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version = "1.9.21" }
-kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version = "1.9.21" }
-kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "1.9.21" }
+kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
+kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinLogging = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
-kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version = "1.9.21" }
-kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version = "1.8.21" }
+kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
+kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinRetry = { module = "com.michael-bull.kotlin-retry:kotlin-retry", version = "1.0.9" }
-kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version = "1.9.21" }
-kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version = "1.9.21" }
+kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.7.3" }
 kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.8.1" }
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
@@ -163,7 +166,7 @@ prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version = "0.
 prometheusHotspot = { module = "io.prometheus:simpleclient_hotspot" }
 prometheusHttpserver = { module = "io.prometheus:simpleclient_httpserver" }
 protoGoogleCommon = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.9.0" }
-protobufGradlePlugin = { module = "com.google.protobuf:protobuf-gradle-plugin", version = "0.9.3" }
+protobufGradlePlugin = { module = "com.google.protobuf:protobuf-gradle-plugin", version.ref = "protobufPlugin" }
 protobufJava = { module = "com.google.protobuf:protobuf-java", version = "3.21.7" }
 protoc = { module = "com.google.protobuf:protoc", version = "3.19.2" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version = "2.10.0" }
@@ -192,10 +195,24 @@ tink = { module = "com.google.crypto.tink:tink", version = "1.6.1" }
 tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.6.1" }
 tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.6.1" }
 tracingDatadog = { module = "com.datadoghq:dd-trace-api", version = "1.31.2" }
-wireBom = { module = "com.squareup.wire:wire-bom", version = "4.9.3" }
-wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version = "4.9.3" }
-wireGrpcClient = { module = "com.squareup.wire:wire-grpc-client", version = "4.9.3" }
-wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version = "4.9.3" }
-wireReflector = { module = "com.squareup.wire:wire-reflector", version = "4.9.3" }
-wireRuntime = { module = "com.squareup.wire:wire-runtime", version = "4.9.3" }
-wireSchema = { module = "com.squareup.wire:wire-schema", version = "4.9.3" }
+wireBom = { module = "com.squareup.wire:wire-bom", version.ref = "wire" }
+wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version.ref = "wire" }
+wireGrpcClient = { module = "com.squareup.wire:wire-grpc-client", version.ref = "wire" }
+wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version.ref = "wire" }
+wireReflector = { module = "com.squareup.wire:wire-reflector", version.ref = "wire" }
+wireRuntime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
+wireSchema = { module = "com.squareup.wire:wire-schema", version.ref = "wire" }
+
+[plugins]
+binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompatibilityPlugin" }
+dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
+flyway = { id = "org.flywaydb.flyway", version = "9.14.1" }
+jooq = { id = "nu.studer.jooq", version = "8.2" }
+kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen" }
+kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm" }
+mavenPublish = { id = "com.vanniktech.maven.publish" }
+mavenPublishBase = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublish" }
+protobuf = { id = "com.google.protobuf" }
+sqldelight = { id = "app.cash.sqldelight" }
+wire = { id = "com.squareup.wire" }

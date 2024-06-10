@@ -1,12 +1,37 @@
-plugins {
-  `gradle-enterprise`
+pluginManagement {
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+  }
 }
 
-gradleEnterprise {
-  buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
+plugins {
+  id("com.gradle.develocity") version "3.17.4"
+}
+
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    mavenCentral()
+    maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
   }
+}
+
+develocity {
+  buildScan {
+    publishing {
+      termsOfUseUrl = "https://gradle.com/terms-of-service"
+      termsOfUseAgree = "yes"
+    }
+  }
+}
+
+gradle.lifecycle.beforeProject {
+  group = when {
+    path.startsWith(":wisp") -> "app.cash.wisp"
+    else -> "com.squareup.misk"
+  }
+  version = findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
 }
 
 include(":detektive")

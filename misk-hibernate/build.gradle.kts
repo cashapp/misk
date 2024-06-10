@@ -1,25 +1,21 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  alias(libs.plugins.kotlinAllOpen)
+  alias(libs.plugins.kotlinJpa)
 }
 
-apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
-apply(plugin = "kotlin-jpa")
-
-configure<AllOpenExtension> {
+allOpen {
   annotation("javax.persistence.Entity")
   annotation("javax.persistence.Embeddable")
   annotation("javax.persistence.MappedSuperclass")
 }
 
 sourceSets {
-  val test by getting {
+  test {
     java.srcDir("src/test/kotlin/")
   }
 }
@@ -52,7 +48,6 @@ dependencies {
   implementation(project(":misk-crypto"))
   implementation(project(":misk-service"))
 
-
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
@@ -70,7 +65,7 @@ dependencies {
   testImplementation(testFixtures(project(":misk-crypto")))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )
