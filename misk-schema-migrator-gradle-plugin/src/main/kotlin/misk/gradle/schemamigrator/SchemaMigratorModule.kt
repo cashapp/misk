@@ -1,4 +1,4 @@
-package misk.schemamigratorgradleplugin
+package misk.gradle.schemamigrator
 
 import misk.MiskCommonServiceModule
 import misk.environment.DeploymentModule

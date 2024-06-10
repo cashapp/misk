@@ -1,4 +1,4 @@
-package misk.schemamigratorgradleplugin
+package misk.gradle.schemamigrator
 
 import jakarta.inject.Inject
 import org.gradle.api.file.DirectoryProperty

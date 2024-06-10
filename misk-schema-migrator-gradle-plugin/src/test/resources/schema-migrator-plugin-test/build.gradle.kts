@@ -1,7 +1,7 @@
 import java.util.Properties
 
 plugins {
-  id("misk.schemamigratorgradleplugin")
+  id("misk.schema-migrator")
 }
 
 val properties = Properties().apply {

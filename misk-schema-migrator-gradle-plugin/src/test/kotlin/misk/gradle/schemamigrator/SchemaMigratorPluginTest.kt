@@ -1,4 +1,4 @@
-package misk.schemamigratorgradleplugin
+package misk.gradle.schemamigrator
 
 import org.gradle.internal.impldep.com.zaxxer.hikari.HikariConfig
 import org.gradle.internal.impldep.com.zaxxer.hikari.HikariDataSource

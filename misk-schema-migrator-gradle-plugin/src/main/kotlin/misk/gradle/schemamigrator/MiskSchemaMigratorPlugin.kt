@@ -1,4 +1,4 @@
-package misk.schemamigratorgradleplugin
+package misk.gradle.schemamigrator
 
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice

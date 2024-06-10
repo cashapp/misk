@@ -12,7 +12,7 @@ plugins {
 gradlePlugin {
   plugins {
     create("MiskSchemaMigratorPlugin") {
-      id = "misk.schemamigratorgradleplugin"
+      id = "misk.schema-migrator"
       implementationClass = "misk.schemamigratorgradleplugin.MiskSchemaMigratorPlugin"
     }
   }
