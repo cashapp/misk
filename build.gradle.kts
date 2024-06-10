@@ -12,7 +12,7 @@ import java.net.Socket
 buildscript {
   repositories {
     mavenCentral()
-    maven(url = "https://plugins.gradle.org/m2/")
+    gradlePluginPortal()
   }
 
   dependencies {
@@ -48,8 +48,7 @@ allprojects {
 dependencyAnalysis {
   issues {
     all {
-      ignoreSourceSet("testFixtures")
-      ignoreSourceSet("test")
+      ignoreSourceSet("testFixtures", "test")
       onAny {
         severity("fail")
         exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
