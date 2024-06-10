@@ -1,11 +1,13 @@
 plugins {
-  `gradle-enterprise`
+  id("com.gradle.develocity") version "3.17.4"
 }
 
-gradleEnterprise {
+develocity {
   buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
+    publishing {
+      termsOfUseUrl = "https://gradle.com/terms-of-service"
+      termsOfUseAgree = "yes"
+    }
   }
 }
 
