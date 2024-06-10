@@ -9,6 +9,14 @@ gradleEnterprise {
   }
 }
 
+gradle.lifecycle.beforeProject {
+  group = when {
+    path.startsWith(":wisp") -> "app.cash.wisp"
+    else -> "com.squareup.misk"
+  }
+  version = findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
+}
+
 include(":detektive")
 include(":wisp:wisp-aws-environment")
 include(":wisp:wisp-client")

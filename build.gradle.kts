@@ -37,14 +37,6 @@ plugins {
 
 apply(plugin = "com.vanniktech.maven.publish.base")
 
-allprojects {
-  group = when {
-    project.path.startsWith(":wisp") -> "app.cash.wisp"
-    else -> "com.squareup.misk"
-  }
-  version = project.findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
-}
-
 dependencyAnalysis {
   issues {
     all {
