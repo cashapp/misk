@@ -57,7 +57,7 @@ JettyService to stop before our feature flag service without having to intertwin
 
 In general, infrastructure services should enhance ReadyService and application services should depend on ReadyService.
 
-See more information here [here](..%2F0.x%2Fmisk-service%2Fmisk-service%2Fmisk%2F-ready-service%2Findex.md).
+See more information here [here](../0.x/misk-service/misk-service/misk/-ready-service/index.md).
 
 ## What does this look like?
 
