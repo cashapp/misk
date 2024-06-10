@@ -20,15 +20,9 @@ jooq-code-gen to it. There's an example of how to do this in this
 a. Add the below lines to your build.gradle.kts
 
 ```
-buildscript {
-  dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:7.15.0")
-    classpath(Dependencies.mysql)
-  }
-}
 plugins {
-  id("org.flywaydb.flyway") version "7.15.0"
-  id("nu.studer.jooq") version "5.2"
+  alias(libs.plugins.flyway)
+  alias(libs.plugins.jooq)
 }
 // We are using flyway here in order to run the migrations to create a schema. 
 // Ensure the migration directory is not called `migrations`. There's more details as to why below.

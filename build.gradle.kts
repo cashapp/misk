@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
@@ -16,15 +15,18 @@ buildscript {
   }
 
   dependencies {
-    classpath(libs.kotlinAllOpenPlugin)
-    classpath(libs.kotlinGradlePlugin)
     classpath(libs.detektGradlePlugin)
     classpath(libs.dokkaGradlePlugin)
-    classpath(libs.kotlinNoArgPlugin)
-    classpath(libs.protobufGradlePlugin)
+    classpath(libs.flywayGradlePlugin)
     classpath(libs.jgit)
-    classpath(libs.wireGradlePlugin)
+    classpath(libs.jooqGradlePlugin)
+    classpath(libs.kotlinAllOpenPlugin)
+    classpath(libs.kotlinGradlePlugin)
+    classpath(libs.kotlinNoArgPlugin)
+    classpath(libs.mysql)
+    classpath(libs.protobufGradlePlugin)
     classpath(libs.sqldelightGradlePlugin)
+    classpath(libs.wireGradlePlugin)
   }
 }
 
@@ -175,12 +177,6 @@ subprojects {
 
   dependencies {
     add("detektPlugins", project(":detektive"))
-  }
-
-  buildscript {
-    repositories {
-      mavenCentral()
-    }
   }
 
   // Only apply if the project has the kotlin plugin added:
