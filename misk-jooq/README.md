@@ -79,7 +79,7 @@ jooq {
 }
 
 // Needed to generate jooq test db classes
-tasks.register("generateJooq") {
+tasks.named("generateJooq") {
   dependsOn("flywayMigrate")
 }
 
