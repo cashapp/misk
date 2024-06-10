@@ -2,6 +2,14 @@ import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
+// Needed to generate jooq test db classes
+buildscript {
+  dependencies {
+    classpath("org.flywaydb:flyway-gradle-plugin:9.14.1")
+    classpath(libs.mysql)
+  }
+}
+
 plugins {
   kotlin("jvm")
   `java-library`
@@ -35,14 +43,6 @@ dependencies {
 
   // Needed to generate jooq test db classes
   jooqGenerator(libs.mysql)
-}
-
-// Needed to generate jooq test db classes
-buildscript {
-  dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:9.14.1")
-    classpath(libs.mysql)
-  }
 }
 
 // Needed to generate jooq test db classes
