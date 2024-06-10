@@ -77,11 +77,20 @@ jooq {
     }
   }
 }
-val generateJooq by project.tasks
-generateJooq.dependsOn("flywayMigrate")
 
-sourceSets.getByName("main").java.srcDirs
-  .add(File("${project.projectDir}/src/main/generated/kotlin"))
+// Needed to generate jooq test db classes
+tasks.named("generateJooq") {
+  dependsOn("flywayMigrate")
+}
+
+// Needed to generate jooq test db classes
+// If you are using this as an example for your service, remember to add the generated code to your
+// main source set instead of your tests as it is done below.
+sourceSets {
+  test {
+    java.srcDirs(layout.projectDirectory.dir("src/test/generated/kotlin"))
+  }
+}
 ```
 
 b. Have a look at `jooq-test-regenerate.sh`. Copy that into the root of your project and modify the database 

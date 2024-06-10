@@ -1,20 +1,20 @@
 plugins {
-  `java-platform`
-  id("com.vanniktech.maven.publish.base")
+  id("java-platform")
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencies {
   constraints {
     project.parent?.subprojects?.forEach { subproject ->
       if (subproject.name != "misk-bom") {
-        api(subproject)
+        api(subproject.path)
       }
     }
   }
 }
 
-extensions.configure<PublishingExtension> {
+publishing {
   publications.create("maven", MavenPublication::class) {
-    from(project.components.getByName("javaPlatform"))
+    from(components.getByName("javaPlatform"))
   }
 }

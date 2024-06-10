@@ -1,15 +1,12 @@
 import com.google.protobuf.gradle.*
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-
-  id("com.google.protobuf")
-  id("com.squareup.wire")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.wire)
 }
 
 protobuf {
@@ -53,7 +50,7 @@ wire {
 }
 
 sourceSets {
-  val main by getting {
+  main {
     java.srcDir("build/generated/source/proto/main/grpc")
     java.srcDir("build/generated/source/proto/main/java")
     java.srcDir("build/generated/source/wire")
@@ -97,7 +94,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-logging-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

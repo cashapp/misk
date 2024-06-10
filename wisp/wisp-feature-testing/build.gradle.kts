@@ -1,9 +1,11 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 sourceSets {
-    val test by getting {
+    test {
         java.srcDir("src/test/kotlin/")
     }
 }
