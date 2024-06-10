@@ -211,6 +211,7 @@ jooq = { id = "nu.studer.jooq", version = "8.2" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen" }
 kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm" }
+mavenPublish = { id = "com.vanniktech.maven.publish" }
 mavenPublishBase = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublish" }
 protobuf = { id = "com.google.protobuf" }
 sqldelight = { id = "app.cash.sqldelight" }
