@@ -21,8 +21,6 @@ buildscript {
     classpath(libs.detektGradlePlugin)
     classpath(libs.dokkaGradlePlugin)
     classpath(libs.kotlinNoArgPlugin)
-    classpath(libs.junitGradlePlugin)
-    classpath(libs.mavenPublishGradlePlugin)
     classpath(libs.protobufGradlePlugin)
     classpath(libs.jgit)
     classpath(libs.wireGradlePlugin)
@@ -33,9 +31,8 @@ buildscript {
 plugins {
   alias(libs.plugins.dependencyAnalysis)
   alias(libs.plugins.binaryCompatibilityValidator)
+  alias(libs.plugins.mavenPublishBase)
 }
-
-apply(plugin = "com.vanniktech.maven.publish.base")
 
 dependencyAnalysis {
   issues {
