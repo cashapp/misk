@@ -1,5 +1,6 @@
 [versions]
 dependencyAnalysisPlugin = "1.29.0"
+flyway = "9.14.1"
 kotlin = "1.9.21"
 kotlinBinaryCompatibilityPlugin = "0.13.1"
 mavenPublish = "0.27.0"
@@ -45,6 +46,7 @@ dockerTransportCore = { module = "com.github.docker-java:docker-java-transport",
 dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.20" }
 errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.20.0" }
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
+flywayGradlePlugin = { module = "org.flywaydb:flyway-gradle-plugin", version.ref = "flyway" }
 gax = { module = "com.google.api:gax", version = "2.5.0" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "1.95.4" }
 gcpCloudStorage = { module = "com.google.cloud:google-cloud-storage", version = "1.117.1" }
@@ -114,6 +116,7 @@ jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-s
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version = "5.12.0.202106070339-r" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.20" }
 jooq = { module = "org.jooq:jooq", version = "3.18.2" }
+jooqGradlePlugin = { module = "nu.studer:gradle-jooq-plugin", version = "8.2" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.9.3" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.9.3" }
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.9.3" }
@@ -206,8 +209,8 @@ wireSchema = { module = "com.squareup.wire:wire-schema", version.ref = "wire" }
 [plugins]
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompatibilityPlugin" }
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
-flyway = { id = "org.flywaydb.flyway", version = "9.14.1" }
-jooq = { id = "nu.studer.jooq", version = "8.2" }
+flyway = { id = "org.flywaydb.flyway" }
+jooq = { id = "nu.studer.jooq" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen" }
 kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm" }

@@ -1,16 +1,6 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 
-// TODO(tsr): it might be better to put these on the root build classpath, but I'm not sure if that
-//  will have other repercussions. Do in a follow-up.
-// Needed to generate jooq test db classes
-buildscript {
-  dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:9.14.1")
-    classpath(libs.mysql)
-  }
-}
-
 plugins {
   alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.mavenPublishBase)
