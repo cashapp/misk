@@ -1,5 +1,20 @@
+pluginManagement {
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+  }
+}
+
 plugins {
   id("com.gradle.develocity") version "3.17.4"
+}
+
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    mavenCentral()
+    maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
+  }
 }
 
 develocity {

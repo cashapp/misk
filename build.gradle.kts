@@ -183,11 +183,6 @@ subprojects {
     }
   }
 
-  repositories {
-    mavenCentral()
-    maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
-  }
-
   // Only apply if the project has the kotlin plugin added:
   plugins.withType<KotlinPluginWrapper> {
     tasks.withType<KotlinCompile> {
