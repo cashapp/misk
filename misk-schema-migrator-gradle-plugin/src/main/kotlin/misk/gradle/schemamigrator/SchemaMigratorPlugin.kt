@@ -13,7 +13,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
-class MiskSchemaMigratorPlugin : Plugin<Project> {
+class SchemaMigratorPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     val extension = create(project)
 
@@ -27,8 +27,8 @@ class MiskSchemaMigratorPlugin : Plugin<Project> {
   }
 
   internal companion object {
-    fun create(project: Project): MiskSchemaMigratorExtension {
-      return project.extensions.create("miskSchemaMigrator", MiskSchemaMigratorExtension::class.java)
+    fun create(project: Project): SchemaMigratorExtension {
+      return project.extensions.create("miskSchemaMigrator", SchemaMigratorExtension::class.java)
     }
   }
 }

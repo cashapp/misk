@@ -10,7 +10,7 @@ Flyway.
 
 ```
 plugins {
-  id("misk.schemamigratorgradleplugin") version <<latest version>>
+  id("misk.schema-migrator") version <<latest version>>
 }
 
 val dbConfig = mapOf(

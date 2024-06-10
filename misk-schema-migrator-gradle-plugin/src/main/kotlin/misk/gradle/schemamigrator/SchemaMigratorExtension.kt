@@ -7,7 +7,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 
-abstract class MiskSchemaMigratorExtension @Inject constructor(objects: ObjectFactory) {
+abstract class SchemaMigratorExtension @Inject constructor(objects: ObjectFactory) {
   @get:Input
   abstract val database: Property<String>
 
