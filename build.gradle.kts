@@ -17,6 +17,7 @@ buildscript {
   dependencies {
     classpath(libs.detektGradlePlugin)
     classpath(libs.dokkaGradlePlugin)
+    // TODO remove Flyway when Misk SchemaMigratorGradlePlugin merges
     classpath(libs.flywayGradlePlugin)
     classpath(libs.jgit)
     classpath(libs.jooqGradlePlugin)
