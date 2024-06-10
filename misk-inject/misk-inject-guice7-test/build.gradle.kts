@@ -1,6 +1,5 @@
 plugins {
-  kotlin("jvm")
-  `java-library`
+  alias(libs.plugins.kotlinJvm)
 }
 
 dependencies {
