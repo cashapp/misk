@@ -5,14 +5,13 @@ import org.gradle.internal.impldep.com.zaxxer.hikari.HikariConfig
 import org.gradle.internal.impldep.com.zaxxer.hikari.HikariDataSource
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.Assertions.assertTrue
 import java.io.File
 import org.junit.jupiter.api.Test
 import java.util.Properties
 
 class SchemaMigratorPluginTest {
   @Test
-  fun `schema migrator plugin migrates schems`() {
+  fun `schema migrator plugin migrates schemas`() {
     val testProjectDir = File(this.javaClass.getResource("/schema-migrator-plugin-test")!!.file)
     val properties = Properties()
     properties.load(File(testProjectDir, "src/main/resources/db.properties").inputStream())
@@ -34,6 +33,7 @@ class SchemaMigratorPluginTest {
       .withProjectDir(testProjectDir)
       .withArguments("migrateSchema")
       .withPluginClasspath()
+      .forwardOutput()
       .build()
 
     assertThat(result.task(":migrateSchema")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)

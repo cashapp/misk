@@ -1,10 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
   `java-gradle-plugin`
-  id("com.vanniktech.maven.publish.base")
   `java-test-fixtures`
 }
 
@@ -12,7 +12,7 @@ gradlePlugin {
   plugins {
     create("MiskSchemaMigratorPlugin") {
       id = "misk.schema-migrator"
-      implementationClass = "misk.schemamigratorgradleplugin.MiskSchemaMigratorPlugin"
+      implementationClass = "misk.gradle.schemamigrator.MiskSchemaMigratorPlugin"
     }
   }
 }
@@ -34,7 +34,7 @@ dependencies {
   testImplementation(libs.junitApi)
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
   )

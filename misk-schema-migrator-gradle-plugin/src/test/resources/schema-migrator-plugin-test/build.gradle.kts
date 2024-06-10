@@ -9,8 +9,8 @@ val properties = Properties().apply {
   if (file.exists()) {
     load(file.inputStream())
   }
-
 }
+
 miskSchemaMigrator {
   database = properties.getProperty("schema")
   username = properties.getProperty("username")

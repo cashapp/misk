@@ -12,18 +12,17 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.register
 
 class MiskSchemaMigratorPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     val extension = create(project)
 
-    project.tasks.register<SchemaMigratorTask>("migrateSchema") {
-      database.set(extension.database)
-      databaseType.set(extension.databaseType)
-      username.set(extension.username)
-      password.set(extension.password)
-      migrationsDir.set(extension.migrationsDir)
+    project.tasks.register("migrateSchema", SchemaMigratorTask::class.java) {
+      it.database.set(extension.database)
+      it.databaseType.set(extension.databaseType)
+      it.username.set(extension.username)
+      it.password.set(extension.password)
+      it.migrationsDir.set(extension.migrationsDir)
     }
   }
 
