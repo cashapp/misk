@@ -1,12 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  id("com.squareup.wire")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  alias(libs.plugins.wire)
 }
 
 dependencies {
@@ -87,7 +85,7 @@ dependencies {
   testImplementation(project(":misk-testing"))
 }
 
-val generatedSourceDir = "$buildDir/generated/source/wire-test"
+val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
 
 wire {
   sourcePath {
@@ -125,10 +123,10 @@ afterEvaluate {
   val generatedSourceGlob = "$generatedSourceDir/**"
 
   sourceSets {
-    val main by getting {
+    main {
       java.setSrcDirs(java.srcDirs.filter { !it.path.contains(generatedSourceDir) })
     }
-    val test by getting {
+    test {
       java.srcDir(generatedSourceDir)
     }
   }
@@ -143,7 +141,7 @@ afterEvaluate {
   }
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

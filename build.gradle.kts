@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
@@ -12,44 +11,36 @@ import java.net.Socket
 buildscript {
   repositories {
     mavenCentral()
-    maven(url = "https://plugins.gradle.org/m2/")
+    gradlePluginPortal()
   }
 
   dependencies {
-    classpath(libs.kotlinAllOpenPlugin)
-    classpath(libs.kotlinGradlePlugin)
     classpath(libs.detektGradlePlugin)
     classpath(libs.dokkaGradlePlugin)
-    classpath(libs.kotlinNoArgPlugin)
-    classpath(libs.junitGradlePlugin)
-    classpath(libs.mavenPublishGradlePlugin)
-    classpath(libs.protobufGradlePlugin)
+    // TODO remove Flyway when Misk SchemaMigratorGradlePlugin merges
+    classpath(libs.flywayGradlePlugin)
     classpath(libs.jgit)
-    classpath(libs.wireGradlePlugin)
+    classpath(libs.jooqGradlePlugin)
+    classpath(libs.kotlinAllOpenPlugin)
+    classpath(libs.kotlinGradlePlugin)
+    classpath(libs.kotlinNoArgPlugin)
+    classpath(libs.mysql)
+    classpath(libs.protobufGradlePlugin)
     classpath(libs.sqldelightGradlePlugin)
+    classpath(libs.wireGradlePlugin)
   }
 }
 
 plugins {
-  id("com.autonomousapps.dependency-analysis") version libs.versions.dependencyAnalysisPlugin.get()
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version libs.versions.kotlinBinaryCompatibilityPlugin.get()
-}
-
-apply(plugin = "com.vanniktech.maven.publish.base")
-
-allprojects {
-  group = when {
-    project.path.startsWith(":wisp") -> "app.cash.wisp"
-    else -> "com.squareup.misk"
-  }
-  version = project.findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
+  alias(libs.plugins.dependencyAnalysis)
+  alias(libs.plugins.binaryCompatibilityValidator)
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencyAnalysis {
   issues {
     all {
-      ignoreSourceSet("testFixtures")
-      ignoreSourceSet("test")
+      ignoreSourceSet("testFixtures", "test")
       onAny {
         severity("fail")
         exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
@@ -116,25 +107,27 @@ dependencyAnalysis {
 apiValidation {
   // ignore subprojects only if present. This allows us to activate only a subset
   // of projects with settings.gradle.kts overlay if we want to activate only some subprojects.
-  ignoredProjects.addAll(subprojects.map { it.name }.filter { setOf(
+  val ignorable = setOf(
     "exemplar",
     "exemplarchat",
     "detektive",
-  ).contains(it) }.toList())
-  additionalSourceSets.addAll(listOf("testFixtures"))
+    "misk-schema-migrator-gradle-plugin"
+  )
+  ignoredProjects.addAll(subprojects.map { it.name }.filter { it in ignorable })
+  additionalSourceSets.add("testFixtures")
 }
 
-val testShardNonHibernate by tasks.creating {
+val testShardNonHibernate = tasks.register("testShardNonHibernate") {
   group = "Continuous integration"
   description = "These tests don't have shared infra and can run in parallel"
 }
 
-val testShardRedis by tasks.creating {
+val testShardRedis = tasks.register("testShardRedis") {
   group = "Continuous integration"
   description = "These tests use redis and thus can't run in parallel"
 }
 
-val testShardHibernate by tasks.creating {
+val testShardHibernate = tasks.register("testShardHibernate") {
   group = "Continuous integration"
   description = "These tests use a DB and thus can't run in parallel"
 }
@@ -157,25 +150,25 @@ val redisProjects = listOf(
   "misk-rate-limiting-bucket4j-redis"
 )
 
-val detektConfig = "$projectDir/detekt.yaml"
+val detektConfig = file("detekt.yaml")
+val doNotDetekt = listOf(
+  "detektive",
+  "exemplar",
+  "exemplarchat",
+  "misk-bom",
+)
 
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
   apply(plugin = "io.gitlab.arturbosch.detekt")
 
-  if (!listOf(
-      "detektive",
-      "exemplar",
-      "exemplarchat",
-      "misk-bom"
-    ).contains(name)
-  ) {
+  if (name !in doNotDetekt) {
     extensions.configure(DetektExtension::class) {
       parallel = true
       buildUponDefaultConfig = false
       ignoreFailures = false
       autoCorrect = true
-      config.setFrom(files(detektConfig))
+      config.setFrom(detektConfig)
     }
   } else {
     extensions.configure(DetektExtension::class) {
@@ -186,17 +179,6 @@ subprojects {
 
   dependencies {
     add("detektPlugins", project(":detektive"))
-  }
-
-  buildscript {
-    repositories {
-      mavenCentral()
-    }
-  }
-
-  repositories {
-    mavenCentral()
-    maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
   }
 
   // Only apply if the project has the kotlin plugin added:
@@ -263,27 +245,26 @@ subprojects {
   }
 
   plugins.withType<BasePlugin> {
-    tasks.findByName("check")!!.apply {
-      if (hibernateProjects.contains(project.name)) {
-        testShardHibernate.dependsOn(this)
-      } else if (redisProjects.contains(project.name)) {
-        testShardRedis.dependsOn(this)
-      } else {
-        testShardNonHibernate.dependsOn(this)
-      }
+    if (hibernateProjects.contains(project.name)) {
+      testShardHibernate.configure { dependsOn("check") }
+    } else if (redisProjects.contains(project.name)) {
+      testShardRedis.configure { dependsOn("check") }
+    } else {
+      testShardNonHibernate.configure { dependsOn("check") }
+    }
 
+    tasks.named("check") {
       // Disable the default `detekt` task and enable `detektMain` which has type resolution enabled
       dependsOn(dependsOn.filterNot { name != "detekt" })
-      if (tasks.findByName("detektMain") != null) {
-        dependsOn("detektMain")
-      }
+      dependsOn(tasks.named { it == "detektMain" })
     }
   }
 
+  val configurationNames = setOf("kapt", "wire", "proto", "Proto")
   configurations.all {
     // Workaround the Gradle bug resolving multiplatform dependencies.
     // https://github.com/square/okio/issues/647
-    if (name.contains("kapt") || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
+    if (name in configurationNames) {
       attributes.attribute(
         Usage.USAGE_ATTRIBUTE,
         this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
@@ -300,7 +281,7 @@ subprojects {
 
 allprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
-    configure<MavenPublishBaseExtension> {
+    mavenPublishing {
       publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
       signAllPublications()
       pom {

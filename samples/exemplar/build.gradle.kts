@@ -1,10 +1,10 @@
 plugins {
-  kotlin("jvm")
-  application
-  id("com.squareup.wire")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.wire)
+  id("application")
 }
 
-val applicationMainClass = "com.squareup.exemplar.ExemplarServiceKt"
+val applicationMainClass = "com.squareup.chat.ChatServiceKt"
 application {
   mainClass.set(applicationMainClass)
 }
@@ -49,20 +49,18 @@ dependencies {
   testImplementation(testFixtures(project(":misk-aws-dynamodb")))
   testImplementation(testFixtures(project(":misk-jdbc")))
   testImplementation(testFixtures(project(":misk-redis")))
-
-
 }
 
-val jar by tasks.getting(Jar::class) {
+tasks.jar {
   manifest {
-    attributes("Main-Class" to "com.squareup.exemplar.ExemplarServiceKt")
+    attributes("Main-Class" to applicationMainClass)
   }
   archiveClassifier.set("unshaded")
 }
 
 sourceSets {
-  val main by getting {
-    java.srcDir("$buildDir/generated/source/wire/")
+  main {
+    java.srcDir(layout.buildDirectory.dir("generated/source/wire"))
   }
 }
 
