@@ -10,6 +10,7 @@ dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
+  api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
   implementation(libs.kotlinLogging)

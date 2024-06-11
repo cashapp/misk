@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal class CoordinatedService(
   private val serviceProvider: Provider<out Service>
 ) : AbstractService(), DelegatingService {
-
   override val service: Service by lazy {
     serviceProvider.get()
       .also { created ->
@@ -154,4 +153,14 @@ internal class CoordinatedService(
       check(state() == State.NEW) { message }
     }
   }
+
+  fun toMetadata() = CoordinatedServiceMetadata(
+    dependencies = dependencies.map { it.serviceProvider.get().javaClass.name }.toSet(),
+    directDependsOn = directDependsOn.map { it.serviceProvider.get().javaClass.name }.toSet(),
+  )
 }
+
+data class CoordinatedServiceMetadata(
+  val dependencies: Set<String>,
+  val directDependsOn: Set<String>,
+)

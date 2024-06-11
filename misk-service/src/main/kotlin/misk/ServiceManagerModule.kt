@@ -9,6 +9,9 @@ import com.google.inject.Scopes
 import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.metadata.servicegraph.ServiceGraphMetadata
+import misk.metadata.servicegraph.ServiceGraphMetadataProvider
+import misk.web.metadata.MetadataModule
 import wisp.logging.getLogger
 
 class ServiceManagerModule @JvmOverloads constructor(
@@ -33,18 +36,35 @@ class ServiceManagerModule @JvmOverloads constructor(
     newMultibinder<ServiceEntry>()
     newMultibinder<DependencyEdge>()
     newMultibinder<EnhancementEdge>()
+
+    install(MetadataModule(ServiceGraphMetadataProvider()))
   }
 
   @Provides
   @Singleton
   internal fun provideServiceManager(
+    builder: ServiceGraphBuilder,
+    listeners: List<ServiceManager.Listener>,
+  ): ServiceManager {
+    val serviceManager = builder.build()
+
+    if (serviceManagerConfig.debug_service_graph) {
+      log.info { "Service dependency graph:\n$builder" }
+    }
+
+    listeners.forEach { serviceManager.addListener(it, directExecutor()) }
+    return serviceManager
+  }
+
+  @Provides
+  @Singleton
+  internal fun provideServiceGraphBuilder(
     injector: Injector,
     services: List<Service>,
-    listeners: List<ServiceManager.Listener>,
     serviceEntries: List<ServiceEntry>,
     dependencies: List<DependencyEdge>,
     enhancements: List<EnhancementEdge>
-  ): ServiceManager {
+  ): ServiceGraphBuilder {
     val invalidServices = mutableListOf<String>()
     val builder = ServiceGraphBuilder()
 
@@ -75,11 +95,13 @@ class ServiceManagerModule @JvmOverloads constructor(
         "use `install(ServiceModule<${services.first()::class.simpleName}>())`."
     }
 
-    val serviceManager = builder.build()
-    if (serviceManagerConfig.debug_service_graph) {
-      log.info { "Service dependency graph:\n$builder" }
-    }
-    listeners.forEach { serviceManager.addListener(it, directExecutor()) }
-    return serviceManager
+    // Run validation within the build method
+    builder.build()
+
+    return builder
   }
+
+  @Provides
+  @Singleton
+  internal fun provideServiceGraphMetadata(builder: ServiceGraphBuilder) = builder.toMetadata()
 }
