@@ -1,6 +1,8 @@
 package misk.web.metadata.all
 
 import jakarta.inject.Inject
+import misk.ServiceGraphBuilderMetadata
+import misk.metadata.servicegraph.ServiceGraphMetadata
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.metadata.MetadataTestingModule
@@ -20,7 +22,7 @@ class AllMetadataActionTest {
   fun `happy path`() {
     val actual = action.getAll()
     val actualIds = actual.all.keys
-    assertEquals(setOf("config", "database-hibernate", "web-actions"), actualIds)
+    assertEquals(setOf("service-graph", "config", "database-hibernate", "web-actions"), actualIds)
 
     // Config
     val actualConfig = actual.all["config"]!!
@@ -88,6 +90,21 @@ class AllMetadataActionTest {
     // TODO maybe add a DB to the test so that assertions can confirm Database Hibernate metadata is included
     val actualDatabaseHibernate = actual.all["database-hibernate"]!!
     assertEquals(listOf(), (actualDatabaseHibernate.metadata as List<DatabaseQueryMetadata>))
+
+    // Service Graph
+    val actualServiceGraphMetadata = actual.all["service-graph"]!!
+    assertEquals(
+      """
+        |ServiceGraphBuilderMetadata(serviceMap={Key[type=misk.web.jetty.JettyService, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[], directDependsOn=[misk.ReadyService]), Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.tasks.RepeatedTaskQueue, annotation=@misk.web.ReadinessRefreshQueue]=CoordinatedServiceMetadata(dependencies=[], directDependsOn=[]), Key[type=misk.ReadyService, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.web.jetty.JettyService], directDependsOn=[misk.web.jetty.JettyThreadPoolMetricsCollector, misk.web.jetty.JettyConnectionMetricsCollector, misk.web.actions.ReadinessCheckService])}, serviceNames={Key[type=misk.web.jetty.JettyService, annotation=[none]]=misk.web.jetty.JettyService, Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=misk.web.jetty.JettyThreadPoolMetricsCollector, Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=misk.web.jetty.JettyConnectionMetricsCollector, Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=misk.web.actions.ReadinessCheckService, Key[type=misk.tasks.RepeatedTaskQueue, annotation=@misk.web.ReadinessRefreshQueue]=misk.tasks.RepeatedTaskQueue, Key[type=misk.ReadyService, annotation=[none]]=misk.ReadyService}, dependencyMap={Key[type=misk.ReadyService, annotation=[none]]=[Key[type=misk.web.jetty.JettyService, annotation=[none]]], Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]], Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]], Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]]}, asciiVisual=misk.web.jetty.JettyService
+        |    \__ misk.ReadyService
+        |        |__ misk.web.jetty.JettyThreadPoolMetricsCollector
+        |        |__ misk.web.jetty.JettyConnectionMetricsCollector
+        |        \__ misk.web.actions.ReadinessCheckService
+        |misk.tasks.RepeatedTaskQueue
+        |)
+      """.trimMargin(),
+      (actualServiceGraphMetadata.metadata as ServiceGraphBuilderMetadata).toString()
+    )
 
     // Web Action Metadata
     val actualWebActionsMetadata = actual.all["web-actions"]!!
