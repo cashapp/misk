@@ -10,7 +10,7 @@ Flyway.
 
 ```
 plugins {
-  id("misk.schema-migrator") version <<latest version>>
+  id("com.squareup.misk.schema-migrator") version <<latest version>>
 }
 
 val dbConfig = mapOf(

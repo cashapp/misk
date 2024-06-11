@@ -10,7 +10,7 @@ plugins {
 gradlePlugin {
   plugins {
     create("MiskSchemaMigratorPlugin") {
-      id = "misk.schema-migrator"
+      id = "com.squareup.misk.schema-migrator"
       implementationClass = "misk.gradle.schemamigrator.SchemaMigratorPlugin"
     }
   }
