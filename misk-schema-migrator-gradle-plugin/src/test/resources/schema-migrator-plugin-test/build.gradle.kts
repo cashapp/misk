@@ -1,7 +1,7 @@
 import java.util.Properties
 
 plugins {
-  id("misk.schema-migrator")
+  id("com.squareup.misk.schema-migrator")
 }
 
 val properties = Properties().apply {
