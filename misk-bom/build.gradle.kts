@@ -7,7 +7,7 @@ dependencies {
   constraints {
     project.parent?.subprojects?.forEach { subproject ->
       if (subproject.name != "misk-bom") {
-        api(subproject.path)
+        api(project(subproject.path))
       }
     }
   }
