@@ -154,7 +154,7 @@ internal class CoordinatedService(
     }
   }
 
-  fun toMetdata() = CoordinatedServiceMetadata(
+  fun toMetadata() = CoordinatedServiceMetadata(
     dependencies = dependencies.map { it.serviceProvider.get().javaClass.name }.toSet(),
     directDependsOn = directDependsOn.map { it.serviceProvider.get().javaClass.name }.toSet(),
   )

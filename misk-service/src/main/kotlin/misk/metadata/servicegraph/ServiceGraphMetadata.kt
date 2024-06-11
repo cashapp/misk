@@ -2,7 +2,6 @@ package misk.metadata.servicegraph
 
 import jakarta.inject.Inject
 import jakarta.inject.Provider
-import misk.ServiceGraphBuilder
 import misk.ServiceGraphBuilderMetadata
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
@@ -19,9 +18,9 @@ class ServiceGraphMetadataProvider : MetadataProvider<ServiceGraphMetadata> {
    * exceptions can surface first. If exceptions come from this callsite it's confusing and often
    * not the root cause.
    */
-  @Inject internal lateinit var builderProvider: Provider<ServiceGraphBuilder>
+  @Inject internal lateinit var metadataProvider: Provider<ServiceGraphBuilderMetadata>
 
   override fun get() = ServiceGraphMetadata(
-    builderMetadata = builderProvider.get().toMetadata()
+    builderMetadata = metadataProvider.get()
   )
 }

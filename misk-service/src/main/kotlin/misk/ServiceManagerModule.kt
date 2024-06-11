@@ -9,6 +9,7 @@ import com.google.inject.Scopes
 import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.metadata.servicegraph.ServiceGraphMetadata
 import misk.metadata.servicegraph.ServiceGraphMetadataProvider
 import misk.web.metadata.MetadataModule
 import wisp.logging.getLogger
@@ -99,4 +100,8 @@ class ServiceManagerModule @JvmOverloads constructor(
 
     return builder
   }
+
+  @Provides
+  @Singleton
+  internal fun provideServiceGraphMetadata(builder: ServiceGraphBuilder) = builder.toMetadata()
 }

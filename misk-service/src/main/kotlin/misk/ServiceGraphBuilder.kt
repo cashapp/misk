@@ -147,7 +147,7 @@ internal class ServiceGraphBuilder {
   }
 
   fun toMetadata() = ServiceGraphBuilderMetadata(
-    serviceMap = serviceMap.map { it.key.toString() to it.value.toMetdata() }.toMap(),
+    serviceMap = serviceMap.map { it.key.toString() to it.value.toMetadata() }.toMap(),
     serviceNames = serviceNames.mapKeys { it.key.toString() },
     dependencyMap = dependencyMap.asMap().map { (k,v) -> k.toString() to v.toString() }.toMap(),
     asciiVisual = toString()
