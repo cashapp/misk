@@ -5,7 +5,6 @@ plugins {
   alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.mavenPublishBase)
   `java-gradle-plugin`
-  `java-test-fixtures`
 }
 
 gradlePlugin {
