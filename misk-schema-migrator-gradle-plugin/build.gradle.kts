@@ -34,6 +34,22 @@ dependencies {
   testImplementation(libs.junitApi)
 }
 
+publishing {
+  publications {
+    // Remove the default 'pluginMaven' publication to avoid conflicts
+    withType<MavenPublication>().configureEach {
+      if (name == "pluginMaven") {
+        tasks.named("publishPluginMavenPublicationToMavenLocal").configure {
+          enabled = false
+        }
+        tasks.named("publishPluginMavenPublicationToMavenCentralRepository").configure {
+          enabled = false
+        }
+      }
+    }
+  }
+}
+
 mavenPublishing {
   configure(
     KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
