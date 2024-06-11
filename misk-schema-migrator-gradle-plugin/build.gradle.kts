@@ -35,6 +35,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    GradlePlugin(javadocJar = JavadocJar.None())
+    GradlePlugin(javadocJar = JavadocJar.Dokka("dokkaGfm"))
   )
 }
