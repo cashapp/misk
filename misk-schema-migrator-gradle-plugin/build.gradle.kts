@@ -1,5 +1,5 @@
+import com.vanniktech.maven.publish.GradlePlugin
 import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.KotlinJvm
 
 plugins {
   alias(libs.plugins.kotlinJvm)
@@ -36,6 +36,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
+    GradlePlugin(javadocJar = JavadocJar.Dokka("dokkaGfm"))
   )
 }
