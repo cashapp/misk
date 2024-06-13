@@ -198,7 +198,7 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
             role = "list"
 
             li {
-              section.links.map { link ->
+              section.links.sortedBy { it.label }.map { link ->
                 ul("-mx-2 py-1") {
                   role = "list"
                   li {
