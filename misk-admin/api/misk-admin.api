@@ -651,8 +651,13 @@ public abstract interface annotation class misk/web/metadata/all/AllMetadataAcce
 }
 
 public final class misk/web/metadata/all/AllMetadataAction : misk/web/actions/WebAction {
+	public static final field Companion Lmisk/web/metadata/all/AllMetadataAction$Companion;
+	public static final field PATH Ljava/lang/String;
 	public fun <init> (Ljava/util/Map;)V
-	public final fun getAll ()Lmisk/web/metadata/all/AllMetadataAction$Response;
+	public final fun getMetadata (Ljava/lang/String;)Lmisk/web/metadata/all/AllMetadataAction$Response;
+}
+
+public final class misk/web/metadata/all/AllMetadataAction$Companion {
 }
 
 public final class misk/web/metadata/all/AllMetadataAction$Response {
@@ -661,7 +666,7 @@ public final class misk/web/metadata/all/AllMetadataAction$Response {
 	public final fun copy (Ljava/util/Map;)Lmisk/web/metadata/all/AllMetadataAction$Response;
 	public static synthetic fun copy$default (Lmisk/web/metadata/all/AllMetadataAction$Response;Ljava/util/Map;ILjava/lang/Object;)Lmisk/web/metadata/all/AllMetadataAction$Response;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAll ()Ljava/util/Map;
+	public final fun getMetadata ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -673,7 +678,7 @@ public final class misk/web/metadata/all/AllMetadataModule : misk/inject/KAbstra
 public final class misk/web/metadata/all/AllMetadataTabAction : misk/web/actions/WebAction {
 	public static final field Companion Lmisk/web/metadata/all/AllMetadataTabAction$Companion;
 	public static final field PATH Ljava/lang/String;
-	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Ljava/util/Map;)V
+	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Lmisk/web/metadata/all/AllMetadataAction;)V
 	public final fun get (Ljava/lang/String;)Ljava/lang/String;
 }
 
