@@ -14,7 +14,7 @@ import misk.web.mediatype.MediaTypes
 class ConfigMetadataAction @Inject constructor(
   private val metadataProvider: Provider<ConfigMetadata>
 ) : WebAction {
-  @Get("/api/config/metadata")
+  @Get("/api/v1/config/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess

@@ -14,14 +14,22 @@ import misk.web.metadata.Metadata
 class AllMetadataAction @Inject constructor(
   private val allMetadata: Map<String, Metadata>
 ) : WebAction {
-  @Get("/api/{id}/metadata")
+  @Get(PATH)
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AllMetadataAccess
-  fun getAll(@PathParam id: String?): Response {
-    val metadata = id?.let { allMetadata.filter { it.key == id } } ?: allMetadata
+  fun getMetadata(@PathParam id: String): Response {
+    // Return all metadata if the id is "all"
+    if (id == "all") return Response(metadata = allMetadata)
+
+    // Return metadata for the requested id
+    val metadata = allMetadata.filter { it.key == id }
     return Response(metadata = metadata)
   }
 
   data class Response(val metadata: Map<String, Metadata>)
+
+  companion object {
+    const val PATH = "/api/{id}/metadata"
+  }
 }
