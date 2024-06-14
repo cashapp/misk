@@ -651,8 +651,14 @@ public abstract interface annotation class misk/web/metadata/all/AllMetadataAcce
 }
 
 public final class misk/web/metadata/all/AllMetadataAction : misk/web/actions/WebAction {
+	public static final field Companion Lmisk/web/metadata/all/AllMetadataAction$Companion;
+	public static final field PATH Ljava/lang/String;
 	public fun <init> (Ljava/util/Map;)V
-	public final fun getAll ()Lmisk/web/metadata/all/AllMetadataAction$Response;
+	public final fun getAll (Ljava/lang/String;)Lmisk/web/metadata/all/AllMetadataAction$Response;
+	public static synthetic fun getAll$default (Lmisk/web/metadata/all/AllMetadataAction;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/metadata/all/AllMetadataAction$Response;
+}
+
+public final class misk/web/metadata/all/AllMetadataAction$Companion {
 }
 
 public final class misk/web/metadata/all/AllMetadataAction$Response {
@@ -673,7 +679,7 @@ public final class misk/web/metadata/all/AllMetadataModule : misk/inject/KAbstra
 public final class misk/web/metadata/all/AllMetadataTabAction : misk/web/actions/WebAction {
 	public static final field Companion Lmisk/web/metadata/all/AllMetadataTabAction$Companion;
 	public static final field PATH Ljava/lang/String;
-	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Ljava/util/Map;)V
+	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Lmisk/web/metadata/all/AllMetadataAction;)V
 	public final fun get (Ljava/lang/String;)Ljava/lang/String;
 }
 

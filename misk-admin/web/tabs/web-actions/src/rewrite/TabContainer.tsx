@@ -13,7 +13,7 @@ export default function TabContainer() {
 
   useEffect(() => {
     axios
-      .get("/api/webaction/metadata")
+      .get("/api/v1/webaction/metadata")
       .then((response: AxiosResponse<WebActionMetadataResponse>) => {
         response.data.webActionMetadata.sort((a, b) =>
           a.name.localeCompare(b.name)

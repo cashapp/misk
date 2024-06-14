@@ -15,7 +15,7 @@ class DatabaseQueryMetadataAction @Inject constructor(
   val metadata: List<DatabaseQueryMetadata>
 ) : WebAction {
 
-  @Get("/api/database/query/metadata")
+  @Get("/api/v1/database/query/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess

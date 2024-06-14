@@ -2,9 +2,9 @@ package misk.web.metadata.all
 
 import jakarta.inject.Inject
 import misk.ServiceGraphBuilderMetadata
-import misk.metadata.servicegraph.ServiceGraphMetadata
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataTestingModule
 import misk.web.metadata.database.DatabaseQueryMetadata
 import misk.web.metadata.webaction.WebActionMetadata
@@ -12,79 +12,21 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
-class AllMetadataActionTest {
+class metadataMetadataActionTest {
   @MiskTestModule
   val module = MetadataTestingModule()
 
   @Inject lateinit var action: AllMetadataAction
 
   @Test
-  fun `happy path`() {
-    val actual = action.getAll()
+  fun `get all`() {
+    val actual = action.getAll("all")
     val actualIds = actual.all.keys
     assertEquals(setOf("service-graph", "config", "database-hibernate", "web-actions"), actualIds)
 
     // Config
     val actualConfig = actual.all["config"]!!
-    assert((actualConfig.metadata as Map<String, String?>).contains("JVM"))
-    assert((actualConfig.metadata as Map<String, String?>).contains("Effective Config"))
-    assertEquals(
-      """
-        ---
-        included:
-          key: "foo"
-        overridden:
-          key: "bar"
-        password:
-          password: "████████"
-          passphrase: "████████"
-          custom: "████████"
-        secret:
-          secret_key: "reference -> ████████"
-        redacted: "████████"
-        
-      """.trimIndent(),
-      (actualConfig.metadata as Map<String, String?>).get("Effective Config")
-    )
-    // Raw files or redaction is controlled by ConfigMetadataAction.ConfigTabMode.
-    // For this test, UNSAFE_LEAK_MISK_SECRETS is set.
-    //
-    //    AdminDashboardModule(
-    //      isDevelopment = true,
-    //      configTabMode = ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS,
-    //    )
-    assertEquals(
-      """
-        included:
-          key: common
-
-        overridden:
-          key: ignored
-
-        password:
-          password: abc123
-          passphrase: abc123
-          custom: abc123
-
-        secret:
-          secret_key: "classpath:/secrets/api_key.txt"
-
-        redacted:
-          key: common123
-      
-      """.trimIndent(),
-      (actualConfig.metadata as Map<String, String?>).get("classpath:/admin-dashboard-app-common.yaml")
-    )
-    assertEquals(
-      """
-        included:
-          key: testing
-        
-        redacted:
-          key: abc123
-      """.trimIndent(),
-      (actualConfig.metadata as Map<String, String?>).get("classpath:/admin-dashboard-app-testing.yaml")
-    )
+    assertConfig(actualConfig)
 
     // Database Hibernate Metadata
     // TODO maybe add a DB to the test so that assertions can confirm Database Hibernate metadata is included
@@ -114,6 +56,78 @@ class AllMetadataActionTest {
       """.trimIndent(),
       (actualWebActionsMetadata.metadata as List<WebActionMetadata>).first().toString()
     )
+  }
 
+  @Test
+  fun `only config`() {
+    val actual = action.getAll("config")
+    val actualIds = actual.all.keys
+    assertEquals(setOf("config"), actualIds)
+
+    // Config
+    val actualConfig = actual.all["config"]!!
+    assertConfig(actualConfig)
+  }
+
+  private fun assertConfig(actualConfig: Metadata) {
+    assert((actualConfig.metadata as Map<String, String?>).contains("JVM"))
+    assert((actualConfig.metadata as Map<String, String?>).contains("Effective Config"))
+    assertEquals(
+      """
+          ---
+          included:
+            key: "foo"
+          overridden:
+            key: "bar"
+          password:
+            password: "████████"
+            passphrase: "████████"
+            custom: "████████"
+          secret:
+            secret_key: "reference -> ████████"
+          redacted: "████████"
+          
+        """.trimIndent(),
+      (actualConfig.metadata as Map<String, String?>).get("Effective Config")
+    )
+    // Raw files or redaction is controlled by ConfigMetadataAction.ConfigTabMode.
+    // For this test, UNSAFE_LEAK_MISK_SECRETS is set.
+    //
+    //    AdminDashboardModule(
+    //      isDevelopment = true,
+    //      configTabMode = ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS,
+    //    )
+    assertEquals(
+      """
+          included:
+            key: common
+  
+          overridden:
+            key: ignored
+  
+          password:
+            password: abc123
+            passphrase: abc123
+            custom: abc123
+  
+          secret:
+            secret_key: "classpath:/secrets/api_key.txt"
+  
+          redacted:
+            key: common123
+        
+        """.trimIndent(),
+      (actualConfig.metadata as Map<String, String?>).get("classpath:/admin-dashboard-app-common.yaml")
+    )
+    assertEquals(
+      """
+          included:
+            key: testing
+          
+          redacted:
+            key: abc123
+        """.trimIndent(),
+      (actualConfig.metadata as Map<String, String?>).get("classpath:/admin-dashboard-app-testing.yaml")
+    )
   }
 }

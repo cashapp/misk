@@ -9,7 +9,7 @@ import {
   mapStateToProps
 } from "../ducks"
 
-const apiUrl = "/api/database/query/metadata"
+const apiUrl = "/api/v1/database/query/metadata"
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   componentDidMount() {

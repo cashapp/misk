@@ -16,6 +16,7 @@ import java.lang.management.RuntimeMXBean
 /**
  * Conveys information about the current JVM
  */
+// TODO replace this with a MetadataModule binding instead of separate web action
 @Singleton
 class JvmMetadataAction @Inject constructor(
   private val runtimeMxBean: RuntimeMXBean,
