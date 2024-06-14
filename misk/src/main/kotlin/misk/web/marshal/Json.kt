@@ -34,7 +34,7 @@ class JsonMarshaller<T>(val adapter: JsonAdapter<T>) : Marshaller<T> {
 
       val responseType = actualResponseType(type)
       if (GenericMarshallers.canHandle(responseType)) return null
-      return JsonMarshaller<Any>(moshi.adapter<Any>(responseType))
+      return JsonMarshaller<Any>(moshi.adapter(responseType))
     }
   }
 }

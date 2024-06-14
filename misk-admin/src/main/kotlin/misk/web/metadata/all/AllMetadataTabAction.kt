@@ -22,11 +22,12 @@ import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.Metadata
 import misk.web.v2.DashboardPageLayout
+import wisp.moshi.defaultKotlinMoshi
 
 @Singleton
 class AllMetadataTabAction @Inject constructor(
   private val dashboardPageLayout: DashboardPageLayout,
-  private val allMetadataAction: AllMetadataAction,
+  private val allMetadata: Map<String, Metadata<Any>>
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -37,8 +38,8 @@ class AllMetadataTabAction @Inject constructor(
   ): String = dashboardPageLayout
     .newBuilder()
     .build { appName, _, _ ->
-      val allMetadata = allMetadataAction.getMetadata("all").metadata
-      val metadata = allMetadataAction.getMetadata(q ?: "").metadata.values.firstOrNull()?.toString()
+      val metadata = allMetadata.filter { it.key == q }.values.firstOrNull()
+      val metadataString = metadata?.toString()
         // TODO properly optimistically serialize to JSON
         ?.split("),")?.joinToString("),\n")
         ?.split(",")?.joinToString(",\n")
@@ -72,14 +73,12 @@ class AllMetadataTabAction @Inject constructor(
             }
           }
 
-          if (metadata == null && q?.isNotBlank() == true) {
+          if (metadataString == null && q?.isNotBlank() == true) {
             // TODO replace with Alert message component
             h3("text-red-500") {
               +"Metadata '${q}' not found. Please select a metadata id from the dropdown."
             }
-          }
-
-          if (metadata != null || allMetadata[q] != null) {
+          } else {
             q?.let {
               h3("mb-4 text-color-blue-500") {
                 code {
@@ -96,7 +95,12 @@ class AllMetadataTabAction @Inject constructor(
 
             pre("bg-gray-100 p-4") {
               code("text-wrap font-mono") {
-                +(metadata ?: "Metadata not found for $q")
+                // TODO properly serialize to JSON
+
+//                val adapter = moshi.adapter(metadata)
+//                val a = defaultKotlinMoshi.adapter(metadata!!.metadata::class.java).toJson(metadata!!.metadata)
+//                +metadata!!.adapter.toJson(metadata!!.metadata)
+
               }
             }
           }

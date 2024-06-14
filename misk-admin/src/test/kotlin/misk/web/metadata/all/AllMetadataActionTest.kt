@@ -4,7 +4,6 @@ import jakarta.inject.Inject
 import misk.ServiceGraphBuilderMetadata
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataTestingModule
 import misk.web.metadata.database.DatabaseQueryMetadata
 import misk.web.metadata.webaction.WebActionMetadata
@@ -21,20 +20,20 @@ class metadataMetadataActionTest {
   @Test
   fun `get all`() {
     val actual = action.getMetadata("all")
-    val actualIds = actual.metadata.keys
+    val actualIds = actual.data.keys
     assertEquals(setOf("service-graph", "config", "database-hibernate", "web-actions"), actualIds)
 
     // Config
-    val actualConfig = actual.metadata["config"]!!
+    val actualConfig = actual.data["config"]!!
     assertConfig(actualConfig)
 
     // Database Hibernate Metadata
     // TODO maybe add a DB to the test so that assertions can confirm Database Hibernate metadata is included
-    val actualDatabaseHibernate = actual.metadata["database-hibernate"]!!
+    val actualDatabaseHibernate = actual.data["database-hibernate"]!!
     assertEquals(listOf(), (actualDatabaseHibernate.metadata as List<DatabaseQueryMetadata>))
 
     // Service Graph
-    val actualServiceGraphMetadata = actual.metadata["service-graph"]!!
+    val actualServiceGraphMetadata = actual.data["service-graph"]!!
     assertEquals(
       """
         |ServiceGraphBuilderMetadata(serviceMap={Key[type=misk.web.jetty.JettyService, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[], directDependsOn=[misk.ReadyService]), Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.tasks.RepeatedTaskQueue, annotation=@misk.web.ReadinessRefreshQueue]=CoordinatedServiceMetadata(dependencies=[], directDependsOn=[]), Key[type=misk.ReadyService, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.web.jetty.JettyService], directDependsOn=[misk.web.jetty.JettyThreadPoolMetricsCollector, misk.web.jetty.JettyConnectionMetricsCollector, misk.web.actions.ReadinessCheckService])}, serviceNames={Key[type=misk.web.jetty.JettyService, annotation=[none]]=misk.web.jetty.JettyService, Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=misk.web.jetty.JettyThreadPoolMetricsCollector, Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=misk.web.jetty.JettyConnectionMetricsCollector, Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=misk.web.actions.ReadinessCheckService, Key[type=misk.tasks.RepeatedTaskQueue, annotation=@misk.web.ReadinessRefreshQueue]=misk.tasks.RepeatedTaskQueue, Key[type=misk.ReadyService, annotation=[none]]=misk.ReadyService}, dependencyMap={Key[type=misk.ReadyService, annotation=[none]]=[Key[type=misk.web.jetty.JettyService, annotation=[none]]], Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]], Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]], Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]]}, asciiVisual=misk.web.jetty.JettyService
@@ -49,7 +48,7 @@ class metadataMetadataActionTest {
     )
 
     // Web Action Metadata
-    val actualWebActionsMetadata = actual.metadata["web-actions"]!!
+    val actualWebActionsMetadata = actual.data["web-actions"]!!
     assertEquals(
       """
         WebActionMetadata(name=StatusAction, function=fun misk.web.actions.StatusAction.getStatus(): misk.web.actions.StatusAction.ServerStatus, packageName=misk.web.actions, description=null, functionAnnotations=[@misk.web.Get(pathPattern="/_status"), @misk.web.ResponseContentType({"application/json;charset=utf-8"}), @misk.security.authz.Unauthenticated(), @misk.web.AvailableWhenDegraded()], requestMediaTypes=[*/*], responseMediaType=application/json;charset=utf-8, parameterTypes=[], parameters=[], requestType=null, returnType=misk.web.actions.StatusAction.ServerStatus, responseType=null, types={}, responseTypes={}, pathPattern=/_status, applicationInterceptors=[], networkInterceptors=[misk.web.interceptors.GunzipRequestBodyInterceptor, misk.web.interceptors.InternalErrorInterceptorFactory${'$'}Companion${'$'}INTERCEPTOR${'$'}1, misk.web.interceptors.RequestLogContextInterceptor, misk.web.interceptors.MetricsInterceptor, misk.web.exceptions.ExceptionHandlingInterceptor], httpMethod=GET, allowedServices=[], allowedCapabilities=[])
@@ -61,15 +60,15 @@ class metadataMetadataActionTest {
   @Test
   fun `only config`() {
     val actual = action.getMetadata("config")
-    val actualIds = actual.metadata.keys
+    val actualIds = actual.data.keys
     assertEquals(setOf("config"), actualIds)
 
     // Config
-    val actualConfig = actual.metadata["config"]!!
+    val actualConfig = actual.data["config"]!!
     assertConfig(actualConfig)
   }
 
-  private fun assertConfig(actualConfig: Metadata) {
+  private fun assertConfig(actualConfig: AllMetadataAction.SerializableMetadata) {
     assert((actualConfig.metadata as Map<String, String?>).contains("JVM"))
     assert((actualConfig.metadata as Map<String, String?>).contains("Effective Config"))
     assertEquals(

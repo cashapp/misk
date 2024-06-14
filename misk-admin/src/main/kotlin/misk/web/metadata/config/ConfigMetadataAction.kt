@@ -19,7 +19,7 @@ class ConfigMetadataAction @Inject constructor(
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
   fun getAll(): Response {
-    return Response(resources = metadataProvider.get().resources)
+    return Response(resources = metadataProvider.get().metadata)
   }
 
   data class Response(val resources: Map<String, String?>)

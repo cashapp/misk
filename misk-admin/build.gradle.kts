@@ -14,6 +14,7 @@ dependencies {
   api(libs.moshiCore)
   api(libs.okio)
   api(project(":wisp:wisp-deployment"))
+  api(project(":wisp:wisp-moshi"))
   api(project(":misk"))
   api(project(":misk-api"))
   api(project(":misk-actions"))

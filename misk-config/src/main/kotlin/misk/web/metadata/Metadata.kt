@@ -1,6 +1,11 @@
 package misk.web.metadata
 
-open class Metadata(
+import com.squareup.moshi.JsonAdapter
+
+interface Metadata<T> {
   /** Metadata object, should be a data class for easy built-in serialization to JSON. */
-  val metadata: Any,
-)
+  val metadata: T
+
+  /** Metadata adapter to use for moshi JSON serialization. */
+  val adapter: JsonAdapter<T>
+}

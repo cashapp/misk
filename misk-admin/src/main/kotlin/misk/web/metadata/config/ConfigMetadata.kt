@@ -1,5 +1,6 @@
 package misk.web.metadata.config
 
+import com.squareup.moshi.JsonAdapter
 import jakarta.inject.Inject
 import misk.config.AppName
 import misk.config.MiskConfig
@@ -8,12 +9,15 @@ import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.deployment.Deployment
+import wisp.moshi.adapter
+import wisp.moshi.defaultKotlinMoshi
 
 data class ConfigMetadata(
-  val resources: Map<String, String?>
-) : Metadata(metadata = resources)
+  override val metadata: Map<String, String?>,
+  override val adapter: JsonAdapter<Map<String, String?>> = defaultKotlinMoshi.adapter<Map<String, String?>>()
+) : Metadata<Map<String, String?>>
 
-class ConfigMetadataProvider : MetadataProvider<ConfigMetadata> {
+class ConfigMetadataProvider : MetadataProvider<Map<String, String?>, ConfigMetadata> {
   @Inject @AppName private lateinit var appName: String
   @Inject private lateinit var deployment: Deployment
   @Inject private lateinit var config: wisp.config.Config
@@ -23,7 +27,7 @@ class ConfigMetadataProvider : MetadataProvider<ConfigMetadata> {
   override val id: String = "config"
 
   override fun get() = ConfigMetadata(
-    resources = generateConfigResources(appName, deployment, config)
+    metadata = generateConfigResources(appName, deployment, config)
   )
 
   private fun generateConfigResources(

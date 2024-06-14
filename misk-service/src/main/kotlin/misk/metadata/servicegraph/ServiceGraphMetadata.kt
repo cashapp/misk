@@ -1,16 +1,20 @@
 package misk.metadata.servicegraph
 
+import com.squareup.moshi.JsonAdapter
 import jakarta.inject.Inject
 import jakarta.inject.Provider
 import misk.ServiceGraphBuilderMetadata
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
+import wisp.moshi.adapter
+import wisp.moshi.defaultKotlinMoshi
 
 data class ServiceGraphMetadata(
-  val builderMetadata: ServiceGraphBuilderMetadata,
-) : Metadata(metadata = builderMetadata)
+  override val metadata: ServiceGraphBuilderMetadata,
+  override val adapter: JsonAdapter<ServiceGraphBuilderMetadata> = defaultKotlinMoshi.adapter<ServiceGraphBuilderMetadata>(),
+) : Metadata<ServiceGraphBuilderMetadata>
 
-class ServiceGraphMetadataProvider : MetadataProvider<ServiceGraphMetadata> {
+class ServiceGraphMetadataProvider : MetadataProvider<ServiceGraphBuilderMetadata, ServiceGraphMetadata> {
   override val id: String = "service-graph"
 
   /**
@@ -21,6 +25,6 @@ class ServiceGraphMetadataProvider : MetadataProvider<ServiceGraphMetadata> {
   @Inject internal lateinit var metadataProvider: Provider<ServiceGraphBuilderMetadata>
 
   override fun get() = ServiceGraphMetadata(
-    builderMetadata = metadataProvider.get()
+    metadata = metadataProvider.get()
   )
 }

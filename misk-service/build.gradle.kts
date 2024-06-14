@@ -13,6 +13,7 @@ dependencies {
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
+  api(project(":wisp:wisp-moshi"))
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinStdLibJdk8)
   implementation(project(":wisp:wisp-logging"))

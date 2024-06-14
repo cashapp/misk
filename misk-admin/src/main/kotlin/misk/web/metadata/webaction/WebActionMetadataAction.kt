@@ -20,7 +20,7 @@ class WebActionMetadataAction @Inject constructor(
   @AdminDashboardAccess
   fun getAll(): Response {
     return Response(
-      webActionMetadata = provider.get().webActions
+      webActionMetadata = provider.get().metadata
     )
   }
 
