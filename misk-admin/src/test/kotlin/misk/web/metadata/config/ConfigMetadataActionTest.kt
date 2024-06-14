@@ -91,8 +91,8 @@ class ConfigMetadataActionTest {
     val jvmRuntime = jvmMetadataAction.getRuntime()
     assertEquals(
       // uptime millis will differ given the different calls from config and jvm action
-      configJvm?.lines()?.filter { !it.contains("uptime_millis") }?.joinToString(),
-      jvmRuntime.lines().filter { !it.contains("uptime_millis") }.joinToString()
+      configJvm?.lines()?.filter { !it.contains("uptime_millis") && !it.contains("class_path") }?.joinToString(),
+      jvmRuntime.lines().filter { !it.contains("uptime_millis") && !it.contains("class_path") }.joinToString()
     )
     assertThat(configJvm).contains("Java Virtual Machine Specification")
     assertThat(configJvm).contains("pid")

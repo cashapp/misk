@@ -6,7 +6,7 @@ import misk.moshi.MoshiModule
 import misk.moshi.adapter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.metadata.jvm.JvmMetadataAction.JvmRuntimeResponse
+import misk.web.metadata.jvm.JvmRuntime
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.lang.management.RuntimeMXBean
@@ -25,9 +25,9 @@ class JvmMetadataActionTest {
   /** Sanity check that we're able to call the action and spot check the expected data */
   @Test fun golden() {
     val rawResponse = jvmMetadataAction.getRuntime();
-    val response = moshi.adapter<JvmRuntimeResponse>().fromJson(rawResponse)!!
+    val response = moshi.adapter<JvmRuntime>().fromJson(rawResponse)!!
     assertThat(response.vm_name).isEqualTo("FakeRuntimeMxBean - VM Name")
-    assertThat(response).isEqualTo(JvmRuntimeResponse.create(FakeRuntimeMxBean()))
+    assertThat(response).isEqualTo(JvmRuntime.create(FakeRuntimeMxBean()))
   }
 
   class JvmMetadataTestingModule : KAbstractModule() {

@@ -7,6 +7,8 @@ import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.DashboardModule
 import misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode.SAFE
+import misk.web.metadata.jvm.JvmMetadata
+import misk.web.metadata.jvm.JvmMetadataProvider
 
 /**
  * Installs Config dashboard tab which shows the raw config inputs
@@ -25,6 +27,7 @@ class ConfigDashboardTabModule @JvmOverloads constructor(
 
     bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
     bind<ConfigMetadata>().toProvider(ConfigMetadataProvider())
+    bind<JvmMetadata>().toProvider(JvmMetadataProvider())
     install(WebActionModule.create<ConfigMetadataAction>())
 
     install(
