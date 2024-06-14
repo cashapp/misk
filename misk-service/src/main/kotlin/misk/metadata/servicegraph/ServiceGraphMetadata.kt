@@ -5,10 +5,15 @@ import jakarta.inject.Provider
 import misk.ServiceGraphBuilderMetadata
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
+import misk.web.metadata.toFormattedJson
+import wisp.moshi.adapter
+import wisp.moshi.defaultKotlinMoshi
 
 data class ServiceGraphMetadata(
   val builderMetadata: ServiceGraphBuilderMetadata,
-) : Metadata(metadata = builderMetadata)
+) : Metadata(metadata = builderMetadata, formattedJsonString = "Service Graph Ascii Visual\n\n${builderMetadata.asciiVisual}\n\nMetadata\n\n" + defaultKotlinMoshi
+  .adapter<ServiceGraphBuilderMetadata>()
+  .toFormattedJson(builderMetadata))
 
 class ServiceGraphMetadataProvider : MetadataProvider<ServiceGraphMetadata> {
   override val id: String = "service-graph"

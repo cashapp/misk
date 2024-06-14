@@ -7,11 +7,16 @@ import misk.resources.ResourceLoader
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.jvm.JvmMetadataAction
+import misk.web.metadata.toFormattedJson
 import wisp.deployment.Deployment
+import wisp.moshi.adapter
+import wisp.moshi.defaultKotlinMoshi
 
 data class ConfigMetadata(
   val resources: Map<String, String?>
-) : Metadata(metadata = resources)
+) : Metadata(metadata = resources, formattedJsonString = defaultKotlinMoshi
+  .adapter<Map<String, String?>>()
+  .toFormattedJson(resources))
 
 class ConfigMetadataProvider : MetadataProvider<ConfigMetadata> {
   @Inject @AppName private lateinit var appName: String

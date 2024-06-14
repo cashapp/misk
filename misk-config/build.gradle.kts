@@ -11,6 +11,7 @@ dependencies {
   api(libs.jacksonAnnotations)
   api(libs.jacksonDatabind)
   api(libs.jakartaInject)
+  api(libs.moshiCore)
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   api(project(":wisp:wisp-resource-loader"))

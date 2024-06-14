@@ -94,8 +94,13 @@ public final class misk/resources/TestingResourceLoaderModule : misk/inject/KAbs
 }
 
 public class misk/web/metadata/Metadata {
-	public fun <init> (Ljava/lang/Object;)V
+	public fun <init> (Ljava/lang/Object;Ljava/lang/String;)V
+	public final fun getFormattedJsonString ()Ljava/lang/String;
 	public final fun getMetadata ()Ljava/lang/Object;
+}
+
+public final class misk/web/metadata/MetadataKt {
+	public static final fun toFormattedJson (Lcom/squareup/moshi/JsonAdapter;Ljava/lang/Object;)Ljava/lang/String;
 }
 
 public final class misk/web/metadata/MetadataModule : misk/inject/KAbstractModule {

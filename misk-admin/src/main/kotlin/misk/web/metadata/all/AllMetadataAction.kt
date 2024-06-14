@@ -18,16 +18,15 @@ class AllMetadataAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AllMetadataAccess
-  fun getMetadata(@PathParam id: String): Response {
+  fun getAll(@PathParam id: String? = null): Response {
     // Return all metadata if the id is "all"
-    if (id == "all") return Response(metadata = allMetadata)
+    if (id == "all") return Response(all = allMetadata)
 
     // Return metadata for the requested id
-    val metadata = allMetadata.filter { it.key == id }
-    return Response(metadata = metadata)
+    return Response(all = allMetadata.filter { it.key == id })
   }
 
-  data class Response(val metadata: Map<String, Metadata>)
+  data class Response(val all: Map<String, Metadata>)
 
   companion object {
     const val PATH = "/api/{id}/metadata"

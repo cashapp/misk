@@ -25,6 +25,7 @@ dependencies {
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-tailwind"))
   implementation(project(":wisp:wisp-config"))
+  implementation(project(":wisp:wisp-moshi"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)

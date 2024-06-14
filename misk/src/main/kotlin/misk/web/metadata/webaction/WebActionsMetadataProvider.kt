@@ -6,10 +6,15 @@ import jakarta.inject.Singleton
 import misk.web.jetty.WebActionsServlet
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
+import misk.web.metadata.toFormattedJson
+import wisp.moshi.adapter
+import wisp.moshi.defaultKotlinMoshi
 
 data class WebActionsMetadata(
   val webActions: List<WebActionMetadata>
-) : Metadata(metadata = webActions)
+) : Metadata(metadata = webActions, formattedJsonString = defaultKotlinMoshi
+  .adapter<List<WebActionMetadata>>()
+  .toFormattedJson(webActions))
 
 @Singleton
 class WebActionsMetadataProvider : MetadataProvider<WebActionsMetadata> {

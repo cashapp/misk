@@ -20,7 +20,6 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
-import misk.web.metadata.Metadata
 import misk.web.v2.DashboardPageLayout
 
 @Singleton
@@ -37,11 +36,8 @@ class AllMetadataTabAction @Inject constructor(
   ): String = dashboardPageLayout
     .newBuilder()
     .build { appName, _, _ ->
-      val allMetadata = allMetadataAction.getMetadata("all").metadata
-      val metadata = allMetadataAction.getMetadata(q ?: "").metadata.values.firstOrNull()?.toString()
-        // TODO properly optimistically serialize to JSON
-        ?.split("),")?.joinToString("),\n")
-        ?.split(",")?.joinToString(",\n")
+      val allMetadata = allMetadataAction.getAll("all").all
+      val metadata = allMetadataAction.getAll(q).all.values.firstOrNull()
 
       div("container mx-auto p-8") {
         h1("text-3xl font-bold") { +"""All Metadata""" }
@@ -96,7 +92,7 @@ class AllMetadataTabAction @Inject constructor(
 
             pre("bg-gray-100 p-4") {
               code("text-wrap font-mono") {
-                +(metadata ?: "Metadata not found for $q")
+                +(metadata?.formattedJsonString ?: "Metadata not found for $q")
               }
             }
           }
