@@ -56,7 +56,7 @@ public abstract interface class misk/logging/Mdc {
 public abstract interface class misk/scope/ActionScoped {
 	public static final field Companion Lmisk/scope/ActionScoped$Companion;
 	public abstract fun get ()Ljava/lang/Object;
-	public abstract fun getIfInScope ()Ljava/lang/Object;
+	public fun getIfInScope ()Ljava/lang/Object;
 }
 
 public final class misk/scope/ActionScoped$Companion {

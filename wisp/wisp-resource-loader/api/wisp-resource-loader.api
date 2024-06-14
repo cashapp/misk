@@ -10,6 +10,7 @@ public final class wisp/resources/FilesystemLoaderBackend : wisp/resources/Resou
 	public static final field INSTANCE Lwisp/resources/FilesystemLoaderBackend;
 	public static final field SCHEME Ljava/lang/String;
 	public fun exists (Ljava/lang/String;)Z
+	public fun list (Ljava/lang/String;)Ljava/util/List;
 	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
 	public fun unwatch (Ljava/lang/String;)V
 	public fun watch (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
