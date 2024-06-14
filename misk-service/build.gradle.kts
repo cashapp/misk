@@ -15,7 +15,9 @@ dependencies {
   api(project(":wisp:wisp-config"))
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinStdLibJdk8)
+  implementation(libs.moshiCore)
   implementation(project(":wisp:wisp-logging"))
+  implementation(project(":wisp:wisp-moshi"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.javaxInject)
