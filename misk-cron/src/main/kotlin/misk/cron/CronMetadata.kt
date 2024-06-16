@@ -12,7 +12,7 @@ internal data class CronMetadata(
   val runningCrons: List<String>
 )
 
-class CronMetadataProvider : MetadataProvider<Metadata> {
+internal class CronMetadataProvider : MetadataProvider<Metadata> {
   @Inject private lateinit var cronManager: CronManager
 
   override val id: String = "cron"
