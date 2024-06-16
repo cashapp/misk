@@ -31,6 +31,11 @@ class CronManager @Inject constructor() {
 
   private val cronEntries = mutableMapOf<String, CronEntry>()
 
+  fun getMetadata() = CronMetadata(
+    cronEntries = cronEntries,
+    runningCrons = runningCrons.map { it.toString() }
+  )
+
   internal fun addCron(name: String, crontab: String, cron: Runnable) {
     require(name.isNotEmpty()) { "Expecting a valid cron name" }
     require(cronEntries[name] == null) { "Cron $name is already registered" }
