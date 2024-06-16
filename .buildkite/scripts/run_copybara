@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -eo pipefail
+
+# Check if the workflow name is provided
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <run_copybara workflow_name>"
+    exit 1
+fi
+
+WORKFLOW=$1
+echo "Running Copybara migration $WORKFLOW"
+../bin/copybara .buildkite/scripts/copy.bara.sky $WORKFLOW --git-committer-name Copybara \
+--git-committer-email cash-dx@squareup.com
+
+# Check the exit status
+status=$?
+if [ $status -eq 4 ]; then
+  echo "Copybara finished without changes made to the OSS repository."
+  exit 0
+elif [ $status -ne 0 ]; then
+  echo "Copybara failed with status $status."
+  exit $status
+else
+  echo "Copybara migration successful."
+  exit 0
+fi
