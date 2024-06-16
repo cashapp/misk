@@ -16,7 +16,6 @@
     * [misk-web][miskweb]: a now deprecated React framework used for the Misk Admin Dashboard v1
     * [wisp](./wisp/README.md): some Misk artifacts that are published without use of the Guice Direct Injection library
 
-
 # Overview
 ## What is Misk
 Misk (Microservice Container in Kotlin) is an open source microservice container from Cash App.
