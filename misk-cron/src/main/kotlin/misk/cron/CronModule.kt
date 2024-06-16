@@ -14,6 +14,7 @@ import java.time.ZoneId
 import jakarta.inject.Qualifier
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
+import misk.moshi.MoshiAdapterModule
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataModule
 

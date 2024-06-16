@@ -8,7 +8,7 @@ import wisp.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
 data class CronMetadata(
-  val cronEntries: Map<String, CronManager.CronEntry>,
+  val cronEntries: Map<String, CronManager.CronEntry.Metadata>,
   val runningCrons: List<String>
 )
 
