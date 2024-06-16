@@ -7,7 +7,7 @@ import misk.web.metadata.toFormattedJson
 import wisp.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
-data class CronMetadata(
+internal data class CronMetadata(
   val cronEntries: Map<String, CronManager.CronEntry.Metadata>,
   val runningCrons: List<String>
 )

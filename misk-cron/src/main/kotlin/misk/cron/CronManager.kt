@@ -30,7 +30,7 @@ class CronManager @Inject constructor() {
     val executionTime: ExecutionTime,
     val runnable: Runnable
   ) {
-    data class ExecutionTimeMetadata(
+    internal data class ExecutionTimeMetadata(
       val nextExecution: String?,
       val timeToNextExecution: String?,
       val lastExecution: String?,
@@ -53,14 +53,14 @@ class CronManager @Inject constructor() {
       }
     }
 
-    data class Metadata(
+    internal data class Metadata(
       val name: String,
       val cronTab: String,
       val executionTime: ExecutionTimeMetadata,
       val runnable: String
     )
 
-    fun toMetadata() = Metadata(
+    internal fun toMetadata() = Metadata(
       name = name,
       cronTab = cronTab,
       executionTime = executionTime.toMetadata(),
@@ -70,7 +70,7 @@ class CronManager @Inject constructor() {
 
   private val cronEntries = mutableMapOf<String, CronEntry>()
 
-  fun getMetadata() = CronMetadata(
+  internal fun getMetadata() = CronMetadata(
     cronEntries = cronEntries.mapValues { it.value.toMetadata() },
     runningCrons = runningCrons.map { it.toString() }
   )

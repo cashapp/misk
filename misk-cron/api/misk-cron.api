@@ -10,6 +10,7 @@ public final class misk/cron/CronEntryModule$Companion {
 public final class misk/cron/CronManager {
 	public static final field Companion Lmisk/cron/CronManager$Companion;
 	public fun <init> ()V
+	public final fun getMetadata ()Lmisk/cron/CronMetadata;
 	public final fun runReadyCrons (Ljava/time/Instant;)V
 	public final fun waitForCronsComplete ()V
 }
@@ -31,7 +32,67 @@ public final class misk/cron/CronManager$CronEntry {
 	public final fun getName ()Ljava/lang/String;
 	public final fun getRunnable ()Ljava/lang/Runnable;
 	public fun hashCode ()I
+	public final fun toMetadata ()Lmisk/cron/CronManager$CronEntry$Metadata;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/cron/CronManager$CronEntry$ExecutionTimeMetadata {
+	public static final field Companion Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata;
+	public static synthetic fun copy$default (Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLastExecution ()Ljava/lang/String;
+	public final fun getNextExecution ()Ljava/lang/String;
+	public final fun getTimeFromLastExecution ()Ljava/lang/String;
+	public final fun getTimeToNextExecution ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/cron/CronManager$CronEntry$ExecutionTimeMetadata$Companion {
+	public final fun toMetadata (Lcom/cronutils/model/time/ExecutionTime;)Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata;
+}
+
+public final class misk/cron/CronManager$CronEntry$Metadata {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata;Ljava/lang/String;)Lmisk/cron/CronManager$CronEntry$Metadata;
+	public static synthetic fun copy$default (Lmisk/cron/CronManager$CronEntry$Metadata;Ljava/lang/String;Ljava/lang/String;Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cron/CronManager$CronEntry$Metadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCronTab ()Ljava/lang/String;
+	public final fun getExecutionTime ()Lmisk/cron/CronManager$CronEntry$ExecutionTimeMetadata;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getRunnable ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/cron/CronMetadata {
+	public fun <init> (Ljava/util/Map;Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/util/Map;Ljava/util/List;)Lmisk/cron/CronMetadata;
+	public static synthetic fun copy$default (Lmisk/cron/CronMetadata;Ljava/util/Map;Ljava/util/List;ILjava/lang/Object;)Lmisk/cron/CronMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCronEntries ()Ljava/util/Map;
+	public final fun getRunningCrons ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/cron/CronMetadataProvider : misk/web/metadata/MetadataProvider {
+	public fun <init> ()V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/web/metadata/Metadata;
+	public fun getId ()Ljava/lang/String;
 }
 
 public final class misk/cron/CronModule : misk/inject/KInstallOnceModule {
