@@ -11,13 +11,14 @@ fi
 WORKFLOW=$1
 echo "Running Copybara migration $WORKFLOW"
 ../bin/copybara .buildkite/scripts/copy.bara.sky $WORKFLOW --git-committer-name Copybara \
---git-committer-email cash-dx@squareup.com || status=$?
+--git-committer-email cash-dx@squareup.com -v || status=$?
 
+echo "Copybara returned status: ${status:-0}"
 # Check the exit status
-if [ $status -eq 4 ]; then
+if [[ "$status" -eq 4 ]]; then
   echo "Copybara finished without changes made to the OSS repository."
   exit 0
-elif [ $status -ne 0 ]; then
+elif [[ "$status" -ne 0 ]]; then
   echo "Copybara failed with status $status."
   exit $status
 else
