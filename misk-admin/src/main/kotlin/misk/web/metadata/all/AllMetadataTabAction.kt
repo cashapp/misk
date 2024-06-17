@@ -35,7 +35,7 @@ class AllMetadataTabAction @Inject constructor(
     @QueryParam q: String?
   ): String = dashboardPageLayout
     .newBuilder()
-    .build { appName, _, _ ->
+    .build { _, _, _ ->
       val allMetadata = allMetadataAction.getAll("all").all
       val metadata = allMetadataAction.getAll(q).all.values.firstOrNull()
 
@@ -56,7 +56,7 @@ class AllMetadataTabAction @Inject constructor(
                 +""
               }
 
-              allMetadata.keys.sorted().forEachIndexed { index, key ->
+              allMetadata.keys.sorted().forEach { key ->
                 option {
                   if (q == key) {
                     selected = true

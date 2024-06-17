@@ -28,6 +28,7 @@ dependencies {
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-admin"))
+  implementation(project(":misk-api"))
   implementation(project(":misk-config"))
   implementation(project(":misk-clustering"))
   implementation(project(":misk-core"))

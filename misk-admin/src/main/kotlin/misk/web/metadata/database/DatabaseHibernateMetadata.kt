@@ -7,13 +7,13 @@ import misk.web.metadata.toFormattedJson
 import wisp.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
-data class DatabaseHibernateMetadata(
+internal data class DatabaseHibernateMetadata(
   val hibernate: List<DatabaseQueryMetadata>
 ) : Metadata(metadata = hibernate, prettyPrint = defaultKotlinMoshi
   .adapter<List<DatabaseQueryMetadata>>()
   .toFormattedJson(hibernate))
 
-class DatabaseHibernateMetadataProvider : MetadataProvider<DatabaseHibernateMetadata> {
+internal class DatabaseHibernateMetadataProvider : MetadataProvider<DatabaseHibernateMetadata> {
   @Inject lateinit var metadata: List<DatabaseQueryMetadata>
 
   override val id: String = "database-hibernate"

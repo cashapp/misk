@@ -14,6 +14,8 @@ import misk.web.metadata.database.DatabaseHibernateMetadataProvider
 import misk.web.metadata.webaction.WebActionsMetadataProvider
 
 /**
+ * This exposes extensive metadata about your Misk application via API and admin dashboard.
+ *
  * To install and use, ensure you also add an AccessAnnotationEntry to grant endpoint access.
  *
  * ```kotlin

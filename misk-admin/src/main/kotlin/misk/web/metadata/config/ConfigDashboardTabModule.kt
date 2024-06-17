@@ -1,12 +1,12 @@
-package misk.web.dashboard
+package misk.web.metadata.config
 
 import misk.inject.KAbstractModule
 import misk.jvm.JvmManagementFactoryModule
 import misk.web.WebActionModule
-import misk.web.metadata.config.ConfigMetadata
-import misk.web.metadata.config.ConfigMetadataAction
+import misk.web.dashboard.AdminDashboard
+import misk.web.dashboard.AdminDashboardAccess
+import misk.web.dashboard.DashboardModule
 import misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode.SAFE
-import misk.web.metadata.config.ConfigMetadataProvider
 
 /**
  * Installs Config dashboard tab which shows the raw config inputs
@@ -27,13 +27,15 @@ class ConfigDashboardTabModule @JvmOverloads constructor(
     bind<ConfigMetadata>().toProvider(ConfigMetadataProvider())
     install(WebActionModule.create<ConfigMetadataAction>())
 
-    install(DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
-      isDevelopment = isDevelopment,
-      slug = "config",
-      urlPathPrefix = "/_admin/config/",
-      developmentWebProxyUrl = "http://localhost:3200/",
-      menuLabel = "Config",
-      menuCategory = "Container Admin"
-    ))
+    install(
+      DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
+        isDevelopment = isDevelopment,
+        slug = "config",
+        urlPathPrefix = "/_admin/config/",
+        developmentWebProxyUrl = "http://localhost:3200/",
+        menuLabel = "Config",
+        menuCategory = "Container Admin"
+      )
+    )
   }
 }

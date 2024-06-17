@@ -236,7 +236,6 @@ subprojects {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = false
     }
-    dependsOn(":startRedis")
   }
 
   tasks.withType<Detekt> {

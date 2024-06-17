@@ -9,11 +9,11 @@ import misk.web.metadata.MetadataProvider
 import misk.web.metadata.jvm.JvmMetadataAction
 import wisp.deployment.Deployment
 
-data class ConfigMetadata(
+internal data class ConfigMetadata(
   val resources: Map<String, String?>
 ) : Metadata(metadata = resources, prettyPrint = resources.toString())
 
-class ConfigMetadataProvider : MetadataProvider<ConfigMetadata> {
+internal class ConfigMetadataProvider : MetadataProvider<ConfigMetadata> {
   @Inject @AppName private lateinit var appName: String
   @Inject private lateinit var deployment: Deployment
   @Inject private lateinit var config: wisp.config.Config

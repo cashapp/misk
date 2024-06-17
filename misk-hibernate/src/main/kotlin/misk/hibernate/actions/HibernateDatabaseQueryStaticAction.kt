@@ -22,13 +22,13 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
-import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.database.DatabaseQueryMetadata
 import wisp.logging.getLogger
 import java.lang.reflect.ParameterizedType
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.web.dashboard.AdminDashboardAccess
 import kotlin.reflect.KClass
 
 /** Runs query from Database Query dashboard tab against DB and returns results */
