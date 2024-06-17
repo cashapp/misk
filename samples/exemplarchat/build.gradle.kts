@@ -46,3 +46,7 @@ tasks.compileKotlin {
     allWarningsAsErrors = false
   }
 }
+
+tasks.withType<Test> {
+  dependsOn(":startRedis")
+}

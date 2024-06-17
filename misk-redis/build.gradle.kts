@@ -47,6 +47,10 @@ dependencies {
   testImplementation(testFixtures(project(":misk-redis")))
 }
 
+tasks.withType<Test> {
+  dependsOn(":startRedis")
+}
+
 mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))

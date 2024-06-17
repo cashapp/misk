@@ -85,3 +85,6 @@ public final class misk/web/DispatchMechanism : java/lang/Enum {
 	public static fun values ()[Lmisk/web/DispatchMechanism;
 }
 
+public abstract interface annotation class misk/web/dashboard/AdminDashboardAccess : java/lang/annotation/Annotation {
+}
+

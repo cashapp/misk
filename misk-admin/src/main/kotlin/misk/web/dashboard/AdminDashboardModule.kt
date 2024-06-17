@@ -3,7 +3,10 @@ package misk.web.dashboard
 import jakarta.inject.Qualifier
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
+import misk.web.metadata.config.ConfigDashboardTabModule
 import misk.web.metadata.config.ConfigMetadataAction
+import misk.web.metadata.database.DatabaseDashboardTabModule
+import misk.web.metadata.webaction.WebActionsDashboardTabModule
 import misk.web.v2.NavbarModule
 
 /**
