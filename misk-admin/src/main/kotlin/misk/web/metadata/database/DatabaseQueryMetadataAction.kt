@@ -4,10 +4,10 @@ import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
-import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.web.dashboard.AdminDashboardAccess
 
 /** Display available queries and their types */
 @Singleton

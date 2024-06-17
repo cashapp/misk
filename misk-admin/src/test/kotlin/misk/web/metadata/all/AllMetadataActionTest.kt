@@ -1,7 +1,6 @@
 package misk.web.metadata.all
 
 import jakarta.inject.Inject
-import misk.ServiceGraphBuilderMetadata
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.metadata.Metadata
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
-class metadataMetadataActionTest {
+class AllMetadataActionTest {
   @MiskTestModule
   val module = MetadataTestingModule()
 
@@ -37,7 +36,7 @@ class metadataMetadataActionTest {
     val actualServiceGraphMetadata = actual.all["service-graph"]!!
     assertEquals(
       """
-        |ServiceGraphBuilderMetadata(serviceMap={Key[type=misk.web.jetty.JettyService, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[], directDependsOn=[misk.ReadyService]), Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.tasks.RepeatedTaskQueue, annotation=@misk.web.ReadinessRefreshQueue]=CoordinatedServiceMetadata(dependencies=[], directDependsOn=[]), Key[type=misk.ReadyService, annotation=[none]]=CoordinatedServiceMetadata(dependencies=[misk.web.jetty.JettyService], directDependsOn=[misk.web.jetty.JettyThreadPoolMetricsCollector, misk.web.jetty.JettyConnectionMetricsCollector, misk.web.actions.ReadinessCheckService])}, serviceNames={Key[type=misk.web.jetty.JettyService, annotation=[none]]=misk.web.jetty.JettyService, Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=misk.web.jetty.JettyThreadPoolMetricsCollector, Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=misk.web.jetty.JettyConnectionMetricsCollector, Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=misk.web.actions.ReadinessCheckService, Key[type=misk.tasks.RepeatedTaskQueue, annotation=@misk.web.ReadinessRefreshQueue]=misk.tasks.RepeatedTaskQueue, Key[type=misk.ReadyService, annotation=[none]]=misk.ReadyService}, dependencyMap={Key[type=misk.ReadyService, annotation=[none]]=[Key[type=misk.web.jetty.JettyService, annotation=[none]]], Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]], Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]], Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]]}, asciiVisual=misk.web.jetty.JettyService
+        |Metadata(serviceMap={Key[type=misk.web.jetty.JettyService, annotation=[none]]=Metadata(dependencies=[], directDependsOn=[misk.ReadyService]), Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=Metadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=Metadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=Metadata(dependencies=[misk.ReadyService], directDependsOn=[]), Key[type=misk.tasks.RepeatedTaskQueue, annotation=@misk.web.ReadinessRefreshQueue]=Metadata(dependencies=[], directDependsOn=[]), Key[type=misk.ReadyService, annotation=[none]]=Metadata(dependencies=[misk.web.jetty.JettyService], directDependsOn=[misk.web.jetty.JettyThreadPoolMetricsCollector, misk.web.jetty.JettyConnectionMetricsCollector, misk.web.actions.ReadinessCheckService])}, serviceNames={Key[type=misk.web.jetty.JettyService, annotation=[none]]=misk.web.jetty.JettyService, Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=misk.web.jetty.JettyThreadPoolMetricsCollector, Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=misk.web.jetty.JettyConnectionMetricsCollector, Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=misk.web.actions.ReadinessCheckService, Key[type=misk.tasks.RepeatedTaskQueue, annotation=@misk.web.ReadinessRefreshQueue]=misk.tasks.RepeatedTaskQueue, Key[type=misk.ReadyService, annotation=[none]]=misk.ReadyService}, dependencyMap={Key[type=misk.ReadyService, annotation=[none]]=[Key[type=misk.web.jetty.JettyService, annotation=[none]]], Key[type=misk.web.jetty.JettyThreadPoolMetricsCollector, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]], Key[type=misk.web.jetty.JettyConnectionMetricsCollector, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]], Key[type=misk.web.actions.ReadinessCheckService, annotation=[none]]=[Key[type=misk.ReadyService, annotation=[none]]]}, asciiVisual=misk.web.jetty.JettyService
         |    \__ misk.ReadyService
         |        |__ misk.web.jetty.JettyThreadPoolMetricsCollector
         |        |__ misk.web.jetty.JettyConnectionMetricsCollector
@@ -45,7 +44,7 @@ class metadataMetadataActionTest {
         |misk.tasks.RepeatedTaskQueue
         |)
       """.trimMargin(),
-      (actualServiceGraphMetadata.metadata as ServiceGraphBuilderMetadata).toString()
+      (actualServiceGraphMetadata.metadata).toString()
     )
 
     // Web Action Metadata
