@@ -11,7 +11,10 @@ import wisp.deployment.Deployment
 
 internal data class ConfigMetadata(
   val resources: Map<String, String?>
-) : Metadata(metadata = resources, prettyPrint = resources.toString())
+) : Metadata(metadata = resources, prettyPrint = resources.entries
+  .joinToString("\n\n") {
+    "${it.key}\n---\n${it.value?.removePrefix("---")?.removePrefix("\n")}"
+  })
 
 internal class ConfigMetadataProvider : MetadataProvider<ConfigMetadata> {
   @Inject @AppName private lateinit var appName: String
