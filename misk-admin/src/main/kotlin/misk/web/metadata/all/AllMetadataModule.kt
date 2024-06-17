@@ -1,7 +1,6 @@
 package misk.web.metadata.all
 
 import misk.inject.KAbstractModule
-import misk.moshi.MoshiAdapterModule
 import misk.web.WebActionModule
 import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.AdminDashboardAccess
