@@ -22,5 +22,7 @@ class WebActionsMetadataProvider : MetadataProvider<WebActionsMetadata> {
 
   override val id: String = "web-actions"
 
-  override fun get() = WebActionsMetadata(servletProvider.get().webActionsMetadata)
+  val metadata by lazy { WebActionsMetadata(servletProvider.get().webActionsMetadata) }
+
+  override fun get() = metadata
 }

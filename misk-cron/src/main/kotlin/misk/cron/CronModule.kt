@@ -14,6 +14,9 @@ import java.time.ZoneId
 import jakarta.inject.Qualifier
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
+import misk.moshi.MoshiAdapterModule
+import misk.web.metadata.Metadata
+import misk.web.metadata.MetadataModule
 
 class CronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,
@@ -29,6 +32,7 @@ class CronModule @JvmOverloads constructor(
         dependsOn = dependencies,
       ).dependsOn<ReadyService>()
     )
+    install(MetadataModule(CronMetadataProvider()))
   }
 
   @Provides
@@ -58,6 +62,7 @@ class FakeCronModule @JvmOverloads constructor(
         dependsOn = dependencies
       ).dependsOn<ReadyService>()
     )
+    install(MetadataModule(CronMetadataProvider()))
   }
 }
 

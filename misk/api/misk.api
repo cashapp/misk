@@ -2204,6 +2204,7 @@ public final class misk/web/metadata/webaction/WebActionsMetadataProvider : misk
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lmisk/web/metadata/webaction/WebActionsMetadata;
 	public fun getId ()Ljava/lang/String;
+	public final fun getMetadata ()Lmisk/web/metadata/webaction/WebActionsMetadata;
 }
 
 public final class misk/web/proxy/OptionalBinder {
