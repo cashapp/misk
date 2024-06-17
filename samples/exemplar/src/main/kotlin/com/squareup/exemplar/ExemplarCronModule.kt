@@ -13,7 +13,6 @@ import misk.cron.FakeCronModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import wisp.logging.getLogger
-import wisp.logging.log
 import java.lang.Thread.sleep
 import java.time.ZoneId
 

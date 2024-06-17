@@ -14,10 +14,12 @@ dependencies {
   api(project(":misk"))
   api(project(":misk-inject"))
   implementation(libs.kotlinLogging)
+  implementation(libs.moshiCore)
   implementation(project(":wisp:wisp-lease"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
   implementation(project(":misk-clustering"))
+  implementation(project(":misk-config"))
   implementation(project(":misk-core"))
   implementation(project(":misk-service"))
 
