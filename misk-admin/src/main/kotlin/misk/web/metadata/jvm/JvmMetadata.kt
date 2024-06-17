@@ -20,7 +20,7 @@ import java.lang.management.RuntimeMXBean
 data class JvmMetadata(
   val jvmRuntime: JvmRuntime,
 ) : Metadata(
-  metadata = jvmRuntime, formattedJsonString = defaultKotlinMoshi
+  metadata = jvmRuntime, prettyPrint = defaultKotlinMoshi
   .adapter<JvmRuntime>()
   .toFormattedJson(jvmRuntime)
 )
