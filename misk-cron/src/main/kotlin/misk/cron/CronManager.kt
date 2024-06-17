@@ -4,6 +4,9 @@ import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
 import com.cronutils.model.time.ExecutionTime
 import com.cronutils.parser.CronParser
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import misk.cron.CronManager.CronEntry.ExecutionTimeMetadata.Companion.toMetadata
 import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Instant
@@ -11,8 +14,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import kotlin.jvm.optionals.getOrNull
 
 @Singleton
 class CronManager @Inject constructor() {
@@ -27,9 +29,51 @@ class CronManager @Inject constructor() {
     val cronTab: String,
     val executionTime: ExecutionTime,
     val runnable: Runnable
-  )
+  ) {
+    internal data class ExecutionTimeMetadata(
+      val nextExecution: String?,
+      val timeToNextExecution: String?,
+      val lastExecution: String?,
+      val timeFromLastExecution: String?
+    ) {
+      companion object {
+        fun ExecutionTime.toMetadata(): ExecutionTimeMetadata {
+          val now = ZonedDateTime.now()
+          val nextExecution = nextExecution(now)
+          val timeToNextExecution = timeToNextExecution(now)
+          val lastExecution = lastExecution(now)
+          val timeFromLastExecution = timeFromLastExecution(now)
+          return ExecutionTimeMetadata(
+            nextExecution = nextExecution.getOrNull().toString(),
+            timeToNextExecution = timeToNextExecution.getOrNull().toString(),
+            lastExecution = lastExecution.getOrNull().toString(),
+            timeFromLastExecution = timeFromLastExecution.getOrNull().toString()
+          )
+        }
+      }
+    }
+
+    internal data class Metadata(
+      val name: String,
+      val cronTab: String,
+      val executionTime: ExecutionTimeMetadata,
+      val runnable: String
+    )
+
+    internal fun toMetadata() = Metadata(
+      name = name,
+      cronTab = cronTab,
+      executionTime = executionTime.toMetadata(),
+      runnable = runnable.toString()
+    )
+  }
 
   private val cronEntries = mutableMapOf<String, CronEntry>()
+
+  internal fun getMetadata() = CronMetadata(
+    cronEntries = cronEntries.mapValues { it.value.toMetadata() },
+    runningCrons = runningCrons.map { it.toString() }
+  )
 
   internal fun addCron(name: String, crontab: String, cron: Runnable) {
     require(name.isNotEmpty()) { "Expecting a valid cron name" }

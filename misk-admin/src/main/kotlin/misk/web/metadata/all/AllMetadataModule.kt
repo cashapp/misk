@@ -1,11 +1,14 @@
 package misk.web.metadata.all
 
+import jakarta.inject.Provider
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.DashboardModule
+import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataModule
+import misk.web.metadata.MetadataProvider
 import misk.web.metadata.config.ConfigMetadataProvider
 import misk.web.metadata.database.DatabaseHibernateMetadataProvider
 import misk.web.metadata.webaction.WebActionsMetadataProvider
