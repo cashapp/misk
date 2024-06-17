@@ -12,7 +12,7 @@ import wisp.moshi.defaultKotlinMoshi
 
 data class WebActionsMetadata(
   val webActions: List<WebActionMetadata>
-) : Metadata(metadata = webActions, formattedJsonString = defaultKotlinMoshi
+) : Metadata(metadata = webActions, prettyPrint = defaultKotlinMoshi
   .adapter<List<WebActionMetadata>>()
   .toFormattedJson(webActions))
 
