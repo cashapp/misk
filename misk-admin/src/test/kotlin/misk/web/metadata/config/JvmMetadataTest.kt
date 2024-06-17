@@ -22,7 +22,7 @@ class JvmMetadataTest {
   val module = JvmMetadataTestingModule()
 
   @Inject lateinit var moshi: Moshi
-  @Inject lateinit var jvmMetadataProvider: Provider<JvmMetadata>
+  @Inject internal lateinit var jvmMetadataProvider: Provider<JvmMetadata>
 
   /** Sanity check that we're able to call the action and spot check the expected data */
   @Test fun golden() {

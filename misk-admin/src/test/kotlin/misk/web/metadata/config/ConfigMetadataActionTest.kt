@@ -2,13 +2,14 @@ package misk.web.metadata.config
 
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
+import jakarta.inject.Provider
 import misk.config.MiskConfig
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.metadata.MetadataTestingModule
 import misk.web.metadata.TestConfig
-import misk.web.metadata.jvm.JvmMetadataAction
+import misk.web.metadata.jvm.JvmMetadata
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
@@ -19,7 +20,7 @@ class ConfigMetadataActionTest {
   @MiskTestModule
   val module = MetadataTestingModule()
 
-  @Inject lateinit var jvmMetadataAction: JvmMetadataAction
+  @Inject internal lateinit var jvmMetadataProvider: Provider<JvmMetadata>
   @Inject lateinit var configMetadataAction: ConfigMetadataAction
 
   @Test fun configSecretsStillAccessibleInCode() {
@@ -88,7 +89,7 @@ class ConfigMetadataActionTest {
     assertThat(response.resources).containsKey("Effective Config")
     assertThat(response.resources).containsKey("JVM")
     val configJvm = response.resources.get("JVM")
-    val jvmRuntime = jvmMetadataAction.getRuntime()
+    val jvmRuntime = jvmMetadataProvider.get().prettyPrint
     assertEquals(
       // uptime millis will differ given the different calls from config and jvm action
       configJvm?.lines()?.filter { !it.contains("uptime_millis") && !it.contains("class_path") }?.joinToString(),
