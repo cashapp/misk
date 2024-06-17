@@ -11,7 +11,7 @@ import wisp.moshi.defaultKotlinMoshi
 
 data class ServiceGraphMetadata(
   val builderMetadata: ServiceGraphBuilderMetadata,
-) : Metadata(metadata = builderMetadata, formattedJsonString = "Service Graph Ascii Visual\n\n${builderMetadata.asciiVisual}\n\nMetadata\n\n" + defaultKotlinMoshi
+) : Metadata(metadata = builderMetadata, prettyPrint = "Service Graph Ascii Visual\n\n${builderMetadata.asciiVisual}\n\nMetadata\n\n" + defaultKotlinMoshi
   .adapter<ServiceGraphBuilderMetadata>()
   .toFormattedJson(builderMetadata))
 

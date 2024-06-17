@@ -92,7 +92,7 @@ class AllMetadataTabAction @Inject constructor(
 
             pre("bg-gray-100 p-4") {
               code("text-wrap font-mono") {
-                +(metadata?.formattedJsonString ?: "Metadata not found for $q")
+                +(metadata?.prettyPrint ?: "Metadata not found for $q")
               }
             }
           }

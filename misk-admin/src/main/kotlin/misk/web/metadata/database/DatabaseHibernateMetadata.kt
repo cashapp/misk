@@ -9,7 +9,7 @@ import wisp.moshi.defaultKotlinMoshi
 
 data class DatabaseHibernateMetadata(
   val hibernate: List<DatabaseQueryMetadata>
-) : Metadata(metadata = hibernate, formattedJsonString = defaultKotlinMoshi
+) : Metadata(metadata = hibernate, prettyPrint = defaultKotlinMoshi
   .adapter<List<DatabaseQueryMetadata>>()
   .toFormattedJson(hibernate))
 
