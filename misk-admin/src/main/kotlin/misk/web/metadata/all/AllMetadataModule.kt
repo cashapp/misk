@@ -11,6 +11,7 @@ import misk.web.metadata.MetadataModule
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.config.ConfigMetadataProvider
 import misk.web.metadata.database.DatabaseHibernateMetadataProvider
+import misk.web.metadata.jvm.JvmMetadataProvider
 import misk.web.metadata.webaction.WebActionsMetadataProvider
 
 /**
@@ -32,6 +33,7 @@ class AllMetadataModule : KAbstractModule() {
     // Built in metadata
     install(MetadataModule(ConfigMetadataProvider()))
     install(MetadataModule(DatabaseHibernateMetadataProvider()))
+    install(MetadataModule(JvmMetadataProvider()))
     install(MetadataModule(WebActionsMetadataProvider()))
 
     // Install dashbaord tab
