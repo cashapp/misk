@@ -23,7 +23,9 @@ dependencies {
   implementation(libs.jacksonJsr310)
   implementation(libs.jacksonKotlin)
   implementation(libs.kotlinLogging)
+  implementation(libs.kotlinxHtml)
   implementation(libs.okio)
+  implementation(project(":misk-tailwind"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-resource-loader-testing"))
 

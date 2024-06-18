@@ -1,7 +1,9 @@
 package misk.web.metadata.jvm
 
 import jakarta.inject.Inject
+import kotlinx.html.TagConsumer
 import misk.moshi.adapter
+import misk.tailwind.components.AlertInfo
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.toFormattedJson
@@ -11,9 +13,11 @@ import java.lang.management.RuntimeMXBean
 internal data class JvmMetadata(
   val jvmRuntime: JvmRuntime,
 ) : Metadata(
-  metadata = jvmRuntime, prettyPrint = defaultKotlinMoshi
-  .adapter<JvmRuntime>()
-  .toFormattedJson(jvmRuntime)
+  metadata = jvmRuntime,
+  prettyPrint = defaultKotlinMoshi
+    .adapter<JvmRuntime>()
+    .toFormattedJson(jvmRuntime),
+  descriptionString = "JVM runtime MX bean configuration."
 )
 
 internal class JvmMetadataProvider : MetadataProvider<JvmMetadata> {

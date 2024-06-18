@@ -70,7 +70,7 @@ class CronManager @Inject constructor() {
 
   private val cronEntries = mutableMapOf<String, CronEntry>()
 
-  internal fun getMetadata() = CronMetadata(
+  internal fun getMetadata() = CronData(
     cronEntries = cronEntries.mapValues { it.value.toMetadata() },
     runningCrons = runningCrons.map { it.toString() }
   )

@@ -11,9 +11,10 @@ import kotlinx.html.h3
 import kotlinx.html.id
 import kotlinx.html.onChange
 import kotlinx.html.option
-import kotlinx.html.pre
 import kotlinx.html.select
 import kotlinx.html.span
+import misk.tailwind.components.AlertError
+import misk.tailwind.components.CodeBlock
 import misk.web.Get
 import misk.web.QueryParam
 import misk.web.ResponseContentType
@@ -70,32 +71,29 @@ internal class MetadataTabIndexAction @Inject constructor(
           }
 
           if (metadata == null && q?.isNotBlank() == true) {
-            // TODO replace with Alert message component
-            h3("text-red-500") {
-              +"Metadata '${q}' not found. Please select a metadata id from the dropdown."
-            }
+            AlertError("Metadata '${q}' not found. Please select a valid metadata id from the select dropdown above.")
           }
 
-          if (metadata != null || allMetadata[q] != null) {
-            q?.let {
-              h3("mb-4 text-color-blue-500") {
-                code {
-                  span("font-bold") {
-                    +"GET "
-                  }
-                  a(classes = "text-blue-500 hover:underline") {
-                    href = AllMetadataAction.PATH.replace("{id}", q)
-                    +AllMetadataAction.PATH.replace("{id}", q)
-                  }
+          if (q != null && metadata != null) {
+            h3("mb-4 text-color-blue-500") {
+              code {
+                span("font-bold") {
+                  +"GET "
+                }
+                a(classes = "text-blue-500 hover:underline") {
+                  href = AllMetadataAction.PATH.replace("{id}", q)
+                  +AllMetadataAction.PATH.replace("{id}", q)
                 }
               }
             }
 
-            pre("bg-gray-100 p-4 overflow-x-scroll rounded-lg") {
-              code("text-wrap font-mono") {
-                +(metadata?.prettyPrint ?: "Metadata not found for $q")
-              }
+            div("my-4") {
+              metadata.descriptionBlock(this@build)
             }
+
+            h3("text-xl font-bold my-4") { +"""Metadata""" }
+
+            CodeBlock(metadata.prettyPrint)
           }
         }
       }
@@ -103,6 +101,5 @@ internal class MetadataTabIndexAction @Inject constructor(
 
   companion object {
     const val PATH = "/_admin/metadata/"
-
   }
 }
