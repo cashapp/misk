@@ -6,7 +6,10 @@ import misk.testing.MiskTestModule
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataTestingModule
 import misk.web.metadata.database.DatabaseQueryMetadata
+import misk.web.metadata.jvm.JvmMetadata
+import misk.web.metadata.jvm.JvmRuntime
 import misk.web.metadata.webaction.WebActionMetadata
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -21,7 +24,7 @@ class AllMetadataActionTest {
   fun `get all`() {
     val actual = action.getAll("all")
     val actualIds = actual.all.keys
-    assertEquals(setOf("service-graph", "config", "database-hibernate", "web-actions"), actualIds)
+    assertEquals(setOf("service-graph", "config", "database-hibernate", "jvm", "web-actions"), actualIds)
 
     // Config
     val actualConfig = actual.all["config"]!!
@@ -47,6 +50,10 @@ class AllMetadataActionTest {
       (actualServiceGraphMetadata.metadata).toString()
     )
 
+    // JVM
+    val actualJvmMetadata = actual.all["jvm"]!!
+    assertThat((actualJvmMetadata.metadata as JvmRuntime).toString()).contains("FakeRuntimeMxBean - VM Name")
+
     // Web Action Metadata
     val actualWebActionsMetadata = actual.all["web-actions"]!!
     assertEquals(
@@ -69,8 +76,7 @@ class AllMetadataActionTest {
   }
 
   private fun assertConfig(actualConfig: Metadata) {
-    assert((actualConfig.metadata as Map<String, String?>).contains("JVM"))
-    assert((actualConfig.metadata as Map<String, String?>).contains("Effective Config"))
+    assertThat(actualConfig.metadata as Map<String, String?>).containsKey("Effective Config")
     assertEquals(
       """
           ---
