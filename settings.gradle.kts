@@ -5,16 +5,12 @@ pluginManagement {
   }
 }
 
-
 plugins {
   id("com.gradle.develocity") version "3.17.4"
 }
 
-
 develocity {
   buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
     publishing {
       termsOfUseUrl = "https://gradle.com/terms-of-service"
       termsOfUseAgree = "yes"
@@ -120,4 +116,3 @@ include(":misk-transactional-jobqueue")
 include(":misk-warmup")
 include(":samples:exemplar")
 include(":samples:exemplarchat")
-
