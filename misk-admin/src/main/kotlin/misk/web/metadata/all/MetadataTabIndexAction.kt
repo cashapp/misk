@@ -23,7 +23,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.v2.DashboardPageLayout
 
 @Singleton
-class AllMetadataTabAction @Inject constructor(
+internal class MetadataTabIndexAction @Inject constructor(
   private val dashboardPageLayout: DashboardPageLayout,
   private val allMetadataAction: AllMetadataAction,
 ) : WebAction {
@@ -40,7 +40,8 @@ class AllMetadataTabAction @Inject constructor(
       val metadata = allMetadataAction.getAll(q).all.values.firstOrNull()
 
       div("container mx-auto p-8") {
-        h1("text-3xl font-bold") { +"""All Metadata""" }
+        val suffix = if (metadata != null) " / $q" else ""
+        h1("text-3xl font-bold") { +"""Metadata$suffix""" }
 
         div {
           form {
