@@ -23,7 +23,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.v2.DashboardPageLayout
 
 @Singleton
-class MetadataTabIndexAction @Inject constructor(
+internal class MetadataTabIndexAction @Inject constructor(
   private val dashboardPageLayout: DashboardPageLayout,
   private val allMetadataAction: AllMetadataAction,
 ) : WebAction {

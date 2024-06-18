@@ -659,16 +659,6 @@ public final class misk/web/metadata/all/AllMetadataModule : misk/inject/KAbstra
 	public fun <init> ()V
 }
 
-public final class misk/web/metadata/all/AllMetadataTabAction : misk/web/actions/WebAction {
-	public static final field Companion Lmisk/web/metadata/all/AllMetadataTabAction$Companion;
-	public static final field PATH Ljava/lang/String;
-	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Lmisk/web/metadata/all/AllMetadataAction;)V
-	public final fun get (Ljava/lang/String;)Ljava/lang/String;
-}
-
-public final class misk/web/metadata/all/AllMetadataTabAction$Companion {
-}
-
 public final class misk/web/metadata/config/ConfigDashboardTabModule : misk/inject/KAbstractModule {
 	public fun <init> (Z)V
 	public fun <init> (ZLmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;)V
