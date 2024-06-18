@@ -73,4 +73,9 @@ class ValidWebEntryTest {
       classException.message
     )
   }
+
+  @Test fun `allows valid path with query parameters`() {
+    class TestWebEntry : ValidWebEntry(valid_slug = "test-slug", valid_url_path_prefix = "/test-slug/?q=abc123")
+    TestWebEntry()
+  }
 }
