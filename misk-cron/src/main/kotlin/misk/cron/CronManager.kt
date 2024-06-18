@@ -7,6 +7,8 @@ import com.cronutils.parser.CronParser
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.cron.CronManager.CronEntry.ExecutionTimeMetadata.Companion.toMetadata
+import wisp.lease.Lease
+import wisp.lease.LeaseManager
 import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Instant
@@ -15,12 +17,14 @@ import java.time.ZonedDateTime
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import kotlin.jvm.optionals.getOrNull
+import kotlin.reflect.KClass
 
 @Singleton
 class CronManager @Inject constructor() {
   @Inject private lateinit var clock: Clock
   @Inject @ForMiskCron private lateinit var executorService: ExecutorService
   @Inject @ForMiskCron private lateinit var zoneId: ZoneId
+  @Inject private lateinit var leaseManager: LeaseManager
 
   private val runningCrons = mutableListOf<CompletableFuture<*>>()
 
@@ -101,17 +105,36 @@ class CronManager @Inject constructor() {
     }
     removeCompletedCrons()
     cronEntries.values.forEach { cronEntry ->
+      // TODO Support old behavior as well
+      val taskLease = buildTaskLease(cronEntry.runnable::class)
+      val holdsTaskLease = if (!taskLease.checkHeld()) {
+        taskLease.acquire()
+      } else {
+        true
+      }
+      if (!holdsTaskLease) {
+        return@forEach
+      }
+
       val nextExecutionTime = cronEntry.executionTime.nextExecution(previousTime).orElseThrow()
         .withSecond(0)
         .withNano(0)
+
 
       if (nextExecutionTime.toInstant() <= now) {
         logger.info {
           "CronJob ${cronEntry.name} was ready at $nextExecutionTime"
         }
         runCron(cronEntry)
+        taskLease.release()
       }
     }
+  }
+
+  internal fun buildTaskLease(klass: KClass<out Runnable>): Lease {
+    val sanitizedClassName = klass.qualifiedName!!.replace(".", "-")
+    val leaseName = "misk-cron-${sanitizedClassName}"
+    return leaseManager.requestLease(leaseName)
   }
 
   private fun removeCompletedCrons() {

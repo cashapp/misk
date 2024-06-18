@@ -1,7 +1,10 @@
 package misk.cron
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
+import misk.clustering.fake.lease.FakeLeaseManager
 import misk.clustering.weights.FakeClusterWeight
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.inject.KAbstractModule
@@ -15,8 +18,6 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class CronTest {
@@ -34,8 +35,9 @@ class CronTest {
 
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var clock: FakeClock
-  @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
-  @Inject lateinit var fakeClusterWeight: FakeClusterWeight
+  @Inject private lateinit var fakeClusterWeight: FakeClusterWeight
+  @Inject private lateinit var fakeLeaseManager: FakeLeaseManager
+  @Inject private lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
 
   @Inject private lateinit var minuteCron: MinuteCron
   @Inject private lateinit var hourCron: HourCron
@@ -70,7 +72,26 @@ class CronTest {
   }
 
   @Test
-  fun leaseDenied() {
+  fun `should not execute if lease is already held`() {
+    assertThat(minuteCron.counter).isZero()
+
+    clock.add(Duration.ofMinutes(1))
+    waitForNextPendingTask().task()
+    cronManager.waitForCronsComplete()
+    assertThat(minuteCron.counter).isEqualTo(1)
+
+    // Mark the lease as held by another process
+    fakeLeaseManager.markLeaseHeldElsewhere("misk-cron-misk-cron-MinuteCron")
+
+    // The lease is already held, we should not execute
+    clock.add(Duration.ofMinutes(1))
+    waitForNextPendingTask().task()
+    cronManager.waitForCronsComplete()
+    assertThat(minuteCron.counter).isEqualTo(1)
+  }
+
+  @Test
+  fun zeroClusterWeightPreventsExecution() {
     assertThat(minuteCron.counter).isEqualTo(0)
     // Cluster weight is 100 by default, so the cron will run.
     clock.add(Duration.ofMinutes(1))

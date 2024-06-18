@@ -2,9 +2,10 @@ package misk.cron
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Injector
-import wisp.logging.getLogger
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import wisp.lease.LeaseManager
+import wisp.logging.getLogger
 
 @Singleton
 internal class CronService @Inject constructor(
@@ -12,6 +13,7 @@ internal class CronService @Inject constructor(
 ) : AbstractIdleService() {
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var cronRunnableEntries: List<CronRunnableEntry>
+  @Inject private lateinit var leaseManager: LeaseManager
 
   override fun startUp() {
     logger.info { "CronService started" }
@@ -24,6 +26,8 @@ internal class CronService @Inject constructor(
 
       val runnable = injector.getProvider(cronRunnable.runnableClass.java).get()
       cronManager.addCron(name, cronPattern.pattern, runnable)
+
+      cronManager.buildTaskLease(cronRunnable.runnableClass)
     }
   }
 
