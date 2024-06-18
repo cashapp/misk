@@ -7,9 +7,19 @@ import misk.web.metadata.toFormattedJson
 import wisp.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
-internal data class CronMetadata(
+internal data class CronData(
   val cronEntries: Map<String, CronManager.CronEntry.Metadata>,
   val runningCrons: List<String>
+)
+
+internal data class CronMetadata(
+  val cronData: CronData,
+): Metadata(
+  metadata = cronData,
+  prettyPrint = defaultKotlinMoshi
+    .adapter<CronData>()
+    .toFormattedJson(cronData),
+  descriptionString = "Cron job data is still untested in multi-pod deployments and may be inaccurate."
 )
 
 internal class CronMetadataProvider : MetadataProvider<Metadata> {
@@ -19,11 +29,6 @@ internal class CronMetadataProvider : MetadataProvider<Metadata> {
 
   override fun get(): Metadata {
     val metadata = cronManager.getMetadata()
-    return Metadata(
-      metadata = metadata,
-      prettyPrint = defaultKotlinMoshi
-        .adapter<CronMetadata>()
-        .toFormattedJson(metadata)
-    )
+    return CronMetadata(metadata)
   }
 }

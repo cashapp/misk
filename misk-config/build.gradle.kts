@@ -11,6 +11,7 @@ dependencies {
   api(libs.jacksonAnnotations)
   api(libs.jacksonDatabind)
   api(libs.jakartaInject)
+  api(libs.kotlinxHtml)
   api(libs.moshiCore)
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
@@ -24,6 +25,7 @@ dependencies {
   implementation(libs.jacksonKotlin)
   implementation(libs.kotlinLogging)
   implementation(libs.okio)
+  implementation(project(":misk-tailwind"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-resource-loader-testing"))
 

@@ -15,7 +15,8 @@ internal data class ServiceGraphMetadata(
   metadata = builderMetadata,
   prettyPrint = "Service Graph Ascii Visual\n\n${builderMetadata.asciiVisual}\n\nMetadata\n\n" + defaultKotlinMoshi
     .adapter<ServiceGraphBuilder.Metadata>()
-    .toFormattedJson(builderMetadata)
+    .toFormattedJson(builderMetadata),
+  descriptionString = "Guava service graph metadata, including a ASCII art visualization for easier debugging."
 )
 
 internal class ServiceGraphMetadataProvider : MetadataProvider<ServiceGraphMetadata> {
