@@ -91,7 +91,7 @@ internal class MetadataTabIndexAction @Inject constructor(
               }
             }
 
-            pre("bg-gray-100 p-4") {
+            pre("bg-gray-100 p-4 overflow-x-scroll rounded-lg") {
               code("text-wrap font-mono") {
                 +(metadata?.prettyPrint ?: "Metadata not found for $q")
               }
