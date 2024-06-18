@@ -124,13 +124,17 @@ open class UnsupportedMediaTypeException @JvmOverloads constructor(message: Stri
   WebActionException(HTTP_UNSUPPORTED_TYPE, message, cause)
 
 /** Similar to [kotlin.require], but throws [BadRequestException] if the check fails */
+@OptIn(ExperimentalContracts::class)
 inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {
+  contract { 
+    returns() implies check
+  }
   if (!check) throw BadRequestException(lazyMessage())
 }
 
 /** Similar to [kotlin.requireNotNull], but throws [BadRequestException] if the check fails */
 @OptIn(ExperimentalContracts::class)
-public inline fun <T : Any> requireRequestNotNull(value: T?, lazyMessage: () -> String): T {
+inline fun <T : Any> requireRequestNotNull(value: T?, lazyMessage: () -> String): T {
   contract {
     returns() implies (value != null)
   }
