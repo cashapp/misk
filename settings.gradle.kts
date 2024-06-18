@@ -5,11 +5,20 @@ pluginManagement {
   }
 }
 
-plugins {
-                               id("com.gradle.develocity") version "3.17.4"
+
+    plugins {
+      id("com.gradle.develocity") version "3.17.4"
 }
 
-dependencyResolutionManagement {
+
+    develocity {
+      buildScan {
+        publishing {
+          termsOfUseUrl = "https://gradle.com/terms-of-service"
+          termsOfUseAgree = "yes"
+        }
+      }
+    }
   repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
   repositories {
     mavenCentral()
