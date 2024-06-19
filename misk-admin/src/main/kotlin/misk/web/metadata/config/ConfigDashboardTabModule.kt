@@ -6,6 +6,7 @@ import misk.web.WebActionModule
 import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.DashboardModule
+import misk.web.metadata.all.MetadataTabIndexAction
 import misk.web.metadata.config.ConfigMetadataAction.ConfigTabMode.SAFE
 import misk.web.metadata.jvm.JvmMetadata
 import misk.web.metadata.jvm.JvmMetadataProvider
@@ -31,12 +32,21 @@ class ConfigDashboardTabModule @JvmOverloads constructor(
     install(WebActionModule.create<ConfigMetadataAction>())
 
     install(
+      DashboardModule.createMenuLink<AdminDashboard, AdminDashboardAccess>(
+        label = "Config",
+        url = MetadataTabIndexAction.PATH + "?q=config",
+        category = "Container Admin",
+      )
+    )
+
+    // TODO delete the old Misk-Web tab after testing in real environments to confirm Metadata tab is sufficient drop-in replacement
+    install(
       DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
         isDevelopment = isDevelopment,
         slug = "config",
         urlPathPrefix = "/_admin/config/",
         developmentWebProxyUrl = "http://localhost:3200/",
-        menuLabel = "Config",
+        menuLabel = "Config v1",
         menuCategory = "Container Admin"
       )
     )
