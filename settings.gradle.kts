@@ -9,6 +9,19 @@ plugins {
   id("com.gradle.develocity") version "3.17.4"
 }
 
+if (plugins.hasPlugin("com.gradle.develocity")) {
+  logger.lifecycle("Applying develocity")
+  develocity {
+    buildScan {
+      publishing {
+        termsOfUseUrl = "https://gradle.com/terms-of-service"
+        termsOfUseAgree = "yes"
+      }
+    }
+  }
+}
+
+
 develocity {
   buildScan {
     publishing {
