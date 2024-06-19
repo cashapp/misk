@@ -12,7 +12,8 @@ import misk.tasks.DelayedTask
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import wisp.time.FakeClock
 import java.time.Clock
 import java.time.Duration
@@ -46,15 +47,16 @@ class CronTest {
   private lateinit var lastRun: Instant
 
   // This simulates what the automated part of cron does.
-  private fun runCrons() {
+  private fun runCrons(cronLeaseBehavior: CronLeaseBehavior) {
     val now = clock.instant()
-    cronManager.runReadyCrons(lastRun)
+    cronManager.tryToRunCrons(lastRun)
     lastRun = now
     cronManager.waitForCronsComplete()
   }
 
-  @Test
-  fun basic() {
+  @ParameterizedTest
+  @MethodSource("cronLeaseBehaviorList")
+  fun basic(cronLeaseBehavior: CronLeaseBehavior) {
     lastRun = clock.instant()
 
     assertThat(minuteCron.counter).isEqualTo(0)
@@ -64,15 +66,16 @@ class CronTest {
     // Advance one hour in one minute intervals.
     repeat(60) {
       clock.add(Duration.ofMinutes(1))
-      runCrons()
+      runCrons(cronLeaseBehavior)
     }
     assertThat(minuteCron.counter).isEqualTo(60)
     assertThat(throwsExceptionCron.counter).isEqualTo(4)
     assertThat(hourCron.counter).isEqualTo(1)
   }
 
-  @Test
-  fun `should not execute if lease is already held`() {
+  @ParameterizedTest
+  @MethodSource("cronLeaseBehaviorList")
+  fun `should not execute if lease is already held`(cronLeaseBehavior: CronLeaseBehavior) {
     assertThat(minuteCron.counter).isZero()
 
     clock.add(Duration.ofMinutes(1))
@@ -90,7 +93,8 @@ class CronTest {
     assertThat(minuteCron.counter).isEqualTo(1)
   }
 
-  @Test
+  @ParameterizedTest
+  @MethodSource("cronLeaseBehaviorList")
   fun zeroClusterWeightPreventsExecution() {
     assertThat(minuteCron.counter).isEqualTo(0)
     // Cluster weight is 100 by default, so the cron will run.
@@ -111,6 +115,14 @@ class CronTest {
     retry(5, FlatBackoff(Duration.ofMillis(200))) {
       pendingTasks.peekPending()!!
     }
+
+  companion object {
+    @JvmStatic
+    private fun cronLeaseBehaviorList() = listOf(
+      CronLeaseBehavior.ONE_LEASE_PER_CRON,
+      CronLeaseBehavior.ONE_LEASE_PER_CLUSTER,
+    )
+  }
 }
 
 @Singleton

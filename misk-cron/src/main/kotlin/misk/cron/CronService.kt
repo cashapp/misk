@@ -9,11 +9,10 @@ import wisp.logging.getLogger
 
 @Singleton
 internal class CronService @Inject constructor(
-  private val injector: Injector
+  private val injector: Injector,
 ) : AbstractIdleService() {
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var cronRunnableEntries: List<CronRunnableEntry>
-  @Inject private lateinit var leaseManager: LeaseManager
 
   override fun startUp() {
     logger.info { "CronService started" }
@@ -26,7 +25,7 @@ internal class CronService @Inject constructor(
 
       val runnable = injector.getProvider(cronRunnable.runnableClass.java).get()
       cronManager.addCron(name, cronPattern.pattern, runnable)
-
+      // We want to request an interest in holding a lease as soon as the service starts up
       cronManager.buildTaskLease(cronRunnable.runnableClass)
     }
   }

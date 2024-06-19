@@ -26,9 +26,8 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
         return@scheduleWithBackoff Status.OK
       }
 
-      val now = clock.instant()
-      cronManager.runReadyCrons(lastRun)
-      lastRun = now
+      cronManager.tryToRunCrons(lastRun)
+      lastRun = clock.instant()
       Status.OK
     }
   }
@@ -40,8 +39,6 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
 
   companion object {
     val INTERVAL: Duration = Duration.ofSeconds(60L)
-    private const val CRON_CLUSTER_LEASE_NAME = "misk.cron.lease"
-
     private val logger = getLogger<CronTask>()
   }
 }

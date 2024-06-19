@@ -24,6 +24,7 @@ class CronManager @Inject constructor() {
   @Inject private lateinit var clock: Clock
   @Inject @ForMiskCron private lateinit var executorService: ExecutorService
   @Inject @ForMiskCron private lateinit var zoneId: ZoneId
+  @Inject @ForMiskCron private lateinit var cronLeaseBehavior: CronLeaseBehavior
   @Inject private lateinit var leaseManager: LeaseManager
 
   private val runningCrons = mutableListOf<CompletableFuture<*>>()
@@ -96,7 +97,28 @@ class CronManager @Inject constructor() {
     cronEntries.clear()
   }
 
-  fun runReadyCrons(lastRun: Instant) {
+  fun tryToRunCrons(lastRun: Instant) {
+    if (cronLeaseBehavior == CronLeaseBehavior.ONE_LEASE_PER_CLUSTER) {
+      tryAcquireSingleLeaseAndRunCrons(lastRun)
+      return
+    }
+
+    tryAcquireLeasePerCronAndRunCrons(lastRun)
+  }
+
+  fun tryAcquireSingleLeaseAndRunCrons(lastRun: Instant) {
+    val singleLease = leaseManager.requestLease(CRON_CLUSTER_LEASE_NAME)
+
+    val holdsTaskLease = if (!singleLease.checkHeld()) {
+      singleLease.acquire()
+    } else {
+      true
+    }
+    // if we are not holding the lease -> just return
+    if (!holdsTaskLease) {
+      return
+    }
+
     val now = clock.instant()
     val previousTime = ZonedDateTime.ofInstant(lastRun, zoneId)
 
@@ -105,7 +127,27 @@ class CronManager @Inject constructor() {
     }
     removeCompletedCrons()
     cronEntries.values.forEach { cronEntry ->
-      // TODO Support old behavior as well
+      val nextExecutionTime = cronEntry.executionTime.nextExecution(previousTime).orElseThrow()
+        .withSecond(0)
+        .withNano(0)
+
+      if (nextExecutionTime.toInstant() <= now) {
+        logger.info {
+          "CronJob ${cronEntry.name} was ready at $nextExecutionTime"
+        }
+        runCron(cronEntry)
+      }
+    }
+  }
+
+  private fun tryAcquireLeasePerCronAndRunCrons(lastRun: Instant) {
+    val now = clock.instant()
+    val previousTime = ZonedDateTime.ofInstant(lastRun, zoneId)
+    logger.info {
+      "Last execution was at $previousTime, now=${ZonedDateTime.ofInstant(now, zoneId)}"
+    }
+    removeCompletedCrons()
+    cronEntries.values.forEach { cronEntry ->
       val taskLease = buildTaskLease(cronEntry.runnable::class)
       val holdsTaskLease = if (!taskLease.checkHeld()) {
         taskLease.acquire()
@@ -167,6 +209,7 @@ class CronManager @Inject constructor() {
   }
 
   companion object {
+    private const val CRON_CLUSTER_LEASE_NAME = "misk.cron.lease"
     private val logger = getLogger<CronManager>()
   }
 }
