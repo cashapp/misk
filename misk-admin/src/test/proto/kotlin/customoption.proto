@@ -1,7 +1,7 @@
 syntax = "proto2";
-package test;
+package test.kt;
 
-option java_package = "com.squareup.protos.test";
+option java_package = "com.squareup.protos.test.kt";
 
 import "google/protobuf/descriptor.proto";
 
@@ -20,5 +20,5 @@ enum Type {
 }
 
 extend google.protobuf.FieldOptions {
-  repeated Type semantic_data_type = 13001;
+  repeated Type semantic_data_type = 13002;
 }

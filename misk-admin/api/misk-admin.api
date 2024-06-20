@@ -8,6 +8,8 @@ public final class com/squareup/protos/test/Type : java/lang/Enum, com/squareup/
 	public static final field CARD_TOKEN Lcom/squareup/protos/test/Type;
 	public static final field NOTE_TYPE_1 Lcom/squareup/protos/test/Type;
 	public static final field NOTE_TYPE_2 Lcom/squareup/protos/test/Type;
+	public static final field ROBOTS Lcom/squareup/protos/test/Type;
+	public static final field ROBOT_TOKEN Lcom/squareup/protos/test/Type;
 	public static final field SHIPMENT_ID Lcom/squareup/protos/test/Type;
 	public static final field SHIPMENT_TOKEN Lcom/squareup/protos/test/Type;
 	public static final field STATUS Lcom/squareup/protos/test/Type;
@@ -59,6 +61,128 @@ public final class com/squareup/protos/test/grpc/HelloRequest$Builder : com/squa
 	public fun build ()Lcom/squareup/protos/test/grpc/HelloRequest;
 	public synthetic fun build ()Lcom/squareup/wire/Message;
 	public fun name (Ljava/lang/String;)Lcom/squareup/protos/test/grpc/HelloRequest$Builder;
+}
+
+public abstract interface annotation class com/squareup/protos/test/kt/SemanticDataTypeOption : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/squareup/protos/test/kt/Type;
+}
+
+public final class com/squareup/protos/test/kt/Type : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ACCOUNT_TOKEN Lcom/squareup/protos/test/kt/Type;
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field CARD_TOKEN Lcom/squareup/protos/test/kt/Type;
+	public static final field Companion Lcom/squareup/protos/test/kt/Type$Companion;
+	public static final field NOTE_TYPE_1 Lcom/squareup/protos/test/kt/Type;
+	public static final field NOTE_TYPE_2 Lcom/squareup/protos/test/kt/Type;
+	public static final field ROBOTS Lcom/squareup/protos/test/kt/Type;
+	public static final field ROBOT_TOKEN Lcom/squareup/protos/test/kt/Type;
+	public static final field SHIPMENT_ID Lcom/squareup/protos/test/kt/Type;
+	public static final field SHIPMENT_TOKEN Lcom/squareup/protos/test/kt/Type;
+	public static final field STATUS Lcom/squareup/protos/test/kt/Type;
+	public static final field TRANSFER_ID Lcom/squareup/protos/test/kt/Type;
+	public static final field WAREHOUSE_TOKEN Lcom/squareup/protos/test/kt/Type;
+	public static final fun fromValue (I)Lcom/squareup/protos/test/kt/Type;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/protos/test/kt/Type;
+	public static fun values ()[Lcom/squareup/protos/test/kt/Type;
+}
+
+public final class com/squareup/protos/test/kt/Type$Companion {
+	public final fun fromValue (I)Lcom/squareup/protos/test/kt/Type;
+}
+
+public final class com/squareup/protos/test/kt/parsing/Robot : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lcom/squareup/protos/test/kt/parsing/Robot$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/String;Lokio/ByteString;)Lcom/squareup/protos/test/kt/parsing/Robot;
+	public static synthetic fun copy$default (Lcom/squareup/protos/test/kt/parsing/Robot;Ljava/lang/Integer;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lcom/squareup/protos/test/kt/parsing/Robot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRobot_id ()Ljava/lang/Integer;
+	public final fun getRobot_token ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/protos/test/kt/parsing/Robot$Companion {
+}
+
+public final class com/squareup/protos/test/kt/parsing/Shipment : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lcom/squareup/protos/test/kt/parsing/Shipment$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/kt/parsing/Warehouse;Lcom/squareup/protos/test/kt/parsing/Warehouse;Lcom/squareup/protos/test/kt/parsing/Shipment$State;Ljava/lang/Double;Ljava/lang/Boolean;Lokio/ByteString;Lokio/ByteString;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/kt/parsing/Warehouse;Lcom/squareup/protos/test/kt/parsing/Warehouse;Lcom/squareup/protos/test/kt/parsing/Shipment$State;Ljava/lang/Double;Ljava/lang/Boolean;Lokio/ByteString;Lokio/ByteString;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/kt/parsing/Warehouse;Lcom/squareup/protos/test/kt/parsing/Warehouse;Lcom/squareup/protos/test/kt/parsing/Shipment$State;Ljava/lang/Double;Ljava/lang/Boolean;Lokio/ByteString;Lokio/ByteString;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)Lcom/squareup/protos/test/kt/parsing/Shipment;
+	public static synthetic fun copy$default (Lcom/squareup/protos/test/kt/parsing/Shipment;Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/kt/parsing/Warehouse;Lcom/squareup/protos/test/kt/parsing/Warehouse;Lcom/squareup/protos/test/kt/parsing/Shipment$State;Ljava/lang/Double;Ljava/lang/Boolean;Lokio/ByteString;Lokio/ByteString;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lcom/squareup/protos/test/kt/parsing/Shipment;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccount_token ()Ljava/lang/String;
+	public final fun getCard_token ()Ljava/lang/String;
+	public final fun getDeleted ()Ljava/lang/Boolean;
+	public final fun getDestination ()Lcom/squareup/protos/test/kt/parsing/Warehouse;
+	public final fun getDestination_signature ()Lokio/ByteString;
+	public final fun getLoad_ratio ()Ljava/lang/Double;
+	public final fun getNotes ()Ljava/util/List;
+	public final fun getShipment_id ()Ljava/lang/Long;
+	public final fun getShipment_token ()Ljava/lang/String;
+	public final fun getSource ()Lcom/squareup/protos/test/kt/parsing/Warehouse;
+	public final fun getSource_signature ()Lokio/ByteString;
+	public final fun getStatus ()Lcom/squareup/protos/test/kt/parsing/Shipment$State;
+	public final fun getTransfer_id ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/protos/test/kt/parsing/Shipment$Companion {
+}
+
+public final class com/squareup/protos/test/kt/parsing/Shipment$State : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field CONSUMING Lcom/squareup/protos/test/kt/parsing/Shipment$State;
+	public static final field Companion Lcom/squareup/protos/test/kt/parsing/Shipment$State$Companion;
+	public static final field DELIVERING Lcom/squareup/protos/test/kt/parsing/Shipment$State;
+	public static final field PICKING_UP Lcom/squareup/protos/test/kt/parsing/Shipment$State;
+	public static final field VALIDATING Lcom/squareup/protos/test/kt/parsing/Shipment$State;
+	public static final fun fromValue (I)Lcom/squareup/protos/test/kt/parsing/Shipment$State;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/protos/test/kt/parsing/Shipment$State;
+	public static fun values ()[Lcom/squareup/protos/test/kt/parsing/Shipment$State;
+}
+
+public final class com/squareup/protos/test/kt/parsing/Shipment$State$Companion {
+	public final fun fromValue (I)Lcom/squareup/protos/test/kt/parsing/Shipment$State;
+}
+
+public final class com/squareup/protos/test/kt/parsing/Warehouse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lcom/squareup/protos/test/kt/parsing/Warehouse$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/kt/parsing/Warehouse;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/kt/parsing/Warehouse;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/kt/parsing/Warehouse;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lokio/ByteString;)Lcom/squareup/protos/test/kt/parsing/Warehouse;
+	public static synthetic fun copy$default (Lcom/squareup/protos/test/kt/parsing/Warehouse;Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/kt/parsing/Warehouse;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lokio/ByteString;ILjava/lang/Object;)Lcom/squareup/protos/test/kt/parsing/Warehouse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternates ()Ljava/util/List;
+	public final fun getCentral_repo ()Lcom/squareup/protos/test/kt/parsing/Warehouse;
+	public final fun getDropoff_points ()Ljava/util/Map;
+	public final fun getRobots ()Ljava/util/Map;
+	public final fun getWarehouse_id ()Ljava/lang/Long;
+	public final fun getWarehouse_token ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/protos/test/kt/parsing/Warehouse$Companion {
 }
 
 public final class com/squareup/protos/test/parsing/Robot : com/squareup/wire/Message {
