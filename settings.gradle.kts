@@ -9,20 +9,20 @@ plugins {
   id("com.gradle.develocity") version "3.17.4"
 }
 
-dependencyResolutionManagement {
-  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-  repositories {
-    mavenCentral()
-    maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
-  }
-}
-
 develocity {
   buildScan {
     publishing {
       termsOfUseUrl = "https://gradle.com/terms-of-service"
       termsOfUseAgree = "yes"
     }
+  }
+}
+
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    mavenCentral()
+    maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
   }
 }
 
@@ -78,7 +78,6 @@ include(":misk-crypto")
 include(":misk-datadog")
 include(":misk-events")
 include(":misk-events-core")
-include(":misk-events-testing")
 include(":misk-exceptions-dynamodb")
 include(":misk-feature")
 include(":misk-feature-testing")

@@ -154,13 +154,13 @@ internal class CoordinatedService(
     }
   }
 
-  fun toMetadata() = CoordinatedServiceMetadata(
+  data class Metadata(
+    val dependencies: Set<String>,
+    val directDependsOn: Set<String>,
+  )
+
+  fun toMetadata() = Metadata(
     dependencies = dependencies.map { it.serviceProvider.get().javaClass.name }.toSet(),
     directDependsOn = directDependsOn.map { it.serviceProvider.get().javaClass.name }.toSet(),
   )
 }
-
-data class CoordinatedServiceMetadata(
-  val dependencies: Set<String>,
-  val directDependsOn: Set<String>,
-)

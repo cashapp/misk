@@ -11,10 +11,10 @@ import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 
 @Singleton
-class WebActionMetadataAction @Inject constructor(
-  val provider: Provider<WebActionsMetadata>
-) : WebAction {
-  @Get("/api/webaction/metadata")
+class WebActionMetadataAction @Inject constructor() : WebAction {
+  @Inject private lateinit var provider: Provider<WebActionsMetadata>
+
+  @Get("/api/v1/webaction/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess

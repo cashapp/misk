@@ -18,12 +18,12 @@ aws2Bom = { module = "software.amazon.awssdk:bom", version = "2.21.24" }
 aws2Dynamodb = { module = "software.amazon.awssdk:dynamodb", version = "2.21.24" }
 aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", version = "2.21.24" }
 aws2Regions = { module = "software.amazon.awssdk:regions", version = "2.21.24" }
-awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.12.576" }
-awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version = "1.12.576" }
+awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.12.734" }
+awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version = "1.12.734" }
 awsSdkAwsCore= { module = "software.amazon.awssdk:aws-core", version = "2.21.24" }
-awsSdkCore = { module = "com.amazonaws:aws-java-sdk-core", version = "1.12.576" }
+awsSdkCore = { module = "com.amazonaws:aws-java-sdk-core", version = "1.12.734" }
 awsSdkSdkCore = { module = "software.amazon.awssdk:sdk-core", version = "2.21.24" }
-awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version = "1.12.576" }
+awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version = "1.12.734" }
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk15on", version = "1.70" }
 bouncycastlePgp = { module = "org.bouncycastle:bcpg-jdk15on", version = "1.70" }
 bucket4jCore = { module = "com.bucket4j:bucket4j-core", version = "8.7.0" }
@@ -82,7 +82,7 @@ hopliteHocon = { module = "com.sksamuel.hoplite:hoplite-hocon", version = "2.7.4
 hopliteJson = { module = "com.sksamuel.hoplite:hoplite-json", version = "2.7.4" }
 hopliteToml = { module = "com.sksamuel.hoplite:hoplite-toml", version = "2.7.4" }
 hopliteYaml = { module = "com.sksamuel.hoplite:hoplite-yaml", version = "2.7.4" }
-hsqldb = { module = "org.hsqldb:hsqldb", version = "2.6.1" }
+hsqldb = { module = "org.hsqldb:hsqldb", version = "2.7.1" }
 jCommander = { module = "com.beust:jcommander", version = "1.72" }
 jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version = "2.14.2" }
 jacksonBom = { module = "com.fasterxml.jackson:jackson-bom", version = "2.14.2" }
@@ -140,8 +140,8 @@ kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "18.0.1" }
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "6.3.0" }
-logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.4.8" }
-logbackCore = { module = "ch.qos.logback:logback-core", version = "1.4.8" }
+logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
+logbackCore = { module = "ch.qos.logback:logback-core", version = "1.4.14" }
 mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.27.0" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version = "1.11.1" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.1" }
@@ -149,7 +149,7 @@ mockitoCore = { module = "org.mockito:mockito-core", version = "5.4.0" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.1" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.1" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.1" }
-mysql = { module = "com.mysql:mysql-connector-j", version = "8.0.33" }
+mysql = { module = "com.mysql:mysql-connector-j", version = "8.2.0" }
 nettyBom = { module = "io.netty:netty-bom", version = "4.1.92.Final" }
 nettyHandler = { module = "io.netty:netty-handler", version = "4.1.92.Final" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version = "4.12.0" }
@@ -162,7 +162,7 @@ openTracingJdbc = { module = "io.opentracing.contrib:opentracing-jdbc", version 
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
 openTracingUtil = { module = "io.opentracing:opentracing-util", version = "0.33.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.2.23" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.3.3" }
 prometheusClient = { module = "io.prometheus:simpleclient" }
 prometheusClientCommon = { module = "io.prometheus:simpleclient_common" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version = "0.16.0" }
