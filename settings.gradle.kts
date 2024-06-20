@@ -34,7 +34,6 @@ gradle.lifecycle.beforeProject {
   version = findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
 }
 
-
 include(":detektive")
 include(":wisp:wisp-aws-environment")
 include(":wisp:wisp-client")
