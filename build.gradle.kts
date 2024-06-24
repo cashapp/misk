@@ -280,12 +280,12 @@ subprojects {
 
 allprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
-    val artifactoryUrl = System.getProperty("artifactory_url")
-    if (!artifactoryUrl.isNullOrBlank()) {
+    val publishUrl = System.getProperty("publish_url")
+    if (!publishUrl.isNullOrBlank()) {
       publishing {
         repositories {
           maven {
-            url = uri(artifactoryUrl)
+            url = uri(publishUrl)
             credentials {
               username = System.getProperty("publish_username", "")
               password = System.getProperty("publish_password", "")
