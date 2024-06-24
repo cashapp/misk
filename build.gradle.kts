@@ -280,9 +280,26 @@ subprojects {
 
 allprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
+    val artifactoryUrl = System.getProperty("artifactory_url")
+    if (!artifactoryUrl.isNullOrBlank()) {
+      publishing {
+        repositories {
+          maven {
+            url = uri(artifactoryUrl)
+            credentials {
+              username = System.getProperty("publish_username", "")
+              password = System.getProperty("publish_password", "")
+            }
+          }
+        }
+      }
+    } else {
+      mavenPublishing {
+        publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+        signAllPublications()
+      }
+    }
     mavenPublishing {
-      publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
-      signAllPublications()
       pom {
         description.set("Open source application container in Kotlin")
         name.set(project.name)
