@@ -98,12 +98,10 @@ class CronManager @Inject constructor() {
   }
 
   fun tryToRunCrons(lastRun: Instant) {
-    if (cronLeaseBehavior == CronLeaseBehavior.ONE_LEASE_PER_CLUSTER) {
-      tryAcquireSingleLeaseAndRunCrons(lastRun)
-      return
+    when(cronLeaseBehavior) {
+      CronLeaseBehavior.ONE_LEASE_PER_CRON -> tryAcquireLeasePerCronAndRunCrons(lastRun)
+      CronLeaseBehavior.ONE_LEASE_PER_CLUSTER -> tryAcquireSingleLeaseAndRunCrons(lastRun)
     }
-
-    tryAcquireLeasePerCronAndRunCrons(lastRun)
   }
 
   fun tryAcquireSingleLeaseAndRunCrons(lastRun: Instant) {

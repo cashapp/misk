@@ -13,6 +13,7 @@ internal class CronService @Inject constructor(
 ) : AbstractIdleService() {
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var cronRunnableEntries: List<CronRunnableEntry>
+  @Inject @ForMiskCron private lateinit var cronLeaseBehavior: CronLeaseBehavior
 
   override fun startUp() {
     logger.info { "CronService started" }
@@ -25,8 +26,11 @@ internal class CronService @Inject constructor(
 
       val runnable = injector.getProvider(cronRunnable.runnableClass.java).get()
       cronManager.addCron(name, cronPattern.pattern, runnable)
-      // We want to request an interest in holding a lease as soon as the service starts up
-      cronManager.buildTaskLease(cronRunnable.runnableClass)
+
+      if (cronLeaseBehavior == CronLeaseBehavior.ONE_LEASE_PER_CRON) {
+        // We want to request an interest in holding a lease as soon as the service starts up
+        cronManager.buildTaskLease(cronRunnable.runnableClass)
+      }
     }
   }
 
