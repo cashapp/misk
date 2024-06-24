@@ -11,6 +11,8 @@ dependencies {
     implementation(libs.dockerTransport)
     implementation(libs.dockerTransportCore)
     implementation(project(":wisp:wisp-logging"))
+    implementation(libs.openTracing)
+    implementation(libs.openTracingUtil)
     runtimeOnly(libs.logbackClassic)
 
     testImplementation(libs.junitApi)
