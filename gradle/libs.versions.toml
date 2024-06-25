@@ -62,12 +62,12 @@ googleAuthLibraryOauth2 = { module = "com.google.auth:google-auth-library-oauth2
 googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "1.95.4" }
 googleHttpClient = { module = "com.google.http-client:google-http-client", version = "1.40.0" }
 googleHttpClientJackson = { module = "com.google.http-client:google-http-client-jackson2", version = "1.39.2" }
-grpcApi = { module = "io.grpc:grpc-api", version = "1.58.0" }
-grpcBom = { module = "io.grpc:grpc-bom", version = "1.58.0" }
-grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.58.0" }
-grpcNetty = { module = "io.grpc:grpc-netty", version = "1.58.0" }
-grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.58.0" }
-grpcStub = { module = "io.grpc:grpc-stub", version = "1.58.0" }
+grpcApi = { module = "io.grpc:grpc-api", version = "1.60.0" }
+grpcBom = { module = "io.grpc:grpc-bom", version = "1.60.0" }
+grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.60.0" }
+grpcNetty = { module = "io.grpc:grpc-netty", version = "1.60.0" }
+grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.60.0" }
+grpcStub = { module = "io.grpc:grpc-stub", version = "1.60.0" }
 guava = { module = "com.google.guava:guava" }
 guavaBom = { module = "com.google.guava:guava-bom", version = "33.0.0-jre" }
 guavaTestLib = { module = "com.google.guava:guava-testlib" }
@@ -162,7 +162,7 @@ openTracingJdbc = { module = "io.opentracing.contrib:opentracing-jdbc", version 
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
 openTracingUtil = { module = "io.opentracing:opentracing-util", version = "0.33.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.3.3" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.3.9" }
 prometheusClient = { module = "io.prometheus:simpleclient" }
 prometheusClientCommon = { module = "io.prometheus:simpleclient_common" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version = "0.16.0" }
@@ -194,9 +194,9 @@ sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version = "2.0.0" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version = "2.0.0" }
 sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version = "2.0.0" }
-tink = { module = "com.google.crypto.tink:tink", version = "1.6.1" }
-tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.6.1" }
-tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.6.1" }
+tink = { module = "com.google.crypto.tink:tink", version = "1.13.0" }
+tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.9.1" }
+tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.10.0" }
 tracingDatadog = { module = "com.datadoghq:dd-trace-api", version = "1.31.2" }
 wireBom = { module = "com.squareup.wire:wire-bom", version.ref = "wire" }
 wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version.ref = "wire" }
