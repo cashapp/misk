@@ -36,8 +36,6 @@ dependencies {
   implementation(libs.okHttp)
   implementation(libs.okio)
   implementation(libs.tink)
-  implementation(libs.tinkAwskms)
-  implementation(libs.tinkGcpkms)
   implementation(libs.wireRuntime)
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk"))
