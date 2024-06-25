@@ -120,6 +120,7 @@ jooqGradlePlugin = { module = "nu.studer:gradle-jooq-plugin", version = "8.2" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.9.3" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.9.3" }
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.9.3" }
+junitPioneer = { module = "org.junit-pioneer:junit-pioneer", version = "2.2.0" }
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version = "5.6.2" }
 kotestAssertionsShared = { module = "io.kotest:kotest-assertions-shared", version = "5.6.2" }
 kotestCommon = { module = "io.kotest:kotest-common", version = "5.6.2" }
