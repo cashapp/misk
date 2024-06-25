@@ -44,6 +44,7 @@ import jakarta.inject.Singleton
       "x-datadog-parent-id",
       "x-datadog-trace-id",
       "x-datadog-span-id",
+      "x-request-id",
     )
   }
 }
