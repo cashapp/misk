@@ -7,8 +7,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import org.junitpioneer.jupiter.SetEnvironmentVariable
 import java.io.File
-import java.lang.IllegalStateException
 import java.net.URLClassLoader
 import java.nio.file.Files
 import kotlin.test.assertEquals
@@ -22,6 +24,7 @@ class ResourceLoaderTest {
             ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
             MemoryResourceLoaderBackend.SCHEME to MemoryResourceLoaderBackend(),
             FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend,
+            EnvironmentResourceLoaderBackend.SCHEME to EnvironmentResourceLoaderBackend
         )
     )
 
@@ -257,7 +260,7 @@ class ResourceLoaderTest {
     @Test
     fun addressValidation() {
         assertFailsWith<IllegalArgumentException> {
-            resourceLoader.open(":")
+            resourceLoader.open("filepath:")
         }
         assertFailsWith<IllegalArgumentException> {
             resourceLoader.open("")
@@ -265,12 +268,28 @@ class ResourceLoaderTest {
         assertFailsWith<IllegalArgumentException> {
             resourceLoader.open(":/")
         }
-        assertFailsWith<IllegalArgumentException> {
-            resourceLoader.open("a:/")
-        }
-        assertFailsWith<IllegalArgumentException> {
-            resourceLoader.open("a://")
-        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", "/", "//", " "])
+    fun pathValidationForPathBasedResources(path: String) {
+      assertFailsWith<IllegalArgumentException> {
+        ClasspathResourceLoaderBackend.checkPath(path)
+      }
+      assertFailsWith<IllegalArgumentException> {
+        MemoryResourceLoaderBackend().checkPath(path)
+      }
+      assertFailsWith<IllegalArgumentException> {
+        FilesystemLoaderBackend.checkPath(path)
+      }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", " "])
+    fun pathValidationForEnvironmentResource(path: String) {
+      assertFailsWith<IllegalArgumentException> {
+        EnvironmentResourceLoaderBackend.checkPath(path)
+      }
     }
 
     @Test
@@ -348,6 +367,38 @@ class ResourceLoaderTest {
 
         assertThat(resourceLoader.exists("classpath:/context_class_loader_exists_resource.txt"))
             .isFalse()
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "SOME_ENV_VAR", value = "value")
+    fun openEnvironmentVariables() {
+      resourceLoader.open("environment:SOME_ENV_VAR")!!.use {
+        assertThat(it.readUtf8()).isEqualTo("value")
+      }
+
+      resourceLoader.open("environment:  SOME_ENV_VAR  ")!!.use {
+        assertThat(it.readUtf8()).isEqualTo("value")
+      }
+
+      assertThat(resourceLoader.open("environment:NOT_THERE")).isNull()
+
+      assertFailsWith<IllegalArgumentException> {
+        resourceLoader.open("environment:")
+      }
+      assertFailsWith<IllegalArgumentException> {
+        resourceLoader.open("environment:  ")
+      }
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "SOME_ENV_VAR", value = "value")
+    fun checkEnvironmentVariablesExist() {
+      assertThat(resourceLoader.exists("environment:SOME_ENV_VAR")).isTrue()
+      assertThat(resourceLoader.exists("environment:  SOME_ENV_VAR  ")).isTrue()
+      assertThat(resourceLoader.exists("environment:NOT_THERE")).isFalse()
+      assertThat(resourceLoader.exists("environment:NOT_THERE")).isFalse()
+      assertThat(resourceLoader.exists("environment:")).isFalse()
+      assertThat(resourceLoader.exists("environment:  ")).isFalse()
     }
 
     private fun <T> withContextClassLoader(classLoader: ClassLoader?, block: () -> T): T {

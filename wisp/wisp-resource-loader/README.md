@@ -15,6 +15,7 @@ val resourceLoader: ResourceLoader = ResourceLoader(
     "classpath:" to ClasspathResourceLoaderBackend,
     "memory:" to MemoryResourceLoaderBackend(),
     "filesystem:" to FilesystemLoaderBackend,
+    "environment:" to EnvironmentLoaderBackend,
   )
 )
 

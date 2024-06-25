@@ -14,8 +14,6 @@ import java.time.ZoneId
 import jakarta.inject.Qualifier
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
-import misk.moshi.MoshiAdapterModule
-import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataModule
 
 class CronModule @JvmOverloads constructor(
@@ -34,14 +32,13 @@ class CronModule @JvmOverloads constructor(
       ).dependsOn<ReadyService>()
     )
     bind<CronLeaseBehavior>().annotatedWith<ForMiskCron>().toInstance(cronLeaseBehavior)
-    install(MetadataModule(CronMetadataProvider()))
   }
+
   @Provides
   @ForMiskCron
   @Singleton
   fun provideTaskQueue(queueFactory: RepeatedTaskQueueFactory): RepeatedTaskQueue =
     queueFactory.new("misk.cron.task-queue")
-
 }
 
 class FakeCronModule @JvmOverloads constructor(

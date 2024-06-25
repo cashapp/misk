@@ -13,8 +13,6 @@ dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
   api(libs.tink)
-  api(libs.tinkAwskms)
-  api(libs.tinkGcpkms)
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   api(project(":misk-config"))
@@ -25,6 +23,8 @@ dependencies {
   implementation(libs.kotlinLogging)
   implementation(libs.moshiCore)
   implementation(libs.okio)
+  implementation(libs.tinkAwskms)
+  implementation(libs.tinkGcpkms)
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk"))
 

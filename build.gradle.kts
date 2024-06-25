@@ -280,9 +280,26 @@ subprojects {
 
 allprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
+    val publishUrl = System.getProperty("publish_url")
+    if (!publishUrl.isNullOrBlank()) {
+      publishing {
+        repositories {
+          maven {
+            url = uri(publishUrl)
+            credentials {
+              username = System.getProperty("publish_username", "")
+              password = System.getProperty("publish_password", "")
+            }
+          }
+        }
+      }
+    } else {
+      mavenPublishing {
+        publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+        signAllPublications()
+      }
+    }
     mavenPublishing {
-      publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
-      signAllPublications()
       pom {
         description.set("Open source application container in Kotlin")
         name.set(project.name)

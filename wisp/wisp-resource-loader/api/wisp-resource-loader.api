@@ -6,6 +6,15 @@ public final class wisp/resources/ClasspathResourceLoaderBackend : wisp/resource
 	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
 }
 
+public final class wisp/resources/EnvironmentResourceLoaderBackend : wisp/resources/ResourceLoader$Backend {
+	public static final field INSTANCE Lwisp/resources/EnvironmentResourceLoaderBackend;
+	public static final field SCHEME Ljava/lang/String;
+	public fun checkPath (Ljava/lang/String;)V
+	public fun exists (Ljava/lang/String;)Z
+	public fun list (Ljava/lang/String;)Ljava/util/List;
+	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
+}
+
 public final class wisp/resources/FilesystemLoaderBackend : wisp/resources/ResourceLoader$Backend {
 	public static final field INSTANCE Lwisp/resources/FilesystemLoaderBackend;
 	public static final field SCHEME Ljava/lang/String;
@@ -53,6 +62,7 @@ public class wisp/resources/ResourceLoader {
 public abstract class wisp/resources/ResourceLoader$Backend {
 	public fun <init> ()V
 	public fun all ()Ljava/util/Set;
+	public fun checkPath (Ljava/lang/String;)V
 	public abstract fun exists (Ljava/lang/String;)Z
 	public fun list (Ljava/lang/String;)Ljava/util/List;
 	public abstract fun open (Ljava/lang/String;)Lokio/BufferedSource;

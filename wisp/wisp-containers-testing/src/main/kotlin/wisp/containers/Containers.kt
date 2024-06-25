@@ -14,6 +14,7 @@ import wisp.logging.getLogger
 import java.io.File
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
+import io.opentracing.util.GlobalTracer
 
 /**
  * A [Container] creates a Docker container for testing.
@@ -78,53 +79,62 @@ class Composer(private val name: String, private vararg val containers: Containe
         if (!running.compareAndSet(false, true)) return
         Runtime.getRuntime().addShutdownHook(Thread { stop() })
 
-        network.start()
+        val span = GlobalTracer.get()
+          .buildSpan("${this.javaClass.canonicalName}.start")
+          .withTag("name", name)
+          .start()
 
-        for (container in containers) {
+        try {
+          network.start()
+
+          for (container in containers) {
             val name = container.name()
             val create = dockerClient.createContainerCmd("todo").apply(container.createCmd)
             require(create.image != "todo") {
-                "must provide an image for container ${create.name}"
+              "must provide an image for container ${create.name}"
             }
 
             dockerClient.listContainersCmd()
-                .withShowAll(true)
-                .withLabelFilter(mapOf("name" to name))
-                .exec()
-                .forEach {
-                    log.info { "removing previous $name container with id ${it.id}" }
-                    dockerClient.removeContainerCmd(it.id).exec()
-                }
+              .withShowAll(true)
+              .withLabelFilter(mapOf("name" to name))
+              .exec()
+              .forEach {
+                log.info { "removing previous $name container with id ${it.id}" }
+                dockerClient.removeContainerCmd(it.id).exec()
+              }
 
             log.info { "pulling ${create.image} for $name container" }
 
             val imageParts = create.image!!.split(":")
             dockerClient.pullImageCmd(imageParts[0])
-                .withTag(imageParts.getOrElse(1) { "latest" })
-                .exec(PullImageResultCallback()).awaitCompletion()
+              .withTag(imageParts.getOrElse(1) { "latest" })
+              .exec(PullImageResultCallback()).awaitCompletion()
 
             log.info { "starting $name container" }
 
             @Suppress("DEPRECATION") val id = create
-                .withNetworkMode(network.id())
-                .withLabels(mapOf("name" to name))
-                .withTty(true)
-                .exec()
-                .id
+              .withNetworkMode(network.id())
+              .withLabels(mapOf("name" to name))
+              .withTty(true)
+              .exec()
+              .id
             containerIds[name] = id
 
             container.beforeStartHook(dockerClient, id)
 
             dockerClient.startContainerCmd(id).exec()
             dockerClient.logContainerCmd(id)
-                .withStdErr(true)
-                .withStdOut(true)
-                .withFollowStream(true)
-                .withSince(0)
-                .exec(LogContainerResultCallback())
-                .awaitStarted()
+              .withStdErr(true)
+              .withStdOut(true)
+              .withFollowStream(true)
+              .withSince(0)
+              .exec(LogContainerResultCallback())
+              .awaitStarted()
 
             log.info { "started $name; container id=$id" }
+          }
+        } finally {
+          span.finish()
         }
     }
 
