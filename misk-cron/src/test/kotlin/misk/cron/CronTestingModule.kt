@@ -14,7 +14,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import java.time.ZoneId
 
-class CronTestingModule : KAbstractModule() {
+class CronTestingModule @JvmOverloads constructor(private val cronLeaseBehavior: CronLeaseBehavior) : KAbstractModule() {
   override fun configure() {
     val applicationModules: List<KAbstractModule> = listOf(
       FakeLeaseModule(),
@@ -23,7 +23,10 @@ class CronTestingModule : KAbstractModule() {
       MiskTestingServiceModule(),
 
       // Cron support requires registering the CronJobHandler and the CronRunnerModule.
-      FakeCronModule(ZoneId.of("America/Toronto")),
+      FakeCronModule(
+        zoneId = ZoneId.of("America/Toronto"),
+        cronLeaseBehavior = cronLeaseBehavior,
+        ),
       ServiceModule<CronTask>()
         .dependsOn(keyOf<RepeatedTaskQueue>(ForMiskCron::class)),
     )
