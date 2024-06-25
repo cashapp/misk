@@ -172,8 +172,8 @@ class CronManager @Inject constructor() {
   }
 
   internal fun buildTaskLease(klass: KClass<out Runnable>): Lease {
-    val sanitizedClassName = klass.qualifiedName!!.replace(".", "-")
-    val leaseName = "misk-cron-${sanitizedClassName}"
+    val className = klass.qualifiedName!!
+    val leaseName = "misk.cron.task.lease.${className}"
     return leaseManager.requestLease(leaseName)
   }
 

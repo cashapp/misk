@@ -13,8 +13,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
 import wisp.time.FakeClock
 import java.time.Clock
 import java.time.Duration
@@ -75,7 +73,7 @@ abstract class AbstractCronTest {
       CronLeaseBehavior.ONE_LEASE_PER_CLUSTER ->
         fakeLeaseManager.markLeaseHeldElsewhere("misk.cron.lease")
       CronLeaseBehavior.ONE_LEASE_PER_CRON ->
-        fakeLeaseManager.markLeaseHeldElsewhere("misk-cron-misk-cron-MinuteCron")
+        fakeLeaseManager.markLeaseHeldElsewhere("misk.cron.task.lease.misk.cron.MinuteCron")
     }
 
     // The lease is already held, we should not execute
@@ -106,14 +104,6 @@ fun zeroClusterWeightPreventsExecution() {
     retry(5, FlatBackoff(Duration.ofMillis(200))) {
       pendingTasks.peekPending()!!
     }
-
-  companion object {
-    @JvmStatic
-    private fun cronLeaseBehaviorList() = listOf(
-      CronLeaseBehavior.ONE_LEASE_PER_CRON,
-      CronLeaseBehavior.ONE_LEASE_PER_CLUSTER,
-    )
-  }
 }
 
 @MiskTest(startService = true)
