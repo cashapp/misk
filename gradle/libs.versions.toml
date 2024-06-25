@@ -195,7 +195,7 @@ sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version = "2.0.0" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version = "2.0.0" }
 sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version = "2.0.0" }
-tink = { module = "com.google.crypto.tink:tink", version = "1.13.0" }
+tink = { module = "com.google.crypto.tink:tink", version = "1.12.0" }
 tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.9.1" }
 tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.10.0" }
 tracingDatadog = { module = "com.datadoghq:dd-trace-api", version = "1.31.2" }
