@@ -14,8 +14,6 @@ import java.time.ZoneId
 import jakarta.inject.Qualifier
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
-import misk.moshi.MoshiAdapterModule
-import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataModule
 
 class CronModule @JvmOverloads constructor(
@@ -24,7 +22,6 @@ class CronModule @JvmOverloads constructor(
   private val dependencies: List<Key<out Service>> = listOf()
 ) : KInstallOnceModule() {
   override fun configure() {
-    install(FakeCronModule(zoneId, threadPoolSize, dependencies))
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
     install(
       ServiceModule(
