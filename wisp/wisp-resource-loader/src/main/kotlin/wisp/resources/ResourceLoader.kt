@@ -46,6 +46,7 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return null
+        backend.checkPath(path)
         return backend.open(path)
     }
 
@@ -60,6 +61,7 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return
+        backend.checkPath(path)
         backend.put(path, data)
     }
 
@@ -73,6 +75,11 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return false
+        try {
+          backend.checkPath(path)
+        } catch (e: IllegalArgumentException) {
+          return false
+        }
         return backend.exists(path)
     }
 
@@ -86,6 +93,11 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return listOf()
+        try {
+          backend.checkPath(path)
+        } catch (e: IllegalArgumentException) {
+          return listOf()
+        }
         return backend.list(path).map { scheme + it }
     }
 
@@ -136,7 +148,7 @@ open class ResourceLoader(
     }
 
     private fun checkAddress(address: String) {
-        require(address.matches(Regex("([^/:]+:)(/[^/]+)+/?"))) { "unexpected address $address" }
+        require(address.matches(Regex("([^/:]+:).+"))) { "unexpected address $address" }
     }
 
     /**
@@ -178,6 +190,7 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return
+        backend.checkPath(path)
         backend.watch(path, resourceChangedListener)
     }
 
@@ -186,6 +199,7 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return
+        backend.checkPath(path)
         backend.unwatch(path)
     }
 
@@ -228,13 +242,17 @@ open class ResourceLoader(
             throw UnsupportedOperationException("${this::class} doesn't support unwatch")
         }
 
+        open fun checkPath(path: String) {
+          require(path.matches(Regex("(/[^/]+)+/?"))) { "unexpected address $path" }
+        }
     }
 
     companion object {
         val SYSTEM = ResourceLoader(
             mapOf(
                 ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
-                FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend
+                FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend,
+                EnvironmentResourceLoaderBackend.SCHEME to EnvironmentResourceLoaderBackend,
             )
         )
     }
