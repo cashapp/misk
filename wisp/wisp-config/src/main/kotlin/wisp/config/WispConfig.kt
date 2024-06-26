@@ -6,8 +6,9 @@ import com.sksamuel.hoplite.json.JsonPropertySource
 import com.sksamuel.hoplite.sources.InputStreamPropertySource
 import com.sksamuel.hoplite.toml.TomlPropertySource
 import com.sksamuel.hoplite.yaml.YamlPropertySource
-import wisp.config.PrefixResourceLoaderPreprocessor.Companion.CLASSPATH_PREFIX
-import wisp.config.PrefixResourceLoaderPreprocessor.Companion.FILESYSTEM_PREFIX
+import wisp.resources.ClasspathResourceLoaderBackend
+import wisp.resources.EnvironmentResourceLoaderBackend
+import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.ResourceLoader
 
 /**
@@ -62,8 +63,9 @@ fun ConfigLoaderBuilder.addWispConfigSources(
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
 ): ConfigLoaderBuilder {
 
-    addPreprocessor(PrefixResourceLoaderPreprocessor(CLASSPATH_PREFIX, resourceLoader))
-    addPreprocessor(PrefixResourceLoaderPreprocessor(FILESYSTEM_PREFIX, resourceLoader))
+    addPreprocessor(PrefixResourceLoaderPreprocessor(ClasspathResourceLoaderBackend.SCHEME, resourceLoader))
+    addPreprocessor(PrefixResourceLoaderPreprocessor(FilesystemLoaderBackend.SCHEME, resourceLoader))
+    addPreprocessor(PrefixResourceLoaderPreprocessor(EnvironmentResourceLoaderBackend.SCHEME, resourceLoader))
 
     configSources
         .filter {

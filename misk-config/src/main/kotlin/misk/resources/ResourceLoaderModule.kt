@@ -10,6 +10,7 @@ import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.MemoryResourceLoaderBackend
 import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
+import wisp.resources.EnvironmentResourceLoaderBackend
 import wisp.resources.ResourceLoader as WispResourceLoader
 
 class ResourceLoaderModule : KAbstractModule() {
@@ -17,9 +18,10 @@ class ResourceLoaderModule : KAbstractModule() {
     val mapBinder = MapBinder.newMapBinder(
       binder(), String::class.java, WispResourceLoader.Backend::class.java
     )
-    mapBinder.addBinding("classpath:").toInstance(ClasspathResourceLoaderBackend)
-    mapBinder.addBinding("filesystem:").toInstance(FilesystemLoaderBackend)
-    mapBinder.addBinding("memory:").toInstance(MemoryResourceLoaderBackend())
+    mapBinder.addBinding(ClasspathResourceLoaderBackend.SCHEME).toInstance(ClasspathResourceLoaderBackend)
+    mapBinder.addBinding(FilesystemLoaderBackend.SCHEME).toInstance(FilesystemLoaderBackend)
+    mapBinder.addBinding(MemoryResourceLoaderBackend.SCHEME).toInstance(MemoryResourceLoaderBackend())
+    mapBinder.addBinding(EnvironmentResourceLoaderBackend.SCHEME).toInstance(EnvironmentResourceLoaderBackend)
   }
 }
 
@@ -32,8 +34,9 @@ class TestingResourceLoaderModule : KAbstractModule() {
     val mapBinder = MapBinder.newMapBinder(
       binder(), String::class.java, WispResourceLoader.Backend::class.java
     )
-    mapBinder.addBinding("classpath:").toInstance(ClasspathResourceLoaderBackend)
-    mapBinder.addBinding("memory:").toInstance(MemoryResourceLoaderBackend())
+    mapBinder.addBinding(ClasspathResourceLoaderBackend.SCHEME).toInstance(ClasspathResourceLoaderBackend)
+    mapBinder.addBinding(MemoryResourceLoaderBackend.SCHEME).toInstance(MemoryResourceLoaderBackend())
+    mapBinder.addBinding(EnvironmentResourceLoaderBackend.SCHEME).toInstance(EnvironmentResourceLoaderBackend)
 
     newMapBinder<String, String>(ForFakeFiles::class)
   }
