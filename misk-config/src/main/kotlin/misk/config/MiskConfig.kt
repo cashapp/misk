@@ -274,7 +274,7 @@ object MiskConfig {
     configYamls: Map<String, String?>,
     overrideValues: JsonNode?
   ): JsonNode {
-    val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), JavaTimeModule())
+    val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule.Builder().build(), JavaTimeModule())
     var result = mapper.createObjectNode()
 
     for ((key, value) in configYamls) {
