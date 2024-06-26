@@ -49,7 +49,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":misk-clustering"))
-  testImplementation(project(":misk-feature-testing"))
+  testImplementation(testFixtures(project(":misk-feature")))
   testImplementation(project(":misk-testing"))
 }
 
