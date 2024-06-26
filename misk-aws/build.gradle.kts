@@ -31,6 +31,7 @@ dependencies {
   implementation(project(":misk-api"))
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":wisp:wisp-logging"))
+  implementation(project(":wisp:wisp-moshi"))
   implementation(project(":wisp:wisp-tracing"))
   implementation(project(":misk-core"))
   implementation(project(":misk-hibernate"))
@@ -49,7 +50,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":misk-clustering"))
-  testImplementation(project(":misk-feature-testing"))
+  testImplementation(testFixtures(project(":misk-feature-testing")))
   testImplementation(project(":misk-testing"))
 }
 
