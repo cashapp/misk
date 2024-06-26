@@ -7,8 +7,9 @@ import com.sksamuel.hoplite.PrimitiveNode
 import com.sksamuel.hoplite.StringNode
 import com.sksamuel.hoplite.fp.valid
 import com.sksamuel.hoplite.preprocessor.TraversingPrimitivePreprocessor
-import wisp.config.PrefixResourceLoaderPreprocessor.Companion.CLASSPATH_PREFIX
-import wisp.config.PrefixResourceLoaderPreprocessor.Companion.FILESYSTEM_PREFIX
+import wisp.resources.ClasspathResourceLoaderBackend
+import wisp.resources.EnvironmentResourceLoaderBackend
+import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.ResourceLoader
 import java.io.FileNotFoundException
 
@@ -17,7 +18,7 @@ import java.io.FileNotFoundException
  * [prefix], then the node value is treated as a resource location.  This is loaded using the
  * [resourceLoader] and returned as a StringNode.
  *
- * [prefix] is either [CLASSPATH_PREFIX] or [FILESYSTEM_PREFIX]
+ * [prefix] is one of [ClasspathResourceLoaderBackend.SCHEME], [EnvironmentResourceLoaderBackend.SCHEME] or [FilesystemLoaderBackend.SCHEME]
  */
 class PrefixResourceLoaderPreprocessor @JvmOverloads constructor(
   val prefix: String,
@@ -25,7 +26,7 @@ class PrefixResourceLoaderPreprocessor @JvmOverloads constructor(
 ) : TraversingPrimitivePreprocessor() {
 
   init {
-    require(prefix in listOf(CLASSPATH_PREFIX, FILESYSTEM_PREFIX))
+    require(prefix in listOf(ClasspathResourceLoaderBackend.SCHEME, FilesystemLoaderBackend.SCHEME, EnvironmentResourceLoaderBackend.SCHEME))
   }
 
   override fun handle(node: PrimitiveNode, context: DecoderContext): ConfigResult<Node> {
@@ -35,10 +36,5 @@ class PrefixResourceLoaderPreprocessor @JvmOverloads constructor(
     } else {
       node.valid()
     }
-  }
-
-  companion object {
-    const val CLASSPATH_PREFIX = "classpath:"
-    const val FILESYSTEM_PREFIX = "filesystem:"
   }
 }
