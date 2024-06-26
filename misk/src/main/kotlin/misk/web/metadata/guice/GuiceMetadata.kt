@@ -3,11 +3,6 @@ package misk.web.metadata.guice
 import com.google.inject.Binding
 import com.google.inject.Injector
 import com.google.inject.Key
-import com.google.inject.spi.ConstructorBinding
-import com.google.inject.spi.InstanceBinding
-import com.google.inject.spi.LinkedKeyBinding
-import com.google.inject.spi.ProviderInstanceBinding
-import com.google.inject.spi.ProviderKeyBinding
 import jakarta.inject.Inject
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
@@ -161,14 +156,7 @@ internal class GuiceMetadataProvider : MetadataProvider<GuiceMetadata> {
       null
     }
 
-    val type = when (this) {
-      is ConstructorBinding<*> -> "ConstructorBinding"
-      is InstanceBinding<*> -> "InstanceBinding"
-      is LinkedKeyBinding<*> -> "LinkedKeyBinding"
-      is ProviderInstanceBinding<*> -> "ProviderInstanceBinding"
-      is ProviderKeyBinding<*> -> "ProviderKeyBinding"
-      else -> "${this::class.simpleName}"
-    }
+    val type = this::class.simpleName ?: "Binding"
 
     return BindingMetadata(type, source, scope, provider).toString()
   }
