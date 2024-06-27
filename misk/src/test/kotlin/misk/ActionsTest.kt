@@ -10,7 +10,7 @@ import kotlin.test.assertFailsWith
 internal class ActionsTest {
   @Test fun methodAsAction() {
     val action = TestAction::myActionMethod.asAction(DispatchMechanism.GET)
-    assertThat(action.name).isEqualTo("TestAction")
+    assertThat(action.name).isEqualTo("WrongName")
     assertThat(action.parameterTypes).hasSize(2)
     assertThat(action.parameterTypes[0]).isEqualTo(Int::class.createType())
     assertThat(action.parameterTypes[1]).isEqualTo(String::class.createType())
