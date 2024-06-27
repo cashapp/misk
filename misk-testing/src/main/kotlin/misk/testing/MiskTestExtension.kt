@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
-import com.google.inject.Stage
 import com.google.inject.testing.fieldbinder.BoundFieldModule
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -26,14 +25,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   }
 
   override fun beforeEach(context: ExtensionContext) {
-    for (dep in context.getExternalDependencies()) {
-      dep.startIfNecessary()
-    }
-
-    for (dep in context.getExternalDependencies()) {
-      dep.beforeEach()
-    }
-
     val module = object : KAbstractModule() {
       override fun configure() {
         binder().requireAtInjectOnConstructors()
@@ -61,6 +52,14 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     val injector = Guice.createInjector(module)
     context.store("injector", injector)
     injector.getInstance<Callbacks>().beforeEach(context)
+
+    for (dep in context.getExternalDependencies()) {
+      dep.startIfNecessary()
+    }
+
+    for (dep in context.getExternalDependencies()) {
+      dep.beforeEach()
+    }
   }
 
   override fun afterEach(context: ExtensionContext) {
