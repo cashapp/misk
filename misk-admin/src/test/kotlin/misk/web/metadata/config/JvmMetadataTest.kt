@@ -2,7 +2,7 @@ package misk.web.metadata.config
 
 import com.squareup.moshi.Moshi
 import jakarta.inject.Inject
-import jakarta.inject.Provider
+import com.google.inject.Provider
 import misk.inject.KAbstractModule
 import misk.moshi.MoshiModule
 import misk.moshi.adapter
