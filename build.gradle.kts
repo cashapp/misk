@@ -245,11 +245,11 @@ subprojects {
 
   plugins.withType<BasePlugin> {
     if (hibernateProjects.contains(project.name)) {
-      testShardHibernate.configure { dependsOn("check") }
+      testShardHibernate.configure { dependsOn("${project.path}:check") }
     } else if (redisProjects.contains(project.name)) {
-      testShardRedis.configure { dependsOn("check") }
+      testShardRedis.configure { dependsOn("${project.path}:check") }
     } else {
-      testShardNonHibernate.configure { dependsOn("check") }
+      testShardNonHibernate.configure { dependsOn("${project.path}:check") }
     }
 
     tasks.named("check") {
