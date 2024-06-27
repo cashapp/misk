@@ -13,8 +13,10 @@ public final class misk/turbo/TemplateKt {
 }
 
 public final class misk/turbo/TurboFrame : kotlinx/html/HTMLTag, kotlinx/html/HtmlInlineTag {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/html/TagConsumer;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLkotlinx/html/TagConsumer;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLkotlinx/html/TagConsumer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lkotlinx/html/TagConsumer;)V
 }
 
 public final class misk/turbo/TurboFrameKt {
