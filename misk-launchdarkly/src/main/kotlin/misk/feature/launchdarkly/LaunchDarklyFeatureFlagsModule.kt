@@ -67,8 +67,7 @@ class LaunchDarklyModule @JvmOverloads constructor(
       .dataSource(Components.streamingDataSource())
       .events(Components.sendEvents())
 
-    val useRelayProxy = config.use_relay_proxy ?: true
-    if (useRelayProxy) {
+    if (config.use_relay_proxy) {
       ldConfig.serviceEndpoints(
         Components.serviceEndpoints().relayProxy(URI.create(config.base_uri))
       )
@@ -94,6 +93,6 @@ data class LaunchDarklyConfig @JvmOverloads constructor(
   @Redact
   val sdk_key: String,
   val base_uri: String,
-  val use_relay_proxy: Boolean? = true,
+  val use_relay_proxy: Boolean = true,
   val ssl: HttpClientSSLConfig? = null,
 ) : Config
