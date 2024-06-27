@@ -61,13 +61,17 @@ class LaunchDarklyModule @JvmOverloads constructor(
   ): LDClientInterface {
     // TODO: This shouldn't exist. We should not be exposing LDClientInterface and the only users of this are
     //   apps who're installing this module but not even using the misk or wisp LaunchDarklyFeatureFlags.
-    val baseUri = URI.create(config.base_uri)
     val ldConfig = LDConfig.Builder()
       // Set wait to 0 to not block here. Block in service initialization instead.
       .startWait(Duration.ofMillis(0))
       .dataSource(Components.streamingDataSource())
       .events(Components.sendEvents())
-      .serviceEndpoints(Components.serviceEndpoints().relayProxy(baseUri))
+
+    if (config.use_relay_proxy) {
+      ldConfig.serviceEndpoints(
+        Components.serviceEndpoints().relayProxy(URI.create(config.base_uri))
+      )
+    }
 
     config.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
@@ -89,5 +93,6 @@ data class LaunchDarklyConfig @JvmOverloads constructor(
   @Redact
   val sdk_key: String,
   val base_uri: String,
+  val use_relay_proxy: Boolean = true,
   val ssl: HttpClientSSLConfig? = null,
 ) : Config
