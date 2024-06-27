@@ -17,7 +17,7 @@ class AllMetadataAction @Inject constructor(
   private val allMetadata: Provider<Map<String, Metadata>>
 ) : WebAction {
   @JvmOverloads
- @Get(PATH)
+  @Get(PATH)
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AllMetadataAccess
