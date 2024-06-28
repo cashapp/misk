@@ -149,8 +149,8 @@ interface Redis {
   fun hrandField(key: String, count: Long): List<String>
 
   /**
-   * Performs a batched iteration of matching keys. If no pattern is provided, all keys
-   * will be scanned through.
+   * Performs a batched iteration of matching keys.
+   * If no pattern is provided, all keys will be scanned through.
    *
    * @param cursor The scan cursor. This should first be "0". Then subsequent cursor values will
    *               be taken from the returned ScanResults.
