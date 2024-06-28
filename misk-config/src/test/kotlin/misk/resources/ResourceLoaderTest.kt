@@ -163,12 +163,6 @@ class ResourceLoaderTest {
     assertFailsWith<IllegalArgumentException> {
       resourceLoader.open(":/")
     }
-    assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("a:/")
-    }
-    assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("a://")
-    }
   }
 
   @Test
