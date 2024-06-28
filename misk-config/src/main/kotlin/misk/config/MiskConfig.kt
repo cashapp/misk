@@ -155,7 +155,7 @@ object MiskConfig {
       }
 
       val path = Joiner.on('.').join(e.path.map { it.fieldName ?: it.index })
-      logger.warn(e) {
+      logger.warn {
         "$configFile: '$path' not found in '${configClass.simpleName}', ignoring " +
           suggestSpelling(e)
       }
