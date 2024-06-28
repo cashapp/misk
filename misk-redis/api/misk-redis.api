@@ -302,6 +302,7 @@ public final class misk/redis/Redis$ZRangeRankMarker : misk/redis/Redis$ZRangeMa
 }
 
 public final class misk/redis/Redis$ZRangeScoreMarker : misk/redis/Redis$ZRangeMarker {
+	public fun <init> (D)V
 	public fun <init> (DZ)V
 	public synthetic fun <init> (DZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()D

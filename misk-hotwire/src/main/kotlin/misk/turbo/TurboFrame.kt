@@ -10,7 +10,7 @@ import kotlinx.html.visit
  *
  * Follows the spec from Hotwire docs: https://turbo.hotwired.dev/handbook/frames
  */
-class TurboFrame(
+class TurboFrame @JvmOverloads constructor(
   id: String,
   src: String? = null,
   lazy: Boolean = false,

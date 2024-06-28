@@ -44,7 +44,7 @@ internal object DockerSqs : ExternalDependency {
       // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
       // the same external port as we do for the internal port
       val exposedClientPort = ExposedPort.tcp(clientPort)
-      withImage("softwaremill/elasticmq:1.4.2")
+      withImage("softwaremill/elasticmq:1.6.5")
         .withName("sqs")
         .withExposedPorts(exposedClientPort)
         .withHostConfig(

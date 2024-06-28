@@ -286,8 +286,8 @@ class AuthenticationTest {
         TestWebActionModule(),
         WebActionModule.create<MixesUnauthenticatedWithOtherAnnotations>())
     }
-    assertThat(exception.cause!!.message).contains(
-      "MixesUnauthenticatedWithOtherAnnotations::get() is annotated with @misk.security.authz.Unauthenticated, but also annotated with the following access annotations: @misk.security.authz.Authenticated. This is a contradiction."
+    assertThat(exception.message).contains(
+      "MixesUnauthenticatedWithOtherAnnotations::get() is annotated with @Unauthenticated, but also annotated with the following access annotations: @Authenticated. This is a contradiction."
     )
   }
 

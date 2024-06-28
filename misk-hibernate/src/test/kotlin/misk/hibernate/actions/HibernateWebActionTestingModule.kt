@@ -9,6 +9,7 @@ import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
 import misk.web.MiskWebModule
 import misk.web.WebTestingModule.Companion.TESTING_WEB_CONFIG
+import misk.web.dashboard.AdminDashboardAccess
 import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
 import wisp.config.Config
 

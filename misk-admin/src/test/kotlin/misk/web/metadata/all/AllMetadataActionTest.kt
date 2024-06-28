@@ -24,7 +24,7 @@ class AllMetadataActionTest {
   fun `get all`() {
     val actual = action.getAll("all")
     val actualIds = actual.all.keys
-    assertEquals(setOf("service-graph", "config", "database-hibernate", "jvm", "web-actions"), actualIds)
+    assertEquals(setOf("service-graph", "guice", "config", "database-hibernate", "jvm", "web-actions"), actualIds)
 
     // Config
     val actualConfig = actual.all["config"]!!
@@ -52,13 +52,13 @@ class AllMetadataActionTest {
 
     // JVM
     val actualJvmMetadata = actual.all["jvm"]!!
-    assertThat((actualJvmMetadata.metadata as JvmRuntime).toString()).contains("FakeRuntimeMxBean - VM Name")
+    assertThat((actualJvmMetadata.metadata as JvmRuntime).toString()).contains("JvmRuntime")
 
     // Web Action Metadata
     val actualWebActionsMetadata = actual.all["web-actions"]!!
     assertEquals(
       """
-        WebActionMetadata(name=StatusAction, function=fun misk.web.actions.StatusAction.getStatus(): misk.web.actions.StatusAction.ServerStatus, packageName=misk.web.actions, description=null, functionAnnotations=[@misk.web.Get(pathPattern="/_status"), @misk.web.ResponseContentType({"application/json;charset=utf-8"}), @misk.security.authz.Unauthenticated(), @misk.web.AvailableWhenDegraded()], requestMediaTypes=[*/*], responseMediaType=application/json;charset=utf-8, parameterTypes=[], parameters=[], requestType=null, returnType=misk.web.actions.StatusAction.ServerStatus, responseType=null, types={}, responseTypes={}, pathPattern=/_status, applicationInterceptors=[], networkInterceptors=[misk.web.interceptors.GunzipRequestBodyInterceptor, misk.web.interceptors.InternalErrorInterceptorFactory${'$'}Companion${'$'}INTERCEPTOR${'$'}1, misk.web.interceptors.RequestLogContextInterceptor, misk.web.interceptors.MetricsInterceptor, misk.web.exceptions.ExceptionHandlingInterceptor], httpMethod=GET, allowedServices=[], allowedCapabilities=[])
+        WebActionMetadata(name=StatusAction, function=fun misk.web.actions.StatusAction.getStatus(): misk.web.actions.StatusAction.ServerStatus, packageName=misk.web.actions, description=null, functionAnnotations=[@misk.web.Get(pathPattern="/_status"), @misk.web.ResponseContentType({"application/json;charset=utf-8"}), @misk.security.authz.Unauthenticated(), @misk.web.AvailableWhenDegraded()], requestMediaTypes=[*/*], responseMediaType=application/json;charset=utf-8, parameterTypes=[], parameters=[], requestType=null, returnType=misk.web.actions.StatusAction.ServerStatus, responseType=null, types={}, responseTypes={}, returnTypes={}, pathPattern=/_status, applicationInterceptors=[], networkInterceptors=[misk.web.interceptors.GunzipRequestBodyInterceptor, misk.web.interceptors.InternalErrorInterceptorFactory${'$'}Companion${'$'}INTERCEPTOR${'$'}1, misk.web.interceptors.RequestLogContextInterceptor, misk.web.interceptors.MetricsInterceptor, misk.web.exceptions.ExceptionHandlingInterceptor], httpMethod=GET, allowedServices=[], allowedCapabilities=[])
       """.trimIndent(),
       (actualWebActionsMetadata.metadata as List<WebActionMetadata>).first().toString()
     )

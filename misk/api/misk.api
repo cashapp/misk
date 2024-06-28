@@ -1328,6 +1328,7 @@ public final class misk/web/MiskWebFormBuilder$Companion {
 }
 
 public final class misk/web/MiskWebFormBuilder$Field {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;

@@ -669,7 +669,7 @@ interface Redis {
    * By default the range is included. Set [isIncluded] to false in order to exclude the start or
    * stop.
    */
-  data class ZRangeScoreMarker(
+  data class ZRangeScoreMarker @JvmOverloads constructor(
     val doubleValue: Double,
     val isIncluded: Boolean = true,
   ) : ZRangeMarker(doubleValue, isIncluded) {
