@@ -34,7 +34,7 @@ class AllMetadataModule : KAbstractModule() {
     install(MetadataModule(JvmMetadataProvider()))
     install(MetadataModule(WebActionsMetadataProvider()))
 
-    // Install dashbaord tab
+    // Install dashboard tab
     install(WebActionModule.create<MetadataTabIndexAction>())
     install(DashboardModule.createHotwireTab<AdminDashboard, AdminDashboardAccess>(
       slug = "metadata",

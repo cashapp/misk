@@ -28,6 +28,7 @@ import misk.tasks.RepeatedTaskQueueConfig
 import misk.tasks.RepeatedTaskQueueFactory
 import wisp.lease.LeaseManager
 import jakarta.inject.Inject
+import misk.web.metadata.MetadataModule
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
 open class AwsSqsJobQueueModule(
@@ -44,6 +45,7 @@ open class AwsSqsJobQueueModule(
     bind<JobConsumer>().to<SqsJobConsumer>()
     bind<JobQueue>().to<SqsJobQueue>()
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
+    install(MetadataModule(SqsJobqueueMetadataProvider()))
 
     install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)).dependsOn<ReadyService>())
 
