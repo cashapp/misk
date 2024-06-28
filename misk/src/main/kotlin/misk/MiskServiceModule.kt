@@ -13,6 +13,8 @@ import misk.resources.ResourceLoaderModule
 import misk.time.ClockModule
 import misk.time.TickerModule
 import misk.tokens.TokenGeneratorModule
+import misk.web.metadata.MetadataModule
+import misk.web.metadata.guice.GuiceMetadataProvider
 
 /**
  * Install this module in real environments.
@@ -53,5 +55,6 @@ class MiskCommonServiceModule @JvmOverloads constructor(
     // Initialize empty sets for our multibindings.
     newMultibinder<HealthCheck>()
     install(ServiceModule<ReadyService>())
+    install(MetadataModule(GuiceMetadataProvider()))
   }
 }
