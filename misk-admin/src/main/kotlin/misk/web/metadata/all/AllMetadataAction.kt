@@ -1,7 +1,7 @@
 package misk.web.metadata.all
 
 import jakarta.inject.Inject
-import jakarta.inject.Provider
+import com.google.inject.Provider
 import jakarta.inject.Singleton
 import misk.web.Get
 import misk.web.PathParam
@@ -16,6 +16,7 @@ class AllMetadataAction @Inject constructor(
   /** Uses a provider here so every load gets fresh metadata from all Metadata providers. */
   private val allMetadata: Provider<Map<String, Metadata>>
 ) : WebAction {
+  @JvmOverloads
   @Get(PATH)
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)

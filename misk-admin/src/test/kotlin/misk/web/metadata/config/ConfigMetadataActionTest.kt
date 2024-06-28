@@ -2,7 +2,7 @@ package misk.web.metadata.config
 
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
-import jakarta.inject.Provider
+import com.google.inject.Provider
 import misk.config.MiskConfig
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest

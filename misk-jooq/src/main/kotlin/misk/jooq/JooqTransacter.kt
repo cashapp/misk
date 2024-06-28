@@ -31,7 +31,7 @@ import wisp.logging.getLogger
 import java.time.Clock
 import kotlin.coroutines.coroutineContext
 
-class JooqTransacter(
+class JooqTransacter @JvmOverloads constructor(
   private val dataSourceService: DataSourceService,
   private val dataSourceConfig: DataSourceConfig,
   private val jooqCodeGenSchemaName: String,
