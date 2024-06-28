@@ -14,6 +14,11 @@ import okio.sink
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import wisp.resources.ClasspathResourceLoaderBackend
+import wisp.resources.FilesystemLoaderBackend
+import wisp.resources.MemoryResourceLoaderBackend
 
 @MiskTest
 class ResourceLoaderTest {
@@ -163,11 +168,16 @@ class ResourceLoaderTest {
     assertFailsWith<IllegalArgumentException> {
       resourceLoader.open(":/")
     }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = [ClasspathResourceLoaderBackend.SCHEME, FilesystemLoaderBackend.SCHEME, MemoryResourceLoaderBackend.SCHEME])
+  fun pathBasedAddressValidation(resource: String) {
     assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("a:/")
+      resourceLoader.open("$resource:/")
     }
     assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("a://")
+      resourceLoader.open("$resource://")
     }
   }
 
