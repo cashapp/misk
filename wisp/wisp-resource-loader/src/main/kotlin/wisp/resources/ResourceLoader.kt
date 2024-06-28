@@ -242,6 +242,10 @@ open class ResourceLoader(
             throw UnsupportedOperationException("${this::class} doesn't support unwatch")
         }
 
+        /*
+         * By default, backends will assume a file-like address path (i.e. path/to/file.txt) unless
+         * a different implementation is provided in the backend.
+         */
         open fun checkPath(path: String) {
           require(path.matches(Regex("(/[^/]+)+/?"))) { "unexpected address $path" }
         }

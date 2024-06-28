@@ -271,6 +271,17 @@ class ResourceLoaderTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = [ClasspathResourceLoaderBackend.SCHEME, FilesystemLoaderBackend.SCHEME, MemoryResourceLoaderBackend.SCHEME])
+    fun pathBasedAddressValidation(resource: String) {
+      assertFailsWith<IllegalArgumentException> {
+        resourceLoader.open("$resource:/")
+      }
+      assertFailsWith<IllegalArgumentException> {
+        resourceLoader.open("$resource://")
+      }
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = ["", "/", "//", " "])
     fun pathValidationForPathBasedResources(path: String) {
       assertFailsWith<IllegalArgumentException> {
