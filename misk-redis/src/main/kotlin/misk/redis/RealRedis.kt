@@ -18,6 +18,7 @@ import redis.clients.jedis.Transaction
 import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.commands.JedisBinaryCommands
+import redis.clients.jedis.params.ScanParams
 import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
@@ -177,6 +178,25 @@ class RealRedis(
     val keyBytes = key.toByteArray(charset)
     return jedis { hrandfield(keyBytes, count) }
       .map { it.toString(charset) }
+  }
+
+  override fun scan(cursor: String, matchPattern: String?, count: Int?): Redis.ScanResult {
+    val cursorBytes = cursor.toByteArray(charset)
+    val results = jedis {
+      if (matchPattern != null || count != null) {
+        val params = ScanParams().apply {
+          matchPattern?.let { match(it) }
+          count?.let { count(it) }
+        }
+        scan(cursorBytes, params)
+      } else {
+        scan(cursorBytes)
+      }
+    }
+    val keys = results.result.map {
+      it.toString(charset)
+    }
+    return Redis.ScanResult(results.cursor, keys)
   }
 
   override fun set(key: String, value: ByteString) {

@@ -159,4 +159,31 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis[key], "Key did not expire")
   }
 
+  @Test fun `scan for all keys with default options`() {
+    val expectedKeys = mutableSetOf<String>()
+    for (i in 1..100) {
+      expectedKeys.add(i.toString())
+      redis[i.toString()] = i.toString().encodeUtf8()
+    }
+
+    val scanResult = redis.scan("0")
+
+    assertEquals(expectedKeys, scanResult.keys.toSet())
+    assertEquals("0", scanResult.cursor)
+  }
+
+  @Test fun `scan for keys matching a pattern`() {
+    redis["test_tag:hello"] = "a".encodeUtf8()
+    redis["different_tag:1"] = "b".encodeUtf8()
+    redis["test_tag:2"] = "c".encodeUtf8()
+    redis["bad_test_tag:3"] = "d".encodeUtf8()
+
+    val scanResult = redis.scan("0", matchPattern = "test_tag:*")
+
+    val expectedKeys = listOf("test_tag:hello", "test_tag:2")
+
+    assertTrue(scanResult.keys.containsAll(expectedKeys) &&
+      expectedKeys.containsAll(scanResult.keys))
+    assertEquals(expectedKeys.size, scanResult.keys.size)
+  }
 }

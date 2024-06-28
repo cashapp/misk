@@ -1,5 +1,6 @@
 package misk.redis
 
+import misk.redis.RealRedis.Companion
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.AbstractPipeline
@@ -7,6 +8,7 @@ import redis.clients.jedis.ClusterPipeline
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Response
 import redis.clients.jedis.args.ListDirection
+import redis.clients.jedis.params.ScanParams
 import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple

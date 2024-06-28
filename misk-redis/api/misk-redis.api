@@ -98,6 +98,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun rpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public fun scan (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)Lmisk/redis/Redis$ScanResult;
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public final fun setClock (Ljava/time/Clock;)V
@@ -162,6 +163,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun rpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public fun scan (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)Lmisk/redis/Redis$ScanResult;
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
@@ -223,6 +225,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public abstract fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun rpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public abstract fun scan (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)Lmisk/redis/Redis$ScanResult;
 	public abstract fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
@@ -240,8 +243,22 @@ public abstract interface class misk/redis/Redis {
 }
 
 public final class misk/redis/Redis$DefaultImpls {
+	public static synthetic fun scan$default (Lmisk/redis/Redis;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/redis/Redis$ScanResult;
 	public static synthetic fun zrange$default (Lmisk/redis/Redis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/List;
 	public static synthetic fun zrangeWithScores$default (Lmisk/redis/Redis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class misk/redis/Redis$ScanResult {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lmisk/redis/Redis$ScanResult;
+	public static synthetic fun copy$default (Lmisk/redis/Redis$ScanResult;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/redis/Redis$ScanResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCursor ()Ljava/lang/String;
+	public final fun getKeys ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/redis/Redis$ZAddOptions : java/lang/Enum {
@@ -547,6 +564,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun rpush (Ljava/lang/String;[Lokio/ByteString;)J
+	public fun scan (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)Lmisk/redis/Redis$ScanResult;
 	public fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z

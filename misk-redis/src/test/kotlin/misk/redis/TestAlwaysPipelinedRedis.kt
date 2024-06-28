@@ -55,6 +55,9 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
   override fun hrandField(key: String, count: Long): List<String> =
     runPipeline { hrandField(key, count) }
 
+  override fun scan(cursor: String, matchPattern: String?, count: Int?): Redis.ScanResult =
+    error("scan is not supported in TestAlwaysPipelinedRedis")
+
   override fun set(key: String, value: ByteString) = runPipeline { set(key, value) }
 
   override fun set(key: String, expiryDuration: Duration, value: ByteString) =
