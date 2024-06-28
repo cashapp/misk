@@ -149,6 +149,21 @@ interface Redis {
   fun hrandField(key: String, count: Long): List<String>
 
   /**
+   * Performs a batched iteration of matching keys.
+   * If no pattern is provided, all keys will be scanned through.
+   *
+   * @param cursor The scan cursor. This should first be "0". Then subsequent cursor values will
+   *               be taken from the returned ScanResults.
+   * @param matchPattern A glob-like match pattern to filter keys by. If this is not provided,
+   *                     then all keys will be scanned.
+   * @param count A hinted desired batch size to be returned in each ScanResult. Note that this is
+   *              just a hint and there are no guarantees on the actual size of each ScanResult.
+   * @return A ScanResult containing the next cursor and the current batch of keys. If the
+   *         returned cursor is "0", then there are no more keys left in the iteration.
+   */
+  fun scan(cursor: String, matchPattern: String? = null, count: Int? = null): ScanResult
+
+  /**
    * Sets the [ByteString] value for the given key.
    *
    * @param key the key to set
@@ -649,6 +664,11 @@ interface Redis {
   abstract class ZRangeMarker(
     val value: Any,
     val included: Boolean
+  )
+
+  data class ScanResult(
+    val cursor: String,
+    val keys: List<String>
   )
 
   data class ZRangeRankMarker(

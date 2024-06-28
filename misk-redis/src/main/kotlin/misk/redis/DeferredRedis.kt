@@ -1,5 +1,6 @@
 package misk.redis
 
+import misk.redis.Redis.ScanResult
 import okio.ByteString
 import redis.clients.jedis.args.ListDirection
 import java.time.Duration

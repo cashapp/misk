@@ -69,4 +69,57 @@ class RealRedisTest : AbstractRedisTest() {
     assertThat(redis["key5"]).isEqualTo("value5".encodeUtf8())
     assertThat(redis["key6"]).isNull()
   }
+
+  @Test fun `scan for all keys with default options`() {
+    val expectedKeys = mutableSetOf<String>()
+    for (i in 1..100) {
+      expectedKeys.add(i.toString())
+      redis[i.toString()] = i.toString().encodeUtf8()
+    }
+
+    val scanKeys = scanAll()
+
+    assertThat(scanKeys).isEqualTo(expectedKeys)
+  }
+
+  @Test fun `scan for keys matching a pattern`() {
+    redis["test_tag:hello"] = "a".encodeUtf8()
+    redis["different_tag:1"] = "b".encodeUtf8()
+    redis["test_tag:2"] = "c".encodeUtf8()
+    redis["bad_test_tag:3"] = "d".encodeUtf8()
+
+    val scanKeys = scanAll(matchPattern = "test_tag:*")
+
+    assertThat(scanKeys).containsExactlyInAnyOrder("test_tag:hello", "test_tag:2")
+  }
+
+  @Test fun `scan for all keys with a desired hinted page size`() {
+    val expectedKeys = mutableSetOf<String>()
+    for (i in 1..100) {
+      expectedKeys.add(i.toString())
+      redis[i.toString()] = i.toString().encodeUtf8()
+    }
+
+    val scanKeys = scanAll(count=1)
+
+    assertThat(scanKeys).isEqualTo(expectedKeys)
+
+  }
+
+  private fun scanAll(
+    initialCursor: String = "0",
+    matchPattern: String? = null,
+    count: Int? = null
+  ): Set<String> {
+    var cursor = initialCursor
+    val allKeys = mutableSetOf<String>()
+
+    do {
+      val result = redis.scan(cursor, matchPattern, count)
+      allKeys.addAll(result.keys)
+      cursor = result.cursor
+    } while (cursor != "0")
+
+    return allKeys
+  }
 }

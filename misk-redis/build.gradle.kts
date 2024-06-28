@@ -16,6 +16,7 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
   implementation(libs.apacheCommonsPool)
+  implementation(libs.apacheCommonsIo)
   implementation(libs.guice)
   implementation(libs.okio)
   implementation(libs.prometheusClient)
