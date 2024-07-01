@@ -1,0 +1,11 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.warmup////PointingToDeclaration/misk-warmup/misk.warmup/index.md
+$dokka.location:misk.warmup//WarmupModule/#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-warmup/misk.warmup/-warmup-module.md
+$dokka.location:misk.warmup/WarmupModule///PointingToDeclaration/misk-warmup/misk.warmup/-warmup-module/index.md
+$dokka.location:misk.warmup/WarmupModule/WarmupModule/#kotlin.String#com.google.inject.Key[misk.warmup.WarmupTask]/PointingToDeclaration/misk-warmup/misk.warmup/-warmup-module/-warmup-module.md
+$dokka.location:misk.warmup/WarmupTask///PointingToDeclaration/misk-warmup/misk.warmup/-warmup-task/index.md
+$dokka.location:misk.warmup/WarmupTask/WarmupTask/#/PointingToDeclaration/misk-warmup/misk.warmup/-warmup-task/-warmup-task.md
+$dokka.location:misk.warmup/WarmupTask/execute/#/PointingToDeclaration/misk-warmup/misk.warmup/-warmup-task/execute.md
+misk.warmup
+

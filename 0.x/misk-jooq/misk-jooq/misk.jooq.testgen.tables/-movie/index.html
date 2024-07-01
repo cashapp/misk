@@ -1,0 +1,1703 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Misk: Microservice Container for Kotlin">
+      
+      
+        <meta name="author" content="Square, Inc.">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../../../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
+    
+    
+      
+        <title>Movie - Misk - Misk</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../css/app.css">
+    
+    <script>__md_scope=new URL("../../../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#movie" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../.." title="Misk" class="md-header__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../../../img/cashapp.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Misk
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Movie - Misk
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cashapp/misk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../.." title="Misk" class="md-nav__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../../../img/cashapp.png" alt="logo">
+
+    </a>
+    Misk
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cashapp/misk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../clients/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clients
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    0.x API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            0.x API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-aws
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws-dynamodb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-aws-dynamodb
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws2-dynamodb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-aws2-dynamodb
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-crypto/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-crypto
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-eventrouter/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-eventrouter
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-events-core/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-events-core
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-events/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-events
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-gcp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-gcp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-grpc-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-grpc-tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-hibernate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-hibernate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-hibernate-testing/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-hibernate-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-inject/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-inject
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-jobqueue/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-jobqueue
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-jobqueue-testing/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-jobqueue-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-metrics-digester/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-metrics-digester
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-prometheus/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-prometheus
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-redis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-redis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-zookeeper/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-zookeeper
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-zoopkeeper-testing/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-zoopkeeper-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Internals
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Internals
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../internals/graceful-shutdown/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Graceful Shutdown
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../internals/service-management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Service Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../wisp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Wisp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Migrations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Migrations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../migrations/misk-metrics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Misk Metrics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Change Log
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../releasing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Releasing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../developer-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://stackoverflow.com/questions/tagged/misk?sort=active" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Stack Overflow ⏏
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructors
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<p>//<a href="../../../">misk-jooq</a>/<a href="../">misk.jooq.testgen.tables</a>/<a href="./">Movie</a></p>
+<h1 id="movie">Movie<a class="headerlink" href="#movie" title="Permanent link">&para;</a></h1>
+<p>[jvm]\
+open class <a href="./">Movie</a>(alias: Name, child: Table&lt;out Record&gt;?, path: ForeignKey&lt;out Record, <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;?, aliased: Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;?, parameters: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;Field&lt;*&gt;?&gt;?) : TableImpl&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt; </p>
+<p>This class is generated by jOOQ.</p>
+<h2 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-movie/">Movie</a></td>
+<td>[jvm]<br>constructor(alias: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>)<br>Create an aliased <code>jooq.movie</code> table reference<br>constructor(alias: Name)<br>Create an aliased <code>jooq.movie</code> table reference<br>constructor()<br>Create a <code>jooq.movie</code> table reference<br>constructor(child: Table&lt;out Record&gt;, key: ForeignKey&lt;out Record, <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;)constructor(alias: Name, child: Table&lt;out Record&gt;?, path: ForeignKey&lt;out Record, <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;?, aliased: Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;?, parameters: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;Field&lt;*&gt;?&gt;?)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-companion/">Companion</a></td>
+<td>[jvm]<br>object <a href="-companion/">Companion</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-c-r-e-a-t-e-d_-a-t/">CREATED_AT</a></td>
+<td>[jvm]<br>val <a href="-c-r-e-a-t-e-d_-a-t/">CREATED_AT</a>: TableField&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html">LocalDateTime</a>?&gt;<br>The column <code>jooq.movie.created_at</code>.</td>
+</tr>
+<tr>
+<td><a href="-g-e-n-r-e/">GENRE</a></td>
+<td>[jvm]<br>val <a href="-g-e-n-r-e/">GENRE</a>: TableField&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?&gt;<br>The column <code>jooq.movie.genre</code>.</td>
+</tr>
+<tr>
+<td><a href="-i-d/">ID</a></td>
+<td>[jvm]<br>val <a href="-i-d/">ID</a>: TableField&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a>?&gt;<br>The column <code>jooq.movie.id</code>.</td>
+</tr>
+<tr>
+<td><a href="-n-a-m-e/">NAME</a></td>
+<td>[jvm]<br>val <a href="-n-a-m-e/">NAME</a>: TableField&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?&gt;<br>The column <code>jooq.movie.name</code>.</td>
+</tr>
+<tr>
+<td><a href="-u-p-d-a-t-e-d_-a-t/">UPDATED_AT</a></td>
+<td>[jvm]<br>val <a href="-u-p-d-a-t-e-d_-a-t/">UPDATED_AT</a>: TableField&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html">LocalDateTime</a>?&gt;<br>The column <code>jooq.movie.updated_at</code>.</td>
+</tr>
+<tr>
+<td><a href="-v-e-r-s-i-o-n/">VERSION</a></td>
+<td>[jvm]<br>val <a href="-v-e-r-s-i-o-n/">VERSION</a>: TableField&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>?&gt;<br>The column <code>jooq.movie.version</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./#-2094910500%2FFunctions%2F1647028818">$alias</a></td>
+<td>[jvm]<br>open override fun <a href="./#-2094910500%2FFunctions%2F1647028818">$alias</a>(): Name?</td>
+</tr>
+<tr>
+<td><a href="./#-1331774371%2FFunctions%2F1647028818">$aliased</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1331774371%2FFunctions%2F1647028818">$aliased</a>(): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1415894166%2FFunctions%2F1647028818">$dataType</a></td>
+<td>[jvm]<br>override fun <a href="./#-1415894166%2FFunctions%2F1647028818">$dataType</a>(): DataType&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-573502344%2FFunctions%2F1647028818">$name</a></td>
+<td>[jvm]<br>override fun <a href="./#-573502344%2FFunctions%2F1647028818">$name</a>(): Name</td>
+</tr>
+<tr>
+<td><a href="./#-778996051%2FFunctions%2F1647028818">$schema</a></td>
+<td>[jvm]<br>override fun <a href="./#-778996051%2FFunctions%2F1647028818">$schema</a>(): Schema?</td>
+</tr>
+<tr>
+<td><a href="./#2112629316%2FFunctions%2F1647028818">accept</a></td>
+<td>[jvm]<br>override fun <a href="./#2112629316%2FFunctions%2F1647028818">accept</a>(p0: Context&lt;*&gt;)</td>
+</tr>
+<tr>
+<td><a href="as/">as</a></td>
+<td>[jvm]<br>open override fun <a href="as/">as</a>(alias: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="./">Movie</a><br>open override fun <a href="as/">as</a>(alias: Name): <a href="./">Movie</a><br>override fun <a href="./#-76247941%2FFunctions%2F1647028818">as</a>(p0: Field&lt;<em>&gt;): SelectField&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>open override fun <a href="./#-668236209%2FFunctions%2F1647028818">as</a>(p0: Table&lt;</em>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-986302039%2FFunctions%2F1647028818">as</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html">BiFunction</a>&lt;in Field&lt;<em>&gt;, in <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, out <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#1604544234%2FFunctions%2F1647028818">as</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in Field&lt;</em>&gt;, out <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-279663261%2FFunctions%2F1647028818">as</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#994530005%2FFunctions%2F1647028818">as</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-collection/index.html">MutableCollection</a>&lt;out <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#97154281%2FFunctions%2F1647028818">as</a>(p0: Name, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html">BiFunction</a>&lt;in Field&lt;<em>&gt;, in <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, out Name&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-2128145410%2FFunctions%2F1647028818">as</a>(p0: Name, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in Field&lt;</em>&gt;, out Name&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#625531541%2FFunctions%2F1647028818">as</a>(p0: Name, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-collection/index.html">MutableCollection</a>&lt;out Name&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-2105569699%2FFunctions%2F1647028818">as</a>(p0: Table&lt;<em>&gt;, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html">BiFunction</a>&lt;in Field&lt;</em>&gt;, in <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, out Field&lt;<em>&gt;&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-678213444%2FFunctions%2F1647028818">as</a>(p0: Table&lt;</em>&gt;, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in Field&lt;<em>&gt;, out Field&lt;</em>&gt;&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-1965152553%2FFunctions%2F1647028818">as</a>(p0: Table&lt;<em>&gt;, vararg p1: Field&lt;</em>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-569331639%2FFunctions%2F1647028818">as</a>(p0: Table&lt;<em>&gt;, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-collection/index.html">MutableCollection</a>&lt;out Field&lt;</em>&gt;&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>open override fun <a href="./#-1328992479%2FFunctions%2F1647028818">as</a>(p0: Name, vararg p1: Name): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#702633741%2FFunctions%2F1647028818">asMultiset</a></td>
+<td>[jvm]<br>override fun <a href="./#702633741%2FFunctions%2F1647028818">asMultiset</a>(): Field&lt;Result&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;&gt;<br>override fun <a href="./#446912279%2FFunctions%2F1647028818">asMultiset</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Field&lt;Result&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;&gt;<br>override fun <a href="./#1010796260%2FFunctions%2F1647028818">asMultiset</a>(p0: Field&lt;*&gt;): Field&lt;Result&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;&gt;<br>override fun <a href="./#-1206978099%2FFunctions%2F1647028818">asMultiset</a>(p0: Name): Field&lt;Result&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="./#358909590%2FFunctions%2F1647028818">asTable</a></td>
+<td>[jvm]<br>override fun <a href="./#358909590%2FFunctions%2F1647028818">asTable</a>(): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-743084498%2FFunctions%2F1647028818">asTable</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#1897992420%2FFunctions%2F1647028818">asTable</a>(p0: Name): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#1047082063%2FFunctions%2F1647028818">asTable</a>(p0: Table&lt;<em>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#361326505%2FFunctions%2F1647028818">asTable</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html">BiFunction</a>&lt;in Field&lt;</em>&gt;, in <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, out <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#1639807210%2FFunctions%2F1647028818">asTable</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in Field&lt;<em>&gt;, out <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-2098701469%2FFunctions%2F1647028818">asTable</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-634322731%2FFunctions%2F1647028818">asTable</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-collection/index.html">MutableCollection</a>&lt;out <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#524428579%2FFunctions%2F1647028818">asTable</a>(p0: Name, vararg p1: Name): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#-1003321195%2FFunctions%2F1647028818">asTable</a>(p0: Name, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-collection/index.html">MutableCollection</a>&lt;out Name&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#1591989463%2FFunctions%2F1647028818">asTable</a>(p0: Table&lt;</em>&gt;, vararg p1: Field&lt;<em>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#124542537%2FFunctions%2F1647028818">asTable</a>(p0: Table&lt;</em>&gt;, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-collection/index.html">MutableCollection</a>&lt;out Field&lt;*&gt;&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1786948886%2FFunctions%2F1647028818">asterisk</a></td>
+<td>[jvm]<br>override fun <a href="./#1786948886%2FFunctions%2F1647028818">asterisk</a>(): QualifiedAsterisk</td>
+</tr>
+<tr>
+<td><a href="./#1810102746%2FFunctions%2F1647028818">clauses</a></td>
+<td>[jvm]<br>override fun <a href="./#1810102746%2FFunctions%2F1647028818">clauses</a>(p0: Context&lt;*&gt;): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;Clause&gt;</td>
+</tr>
+<tr>
+<td><a href="./#297754409%2FFunctions%2F1647028818">convert</a></td>
+<td>[jvm]<br>override fun &lt;<a href="./#297754409%2FFunctions%2F1647028818">U</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#297754409%2FFunctions%2F1647028818">convert</a>(p0: Binding&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="./#297754409%2FFunctions%2F1647028818">U</a>&gt;): SelectField&lt;<a href="./#297754409%2FFunctions%2F1647028818">U</a>&gt;<br>override fun &lt;<a href="./#-328947836%2FFunctions%2F1647028818">U</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#-328947836%2FFunctions%2F1647028818">convert</a>(p0: Converter&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="./#-328947836%2FFunctions%2F1647028818">U</a>&gt;): SelectField&lt;<a href="./#-328947836%2FFunctions%2F1647028818">U</a>&gt;<br>override fun &lt;<a href="./#1622709276%2FFunctions%2F1647028818">U</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#1622709276%2FFunctions%2F1647028818">convert</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;<a href="./#1622709276%2FFunctions%2F1647028818">U</a>&gt;, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, out <a href="./#1622709276%2FFunctions%2F1647028818">U</a>&gt;, p2: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in <a href="./#1622709276%2FFunctions%2F1647028818">U</a>, out <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;): SelectField&lt;<a href="./#1622709276%2FFunctions%2F1647028818">U</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-485421503%2FFunctions%2F1647028818">convertFrom</a></td>
+<td>[jvm]<br>override fun &lt;<a href="./#-485421503%2FFunctions%2F1647028818">U</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#-485421503%2FFunctions%2F1647028818">convertFrom</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, out <a href="./#-485421503%2FFunctions%2F1647028818">U</a>&gt;): SelectField&lt;<a href="./#-485421503%2FFunctions%2F1647028818">U</a>&gt;<br>override fun &lt;<a href="./#-1855159055%2FFunctions%2F1647028818">U</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#-1855159055%2FFunctions%2F1647028818">convertFrom</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;<a href="./#-1855159055%2FFunctions%2F1647028818">U</a>&gt;, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, out <a href="./#-1855159055%2FFunctions%2F1647028818">U</a>&gt;): SelectField&lt;<a href="./#-1855159055%2FFunctions%2F1647028818">U</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#993093500%2FFunctions%2F1647028818">convertTo</a></td>
+<td>[jvm]<br>override fun &lt;<a href="./#993093500%2FFunctions%2F1647028818">U</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#993093500%2FFunctions%2F1647028818">convertTo</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in <a href="./#993093500%2FFunctions%2F1647028818">U</a>, out <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;): SelectField&lt;<a href="./#993093500%2FFunctions%2F1647028818">U</a>&gt;<br>override fun &lt;<a href="./#2055103532%2FFunctions%2F1647028818">U</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#2055103532%2FFunctions%2F1647028818">convertTo</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;<a href="./#2055103532%2FFunctions%2F1647028818">U</a>&gt;, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html">Function</a>&lt;in <a href="./#2055103532%2FFunctions%2F1647028818">U</a>, out <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;): SelectField&lt;<a href="./#2055103532%2FFunctions%2F1647028818">U</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#176549130%2FFunctions%2F1647028818">crossApply</a></td>
+<td>[jvm]<br>override fun <a href="./#176549130%2FFunctions%2F1647028818">crossApply</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;Record&gt;<br>override fun <a href="./#-1477341248%2FFunctions%2F1647028818">crossApply</a>(p0: Name): Table&lt;Record&gt;<br>override fun <a href="./#688921769%2FFunctions%2F1647028818">crossApply</a>(p0: SQL): Table&lt;Record&gt;<br>override fun <a href="./#-1706422750%2FFunctions%2F1647028818">crossApply</a>(p0: TableLike&lt;*&gt;): Table&lt;Record&gt;<br>override fun <a href="./#-999260378%2FFunctions%2F1647028818">crossApply</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): Table&lt;Record&gt;<br>override fun <a href="./#379126149%2FFunctions%2F1647028818">crossApply</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): Table&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1797703612%2FFunctions%2F1647028818">crossJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#1797703612%2FFunctions%2F1647028818">crossJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;Record&gt;<br>override fun <a href="./#143813234%2FFunctions%2F1647028818">crossJoin</a>(p0: Name): Table&lt;Record&gt;<br>override fun <a href="./#879764407%2FFunctions%2F1647028818">crossJoin</a>(p0: SQL): Table&lt;Record&gt;<br>override fun <a href="./#-1190783276%2FFunctions%2F1647028818">crossJoin</a>(p0: TableLike&lt;*&gt;): Table&lt;Record&gt;<br>override fun <a href="./#-1313558348%2FFunctions%2F1647028818">crossJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): Table&lt;Record&gt;<br>override fun <a href="./#-686701293%2FFunctions%2F1647028818">crossJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): Table&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1556093313%2FFunctions%2F1647028818">dataType</a></td>
+<td>[jvm]<br>@Nullable<br>abstract fun <a href="./#-1556093313%2FFunctions%2F1647028818">dataType</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): @NullableDataType&lt;<em>&gt;?<br>@Nullable<br>abstract fun <a href="./#-65999741%2FFunctions%2F1647028818">dataType</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): @NullableDataType&lt;</em>&gt;?<br>@Nullable<br>abstract fun <a href="./#-1719890119%2FFunctions%2F1647028818">dataType</a>(p0: Name): @NullableDataType&lt;*&gt;?</td>
+</tr>
+<tr>
+<td><a href="./#1276512454%2FFunctions%2F1647028818">dataTypes</a></td>
+<td>[jvm]<br>@NotNull<br>abstract fun <a href="./#1276512454%2FFunctions%2F1647028818">dataTypes</a>(): @NotNull<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;@NotNullDataType&lt;*&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="./#2015331770%2FFunctions%2F1647028818">declaresCTE</a></td>
+<td>[jvm]<br>open override fun <a href="./#2015331770%2FFunctions%2F1647028818">declaresCTE</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-2142887949%2FFunctions%2F1647028818">declaresFields</a></td>
+<td>[jvm]<br>open override fun <a href="./#-2142887949%2FFunctions%2F1647028818">declaresFields</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1746626300%2FFunctions%2F1647028818">declaresTables</a></td>
+<td>[jvm]<br>open override fun <a href="./#1746626300%2FFunctions%2F1647028818">declaresTables</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-354436181%2FFunctions%2F1647028818">declaresWindows</a></td>
+<td>[jvm]<br>open override fun <a href="./#-354436181%2FFunctions%2F1647028818">declaresWindows</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-940653683%2FFunctions%2F1647028818">divideBy</a></td>
+<td>[jvm]<br>override fun <a href="./#-940653683%2FFunctions%2F1647028818">divideBy</a>(p0: Table&lt;*&gt;): DivideByOnStep</td>
+</tr>
+<tr>
+<td><a href="./#1554195410%2FFunctions%2F1647028818">eq</a></td>
+<td>[jvm]<br>override fun <a href="./#1554195410%2FFunctions%2F1647028818">eq</a>(p0: Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;): Condition</td>
+</tr>
+<tr>
+<td><a href="./#-37684780%2FFunctions%2F1647028818">equal</a></td>
+<td>[jvm]<br>override fun <a href="./#-37684780%2FFunctions%2F1647028818">equal</a>(p0: Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;): Condition</td>
+</tr>
+<tr>
+<td><a href="./#-1436109385%2FFunctions%2F1647028818">equals</a></td>
+<td>[jvm]<br>open operator override fun <a href="./#-1436109385%2FFunctions%2F1647028818">equals</a>(other: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>?): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#814763257%2FFunctions%2F1647028818">field</a></td>
+<td>[jvm]<br>@Nullable<br>abstract fun <a href="./#814763257%2FFunctions%2F1647028818">field</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): @NullableField&lt;<em>&gt;?<br>@Nullable<br>abstract fun &lt;<a href="./#-1298210769%2FFunctions%2F1647028818">T</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#-1298210769%2FFunctions%2F1647028818">field</a>(p0: Field&lt;<a href="./#-1298210769%2FFunctions%2F1647028818">T</a>&gt;): @NullableField&lt;<a href="./#-1298210769%2FFunctions%2F1647028818">T</a>&gt;?<br>@Nullable<br>abstract fun &lt;<a href="./#-757557687%2FFunctions%2F1647028818">T</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#-757557687%2FFunctions%2F1647028818">field</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;<a href="./#-757557687%2FFunctions%2F1647028818">T</a>&gt;): @NullableField&lt;<a href="./#-757557687%2FFunctions%2F1647028818">T</a>&gt;?<br>@Nullable<br>abstract fun &lt;<a href="./#667903692%2FFunctions%2F1647028818">T</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#667903692%2FFunctions%2F1647028818">field</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p1: DataType&lt;<a href="./#667903692%2FFunctions%2F1647028818">T</a>&gt;): @NullableField&lt;<a href="./#667903692%2FFunctions%2F1647028818">T</a>&gt;?<br>open override fun <a href="./#72900334%2FFunctions%2F1647028818">field</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Field&lt;</em>&gt;?<br>open override fun <a href="./#-1580990044%2FFunctions%2F1647028818">field</a>(p0: Name): Field&lt;*&gt;?<br>open override fun &lt;<a href="./#-1467282882%2FFunctions%2F1647028818">T</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#-1467282882%2FFunctions%2F1647028818">field</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;<a href="./#-1467282882%2FFunctions%2F1647028818">T</a>&gt;): Field&lt;<a href="./#-1467282882%2FFunctions%2F1647028818">T</a>&gt;?<br>open override fun &lt;<a href="./#1521791361%2FFunctions%2F1647028818">T</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#1521791361%2FFunctions%2F1647028818">field</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: DataType&lt;<a href="./#1521791361%2FFunctions%2F1647028818">T</a>&gt;): Field&lt;<a href="./#1521791361%2FFunctions%2F1647028818">T</a>&gt;?<br>open override fun &lt;<a href="./#1665018100%2FFunctions%2F1647028818">T</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#1665018100%2FFunctions%2F1647028818">field</a>(p0: Name, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;<a href="./#1665018100%2FFunctions%2F1647028818">T</a>&gt;): Field&lt;<a href="./#1665018100%2FFunctions%2F1647028818">T</a>&gt;?<br>open override fun &lt;<a href="./#890960567%2FFunctions%2F1647028818">T</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#890960567%2FFunctions%2F1647028818">field</a>(p0: Name, p1: DataType&lt;<a href="./#890960567%2FFunctions%2F1647028818">T</a>&gt;): Field&lt;<a href="./#890960567%2FFunctions%2F1647028818">T</a>&gt;?</td>
+</tr>
+<tr>
+<td><a href="./#-1911319672%2FFunctions%2F1647028818">fields</a></td>
+<td>[jvm]<br>@Nullable<br>abstract fun <a href="./#-1911319672%2FFunctions%2F1647028818">fields</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): @NotNull<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;@NullableField&lt;<em>&gt;?&gt;<br>@Nullable<br>abstract fun <a href="./#13725787%2FFunctions%2F1647028818">fields</a>(vararg p0: Field&lt;</em>&gt;): @NotNull<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;@NullableField&lt;<em>&gt;?&gt;<br>@Nullable<br>abstract fun <a href="./#-1642313838%2FFunctions%2F1647028818">fields</a>(vararg p0: Name): @NotNull<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;@NullableField&lt;</em>&gt;?&gt;<br>@Nullable<br>abstract fun <a href="./#-62936641%2FFunctions%2F1647028818">fields</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): @NotNull<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;@NullableField&lt;<em>&gt;?&gt;<br>override fun <a href="./#1237465711%2FFunctions%2F1647028818">fields</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;Field&lt;</em>&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="fields-row/">fieldsRow</a></td>
+<td>[jvm]<br>open override fun <a href="fields-row/">fieldsRow</a>(): Row6&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a>?, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>?, <a href="https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html">LocalDateTime</a>?, <a href="https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html">LocalDateTime</a>?&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-2100899077%2FFunctions%2F1647028818">fieldStream</a></td>
+<td>[jvm]<br>@NotNull<br>abstract fun <a href="./#-2100899077%2FFunctions%2F1647028818">fieldStream</a>(): @NotNull<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html">Stream</a>&lt;Field&lt;*&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1979777203%2FFunctions%2F1647028818">forceIndex</a></td>
+<td>[jvm]<br>override fun <a href="./#1979777203%2FFunctions%2F1647028818">forceIndex</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1722906496%2FFunctions%2F1647028818">forceIndexForGroupBy</a></td>
+<td>[jvm]<br>override fun <a href="./#1722906496%2FFunctions%2F1647028818">forceIndexForGroupBy</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-363735506%2FFunctions%2F1647028818">forceIndexForJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#-363735506%2FFunctions%2F1647028818">forceIndexForJoin</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1907951857%2FFunctions%2F1647028818">forceIndexForOrderBy</a></td>
+<td>[jvm]<br>override fun <a href="./#-1907951857%2FFunctions%2F1647028818">forceIndexForOrderBy</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#2011819286%2FFunctions%2F1647028818">from</a></td>
+<td>[jvm]<br>override fun <a href="./#2011819286%2FFunctions%2F1647028818">from</a>(p0: Record): <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a></td>
+</tr>
+<tr>
+<td><a href="./#871370581%2FFunctions%2F1647028818">fullJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#871370581%2FFunctions%2F1647028818">fullJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-782519797%2FFunctions%2F1647028818">fullJoin</a>(p0: Name): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-1643969282%2FFunctions%2F1647028818">fullJoin</a>(p0: SQL): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#1082045805%2FFunctions%2F1647028818">fullJoin</a>(p0: TableLike&lt;*&gt;): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-1912867013%2FFunctions%2F1647028818">fullJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#1657377946%2FFunctions%2F1647028818">fullJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): TablePartitionByStep&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1171686872%2FFunctions%2F1647028818">fullOuterJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#-1171686872%2FFunctions%2F1647028818">fullOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#1469390046%2FFunctions%2F1647028818">fullOuterJoin</a>(p0: Name): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-1571327029%2FFunctions%2F1647028818">fullOuterJoin</a>(p0: SQL): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#135634240%2FFunctions%2F1647028818">fullOuterJoin</a>(p0: TableLike&lt;*&gt;): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-865251384%2FFunctions%2F1647028818">fullOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-803991513%2FFunctions%2F1647028818">fullOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): TablePartitionByStep&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#824529672%2FFunctions%2F1647028818">generatesCast</a></td>
+<td>[jvm]<br>open override fun <a href="./#824529672%2FFunctions%2F1647028818">generatesCast</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1211480551%2FFunctions%2F1647028818">getBinding</a></td>
+<td>[jvm]<br>override fun <a href="./#-1211480551%2FFunctions%2F1647028818">getBinding</a>(): Binding&lt;*, <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#747946757%2FFunctions%2F1647028818">getCatalog</a></td>
+<td>[jvm]<br>override fun <a href="./#747946757%2FFunctions%2F1647028818">getCatalog</a>(): Catalog?</td>
+</tr>
+<tr>
+<td><a href="./#1344739409%2FFunctions%2F1647028818">getChecks</a></td>
+<td>[jvm]<br>open override fun <a href="./#1344739409%2FFunctions%2F1647028818">getChecks</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a>&lt;Check&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="./#532033898%2FFunctions%2F1647028818">getComment</a></td>
+<td>[jvm]<br>override fun <a href="./#532033898%2FFunctions%2F1647028818">getComment</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1374414391%2FFunctions%2F1647028818">getCommentPart</a></td>
+<td>[jvm]<br>override fun <a href="./#1374414391%2FFunctions%2F1647028818">getCommentPart</a>(): Comment</td>
+</tr>
+<tr>
+<td><a href="./#-81509602%2FFunctions%2F1647028818">getConverter</a></td>
+<td>[jvm]<br>override fun <a href="./#-81509602%2FFunctions%2F1647028818">getConverter</a>(): ContextConverter&lt;*, <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1277531880%2FFunctions%2F1647028818">getDataType</a></td>
+<td>[jvm]<br>override fun <a href="./#-1277531880%2FFunctions%2F1647028818">getDataType</a>(): DataType&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>override fun <a href="./#775100767%2FFunctions%2F1647028818">getDataType</a>(p0: Configuration): DataType&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="get-identity/">getIdentity</a></td>
+<td>[jvm]<br>open override fun <a href="get-identity/">getIdentity</a>(): Identity&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a>?&gt;</td>
+</tr>
+<tr>
+<td><a href="./#718199806%2FFunctions%2F1647028818">getIndexes</a></td>
+<td>[jvm]<br>open override fun <a href="./#718199806%2FFunctions%2F1647028818">getIndexes</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a>&lt;Index&gt;</td>
+</tr>
+<tr>
+<td><a href="get-keys/">getKeys</a></td>
+<td>[jvm]<br>open override fun <a href="get-keys/">getKeys</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a>&lt;UniqueKey&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="./#414013414%2FFunctions%2F1647028818">getName</a></td>
+<td>[jvm]<br>override fun <a href="./#414013414%2FFunctions%2F1647028818">getName</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1035170784%2FFunctions%2F1647028818">getOptions</a></td>
+<td>[jvm]<br>override fun <a href="./#-1035170784%2FFunctions%2F1647028818">getOptions</a>(): TableOptions</td>
+</tr>
+<tr>
+<td><a href="./#-2122773640%2FFunctions%2F1647028818">getPackage</a></td>
+<td>[jvm]<br>override fun <a href="./#-2122773640%2FFunctions%2F1647028818">getPackage</a>(): Package?</td>
+</tr>
+<tr>
+<td><a href="get-primary-key/">getPrimaryKey</a></td>
+<td>[jvm]<br>open override fun <a href="get-primary-key/">getPrimaryKey</a>(): UniqueKey&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-455576958%2FFunctions%2F1647028818">getQualifiedName</a></td>
+<td>[jvm]<br>open override fun <a href="./#-455576958%2FFunctions%2F1647028818">getQualifiedName</a>(): Name</td>
+</tr>
+<tr>
+<td><a href="./#301589465%2FFunctions%2F1647028818">getRecordTimestamp</a></td>
+<td>[jvm]<br>open override fun <a href="./#301589465%2FFunctions%2F1647028818">getRecordTimestamp</a>(): TableField&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, *&gt;?</td>
+</tr>
+<tr>
+<td><a href="get-record-type/">getRecordType</a></td>
+<td>[jvm]<br>open override fun <a href="get-record-type/">getRecordType</a>(): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>The class holding records for this type</td>
+</tr>
+<tr>
+<td><a href="get-record-version/">getRecordVersion</a></td>
+<td>[jvm]<br>open override fun <a href="get-record-version/">getRecordVersion</a>(): TableField&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>?&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1263473324%2FFunctions%2F1647028818">getReferences</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1263473324%2FFunctions%2F1647028818">getReferences</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a>&lt;ForeignKey&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, *&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="./#550834819%2FFunctions%2F1647028818">getReferencesFrom</a></td>
+<td>[jvm]<br>override fun &lt;<a href="./#550834819%2FFunctions%2F1647028818">O</a> : Record&gt; <a href="./#550834819%2FFunctions%2F1647028818">getReferencesFrom</a>(p0: Table&lt;<a href="./#550834819%2FFunctions%2F1647028818">O</a>&gt;): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a>&lt;ForeignKey&lt;<a href="./#550834819%2FFunctions%2F1647028818">O</a>, <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1022518804%2FFunctions%2F1647028818">getReferencesTo</a></td>
+<td>[jvm]<br>override fun &lt;<a href="./#1022518804%2FFunctions%2F1647028818">O</a> : Record&gt; <a href="./#1022518804%2FFunctions%2F1647028818">getReferencesTo</a>(p0: Table&lt;<a href="./#1022518804%2FFunctions%2F1647028818">O</a>&gt;): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a>&lt;ForeignKey&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>, <a href="./#1022518804%2FFunctions%2F1647028818">O</a>&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="get-schema/">getSchema</a></td>
+<td>[jvm]<br>open override fun <a href="get-schema/">getSchema</a>(): Schema</td>
+</tr>
+<tr>
+<td><a href="./#809766294%2FFunctions%2F1647028818">getTableType</a></td>
+<td>[jvm]<br>override fun <a href="./#809766294%2FFunctions%2F1647028818">getTableType</a>(): TableOptions.TableType</td>
+</tr>
+<tr>
+<td><a href="./#-1503799262%2FFunctions%2F1647028818">getType</a></td>
+<td>[jvm]<br>override fun <a href="./#-1503799262%2FFunctions%2F1647028818">getType</a>(): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-538395369%2FFunctions%2F1647028818">getUniqueKeys</a></td>
+<td>[jvm]<br>open override fun <a href="./#-538395369%2FFunctions%2F1647028818">getUniqueKeys</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a>&lt;UniqueKey&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-91886757%2FFunctions%2F1647028818">getUnqualifiedName</a></td>
+<td>[jvm]<br>override fun <a href="./#-91886757%2FFunctions%2F1647028818">getUnqualifiedName</a>(): Name</td>
+</tr>
+<tr>
+<td><a href="./#1797380408%2FFunctions%2F1647028818">hashCode</a></td>
+<td>[jvm]<br>open override fun <a href="./#1797380408%2FFunctions%2F1647028818">hashCode</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></td>
+</tr>
+<tr>
+<td><a href="./#1369632674%2FFunctions%2F1647028818">ignoreIndex</a></td>
+<td>[jvm]<br>override fun <a href="./#1369632674%2FFunctions%2F1647028818">ignoreIndex</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1933260881%2FFunctions%2F1647028818">ignoreIndexForGroupBy</a></td>
+<td>[jvm]<br>override fun <a href="./#-1933260881%2FFunctions%2F1647028818">ignoreIndexForGroupBy</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#981535839%2FFunctions%2F1647028818">ignoreIndexForJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#981535839%2FFunctions%2F1647028818">ignoreIndexForJoin</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1269151938%2FFunctions%2F1647028818">ignoreIndexForOrderBy</a></td>
+<td>[jvm]<br>override fun <a href="./#-1269151938%2FFunctions%2F1647028818">ignoreIndexForOrderBy</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#2105316312%2FFunctions%2F1647028818">indexOf</a></td>
+<td>[jvm]<br>abstract fun <a href="./#2105316312%2FFunctions%2F1647028818">indexOf</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><br>abstract fun <a href="./#-491095259%2FFunctions%2F1647028818">indexOf</a>(p0: Field&lt;*&gt;): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><br>abstract fun <a href="./#451425934%2FFunctions%2F1647028818">indexOf</a>(p0: Name): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></td>
+</tr>
+<tr>
+<td><a href="./#492143186%2FFunctions%2F1647028818">innerJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#492143186%2FFunctions%2F1647028818">innerJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): TableOnStep&lt;Record&gt;<br>override fun <a href="./#-1161747192%2FFunctions%2F1647028818">innerJoin</a>(p0: Name): TableOnStep&lt;Record&gt;<br>override fun <a href="./#-824918431%2FFunctions%2F1647028818">innerJoin</a>(p0: SQL): TableOnStep&lt;Record&gt;<br>override fun <a href="./#-168567958%2FFunctions%2F1647028818">innerJoin</a>(p0: TableLike&lt;*&gt;): TableOnStep&lt;Record&gt;<br>override fun <a href="./#721545950%2FFunctions%2F1647028818">innerJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): TableOnStep&lt;Record&gt;<br>override fun <a href="./#-2017512131%2FFunctions%2F1647028818">innerJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): TableOnStep&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-76779016%2FFunctions%2F1647028818">isSimple</a></td>
+<td>[jvm]<br>@Internal<br>override fun <a href="./#-76779016%2FFunctions%2F1647028818">isSimple</a>(p0: Context&lt;*&gt;): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-198564378%2FFunctions%2F1647028818">join</a></td>
+<td>[jvm]<br>override fun <a href="./#-198564378%2FFunctions%2F1647028818">join</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): TableOnStep&lt;Record&gt;<br>override fun <a href="./#-1852454756%2FFunctions%2F1647028818">join</a>(p0: Name): TableOnStep&lt;Record&gt;<br>override fun <a href="./#399726669%2FFunctions%2F1647028818">join</a>(p0: SQL): TableOnStep&lt;Record&gt;<br>override fun <a href="./#50703102%2FFunctions%2F1647028818">join</a>(p0: TableLike&lt;<em>&gt;): TableOnStep&lt;Record&gt;<br>override fun <a href="./#1547613642%2FFunctions%2F1647028818">join</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): TableOnStep&lt;Record&gt;<br>override fun <a href="./#1806193705%2FFunctions%2F1647028818">join</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): TableOnStep&lt;Record&gt;<br>override fun <a href="./#-1181671552%2FFunctions%2F1647028818">join</a>(p0: TableLike&lt;</em>&gt;, p1: JoinType): JoinTable&lt;*&gt;</td>
+</tr>
+<tr>
+<td><a href="./#690538983%2FFunctions%2F1647028818">leftAntiJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#690538983%2FFunctions%2F1647028818">leftAntiJoin</a>(p0: TableLike&lt;*&gt;): TableOnStep&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#2066888397%2FFunctions%2F1647028818">leftJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#2066888397%2FFunctions%2F1647028818">leftJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#412998019%2FFunctions%2F1647028818">leftJoin</a>(p0: Name): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-358478202%2FFunctions%2F1647028818">leftJoin</a>(p0: SQL): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#314434789%2FFunctions%2F1647028818">leftJoin</a>(p0: TableLike&lt;*&gt;): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-1904040253%2FFunctions%2F1647028818">leftJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#160185378%2FFunctions%2F1647028818">leftJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): TablePartitionByStep&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#99433904%2FFunctions%2F1647028818">leftOuterJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#99433904%2FFunctions%2F1647028818">leftOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-1554456474%2FFunctions%2F1647028818">leftOuterJoin</a>(p0: Name): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-1530323133%2FFunctions%2F1647028818">leftOuterJoin</a>(p0: SQL): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-977184568%2FFunctions%2F1647028818">leftOuterJoin</a>(p0: TableLike&lt;*&gt;): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-1211165376%2FFunctions%2F1647028818">leftOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-202056289%2FFunctions%2F1647028818">leftOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): TablePartitionByStep&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-954516749%2FFunctions%2F1647028818">leftSemiJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#-954516749%2FFunctions%2F1647028818">leftSemiJoin</a>(p0: TableLike&lt;*&gt;): TableOnStep&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-2146780855%2FFunctions%2F1647028818">naturalFullOuterJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#-2146780855%2FFunctions%2F1647028818">naturalFullOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;Record&gt;<br>override fun <a href="./#494296063%2FFunctions%2F1647028818">naturalFullOuterJoin</a>(p0: Name): Table&lt;Record&gt;<br>override fun <a href="./#-2018423670%2FFunctions%2F1647028818">naturalFullOuterJoin</a>(p0: SQL): Table&lt;Record&gt;<br>override fun <a href="./#1360669537%2FFunctions%2F1647028818">naturalFullOuterJoin</a>(p0: TableLike&lt;*&gt;): Table&lt;Record&gt;<br>override fun <a href="./#1847896007%2FFunctions%2F1647028818">naturalFullOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): Table&lt;Record&gt;<br>override fun <a href="./#-1129383642%2FFunctions%2F1647028818">naturalFullOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): Table&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1116983899%2FFunctions%2F1647028818">naturalJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#-1116983899%2FFunctions%2F1647028818">naturalJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;Record&gt;<br>override fun <a href="./#1524093019%2FFunctions%2F1647028818">naturalJoin</a>(p0: Name): Table&lt;Record&gt;<br>override fun <a href="./#1617026222%2FFunctions%2F1647028818">naturalJoin</a>(p0: SQL): Table&lt;Record&gt;<br>override fun <a href="./#-396393539%2FFunctions%2F1647028818">naturalJoin</a>(p0: TableLike&lt;*&gt;): Table&lt;Record&gt;<br>override fun <a href="./#1940361963%2FFunctions%2F1647028818">naturalJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): Table&lt;Record&gt;<br>override fun <a href="./#-877232054%2FFunctions%2F1647028818">naturalJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): Table&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-875660079%2FFunctions%2F1647028818">naturalLeftOuterJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#-875660079%2FFunctions%2F1647028818">naturalLeftOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;Record&gt;<br>override fun <a href="./#1765416839%2FFunctions%2F1647028818">naturalLeftOuterJoin</a>(p0: Name): Table&lt;Record&gt;<br>override fun <a href="./#-1977419774%2FFunctions%2F1647028818">naturalLeftOuterJoin</a>(p0: SQL): Table&lt;Record&gt;<br>override fun <a href="./#247850729%2FFunctions%2F1647028818">naturalLeftOuterJoin</a>(p0: TableLike&lt;*&gt;): Table&lt;Record&gt;<br>override fun <a href="./#1501982015%2FFunctions%2F1647028818">naturalLeftOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): Table&lt;Record&gt;<br>override fun <a href="./#-527448418%2FFunctions%2F1647028818">naturalLeftOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): Table&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#936403396%2FFunctions%2F1647028818">naturalRightOuterJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#936403396%2FFunctions%2F1647028818">naturalRightOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;Record&gt;<br>override fun <a href="./#-717486982%2FFunctions%2F1647028818">naturalRightOuterJoin</a>(p0: Name): Table&lt;Record&gt;<br>override fun <a href="./#-1364776785%2FFunctions%2F1647028818">naturalRightOuterJoin</a>(p0: SQL): Table&lt;Record&gt;<br>override fun <a href="./#-1718015780%2FFunctions%2F1647028818">naturalRightOuterJoin</a>(p0: TableLike&lt;*&gt;): Table&lt;Record&gt;<br>override fun <a href="./#267841452%2FFunctions%2F1647028818">naturalRightOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): Table&lt;Record&gt;<br>override fun <a href="./#142707723%2FFunctions%2F1647028818">naturalRightOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): Table&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-70017113%2FFunctions%2F1647028818">ne</a></td>
+<td>[jvm]<br>override fun <a href="./#-70017113%2FFunctions%2F1647028818">ne</a>(p0: Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;): Condition</td>
+</tr>
+<tr>
+<td><a href="./#953947041%2FFunctions%2F1647028818">newRecord</a></td>
+<td>[jvm]<br>override fun <a href="./#953947041%2FFunctions%2F1647028818">newRecord</a>(): <a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a></td>
+</tr>
+<tr>
+<td><a href="./#170510141%2FFunctions%2F1647028818">notEqual</a></td>
+<td>[jvm]<br>override fun <a href="./#170510141%2FFunctions%2F1647028818">notEqual</a>(p0: Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;): Condition</td>
+</tr>
+<tr>
+<td><a href="./#-2012041745%2FFunctions%2F1647028818">outerApply</a></td>
+<td>[jvm]<br>override fun <a href="./#-2012041745%2FFunctions%2F1647028818">outerApply</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;Record&gt;<br>override fun <a href="./#629035173%2FFunctions%2F1647028818">outerApply</a>(p0: Name): Table&lt;Record&gt;<br>override fun <a href="./#1311058724%2FFunctions%2F1647028818">outerApply</a>(p0: SQL): Table&lt;Record&gt;<br>override fun <a href="./#-1068623353%2FFunctions%2F1647028818">outerApply</a>(p0: TableLike&lt;*&gt;): Table&lt;Record&gt;<br>override fun <a href="./#35854817%2FFunctions%2F1647028818">outerApply</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): Table&lt;Record&gt;<br>override fun <a href="./#-82923200%2FFunctions%2F1647028818">outerApply</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): Table&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1421099197%2FFunctions%2F1647028818">recordType</a></td>
+<td>[jvm]<br>override fun <a href="./#1421099197%2FFunctions%2F1647028818">recordType</a>(): RecordType&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="rename/">rename</a></td>
+<td>[jvm]<br>open override fun <a href="rename/">rename</a>(name: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="./">Movie</a><br>open override fun <a href="rename/">rename</a>(name: Name): <a href="./">Movie</a><br>Rename this table<br>[jvm]<br>open fun <a href="./#1808462553%2FFunctions%2F1647028818">rename</a>(p0: Table&lt;*&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1522176083%2FFunctions%2F1647028818">rendersContent</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1522176083%2FFunctions%2F1647028818">rendersContent</a>(p0: Context&lt;*&gt;): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#2016272024%2FFunctions%2F1647028818">rightJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#2016272024%2FFunctions%2F1647028818">rightJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#362381646%2FFunctions%2F1647028818">rightJoin</a>(p0: Name): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-1191394981%2FFunctions%2F1647028818">rightJoin</a>(p0: SQL): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#459706800%2FFunctions%2F1647028818">rightJoin</a>(p0: TableLike&lt;*&gt;): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-831141544%2FFunctions%2F1647028818">rightJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#152172983%2FFunctions%2F1647028818">rightJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): TablePartitionByStep&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1099545797%2FFunctions%2F1647028818">rightOuterJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#1099545797%2FFunctions%2F1647028818">rightOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-554344581%2FFunctions%2F1647028818">rightOuterJoin</a>(p0: Name): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-389682802%2FFunctions%2F1647028818">rightOuterJoin</a>(p0: SQL): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#-1039404323%2FFunctions%2F1647028818">rightOuterJoin</a>(p0: TableLike&lt;*&gt;): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#2059618251%2FFunctions%2F1647028818">rightOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): TablePartitionByStep&lt;Record&gt;<br>override fun <a href="./#1639929130%2FFunctions%2F1647028818">rightOuterJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): TablePartitionByStep&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#415928381%2FFunctions%2F1647028818">rowid</a></td>
+<td>[jvm]<br>open override fun <a href="./#415928381%2FFunctions%2F1647028818">rowid</a>(): Field&lt;RowId&gt;</td>
+</tr>
+<tr>
+<td><a href="./#2083598208%2FFunctions%2F1647028818">straightJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#2083598208%2FFunctions%2F1647028818">straightJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): TableOptionalOnStep&lt;Record&gt;<br>override fun <a href="./#429707830%2FFunctions%2F1647028818">straightJoin</a>(p0: Name): TableOptionalOnStep&lt;Record&gt;<br>override fun <a href="./#-1604865165%2FFunctions%2F1647028818">straightJoin</a>(p0: SQL): TableOptionalOnStep&lt;Record&gt;<br>override fun <a href="./#756972184%2FFunctions%2F1647028818">straightJoin</a>(p0: TableLike&lt;*&gt;): TableOptionalOnStep&lt;Record&gt;<br>override fun <a href="./#-624964240%2FFunctions%2F1647028818">straightJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): TableOptionalOnStep&lt;Record&gt;<br>override fun <a href="./#595748303%2FFunctions%2F1647028818">straightJoin</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): TableOptionalOnStep&lt;Record&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1016768297%2FFunctions%2F1647028818">toString</a></td>
+<td>[jvm]<br>open override fun <a href="./#1016768297%2FFunctions%2F1647028818">toString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#558226825%2FFunctions%2F1647028818">type</a></td>
+<td>[jvm]<br>@Nullable<br>abstract fun <a href="./#558226825%2FFunctions%2F1647028818">type</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): @Nullable<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;<em>&gt;?<br>@Nullable<br>abstract fun <a href="./#1949835577%2FFunctions%2F1647028818">type</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): @Nullable<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;</em>&gt;?<br>@Nullable<br>abstract fun <a href="./#295945199%2FFunctions%2F1647028818">type</a>(p0: Name): @Nullable<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;*&gt;?</td>
+</tr>
+<tr>
+<td><a href="./#-410116484%2FFunctions%2F1647028818">types</a></td>
+<td>[jvm]<br>@NotNull<br>abstract fun <a href="./#-410116484%2FFunctions%2F1647028818">types</a>(): @NotNull<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;@NotNull<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>&lt;*&gt;&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1005514455%2FFunctions%2F1647028818">useIndex</a></td>
+<td>[jvm]<br>override fun <a href="./#1005514455%2FFunctions%2F1647028818">useIndex</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-155776860%2FFunctions%2F1647028818">useIndexForGroupBy</a></td>
+<td>[jvm]<br>override fun <a href="./#-155776860%2FFunctions%2F1647028818">useIndexForGroupBy</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#52852618%2FFunctions%2F1647028818">useIndexForJoin</a></td>
+<td>[jvm]<br>override fun <a href="./#52852618%2FFunctions%2F1647028818">useIndexForJoin</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#508332083%2FFunctions%2F1647028818">useIndexForOrderBy</a></td>
+<td>[jvm]<br>override fun <a href="./#508332083%2FFunctions%2F1647028818">useIndexForOrderBy</a>(vararg p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#917860123%2FFunctions%2F1647028818">where</a></td>
+<td>[jvm]<br>open override fun <a href="./#917860123%2FFunctions%2F1647028818">where</a>(vararg p0: Condition): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>open override fun <a href="./#1713547993%2FFunctions%2F1647028818">where</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>open override fun <a href="./#-1123773719%2FFunctions%2F1647028818">where</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-collection/index.html">MutableCollection</a>&lt;out Condition&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>open override fun <a href="./#1946409421%2FFunctions%2F1647028818">where</a>(p0: Condition): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>open override fun <a href="./#-213460281%2FFunctions%2F1647028818">where</a>(p0: Field&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>open override fun <a href="./#1292691706%2FFunctions%2F1647028818">where</a>(p0: SQL): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>open override fun <a href="./#1634506807%2FFunctions%2F1647028818">where</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;<br>open override fun <a href="./#2130147734%2FFunctions%2F1647028818">where</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, vararg p1: QueryPart): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1883802630%2FFunctions%2F1647028818">whereExists</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1883802630%2FFunctions%2F1647028818">whereExists</a>(p0: Select&lt;*&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1415191115%2FFunctions%2F1647028818">whereNotExists</a></td>
+<td>[jvm]<br>open override fun <a href="./#1415191115%2FFunctions%2F1647028818">whereNotExists</a>(p0: Select&lt;*&gt;): Table&lt;<a href="../../misk.jooq.testgen.tables.records/-movie-record/">MovieRecord</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1070193509%2FFunctions%2F1647028818">withOrdinality</a></td>
+<td>[jvm]<br>override fun <a href="./#1070193509%2FFunctions%2F1647028818">withOrdinality</a>(): Table&lt;Record&gt;</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2018-2021 Square, Inc.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../../../..", "features": [], "search": "../../../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../../../assets/javascripts/bundle.ad660dcc.min.js"></script>
+      
+    
+  </body>
+</html>

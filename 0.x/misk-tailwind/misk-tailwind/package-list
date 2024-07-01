@@ -1,0 +1,82 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.tailwind.components////PointingToDeclaration/misk-tailwind/misk.tailwind.components/index.md
+$dokka.location:misk.tailwind.components//Alert/kotlinx.html.TagConsumer[*]#misk.tailwind.components.AlertTheme#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.Boolean#kotlin.Boolean/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert.md
+$dokka.location:misk.tailwind.components//AlertError/kotlinx.html.TagConsumer[*]#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.Boolean#kotlin.Boolean/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-error.md
+$dokka.location:misk.tailwind.components//AlertInfo/kotlinx.html.TagConsumer[*]#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.Boolean#kotlin.Boolean/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-info.md
+$dokka.location:misk.tailwind.components//AlertInfoHighlight/kotlinx.html.TagConsumer[*]#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.Boolean#kotlin.Boolean/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-info-highlight.md
+$dokka.location:misk.tailwind.components//AlertMessage/kotlinx.html.TagConsumer[*]#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-message.md
+$dokka.location:misk.tailwind.components//AlertSuccess/kotlinx.html.TagConsumer[*]#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.Boolean#kotlin.Boolean/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-success.md
+$dokka.location:misk.tailwind.components//CodeBlock/kotlinx.html.TagConsumer[*]#kotlin.String/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-code-block.md
+$dokka.location:misk.tailwind.components//ToggleContainer/kotlinx.html.TagConsumer[*]#kotlin.String#kotlin.Boolean#kotlin.Function1[kotlinx.html.TagConsumer[*],kotlin.Unit]#kotlin.Boolean#kotlin.Function1[kotlinx.html.TagConsumer[*],kotlin.Unit]/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-toggle-container.md
+$dokka.location:misk.tailwind.components/AlertTheme.BLUE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.components/-alert-theme/-b-l-u-e/index.md
+$dokka.location:misk.tailwind.components/AlertTheme.BLUE_HIGHLIGHT///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.components/-alert-theme/-b-l-u-e_-h-i-g-h-l-i-g-h-t/index.md
+$dokka.location:misk.tailwind.components/AlertTheme.GREEN///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.components/-alert-theme/-g-r-e-e-n/index.md
+$dokka.location:misk.tailwind.components/AlertTheme.RED///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.components/-alert-theme/-r-e-d/index.md
+$dokka.location:misk.tailwind.components/AlertTheme///PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-theme/index.md
+$dokka.location:misk.tailwind.components/AlertTheme/backgroundColor/#/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-theme/background-color.md
+$dokka.location:misk.tailwind.components/AlertTheme/entries/#/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-theme/entries.md
+$dokka.location:misk.tailwind.components/AlertTheme/headingTextColor/#/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-theme/heading-text-color.md
+$dokka.location:misk.tailwind.components/AlertTheme/hoverTextColor/#/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-theme/hover-text-color.md
+$dokka.location:misk.tailwind.components/AlertTheme/iconColor/#/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-theme/icon-color.md
+$dokka.location:misk.tailwind.components/AlertTheme/textColor/#/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-theme/text-color.md
+$dokka.location:misk.tailwind.components/AlertTheme/valueOf/#kotlin.String/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-theme/value-of.md
+$dokka.location:misk.tailwind.components/AlertTheme/values/#/PointingToDeclaration/misk-tailwind/misk.tailwind.components/-alert-theme/values.md
+$dokka.location:misk.tailwind.icons////PointingToDeclaration/misk-tailwind/misk.tailwind.icons/index.md
+$dokka.location:misk.tailwind.icons//heroicon/kotlinx.html.TagConsumer[*]#misk.tailwind.icons.Heroicons#kotlin.String?#kotlin.String?/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/heroicon.md
+$dokka.location:misk.tailwind.icons/HeroiconProps///PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicon-props/index.md
+$dokka.location:misk.tailwind.icons/HeroiconProps/HeroiconProps/#misk.tailwind.icons.Heroicons#kotlin.String?#kotlin.String?/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicon-props/-heroicon-props.md
+$dokka.location:misk.tailwind.icons/HeroiconProps/icon/#/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicon-props/icon.md
+$dokka.location:misk.tailwind.icons/HeroiconProps/modifierClass/#/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicon-props/modifier-class.md
+$dokka.location:misk.tailwind.icons/HeroiconProps/spanClass/#/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicon-props/span-class.md
+$dokka.location:misk.tailwind.icons/Heroicons.BELL_ALERT///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-b-e-l-l_-a-l-e-r-t/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.DOCUMENT_MAGNIFYING_GLASS///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-d-o-c-u-m-e-n-t_-m-a-g-n-i-f-y-i-n-g_-g-l-a-s-s/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.MAGNIFYING_GLASS///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-m-a-g-n-i-f-y-i-n-g_-g-l-a-s-s/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.MINI_ARROW_LONG_LEFT///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-m-i-n-i_-a-r-r-o-w_-l-o-n-g_-l-e-f-t/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.MINI_ARROW_LONG_RIGHT///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-m-i-n-i_-a-r-r-o-w_-l-o-n-g_-r-i-g-h-t/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.MINI_ARROW_TOP_RIGHT_ON_SQUARE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-m-i-n-i_-a-r-r-o-w_-t-o-p_-r-i-g-h-t_-o-n_-s-q-u-a-r-e/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.MINI_CHEVRON_DOWN///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-m-i-n-i_-c-h-e-v-r-o-n_-d-o-w-n/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.MINI_CHEVRON_UP///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-m-i-n-i_-c-h-e-v-r-o-n_-u-p/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.MINI_CHEVRON_UP_DOWN///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-m-i-n-i_-c-h-e-v-r-o-n_-u-p_-d-o-w-n/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.MINI_FUNNEL///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-m-i-n-i_-f-u-n-n-e-l/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.OUTLINE_BARS_3_CENTER_LEFT///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-o-u-t-l-i-n-e_-b-a-r-s_3_-c-e-n-t-e-r_-l-e-f-t/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.OUTLINE_BARS_4///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-o-u-t-l-i-n-e_-b-a-r-s_4/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.OUTLINE_CLOCK///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-o-u-t-l-i-n-e_-c-l-o-c-k/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.OUTLINE_DOCUMENT_MAGNIFYING_GLASS///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-o-u-t-l-i-n-e_-d-o-c-u-m-e-n-t_-m-a-g-n-i-f-y-i-n-g_-g-l-a-s-s/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.OUTLINE_HOME///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-o-u-t-l-i-n-e_-h-o-m-e/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.OUTLINE_XMARK///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-o-u-t-l-i-n-e_-x-m-a-r-k/index.md
+$dokka.location:misk.tailwind.icons/Heroicons.QUEUE_LIST///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-tailwind/misk.tailwind.icons/-heroicons/-q-u-e-u-e_-l-i-s-t/index.md
+$dokka.location:misk.tailwind.icons/Heroicons///PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicons/index.md
+$dokka.location:misk.tailwind.icons/Heroicons/defaultModifierClass/#/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicons/default-modifier-class.md
+$dokka.location:misk.tailwind.icons/Heroicons/entries/#/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicons/entries.md
+$dokka.location:misk.tailwind.icons/Heroicons/id/#/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicons/id.md
+$dokka.location:misk.tailwind.icons/Heroicons/rawHtml/#/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicons/raw-html.md
+$dokka.location:misk.tailwind.icons/Heroicons/svgClass/#/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicons/svg-class.md
+$dokka.location:misk.tailwind.icons/Heroicons/valueOf/#kotlin.String/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicons/value-of.md
+$dokka.location:misk.tailwind.icons/Heroicons/values/#/PointingToDeclaration/misk-tailwind/misk.tailwind.icons/-heroicons/values.md
+$dokka.location:misk.tailwind.pages////PointingToDeclaration/misk-tailwind/misk.tailwind.pages/index.md
+$dokka.location:misk.tailwind.pages//Navbar/kotlinx.html.TagConsumer[*]#kotlin.String#wisp.deployment.Deployment#kotlin.String#kotlin.collections.List[misk.tailwind.pages.MenuSection]#kotlin.Function1[kotlinx.html.TagConsumer[*],kotlin.Unit]/PointingToDeclaration/misk-tailwind/misk.tailwind.pages/-navbar.md
+$dokka.location:misk.tailwind.pages/MenuSection///PointingToDeclaration/misk-tailwind/misk.tailwind.pages/-menu-section/index.md
+$dokka.location:misk.tailwind.pages/MenuSection/MenuSection/#kotlin.String#kotlin.collections.List[misk.tailwind.Link]/PointingToDeclaration/misk-tailwind/misk.tailwind.pages/-menu-section/-menu-section.md
+$dokka.location:misk.tailwind.pages/MenuSection/links/#/PointingToDeclaration/misk-tailwind/misk.tailwind.pages/-menu-section/links.md
+$dokka.location:misk.tailwind.pages/MenuSection/title/#/PointingToDeclaration/misk-tailwind/misk.tailwind.pages/-menu-section/title.md
+$dokka.location:misk.tailwind////PointingToDeclaration/misk-tailwind/misk.tailwind/index.md
+$dokka.location:misk.tailwind//TailwindHtmlLayout/kotlinx.html.TagConsumer[*]#kotlin.String#kotlin.String#kotlin.Boolean#kotlin.String?#kotlin.Function1[kotlinx.html.TagConsumer[*],kotlin.Unit]#kotlin.Function1[kotlinx.html.TagConsumer[*],kotlin.Unit]/PointingToDeclaration/misk-tailwind/misk.tailwind/-tailwind-html-layout.md
+$dokka.location:misk.tailwind/Link///PointingToDeclaration/misk-tailwind/misk.tailwind/-link/index.md
+$dokka.location:misk.tailwind/Link/Link/#kotlin.String#kotlin.String#misk.tailwind.Style?#kotlin.Boolean#kotlin.Boolean#kotlin.Boolean?#kotlin.Boolean#kotlin.String?#kotlin.String?/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/-link.md
+$dokka.location:misk.tailwind/Link/dataTurbo/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/data-turbo.md
+$dokka.location:misk.tailwind/Link/hoverText/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/hover-text.md
+$dokka.location:misk.tailwind/Link/href/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/href.md
+$dokka.location:misk.tailwind/Link/isPageNavigation/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/is-page-navigation.md
+$dokka.location:misk.tailwind/Link/isSelected/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/is-selected.md
+$dokka.location:misk.tailwind/Link/label/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/label.md
+$dokka.location:misk.tailwind/Link/openInNewTab/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/open-in-new-tab.md
+$dokka.location:misk.tailwind/Link/rawHtml/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/raw-html.md
+$dokka.location:misk.tailwind/Link/style/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-link/style.md
+$dokka.location:misk.tailwind/Style///PointingToDeclaration/misk-tailwind/misk.tailwind/-style/index.md
+$dokka.location:misk.tailwind/Style/classes/#/PointingToDeclaration/misk-tailwind/misk.tailwind/-style/classes.md
+misk.tailwind
+misk.tailwind.components
+misk.tailwind.icons
+misk.tailwind.pages
+

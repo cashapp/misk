@@ -1,0 +1,26 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.gradle.schemamigrator////PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/index.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorDatabase///PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-database/index.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorExtension///PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-extension/index.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorExtension/SchemaMigratorExtension/#org.gradle.api.model.ObjectFactory/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-extension/-schema-migrator-extension.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorExtension/database/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-extension/database.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorExtension/databaseType/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-extension/database-type.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorExtension/migrationsDir/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-extension/migrations-dir.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorExtension/password/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-extension/password.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorExtension/username/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-extension/username.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorModule///PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-module/index.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorModule/SchemaMigratorModule/#kotlin.String#kotlin.String#kotlin.String#kotlin.String#java.io.File/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-module/-schema-migrator-module.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorPlugin///PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-plugin/index.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorPlugin/SchemaMigratorPlugin/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-plugin/-schema-migrator-plugin.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorPlugin/apply/#org.gradle.api.Project/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-plugin/apply.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorTask///PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-task/index.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorTask/SchemaMigratorTask/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-task/-schema-migrator-task.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorTask/database/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-task/database.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorTask/databaseType/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-task/database-type.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorTask/migrateSchemas/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-task/migrate-schemas.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorTask/migrationsDir/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-task/migrations-dir.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorTask/password/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-task/password.md
+$dokka.location:misk.gradle.schemamigrator/SchemaMigratorTask/username/#/PointingToDeclaration/misk-schema-migrator-gradle-plugin/misk.gradle.schemamigrator/-schema-migrator-task/username.md
+misk.gradle.schemamigrator
+

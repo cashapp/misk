@@ -1,0 +1,1870 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Misk: Microservice Container for Kotlin">
+      
+      
+        <meta name="author" content="Square, Inc.">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../../../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
+    
+    
+      
+        <title>VitessDialect - Misk - Misk</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../css/app.css">
+    
+    <script>__md_scope=new URL("../../../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#vitessdialect" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../.." title="Misk" class="md-header__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../../../img/cashapp.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Misk
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              VitessDialect - Misk
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cashapp/misk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../.." title="Misk" class="md-nav__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../../../img/cashapp.png" alt="logo">
+
+    </a>
+    Misk
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cashapp/misk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../clients/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clients
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    0.x API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            0.x API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-aws
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws-dynamodb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-aws-dynamodb
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws2-dynamodb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-aws2-dynamodb
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-crypto/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-crypto
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-eventrouter/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-eventrouter
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-events-core/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-events-core
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-events/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-events
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-gcp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-gcp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-grpc-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-grpc-tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-hibernate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-hibernate-testing/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-hibernate-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-inject/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-inject
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-jobqueue/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-jobqueue
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-jobqueue-testing/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-jobqueue-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-metrics-digester/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-metrics-digester
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-prometheus/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-prometheus
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-redis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-redis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-zookeeper/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-zookeeper
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-zoopkeeper-testing/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-zoopkeeper-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Internals
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Internals
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../internals/graceful-shutdown/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Graceful Shutdown
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../internals/service-management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Service Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../wisp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Wisp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Migrations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Migrations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../migrations/misk-metrics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Misk Metrics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Change Log
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../releasing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Releasing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../developer-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://stackoverflow.com/questions/tagged/misk?sort=active" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Stack Overflow ⏏
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructors
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<p>//<a href="../../../">misk-hibernate</a>/<a href="../">misk.hibernate</a>/<a href="./">VitessDialect</a></p>
+<h1 id="vitessdialect">VitessDialect<a class="headerlink" href="#vitessdialect" title="Permanent link">&para;</a></h1>
+<p>[jvm]\
+class <a href="./">VitessDialect</a> : MySQL57Dialect</p>
+<h2 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-vitess-dialect/">VitessDialect</a></td>
+<td>[jvm]<br>constructor()</td>
+</tr>
+</tbody>
+</table>
+<h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./#825753355%2FProperties%2F-71375161">uniqueDelegate</a></td>
+<td>[jvm]<br>val <a href="./#825753355%2FProperties%2F-71375161">uniqueDelegate</a>: UniqueDelegate</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./#-348586906%2FFunctions%2F-71375161">addSqlHintOrComment</a></td>
+<td>[jvm]<br>open fun <a href="./#-348586906%2FFunctions%2F-71375161">addSqlHintOrComment</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: QueryParameters, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1980028895%2FFunctions%2F-71375161">appendLockHint</a></td>
+<td>[jvm]<br>open fun <a href="./#-1980028895%2FFunctions%2F-71375161">appendLockHint</a>(p0: LockOptions, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#388289029%2FFunctions%2F-71375161">applyLocksToSql</a></td>
+<td>[jvm]<br>open fun <a href="./#388289029%2FFunctions%2F-71375161">applyLocksToSql</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: LockOptions, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-map/index.html">MutableMap</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;&gt;): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1888175229%2FFunctions%2F-71375161">areStringComparisonsCaseInsensitive</a></td>
+<td>[jvm]<br>open override fun <a href="./#1888175229%2FFunctions%2F-71375161">areStringComparisonsCaseInsensitive</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1374189244%2FFunctions%2F-71375161">augmentPhysicalTableTypes</a></td>
+<td>[jvm]<br>open fun <a href="./#-1374189244%2FFunctions%2F-71375161">augmentPhysicalTableTypes</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;)</td>
+</tr>
+<tr>
+<td><a href="./#74521027%2FFunctions%2F-71375161">augmentRecognizedTableTypes</a></td>
+<td>[jvm]<br>open fun <a href="./#74521027%2FFunctions%2F-71375161">augmentRecognizedTableTypes</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;)</td>
+</tr>
+<tr>
+<td><a href="./#-256368377%2FFunctions%2F-71375161">buildIdentifierHelper</a></td>
+<td>[jvm]<br>open override fun <a href="./#-256368377%2FFunctions%2F-71375161">buildIdentifierHelper</a>(p0: IdentifierHelperBuilder, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html">DatabaseMetaData</a>): IdentifierHelper</td>
+</tr>
+<tr>
+<td><a href="build-s-q-l-exception-conversion-delegate/">buildSQLExceptionConversionDelegate</a></td>
+<td>[jvm]<br>open override fun <a href="build-s-q-l-exception-conversion-delegate/">buildSQLExceptionConversionDelegate</a>(): SQLExceptionConversionDelegate</td>
+</tr>
+<tr>
+<td><a href="./#550694100%2FFunctions%2F-71375161">canCreateCatalog</a></td>
+<td>[jvm]<br>open override fun <a href="./#550694100%2FFunctions%2F-71375161">canCreateCatalog</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-977393620%2FFunctions%2F-71375161">canCreateSchema</a></td>
+<td>[jvm]<br>open override fun <a href="./#-977393620%2FFunctions%2F-71375161">canCreateSchema</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-174037026%2FFunctions%2F-71375161">cast</a></td>
+<td>[jvm]<br>open fun <a href="./#-174037026%2FFunctions%2F-71375161">cast</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open fun <a href="./#-804045121%2FFunctions%2F-71375161">cast</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p3: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open fun <a href="./#-1648295618%2FFunctions%2F-71375161">cast</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p3: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p4: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#184101341%2FFunctions%2F-71375161">closeQuote</a></td>
+<td>[jvm]<br>open override fun <a href="./#184101341%2FFunctions%2F-71375161">closeQuote</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html">Char</a></td>
+</tr>
+<tr>
+<td><a href="./#-95140181%2FFunctions%2F-71375161">contributeTypes</a></td>
+<td>[jvm]<br>open fun <a href="./#-95140181%2FFunctions%2F-71375161">contributeTypes</a>(p0: TypeContributions, p1: ServiceRegistry)</td>
+</tr>
+<tr>
+<td><a href="./#1710898025%2FFunctions%2F-71375161">createCaseFragment</a></td>
+<td>[jvm]<br>open fun <a href="./#1710898025%2FFunctions%2F-71375161">createCaseFragment</a>(): CaseFragment</td>
+</tr>
+<tr>
+<td><a href="./#-612665892%2FFunctions%2F-71375161">createOuterJoinFragment</a></td>
+<td>[jvm]<br>open fun <a href="./#-612665892%2FFunctions%2F-71375161">createOuterJoinFragment</a>(): JoinFragment</td>
+</tr>
+<tr>
+<td><a href="./#1632451524%2FFunctions%2F-71375161">defaultScrollMode</a></td>
+<td>[jvm]<br>open fun <a href="./#1632451524%2FFunctions%2F-71375161">defaultScrollMode</a>(): ScrollMode</td>
+</tr>
+<tr>
+<td><a href="./#-935196365%2FFunctions%2F-71375161">doesReadCommittedCauseWritersToBlockReaders</a></td>
+<td>[jvm]<br>open fun <a href="./#-935196365%2FFunctions%2F-71375161">doesReadCommittedCauseWritersToBlockReaders</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1628320852%2FFunctions%2F-71375161">doesRepeatableReadCauseReadersToBlockWriters</a></td>
+<td>[jvm]<br>open fun <a href="./#-1628320852%2FFunctions%2F-71375161">doesRepeatableReadCauseReadersToBlockWriters</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1781778258%2FFunctions%2F-71375161">dropConstraints</a></td>
+<td>[jvm]<br>open override fun <a href="./#1781778258%2FFunctions%2F-71375161">dropConstraints</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1814022599%2FFunctions%2F-71375161">equivalentTypes</a></td>
+<td>[jvm]<br>open fun <a href="./#-1814022599%2FFunctions%2F-71375161">equivalentTypes</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#104564224%2FFunctions%2F-71375161">forceLobAsLastValue</a></td>
+<td>[jvm]<br>open fun <a href="./#104564224%2FFunctions%2F-71375161">forceLobAsLastValue</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1209930737%2FFunctions%2F-71375161">forUpdateOfColumns</a></td>
+<td>[jvm]<br>open fun <a href="./#1209930737%2FFunctions%2F-71375161">forUpdateOfColumns</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1080273681%2FFunctions%2F-71375161">getAddColumnString</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1080273681%2FFunctions%2F-71375161">getAddColumnString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#225013250%2FFunctions%2F-71375161">getAddColumnSuffixString</a></td>
+<td>[jvm]<br>open fun <a href="./#225013250%2FFunctions%2F-71375161">getAddColumnSuffixString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-320779192%2FFunctions%2F-71375161">getAddForeignKeyConstraintString</a></td>
+<td>[jvm]<br>open fun <a href="./#-320779192%2FFunctions%2F-71375161">getAddForeignKeyConstraintString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open override fun <a href="./#-1777144466%2FFunctions%2F-71375161">getAddForeignKeyConstraintString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p3: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;, p4: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#125009717%2FFunctions%2F-71375161">getAddPrimaryKeyConstraintString</a></td>
+<td>[jvm]<br>open fun <a href="./#125009717%2FFunctions%2F-71375161">getAddPrimaryKeyConstraintString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1704481010%2FFunctions%2F-71375161">getAlterTableString</a></td>
+<td>[jvm]<br>open fun <a href="./#-1704481010%2FFunctions%2F-71375161">getAlterTableString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#982785722%2FFunctions%2F-71375161">getAuxiliaryDatabaseObjectExporter</a></td>
+<td>[jvm]<br>open fun <a href="./#982785722%2FFunctions%2F-71375161">getAuxiliaryDatabaseObjectExporter</a>(): Exporter&lt;AuxiliaryDatabaseObject&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1120504345%2FFunctions%2F-71375161">getCallableStatementSupport</a></td>
+<td>[jvm]<br>open fun <a href="./#-1120504345%2FFunctions%2F-71375161">getCallableStatementSupport</a>(): CallableStatementSupport</td>
+</tr>
+<tr>
+<td><a href="./#1191706860%2FFunctions%2F-71375161">getCascadeConstraintsString</a></td>
+<td>[jvm]<br>open fun <a href="./#1191706860%2FFunctions%2F-71375161">getCascadeConstraintsString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-97106653%2FFunctions%2F-71375161">getCaseInsensitiveLike</a></td>
+<td>[jvm]<br>open fun <a href="./#-97106653%2FFunctions%2F-71375161">getCaseInsensitiveLike</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1732777373%2FFunctions%2F-71375161">getCastTypeName</a></td>
+<td>[jvm]<br>open override fun <a href="./#1732777373%2FFunctions%2F-71375161">getCastTypeName</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#384893109%2FFunctions%2F-71375161">getColumnAliasExtractor</a></td>
+<td>[jvm]<br>open fun <a href="./#384893109%2FFunctions%2F-71375161">getColumnAliasExtractor</a>(): ColumnAliasExtractor</td>
+</tr>
+<tr>
+<td><a href="./#-899187434%2FFunctions%2F-71375161">getColumnComment</a></td>
+<td>[jvm]<br>open override fun <a href="./#-899187434%2FFunctions%2F-71375161">getColumnComment</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1214432529%2FFunctions%2F-71375161">getCreateCatalogCommand</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1214432529%2FFunctions%2F-71375161">getCreateCatalogCommand</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-497202367%2FFunctions%2F-71375161">getCreateMultisetTableString</a></td>
+<td>[jvm]<br>open fun <a href="./#-497202367%2FFunctions%2F-71375161">getCreateMultisetTableString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1870804613%2FFunctions%2F-71375161">getCreateSchemaCommand</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1870804613%2FFunctions%2F-71375161">getCreateSchemaCommand</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1995771442%2FFunctions%2F-71375161">getCreateSequenceStrings</a></td>
+<td>[jvm]<br>open fun <a href="./#-1995771442%2FFunctions%2F-71375161">getCreateSequenceStrings</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-728493800%2FFunctions%2F-71375161">getCreateTableString</a></td>
+<td>[jvm]<br>open fun <a href="./#-728493800%2FFunctions%2F-71375161">getCreateTableString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-378844961%2FFunctions%2F-71375161">getCreateTemporaryTableColumnAnnotation</a></td>
+<td>[jvm]<br>open fun <a href="./#-378844961%2FFunctions%2F-71375161">getCreateTemporaryTableColumnAnnotation</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1055972484%2FFunctions%2F-71375161">getCrossJoinSeparator</a></td>
+<td>[jvm]<br>open fun <a href="./#1055972484%2FFunctions%2F-71375161">getCrossJoinSeparator</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1878906930%2FFunctions%2F-71375161">getCurrentSchemaCommand</a></td>
+<td>[jvm]<br>open fun <a href="./#-1878906930%2FFunctions%2F-71375161">getCurrentSchemaCommand</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#433283673%2FFunctions%2F-71375161">getCurrentTimestampSelectString</a></td>
+<td>[jvm]<br>open override fun <a href="./#433283673%2FFunctions%2F-71375161">getCurrentTimestampSelectString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1766325895%2FFunctions%2F-71375161">getCurrentTimestampSQLFunctionName</a></td>
+<td>[jvm]<br>open fun <a href="./#1766325895%2FFunctions%2F-71375161">getCurrentTimestampSQLFunctionName</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1621449135%2FFunctions%2F-71375161">getDefaultBatchLoadSizingStrategy</a></td>
+<td>[jvm]<br>open fun <a href="./#1621449135%2FFunctions%2F-71375161">getDefaultBatchLoadSizingStrategy</a>(): BatchLoadSizingStrategy</td>
+</tr>
+<tr>
+<td><a href="./#-1284985407%2FFunctions%2F-71375161">getDefaultMultiTableBulkIdStrategy</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1284985407%2FFunctions%2F-71375161">getDefaultMultiTableBulkIdStrategy</a>(): MultiTableBulkIdStrategy</td>
+</tr>
+<tr>
+<td><a href="./#-1359886649%2FFunctions%2F-71375161">getDefaultProperties</a></td>
+<td>[jvm]<br>fun <a href="./#-1359886649%2FFunctions%2F-71375161">getDefaultProperties</a>(): <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html">Properties</a></td>
+</tr>
+<tr>
+<td><a href="./#-597132318%2FFunctions%2F-71375161">getDropCatalogCommand</a></td>
+<td>[jvm]<br>open override fun <a href="./#-597132318%2FFunctions%2F-71375161">getDropCatalogCommand</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#709257720%2FFunctions%2F-71375161">getDropForeignKeyString</a></td>
+<td>[jvm]<br>open override fun <a href="./#709257720%2FFunctions%2F-71375161">getDropForeignKeyString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1335696936%2FFunctions%2F-71375161">getDropSchemaCommand</a></td>
+<td>[jvm]<br>open override fun <a href="./#1335696936%2FFunctions%2F-71375161">getDropSchemaCommand</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1933854501%2FFunctions%2F-71375161">getDropSequenceStrings</a></td>
+<td>[jvm]<br>open fun <a href="./#-1933854501%2FFunctions%2F-71375161">getDropSequenceStrings</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1884923431%2FFunctions%2F-71375161">getDropTableString</a></td>
+<td>[jvm]<br>open fun <a href="./#-1884923431%2FFunctions%2F-71375161">getDropTableString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-395796301%2FFunctions%2F-71375161">getForeignKeyExporter</a></td>
+<td>[jvm]<br>open fun <a href="./#-395796301%2FFunctions%2F-71375161">getForeignKeyExporter</a>(): Exporter&lt;ForeignKey&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1721621314%2FFunctions%2F-71375161">getForUpdateNowaitString</a></td>
+<td>[jvm]<br>open fun <a href="./#1721621314%2FFunctions%2F-71375161">getForUpdateNowaitString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open fun <a href="./#-1907879678%2FFunctions%2F-71375161">getForUpdateNowaitString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-729445329%2FFunctions%2F-71375161">getForUpdateSkipLockedString</a></td>
+<td>[jvm]<br>open fun <a href="./#-729445329%2FFunctions%2F-71375161">getForUpdateSkipLockedString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open fun <a href="./#-994965195%2FFunctions%2F-71375161">getForUpdateSkipLockedString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1694352940%2FFunctions%2F-71375161">getForUpdateString</a></td>
+<td>[jvm]<br>open fun <a href="./#1694352940%2FFunctions%2F-71375161">getForUpdateString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open fun <a href="./#-1832195804%2FFunctions%2F-71375161">getForUpdateString</a>(p0: LockMode): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open fun <a href="./#111103453%2FFunctions%2F-71375161">getForUpdateString</a>(p0: LockOptions): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open fun <a href="./#-701447614%2FFunctions%2F-71375161">getForUpdateString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: LockOptions): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open override fun <a href="./#-390076940%2FFunctions%2F-71375161">getForUpdateString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1511436960%2FFunctions%2F-71375161">getFunctions</a></td>
+<td>[jvm]<br>fun <a href="./#-1511436960%2FFunctions%2F-71375161">getFunctions</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-map/index.html">MutableMap</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, SQLFunction&gt;</td>
+</tr>
+<tr>
+<td><a href="./#944866242%2FFunctions%2F-71375161">getHibernateTypeName</a></td>
+<td>[jvm]<br>open fun <a href="./#944866242%2FFunctions%2F-71375161">getHibernateTypeName</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open fun <a href="./#1137703419%2FFunctions%2F-71375161">getHibernateTypeName</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p3: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-367652964%2FFunctions%2F-71375161">getIdentityColumnSupport</a></td>
+<td>[jvm]<br>open override fun <a href="./#-367652964%2FFunctions%2F-71375161">getIdentityColumnSupport</a>(): IdentityColumnSupport</td>
+</tr>
+<tr>
+<td><a href="./#-1870162264%2FFunctions%2F-71375161">getIndexExporter</a></td>
+<td>[jvm]<br>open fun <a href="./#-1870162264%2FFunctions%2F-71375161">getIndexExporter</a>(): Exporter&lt;Index&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-28963242%2FFunctions%2F-71375161">getInExpressionCountLimit</a></td>
+<td>[jvm]<br>open fun <a href="./#-28963242%2FFunctions%2F-71375161">getInExpressionCountLimit</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></td>
+</tr>
+<tr>
+<td><a href="./#1286061908%2FFunctions%2F-71375161">getLimitHandler</a></td>
+<td>[jvm]<br>open override fun <a href="./#1286061908%2FFunctions%2F-71375161">getLimitHandler</a>(): LimitHandler</td>
+</tr>
+<tr>
+<td><a href="./#1666969739%2FFunctions%2F-71375161">getLimitString</a></td>
+<td>[jvm]<br>open override fun <a href="./#1666969739%2FFunctions%2F-71375161">getLimitString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1542811693%2FFunctions%2F-71375161">getLobMergeStrategy</a></td>
+<td>[jvm]<br>open fun <a href="./#-1542811693%2FFunctions%2F-71375161">getLobMergeStrategy</a>(): LobMergeStrategy</td>
+</tr>
+<tr>
+<td><a href="./#-152732105%2FFunctions%2F-71375161">getLockingStrategy</a></td>
+<td>[jvm]<br>open fun <a href="./#-152732105%2FFunctions%2F-71375161">getLockingStrategy</a>(p0: Lockable, p1: LockMode): LockingStrategy</td>
+</tr>
+<tr>
+<td><a href="./#1010101778%2FFunctions%2F-71375161">getLowercaseFunction</a></td>
+<td>[jvm]<br>open fun <a href="./#1010101778%2FFunctions%2F-71375161">getLowercaseFunction</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1262189427%2FFunctions%2F-71375161">getMaxAliasLength</a></td>
+<td>[jvm]<br>open fun <a href="./#-1262189427%2FFunctions%2F-71375161">getMaxAliasLength</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></td>
+</tr>
+<tr>
+<td><a href="./#-1944320237%2FFunctions%2F-71375161">getNameQualifierSupport</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1944320237%2FFunctions%2F-71375161">getNameQualifierSupport</a>(): NameQualifierSupport</td>
+</tr>
+<tr>
+<td><a href="./#1654383157%2FFunctions%2F-71375161">getNativeIdentifierGeneratorStrategy</a></td>
+<td>[jvm]<br>open fun <a href="./#1654383157%2FFunctions%2F-71375161">getNativeIdentifierGeneratorStrategy</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1950901963%2FFunctions%2F-71375161">getNoColumnsInsertString</a></td>
+<td>[jvm]<br>open fun <a href="./#-1950901963%2FFunctions%2F-71375161">getNoColumnsInsertString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#2091334456%2FFunctions%2F-71375161">getNotExpression</a></td>
+<td>[jvm]<br>open override fun <a href="./#2091334456%2FFunctions%2F-71375161">getNotExpression</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1110799025%2FFunctions%2F-71375161">getNullColumnString</a></td>
+<td>[jvm]<br>open fun <a href="./#1110799025%2FFunctions%2F-71375161">getNullColumnString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#204041360%2FFunctions%2F-71375161">getQueryHintString</a></td>
+<td>[jvm]<br>open fun <a href="./#204041360%2FFunctions%2F-71375161">getQueryHintString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open override fun <a href="./#574949345%2FFunctions%2F-71375161">getQueryHintString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1556699420%2FFunctions%2F-71375161">getQuerySequencesString</a></td>
+<td>[jvm]<br>open fun <a href="./#-1556699420%2FFunctions%2F-71375161">getQuerySequencesString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#485815654%2FFunctions%2F-71375161">getReadLockString</a></td>
+<td>[jvm]<br>open fun <a href="./#485815654%2FFunctions%2F-71375161">getReadLockString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open override fun <a href="./#-739968177%2FFunctions%2F-71375161">getReadLockString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1176108942%2FFunctions%2F-71375161">getResultSet</a></td>
+<td>[jvm]<br>open fun <a href="./#-1176108942%2FFunctions%2F-71375161">getResultSet</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html">CallableStatement</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html">ResultSet</a><br>open fun <a href="./#-1485395536%2FFunctions%2F-71375161">getResultSet</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html">CallableStatement</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html">ResultSet</a><br>open override fun <a href="./#-1538036185%2FFunctions%2F-71375161">getResultSet</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html">CallableStatement</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html">ResultSet</a></td>
+</tr>
+<tr>
+<td><a href="./#-76860179%2FFunctions%2F-71375161">getSchemaNameResolver</a></td>
+<td>[jvm]<br>open fun <a href="./#-76860179%2FFunctions%2F-71375161">getSchemaNameResolver</a>(): SchemaNameResolver</td>
+</tr>
+<tr>
+<td><a href="./#-1299722438%2FFunctions%2F-71375161">getSelectClauseNullString</a></td>
+<td>[jvm]<br>open fun <a href="./#-1299722438%2FFunctions%2F-71375161">getSelectClauseNullString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-537854131%2FFunctions%2F-71375161">getSelectGUIDString</a></td>
+<td>[jvm]<br>open override fun <a href="./#-537854131%2FFunctions%2F-71375161">getSelectGUIDString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1235375435%2FFunctions%2F-71375161">getSelectSequenceNextValString</a></td>
+<td>[jvm]<br>open fun <a href="./#1235375435%2FFunctions%2F-71375161">getSelectSequenceNextValString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#225980701%2FFunctions%2F-71375161">getSequenceExporter</a></td>
+<td>[jvm]<br>open fun <a href="./#225980701%2FFunctions%2F-71375161">getSequenceExporter</a>(): Exporter&lt;Sequence&gt;</td>
+</tr>
+<tr>
+<td><a href="./#2051421318%2FFunctions%2F-71375161">getSequenceInformationExtractor</a></td>
+<td>[jvm]<br>open fun <a href="./#2051421318%2FFunctions%2F-71375161">getSequenceInformationExtractor</a>(): SequenceInformationExtractor</td>
+</tr>
+<tr>
+<td><a href="./#-689888921%2FFunctions%2F-71375161">getSequenceNextValString</a></td>
+<td>[jvm]<br>open fun <a href="./#-689888921%2FFunctions%2F-71375161">getSequenceNextValString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1250364498%2FFunctions%2F-71375161">getTableComment</a></td>
+<td>[jvm]<br>open override fun <a href="./#1250364498%2FFunctions%2F-71375161">getTableComment</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#497144620%2FFunctions%2F-71375161">getTableExporter</a></td>
+<td>[jvm]<br>open fun <a href="./#497144620%2FFunctions%2F-71375161">getTableExporter</a>(): Exporter&lt;Table&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1265119746%2FFunctions%2F-71375161">getTableTypeString</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1265119746%2FFunctions%2F-71375161">getTableTypeString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1835667192%2FFunctions%2F-71375161">getTypeName</a></td>
+<td>[jvm]<br>open fun <a href="./#1835667192%2FFunctions%2F-71375161">getTypeName</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open fun <a href="./#-1584327502%2FFunctions%2F-71375161">getTypeName</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, p3: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#742282028%2FFunctions%2F-71375161">getUniqueKeyExporter</a></td>
+<td>[jvm]<br>open fun <a href="./#742282028%2FFunctions%2F-71375161">getUniqueKeyExporter</a>(): Exporter&lt;Constraint&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-902097052%2FFunctions%2F-71375161">getViolatedConstraintNameExtracter</a></td>
+<td>[jvm]<br>open override fun <a href="./#-902097052%2FFunctions%2F-71375161">getViolatedConstraintNameExtracter</a>(): ViolatedConstraintNameExtracter</td>
+</tr>
+<tr>
+<td><a href="./#-1362132487%2FFunctions%2F-71375161">getWriteLockString</a></td>
+<td>[jvm]<br>open fun <a href="./#-1362132487%2FFunctions%2F-71375161">getWriteLockString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><br>open override fun <a href="./#-464446758%2FFunctions%2F-71375161">getWriteLockString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#2128896643%2FFunctions%2F-71375161">hasAlterTable</a></td>
+<td>[jvm]<br>open fun <a href="./#2128896643%2FFunctions%2F-71375161">hasAlterTable</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#981709523%2FFunctions%2F-71375161">hasSelfReferentialForeignKeyBug</a></td>
+<td>[jvm]<br>open override fun <a href="./#981709523%2FFunctions%2F-71375161">hasSelfReferentialForeignKeyBug</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-471412571%2FFunctions%2F-71375161">inlineLiteral</a></td>
+<td>[jvm]<br>open fun <a href="./#-471412571%2FFunctions%2F-71375161">inlineLiteral</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1793876811%2FFunctions%2F-71375161">isCurrentTimestampSelectStringCallable</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1793876811%2FFunctions%2F-71375161">isCurrentTimestampSelectStringCallable</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#2109519898%2FFunctions%2F-71375161">isJdbcLogWarningsEnabledByDefault</a></td>
+<td>[jvm]<br>open override fun <a href="./#2109519898%2FFunctions%2F-71375161">isJdbcLogWarningsEnabledByDefault</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#266072200%2FFunctions%2F-71375161">isLegacyLimitHandlerBehaviorEnabled</a></td>
+<td>[jvm]<br>open fun <a href="./#266072200%2FFunctions%2F-71375161">isLegacyLimitHandlerBehaviorEnabled</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#625872728%2FFunctions%2F-71375161">isLockTimeoutParameterized</a></td>
+<td>[jvm]<br>open fun <a href="./#625872728%2FFunctions%2F-71375161">isLockTimeoutParameterized</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1498254896%2FFunctions%2F-71375161">isTypeNameRegistered</a></td>
+<td>[jvm]<br>open fun <a href="./#-1498254896%2FFunctions%2F-71375161">isTypeNameRegistered</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1133628377%2FFunctions%2F-71375161">openQuote</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1133628377%2FFunctions%2F-71375161">openQuote</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html">Char</a></td>
+</tr>
+<tr>
+<td><a href="./#-1789588975%2FFunctions%2F-71375161">qualifyIndexName</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1789588975%2FFunctions%2F-71375161">qualifyIndexName</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1127963957%2FFunctions%2F-71375161">quote</a></td>
+<td>[jvm]<br>fun <a href="./#-1127963957%2FFunctions%2F-71375161">quote</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-2028723662%2FFunctions%2F-71375161">registerResultSetOutParameter</a></td>
+<td>[jvm]<br>open fun <a href="./#-2028723662%2FFunctions%2F-71375161">registerResultSetOutParameter</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html">CallableStatement</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><br>open override fun <a href="./#-1930241204%2FFunctions%2F-71375161">registerResultSetOutParameter</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html">CallableStatement</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></td>
+</tr>
+<tr>
+<td><a href="./#-1839637275%2FFunctions%2F-71375161">remapSqlTypeDescriptor</a></td>
+<td>[jvm]<br>open fun <a href="./#-1839637275%2FFunctions%2F-71375161">remapSqlTypeDescriptor</a>(p0: SqlTypeDescriptor): SqlTypeDescriptor</td>
+</tr>
+<tr>
+<td><a href="./#1824588174%2FFunctions%2F-71375161">renderOrderByElement</a></td>
+<td>[jvm]<br>open override fun <a href="./#1824588174%2FFunctions%2F-71375161">renderOrderByElement</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p3: NullPrecedence): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1112463628%2FFunctions%2F-71375161">replaceResultVariableInOrderByClauseWithPosition</a></td>
+<td>[jvm]<br>open fun <a href="./#-1112463628%2FFunctions%2F-71375161">replaceResultVariableInOrderByClauseWithPosition</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#840001327%2FFunctions%2F-71375161">requiresCastingOfParametersInSelectClause</a></td>
+<td>[jvm]<br>open fun <a href="./#840001327%2FFunctions%2F-71375161">requiresCastingOfParametersInSelectClause</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-380037425%2FFunctions%2F-71375161">requiresParensForTupleDistinctCounts</a></td>
+<td>[jvm]<br>open fun <a href="./#-380037425%2FFunctions%2F-71375161">requiresParensForTupleDistinctCounts</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1016066307%2FFunctions%2F-71375161">supportsBindAsCallableArgument</a></td>
+<td>[jvm]<br>open fun <a href="./#-1016066307%2FFunctions%2F-71375161">supportsBindAsCallableArgument</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1084350658%2FFunctions%2F-71375161">supportsCascadeDelete</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1084350658%2FFunctions%2F-71375161">supportsCascadeDelete</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1621813889%2FFunctions%2F-71375161">supportsCaseInsensitiveLike</a></td>
+<td>[jvm]<br>open fun <a href="./#1621813889%2FFunctions%2F-71375161">supportsCaseInsensitiveLike</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-719430581%2FFunctions%2F-71375161">supportsCircularCascadeDeleteConstraints</a></td>
+<td>[jvm]<br>open fun <a href="./#-719430581%2FFunctions%2F-71375161">supportsCircularCascadeDeleteConstraints</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-560504134%2FFunctions%2F-71375161">supportsColumnCheck</a></td>
+<td>[jvm]<br>open override fun <a href="./#-560504134%2FFunctions%2F-71375161">supportsColumnCheck</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#406729883%2FFunctions%2F-71375161">supportsCommentOn</a></td>
+<td>[jvm]<br>open fun <a href="./#406729883%2FFunctions%2F-71375161">supportsCommentOn</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#821252174%2FFunctions%2F-71375161">supportsCurrentTimestampSelection</a></td>
+<td>[jvm]<br>open override fun <a href="./#821252174%2FFunctions%2F-71375161">supportsCurrentTimestampSelection</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#653648589%2FFunctions%2F-71375161">supportsEmptyInList</a></td>
+<td>[jvm]<br>open override fun <a href="./#653648589%2FFunctions%2F-71375161">supportsEmptyInList</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1814275364%2FFunctions%2F-71375161">supportsExistsInSelect</a></td>
+<td>[jvm]<br>open fun <a href="./#1814275364%2FFunctions%2F-71375161">supportsExistsInSelect</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-942577277%2FFunctions%2F-71375161">supportsExpectedLobUsagePattern</a></td>
+<td>[jvm]<br>open fun <a href="./#-942577277%2FFunctions%2F-71375161">supportsExpectedLobUsagePattern</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-894950498%2FFunctions%2F-71375161">supportsIfExistsAfterAlterTable</a></td>
+<td>[jvm]<br>open fun <a href="./#-894950498%2FFunctions%2F-71375161">supportsIfExistsAfterAlterTable</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1689018478%2FFunctions%2F-71375161">supportsIfExistsAfterConstraintName</a></td>
+<td>[jvm]<br>open fun <a href="./#1689018478%2FFunctions%2F-71375161">supportsIfExistsAfterConstraintName</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1092708085%2FFunctions%2F-71375161">supportsIfExistsAfterTableName</a></td>
+<td>[jvm]<br>open fun <a href="./#-1092708085%2FFunctions%2F-71375161">supportsIfExistsAfterTableName</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-299774559%2FFunctions%2F-71375161">supportsIfExistsBeforeConstraintName</a></td>
+<td>[jvm]<br>open fun <a href="./#-299774559%2FFunctions%2F-71375161">supportsIfExistsBeforeConstraintName</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1060165284%2FFunctions%2F-71375161">supportsIfExistsBeforeTableName</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1060165284%2FFunctions%2F-71375161">supportsIfExistsBeforeTableName</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1782913928%2FFunctions%2F-71375161">supportsJdbcConnectionLobCreation</a></td>
+<td>[jvm]<br>open fun <a href="./#-1782913928%2FFunctions%2F-71375161">supportsJdbcConnectionLobCreation</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html">DatabaseMetaData</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#793923714%2FFunctions%2F-71375161">supportsLimit</a></td>
+<td>[jvm]<br>open override fun <a href="./#793923714%2FFunctions%2F-71375161">supportsLimit</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-722932571%2FFunctions%2F-71375161">supportsLobValueChangePropogation</a></td>
+<td>[jvm]<br>open override fun <a href="./#-722932571%2FFunctions%2F-71375161">supportsLobValueChangePropogation</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-748263232%2FFunctions%2F-71375161">supportsLockTimeouts</a></td>
+<td>[jvm]<br>open override fun <a href="./#-748263232%2FFunctions%2F-71375161">supportsLockTimeouts</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1827024566%2FFunctions%2F-71375161">supportsNamedParameters</a></td>
+<td>[jvm]<br>open fun <a href="./#1827024566%2FFunctions%2F-71375161">supportsNamedParameters</a>(p0: <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html">DatabaseMetaData</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1327789058%2FFunctions%2F-71375161">supportsNationalizedTypes</a></td>
+<td>[jvm]<br>open fun <a href="./#1327789058%2FFunctions%2F-71375161">supportsNationalizedTypes</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-383722652%2FFunctions%2F-71375161">supportsNoColumnsInsert</a></td>
+<td>[jvm]<br>open fun <a href="./#-383722652%2FFunctions%2F-71375161">supportsNoColumnsInsert</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#573396198%2FFunctions%2F-71375161">supportsNonQueryWithCTE</a></td>
+<td>[jvm]<br>open fun <a href="./#573396198%2FFunctions%2F-71375161">supportsNonQueryWithCTE</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#183824235%2FFunctions%2F-71375161">supportsNoWait</a></td>
+<td>[jvm]<br>open fun <a href="./#183824235%2FFunctions%2F-71375161">supportsNoWait</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-513344524%2FFunctions%2F-71375161">supportsOuterJoinForUpdate</a></td>
+<td>[jvm]<br>open fun <a href="./#-513344524%2FFunctions%2F-71375161">supportsOuterJoinForUpdate</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1757218403%2FFunctions%2F-71375161">supportsParametersInInsertSelect</a></td>
+<td>[jvm]<br>open fun <a href="./#-1757218403%2FFunctions%2F-71375161">supportsParametersInInsertSelect</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1780697784%2FFunctions%2F-71375161">supportsPartitionBy</a></td>
+<td>[jvm]<br>open fun <a href="./#1780697784%2FFunctions%2F-71375161">supportsPartitionBy</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1494257922%2FFunctions%2F-71375161">supportsPooledSequences</a></td>
+<td>[jvm]<br>open fun <a href="./#1494257922%2FFunctions%2F-71375161">supportsPooledSequences</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#732511025%2FFunctions%2F-71375161">supportsResultSetPositionQueryMethodsOnForwardOnlyCursor</a></td>
+<td>[jvm]<br>open fun <a href="./#732511025%2FFunctions%2F-71375161">supportsResultSetPositionQueryMethodsOnForwardOnlyCursor</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#823624983%2FFunctions%2F-71375161">supportsRowValueConstructorSyntax</a></td>
+<td>[jvm]<br>open override fun <a href="./#823624983%2FFunctions%2F-71375161">supportsRowValueConstructorSyntax</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#580840049%2FFunctions%2F-71375161">supportsRowValueConstructorSyntaxInInList</a></td>
+<td>[jvm]<br>open override fun <a href="./#580840049%2FFunctions%2F-71375161">supportsRowValueConstructorSyntaxInInList</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1186747494%2FFunctions%2F-71375161">supportsRowValueConstructorSyntaxInSet</a></td>
+<td>[jvm]<br>open override fun <a href="./#1186747494%2FFunctions%2F-71375161">supportsRowValueConstructorSyntaxInSet</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-918769839%2FFunctions%2F-71375161">supportsSelectAliasInGroupByClause</a></td>
+<td>[jvm]<br>open override fun <a href="./#-918769839%2FFunctions%2F-71375161">supportsSelectAliasInGroupByClause</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1071058201%2FFunctions%2F-71375161">supportsSequences</a></td>
+<td>[jvm]<br>open fun <a href="./#-1071058201%2FFunctions%2F-71375161">supportsSequences</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-703821256%2FFunctions%2F-71375161">supportsSkipLocked</a></td>
+<td>[jvm]<br>open fun <a href="./#-703821256%2FFunctions%2F-71375161">supportsSkipLocked</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1939213159%2FFunctions%2F-71375161">supportsSubqueryOnMutatingTable</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1939213159%2FFunctions%2F-71375161">supportsSubqueryOnMutatingTable</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#966701990%2FFunctions%2F-71375161">supportsSubselectAsInPredicateLHS</a></td>
+<td>[jvm]<br>open fun <a href="./#966701990%2FFunctions%2F-71375161">supportsSubselectAsInPredicateLHS</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-116983065%2FFunctions%2F-71375161">supportsTableCheck</a></td>
+<td>[jvm]<br>open fun <a href="./#-116983065%2FFunctions%2F-71375161">supportsTableCheck</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-596959539%2FFunctions%2F-71375161">supportsTupleCounts</a></td>
+<td>[jvm]<br>open fun <a href="./#-596959539%2FFunctions%2F-71375161">supportsTupleCounts</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-2112162767%2FFunctions%2F-71375161">supportsTupleDistinctCounts</a></td>
+<td>[jvm]<br>open fun <a href="./#-2112162767%2FFunctions%2F-71375161">supportsTupleDistinctCounts</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-687129909%2FFunctions%2F-71375161">supportsTuplesInSubqueries</a></td>
+<td>[jvm]<br>open fun <a href="./#-687129909%2FFunctions%2F-71375161">supportsTuplesInSubqueries</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1831307071%2FFunctions%2F-71375161">supportsUnboundedLobLocatorMaterialization</a></td>
+<td>[jvm]<br>open fun <a href="./#1831307071%2FFunctions%2F-71375161">supportsUnboundedLobLocatorMaterialization</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1391135740%2FFunctions%2F-71375161">supportsUnionAll</a></td>
+<td>[jvm]<br>open override fun <a href="./#1391135740%2FFunctions%2F-71375161">supportsUnionAll</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#2138330785%2FFunctions%2F-71375161">supportsValuesList</a></td>
+<td>[jvm]<br>open fun <a href="./#2138330785%2FFunctions%2F-71375161">supportsValuesList</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-871185899%2FFunctions%2F-71375161">toBooleanValueString</a></td>
+<td>[jvm]<br>open fun <a href="./#-871185899%2FFunctions%2F-71375161">toBooleanValueString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-73916999%2FFunctions%2F-71375161">toString</a></td>
+<td>[jvm]<br>open override fun <a href="./#-73916999%2FFunctions%2F-71375161">toString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#-1527246776%2FFunctions%2F-71375161">transformSelectString</a></td>
+<td>[jvm]<br>open fun <a href="./#-1527246776%2FFunctions%2F-71375161">transformSelectString</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#1312090107%2FFunctions%2F-71375161">useFollowOnLocking</a></td>
+<td>[jvm]<br>open fun <a href="./#1312090107%2FFunctions%2F-71375161">useFollowOnLocking</a>(p0: QueryParameters): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="use-input-stream-to-insert-blob/">useInputStreamToInsertBlob</a></td>
+<td>[jvm]<br>open override fun <a href="use-input-stream-to-insert-blob/">useInputStreamToInsertBlob</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2018-2021 Square, Inc.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../../../..", "features": [], "search": "../../../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../../../assets/javascripts/bundle.ad660dcc.min.js"></script>
+      
+    
+  </body>
+</html>

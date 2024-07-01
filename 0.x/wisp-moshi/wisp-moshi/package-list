@@ -1,0 +1,8 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.moshi////PointingToDeclaration/wisp-moshi/wisp.moshi/index.md
+$dokka.location:wisp.moshi//adapter/com.squareup.moshi.Moshi#/PointingToDeclaration/wisp-moshi/wisp.moshi/adapter.md
+$dokka.location:wisp.moshi//buildMoshi/#kotlin.collections.List[kotlin.Any]#kotlin.collections.List[kotlin.Any]/PointingToDeclaration/wisp-moshi/wisp.moshi/build-moshi.md
+$dokka.location:wisp.moshi//defaultKotlinMoshi/#/PointingToDeclaration/wisp-moshi/wisp.moshi/default-kotlin-moshi.md
+wisp.moshi
+

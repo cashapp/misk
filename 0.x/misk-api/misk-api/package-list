@@ -1,0 +1,66 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.annotation////PointingToDeclaration/misk-api/misk.annotation/index.md
+$dokka.location:misk.annotation/ExperimentalMiskApi///PointingToDeclaration/misk-api/misk.annotation/-experimental-misk-api/index.md
+$dokka.location:misk.api////PointingToDeclaration/misk-api/misk.api/index.md
+$dokka.location:misk.api/HttpRequest///PointingToDeclaration/misk-api/misk.api/-http-request/index.md
+$dokka.location:misk.api/HttpRequest/dispatchMechanism/#/PointingToDeclaration/misk-api/misk.api/-http-request/dispatch-mechanism.md
+$dokka.location:misk.api/HttpRequest/requestHeaders/#/PointingToDeclaration/misk-api/misk.api/-http-request/request-headers.md
+$dokka.location:misk.api/HttpRequest/url/#/PointingToDeclaration/misk-api/misk.api/-http-request/url.md
+$dokka.location:misk.client////PointingToDeclaration/misk-api/misk.client/index.md
+$dokka.location:misk.client/ClientAction///PointingToDeclaration/misk-api/misk.client/-client-action/index.md
+$dokka.location:misk.client/ClientAction/ClientAction/#kotlin.String#kotlin.reflect.KFunction[*]#kotlin.collections.List[kotlin.reflect.KType]#kotlin.reflect.KType/PointingToDeclaration/misk-api/misk.client/-client-action/-client-action.md
+$dokka.location:misk.client/ClientAction/ClientAction/#kotlin.String#kotlin.reflect.KFunction[*]/PointingToDeclaration/misk-api/misk.client/-client-action/-client-action.md
+$dokka.location:misk.client/ClientAction/function/#/PointingToDeclaration/misk-api/misk.client/-client-action/function.md
+$dokka.location:misk.client/ClientAction/name/#/PointingToDeclaration/misk-api/misk.client/-client-action/name.md
+$dokka.location:misk.client/ClientAction/parameterTypes/#/PointingToDeclaration/misk-api/misk.client/-client-action/parameter-types.md
+$dokka.location:misk.client/ClientAction/returnType/#/PointingToDeclaration/misk-api/misk.client/-client-action/return-type.md
+$dokka.location:misk.client/ClientNetworkChain///PointingToDeclaration/misk-api/misk.client/-client-network-chain/index.md
+$dokka.location:misk.client/ClientNetworkChain/action/#/PointingToDeclaration/misk-api/misk.client/-client-network-chain/action.md
+$dokka.location:misk.client/ClientNetworkChain/proceed/#okhttp3.Request/PointingToDeclaration/misk-api/misk.client/-client-network-chain/proceed.md
+$dokka.location:misk.client/ClientNetworkChain/request/#/PointingToDeclaration/misk-api/misk.client/-client-network-chain/request.md
+$dokka.location:misk.client/ClientNetworkInterceptor.Factory///PointingToDeclaration/misk-api/misk.client/-client-network-interceptor/-factory/index.md
+$dokka.location:misk.client/ClientNetworkInterceptor.Factory/create/#misk.client.ClientAction/PointingToDeclaration/misk-api/misk.client/-client-network-interceptor/-factory/create.md
+$dokka.location:misk.client/ClientNetworkInterceptor///PointingToDeclaration/misk-api/misk.client/-client-network-interceptor/index.md
+$dokka.location:misk.client/ClientNetworkInterceptor/intercept/#misk.client.ClientNetworkChain/PointingToDeclaration/misk-api/misk.client/-client-network-interceptor/intercept.md
+$dokka.location:misk.client/NetworkInterceptorWrapper///PointingToDeclaration/misk-api/misk.client/-network-interceptor-wrapper/index.md
+$dokka.location:misk.client/NetworkInterceptorWrapper/NetworkInterceptorWrapper/#misk.client.ClientAction#misk.client.ClientNetworkInterceptor/PointingToDeclaration/misk-api/misk.client/-network-interceptor-wrapper/-network-interceptor-wrapper.md
+$dokka.location:misk.client/NetworkInterceptorWrapper/action/#/PointingToDeclaration/misk-api/misk.client/-network-interceptor-wrapper/action.md
+$dokka.location:misk.client/NetworkInterceptorWrapper/intercept/#okhttp3.Interceptor.Chain/PointingToDeclaration/misk-api/misk.client/-network-interceptor-wrapper/intercept.md
+$dokka.location:misk.client/NetworkInterceptorWrapper/interceptor/#/PointingToDeclaration/misk-api/misk.client/-network-interceptor-wrapper/interceptor.md
+$dokka.location:misk.logging////PointingToDeclaration/misk-api/misk.logging/index.md
+$dokka.location:misk.logging/Mdc///PointingToDeclaration/misk-api/misk.logging/-mdc/index.md
+$dokka.location:misk.logging/Mdc/clear/#/PointingToDeclaration/misk-api/misk.logging/-mdc/clear.md
+$dokka.location:misk.logging/Mdc/get/#kotlin.String/PointingToDeclaration/misk-api/misk.logging/-mdc/get.md
+$dokka.location:misk.logging/Mdc/put/#kotlin.String#kotlin.String?/PointingToDeclaration/misk-api/misk.logging/-mdc/put.md
+$dokka.location:misk.scope////PointingToDeclaration/misk-api/misk.scope/index.md
+$dokka.location:misk.scope/ActionScoped.Companion///PointingToDeclaration/misk-api/misk.scope/-action-scoped/-companion/index.md
+$dokka.location:misk.scope/ActionScoped.Companion/of/#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/misk-api/misk.scope/-action-scoped/-companion/of.md
+$dokka.location:misk.scope/ActionScoped///PointingToDeclaration/misk-api/misk.scope/-action-scoped/index.md
+$dokka.location:misk.scope/ActionScoped/get/#/PointingToDeclaration/misk-api/misk.scope/-action-scoped/get.md
+$dokka.location:misk.scope/ActionScoped/getIfInScope/#/PointingToDeclaration/misk-api/misk.scope/-action-scoped/get-if-in-scope.md
+$dokka.location:misk.scope/ActionScopedProvider///PointingToDeclaration/misk-api/misk.scope/-action-scoped-provider/index.md
+$dokka.location:misk.scope/ActionScopedProvider/get/#/PointingToDeclaration/misk-api/misk.scope/-action-scoped-provider/get.md
+$dokka.location:misk.web.dashboard////PointingToDeclaration/misk-api/misk.web.dashboard/index.md
+$dokka.location:misk.web.dashboard/AdminDashboardAccess///PointingToDeclaration/misk-api/misk.web.dashboard/-admin-dashboard-access/index.md
+$dokka.location:misk.web////PointingToDeclaration/misk-api/misk.web/index.md
+$dokka.location:misk.web/DispatchMechanism.DELETE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-api/misk.web/-dispatch-mechanism/-d-e-l-e-t-e/index.md
+$dokka.location:misk.web/DispatchMechanism.GET///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-api/misk.web/-dispatch-mechanism/-g-e-t/index.md
+$dokka.location:misk.web/DispatchMechanism.GRPC///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-api/misk.web/-dispatch-mechanism/-g-r-p-c/index.md
+$dokka.location:misk.web/DispatchMechanism.PATCH///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-api/misk.web/-dispatch-mechanism/-p-a-t-c-h/index.md
+$dokka.location:misk.web/DispatchMechanism.POST///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-api/misk.web/-dispatch-mechanism/-p-o-s-t/index.md
+$dokka.location:misk.web/DispatchMechanism.PUT///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-api/misk.web/-dispatch-mechanism/-p-u-t/index.md
+$dokka.location:misk.web/DispatchMechanism.WEBSOCKET///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-api/misk.web/-dispatch-mechanism/-w-e-b-s-o-c-k-e-t/index.md
+$dokka.location:misk.web/DispatchMechanism///PointingToDeclaration/misk-api/misk.web/-dispatch-mechanism/index.md
+$dokka.location:misk.web/DispatchMechanism/entries/#/PointingToDeclaration/misk-api/misk.web/-dispatch-mechanism/entries.md
+$dokka.location:misk.web/DispatchMechanism/method/#/PointingToDeclaration/misk-api/misk.web/-dispatch-mechanism/method.md
+$dokka.location:misk.web/DispatchMechanism/valueOf/#kotlin.String/PointingToDeclaration/misk-api/misk.web/-dispatch-mechanism/value-of.md
+$dokka.location:misk.web/DispatchMechanism/values/#/PointingToDeclaration/misk-api/misk.web/-dispatch-mechanism/values.md
+misk.annotation
+misk.api
+misk.client
+misk.logging
+misk.scope
+misk.web
+misk.web.dashboard
+

@@ -1,0 +1,31 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:org.assertj.core.api////PointingToDeclaration/wisp-logging-testing/org.assertj.core.api/index.md
+$dokka.location:org.assertj.core.api//assertOrdering/#kotlin.Array[TypeParam(bounds=[kotlin.Comparable[^]])]/PointingToDeclaration/wisp-logging-testing/org.assertj.core.api/assert-ordering.md
+$dokka.location:org.assertj.core.api//containsExactly/org.assertj.core.api.MapAssert[TypeParam(bounds=[kotlin.Any?]),TypeParam(bounds=[kotlin.Any?])]#kotlin.Array[kotlin.Pair[TypeParam(bounds=[kotlin.Any?]),TypeParam(bounds=[kotlin.Any?])]]/PointingToDeclaration/wisp-logging-testing/org.assertj.core.api/contains-exactly.md
+$dokka.location:org.assertj.core.api//isEqualToAsJson/org.assertj.core.api.AbstractCharSequenceAssert[*,TypeParam(bounds=[kotlin.CharSequence])]#kotlin.CharSequence/PointingToDeclaration/wisp-logging-testing/org.assertj.core.api/is-equal-to-as-json.md
+$dokka.location:wisp.logging////PointingToDeclaration/wisp-logging-testing/wisp.logging/index.md
+$dokka.location:wisp.logging/LogCollector///PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/index.md
+$dokka.location:wisp.logging/LogCollector/takeEvent/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-event.md
+$dokka.location:wisp.logging/LogCollector/takeEvent/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-event.md
+$dokka.location:wisp.logging/LogCollector/takeEvents/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-events.md
+$dokka.location:wisp.logging/LogCollector/takeEvents/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-events.md
+$dokka.location:wisp.logging/LogCollector/takeMessage/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-message.md
+$dokka.location:wisp.logging/LogCollector/takeMessage/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-message.md
+$dokka.location:wisp.logging/LogCollector/takeMessages/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-messages.md
+$dokka.location:wisp.logging/LogCollector/takeMessages/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-messages.md
+$dokka.location:wisp.logging/WispQueuedLogCollector///PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/index.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/WispQueuedLogCollector/#/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/-wisp-queued-log-collector.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/shutDown/#/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/shut-down.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/startUp/#/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/start-up.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/takeEvent/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/take-event.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/takeEvent/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/take-event.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/takeEvents/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/take-events.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/takeEvents/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/take-events.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/takeMessage/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/take-message.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/takeMessage/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/take-message.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/takeMessages/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/take-messages.md
+$dokka.location:wisp.logging/WispQueuedLogCollector/takeMessages/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-wisp-queued-log-collector/take-messages.md
+org.assertj.core.api
+wisp.logging
+

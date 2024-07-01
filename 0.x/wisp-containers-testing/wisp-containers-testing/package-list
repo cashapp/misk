@@ -1,0 +1,21 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.containers////PointingToDeclaration/wisp-containers-testing/wisp.containers/index.md
+$dokka.location:wisp.containers/Composer.Companion///PointingToDeclaration/wisp-containers-testing/wisp.containers/-composer/-companion/index.md
+$dokka.location:wisp.containers/Composer.Companion/dockerClient/#/PointingToDeclaration/wisp-containers-testing/wisp.containers/-composer/-companion/docker-client.md
+$dokka.location:wisp.containers/Composer///PointingToDeclaration/wisp-containers-testing/wisp.containers/-composer/index.md
+$dokka.location:wisp.containers/Composer/Composer/#kotlin.String#kotlin.Array[wisp.containers.Container]/PointingToDeclaration/wisp-containers-testing/wisp.containers/-composer/-composer.md
+$dokka.location:wisp.containers/Composer/running/#/PointingToDeclaration/wisp-containers-testing/wisp.containers/-composer/running.md
+$dokka.location:wisp.containers/Composer/start/#/PointingToDeclaration/wisp-containers-testing/wisp.containers/-composer/start.md
+$dokka.location:wisp.containers/Composer/stop/#/PointingToDeclaration/wisp-containers-testing/wisp.containers/-composer/stop.md
+$dokka.location:wisp.containers/Container///PointingToDeclaration/wisp-containers-testing/wisp.containers/-container/index.md
+$dokka.location:wisp.containers/Container/Container/#kotlin.Function1[com.github.dockerjava.api.command.CreateContainerCmd,kotlin.Unit]#kotlin.Function2[com.github.dockerjava.api.DockerClient,kotlin.String,kotlin.Unit]/PointingToDeclaration/wisp-containers-testing/wisp.containers/-container/-container.md
+$dokka.location:wisp.containers/Container/Container/#kotlin.Function1[com.github.dockerjava.api.command.CreateContainerCmd,kotlin.Unit]/PointingToDeclaration/wisp-containers-testing/wisp.containers/-container/-container.md
+$dokka.location:wisp.containers/Container/beforeStartHook/#/PointingToDeclaration/wisp-containers-testing/wisp.containers/-container/before-start-hook.md
+$dokka.location:wisp.containers/Container/createCmd/#/PointingToDeclaration/wisp-containers-testing/wisp.containers/-container/create-cmd.md
+$dokka.location:wisp.containers/ContainerUtil///PointingToDeclaration/wisp-containers-testing/wisp.containers/-container-util/index.md
+$dokka.location:wisp.containers/ContainerUtil/dockerTargetOrLocalHost/#/PointingToDeclaration/wisp-containers-testing/wisp.containers/-container-util/docker-target-or-local-host.md
+$dokka.location:wisp.containers/ContainerUtil/dockerTargetOrLocalIp/#/PointingToDeclaration/wisp-containers-testing/wisp.containers/-container-util/docker-target-or-local-ip.md
+$dokka.location:wisp.containers/ContainerUtil/isRunningInDocker/#/PointingToDeclaration/wisp-containers-testing/wisp.containers/-container-util/is-running-in-docker.md
+wisp.containers
+

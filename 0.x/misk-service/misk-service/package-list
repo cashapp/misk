@@ -1,0 +1,26 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk////PointingToDeclaration/misk-service/misk/index.md
+$dokka.location:misk//ServiceModule/#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-service/misk/-service-module.md
+$dokka.location:misk/DelegatingService///PointingToDeclaration/misk-service/misk/-delegating-service/index.md
+$dokka.location:misk/DelegatingService/service/#/PointingToDeclaration/misk-service/misk/-delegating-service/service.md
+$dokka.location:misk/ReadyService.Companion///PointingToDeclaration/misk-service/misk/-ready-service/-companion/index.md
+$dokka.location:misk/ReadyService///PointingToDeclaration/misk-service/misk/-ready-service/index.md
+$dokka.location:misk/ReadyService/ReadyService/#/PointingToDeclaration/misk-service/misk/-ready-service/-ready-service.md
+$dokka.location:misk/ServiceManagerConfig///PointingToDeclaration/misk-service/misk/-service-manager-config/index.md
+$dokka.location:misk/ServiceManagerConfig/ServiceManagerConfig/#kotlin.Boolean/PointingToDeclaration/misk-service/misk/-service-manager-config/-service-manager-config.md
+$dokka.location:misk/ServiceManagerConfig/debug_service_graph/#/PointingToDeclaration/misk-service/misk/-service-manager-config/debug_service_graph.md
+$dokka.location:misk/ServiceManagerModule.Companion///PointingToDeclaration/misk-service/misk/-service-manager-module/-companion/index.md
+$dokka.location:misk/ServiceManagerModule///PointingToDeclaration/misk-service/misk/-service-manager-module/index.md
+$dokka.location:misk/ServiceManagerModule/ServiceManagerModule/#misk.ServiceManagerConfig/PointingToDeclaration/misk-service/misk/-service-manager-module/-service-manager-module.md
+$dokka.location:misk/ServiceModule///PointingToDeclaration/misk-service/misk/-service-module/index.md
+$dokka.location:misk/ServiceModule/ServiceModule/#com.google.inject.Key[com.google.common.util.concurrent.Service]#kotlin.collections.List[com.google.inject.Key[com.google.common.util.concurrent.Service]]#kotlin.collections.List[com.google.inject.Key[com.google.common.util.concurrent.Service]]/PointingToDeclaration/misk-service/misk/-service-module/-service-module.md
+$dokka.location:misk/ServiceModule/dependsOn/#/PointingToDeclaration/misk-service/misk/-service-module/depends-on.md
+$dokka.location:misk/ServiceModule/dependsOn/#com.google.inject.Key[com.google.common.util.concurrent.Service]/PointingToDeclaration/misk-service/misk/-service-module/depends-on.md
+$dokka.location:misk/ServiceModule/dependsOn/#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-service/misk/-service-module/depends-on.md
+$dokka.location:misk/ServiceModule/enhancedBy/#/PointingToDeclaration/misk-service/misk/-service-module/enhanced-by.md
+$dokka.location:misk/ServiceModule/enhancedBy/#com.google.inject.Key[com.google.common.util.concurrent.Service]/PointingToDeclaration/misk-service/misk/-service-module/enhanced-by.md
+$dokka.location:misk/ServiceModule/enhancedBy/#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-service/misk/-service-module/enhanced-by.md
+$dokka.location:misk/ServiceModule/key/#/PointingToDeclaration/misk-service/misk/-service-module/key.md
+misk
+

@@ -1,0 +1,14 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.token////PointingToDeclaration/wisp-token/wisp.token/index.md
+$dokka.location:wisp.token/RealTokenGenerator///PointingToDeclaration/wisp-token/wisp.token/-real-token-generator/index.md
+$dokka.location:wisp.token/RealTokenGenerator/RealTokenGenerator/#/PointingToDeclaration/wisp-token/wisp.token/-real-token-generator/-real-token-generator.md
+$dokka.location:wisp.token/RealTokenGenerator/generate/#kotlin.String?#kotlin.Int/PointingToDeclaration/wisp-token/wisp.token/-real-token-generator/generate.md
+$dokka.location:wisp.token/TokenGenerator.Companion///PointingToDeclaration/wisp-token/wisp.token/-token-generator/-companion/index.md
+$dokka.location:wisp.token/TokenGenerator.Companion/CANONICALIZE_LENGTH_MAX/#/PointingToDeclaration/wisp-token/wisp.token/-token-generator/-companion/-c-a-n-o-n-i-c-a-l-i-z-e_-l-e-n-g-t-h_-m-a-x.md
+$dokka.location:wisp.token/TokenGenerator.Companion/CANONICALIZE_LENGTH_MIN/#/PointingToDeclaration/wisp-token/wisp.token/-token-generator/-companion/-c-a-n-o-n-i-c-a-l-i-z-e_-l-e-n-g-t-h_-m-i-n.md
+$dokka.location:wisp.token/TokenGenerator.Companion/canonicalize/#kotlin.String/PointingToDeclaration/wisp-token/wisp.token/-token-generator/-companion/canonicalize.md
+$dokka.location:wisp.token/TokenGenerator///PointingToDeclaration/wisp-token/wisp.token/-token-generator/index.md
+$dokka.location:wisp.token/TokenGenerator/generate/#kotlin.String?#kotlin.Int/PointingToDeclaration/wisp-token/wisp.token/-token-generator/generate.md
+wisp.token
+

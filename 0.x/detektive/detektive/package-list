@@ -1,0 +1,22 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:cash.detektive.javacompat////PointingToDeclaration/detektive/cash.detektive.javacompat/index.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads.ElementType.CONSTRUCTOR///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/-element-type/-c-o-n-s-t-r-u-c-t-o-r/index.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads.ElementType.FUNCTION///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/-element-type/-f-u-n-c-t-i-o-n/index.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads.ElementType///PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/-element-type/index.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads.ElementType/entries/#/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/-element-type/entries.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads.ElementType/valueOf/#kotlin.String/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/-element-type/value-of.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads.ElementType/values/#/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/-element-type/values.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads///PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/index.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads/AnnotatePublicApisWithJvmOverloads/#io.gitlab.arturbosch.detekt.api.Config/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/-annotate-public-apis-with-jvm-overloads.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads/issue/#/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/issue.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads/visitNamedFunction/#org.jetbrains.kotlin.psi.KtNamedFunction/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/visit-named-function.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads/visitPrimaryConstructor/#org.jetbrains.kotlin.psi.KtPrimaryConstructor/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/visit-primary-constructor.md
+$dokka.location:cash.detektive////PointingToDeclaration/detektive/cash.detektive/index.md
+$dokka.location:cash.detektive/DetektiveRuleSetProvider///PointingToDeclaration/detektive/cash.detektive/-detektive-rule-set-provider/index.md
+$dokka.location:cash.detektive/DetektiveRuleSetProvider/DetektiveRuleSetProvider/#/PointingToDeclaration/detektive/cash.detektive/-detektive-rule-set-provider/-detektive-rule-set-provider.md
+$dokka.location:cash.detektive/DetektiveRuleSetProvider/instance/#io.gitlab.arturbosch.detekt.api.Config/PointingToDeclaration/detektive/cash.detektive/-detektive-rule-set-provider/instance.md
+$dokka.location:cash.detektive/DetektiveRuleSetProvider/ruleSetId/#/PointingToDeclaration/detektive/cash.detektive/-detektive-rule-set-provider/rule-set-id.md
+cash.detektive
+cash.detektive.javacompat
+

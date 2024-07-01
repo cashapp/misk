@@ -1,0 +1,19 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.ratelimiting.bucket4j////PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/index.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jPruner///PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-pruner/index.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jPruner/Bucket4jPruner/#/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-pruner/-bucket4j-pruner.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jPruner/clockTimeMeter/#/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-pruner/clock-time-meter.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jRateLimiter///PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-rate-limiter/index.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jRateLimiter/Bucket4jRateLimiter/#io.github.bucket4j.distributed.proxy.ProxyManager[kotlin.String]#java.time.Clock#io.micrometer.core.instrument.MeterRegistry/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-rate-limiter/-bucket4j-rate-limiter.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jRateLimiter/availableTokens/#kotlin.String#wisp.ratelimiting.RateLimitConfiguration/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-rate-limiter/available-tokens.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jRateLimiter/consumeToken/#kotlin.String#wisp.ratelimiting.RateLimitConfiguration#kotlin.Long/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-rate-limiter/consume-token.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jRateLimiter/releaseToken/#kotlin.String#wisp.ratelimiting.RateLimitConfiguration#kotlin.Long/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-rate-limiter/release-token.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jRateLimiter/resetBucket/#kotlin.String#wisp.ratelimiting.RateLimitConfiguration/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-rate-limiter/reset-bucket.md
+$dokka.location:wisp.ratelimiting.bucket4j/Bucket4jRateLimiter/testConsumptionAttempt/#kotlin.String#wisp.ratelimiting.RateLimitConfiguration#kotlin.Long/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-bucket4j-rate-limiter/test-consumption-attempt.md
+$dokka.location:wisp.ratelimiting.bucket4j/ClockTimeMeter///PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-clock-time-meter/index.md
+$dokka.location:wisp.ratelimiting.bucket4j/ClockTimeMeter/ClockTimeMeter/#java.time.Clock/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-clock-time-meter/-clock-time-meter.md
+$dokka.location:wisp.ratelimiting.bucket4j/ClockTimeMeter/currentTimeNanos/#/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-clock-time-meter/current-time-nanos.md
+$dokka.location:wisp.ratelimiting.bucket4j/ClockTimeMeter/isWallClockBased/#/PointingToDeclaration/bucket4j/wisp.ratelimiting.bucket4j/-clock-time-meter/is-wall-clock-based.md
+wisp.ratelimiting.bucket4j
+

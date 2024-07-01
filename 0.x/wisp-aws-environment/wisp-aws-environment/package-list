@@ -1,0 +1,14 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.aws.environment////PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/index.md
+$dokka.location:wisp.aws.environment/AwsAccountId///PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/-aws-account-id/index.md
+$dokka.location:wisp.aws.environment/AwsAccountId/AwsAccountId/#kotlin.String/PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/-aws-account-id/-aws-account-id.md
+$dokka.location:wisp.aws.environment/AwsAccountId/value/#/PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/-aws-account-id/value.md
+$dokka.location:wisp.aws.environment/AwsEnvironment///PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/-aws-environment/index.md
+$dokka.location:wisp.aws.environment/AwsEnvironment/awsAccountId/#wisp.deployment.EnvironmentVariableLoader#kotlin.String/PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/-aws-environment/aws-account-id.md
+$dokka.location:wisp.aws.environment/AwsEnvironment/awsRegion/#wisp.deployment.EnvironmentVariableLoader#kotlin.collections.List[kotlin.String]#kotlin.String/PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/-aws-environment/aws-region.md
+$dokka.location:wisp.aws.environment/AwsRegion///PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/-aws-region/index.md
+$dokka.location:wisp.aws.environment/AwsRegion/AwsRegion/#kotlin.String/PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/-aws-region/-aws-region.md
+$dokka.location:wisp.aws.environment/AwsRegion/name/#/PointingToDeclaration/wisp-aws-environment/wisp.aws.environment/-aws-region/name.md
+wisp.aws.environment
+

@@ -1,0 +1,1826 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Misk: Microservice Container for Kotlin">
+      
+      
+        <meta name="author" content="Square, Inc.">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../../../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
+    
+    
+      
+        <title>AnnotatePublicApisWithJvmOverloads - Misk - Misk</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../css/app.css">
+    
+    <script>__md_scope=new URL("../../../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#annotatepublicapiswithjvmoverloads" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../.." title="Misk" class="md-header__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../../../img/cashapp.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Misk
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AnnotatePublicApisWithJvmOverloads - Misk
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cashapp/misk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../.." title="Misk" class="md-nav__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../../../img/cashapp.png" alt="logo">
+
+    </a>
+    Misk
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cashapp/misk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../clients/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clients
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    0.x API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            0.x API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-aws
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws-dynamodb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-aws-dynamodb
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws2-dynamodb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-aws2-dynamodb
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-crypto/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-crypto
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-eventrouter/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-eventrouter
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-events-core/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-events-core
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-events/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-events
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-gcp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-gcp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-grpc-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-grpc-tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-hibernate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-hibernate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-hibernate-testing/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-hibernate-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-inject/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-inject
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-jobqueue/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-jobqueue
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-jobqueue-testing/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-jobqueue-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-metrics-digester/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-metrics-digester
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-prometheus/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-prometheus
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-redis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-redis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-zookeeper/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-zookeeper
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-zoopkeeper-testing/index.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    misk-zoopkeeper-testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Internals
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Internals
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../internals/graceful-shutdown/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Graceful Shutdown
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../internals/service-management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Service Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../wisp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Wisp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Migrations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Migrations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../migrations/misk-metrics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Misk Metrics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Change Log
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../releasing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Releasing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../developer-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://stackoverflow.com/questions/tagged/misk?sort=active" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Stack Overflow ⏏
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructors
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<p>//<a href="../../../">detektive</a>/<a href="../">cash.detektive.javacompat</a>/<a href="./">AnnotatePublicApisWithJvmOverloads</a></p>
+<h1 id="annotatepublicapiswithjvmoverloads">AnnotatePublicApisWithJvmOverloads<a class="headerlink" href="#annotatepublicapiswithjvmoverloads" title="Permanent link">&para;</a></h1>
+<p>[jvm]\
+class <a href="./">AnnotatePublicApisWithJvmOverloads</a>(config: Config) : Rule</p>
+<h2 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-annotate-public-apis-with-jvm-overloads/">AnnotatePublicApisWithJvmOverloads</a></td>
+<td>[jvm]<br>constructor(config: Config)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-element-type/">ElementType</a></td>
+<td>[jvm]<br>enum <a href="-element-type/">ElementType</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-enum/index.html">Enum</a>&lt;<a href="-element-type/">AnnotatePublicApisWithJvmOverloads.ElementType</a>&gt;</td>
+</tr>
+</tbody>
+</table>
+<h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./#-1394412364%2FProperties%2F-1380376907">active</a></td>
+<td>[jvm]<br>open val <a href="./#-1394412364%2FProperties%2F-1380376907">active</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#1781549634%2FProperties%2F-1380376907">aliases</a></td>
+<td>[jvm]<br>val <a href="./#1781549634%2FProperties%2F-1380376907">aliases</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#40209733%2FProperties%2F-1380376907">autoCorrect</a></td>
+<td>[jvm]<br>open val <a href="./#40209733%2FProperties%2F-1380376907">autoCorrect</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1173356575%2FProperties%2F-1380376907">bindingContext</a></td>
+<td>[jvm]<br>var <a href="./#-1173356575%2FProperties%2F-1380376907">bindingContext</a>: BindingContext</td>
+</tr>
+<tr>
+<td><a href="./#269999913%2FProperties%2F-1380376907">compilerResources</a></td>
+<td>[jvm]<br>var <a href="./#269999913%2FProperties%2F-1380376907">compilerResources</a>: CompilerResources?</td>
+</tr>
+<tr>
+<td><a href="./#837618324%2FProperties%2F-1380376907">defaultRuleIdAliases</a></td>
+<td>[jvm]<br>open val <a href="./#837618324%2FProperties%2F-1380376907">defaultRuleIdAliases</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1526031387%2FProperties%2F-1380376907">filters</a></td>
+<td>[jvm]<br>open val <a href="./#-1526031387%2FProperties%2F-1380376907">filters</a>: PathFilters?</td>
+</tr>
+<tr>
+<td><a href="./#-1067200605%2FProperties%2F-1380376907">findings</a></td>
+<td>[jvm]<br>open override val <a href="./#-1067200605%2FProperties%2F-1380376907">findings</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a>&lt;Finding&gt;</td>
+</tr>
+<tr>
+<td><a href="issue/">issue</a></td>
+<td>[jvm]<br>open override val <a href="issue/">issue</a>: Issue</td>
+</tr>
+<tr>
+<td><a href="./#-1660489391%2FProperties%2F-1380376907">parentPath</a></td>
+<td>[jvm]<br>open val <a href="./#-1660489391%2FProperties%2F-1380376907">parentPath</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?</td>
+</tr>
+<tr>
+<td><a href="./#-1004532157%2FProperties%2F-1380376907">ruleId</a></td>
+<td>[jvm]<br>override val <a href="./#-1004532157%2FProperties%2F-1380376907">ruleId</a>: RuleId</td>
+</tr>
+<tr>
+<td><a href="./#1242304408%2FProperties%2F-1380376907">ruleSetConfig</a></td>
+<td>[jvm]<br>open override val <a href="./#1242304408%2FProperties%2F-1380376907">ruleSetConfig</a>: Config</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./#-1486258314%2FFunctions%2F-1380376907">clearFindings</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1486258314%2FFunctions%2F-1380376907">clearFindings</a>()</td>
+</tr>
+<tr>
+<td><a href="./#-325081910%2FFunctions%2F-1380376907">report</a></td>
+<td>[jvm]<br>open override fun <a href="./#-325081910%2FFunctions%2F-1380376907">report</a>(finding: Finding, aliases: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;, ruleSetId: RuleSetId?)<br>open override fun <a href="./#138844602%2FFunctions%2F-1380376907">report</a>(findings: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a>&lt;Finding&gt;, aliases: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;, ruleSetId: RuleSetId?)<br>fun <a href="./#33214114%2FFunctions%2F-1380376907">report</a>(finding: Finding)<br>fun <a href="./#817850028%2FFunctions%2F-1380376907">report</a>(findings: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a>&lt;Finding&gt;)</td>
+</tr>
+<tr>
+<td><a href="./#-1163322%2FFunctions%2F-1380376907">subConfig</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1163322%2FFunctions%2F-1380376907">subConfig</a>(key: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): Config</td>
+</tr>
+<tr>
+<td><a href="./#-1632767147%2FFunctions%2F-1380376907">valueOrDefault</a></td>
+<td>[jvm]<br>open override fun &lt;<a href="./#-1632767147%2FFunctions%2F-1380376907">T</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#-1632767147%2FFunctions%2F-1380376907">valueOrDefault</a>(key: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, default: <a href="./#-1632767147%2FFunctions%2F-1380376907">T</a>): <a href="./#-1632767147%2FFunctions%2F-1380376907">T</a></td>
+</tr>
+<tr>
+<td><a href="./#1018541823%2FFunctions%2F-1380376907">valueOrNull</a></td>
+<td>[jvm]<br>open override fun &lt;<a href="./#1018541823%2FFunctions%2F-1380376907">T</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>&gt; <a href="./#1018541823%2FFunctions%2F-1380376907">valueOrNull</a>(key: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="./#1018541823%2FFunctions%2F-1380376907">T</a>?</td>
+</tr>
+<tr>
+<td><a href="./#-1145838586%2FFunctions%2F-1380376907">visit</a></td>
+<td>[jvm]<br>open fun <a href="./#-1145838586%2FFunctions%2F-1380376907">visit</a>(root: KtFile)</td>
+</tr>
+<tr>
+<td><a href="./#-1587397638%2FFunctions%2F-1380376907">visitAnnotatedExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1587397638%2FFunctions%2F-1380376907">visitAnnotatedExpression</a>(@NotNullp0: KtAnnotatedExpression)<br>override fun <a href="./#-354288419%2FFunctions%2F-1380376907">visitAnnotatedExpression</a>(@NotNullp0: KtAnnotatedExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-960484758%2FFunctions%2F-1380376907">visitAnnotation</a></td>
+<td>[jvm]<br>open fun <a href="./#-960484758%2FFunctions%2F-1380376907">visitAnnotation</a>(@NotNullp0: KtAnnotation)<br>override fun <a href="./#201023597%2FFunctions%2F-1380376907">visitAnnotation</a>(@NotNullp0: KtAnnotation, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-400800684%2FFunctions%2F-1380376907">visitAnnotationEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#-400800684%2FFunctions%2F-1380376907">visitAnnotationEntry</a>(@NotNullp0: KtAnnotationEntry)<br>override fun <a href="./#-182520509%2FFunctions%2F-1380376907">visitAnnotationEntry</a>(@NotNullp0: KtAnnotationEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#803428945%2FFunctions%2F-1380376907">visitAnnotationUseSiteTarget</a></td>
+<td>[jvm]<br>open fun <a href="./#803428945%2FFunctions%2F-1380376907">visitAnnotationUseSiteTarget</a>(@NotNullp0: KtAnnotationUseSiteTarget, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#384853610%2FFunctions%2F-1380376907">visitAnonymousInitializer</a></td>
+<td>[jvm]<br>open fun <a href="./#384853610%2FFunctions%2F-1380376907">visitAnonymousInitializer</a>(@NotNullp0: KtAnonymousInitializer)<br>override fun <a href="./#-2050251667%2FFunctions%2F-1380376907">visitAnonymousInitializer</a>(@NotNullp0: KtAnonymousInitializer, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#190997389%2FFunctions%2F-1380376907">visitArgument</a></td>
+<td>[jvm]<br>open fun <a href="./#190997389%2FFunctions%2F-1380376907">visitArgument</a>(@NotNullp0: KtValueArgument)<br>override fun <a href="./#7429354%2FFunctions%2F-1380376907">visitArgument</a>(@NotNullp0: KtValueArgument, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#665571568%2FFunctions%2F-1380376907">visitArrayAccessExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#665571568%2FFunctions%2F-1380376907">visitArrayAccessExpression</a>(@NotNullp0: KtArrayAccessExpression)<br>override fun <a href="./#-1499865%2FFunctions%2F-1380376907">visitArrayAccessExpression</a>(@NotNullp0: KtArrayAccessExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-791510175%2FFunctions%2F-1380376907">visitBackingField</a></td>
+<td>[jvm]<br>open fun <a href="./#-791510175%2FFunctions%2F-1380376907">visitBackingField</a>(@NotNullp0: KtBackingField, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-87976086%2FFunctions%2F-1380376907">visitBinaryExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-87976086%2FFunctions%2F-1380376907">visitBinaryExpression</a>(@NotNullp0: KtBinaryExpression)<br>override fun <a href="./#1364349805%2FFunctions%2F-1380376907">visitBinaryExpression</a>(@NotNullp0: KtBinaryExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-985625614%2FFunctions%2F-1380376907">visitBinaryFile</a></td>
+<td>[jvm]<br>open fun <a href="./#-985625614%2FFunctions%2F-1380376907">visitBinaryFile</a>(@NotNullp0: @NotNullPsiBinaryFile)</td>
+</tr>
+<tr>
+<td><a href="./#-1726976926%2FFunctions%2F-1380376907">visitBinaryWithTypeRHSExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1726976926%2FFunctions%2F-1380376907">visitBinaryWithTypeRHSExpression</a>(@NotNullp0: KtBinaryExpressionWithTypeRHS)<br>override fun <a href="./#-565186699%2FFunctions%2F-1380376907">visitBinaryWithTypeRHSExpression</a>(@NotNullp0: KtBinaryExpressionWithTypeRHS, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1507700272%2FFunctions%2F-1380376907">visitBlockExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1507700272%2FFunctions%2F-1380376907">visitBlockExpression</a>(@NotNullp0: KtBlockExpression)<br>override fun <a href="./#1430569031%2FFunctions%2F-1380376907">visitBlockExpression</a>(@NotNullp0: KtBlockExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1083816394%2FFunctions%2F-1380376907">visitBlockStringTemplateEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#1083816394%2FFunctions%2F-1380376907">visitBlockStringTemplateEntry</a>(@NotNullp0: KtBlockStringTemplateEntry)<br>override fun <a href="./#-1767561971%2FFunctions%2F-1380376907">visitBlockStringTemplateEntry</a>(@NotNullp0: KtBlockStringTemplateEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1290524780%2FFunctions%2F-1380376907">visitBreakExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#1290524780%2FFunctions%2F-1380376907">visitBreakExpression</a>(@NotNullp0: KtBreakExpression)<br>override fun <a href="./#-228479445%2FFunctions%2F-1380376907">visitBreakExpression</a>(@NotNullp0: KtBreakExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1052199932%2FFunctions%2F-1380376907">visitCallableReferenceExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1052199932%2FFunctions%2F-1380376907">visitCallableReferenceExpression</a>(@NotNullp0: KtCallableReferenceExpression)<br>override fun <a href="./#1911500691%2FFunctions%2F-1380376907">visitCallableReferenceExpression</a>(@NotNullp0: KtCallableReferenceExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1648360374%2FFunctions%2F-1380376907">visitCallExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1648360374%2FFunctions%2F-1380376907">visitCallExpression</a>(@NotNullp0: KtCallExpression)<br>override fun <a href="./#2077264525%2FFunctions%2F-1380376907">visitCallExpression</a>(@NotNullp0: KtCallExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1662772284%2FFunctions%2F-1380376907">visitCatchSection</a></td>
+<td>[jvm]<br>open fun <a href="./#-1662772284%2FFunctions%2F-1380376907">visitCatchSection</a>(@NotNullp0: KtCatchClause)<br>override fun <a href="./#1788825555%2FFunctions%2F-1380376907">visitCatchSection</a>(@NotNullp0: KtCatchClause, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-473468630%2FFunctions%2F-1380376907">visitClass</a></td>
+<td>[jvm]<br>open fun <a href="./#-473468630%2FFunctions%2F-1380376907">visitClass</a>(@NotNullp0: KtClass)<br>override fun <a href="./#1881522605%2FFunctions%2F-1380376907">visitClass</a>(@NotNullp0: KtClass, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-621502042%2FFunctions%2F-1380376907">visitClassBody</a></td>
+<td>[jvm]<br>open fun <a href="./#-621502042%2FFunctions%2F-1380376907">visitClassBody</a>(@NotNullp0: KtClassBody)<br>override fun <a href="./#899287473%2FFunctions%2F-1380376907">visitClassBody</a>(@NotNullp0: KtClassBody, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-129506358%2FFunctions%2F-1380376907">visitClassInitializer</a></td>
+<td>[jvm]<br>open fun <a href="./#-129506358%2FFunctions%2F-1380376907">visitClassInitializer</a>(@NotNullp0: KtClassInitializer)<br>open override fun <a href="./#-1147290867%2FFunctions%2F-1380376907">visitClassInitializer</a>(@NotNullp0: KtClassInitializer, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#623562986%2FFunctions%2F-1380376907">visitClassLiteralExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#623562986%2FFunctions%2F-1380376907">visitClassLiteralExpression</a>(@NotNullp0: KtClassLiteralExpression)<br>override fun <a href="./#723446253%2FFunctions%2F-1380376907">visitClassLiteralExpression</a>(@NotNullp0: KtClassLiteralExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1603225318%2FFunctions%2F-1380376907">visitClassOrObject</a></td>
+<td>[jvm]<br>open fun <a href="./#1603225318%2FFunctions%2F-1380376907">visitClassOrObject</a>(@NotNullp0: KtClassOrObject)<br>override fun <a href="./#305675377%2FFunctions%2F-1380376907">visitClassOrObject</a>(@NotNullp0: KtClassOrObject, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#15230984%2FFunctions%2F-1380376907">visitCollectionLiteralExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#15230984%2FFunctions%2F-1380376907">visitCollectionLiteralExpression</a>(@NotNullp0: KtCollectionLiteralExpression)<br>override fun <a href="./#918057743%2FFunctions%2F-1380376907">visitCollectionLiteralExpression</a>(@NotNullp0: KtCollectionLiteralExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-308009782%2FFunctions%2F-1380376907">visitComment</a></td>
+<td>[jvm]<br>open fun <a href="./#-308009782%2FFunctions%2F-1380376907">visitComment</a>(@NotNullp0: @NotNullPsiComment)</td>
+</tr>
+<tr>
+<td><a href="./#271509376%2FFunctions%2F-1380376907">visitCondition</a></td>
+<td>[jvm]<br>open override fun <a href="./#271509376%2FFunctions%2F-1380376907">visitCondition</a>(root: KtFile): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1233260278%2FFunctions%2F-1380376907">visitConstantExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1233260278%2FFunctions%2F-1380376907">visitConstantExpression</a>(@NotNullp0: KtConstantExpression)<br>override fun <a href="./#-681343539%2FFunctions%2F-1380376907">visitConstantExpression</a>(@NotNullp0: KtConstantExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1259750138%2FFunctions%2F-1380376907">visitConstructorCalleeExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#1259750138%2FFunctions%2F-1380376907">visitConstructorCalleeExpression</a>(@NotNullp0: KtConstructorCalleeExpression)<br>override fun <a href="./#532616669%2FFunctions%2F-1380376907">visitConstructorCalleeExpression</a>(@NotNullp0: KtConstructorCalleeExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1649320294%2FFunctions%2F-1380376907">visitConstructorDelegationCall</a></td>
+<td>[jvm]<br>open fun <a href="./#-1649320294%2FFunctions%2F-1380376907">visitConstructorDelegationCall</a>(@NotNullp0: KtConstructorDelegationCall)<br>override fun <a href="./#1096107581%2FFunctions%2F-1380376907">visitConstructorDelegationCall</a>(@NotNullp0: KtConstructorDelegationCall, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-506918679%2FFunctions%2F-1380376907">visitContextReceiverList</a></td>
+<td>[jvm]<br>open fun <a href="./#-506918679%2FFunctions%2F-1380376907">visitContextReceiverList</a>(@NotNullp0: KtContextReceiverList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a><br>open fun <a href="./#-118014302%2FFunctions%2F-1380376907">visitContextReceiverList</a>(@NotNullp0: KtContextReceiverList)</td>
+</tr>
+<tr>
+<td><a href="./#-1562615958%2FFunctions%2F-1380376907">visitContinueExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1562615958%2FFunctions%2F-1380376907">visitContinueExpression</a>(@NotNullp0: KtContinueExpression)<br>override fun <a href="./#659458925%2FFunctions%2F-1380376907">visitContinueExpression</a>(@NotNullp0: KtContinueExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-65982170%2FFunctions%2F-1380376907">visitDeclaration</a></td>
+<td>[jvm]<br>open fun <a href="./#-65982170%2FFunctions%2F-1380376907">visitDeclaration</a>(@NotNullp0: KtDeclaration)<br>override fun <a href="./#2094828081%2FFunctions%2F-1380376907">visitDeclaration</a>(@NotNullp0: KtDeclaration, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-823389790%2FFunctions%2F-1380376907">visitDelegatedSuperTypeEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#-823389790%2FFunctions%2F-1380376907">visitDelegatedSuperTypeEntry</a>(@NotNullp0: KtDelegatedSuperTypeEntry)<br>override fun <a href="./#1066213941%2FFunctions%2F-1380376907">visitDelegatedSuperTypeEntry</a>(@NotNullp0: KtDelegatedSuperTypeEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1015656746%2FFunctions%2F-1380376907">visitDestructuringDeclaration</a></td>
+<td>[jvm]<br>open fun <a href="./#1015656746%2FFunctions%2F-1380376907">visitDestructuringDeclaration</a>(@NotNullp0: KtDestructuringDeclaration)<br>override fun <a href="./#-1298431571%2FFunctions%2F-1380376907">visitDestructuringDeclaration</a>(@NotNullp0: KtDestructuringDeclaration, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1635194380%2FFunctions%2F-1380376907">visitDestructuringDeclarationEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#1635194380%2FFunctions%2F-1380376907">visitDestructuringDeclarationEntry</a>(@NotNullp0: KtDestructuringDeclarationEntry)<br>override fun <a href="./#-1820361589%2FFunctions%2F-1380376907">visitDestructuringDeclarationEntry</a>(@NotNullp0: KtDestructuringDeclarationEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#579901230%2FFunctions%2F-1380376907">visitDirectory</a></td>
+<td>[jvm]<br>open fun <a href="./#579901230%2FFunctions%2F-1380376907">visitDirectory</a>(@NotNullp0: @NotNullPsiDirectory)</td>
+</tr>
+<tr>
+<td><a href="./#718574186%2FFunctions%2F-1380376907">visitDotQualifiedExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#718574186%2FFunctions%2F-1380376907">visitDotQualifiedExpression</a>(@NotNullp0: KtDotQualifiedExpression)<br>override fun <a href="./#-1081477011%2FFunctions%2F-1380376907">visitDotQualifiedExpression</a>(@NotNullp0: KtDotQualifiedExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1338157454%2FFunctions%2F-1380376907">visitDoubleColonExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#1338157454%2FFunctions%2F-1380376907">visitDoubleColonExpression</a>(@NotNullp0: KtDoubleColonExpression)<br>override fun <a href="./#877540553%2FFunctions%2F-1380376907">visitDoubleColonExpression</a>(@NotNullp0: KtDoubleColonExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-20853538%2FFunctions%2F-1380376907">visitDoWhileExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-20853538%2FFunctions%2F-1380376907">visitDoWhileExpression</a>(@NotNullp0: KtDoWhileExpression)<br>override fun <a href="./#911869817%2FFunctions%2F-1380376907">visitDoWhileExpression</a>(@NotNullp0: KtDoWhileExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1469880024%2FFunctions%2F-1380376907">visitDynamicType</a></td>
+<td>[jvm]<br>open fun <a href="./#-1469880024%2FFunctions%2F-1380376907">visitDynamicType</a>(@NotNullp0: KtDynamicType)<br>open override fun <a href="./#234294767%2FFunctions%2F-1380376907">visitDynamicType</a>(@NotNullp0: KtDynamicType, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#660701831%2FFunctions%2F-1380376907">visitElement</a></td>
+<td>[jvm]<br>open override fun <a href="./#660701831%2FFunctions%2F-1380376907">visitElement</a>(@NotNullp0: PsiElement)</td>
+</tr>
+<tr>
+<td><a href="./#2073447864%2FFunctions%2F-1380376907">visitEnumEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#2073447864%2FFunctions%2F-1380376907">visitEnumEntry</a>(@NotNullp0: KtEnumEntry)<br>override fun <a href="./#-64194721%2FFunctions%2F-1380376907">visitEnumEntry</a>(@NotNullp0: KtEnumEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-678453422%2FFunctions%2F-1380376907">visitErrorElement</a></td>
+<td>[jvm]<br>open fun <a href="./#-678453422%2FFunctions%2F-1380376907">visitErrorElement</a>(@NotNullp0: @NotNullPsiErrorElement)</td>
+</tr>
+<tr>
+<td><a href="./#1311304590%2FFunctions%2F-1380376907">visitEscapeStringTemplateEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#1311304590%2FFunctions%2F-1380376907">visitEscapeStringTemplateEntry</a>(@NotNullp0: KtEscapeStringTemplateEntry)<br>override fun <a href="./#2019275465%2FFunctions%2F-1380376907">visitEscapeStringTemplateEntry</a>(@NotNullp0: KtEscapeStringTemplateEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1826954614%2FFunctions%2F-1380376907">visitExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1826954614%2FFunctions%2F-1380376907">visitExpression</a>(@NotNullp0: KtExpression)<br>override fun <a href="./#-904567731%2FFunctions%2F-1380376907">visitExpression</a>(@NotNullp0: KtExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1218875154%2FFunctions%2F-1380376907">visitExpressionWithLabel</a></td>
+<td>[jvm]<br>open fun <a href="./#-1218875154%2FFunctions%2F-1380376907">visitExpressionWithLabel</a>(@NotNullp0: KtExpressionWithLabel)<br>override fun <a href="./#-400309911%2FFunctions%2F-1380376907">visitExpressionWithLabel</a>(@NotNullp0: KtExpressionWithLabel, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1638250314%2FFunctions%2F-1380376907">visitFile</a></td>
+<td>[jvm]<br>fun <a href="./#-1638250314%2FFunctions%2F-1380376907">visitFile</a>(root: KtFile, bindingContext: BindingContext, compilerResources: CompilerResources?)<br>open fun <a href="./#1724806482%2FFunctions%2F-1380376907">visitFile</a>(@NotNullp0: @NotNullPsiFile)</td>
+</tr>
+<tr>
+<td><a href="./#995250913%2FFunctions%2F-1380376907">visitFileAnnotationList</a></td>
+<td>[jvm]<br>open fun <a href="./#995250913%2FFunctions%2F-1380376907">visitFileAnnotationList</a>(@NotNullp0: KtFileAnnotationList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1065997366%2FFunctions%2F-1380376907">visitFinallySection</a></td>
+<td>[jvm]<br>open fun <a href="./#-1065997366%2FFunctions%2F-1380376907">visitFinallySection</a>(@NotNullp0: KtFinallySection)<br>override fun <a href="./#-669617395%2FFunctions%2F-1380376907">visitFinallySection</a>(@NotNullp0: KtFinallySection, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1022924952%2FFunctions%2F-1380376907">visitForExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#1022924952%2FFunctions%2F-1380376907">visitForExpression</a>(@NotNullp0: KtForExpression)<br>override fun <a href="./#-1806757761%2FFunctions%2F-1380376907">visitForExpression</a>(@NotNullp0: KtForExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#347680970%2FFunctions%2F-1380376907">visitFunctionType</a></td>
+<td>[jvm]<br>open fun <a href="./#347680970%2FFunctions%2F-1380376907">visitFunctionType</a>(@NotNullp0: KtFunctionType)<br>override fun <a href="./#-288829939%2FFunctions%2F-1380376907">visitFunctionType</a>(@NotNullp0: KtFunctionType, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#2084100458%2FFunctions%2F-1380376907">visitIfExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#2084100458%2FFunctions%2F-1380376907">visitIfExpression</a>(@NotNullp0: KtIfExpression)<br>override fun <a href="./#1848562029%2FFunctions%2F-1380376907">visitIfExpression</a>(@NotNullp0: KtIfExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1405108167%2FFunctions%2F-1380376907">visitImportAlias</a></td>
+<td>[jvm]<br>open fun <a href="./#1405108167%2FFunctions%2F-1380376907">visitImportAlias</a>(@NotNullp0: KtImportAlias, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a><br>open fun <a href="./#-377892988%2FFunctions%2F-1380376907">visitImportAlias</a>(@NotNullp0: KtImportAlias)</td>
+</tr>
+<tr>
+<td><a href="./#1389462470%2FFunctions%2F-1380376907">visitImportDirective</a></td>
+<td>[jvm]<br>open fun <a href="./#1389462470%2FFunctions%2F-1380376907">visitImportDirective</a>(@NotNullp0: KtImportDirective)<br>override fun <a href="./#-2108120175%2FFunctions%2F-1380376907">visitImportDirective</a>(@NotNullp0: KtImportDirective, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1224614678%2FFunctions%2F-1380376907">visitImportList</a></td>
+<td>[jvm]<br>open fun <a href="./#-1224614678%2FFunctions%2F-1380376907">visitImportList</a>(@NotNullp0: KtImportList)<br>override fun <a href="./#-1496424979%2FFunctions%2F-1380376907">visitImportList</a>(@NotNullp0: KtImportList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#223582810%2FFunctions%2F-1380376907">visitInitializerList</a></td>
+<td>[jvm]<br>open fun <a href="./#223582810%2FFunctions%2F-1380376907">visitInitializerList</a>(@NotNullp0: KtInitializerList)<br>override fun <a href="./#620499581%2FFunctions%2F-1380376907">visitInitializerList</a>(@NotNullp0: KtInitializerList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#334265130%2FFunctions%2F-1380376907">visitIntersectionType</a></td>
+<td>[jvm]<br>open fun <a href="./#334265130%2FFunctions%2F-1380376907">visitIntersectionType</a>(@NotNullp0: KtIntersectionType)<br>open override fun <a href="./#67860397%2FFunctions%2F-1380376907">visitIntersectionType</a>(@NotNullp0: KtIntersectionType, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#917371594%2FFunctions%2F-1380376907">visitIsExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#917371594%2FFunctions%2F-1380376907">visitIsExpression</a>(@NotNullp0: KtIsExpression)<br>override fun <a href="./#1063699469%2FFunctions%2F-1380376907">visitIsExpression</a>(@NotNullp0: KtIsExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1819344469%2FFunctions%2F-1380376907">visitKtElement</a></td>
+<td>[jvm]<br>open fun <a href="./#-1819344469%2FFunctions%2F-1380376907">visitKtElement</a>(@NotNullp0: KtElement)<br>override fun <a href="./#281870092%2FFunctions%2F-1380376907">visitKtElement</a>(@NotNullp0: KtElement, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#433083731%2FFunctions%2F-1380376907">visitKtFile</a></td>
+<td>[jvm]<br>open fun <a href="./#433083731%2FFunctions%2F-1380376907">visitKtFile</a>(@NotNullp0: KtFile)<br>override fun <a href="./#1930749540%2FFunctions%2F-1380376907">visitKtFile</a>(@NotNullp0: KtFile, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-950350716%2FFunctions%2F-1380376907">visitLabeledExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-950350716%2FFunctions%2F-1380376907">visitLabeledExpression</a>(@NotNullp0: KtLabeledExpression)<br>override fun <a href="./#-1151793389%2FFunctions%2F-1380376907">visitLabeledExpression</a>(@NotNullp0: KtLabeledExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1186391466%2FFunctions%2F-1380376907">visitLambdaExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#1186391466%2FFunctions%2F-1380376907">visitLambdaExpression</a>(@NotNullp0: KtLambdaExpression)<br>override fun <a href="./#-758203091%2FFunctions%2F-1380376907">visitLambdaExpression</a>(@NotNullp0: KtLambdaExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1080396150%2FFunctions%2F-1380376907">visitLiteralStringTemplateEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#-1080396150%2FFunctions%2F-1380376907">visitLiteralStringTemplateEntry</a>(@NotNullp0: KtLiteralStringTemplateEntry)<br>override fun <a href="./#-2080681907%2FFunctions%2F-1380376907">visitLiteralStringTemplateEntry</a>(@NotNullp0: KtLiteralStringTemplateEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1395506186%2FFunctions%2F-1380376907">visitLoopExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#1395506186%2FFunctions%2F-1380376907">visitLoopExpression</a>(@NotNullp0: KtLoopExpression)<br>override fun <a href="./#298080973%2FFunctions%2F-1380376907">visitLoopExpression</a>(@NotNullp0: KtLoopExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-89699990%2FFunctions%2F-1380376907">visitModifierList</a></td>
+<td>[jvm]<br>open fun <a href="./#-89699990%2FFunctions%2F-1380376907">visitModifierList</a>(@NotNullp0: KtModifierList)<br>override fun <a href="./#1460822381%2FFunctions%2F-1380376907">visitModifierList</a>(@NotNullp0: KtModifierList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1313297814%2FFunctions%2F-1380376907">visitNamedDeclaration</a></td>
+<td>[jvm]<br>open fun <a href="./#-1313297814%2FFunctions%2F-1380376907">visitNamedDeclaration</a>(@NotNullp0: KtNamedDeclaration)<br>override fun <a href="./#-1057824659%2FFunctions%2F-1380376907">visitNamedDeclaration</a>(@NotNullp0: KtNamedDeclaration, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="visit-named-function/">visitNamedFunction</a></td>
+<td>[jvm]<br>open override fun <a href="visit-named-function/">visitNamedFunction</a>(function: KtNamedFunction)<br>override fun <a href="./#-3219361%2FFunctions%2F-1380376907">visitNamedFunction</a>(@NotNullp0: KtNamedFunction, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1732218538%2FFunctions%2F-1380376907">visitNullableType</a></td>
+<td>[jvm]<br>open fun <a href="./#1732218538%2FFunctions%2F-1380376907">visitNullableType</a>(@NotNullp0: KtNullableType)<br>override fun <a href="./#-591465427%2FFunctions%2F-1380376907">visitNullableType</a>(@NotNullp0: KtNullableType, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#164494884%2FFunctions%2F-1380376907">visitObjectDeclaration</a></td>
+<td>[jvm]<br>open fun <a href="./#164494884%2FFunctions%2F-1380376907">visitObjectDeclaration</a>(@NotNullp0: KtObjectDeclaration)<br>override fun <a href="./#-886546061%2FFunctions%2F-1380376907">visitObjectDeclaration</a>(@NotNullp0: KtObjectDeclaration, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#323158346%2FFunctions%2F-1380376907">visitObjectLiteralExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#323158346%2FFunctions%2F-1380376907">visitObjectLiteralExpression</a>(@NotNullp0: KtObjectLiteralExpression)<br>override fun <a href="./#978578829%2FFunctions%2F-1380376907">visitObjectLiteralExpression</a>(@NotNullp0: KtObjectLiteralExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-410943605%2FFunctions%2F-1380376907">visitOuterLanguageElement</a></td>
+<td>[jvm]<br>open fun <a href="./#-410943605%2FFunctions%2F-1380376907">visitOuterLanguageElement</a>(@NotNullp0: @NotNullOuterLanguageElement)</td>
+</tr>
+<tr>
+<td><a href="./#1891707242%2FFunctions%2F-1380376907">visitPackageDirective</a></td>
+<td>[jvm]<br>open fun <a href="./#1891707242%2FFunctions%2F-1380376907">visitPackageDirective</a>(@NotNullp0: KtPackageDirective)<br>open override fun <a href="./#1845264749%2FFunctions%2F-1380376907">visitPackageDirective</a>(@NotNullp0: KtPackageDirective, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-734377400%2FFunctions%2F-1380376907">visitParameter</a></td>
+<td>[jvm]<br>open fun <a href="./#-734377400%2FFunctions%2F-1380376907">visitParameter</a>(@NotNullp0: KtParameter)<br>override fun <a href="./#1637730511%2FFunctions%2F-1380376907">visitParameter</a>(@NotNullp0: KtParameter, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1391555404%2FFunctions%2F-1380376907">visitParameterList</a></td>
+<td>[jvm]<br>open fun <a href="./#1391555404%2FFunctions%2F-1380376907">visitParameterList</a>(@NotNullp0: KtParameterList)<br>override fun <a href="./#-1596524725%2FFunctions%2F-1380376907">visitParameterList</a>(@NotNullp0: KtParameterList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1540134990%2FFunctions%2F-1380376907">visitParenthesizedExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1540134990%2FFunctions%2F-1380376907">visitParenthesizedExpression</a>(@NotNullp0: KtParenthesizedExpression)<br>override fun <a href="./#1829562917%2FFunctions%2F-1380376907">visitParenthesizedExpression</a>(@NotNullp0: KtParenthesizedExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-905684390%2FFunctions%2F-1380376907">visitPlainText</a></td>
+<td>[jvm]<br>open fun <a href="./#-905684390%2FFunctions%2F-1380376907">visitPlainText</a>(@NotNullp0: @NotNullPsiPlainText)</td>
+</tr>
+<tr>
+<td><a href="./#-1360331486%2FFunctions%2F-1380376907">visitPlainTextFile</a></td>
+<td>[jvm]<br>open fun <a href="./#-1360331486%2FFunctions%2F-1380376907">visitPlainTextFile</a>(@NotNullp0: @NotNullPsiPlainTextFile)</td>
+</tr>
+<tr>
+<td><a href="./#-436224320%2FFunctions%2F-1380376907">visitPostfixExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-436224320%2FFunctions%2F-1380376907">visitPostfixExpression</a>(@NotNullp0: KtPostfixExpression)<br>override fun <a href="./#-1037970089%2FFunctions%2F-1380376907">visitPostfixExpression</a>(@NotNullp0: KtPostfixExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-620096566%2FFunctions%2F-1380376907">visitPrefixExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-620096566%2FFunctions%2F-1380376907">visitPrefixExpression</a>(@NotNullp0: KtPrefixExpression)<br>override fun <a href="./#372607757%2FFunctions%2F-1380376907">visitPrefixExpression</a>(@NotNullp0: KtPrefixExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="visit-primary-constructor/">visitPrimaryConstructor</a></td>
+<td>[jvm]<br>open override fun <a href="visit-primary-constructor/">visitPrimaryConstructor</a>(constructor: KtPrimaryConstructor)<br>override fun <a href="./#-150849971%2FFunctions%2F-1380376907">visitPrimaryConstructor</a>(@NotNullp0: KtPrimaryConstructor, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#776626410%2FFunctions%2F-1380376907">visitProperty</a></td>
+<td>[jvm]<br>open fun <a href="./#776626410%2FFunctions%2F-1380376907">visitProperty</a>(@NotNullp0: KtProperty)<br>override fun <a href="./#-319989267%2FFunctions%2F-1380376907">visitProperty</a>(@NotNullp0: KtProperty, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1464277642%2FFunctions%2F-1380376907">visitPropertyAccessor</a></td>
+<td>[jvm]<br>open fun <a href="./#1464277642%2FFunctions%2F-1380376907">visitPropertyAccessor</a>(@NotNullp0: KtPropertyAccessor)<br>override fun <a href="./#-1863177139%2FFunctions%2F-1380376907">visitPropertyAccessor</a>(@NotNullp0: KtPropertyAccessor, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-449342006%2FFunctions%2F-1380376907">visitPropertyDelegate</a></td>
+<td>[jvm]<br>open fun <a href="./#-449342006%2FFunctions%2F-1380376907">visitPropertyDelegate</a>(@NotNullp0: KtPropertyDelegate)<br>override fun <a href="./#-552351475%2FFunctions%2F-1380376907">visitPropertyDelegate</a>(@NotNullp0: KtPropertyDelegate, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1935115506%2FFunctions%2F-1380376907">visitQualifiedExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#1935115506%2FFunctions%2F-1380376907">visitQualifiedExpression</a>(@NotNullp0: KtQualifiedExpression)<br>override fun <a href="./#-603806491%2FFunctions%2F-1380376907">visitQualifiedExpression</a>(@NotNullp0: KtQualifiedExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-2110585516%2FFunctions%2F-1380376907">visitReferenceExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-2110585516%2FFunctions%2F-1380376907">visitReferenceExpression</a>(@NotNullp0: KtReferenceExpression)<br>override fun <a href="./#613291075%2FFunctions%2F-1380376907">visitReferenceExpression</a>(@NotNullp0: KtReferenceExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#619741962%2FFunctions%2F-1380376907">visitReturnExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#619741962%2FFunctions%2F-1380376907">visitReturnExpression</a>(@NotNullp0: KtReturnExpression)<br>override fun <a href="./#-1489325107%2FFunctions%2F-1380376907">visitReturnExpression</a>(@NotNullp0: KtReturnExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-345205684%2FFunctions%2F-1380376907">visitSafeQualifiedExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-345205684%2FFunctions%2F-1380376907">visitSafeQualifiedExpression</a>(@NotNullp0: KtSafeQualifiedExpression)<br>override fun <a href="./#1888859723%2FFunctions%2F-1380376907">visitSafeQualifiedExpression</a>(@NotNullp0: KtSafeQualifiedExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#959073386%2FFunctions%2F-1380376907">visitScript</a></td>
+<td>[jvm]<br>open fun <a href="./#959073386%2FFunctions%2F-1380376907">visitScript</a>(@NotNullp0: KtScript)<br>override fun <a href="./#-1748435347%2FFunctions%2F-1380376907">visitScript</a>(@NotNullp0: KtScript, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#365127532%2FFunctions%2F-1380376907">visitScriptInitializer</a></td>
+<td>[jvm]<br>open fun <a href="./#365127532%2FFunctions%2F-1380376907">visitScriptInitializer</a>(@NotNullp0: KtScriptInitializer)<br>open override fun <a href="./#-73777365%2FFunctions%2F-1380376907">visitScriptInitializer</a>(@NotNullp0: KtScriptInitializer, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#783402570%2FFunctions%2F-1380376907">visitSecondaryConstructor</a></td>
+<td>[jvm]<br>open fun <a href="./#783402570%2FFunctions%2F-1380376907">visitSecondaryConstructor</a>(@NotNullp0: KtSecondaryConstructor)<br>override fun <a href="./#1424132237%2FFunctions%2F-1380376907">visitSecondaryConstructor</a>(@NotNullp0: KtSecondaryConstructor, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-996979126%2FFunctions%2F-1380376907">visitSelfType</a></td>
+<td>[jvm]<br>open fun <a href="./#-996979126%2FFunctions%2F-1380376907">visitSelfType</a>(@NotNullp0: KtSelfType)<br>override fun <a href="./#-1631584115%2FFunctions%2F-1380376907">visitSelfType</a>(@NotNullp0: KtSelfType, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1662382698%2FFunctions%2F-1380376907">visitSimpleNameExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#1662382698%2FFunctions%2F-1380376907">visitSimpleNameExpression</a>(@NotNullp0: KtSimpleNameExpression)<br>override fun <a href="./#-1872979859%2FFunctions%2F-1380376907">visitSimpleNameExpression</a>(@NotNullp0: KtSimpleNameExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1521210950%2FFunctions%2F-1380376907">visitSimpleNameStringTemplateEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#1521210950%2FFunctions%2F-1380376907">visitSimpleNameStringTemplateEntry</a>(@NotNullp0: KtSimpleNameStringTemplateEntry)<br>override fun <a href="./#222232849%2FFunctions%2F-1380376907">visitSimpleNameStringTemplateEntry</a>(@NotNullp0: KtSimpleNameStringTemplateEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1780049356%2FFunctions%2F-1380376907">visitStringTemplateEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#1780049356%2FFunctions%2F-1380376907">visitStringTemplateEntry</a>(@NotNullp0: KtStringTemplateEntry)<br>override fun <a href="./#595309771%2FFunctions%2F-1380376907">visitStringTemplateEntry</a>(@NotNullp0: KtStringTemplateEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1139516976%2FFunctions%2F-1380376907">visitStringTemplateEntryWithExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1139516976%2FFunctions%2F-1380376907">visitStringTemplateEntryWithExpression</a>(@NotNullp0: KtStringTemplateEntryWithExpression)<br>override fun <a href="./#-335431609%2FFunctions%2F-1380376907">visitStringTemplateEntryWithExpression</a>(@NotNullp0: KtStringTemplateEntryWithExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1498241494%2FFunctions%2F-1380376907">visitStringTemplateExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1498241494%2FFunctions%2F-1380376907">visitStringTemplateExpression</a>(@NotNullp0: KtStringTemplateExpression)<br>override fun <a href="./#1288301741%2FFunctions%2F-1380376907">visitStringTemplateExpression</a>(@NotNullp0: KtStringTemplateExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1420735604%2FFunctions%2F-1380376907">visitSuperExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#1420735604%2FFunctions%2F-1380376907">visitSuperExpression</a>(@NotNullp0: KtSuperExpression)<br>override fun <a href="./#-1785052893%2FFunctions%2F-1380376907">visitSuperExpression</a>(@NotNullp0: KtSuperExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-144873622%2FFunctions%2F-1380376907">visitSuperTypeCallEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#-144873622%2FFunctions%2F-1380376907">visitSuperTypeCallEntry</a>(@NotNullp0: KtSuperTypeCallEntry)<br>override fun <a href="./#-1348697235%2FFunctions%2F-1380376907">visitSuperTypeCallEntry</a>(@NotNullp0: KtSuperTypeCallEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-576971094%2FFunctions%2F-1380376907">visitSuperTypeEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#-576971094%2FFunctions%2F-1380376907">visitSuperTypeEntry</a>(@NotNullp0: KtSuperTypeEntry)<br>override fun <a href="./#1873830957%2FFunctions%2F-1380376907">visitSuperTypeEntry</a>(@NotNullp0: KtSuperTypeEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1735802868%2FFunctions%2F-1380376907">visitSuperTypeList</a></td>
+<td>[jvm]<br>open fun <a href="./#1735802868%2FFunctions%2F-1380376907">visitSuperTypeList</a>(@NotNullp0: KtSuperTypeList)<br>override fun <a href="./#-1202043485%2FFunctions%2F-1380376907">visitSuperTypeList</a>(@NotNullp0: KtSuperTypeList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-697884822%2FFunctions%2F-1380376907">visitSuperTypeListEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#-697884822%2FFunctions%2F-1380376907">visitSuperTypeListEntry</a>(@NotNullp0: KtSuperTypeListEntry)<br>override fun <a href="./#-1796486291%2FFunctions%2F-1380376907">visitSuperTypeListEntry</a>(@NotNullp0: KtSuperTypeListEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#987573322%2FFunctions%2F-1380376907">visitThisExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#987573322%2FFunctions%2F-1380376907">visitThisExpression</a>(@NotNullp0: KtThisExpression)<br>override fun <a href="./#733897357%2FFunctions%2F-1380376907">visitThisExpression</a>(@NotNullp0: KtThisExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#505322718%2FFunctions%2F-1380376907">visitThrowExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#505322718%2FFunctions%2F-1380376907">visitThrowExpression</a>(@NotNullp0: KtThrowExpression)<br>override fun <a href="./#2009282425%2FFunctions%2F-1380376907">visitThrowExpression</a>(@NotNullp0: KtThrowExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1477019212%2FFunctions%2F-1380376907">visitTryExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1477019212%2FFunctions%2F-1380376907">visitTryExpression</a>(@NotNullp0: KtTryExpression)<br>override fun <a href="./#262624227%2FFunctions%2F-1380376907">visitTryExpression</a>(@NotNullp0: KtTryExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-2078324818%2FFunctions%2F-1380376907">visitTypeAlias</a></td>
+<td>[jvm]<br>open fun <a href="./#-2078324818%2FFunctions%2F-1380376907">visitTypeAlias</a>(@NotNullp0: KtTypeAlias)<br>override fun <a href="./#1973260969%2FFunctions%2F-1380376907">visitTypeAlias</a>(@NotNullp0: KtTypeAlias, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1368248810%2FFunctions%2F-1380376907">visitTypeArgumentList</a></td>
+<td>[jvm]<br>open fun <a href="./#1368248810%2FFunctions%2F-1380376907">visitTypeArgumentList</a>(@NotNullp0: KtTypeArgumentList)<br>override fun <a href="./#-566638355%2FFunctions%2F-1380376907">visitTypeArgumentList</a>(@NotNullp0: KtTypeArgumentList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-141065494%2FFunctions%2F-1380376907">visitTypeConstraint</a></td>
+<td>[jvm]<br>open fun <a href="./#-141065494%2FFunctions%2F-1380376907">visitTypeConstraint</a>(@NotNullp0: KtTypeConstraint)<br>override fun <a href="./#527955949%2FFunctions%2F-1380376907">visitTypeConstraint</a>(@NotNullp0: KtTypeConstraint, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#583398954%2FFunctions%2F-1380376907">visitTypeConstraintList</a></td>
+<td>[jvm]<br>open fun <a href="./#583398954%2FFunctions%2F-1380376907">visitTypeConstraintList</a>(@NotNullp0: KtTypeConstraintList)<br>override fun <a href="./#1571593389%2FFunctions%2F-1380376907">visitTypeConstraintList</a>(@NotNullp0: KtTypeConstraintList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#238532604%2FFunctions%2F-1380376907">visitTypeParameter</a></td>
+<td>[jvm]<br>open fun <a href="./#238532604%2FFunctions%2F-1380376907">visitTypeParameter</a>(@NotNullp0: KtTypeParameter)<br>override fun <a href="./#67681435%2FFunctions%2F-1380376907">visitTypeParameter</a>(@NotNullp0: KtTypeParameter, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-2006230784%2FFunctions%2F-1380376907">visitTypeParameterList</a></td>
+<td>[jvm]<br>open fun <a href="./#-2006230784%2FFunctions%2F-1380376907">visitTypeParameterList</a>(@NotNullp0: KtTypeParameterList)<br>override fun <a href="./#-1069124841%2FFunctions%2F-1380376907">visitTypeParameterList</a>(@NotNullp0: KtTypeParameterList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#638238250%2FFunctions%2F-1380376907">visitTypeProjection</a></td>
+<td>[jvm]<br>open fun <a href="./#638238250%2FFunctions%2F-1380376907">visitTypeProjection</a>(@NotNullp0: KtTypeProjection)<br>override fun <a href="./#-549530451%2FFunctions%2F-1380376907">visitTypeProjection</a>(@NotNullp0: KtTypeProjection, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-66310472%2FFunctions%2F-1380376907">visitTypeReference</a></td>
+<td>[jvm]<br>open fun <a href="./#-66310472%2FFunctions%2F-1380376907">visitTypeReference</a>(@NotNullp0: KtTypeReference)<br>override fun <a href="./#387479135%2FFunctions%2F-1380376907">visitTypeReference</a>(@NotNullp0: KtTypeReference, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-405525492%2FFunctions%2F-1380376907">visitUnaryExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-405525492%2FFunctions%2F-1380376907">visitUnaryExpression</a>(@NotNullp0: KtUnaryExpression)<br>override fun <a href="./#1888724619%2FFunctions%2F-1380376907">visitUnaryExpression</a>(@NotNullp0: KtUnaryExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#462487274%2FFunctions%2F-1380376907">visitUserType</a></td>
+<td>[jvm]<br>open fun <a href="./#462487274%2FFunctions%2F-1380376907">visitUserType</a>(@NotNullp0: KtUserType)<br>override fun <a href="./#299301869%2FFunctions%2F-1380376907">visitUserType</a>(@NotNullp0: KtUserType, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#1935219970%2FFunctions%2F-1380376907">visitValueArgumentList</a></td>
+<td>[jvm]<br>open fun <a href="./#1935219970%2FFunctions%2F-1380376907">visitValueArgumentList</a>(@NotNullp0: KtValueArgumentList)<br>override fun <a href="./#1857809109%2FFunctions%2F-1380376907">visitValueArgumentList</a>(@NotNullp0: KtValueArgumentList, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#838336042%2FFunctions%2F-1380376907">visitWhenConditionInRange</a></td>
+<td>[jvm]<br>open fun <a href="./#838336042%2FFunctions%2F-1380376907">visitWhenConditionInRange</a>(@NotNullp0: KtWhenConditionInRange)<br>override fun <a href="./#1395233965%2FFunctions%2F-1380376907">visitWhenConditionInRange</a>(@NotNullp0: KtWhenConditionInRange, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1658883926%2FFunctions%2F-1380376907">visitWhenConditionIsPattern</a></td>
+<td>[jvm]<br>open fun <a href="./#-1658883926%2FFunctions%2F-1380376907">visitWhenConditionIsPattern</a>(@NotNullp0: KtWhenConditionIsPattern)<br>override fun <a href="./#316592685%2FFunctions%2F-1380376907">visitWhenConditionIsPattern</a>(@NotNullp0: KtWhenConditionIsPattern, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#2084469020%2FFunctions%2F-1380376907">visitWhenConditionWithExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#2084469020%2FFunctions%2F-1380376907">visitWhenConditionWithExpression</a>(@NotNullp0: KtWhenConditionWithExpression)<br>override fun <a href="./#868456315%2FFunctions%2F-1380376907">visitWhenConditionWithExpression</a>(@NotNullp0: KtWhenConditionWithExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#483027050%2FFunctions%2F-1380376907">visitWhenEntry</a></td>
+<td>[jvm]<br>open fun <a href="./#483027050%2FFunctions%2F-1380376907">visitWhenEntry</a>(@NotNullp0: KtWhenEntry)<br>override fun <a href="./#-194157971%2FFunctions%2F-1380376907">visitWhenEntry</a>(@NotNullp0: KtWhenEntry, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-627096118%2FFunctions%2F-1380376907">visitWhenExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-627096118%2FFunctions%2F-1380376907">visitWhenExpression</a>(@NotNullp0: KtWhenExpression)<br>override fun <a href="./#-682223347%2FFunctions%2F-1380376907">visitWhenExpression</a>(@NotNullp0: KtWhenExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1844792440%2FFunctions%2F-1380376907">visitWhileExpression</a></td>
+<td>[jvm]<br>open fun <a href="./#-1844792440%2FFunctions%2F-1380376907">visitWhileExpression</a>(@NotNullp0: KtWhileExpression)<br>override fun <a href="./#-2109360241%2FFunctions%2F-1380376907">visitWhileExpression</a>(@NotNullp0: KtWhileExpression, p1: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a>): <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html">Void</a></td>
+</tr>
+<tr>
+<td><a href="./#-1311095822%2FFunctions%2F-1380376907">visitWhiteSpace</a></td>
+<td>[jvm]<br>open fun <a href="./#-1311095822%2FFunctions%2F-1380376907">visitWhiteSpace</a>(@NotNullp0: @NotNullPsiWhiteSpace)</td>
+</tr>
+<tr>
+<td><a href="./#897671675%2FFunctions%2F-1380376907">withAutoCorrect</a></td>
+<td>[jvm]<br>open fun <a href="./#897671675%2FFunctions%2F-1380376907">withAutoCorrect</a>(block: () -&gt; <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a>)</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2018-2021 Square, Inc.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../../../..", "features": [], "search": "../../../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../../../assets/javascripts/bundle.ad660dcc.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,14 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.time////PointingToDeclaration/wisp-time-testing/wisp.time/index.md
+$dokka.location:wisp.time/FakeClock///PointingToDeclaration/wisp-time-testing/wisp.time/-fake-clock/index.md
+$dokka.location:wisp.time/FakeClock/FakeClock/#kotlin.Long#java.time.ZoneId/PointingToDeclaration/wisp-time-testing/wisp.time/-fake-clock/-fake-clock.md
+$dokka.location:wisp.time/FakeClock/add/#java.time.Duration/PointingToDeclaration/wisp-time-testing/wisp.time/-fake-clock/add.md
+$dokka.location:wisp.time/FakeClock/add/#java.time.Period/PointingToDeclaration/wisp-time-testing/wisp.time/-fake-clock/add.md
+$dokka.location:wisp.time/FakeClock/add/#kotlin.Long#java.util.concurrent.TimeUnit/PointingToDeclaration/wisp-time-testing/wisp.time/-fake-clock/add.md
+$dokka.location:wisp.time/FakeClock/getZone/#/PointingToDeclaration/wisp-time-testing/wisp.time/-fake-clock/get-zone.md
+$dokka.location:wisp.time/FakeClock/instant/#/PointingToDeclaration/wisp-time-testing/wisp.time/-fake-clock/instant.md
+$dokka.location:wisp.time/FakeClock/setNow/#java.time.Instant/PointingToDeclaration/wisp-time-testing/wisp.time/-fake-clock/set-now.md
+$dokka.location:wisp.time/FakeClock/withZone/#java.time.ZoneId/PointingToDeclaration/wisp-time-testing/wisp.time/-fake-clock/with-zone.md
+wisp.time
+

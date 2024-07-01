@@ -1,0 +1,46 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.jobqueue////PointingToDeclaration/misk-jobqueue/misk.jobqueue/index.md
+$dokka.location:misk.jobqueue//subscribe/misk.jobqueue.JobConsumer#misk.jobqueue.QueueName#kotlin.Function1[misk.jobqueue.Job,kotlin.Unit]/PointingToDeclaration/misk-jobqueue/misk.jobqueue/subscribe.md
+$dokka.location:misk.jobqueue/Job///PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job/index.md
+$dokka.location:misk.jobqueue/Job/acknowledge/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job/acknowledge.md
+$dokka.location:misk.jobqueue/Job/attributes/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job/attributes.md
+$dokka.location:misk.jobqueue/Job/body/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job/body.md
+$dokka.location:misk.jobqueue/Job/deadLetter/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job/dead-letter.md
+$dokka.location:misk.jobqueue/Job/delayWithBackoff/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job/delay-with-backoff.md
+$dokka.location:misk.jobqueue/Job/id/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job/id.md
+$dokka.location:misk.jobqueue/Job/idempotenceKey/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job/idempotence-key.md
+$dokka.location:misk.jobqueue/Job/queueName/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job/queue-name.md
+$dokka.location:misk.jobqueue/JobConsumer///PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-consumer/index.md
+$dokka.location:misk.jobqueue/JobConsumer/subscribe/#misk.jobqueue.QueueName#misk.jobqueue.JobHandler/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-consumer/subscribe.md
+$dokka.location:misk.jobqueue/JobConsumer/unsubscribe/#misk.jobqueue.QueueName/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-consumer/unsubscribe.md
+$dokka.location:misk.jobqueue/JobHandler///PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-handler/index.md
+$dokka.location:misk.jobqueue/JobHandler/handleJob/#misk.jobqueue.Job/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-handler/handle-job.md
+$dokka.location:misk.jobqueue/JobQueue.BatchEnqueueException///PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-batch-enqueue-exception/index.md
+$dokka.location:misk.jobqueue/JobQueue.BatchEnqueueException/BatchEnqueueException/#misk.jobqueue.QueueName#kotlin.collections.List[kotlin.String]#kotlin.collections.List[misk.jobqueue.JobQueue.EnqueueErrorResult]/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-batch-enqueue-exception/-batch-enqueue-exception.md
+$dokka.location:misk.jobqueue/JobQueue.BatchEnqueueException/failed/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-batch-enqueue-exception/failed.md
+$dokka.location:misk.jobqueue/JobQueue.BatchEnqueueException/queueName/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-batch-enqueue-exception/queue-name.md
+$dokka.location:misk.jobqueue/JobQueue.BatchEnqueueException/successful/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-batch-enqueue-exception/successful.md
+$dokka.location:misk.jobqueue/JobQueue.Companion///PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-companion/index.md
+$dokka.location:misk.jobqueue/JobQueue.Companion/SQS_MAX_BATCH_ENQUEUE_JOB_SIZE/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-companion/-s-q-s_-m-a-x_-b-a-t-c-h_-e-n-q-u-e-u-e_-j-o-b_-s-i-z-e.md
+$dokka.location:misk.jobqueue/JobQueue.EnqueueErrorResult///PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-enqueue-error-result/index.md
+$dokka.location:misk.jobqueue/JobQueue.EnqueueErrorResult/EnqueueErrorResult/#kotlin.String#kotlin.Boolean#kotlin.String#kotlin.String/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-enqueue-error-result/-enqueue-error-result.md
+$dokka.location:misk.jobqueue/JobQueue.EnqueueErrorResult/clientError/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-enqueue-error-result/client-error.md
+$dokka.location:misk.jobqueue/JobQueue.EnqueueErrorResult/code/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-enqueue-error-result/code.md
+$dokka.location:misk.jobqueue/JobQueue.EnqueueErrorResult/idempotenceKey/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-enqueue-error-result/idempotence-key.md
+$dokka.location:misk.jobqueue/JobQueue.EnqueueErrorResult/message/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-enqueue-error-result/message.md
+$dokka.location:misk.jobqueue/JobQueue.JobRequest///PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-job-request/index.md
+$dokka.location:misk.jobqueue/JobQueue.JobRequest/JobRequest/#kotlin.String#kotlin.String#java.time.Duration?#kotlin.collections.Map[kotlin.String,kotlin.String]/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-job-request/-job-request.md
+$dokka.location:misk.jobqueue/JobQueue.JobRequest/attributes/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-job-request/attributes.md
+$dokka.location:misk.jobqueue/JobQueue.JobRequest/body/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-job-request/body.md
+$dokka.location:misk.jobqueue/JobQueue.JobRequest/deliveryDelay/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-job-request/delivery-delay.md
+$dokka.location:misk.jobqueue/JobQueue.JobRequest/idempotenceKey/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/-job-request/idempotence-key.md
+$dokka.location:misk.jobqueue/JobQueue///PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/index.md
+$dokka.location:misk.jobqueue/JobQueue/batchEnqueue/#misk.jobqueue.QueueName#kotlin.collections.List[misk.jobqueue.JobQueue.JobRequest]/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/batch-enqueue.md
+$dokka.location:misk.jobqueue/JobQueue/enqueue/#misk.jobqueue.QueueName#kotlin.String#java.time.Duration?#kotlin.collections.Map[kotlin.String,kotlin.String]/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/enqueue.md
+$dokka.location:misk.jobqueue/JobQueue/enqueue/#misk.jobqueue.QueueName#kotlin.String#kotlin.String#java.time.Duration?#kotlin.collections.Map[kotlin.String,kotlin.String]/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-job-queue/enqueue.md
+$dokka.location:misk.jobqueue/QueueName///PointingToDeclaration/misk-jobqueue/misk.jobqueue/-queue-name/index.md
+$dokka.location:misk.jobqueue/QueueName/QueueName/#kotlin.String/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-queue-name/-queue-name.md
+$dokka.location:misk.jobqueue/QueueName/value/#/PointingToDeclaration/misk-jobqueue/misk.jobqueue/-queue-name/value.md
+misk.jobqueue
+
