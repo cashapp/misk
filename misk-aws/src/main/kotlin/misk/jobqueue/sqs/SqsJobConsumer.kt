@@ -203,15 +203,9 @@ internal class SqsJobConsumer @Inject internal constructor(
 
     private fun handleMessages(messages: List<SqsJob>): List<CompletableFuture<Status>> {
       return if (batchHandler != null) {
-        listOf(
-          CompletableFuture.supplyAsync(
-            {
-              metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc(messages.size.toDouble())
-              invokeHandler(messages, useBatchHandler = true)
-            },
-            handlingThreads
-          )
-        )
+        metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc(messages.size.toDouble())
+        val status = invokeHandler(messages, useBatchHandler = true)
+        return listOf(CompletableFuture.completedFuture(status))
       } else {
         messages.map { message ->
           CompletableFuture.supplyAsync(
