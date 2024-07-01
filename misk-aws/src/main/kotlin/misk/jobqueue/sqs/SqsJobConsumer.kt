@@ -99,17 +99,17 @@ internal class SqsJobConsumer @Inject internal constructor(
     handlingThreads.awaitTermination(10, TimeUnit.SECONDS)
   }
 
-  internal abstract inner class BaseQueueReceiver(queueName: QueueName) : QueueReceiver {
+  internal abstract inner class QueueReceiver(queueName: QueueName) {
     val queue = queues.getForReceiving(queueName)
     private val shouldKeepRunning = AtomicBoolean(true)
 
-    abstract fun receive(): Status
+    protected abstract fun receive(): Status
 
-    override fun stop() {
+    fun stop() {
       shouldKeepRunning.set(false)
     }
 
-    override fun run(): Status {
+    fun run(): Status {
       return if (!shouldKeepRunning.get()) {
         Status.NO_RESCHEDULE
       } else {
@@ -172,7 +172,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   internal inner class IndividualQueueReceiver(
     queueName: QueueName,
     private val handler: JobHandler
-  ) : BaseQueueReceiver(queueName) {
+  ) : QueueReceiver(queueName) {
 
     override fun receive(): Status {
       val size = sqsConsumerAllocator.computeSqsConsumersForPod(queue.name, receiverPolicy)
@@ -264,7 +264,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   internal inner class BatchQueueReceiver(
     queueName: QueueName,
     private val handler: BatchJobHandler
-  ) : BaseQueueReceiver(queueName) {
+  ) : QueueReceiver(queueName) {
 
     override fun receive(): Status {
       // Repeatedly long poll for messages until we have batchSize messages.
