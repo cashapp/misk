@@ -101,7 +101,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
   internal abstract inner class BaseQueueReceiver(queueName: QueueName) : QueueReceiver {
     val queue = queues.getForReceiving(queueName)
-    private val shouldKeepRunning = AtomicBoolean(false)
+    private val shouldKeepRunning = AtomicBoolean(true)
 
     abstract fun receive(): Status
 
@@ -156,6 +156,7 @@ internal class SqsJobConsumer @Inject internal constructor(
               queue.queueName
             )
           }
+
 
         } catch (e: NumberFormatException) {
           log.warn("Message ${message.messageId} had invalid SentTimestamp format")
@@ -266,7 +267,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   ) : BaseQueueReceiver(queueName) {
 
     override fun receive(): Status {
-      // Repeatedly long-poll for messages until we accumulate batchSize messages.
+      // Repeatedly long poll for messages until we have batchSize messages.
       // If there are no messages available, short circuit further requests.
       val cutoff = TimeSource.Monotonic.markNow() + 20.seconds // TODO make configurable
       val batch: MutableList<SqsJob> = mutableListOf()
