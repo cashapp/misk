@@ -15,6 +15,7 @@ import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
 import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeType
+import org.apache.commons.io.FilenameUtils
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -154,6 +155,19 @@ class FakeRedis : Redis {
   private fun randomFields(key: String, count: Long): List<Pair<String, ByteString>>? {
     checkHrandFieldCount(count)
     return hgetAll(key)?.toList()?.shuffled(random)?.take(count.toInt())
+  }
+
+  // Cursor and count are ignored for fake implementation. All matches are always
+  // returned without pagination.
+  @Synchronized
+  override fun scan(cursor: String, matchPattern: String?, count: Int?): Redis.ScanResult {
+    val matchingKeys = mutableListOf<String>()
+    keyValueStore.keys.forEach { key ->
+      if (matchPattern == null || FilenameUtils.wildcardMatch(key, matchPattern)) {
+        matchingKeys.add(key)
+      }
+    }
+    return Redis.ScanResult("0", matchingKeys)
   }
 
   @Synchronized

@@ -1,7 +1,7 @@
 package misk.metadata.servicegraph
 
 import jakarta.inject.Inject
-import jakarta.inject.Provider
+import com.google.inject.Provider
 import misk.ServiceGraphBuilder
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider

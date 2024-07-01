@@ -233,7 +233,7 @@ class MiskWebFormBuilder {
    * Enums are encoded to contain their values within their Type definition as
    * opposed to a unique Type.
    */
-  data class Field(
+  data class Field @JvmOverloads constructor(
     val name: String,
     val type: String,
     val repeated: Boolean,
