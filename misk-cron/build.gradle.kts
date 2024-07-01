@@ -25,6 +25,7 @@ dependencies {
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
+  testImplementation(libs.junitParams)
   testImplementation(libs.logbackClassic)
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-time-testing"))
