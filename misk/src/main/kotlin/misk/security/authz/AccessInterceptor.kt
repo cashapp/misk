@@ -121,7 +121,7 @@ class AccessInterceptor private constructor(
       val allowedCapabilities = actionEntries.flatMap { it.capabilities }.toSet()
 
       if (!allowAnyService && allowedServices.isEmpty() && !allowAnyUser && allowedCapabilities.isEmpty()) {
-        logger.error { "${action.name}::${action.function.name}() has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated, use explicit boolean parameters allowAnyService or allowAnyUser instead."}
+        logger.warn { "${action.name}::${action.function.name}() has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated, use explicit boolean parameters allowAnyService or allowAnyUser instead."}
       }
 
       return AccessInterceptor(
