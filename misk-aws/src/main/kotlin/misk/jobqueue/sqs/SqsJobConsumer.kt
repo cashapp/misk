@@ -103,18 +103,35 @@ internal class SqsJobConsumer @Inject internal constructor(
     val queue = queues.getForReceiving(queueName)
     private val shouldKeepRunning = AtomicBoolean(true)
 
-    protected abstract fun receive(): Status
+    protected abstract fun receive(): List<Status>
 
     fun stop() {
       shouldKeepRunning.set(false)
     }
 
     fun run(): Status {
-      return if (!shouldKeepRunning.get()) {
-        Status.NO_RESCHEDULE
-      } else {
-        receive()
+      if (!shouldKeepRunning.get()) {
+        return Status.NO_RESCHEDULE
       }
+      val size = sqsConsumerAllocator.computeSqsConsumersForPod(queue.name, receiverPolicy)
+      val futures = List(size) {
+        CompletableFuture.supplyAsync({ receive() }, receivingThreads)
+      }
+
+      // Either all messages are consumed and processed successfully, or we signal failure.
+      // If none of the received consume any messages, return NO_WORK for backoff.
+      return CompletableFuture.allOf(*futures.toTypedArray()).thenApply {
+        futures.flatMap { it.join() }
+          .onEach { check(it in listOf(Status.FAILED, Status.OK, Status.NO_WORK)) }
+          .fold(Status.NO_WORK) { finalStatus, status ->
+            when {
+              status == Status.FAILED -> status
+              status == Status.OK && finalStatus != Status.FAILED -> status
+              status == Status.NO_WORK && finalStatus == Status.NO_WORK -> status
+              else -> finalStatus
+            }
+          }
+      }.join()
     }
 
     /**
@@ -174,29 +191,7 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val handler: JobHandler
   ) : QueueReceiver(queueName) {
 
-    override fun receive(): Status {
-      val size = sqsConsumerAllocator.computeSqsConsumersForPod(queue.name, receiverPolicy)
-      val futures = List(size) {
-        CompletableFuture.supplyAsync({ receiveMessages() }, receivingThreads)
-      }
-
-      // Either all messages are consumed and processed successfully, or we signal failure.
-      // If none of the received consume any messages, return NO_WORK for backoff.
-      return CompletableFuture.allOf(*futures.toTypedArray()).thenApply {
-        futures.flatMap { it.join() }
-          .onEach { check(it in listOf(Status.FAILED, Status.OK, Status.NO_WORK)) }
-          .fold(Status.NO_WORK) { finalStatus, status ->
-            when {
-              status == Status.FAILED -> status
-              status == Status.OK && finalStatus != Status.FAILED -> status
-              status == Status.NO_WORK && finalStatus == Status.NO_WORK -> status
-              else -> finalStatus
-            }
-          }
-      }.join()
-    }
-
-    private fun receiveMessages(): List<Status> {
+    override fun receive(): List<Status> {
       val messages = fetchMessages(batchSize(), waitTimeSeconds = 0)
 
       if (messages.isEmpty()) {
@@ -266,7 +261,7 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val handler: BatchJobHandler
   ) : QueueReceiver(queueName) {
 
-    override fun receive(): Status {
+    override fun receive(): List<Status> {
       // Repeatedly long poll for messages until we have batchSize messages.
       // If there are no messages available, short circuit further requests.
       val cutoff = TimeSource.Monotonic.markNow() + 20.seconds // TODO make configurable
@@ -283,10 +278,10 @@ internal class SqsJobConsumer @Inject internal constructor(
       }
 
       if (batch.isEmpty()) {
-        return Status.NO_WORK
+        return listOf(Status.NO_WORK)
       }
 
-      return handleMessages(batch)
+      return listOf(handleMessages(batch))
     }
 
     @OptIn(ExperimentalMiskApi::class)
