@@ -47,7 +47,6 @@ vitess/base
 We integrate [Kotlin Binary Compatibility Validator][2] into our build 
 pipeline to automatically detect breaking changes that could affect existing clients.
 
-
 ### [Kotlin Binary Compatibility Validator][2]
 This tool checks for changes to the public binary API. The plugin generates a dump of the
 current API and compares it to the previous version. If a binary incompatibility is detected, 
