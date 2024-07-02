@@ -71,13 +71,13 @@ object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
         val result = mutableSetOf<String>()
         JarFile(file).use { jarFile ->
             for (entry in jarFile.entries().asIterator()) {
-                val childFile = File(entry.name)
-                if (!childFile.toPath().normalize().startsWith(pathPrefix) || childFile.name == pathPrefix) continue
+                val childFilePath = File(entry.name).toPath().normalize()
+                if (entry.name == pathPrefix || !childFilePath.startsWith(pathPrefix)) continue
 
-                var endIndex = childFile.name.indexOf("/", pathPrefix.length)
-                if (endIndex == -1) endIndex = childFile.name.length
+                var endIndex = entry.name.indexOf("/", pathPrefix.length)
+                if (endIndex == -1) endIndex = entry.name.length
 
-                result += childFile.name.substring(pathPrefix.length, endIndex)
+                result += entry.name.substring(pathPrefix.length, endIndex)
             }
         }
         return result
