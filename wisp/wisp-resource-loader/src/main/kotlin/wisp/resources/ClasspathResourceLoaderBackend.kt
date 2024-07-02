@@ -66,12 +66,13 @@ object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
         //  * Unrelated paths like `META-INF/MANIFEST.MF`. Ignore these.
         //  * Equal paths like `wisp/resources/`. Ignore these; we're only collecting children.
         //  * Child file paths like `wisp/resources/child.txt`. We collect the `child.txt` substring.
-        //  * Child directory paths like `wisp/resources/nested/child.txt`. We collect the `nexted`
+        //  * Child directory paths like `wisp/resources/nested/child.txt`. We collect the `nested`
         //    substring for the child directory.
         val result = mutableSetOf<String>()
         JarFile(file).use { jarFile ->
             for (entry in jarFile.entries().asIterator()) {
-                if (!entry.name.startsWith(pathPrefix) || entry.name == pathPrefix) continue
+                val childFile = File(entry.name)
+                if (!childFile.toPath().normalize().startsWith(pathPrefix) || childFile.name == pathPrefix) continue
 
                 var endIndex = entry.name.indexOf("/", pathPrefix.length)
                 if (endIndex == -1) endIndex = entry.name.length
