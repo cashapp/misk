@@ -1,6 +1,44 @@
+public final class misk/jobqueue/ColorException : java/lang/Exception {
+	public fun <init> ()V
+}
+
 public final class misk/jobqueue/DevelopmentJobProcessorModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
+}
+
+public final class misk/jobqueue/ExampleJobEnqueuer {
+	public final fun batchEnqueueRed (Ljava/util/List;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;)V
+	public static synthetic fun batchEnqueueRed$default (Lmisk/jobqueue/ExampleJobEnqueuer;Ljava/util/List;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;ILjava/lang/Object;)V
+	public final fun enqueueEnqueuer ()V
+	public final fun enqueueGreen (Ljava/lang/String;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;)V
+	public static synthetic fun enqueueGreen$default (Lmisk/jobqueue/ExampleJobEnqueuer;Ljava/lang/String;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;ILjava/lang/Object;)V
+	public final fun enqueueRed (Ljava/lang/String;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;)V
+	public static synthetic fun enqueueRed$default (Lmisk/jobqueue/ExampleJobEnqueuer;Ljava/lang/String;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;ILjava/lang/Object;)V
+}
+
+public final class misk/jobqueue/ExampleJobHandler : misk/jobqueue/JobHandler {
+	public static final field Companion Lmisk/jobqueue/ExampleJobHandler$Companion;
+	public fun handleJob (Lmisk/jobqueue/Job;)V
+}
+
+public final class misk/jobqueue/ExampleJobHandler$Companion {
+}
+
+public final class misk/jobqueue/ExampleJobHint : java/lang/Enum {
+	public static final field DEAD_LETTER Lmisk/jobqueue/ExampleJobHint;
+	public static final field DEAD_LETTER_ONCE Lmisk/jobqueue/ExampleJobHint;
+	public static final field DELAY_ONCE Lmisk/jobqueue/ExampleJobHint;
+	public static final field DONT_ACK Lmisk/jobqueue/ExampleJobHint;
+	public static final field THROW Lmisk/jobqueue/ExampleJobHint;
+	public static final field THROW_ONCE Lmisk/jobqueue/ExampleJobHint;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/jobqueue/ExampleJobHint;
+	public static fun values ()[Lmisk/jobqueue/ExampleJobHint;
+}
+
+public final class misk/jobqueue/ExampleJobQueuesTestingModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
 }
 
 public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/Job {
@@ -106,6 +144,19 @@ public abstract interface class misk/jobqueue/JobHandler {
 	public abstract fun handleJob (Lmisk/jobqueue/Job;)V
 }
 
+public final class misk/jobqueue/JobHandlerMetadata {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lmisk/jobqueue/JobHandlerMetadata;
+	public static synthetic fun copy$default (Lmisk/jobqueue/JobHandlerMetadata;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/JobHandlerMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHandlerClass ()Ljava/lang/String;
+	public final fun getSupertypes ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class misk/jobqueue/JobQueue {
 	public static final field Companion Lmisk/jobqueue/JobQueue$Companion;
 	public static final field SQS_MAX_BATCH_ENQUEUE_JOB_SIZE I
@@ -177,6 +228,27 @@ public final class misk/jobqueue/JobQueue$JobRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/jobqueue/JobqueueMetadata : misk/web/metadata/Metadata {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lmisk/jobqueue/JobqueueMetadata;
+	public static synthetic fun copy$default (Lmisk/jobqueue/JobqueueMetadata;Ljava/util/Map;ILjava/lang/Object;)Lmisk/jobqueue/JobqueueMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getQueues ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jobqueue/JobqueueMetadataProvider : misk/web/metadata/MetadataProvider {
+	public field queues Ljava/util/Map;
+	public fun <init> ()V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/jobqueue/JobqueueMetadata;
+	public fun getId ()Ljava/lang/String;
+	public final fun getQueues ()Ljava/util/Map;
+	public final fun setQueues (Ljava/util/Map;)V
+}
+
 public final class misk/jobqueue/QueueName {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -186,5 +258,10 @@ public final class misk/jobqueue/QueueName {
 	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jobqueue/TestFixturesKt {
+	public static final fun getGREEN_QUEUE ()Lmisk/jobqueue/QueueName;
+	public static final fun getRED_QUEUE ()Lmisk/jobqueue/QueueName;
 }
 
