@@ -71,8 +71,12 @@ object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
         val result = mutableSetOf<String>()
         JarFile(file).use { jarFile ->
             for (entry in jarFile.entries().asIterator()) {
+                if (!entry.name.startsWith(pathPrefix) || entry.name == pathPrefix) continue
+
+                // Verify that the normalized file path still has the correct prefix
+                // This is to fix a security vulnerability where a zip file may contain file entries such as "..\sneaky-file"
                 val childFilePath = File(entry.name).toPath().normalize()
-                if (entry.name == pathPrefix || !childFilePath.startsWith(pathPrefix)) continue
+                if (!childFilePath.startsWith(pathPrefix)) continue
 
                 var endIndex = entry.name.indexOf("/", pathPrefix.length)
                 if (endIndex == -1) endIndex = entry.name.length
