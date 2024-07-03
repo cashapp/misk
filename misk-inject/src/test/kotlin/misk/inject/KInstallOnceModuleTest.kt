@@ -5,16 +5,18 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 
 @MiskTest
 class KInstallOnceModuleTest {
   @MiskTestModule
   val module : KAbstractModule = TestModule()
 
-  @Inject private lateinit var someValue : String
+  @Inject @MyMap lateinit var map : Map<String, String>
 
   @Test fun testInstallOnceModule() {
-    assertThat(someValue).isEqualTo("Install once test")
+    assertThat(map["key"]).isEqualTo("value")
+    assertThat(map.size).isEqualTo(1)
   }
 
   class TestModule : KAbstractModule() {
@@ -26,7 +28,11 @@ class KInstallOnceModuleTest {
 
   class TestInstallOnceModule : KInstallOnceModule() {
     override fun configure() {
-      bind<String>().toInstance("Install once test")
+      val binder = newMapBinder<String, String>(MyMap::class)
+      binder.addBinding("key").toInstance("value")
     }
   }
 }
+
+@Qualifier
+annotation class MyMap
