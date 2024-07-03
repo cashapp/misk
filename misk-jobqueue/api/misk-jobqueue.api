@@ -144,19 +144,6 @@ public abstract interface class misk/jobqueue/JobHandler {
 	public abstract fun handleJob (Lmisk/jobqueue/Job;)V
 }
 
-public final class misk/jobqueue/JobHandlerMetadata {
-	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lmisk/jobqueue/JobHandlerMetadata;
-	public static synthetic fun copy$default (Lmisk/jobqueue/JobHandlerMetadata;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/JobHandlerMetadata;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getHandlerClass ()Ljava/lang/String;
-	public final fun getSupertypes ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public abstract interface class misk/jobqueue/JobQueue {
 	public static final field Companion Lmisk/jobqueue/JobQueue$Companion;
 	public static final field SQS_MAX_BATCH_ENQUEUE_JOB_SIZE I
@@ -228,25 +215,8 @@ public final class misk/jobqueue/JobQueue$JobRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/jobqueue/JobqueueMetadata : misk/web/metadata/Metadata {
-	public fun <init> (Ljava/util/Map;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/Map;)Lmisk/jobqueue/JobqueueMetadata;
-	public static synthetic fun copy$default (Lmisk/jobqueue/JobqueueMetadata;Ljava/util/Map;ILjava/lang/Object;)Lmisk/jobqueue/JobqueueMetadata;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getQueues ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/jobqueue/JobqueueMetadataProvider : misk/web/metadata/MetadataProvider {
-	public field queues Ljava/util/Map;
+public final class misk/jobqueue/JobqueueMetadataModule : misk/inject/KInstallOnceModule {
 	public fun <init> ()V
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lmisk/jobqueue/JobqueueMetadata;
-	public fun getId ()Ljava/lang/String;
-	public final fun getQueues ()Ljava/util/Map;
-	public final fun setQueues (Ljava/util/Map;)V
 }
 
 public final class misk/jobqueue/QueueName {
