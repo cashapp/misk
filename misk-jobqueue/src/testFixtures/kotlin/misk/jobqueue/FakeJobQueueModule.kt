@@ -8,6 +8,6 @@ class FakeJobQueueModule : KAbstractModule() {
     bind<JobQueue>().to<FakeJobQueue>()
     bind<TransactionalJobQueue>().to<FakeJobQueue>()
 
-    install(MetadataModule(JobqueueMetadataProvider()))
+    install(JobqueueMetadataModule())
   }
 }

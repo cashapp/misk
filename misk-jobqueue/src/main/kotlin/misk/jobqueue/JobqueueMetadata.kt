@@ -1,19 +1,21 @@
 package misk.jobqueue
 
 import jakarta.inject.Inject
+import misk.inject.KInstallOnceModule
 import misk.inject.typeLiteral
 import misk.web.metadata.Metadata
+import misk.web.metadata.MetadataModule
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.toFormattedJson
 import wisp.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
-data class JobHandlerMetadata(
+internal data class JobHandlerMetadata(
   val handlerClass: String,
   val supertypes: List<String>,
 )
 
-data class JobqueueMetadata(
+internal data class JobqueueMetadata(
   val queues: Map<String, JobHandlerMetadata>
 ): Metadata(
   metadata = queues,
@@ -23,7 +25,7 @@ data class JobqueueMetadata(
   descriptionString = "Job queues and their registered handlers."
   )
 
-class JobqueueMetadataProvider: MetadataProvider<JobqueueMetadata> {
+internal class JobqueueMetadataProvider: MetadataProvider<JobqueueMetadata> {
   @Inject lateinit var queues: Map<QueueName, JobHandler>
 
   override val id = "job-queue"
@@ -38,5 +40,13 @@ class JobqueueMetadataProvider: MetadataProvider<JobqueueMetadata> {
           .filterNot { it == Any::class.qualifiedName }
       ) }
       .toSortedMap())
+  }
+}
+
+// Dedicated module to ensure install once semantics since it is installed as part of the
+// AwsSqsJobHandlerModule module which is installed multiple times.
+class JobqueueMetadataModule: KInstallOnceModule() {
+  override fun configure() {
+    install(MetadataModule(JobqueueMetadataProvider()))
   }
 }
