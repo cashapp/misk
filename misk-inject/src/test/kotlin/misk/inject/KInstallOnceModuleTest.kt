@@ -1,38 +1,37 @@
 package misk.inject
 
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import jakarta.inject.Qualifier
 
 @MiskTest
 class KInstallOnceModuleTest {
   @MiskTestModule
-  val module : KAbstractModule = TestModule()
+  val module = TestModule()
 
-  @Inject @MyMap lateinit var map : Map<String, String>
+  @Inject private lateinit var map: Map<String, TestValue>
 
   @Test fun testInstallOnceModule() {
-    assertThat(map["key"]).isEqualTo("value")
+    assertThat(map["key"]).isEqualTo(TestValue("abc"))
     assertThat(map.size).isEqualTo(1)
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(TestInstallOnceModule())
-      install(TestInstallOnceModule())
+      install(TestInstallOnceModule("abc"))
+      install(TestInstallOnceModule("123"))
     }
   }
 
-  class TestInstallOnceModule : KInstallOnceModule() {
+  class TestInstallOnceModule(val token: String) : KInstallOnceModule() {
     override fun configure() {
-      val binder = newMapBinder<String, String>(MyMap::class)
-      binder.addBinding("key").toInstance("value")
+      val binder = newMapBinder<String, TestValue>()
+      binder.addBinding("key").toInstance(TestValue(token))
     }
   }
+
+  private data class TestValue(val value: String)
 }
 
-@Qualifier
-annotation class MyMap
