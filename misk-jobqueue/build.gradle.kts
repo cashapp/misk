@@ -8,6 +8,13 @@ plugins {
 }
 
 dependencies {
+  api(project(":misk-inject"))
+  implementation(libs.guice)
+  implementation(libs.jakartaInject)
+  implementation(libs.moshiCore)
+  implementation(project(":misk-config"))
+  implementation(project(":wisp:wisp-moshi"))
+
   testFixturesApi(libs.guice)
   testFixturesApi(libs.jakartaInject)
   testFixturesApi(project(":wisp:wisp-token"))
@@ -18,6 +25,7 @@ dependencies {
   testFixturesApi(project(":misk-transactional-jobqueue"))
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.guice)
