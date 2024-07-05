@@ -8,11 +8,9 @@ plugins {
 }
 
 dependencies {
-  api(project(":misk-inject"))
-  implementation(libs.guice)
-  implementation(libs.jakartaInject)
+  api(libs.jakartaInject)
+  api(project(":misk-config"))
   implementation(libs.moshiCore)
-  implementation(project(":misk-config"))
   implementation(project(":wisp:wisp-moshi"))
 
   testFixturesApi(libs.guice)
