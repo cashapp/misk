@@ -3,15 +3,14 @@ package misk.jobqueue.sqs
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.jobqueue.JobHandler
-import misk.jobqueue.JobqueueMetadataModule
 import misk.jobqueue.QueueName
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
@@ -37,7 +36,6 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
         dependsOn = dependsOn
       ).dependsOn<ReadyService>()
     )
-    install(JobqueueMetadataModule())
   }
 
   companion object {
