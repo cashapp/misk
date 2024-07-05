@@ -36,7 +36,8 @@ class SqsJobQueueTestModule(
             queue_attribute_importer_frequency_ms = 0
           )
         )
-      ).with(SqsTestModule(credentials, client))
+      )
+        .with(SqsTestModule(credentials, client))
     )
   }
 }
