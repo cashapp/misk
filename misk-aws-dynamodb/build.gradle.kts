@@ -1,17 +1,15 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
   api(libs.awsDynamodb)
-  api(libs.awsJavaSdkCore)
+  api(libs.awsSdkCore)
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
@@ -39,7 +37,7 @@ dependencies {
   testImplementation(libs.junitApi)
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

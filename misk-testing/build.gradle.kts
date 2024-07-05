@@ -1,11 +1,9 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencies {
@@ -17,7 +15,7 @@ dependencies {
   api(libs.jettyServletApi)
   api(libs.junitApi)
   api(libs.kotlinLogging)
-  api(libs.moshi)
+  api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.openTracingMock)
   api(libs.servletApi)
@@ -32,7 +30,7 @@ dependencies {
   implementation(libs.logbackClassic)
   implementation(libs.mockitoCore)
   implementation(libs.okio)
-  implementation(libs.openTracingApi)
+  implementation(libs.openTracing)
   implementation(libs.slf4jApi)
   implementation(project(":wisp:wisp-containers-testing"))
   implementation(project(":wisp:wisp-deployment"))
@@ -45,7 +43,7 @@ dependencies {
   testImplementation(libs.kotlinTest)
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

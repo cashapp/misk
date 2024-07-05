@@ -1,12 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
@@ -17,7 +15,8 @@ dependencies {
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
-  implementation(libs.apacheCommonsPool2)
+  implementation(libs.apacheCommonsPool)
+  implementation(libs.apacheCommonsIo)
   implementation(libs.guice)
   implementation(libs.okio)
   implementation(libs.prometheusClient)
@@ -49,7 +48,11 @@ dependencies {
   testImplementation(testFixtures(project(":misk-redis")))
 }
 
-configure<MavenPublishBaseExtension> {
+tasks.withType<Test> {
+  dependsOn(":startRedis")
+}
+
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

@@ -9,17 +9,22 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
+import misk.web.metadata.jvm.JvmMetadata
 
 @Singleton
-class ConfigMetadataAction @Inject constructor(
-  private val metadataProvider: Provider<ConfigMetadata>
-) : WebAction {
-  @Get("/api/config/metadata")
+class ConfigMetadataAction @Inject constructor() : WebAction {
+  @Inject private lateinit var configMetadataProvider: Provider<ConfigMetadata>
+  @Inject private lateinit var jvmMetadataProvider: Provider<JvmMetadata>
+
+  @Get("/api/v1/config/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
   fun getAll(): Response {
-    return Response(resources = metadataProvider.get().resources)
+    return Response(
+      resources = configMetadataProvider.get().resources
+        + mapOf("JVM" to jvmMetadataProvider.get().prettyPrint)
+    )
   }
 
   data class Response(val resources: Map<String, String?>)

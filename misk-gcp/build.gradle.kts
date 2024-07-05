@@ -1,12 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
@@ -27,9 +25,9 @@ dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
   api(libs.logbackClassic)
-  api(libs.moshi)
+  api(libs.moshiCore)
   api(libs.okio)
-  api(libs.openTracingApi)
+  api(libs.openTracing)
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   api(project(":misk-config"))
@@ -53,8 +51,8 @@ dependencies {
 
   testFixturesApi(libs.dockerApi)
   testFixturesApi(libs.dockerCore)
-  testFixturesApi(libs.dockerTransportHttpClient)
-  testFixturesApi(libs.findBugs)
+  testFixturesApi(libs.dockerTransport)
+  testFixturesApi(libs.findbugsJsr305)
   testFixturesApi(libs.gcpCloudCore)
   testFixturesApi(libs.gcpCloudStorage)
   testFixturesApi(libs.gcpDatastore) {
@@ -70,7 +68,7 @@ dependencies {
   testFixturesApi(project(":misk-gcp"))
   testFixturesApi(project(":misk-inject"))
   testFixturesImplementation(libs.assertj)
-  testFixturesImplementation(libs.dockerTransport)
+  testFixturesImplementation(libs.dockerTransportCore)
   testFixturesImplementation(libs.gax)
   testFixturesImplementation(libs.gcpSpanner)
   testFixturesImplementation(libs.googleAuthLibraryCredentials)
@@ -78,8 +76,8 @@ dependencies {
   testFixturesImplementation(libs.junitApi)
   testFixturesImplementation(libs.kotlinRetry)
   testFixturesImplementation(libs.kotlinTest)
-  testFixturesImplementation(libs.kotlinxCoroutines)
-  testFixturesImplementation(libs.moshi)
+  testFixturesImplementation(libs.kotlinxCoroutinesCore)
+  testFixturesImplementation(libs.moshiCore)
   testFixturesImplementation(project(":wisp:wisp-containers-testing"))
   testFixturesImplementation(project(":wisp:wisp-moshi"))
   testFixturesImplementation(project(":misk-service"))
@@ -89,7 +87,7 @@ dependencies {
   testImplementation(libs.dockerApi)
   testImplementation(libs.dockerCore)
   testImplementation(libs.dockerTransport)
-  testImplementation(libs.dockerTransportHttpClient)
+  testImplementation(libs.dockerTransportCore)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.openTracingDatadog)
@@ -100,7 +98,7 @@ dependencies {
   testImplementation(testFixtures(project(":misk-gcp")))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

@@ -1,25 +1,23 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
   api(libs.aws2Dynamodb)
-  api(libs.awsAuth)
-  api(libs.awsSdkCore)
+  api(libs.aws2Auth)
+  api(libs.awsSdkSdkCore)
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
   api(project(":misk-aws"))
   api(project(":misk-inject"))
-  implementation(libs.awsCore)
-  implementation(libs.awsRegions)
+  implementation(libs.awsSdkAwsCore)
+  implementation(libs.aws2Regions)
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
 
@@ -48,7 +46,7 @@ dependencies {
   }
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

@@ -1,5 +1,7 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
@@ -7,8 +9,10 @@ dependencies {
     api(libs.kotlinLogging)
     implementation(libs.dockerCore)
     implementation(libs.dockerTransport)
-    implementation(libs.dockerTransportHttpClient)
+    implementation(libs.dockerTransportCore)
     implementation(project(":wisp:wisp-logging"))
+    implementation(libs.openTracing)
+    implementation(libs.openTracingUtil)
     runtimeOnly(libs.logbackClassic)
 
     testImplementation(libs.junitApi)

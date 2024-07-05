@@ -9,7 +9,7 @@ export interface IConfigResources {
   [name: string]: string
 }
 
-const apiUrl = "/api/config/metadata"
+const apiUrl = "/api/v1/config/metadata"
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   componentDidMount() {

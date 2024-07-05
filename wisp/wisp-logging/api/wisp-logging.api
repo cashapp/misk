@@ -1,3 +1,7 @@
+public abstract interface class wisp/logging/Copyable {
+	public abstract fun copyWithNewTags (Ljava/util/Set;)Lwisp/logging/Copyable;
+}
+
 public final class wisp/logging/LoggingKt {
 	public static final fun debug (Lmu/KLogger;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun debug (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
@@ -108,10 +112,10 @@ public class wisp/logging/SampledLogger : mu/KLogger {
 	public fun warn (Lorg/slf4j/Marker;Lkotlin/jvm/functions/Function0;)V
 }
 
-public class wisp/logging/TaggedLogger : mu/KLogger {
+public abstract class wisp/logging/TaggedLogger : mu/KLogger, wisp/logging/Copyable {
 	public static final field Companion Lwisp/logging/TaggedLogger$Companion;
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/util/Set;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmu/KLogger;Ljava/util/Set;)V
 	public final fun asContext (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public fun catching (Ljava/lang/Throwable;)V
 	public fun debug (Ljava/lang/String;)V
@@ -171,6 +175,7 @@ public class wisp/logging/TaggedLogger : mu/KLogger {
 	public fun isTraceEnabled (Lorg/slf4j/Marker;)Z
 	public fun isWarnEnabled ()Z
 	public fun isWarnEnabled (Lorg/slf4j/Marker;)Z
+	public final fun tag (Ljava/util/Collection;)Lwisp/logging/TaggedLogger;
 	public final fun tag ([Lkotlin/Pair;)Lwisp/logging/TaggedLogger;
 	public fun throwing (Ljava/lang/Throwable;)Ljava/lang/Throwable;
 	public fun trace (Ljava/lang/String;)V

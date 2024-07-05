@@ -1,18 +1,16 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
   api(project(":misk-inject"))
   api(libs.prometheusClient)
-  implementation(libs.findBugs)
+  implementation(libs.findbugsJsr305)
   implementation(libs.guava)
   implementation(libs.guice)
   implementation(libs.jakartaInject)
@@ -24,7 +22,7 @@ dependencies {
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.kotlinStdLibJdk8)
   testFixturesImplementation(libs.micrometerCore)
-  testFixturesImplementation(libs.micrometerPrometheus)
+  testFixturesImplementation(libs.micrometerRegistryPrometheus)
 
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-metrics"))
@@ -33,7 +31,7 @@ dependencies {
 
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

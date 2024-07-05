@@ -12,6 +12,7 @@ import kotlinx.html.main
 import kotlinx.html.nav
 import kotlinx.html.role
 import kotlinx.html.span
+import kotlinx.html.title
 import kotlinx.html.ul
 import kotlinx.html.unsafe
 import misk.tailwind.Link
@@ -197,7 +198,7 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
             role = "list"
 
             li {
-              section.links.map { link ->
+              section.links.sortedBy { it.label }.map { link ->
                 ul("-mx-2 py-1") {
                   role = "list"
                   li {
@@ -214,6 +215,7 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
                     } ?: let {
                       a(classes = "$isSelectedStyles group flex justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold") {
                         href = link.href
+                        link.hoverText?.let { title = it }
 
                         if (link.dataTurbo == true) {
                           attributes["data-turbo-preload"] = ""

@@ -5,13 +5,12 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.Listener
 import com.google.common.util.concurrent.Service.State
-import java.util.concurrent.atomic.AtomicBoolean
 import com.google.inject.Provider
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal class CoordinatedService(
   private val serviceProvider: Provider<out Service>
 ) : AbstractService(), DelegatingService {
-
   override val service: Service by lazy {
     serviceProvider.get()
       .also { created ->
@@ -154,4 +153,14 @@ internal class CoordinatedService(
       check(state() == State.NEW) { message }
     }
   }
+
+  data class Metadata(
+    val dependencies: Set<String>,
+    val directDependsOn: Set<String>,
+  )
+
+  fun toMetadata() = Metadata(
+    dependencies = dependencies.map { it.serviceProvider.get().javaClass.name }.toSet(),
+    directDependsOn = directDependsOn.map { it.serviceProvider.get().javaClass.name }.toSet(),
+  )
 }

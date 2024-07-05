@@ -1,19 +1,16 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  id("com.squareup.wire")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  alias(libs.plugins.wire)
 }
 
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
   api(libs.kotlinxHtml)
-  api(libs.moshi)
   api(libs.okio)
   api(project(":wisp:wisp-deployment"))
   api(project(":misk"))
@@ -22,11 +19,13 @@ dependencies {
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(libs.kotlinxHtml)
+  implementation(libs.moshiCore)
   implementation(libs.okHttp)
   implementation(project(":misk-core"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-tailwind"))
   implementation(project(":wisp:wisp-config"))
+  implementation(project(":wisp:wisp-moshi"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
@@ -35,11 +34,12 @@ dependencies {
   testImplementation(libs.wireRuntime)
   testImplementation(project(":misk-api"))
   testImplementation(project(":misk-action-scopes"))
+  testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
 }
 
 sourceSets {
-  val main by getting {
+  main {
     resources.srcDir(listOf(
       "web/tabs/config/lib",
       "web/tabs/database/lib",
@@ -49,11 +49,17 @@ sourceSets {
   }
 }
 
-val generatedSourceDir = "$buildDir/generated/source/wire-test"
+val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
 
 wire {
   sourcePath {
     srcDir("src/test/proto/")
+  }
+  kotlin {
+    out = generatedSourceDir
+    includes = listOf(
+      "test.kt.*",
+    )
   }
   java {
     out = generatedSourceDir
@@ -65,10 +71,10 @@ afterEvaluate {
   val generatedSourceGlob = "$generatedSourceDir/**"
 
   sourceSets {
-    val main by getting {
+    main {
       java.setSrcDirs(java.srcDirs.filter { !it.path.contains(generatedSourceDir) })
     }
-    val test by getting {
+    test {
       java.srcDir(generatedSourceDir)
     }
   }
@@ -83,7 +89,7 @@ afterEvaluate {
   }
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

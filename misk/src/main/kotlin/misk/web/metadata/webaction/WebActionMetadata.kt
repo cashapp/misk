@@ -29,6 +29,7 @@ data class WebActionMetadata(
   val responseType: String,
   val types: Map<String, MiskWebFormBuilder.Type>,
   val responseTypes: Map<String, MiskWebFormBuilder.Type>,
+  val returnTypes: Map<String, MiskWebFormBuilder.Type>,
   val pathPattern: String,
   val applicationInterceptors: List<String>,
   val networkInterceptors: List<String>,
@@ -74,6 +75,7 @@ data class WebActionMetadata(
     returnType = returnType.toString(),
     responseType = responseType.toString(),
     types = MiskWebFormBuilder().calculateTypes(requestType),
+    returnTypes = MiskWebFormBuilder().calculateTypes(returnType),
     responseTypes = MiskWebFormBuilder().calculateTypes(responseType),
     pathPattern = pathPattern.toString(),
     applicationInterceptors = applicationInterceptors.map {

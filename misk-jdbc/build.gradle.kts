@@ -1,12 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
@@ -16,8 +14,8 @@ dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
-  api(libs.moshi)
-  api(libs.openTracingApi)
+  api(libs.moshiCore)
+  api(libs.openTracing)
   api(libs.prometheusClient)
   api(project(":misk-config"))
   api(project(":misk-core"))
@@ -25,7 +23,7 @@ dependencies {
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   implementation(libs.dockerTransport)
-  implementation(libs.dockerTransportHttpClient)
+  implementation(libs.dockerTransportCore)
   implementation(libs.hikariCp)
   implementation(libs.kotlinLogging)
   implementation(libs.mysql)
@@ -40,7 +38,7 @@ dependencies {
 
   testFixturesApi(libs.datasourceProxy)
   testFixturesApi(libs.jakartaInject)
-  testFixturesApi(libs.moshi)
+  testFixturesApi(libs.moshiCore)
   testFixturesApi(libs.okHttp)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-jdbc"))
@@ -68,7 +66,7 @@ dependencies {
   testImplementation(testFixtures(project(":misk-jdbc")))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

@@ -1,24 +1,30 @@
 [versions]
 dependencyAnalysisPlugin = "1.29.0"
+flyway = "9.14.1"
+kotlin = "1.9.21"
 kotlinBinaryCompatibilityPlugin = "0.13.1"
+mavenPublish = "0.27.0"
+protobufPlugin = "0.9.3"
+wire = "4.9.3"
 
 [libraries]
-apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.11" }
-apacheCommonsPool2 = { module = "org.apache.commons:commons-pool2", version = "2.11.1" }
+apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.11" }
+apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.11.1" }
+apacheCommonsIo = { module = "commons-io:commons-io", version = "2.16.1" }
 assertj = { module = "org.assertj:assertj-core", version = "3.25.3" }
 awaitility = { module = "org.awaitility:awaitility", version = "4.1.0" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version = "4.1.0" }
+aws2Auth = { module = "software.amazon.awssdk:auth", version = "2.21.24" }
 aws2Bom = { module = "software.amazon.awssdk:bom", version = "2.21.24" }
 aws2Dynamodb = { module = "software.amazon.awssdk:dynamodb", version = "2.21.24" }
 aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", version = "2.21.24" }
-awsAuth = { module = "software.amazon.awssdk:auth", version = "2.21.24" }
-awsCore = { module = "software.amazon.awssdk:aws-core", version = "2.21.24" }
-awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.12.576" }
-awsJavaSdkCore = { module = "com.amazonaws:aws-java-sdk-core", version = "1.12.576" }
-awsRegions = { module = "software.amazon.awssdk:regions", version = "2.21.24" }
-awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version = "1.12.576" }
-awsSdkCore = { module = "software.amazon.awssdk:sdk-core", version = "2.21.24" }
-awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version = "1.12.576" }
+aws2Regions = { module = "software.amazon.awssdk:regions", version = "2.21.24" }
+awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.12.734" }
+awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version = "1.12.734" }
+awsSdkAwsCore= { module = "software.amazon.awssdk:aws-core", version = "2.21.24" }
+awsSdkCore = { module = "com.amazonaws:aws-java-sdk-core", version = "1.12.734" }
+awsSdkSdkCore = { module = "software.amazon.awssdk:sdk-core", version = "2.21.24" }
+awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version = "1.12.734" }
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk15on", version = "1.70" }
 bouncycastlePgp = { module = "org.bouncycastle:bcpg-jdk15on", version = "1.70" }
 bucket4jCore = { module = "com.bucket4j:bucket4j-core", version = "8.7.0" }
@@ -36,32 +42,33 @@ detektTest = { module = "io.gitlab.arturbosch.detekt:detekt-test", version = "1.
 detektTestUtils = { module = "io.gitlab.arturbosch.detekt:detekt-test-utils", version = "1.23.1" }
 dockerApi = { module = "com.github.docker-java:docker-java-api", version = "3.3.1" }
 dockerCore = { module = "com.github.docker-java:docker-java-core", version = "3.3.1" }
-dockerTransport = { module = "com.github.docker-java:docker-java-transport", version = "3.3.1" }
-dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version = "3.3.1" }
+dockerTransport = { module = "com.github.docker-java:docker-java-transport-httpclient5", version = "3.3.1" }
+dockerTransportCore = { module = "com.github.docker-java:docker-java-transport", version = "3.3.1" }
 dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.20" }
 errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.20.0" }
-findBugs = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
+findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
+flywayGradlePlugin = { module = "org.flywaydb:flyway-gradle-plugin", version.ref = "flyway" }
 gax = { module = "com.google.api:gax", version = "2.5.0" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "1.95.4" }
 gcpCloudStorage = { module = "com.google.cloud:google-cloud-storage", version = "1.117.1" }
-gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "1.107.1" }
+gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.2.10" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version ="v1-rev20210622-1.31.5" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "2.3.2" }
-gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.13.0" }
-googleApiClient = { module = "com.google.api-client:google-api-client", version = "1.32.1" }
+gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.23.4" }
+googleApiClient = { module = "com.google.api-client:google-api-client", version = "1.35.0" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20210127-1.31.5" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version = "1.1.0" }
 googleAuthLibraryOauth2 = { module = "com.google.auth:google-auth-library-oauth2-http", version = "1.1.0" }
 googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "1.95.4" }
 googleHttpClient = { module = "com.google.http-client:google-http-client", version = "1.40.0" }
 googleHttpClientJackson = { module = "com.google.http-client:google-http-client-jackson2", version = "1.39.2" }
-grpcApi = { module = "io.grpc:grpc-api", version = "1.58.0" }
-grpcBom = { module = "io.grpc:grpc-bom", version = "1.58.0" }
-grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.58.0" }
-grpcNetty = { module = "io.grpc:grpc-netty", version = "1.58.0" }
-grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.58.0" }
-grpcStub = { module = "io.grpc:grpc-stub", version = "1.58.0" }
+grpcApi = { module = "io.grpc:grpc-api", version = "1.60.0" }
+grpcBom = { module = "io.grpc:grpc-bom", version = "1.60.0" }
+grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.60.0" }
+grpcNetty = { module = "io.grpc:grpc-netty", version = "1.60.0" }
+grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.60.0" }
+grpcStub = { module = "io.grpc:grpc-stub", version = "1.60.0" }
 guava = { module = "com.google.guava:guava" }
 guavaBom = { module = "com.google.guava:guava-bom", version = "33.0.0-jre" }
 guavaTestLib = { module = "com.google.guava:guava-testlib" }
@@ -76,15 +83,15 @@ hopliteHocon = { module = "com.sksamuel.hoplite:hoplite-hocon", version = "2.7.4
 hopliteJson = { module = "com.sksamuel.hoplite:hoplite-json", version = "2.7.4" }
 hopliteToml = { module = "com.sksamuel.hoplite:hoplite-toml", version = "2.7.4" }
 hopliteYaml = { module = "com.sksamuel.hoplite:hoplite-yaml", version = "2.7.4" }
-hsqldb = { module = "org.hsqldb:hsqldb", version = "2.6.1" }
+hsqldb = { module = "org.hsqldb:hsqldb", version = "2.7.1" }
 jCommander = { module = "com.beust:jcommander", version = "1.72" }
-jacksonAnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version = "2.14.2" }
-jacksonBom = { module = "com.fasterxml.jackson:jackson-bom", version = "2.14.2" }
-jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version = "2.14.2" }
-jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version = "2.14.2" }
-jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.14.2" }
-jacksonJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version = "2.14.2" }
-jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version = "2.14.2" }
+jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version = "2.17.1" }
+jacksonBom = { module = "com.fasterxml.jackson:jackson-bom", version = "2.17.1" }
+jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version = "2.17.1" }
+jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version = "2.17.1" }
+jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.17.1" }
+jacksonJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version = "2.17.1" }
+jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version = "2.17.1" }
 javaxAnnotation = { module = "javax.annotation:javax.annotation-api", version = "1.3.2" }
 jakartaInject = { module = "jakarta.inject:jakarta.inject-api", version = "2.0.1" }
 javaxInject = { module = "javax.inject:javax.inject", version = "1" }
@@ -110,60 +117,61 @@ jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-s
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version = "5.12.0.202106070339-r" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.20" }
 jooq = { module = "org.jooq:jooq", version = "3.18.2" }
+jooqGradlePlugin = { module = "nu.studer:gradle-jooq-plugin", version = "8.2" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.9.3" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.9.3" }
-junitGradlePlugin = { module = "org.junit.platform:junit-platform-gradle-plugin", version = "1.2.0" }
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.9.3" }
+junitPioneer = { module = "org.junit-pioneer:junit-pioneer", version = "2.2.0" }
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version = "5.6.2" }
 kotestAssertionsShared = { module = "io.kotest:kotest-assertions-shared", version = "5.6.2" }
 kotestCommon = { module = "io.kotest:kotest-common", version = "5.6.2" }
 kotestFrameworkApi = { module = "io.kotest:kotest-framework-api", version = "5.6.2" }
 kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version = "5.6.2" }
-kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version = "1.9.21" }
-kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version = "1.9.21" }
-kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version = "1.9.21" }
-kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "1.9.21" }
+kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
+kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinLogging = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
-kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version = "1.9.21" }
-kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version = "1.8.21" }
+kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
+kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinRetry = { module = "com.michael-bull.kotlin-retry:kotlin-retry", version = "1.0.9" }
-kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version = "1.9.21" }
-kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version = "1.9.21" }
-kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.7.3" }
+kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.7.3" }
 kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.8.1" }
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "18.0.1" }
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "6.3.0" }
-logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.4.8" }
-logbackCore = { module = "ch.qos.logback:logback-core", version = "1.4.8" }
+logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
+logbackCore = { module = "ch.qos.logback:logback-core", version = "1.4.14" }
 mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.27.0" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version = "1.11.1" }
-micrometerPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.1" }
+micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.1" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.4.0" }
-moshi = { module = "com.squareup.moshi:moshi", version = "1.15.1" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.1" }
+moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.1" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.1" }
-mysql = { module = "com.mysql:mysql-connector-j", version = "8.0.33" }
+mysql = { module = "com.mysql:mysql-connector-j", version = "8.2.0" }
 nettyBom = { module = "io.netty:netty-bom", version = "4.1.92.Final" }
 nettyHandler = { module = "io.netty:netty-handler", version = "4.1.92.Final" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version = "4.12.0" }
 okHttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version = "4.12.0" }
 okio = { module = "com.squareup.okio:okio", version = "3.8.0" }
-openTracingApi = { module = "io.opentracing:opentracing-api", version = "0.33.0" }
+openTracing = { module = "io.opentracing:opentracing-api", version = "0.33.0" }
 openTracingConcurrent = { module = "io.opentracing.contrib:opentracing-concurrent", version = "0.4.0" }
 openTracingDatadog = { module = "com.datadoghq:dd-trace-ot", version = "1.31.2" }
 openTracingJdbc = { module = "io.opentracing.contrib:opentracing-jdbc", version = "0.2.15" }
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
 openTracingUtil = { module = "io.opentracing:opentracing-util", version = "0.33.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.2.23" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.3.9" }
 prometheusClient = { module = "io.prometheus:simpleclient" }
 prometheusClientCommon = { module = "io.prometheus:simpleclient_common" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version = "0.16.0" }
 prometheusHotspot = { module = "io.prometheus:simpleclient_hotspot" }
 prometheusHttpserver = { module = "io.prometheus:simpleclient_httpserver" }
 protoGoogleCommon = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.9.0" }
-protobufGradlePlugin = { module = "com.google.protobuf:protobuf-gradle-plugin", version = "0.9.3" }
+protobufGradlePlugin = { module = "com.google.protobuf:protobuf-gradle-plugin", version.ref = "protobufPlugin" }
 protobufJava = { module = "com.google.protobuf:protobuf-java", version = "3.21.7" }
 protoc = { module = "com.google.protobuf:protoc", version = "3.19.2" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version = "2.10.0" }
@@ -188,14 +196,28 @@ sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version = "2.0.0" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version = "2.0.0" }
 sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version = "2.0.0" }
-tink = { module = "com.google.crypto.tink:tink", version = "1.6.1" }
-tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.6.1" }
-tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.6.1" }
+tink = { module = "com.google.crypto.tink:tink", version = "1.12.0" }
+tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.9.1" }
+tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.10.0" }
 tracingDatadog = { module = "com.datadoghq:dd-trace-api", version = "1.31.2" }
-wireBom = { module = "com.squareup.wire:wire-bom", version = "4.9.3" }
-wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version = "4.9.3" }
-wireGrpcClient = { module = "com.squareup.wire:wire-grpc-client", version = "4.9.3" }
-wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version = "4.9.3" }
-wireReflector = { module = "com.squareup.wire:wire-reflector", version = "4.9.3" }
-wireRuntime = { module = "com.squareup.wire:wire-runtime", version = "4.9.3" }
-wireSchema = { module = "com.squareup.wire:wire-schema", version = "4.9.3" }
+wireBom = { module = "com.squareup.wire:wire-bom", version.ref = "wire" }
+wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version.ref = "wire" }
+wireGrpcClient = { module = "com.squareup.wire:wire-grpc-client", version.ref = "wire" }
+wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version.ref = "wire" }
+wireReflector = { module = "com.squareup.wire:wire-reflector", version.ref = "wire" }
+wireRuntime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
+wireSchema = { module = "com.squareup.wire:wire-schema", version.ref = "wire" }
+
+[plugins]
+binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompatibilityPlugin" }
+dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
+flyway = { id = "org.flywaydb.flyway" }
+jooq = { id = "nu.studer.jooq" }
+kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen" }
+kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm" }
+mavenPublish = { id = "com.vanniktech.maven.publish" }
+mavenPublishBase = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublish" }
+protobuf = { id = "com.google.protobuf" }
+sqldelight = { id = "app.cash.sqldelight" }
+wire = { id = "com.squareup.wire" }

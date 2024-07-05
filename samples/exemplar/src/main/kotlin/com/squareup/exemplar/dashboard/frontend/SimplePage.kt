@@ -8,11 +8,11 @@ import misk.turbo.turbo_frame
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
-import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.HtmlLayout
 import misk.web.mediatype.MediaTypes
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.web.dashboard.AdminDashboardAccess
 
 /**
  * Example page from Tailwind UI
