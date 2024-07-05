@@ -26,7 +26,6 @@ import misk.web.metadata.webaction.WebActionsMetadataProvider
  */
 class AllMetadataModule : KAbstractModule() {
   override fun configure() {
-    // Expose metadata as an API
     install(WebActionModule.create<AllMetadataAction>())
 
     // Built in metadata
@@ -35,7 +34,7 @@ class AllMetadataModule : KAbstractModule() {
     install(MetadataModule(JvmMetadataProvider()))
     install(MetadataModule(WebActionsMetadataProvider()))
 
-    // Install dashboard tab
+    // Install dashbaord tab
     install(WebActionModule.create<MetadataTabIndexAction>())
     install(DashboardModule.createHotwireTab<AdminDashboard, AdminDashboardAccess>(
       slug = "metadata",

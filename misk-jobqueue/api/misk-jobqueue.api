@@ -1,44 +1,6 @@
-public final class misk/jobqueue/ColorException : java/lang/Exception {
-	public fun <init> ()V
-}
-
 public final class misk/jobqueue/DevelopmentJobProcessorModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
-}
-
-public final class misk/jobqueue/ExampleJobEnqueuer {
-	public final fun batchEnqueueRed (Ljava/util/List;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;)V
-	public static synthetic fun batchEnqueueRed$default (Lmisk/jobqueue/ExampleJobEnqueuer;Ljava/util/List;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;ILjava/lang/Object;)V
-	public final fun enqueueEnqueuer ()V
-	public final fun enqueueGreen (Ljava/lang/String;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;)V
-	public static synthetic fun enqueueGreen$default (Lmisk/jobqueue/ExampleJobEnqueuer;Ljava/lang/String;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;ILjava/lang/Object;)V
-	public final fun enqueueRed (Ljava/lang/String;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;)V
-	public static synthetic fun enqueueRed$default (Lmisk/jobqueue/ExampleJobEnqueuer;Ljava/lang/String;Ljava/time/Duration;Lmisk/jobqueue/ExampleJobHint;ILjava/lang/Object;)V
-}
-
-public final class misk/jobqueue/ExampleJobHandler : misk/jobqueue/JobHandler {
-	public static final field Companion Lmisk/jobqueue/ExampleJobHandler$Companion;
-	public fun handleJob (Lmisk/jobqueue/Job;)V
-}
-
-public final class misk/jobqueue/ExampleJobHandler$Companion {
-}
-
-public final class misk/jobqueue/ExampleJobHint : java/lang/Enum {
-	public static final field DEAD_LETTER Lmisk/jobqueue/ExampleJobHint;
-	public static final field DEAD_LETTER_ONCE Lmisk/jobqueue/ExampleJobHint;
-	public static final field DELAY_ONCE Lmisk/jobqueue/ExampleJobHint;
-	public static final field DONT_ACK Lmisk/jobqueue/ExampleJobHint;
-	public static final field THROW Lmisk/jobqueue/ExampleJobHint;
-	public static final field THROW_ONCE Lmisk/jobqueue/ExampleJobHint;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lmisk/jobqueue/ExampleJobHint;
-	public static fun values ()[Lmisk/jobqueue/ExampleJobHint;
-}
-
-public final class misk/jobqueue/ExampleJobQueuesTestingModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
 }
 
 public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/Job {
@@ -215,10 +177,6 @@ public final class misk/jobqueue/JobQueue$JobRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/jobqueue/JobqueueMetadataModule : misk/inject/KInstallOnceModule {
-	public fun <init> ()V
-}
-
 public final class misk/jobqueue/QueueName {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -228,10 +186,5 @@ public final class misk/jobqueue/QueueName {
 	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/jobqueue/TestFixturesKt {
-	public static final fun getGREEN_QUEUE ()Lmisk/jobqueue/QueueName;
-	public static final fun getRED_QUEUE ()Lmisk/jobqueue/QueueName;
 }
 
