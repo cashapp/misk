@@ -41,7 +41,6 @@ dependencies {
 sourceSets {
   main {
     resources.srcDir(listOf(
-      "web/tabs/config/lib",
       "web/tabs/database/lib",
       "web/tabs/web-actions/lib"
     ))
