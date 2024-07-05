@@ -9,19 +9,17 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.metadata.MetadataTestingModule
 import misk.web.metadata.TestConfig
-import misk.web.metadata.jvm.JvmMetadata
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
-class ConfigMetadataActionTest {
+class ConfigMetadataTest {
   @MiskTestModule
   val module = MetadataTestingModule()
 
-  @Inject internal lateinit var jvmMetadataProvider: Provider<JvmMetadata>
-  @Inject lateinit var configMetadataAction: ConfigMetadataAction
+  @Inject internal lateinit var configMetadataProvider: Provider<ConfigMetadata>
 
   @Test fun configSecretsStillAccessibleInCode() {
     val config = MiskConfig.load<TestConfig>("admin-dashboard-app", TESTING)
@@ -35,7 +33,7 @@ class ConfigMetadataActionTest {
   }
 
   @Test fun passesAlongEffectiveConfigWithRedaction() {
-    val response = configMetadataAction.getAll()
+    val response = configMetadataProvider.get()
     assertThat(response.resources).containsKey("Effective Config")
 
     val effectiveConfig = response.resources.get("Effective Config")
@@ -60,7 +58,7 @@ class ConfigMetadataActionTest {
   }
 
   @Test fun passesAlongFullUnderlyingConfigResources() {
-    val response = configMetadataAction.getAll()
+    val response = configMetadataProvider.get()
     assertThat(response.resources).containsKey("classpath:/admin-dashboard-app-common.yaml")
     assertThat(response.resources).containsKey("classpath:/admin-dashboard-app-testing.yaml")
 
@@ -73,7 +71,7 @@ class ConfigMetadataActionTest {
   }
 
   @Test fun doesNotRedactRawConfigFiles() {
-    val response = configMetadataAction.getAll()
+    val response = configMetadataProvider.get()
     assertThat(response.resources).containsKey("classpath:/admin-dashboard-app-common.yaml")
     assertThat(response.resources).containsKey("Effective Config")
 
@@ -82,24 +80,6 @@ class ConfigMetadataActionTest {
 
     assertThat(commonConfig).contains("common123")
     assertThat(effectiveConfig).doesNotContain("pass1", "phrase2")
-  }
-
-  @Test fun passesAlongJvmConfig() {
-    val response = configMetadataAction.getAll()
-    assertThat(response.resources).containsKey("Effective Config")
-    assertThat(response.resources).containsKey("JVM")
-    val configJvm = response.resources.get("JVM")
-    val jvmRuntime = jvmMetadataProvider.get().prettyPrint
-    assertEquals(
-      // uptime millis will differ given the different calls from config and jvm action
-      configJvm?.lines()?.filter { !it.contains("uptime_millis") && !it.contains("class_path") }?.joinToString(),
-      jvmRuntime.lines().filter { !it.contains("uptime_millis") && !it.contains("class_path") }.joinToString()
-    )
-    assertThat(configJvm).contains("Java Virtual Machine Specification")
-    assertThat(configJvm).contains("pid")
-    assertThat(configJvm).contains("vm_name")
-    assertThat(configJvm).contains("vm_vendor")
-    assertThat(configJvm).contains("class_path")
   }
 }
 
@@ -116,14 +96,13 @@ class ConfigMetadataActionSafeTest {
     ConfigTabModeModule(ConfigMetadataAction.ConfigTabMode.SAFE)
   )
 
-  @Inject lateinit var configMetadataAction: ConfigMetadataAction
+  @Inject internal lateinit var configMetadataProvider: Provider<ConfigMetadata>
 
   @Test fun secureModeDoesNotIncludeEffectiveConfigOrRawYamlFiles() {
-    val response = configMetadataAction.getAll()
+    val response = configMetadataProvider.get()
     assertThat(response.resources).doesNotContainKey("Effective Config")
     assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-common.yaml")
     assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-testing.yaml")
-    assertThat(response.resources).containsKey("JVM")
   }
 }
 
@@ -134,13 +113,12 @@ class ConfigMetadataActionRedactedTest {
     ConfigTabModeModule(ConfigMetadataAction.ConfigTabMode.SHOW_REDACTED_EFFECTIVE_CONFIG)
   )
 
-  @Inject lateinit var configMetadataAction: ConfigMetadataAction
+  @Inject internal lateinit var configMetadataProvider: Provider<ConfigMetadata>
 
   @Test fun showEffectiveConfigModeDoesNotIncludeRawYamlFiles() {
-    val response = configMetadataAction.getAll()
+    val response = configMetadataProvider.get()
     assertThat(response.resources).containsKey("Effective Config")
     assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-common.yaml")
     assertThat(response.resources).doesNotContainKey("classpath:/admin-dashboard-app-testing.yaml")
-    assertThat(response.resources).containsKey("JVM")
   }
 }
