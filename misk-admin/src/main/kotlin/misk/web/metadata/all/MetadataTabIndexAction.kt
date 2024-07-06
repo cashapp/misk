@@ -91,9 +91,7 @@ internal class MetadataTabIndexAction @Inject constructor(
               metadata.descriptionBlock(this@build)
             }
 
-            h3("text-xl font-bold my-4") { +"""Metadata""" }
-
-            CodeBlock(metadata.prettyPrint)
+            metadata.contentBlock(this@build)
           }
         }
       }

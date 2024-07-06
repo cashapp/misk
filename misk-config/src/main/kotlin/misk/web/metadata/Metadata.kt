@@ -2,7 +2,10 @@ package misk.web.metadata
 
 import com.squareup.moshi.JsonAdapter
 import kotlinx.html.TagConsumer
+import kotlinx.html.div
+import kotlinx.html.h3
 import misk.tailwind.components.AlertInfoHighlight
+import misk.tailwind.components.CodeBlock
 
 open class Metadata @JvmOverloads constructor(
   /** Metadata object, should be a data class for easy built-in serialization to JSON. */
@@ -23,6 +26,12 @@ open class Metadata @JvmOverloads constructor(
   /** HTML block for description. Can be overridden to show more complex UI or documentation. */
   open fun descriptionBlock(tagConsumer: TagConsumer<*>) = tagConsumer.apply {
     AlertInfoHighlight(message = descriptionString)
+  }
+
+  /** HTML block for the content. Can be overridden to show more complex UI than the default prettyPrint console output. */
+  open fun contentBlock(tagConsumer: TagConsumer<*>) = tagConsumer.apply {
+    h3("text-xl font-bold my-4") { +"""Metadata""" }
+    CodeBlock(prettyPrint)
   }
 }
 
