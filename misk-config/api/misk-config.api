@@ -98,6 +98,7 @@ public class misk/web/metadata/Metadata {
 	public fun <init> (Ljava/lang/Object;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun contentBlock (Lkotlinx/html/TagConsumer;)Lkotlinx/html/TagConsumer;
 	public fun descriptionBlock (Lkotlinx/html/TagConsumer;)Lkotlinx/html/TagConsumer;
 	public final fun getDescriptionString ()Ljava/lang/String;
 	public final fun getMetadata ()Ljava/lang/Object;

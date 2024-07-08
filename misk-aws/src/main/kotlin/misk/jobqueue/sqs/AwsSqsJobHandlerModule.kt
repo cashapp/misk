@@ -11,8 +11,6 @@ import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.jobqueue.JobqueueMetadataProvider
-import misk.web.metadata.MetadataModule
 import kotlin.reflect.KClass
 
 /**
@@ -38,7 +36,6 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
         dependsOn = dependsOn
       ).dependsOn<ReadyService>()
     )
-    install(MetadataModule(JobqueueMetadataProvider()))
   }
 
   companion object {

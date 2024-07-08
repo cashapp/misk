@@ -37,8 +37,8 @@ dependencies {
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-service"))
+  implementation(project(":misk-tailwind"))
   implementation(project(":misk-testing"))
-  implementation(testFixtures(project(":misk-jobqueue")))
 
   testImplementation(libs.assertj)
   testImplementation(libs.awsDynamodb)

@@ -792,7 +792,6 @@ public final class misk/web/metadata/config/ConfigDashboardTabModule : misk/inje
 
 public final class misk/web/metadata/config/ConfigMetadataAction : misk/web/actions/WebAction {
 	public fun <init> ()V
-	public final fun getAll ()Lmisk/web/metadata/config/ConfigMetadataAction$Response;
 }
 
 public final class misk/web/metadata/config/ConfigMetadataAction$ConfigTabMode : java/lang/Enum {
@@ -802,17 +801,6 @@ public final class misk/web/metadata/config/ConfigMetadataAction$ConfigTabMode :
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
 	public static fun values ()[Lmisk/web/metadata/config/ConfigMetadataAction$ConfigTabMode;
-}
-
-public final class misk/web/metadata/config/ConfigMetadataAction$Response {
-	public fun <init> (Ljava/util/Map;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/Map;)Lmisk/web/metadata/config/ConfigMetadataAction$Response;
-	public static synthetic fun copy$default (Lmisk/web/metadata/config/ConfigMetadataAction$Response;Ljava/util/Map;ILjava/lang/Object;)Lmisk/web/metadata/config/ConfigMetadataAction$Response;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getResources ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/web/metadata/database/DatabaseDashboardTabModule : misk/inject/KAbstractModule {
