@@ -82,6 +82,7 @@ class DataSourceService @JvmOverloads constructor(
     hikariConfig.idleTimeout = config.connection_idle_timeout?.toMillis()
       ?: config.connection_max_lifetime.minus(DEFAULT_CONNECTION_IDLE_TIMEOUT_OFFSET).toMillis()
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
+    hikariConfig.keepaliveTime = config.keepalive_time.toMillis()
 
     if (config.type != DataSourceType.VITESS_MYSQL) {
       // Our Hibernate settings expect autocommit to be disabled, see
