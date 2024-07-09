@@ -126,7 +126,7 @@ function FormEnumComponent({
   onChange
 }: FormComponentProps<string>) {
   const enumValues = field.type
-    .replace(">", "")
+    .replace(/>/g, "")
     .substring(5)
     .split(",")
   const protoType = enumValues.shift()
