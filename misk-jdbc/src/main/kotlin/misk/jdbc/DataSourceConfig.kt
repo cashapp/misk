@@ -59,6 +59,7 @@ data class DataSourceConfig @JvmOverloads constructor(
   val connection_idle_timeout: Duration? = null,
   val connection_max_lifetime: Duration = Duration.ofMinutes(1),
   val query_timeout: Duration? = Duration.ofMinutes(1),
+  val keepalive_time: Duration = Duration.ofSeconds(0),
   val migrations_resource: String? = null,
   val migrations_resources: List<String>? = null,
   /**
@@ -311,6 +312,7 @@ data class DataSourceConfig @JvmOverloads constructor(
       this.connection_idle_timeout,
       this.connection_max_lifetime,
       this.query_timeout,
+      this.keepalive_time,
       this.migrations_resource,
       this.migrations_resources,
       this.migrations_resources_exclusion,
