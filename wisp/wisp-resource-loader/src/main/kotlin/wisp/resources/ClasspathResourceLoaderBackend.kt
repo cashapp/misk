@@ -79,10 +79,11 @@ object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
                 val childFilePath = File(entry.name).toPath().normalize()
                 if (!childFilePath.startsWith(Paths.get(pathPrefix))) continue
 
-                var endIndex = entry.name.indexOf("/", pathPrefix.length)
-                if (endIndex == -1) endIndex = entry.name.length
+                val childFilePathStr = childFilePath.toString()
+                var endIndex = childFilePathStr.indexOf("/", pathPrefix.length)
+                if (endIndex == -1) endIndex = childFilePathStr.length
 
-                result += entry.name.substring(pathPrefix.length, endIndex)
+                result += childFilePathStr.substring(pathPrefix.length, endIndex)
             }
         }
         return result
