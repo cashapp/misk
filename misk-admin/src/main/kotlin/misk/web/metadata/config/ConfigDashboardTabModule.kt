@@ -2,7 +2,6 @@ package misk.web.metadata.config
 
 import misk.inject.KAbstractModule
 import misk.jvm.JvmManagementFactoryModule
-import misk.web.WebActionModule
 import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.DashboardModule
@@ -24,12 +23,8 @@ class ConfigDashboardTabModule @JvmOverloads constructor(
   private val mode: ConfigMetadataAction.ConfigTabMode = SAFE,
 ) : KAbstractModule() {
   override fun configure() {
-    install(JvmManagementFactoryModule())
-
     bind<ConfigMetadataAction.ConfigTabMode>().toInstance(mode)
     bind<ConfigMetadata>().toProvider(ConfigMetadataProvider())
-    bind<JvmMetadata>().toProvider(JvmMetadataProvider())
-    install(WebActionModule.create<ConfigMetadataAction>())
 
     install(
       DashboardModule.createMenuLink<AdminDashboard, AdminDashboardAccess>(
@@ -39,16 +34,8 @@ class ConfigDashboardTabModule @JvmOverloads constructor(
       )
     )
 
-    // TODO delete the old Misk-Web tab after testing in real environments to confirm Metadata tab is sufficient drop-in replacement
-    install(
-      DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
-        isDevelopment = isDevelopment,
-        slug = "config",
-        urlPathPrefix = "/_admin/config/",
-        developmentWebProxyUrl = "http://localhost:3200/",
-        menuLabel = "Config v1",
-        menuCategory = "Container Admin"
-      )
-    )
+    // TODO Maybe split this out into its own module? Don't tightly couple with config anymore
+    bind<JvmMetadata>().toProvider(JvmMetadataProvider())
+    install(JvmManagementFactoryModule())
   }
 }
