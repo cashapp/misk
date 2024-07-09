@@ -4,6 +4,7 @@ import okio.BufferedSource
 import okio.buffer
 import okio.source
 import java.io.File
+import java.nio.file.Paths
 import java.util.jar.JarFile
 
 /**
@@ -76,7 +77,7 @@ object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
                 // Verify that the normalized file path still has the correct prefix
                 // This is to fix a security vulnerability where a zip file may contain file entries such as "..\sneaky-file"
                 val childFilePath = File(entry.name).toPath().normalize()
-                if (!childFilePath.startsWith(pathPrefix)) continue
+                if (!childFilePath.startsWith(Paths.get(pathPrefix))) continue
 
                 var endIndex = entry.name.indexOf("/", pathPrefix.length)
                 if (endIndex == -1) endIndex = entry.name.length
