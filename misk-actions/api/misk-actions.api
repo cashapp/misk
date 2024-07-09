@@ -132,9 +132,6 @@ public class misk/exceptions/WebActionException : java/lang/RuntimeException {
 	public final fun isServerError ()Z
 }
 
-public abstract interface annotation class misk/security/authz/AllowAnyService : java/lang/annotation/Annotation {
-}
-
 public abstract interface annotation class misk/security/authz/Authenticated : java/lang/annotation/Annotation {
 	public abstract fun allowAnyService ()Z
 	public abstract fun allowAnyUser ()Z

@@ -26,11 +26,3 @@ annotation class Authenticated(
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class Unauthenticated
-
-/**
- * Annotation indicating that any authenticated service is allowed to access this endpoint.
- */
-@Deprecated("Use Authenticated(allowAnyService = true) instead.")
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class AllowAnyService

@@ -6,12 +6,16 @@ import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import jakarta.inject.Inject
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.logging.LogCollectorModule
 import misk.scope.ActionScoped
 import misk.security.authz.AccessAnnotationEntry
 import misk.security.authz.AccessControlModule
+import misk.security.authz.Authenticated
+import misk.security.authz.ExcludeFromAllowAnyService
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.authz.Unauthenticated
@@ -25,11 +29,6 @@ import misk.web.WebServerTestingModule
 import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import jakarta.inject.Inject
-import misk.logging.LogCollectorModule
-import misk.security.authz.AllowAnyService
-import misk.security.authz.Authenticated
-import misk.security.authz.ExcludeFromAllowAnyService
 
 // Common module for web action-related tests to use that bind up some sample web actions
 class TestWebActionModule : KAbstractModule() {
@@ -174,7 +173,7 @@ class AllowAnyServiceAccessAction @Inject constructor() : WebAction {
 
   @Get("/allow_any_service_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-  @AllowAnyService
+  @Authenticated(allowAnyService = true)
   fun get() = "${scopedCaller.get()} authorized as any service".toResponseBody()
 }
 
@@ -184,8 +183,7 @@ class AllowAnyServicePlusAuthenticatedAccessAction @Inject constructor() : WebAc
 
   @Get("/allow_any_service_plus_authenticated")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-  @AllowAnyService
-  @Authenticated(services = ["web-proxy"], capabilities = ["admin"])
+  @Authenticated(services = ["web-proxy"], capabilities = ["admin"], allowAnyService = true)
   fun get() = "${scopedCaller.get()} authorized as any service".toResponseBody()
 }
 
