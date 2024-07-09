@@ -7,7 +7,7 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
-Version 2024.07.05?
+Version 2024.07.09
 ---------------------------------
 Breaking changes:
 - Remove `@AllowAnyService` annotation (which has been deprecated for months, was rarely used, and has no more internal usage), use `@Authenticated(allowAnyService = true)` instead. 
