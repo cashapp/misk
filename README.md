@@ -49,7 +49,7 @@ It has been powering hundreds of microservices within Cash App since 2018.
     * Integration with prometheus
     * Built-in metrics for JVM performance, networking and connection pooling
 * Testing framework with annotations
-* Kotlin utilities with minimal dependencies: Wisp
+* Kotlin utilities with minimal dependencies: [Wisp](wisp/README.md)
 
 ## What's Next?
 Want to jump right into it? Check out our [Getting Started Guide](./docs/getting-started.md).
