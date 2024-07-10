@@ -7,6 +7,16 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+Version 2024.07.09
+---------------------------------
+Breaking changes:
+- Remove `@AllowAnyService` annotation (which has been deprecated for months, was rarely used, and has no more internal usage), use `@Authenticated(allowAnyService = true)` instead. 
+- Remove support for empty `@Authenticated` annotation, explicit passing of non-empty parameters `capabilities, users, allowAnyUser, or allowAnyService` is now required. Instead of the existing soft-failure error log behavior, an IllegalArgumentException will be thrown if the annotation constructor is empty.
+- Empty authentication **allow all** policy has now been changed to **deny all**.
+  - Empty Authentication annotation constructors previously would result in an **allow all** policy to any authenticated user or service. 
+  - That default has changed. Now, an empty capabilities and empty services list will **deny all** authenticated users or services. 
+  - In practice, this grants a new verb to Misk's access annotation language, that of a web action which is installed but no user or service is allowed to access, which is now set with `@Authenticated` (empty constructor).
+
 Version 2024.05.22
 ---------------------------------
 Breaking changes:
