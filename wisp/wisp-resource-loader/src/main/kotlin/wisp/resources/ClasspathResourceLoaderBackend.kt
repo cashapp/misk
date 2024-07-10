@@ -77,12 +77,12 @@ object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
                 // Verify that the normalized file path still has the correct prefix
                 // This is to fix a security vulnerability where a zip file may contain file entries such as "..\sneaky-file"
                 val childFilePath = File(entry.name).toPath().normalize()
-                if (!childFilePath.startsWith(Paths.get(pathPrefix))) continue
+                val prefixFilePath = Paths.get(pathPrefix)
+                if (!childFilePath.startsWith(prefixFilePath)) continue
 
-                var endIndex = entry.name.indexOf("/", pathPrefix.length)
-                if (endIndex == -1) endIndex = entry.name.length
-
-                result += entry.name.substring(pathPrefix.length, endIndex)
+                if (childFilePath.nameCount > prefixFilePath.nameCount) {
+                    result += childFilePath.getName(prefixFilePath.nameCount).toString()
+                }
             }
         }
         return result
