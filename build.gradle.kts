@@ -2,6 +2,10 @@ import com.vanniktech.maven.publish.SonatypeHost
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.STARTED
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -246,10 +250,21 @@ subprojects {
 
   tasks.withType<Test> {
     useJUnitPlatform()
-    testLogging {
-      events("started", "passed", "skipped", "failed")
-      exceptionFormat = TestExceptionFormat.FULL
-      showStandardStreams = false
+
+    val enableLogging = project.findProperty("misk.test.logging")?.toString().toBoolean()
+
+    if (enableLogging) {
+      testLogging {
+        events = setOf(STARTED, PASSED, SKIPPED, FAILED)
+        exceptionFormat = TestExceptionFormat.FULL
+        showExceptions = true
+      }
+    } else {
+      testLogging {
+        showStandardStreams = false
+        exceptionFormat = TestExceptionFormat.SHORT
+        showExceptions = false
+      }
     }
   }
 
