@@ -251,7 +251,7 @@ subprojects {
   tasks.withType<Test> {
     useJUnitPlatform()
 
-    val enableLogging = project.findProperty("misk.test.logging")?.toString()?.toBoolean() ?: true
+    val enableLogging = project.findProperty("misk.test.logging")?.toString().toBoolean()
 
     if (enableLogging) {
       testLogging {
