@@ -127,19 +127,34 @@ val testShardRedis = tasks.register("testShardRedis") {
   description = "These tests use redis and thus can't run in parallel"
 }
 
-val testShardHibernate = tasks.register("testShardHibernate") {
+val testShardHibernate1 = tasks.register("testShardHibernate1") {
   group = "Continuous integration"
   description = "These tests use a DB and thus can't run in parallel"
 }
 
-val hibernateProjects = listOf(
+val testShardHibernate2 = tasks.register("testShardHibernate2") {
+  group = "Continuous integration"
+  description = "These tests use a DB and thus can't run in parallel"
+}
+
+// I've split the hibernate-requiring projects into two groups
+// that should take roughly the same amount of time, based on
+// a recent build scan:
+// https://scans.gradle.com/s/lchid7o4myy7m/tests/overview?toggled=WyI6bWlzay1qZGJjOnRlc3QtMCIsIjptaXNrLWhpYmVybmF0ZTp0ZXN0LTEiLCI6bWlzay1hd3M6dGVzdC0yIiwiOm1pc2stc3FsZGVsaWdodDp0ZXN0LTMiLCI6bWlzay1ldmVudHM6dGVzdC00IiwiOm1pc2stam9icXVldWU6dGVzdC01IiwiOm1pc2stcmF0ZS1saW1pdGluZy1idWNrZXQ0ai1teXNxbDp0ZXN0LTYiXQ
+// If we ever need to fiddle with this again we should do this in
+// a more dynamic way.
+
+val hibernateProjects1 = listOf(
   "misk-aws",
+  "misk-hibernate",
+)
+
+val hibernateProjects2 = listOf(
   "misk-events",
   "misk-jobqueue",
   "misk-jobqueue-testing",
   "misk-jdbc",
   "misk-jdbc-testing",
-  "misk-hibernate",
   "misk-hibernate-testing",
   "misk-rate-limiting-bucket4j-mysql",
   "misk-sqldelight"
@@ -245,8 +260,10 @@ subprojects {
 
   plugins.withType<BasePlugin> {
     val subproj = project
-    if (hibernateProjects.contains(project.name)) {
-      testShardHibernate.configure { dependsOn("${subproj.path}:check") }
+    if (hibernateProjects1.contains(project.name)) {
+      testShardHibernate1.configure { dependsOn("${subproj.path}:check") }
+    } else if (hibernateProjects2.contains(project.name)) {
+      testShardHibernate2.configure { dependsOn("${subproj.path}:check") }
     } else if (redisProjects.contains(project.name)) {
       testShardRedis.configure { dependsOn("${subproj.path}:check") }
     } else {
