@@ -1,8 +1,8 @@
 package misk.gradle.schemamigrator
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import org.assertj.core.api.Assertions.assertThat
-import org.gradle.internal.impldep.com.zaxxer.hikari.HikariConfig
-import org.gradle.internal.impldep.com.zaxxer.hikari.HikariDataSource
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import java.io.File
