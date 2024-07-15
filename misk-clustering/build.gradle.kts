@@ -18,7 +18,7 @@ dependencies {
   implementation(libs.kubernetesClient)
   implementation(libs.kubernetesClientApi)
   implementation(libs.okHttp)
-  implementation(project(":wisp:wisp-lease"))
+  api(project(":wisp:wisp-lease"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk-core"))
   implementation(project(":misk-lease"))
