@@ -7,6 +7,91 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+2024 Q2 Summary
+===
+
+Misk had a [busy quarter](https://github.com/cashapp/misk/graphs/contributors?from=2024-04-01&to=2024-06-30&type=c) with 98 PRs merged (over one per day!) from over 30 contributors. 
+
+From their efforts, numerous bug fixes, API improvements, and net-new functionality is now available to the growing community of developers building services with Misk.
+
+Thank you Misk Contributors!
+---
+
+Misk has an active community of contributors giving back by upstreaming improvements, often motivated by their own experience building and operating Misk services. 
+
+- 5 New Contributors: @addissemagn, @brunofrts, @nliblock, @jessejacksonafterpay, @kalyancash
+- 2 External Contributors: @JGulbronson – Faire, @mgulbronson – Faire
+- 23 Repeat Contributors: @adrw, @yyuan-squareup, @staktrace, @jvmakine, @mmollaverdi, @traviscj, @SeabertYu, @mslogar-squareup, @keeferrourke, @frojasg, @damar-block, @sahilm, @afkelsall, @RONNCC, @mhickman, @mericson-square, @ean5533, @din-cashapp, @katukota, @aparajon, @mpeyper, @rainecp, @aerb
+- Contributors submitted changes and improvements in the following Misk domains: Admin, API, Build, Code Cleanup, Debugging Tools, Dependency Upgrades, Documentation, JobQueue, Redis, TestFixtures Migration, & UI
+
+Thanks to all who made Misk a better framework this quarter!
+
+Showcase: The New Misk UI Stack
+---
+
+Over the past year, the Misk admin dashboard has migrated to a new UI stack: kotlinx.html, Hotwire, and Tailwind UI.
+
+This stack doesn't have a dedicated web build (ie. npm node modules, webpack...) and has proven to be a lightweight, developer friendly stack for quickly shipping and maintaining simple UI from your Misk service. Builds are automatically part of your usual Gradle Misk Kotlin build which makes local development and CI builds fast and simple.
+
+> "Having a quick and easy way (for a backend eng 😅) to create custom UI is a power tool in your toolkit! It has helped us to creates internal utilities that makes operating and validate our services a walk in the park. I was able to successfully ship some new UI in one morning!" – @frojasg
+
+![Guice Metadata built on the new Misk UI stack](./docs/img/2024-07-05-misk-metadata-guice.png)
+
+Developers have been surprised how fast they can ramp up and ship UI from their service, on the order of a few hours one morning, instead of a few weeks (or months) to build a full JS frontend app. 
+
+See the [Exemplar service code](https://github.com/cashapp/misk/blob/master/samples/exemplar/src/main/kotlin/com/squareup/exemplar/dashboard/ExemplarDashboardModule.kt) in the repo for full examples of the new UI stack in use for building dedicated frontend apps, admin dashboard tabs, and more.
+
+Showcase: New Metadata tab in the Misk admin dashboard
+---
+
+![Config Metadata](./docs/img/2024-07-05-misk-metadata-config.png)
+
+The new Metadata tab makes it easy to expose information from all parts of your running service. Find it at `/_admin/metadata/`!
+
+- Service owners can more easily debug code issues vs connectivity issues.
+- Platform teams can expose data through the UI or metadata API with [<50 LOC and no HTML](https://github.com/cashapp/misk/pull/3309).
+- Security teams can now audit internal infrastructure configuration across all Misk services easily.
+
+![Service Graph Metadata](./docs/img/2024-07-05-misk-metadata-service-graph.png)
+
+The Metadata tab already includes the following information:
+
+- Configured backfills with [Backfila](https://github.com/cashapp/backfila/pull/392)
+- Eventing Kafka topics produced or consumed
+- Config YAML ([replacing the existing Config tab](https://github.com/cashapp/misk/pull/3312))
+- JVM settings
+- Guava service graph
+- Guice bindings
+- Cron jobs
+- ...and more to come (PRs are welcome!)
+
+If you want to expose more metadata from Misk or your internal library or service, [see the Exemplar service code](https://github.com/cashapp/misk/pull/3355).
+
+Showcase: New requireRequest utility APIs
+---
+
+A common pattern in request validation is ensuring non-null request fields and throwing a BadRequestException otherwise. The new `requireRequestNotNull` utility API does this in a single line, reducing boilerplate and making the code more readable.
+
+**Before**
+
+```kotlin
+requireRequest(request.parameter != null) { "parameter must not be null" }
+
+// later, safe do because of previous null check
+request.parameter!!
+```
+
+**After**
+
+```kotlin
+requireRequestNotNull(request.parameter) { "parameter must not be null" }
+
+// later - no need for !!
+request.parameter
+```
+
+Misk is open for PRs if there are other broad usage utility functions which would be beneficial to offer to all users of Misk.
+
 Version 2024.07.09
 ---------------------------------
 Breaking changes:

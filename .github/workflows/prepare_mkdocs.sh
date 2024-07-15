@@ -52,8 +52,15 @@ done
 echo "Fix docs/ relative links in special files"
 dir="docs"
 find "$dir" -name '*.md' -print0 | while IFS= read -r -d '' file; do
+  # Fix markdown links
   # Use sed to replace the links and store the result in a variable
   modified_content=$(sed -E 's|\(\./docs/(.*).md\)|(\1.md)|g' "$file")
+  # Echo the modified content back into the file
+  echo "$modified_content" > "$file"
+
+  # Fix image references
+  # Use sed to replace the links and store the result in a variable
+  modified_content=$(sed -E 's|\(\./docs/(.*).png\)|(\1.png)|g' "$file")
   # Echo the modified content back into the file
   echo "$modified_content" > "$file"
 done
