@@ -30,6 +30,7 @@ dependencies {
 
   testImplementation(gradleTestKit())
   testImplementation(libs.assertj)
+  testImplementation(libs.hikariCp)
   testImplementation(libs.junitApi)
 }
 
