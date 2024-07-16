@@ -5,6 +5,7 @@ import com.google.inject.Provides
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
+import com.launchdarkly.sdk.server.integrations.EventProcessorBuilder.DEFAULT_CAPACITY
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import io.micrometer.core.instrument.MeterRegistry
@@ -65,7 +66,7 @@ class LaunchDarklyModule @JvmOverloads constructor(
       // Set wait to 0 to not block here. Block in service initialization instead.
       .startWait(Duration.ofMillis(0))
       .dataSource(Components.streamingDataSource())
-      .events(Components.sendEvents())
+      .events(Components.sendEvents().capacity(config.event_capacity ?: DEFAULT_CAPACITY))
 
     if (config.use_relay_proxy) {
       ldConfig.serviceEndpoints(
@@ -95,4 +96,5 @@ data class LaunchDarklyConfig @JvmOverloads constructor(
   val base_uri: String,
   val use_relay_proxy: Boolean = true,
   val ssl: HttpClientSSLConfig? = null,
+  val event_capacity: Int? = null
 ) : Config
