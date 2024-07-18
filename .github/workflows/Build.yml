@@ -96,11 +96,6 @@ jobs:
           cat gradle.properties
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Build Misk Web
-        run: |
-          npm install -g @misk/cli
-          miskweb ci-build -e
-
       - name: Publish the artifacts
         run: |
           gradle clean publish --stacktrace
