@@ -94,7 +94,7 @@ abstract class MiskWebBuildTask @Inject constructor(
   fun buildTabs() {
     val rootFile = rootDir.asFile.get()
 
-    logger.quiet("Running miskweb build...")
+    logger.lifecycle("Running miskweb build...")
 
     val npmPath = rootFile.resolve("bin/npm").absolutePath
     val npmInstallResult = ExecOperationsHelper(execOps).exec(
@@ -131,7 +131,7 @@ abstract class MiskWebBuildTask @Inject constructor(
     logger.quiet(miskWebBuildResult.stdOut)
     miskWebBuildResult.assertNormalExitValue()
 
-    logger.quiet("Miskweb build complete!")
+    logger.lifecycle("Miskweb build complete!")
   }
 }
 
@@ -161,6 +161,10 @@ val buildMiskWeb = tasks.register("buildMiskWeb", MiskWebBuildTask::class.java) 
   rootDir.set(project.rootDir)
   inputFiles.setFrom(inputs)
   outputFiles.setFrom(outputs)
+}
+
+tasks.named { it == "explodeCodeSourceMain" }.configureEach {
+  dependsOn(buildMiskWeb)
 }
 
 tasks.named("processResources").configure {
