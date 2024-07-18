@@ -32,6 +32,10 @@ dependencies {
   testImplementation(libs.junitApi)
 }
 
+tasks.withType<Test> {
+  dependsOn(":startRedis")
+}
+
 mavenPublishing {
   configure(
     KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
