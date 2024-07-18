@@ -45,8 +45,7 @@ jobs:
     strategy:
       matrix:
         cmd:
-          - gradle testShardHibernate1 -i --scan --no-parallel
-          - gradle testShardHibernate2 -i --scan --no-parallel
+          - gradle testShardHibernate -i --scan --no-parallel
           - gradle testShardRedis -i --scan --no-parallel
           - gradle testShardNonHibernate -i --scan --parallel
 
