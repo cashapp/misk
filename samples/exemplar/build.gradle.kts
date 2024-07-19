@@ -4,7 +4,7 @@ plugins {
   id("application")
 }
 
-val applicationMainClass = "com.squareup.chat.ChatServiceKt"
+val applicationMainClass = "com.squareup.exemplar.ExemplarServiceKt"
 application {
   mainClass.set(applicationMainClass)
 }
