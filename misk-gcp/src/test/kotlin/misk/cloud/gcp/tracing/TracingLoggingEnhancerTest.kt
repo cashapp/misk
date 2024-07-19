@@ -6,6 +6,7 @@ import datadog.opentracing.DDTracer
 import ddtrot.dd.trace.common.writer.Writer
 import ddtrot.dd.trace.core.DDSpan
 import io.opentracing.noop.NoopTracerFactory
+import io.opentracing.util.GlobalTracer
 import misk.testing.MiskTest
 import wisp.tracing.traceWithSpan
 import org.assertj.core.api.Assertions.assertThat
@@ -14,9 +15,8 @@ import org.junit.jupiter.api.Test
 @MiskTest
 class TracingLoggingEnhancerTest {
   @Test fun enhanceDatadogTracer() {
-    val tracer = DDTracer.builder()
-      .writer(NoopWriter())
-      .build()
+    GlobalTracer.registerIfAbsent(DDTracer.builder().writer(NoopWriter()).build())
+    val tracer = GlobalTracer.get()
     tracer.traceWithSpan("test span") {
       val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
 

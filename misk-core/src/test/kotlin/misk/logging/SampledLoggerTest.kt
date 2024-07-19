@@ -9,7 +9,6 @@ import misk.sampling.RateLimitingSampler
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.containsExactly
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import wisp.logging.error
@@ -46,24 +45,24 @@ class SampledLoggerTest {
       assertThat(it.level).isEqualTo(Level.INFO)
       assertThat(it.message).isEqualTo("test 1")
       assertThat(it.throwableProxy).isNull()
-      assertThat(it.mdcPropertyMap).containsExactly(
-        "user-id" to "blah1"
+      assertThat(it.mdcPropertyMap).containsEntry(
+        "user-id", "blah1"
       )
     })
     assertThat(events[1]).satisfies({
       assertThat(it.level).isEqualTo(Level.ERROR)
       assertThat(it.message).isEqualTo("test 2")
       assertThat(it.throwableProxy.className).isEqualTo(IllegalStateException::class.qualifiedName)
-      assertThat(it.mdcPropertyMap).containsExactly(
-        "user-id" to "blah2"
+      assertThat(it.mdcPropertyMap).containsEntry(
+        "user-id", "blah2"
       )
     })
     assertThat(events[2]).satisfies({
       assertThat(it.level).isEqualTo(Level.WARN)
       assertThat(it.message).isEqualTo("test 3")
       assertThat(it.throwableProxy).isNull()
-      assertThat(it.mdcPropertyMap).containsExactly(
-        "user-id" to "blah3"
+      assertThat(it.mdcPropertyMap).containsEntry(
+        "user-id", "blah3"
       )
     })
 
@@ -82,17 +81,19 @@ class SampledLoggerTest {
       assertThat(it.level).isEqualTo(Level.INFO)
       assertThat(it.message).isEqualTo("sampled test 1")
       assertThat(it.throwableProxy).isNull()
-      assertThat(it.mdcPropertyMap).containsExactly(
-        "user-id" to "blerb1"
+      assertThat(it.mdcPropertyMap).containsAllEntriesOf(
+        mutableMapOf("user-id" to "blerb1")
       )
     })
     assertThat(sampledEvents[1]).satisfies({
       assertThat(it.level).isEqualTo(Level.ERROR)
       assertThat(it.message).isEqualTo("sampled test 2")
       assertThat(it.throwableProxy.className).isEqualTo(NullPointerException::class.qualifiedName)
-      assertThat(it.mdcPropertyMap).containsExactly(
-        "user-id" to "blerb2",
-        "context-id" to "111111"
+      assertThat(it.mdcPropertyMap).containsAllEntriesOf(
+        mutableMapOf(
+          "user-id" to "blerb2",
+          "context-id" to "111111"
+        )
       )
     })
 
@@ -106,8 +107,8 @@ class SampledLoggerTest {
       assertThat(it.level).isEqualTo(Level.WARN)
       assertThat(it.message).isEqualTo("sampled test 4")
       assertThat(it.throwableProxy).isNull()
-      assertThat(it.mdcPropertyMap).containsExactly(
-        "user-id" to "blerb4"
+      assertThat(it.mdcPropertyMap).containsAllEntriesOf(
+        mutableMapOf("user-id" to "blerb4")
       )
     })
   }

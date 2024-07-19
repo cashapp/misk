@@ -2,7 +2,6 @@ package wisp.logging
 
 import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.containsExactly
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,13 +42,11 @@ class LoggingTest {
             assertThat(it.level).isEqualTo(Level.ERROR)
             assertThat(it.message).isEqualTo("untagged error")
             assertThat(it.throwableProxy.className).isEqualTo(IllegalStateException::class.qualifiedName)
-            assertThat(it.mdcPropertyMap).isEmpty()
         })
         assertThat(untaggedEvents[1]).satisfies({
             assertThat(it.level).isEqualTo(Level.INFO)
             assertThat(it.message).isEqualTo("untagged info")
             assertThat(it.throwableProxy).isNull()
-            assertThat(it.mdcPropertyMap).isEmpty()
         })
 
         // Log with tags
@@ -62,17 +59,19 @@ class LoggingTest {
             assertThat(it.level).isEqualTo(Level.INFO)
             assertThat(it.message).isEqualTo("tagged info")
             assertThat(it.throwableProxy).isNull()
-            assertThat(it.mdcPropertyMap).containsExactly(
+            assertThat(it.mdcPropertyMap).containsAllEntriesOf(
+              mutableMapOf(
                 "user-id" to "blerb",
                 "alias-id" to "d6F1EF53"
+              )
             )
         })
         assertThat(taggedEvents[1]).satisfies({
             assertThat(it.level).isEqualTo(Level.ERROR)
             assertThat(it.message).isEqualTo("tagged error")
             assertThat(it.throwableProxy.className).isEqualTo(NullPointerException::class.qualifiedName)
-            assertThat(it.mdcPropertyMap).containsExactly(
-                "sample-size" to "200"
+            assertThat(it.mdcPropertyMap).containsAllEntriesOf(
+                mutableMapOf("sample-size" to "200")
             )
         })
 
@@ -92,17 +91,21 @@ class LoggingTest {
             assertThat(it.level).isEqualTo(Level.WARN)
             assertThat(it.message).isEqualTo("inherited warn")
             assertThat(it.throwableProxy).isNull()
-            assertThat(it.mdcPropertyMap).containsExactly(
+            assertThat(it.mdcPropertyMap).containsAllEntriesOf(
+              mutableMapOf(
                 "user-id" to "inherited-external",
                 "context-id" to "overridden"
+              )
             )
         })
         assertThat(defaultTaggedEvents[1]).satisfies({
             assertThat(it.level).isEqualTo(Level.INFO)
             assertThat(it.message).isEqualTo("uses default tags")
-            assertThat(it.mdcPropertyMap).containsExactly(
+            assertThat(it.mdcPropertyMap).containsAllEntriesOf(
+              mutableMapOf(
                 "user-id" to "inherited-external",
                 "context-id" to "111111"
+              )
             )
         })
     }

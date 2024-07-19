@@ -4,6 +4,7 @@ import datadog.opentracing.DDTracer
 import ddtrot.dd.trace.common.writer.Writer
 import ddtrot.dd.trace.core.DDSpan
 import io.opentracing.mock.MockTracer
+import io.opentracing.util.GlobalTracer
 import net.ttddyy.dsproxy.transform.TransformInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -23,9 +24,8 @@ class SpanInjectorTest {
 
   @Test
   fun testDatadog() {
-    val tracer = DDTracer.builder()
-        .writer(NoopWriter())
-        .build();
+    GlobalTracer.registerIfAbsent(DDTracer.builder().writer(NoopWriter()).build())
+    val tracer = GlobalTracer.get()
     val span = tracer.buildSpan("operation").start()
     tracer.activateSpan(span).use { _ ->
       val config = DataSourceConfig(DataSourceType.VITESS_MYSQL)
@@ -48,7 +48,7 @@ class NoopWriter : Writer {
   override fun close() {
   }
 
-  override fun flush() : Boolean {
+  override fun flush(): Boolean {
     return true
   }
 
