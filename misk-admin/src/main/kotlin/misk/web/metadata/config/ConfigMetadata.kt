@@ -14,6 +14,7 @@ import misk.tailwind.components.CodeBlock
 import misk.tailwind.components.ToggleContainer
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
+import wisp.config.Config
 import wisp.deployment.Deployment
 
 internal data class ConfigMetadata(
@@ -103,7 +104,7 @@ internal data class ConfigMetadata(
 internal class ConfigMetadataProvider : MetadataProvider<ConfigMetadata> {
   @Inject @AppName private lateinit var appName: String
   @Inject private lateinit var deployment: Deployment
-  @Inject private lateinit var config: wisp.config.Config
+  @Inject private lateinit var config: Config
   @Inject private lateinit var mode: ConfigMetadataAction.ConfigTabMode
 
   override val id: String = "config"
@@ -115,7 +116,7 @@ internal class ConfigMetadataProvider : MetadataProvider<ConfigMetadata> {
   private fun generateConfigResources(
     appName: String,
     deployment: Deployment,
-    config: wisp.config.Config
+    config: Config
   ): Map<String, String?> {
     // TODO: Need to figure out how to get the overrides (ie. k8s /etc/secrets, database override...).
     val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())

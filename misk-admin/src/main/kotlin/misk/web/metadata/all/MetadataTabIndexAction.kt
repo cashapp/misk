@@ -14,7 +14,6 @@ import kotlinx.html.option
 import kotlinx.html.select
 import kotlinx.html.span
 import misk.tailwind.components.AlertError
-import misk.tailwind.components.CodeBlock
 import misk.web.Get
 import misk.web.QueryParam
 import misk.web.ResponseContentType
@@ -37,7 +36,7 @@ internal class MetadataTabIndexAction @Inject constructor(
   ): String = dashboardPageLayout
     .newBuilder()
     .build { _, _, _ ->
-      val allMetadata = allMetadataAction.getAll("all").all
+      val allKeys = allMetadataAction.allKeys
       val metadata = allMetadataAction.getAll(q).all.values.firstOrNull()
 
       div("container mx-auto p-8") {
@@ -58,7 +57,7 @@ internal class MetadataTabIndexAction @Inject constructor(
                 +""
               }
 
-              allMetadata.keys.sorted().forEach { key ->
+              allKeys.forEach { key ->
                 option {
                   if (q == key) {
                     selected = true
