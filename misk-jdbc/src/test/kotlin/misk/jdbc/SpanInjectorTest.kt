@@ -1,17 +1,31 @@
 package misk.jdbc
 
-import datadog.opentracing.DDTracer
-import ddtrot.dd.trace.common.writer.Writer
-import ddtrot.dd.trace.core.DDSpan
 import io.opentracing.mock.MockTracer
 import io.opentracing.util.GlobalTracer
 import net.ttddyy.dsproxy.transform.TransformInfo
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
 import javax.sql.DataSource
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SpanInjectorTest {
+
+  private val tracer = MockTracer()
+
+  @BeforeAll
+  fun initClass() {
+    GlobalTracer.registerIfAbsent(tracer)
+  }
+
+  @BeforeEach
+  fun setup() {
+    tracer.reset()
+  }
+
   @Test
   fun testDecoratesIfItsVitessMysql() {
     val tracer = MockTracer()
@@ -24,7 +38,6 @@ class SpanInjectorTest {
 
   @Test
   fun testDatadog() {
-    GlobalTracer.registerIfAbsent(DDTracer.builder().writer(NoopWriter()).build())
     val tracer = GlobalTracer.get()
     val span = tracer.buildSpan("operation").start()
     tracer.activateSpan(span).use { _ ->
@@ -35,23 +48,5 @@ class SpanInjectorTest {
       val result = injector.transformQuery(transformInfo)
       assertThat(result).contains(span.context().toTraceId())
     }
-  }
-}
-
-class NoopWriter : Writer {
-  override fun start() {
-  }
-
-  override fun write(trace: MutableList<DDSpan>?) {
-  }
-
-  override fun close() {
-  }
-
-  override fun flush(): Boolean {
-    return true
-  }
-
-  override fun incrementDropCounts(p0: Int) {
   }
 }
