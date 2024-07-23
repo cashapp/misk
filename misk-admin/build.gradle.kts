@@ -116,6 +116,7 @@ abstract class MiskWebBuildTask @Inject constructor(
     // Per the Node docs (https://docs.npmjs.com/cli/v10/configuring-npm/folders#executables),
     // executables are installed in 'node_modules/.bin'.
     val nodeModulesBin = rootFile.resolve("node_modules/.bin").absolutePath
+    val hermitBin = rootFile.resolve("bin").absolutePath
     val miskWebPath = rootFile.resolve("node_modules/.bin/miskweb").absolutePath
     val miskWebBuildResult = ExecOperationsHelper(execOps).exec(
       miskWebPath, "ci-build", "-e",
@@ -127,7 +128,7 @@ abstract class MiskWebBuildTask @Inject constructor(
       // We need miskweb to be on the PATH. In some environments we have multiple hermit environments
       // and the misk hermit env is not the one that is active, so the misk/node_modules/.bin folder
       // isn't automatically on the PATH. Let's add it explicitly to make sure it's there.
-      environment(mapOf("PATH" to "$nodeModulesBin:${environment["PATH"]}"))
+      environment(mapOf("PATH" to "$nodeModulesBin:$hermitBin:${environment["PATH"]}"))
     }
     logger.quiet("Ran $miskWebPath from ${miskWebBuildResult.workingDir}")
     logger.quiet(miskWebBuildResult.stdOut)
