@@ -47,7 +47,7 @@ export default function TabContainer() {
         <H1 style={{ margin: 0 }}>Web Actions</H1>
         <Spacer size="small" />
         <p style={{ margin: 0 }}>
-          Direct any feedback to #misk-web-discuss. You can access the v1
+          Direct any feedback to #misk-ui-discuss. You can access the v1
           version <a href="/_admin/web-actions-v1/">here.</a>
         </p>
       </div>
