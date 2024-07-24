@@ -7,7 +7,7 @@ import misk.cloud.aws.AwsRegion
 import misk.jobqueue.QueueName
 
 /** [ResolvedQueue] provides information needed to reach an SQS queue */
-internal class ResolvedQueue(
+class ResolvedQueue internal constructor(
   val name: QueueName,
   val sqsQueueName: QueueName,
   val url: String,

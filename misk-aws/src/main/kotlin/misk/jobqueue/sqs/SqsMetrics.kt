@@ -11,7 +11,7 @@ import jakarta.inject.Singleton
  * for queues both client-side and on SQS with the same label.
  */
 @Singleton
-internal class SqsMetrics @Inject internal constructor(metrics: Metrics) {
+class SqsMetrics @Inject internal constructor(metrics: Metrics) {
   val jobsEnqueued = metrics.counter(
     "jobs_enqueued_total",
     "total # of jobs sent to a queueName",

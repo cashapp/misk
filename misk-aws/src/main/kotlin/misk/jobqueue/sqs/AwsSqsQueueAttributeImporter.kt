@@ -11,7 +11,7 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 import jakarta.inject.Inject
 
-internal class AwsSqsQueueAttributeImporter @Inject constructor(
+class AwsSqsQueueAttributeImporter @Inject internal constructor(
   private val config: AwsSqsJobQueueConfig,
   private val leaseManager: LeaseManager,
   private val metrics: SqsMetrics,

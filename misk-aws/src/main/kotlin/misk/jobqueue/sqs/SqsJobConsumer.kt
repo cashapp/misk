@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Singleton
-internal class SqsJobConsumer @Inject internal constructor(
+class SqsJobConsumer @Inject internal constructor(
   @ForSqsHandling private val handlingThreads: ExecutorService,
   @ForSqsHandling private val taskQueue: RepeatedTaskQueue,
   @ForSqsReceiving private val receivingThreads: ExecutorService,
