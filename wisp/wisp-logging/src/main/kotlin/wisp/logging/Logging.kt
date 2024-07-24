@@ -98,7 +98,10 @@ fun KLogger.log(level: Level, th: Throwable, vararg tags: Tag, message: () -> An
     }
 }
 
-fun withTags(vararg tags: Tag, f: () -> Unit) {
+@Deprecated("Prefer withLoggingContext", ReplaceWith("withLoggingContext(*tags) { f() }"))
+fun withTags(vararg tags: Tag, f: () -> Unit) = withLoggingContext(*tags) { f() }
+
+fun <T> withLoggingContext(vararg tags: Tag, f: () -> T): T {
     // Establish MDC, saving prior MDC
     val priorMDC = tags.map { (k, v) ->
         val priorValue = MDC.get(k)
@@ -107,7 +110,7 @@ fun withTags(vararg tags: Tag, f: () -> Unit) {
     }
 
     try {
-        f()
+        return f()
     } finally {
         // Restore or clear prior MDC
         priorMDC.forEach { (k, v) -> if (v == null) MDC.remove(k) else MDC.put(k, v) }
