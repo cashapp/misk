@@ -2124,6 +2124,58 @@ public abstract interface class misk/web/mdc/LogContextProvider {
 	public abstract fun get (Ljavax/servlet/http/HttpServletRequest;)Ljava/lang/String;
 }
 
+public final class misk/web/metadata/guice/GuiceMetadata : misk/web/metadata/Metadata {
+	public fun <init> (Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;)V
+	public final fun component1 ()Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;
+	public final fun copy (Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;)Lmisk/web/metadata/guice/GuiceMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/guice/GuiceMetadata;Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;ILjava/lang/Object;)Lmisk/web/metadata/guice/GuiceMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGuice ()Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/guice/GuiceMetadataProvider : misk/web/metadata/MetadataProvider {
+	public field injector Lcom/google/inject/Injector;
+	public fun <init> ()V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/web/metadata/guice/GuiceMetadata;
+	public final fun getAllBindings ()Ljava/util/Map;
+	public fun getId ()Ljava/lang/String;
+	public final fun getInjector ()Lcom/google/inject/Injector;
+	public final fun setInjector (Lcom/google/inject/Injector;)V
+}
+
+public final class misk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnnotation ()Ljava/lang/String;
+	public final fun getProvider ()Ljava/lang/String;
+	public final fun getScope ()Ljava/lang/String;
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/guice/GuiceMetadataProvider$Metadata {
+	public fun <init> (Ljava/util/Set;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/Set;)Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;Ljava/util/Set;ILjava/lang/Object;)Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBindingMetadata ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/metadata/webaction/WebActionMetadata {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KFunction;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lokhttp3/MediaType;Ljava/util/List;Ljava/util/List;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lmisk/web/PathPattern;Ljava/util/List;Ljava/util/List;Lmisk/web/DispatchMechanism;Ljava/util/Set;Ljava/util/Set;)V

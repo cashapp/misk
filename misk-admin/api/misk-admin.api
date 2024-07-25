@@ -924,6 +924,20 @@ public final class misk/web/metadata/database/DatabaseQueryMetadataAction$Respon
 public abstract interface annotation class misk/web/metadata/database/NoAdminDashboardDatabaseAccess : java/lang/annotation/Annotation {
 }
 
+public final class misk/web/metadata/guice/GuiceDashboardTabModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/web/metadata/guice/GuiceTabIndexAction : misk/web/actions/WebAction {
+	public static final field Companion Lmisk/web/metadata/guice/GuiceTabIndexAction$Companion;
+	public static final field PATH Ljava/lang/String;
+	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Lmisk/web/metadata/guice/GuiceMetadataProvider;)V
+	public final fun get ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/guice/GuiceTabIndexAction$Companion {
+}
+
 public final class misk/web/metadata/webaction/WebActionsDashboardTabModule : misk/inject/KAbstractModule {
 	public fun <init> (Z)V
 }

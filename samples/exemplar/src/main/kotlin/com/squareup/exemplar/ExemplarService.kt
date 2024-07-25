@@ -23,6 +23,7 @@ fun main(args: Array<String>) {
     ExemplarMetadataModule(),
     ExemplarWebActionsModule(),
     ExemplarCronModule(),
+    ExemplarGuiceBindingsModule(),
     MiskRealServiceModule(),
     MiskWebModule(config.web),
     PrometheusMetricsServiceModule(config.prometheus),
