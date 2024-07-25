@@ -2,7 +2,8 @@ package misk.web.metadata.guice
 
 import com.google.inject.Binding
 import com.google.inject.Injector
-import com.google.inject.Key
+import com.google.inject.Scope
+import com.google.inject.spi.DefaultBindingScopingVisitor
 import jakarta.inject.Inject
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
@@ -10,117 +11,53 @@ import misk.web.metadata.toFormattedJson
 import wisp.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
-internal data class GuiceMetadata(
+// TODO consider moving to misk-admin so it can be internal scoped
+data class GuiceMetadata(
   val guice: GuiceMetadataProvider.Metadata
 ) : Metadata(
   metadata = guice,
-  prettyPrint = "Total Bindings: ${guice.all.size}\n\n" + defaultKotlinMoshi
-    .adapter<Map<String, Map<String, String>>>()
-    .toFormattedJson(guice.grouped),
+  prettyPrint = "Total Bindings: ${guice.bindingMetadata.size}\n\n" + defaultKotlinMoshi
+    .adapter<Set<GuiceMetadataProvider.BindingMetadata>>()
+    .toFormattedJson(guice.bindingMetadata),
   descriptionString = "Direct injection bindings, powered by Guice. This metadata is work-in-progress."
 )
 
-internal class GuiceMetadataProvider : MetadataProvider<GuiceMetadata> {
+class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetadata> {
   @Inject lateinit var injector: Injector
 
   override val id = "guice"
 
-  internal data class Metadata(
-    val all: Map<String, String>,
-    val grouped: Map<String, Map<String, String>>,
+  data class Metadata(
+    val bindingMetadata: Set<BindingMetadata>
   )
+
+  data class BindingMetadata(
+    val type: String,
+    val source: String,
+    val scope: String?,
+    val provider: String,
+    val annotation: String?
+  ) {
+    override fun toString(): String {
+      return "$type(source=$source, scope=$scope, provider=$provider, annotation=$annotation)"
+    }
+  }
 
   val allBindings by lazy {
     injector.allBindings
   }
 
-  val ambiguousNames by lazy {
-    allBindings.keys
-      .groupBy { it.typeLiteral.rawType.simpleName }
-      .map { entry ->
-        entry.key to entry.value
-          .map { it.typeLiteral.rawType.packageName }
-          .toSet()
-      }
-      .filter { it.second.size > 1 }
-      .toMap()
-  }
-
-  val unambiguousPackages by lazy {
-    allBindings.filter { it.key.typeLiteral.rawType.simpleName !in ambiguousNames.keys }
-      .keys
-      .map { it.typeLiteral.rawType.packageName }
-      .toSet()
-  }
-
+  // TODO should this cache the result?
   override fun get(): GuiceMetadata {
-    val raw = allBindings
-      .map { it.key.prettyPrint() to it.value.prettyPrint() }
-      .toMap()
-      .toSortedMap()
+    val bindingMetadataSet = allBindings.map { it.value.toMetadata() }.toSet()
 
-    val all = raw.entries.groupBy {
-      if (it.key.contains(" / ")) it.key.split(" / ").first() else "default"
-    }.map {
-      it.key to it.value.associate { it.key.split(" / ").last() to it.value }
-    }.toMap()
-
-    return GuiceMetadata(
-      Metadata(
-        all = allBindings.map { it.key.toString() to it.value.toString() }.toMap(),
-        grouped = all
-      )
-    )
+    return GuiceMetadata(Metadata(bindingMetadata = bindingMetadataSet))
   }
 
-  fun Key<*>.prettyPrint(): String {
-    var pretty = typeLiteral.toString()
-
-    pretty = pretty.stripAmbiguousPackages()
-
-    return if (annotation != null) {
-      if (annotation.annotationClass.qualifiedName == "com.google.inject.internal.Element") {
-        if (annotation.toString().contains("type=MULTIBINDER")) {
-          "Multibinder / List<$pretty>"
-        } else if (annotation.toString().contains("type=MAPBINDER")) {
-          var keyType = annotation.toString().split("keyType=").last().removeSuffix(")")
-          keyType = keyType.stripAmbiguousPackages()
-          "Mapbinder / Map<$keyType,$pretty>"
-        } else {
-          "$pretty, annotation=$annotation"
-        }
-      } else {
-        "$pretty, annotation=$annotation"
-      }
-    } else {
-      pretty
-    }
-  }
-
-  private fun String.stripAmbiguousPackages(): String {
+  private fun String.stripCommonPackages(): String {
     var pretty = this
 
-    // Protect ambiguous packages by changing . to - in package names
-    ambiguousNames.forEach {
-      it.value.forEach { pkg ->
-        pretty = pretty.replace("$pkg.${it.key}", "${pkg.replace(".", "-")}.${it.key}")
-      }
-    }
-
-    // Strip unambiguous packages
-    unambiguousPackages.forEach {
-      pretty = pretty.replace("$it.", "")
-    }
-
-    // Restore ambiguous packages - with .
-    ambiguousNames.forEach {
-      it.value.forEach { pkg ->
-        pretty = pretty.replace("${pkg.replace(".", "-")}.${it.key}", "$pkg.${it.key}")
-      }
-    }
-
-    // Strip specific groups that don't need to be unambiguous (ie. javax vs jakarta vs google inject annotations)
-    val commonPackages = listOf("com.google.inject", "jakarta.inject", "javax.inject")
+    val commonPackages = listOf("com.google.inject", "jakarta.inject", "javax.inject", "java.util", "java.lang")
     commonPackages.forEach {
       pretty = pretty.replace("$it.", "")
     }
@@ -128,36 +65,49 @@ internal class GuiceMetadataProvider : MetadataProvider<GuiceMetadata> {
     return pretty
   }
 
-  private data class BindingMetadata(
-    val type: String,
-    val source: String,
-    val scope: String?,
-    val provider: String?
-  ) {
-    override fun toString(): String {
-      return "$type(source=$source, scope=$scope, provider=$provider)"
+  private fun Binding<*>.toMetadata() : BindingMetadata {
+    val key = key
+    val type = key.typeLiteral.toString().stripCommonPackages()
+    val source = source.toString()
+    val scope = acceptScopingVisitor(ScopeVisitor())
+    //TODO improve the provider string
+    val provider = provider?.toString() ?: ""
+    val annotation = key.annotation?.prettyPrint() ?: ""
+    return BindingMetadata(type, source, scope, provider, annotation)
+  }
+
+  private class ScopeVisitor : DefaultBindingScopingVisitor<String?>() {
+    override fun visitEagerSingleton(): String {
+      return "Singleton"
+    }
+
+    override fun visitScope(scope: Scope): String {
+      return scope.toString()
+    }
+
+    override fun visitNoScoping(): String? {
+      return null
+    }
+
+    override fun visitScopeAnnotation(scopeAnnotation: Class<out Annotation>?): String {
+      return "Annotation: $scopeAnnotation"
     }
   }
 
-  fun Binding<*>.prettyPrint(): String {
-    val bindingString = this.toString()
-
-    val source = source.toString().removePrefix("class ")
-
-    val scope = if (bindingString.contains("scope=")) {
-      bindingString.split("scope=").last().split("}").first().split(",").first()
+  private fun Annotation.prettyPrint(): String {
+    val annotationString = toString()
+    return if (annotationClass.qualifiedName == "com.google.inject.internal.Element") {
+      if (annotationString.contains("type=MULTIBINDER")) {
+        "Multibinder element"
+      } else if (annotationString.contains("type=MAPBINDER")) {
+        var keyType = annotationString.split("keyType=").last().removeSuffix(")")
+        keyType = keyType.stripCommonPackages()
+        "Mapbinder<Key=$keyType>"
+      } else {
+        annotationString
+      }
     } else {
-      null
+      annotationString
     }
-
-    val provider = if (bindingString.contains("provider=")) {
-      bindingString.split("provider=").last().split("}").first().split(",").first()
-    } else {
-      null
-    }
-
-    val type = this::class.simpleName ?: "Binding"
-
-    return BindingMetadata(type, source, scope, provider).toString()
   }
 }
