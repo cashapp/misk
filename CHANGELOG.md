@@ -41,6 +41,15 @@ Developers have been surprised how fast they can ramp up and ship UI from their 
 
 See the [Exemplar service code](https://github.com/cashapp/misk/blob/master/samples/exemplar/src/main/kotlin/com/squareup/exemplar/dashboard/ExemplarDashboardModule.kt) in the repo for full examples of the new UI stack in use for building dedicated frontend apps, admin dashboard tabs, and more.
 
+Showcase: New Schema Migrator Gradle Plugin
+---
+
+Misk has shipped with a performant database schema migrator for years. It "just works" ensuring table schemas are up to date and running migrations in local develompent and test environments.
+
+Now, the Misk Schema Migrator is available as a standalone Gradle plugin for use without running the service or test suite. For some services previously forced to rely on a more complex plugin like Flyway to use libraries like jOOQ, the new Schema Migrator Gradle Plugin provides a simple way to get that functionality without new non-Misk dependencies. Additionally, the Schema Migrator Gradle Plugin is compatible with the Gradle config cache for optimal performance.
+
+Check out the simple syntax and user docs [here](./misk-schema-migrator-gradle-plugin/README.md) and try it for yourself today.
+
 Showcase: New Metadata tab in the Misk admin dashboard
 ---
 
