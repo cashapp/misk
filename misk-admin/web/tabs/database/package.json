@@ -22,7 +22,7 @@
     "@misk/cli": "0.4.0",
     "@misk/common": "0.4.0",
     "@misk/core": "0.4.0",
-    "@misk/simpleredux": "0.4.0",
+    "@misk/simpleredux": "0.5.0",
     "copy-to-clipboard": "^3.1.0"
   },
   "devDependencies": {
