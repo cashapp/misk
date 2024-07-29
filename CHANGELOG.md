@@ -104,6 +104,7 @@ Misk is open for PRs if there are other broad usage utility functions which woul
 Version 2024.07.09
 ---------------------------------
 Breaking changes:
+
 - Remove `@AllowAnyService` annotation (which has been deprecated for months, was rarely used, and has no more internal usage), use `@Authenticated(allowAnyService = true)` instead. 
 - Remove support for empty `@Authenticated` annotation, explicit passing of non-empty parameters `capabilities, users, allowAnyUser, or allowAnyService` is now required. Instead of the existing soft-failure error log behavior, an IllegalArgumentException will be thrown if the annotation constructor is empty.
 - Empty authentication **allow all** policy has now been changed to **deny all**.
@@ -114,27 +115,29 @@ Breaking changes:
 Version 2024.05.22
 ---------------------------------
 Breaking changes:
+
 - Added `@ExperimentalMiskApi` to `TaggedLogger`. Any code that uses this class will need to `@OptIn(ExperimentalMiskApi::class)`.
 
 Version 2024.05.16
 ---------------------------------
 Breaking changes:
+
 - Remove the deprecated `BETA_PREFIX` val which was used to gate development of the new v2 admin dashboard. It has been deprecated since 2023-06-30 when the v2 admin dashboard was promoted to `/_admin/`.
 
 Version 2024.05.14
 ---------------------------------
 Breaking changes:
+
 - LogRequestResponse can't be target to classes ([#3225](https://github.com/cashapp/misk/pull/3225))
 
 Version 2024.05.06
 ---------------------------------
 Breaking changes:
+
 - Concurrency limiter is now disabled by default ([#3256](https://github.com/cashapp/misk/pull/3256))
 
 Version 0.24.0 *(2022-04-13)*
 ----------------------------
-
-Unstable public release.
 
 New features and fixes:
 
@@ -145,7 +148,7 @@ New features and fixes:
 Version 0.23.0 *(2022-03-30)*
 -----------------------------
 
-Unstable public release. Thank you to all the contributors, as always.
+Thank you to all the contributors, as always.
 
 Breaking changes:
 
@@ -187,8 +190,6 @@ Fixes:
 Version 0.22.0 *(2021-11-03)*
 ----------------------------
 
-Unstable public release.
-
 Breaking changes:
 
 - The `/error` action is no longer installed by default (#2190)
@@ -207,12 +208,10 @@ New features and fixes:
 Version 0.21.0 *(2021-10-18)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 Version 0.20.0 *(2021-08-31)*
 ----------------------------
-
-Unstable public release.
 
 Breaking changes:
 
@@ -239,82 +238,82 @@ New features and fixes:
 Version 0.19.0 *(2021-06-30)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 Version 0.18.0 *(2021-06-28)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 Version 0.17.1 *(2021-04-29)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 Version 0.17.0 *(2021-04-28)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.16.0 *(2020-12-17)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.15.0 *(2020-12-03)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.14.0 *(2020-11-12)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.13.0 *(2020-07-16)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.12.0 *(2020-05-06)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.11.0 *(2020-02-25)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.10.0 *(2019-01-21)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.9.0 *(2019-12-06)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.8.0 *(2019-10-22)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.7.0 *(2019-08-26)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.2.5 *(2018-06-11)*
