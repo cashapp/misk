@@ -166,12 +166,13 @@ val buildMiskWeb = tasks.register("buildMiskWeb", MiskWebBuildTask::class.java) 
   outputFiles.setFrom(outputs)
 }
 
-tasks.named { it == "explodeCodeSourceMain" }.configureEach {
-  dependsOn(buildMiskWeb)
-}
-
-tasks.named("processResources").configure {
-  dependsOn(buildMiskWeb)
+// buildMiskWeb is expensive and generally not needed locally. Only build it on CI, or if
+// specifically requested.
+val isCi = System.getenv("CI") == "true" || System.getenv("GITHUB_ACTIONS") != null
+if (isCi || System.getProperty("misk.admin.buildMiskWeb") == "true") {
+  tasks.named { it == "explodeCodeSourceMain" || it == "processResources" }.configureEach {
+    dependsOn(buildMiskWeb)
+  }
 }
 
 sourceSets {
