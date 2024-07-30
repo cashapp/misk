@@ -7,10 +7,19 @@ public final class misk/cron/CronEntryModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;)Lmisk/cron/CronEntryModule;
 }
 
+public final class misk/cron/CronLeaseBehavior : java/lang/Enum {
+	public static final field ONE_LEASE_PER_CLUSTER Lmisk/cron/CronLeaseBehavior;
+	public static final field ONE_LEASE_PER_CRON Lmisk/cron/CronLeaseBehavior;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/cron/CronLeaseBehavior;
+	public static fun values ()[Lmisk/cron/CronLeaseBehavior;
+}
+
 public final class misk/cron/CronManager {
 	public static final field Companion Lmisk/cron/CronManager$Companion;
 	public fun <init> ()V
-	public final fun runReadyCrons (Ljava/time/Instant;)V
+	public final fun tryAcquireSingleLeaseAndRunCrons (Ljava/time/Instant;)V
+	public final fun tryToRunCrons (Ljava/time/Instant;)V
 	public final fun waitForCronsComplete ()V
 }
 
@@ -38,7 +47,8 @@ public final class misk/cron/CronModule : misk/inject/KInstallOnceModule {
 	public fun <init> (Ljava/time/ZoneId;)V
 	public fun <init> (Ljava/time/ZoneId;I)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;)V
-	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;Lmisk/cron/CronLeaseBehavior;)V
+	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;Lmisk/cron/CronLeaseBehavior;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun provideTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
 }
 
@@ -50,6 +60,7 @@ public final class misk/cron/FakeCronModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/time/ZoneId;)V
 	public fun <init> (Ljava/time/ZoneId;I)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;)V
-	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;Lmisk/cron/CronLeaseBehavior;)V
+	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;Lmisk/cron/CronLeaseBehavior;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 

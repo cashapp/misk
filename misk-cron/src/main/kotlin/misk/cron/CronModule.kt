@@ -19,7 +19,8 @@ import misk.web.metadata.MetadataModule
 class CronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
-  private val dependencies: List<Key<out Service>> = listOf()
+  private val dependencies: List<Key<out Service>> = listOf(),
+  private val cronLeaseBehavior: CronLeaseBehavior = CronLeaseBehavior.ONE_LEASE_PER_CRON,
 ) : KInstallOnceModule() {
   override fun configure() {
     install(FakeCronModule(zoneId, threadPoolSize, dependencies))
@@ -30,6 +31,7 @@ class CronModule @JvmOverloads constructor(
         dependsOn = dependencies,
       ).dependsOn<ReadyService>()
     )
+    bind<CronLeaseBehavior>().annotatedWith<ForMiskCron>().toInstance(cronLeaseBehavior)
   }
 
   @Provides
@@ -42,10 +44,12 @@ class CronModule @JvmOverloads constructor(
 class FakeCronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
-  private val dependencies: List<Key<out Service>> = listOf()
-) : KAbstractModule() {
+  private val dependencies: List<Key<out Service>> = listOf(),
+  private val cronLeaseBehavior: CronLeaseBehavior = CronLeaseBehavior.ONE_LEASE_PER_CLUSTER,
+  ) : KAbstractModule() {
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
+    bind<CronLeaseBehavior>().annotatedWith<ForMiskCron>().toInstance(cronLeaseBehavior)
     install(
       ExecutorServiceModule.withFixedThreadPool(
         ForMiskCron::class,
@@ -66,3 +70,8 @@ class FakeCronModule @JvmOverloads constructor(
 @Qualifier
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 internal annotation class ForMiskCron
+
+enum class CronLeaseBehavior {
+  ONE_LEASE_PER_CLUSTER,
+  ONE_LEASE_PER_CRON,
+}
