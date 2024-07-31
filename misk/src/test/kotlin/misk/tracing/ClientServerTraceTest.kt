@@ -104,12 +104,13 @@ internal class ClientServerTraceTest {
     client.doRoar(dinosaurRequest).execute()
 
     // Expect 4 spans on the server.
-    val serverSpans = listOf(
-      serverTracer.take("http.action"),
-      serverTracer.take("POST"),
-      serverTracer.take("POST"),
-      serverTracer.take("http.action")
-    )
+    val serverSpans = mutableListOf<MockSpan>()
+    while (serverSpans.size < 4) {
+      val span = serverTracer.take() // Raises an exception if no spans are found
+      if (span.operationName() == "http.action" || span.operationName() == "POST") {
+        serverSpans.add(span)
+      }
+    }
 
     val spanIds = serverSpans.map { it.context().spanId() }.toSet()
     val traceId = serverSpans[0].context().traceId()
