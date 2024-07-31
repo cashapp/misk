@@ -236,6 +236,22 @@ subprojects {
   tasks.withType<Test> {
     useJUnitPlatform()
 
+    if (System.getenv("CI") == "true") {
+      // Enable Datadog tracing for buildkite tests
+      systemProperties(
+        mapOf(
+          "dd.civisibility.enabled" to true,
+          "dd.profiling.enabled" to false,
+          "dd.trace.enabled" to true,
+          "dd.jmxfetch.enabled" to false,
+          "dd.civisibility.code.coverage.enabled" to false,
+          "dd.civisibility.git.upload.enabled" to false,
+          "dd.integration.opentracing.enabled" to true,
+          "dd.instrumentation.telemetry.enabled" to false,
+        )
+      )
+    }
+
     val enableLogging = project.findProperty("misk.test.logging")?.toString().toBoolean()
 
     if (enableLogging) {
@@ -248,7 +264,7 @@ subprojects {
       testLogging {
         showStandardStreams = false
         exceptionFormat = TestExceptionFormat.SHORT
-        showExceptions = false
+        showExceptions = true
       }
     }
   }
