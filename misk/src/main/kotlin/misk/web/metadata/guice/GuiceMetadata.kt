@@ -2,6 +2,7 @@ package misk.web.metadata.guice
 
 import com.google.inject.Binding
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Scope
 import com.google.inject.spi.DefaultBindingScopingVisitor
 import jakarta.inject.Inject
@@ -24,6 +25,8 @@ data class GuiceMetadata(
 
 class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetadata> {
   @Inject lateinit var injector: Injector
+
+  private val keyAnnotationRegex = """annotation=([^]]+)""".toRegex()
 
   override val id = "guice"
 
@@ -72,7 +75,7 @@ class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetada
     val scope = acceptScopingVisitor(ScopeVisitor())
     //TODO improve the provider string
     val provider = provider?.toString() ?: ""
-    val annotation = key.annotation?.prettyPrint() ?: ""
+    val annotation = key.prettyPrintAnnotation()
     return BindingMetadata(type, source, scope, provider, annotation)
   }
 
@@ -91,6 +94,20 @@ class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetada
 
     override fun visitScopeAnnotation(scopeAnnotation: Class<out Annotation>?): String {
       return "Annotation: $scopeAnnotation"
+    }
+  }
+
+  private fun Key<*>.prettyPrintAnnotation(): String {
+    return annotation?.prettyPrint() ?: maybeExtractAnnotationFromKey(toString())
+  }
+
+  private fun maybeExtractAnnotationFromKey(keyToString: String): String {
+    val matchResult = keyAnnotationRegex.find(keyToString)
+    val annotation = matchResult?.groupValues?.get(1) ?: ""
+    return if (annotation == "[none") {
+      ""
+    } else {
+      annotation
     }
   }
 
