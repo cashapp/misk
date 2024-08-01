@@ -18,6 +18,7 @@ dependencies {
   testFixturesApi(project(":misk-transactional-jobqueue"))
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":misk-testing-api"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.guice)
