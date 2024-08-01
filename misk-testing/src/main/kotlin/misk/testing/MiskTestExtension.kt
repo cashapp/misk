@@ -4,11 +4,12 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
-import com.google.inject.Stage
 import com.google.inject.testing.fieldbinder.BoundFieldModule
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
+import misk.inject.ReusableTestModule
 import misk.inject.getInstance
 import misk.inject.uninject
 import org.junit.jupiter.api.extension.AfterEachCallback
@@ -17,11 +18,14 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import wisp.logging.getLogger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
   companion object {
     private val runningDependencies = ConcurrentHashMap.newKeySet<String>()
+    private val runningServices = ConcurrentHashMap.newKeySet<List<Module>>()
+    private val injectedModules = ConcurrentHashMap<List<Module>, Injector>()
     private val log = getLogger<MiskTestExtension>()
   }
 
@@ -37,12 +41,15 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     val module = object : KAbstractModule() {
       override fun configure() {
         binder().requireAtInjectOnConstructors()
-        multibind<BeforeEachCallback>().to<LogLevelExtension>()
 
+        multibind<BeforeEachCallback>().to<LogLevelExtension>()
         if (context.startService()) {
           multibind<BeforeEachCallback>().to<StartServicesBeforeEach>()
-          multibind<AfterEachCallback>().to<StopServicesAfterEach>()
+          if (!context.reuseInjector()) {
+            multibind<AfterEachCallback>().to<StopServicesAfterEach>()
+          }
         }
+
         for (module in context.getActionTestModules()) {
           install(module)
         }
@@ -55,10 +62,17 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
         // Initialize empty sets for our multibindings.
         newMultibinder<BeforeEachCallback>()
         newMultibinder<AfterEachCallback>()
+        newMultibinder<TestFixture>()
       }
     }
 
-    val injector = Guice.createInjector(module)
+    val injector = if (context.reuseInjector()) {
+      injectedModules.getOrPut(context.getActionTestModules().toList()) {
+        Guice.createInjector(module)
+      }
+    } else {
+      Guice.createInjector(module)
+    }
     context.store("injector", injector)
     injector.getInstance<Callbacks>().beforeEach(context)
   }
@@ -79,8 +93,19 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     override fun beforeEach(context: ExtensionContext) {
       if (context.startService()) {
+        if (context.reuseInjector() && runningServices.contains(context.getActionTestModules())) {
+          return
+        }
         try {
           serviceManager.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
+          runningServices.add(context.getActionTestModules().toList())
+          if (context.reuseInjector()) {
+            Runtime.getRuntime().addShutdownHook(
+              thread(start = false) {
+                serviceManager.stopAsync().awaitStopped(30, TimeUnit.SECONDS)
+              }
+            )
+          }
         } catch (e: IllegalStateException) {
           // Unwrap and throw the real service failure
           val suppressed = e.suppressed.firstOrNull()
@@ -101,8 +126,8 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     override fun afterEach(context: ExtensionContext) {
       if (context.startService()) {
         serviceManager.stopAsync()
+        serviceManager.awaitStopped(30, TimeUnit.SECONDS)
       }
-      serviceManager.awaitStopped(30, TimeUnit.SECONDS)
     }
   }
 
@@ -122,6 +147,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   class Callbacks @Inject constructor(
     private val beforeEachCallbacks: Set<BeforeEachCallback>,
     private val afterEachCallbacks: Set<AfterEachCallback>,
+    private val testFixtures: Set<TestFixture>,
   ) : BeforeEachCallback, AfterEachCallback {
 
     override fun afterEach(context: ExtensionContext) {
@@ -130,6 +156,9 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     override fun beforeEach(context: ExtensionContext) {
       beforeEachCallbacks.forEach { it.beforeEach(context) }
+      if (context.reuseInjector()) {
+        testFixtures.forEach { it.reset() }
+      }
     }
   }
 
@@ -153,6 +182,17 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 private fun ExtensionContext.startService(): Boolean {
   return getFromStoreOrCompute("startService") {
     rootRequiredTestClass.getAnnotationsByType(MiskTest::class.java)[0].startService
+  }
+}
+
+// The injector is reused across tests if
+//   1. The tests module(s) used in the test extend ReusableTestModules, AND
+//   2. The environment variable MISK_TEST_REUSE_INJECTOR is set to true
+@OptIn(ExperimentalMiskApi::class)
+private fun ExtensionContext.reuseInjector(): Boolean {
+  return getFromStoreOrCompute("reuseInjector") {
+    (System.getenv("MISK_TEST_REUSE_INJECTOR")?.toBoolean() ?: false) &&
+      getActionTestModules().all { it is ReusableTestModule }
   }
 }
 

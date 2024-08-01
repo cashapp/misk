@@ -39,6 +39,7 @@ dependencies {
   implementation(project(":misk-action-scopes"))
   implementation(project(":misk-config"))
   implementation(project(":misk-service"))
+  implementation(project(":misk-testing-api"))
 
   testImplementation(libs.kotlinTest)
 }

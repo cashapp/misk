@@ -21,6 +21,7 @@ dependencies {
   testFixturesImplementation(libs.kotlinStdLibJdk8)
   testFixturesImplementation(libs.moshiCore)
   testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":misk-testing-api"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.guice)

@@ -1,0 +1,4 @@
+public abstract interface class misk/testing/TestFixture {
+	public abstract fun reset ()V
+}
+
