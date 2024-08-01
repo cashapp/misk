@@ -1,6 +1,6 @@
 <img src="https://github.com/cashapp/misk/raw/master/misk.png" width="300">
 
-[<img src="https://img.shields.io/maven-central/v/com.squareup.misk/misk.svg?label=latest%20release"/>](http://search.maven.org/#search%7Cga%7C1%7Ccom.squareup.misk)
+[<img src="https://img.shields.io/maven-central/v/com.squareup.misk/misk.svg?label=latest%20release"/>](http://search.maven.org/#search%7Cga%7C1%7Ccom.squareup.misk) [![Mutable.ai Auto Wiki](https://img.shields.io/badge/Auto_Wiki-Mutable.ai-blue)](https://wiki.mutable.ai/cashapp/misk)
 
 * Releases
     * See most recent [public build][snap]
