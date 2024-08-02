@@ -1,7 +1,7 @@
 [versions]
 dependencyAnalysisPlugin = "1.29.0"
 flyway = "9.14.1"
-kotlin = "1.9.21"
+kotlin = "1.9.25"
 kotlinBinaryCompatibilityPlugin = "0.13.1"
 mavenPublish = "0.27.0"
 protobufPlugin = "0.9.3"
@@ -130,6 +130,7 @@ kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version 
 kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
 kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+kotlinGradleBom = { module = "org.jetbrains.kotlin:kotlin-gradle-plugins-bom", version.ref = "kotlin" }
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinLogging = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
