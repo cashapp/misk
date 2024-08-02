@@ -3,6 +3,7 @@ package misk.web.metadata.guice
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.html.InputType
+import kotlinx.html.a
 import kotlinx.html.div
 import kotlinx.html.h1
 import kotlinx.html.input
@@ -24,6 +25,7 @@ import misk.web.v2.DashboardPageLayout
 class GuiceTabIndexAction @Inject constructor(
   private val dashboardPageLayout: DashboardPageLayout,
   private val guiceMetadataProvider: GuiceMetadataProvider,
+  private val guiceSourceUrlProvider: GuiceSourceUrlProvider,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -91,7 +93,16 @@ class GuiceTabIndexAction @Inject constructor(
                           +it.type
                         }
                         td("whitespace-normal px-3 py-4 text-sm") {
-                          +it.source
+                          val sourceUrl = guiceSourceUrlProvider.urlForSource(it.source)
+                          if (sourceUrl != null) {
+                            a(
+                              classes = "underline text-gray-500 hover:text-gray-900",
+                              href = sourceUrl,
+                              target = "_blank"
+                            ) { +it.source }
+                          } else {
+                            +it.source
+                          }
                         }
                         td(
                           "whitespace-normal px-3 py-4 text-sm"

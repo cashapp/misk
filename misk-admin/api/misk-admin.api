@@ -924,14 +924,41 @@ public final class misk/web/metadata/database/DatabaseQueryMetadataAction$Respon
 public abstract interface annotation class misk/web/metadata/database/NoAdminDashboardDatabaseAccess : java/lang/annotation/Annotation {
 }
 
+public class misk/web/metadata/guice/GitHubSourceUrlProvider : misk/web/metadata/guice/GuiceSourceUrlProvider {
+	public fun <init> ()V
+	protected fun generateQuery (Lmisk/web/metadata/guice/GitHubSourceUrlProvider$SourceLocation;)Ljava/lang/String;
+	public fun urlForSource (Ljava/lang/String;)Ljava/lang/String;
+}
+
+protected final class misk/web/metadata/guice/GitHubSourceUrlProvider$SourceLocation {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()I
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)Lmisk/web/metadata/guice/GitHubSourceUrlProvider$SourceLocation;
+	public static synthetic fun copy$default (Lmisk/web/metadata/guice/GitHubSourceUrlProvider$SourceLocation;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IILjava/lang/Object;)Lmisk/web/metadata/guice/GitHubSourceUrlProvider$SourceLocation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClassName ()Ljava/lang/String;
+	public final fun getFunctionName ()Ljava/lang/String;
+	public final fun getLineNumber ()I
+	public final fun getPackageName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/metadata/guice/GuiceDashboardTabModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+}
+
+public abstract interface class misk/web/metadata/guice/GuiceSourceUrlProvider {
+	public abstract fun urlForSource (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class misk/web/metadata/guice/GuiceTabIndexAction : misk/web/actions/WebAction {
 	public static final field Companion Lmisk/web/metadata/guice/GuiceTabIndexAction$Companion;
 	public static final field PATH Ljava/lang/String;
-	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Lmisk/web/metadata/guice/GuiceMetadataProvider;)V
+	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Lmisk/web/metadata/guice/GuiceMetadataProvider;Lmisk/web/metadata/guice/GuiceSourceUrlProvider;)V
 	public final fun get ()Ljava/lang/String;
 }
 

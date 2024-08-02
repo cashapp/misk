@@ -14,11 +14,20 @@ class ExemplarGuiceBindingsModule : KAbstractModule() {
     bind<String>()
       .annotatedWith(Names.named("ConstantBindingExample"))
       .toInstance("MyString")
+    bind<Service>()
+      .annotatedWith(Names.named("ServiceInCompanionClass"))
+      .to<MyCompanionService>()
   }
 
   @Provides
   @Named("YetAnotherService")
   fun provideYetAnotherService(): Service = AnotherServiceImpl()
+
+  companion object {
+    class MyCompanionService : Service {
+      override fun execute() = "ServiceInCompanionClass"
+    }
+  }
 }
 
 interface Service {
