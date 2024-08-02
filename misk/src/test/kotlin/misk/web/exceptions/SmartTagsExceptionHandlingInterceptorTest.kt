@@ -499,7 +499,7 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
 
       // This is testing the ThreadLocal cleanup function within TaggedLogger when asContext() exits
       // without throwing an exception
-      val shouldBeEmptySet = SmartTagsThreadLocalHandler.popThreadLocalMdcContext()
+      val shouldBeEmptySet = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
       logger.info { "Should be zero size and log with no MDC context: ${shouldBeEmptySet.size}" }
       return ""
     }

@@ -212,7 +212,7 @@ internal class SqsJobConsumer @Inject internal constructor(
                 )
                 Status.OK
               } catch (th: Throwable) {
-                val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalMdcContext()
+                val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
 
                 log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
 

@@ -3,15 +3,22 @@ package wisp.logging
 object SmartTagsThreadLocalHandler {
   private val threadLocalMdcContext = ThreadLocal<ThreadLocalTaggedLoggerMdcContext>()
 
-  fun clear() = threadLocalMdcContext.remove()
-
-  fun popThreadLocalMdcContext() = threadLocalMdcContext
+  /**
+   * Retrieves all the logging MDC tags that were added to the logger via `withSmartTags()` and
+   * clears the thread local storage.
+   *
+   * Note: the thread local storage is only populated when an exception is thrown within a
+   * `withSmartTags()` block.
+   */
+  fun popThreadLocalSmartTags() = threadLocalMdcContext
     .get()
     ?.tags
     ?.also { threadLocalMdcContext.remove() }
     ?: emptySet()
 
-  fun addOrClearTags(th: Throwable, tags: Set<Tag>) {
+  internal fun clear() = threadLocalMdcContext.remove()
+
+  internal fun addOrClearTags(th: Throwable, tags: Set<Tag>) {
     val existingContext = threadLocalMdcContext.get()
 
     if (existingContext == null || !existingContext.wasTriggeredBy(th)) {
