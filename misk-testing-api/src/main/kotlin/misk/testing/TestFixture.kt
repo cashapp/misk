@@ -57,7 +57,7 @@ class ResettablePropertyDelegate<T>(private val initializer: () -> T) {
 open class FakeFixture : TestFixture {
   private val delegates = mutableListOf<ResettablePropertyDelegate<*>>()
 
-  final override fun reset() {
+  override fun reset() {
     delegates.forEach { it.reset() }
   }
 
