@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - raine/copybara-test
     paths-ignore:
       - "docs/**"
       - "*.md"
