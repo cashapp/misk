@@ -9,10 +9,6 @@ import misk.MiskTestingServiceModule
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
-import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.LogMDCContextTestAction.LogMDCContextTestActionLogger.Companion.getTaggedLogger
-import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.NestedLoggersOuterExceptionHandled.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrown
-import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.NestedLoggersOuterExceptionHandledNoneThrown.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedOuterExceptionThrownThenNone
-import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.NestedTaggedLoggersThrowsException.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNested
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
@@ -25,29 +21,29 @@ import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.actions.WebAction
-import misk.web.exceptions.TaggedLoggerExceptionHandlingInterceptorTest.NestedTaggedLoggersBothSucceed.ServiceExtendedTaggedLogger.Companion.getTaggedLoggerNestedThreads
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import mu.KLogger
+import mu.KotlinLogging
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.MDC
-import wisp.logging.Copyable
 import wisp.logging.LogCollector
+import wisp.logging.SmartTagsThreadLocalHandler
 import wisp.logging.Tag
-import wisp.logging.TaggedLogger
 import wisp.logging.getLogger
 import wisp.logging.info
+import wisp.logging.withSmartTags
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 @MiskTest(startService = true)
-internal class TaggedLoggerExceptionHandlingInterceptorTest {
+internal class SmartTagsExceptionHandlingInterceptorTest {
   @MiskTestModule
   val module = object :KAbstractModule() {
     override fun configure() {
@@ -222,21 +218,6 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
       val logger = this::class.getTaggedLogger()
       const val URL = "/log/LogMDCContextTestAction/test"
     }
-
-    data class LogMDCContextTestActionLogger<L: Any>(val logClass: KClass<L>, val tags: Set<Tag> = emptySet()): TaggedLogger<L, LogMDCContextTestActionLogger<L>>(logClass, tags),
-    Copyable<LogMDCContextTestActionLogger<L>> {
-      fun testTag(value: String) = tag(Tag("testTag", value))
-
-      companion object {
-        fun <T : Any> KClass<T>.getTaggedLogger(): LogMDCContextTestActionLogger<T> {
-          return LogMDCContextTestActionLogger(this)
-        }
-      }
-
-      override fun copyWithNewTags(newTags: Set<Tag>): LogMDCContextTestActionLogger<L> {
-        return this.copy(tags = newTags)
-      }
-    }
   }
 
   @Test
@@ -337,34 +318,16 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
         }
 
       // Manually add this tag to identify the execution for verification
-      logger.info(EXECUTION_IDENTIFIER to headers[IDENTIFIER_HEADER]) { "Log message after TaggedLogger" }
+      logger.tag(EXECUTION_IDENTIFIER to headers[IDENTIFIER_HEADER])
+        .asContext { logger.info { "Log message after TaggedLogger" } }
       return result
     }
 
     companion object {
-      val logger = this::class.getTaggedLoggerNestedThreads()
+      val logger = this::class.getTaggedLogger()
       const val URL = "/log/NestedTaggedLoggersBothSucceed/test"
       const val IDENTIFIER_HEADER = "IDENTIFIER_HEADER"
       const val EXECUTION_IDENTIFIER = "executionIdentifier"
-    }
-
-    data class ServiceExtendedTaggedLogger<L: Any>(
-      val logClass: KClass<L>,
-      val tags: Set<Tag> = emptySet()
-    ): TaggedLogger<L, ServiceExtendedTaggedLogger<L>>(logClass, tags), Copyable<ServiceExtendedTaggedLogger<L>> {
-
-      fun testTag(value: String) = tag(Tag("testTag", value))
-      fun testTagNested(value: String) = tag(Tag("testTagNested", value))
-
-      companion object {
-        fun <T : Any> KClass<T>.getTaggedLoggerNestedThreads(): ServiceExtendedTaggedLogger<T> {
-          return ServiceExtendedTaggedLogger(this)
-        }
-      }
-
-      override fun copyWithNewTags(newTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
-        return this.copy(tags = newTags)
-      }
     }
 
     class AnotherClass() {
@@ -379,7 +342,7 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
       }
 
       companion object {
-        val logger = this::class.getTaggedLoggerNestedThreads()
+        val logger = this::class.getTaggedLogger()
       }
     }
   }
@@ -436,24 +399,8 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
     class NestedTaggedLoggersException(message: String) : Throwable(message)
 
     companion object {
-      val logger = this::class.getTaggedLoggerNested()
+      val logger = this::class.getTaggedLogger()
       const val URL = "/log/NestedTaggedLoggersLogger/test"
-    }
-
-    data class ServiceExtendedTaggedLogger<L: Any>(val logClass: KClass<L>, val tags: Set<Tag> = emptySet()): TaggedLogger<L, ServiceExtendedTaggedLogger<L>>(logClass, tags),
-    Copyable<ServiceExtendedTaggedLogger<L>> {
-      fun testTag(value: String) = tag(Tag("testTag", value))
-      fun testTagNested(value: String) = tag(Tag("testTagNested", value))
-
-      companion object {
-        fun <T : Any> KClass<T>.getTaggedLoggerNested(): ServiceExtendedTaggedLogger<T> {
-          return ServiceExtendedTaggedLogger(this)
-        }
-      }
-
-      override fun copyWithNewTags(newTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
-        return this.copy(tags = newTags)
-      }
     }
   }
 
@@ -512,24 +459,8 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
     class OuterTaggedLoggerException(message: String) : Throwable(message)
 
     companion object {
-      val logger = this::class.getTaggedLoggerNestedOuterExceptionThrown()
+      val logger = this::class.getTaggedLogger()
       const val URL = "/log/NestedLoggersOuterExceptionHandled/test"
-    }
-
-    data class ServiceExtendedTaggedLogger<L: Any>(val logClass: KClass<L>, val tags: Set<Tag> = emptySet()): TaggedLogger<L, ServiceExtendedTaggedLogger<L>>(logClass, tags),
-      Copyable<ServiceExtendedTaggedLogger<L>> {
-      fun testTag(value: String)= tag("testTag" to value)
-      fun testTagNested(value: String) = tag("testTagNested" to value)
-
-      companion object {
-        fun <T : Any> KClass<T>.getTaggedLoggerNestedOuterExceptionThrown(): ServiceExtendedTaggedLogger<T> {
-          return ServiceExtendedTaggedLogger(this)
-        }
-      }
-
-      override fun copyWithNewTags(newTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
-        return this.copy(tags = newTags)
-      }
     }
   }
 
@@ -568,7 +499,7 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
 
       // This is testing the ThreadLocal cleanup function within TaggedLogger when asContext() exits
       // without throwing an exception
-      val shouldBeEmptySet = TaggedLogger.popThreadLocalMdcContext()
+      val shouldBeEmptySet = SmartTagsThreadLocalHandler.popThreadLocalMdcContext()
       logger.info { "Should be zero size and log with no MDC context: ${shouldBeEmptySet.size}" }
       return ""
     }
@@ -585,25 +516,10 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
     class OuterTaggedLoggerException(message: String) : Throwable(message)
 
     companion object {
-      val logger = this::class.getTaggedLoggerNestedOuterExceptionThrownThenNone()
+      val logger = this::class.getTaggedLogger()
       const val URL = "/log/NestedLoggersOuterExceptionHandledNoneThrown/test"
     }
 
-    data class ServiceExtendedTaggedLogger<L: Any>(val logClass: KClass<L>, val tags: Set<Tag> = emptySet()): TaggedLogger<L, ServiceExtendedTaggedLogger<L>>(logClass, tags),
-      Copyable<ServiceExtendedTaggedLogger<L>> {
-      fun testTag(value: String)= tag("testTag" to value)
-      fun testTagNested(value: String) = tag("testTagNested" to value)
-
-      companion object {
-        fun <T : Any> KClass<T>.getTaggedLoggerNestedOuterExceptionThrownThenNone(): ServiceExtendedTaggedLogger<T> {
-          return ServiceExtendedTaggedLogger(this)
-        }
-      }
-
-      override fun copyWithNewTags(newTags: Set<Tag>): ServiceExtendedTaggedLogger<L> {
-        return this.copy(tags = newTags)
-      }
-    }
   }
 
 
@@ -617,5 +533,40 @@ internal class TaggedLoggerExceptionHandlingInterceptorTest {
       .get()
     asService?.let { request.addHeader(FakeCallerAuthenticator.SERVICE_HEADER, it) }
     return httpClient.newCall(request.build()).execute()
+  }
+}
+
+/**
+ * This is an example wrapper to demonstrate how a service using an existing `TaggedLogger` implementation
+ * could go about migrating to this new tagged logger with minimal changes in their service initially.
+ *
+ * In particular, this enables the tests above to have minimal migration from how they were originally
+ * written to be able to thoroughly test the new `withSmartTags` style of logging.
+ */
+data class TestTaggedLogger(
+  val kLogger: KLogger,
+  private val tags: Set<Tag> = emptySet()
+): KLogger by kLogger {
+  fun testTag(value: String)= tag("testTag" to value)
+  fun testTagNested(value: String) = tag("testTagNested" to value)
+
+  fun tag(vararg newTags: Tag) = TestTaggedLogger(kLogger, tags.plus(newTags))
+
+  // Adds the tags to the Mapped Diagnostic Context for the current thread for the duration of the
+  // block.
+  fun <T> asContext(f: () -> T): T {
+    return withSmartTags(*tags.toTypedArray()) {
+      f()
+    }
+  }
+}
+
+fun <T : Any> KClass<T>.getTaggedLogger(): TestTaggedLogger = when {
+  this.isCompanion -> {
+    TestTaggedLogger(KotlinLogging.logger(this.java.declaringClass.canonicalName))
+  }
+
+  else -> {
+    TestTaggedLogger(KotlinLogging.logger(this.java.canonicalName))
   }
 }

@@ -113,3 +113,30 @@ fun withTags(vararg tags: Tag, f: () -> Unit) {
         priorMDC.forEach { (k, v) -> if (v == null) MDC.remove(k) else MDC.put(k, v) }
     }
 }
+
+fun <T> withSmartTags(vararg tags: Tag, f: () -> T): T {
+  // Establish MDC, saving prior MDC
+  val priorMDC = tags.map { (k, v) ->
+    val priorValue = MDC.get(k)
+    MDC.put(k, v.toString())
+    k to priorValue
+  }
+
+  try {
+    return f().also {
+      // Exiting this block gracefully: Lets do some cleanup to keep the ThreadLocal clear.
+      // The scenario here is that when nested `withSmartTags` threw an exception and it was
+      // caught and handled by this `withSmartTags`, it should clean up the unused and unneeded context.
+      SmartTagsThreadLocalHandler.clear()
+    }
+  } catch (th: Throwable) {
+    // Calls to `withSmartTags` can be nested - only set if there is not already a context set
+    // This will be cleared upon logging of the exception within misk or if the thrown exception
+    // is handled by a higher level `withSmartTags`
+    SmartTagsThreadLocalHandler.addOrClearTags(th, tags.toSet())
+    throw th
+  } finally {
+    // Restore or clear prior MDC
+    priorMDC.forEach { (k, v) -> if (v == null) MDC.remove(k) else MDC.put(k, v) }
+  }
+}
