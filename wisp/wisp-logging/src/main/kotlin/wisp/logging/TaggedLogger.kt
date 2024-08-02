@@ -76,6 +76,7 @@ import kotlin.reflect.KClass
  */
 
 @ExperimentalMiskApi
+@Deprecated("This is currently being replaced and should not be used")
 abstract class TaggedLogger<L:Any, out R> (
   private val kLogger: KLogger,
   private val tags: Set<Tag>
