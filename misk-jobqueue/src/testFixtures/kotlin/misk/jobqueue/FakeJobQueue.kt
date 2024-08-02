@@ -14,7 +14,7 @@ import java.util.concurrent.PriorityBlockingQueue
 import jakarta.inject.Inject
 import com.google.inject.Provider
 import jakarta.inject.Singleton
-import misk.testing.TestFixture
+import misk.testing.DelegatedPropertiesTestFixture
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.jvm.Throws
 import kotlin.math.min
@@ -38,11 +38,11 @@ class FakeJobQueue @Inject constructor(
   private val clock: Clock,
   private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
   private val tokenGenerator: TokenGenerator
-) : JobQueue, TransactionalJobQueue, TestFixture {
-  private val jobQueues = ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>()
-  private val deadletteredJobs = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
-  private val failureJobQueues = ConcurrentHashMap<QueueName, LinkedBlockingQueue<Exception>>()
-  private val failureJobQueue = LinkedBlockingQueue<Exception>()
+) : JobQueue, TransactionalJobQueue, DelegatedPropertiesTestFixture() {
+  private val jobQueues by resettable { ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>() }
+  private val deadletteredJobs by resettable { ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>() }
+  private val failureJobQueues by resettable { ConcurrentHashMap<QueueName, LinkedBlockingQueue<Exception>>() }
+  private val failureJobQueue by resettable { LinkedBlockingQueue<Exception>() }
 
   /**
    * pushFailure is used to cause the next enqueue/batchEnqueue call to the job queue to throw.
@@ -268,13 +268,6 @@ class FakeJobQueue @Inject constructor(
         return job
       }
     }
-  }
-
-  override fun reset() {
-    jobQueues.clear()
-    deadletteredJobs.clear()
-    failureJobQueues.clear()
-    failureJobQueue.clear()
   }
 }
 

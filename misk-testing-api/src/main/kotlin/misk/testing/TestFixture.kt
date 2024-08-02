@@ -1,11 +1,13 @@
 package misk.testing
 
+import kotlin.reflect.KProperty
+
 /**
  * Interface for test fixtures that need to be reset between test runs, when the reuse injector feature is enabled.
  *
  * This needs to be implemented by:
  *   1. stateful fakes which hold `var`s or mutable collections. The `reset` implementation should set the state to
- *   the initial values.
+ *   the initial values. In such case, prefer extending the `DelegatedPropertiesTestFixture` class instead.
  *   2. test dependencies interacting with external stores, such as databases or caches. The `reset` implementation
  *   needs to clear the store.
  *
@@ -23,4 +25,47 @@ interface TestFixture {
    * Called before each test run to reset the state of the fixture.
    */
   fun reset()
+}
+
+class ResettablePropertyDelegate<T>(private val initializer: () -> T) {
+  private var value: T = initializer()
+
+  operator fun getValue(thisRef: Any?, property: KProperty<*>): T = this.value
+
+  operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+    this.value = value
+  }
+
+  fun reset() {
+    this.value = initializer()
+  }
+}
+
+/**
+ * Base class for fakes that need to reset their state between test runs.
+ *
+ * This class provides a mechanism to define properties that will automatically be reset between test runs.
+ * The properties are defined using the `resettable` function, which creates a resettable property delegate.
+ *
+ * ```kotlin
+ * class FakeJwtVerifier @Inject constructor() : JwtVerifier, DelegatedPropertiesTestFixture() {
+ *   - private var succeeds = true
+ *   + private var succeeds by resettable { true }
+ *
+ *   // more methods
+ * }
+ * ```
+ */
+open class DelegatedPropertiesTestFixture : TestFixture {
+  private val delegates = mutableListOf<ResettablePropertyDelegate<*>>()
+
+  final override fun reset() {
+    delegates.forEach { it.reset() }
+  }
+
+  fun <T> resettable(initializer: () -> T): ResettablePropertyDelegate<T> {
+    val delegate = ResettablePropertyDelegate(initializer)
+    delegates.add(delegate)
+    return delegate
+  }
 }
