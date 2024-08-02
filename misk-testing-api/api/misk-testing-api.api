@@ -1,4 +1,4 @@
-public class misk/testing/DelegatedPropertiesTestFixture : misk/testing/TestFixture {
+public class misk/testing/FakeFixture : misk/testing/TestFixture {
 	public fun <init> ()V
 	public final fun reset ()V
 	public final fun resettable (Lkotlin/jvm/functions/Function0;)Lmisk/testing/ResettablePropertyDelegate;
