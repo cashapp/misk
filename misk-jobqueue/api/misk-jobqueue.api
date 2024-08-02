@@ -55,7 +55,7 @@ public final class misk/jobqueue/FakeJobHandlerModule$Companion {
 	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/jobqueue/FakeJobHandlerModule;
 }
 
-public final class misk/jobqueue/FakeJobQueue : misk/testing/DelegatedPropertiesTestFixture, misk/jobqueue/JobQueue, misk/jobqueue/TransactionalJobQueue {
+public final class misk/jobqueue/FakeJobQueue : misk/testing/FakeFixture, misk/jobqueue/JobQueue, misk/jobqueue/TransactionalJobQueue {
 	public fun <init> (Ljava/time/Clock;Lcom/google/inject/Provider;Lwisp/token/TokenGenerator;)V
 	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;)V
 	public fun enqueue (Lmisk/hibernate/Session;Lmisk/hibernate/Gid;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V

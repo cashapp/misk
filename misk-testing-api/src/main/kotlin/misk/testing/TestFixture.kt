@@ -42,13 +42,11 @@ class ResettablePropertyDelegate<T>(private val initializer: () -> T) {
 }
 
 /**
- * Base class for fakes that need to reset their state between test runs.
- *
- * This class provides a mechanism to define properties that will automatically be reset between test runs.
+ * Base class providing a mechanism to define properties in fakes that will automatically be reset between test runs.
  * The properties are defined using the `resettable` function, which creates a resettable property delegate.
  *
  * ```kotlin
- * class FakeJwtVerifier @Inject constructor() : JwtVerifier, DelegatedPropertiesTestFixture() {
+ * class FakeJwtVerifier @Inject constructor() : JwtVerifier, FakeFixture() {
  *   - private var succeeds = true
  *   + private var succeeds by resettable { true }
  *
@@ -56,7 +54,7 @@ class ResettablePropertyDelegate<T>(private val initializer: () -> T) {
  * }
  * ```
  */
-open class DelegatedPropertiesTestFixture : TestFixture {
+open class FakeFixture : TestFixture {
   private val delegates = mutableListOf<ResettablePropertyDelegate<*>>()
 
   final override fun reset() {

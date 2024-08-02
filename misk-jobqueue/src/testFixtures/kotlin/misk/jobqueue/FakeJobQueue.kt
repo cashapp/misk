@@ -14,7 +14,7 @@ import java.util.concurrent.PriorityBlockingQueue
 import jakarta.inject.Inject
 import com.google.inject.Provider
 import jakarta.inject.Singleton
-import misk.testing.DelegatedPropertiesTestFixture
+import misk.testing.FakeFixture
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.jvm.Throws
 import kotlin.math.min
@@ -38,7 +38,7 @@ class FakeJobQueue @Inject constructor(
   private val clock: Clock,
   private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
   private val tokenGenerator: TokenGenerator
-) : JobQueue, TransactionalJobQueue, DelegatedPropertiesTestFixture() {
+) : JobQueue, TransactionalJobQueue, FakeFixture() {
   private val jobQueues by resettable { ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>() }
   private val deadletteredJobs by resettable { ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>() }
   private val failureJobQueues by resettable { ConcurrentHashMap<QueueName, LinkedBlockingQueue<Exception>>() }
