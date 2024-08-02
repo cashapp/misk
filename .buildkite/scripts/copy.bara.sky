@@ -1,0 +1,64 @@
+# This is a configuration file for Copybara that defines the workflow for syncing changes between the OSS and monorepo.
+
+MONOREPO_URL = "org-49461806@github.com:squareup/cash-server.git"
+OSS_REPO_URL = "git@github.com:cashapp/misk.git"
+
+MONOREPO_BRANCH = "raine/misk-copybara" #main
+OSS_REPO_BRANCH = "raine/copybara-test" #master
+
+MONOREPO_INCLUDES = ["misk/**"]
+MONOREPO_EXCLUDES = ["misk/copy.bara.sky", "misk/.buildkite/*"]
+
+OSS_REPO_INCLUDES = ["**"]
+OSS_REPO_EXCLUDES = []
+
+transforms = [
+    core.move("", "misk", glob(["**"])),
+]
+
+author = authoring.pass_thru("CashApp Copybara <cash-dx@squareup.com>")
+
+# Push changes from the monorepo to the OSS repo
+core.workflow(
+    name = "push",
+    origin = git.origin(
+        url = MONOREPO_URL,
+        ref = MONOREPO_BRANCH,
+    ),
+    origin_files = glob(MONOREPO_INCLUDES, exclude = MONOREPO_EXCLUDES),
+
+    destination = git.destination(
+        url = OSS_REPO_URL,
+        push = OSS_REPO_BRANCH,
+    ),
+    destination_files = glob(OSS_REPO_INCLUDES, exclude = OSS_REPO_EXCLUDES),
+    mode = "ITERATIVE",
+    authoring = author,
+    transformations = [
+        metadata.restore_author("ORIGINAL_AUTHOR", search_all_changes = True),
+        #used when a PR is created in the OSS and we want to do a fake-merge
+        metadata.expose_label("COPYBARA_INTEGRATE_REVIEW"),
+    ] + core.reverse(transforms),
+)
+
+# Pull changes from the OSS to the monorepo (This is just for reference, the SoT is the monorepo)
+core.workflow(
+    name = "pull",
+    origin = git.origin(
+        url = OSS_REPO_URL,
+        ref = OSS_REPO_BRANCH,
+    ),
+    origin_files = glob(OSS_REPO_INCLUDES, exclude = OSS_REPO_EXCLUDES),
+
+    destination = git.destination(
+        url = MONOREPO_URL,
+        push = MONOREPO_BRANCH,
+    ),
+    destination_files = glob(MONOREPO_INCLUDES, exclude = MONOREPO_EXCLUDES),
+    mode = "ITERATIVE",
+    authoring = author,
+    transformations = [
+        metadata.restore_author("ORIGINAL_AUTHOR", search_all_changes = True),
+        metadata.expose_label("COPYBARA_INTEGRATE_REVIEW"),
+    ] + transforms,
+)
