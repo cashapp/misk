@@ -17,6 +17,7 @@ dependencies {
   implementation(libs.kotlinStdLibJdk8)
 
   testFixturesApi(project(":misk-inject"))
+  testFixturesApi(project(":misk-testing-api"))
   testFixturesApi(libs.prometheusClient)
   testFixturesImplementation(libs.guava)
   testFixturesImplementation(libs.guice)

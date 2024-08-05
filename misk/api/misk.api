@@ -309,7 +309,8 @@ public abstract class misk/MiskCommand : java/lang/Runnable {
 public final class misk/MiskCommonServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Lmisk/ServiceManagerConfig;)V
-	public synthetic fun <init> (Lmisk/ServiceManagerConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/ServiceManagerConfig;Z)V
+	public synthetic fun <init> (Lmisk/ServiceManagerConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/MiskRealServiceModule : misk/inject/KAbstractModule {
