@@ -42,6 +42,7 @@ class MiskRealServiceModule @JvmOverloads constructor(
  */
 class MiskCommonServiceModule @JvmOverloads constructor(
   private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig(),
+  private val installMetrics: Boolean = true
 ) : KAbstractModule() {
   override fun configure() {
     binder().disableCircularProxies()
@@ -49,7 +50,9 @@ class MiskCommonServiceModule @JvmOverloads constructor(
     install(MdcModule())
     install(ExecutorsModule())
     install(ServiceManagerModule(serviceManagerConfig))
-    install(PrometheusMetricsClientModule())
+    if (installMetrics) {
+      install(PrometheusMetricsClientModule())
+    }
     install(MoshiModule(useWireToRead = true, useWireToWrite = true))
     install(JvmManagementFactoryModule())
     // Initialize empty sets for our multibindings.
