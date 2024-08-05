@@ -3,7 +3,7 @@ public final class org/assertj/core/api/AssertExtensionsKt {
 	public static final fun isEqualToAsJson (Lorg/assertj/core/api/AbstractCharSequenceAssert;Ljava/lang/CharSequence;)Lorg/assertj/core/api/AbstractCharSequenceAssert;
 }
 
-public abstract interface class wisp/logging/LogCollector {
+public abstract interface class wisp/logging/LogCollector : misk/testing/TestFixture {
 	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Lch/qos/logback/classic/spi/ILoggingEvent;
 	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Lch/qos/logback/classic/spi/ILoggingEvent;
 	public abstract fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
@@ -25,7 +25,7 @@ public final class wisp/logging/LogCollector$DefaultImpls {
 	public static synthetic fun takeMessages$default (Lwisp/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/util/List;
 }
 
-public final class wisp/logging/WispQueuedLogCollector : wisp/logging/LogCollector {
+public final class wisp/logging/WispQueuedLogCollector : misk/testing/FakeFixture, wisp/logging/LogCollector {
 	public fun <init> ()V
 	public final fun shutDown ()V
 	public final fun startUp ()V

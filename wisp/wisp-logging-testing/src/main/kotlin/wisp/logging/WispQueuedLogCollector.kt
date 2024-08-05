@@ -4,14 +4,15 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.UnsynchronizedAppenderBase
+import misk.testing.FakeFixture
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
-class WispQueuedLogCollector : LogCollector {
-    private val queue = LinkedBlockingDeque<ILoggingEvent>()
+class WispQueuedLogCollector : LogCollector, FakeFixture() {
+    private val queue by resettable { LinkedBlockingDeque<ILoggingEvent>() }
 
     private var wasStarted = false
 
