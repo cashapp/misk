@@ -5,7 +5,7 @@ import misk.inject.KAbstractModule
 
 class FakeMetricsModule : KAbstractModule() {
   override fun configure() {
-    bind<CollectorRegistry>().toInstance(CollectorRegistry(true))
+    install(CollectorRegistryModule())
     bind<Metrics>().to<FakeMetrics>()
   }
 }
