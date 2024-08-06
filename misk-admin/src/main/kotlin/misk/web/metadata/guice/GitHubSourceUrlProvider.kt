@@ -8,12 +8,15 @@ import java.net.URLEncoder
  */
 
 open class GitHubSourceUrlProvider @Inject constructor() : GuiceSourceUrlProvider {
-  private val sourceWithLineNumberRegex = """^([\w.]+)\.((?:\w+\$?)+)\.(\w+)\(.*:(\d+)\)$""".toRegex()
+  private val sourceWithLineNumberRegex = Regex("""^([\w.]+)\.((?:\w+\$?)+)\.(\w+)\(.*:(\d+)\)$""")
+  private val classRegex = Regex("""class\s+([a-zA-Z0-9_.$]+)""")
+  private val functionRegex = Regex("""(?:\w+\s+)?(?:\w+\s+)?(?:\w+\s+)?([a-zA-Z0-9_.$]+)\.([a-zA-Z0-9_.$]+)\(([^)]*)\)""")
   protected data class SourceLocation(
     val packageName: String,
     val className: String,
-    val functionName: String,
-    val lineNumber: Int,
+    val innerClassName: String?,
+    val functionName: String?,
+    val lineNumber: Int?,
   )
   override fun urlForSource(source: String): String? {
     val sourceLocation = maybeSourceLocation(source) ?: return null
@@ -21,7 +24,16 @@ open class GitHubSourceUrlProvider @Inject constructor() : GuiceSourceUrlProvide
   }
 
   protected open fun generateQuery(source: SourceLocation): String {
-    return """"package ${source.packageName}" ${source.className.replace('$', ' ')} ${source.functionName}"""
+    val sb = StringBuilder()
+    sb.append(""""package ${source.packageName}"""")
+    sb.append(" ${source.className}")
+    if (source.innerClassName != null) {
+      sb.append(" ${source.innerClassName}")
+    }
+    if (source.functionName != null) {
+      sb.append(" ${source.functionName}")
+    }
+    return sb.toString()
   }
 
   private fun githubSearchUrl(source: SourceLocation): String {
@@ -30,15 +42,54 @@ open class GitHubSourceUrlProvider @Inject constructor() : GuiceSourceUrlProvide
   }
 
   private fun maybeSourceLocation(source: String): SourceLocation? {
-    val matchResult = sourceWithLineNumberRegex.matchEntire(source)
-
-    return if (matchResult != null) {
-      // Extract the package, class, function names, and line number from the match groups
+    sourceWithLineNumberRegex.matchEntire(source)?.let {matchResult ->
       val (packageName, className, functionName, lineNumberStr) = matchResult.destructured
+      val (innerClassName, outerClassName) = parseClass(className)
       val lineNumber = lineNumberStr.toInt()
-      SourceLocation(packageName, className, functionName, lineNumber)
-    } else {
-      null
+      return SourceLocation(
+        packageName =  packageName,
+        className = outerClassName,
+        innerClassName = innerClassName,
+        functionName = functionName,
+        lineNumber = lineNumber
+      )
     }
+
+    classRegex.find(source)?.let { matchResult ->
+      val fullClassName = matchResult.groupValues[1]
+      val packageName = fullClassName.substringBeforeLast('.')
+      val className = fullClassName.substringAfterLast('.')
+      val (innerClassName, outerClassName) = parseClass(className)
+      return SourceLocation(
+        packageName = packageName,
+        className = outerClassName,
+        innerClassName = innerClassName,
+        functionName = null,
+        lineNumber = null
+      )
+    }
+
+    functionRegex.find(source)?.let {matchResult ->
+      val fullClassName = matchResult.groupValues[1]
+      val functionName = matchResult.groupValues[2].substringBefore('$')
+      val packageName = fullClassName.substringBeforeLast('.')
+      val className = fullClassName.substringAfterLast('.')
+      val (innerClassName, outerClassName) = parseClass(className)
+      return SourceLocation(
+        packageName = packageName,
+        className = outerClassName,
+        innerClassName = innerClassName,
+        functionName = functionName,
+        lineNumber = null
+      )
+    }
+
+    return null
+  }
+
+  private fun parseClass(className: String): Pair<String?, String> {
+    val innerClassName = if ('$' in className) className.substringAfter('$') else null
+    val outerClassName = if ('$' in className) className.substringBefore('$') else className
+    return Pair(innerClassName, outerClassName)
   }
 }
