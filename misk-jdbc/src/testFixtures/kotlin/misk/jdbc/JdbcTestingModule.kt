@@ -12,6 +12,7 @@ import misk.time.ForceUtcTimeZoneService
 import misk.vitess.VitessScaleSafetyChecks
 import okhttp3.OkHttpClient
 import com.google.inject.Provider
+import misk.testing.TestFixture
 import kotlin.reflect.KClass
 
 /**
@@ -45,7 +46,14 @@ class JdbcTestingModule(
         .dependsOn<SchemaMigratorService>(qualifier)
         .enhancedBy<ReadyService>()
     )
-    bind(truncateTablesServiceKey).toProvider(Provider {
+    multibind<TestFixture>().toProvider {
+      JdbcTestFixture(
+        qualifier = qualifier,
+        dataSourceService = dataSourceServiceProvider.get(),
+        transacterProvider = transacterProvider
+      )
+    }.asSingleton()
+    bind(truncateTablesServiceKey).toProvider {
       TruncateTablesService(
         qualifier = qualifier,
         dataSourceService = dataSourceServiceProvider.get(),
@@ -53,7 +61,7 @@ class JdbcTestingModule(
         startUpStatements = startUpStatements,
         shutDownStatements = shutDownStatements
       )
-    }).asSingleton()
+    }.asSingleton()
 
     if (scaleSafetyChecks) bindScaleSafetyChecks()
   }
