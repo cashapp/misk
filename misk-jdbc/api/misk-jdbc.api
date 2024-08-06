@@ -510,6 +510,15 @@ public final class misk/jdbc/JdbcModule : misk/inject/KAbstractModule {
 	public final fun getReaderConfig ()Lmisk/jdbc/DataSourceConfig;
 }
 
+public final class misk/jdbc/JdbcTestFixture : misk/testing/TestFixture {
+	public static final field Companion Lmisk/jdbc/JdbcTestFixture$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;)V
+	public fun reset ()V
+}
+
+public final class misk/jdbc/JdbcTestFixture$Companion {
+}
+
 public final class misk/jdbc/JdbcTestingModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;Z)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/util/List;Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -663,7 +672,8 @@ public final class misk/jdbc/TruncateTablesService : com/google/common/util/conc
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/jdbc/JdbcTestFixture;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/jdbc/JdbcTestFixture;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/vitess/ConnectionExtensionsKt {
