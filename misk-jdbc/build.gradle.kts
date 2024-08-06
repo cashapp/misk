@@ -42,6 +42,7 @@ dependencies {
   testFixturesApi(libs.okHttp)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-jdbc"))
+  testFixturesApi(project(":misk-testing-api"))
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.hikariCp)
   testFixturesImplementation(libs.kotlinLogging)
