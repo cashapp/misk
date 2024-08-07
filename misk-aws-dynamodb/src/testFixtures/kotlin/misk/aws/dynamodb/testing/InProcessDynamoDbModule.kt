@@ -13,6 +13,7 @@ import misk.ServiceModule
 import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
 import misk.inject.KAbstractModule
+import misk.testing.TestFixture
 import kotlin.reflect.KClass
 
 /**
@@ -37,6 +38,7 @@ class InProcessDynamoDbModule(
     bind<DynamoDbService>().to<InProcessDynamoDbService>()
     install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
     install(ServiceModule<TestDynamoDb>())
+    multibind<TestFixture>().to<TestDynamoDb>()
   }
 
   @Provides
