@@ -65,7 +65,7 @@ public final class misk/aws2/dynamodb/testing/InProcessDynamoDbModule : misk/inj
 	public final fun providesTestDynamoDb ()Lmisk/aws2/dynamodb/testing/TestDynamoDb;
 }
 
-public final class misk/aws2/dynamodb/testing/TestDynamoDb : com/google/common/util/concurrent/Service {
+public final class misk/aws2/dynamodb/testing/TestDynamoDb : com/google/common/util/concurrent/Service, misk/testing/TestFixture {
 	public fun <init> (Lapp/cash/tempest2/testing/internal/TestDynamoDbService;)V
 	public fun addListener (Lcom/google/common/util/concurrent/Service$Listener;Ljava/util/concurrent/Executor;)V
 	public fun awaitRunning ()V
@@ -75,6 +75,7 @@ public final class misk/aws2/dynamodb/testing/TestDynamoDb : com/google/common/u
 	public fun failureCause ()Ljava/lang/Throwable;
 	public final fun getService ()Lapp/cash/tempest2/testing/internal/TestDynamoDbService;
 	public fun isRunning ()Z
+	public fun reset ()V
 	public fun startAsync ()Lcom/google/common/util/concurrent/Service;
 	public fun state ()Lcom/google/common/util/concurrent/Service$State;
 	public fun stopAsync ()Lcom/google/common/util/concurrent/Service;

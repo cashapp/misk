@@ -11,6 +11,7 @@ import misk.ServiceModule
 import misk.aws2.dynamodb.DynamoDbService
 import misk.aws2.dynamodb.RequiredDynamoDbTable
 import misk.inject.KAbstractModule
+import misk.testing.TestFixture
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
 
@@ -33,6 +34,7 @@ class DockerDynamoDbModule(
     bind<DynamoDbService>().to<DockerDynamoDbService>()
     install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
     install(ServiceModule<TestDynamoDb>())
+    multibind<TestFixture>().to<TestDynamoDb>()
   }
 
   @Provides
