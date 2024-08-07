@@ -967,6 +967,20 @@ public final class misk/web/metadata/guice/GuiceTabIndexAction : misk/web/action
 public final class misk/web/metadata/guice/GuiceTabIndexAction$Companion {
 }
 
+public final class misk/web/metadata/servicegraph/ServiceGraphDashboardTabModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/web/metadata/servicegraph/ServiceGraphTabIndexAction : misk/web/actions/WebAction {
+	public static final field Companion Lmisk/web/metadata/servicegraph/ServiceGraphTabIndexAction$Companion;
+	public static final field PATH Ljava/lang/String;
+	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Lcom/google/inject/Provider;)V
+	public final fun get ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/servicegraph/ServiceGraphTabIndexAction$Companion {
+}
+
 public final class misk/web/metadata/webaction/WebActionsDashboardTabModule : misk/inject/KAbstractModule {
 	public fun <init> (Z)V
 }

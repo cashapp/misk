@@ -10,12 +10,12 @@ dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
+  api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinStdLibJdk8)
   implementation(libs.moshiCore)
-  implementation(project(":misk-config"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
 

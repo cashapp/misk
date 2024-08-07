@@ -4,8 +4,16 @@ import com.google.common.collect.LinkedHashMultimap
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
-import misk.CoordinatedService.Companion.CycleValidity
 import com.google.inject.Provider
+import misk.CoordinatedService.Companion.CycleValidity
+
+data class ServiceGraphBuilderMetadata(
+  val serviceMap: Map<String, CoordinatedServiceMetadata>,
+  val serviceNames: Map<String, String>,
+  /** A map of downstream services -> their upstreams. */
+  val dependencyMap: Map<String, String>,
+  val asciiVisual: String,
+)
 
 /**
  * Builds a graph of [CoordinatedService]s which defer start up and shut down until their dependent
@@ -146,15 +154,7 @@ internal class ServiceGraphBuilder {
     append(serviceNames[key])
   }
 
-  data class Metadata(
-    val serviceMap: Map<String, CoordinatedService.Metadata>,
-    val serviceNames: Map<String, String>,
-    /** A map of downstream services -> their upstreams. */
-    val dependencyMap: Map<String, String>,
-    val asciiVisual: String,
-  )
-
-  fun toMetadata() = Metadata(
+  fun toMetadata() = ServiceGraphBuilderMetadata(
     serviceMap = serviceMap.map { it.key.toString() to it.value.toMetadata() }.toMap(),
     serviceNames = serviceNames.mapKeys { it.key.toString() },
     dependencyMap = dependencyMap.asMap().map { (k,v) -> k.toString() to v.toString() }.toMap(),

@@ -1,3 +1,16 @@
+public final class misk/CoordinatedServiceMetadata {
+	public fun <init> (Ljava/util/Set;Ljava/util/Set;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/Set;Ljava/util/Set;)Lmisk/CoordinatedServiceMetadata;
+	public static synthetic fun copy$default (Lmisk/CoordinatedServiceMetadata;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)Lmisk/CoordinatedServiceMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDependencies ()Ljava/util/Set;
+	public final fun getDirectDependsOn ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class misk/DelegatingService : com/google/common/util/concurrent/Service {
 	public abstract fun getService ()Lcom/google/common/util/concurrent/Service;
 }
@@ -8,6 +21,23 @@ public final class misk/ReadyService : com/google/common/util/concurrent/Abstrac
 }
 
 public final class misk/ReadyService$Companion {
+}
+
+public final class misk/ServiceGraphBuilderMetadata {
+	public fun <init> (Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/util/Map;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;)Lmisk/ServiceGraphBuilderMetadata;
+	public static synthetic fun copy$default (Lmisk/ServiceGraphBuilderMetadata;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;ILjava/lang/Object;)Lmisk/ServiceGraphBuilderMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAsciiVisual ()Ljava/lang/String;
+	public final fun getDependencyMap ()Ljava/util/Map;
+	public final fun getServiceMap ()Ljava/util/Map;
+	public final fun getServiceNames ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/ServiceManagerConfig : wisp/config/Config {
@@ -45,5 +75,30 @@ public final class misk/ServiceModule : misk/inject/KAbstractModule {
 	public final fun getDependsOn ()Ljava/util/List;
 	public final fun getEnhancedBy ()Ljava/util/List;
 	public final fun getKey ()Lcom/google/inject/Key;
+}
+
+public final class misk/metadata/servicegraph/ServiceGraphMetadata : misk/web/metadata/Metadata {
+	public fun <init> (Lmisk/ServiceGraphBuilderMetadata;)V
+	public final fun component1 ()Lmisk/ServiceGraphBuilderMetadata;
+	public final fun copy (Lmisk/ServiceGraphBuilderMetadata;)Lmisk/metadata/servicegraph/ServiceGraphMetadata;
+	public static synthetic fun copy$default (Lmisk/metadata/servicegraph/ServiceGraphMetadata;Lmisk/ServiceGraphBuilderMetadata;ILjava/lang/Object;)Lmisk/metadata/servicegraph/ServiceGraphMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuilderMetadata ()Lmisk/ServiceGraphBuilderMetadata;
+	public final fun getGraphVisual ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/metadata/servicegraph/ServiceGraphMetadata$GraphPairs {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/metadata/servicegraph/ServiceGraphMetadata$GraphPairs;
+	public static synthetic fun copy$default (Lmisk/metadata/servicegraph/ServiceGraphMetadata$GraphPairs;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/metadata/servicegraph/ServiceGraphMetadata$GraphPairs;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getTarget ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

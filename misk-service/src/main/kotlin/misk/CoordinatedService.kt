@@ -8,6 +8,11 @@ import com.google.common.util.concurrent.Service.State
 import com.google.inject.Provider
 import java.util.concurrent.atomic.AtomicBoolean
 
+data class CoordinatedServiceMetadata(
+  val dependencies: Set<String>,
+  val directDependsOn: Set<String>,
+)
+
 internal class CoordinatedService(
   private val serviceProvider: Provider<out Service>
 ) : AbstractService(), DelegatingService {
@@ -154,12 +159,7 @@ internal class CoordinatedService(
     }
   }
 
-  data class Metadata(
-    val dependencies: Set<String>,
-    val directDependsOn: Set<String>,
-  )
-
-  fun toMetadata() = Metadata(
+  fun toMetadata() = CoordinatedServiceMetadata(
     dependencies = dependencies.map { it.serviceProvider.get().javaClass.name }.toSet(),
     directDependsOn = directDependsOn.map { it.serviceProvider.get().javaClass.name }.toSet(),
   )

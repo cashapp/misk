@@ -20,6 +20,7 @@ dependencies {
   api(project(":misk-actions"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
+  api(project(":misk-service"))
   api(libs.kotlinxHtml)
   implementation(libs.kotlinLogging)
   implementation(libs.moshiCore)
