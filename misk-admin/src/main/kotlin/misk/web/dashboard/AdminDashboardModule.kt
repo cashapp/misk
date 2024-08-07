@@ -7,6 +7,7 @@ import misk.web.metadata.config.ConfigDashboardTabModule
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.metadata.database.DatabaseDashboardTabModule
 import misk.web.metadata.guice.GuiceDashboardTabModule
+import misk.web.metadata.servicegraph.ServiceGraphDashboardTabModule
 import misk.web.metadata.webaction.WebActionsDashboardTabModule
 import misk.web.v2.NavbarModule
 
@@ -35,6 +36,7 @@ class AdminDashboardModule @JvmOverloads constructor(
     install(ConfigDashboardTabModule(isDevelopment, configTabMode))
     install(DatabaseDashboardTabModule(isDevelopment))
     install(GuiceDashboardTabModule())
+    install(ServiceGraphDashboardTabModule())
     install(WebActionsDashboardTabModule(isDevelopment))
   }
 }
