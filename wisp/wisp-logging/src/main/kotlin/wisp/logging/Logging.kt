@@ -113,3 +113,82 @@ fun withTags(vararg tags: Tag, f: () -> Unit) {
         priorMDC.forEach { (k, v) -> if (v == null) MDC.remove(k) else MDC.put(k, v) }
     }
 }
+
+/**
+ * Use this function to add tags to the MDC context for the duration of the block.
+ *
+ * This is particularly useful (the smart aspect) when an exception is thrown within the block,
+ * the tags can be retrieved outside that block using `SmartTagsThreadLocalHandler.popThreadLocalSmartTags()`
+ * and added to the MDC context again when logging the exception.
+ *
+ * Within Misk this is already built into both WebAction (`misk.web.exceptions.ExceptionHandlingInterceptor`)
+ * and `misk.jobqueue.sqs.SqsJobConsumer`. These can be used as an example to extend for any
+ * other incoming "event" consumers within a service such as Kafka, scheduled tasks, temporal workflows, etc.
+ *
+ * Usage:
+ * ```
+ * class ServiceAction (private val webClient: WebClient): WebAction {
+ *
+ *   @Post("/api/resource")
+ *   fun executeWebAction(@RequestBody request: ServiceActionRequest) {
+ *     logger.info() { "Received request" }
+ *
+ *     val loadedContext = aClient.load(request.id)
+ *
+ *     withSmartTags(
+ *       "processValue" to request.process_value,
+ *       "contextToken" to loadedContext.token
+ *     ) {
+ *       logger.info() { "Processing request" }
+ *       doSomething()
+ *     }
+ *   }
+ *
+ *   private fun doSomething() {
+ *     logger.info() { "Start Process" }
+ *
+ *     client.someWebRequest() // Client throws exception which is caught and logged by misk framework
+ *
+ *     logger.info() { "Done" }
+ *   }
+ *
+ *   companion object {
+ *     val logger = KotlinLogging.logger(ServiceAction::class.java.canonicalName)
+ *   }
+ * }
+ * ```
+ *
+ * Logging result:
+ * ```
+ *   Log MDC context: [] Log message: "Received request"
+ *   Log MDC context: [processValue: "PV_123", contextToken: "contextTokenValue"] Log message: "Processing request"
+ *   Log MDC context: [processValue: "PV_123", contextToken: "contextTokenValue"] Log message: "Start Process"
+ *   Log MDC context: [processValue: "PV_123", contextToken: "contextTokenValue"] Log message: "unexpected error dispatching to ServiceAction" // This log would not normally include the MDC context
+ * ```
+ */
+fun <T> withSmartTags(vararg tags: Tag, f: () -> T): T {
+  // Establish MDC, saving prior MDC
+  val priorMDC = tags.map { (k, v) ->
+    val priorValue = MDC.get(k)
+    MDC.put(k, v.toString())
+    k to priorValue
+  }
+
+  try {
+    return f().also {
+      // Exiting this block gracefully: Lets do some cleanup to keep the ThreadLocal clear.
+      // The scenario here is that when nested `withSmartTags` threw an exception and it was
+      // caught and handled by this `withSmartTags`, it should clean up the unused and unneeded context.
+      SmartTagsThreadLocalHandler.clear()
+    }
+  } catch (th: Throwable) {
+    // Calls to `withSmartTags` can be nested - only set if there is not already a context set
+    // This will be cleared upon logging of the exception within misk or if the thrown exception
+    // is handled by a higher level `withSmartTags`
+    SmartTagsThreadLocalHandler.addOrClearTags(th, tags.toSet())
+    throw th
+  } finally {
+    // Restore or clear prior MDC
+    priorMDC.forEach { (k, v) -> if (v == null) MDC.remove(k) else MDC.put(k, v) }
+  }
+}
