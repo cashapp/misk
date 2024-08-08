@@ -1943,6 +1943,7 @@ public final class misk/web/jetty/JettyService : com/google/common/util/concurre
 	public final fun getHealthServerUrl ()Lokhttp3/HttpUrl;
 	public final fun getHttpServerUrl ()Lokhttp3/HttpUrl;
 	public final fun getHttpsServerUrl ()Lokhttp3/HttpUrl;
+	public final fun stop ()V
 }
 
 public final class misk/web/jetty/JettyService$Companion {

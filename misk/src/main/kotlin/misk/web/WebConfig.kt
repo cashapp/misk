@@ -105,7 +105,11 @@ data class WebConfig @JvmOverloads constructor(
     log_level = concurrency_limiter_log_level,
   ),
 
-  /** The number of milliseconds to sleep before commencing service shutdown. */
+  /**
+   * The number of milliseconds to sleep before commencing service shutdown. 0 or
+   * greater will defer the actual shutdown of Jetty to after all Guava managed
+   * services are shutdown.
+   * */
   val shutdown_sleep_ms: Int = 0,
 
   /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
