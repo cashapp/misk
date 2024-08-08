@@ -11,4 +11,18 @@ class Attributes @JvmOverloads constructor(
   // Indicates that the user is anonymous, which may have backend-specific behavior, like not
   // including the user in analytics.
   anonymous: Boolean = false
-) : wisp.feature.Attributes(text, number, anonymous)
+) : wisp.feature.Attributes(text, number, anonymous) {
+  override fun with(name: String, value: String): Attributes =
+    copy(text = text.plus(name to value))
+  
+  override fun with(name: String, value: Number): Attributes {
+    val number = number ?: mapOf()
+    return copy(number = number.plus(name to value))
+  }
+
+  override fun copy(
+    text: Map<String, String>,
+    number: Map<String, Number>?,
+    anonymous: Boolean
+  ): Attributes = Attributes(text, number, anonymous)
+}
