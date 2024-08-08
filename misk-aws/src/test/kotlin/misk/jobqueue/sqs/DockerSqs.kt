@@ -6,6 +6,7 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClient
+import com.amazonaws.services.sqs.model.AmazonSQSException
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
@@ -85,7 +86,7 @@ internal object DockerSqs : ExternalDependency {
       try {
         client.getQueueUrl("does not exist")
       } catch (e: Exception) {
-        if (e is QueueDoesNotExistException) {
+        if (e is QueueDoesNotExistException || (e is AmazonSQSException && e.statusCode == 400)) {
           break
         }
         log.info { "sqs not available yet" }
