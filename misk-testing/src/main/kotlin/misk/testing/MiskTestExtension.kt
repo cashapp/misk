@@ -12,6 +12,7 @@ import misk.inject.KAbstractModule
 import misk.inject.ReusableTestModule
 import misk.inject.getInstance
 import misk.inject.uninject
+import misk.web.jetty.JettyService
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -124,10 +125,27 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     lateinit var serviceManager: ServiceManager
 
     override fun afterEach(context: ExtensionContext) {
+
       if (context.startService()) {
         serviceManager.stopAsync()
         serviceManager.awaitStopped(30, TimeUnit.SECONDS)
+
+        /**
+         * By default, Jetty shutdown is not managed by Guava so needs to be
+         * done explicitly. This is being done in MiskApplication.
+         */
+        if (jettyIsRunning()) {
+          context.retrieve<Injector>("injector").getInstance<JettyService>().stop()
+        }
       }
+    }
+
+    private fun jettyIsRunning() : Boolean {
+      return serviceManager
+        .servicesByState()
+        .values()
+        .toList()
+        .any { it.toString().startsWith("JettyService") }
     }
   }
 
