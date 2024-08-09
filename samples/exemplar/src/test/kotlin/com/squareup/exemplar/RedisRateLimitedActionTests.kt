@@ -20,7 +20,7 @@ class RedisRateLimitedActionTests : AbstractRateLimitedActionTests() {
   @MiskTestModule val module: Module = object : KAbstractModule() {
     override fun configure() {
       install(ExemplarTestModule())
-      install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(RedisBucket4jRateLimiterModule())
       install(RedisTestFlushModule())
       bind<MeterRegistry>().toInstance(SimpleMeterRegistry())

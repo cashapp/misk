@@ -23,7 +23,7 @@ import java.time.Duration
  * To use this in tests:
  *
  * 1. Install a `RedisModule` instead of a `FakeRedisModule`.
- *    Make sure to supply the [DockerRedis.config] as the [RedisConfig].
+ *    Make sure to supply the [DockerRedis.replicationGroupConfig] as the [RedisReplicationGroupConfig].
  * 2. Add `@MiskExternalDependency private val dockerRedis: DockerRedis` to your test class.
  */
 object DockerRedis : ExternalDependency {
@@ -35,7 +35,7 @@ object DockerRedis : ExternalDependency {
   private val jedis by lazy { JedisPooled(hostname, port) }
 
   private val redisNodeConfig = RedisNodeConfig(hostname, port)
-  private val groupConfig = RedisReplicationGroupConfig(
+  val replicationGroupConfig = RedisReplicationGroupConfig(
     writer_endpoint = redisNodeConfig,
     reader_endpoint = redisNodeConfig,
     // NB: Docker redis images won't accept a start-up password via Container->withCmd.
@@ -46,7 +46,7 @@ object DockerRedis : ExternalDependency {
     redis_auth_password = "",
     timeout_ms = 1_000, // 1 second.
   )
-  val config = RedisConfig(mapOf("test-group" to groupConfig))
+  val config = RedisConfig(mapOf("test-group" to replicationGroupConfig))
 
   private val composer = Composer(
     "misk-redis-testing",

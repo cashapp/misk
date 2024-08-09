@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
     MiskRealServiceModule(),
     MiskWebModule(config.web),
     ChatModule(),
-    RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false),
+    RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false),
     ConfigModule.create("chat", config),
     DeploymentModule(deployment),
     PrometheusMetricsServiceModule(config.prometheus)
