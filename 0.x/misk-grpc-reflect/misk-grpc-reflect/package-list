@@ -1,0 +1,13 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.grpc.reflect////PointingToDeclaration/misk-grpc-reflect/misk.grpc.reflect/index.md
+$dokka.location:misk.grpc.reflect/GrpcReflectModule.Companion///PointingToDeclaration/misk-grpc-reflect/misk.grpc.reflect/-grpc-reflect-module/-companion/index.md
+$dokka.location:misk.grpc.reflect/GrpcReflectModule///PointingToDeclaration/misk-grpc-reflect/misk.grpc.reflect/-grpc-reflect-module/index.md
+$dokka.location:misk.grpc.reflect/GrpcReflectModule/GrpcReflectModule/#/PointingToDeclaration/misk-grpc-reflect/misk.grpc.reflect/-grpc-reflect-module/-grpc-reflect-module.md
+$dokka.location:misk.grpc.reflect/GrpcReflectModule/provideSchema/#kotlin.collections.List[misk.web.actions.WebActionEntry]/PointingToDeclaration/misk-grpc-reflect/misk.grpc.reflect/-grpc-reflect-module/provide-schema.md
+$dokka.location:misk.grpc.reflect/GrpcReflectModule/provideServiceReflector/#com.squareup.wire.schema.Schema/PointingToDeclaration/misk-grpc-reflect/misk.grpc.reflect/-grpc-reflect-module/provide-service-reflector.md
+$dokka.location:misk.grpc.reflect/ServerReflectionApi///PointingToDeclaration/misk-grpc-reflect/misk.grpc.reflect/-server-reflection-api/index.md
+$dokka.location:misk.grpc.reflect/ServerReflectionApi/ServerReflectionApi/#com.squareup.wire.reflector.SchemaReflector/PointingToDeclaration/misk-grpc-reflect/misk.grpc.reflect/-server-reflection-api/-server-reflection-api.md
+$dokka.location:misk.grpc.reflect/ServerReflectionApi/ServerReflectionInfo/#com.squareup.wire.MessageSource[grpc.reflection.v1alpha.ServerReflectionRequest]#com.squareup.wire.MessageSink[grpc.reflection.v1alpha.ServerReflectionResponse]/PointingToDeclaration/misk-grpc-reflect/misk.grpc.reflect/-server-reflection-api/-server-reflection-info.md
+misk.grpc.reflect
+

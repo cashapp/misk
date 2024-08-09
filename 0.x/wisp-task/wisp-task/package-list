@@ -1,0 +1,54 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.task.exception////PointingToDeclaration/wisp-task/wisp.task.exception/index.md
+$dokka.location:wisp.task.exception/FailedTaskException///PointingToDeclaration/wisp-task/wisp.task.exception/-failed-task-exception/index.md
+$dokka.location:wisp.task.exception/FailedTaskException/FailedTaskException/#/PointingToDeclaration/wisp-task/wisp.task.exception/-failed-task-exception/-failed-task-exception.md
+$dokka.location:wisp.task.exception/NoTaskFoundException///PointingToDeclaration/wisp-task/wisp.task.exception/-no-task-found-exception/index.md
+$dokka.location:wisp.task.exception/NoTaskFoundException/NoTaskFoundException/#kotlin.String/PointingToDeclaration/wisp-task/wisp.task.exception/-no-task-found-exception/-no-task-found-exception.md
+$dokka.location:wisp.task.exception/NoWorkForTaskException///PointingToDeclaration/wisp-task/wisp.task.exception/-no-work-for-task-exception/index.md
+$dokka.location:wisp.task.exception/NoWorkForTaskException/NoWorkForTaskException/#/PointingToDeclaration/wisp-task/wisp.task.exception/-no-work-for-task-exception/-no-work-for-task-exception.md
+$dokka.location:wisp.task.exception/TaskAlreadyExistsException///PointingToDeclaration/wisp-task/wisp.task.exception/-task-already-exists-exception/index.md
+$dokka.location:wisp.task.exception/TaskAlreadyExistsException/TaskAlreadyExistsException/#kotlin.String/PointingToDeclaration/wisp-task/wisp.task.exception/-task-already-exists-exception/-task-already-exists-exception.md
+$dokka.location:wisp.task////PointingToDeclaration/wisp-task/wisp.task/index.md
+$dokka.location:wisp.task//defaultThrowableRetryPolicy/#/PointingToDeclaration/wisp-task/wisp.task/default-throwable-retry-policy.md
+$dokka.location:wisp.task/RepeatedTask.Companion///PointingToDeclaration/wisp-task/wisp.task/-repeated-task/-companion/index.md
+$dokka.location:wisp.task/RepeatedTask///PointingToDeclaration/wisp-task/wisp.task/-repeated-task/index.md
+$dokka.location:wisp.task/RepeatedTask/RepeatedTask/#kotlin.String#io.micrometer.core.instrument.MeterRegistry#wisp.task.RepeatedTaskConfig#kotlin.coroutines.SuspendFunction1[com.github.michaelbull.retry.RetryFailure[kotlin.Throwable],com.github.michaelbull.retry.RetryInstruction]#wisp.task.TaskConfig#kotlin.Function2[kotlin.String,wisp.task.TaskConfig,wisp.task.Status]/PointingToDeclaration/wisp-task/wisp.task/-repeated-task/-repeated-task.md
+$dokka.location:wisp.task/RepeatedTask/isRunning/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task/is-running.md
+$dokka.location:wisp.task/RepeatedTask/name/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task/name.md
+$dokka.location:wisp.task/RepeatedTask/shutDown/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task/shut-down.md
+$dokka.location:wisp.task/RepeatedTask/startUp/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task/start-up.md
+$dokka.location:wisp.task/RepeatedTaskConfig///PointingToDeclaration/wisp-task/wisp.task/-repeated-task-config/index.md
+$dokka.location:wisp.task/RepeatedTaskConfig/RepeatedTaskConfig/#kotlin.Long#kotlin.Long#kotlin.Long#kotlin.Long/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-config/-repeated-task-config.md
+$dokka.location:wisp.task/RepeatedTaskConfig/defaultJitterMs/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-config/default-jitter-ms.md
+$dokka.location:wisp.task/RepeatedTaskConfig/defaultMaxDelayMs/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-config/default-max-delay-ms.md
+$dokka.location:wisp.task/RepeatedTaskConfig/initialDelayMs/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-config/initial-delay-ms.md
+$dokka.location:wisp.task/RepeatedTaskConfig/timeBetweenRunsMs/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-config/time-between-runs-ms.md
+$dokka.location:wisp.task/RepeatedTaskManager///PointingToDeclaration/wisp-task/wisp.task/-repeated-task-manager/index.md
+$dokka.location:wisp.task/RepeatedTaskManager/RepeatedTaskManager/#io.micrometer.core.instrument.MeterRegistry/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-manager/-repeated-task-manager.md
+$dokka.location:wisp.task/RepeatedTaskManager/createTask/#kotlin.String#io.micrometer.core.instrument.MeterRegistry#wisp.task.RepeatedTaskConfig#kotlin.coroutines.SuspendFunction1[com.github.michaelbull.retry.RetryFailure[kotlin.Throwable],com.github.michaelbull.retry.RetryInstruction]#wisp.task.TaskConfig#kotlin.Function2[kotlin.String,wisp.task.TaskConfig,wisp.task.Status]/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-manager/create-task.md
+$dokka.location:wisp.task/RepeatedTaskManager/getTask/#kotlin.String/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-manager/get-task.md
+$dokka.location:wisp.task/RepeatedTaskManager/isTaskRunning/#kotlin.String/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-manager/is-task-running.md
+$dokka.location:wisp.task/RepeatedTaskManager/shutDown/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-manager/shut-down.md
+$dokka.location:wisp.task/RepeatedTaskManager/taskExists/#kotlin.String/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-manager/task-exists.md
+$dokka.location:wisp.task/RepeatedTaskMetrics.Companion///PointingToDeclaration/wisp-task/wisp.task/-repeated-task-metrics/-companion/index.md
+$dokka.location:wisp.task/RepeatedTaskMetrics.Companion/DURATION_SUMMARY_NAME/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-metrics/-companion/-d-u-r-a-t-i-o-n_-s-u-m-m-a-r-y_-n-a-m-e.md
+$dokka.location:wisp.task/RepeatedTaskMetrics.Companion/FAILED_COUNTER_NAME/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-metrics/-companion/-f-a-i-l-e-d_-c-o-u-n-t-e-r_-n-a-m-e.md
+$dokka.location:wisp.task/RepeatedTaskMetrics.Companion/NO_WORK_COUNTER_NAME/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-metrics/-companion/-n-o_-w-o-r-k_-c-o-u-n-t-e-r_-n-a-m-e.md
+$dokka.location:wisp.task/RepeatedTaskMetrics.Companion/SUCCESS_COUNTER_NAME/#/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-metrics/-companion/-s-u-c-c-e-s-s_-c-o-u-n-t-e-r_-n-a-m-e.md
+$dokka.location:wisp.task/RepeatedTaskMetrics///PointingToDeclaration/wisp-task/wisp.task/-repeated-task-metrics/index.md
+$dokka.location:wisp.task/RepeatedTaskMetrics/RepeatedTaskMetrics/#io.micrometer.core.instrument.MeterRegistry/PointingToDeclaration/wisp-task/wisp.task/-repeated-task-metrics/-repeated-task-metrics.md
+$dokka.location:wisp.task/Status.FAILED///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}wisp-task/wisp.task/-status/-f-a-i-l-e-d/index.md
+$dokka.location:wisp.task/Status.NO_RESCHEDULE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}wisp-task/wisp.task/-status/-n-o_-r-e-s-c-h-e-d-u-l-e/index.md
+$dokka.location:wisp.task/Status.NO_WORK///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}wisp-task/wisp.task/-status/-n-o_-w-o-r-k/index.md
+$dokka.location:wisp.task/Status.OK///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}wisp-task/wisp.task/-status/-o-k/index.md
+$dokka.location:wisp.task/Status///PointingToDeclaration/wisp-task/wisp.task/-status/index.md
+$dokka.location:wisp.task/Status/entries/#/PointingToDeclaration/wisp-task/wisp.task/-status/entries.md
+$dokka.location:wisp.task/Status/metricLabel/#/PointingToDeclaration/wisp-task/wisp.task/-status/metric-label.md
+$dokka.location:wisp.task/Status/valueOf/#kotlin.String/PointingToDeclaration/wisp-task/wisp.task/-status/value-of.md
+$dokka.location:wisp.task/Status/values/#/PointingToDeclaration/wisp-task/wisp.task/-status/values.md
+$dokka.location:wisp.task/TaskConfig///PointingToDeclaration/wisp-task/wisp.task/-task-config/index.md
+$dokka.location:wisp.task/TaskConfig/TaskConfig/#/PointingToDeclaration/wisp-task/wisp.task/-task-config/-task-config.md
+wisp.task
+wisp.task.exception
+

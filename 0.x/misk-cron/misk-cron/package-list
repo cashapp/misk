@@ -1,0 +1,27 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.cron////PointingToDeclaration/misk-cron/misk.cron/index.md
+$dokka.location:misk.cron/CronEntryModule.Companion///PointingToDeclaration/misk-cron/misk.cron/-cron-entry-module/-companion/index.md
+$dokka.location:misk.cron/CronEntryModule.Companion/create/#/PointingToDeclaration/misk-cron/misk.cron/-cron-entry-module/-companion/create.md
+$dokka.location:misk.cron/CronEntryModule.Companion/create/#kotlin.reflect.KClass[TypeParam(bounds=[java.lang.Runnable])]/PointingToDeclaration/misk-cron/misk.cron/-cron-entry-module/-companion/create.md
+$dokka.location:misk.cron/CronEntryModule///PointingToDeclaration/misk-cron/misk.cron/-cron-entry-module/index.md
+$dokka.location:misk.cron/CronManager.Companion///PointingToDeclaration/misk-cron/misk.cron/-cron-manager/-companion/index.md
+$dokka.location:misk.cron/CronManager.CronEntry///PointingToDeclaration/misk-cron/misk.cron/-cron-manager/-cron-entry/index.md
+$dokka.location:misk.cron/CronManager.CronEntry/CronEntry/#kotlin.String#kotlin.String#com.cronutils.model.time.ExecutionTime#java.lang.Runnable/PointingToDeclaration/misk-cron/misk.cron/-cron-manager/-cron-entry/-cron-entry.md
+$dokka.location:misk.cron/CronManager.CronEntry/cronTab/#/PointingToDeclaration/misk-cron/misk.cron/-cron-manager/-cron-entry/cron-tab.md
+$dokka.location:misk.cron/CronManager.CronEntry/executionTime/#/PointingToDeclaration/misk-cron/misk.cron/-cron-manager/-cron-entry/execution-time.md
+$dokka.location:misk.cron/CronManager.CronEntry/name/#/PointingToDeclaration/misk-cron/misk.cron/-cron-manager/-cron-entry/name.md
+$dokka.location:misk.cron/CronManager.CronEntry/runnable/#/PointingToDeclaration/misk-cron/misk.cron/-cron-manager/-cron-entry/runnable.md
+$dokka.location:misk.cron/CronManager///PointingToDeclaration/misk-cron/misk.cron/-cron-manager/index.md
+$dokka.location:misk.cron/CronManager/CronManager/#/PointingToDeclaration/misk-cron/misk.cron/-cron-manager/-cron-manager.md
+$dokka.location:misk.cron/CronManager/runReadyCrons/#java.time.Instant/PointingToDeclaration/misk-cron/misk.cron/-cron-manager/run-ready-crons.md
+$dokka.location:misk.cron/CronManager/waitForCronsComplete/#/PointingToDeclaration/misk-cron/misk.cron/-cron-manager/wait-for-crons-complete.md
+$dokka.location:misk.cron/CronModule///PointingToDeclaration/misk-cron/misk.cron/-cron-module/index.md
+$dokka.location:misk.cron/CronModule/CronModule/#java.time.ZoneId#kotlin.Int#kotlin.collections.List[com.google.inject.Key[com.google.common.util.concurrent.Service]]/PointingToDeclaration/misk-cron/misk.cron/-cron-module/-cron-module.md
+$dokka.location:misk.cron/CronModule/provideTaskQueue/#misk.tasks.RepeatedTaskQueueFactory/PointingToDeclaration/misk-cron/misk.cron/-cron-module/provide-task-queue.md
+$dokka.location:misk.cron/CronPattern///PointingToDeclaration/misk-cron/misk.cron/-cron-pattern/index.md
+$dokka.location:misk.cron/CronPattern/pattern/#/PointingToDeclaration/misk-cron/misk.cron/-cron-pattern/pattern.md
+$dokka.location:misk.cron/FakeCronModule///PointingToDeclaration/misk-cron/misk.cron/-fake-cron-module/index.md
+$dokka.location:misk.cron/FakeCronModule/FakeCronModule/#java.time.ZoneId#kotlin.Int#kotlin.collections.List[com.google.inject.Key[com.google.common.util.concurrent.Service]]/PointingToDeclaration/misk-cron/misk.cron/-fake-cron-module/-fake-cron-module.md
+misk.cron
+

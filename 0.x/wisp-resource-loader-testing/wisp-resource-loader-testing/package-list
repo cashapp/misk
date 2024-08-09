@@ -1,0 +1,9 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.resources////PointingToDeclaration/wisp-resource-loader-testing/wisp.resources/index.md
+$dokka.location:wisp.resources/FakeFilesystemLoaderBackend///PointingToDeclaration/wisp-resource-loader-testing/wisp.resources/-fake-filesystem-loader-backend/index.md
+$dokka.location:wisp.resources/FakeFilesystemLoaderBackend/FakeFilesystemLoaderBackend/#kotlin.collections.Map[kotlin.String,kotlin.String]/PointingToDeclaration/wisp-resource-loader-testing/wisp.resources/-fake-filesystem-loader-backend/-fake-filesystem-loader-backend.md
+$dokka.location:wisp.resources/FakeFilesystemLoaderBackend/exists/#kotlin.String/PointingToDeclaration/wisp-resource-loader-testing/wisp.resources/-fake-filesystem-loader-backend/exists.md
+$dokka.location:wisp.resources/FakeFilesystemLoaderBackend/open/#kotlin.String/PointingToDeclaration/wisp-resource-loader-testing/wisp.resources/-fake-filesystem-loader-backend/open.md
+wisp.resources
+

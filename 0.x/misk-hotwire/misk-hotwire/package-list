@@ -1,0 +1,30 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.hotwire////PointingToDeclaration/misk-hotwire/misk.hotwire/index.md
+$dokka.location:misk.hotwire//buildHtml/#kotlin.Function1[kotlinx.html.TagConsumer[*],kotlin.Unit]/PointingToDeclaration/misk-hotwire/misk.hotwire/build-html.md
+$dokka.location:misk.hotwire//buildHtmlResponseBody/#kotlin.Function1[kotlinx.html.TagConsumer[*],kotlin.Unit]/PointingToDeclaration/misk-hotwire/misk.hotwire/build-html-response-body.md
+$dokka.location:misk.turbo////PointingToDeclaration/misk-hotwire/misk.turbo/index.md
+$dokka.location:misk.turbo//addHotwireHeadImports/kotlinx.html.TagConsumer[*]#kotlin.String/PointingToDeclaration/misk-hotwire/misk.turbo/add-hotwire-head-imports.md
+$dokka.location:misk.turbo//template/kotlinx.html.TagConsumer[*]#kotlin.Function1[misk.turbo.Template,kotlin.Unit]/PointingToDeclaration/misk-hotwire/misk.turbo/template.md
+$dokka.location:misk.turbo//turbo_frame/kotlinx.html.TagConsumer[*]#kotlin.String#kotlin.String?#kotlin.Boolean#kotlin.Function1[misk.turbo.TurboFrame,kotlin.Unit]/PointingToDeclaration/misk-hotwire/misk.turbo/turbo_frame.md
+$dokka.location:misk.turbo//turbo_stream/kotlinx.html.TagConsumer[*]#misk.turbo.TurboStreamAction#kotlin.String#kotlin.Function1[misk.turbo.TurboStream,kotlin.Unit]/PointingToDeclaration/misk-hotwire/misk.turbo/turbo_stream.md
+$dokka.location:misk.turbo/Template///PointingToDeclaration/misk-hotwire/misk.turbo/-template/index.md
+$dokka.location:misk.turbo/Template/Template/#kotlinx.html.TagConsumer[*]/PointingToDeclaration/misk-hotwire/misk.turbo/-template/-template.md
+$dokka.location:misk.turbo/TurboFrame///PointingToDeclaration/misk-hotwire/misk.turbo/-turbo-frame/index.md
+$dokka.location:misk.turbo/TurboFrame/TurboFrame/#kotlin.String#kotlin.String?#kotlin.Boolean#kotlinx.html.TagConsumer[*]/PointingToDeclaration/misk-hotwire/misk.turbo/-turbo-frame/-turbo-frame.md
+$dokka.location:misk.turbo/TurboStream///PointingToDeclaration/misk-hotwire/misk.turbo/-turbo-stream/index.md
+$dokka.location:misk.turbo/TurboStream/TurboStream/#misk.turbo.TurboStreamAction#kotlin.String#kotlinx.html.TagConsumer[*]/PointingToDeclaration/misk-hotwire/misk.turbo/-turbo-stream/-turbo-stream.md
+$dokka.location:misk.turbo/TurboStreamAction.AFTER///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-hotwire/misk.turbo/-turbo-stream-action/-a-f-t-e-r/index.md
+$dokka.location:misk.turbo/TurboStreamAction.APPEND///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-hotwire/misk.turbo/-turbo-stream-action/-a-p-p-e-n-d/index.md
+$dokka.location:misk.turbo/TurboStreamAction.BEFORE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-hotwire/misk.turbo/-turbo-stream-action/-b-e-f-o-r-e/index.md
+$dokka.location:misk.turbo/TurboStreamAction.PREPEND///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-hotwire/misk.turbo/-turbo-stream-action/-p-r-e-p-e-n-d/index.md
+$dokka.location:misk.turbo/TurboStreamAction.REMOVE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-hotwire/misk.turbo/-turbo-stream-action/-r-e-m-o-v-e/index.md
+$dokka.location:misk.turbo/TurboStreamAction.REPLACE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-hotwire/misk.turbo/-turbo-stream-action/-r-e-p-l-a-c-e/index.md
+$dokka.location:misk.turbo/TurboStreamAction.UPDATE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}misk-hotwire/misk.turbo/-turbo-stream-action/-u-p-d-a-t-e/index.md
+$dokka.location:misk.turbo/TurboStreamAction///PointingToDeclaration/misk-hotwire/misk.turbo/-turbo-stream-action/index.md
+$dokka.location:misk.turbo/TurboStreamAction/entries/#/PointingToDeclaration/misk-hotwire/misk.turbo/-turbo-stream-action/entries.md
+$dokka.location:misk.turbo/TurboStreamAction/valueOf/#kotlin.String/PointingToDeclaration/misk-hotwire/misk.turbo/-turbo-stream-action/value-of.md
+$dokka.location:misk.turbo/TurboStreamAction/values/#/PointingToDeclaration/misk-hotwire/misk.turbo/-turbo-stream-action/values.md
+misk.hotwire
+misk.turbo
+

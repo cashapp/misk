@@ -1,0 +1,8 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.token////PointingToDeclaration/wisp-token-testing/wisp.token/index.md
+$dokka.location:wisp.token/FakeTokenGenerator///PointingToDeclaration/wisp-token-testing/wisp.token/-fake-token-generator/index.md
+$dokka.location:wisp.token/FakeTokenGenerator/FakeTokenGenerator/#/PointingToDeclaration/wisp-token-testing/wisp.token/-fake-token-generator/-fake-token-generator.md
+$dokka.location:wisp.token/FakeTokenGenerator/generate/#kotlin.String?#kotlin.Int/PointingToDeclaration/wisp-token-testing/wisp.token/-fake-token-generator/generate.md
+wisp.token
+

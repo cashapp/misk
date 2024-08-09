@@ -1,0 +1,31 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:com.squareup.chat.actions////PointingToDeclaration/exemplarchat/com.squareup.chat.actions/index.md
+$dokka.location:com.squareup.chat.actions/ChatWebSocketAction///PointingToDeclaration/exemplarchat/com.squareup.chat.actions/-chat-web-socket-action/index.md
+$dokka.location:com.squareup.chat.actions/ChatWebSocketAction/ChatWebSocketAction/#misk.redis.Redis/PointingToDeclaration/exemplarchat/com.squareup.chat.actions/-chat-web-socket-action/-chat-web-socket-action.md
+$dokka.location:com.squareup.chat.actions/ChatWebSocketAction/chat/#kotlin.String#misk.web.actions.WebSocket/PointingToDeclaration/exemplarchat/com.squareup.chat.actions/-chat-web-socket-action/chat.md
+$dokka.location:com.squareup.chat.actions/ToggleManualHealthCheckAction///PointingToDeclaration/exemplarchat/com.squareup.chat.actions/-toggle-manual-health-check-action/index.md
+$dokka.location:com.squareup.chat.actions/ToggleManualHealthCheckAction/ToggleManualHealthCheckAction/#/PointingToDeclaration/exemplarchat/com.squareup.chat.actions/-toggle-manual-health-check-action/-toggle-manual-health-check-action.md
+$dokka.location:com.squareup.chat.actions/ToggleManualHealthCheckAction/manualHealthCheck/#/PointingToDeclaration/exemplarchat/com.squareup.chat.actions/-toggle-manual-health-check-action/manual-health-check.md
+$dokka.location:com.squareup.chat.actions/ToggleManualHealthCheckAction/setManualHealthCheck/#kotlin.String?/PointingToDeclaration/exemplarchat/com.squareup.chat.actions/-toggle-manual-health-check-action/set-manual-health-check.md
+$dokka.location:com.squareup.chat.healthchecks////PointingToDeclaration/exemplarchat/com.squareup.chat.healthchecks/index.md
+$dokka.location:com.squareup.chat.healthchecks/ManualHealthCheck///PointingToDeclaration/exemplarchat/com.squareup.chat.healthchecks/-manual-health-check/index.md
+$dokka.location:com.squareup.chat.healthchecks/ManualHealthCheck/ManualHealthCheck/#/PointingToDeclaration/exemplarchat/com.squareup.chat.healthchecks/-manual-health-check/-manual-health-check.md
+$dokka.location:com.squareup.chat.healthchecks/ManualHealthCheck/setHealth/#/PointingToDeclaration/exemplarchat/com.squareup.chat.healthchecks/-manual-health-check/set-health.md
+$dokka.location:com.squareup.chat.healthchecks/ManualHealthCheck/setUnhealthy/#/PointingToDeclaration/exemplarchat/com.squareup.chat.healthchecks/-manual-health-check/set-unhealthy.md
+$dokka.location:com.squareup.chat.healthchecks/ManualHealthCheck/status/#/PointingToDeclaration/exemplarchat/com.squareup.chat.healthchecks/-manual-health-check/status.md
+$dokka.location:com.squareup.chat////PointingToDeclaration/exemplarchat/com.squareup.chat/index.md
+$dokka.location:com.squareup.chat//main/#kotlin.Array[kotlin.String]/PointingToDeclaration/exemplarchat/com.squareup.chat/main.md
+$dokka.location:com.squareup.chat/ChatConfig///PointingToDeclaration/exemplarchat/com.squareup.chat/-chat-config/index.md
+$dokka.location:com.squareup.chat/ChatConfig/ChatConfig/#misk.web.WebConfig#misk.metrics.backends.prometheus.PrometheusConfig#misk.clustering.kubernetes.KubernetesConfig/PointingToDeclaration/exemplarchat/com.squareup.chat/-chat-config/-chat-config.md
+$dokka.location:com.squareup.chat/ChatConfig/kubernetes/#/PointingToDeclaration/exemplarchat/com.squareup.chat/-chat-config/kubernetes.md
+$dokka.location:com.squareup.chat/ChatConfig/prometheus/#/PointingToDeclaration/exemplarchat/com.squareup.chat/-chat-config/prometheus.md
+$dokka.location:com.squareup.chat/ChatConfig/web/#/PointingToDeclaration/exemplarchat/com.squareup.chat/-chat-config/web.md
+$dokka.location:com.squareup.chat/ChatLogging///PointingToDeclaration/exemplarchat/com.squareup.chat/-chat-logging/index.md
+$dokka.location:com.squareup.chat/ChatLogging/configure/#/PointingToDeclaration/exemplarchat/com.squareup.chat/-chat-logging/configure.md
+$dokka.location:com.squareup.chat/ChatModule///PointingToDeclaration/exemplarchat/com.squareup.chat/-chat-module/index.md
+$dokka.location:com.squareup.chat/ChatModule/ChatModule/#/PointingToDeclaration/exemplarchat/com.squareup.chat/-chat-module/-chat-module.md
+com.squareup.chat
+com.squareup.chat.actions
+com.squareup.chat.healthchecks
+

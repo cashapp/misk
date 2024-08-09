@@ -1,0 +1,13 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.clustering.dynamo////PointingToDeclaration/misk-clustering-dynamodb/misk.clustering.dynamo/index.md
+$dokka.location:misk.clustering.dynamo/DynamoClusterConfig///PointingToDeclaration/misk-clustering-dynamodb/misk.clustering.dynamo/-dynamo-cluster-config/index.md
+$dokka.location:misk.clustering.dynamo/DynamoClusterConfig/DynamoClusterConfig/#kotlin.String#kotlin.String#kotlin.Long#kotlin.Long/PointingToDeclaration/misk-clustering-dynamodb/misk.clustering.dynamo/-dynamo-cluster-config/-dynamo-cluster-config.md
+$dokka.location:misk.clustering.dynamo/DynamoClusterConfig/appName/#/PointingToDeclaration/misk-clustering-dynamodb/misk.clustering.dynamo/-dynamo-cluster-config/app-name.md
+$dokka.location:misk.clustering.dynamo/DynamoClusterConfig/stale_threshold_seconds/#/PointingToDeclaration/misk-clustering-dynamodb/misk.clustering.dynamo/-dynamo-cluster-config/stale_threshold_seconds.md
+$dokka.location:misk.clustering.dynamo/DynamoClusterConfig/table_name/#/PointingToDeclaration/misk-clustering-dynamodb/misk.clustering.dynamo/-dynamo-cluster-config/table_name.md
+$dokka.location:misk.clustering.dynamo/DynamoClusterConfig/update_frequency_seconds/#/PointingToDeclaration/misk-clustering-dynamodb/misk.clustering.dynamo/-dynamo-cluster-config/update_frequency_seconds.md
+$dokka.location:misk.clustering.dynamo/DynamoClusterModule///PointingToDeclaration/misk-clustering-dynamodb/misk.clustering.dynamo/-dynamo-cluster-module/index.md
+$dokka.location:misk.clustering.dynamo/DynamoClusterModule/DynamoClusterModule/#misk.clustering.dynamo.DynamoClusterConfig/PointingToDeclaration/misk-clustering-dynamodb/misk.clustering.dynamo/-dynamo-cluster-module/-dynamo-cluster-module.md
+misk.clustering.dynamo
+

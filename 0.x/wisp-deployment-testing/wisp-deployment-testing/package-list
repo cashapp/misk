@@ -1,0 +1,13 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.deployment////PointingToDeclaration/wisp-deployment-testing/wisp.deployment/index.md
+$dokka.location:wisp.deployment/FakeDeploymentLocation///PointingToDeclaration/wisp-deployment-testing/wisp.deployment/-fake-deployment-location/index.md
+$dokka.location:wisp.deployment/FakeDeploymentLocation/FakeDeploymentLocation/#kotlin.String/PointingToDeclaration/wisp-deployment-testing/wisp.deployment/-fake-deployment-location/-fake-deployment-location.md
+$dokka.location:wisp.deployment/FakeDeploymentLocation/id/#/PointingToDeclaration/wisp-deployment-testing/wisp.deployment/-fake-deployment-location/id.md
+$dokka.location:wisp.deployment/FakeEnvironmentVariableLoader///PointingToDeclaration/wisp-deployment-testing/wisp.deployment/-fake-environment-variable-loader/index.md
+$dokka.location:wisp.deployment/FakeEnvironmentVariableLoader/FakeEnvironmentVariableLoader/#kotlin.collections.MutableMap[kotlin.String,kotlin.String]/PointingToDeclaration/wisp-deployment-testing/wisp.deployment/-fake-environment-variable-loader/-fake-environment-variable-loader.md
+$dokka.location:wisp.deployment/FakeEnvironmentVariableLoader/getEnvironmentVariable/#kotlin.String/PointingToDeclaration/wisp-deployment-testing/wisp.deployment/-fake-environment-variable-loader/get-environment-variable.md
+$dokka.location:wisp.deployment/FakeEnvironmentVariableLoader/getEnvironmentVariableOrDefault/#kotlin.String#kotlin.String/PointingToDeclaration/wisp-deployment-testing/wisp.deployment/-fake-environment-variable-loader/get-environment-variable-or-default.md
+$dokka.location:wisp.deployment/FakeEnvironmentVariableLoader/vars/#/PointingToDeclaration/wisp-deployment-testing/wisp.deployment/-fake-environment-variable-loader/vars.md
+wisp.deployment
+

@@ -1,0 +1,8 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.lease////PointingToDeclaration/misk-lease/misk.lease/index.md
+$dokka.location:misk.lease/LeaseService.Companion///PointingToDeclaration/misk-lease/misk.lease/-lease-service/-companion/index.md
+$dokka.location:misk.lease/LeaseService///PointingToDeclaration/misk-lease/misk.lease/-lease-service/index.md
+$dokka.location:misk.lease/LeaseService/LeaseService/#wisp.lease.LeaseManager/PointingToDeclaration/misk-lease/misk.lease/-lease-service/-lease-service.md
+misk.lease
+

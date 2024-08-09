@@ -1,0 +1,16 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.sqldelight////PointingToDeclaration/misk-sqldelight/misk.sqldelight/index.md
+$dokka.location:misk.sqldelight/RetryingTransacter///PointingToDeclaration/misk-sqldelight/misk.sqldelight/-retrying-transacter/index.md
+$dokka.location:misk.sqldelight/RetryingTransacter/RetryingTransacter/#app.cash.sqldelight.Transacter#misk.sqldelight.TransacterOptions/PointingToDeclaration/misk-sqldelight/misk.sqldelight/-retrying-transacter/-retrying-transacter.md
+$dokka.location:misk.sqldelight/RetryingTransacter/options/#/PointingToDeclaration/misk-sqldelight/misk.sqldelight/-retrying-transacter/options.md
+$dokka.location:misk.sqldelight/RetryingTransacter/transaction/#kotlin.Boolean#kotlin.Function1[app.cash.sqldelight.TransactionWithoutReturn,kotlin.Unit]/PointingToDeclaration/misk-sqldelight/misk.sqldelight/-retrying-transacter/transaction.md
+$dokka.location:misk.sqldelight/RetryingTransacter/transactionWithResult/#kotlin.Boolean#kotlin.Function1[app.cash.sqldelight.TransactionWithReturn[TypeParam(bounds=[kotlin.Any?])],TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-sqldelight/misk.sqldelight/-retrying-transacter/transaction-with-result.md
+$dokka.location:misk.sqldelight/TransacterOptions///PointingToDeclaration/misk-sqldelight/misk.sqldelight/-transacter-options/index.md
+$dokka.location:misk.sqldelight/TransacterOptions/TransacterOptions/#kotlin.Int#kotlin.Long#kotlin.Long#kotlin.Long/PointingToDeclaration/misk-sqldelight/misk.sqldelight/-transacter-options/-transacter-options.md
+$dokka.location:misk.sqldelight/TransacterOptions/maxAttempts/#/PointingToDeclaration/misk-sqldelight/misk.sqldelight/-transacter-options/max-attempts.md
+$dokka.location:misk.sqldelight/TransacterOptions/maxRetryDelayMillis/#/PointingToDeclaration/misk-sqldelight/misk.sqldelight/-transacter-options/max-retry-delay-millis.md
+$dokka.location:misk.sqldelight/TransacterOptions/minRetryDelayMillis/#/PointingToDeclaration/misk-sqldelight/misk.sqldelight/-transacter-options/min-retry-delay-millis.md
+$dokka.location:misk.sqldelight/TransacterOptions/retryJitterMillis/#/PointingToDeclaration/misk-sqldelight/misk.sqldelight/-transacter-options/retry-jitter-millis.md
+misk.sqldelight
+
