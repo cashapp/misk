@@ -20,7 +20,7 @@ class RealRedisTest : AbstractRedisTest() {
   @MiskTestModule
   private val module: Module = object : KAbstractModule() {
     override fun configure() {
-      install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
     }
