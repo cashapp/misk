@@ -23,7 +23,7 @@ class PipelinedRedisClusterTest : AbstractRedisTest() {
   @MiskTestModule
   private val module: Module = object : KAbstractModule() {
     override fun configure() {
-      install(RedisClusterModule(DockerRedisCluster.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisClusterModule(DockerRedisCluster.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
 

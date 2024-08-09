@@ -27,7 +27,7 @@ class RedisClientMetricsTest {
     override fun configure() {
       install(DeploymentModule(TESTING))
       install(MiskTestingServiceModule())
-      install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
     }
   }
 

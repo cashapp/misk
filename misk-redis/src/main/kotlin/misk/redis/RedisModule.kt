@@ -25,9 +25,9 @@ import wisp.deployment.Deployment
  *
  * You must pass in configuration for your Redis client.
  *
- * [redisConfig]: Only one replication group config is supported; this module will use the first
- * configuration it finds. An empty [RedisReplicationGroupConfig.redis_auth_password] is only
- * permitted in fake environments. See [Deployment].
+ * [redisReplicationGroupConfig]: Only one replication group config is supported.
+ * An empty [RedisReplicationGroupConfig.redis_auth_password] is only permitted in fake
+ * environments. See [Deployment].
  *
  * [connectionPoolConfig]: Misk-redis is backed by a [JedisPooled], you may not want to use the
  * [ConnectionPoolConfig] defaults! Be sure to understand them!
@@ -35,7 +35,7 @@ import wisp.deployment.Deployment
  * See: https://github.com/xetorthio/jedis/wiki/Getting-started#using-jedis-in-a-multithreaded-environment
  */
 class RedisModule @JvmOverloads constructor(
-  private val redisConfig: RedisConfig,
+  private val redisReplicationGroupConfig: RedisReplicationGroupConfig,
   private val connectionPoolConfig: ConnectionPoolConfig,
   private val useSsl: Boolean = true,
 ) : KAbstractModule() {
@@ -46,13 +46,24 @@ class RedisModule @JvmOverloads constructor(
     jedisPoolConfig: JedisPoolConfig,
     useSsl: Boolean = true,
   ) : this(
-    redisConfig,
+    getFirstReplicationGroup(redisConfig),
     connectionPoolConfig = jedisPoolConfig.toConnectionPoolConfig(),
     useSsl = useSsl
   )
 
+  @Deprecated("Please use RedisReplicationGroupConfig to pass specific redis cluster configuration.")
+  constructor(
+    redisConfig: RedisConfig,
+    connectionPoolConfig: ConnectionPoolConfig,
+    useSsl: Boolean = true,
+  ) : this(
+    getFirstReplicationGroup(redisConfig),
+    connectionPoolConfig = connectionPoolConfig,
+    useSsl = useSsl,
+  )
+
   override fun configure() {
-    bind<RedisConfig>().toInstance(redisConfig)
+    bind<RedisReplicationGroupConfig>().toInstance(redisReplicationGroupConfig)
     install(ServiceModule<RedisService>().enhancedBy<ReadyService>())
     requireBinding<Metrics>()
   }
@@ -66,20 +77,25 @@ class RedisModule @JvmOverloads constructor(
   @Provides @Singleton
   internal fun provideUnifiedJedis(
     clientMetrics: RedisClientMetrics,
-    config: RedisConfig,
+    redisReplicationGroupConfig: RedisReplicationGroupConfig,
     deployment: Deployment,
   ): UnifiedJedis {
-    // Get the first replication group, we only support 1 replication group per service.
-    val replicationGroup = config[config.keys.first()]
-      ?: throw RuntimeException("At least 1 replication group must be specified")
 
     return JedisPooledWithMetrics(
       metrics = clientMetrics,
       poolConfig = connectionPoolConfig,
-      replicationGroupConfig = replicationGroup,
+      replicationGroupConfig = redisReplicationGroupConfig,
       ssl = useSsl,
       requiresPassword = deployment.isReal
     )
+  }
+
+  companion object {
+    private fun getFirstReplicationGroup(redisConfig: RedisConfig): RedisReplicationGroupConfig {
+      // Get the first replication group, we only support 1 replication group per service.
+      return redisConfig.values.firstOrNull()
+        ?: throw RuntimeException("At least 1 replication group must be specified")
+    }
   }
 }
 
