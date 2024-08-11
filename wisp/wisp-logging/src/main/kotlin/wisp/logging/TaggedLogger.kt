@@ -3,7 +3,6 @@ package wisp.logging
 import misk.annotation.ExperimentalMiskApi
 import mu.KLogger
 import mu.KotlinLogging
-import org.slf4j.MDC
 import kotlin.reflect.KClass
 
 /**
@@ -98,68 +97,10 @@ abstract class TaggedLogger<L:Any, out R> (
 
   // Adds the tags to the Mapped Diagnostic Context for the current thread for the duration of the block.
   fun <T> asContext(f: () -> T): T {
-    val priorMDC = MDC.getCopyOfContextMap() ?: emptyMap()
-
-    tags.forEach { (k, v) ->
-      if (v != null) {
-        MDC.put(k, v.toString())
-      }
-    }
-
-    try {
-      return f().also {
-        // Exiting this TaggedLogger gracefully: Lets do some cleanup to keep the ThreadLocal clear.
-        // The scenario here is that when nested TaggedLogger threw an exception and it was
-        // caught and handled by this TaggedLogger, it should clean up the unused and unneeded context.
-        threadLocalMdcContext.remove()
-      }
-    } catch (th: Throwable) {
-      // TaggedLoggers can be nested - only set if there is not already a context set
-      // This will be cleared upon logging of the exception within misk or if the thrown exception
-      // is handled by a higher level TaggedLogger
-      if (shouldSetThreadLocalContext(th)) {
-        // Set thread local MDC context for the ExceptionHandlingInterceptor to read
-        threadLocalMdcContext.set(ThreadLocalTaggedLoggerMdcContext.createWithMdcSnapshot(th))
-      }
-      throw th
-    } finally {
-      MDC.setContextMap(priorMDC)
-    }
-  }
-
-  private fun shouldSetThreadLocalContext(th: Throwable): Boolean {
-    // This is the first of any nested TaggedLoggers to catch this exception
-    if (threadLocalMdcContext.get() == null) {
-      return true
-    }
-
-    // A nested TaggedLogger may have caught and handled the exception, and has now thrown something else
-    return !(threadLocalMdcContext.get()?.wasTriggeredBy(th) ?: false)
-  }
-
-  private data class ThreadLocalTaggedLoggerMdcContext(
-    val triggeringThrowable: Throwable,
-    val tags: Set<Tag>
-  ) {
-    fun wasTriggeredBy(throwable: Throwable): Boolean {
-      return triggeringThrowable == throwable
-    }
-
-    companion object {
-      fun createWithMdcSnapshot(triggeringThrowable: Throwable) =
-        ThreadLocalTaggedLoggerMdcContext(triggeringThrowable, MDC.getCopyOfContextMap().map { Tag(it.key, it.value) }.toSet())
-    }
+    return withSmartTags(*tags.toTypedArray(), block = f)
   }
 
   companion object {
-    private val threadLocalMdcContext = ThreadLocal<ThreadLocalTaggedLoggerMdcContext>()
-
-    fun popThreadLocalMdcContext() = threadLocalMdcContext
-      .get()
-      ?.tags
-      ?.also { threadLocalMdcContext.remove() }
-      ?: emptySet()
-
     private fun <T : Any> getLogger(loggerClass: KClass<T>): KLogger {
       return when {
         loggerClass.isCompanion -> {

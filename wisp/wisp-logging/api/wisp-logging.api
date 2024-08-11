@@ -17,7 +17,10 @@ public final class wisp/logging/LoggingKt {
 	public static final fun trace (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun warn (Lmu/KLogger;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun warn (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
-	public static final fun withTags ([Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
+	public static final fun withSmartTags ([Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun withTags ([Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun withTags ([Lkotlin/Pair;ZLkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static synthetic fun withTags$default ([Lkotlin/Pair;ZLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public class wisp/logging/SampledLogger : mu/KLogger {
@@ -110,6 +113,11 @@ public class wisp/logging/SampledLogger : mu/KLogger {
 	public fun warn (Lorg/slf4j/Marker;Ljava/lang/String;[Ljava/lang/Object;)V
 	public fun warn (Lorg/slf4j/Marker;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
 	public fun warn (Lorg/slf4j/Marker;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class wisp/logging/SmartTagsThreadLocalHandler {
+	public static final field INSTANCE Lwisp/logging/SmartTagsThreadLocalHandler;
+	public final fun popThreadLocalSmartTags ()Ljava/util/Set;
 }
 
 public abstract class wisp/logging/TaggedLogger : mu/KLogger, wisp/logging/Copyable {
@@ -209,6 +217,5 @@ public abstract class wisp/logging/TaggedLogger : mu/KLogger, wisp/logging/Copya
 }
 
 public final class wisp/logging/TaggedLogger$Companion {
-	public final fun popThreadLocalMdcContext ()Ljava/util/Set;
 }
 

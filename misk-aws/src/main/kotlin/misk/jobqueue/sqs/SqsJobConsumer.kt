@@ -21,7 +21,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import org.slf4j.MDC
-import wisp.logging.TaggedLogger
+import wisp.logging.SmartTagsThreadLocalHandler
 import wisp.logging.error
 import wisp.logging.getLogger
 import wisp.tracing.traceWithNewRootSpan
@@ -212,7 +212,7 @@ internal class SqsJobConsumer @Inject internal constructor(
                 )
                 Status.OK
               } catch (th: Throwable) {
-                val mdcTags = TaggedLogger.popThreadLocalMdcContext()
+                val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
 
                 log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
 
