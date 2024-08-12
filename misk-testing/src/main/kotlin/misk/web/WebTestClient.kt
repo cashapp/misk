@@ -9,6 +9,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import jakarta.inject.Inject
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import kotlin.reflect.KClass
 
 /**
@@ -55,11 +56,13 @@ class WebTestClient @Inject constructor(
    * Performs a call to the started service. Allows the caller to customize the action before it's
    * sent through.
    */
-  fun call(path: String, action: Request.Builder.() -> Unit): WebTestResponse =
-    Request.Builder()
-      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
+  fun call(path: String, action: Request.Builder.() -> Unit): WebTestResponse {
+    val fullUrl = jettyService.httpServerUrl.toUrl().toString() + path.trimStart('/')
+    return Request.Builder()
+      .url(fullUrl.toHttpUrl())
       .apply(action)
       .let { performRequest(it) }
+  }
 
   private fun performRequest(request: Request.Builder): WebTestResponse {
     request.header("Accept", MediaTypes.ALL)

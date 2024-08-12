@@ -22,6 +22,7 @@ class WebTestClientTest {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       install(WebActionModule.create<GetAction>())
+      install(WebActionModule.create<GetActionWithQueryParams>())
       install(WebActionModule.create<PostAction>())
     }
   }
@@ -32,6 +33,12 @@ class WebTestClientTest {
     @Get("/get")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun get() = Packet("get")
+  }
+
+  class GetActionWithQueryParams @Inject constructor() : WebAction {
+    @Get("/get/param")
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun get(@QueryParam paramKey:String) = Packet("get with param value: $paramKey")
   }
 
   class PostAction @Inject constructor() : WebAction {
@@ -48,6 +55,15 @@ class WebTestClientTest {
         .get("/get")
         .parseJson<Packet>()
     ).isEqualTo(Packet("get"))
+  }
+
+  @Test
+  fun `performs a GET with query param`() {
+    assertThat(
+      webTestClient
+        .get("/get/param?paramKey=test")
+        .parseJson<Packet>()
+    ).isEqualTo(Packet("get with param value: test"))
   }
 
   @Test
