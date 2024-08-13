@@ -104,6 +104,13 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
             Runtime.getRuntime().addShutdownHook(
               thread(start = false) {
                 serviceManager.stopAsync().awaitStopped(30, TimeUnit.SECONDS)
+                /**
+                 * By default, Jetty shutdown is not managed by Guava so needs to be
+                 * done explicitly. This is being done in MiskApplication.
+                 */
+                if (serviceManager.jettyIsRunning()) {
+                  context.stopJetty()
+                }
               }
             )
           }
@@ -134,8 +141,8 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
          * By default, Jetty shutdown is not managed by Guava so needs to be
          * done explicitly. This is being done in MiskApplication.
          */
-        if (jettyIsRunning()) {
-          context.retrieve<Injector>("injector").getInstance<JettyService>().stop()
+        if (serviceManager.jettyIsRunning()) {
+          context.stopJetty()
         }
       }
     }
@@ -201,6 +208,19 @@ private fun ExtensionContext.startService(): Boolean {
   return getFromStoreOrCompute("startService") {
     rootRequiredTestClass.getAnnotationsByType(MiskTest::class.java)[0].startService
   }
+}
+
+
+private fun ServiceManager.jettyIsRunning() : Boolean {
+  return this
+    .servicesByState()
+    .values()
+    .toList()
+    .any { it.toString().startsWith("JettyService") }
+}
+
+private fun ExtensionContext.stopJetty() {
+  this.retrieve<Injector>("injector").getInstance<JettyService>().stop()
 }
 
 // The injector is reused across tests if
