@@ -17,6 +17,10 @@ class JdbcTestFixture(
   private val persistentTables = setOf("schema_version")
 
   override fun reset() {
+    if (!dataSourceService.isRunning) {
+      logger.info { "Skipping truncate tables because data source is not running" }
+      return
+    }
     val stopwatch = Stopwatch.createStarted()
 
     val truncatedTableNames = shards(dataSourceService).get().flatMap { shard ->
