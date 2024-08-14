@@ -55,7 +55,9 @@ public abstract class misk/inject/KInstallOnceModule : misk/inject/KAbstractModu
 	public final fun hashCode ()I
 }
 
-public abstract class misk/inject/ReusableTestModule : misk/inject/KInstallOnceModule {
+public abstract class misk/inject/ReusableTestModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
 }
 
