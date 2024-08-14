@@ -4,7 +4,7 @@ import com.google.inject.Binding
 import com.google.inject.Injector
 import com.google.inject.Key
 import com.google.inject.Scope
-import com.google.inject.spi.DefaultBindingScopingVisitor
+import com.google.inject.spi.BindingScopingVisitor
 import jakarta.inject.Inject
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
@@ -79,7 +79,7 @@ class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetada
     return BindingMetadata(type, source, scope, provider, annotation)
   }
 
-  private class ScopeVisitor : DefaultBindingScopingVisitor<String?>() {
+  private class ScopeVisitor : BindingScopingVisitor<String?> {
     override fun visitEagerSingleton(): String {
       return "Singleton"
     }
