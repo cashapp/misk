@@ -31,7 +31,7 @@ You can check [code samples here](./src/test/kotlin/misk/testing).
 By default, Misk creates a new injector and starts/stops `Service`s for each test method. This can be slow depending on the size of dependency graph and the type of services involved.
 
 To speed up tests, you can reuse the injector instance and service lifecycle across tests by:
-1. Extending `misk.inject.ReusableTestModule` in your `@MiskTestModule` annotated modules. Note that this does not currently support test module classes with any constructor arguments.
+1. Extending `misk.inject.ReusableTestModule` in your `@MiskTestModule` annotated modules.
 2. Setting the `MISK_TEST_REUSE_INJECTOR` environment variable to true for the test task in your build file.
 ```kotlin
 tasks.withType<Test>().configureEach {

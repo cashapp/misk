@@ -1,6 +1,5 @@
 package misk.metrics.v2
 
-import io.prometheus.client.CollectorRegistry
 import misk.inject.KAbstractModule
 
 class FakeMetricsModule : KAbstractModule() {
