@@ -6,15 +6,12 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.CreateQueueRequest
 import jakarta.inject.Inject
 import misk.annotation.ExperimentalMiskApi
-import misk.clustering.fake.lease.FakeLeaseManager
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_BATCH_SIZE
-import misk.jobqueue.sqs.TaggedLoggerJobQueueTest.SqsJobQueueTestTaggedLogger.Companion.getTaggedLogger
 import misk.jobqueue.subscribe
 import misk.logging.LogCollectorModule
-import misk.tasks.RepeatedTaskQueue
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -22,20 +19,18 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.feature.testing.FakeFeatureFlags
-import wisp.logging.Copyable
 import wisp.logging.LogCollector
-import wisp.logging.Tag
-import wisp.logging.TaggedLogger
 import wisp.logging.getLogger
+import wisp.logging.withSmartTags
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.reflect.KClass
 
+@OptIn(ExperimentalMiskApi::class)
 @MiskTest(startService = true)
-internal class TaggedLoggerJobQueueTest {
+internal class SmartTagsJobQueueTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
-  @MiskTestModule private val module = object: KAbstractModule() {
+  @MiskTestModule private val module = object : KAbstractModule() {
     override fun configure() {
       install(SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client))
       install(LogCollectorModule())
@@ -46,14 +41,9 @@ internal class TaggedLoggerJobQueueTest {
   @Inject private lateinit var queue: JobQueue
   @Inject private lateinit var consumer: SqsJobConsumer
   @Inject private lateinit var logCollector: LogCollector
-  @Inject private lateinit var sqsMetrics: SqsMetrics
-  @Inject @ForSqsHandling lateinit var taskQueue: RepeatedTaskQueue
   @Inject private lateinit var fakeFeatureFlags: FakeFeatureFlags
-  @Inject private lateinit var fakeLeaseManager: FakeLeaseManager
-  @Inject private lateinit var queueResolver: QueueResolver
 
   private lateinit var queueName: QueueName
-  private lateinit var deadLetterQueueName: QueueName
 
   @BeforeEach
   fun setUp() {
@@ -85,20 +75,19 @@ internal class TaggedLoggerJobQueueTest {
         return@subscribe
       }
 
-      taggedLogger
-        .testTag("test123")
-        .asContext {
-          messageIdToVerify = it.id
-          taggedLogger.info("Test log with mdc")
-          throw SqsJobQueueTestException("Test exception")
-        }
+      withSmartTags("testTag" to "test123") {
+        messageIdToVerify = it.id
+        logger.info("Test log with mdc")
+        throw SqsJobQueueTestException("Test exception")
+      }
     }
 
     queue.enqueue(queueName, "job body")
 
     assertThat(allJobsComplete.await(10, TimeUnit.SECONDS)).isTrue()
 
-    val serviceLogEvents = logCollector.takeEvents(TaggedLoggerJobQueueTest::class, consumeUnmatchedLogs = false)
+    val serviceLogEvents =
+      logCollector.takeEvents(SmartTagsJobQueueTest::class, consumeUnmatchedLogs = false)
     val sqsLogErrorEvents = logCollector.takeEvents(SqsJobConsumer::class)
       .filter { it.level == Level.ERROR }
 
@@ -113,7 +102,7 @@ internal class TaggedLoggerJobQueueTest {
   }
 
   @Test
-  fun shouldLogNormallyWhenNotUsingTaggedLogger() {
+  fun shouldLogNormallyWhenNotUsingSmartTags() {
     val allJobsComplete = CountDownLatch(1)
     var messageIdToVerify: String? = null
     val jobsReceived = AtomicInteger()
@@ -127,7 +116,7 @@ internal class TaggedLoggerJobQueueTest {
       }
 
       messageIdToVerify = it.id
-      normalLogger.info("Test log without mdc")
+      logger.info("Test log without mdc")
       throw SqsJobQueueTestException("Test exception")
     }
 
@@ -135,7 +124,8 @@ internal class TaggedLoggerJobQueueTest {
 
     assertThat(allJobsComplete.await(10, TimeUnit.SECONDS)).isTrue()
 
-    val serviceLogEvents = logCollector.takeEvents(TaggedLoggerJobQueueTest::class, consumeUnmatchedLogs = false)
+    val serviceLogEvents =
+      logCollector.takeEvents(SmartTagsJobQueueTest::class, consumeUnmatchedLogs = false)
     val sqsLogErrorEvents = logCollector.takeEvents(SqsJobConsumer::class)
       .filter { it.level == Level.ERROR }
 
@@ -147,31 +137,22 @@ internal class TaggedLoggerJobQueueTest {
     assertExistingMdcPropertiesArePresent(sqsLogErrorEvents.single(), messageIdToVerify)
   }
 
-  private fun assertExistingMdcPropertiesArePresent(logEvent: ILoggingEvent, messageIdToVerify: String?) {
+  private fun assertExistingMdcPropertiesArePresent(
+    logEvent: ILoggingEvent,
+    messageIdToVerify: String?
+  ) {
     assertThat(logEvent.mdcPropertyMap).containsEntry("sqs_job_id", messageIdToVerify)
     assertThat(logEvent.mdcPropertyMap).containsEntry("misk.job_queue.job_id", messageIdToVerify)
-    assertThat(logEvent.mdcPropertyMap).containsEntry("misk.job_queue.queue_name", queueName.value)
+    assertThat(logEvent.mdcPropertyMap).containsEntry(
+      "misk.job_queue.queue_name",
+      queueName.value
+    )
     assertThat(logEvent.mdcPropertyMap).containsEntry("misk.job_queue.queue_type", "aws-sqs")
   }
 
-  class SqsJobQueueTestException(override val message: String): Exception()
+  class SqsJobQueueTestException(override val message: String) : Exception()
 
   companion object {
-    val taggedLogger = this::class.getTaggedLogger()
-    val normalLogger = getLogger<TaggedLoggerJobQueueTest>()
-  }
-
-  @OptIn(ExperimentalMiskApi::class)
-  data class SqsJobQueueTestTaggedLogger<L: Any>(val logClass: KClass<L>, val tags: Set<Tag> = emptySet()): TaggedLogger<L, SqsJobQueueTestTaggedLogger<L>>(logClass, tags),
-    Copyable<SqsJobQueueTestTaggedLogger<L>> {
-    fun testTag(value: String) = tag(Tag("testTag", value))
-
-    companion object {
-      fun <T : Any> KClass<T>.getTaggedLogger() = SqsJobQueueTestTaggedLogger(this)
-    }
-
-    override fun copyWithNewTags(newTags: Set<Tag>): SqsJobQueueTestTaggedLogger<L> {
-      return copy(tags = newTags)
-    }
+    val logger = getLogger<SmartTagsJobQueueTest>()
   }
 }

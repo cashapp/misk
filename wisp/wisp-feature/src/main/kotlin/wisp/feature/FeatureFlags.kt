@@ -372,16 +372,16 @@ open class Attributes @JvmOverloads constructor(
     // including the user in analytics.
     val anonymous: Boolean = false
 ) {
-    fun with(name: String, value: String): Attributes =
+    open fun with(name: String, value: String): Attributes =
         copy(text = text.plus(name to value))
 
-    fun with(name: String, value: Number): Attributes {
+    open fun with(name: String, value: Number): Attributes {
         val number = number ?: mapOf()
         return copy(number = number.plus(name to value))
     }
 
     @JvmOverloads
-    fun copy(
+    open fun copy(
         text: Map<String, String> = this.text,
         number: Map<String, Number>? = this.number,
         anonymous: Boolean = this.anonymous

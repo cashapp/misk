@@ -38,6 +38,7 @@ class ServiceManagerModule @JvmOverloads constructor(
     newMultibinder<EnhancementEdge>()
 
     install(MetadataModule(ServiceGraphMetadataProvider()))
+    bind<ServiceGraphMetadata>().toProvider(ServiceGraphMetadataProvider())
   }
 
   @Provides

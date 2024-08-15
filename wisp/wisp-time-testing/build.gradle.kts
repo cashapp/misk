@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
-    testImplementation(libs.assertj)
-    testImplementation(libs.junitApi)
+  api(project(":misk-testing-api"))
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
 }

@@ -379,9 +379,11 @@ public final class misk/redis/RedisClusterConfig : java/util/LinkedHashMap, wisp
 }
 
 public final class misk/redis/RedisClusterModule : misk/inject/KAbstractModule {
-	public fun <init> (Lmisk/redis/RedisClusterConfig;Lredis/clients/jedis/ConnectionPoolConfig;)V
 	public fun <init> (Lmisk/redis/RedisClusterConfig;Lredis/clients/jedis/ConnectionPoolConfig;Z)V
 	public synthetic fun <init> (Lmisk/redis/RedisClusterConfig;Lredis/clients/jedis/ConnectionPoolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/redis/RedisClusterReplicationGroupConfig;Lredis/clients/jedis/ConnectionPoolConfig;)V
+	public fun <init> (Lmisk/redis/RedisClusterReplicationGroupConfig;Lredis/clients/jedis/ConnectionPoolConfig;Z)V
+	public synthetic fun <init> (Lmisk/redis/RedisClusterReplicationGroupConfig;Lredis/clients/jedis/ConnectionPoolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/redis/RedisClusterReplicationGroupConfig {
@@ -444,11 +446,17 @@ public final class misk/redis/RedisKt {
 }
 
 public final class misk/redis/RedisModule : misk/inject/KAbstractModule {
-	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/ConnectionPoolConfig;)V
+	public static final field Companion Lmisk/redis/RedisModule$Companion;
 	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/ConnectionPoolConfig;Z)V
 	public synthetic fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/ConnectionPoolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;Z)V
 	public synthetic fun <init> (Lmisk/redis/RedisConfig;Lredis/clients/jedis/JedisPoolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/redis/RedisReplicationGroupConfig;Lredis/clients/jedis/ConnectionPoolConfig;)V
+	public fun <init> (Lmisk/redis/RedisReplicationGroupConfig;Lredis/clients/jedis/ConnectionPoolConfig;Z)V
+	public synthetic fun <init> (Lmisk/redis/RedisReplicationGroupConfig;Lredis/clients/jedis/ConnectionPoolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/redis/RedisModule$Companion {
 }
 
 public final class misk/redis/RedisNodeConfig {
@@ -498,6 +506,7 @@ public final class misk/redis/testing/DockerRedis : misk/testing/ExternalDepende
 	public fun beforeEach ()V
 	public final fun getConfig ()Lmisk/redis/RedisConfig;
 	public fun getId ()Ljava/lang/String;
+	public final fun getReplicationGroupConfig ()Lmisk/redis/RedisReplicationGroupConfig;
 	public fun shutdown ()V
 	public fun startup ()V
 }
@@ -508,6 +517,7 @@ public final class misk/redis/testing/DockerRedisCluster : misk/testing/External
 	public fun beforeEach ()V
 	public final fun getConfig ()Lmisk/redis/RedisClusterConfig;
 	public fun getId ()Ljava/lang/String;
+	public final fun getReplicationGroupConfig ()Lmisk/redis/RedisClusterReplicationGroupConfig;
 	public fun shutdown ()V
 	public fun startup ()V
 }

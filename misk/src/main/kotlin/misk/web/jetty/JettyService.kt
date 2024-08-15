@@ -368,7 +368,7 @@ class JettyService @Inject internal constructor(
     }
   }
 
-  internal fun stop() {
+  fun stop() {
     if (server.isRunning) {
       val stopwatch = Stopwatch.createStarted()
       logger.info("Stopping Jetty")
@@ -400,7 +400,9 @@ class JettyService @Inject internal constructor(
     //
     // Ideally we could call jetty.awaitInflightRequests() but that's not available
     // for us.
-    if (webConfig.shutdown_sleep_ms > 0) {
+    //
+    // Default is to shutdown jetty after all guava managed services are shutdown.
+    if (webConfig.shutdown_sleep_ms >= 0) {
       sleep(webConfig.shutdown_sleep_ms.toLong())
     } else {
       stop()
