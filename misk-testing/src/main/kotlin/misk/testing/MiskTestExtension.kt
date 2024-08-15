@@ -44,7 +44,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
         binder().requireAtInjectOnConstructors()
 
         multibind<BeforeEachCallback>().to<LogLevelExtension>()
-        if (context.startService()) {
+        if (context.startService() || context.reuseInjector()) {
           multibind<BeforeEachCallback>().to<StartServicesBeforeEach>()
           if (!context.reuseInjector()) {
             multibind<AfterEachCallback>().to<StopServicesAfterEach>()
@@ -132,7 +132,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     lateinit var serviceManager: ServiceManager
 
     override fun afterEach(context: ExtensionContext) {
-
       if (context.startService()) {
         serviceManager.stopAsync()
         serviceManager.awaitStopped(30, TimeUnit.SECONDS)
@@ -145,14 +144,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           context.stopJetty()
         }
       }
-    }
-
-    private fun jettyIsRunning() : Boolean {
-      return serviceManager
-        .servicesByState()
-        .values()
-        .toList()
-        .any { it.toString().startsWith("JettyService") }
     }
   }
 
