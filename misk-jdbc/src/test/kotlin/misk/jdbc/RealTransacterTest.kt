@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
+import java.sql.SQLException
 import java.time.LocalDate
 import kotlin.test.assertFailsWith
 import kotlin.test.fail
@@ -242,21 +243,44 @@ abstract class RealTransacterTest {
 
   @Test
   fun `a new transaction can be started in session close hook`() {
-    transacter.transactionWithSession { session ->
-      session.useConnection { connection ->
-        session.onSessionClose {
-          transacter.transactionWithSession { innerSession ->
-            innerSession.useConnection { innerConnection ->
-              innerConnection.createStatement().execute("INSERT INTO movies (name) VALUES ('1')")
+    val maxRetries = 3
+    var attempt = 0
+    var success = false
+
+    while (attempt < maxRetries && !success) {
+      try {
+        transacter.transactionWithSession { session ->
+          session.useConnection { connection ->
+            session.onSessionClose {
+              transacter.transactionWithSession { innerSession ->
+                innerSession.useConnection { innerConnection ->
+                  innerConnection.createStatement()
+                    .execute("INSERT INTO movies (name) VALUES ('1')")
+                }
+              }
             }
+            connection.createStatement().execute("INSERT INTO movies (name) VALUES ('2')")
           }
         }
-        connection.createStatement().execute("INSERT INTO movies (name) VALUES ('2')")
+        success = true // Test passed, exit the loop
+      } catch (e: SQLException) {
+        if (isCockroachDbRetryableError(e)) {
+          attempt++
+          if (attempt >= maxRetries) {
+            throw e // Rethrow after max retries
+          }
+        } else {
+          throw e // Rethrow if it's not a retryable error
+        }
       }
     }
 
     val afterCount = transacter.transactionWithSession { session -> session.useConnection(count) }
     assertThat(afterCount).isEqualTo(2)
+  }
+
+  private fun isCockroachDbRetryableError(e: SQLException): Boolean {
+    return e.sqlState == "40001" // CockroachDB's serializable transaction error code
   }
 
   @Test
