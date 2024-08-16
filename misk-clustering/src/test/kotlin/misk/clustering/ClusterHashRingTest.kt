@@ -9,16 +9,16 @@ import org.junit.jupiter.api.assertThrows
 
 internal class ClusterHashRingTest {
   @Test fun singleNode() {
-    val zork = Cluster.Member("zork", "192.49.168.23")
+    val zork = Cluster.Member("zork", "192.49.168.23", "fakeDeployment")
     val hashRing =
       ClusterHashRing(members = setOf(zork), hashFn = Hashing.murmur3_32(0))
     assertThat(listOf("foo", "bar", "zed").map { hashRing[it] }).containsExactly(zork, zork, zork)
   }
 
   @Test fun multipleNodes() {
-    val zork = Cluster.Member("zork", "192.49.168.23")
-    val mork = Cluster.Member("mork", "192.49.168.24")
-    val quark = Cluster.Member("quark", "192.49.168.25")
+    val zork = Cluster.Member("zork", "192.49.168.23", "fakeDeployment")
+    val mork = Cluster.Member("mork", "192.49.168.24", "fakeDeployment")
+    val quark = Cluster.Member("quark", "192.49.168.25", "fakeDeployment")
 
     // First version of hash ring
     val hashRing1 = ClusterHashRing(
@@ -40,7 +40,7 @@ internal class ClusterHashRingTest {
       .containsExactly(zork, quark, zork, zork)
 
     // Add a new member, should not remap resources unnecessarily
-    val bork = Cluster.Member("bork", "192.49.168.26")
+    val bork = Cluster.Member("bork", "192.49.168.26", "fakeDeployment")
     val hashRing3 = ClusterHashRing(
       members = setOf(zork, quark, bork),
       hashFn = Hashing.murmur3_32(0)
@@ -67,9 +67,9 @@ internal class ClusterHashRingTest {
       (c, INT_MAX] => a
      This test ensures that each range ends up mapping to the expected vnode.
      */
-    val a = Cluster.Member("a", "192.49.168.23")
-    val b = Cluster.Member("b", "192.49.168.24")
-    val c = Cluster.Member("c", "192.49.168.25")
+    val a = Cluster.Member("a", "192.49.168.23", "fakeDeployment")
+    val b = Cluster.Member("b", "192.49.168.24", "fakeDeployment")
+    val c = Cluster.Member("c", "192.49.168.25", "fakeDeployment")
 
     // First version of hash ring
     val hashRing = ClusterHashRing(

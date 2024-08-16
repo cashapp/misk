@@ -15,7 +15,7 @@ import java.util.UUID
 
 class DynamoClusterModule @JvmOverloads constructor(private val config: DynamoClusterConfig = DynamoClusterConfig()) : KAbstractModule() {
   override fun configure() {
-    val defaultCluster = DefaultCluster(Cluster.Member(UUID.randomUUID().toString(), "invalid-ip"))
+    val defaultCluster = DefaultCluster(Cluster.Member(UUID.randomUUID().toString(), "invalid-ip", "invalid-deployment"))
     bind<DynamoClusterConfig>().toInstance(config)
     bind<Cluster>().toInstance(defaultCluster)
     bind<DefaultCluster>().toInstance(defaultCluster)
