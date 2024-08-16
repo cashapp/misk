@@ -167,10 +167,19 @@ val buildMiskWeb = tasks.register("buildMiskWeb", MiskWebBuildTask::class.java) 
   outputFiles.setFrom(outputs)
 }
 
-// buildMiskWeb is expensive and generally not needed locally. Only build it on CI, or if
+// buildMiskWeb is expensive and generally not needed locally. Only build it on CI shadowJar, or if
 // specifically requested.
 val isCi = System.getenv("CI") == "true" || System.getenv("GITHUB_ACTIONS") != null
-if (isCi || System.getProperty("misk.admin.buildMiskWeb") == "true") {
+if (isCi) {
+  tasks.named { it == "explodeCodeSourceMain" || it == "shadowJar" }.configureEach {
+    dependsOn(buildMiskWeb)
+  }
+
+  // Needed to properly order since there is an implicit dep
+  tasks.named { it == "processResources" }.configureEach {
+    mustRunAfter(buildMiskWeb)
+  }
+} else if (System.getProperty("misk.admin.buildMiskWeb") == "true") {
   tasks.named { it == "explodeCodeSourceMain" || it == "processResources" }.configureEach {
     dependsOn(buildMiskWeb)
   }
