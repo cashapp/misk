@@ -97,7 +97,10 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Creates a new scope on the current thread with the provided seed data */
-  fun create(seedData: Map<Key<*>, Any?>): Instance {
+  fun create(
+    seedData: Map<Key<*>, Any?>,
+    providerOverrides: Map<Key<*>, ActionScopedProvider<*>>? = null,
+  ): Instance {
     check(!inScope()) {
       "cannot create an ActionScope.Instance on a thread that is already running in an action scope"
     }
@@ -105,7 +108,7 @@ class ActionScope @Inject internal constructor(
     val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
 
     val lazyValues = providers.mapValues { (key, _) ->
-      SynchronizedLazy(providerFor(key))
+      SynchronizedLazy(providerFor(key, providerOverrides))
     }
 
     return Instance(lazyValues + immediateValues, this)
@@ -202,8 +205,12 @@ class ActionScope @Inject internal constructor(
     return threadLocalInstance.get()[key]
   }
 
-  private fun providerFor(key: Key<*>): ActionScopedProvider<*> {
-    return requireNotNull(providers[key]?.get()) {
+  private fun providerFor(
+    key: Key<*>,
+    providerOverrides: Map<Key<*>, ActionScopedProvider<*>>?,
+  ): ActionScopedProvider<*> {
+    val provider = providerOverrides?.get(key) ?: providers[key]?.get()
+    return requireNotNull(provider) {
       "no ActionScopedProvider available for $key"
     }
   }
