@@ -108,10 +108,14 @@ class ActionScope @Inject internal constructor(
     val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
 
     val lazyValues = providers.mapValues { (key, _) ->
-      SynchronizedLazy(providerFor(key, providerOverrides))
+      SynchronizedLazy(providerFor(key))
     }
 
-    return Instance(lazyValues + immediateValues, this)
+    val lazyOverrides = providerOverrides.mapValues { (_, provider) ->
+      SynchronizedLazy(provider)
+    }
+
+    return Instance(lazyValues + lazyOverrides + immediateValues, this)
   }
 
   /** Starts the scope on a thread with the provided instance */
@@ -205,12 +209,8 @@ class ActionScope @Inject internal constructor(
     return threadLocalInstance.get()[key]
   }
 
-  private fun providerFor(
-    key: Key<*>,
-    providerOverrides: Map<Key<*>, ActionScopedProvider<*>>,
-  ): ActionScopedProvider<*> {
-    val provider = providerOverrides.get(key) ?: providers[key]?.get()
-    return requireNotNull(provider) {
+  private fun providerFor(key: Key<*>): ActionScopedProvider<*> {
+    return requireNotNull(providers[key]?.get()) {
       "no ActionScopedProvider available for $key"
     }
   }
