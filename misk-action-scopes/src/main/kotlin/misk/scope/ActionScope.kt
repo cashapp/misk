@@ -99,7 +99,7 @@ class ActionScope @Inject internal constructor(
   /** Creates a new scope on the current thread with the provided seed data */
   fun create(
     seedData: Map<Key<*>, Any?>,
-    providerOverrides: Map<Key<*>, ActionScopedProvider<*>>? = null,
+    providerOverrides: Map<Key<*>, ActionScopedProvider<*>> = emptyMap(),
   ): Instance {
     check(!inScope()) {
       "cannot create an ActionScope.Instance on a thread that is already running in an action scope"
@@ -207,9 +207,9 @@ class ActionScope @Inject internal constructor(
 
   private fun providerFor(
     key: Key<*>,
-    providerOverrides: Map<Key<*>, ActionScopedProvider<*>>?,
+    providerOverrides: Map<Key<*>, ActionScopedProvider<*>>,
   ): ActionScopedProvider<*> {
-    val provider = providerOverrides?.get(key) ?: providers[key]?.get()
+    val provider = providerOverrides.get(key) ?: providers[key]?.get()
     return requireNotNull(provider) {
       "no ActionScopedProvider available for $key"
     }
