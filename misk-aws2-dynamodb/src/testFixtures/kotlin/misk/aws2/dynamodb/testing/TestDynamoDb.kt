@@ -14,7 +14,7 @@ class TestDynamoDb @Inject constructor(
   val service: TestDynamoDbService
 ) : Service by service, TestFixture {
   override fun reset() {
-    if (service.server.isRunning) {
+    if (service.client.isRunning) {
       service.client.reset()
     }
   }

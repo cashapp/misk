@@ -25,6 +25,7 @@ dependencies {
   api(project(":misk-api"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
+  api(project(":misk-testing-api"))
   implementation(libs.guavaTestLib)
   implementation(libs.guiceTestLib)
   implementation(libs.logbackClassic)
@@ -39,7 +40,6 @@ dependencies {
   implementation(project(":misk-action-scopes"))
   implementation(project(":misk-config"))
   implementation(project(":misk-service"))
-  implementation(project(":misk-testing-api"))
   implementation(testFixtures(project(":misk-metrics")))
 
   testImplementation(libs.kotlinTest)
