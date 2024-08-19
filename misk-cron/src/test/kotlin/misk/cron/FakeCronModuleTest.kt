@@ -56,8 +56,8 @@ class FakeCronModuleTest {
   @Singleton
   private class DependentService @Inject constructor() : AbstractIdleService() {
     override fun startUp() {
-      logger.info { "DependentService started" }
       sleep(1000)
+      logger.info { "DependentService started" }
     }
 
     override fun shutDown() {}
