@@ -1,7 +1,10 @@
 package misk.cron
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
+import misk.clustering.fake.lease.FakeLeaseManager
 import misk.clustering.weights.FakeClusterWeight
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.inject.KAbstractModule
@@ -15,27 +18,14 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
-@MiskTest(startService = true)
-class CronTest {
-  @Suppress("unused")
-  @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      install(CronTestingModule())
-
-      install(CronEntryModule.create<MinuteCron>())
-      install(CronEntryModule.create<HourCron>())
-      install(CronEntryModule.create<ThrowsExceptionCron>())
-    }
-  }
-
+abstract class AbstractCronTest {
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var clock: FakeClock
-  @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
-  @Inject lateinit var fakeClusterWeight: FakeClusterWeight
+  @Inject private lateinit var fakeClusterWeight: FakeClusterWeight
+  @Inject private lateinit var fakeLeaseManager: FakeLeaseManager
+  @Inject private lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
+  @Inject @ForMiskCron private lateinit var cronLeaseBehavior: CronLeaseBehavior
 
   @Inject private lateinit var minuteCron: MinuteCron
   @Inject private lateinit var hourCron: HourCron
@@ -46,7 +36,7 @@ class CronTest {
   // This simulates what the automated part of cron does.
   private fun runCrons() {
     val now = clock.instant()
-    cronManager.runReadyCrons(lastRun)
+    cronManager.tryToRunCrons(lastRun)
     lastRun = now
     cronManager.waitForCronsComplete()
   }
@@ -70,7 +60,31 @@ class CronTest {
   }
 
   @Test
-  fun leaseDenied() {
+  fun `should not execute if lease is already held`() {
+    assertThat(minuteCron.counter).isZero()
+
+    clock.add(Duration.ofMinutes(1))
+    waitForNextPendingTask().task()
+    cronManager.waitForCronsComplete()
+    assertThat(minuteCron.counter).isEqualTo(1)
+
+    // Mark the lease as held by another process
+    when (cronLeaseBehavior) {
+      CronLeaseBehavior.ONE_LEASE_PER_CLUSTER ->
+        fakeLeaseManager.markLeaseHeldElsewhere("misk.cron.lease")
+      CronLeaseBehavior.ONE_LEASE_PER_CRON ->
+        fakeLeaseManager.markLeaseHeldElsewhere("misk.cron.task.lease.misk.cron.MinuteCron")
+    }
+
+    // The lease is already held, we should not execute
+    clock.add(Duration.ofMinutes(1))
+    waitForNextPendingTask().task()
+    cronManager.waitForCronsComplete()
+    assertThat(minuteCron.counter).isEqualTo(1)
+  }
+
+@Test
+fun zeroClusterWeightPreventsExecution() {
     assertThat(minuteCron.counter).isEqualTo(0)
     // Cluster weight is 100 by default, so the cron will run.
     clock.add(Duration.ofMinutes(1))
@@ -90,6 +104,34 @@ class CronTest {
     retry(5, FlatBackoff(Duration.ofMillis(200))) {
       pendingTasks.peekPending()!!
     }
+}
+
+@MiskTest(startService = true)
+class CronTestPerCluster: AbstractCronTest() {
+  @Suppress("unused")
+  @MiskTestModule
+  val module = object : KAbstractModule() {
+    override fun configure() {
+      install(CronTestingModule(CronLeaseBehavior.ONE_LEASE_PER_CLUSTER))
+      install(CronEntryModule.create<MinuteCron>())
+      install(CronEntryModule.create<HourCron>())
+      install(CronEntryModule.create<ThrowsExceptionCron>())
+    }
+  }
+}
+
+@MiskTest(startService = true)
+class CronTestPerLease: AbstractCronTest() {
+  @Suppress("unused")
+  @MiskTestModule
+  val module = object : KAbstractModule() {
+    override fun configure() {
+      install(CronTestingModule(CronLeaseBehavior.ONE_LEASE_PER_CRON))
+      install(CronEntryModule.create<MinuteCron>())
+      install(CronEntryModule.create<HourCron>())
+      install(CronEntryModule.create<ThrowsExceptionCron>())
+    }
+  }
 }
 
 @Singleton
