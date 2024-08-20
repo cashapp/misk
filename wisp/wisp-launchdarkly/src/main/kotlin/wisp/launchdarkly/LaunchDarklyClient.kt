@@ -33,7 +33,11 @@ object LaunchDarklyClient {
                     .streaming(baseUri)
                     .events(baseUri)
             )
-            .events(Components.sendEvents().capacity(config.event_capacity))
+            .events(
+              Components.sendEvents()
+                .capacity(config.event_capacity)
+                .flushInterval(config.flush_interval)
+            )
 
         config.ssl?.let {
             val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
