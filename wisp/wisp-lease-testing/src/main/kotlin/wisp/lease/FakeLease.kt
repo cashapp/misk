@@ -8,6 +8,8 @@ class FakeLease(
 
     override fun checkHeld() = manager.isLeaseHeld(name)
 
+    override fun checkHeldElsewhere() = manager.isLeaseHeldElsewhere(name)
+
     /**
      * @return true if this process acquires the lease.
      */

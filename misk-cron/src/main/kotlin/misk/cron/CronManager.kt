@@ -145,6 +145,11 @@ class CronManager @Inject constructor() {
       "Last execution was at $previousTime, now=${ZonedDateTime.ofInstant(now, zoneId)}"
     }
     removeCompletedCrons()
+    val clusterLease = leaseManager.requestLease(CRON_CLUSTER_LEASE_NAME)
+    if (clusterLease.checkHeldElsewhere()) {
+      logger.info { "Cluster lease is held, skipping cron execution" }
+      return
+    }
     cronEntries.values.forEach { cronEntry ->
       val taskLease = buildTaskLease(cronEntry.runnable::class)
       val holdsTaskLease = if (!taskLease.checkHeld()) {

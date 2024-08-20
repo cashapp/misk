@@ -184,6 +184,10 @@ internal class TestLease(
     return release
   }
 
+  override fun checkHeldElsewhere(): Boolean {
+    return !checkHeld
+  }
+
   override fun addListener(listener: Lease.StateChangeListener) {
     TODO("Not yet implemented")
   }
