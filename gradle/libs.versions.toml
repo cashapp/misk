@@ -5,7 +5,7 @@ kotlin = "1.9.25"
 kotlinBinaryCompatibilityPlugin = "0.13.1"
 mavenPublish = "0.27.0"
 protobufPlugin = "0.9.3"
-wire = "4.9.3"
+wire = "5.0.0"
 
 [libraries]
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.11" }
@@ -155,8 +155,8 @@ moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.1" }
 mysql = { module = "com.mysql:mysql-connector-j", version = "8.2.0" }
 nettyBom = { module = "io.netty:netty-bom", version = "4.1.92.Final" }
 nettyHandler = { module = "io.netty:netty-handler", version = "4.1.92.Final" }
-okHttp = { module = "com.squareup.okhttp3:okhttp", version = "4.12.0" }
-okHttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version = "4.12.0" }
+okHttp = { module = "com.squareup.okhttp3:okhttp", version = "5.0.0-alpha.12" }
+okHttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version = "5.0.0-alpha.12" }
 okio = { module = "com.squareup.okio:okio", version = "3.8.0" }
 openTracing = { module = "io.opentracing:opentracing-api", version = "0.33.0" }
 openTracingConcurrent = { module = "io.opentracing.contrib:opentracing-concurrent", version = "0.4.0" }

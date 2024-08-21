@@ -57,12 +57,10 @@ internal class MultipartRequestTest {
         |  a: apple
         |  b: banana
         |  Content-Type: text/plain; charset=utf-8
-        |  Content-Length: 13
         |fruit salad!
         |
         |part 1:
         |  Content-Disposition: form-data; name="d"
-        |  Content-Length: 10
         |good doggo
         |""".trimMargin()
     )
