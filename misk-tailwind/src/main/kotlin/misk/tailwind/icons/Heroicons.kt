@@ -57,6 +57,55 @@ enum class Heroicons(
   val defaultModifierClass: String = "",
   val rawHtml: (String) -> String,
 ) {
+  OUTLINE_CODE_BRACKET(
+    id = "outline/code-bracket",
+    svgClass = "mr-3 flex-shrink-0 h-5 w-5",
+    defaultModifierClass = "text-gray-400 group-hover:text-gray-500",
+    rawHtml = {
+      """
+      <svg class="$it" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+      </svg>
+      """.trimIndent()
+    }
+  ),
+  OUTLINE_CODE_BRACKET_SQUARE(
+    id = "outline/code-bracket",
+    svgClass = "mr-3 flex-shrink-0 h-5 w-5",
+    defaultModifierClass = "text-gray-400 group-hover:text-gray-500",
+    rawHtml = {
+      """
+      <svg class="$it" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+      </svg>
+      """.trimIndent()
+    }
+  ),
+  OUTLINE_ARROW_DOWN_ON_SQUARE(
+    id = "outline/arrow-down-on-square",
+    svgClass = "mr-3 flex-shrink-0 h-5 w-5",
+    defaultModifierClass = "text-gray-400 group-hover:text-gray-500",
+    rawHtml = {
+      """
+      <svg class="$it" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3 3m0 0 3-3m-3 3V2.25" />
+      </svg>
+      """.trimIndent()
+    }
+  ),
+  OUTLINE_ARROW_TOP_RIGHT_ON_SQUARE(
+    id = "outline/arrow-top-right-on-square",
+    svgClass = "mr-3 flex-shrink-0 h-5 w-5",
+    defaultModifierClass = "text-gray-400 group-hover:text-gray-500",
+    rawHtml = {
+      """
+      <svg class="$it" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+      </svg>
+
+      """.trimIndent()
+    }
+  ),
   OUTLINE_XMARK(
     id = "outline/x-mark",
     svgClass = "mr-3 flex-shrink-0 h-5 w-5",
@@ -129,7 +178,7 @@ enum class Heroicons(
     """.trimIndent()
     }
   ),
-  QUEUE_LIST(
+  OUTLINE_QUEUE_LIST(
     id = "queue-list",
     svgClass = "mr-3 flex-shrink-0 h-5 w-5",
     defaultModifierClass = "text-gray-400 group-hover:text-gray-500",

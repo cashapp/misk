@@ -10,27 +10,30 @@ import kotlinx.html.span
 import misk.tailwind.icons.Heroicons
 import misk.tailwind.icons.heroicon
 
-fun TagConsumer<*>.ToggleContainer(buttonText: String, borderless: Boolean = false, menuBlock: TagConsumer<*>.() -> Unit = {}, isOpen: Boolean = false, hiddenBlock: TagConsumer<*>.() -> Unit) {
+fun TagConsumer<*>.ToggleContainer(buttonText: String, classes: String = "", borderless: Boolean = false, marginless: Boolean = false, menuBlock: TagConsumer<*>.() -> Unit = {}, isOpen: Boolean = false, hiddenBlock: TagConsumer<*>.() -> Unit) {
   val borderStyle = if (!borderless) "border-b border-t border-gray-200" else ""
   val containerBorderStyle = if (!borderless) "border-t border-gray-200" else ""
   val hiddenStyle = if (isOpen) "" else "hidden"
 
-  section("grid items-center $borderStyle") {
+  section("grid items-center $borderStyle $classes") {
     attributes["data-controller"] = "toggle"
     attributes["aria-labelledby"] = "info-heading"
 
-    div("relative col-start-1 row-start-1") {
-      button(classes = "w-full font-medium text-gray-700 py-4") {
+    div {
+      val buttonStyle = if (marginless) "" else "py-4"
+      button(classes = "w-full font-medium text-gray-700 $buttonStyle") {
         attributes["data-action"] = "toggle#toggle"
 
         type = ButtonType.button
-        attributes["aria-controls"] = "toggle-container-1"
+        attributes["aria-controls"] = "toggle-container-button"
         attributes["aria-expanded"] = "false"
 
-        div("justify-between mx-auto flex space-x-6 divide-x divide-gray-200 text-sm text-left px-4") {
+        val marginStyle = if (marginless) "" else "space-x-6 px-4"
+        div("justify-between mx-auto flex $marginStyle divide-x divide-gray-200 text-sm text-left") {
           menuBlock()
 
-          div(classes = "pl-6") {
+          val leftPadStyle = if (marginless) "" else "pl-6"
+          div(classes = leftPadStyle) {
             div(classes = "group flex items-center font-medium text-gray-700") {
               span("pr-4") {
                 +buttonText
@@ -58,7 +61,7 @@ fun TagConsumer<*>.ToggleContainer(buttonText: String, borderless: Boolean = fal
       attributes["data-toggle-target"] = "toggleable"
       attributes["data-css-class"] = "hidden"
 
-      id = "toggle-container-1"
+      id = "toggle-container-contents"
 
       hiddenBlock()
     }
