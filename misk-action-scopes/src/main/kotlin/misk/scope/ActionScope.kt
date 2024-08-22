@@ -97,7 +97,8 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Creates a new scope on the current thread with the provided seed data */
-  fun create(
+  @JvmOverloads
+ fun create(
     seedData: Map<Key<*>, Any?>,
     providerOverrides: Map<Key<*>, ActionScopedProvider<*>> = emptyMap(),
   ): Instance {
