@@ -76,8 +76,8 @@ public final class misk/tailwind/components/CodeBlockKt {
 }
 
 public final class misk/tailwind/components/ToggleContainerKt {
-	public static final fun ToggleContainer (Lkotlinx/html/TagConsumer;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function1;)V
-	public static synthetic fun ToggleContainer$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun ToggleContainer (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;ZZLkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function1;)V
+	public static synthetic fun ToggleContainer$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;ZZLkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public final class misk/tailwind/icons/HeroiconProps {
@@ -109,13 +109,17 @@ public final class misk/tailwind/icons/Heroicons : java/lang/Enum {
 	public static final field MINI_CHEVRON_UP Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_CHEVRON_UP_DOWN Lmisk/tailwind/icons/Heroicons;
 	public static final field MINI_FUNNEL Lmisk/tailwind/icons/Heroicons;
+	public static final field OUTLINE_ARROW_DOWN_ON_SQUARE Lmisk/tailwind/icons/Heroicons;
+	public static final field OUTLINE_ARROW_TOP_RIGHT_ON_SQUARE Lmisk/tailwind/icons/Heroicons;
 	public static final field OUTLINE_BARS_3_CENTER_LEFT Lmisk/tailwind/icons/Heroicons;
 	public static final field OUTLINE_BARS_4 Lmisk/tailwind/icons/Heroicons;
 	public static final field OUTLINE_CLOCK Lmisk/tailwind/icons/Heroicons;
+	public static final field OUTLINE_CODE_BRACKET Lmisk/tailwind/icons/Heroicons;
+	public static final field OUTLINE_CODE_BRACKET_SQUARE Lmisk/tailwind/icons/Heroicons;
 	public static final field OUTLINE_DOCUMENT_MAGNIFYING_GLASS Lmisk/tailwind/icons/Heroicons;
 	public static final field OUTLINE_HOME Lmisk/tailwind/icons/Heroicons;
+	public static final field OUTLINE_QUEUE_LIST Lmisk/tailwind/icons/Heroicons;
 	public static final field OUTLINE_XMARK Lmisk/tailwind/icons/Heroicons;
-	public static final field QUEUE_LIST Lmisk/tailwind/icons/Heroicons;
 	public final fun getDefaultModifierClass ()Ljava/lang/String;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getId ()Ljava/lang/String;

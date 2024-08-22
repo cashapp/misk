@@ -8,6 +8,8 @@ import kotlinx.html.h1
 import kotlinx.html.script
 import kotlinx.html.unsafe
 import misk.metadata.servicegraph.ServiceGraphMetadata
+import misk.tailwind.components.AlertInfo
+import misk.tailwind.components.AlertInfoHighlight
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
@@ -39,11 +41,12 @@ class ServiceGraphTabIndexAction @Inject constructor(
         .adapter<List<ServiceGraphMetadata.GraphPairs>>()
         .toFormattedJson(serviceGraphMetadataProvider.get().graphVisual)
 
-      div("p-4 sm:p-6 lg:p-8") {
-
-        h1("text-3xl font-medium mb-8") {
+      div("container mx-auto p-8") {
+        h1("text-3xl font-bold mb-8") {
           +"""Service Graph"""
         }
+        AlertInfoHighlight("Explore the directed Guava service graph for your application.  If the graph doesn't show below, try reloading the page.", "Guava Docs", "https://github.com/google/guava/wiki/ServiceExplained")
+        AlertInfo("Understanding the Graph: A directed arrow from Service A to Service B shows that Service B requires Service A to already be running before it can start. Services that always need to be running are configured to be required by the misk.ReadyService.")
 
         div("svg-container") { }
 
