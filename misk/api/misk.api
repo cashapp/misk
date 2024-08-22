@@ -2149,20 +2149,26 @@ public final class misk/web/metadata/guice/GuiceMetadataProvider : misk/web/meta
 }
 
 public final class misk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;
-	public static synthetic fun copy$default (Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAnnotation ()Ljava/lang/String;
 	public final fun getProvider ()Ljava/lang/String;
 	public final fun getScope ()Ljava/lang/String;
 	public final fun getSource ()Ljava/lang/String;
+	public final fun getSubElements ()Ljava/util/List;
+	public final fun getSubElementsType ()Ljava/lang/String;
 	public final fun getType ()Ljava/lang/String;
+	public final fun getTypePackage ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

@@ -135,7 +135,7 @@ fun TagConsumer<*>.Navbar(
     }
     div("xl:pl-72") {
       // +"""<!-- Sticky search header -->"""
-      div("sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b-4 ${deployment.asBorderColor()} bg-gray-900 px-6 shadow-sm sm:px-6 lg:px-6") {
+      div("fixed w-full z-40 flex h-16 shrink-0 items-center gap-x-6 border-b-4 ${deployment.asBorderColor()} bg-gray-900 px-6 shadow-sm sm:px-6 lg:px-6") {
         if (menuSections.isNotEmpty()) {
           button(classes = "-m-2.5 p-2.5 text-white xl:hidden") {
             attributes["data-action"] = "toggle#toggle"
@@ -163,7 +163,7 @@ fun TagConsumer<*>.Navbar(
         }
       }
       main("h-full bg-white") {
-        div {
+        div("pt-16") {
           content()
         }
       }
