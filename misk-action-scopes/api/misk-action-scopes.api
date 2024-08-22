@@ -18,6 +18,7 @@ public final class misk/scope/ActionScope : java/lang/AutoCloseable {
 	public static final field Companion Lmisk/scope/ActionScope$Companion;
 	public final fun asContextElement ()Lkotlin/coroutines/CoroutineContext$Element;
 	public fun close ()V
+	public final fun create (Ljava/util/Map;)Lmisk/scope/ActionScope$Instance;
 	public final fun create (Ljava/util/Map;Ljava/util/Map;)Lmisk/scope/ActionScope$Instance;
 	public static synthetic fun create$default (Lmisk/scope/ActionScope;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lmisk/scope/ActionScope$Instance;
 	public final fun enter (Ljava/util/Map;)Lmisk/scope/ActionScope;
