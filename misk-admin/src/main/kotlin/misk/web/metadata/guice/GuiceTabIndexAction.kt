@@ -41,7 +41,7 @@ class GuiceTabIndexAction @Inject constructor(
     .newBuilder()
     .headBlock {
       val controllers = listOf(
-        "search_bar_controller",
+        "guice_search_bar_controller",
       )
       controllers.forEach {
         script {
@@ -65,7 +65,7 @@ class GuiceTabIndexAction @Inject constructor(
       }
     }
     .build { _, _, _ ->
-      val registrations = guiceMetadataProvider.get().guice.bindingMetadata
+      val bindings = guiceMetadataProvider.get().guice.bindingMetadata
 
       div("container mx-auto p-8") {
         h1("text-3xl font-bold mb-4") {
@@ -92,11 +92,11 @@ class GuiceTabIndexAction @Inject constructor(
           }
 
           div("lg:col-start-3 lg:row-end-1 py-4") {
-            registrations
+            bindings
               .groupBy { it.typePackage }
               .toSortedMap()
-              .map { (typePackage, registration) ->
-                div("registration-group") {
+              .map { (typePackage, binding) ->
+                div("binding-group") {
                   ToggleContainer(
                     buttonText = typePackage,
                     classes = "py-2",
@@ -104,7 +104,7 @@ class GuiceTabIndexAction @Inject constructor(
                     marginless = true,
                   ) {
                     div("grid grid-cols-1 gap-y-4") {
-                      registration.map { BindingCard(it) }
+                      binding.map { BindingCard(it) }
                     }
                   }
                 }
@@ -117,9 +117,9 @@ class GuiceTabIndexAction @Inject constructor(
   private fun TagConsumer<*>.BindingCard(binding: GuiceMetadataProvider.BindingMetadata) {
     val truncateLength = 85
 
-    div("registration mt-5 rounded-lg bg-gray-50 shadow-sm ring-1 ring-gray-900/5") {
-      dl("flex flex-wrap py-6") {
-        div("flex-auto pl-6 pb-6") {
+    div("binding mt-5 rounded-lg bg-gray-50 shadow-sm ring-1 ring-gray-900/5") {
+      dl("flex flex-wrap") {
+        div("flex-auto pl-6 py-6") {
           this@dl.dd("mt-1 text-base font-mono font-semibold leading-6 text-gray-900") { +binding.type }
         }
         div("flex-none self-end px-6 pb-6") {
@@ -176,16 +176,15 @@ class GuiceTabIndexAction @Inject constructor(
             }
           }
         }
-      }
-
-      if (!binding.subElements.isNullOrEmpty()) {
-        CardRow("Binder Elements", Heroicons.OUTLINE_QUEUE_LIST) {
-          ToggleContainer(
-            buttonText = "Binder Elements",
-            borderless = true,
-            marginless = true,
-          ) {
-            binding.subElements!!.map { BindingCard(it) }
+        if (!binding.subElements.isNullOrEmpty()) {
+          CardRow("Binder Elements", Heroicons.OUTLINE_QUEUE_LIST) {
+            ToggleContainer(
+              buttonText = "Binder Elements",
+              borderless = true,
+              marginless = true,
+            ) {
+              binding.subElements!!.map { BindingCard(it) }
+            }
           }
         }
       }
