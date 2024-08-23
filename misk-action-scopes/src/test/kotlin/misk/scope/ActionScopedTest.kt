@@ -62,6 +62,25 @@ internal class ActionScopedTest {
   }
 
   @Test
+  fun overrideActionScopedProvider() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(
+      keyOf<String>(Names.named("from-seed")) to "seed-value"
+    )
+
+    val providerOverride = object : ActionScopedProvider<String> {
+      override fun get(): String = "overridden-bar"
+    }
+
+    scope.create(
+      seedData,
+      mapOf(keyOf<String>(Names.named("bar")) to providerOverride),
+    ).inScope { assertThat(foo.get()).isEqualTo("overridden-bar and foo!") }
+  }
+
+  @Test
   fun doubleEnterScopeFails() {
     assertFailsWith<IllegalStateException> {
       val injector = Guice.createInjector(TestActionScopedProviderModule())
