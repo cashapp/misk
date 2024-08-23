@@ -42,6 +42,7 @@ nav:
   - 'Overview': index.md
   - 'Getting Started': getting-started.md
   - 'Actions': actions.md
+  - 'Multipart Forms': multipart.md
   - 'Clients': clients.md
   - 'Testing': testing.md
   - '0.x API':
