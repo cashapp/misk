@@ -14,6 +14,8 @@ import java.time.Clock
 
 class SchemaMigratorModule(
   private val database: String,
+  private val host: String?,
+  private val port: Int?,
   private val dbType: String,
   private val username: String,
   private val password: String,
@@ -22,6 +24,8 @@ class SchemaMigratorModule(
 
   override fun configure() {
     val schemaMigratorClusterConfig = DataSourceConfig(
+      host = host,
+      port = port,
       type = DataSourceType.valueOf(dbType),
       migrations_resource = "filesystem:$schemaDir",
       database = database,

@@ -9,6 +9,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
@@ -19,6 +20,8 @@ class SchemaMigratorPlugin : Plugin<Project> {
 
     project.tasks.register("migrateSchema", SchemaMigratorTask::class.java) {
       it.database.set(extension.database)
+      it.host.set(extension.host)
+      it.port.set(extension.port)
       it.databaseType.set(extension.databaseType)
       it.username.set(extension.username)
       it.password.set(extension.password)
@@ -38,6 +41,14 @@ abstract class SchemaMigratorTask : DefaultTask() {
   abstract val database: Property<String>
 
   @get:Input
+  @get:Optional
+  abstract val host: Property<String>
+
+  @get:Input
+  @get:Optional
+  abstract val port: Property<Int>
+
+  @get:Input
   abstract val databaseType: Property<String>
 
   @get:Input
@@ -45,6 +56,7 @@ abstract class SchemaMigratorTask : DefaultTask() {
 
   @get:Input
   abstract val password: Property<String>
+
 
   @get:PathSensitive(PathSensitivity.RELATIVE)
   @get:InputDirectory
@@ -55,6 +67,8 @@ abstract class SchemaMigratorTask : DefaultTask() {
     val injector = Guice.createInjector(
       SchemaMigratorModule(
         database.get(),
+        host.orNull,
+        port.orNull,
         databaseType.get(),
         username.get(),
         password.get(),

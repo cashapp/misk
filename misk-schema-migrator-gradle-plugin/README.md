@@ -22,6 +22,8 @@ val dbConfig = mapOf(
 
 miskSchemaMigrator {
   database = dbConfig["schema"]
+  host = "localhost" // optional, defaults to localhost
+  port = 3306 // optional, defaults to 3306
   username = dbConfig["user"]
   password = dbConfig["password"]
   migrationsDir = layout.projectDirectory.dir("src/main/resources/db-migrations")
