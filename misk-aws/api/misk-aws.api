@@ -35,6 +35,27 @@ public final class misk/cloud/aws/TypesKt {
 	public static final fun toMiskAwsRegion (Lwisp/aws/environment/AwsRegion;)Lmisk/cloud/aws/AwsRegion;
 }
 
+public final class misk/jobqueue/sqs/AwsSqsBatchJobHandlerModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion;
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+}
+
+public final class misk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion {
+	public final synthetic fun create (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Z)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public final synthetic fun create (Lmisk/jobqueue/QueueName;Z)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
+}
+
 public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;
 	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V

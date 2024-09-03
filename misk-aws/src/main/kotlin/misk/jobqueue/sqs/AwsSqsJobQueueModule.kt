@@ -61,7 +61,7 @@ open class AwsSqsJobQueueModule(
     install(
       ExecutorServiceModule.withUnboundThreadPool(
         ForSqsReceiving::class,
-        "sqs-receiver"
+        "sqs-receiver-%d"
       )
     )
 
