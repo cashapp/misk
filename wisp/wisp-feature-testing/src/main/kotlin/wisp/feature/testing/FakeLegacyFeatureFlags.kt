@@ -121,7 +121,8 @@ constructor(
         val overrideMapValuesCopy = PriorityQueue(overrideMapValues)
         var currentMapValue = overrideMapValuesCopy.poll()
         while (overrideMapValuesCopy.isNotEmpty()) {
-            if (attributes.text.entries.containsAll(currentMapValue.attributes.text.entries)) {
+            if (attributes.text.entries.containsAll(currentMapValue.attributes.text.entries) &&
+                   (attributes.number?.entries?: emptySet()).containsAll(currentMapValue.attributes.number?.entries ?: emptySet())) {
                 break
             }
             currentMapValue = overrideMapValuesCopy.poll()
@@ -362,8 +363,10 @@ constructor(
             )
 
         synchronized(trackers) {
-            trackers[mapKey]
-                ?.filter { r -> r.attributes.text.entries.containsAll(attributes.text.entries) }
+            trackers[mapKey]?.filter { r ->
+                r.attributes.text.entries.containsAll(attributes.text.entries) &&
+                    (r.attributes.number?.entries ?: emptySet()).containsAll(attributes.number?.entries ?: emptySet())
+            }
                 ?.forEach { r ->
                     @Suppress("UNCHECKED_CAST")
                     r.executor.execute {
@@ -413,11 +416,16 @@ constructor(
         val value: Any
     ) : Comparable<MapValue> {
         override fun compareTo(other: MapValue): Int {
-            val attributeSizeCompare = -attributes.text.size.compareTo(other.attributes.text.size)
-            return if (attributeSizeCompare != 0) {
-                attributeSizeCompare
+            val textAttributeSizeCompare = -attributes.text.size.compareTo(other.attributes.text.size)
+            return if (textAttributeSizeCompare != 0) {
+                textAttributeSizeCompare
             } else {
-                -order.compareTo(other.order)
+                val numberAttributeSizeCompare = -(attributes.number?.size ?: 0).compareTo(other.attributes.number?.size ?: 0)
+                if (numberAttributeSizeCompare != 0) {
+                    numberAttributeSizeCompare
+                } else {
+                    -order.compareTo(other.order)
+                }
             }
         }
     }

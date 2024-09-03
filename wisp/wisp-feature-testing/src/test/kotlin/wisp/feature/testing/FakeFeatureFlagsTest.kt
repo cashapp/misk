@@ -214,6 +214,27 @@ internal class FakeFeatureFlagsTest {
         assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", goodJokerAttributes))
             .isEqualTo(JsonFeature("joker"))
 
+        // Can override with specific numeric attributes
+        subject.overrideKeyJson(FEATURE, "batman", JsonFeature("batman"))
+        assertThat(subject.getJson<JsonFeature>(FEATURE, "batman")).isEqualTo(JsonFeature("batman"))
+
+        val goodBatmanNumericAttributes = Attributes(emptyMap(),  mapOf("anger" to 10))
+        val badBatmanNumericAttributes = Attributes(emptyMap(),  mapOf("anger" to 100))
+        val sleepyBadBatmanNumericAttributes = Attributes(emptyMap(),  mapOf("anger" to 100, "sleepiness" to 60))
+        subject.overrideKeyJson(FEATURE, "batman", JsonFeature("batman"))
+        subject.overrideKeyJson(FEATURE, "batman", JsonFeature("bad-batman"), badBatmanNumericAttributes)
+
+        assertThat(subject.getJson<JsonFeature>(FEATURE, "batman")).isEqualTo(JsonFeature("batman"))
+        assertThat(subject.getJson<JsonFeature>(FEATURE, "batman", badBatmanNumericAttributes)).isEqualTo(
+            JsonFeature("bad-batman")
+        )
+        assertThat(subject.getJson<JsonFeature>(FEATURE, "batman", sleepyBadBatmanNumericAttributes)).isEqualTo(
+            JsonFeature("bad-batman")
+        )
+        // Provides the key level override when there is no match on attributes
+        assertThat(subject.getJson<JsonFeature>(FEATURE, "batman", goodBatmanNumericAttributes))
+            .isEqualTo(JsonFeature("batman"))
+
         subject.reset()
         subject.override(FEATURE, JsonFeature("test-class"), JsonFeature::class.java)
         subject.overrideKey(
