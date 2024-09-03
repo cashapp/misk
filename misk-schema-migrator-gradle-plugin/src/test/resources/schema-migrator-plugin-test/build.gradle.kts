@@ -12,6 +12,8 @@ val properties = Properties().apply {
 }
 
 miskSchemaMigrator {
+  host = "localhost"
+  port = 3306
   database = properties.getProperty("schema")
   username = properties.getProperty("username")
   password = properties.getProperty("password")
