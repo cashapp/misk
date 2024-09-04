@@ -261,7 +261,6 @@ public final class routeguide/RouteGuideProto$Feature : com/google/protobuf/Gene
 	public fun getNameBytes ()Lcom/google/protobuf/ByteString;
 	public fun getParserForType ()Lcom/google/protobuf/Parser;
 	public fun getSerializedSize ()I
-	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
 	public fun hasLocation ()Z
 	public fun hasName ()Z
 	public fun hashCode ()I
@@ -379,7 +378,6 @@ public final class routeguide/RouteGuideProto$FeatureDatabase : com/google/proto
 	public fun getFeatureOrBuilderList ()Ljava/util/List;
 	public fun getParserForType ()Lcom/google/protobuf/Parser;
 	public fun getSerializedSize ()I
-	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
 	public fun hashCode ()I
 	public final fun isInitialized ()Z
 	public static fun newBuilder ()Lrouteguide/RouteGuideProto$FeatureDatabase$Builder;
@@ -514,7 +512,6 @@ public final class routeguide/RouteGuideProto$Point : com/google/protobuf/Genera
 	public fun getLongitude ()I
 	public fun getParserForType ()Lcom/google/protobuf/Parser;
 	public fun getSerializedSize ()I
-	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
 	public fun hasLatitude ()Z
 	public fun hasLongitude ()Z
 	public fun hashCode ()I
@@ -633,7 +630,6 @@ public final class routeguide/RouteGuideProto$Rectangle : com/google/protobuf/Ge
 	public fun getLoOrBuilder ()Lrouteguide/RouteGuideProto$PointOrBuilder;
 	public fun getParserForType ()Lcom/google/protobuf/Parser;
 	public fun getSerializedSize ()I
-	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
 	public fun hasHi ()Z
 	public fun hasLo ()Z
 	public fun hashCode ()I
@@ -762,7 +758,6 @@ public final class routeguide/RouteGuideProto$RouteNote : com/google/protobuf/Ge
 	public fun getMessageBytes ()Lcom/google/protobuf/ByteString;
 	public fun getParserForType ()Lcom/google/protobuf/Parser;
 	public fun getSerializedSize ()I
-	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
 	public fun hasLocation ()Z
 	public fun hasMessage ()Z
 	public fun hashCode ()I
@@ -891,7 +886,6 @@ public final class routeguide/RouteGuideProto$RouteSummary : com/google/protobuf
 	public fun getParserForType ()Lcom/google/protobuf/Parser;
 	public fun getPointCount ()I
 	public fun getSerializedSize ()I
-	public final fun getUnknownFields ()Lcom/google/protobuf/UnknownFieldSet;
 	public fun hasDistance ()Z
 	public fun hasElapsedTime ()Z
 	public fun hasFeatureCount ()Z
