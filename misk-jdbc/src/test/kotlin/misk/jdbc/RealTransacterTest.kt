@@ -146,16 +146,19 @@ abstract class RealTransacterTest {
 
   @Test
   fun `exception in post commit hook does not cause the transaction to rollback`() {
-    assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
-      transacter.transactionWithSession { session ->
-        session.useConnection { connection ->
-          session.onPostCommit {
-            throw RuntimeException()
+    retryTransaction {
+      assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
+        transacter.transactionWithSession { session ->
+          session.useConnection { connection ->
+            session.onPostCommit {
+              throw RuntimeException()
+            }
+            connection.createStatement().execute("INSERT INTO movies (name) VALUES ('hello')")
           }
-          connection.createStatement().execute("INSERT INTO movies (name) VALUES ('hello')")
         }
       }
     }
+
     val afterCount = transacter.transactionWithSession { session -> session.useConnection(count) }
     assertThat(afterCount).isEqualTo(1)
   }
@@ -243,26 +246,34 @@ abstract class RealTransacterTest {
 
   @Test
   fun `a new transaction can be started in session close hook`() {
-    val maxRetries = 3
-    var attempt = 0
-    var success = false
-
-    while (attempt < maxRetries && !success) {
-      try {
-        transacter.transactionWithSession { session ->
-          session.useConnection { connection ->
-            session.onSessionClose {
-              transacter.transactionWithSession { innerSession ->
-                innerSession.useConnection { innerConnection ->
-                  innerConnection.createStatement()
-                    .execute("INSERT INTO movies (name) VALUES ('1')")
-                }
+    retryTransaction {
+      transacter.transactionWithSession { session ->
+        session.useConnection { connection ->
+          session.onSessionClose {
+            transacter.transactionWithSession { innerSession ->
+              innerSession.useConnection { innerConnection ->
+                innerConnection.createStatement()
+                  .execute("INSERT INTO movies (name) VALUES ('1')")
               }
             }
-            connection.createStatement().execute("INSERT INTO movies (name) VALUES ('2')")
           }
+          connection.createStatement().execute("INSERT INTO movies (name) VALUES ('2')")
         }
-        success = true // Test passed, exit the loop
+      }
+    }
+
+    val afterCount = transacter.transactionWithSession { session -> session.useConnection(count) }
+    assertThat(afterCount).isEqualTo(2)
+  }
+
+  private fun retryTransaction(transaction: () -> Unit) {
+    val maxRetries = 3
+    var attempt = 0
+
+    while (attempt < maxRetries) {
+      try {
+        transaction() // Execute the transaction
+        return // Exit the function if successful
       } catch (e: SQLException) {
         if (isCockroachDbRetryableError(e)) {
           attempt++
@@ -274,9 +285,6 @@ abstract class RealTransacterTest {
         }
       }
     }
-
-    val afterCount = transacter.transactionWithSession { session -> session.useConnection(count) }
-    assertThat(afterCount).isEqualTo(2)
   }
 
   private fun isCockroachDbRetryableError(e: SQLException): Boolean {
