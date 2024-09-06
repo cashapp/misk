@@ -8,9 +8,6 @@ interface JobConsumer {
    * handler. A service may only have one subscription outstanding per queue
    */
   fun subscribe(queueName: QueueName, handler: JobHandler)
-
-  fun subscribe(queueName: QueueName, handler: BatchJobHandler)
-
   fun unsubscribe(queueName: QueueName)
 }
 

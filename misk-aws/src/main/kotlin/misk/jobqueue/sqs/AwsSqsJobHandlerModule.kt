@@ -1,5 +1,6 @@
 package misk.jobqueue.sqs
 
+import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.ReadyService
@@ -8,6 +9,8 @@ import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
@@ -64,6 +67,28 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       dependsOn: List<Key<out Service>> = emptyList(),
     ): AwsSqsJobHandlerModule<T> {
       return AwsSqsJobHandlerModule(queueName, handlerClass, installRetryQueue, dependsOn)
+    }
+  }
+}
+
+@Singleton
+internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
+  private val attributeImporter: AwsSqsQueueAttributeImporter,
+  private val consumer: SqsJobConsumer,
+  private val consumerMapping: Map<QueueName, JobHandler>,
+  private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
+  private val config: AwsSqsJobQueueConfig
+) : AbstractIdleService() {
+  override fun startUp() {
+    consumerMapping.forEach { consumer.subscribe(it.key, it.value) }
+    externalQueues.forEach { attributeImporter.import(it.key) }
+  }
+
+  override fun shutDown() {
+    if (config.safe_shutdown) {
+      consumerMapping.forEach { consumer.unsubscribe(it.key) }
+      attributeImporter.shutDown()
+      consumer.shutDown()
     }
   }
 }
