@@ -1,7 +1,3 @@
-public abstract interface class misk/jobqueue/BatchJobHandler {
-	public abstract fun handleJobs (Ljava/util/Collection;)V
-}
-
 public final class misk/jobqueue/DevelopmentJobProcessorModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
@@ -98,7 +94,6 @@ public abstract interface class misk/jobqueue/Job {
 }
 
 public abstract interface class misk/jobqueue/JobConsumer {
-	public abstract fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/BatchJobHandler;)V
 	public abstract fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/JobHandler;)V
 	public abstract fun unsubscribe (Lmisk/jobqueue/QueueName;)V
 }
