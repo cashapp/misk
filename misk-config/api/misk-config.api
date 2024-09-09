@@ -19,13 +19,21 @@ public final class misk/config/MiskConfig {
 	public static synthetic fun filesInDir$default (Ljava/lang/String;Ljava/io/FilenameFilter;ILjava/lang/Object;)Ljava/util/List;
 	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;)Lwisp/config/Config;
 	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;Z)Lwisp/config/Config;
+	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ZLcom/fasterxml/jackson/databind/deser/BeanDeserializerModifier;)Lwisp/config/Config;
 	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;)Lwisp/config/Config;
 	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lwisp/config/Config;
 	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ZILjava/lang/Object;)Lwisp/config/Config;
+	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ZLcom/fasterxml/jackson/databind/deser/BeanDeserializerModifier;ILjava/lang/Object;)Lwisp/config/Config;
 	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lwisp/config/Config;
 	public final fun loadConfigYamlMap (Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;)Ljava/util/Map;
 	public static synthetic fun loadConfigYamlMap$default (Lmisk/config/MiskConfig;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Ljava/util/Map;
 	public final fun toRedactedYaml (Lwisp/config/Config;Lmisk/resources/ResourceLoader;)Ljava/lang/String;
+}
+
+public final class misk/config/MiskConfig$DeserializerModifierModule : com/fasterxml/jackson/databind/module/SimpleModule {
+	public fun <init> (Lcom/fasterxml/jackson/databind/deser/BeanDeserializerModifier;)V
+	public final fun getDeserializerModifier ()Lcom/fasterxml/jackson/databind/deser/BeanDeserializerModifier;
+	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
 }
 
 public final class misk/config/MiskConfig$RealSecret : misk/config/Secret {
