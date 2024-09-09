@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
@@ -108,11 +109,33 @@ object MiskConfig {
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
     failOnUnknownProperties: Boolean
   ): T {
+    return load(configClass,
+      appName,
+      deployment,
+      overrideResources,
+      overrideValues,
+      resourceLoader,
+      failOnUnknownProperties,
+      deserializerModifier = null
+    );
+  }
+
+  @JvmStatic
+  fun <T : Config> load(
+    configClass: Class<out Config>,
+    appName: String,
+    deployment: Deployment,
+    overrideResources: List<String> = listOf(),
+    overrideValues: JsonNode? = null,
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
+    failOnUnknownProperties: Boolean,
+    deserializerModifier: BeanDeserializerModifier? = null
+  ): T {
     check(!Secret::class.java.isAssignableFrom(configClass)) {
       "Top level service config cannot be a Secret<*>"
     }
 
-    val mapper = newObjectMapper(resourceLoader, false)
+    val mapper = newObjectMapper(resourceLoader, false, deserializerModifier)
 
     val configYamls = loadConfigYamlMap(appName, deployment, overrideResources, resourceLoader)
     check(configYamls.values.any { it != null }) {
@@ -230,12 +253,14 @@ object MiskConfig {
   }
 
   fun <T : Config> toRedactedYaml(config: T, resourceLoader: ResourceLoader): String {
-    return newObjectMapper(resourceLoader, true).writeValueAsString(config)
+    val serializingMapper = newObjectMapper(resourceLoader, true, null)
+    return serializingMapper.writeValueAsString(config)
   }
 
   private fun newObjectMapper(
     resourceLoader: ResourceLoader,
-    redactSecrets: Boolean
+    redactSecrets: Boolean,
+    deserializerModifier: BeanDeserializerModifier?
   ): ObjectMapper {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(
       KotlinModule.Builder().build(),
@@ -252,6 +277,12 @@ object MiskConfig {
     } else {
       mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
     }
+
+    // The deserializerModifier can be null if this mapper is serializing only.
+    deserializerModifier?.let {
+      mapper.registerModule(DeserializerModifierModule(it))
+    }
+
     return mapper
   }
 
@@ -324,6 +355,14 @@ object MiskConfig {
     SimpleModule() {
     override fun setupModule(context: SetupContext?) {
       addDeserializer(Secret::class.java, SecretDeserializer(resourceLoader, mapper))
+      super.setupModule(context)
+    }
+  }
+
+  class DeserializerModifierModule(val deserializerModifier: BeanDeserializerModifier) :
+    SimpleModule() {
+    override fun setupModule(context: SetupContext?) {
+      setDeserializerModifier(deserializerModifier)
       super.setupModule(context)
     }
   }
