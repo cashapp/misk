@@ -98,19 +98,23 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           return
         }
         try {
-          serviceManager.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
+          try {
+            serviceManager.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
+          } catch (e: Exception) {
+            if (context.reuseInjector()) {
+              // The `ServiceManager` requires services to be in a NEW state when starting them,
+              // so if services fail to start, we need to stop them and remove the injector from the cache,
+              // so that the next test can start fresh.
+              serviceManager.stop(context)
+              injectedModules.remove(context.getActionTestModules())
+              throw e
+            }
+          }
           runningServices.add(context.getActionTestModules().toList())
           if (context.reuseInjector()) {
             Runtime.getRuntime().addShutdownHook(
               thread(start = false) {
-                serviceManager.stopAsync().awaitStopped(30, TimeUnit.SECONDS)
-                /**
-                 * By default, Jetty shutdown is not managed by Guava so needs to be
-                 * done explicitly. This is being done in MiskApplication.
-                 */
-                if (serviceManager.jettyIsRunning()) {
-                  context.stopJetty()
-                }
+                serviceManager.stop(context)
               }
             )
           }
@@ -133,16 +137,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     override fun afterEach(context: ExtensionContext) {
       if (context.startService()) {
-        serviceManager.stopAsync()
-        serviceManager.awaitStopped(30, TimeUnit.SECONDS)
-
-        /**
-         * By default, Jetty shutdown is not managed by Guava so needs to be
-         * done explicitly. This is being done in MiskApplication.
-         */
-        if (serviceManager.jettyIsRunning()) {
-          context.stopJetty()
-        }
+        serviceManager.stop(context)
       }
     }
   }
@@ -232,5 +227,16 @@ private fun ExtensionContext.getActionTestModules(): Iterable<Module> {
 private fun ExtensionContext.getExternalDependencies(): Iterable<ExternalDependency> {
   return getFromStoreOrCompute("external-dependencies") {
     fieldsAnnotatedBy<MiskExternalDependency, ExternalDependency>()
+  }
+}
+
+private fun ServiceManager.stop(context: ExtensionContext) {
+  this.stopAsync().awaitStopped(30, TimeUnit.SECONDS)
+  /**
+   * By default, Jetty shutdown is not managed by Guava so needs to be
+   * done explicitly. This is being done in MiskApplication.
+   */
+  if (this.jettyIsRunning()) {
+    context.stopJetty()
   }
 }
