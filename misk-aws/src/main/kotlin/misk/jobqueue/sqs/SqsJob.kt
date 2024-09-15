@@ -1,12 +1,16 @@
 package misk.jobqueue.sqs
 
+import com.amazonaws.services.sqs.model.ChangeMessageVisibilityRequest
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.SendMessageRequest
+import com.google.common.annotations.VisibleForTesting
 import com.squareup.moshi.Moshi
 import misk.jobqueue.Job
 import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
+import java.math.BigInteger
+import kotlin.random.Random
 
 internal class SqsJob(
   override val queueName: QueueName,
@@ -55,6 +59,28 @@ internal class SqsJob(
     metrics.jobsDeadLettered.labels(queueName.value, queueName.value).inc()
   }
 
+  /**
+   *  Assign a visibility timeout for some duration X making the job invisible to the consumers for
+   *  that duration. With every subsequent retry the duration becomes longer until it hits the max
+   *  value of 10hrs.
+   */
+  override fun delayWithBackoff() {
+    val maxReceiveCount = queue.maxRetries
+    val visibilityTime = calculateVisibilityTimeOut(
+      currentReceiveCount = attributes[RECEIVE_COUNT]?.toInt()  ?: 1,
+      maxReceiveCount = maxReceiveCount,
+    )
+
+    queue.call { client ->
+      client.changeMessageVisibility(
+        ChangeMessageVisibilityRequest()
+          .withQueueUrl(queue.url)
+          .withReceiptHandle(message.receiptHandle)
+          .withVisibilityTimeout(visibilityTime)
+      )
+    }
+    metrics.visibilityTime.labels(queueName.value, queueName.value).set(visibilityTime.toDouble())
+  }
   private fun deleteMessage(queue: ResolvedQueue, message: Message) {
     val (deleteDuration, _) = queue.call {
       timed { it.deleteMessage(queue.url, message.receiptHandle) }
@@ -67,6 +93,9 @@ internal class SqsJob(
   }
 
   companion object {
+    /** We are limited with 12hrs after which SQS would thrown an exception - to be safe we set it to 10hrs. */
+    const val MAX_JOB_DELAY = 10 * 60 * 60L
+    const val RECEIVE_COUNT = "ApproximateReceiveCount"
     /** Message attribute that captures original trace id for a job, when available. */
     const val ORIGINAL_TRACE_ID_ATTR = "x-original-trace-id"
 
@@ -85,5 +114,15 @@ internal class SqsJob(
     /** Client-assigned identifier, useful to detect duplicate messages. */
     const val JOBQUEUE_METADATA_IDEMPOTENCE_KEY = "idempotence_key"
     const val JOBQUEUE_METADATA_ORIGINAL_TRACE_ID = "original_trace_id"
+
+    /** Estimates the current visibility timeout*/
+    @VisibleForTesting
+    fun calculateVisibilityTimeOut(currentReceiveCount: Int, maxReceiveCount: Int): Int {
+      val consecutiveRetryCount = (currentReceiveCount + 1).coerceAtMost(maxReceiveCount)
+      val backoff = BigInteger.TWO.pow(consecutiveRetryCount - 1).toLong()
+      val backoffWithJitter = MAX_JOB_DELAY.coerceAtMost((backoff / 2 + Random.nextLong(0, backoff / 2)))
+
+      return backoffWithJitter.toInt()
+    }
   }
 }

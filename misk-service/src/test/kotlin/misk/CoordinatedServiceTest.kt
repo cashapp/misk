@@ -11,7 +11,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
 class CoordinatedServiceTest {

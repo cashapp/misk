@@ -1,3 +1,7 @@
+public abstract interface class wisp/logging/Copyable {
+	public abstract fun copyWithNewTags (Ljava/util/Set;)Lwisp/logging/Copyable;
+}
+
 public final class wisp/logging/LoggingKt {
 	public static final fun debug (Lmu/KLogger;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun debug (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
@@ -13,7 +17,10 @@ public final class wisp/logging/LoggingKt {
 	public static final fun trace (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun warn (Lmu/KLogger;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun warn (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
-	public static final fun withTags ([Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
+	public static final fun withSmartTags ([Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun withTags ([Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun withTags ([Lkotlin/Pair;ZLkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static synthetic fun withTags$default ([Lkotlin/Pair;ZLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public class wisp/logging/SampledLogger : mu/KLogger {
@@ -106,5 +113,109 @@ public class wisp/logging/SampledLogger : mu/KLogger {
 	public fun warn (Lorg/slf4j/Marker;Ljava/lang/String;[Ljava/lang/Object;)V
 	public fun warn (Lorg/slf4j/Marker;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
 	public fun warn (Lorg/slf4j/Marker;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class wisp/logging/SmartTagsThreadLocalHandler {
+	public static final field INSTANCE Lwisp/logging/SmartTagsThreadLocalHandler;
+	public final fun popThreadLocalSmartTags ()Ljava/util/Set;
+}
+
+public abstract class wisp/logging/TaggedLogger : mu/KLogger, wisp/logging/Copyable {
+	public static final field Companion Lwisp/logging/TaggedLogger$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;Ljava/util/Set;)V
+	public fun <init> (Lmu/KLogger;Ljava/util/Set;)V
+	public final fun asContext (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun catching (Ljava/lang/Throwable;)V
+	public fun debug (Ljava/lang/String;)V
+	public fun debug (Ljava/lang/String;Ljava/lang/Object;)V
+	public fun debug (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun debug (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun debug (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun debug (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun debug (Lkotlin/jvm/functions/Function0;)V
+	public fun debug (Lorg/slf4j/Marker;Ljava/lang/String;)V
+	public fun debug (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;)V
+	public fun debug (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun debug (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun debug (Lorg/slf4j/Marker;Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun debug (Lorg/slf4j/Marker;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun debug (Lorg/slf4j/Marker;Lkotlin/jvm/functions/Function0;)V
+	public fun entry ([Ljava/lang/Object;)V
+	public fun error (Ljava/lang/String;)V
+	public fun error (Ljava/lang/String;Ljava/lang/Object;)V
+	public fun error (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun error (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun error (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun error (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun error (Lkotlin/jvm/functions/Function0;)V
+	public fun error (Lorg/slf4j/Marker;Ljava/lang/String;)V
+	public fun error (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;)V
+	public fun error (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun error (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun error (Lorg/slf4j/Marker;Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun error (Lorg/slf4j/Marker;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun error (Lorg/slf4j/Marker;Lkotlin/jvm/functions/Function0;)V
+	public fun exit ()V
+	public fun exit (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun getName ()Ljava/lang/String;
+	public fun getUnderlyingLogger ()Lorg/slf4j/Logger;
+	public fun info (Ljava/lang/String;)V
+	public fun info (Ljava/lang/String;Ljava/lang/Object;)V
+	public fun info (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun info (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun info (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun info (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun info (Lkotlin/jvm/functions/Function0;)V
+	public fun info (Lorg/slf4j/Marker;Ljava/lang/String;)V
+	public fun info (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;)V
+	public fun info (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun info (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun info (Lorg/slf4j/Marker;Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun info (Lorg/slf4j/Marker;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun info (Lorg/slf4j/Marker;Lkotlin/jvm/functions/Function0;)V
+	public fun isDebugEnabled ()Z
+	public fun isDebugEnabled (Lorg/slf4j/Marker;)Z
+	public fun isErrorEnabled ()Z
+	public fun isErrorEnabled (Lorg/slf4j/Marker;)Z
+	public fun isInfoEnabled ()Z
+	public fun isInfoEnabled (Lorg/slf4j/Marker;)Z
+	public fun isTraceEnabled ()Z
+	public fun isTraceEnabled (Lorg/slf4j/Marker;)Z
+	public fun isWarnEnabled ()Z
+	public fun isWarnEnabled (Lorg/slf4j/Marker;)Z
+	public final fun tag (Ljava/util/Collection;)Lwisp/logging/TaggedLogger;
+	public final fun tag ([Lkotlin/Pair;)Lwisp/logging/TaggedLogger;
+	public fun throwing (Ljava/lang/Throwable;)Ljava/lang/Throwable;
+	public fun trace (Ljava/lang/String;)V
+	public fun trace (Ljava/lang/String;Ljava/lang/Object;)V
+	public fun trace (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun trace (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun trace (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun trace (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun trace (Lkotlin/jvm/functions/Function0;)V
+	public fun trace (Lorg/slf4j/Marker;Ljava/lang/String;)V
+	public fun trace (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;)V
+	public fun trace (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun trace (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun trace (Lorg/slf4j/Marker;Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun trace (Lorg/slf4j/Marker;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun trace (Lorg/slf4j/Marker;Lkotlin/jvm/functions/Function0;)V
+	public fun warn (Ljava/lang/String;)V
+	public fun warn (Ljava/lang/String;Ljava/lang/Object;)V
+	public fun warn (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun warn (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun warn (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun warn (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun warn (Lkotlin/jvm/functions/Function0;)V
+	public fun warn (Lorg/slf4j/Marker;Ljava/lang/String;)V
+	public fun warn (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;)V
+	public fun warn (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun warn (Lorg/slf4j/Marker;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun warn (Lorg/slf4j/Marker;Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun warn (Lorg/slf4j/Marker;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun warn (Lorg/slf4j/Marker;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class wisp/logging/TaggedLogger$Companion {
 }
 

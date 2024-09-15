@@ -1,35 +1,34 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
-  api(Dependencies.guava)
+  api(libs.guava)
   api(project(":wisp:wisp-feature"))
-  implementation(Dependencies.kotlinStdLibJdk8)
+  implementation(libs.kotlinStdLibJdk8)
 
-  testFixturesApi(Dependencies.jakartaInject)
+  testFixturesApi(libs.jakartaInject)
   testFixturesApi(project(":wisp:wisp-feature"))
   testFixturesApi(project(":wisp:wisp-feature-testing"))
   testFixturesApi(project(":misk-feature"))
   testFixturesApi(project(":misk-inject"))
-  testFixturesImplementation(Dependencies.guice)
-  testFixturesImplementation(Dependencies.kotlinStdLibJdk8)
-  testFixturesImplementation(Dependencies.moshi)
+  testFixturesImplementation(libs.guice)
+  testFixturesImplementation(libs.kotlinStdLibJdk8)
+  testFixturesImplementation(libs.moshiCore)
   testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":misk-testing-api"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.guice)
-  testImplementation(Dependencies.jakartaInject)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.moshi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.guice)
+  testImplementation(libs.jakartaInject)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
+  testImplementation(libs.moshiCore)
   testImplementation(project(":wisp:wisp-feature-testing"))
   testImplementation(project(":wisp:wisp-moshi"))
   testImplementation(project(":misk-feature"))
@@ -37,7 +36,7 @@ dependencies {
   testImplementation(project(":misk-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

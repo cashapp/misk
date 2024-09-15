@@ -1,7 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-  kotlin("jvm")
+  alias(libs.plugins.kotlinJvm)
   application
 }
 
@@ -11,7 +9,7 @@ application {
 }
 
 dependencies {
-  implementation(Dependencies.jakartaInject)
+  implementation(libs.jakartaInject)
   implementation(project(":wisp:wisp-config"))
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
@@ -20,30 +18,35 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-redis"))
-  implementation(Dependencies.guice)
-  implementation(Dependencies.jedis)
-  implementation(Dependencies.logbackClassic)
-  implementation(Dependencies.slf4jApi)
-  implementation(Dependencies.okHttp)
+  implementation(project(":misk-service"))
+  implementation(libs.guice)
+  implementation(libs.jedis)
+  implementation(libs.logbackClassic)
+  implementation(libs.slf4jApi)
+  implementation(libs.okHttp)
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-config"))
   implementation(testFixtures(project(":misk-redis")))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
   testImplementation(project(":misk-testing"))
 }
 
-val jar by tasks.getting(Jar::class) {
+tasks.jar {
   manifest {
-    attributes("Main-Class" to "com.squareup.chat.ChatServiceKt")
+    attributes("Main-Class" to applicationMainClass)
   }
-  classifier = "unshaded"
+  archiveClassifier.set("unshaded")
 }
 
-val compileKotlin by tasks.getting(KotlinCompile::class) {
+tasks.compileKotlin {
   kotlinOptions {
     // TODO(alec): Enable again once Environment enum is deleted
     allWarningsAsErrors = false
   }
+}
+
+tasks.withType<Test> {
+  dependsOn(":startRedis")
 }

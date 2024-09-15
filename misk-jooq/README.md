@@ -20,15 +20,9 @@ jooq-code-gen to it. There's an example of how to do this in this
 a. Add the below lines to your build.gradle.kts
 
 ```
-buildscript {
-  dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:7.15.0")
-    classpath(Dependencies.mysql)
-  }
-}
 plugins {
-  id("org.flywaydb.flyway") version "7.15.0"
-  id("nu.studer.jooq") version "5.2"
+  alias(libs.plugins.flyway)
+  alias(libs.plugins.jooq)
 }
 // We are using flyway here in order to run the migrations to create a schema. 
 // Ensure the migration directory is not called `migrations`. There's more details as to why below.
@@ -77,11 +71,20 @@ jooq {
     }
   }
 }
-val generateJooq by project.tasks
-generateJooq.dependsOn("flywayMigrate")
 
-sourceSets.getByName("main").java.srcDirs
-  .add(File("${project.projectDir}/src/main/generated/kotlin"))
+// Needed to generate jooq test db classes
+tasks.named("generateJooq") {
+  dependsOn("flywayMigrate")
+}
+
+// Needed to generate jooq test db classes
+// If you are using this as an example for your service, remember to add the generated code to your
+// main source set instead of your tests as it is done below.
+sourceSets {
+  test {
+    java.srcDirs(layout.projectDirectory.dir("src/test/generated/kotlin"))
+  }
+}
 ```
 
 b. Have a look at `jooq-test-regenerate.sh`. Copy that into the root of your project and modify the database 

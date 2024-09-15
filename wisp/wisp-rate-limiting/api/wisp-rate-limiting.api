@@ -108,6 +108,7 @@ public final class wisp/ratelimiting/RateLimiterMetrics$ConsumptionResult : java
 	public static final field EXCEPTION Lwisp/ratelimiting/RateLimiterMetrics$ConsumptionResult;
 	public static final field REJECTED Lwisp/ratelimiting/RateLimiterMetrics$ConsumptionResult;
 	public static final field SUCCESS Lwisp/ratelimiting/RateLimiterMetrics$ConsumptionResult;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lwisp/ratelimiting/RateLimiterMetrics$ConsumptionResult;
 	public static fun values ()[Lwisp/ratelimiting/RateLimiterMetrics$ConsumptionResult;
 }

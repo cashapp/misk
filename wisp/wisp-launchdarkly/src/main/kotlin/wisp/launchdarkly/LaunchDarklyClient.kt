@@ -3,6 +3,7 @@ package wisp.launchdarkly
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
+import com.launchdarkly.sdk.server.integrations.EventProcessorBuilder.DEFAULT_CAPACITY
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import wisp.resources.ResourceLoader
 import wisp.security.ssl.SslContextFactory
@@ -31,6 +32,11 @@ object LaunchDarklyClient {
                 Components.serviceEndpoints()
                     .streaming(baseUri)
                     .events(baseUri)
+            )
+            .events(
+              Components.sendEvents()
+                .capacity(config.event_capacity)
+                .flushInterval(config.flush_interval)
             )
 
         config.ssl?.let {

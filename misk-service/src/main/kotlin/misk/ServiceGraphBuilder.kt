@@ -4,15 +4,26 @@ import com.google.common.collect.LinkedHashMultimap
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
-import misk.CoordinatedService.Companion.CycleValidity
 import com.google.inject.Provider
+import misk.CoordinatedService.Companion.CycleValidity
+
+data class ServiceGraphBuilderMetadata(
+  val serviceMap: Map<String, CoordinatedServiceMetadata>,
+  val serviceNames: Map<String, String>,
+  /** A map of downstream services -> their upstreams. */
+  val dependencyMap: Map<String, String>,
+  val asciiVisual: String,
+)
 
 /**
  * Builds a graph of [CoordinatedService]s which defer start up and shut down until their dependent
  * services are ready.
  */
 internal class ServiceGraphBuilder {
-  private var serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
+  private val serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
+  private val serviceNames = mutableMapOf<Key<*>, String>()
+
+  /** A map of downstream services -> their upstreams. */
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
 
   /**
@@ -22,14 +33,15 @@ internal class ServiceGraphBuilder {
    * Keys must be unique. If a key is reused, then the original key-service pair will be replaced.
    */
   fun addService(key: Key<*>, service: Service) {
-    addService(key) { service }
+    addService(key, service::class.qualifiedName) { service }
   }
 
-  fun addService(key: Key<*>, serviceProvider: Provider<out Service>) {
+  fun addService(key: Key<*>, serviceName: String?, serviceProvider: Provider<out Service>) {
     check(serviceMap[key] == null) {
       "Service $key cannot be registered more than once"
     }
     serviceMap[key] = CoordinatedService(serviceProvider)
+    serviceNames[key] = serviceName ?: "Anonymous Service(${key.typeLiteral.type.typeName})"
   }
 
   /**
@@ -68,7 +80,7 @@ internal class ServiceGraphBuilder {
    */
   private fun linkDependencies() {
     for ((key, service) in serviceMap) {
-      val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
+      val dependencies = dependencyMap[key].map { serviceMap[it]!! }
       service.addDependentServices(*dependencies.toTypedArray())
     }
   }
@@ -100,4 +112,52 @@ internal class ServiceGraphBuilder {
       }
     }
   }
+
+  override fun toString(): String = buildString {
+    val allServices = serviceMap.keys
+    val serviceRoots = allServices.filterNot { it in dependencyMap.keys() }
+    for (root in serviceRoots) {
+      depthFirst(serviceKey = root, prefix = "", isLast = true, isRoot = true)
+    }
+  }
+
+  private fun StringBuilder.depthFirst(
+    serviceKey: Key<*>,
+    prefix: String,
+    isLast: Boolean,
+    isRoot: Boolean
+  ) {
+    if (!isRoot) {
+      append(prefix)
+      append(if (isLast) "\\__ " else "|__ ")
+    }
+    append(serviceNameOf(serviceKey))
+    append("\n")
+
+    val downstreamServices =
+      dependencyMap.asMap().filter { it.value.contains(serviceKey) }.keys.toList()
+    for ((index, downstreamService) in downstreamServices.withIndex()) {
+      val newPrefix = prefix + if (isLast) "    " else "|   "
+      depthFirst(
+        serviceKey = downstreamService,
+        prefix = newPrefix,
+        isLast = (index == downstreamServices.size - 1),
+        isRoot = false
+      )
+    }
+  }
+
+  private fun serviceNameOf(key: Key<*>): String = buildString {
+    if (key.annotation != null) {
+      append("${key.annotation} ")
+    }
+    append(serviceNames[key])
+  }
+
+  fun toMetadata() = ServiceGraphBuilderMetadata(
+    serviceMap = serviceMap.map { it.key.toString() to it.value.toMetadata() }.toMap(),
+    serviceNames = serviceNames.mapKeys { it.key.toString() },
+    dependencyMap = dependencyMap.asMap().map { (k,v) -> k.toString() to v.toString() }.toMap(),
+    asciiVisual = toString()
+  )
 }

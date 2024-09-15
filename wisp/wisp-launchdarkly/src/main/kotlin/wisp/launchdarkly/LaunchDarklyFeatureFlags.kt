@@ -2,6 +2,7 @@ package wisp.launchdarkly
 
 import com.launchdarkly.sdk.EvaluationDetail
 import com.launchdarkly.sdk.EvaluationReason
+import com.launchdarkly.sdk.LDContext
 import com.launchdarkly.sdk.LDUser
 import com.launchdarkly.sdk.LDValue
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
@@ -112,22 +113,22 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
     get(feature, key, attributes) { name, user ->
-      ldClient.value.boolVariationDetail(name, user, false)
+      ldClient.value.boolVariationDetail(name, LDContext.fromUser(user), false)
     }
 
   override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
     get(feature, key, attributes) { name, user ->
-      ldClient.value.doubleVariationDetail(name, user, 0.0)
+      ldClient.value.doubleVariationDetail(name, LDContext.fromUser(user), 0.0)
     }
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
     get(feature, key, attributes) { name, user ->
-      ldClient.value.intVariationDetail(name, user, 0)
+      ldClient.value.intVariationDetail(name, LDContext.fromUser(user), 0)
     }
 
   override fun getString(feature: Feature, key: String, attributes: Attributes): String =
     get(feature, key, attributes) { name, user ->
-      ldClient.value.stringVariationDetail(name, user, "")
+      ldClient.value.stringVariationDetail(name, LDContext.fromUser(user), "")
     }
 
   override fun <T : Enum<T>> getEnum(
@@ -137,7 +138,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     attributes: Attributes,
   ): T {
     val result = get(feature, key, attributes) { name, user ->
-      ldClient.value.stringVariationDetail(name, user, "")
+      ldClient.value.stringVariationDetail(name, LDContext.fromUser(user), "")
     }
     return java.lang.Enum.valueOf(clazz, result.uppercase(Locale.getDefault()))
   }
@@ -149,7 +150,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     attributes: Attributes,
   ): T {
     val result = get(feature, key, attributes) { name, user ->
-      ldClient.value.jsonValueVariationDetail(name, user, LDValue.ofNull())
+      ldClient.value.jsonValueVariationDetail(name, LDContext.fromUser(user), LDValue.ofNull())
     }
     return moshi.adapter(clazz)
       .fromSafeJson(result.toJsonString()) { exception ->
@@ -160,7 +161,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
 
   override fun getJsonString(feature: Feature, key: String, attributes: Attributes): String {
     val result = get(feature, key, attributes) { name, user ->
-      ldClient.value.jsonValueVariationDetail(name, user, LDValue.ofNull())
+      ldClient.value.jsonValueVariationDetail(name, LDContext.fromUser(user), LDValue.ofNull())
     }
     return result.toJsonString()
   }
@@ -176,7 +177,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     checkInitialized()
     val listener = ldClient.value.flagTracker.addFlagValueChangeListener(
       feature.name,
-      buildUser(feature, key, attributes)
+      LDContext.fromUser(buildUser(feature, key, attributes))
     ) { event ->
       executor.execute {
         tracker(mapper(event.newValue))
@@ -282,7 +283,9 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
       )
     }
 
-    throw IllegalStateException("Feature flag $feature is off but no off variation is specified")
+    throw IllegalStateException(
+      "Feature flag $feature is off but no off variation is specified, evaluation reason: ${detail.reason}"
+    )
   }
 
   private fun buildUser(feature: Feature, key: String, attributes: Attributes): LDUser {
@@ -292,7 +295,6 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
       when (k) {
         // LaunchDarkly has some built-in keys that have to be initialized with their named
         // methods.
-        "secondary" -> builder.secondary(v)
         "ip" -> builder.ip(v)
         "email" -> builder.email(v)
         "name" -> builder.name(v)

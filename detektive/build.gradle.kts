@@ -1,31 +1,29 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencies {
-  compileOnly(Dependencies.detektApi)
-  compileOnly(Dependencies.detektPsiUtils)
-  compileOnly(Dependencies.kotlinCompilerEmbeddable)
+  compileOnly(libs.detektApi)
+  compileOnly(libs.detektPsiUtils)
+  compileOnly(libs.kotlinCompilerEmbeddable)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.detektParser)
-  testImplementation(Dependencies.detektTest)
-  testImplementation(Dependencies.detektTestUtils)
-  testImplementation(Dependencies.guice)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.junitParams)
-  testImplementation(Dependencies.kotlinTest)
+  testImplementation(libs.assertj)
+  testImplementation(libs.detektParser)
+  testImplementation(libs.detektTest)
+  testImplementation(libs.detektTestUtils)
+  testImplementation(libs.guice)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.junitParams)
+  testImplementation(libs.kotlinTest)
 
-  testRuntimeOnly(Dependencies.junitEngine)
+  testRuntimeOnly(libs.junitEngine)
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
   )

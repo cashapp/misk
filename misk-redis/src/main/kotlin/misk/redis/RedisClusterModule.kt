@@ -1,15 +1,17 @@
 package misk.redis
 
-import com.google.common.base.Ticker
 import com.google.inject.Provides
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.metrics.v2.Metrics
+import redis.clients.jedis.ClientSetInfoConfig
 import redis.clients.jedis.ConnectionPoolConfig
+import redis.clients.jedis.DefaultJedisClientConfig
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisCluster
+import redis.clients.jedis.UnifiedJedis
 import wisp.deployment.Deployment
 
 /**
@@ -29,9 +31,9 @@ import wisp.deployment.Deployment
  * ```
  *
  *
- * [redisClusterConfig]: Only one replication group config is supported; this module will use the first
- * configuration it finds. An empty [RedisReplicationGroupConfig.redis_auth_password] is only
- * permitted in fake environments. See [Deployment].
+ * [redisClusterGroupConfig]: Only one replication group config is supported.
+ * An empty [RedisReplicationGroupConfig.redis_auth_password] is only permitted in fake
+ * environments. See [Deployment].
  *
  * This initiates a [JedisCluster] which automatically discovers the topology of the Redis cluster,
  * and routes commands to the appropriate node based on the hash slot of the key.
@@ -45,48 +47,74 @@ import wisp.deployment.Deployment
  * https://redis.com/blog/redis-clustering-best-practices-with-keys/
  */
 class RedisClusterModule @JvmOverloads constructor(
-  private val redisClusterConfig: RedisClusterConfig,
+  private val redisClusterGroupConfig: RedisClusterReplicationGroupConfig,
   private val connectionPoolConfig: ConnectionPoolConfig,
   private val useSsl: Boolean = true
 ) : KAbstractModule() {
 
+  @Deprecated("Please use RedisClusterReplicationGroupConfig to pass specific redis cluster configuration.")
+  constructor(
+    redisClusterConfig: RedisClusterConfig,
+    connectionPoolConfig: ConnectionPoolConfig,
+    useSsl: Boolean = true,
+  ) : this(
+    // Get the first replication group, we only support 1 replication group per service.
+    redisClusterConfig.values.firstOrNull()
+      ?: throw RuntimeException("At least 1 replication group must be specified"),
+    connectionPoolConfig = connectionPoolConfig,
+    useSsl = useSsl,
+  )
+
   override fun configure() {
-    bind<RedisClusterConfig>().toInstance(redisClusterConfig)
+    bind<RedisClusterReplicationGroupConfig>().toInstance(redisClusterGroupConfig)
     install(ServiceModule<RedisService>().enhancedBy<ReadyService>())
     requireBinding<Metrics>()
   }
 
   @Provides @Singleton
   internal fun provideRedisClusterClient(
-    config: RedisClusterConfig,
-    deployment: Deployment,
-    metrics: Metrics,
-    ticker: Ticker,
-  ): Redis {
-    // Get the first replication group, we only support 1 replication group per service.
-    val replicationGroup = config[config.keys.first()]
-      ?: throw RuntimeException("At least 1 replication group must be specified")
+    clientMetrics: RedisClientMetrics,
+    unifiedJedis: UnifiedJedis
+  ): Redis = RealRedis(unifiedJedis, clientMetrics)
+
+  @Provides @Singleton
+  internal fun provideUnifiedJedis(
+    replicationGroup: RedisClusterReplicationGroupConfig,
+    deployment: Deployment
+  ): UnifiedJedis {
 
     // Create our jedis pool with client-side metrics.
-    val clientMetrics = RedisClientMetrics(ticker, metrics)
+    val jedisClientConfig = DefaultJedisClientConfig.builder()
+      .connectionTimeoutMillis(replicationGroup.timeout_ms)
+      .socketTimeoutMillis(replicationGroup.timeout_ms)
+      .password(replicationGroup.redis_auth_password
+        .ifEmpty {
+          check(!deployment.isReal) {
+            "This Redis client is configured to require an auth password, but none was provided!"
+          }
+          null
+        }
+      )
+      .clientName(replicationGroup.client_name)
+      .ssl(useSsl)
+      //CLIENT SETINFO is only supported in Redis v7.2+
+      .clientSetInfoConfig(ClientSetInfoConfig.DISABLED)
+      .build()
 
-    val jedisCluster = JedisCluster(
-      HostAndPort(
-        replicationGroup.configuration_endpoint.hostname,
-        replicationGroup.configuration_endpoint.port
+    // We want to support services running both under docker and localhost when running locally and this is a way to support that.
+    // If a hostname is provided, it will always take precedence over the environment variable.
+    val redisHost = replicationGroup.configuration_endpoint.hostname?.takeUnless { it.isNullOrBlank() } ?: System.getenv("REDIS_HOST") ?: "127.0.0.1"
+
+    return JedisCluster(
+      setOf(
+        HostAndPort(
+          redisHost,
+          replicationGroup.configuration_endpoint.port
+        )
       ),
-      replicationGroup.timeout_ms,
-      replicationGroup.timeout_ms,
+      jedisClientConfig,
       replicationGroup.max_attempts,
-      replicationGroup.redis_auth_password.ifEmpty {
-        check(!deployment.isReal) { "Redis auth password cannot be empty in a real environment!" }
-        null
-      },
-      replicationGroup.client_name,
-      connectionPoolConfig,
-      useSsl
+      connectionPoolConfig
     )
-
-    return RealRedis(jedisCluster, clientMetrics)
   }
 }

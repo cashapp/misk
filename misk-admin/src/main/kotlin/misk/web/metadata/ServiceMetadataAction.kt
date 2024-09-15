@@ -14,6 +14,7 @@ import jakarta.inject.Singleton
 /**
  * Service Metadata used for front end dashboards including App Name and Misk.Deployment name
  */
+// TODO replace this with a MetadataModule binding instead of separate web action
 @Singleton
 class ServiceMetadataAction @Inject constructor(
   private val optionalBinder: OptionalBinder,

@@ -1,25 +1,23 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencies {
-  api(Dependencies.kotlinLogging)
+  api(libs.kotlinLogging)
   api(project(":misk-inject"))
-  implementation(Dependencies.guice)
-  implementation(Dependencies.openTracingApi)
-  implementation(Dependencies.openTracingUtil)
-  implementation(Dependencies.slf4jApi)
-  implementation(Dependencies.tracingDatadog)
+  implementation(libs.guice)
+  implementation(libs.openTracing)
+  implementation(libs.openTracingUtil)
+  implementation(libs.slf4jApi)
+  implementation(libs.tracingDatadog)
   implementation(project(":wisp:wisp-logging"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

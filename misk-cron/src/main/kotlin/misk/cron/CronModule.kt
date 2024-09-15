@@ -7,18 +7,20 @@ import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceModule
-import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import java.time.ZoneId
 import jakarta.inject.Qualifier
+import misk.inject.KAbstractModule
+import misk.inject.KInstallOnceModule
+import misk.web.metadata.MetadataModule
 
 class CronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf()
-) : KAbstractModule() {
+) : KInstallOnceModule() {
   override fun configure() {
     install(FakeCronModule(zoneId, threadPoolSize, dependencies))
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
@@ -57,6 +59,7 @@ class FakeCronModule @JvmOverloads constructor(
         dependsOn = dependencies
       ).dependsOn<ReadyService>()
     )
+    install(MetadataModule(CronMetadataProvider()))
   }
 }
 

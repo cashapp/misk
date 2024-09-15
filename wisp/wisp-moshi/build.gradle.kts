@@ -1,8 +1,10 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
-    api(Dependencies.moshi)
-    implementation(Dependencies.moshiKotlin)
+    api(libs.moshiCore)
+    implementation(libs.moshiKotlin)
 }

@@ -1,12 +1,37 @@
-plugins {
-  `gradle-enterprise`
+pluginManagement {
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+  }
 }
 
-gradleEnterprise {
+plugins {
+  id("com.gradle.develocity") version "3.18"
+}
+
+develocity {
   buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
+    publishing {
+      termsOfUseUrl = "https://gradle.com/terms-of-service"
+      termsOfUseAgree = "yes"
+    }
   }
+}
+
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    mavenCentral()
+    maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
+  }
+}
+
+gradle.lifecycle.beforeProject {
+  group = when {
+    path.startsWith(":wisp") -> "app.cash.wisp"
+    else -> "com.squareup.misk"
+  }
+  version = findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
 }
 
 include(":detektive")
@@ -39,6 +64,7 @@ include(":misk")
 include(":misk-action-scopes")
 include(":misk-actions")
 include(":misk-admin")
+include(":misk-api")
 include(":misk-aws")
 include(":misk-aws-dynamodb")
 include(":misk-aws2-dynamodb")
@@ -52,7 +78,6 @@ include(":misk-crypto")
 include(":misk-datadog")
 include(":misk-events")
 include(":misk-events-core")
-include(":misk-events-testing")
 include(":misk-exceptions-dynamodb")
 include(":misk-feature")
 include(":misk-feature-testing")
@@ -79,10 +104,14 @@ include(":misk-rate-limiting-bucket4j-dynamodb-v1")
 include(":misk-rate-limiting-bucket4j-mysql")
 include(":misk-rate-limiting-bucket4j-redis")
 include(":misk-redis")
+include(":misk-schema-migrator-gradle-plugin")
 include(":misk-service")
 include(":misk-slack")
+include(":misk-sqldelight")
+include(":misk-sqldelight-testing")
 include(":misk-tailwind")
 include(":misk-testing")
+include(":misk-testing-api")
 include(":misk-transactional-jobqueue")
 include(":misk-warmup")
 include(":samples:exemplar")

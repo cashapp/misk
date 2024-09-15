@@ -15,9 +15,11 @@ import misk.MiskCaller
 import misk.MiskDefault
 import misk.ReadyService
 import misk.ServiceModule
+import misk.api.HttpRequest
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
+import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.queuing.TimedBlockingQueue
@@ -67,6 +69,7 @@ import misk.web.interceptors.RequestLoggingTransformer
 import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
+import misk.web.jetty.JettyThreadPoolHealthCheck
 import misk.web.jetty.JettyThreadPoolMetricsCollector
 import misk.web.jetty.MeasuredQueuedThreadPool
 import misk.web.jetty.MeasuredThreadPool
@@ -137,6 +140,7 @@ class MiskWebModule @JvmOverloads constructor(
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
         bindSeedData(HttpCall::class)
+        bindSeedData(HttpRequest::class)
         bindSeedData(HttpServletRequest::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)
         newMultibinder<MiskCallerAuthenticator>()
@@ -261,7 +265,9 @@ class MiskWebModule @JvmOverloads constructor(
     install(WebActionModule.create<ReadinessCheckAction>())
 
     install(WebActionModule.create<LivenessCheckAction>())
-    install(WebActionModule.create<NotFoundAction>())
+    if (config.install_default_not_found_action) {
+      install(WebActionModule.create<NotFoundAction>())
+    }
 
     val maxThreads = config.jetty_max_thread_pool_size
     val minThreads = min(config.jetty_min_thread_pool_size, maxThreads)
@@ -294,6 +300,9 @@ class MiskWebModule @JvmOverloads constructor(
       }
       bind<ThreadPool>().toInstance(threadPool)
       bind<MeasuredThreadPool>().toInstance(MeasuredThreadPoolExecutor(executor))
+    }
+    if (config.enable_thread_pool_health_check) {
+      multibind<HealthCheck>().to<JettyThreadPoolHealthCheck>()
     }
   }
 

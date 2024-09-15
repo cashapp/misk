@@ -1,26 +1,23 @@
 import com.google.protobuf.gradle.*
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-
-  id("com.google.protobuf")
-  id("com.squareup.wire")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.wire)
 }
 
 protobuf {
   plugins {
     id("grpc") {
-      artifact = Dependencies.grpcGenJava
+      artifact = "${libs.grpcGenJava.get().group}:${libs.grpcGenJava.get().name}:${libs.grpcGenJava.get().version}"
     }
   }
 
   protoc {
-    artifact = Dependencies.protoc
+    artifact = "${libs.protoc.get().group}:${libs.protoc.get().name}:${libs.protoc.get().version}"
   }
 
   generateProtoTasks {
@@ -53,7 +50,7 @@ wire {
 }
 
 sourceSets {
-  val main by getting {
+  main {
     java.srcDir("build/generated/source/proto/main/grpc")
     java.srcDir("build/generated/source/proto/main/java")
     java.srcDir("build/generated/source/wire")
@@ -63,41 +60,41 @@ sourceSets {
 }
 
 dependencies {
-  api(Dependencies.grpcApi)
-  api(Dependencies.grpcStub)
-  api(Dependencies.guava)
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
-  api(Dependencies.okHttp)
-  api(Dependencies.okio)
-  api(Dependencies.protobufJava)
+  api(libs.grpcApi)
+  api(libs.grpcStub)
+  api(libs.guava)
+  api(libs.guice)
+  api(libs.jakartaInject)
+  api(libs.okHttp)
+  api(libs.okio)
+  api(libs.protobufJava)
   api(project(":misk"))
   api(project(":misk-actions"))
+  api(project(":misk-api"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
-  implementation(Dependencies.grpcNetty)
-  implementation(Dependencies.grpcProtobuf)
-  implementation(Dependencies.javaxAnnotation)
-  implementation(Dependencies.kotlinxCoroutines)
-  implementation(Dependencies.nettyHandler)
-  implementation(Dependencies.wireGrpcClient)
-  implementation(Dependencies.wireRuntime)
+  implementation(libs.grpcNetty)
+  implementation(libs.grpcProtobuf)
+  implementation(libs.javaxAnnotation)
+  implementation(libs.nettyHandler)
+  implementation(libs.wireGrpcClient)
+  implementation(libs.wireRuntime)
   implementation(project(":misk-core"))
   implementation(testFixtures(project(":misk-metrics")))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.awaitility)
-  testImplementation(Dependencies.awaitilityKotlin)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.logbackClassic)
-  testImplementation(Dependencies.protoGoogleCommon)
+  testImplementation(libs.assertj)
+  testImplementation(libs.awaitility)
+  testImplementation(libs.awaitilityKotlin)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
+  testImplementation(libs.logbackClassic)
+  testImplementation(libs.protoGoogleCommon)
   testImplementation(project(":wisp:wisp-logging-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

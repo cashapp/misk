@@ -1,8 +1,11 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
+  api(project(":misk-testing-api"))
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
 }

@@ -2,12 +2,12 @@ package misk.scope
 
 import com.google.inject.Key
 import com.google.inject.Provider
-import kotlinx.coroutines.asContextElement
-import java.util.UUID
-import java.util.concurrent.Callable
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asContextElement
+import java.util.UUID
+import java.util.concurrent.Callable
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -24,7 +24,7 @@ class ActionScope @Inject internal constructor(
   private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
 ) : AutoCloseable {
   companion object {
-    private val threadLocalScope = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
+    private val threadLocalInstance = ThreadLocal<Instance>()
     private val threadLocalUUID = ThreadLocal<UUID>()
   }
 
@@ -59,35 +59,73 @@ class ActionScope @Inject internal constructor(
    * Example usage:
    * ```
    *  scope.enter(seedData).use {
-        runBlocking(scope.asContextElement()) {
-          async(Dispatchers.IO) {
-            tester.fooValue()
-          }.await()
-        }
-      }
+   *    runBlocking(scope.asContextElement()) {
+   *      async(Dispatchers.IO) {
+   *        tester.fooValue()
+   *      }.await()
+   *    }
+   *  }
    * ```
    *
    */
   fun asContextElement(): CoroutineContext.Element {
     check(inScope()) { "not running within an ActionScope" }
 
-    val currentScopedData = threadLocalScope.get()
+    val instance = threadLocalInstance.get()
 
-    return threadLocalScope.asContextElement(currentScopedData)
+    return threadLocalInstance.asContextElement(instance)
   }
 
+  @Deprecated(
+    "Use snapshotActionScopeInstance instead",
+    ReplaceWith("this.snapshotActionScopeInstance()"),
+  )
   fun snapshotActionScope(): Map<Key<*>, Any?> {
-    check(inScope()) { "not running within an ActionScope" }
-    return threadLocalScope.get().toMap()
+    return snapshotActionScopeInstance().asImmediateValues()
   }
 
-  /** Starts the scope on a thread with the provided seed data */
+  fun snapshotActionScopeInstance(): Instance {
+    check(inScope()) { "not running within an ActionScope" }
+    return threadLocalInstance.get()
+  }
+
+  @Deprecated("Use create() instead and then call inScope() to enter the scope")
+    /** Starts the scope on a thread with the provided seed data */
   fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
+    create(seedData).enter()
+    return this
+  }
+
+  /** Creates a new scope on the current thread with the provided seed data */
+  @JvmOverloads
+ fun create(
+    seedData: Map<Key<*>, Any?>,
+    providerOverrides: Map<Key<*>, ActionScopedProvider<*>> = emptyMap(),
+  ): Instance {
+    check(!inScope()) {
+      "cannot create an ActionScope.Instance on a thread that is already running in an action scope"
+    }
+
+    val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
+
+    val lazyValues = providers.mapValues { (key, _) ->
+      SynchronizedLazy(providerFor(key))
+    }
+
+    val lazyOverrides = providerOverrides.mapValues { (_, provider) ->
+      SynchronizedLazy(provider)
+    }
+
+    return Instance(lazyValues + lazyOverrides + immediateValues, this)
+  }
+
+  /** Starts the scope on a thread with the provided instance */
+  internal fun enter(instance: Instance): ActionScope {
     check(!inScope()) {
       "cannot begin an ActionScope on a thread that is already running in an action scope"
     }
 
-    threadLocalScope.set(LinkedHashMap(seedData))
+    threadLocalInstance.set(instance)
 
     // If an action scope had previously been entered on the thread, re-use its UUID.
     // Otherwise, generate a new one.
@@ -99,7 +137,7 @@ class ActionScope @Inject internal constructor(
   }
 
   override fun close() {
-    threadLocalScope.remove()
+    threadLocalInstance.remove()
 
     // Explicitly NOT removing threadLocalUUID because we want to retain the thread's UUID if
     // the action scope is re-entered on the same thread.
@@ -108,7 +146,7 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Returns true if currently in the scope */
-  fun inScope(): Boolean = threadLocalScope.get() != null
+  fun inScope(): Boolean = threadLocalInstance.get() != null
 
   /**
    * Wraps a [Callable] that will be called on another thread, propagating the current
@@ -117,7 +155,7 @@ class ActionScope @Inject internal constructor(
   fun <T> propagate(c: Callable<T>): Callable<T> {
     check(inScope()) { "not running within an ActionScope" }
 
-    val currentScopedData = threadLocalScope.get().toMap()
+    val currentInstance = threadLocalInstance.get()
     val currentThreadUUID = threadLocalUUID.get()
 
     return Callable {
@@ -126,7 +164,7 @@ class ActionScope @Inject internal constructor(
       if (inScope() && currentThreadUUID == threadLocalUUID.get()) {
         c.call()
       } else {
-        enter(currentScopedData).use {
+        currentInstance.inScope {
           c.call()
         }
       }
@@ -140,9 +178,9 @@ class ActionScope @Inject internal constructor(
   fun <T> propagate(f: KFunction<T>): KFunction<T> {
     check(inScope()) { "not running within an ActionScope" }
 
-    val currentScopedData = threadLocalScope.get().toMap()
+    val currentInstance = threadLocalInstance.get()
     val currentThreadUUID = threadLocalUUID.get()
-    return WrappedKFunction(currentScopedData, this, f, currentThreadUUID)
+    return WrappedKFunction(currentInstance, this, f, currentThreadUUID)
   }
 
   /**
@@ -152,7 +190,7 @@ class ActionScope @Inject internal constructor(
   fun <T> propagate(f: () -> T): () -> T {
     check(inScope()) { "not running within an ActionScope" }
 
-    val currentScopedData = threadLocalScope.get().toMap()
+    val currentInstance = threadLocalInstance.get()
     val currentThreadUUID = threadLocalUUID.get()
 
     return {
@@ -161,9 +199,7 @@ class ActionScope @Inject internal constructor(
       if (inScope() && currentThreadUUID == threadLocalUUID.get()) {
         f.invoke()
       } else {
-        enter(currentScopedData).use {
-          f.invoke()
-        }
+        currentInstance.inScope(f)
       }
     }
   }
@@ -171,34 +207,43 @@ class ActionScope @Inject internal constructor(
   /** Returns the action scoped value for the given key */
   fun <T> get(key: Key<T>): T {
     check(inScope()) { "not running within an ActionScope" }
-
-    // NB(mmihic): We don't use computeIfAbsent because computing the value of this
-    // key might require computing the values of keys on which we depend, which would
-    // cause recursive calls to computeIfAbsent which is unsupported (and explicitly
-    // detected in JDK 9+)
-    val threadState = threadLocalScope.get()
-    val cachedValue = threadState[key]
-    if (cachedValue != null) {
-      @Suppress("UNCHECKED_CAST")
-      return cachedValue as T
-    }
-
-    val value = providerFor(key as Key<*>).get()
-    threadState[key] = value
-
-    @Suppress("UNCHECKED_CAST")
-    return value as T
+    return threadLocalInstance.get()[key]
   }
 
-  @Suppress("UNCHECKED_CAST")
   private fun providerFor(key: Key<*>): ActionScopedProvider<*> {
     return requireNotNull(providers[key]?.get()) {
       "no ActionScopedProvider available for $key"
     }
   }
 
+  class Instance internal constructor(
+    private val lazyValues: Map<Key<*>, Lazy<*>>,
+    private val scope: ActionScope,
+  ) : AutoCloseable by scope {
+    internal operator fun <T> get(key: Key<T>): T {
+      @Suppress("UNCHECKED_CAST")
+      return lazyValues.getValue(key).value as T
+    }
+
+    internal fun asImmediateValues(): Map<Key<*>, Any?> {
+      return lazyValues
+        .filterValues { it.isInitialized() }
+        .mapValues { it.value.value }
+    }
+
+    fun <T> inScope(block: () -> T): T {
+      return scope.enter(this).use {
+        block()
+      }
+    }
+
+    fun enter() {
+      scope.enter(this)
+    }
+  }
+
   private class WrappedKFunction<T>(
-    val seedData: Map<Key<*>, Any?>,
+    val instance: Instance,
     val scope: ActionScope,
     val wrapped: KFunction<T>,
     val threadUUID: UUID
@@ -209,7 +254,7 @@ class ActionScope @Inject internal constructor(
       return if (scope.inScope() && threadUUID == threadLocalUUID.get()) {
         wrapped.call(*args)
       } else {
-        scope.enter(seedData).use {
+        instance.inScope {
           wrapped.call(*args)
         }
       }
@@ -219,9 +264,9 @@ class ActionScope @Inject internal constructor(
       // If the original thread is the same as the thread that calls the KFunction and we are already
       // in scope, then there is no need to re-enter the scope.
       return if (scope.inScope() && threadUUID == threadLocalUUID.get()) {
-       wrapped.callBy(args)
+        wrapped.callBy(args)
       } else {
-        scope.enter(seedData).use {
+        instance.inScope {
           wrapped.callBy(args)
         }
       }

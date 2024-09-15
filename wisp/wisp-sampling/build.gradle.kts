@@ -1,10 +1,12 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
-    testRuntimeOnly(Dependencies.junitEngine)
-    testRuntimeOnly(Dependencies.kotestJunitRunnerJvm)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
+    testRuntimeOnly(libs.junitEngine)
+    testRuntimeOnly(libs.kotestJunitRunnerJvm)
 }

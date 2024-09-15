@@ -4,10 +4,14 @@ import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provider
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import misk.annotation.ExperimentalMiskApi
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.jobqueue.JobConsumer
@@ -17,6 +21,8 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import org.slf4j.MDC
+import wisp.logging.SmartTagsThreadLocalHandler
+import wisp.logging.error
 import wisp.logging.getLogger
 import wisp.tracing.traceWithNewRootSpan
 import java.time.Clock
@@ -26,9 +32,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
 @Singleton
 internal class SqsJobConsumer @Inject internal constructor(
@@ -180,6 +183,7 @@ internal class SqsJobConsumer @Inject internal constructor(
       }.join()
     }
 
+    @OptIn(ExperimentalMiskApi::class)
     private fun handleMessages(messages: List<SqsJob>): List<CompletableFuture<Status>> {
       return messages.map { message ->
         CompletableFuture.supplyAsync(
@@ -208,7 +212,10 @@ internal class SqsJobConsumer @Inject internal constructor(
                 )
                 Status.OK
               } catch (th: Throwable) {
-                log.error(th) { "error handling job from ${queue.queueName}" }
+                val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+
+                log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
+
                 metrics.handlerFailures.labels(queue.queueName, queue.queueName).inc()
                 Tags.ERROR.set(span, true)
                 Status.FAILED

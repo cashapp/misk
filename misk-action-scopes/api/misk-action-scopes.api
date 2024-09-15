@@ -18,6 +18,9 @@ public final class misk/scope/ActionScope : java/lang/AutoCloseable {
 	public static final field Companion Lmisk/scope/ActionScope$Companion;
 	public final fun asContextElement ()Lkotlin/coroutines/CoroutineContext$Element;
 	public fun close ()V
+	public final fun create (Ljava/util/Map;)Lmisk/scope/ActionScope$Instance;
+	public final fun create (Ljava/util/Map;Ljava/util/Map;)Lmisk/scope/ActionScope$Instance;
+	public static synthetic fun create$default (Lmisk/scope/ActionScope;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lmisk/scope/ActionScope$Instance;
 	public final fun enter (Ljava/util/Map;)Lmisk/scope/ActionScope;
 	public final fun get (Lcom/google/inject/Key;)Ljava/lang/Object;
 	public final fun inScope ()Z
@@ -27,22 +30,16 @@ public final class misk/scope/ActionScope : java/lang/AutoCloseable {
 	public final fun runBlocking (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public final fun runBlocking (Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public final fun snapshotActionScope ()Ljava/util/Map;
+	public final fun snapshotActionScopeInstance ()Lmisk/scope/ActionScope$Instance;
 }
 
 public final class misk/scope/ActionScope$Companion {
 }
 
-public abstract interface class misk/scope/ActionScoped {
-	public static final field Companion Lmisk/scope/ActionScoped$Companion;
-	public abstract fun get ()Ljava/lang/Object;
-}
-
-public final class misk/scope/ActionScoped$Companion {
-	public final fun of (Ljava/lang/Object;)Lmisk/scope/ActionScoped;
-}
-
-public abstract interface class misk/scope/ActionScopedProvider {
-	public abstract fun get ()Ljava/lang/Object;
+public final class misk/scope/ActionScope$Instance : java/lang/AutoCloseable {
+	public fun close ()V
+	public final fun enter ()V
+	public final fun inScope (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
 public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstractModule {

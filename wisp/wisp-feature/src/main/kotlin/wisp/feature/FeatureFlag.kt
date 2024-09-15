@@ -15,6 +15,7 @@ sealed interface FeatureFlag<T : Any> {
      * The attributes of this feature flag, provided during flag evaluation
      */
     val attributes: Attributes
+      get() = Attributes()
 }
 
 interface StringFeatureFlag : FeatureFlag<String>

@@ -1,10 +1,143 @@
-Change Log
+Changelog
 ==========
+
+Misk releases since 2023-05-27 have been automatically published to Maven on PR merge to master.
+
+The Changelog consequently will not be updated regularly since releases only include the changes of the last PR so the Changelog is now equivalent to the git commit history.
+
+Major and breaking changes will still be documented in the Changelog.
+
+2024 Q2 Summary
+===
+
+Misk had a [busy quarter](https://github.com/cashapp/misk/graphs/contributors?from=2024-04-01&to=2024-06-30&type=c) with 98 PRs merged (over one per day!) from over 30 contributors. 
+
+From their efforts, numerous bug fixes, API improvements, and net-new functionality is now available to the growing community of developers building services with Misk.
+
+Thank you Misk Contributors!
+---
+
+Misk has an active community of contributors giving back by upstreaming improvements, often motivated by their own experience building and operating Misk services. 
+
+- 5 New Contributors: @addissemagn, @brunofrts, @nliblock, @jessejacksonafterpay, @kalyancash
+- 2 External Contributors: @JGulbronson – Faire, @mgulbronson – Faire
+- 23 Repeat Contributors: @adrw, @yyuan-squareup, @staktrace, @jvmakine, @mmollaverdi, @traviscj, @SeabertYu, @mslogar-squareup, @keeferrourke, @frojasg, @damar-block, @sahilm, @afkelsall, @RONNCC, @mhickman, @mericson-square, @ean5533, @din-cashapp, @katukota, @aparajon, @mpeyper, @rainecp, @aerb
+- Contributors submitted changes and improvements in the following Misk domains: Admin, API, Build, Code Cleanup, Debugging Tools, Dependency Upgrades, Documentation, JobQueue, Redis, TestFixtures Migration, & UI
+
+Thanks to all who made Misk a better framework this quarter!
+
+Showcase: The New Misk UI Stack
+---
+
+Over the past year, the Misk admin dashboard has migrated to a new UI stack: kotlinx.html, Hotwire, and Tailwind UI.
+
+This stack doesn't have a dedicated web build (ie. npm node modules, webpack...) and has proven to be a lightweight, developer friendly stack for quickly shipping and maintaining simple UI from your Misk service. Builds are automatically part of your usual Gradle Misk Kotlin build which makes local development and CI builds fast and simple.
+
+> "Having a quick and easy way (for a backend eng 😅) to create custom UI is a power tool in your toolkit! It has helped us to creates internal utilities that makes operating and validate our services a walk in the park. I was able to successfully ship some new UI in one morning!" – @frojasg
+
+![Guice Metadata built on the new Misk UI stack](./docs/img/2024-07-05-misk-metadata-guice.png)
+
+Developers have been surprised how fast they can ramp up and ship UI from their service, on the order of a few hours one morning, instead of a few weeks (or months) to build a full JS frontend app. 
+
+See the [Exemplar service code](https://github.com/cashapp/misk/blob/master/samples/exemplar/src/main/kotlin/com/squareup/exemplar/dashboard/ExemplarDashboardModule.kt) in the repo for full examples of the new UI stack in use for building dedicated frontend apps, admin dashboard tabs, and more.
+
+Showcase: New Schema Migrator Gradle Plugin
+---
+
+Misk has shipped with a performant database schema migrator for years. It "just works" ensuring table schemas are up to date and running migrations in local develompent and test environments.
+
+Now, the Misk Schema Migrator is available as a standalone Gradle plugin for use without running the service or test suite. For some services previously forced to rely on a more complex plugin like Flyway to use libraries like jOOQ, the new Schema Migrator Gradle Plugin provides a simple way to get that functionality without new non-Misk dependencies. Additionally, the Schema Migrator Gradle Plugin is compatible with the Gradle config cache for optimal performance.
+
+Check out the simple syntax and user docs [here](./misk-schema-migrator-gradle-plugin/README.md) and try it for yourself today.
+
+Showcase: New Metadata tab in the Misk admin dashboard
+---
+
+![Config Metadata](./docs/img/2024-07-05-misk-metadata-config.png)
+
+The new Metadata tab makes it easy to expose information from all parts of your running service. Find it at `/_admin/metadata/`!
+
+- Service owners can more easily debug code issues vs connectivity issues.
+- Platform teams can expose data through the UI or metadata API with [<50 LOC and no HTML](https://github.com/cashapp/misk/pull/3309).
+- Security teams can now audit internal infrastructure configuration across all Misk services easily.
+
+![Service Graph Metadata](./docs/img/2024-07-05-misk-metadata-service-graph.png)
+
+The Metadata tab already includes the following information:
+
+- Configured backfills with [Backfila](https://github.com/cashapp/backfila/pull/392)
+- Eventing Kafka topics produced or consumed
+- Config YAML ([replacing the existing Config tab](https://github.com/cashapp/misk/pull/3312))
+- JVM settings
+- Guava service graph
+- Guice bindings
+- Cron jobs
+- ...and more to come (PRs are welcome!)
+
+If you want to expose more metadata from Misk or your internal library or service, [see the Exemplar service code](https://github.com/cashapp/misk/pull/3355).
+
+Showcase: New requireRequest utility APIs
+---
+
+A common pattern in request validation is ensuring non-null request fields and throwing a BadRequestException otherwise. The new `requireRequestNotNull` utility API does this in a single line, reducing boilerplate and making the code more readable.
+
+**Before**
+
+```kotlin
+requireRequest(request.parameter != null) { "parameter must not be null" }
+
+// later, safe do because of previous null check
+request.parameter!!
+```
+
+**After**
+
+```kotlin
+requireRequestNotNull(request.parameter) { "parameter must not be null" }
+
+// later - no need for !!
+request.parameter
+```
+
+Misk is open for PRs if there are other broad usage utility functions which would be beneficial to offer to all users of Misk.
+
+Version 2024.07.09
+---------------------------------
+Breaking changes:
+
+- Remove `@AllowAnyService` annotation (which has been deprecated for months, was rarely used, and has no more internal usage), use `@Authenticated(allowAnyService = true)` instead. 
+- Remove support for empty `@Authenticated` annotation, explicit passing of non-empty parameters `capabilities, users, allowAnyUser, or allowAnyService` is now required. Instead of the existing soft-failure error log behavior, an IllegalArgumentException will be thrown if the annotation constructor is empty.
+- Empty authentication **allow all** policy has now been changed to **deny all**.
+  - Empty Authentication annotation constructors previously would result in an **allow all** policy to any authenticated user or service. 
+  - That default has changed. Now, an empty capabilities and empty services list will **deny all** authenticated users or services. 
+  - In practice, this grants a new verb to Misk's access annotation language, that of a web action which is installed but no user or service is allowed to access, which is now set with `@Authenticated` (empty constructor).
+
+Version 2024.05.22
+---------------------------------
+Breaking changes:
+
+- Added `@ExperimentalMiskApi` to `TaggedLogger`. Any code that uses this class will need to `@OptIn(ExperimentalMiskApi::class)`.
+
+Version 2024.05.16
+---------------------------------
+Breaking changes:
+
+- Remove the deprecated `BETA_PREFIX` val which was used to gate development of the new v2 admin dashboard. It has been deprecated since 2023-06-30 when the v2 admin dashboard was promoted to `/_admin/`.
+
+Version 2024.05.14
+---------------------------------
+Breaking changes:
+
+- LogRequestResponse can't be target to classes ([#3225](https://github.com/cashapp/misk/pull/3225))
+
+Version 2024.05.06
+---------------------------------
+Breaking changes:
+
+- Concurrency limiter is now disabled by default ([#3256](https://github.com/cashapp/misk/pull/3256))
 
 Version 0.24.0 *(2022-04-13)*
 ----------------------------
-
-Unstable public release.
 
 New features and fixes:
 
@@ -15,7 +148,7 @@ New features and fixes:
 Version 0.23.0 *(2022-03-30)*
 -----------------------------
 
-Unstable public release. Thank you to all the contributors, as always.
+Thank you to all the contributors, as always.
 
 Breaking changes:
 
@@ -57,8 +190,6 @@ Fixes:
 Version 0.22.0 *(2021-11-03)*
 ----------------------------
 
-Unstable public release.
-
 Breaking changes:
 
 - The `/error` action is no longer installed by default (#2190)
@@ -77,12 +208,10 @@ New features and fixes:
 Version 0.21.0 *(2021-10-18)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 Version 0.20.0 *(2021-08-31)*
 ----------------------------
-
-Unstable public release.
 
 Breaking changes:
 
@@ -109,82 +238,82 @@ New features and fixes:
 Version 0.19.0 *(2021-06-30)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 Version 0.18.0 *(2021-06-28)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 Version 0.17.1 *(2021-04-29)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 Version 0.17.0 *(2021-04-28)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.16.0 *(2020-12-17)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.15.0 *(2020-12-03)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.14.0 *(2020-11-12)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.13.0 *(2020-07-16)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.12.0 *(2020-05-06)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.11.0 *(2020-02-25)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.10.0 *(2019-01-21)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.9.0 *(2019-12-06)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.8.0 *(2019-10-22)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.7.0 *(2019-08-26)*
 ----------------------------
 
-Unstable public release.
+Public release.
 
 
 Version 0.2.5 *(2018-06-11)*

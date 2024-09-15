@@ -3,6 +3,8 @@ package misk.hibernate
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.inject.TypeLiteral
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.inject.typeLiteral
 import wisp.logging.getLogger
 import java.lang.reflect.InvocationHandler
@@ -10,10 +12,9 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
-import java.util.*
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import java.util.EnumSet
 import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.Expression
 import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
@@ -24,6 +25,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.allSupertypes
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.primaryConstructor
@@ -58,6 +60,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   private val constraints = mutableListOf<PredicateFactory>()
   private val orderFactories = mutableListOf<OrderFactory>()
+  private val groupFactories = mutableListOf<GroupFactory>()
   private val fetchFactories = mutableListOf<FetchFactory>()
   private val hints = mutableListOf<String>()
 
@@ -185,7 +188,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   override fun dynamicUniqueResult(session: Session, projectedPaths: List<String>): List<Any?>? {
-    val list = select(false, session, projectedPaths)
+    val list = dynamicSelectWithProjectedPaths(false, session, projectedPaths)
     return list.firstOrNull()
   }
 
@@ -193,7 +196,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     session: Session,
     selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
   ): List<Any?>? {
-    val list = select(false, session, selection)
+    val list = dynamicSelect(false, session, selection)
     return list.firstOrNull()
   }
 
@@ -222,23 +225,23 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   override fun dynamicList(session: Session, projectedPaths: List<String>): List<List<Any?>> {
-    return select(true, session, projectedPaths)
+    return dynamicSelectWithProjectedPaths(true, session, projectedPaths)
   }
 
   override fun dynamicList(
     session: Session,
     selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
   ): List<List<Any?>> {
-    return select(true, session, selection)
+    return dynamicSelect(true, session, selection)
   }
 
-  private fun select(
+  private fun dynamicSelectWithProjectedPaths(
     returnList: Boolean,
     session: Session,
     projectedPaths: List<String>
   ): List<List<Any?>> {
     val splitProjectedPaths = projectedPaths.map { it.split('.') }
-    return select(returnList, session) { criteriaBuilder, queryRoot ->
+    return dynamicSelect(returnList, session) { criteriaBuilder, queryRoot ->
       criteriaBuilder.array(
         *splitProjectedPaths.map {
           queryRoot.traverse<Any?>(it)
@@ -248,7 +251,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun select(
+  private fun dynamicSelect(
     returnList: Boolean,
     session: Session,
     selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
@@ -262,6 +265,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
     query.where(predicate)
 
+    check(groupFactories.size == 0) {
+      "@Group methods shouldn't be used with dynamicUniqueResult or dynamicList, use a @Select projection with aggregation instead"
+    }
     query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
 
     fetchFactories.forEach { it(queryRoot) }
@@ -295,6 +301,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
     query.where(predicate)
 
+    check(groupFactories.size == 0) {
+      "@Group methods shouldn't be used with uniqueResult or list, use a @Select projection with aggregation instead"
+    }
     query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
 
     fetchFactories.forEach { it(queryRoot) }
@@ -313,6 +322,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   override fun count(session: Session): Long {
     check(!predicatesOnly) { "cannot select on this query" }
 
+    check(groupFactories.size == 0) {
+      "@Group methods shouldn't be used for a count, use a @Select projection with aggregation instead"
+    }
     check(orderFactories.size == 0) { "orderBy shouldn't be used for a count" }
     check(firstResult == 0) { "firstResult shouldn't be used for a count" }
     check(maxRows == -1) { "maxRows shouldn't be used for a count" }
@@ -400,8 +412,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   @Singleton
   internal class Factory @Inject internal constructor(
     private var queryLimitsConfig: QueryLimitsConfig
-  ) :
-    Query.Factory {
+  ) : Query.Factory {
     private val queryMethodHandlersCache = CacheBuilder.newBuilder()
       .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
         override fun load(key: KClass<*>) = queryMethodHandlers(key)
@@ -465,10 +476,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     var rowCountWarningLimit: Int
   )
 
+  data class ParsedProperty(val path: List<String>, val aggregation: AggregationType)
+
   class SelectMethodHandler(
     private val returnList: Boolean,
     private val constructor: KFunction<*>?,
-    private val properties: List<List<String>>
+    private val properties: List<ParsedProperty>
   ) : QueryMethodHandler {
 
     override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
@@ -483,6 +496,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       query.select(select(criteriaBuilder, root))
       query.where(reflectionQuery.buildWherePredicate(root, criteriaBuilder))
       query.orderBy(reflectionQuery.buildOrderBys(root, criteriaBuilder))
+      query.groupBy(reflectionQuery.buildGroupBys(root, criteriaBuilder).flatten())
 
       reflectionQuery.fetchFactories.forEach { it(root) }
 
@@ -494,20 +508,42 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         typedQuery.list()
       }
       reflectionQuery.checkRowCount(returnList, rows.size)
-      val list = rows.map { toValue(it) }
+      val list = rows.mapNotNull { toValue(it) }
       return if (returnList) list else list.firstOrNull()
     }
 
     private fun select(
       criteriaBuilder: CriteriaBuilder,
       queryRoot: Root<*>
-    ) = criteriaBuilder.array(*properties.map { queryRoot.traverse<Any?>(it) }.toTypedArray())
+    ) = criteriaBuilder.array(*properties.map {
+      when (it.aggregation) {
+        AggregationType.NONE -> queryRoot.traverse<Any?>(it.path)
+        AggregationType.AVG -> criteriaBuilder.avg(queryRoot.traverse<Number?>(it.path))
+        AggregationType.COUNT -> criteriaBuilder.count(queryRoot.traverse<Any?>(it.path))
+        AggregationType.COUNT_DISTINCT -> criteriaBuilder.countDistinct(queryRoot.traverse<Any?>(it.path))
+        AggregationType.MAX -> criteriaBuilder.max(queryRoot.traverse<Number?>(it.path))
+        AggregationType.MIN -> criteriaBuilder.min(queryRoot.traverse<Number?>(it.path))
+        AggregationType.SUM -> criteriaBuilder.sum(queryRoot.traverse<Number?>(it.path))
+      }
+    }.toTypedArray())
 
-    private fun toValue(row: Any): Any? {
+    private fun toValue(row: Any?): Any? {
       return when {
+        row == null -> null
         constructor == null -> row
         properties.size == 1 -> constructor.call(row)
-        else -> constructor.call(*(row as Array<*>))
+        else -> {
+          val args = row as Array<*>
+          // If we got back an array of null values, which can't be assigned to the constructor,
+          // then we should return null.
+          if (args.all { it == null } && constructor.parameters.none { it.type.isMarkedNullable } ) return null
+          // Now it's (probably!) safe to call the constructor.
+          // There are very rare cases where this could still fail if the constructor is
+          // expecting a non-nullable type for the property, but the query returned null.
+          // This will probably only happen if the mysql isn't running in strict mode, and the
+          // query author forgot to add a group to their aggregation query.
+          constructor.call(*args)
+        }
       }
     }
   }
@@ -517,6 +553,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any?
 
     companion object {
+      // Primitives are special. We have to ensure we are using the boxed types.
+      private val doubleType = Double::class.createType(nullable = true).typeLiteral().rawType
+      private val longType = Long::class.createType(nullable = true).typeLiteral().rawType
+      private val numberType = Number::class.createType(nullable = true).typeLiteral().rawType
+
+      private fun typeToString(type: Class<*>): String = "${type.simpleName}?"
+
       fun create(
         errors: MutableList<String>,
         function: KFunction<*>,
@@ -526,6 +569,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         val select = function.findAnnotation<Select>()
         val order = function.findAnnotation<Order>()
         val fetch = function.findAnnotation<Fetch>()
+        val group = function.findAnnotation<Group>()
 
         if (listOfNotNull(constraint, select, order, fetch).size > 1) {
           errors.add("${function.name}() has too many annotations")
@@ -547,12 +591,17 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
 
+        if (group != null) {
+          createGroup(errors, function, result, group)
+          return
+        }
+
         if (select != null) {
           createSelect(errors, function, result, select)
           return
         }
 
-        errors.add("${function.name}() must be annotated @Constraint, @Fetch, @Order, or @Select")
+        errors.add("${function.name}() must be annotated @Constraint, @Fetch, @Order, @Group, or @Select")
       }
 
       private fun createOrder(
@@ -592,6 +641,37 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         }
       }
 
+      private fun createGroup(
+        errors: MutableList<String>,
+        function: KFunction<*>,
+        result: MutableMap<Method, QueryMethodHandler>,
+        group: Group
+      ) {
+        if (!group.paths.all { it.matches(PATH_PATTERN) }) {
+          errors.add("${function.name}() paths are not valid: '${group.paths}'")
+          return
+        }
+
+        val paths = group.paths.map { it.split('.') }
+
+        val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
+        if (javaMethod.returnType != javaMethod.declaringClass) {
+          errors.add(
+            "${function.name}() returns ${javaMethod.returnType.name} but " +
+              "@Group methods must return this (${javaMethod.declaringClass.name})"
+          )
+          return
+        }
+
+        result[javaMethod] = object : QueryMethodHandler {
+          override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+            return reflectionQuery.addGroupBy { root, _ ->
+              paths.map { root.traverse<Any?>(it) }
+            }
+          }
+        }
+      }
+
       private fun createFetch(
         errors: MutableList<String>,
         function: KFunction<*>,
@@ -615,7 +695,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         result[javaMethod] = object : QueryMethodHandler {
           override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
             return reflectionQuery.addFetch { root ->
-              root.fetch<Any?, Any?>(fetch.path, fetch.joinType)
+              if (fetch.forProjection) {
+                root.join<Any?, Any?>(fetch.path, fetch.joinType)
+              } else {
+                root.fetch<Any?, Any?>(fetch.path, fetch.joinType)
+              }
             }
           }
         }
@@ -800,6 +884,15 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           errors.add("${function.name}() return type must be a non-null List or a nullable value")
           return
         }
+        if (select.aggregation != AggregationType.NONE) {
+          errors.addAll(
+            collectAggregationTypeErrors(
+              aggregation = select.aggregation,
+              elementType = elementType,
+              propertyName = "${function.name}() return",
+            ))
+          if (errors.isNotEmpty()) return
+        }
 
         val isProjection = Projection::class.java.isAssignableFrom(elementType.rawType)
 
@@ -821,7 +914,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           }
 
           val pathPrefix = if (select.path.isEmpty()) "" else "${select.path}."
-          val properties = mutableListOf<List<String>>()
+          val properties = mutableListOf<ParsedProperty>()
           for (parameter in parameters) {
             val property = parameter.findAnnotation<Property>()
             if (property == null) {
@@ -840,17 +933,72 @@ internal class ReflectionQuery<T : DbEntity<T>>(
               continue
             }
 
+            if (property.aggregation != AggregationType.NONE) {
+              errors.addAll(
+                collectAggregationTypeErrors(
+                  aggregation = property.aggregation,
+                  elementType = parameter.type.typeLiteral(),
+                  propertyName = "${projectionClass.java.name}#${parameter.name}",
+                ))
+              if (errors.isNotEmpty()) {
+                continue
+              }
+            }
+
             val path = (pathPrefix + property.path).split('.')
-            properties.add(path)
+            properties.add(ParsedProperty(path, property.aggregation))
           }
+          if (errors.isNotEmpty()) return
           selectMethodHandler = SelectMethodHandler(isList, constructor, properties)
         } else {
-          val onlyPath = select.path.split('.')
+          val onlyPath = ParsedProperty(select.path.split('.'), select.aggregation)
           selectMethodHandler = SelectMethodHandler(isList, null, listOf(onlyPath))
         }
 
         val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
         result[javaMethod] = selectMethodHandler
+      }
+
+      private fun collectAggregationTypeErrors(
+        aggregation: AggregationType,
+        elementType: TypeLiteral<*>,
+        propertyName: String,
+      ) : MutableList<String> {
+        val errors = mutableListOf<String>()
+        when (aggregation) {
+          AggregationType.AVG -> {
+            if (!doubleType.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be ${typeToString(doubleType)} for AVG aggregations, but was $elementType")
+            }
+          }
+          AggregationType.COUNT -> {
+            if (!longType.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be ${typeToString(longType)} for COUNT aggregations, but was $elementType")
+            }
+          }
+          AggregationType.COUNT_DISTINCT -> {
+            if (!longType.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be ${typeToString(longType)} for COUNT_DISTINCT aggregations, but was $elementType")
+            }
+          }
+          AggregationType.MAX -> {
+            if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be out ${typeToString(Comparable::class.java)} for MAX aggregations, but was $elementType")
+            }
+          }
+          AggregationType.MIN -> {
+            if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be out ${typeToString(Comparable::class.java)} for MIN aggregations, but was $elementType")
+            }
+          }
+          AggregationType.SUM -> {
+            if (!numberType.isAssignableFrom(elementType.rawType)) {
+              errors.add("$propertyName element type must be out ${typeToString(Number::class.java)} for SUM aggregations, but was $elementType")
+            }
+          }
+          else -> error("Unexpected AggregationType: $aggregation on $propertyName")
+        }
+        return errors
       }
     }
   }
@@ -879,6 +1027,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return this
   }
 
+  internal fun addGroupBy(groupFactory: GroupFactory): ReflectionQuery<T> {
+    groupFactories.add(groupFactory)
+    return this
+  }
+
   /**
    * Root: the table root, like 'm' in 'SELECT * FROM movies m ORDER BY m.release_date'
    * CriteriaBuilder: factory for asc, desc
@@ -888,6 +1041,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     criteriaBuilder: CriteriaBuilder
   ): List<javax.persistence.criteria.Order> {
     return orderFactories.map { it(root, criteriaBuilder) }
+  }
+
+  private fun buildGroupBys(
+    root: Root<*>,
+    criteriaBuilder: CriteriaBuilder
+  ): List<List<Expression<*>>> {
+    return groupFactories.map { it(root, criteriaBuilder) }
   }
 
   internal fun addFetch(fetchFactory: FetchFactory): ReflectionQuery<T> {
@@ -952,7 +1112,9 @@ private typealias PredicateFactory = (root: Root<*>, criteriaBuilder: CriteriaBu
 private typealias OrderFactory =
   (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
 
-private typealias FetchFactory = (root: Root<*>) -> javax.persistence.criteria.Fetch<*, *>
+private typealias GroupFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> List<Expression<*>>
+
+private typealias FetchFactory = (root: Root<*>) -> javax.persistence.criteria.FetchParent<*, *>
 
 private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
 
@@ -994,3 +1156,4 @@ private fun CriteriaBuilder.addInClause(
     }
   }
 }
+

@@ -12,7 +12,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okhttp3.internal.EMPTY_REQUEST
 import okio.Buffer
 import okio.GzipSink
 import okio.buffer
@@ -113,7 +112,7 @@ abstract class AbstractGzipTest {
   fun post(path: String): Response = call(
     Request.Builder()
       .url(jetty.httpServerUrl.newBuilder().encodedPath(path).build())
-      .post(EMPTY_REQUEST)
+      .post(ByteArray(0).toRequestBody())
   )
 
   fun call(request: Request.Builder): Response {

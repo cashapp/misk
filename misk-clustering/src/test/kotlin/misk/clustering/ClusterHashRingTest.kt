@@ -11,7 +11,7 @@ internal class ClusterHashRingTest {
   @Test fun singleNode() {
     val zork = Cluster.Member("zork", "192.49.168.23")
     val hashRing =
-      ClusterHashRing(members = setOf(zork), hashFn = Hashing.murmur3_32(0))
+      ClusterHashRing(members = setOf(zork), hashFn = Hashing.murmur3_32_fixed(0))
     assertThat(listOf("foo", "bar", "zed").map { hashRing[it] }).containsExactly(zork, zork, zork)
   }
 
@@ -23,7 +23,7 @@ internal class ClusterHashRingTest {
     // First version of hash ring
     val hashRing1 = ClusterHashRing(
       members = setOf(zork, mork, quark),
-      hashFn = Hashing.murmur3_32(0)
+      hashFn = Hashing.murmur3_32_fixed(0)
     )
     assertThat(
       listOf("foo", "bar", "zed", "abadidea").map {
@@ -34,7 +34,7 @@ internal class ClusterHashRingTest {
     // Remove one of the members, only the resources mapped to that member should change
     val hashRing2 = ClusterHashRing(
       members = setOf(zork, quark),
-      hashFn = Hashing.murmur3_32(0)
+      hashFn = Hashing.murmur3_32_fixed(0)
     )
     assertThat(listOf("foo", "bar", "zed", "abadidea").map { hashRing2[it] })
       .containsExactly(zork, quark, zork, zork)
@@ -43,7 +43,7 @@ internal class ClusterHashRingTest {
     val bork = Cluster.Member("bork", "192.49.168.26")
     val hashRing3 = ClusterHashRing(
       members = setOf(zork, quark, bork),
-      hashFn = Hashing.murmur3_32(0)
+      hashFn = Hashing.murmur3_32_fixed(0)
     )
     assertThat(listOf("foo", "bar", "zed", "abadidea").map { hashRing3[it] })
       .containsExactly(zork, quark, zork, zork)
@@ -51,7 +51,7 @@ internal class ClusterHashRingTest {
 
   @Test fun zeroNodes() {
     val hashRing =
-      ClusterHashRing(members = setOf(), hashFn = Hashing.murmur3_32(0))
+      ClusterHashRing(members = setOf(), hashFn = Hashing.murmur3_32_fixed(0))
     assertThrows<NoMembersAvailableException> {
       hashRing["foo"]
     }

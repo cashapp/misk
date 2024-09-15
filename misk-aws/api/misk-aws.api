@@ -99,6 +99,7 @@ public final class misk/jobqueue/sqs/AwsSqsJobQueueModuleKt {
 public final class misk/jobqueue/sqs/AwsSqsJobReceiverPolicy : java/lang/Enum {
 	public static final field BALANCED_MAX Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
 	public static final field ONE_FLAG_ONLY Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
 	public static fun values ()[Lmisk/jobqueue/sqs/AwsSqsJobReceiverPolicy;
 }

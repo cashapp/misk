@@ -87,7 +87,7 @@ data class WebConfig @JvmOverloads constructor(
   val cors: Map<String, CorsConfig> = mapOf(),
 
   /** If true, disables automatic load shedding when degraded. */
-  val concurrency_limiter_disabled: Boolean = false,
+  val concurrency_limiter_disabled: Boolean = true,
 
   /** The level of log when concurrency shedding. */
   val concurrency_limiter_log_level: Level = Level.ERROR,
@@ -105,7 +105,11 @@ data class WebConfig @JvmOverloads constructor(
     log_level = concurrency_limiter_log_level,
   ),
 
-  /** The number of milliseconds to sleep before commencing service shutdown. */
+  /**
+   * The number of milliseconds to sleep before commencing service shutdown. 0 or
+   * greater will defer the actual shutdown of Jetty to after all Guava managed
+   * services are shutdown.
+   * */
   val shutdown_sleep_ms: Int = 0,
 
   /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
@@ -134,8 +138,26 @@ data class WebConfig @JvmOverloads constructor(
   val readiness_max_age_ms: Int = 10000,
 
   /** If possible (e.g. running on JDK 21) misk will attempt to use a virtual thread executor for jetty. */
-  val use_virtual_threads: Boolean = false
-) : Config
+  val use_virtual_threads: Boolean = false,
+
+  /** If true install NotFoundAction, the default action when a path is not found. */
+  val install_default_not_found_action: Boolean = true,
+
+  /** The output buffer size of Jetty (default is 32KB). */
+  val jetty_output_buffer_size: Int? = null,
+
+  /** The initial size of session's flow control receive window. */
+  val jetty_initial_session_recv_window: Int? = null,
+
+  /** The initial size of stream's flow control receive window. */
+  val jetty_initial_stream_recv_window: Int? = null,
+
+  /** Wires up health checks on whether Jetty's thread pool is low on threads. */
+  val enable_thread_pool_health_check: Boolean = false,
+
+  /** Configurations to enable Jetty to listen for traffic on a unix domain socket being proxied through a sidecar (e.g. envoy, istio) */
+  val unix_domain_sockets: List<WebUnixDomainSocketConfig>? = null,
+  ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
   /** HTTPS port to listen on, or 0 for any available port. */
@@ -166,7 +188,7 @@ data class WebSslConfig @JvmOverloads constructor(
 }
 
 data class WebUnixDomainSocketConfig @JvmOverloads constructor(
-  /** The Unix Domain Socket to listen on. */
+  /** The Unix Domain Socket to listen on. Will attempt to use the JEP-380 connector when supported (using Java 16+ and file path) */
   val path: String,
   /** If true, the listener will support H2C. */
   val h2c: Boolean? = true

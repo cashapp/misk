@@ -1,23 +1,25 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 sourceSets {
-    val test by getting {
+    test {
         java.srcDir("src/test/kotlin/")
     }
 }
 
 dependencies {
-    api(Dependencies.moshi)
+    api(libs.moshiCore)
     api(project(":wisp:wisp-config"))
     api(project(":wisp:wisp-feature"))
     implementation(project(":wisp:wisp-moshi"))
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.hopliteCore)
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.kotestAssertionsShared)
-    testImplementation(Dependencies.kotestCommon)
+    testImplementation(libs.assertj)
+    testImplementation(libs.hopliteCore)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.kotestAssertionsShared)
+    testImplementation(libs.kotestCommon)
     testImplementation(project(":wisp:wisp-resource-loader"))
 }

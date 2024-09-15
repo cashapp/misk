@@ -1,6 +1,5 @@
 package misk.jobqueue
 
-import com.google.common.collect.Queues
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.hibernate.Gid
@@ -15,8 +14,10 @@ import java.util.concurrent.PriorityBlockingQueue
 import jakarta.inject.Inject
 import com.google.inject.Provider
 import jakarta.inject.Singleton
+import misk.testing.FakeFixture
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.jvm.Throws
+import kotlin.math.min
 
 /**
  * A fake implementation of [JobQueue] and [FakeTransactionalJobQueue] intended for testing.
@@ -37,11 +38,11 @@ class FakeJobQueue @Inject constructor(
   private val clock: Clock,
   private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
   private val tokenGenerator: TokenGenerator
-) : JobQueue, TransactionalJobQueue {
-  private val jobQueues = ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>()
-  private val deadletteredJobs = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
-  private val failureJobQueues = ConcurrentHashMap<QueueName, LinkedBlockingQueue<Exception>>()
-  private val failureJobQueue = LinkedBlockingQueue<Exception>()
+) : JobQueue, TransactionalJobQueue, FakeFixture() {
+  private val jobQueues by resettable { ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>() }
+  private val deadletteredJobs by resettable { ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>() }
+  private val failureJobQueues by resettable { ConcurrentHashMap<QueueName, LinkedBlockingQueue<Exception>>() }
+  private val failureJobQueue by resettable { LinkedBlockingQueue<Exception>() }
 
   /**
    * pushFailure is used to cause the next enqueue/batchEnqueue call to the job queue to throw.
@@ -191,7 +192,8 @@ class FakeJobQueue @Inject constructor(
     jobsSupplier: () -> FakeJob?
   ): List<FakeJob> {
     val jobHandlers = jobHandlers.get()
-    val result = mutableListOf<FakeJob>()
+    val resultedJobs = mutableListOf<FakeJob>()
+    val jobsToQueueBack = mutableSetOf<FakeJob>()
     // Used to prevent an infinite loop by mistake in supplier.
     val touchedJobs = mutableSetOf<FakeJob>()
     while (true) {
@@ -206,27 +208,47 @@ class FakeJobQueue @Inject constructor(
 
       val jobHandler = jobHandlers[job.queueName]!!
       try {
-        retry(retries, FlatBackoff(Duration.ofMillis(20))) { jobHandler.handleJob(job) }
+        retry(retries, FlatBackoff(Duration.ofMillis(20))) {
+          // we re-enqueue the job if the backoff delayed time was called
+          if (job.delayedForBackoff) {
+            jobsToQueueBack += job
+          } else {
+            jobHandler.handleJob(job)
+          }
+        }
       } catch (e: Throwable) {
         deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
         // Re-throwing also ensures that we won't cause an infinite loop.
         throw e
       }
+      // validate that the job has been added to jobsToQueueBack
+      if (jobsToQueueBack.contains(job)) {
+        continue
+      } else {
+        resultedJobs += job
+      }
 
-      result += job
       if (!job.deadLettered && assertAcknowledged && !job.acknowledged) {
         deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
         error("Expected $job to be acknowledged after handling")
       }
     }
 
-    // Reenqueue deadlettered jobs outside of the main loop to prevent an infinite loop.
-    result.forEach { job ->
+    // Re-enqueue deadlettered jobs outside of the main loop to prevent an infinite loop.
+    resultedJobs.forEach { job ->
       if (job.deadLettered || !job.acknowledged) {
         deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
       }
     }
-    return result
+    // Similarly to above re-enqueue jobs that have been called to have the visibility timeout.
+    jobsToQueueBack.forEach { job ->
+      if (job.delayedForBackoff && !job.acknowledged) {
+        job.delayedForBackoff = false
+        jobQueues.getOrPut(job.queueName, ::PriorityBlockingQueue).add(job)
+      }
+    }
+
+    return resultedJobs
   }
 
   private fun pollNextJob(jobs: PriorityBlockingQueue<FakeJob>, considerDelays: Boolean): FakeJob? {
@@ -256,7 +278,7 @@ data class FakeJob(
   override val body: String,
   override val attributes: Map<String, String>,
   val enqueuedAt: Instant,
-  val deliveryDelay: Duration? = null
+  var deliveryDelay: Duration? = null,
 ) : Job, Comparable<FakeJob> {
   val deliverAt: Instant
     get() = when (deliveryDelay) {
@@ -268,6 +290,12 @@ data class FakeJob(
   var deadLettered: Boolean = false
     internal set
 
+  var delayedForBackoff: Boolean = false
+    internal set
+
+  var delayDuration: Long? = null
+    internal set
+
   override fun acknowledge() {
     acknowledged = true
   }
@@ -275,7 +303,12 @@ data class FakeJob(
   override fun deadLetter() {
     deadLettered = true
   }
+  override fun delayWithBackoff() {
+    delayedForBackoff  = true
 
+    delayDuration = min((delayDuration ?: MIN_DElAY_DURATION) * 2, MAX_DELAY_DURATION)
+    deliveryDelay = Duration.ofMillis(delayDuration!!)
+  }
   override fun compareTo(other: FakeJob): Int {
     val result = deliverAt.compareTo(other.deliverAt)
     if (result == 0) {
@@ -283,5 +316,10 @@ data class FakeJob(
       return id.compareTo(other.id)
     }
     return result
+  }
+
+  companion object {
+    const val MIN_DElAY_DURATION = 1_000L
+    const val MAX_DELAY_DURATION = 10_000L
   }
 }

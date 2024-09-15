@@ -51,6 +51,7 @@ public class misk/exceptions/ConflictException : misk/exceptions/WebActionExcept
 
 public final class misk/exceptions/ExceptionsKt {
 	public static final fun requireRequest (ZLkotlin/jvm/functions/Function0;)V
+	public static final fun requireRequestNotNull (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
 public class misk/exceptions/GatewayTimeoutException : misk/exceptions/WebActionException {
@@ -131,10 +132,9 @@ public class misk/exceptions/WebActionException : java/lang/RuntimeException {
 	public final fun isServerError ()Z
 }
 
-public abstract interface annotation class misk/security/authz/AllowAnyService : java/lang/annotation/Annotation {
-}
-
 public abstract interface annotation class misk/security/authz/Authenticated : java/lang/annotation/Annotation {
+	public abstract fun allowAnyService ()Z
+	public abstract fun allowAnyUser ()Z
 	public abstract fun capabilities ()[Ljava/lang/String;
 	public abstract fun services ()[Ljava/lang/String;
 }
@@ -301,5 +301,14 @@ public abstract interface annotation class misk/web/interceptors/LogRequestRespo
 	public abstract fun errorRatePerSecond ()J
 	public abstract fun excludedEnvironments ()[Ljava/lang/String;
 	public abstract fun ratePerSecond ()J
+	public abstract fun requestLoggingMode ()Lmisk/web/interceptors/RequestLoggingMode;
+}
+
+public final class misk/web/interceptors/RequestLoggingMode : java/lang/Enum {
+	public static final field ALL Lmisk/web/interceptors/RequestLoggingMode;
+	public static final field ERROR_ONLY Lmisk/web/interceptors/RequestLoggingMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/web/interceptors/RequestLoggingMode;
+	public static fun values ()[Lmisk/web/interceptors/RequestLoggingMode;
 }
 

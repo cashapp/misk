@@ -1,14 +1,18 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
-    api(Dependencies.kotlinLogging)
-    api(Dependencies.slf4jApi)
+    api(libs.kotlinLogging)
+    api(libs.slf4jApi)
     api(project(":wisp:wisp-sampling"))
+  
+    implementation(project(":misk-api"))
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.logbackClassic)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.logbackClassic)
     testImplementation(project(":wisp:wisp-logging-testing"))
 }

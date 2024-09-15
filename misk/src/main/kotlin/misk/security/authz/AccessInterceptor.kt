@@ -16,7 +16,8 @@ class AccessInterceptor private constructor(
   val allowedCapabilities: Set<String>,
   private val caller: ActionScoped<MiskCaller?>,
   private val allowAnyService: Boolean,
-  private val excludeFromAllowAnyService: Set<String>
+  private val excludeFromAllowAnyService: Set<String>,
+  private val allowAnyUser: Boolean,
 ) : ApplicationInterceptor {
   override fun intercept(chain: Chain): Any {
     val caller = caller.get() ?: throw UnauthenticatedException()
@@ -30,10 +31,14 @@ class AccessInterceptor private constructor(
 
   /** Check whether the caller is allowed to access this endpoint */
   private fun isAuthorized(caller: MiskCaller): Boolean {
-    // Allow if we don't have any requirements on service or capability
-    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty() && !allowAnyService) return true
+    // Deny if we don't have any requirements on service or capability
+    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty() && !allowAnyService && !allowAnyUser) return false
 
     if (allowAnyService && caller.service != null && !excludeFromAllowAnyService.contains(caller.service)) {
+      return true
+    }
+
+    if (allowAnyUser && caller.user != null) {
       return true
     }
 
@@ -70,14 +75,14 @@ class AccessInterceptor private constructor(
         return null
       }
 
-      val allowAnyService = action.hasAnnotation<AllowAnyService>()
+      val allowAnyService = actionEntries.any { it.allowAnyService }
+      val allowAnyUser = actionEntries.any { it.allowAnyUser }
 
       // No access annotations. Fail with a useful message.
-      check(allowAnyService || actionEntries.isNotEmpty()) {
+      check(allowAnyService || allowAnyUser || actionEntries.isNotEmpty()) {
         val requiredAnnotations = mutableListOf<KClass<out Annotation>>()
         requiredAnnotations += Authenticated::class
         requiredAnnotations += Unauthenticated::class
-        requiredAnnotations += AllowAnyService::class
         requiredAnnotations += registeredEntries.map { it.annotation }
         """You need to register an AccessAnnotationEntry to tell the authorization system which capabilities and services are allowed to access ${action.name}::${action.function.name}(). You can either:
           |
@@ -114,8 +119,8 @@ class AccessInterceptor private constructor(
       val allowedServices = actionEntries.flatMap { it.services }.toSet()
       val allowedCapabilities = actionEntries.flatMap { it.capabilities }.toSet()
 
-      if (!allowAnyService && allowedServices.isEmpty() && allowedCapabilities.isEmpty()) {
-        logger.warn { "${action.name}::${action.function.name}() has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated."}
+      if (!allowAnyService && allowedServices.isEmpty() && !allowAnyUser && allowedCapabilities.isEmpty()) {
+        logger.warn { "${action.name}::${action.function.name}() has an empty set of allowed services and capabilities. Access will be denied. This method of allowing all services and users has been removed, use explicit boolean parameters allowAnyService or allowAnyUser instead." }
       }
 
       return AccessInterceptor(
@@ -123,12 +128,17 @@ class AccessInterceptor private constructor(
         allowedCapabilities,
         caller,
         allowAnyService,
-        excludeFromAllowAnyService.toSet()
+        excludeFromAllowAnyService.toSet(),
+        allowAnyUser,
       )
     }
 
     private fun Authenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
-      Authenticated::class, services.toList(), capabilities.toList()
+      annotation = Authenticated::class,
+      services = services.toList(),
+      capabilities = capabilities.toList(),
+      allowAnyService = allowAnyService,
+      allowAnyUser = allowAnyUser
     )
 
     private inline fun <reified T : Annotation> Action.hasAnnotation() =

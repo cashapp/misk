@@ -1,14 +1,16 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 
 dependencies {
     api(project(":wisp:wisp-token"))
 
-    testImplementation(Dependencies.kotestAssertionsShared)
-    testImplementation(Dependencies.kotestCommon)
-    testImplementation(Dependencies.kotestFrameworkApi)
-    testRuntimeOnly(Dependencies.junitEngine)
-    testRuntimeOnly(Dependencies.kotestJunitRunnerJvm)
+    testImplementation(libs.kotestAssertionsShared)
+    testImplementation(libs.kotestCommon)
+    testImplementation(libs.kotestFrameworkApi)
+    testRuntimeOnly(libs.junitEngine)
+    testRuntimeOnly(libs.kotestJunitRunnerJvm)
 }

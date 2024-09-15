@@ -29,7 +29,12 @@ export function FormComponent(props: FormComponentProps<any>) {
     delegate = <FormRepeatedComponent {...props} />
   } else if (field.type === "String" || field.type === "ByteString") {
     delegate = <FormTextComponent {...props} />
-  } else if (field.type === "Int" || field.type === "Long") {
+  } else if (
+    field.type === "Int" ||
+    field.type === "Long" ||
+    field.type == "Float" ||
+    field.type == "Double"
+  ) {
     delegate = <FormNumberComponent {...props} />
   } else if (field.type === "Boolean") {
     delegate = <FormBoolComponent {...props} />
@@ -121,7 +126,7 @@ function FormEnumComponent({
   onChange
 }: FormComponentProps<string>) {
   const enumValues = field.type
-    .replace(">", "")
+    .replace(/>/g, "")
     .substring(5)
     .split(",")
   const protoType = enumValues.shift()

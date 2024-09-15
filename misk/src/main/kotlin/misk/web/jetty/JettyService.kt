@@ -1,8 +1,10 @@
 package misk.web.jetty
 
 import com.google.common.base.Stopwatch
+import com.google.common.base.Strings
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import com.squareup.wire.internal.newMutableList
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.security.ssl.CipherSuites
@@ -10,14 +12,17 @@ import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
 import misk.web.WebConfig
 import misk.web.WebSslConfig
+import misk.web.WebUnixDomainSocketConfig
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
 import org.eclipse.jetty.http.UriCompliance
+import org.eclipse.jetty.http2.server.AbstractHTTP2ServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
 import org.eclipse.jetty.io.ConnectionStatistics
 import org.eclipse.jetty.server.ConnectionFactory
+import org.eclipse.jetty.server.Connector
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.NetworkConnector
@@ -32,18 +37,26 @@ import org.eclipse.jetty.servlet.FilterHolder
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.servlets.CrossOriginFilter
+import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
 import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
+import org.eclipse.jetty.util.JavaVersion
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import wisp.logging.getLogger
+import java.io.File
+import java.io.IOException
+import java.lang.RuntimeException
 import java.lang.Thread.sleep
 import java.net.InetAddress
+import java.nio.file.Files
 import java.nio.file.InvalidPathException
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import java.util.regex.Pattern
 import javax.servlet.DispatcherType
 
 @Singleton
@@ -106,13 +119,14 @@ class JettyService @Inject internal constructor(
     if (webConfig.http_header_cache_size != null) {
       httpConfig.headerCacheSize = webConfig.http_header_cache_size
     }
+    if (webConfig.jetty_output_buffer_size != null) {
+      httpConfig.outputBufferSize = webConfig.jetty_output_buffer_size
+    }
     httpConnectionFactories += HttpConnectionFactory(httpConfig)
     if (webConfig.http2) {
-      val http2 = HTTP2ServerConnectionFactory(httpConfig)
-      if (webConfig.jetty_max_concurrent_streams != null) {
-        http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
-      }
-      httpConnectionFactories += HTTP2CServerConnectionFactory(httpConfig)
+      val http2 = HTTP2CServerConnectionFactory(httpConfig)
+      http2.customize(webConfig)
+      httpConnectionFactories += http2
     }
 
     // TODO(mmihic): Allow require running only on HTTPS?
@@ -195,9 +209,7 @@ class JettyService @Inject internal constructor(
 
       if (webConfig.http2) {
         val http2 = HTTP2ServerConnectionFactory(httpsConfig)
-        if (webConfig.jetty_max_concurrent_streams != null) {
-          http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
-        }
+        http2.customize(webConfig)
         httpsConnectionFactories += http2
       }
 
@@ -230,25 +242,58 @@ class JettyService @Inject internal constructor(
       server.addConnector(httpsConnector)
     }
 
+    var socketConfigs = newMutableList<WebUnixDomainSocketConfig>()
     if (webConfig.unix_domain_socket != null) {
+      socketConfigs.add(webConfig.unix_domain_socket)
+    }
+    if (webConfig.unix_domain_sockets != null) {
+      socketConfigs.addAll(webConfig.unix_domain_sockets)
+    }
+    socketConfigs.stream().forEach() { socketConfig ->
       val udsConnFactories = mutableListOf<ConnectionFactory>()
       udsConnFactories.add(HttpConnectionFactory(httpConfig))
-      if (webConfig.unix_domain_socket.h2c == true) {
+      if (socketConfig.h2c == true) {
         udsConnFactories.add(HTTP2CServerConnectionFactory(httpConfig))
       }
 
-      val udsConnector = UnixSocketConnector(
-        server,
-        null /* executor */,
-        null /* scheduler */,
-        null /* buffer pool */,
-        webConfig.selectors ?: -1,
-        *udsConnFactories.toTypedArray()
-      )
-      udsConnector.setUnixSocket(webConfig.unix_domain_socket.path)
-      udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
-      udsConnector.name = "uds"
-      server.addConnector(udsConnector)
+      if (isJEP380Supported(socketConfig.path)) {
+        logger.info("Using UnixDomainServerConnector for ${socketConfig.path}")
+        val udsConnector = UnixDomainServerConnector(
+          server,
+          null /* executor */,
+          null /* scheduler */,
+          null /* buffer pool */,
+          webConfig.acceptors ?: -1 ,
+          webConfig.selectors ?: -1,
+          *udsConnFactories.toTypedArray()
+        )
+        val socketFile = File(socketConfig.path)
+        udsConnector.unixDomainPath = socketFile.toPath()
+        udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
+        udsConnector.name = "uds"
+
+        // set file permissions after socket creation so sidecars (e.g. envoy, istio) have access
+        try {
+          udsConnector.start();
+          setFilePermissions(socketFile)
+        } catch (e: Exception) {
+          cleanAndThrow(udsConnector, e)
+        }
+        server.addConnector(udsConnector)
+      } else {
+        val udsConnector = UnixSocketConnector(
+          server,
+          null /* executor */,
+          null /* scheduler */,
+          null /* buffer pool */,
+          webConfig.selectors ?: -1,
+          *udsConnFactories.toTypedArray()
+        )
+        udsConnector.setUnixSocket(socketConfig.path)
+        udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
+        udsConnector.name = "uds"
+        server.addConnector(udsConnector)
+      }
     }
 
     // TODO(mmihic): Force security handler?
@@ -323,7 +368,7 @@ class JettyService @Inject internal constructor(
     }
   }
 
-  internal fun stop() {
+  fun stop() {
     if (server.isRunning) {
       val stopwatch = Stopwatch.createStarted()
       logger.info("Stopping Jetty")
@@ -355,7 +400,9 @@ class JettyService @Inject internal constructor(
     //
     // Ideally we could call jetty.awaitInflightRequests() but that's not available
     // for us.
-    if (webConfig.shutdown_sleep_ms > 0) {
+    //
+    // Default is to shutdown jetty after all guava managed services are shutdown.
+    if (webConfig.shutdown_sleep_ms >= 0) {
       sleep(webConfig.shutdown_sleep_ms.toLong())
     } else {
       stop()
@@ -412,4 +459,49 @@ private fun NetworkConnector.toHttpUrl(): HttpUrl {
  */
 private fun HttpConfiguration.customizeForGrpc() {
   isDelayDispatchUntilContent = false
+}
+
+private fun AbstractHTTP2ServerConnectionFactory.customize(webConfig: WebConfig) {
+  if (webConfig.jetty_max_concurrent_streams != null) {
+    maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
+  }
+  if (webConfig.jetty_initial_session_recv_window != null) {
+    initialSessionRecvWindow = webConfig.jetty_initial_session_recv_window
+  }
+  if (webConfig.jetty_initial_stream_recv_window != null) {
+    initialStreamRecvWindow = webConfig.jetty_initial_stream_recv_window
+  }
+}
+
+/**
+ * JEP-380 is supported when running Java 16+ and the provided socket path is non-abstract. Abstract
+ * socket paths are identified by paths prefixed with an `@` symbol or a null byte.
+ */
+internal fun isJEP380Supported(
+  path: String,
+  javaVersion: Int = JavaVersion.VERSION.major
+) : Boolean {
+  return javaVersion >= 16 &&
+    !Strings.isNullOrEmpty(path) &&
+    !Pattern.compile("^@|\u0000").matcher(path).find()
+}
+
+private fun setFilePermissions(file: File) {
+  try {
+    Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rw-rw-rw-"))
+  } catch (e: IOException) {
+    throw RuntimeException(e);
+  }
+}
+
+private fun cleanAndThrow(connector: Connector, exception: Exception){
+  var runtimeException = RuntimeException(exception);
+  if (connector.isStarted()){
+    try {
+      connector.stop();
+    } catch (e: Exception) {
+      runtimeException.addSuppressed(e);
+    }
+  }
+  throw runtimeException
 }

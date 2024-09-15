@@ -1,18 +1,15 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  
-  id("com.squareup.wire")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  alias(libs.plugins.wire)
 }
 
 wire {
   sourcePath {
-    srcJar(Dependencies.wireReflector)
+    srcJar(libs.wireReflector)
   }
   // Generate service interfaces only; the client comes with wire-reflector.
   kotlin {
@@ -24,31 +21,30 @@ wire {
 }
 
 dependencies {
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
-  api(Dependencies.wireReflector)
+  api(libs.guice)
+  api(libs.jakartaInject)
+  api(libs.wireReflector)
   api(project(":misk-actions"))
   api(project(":misk-inject"))
-  implementation(Dependencies.kotlinLogging)
-  implementation(Dependencies.kotlinReflect)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.wireGrpcClient)
-  implementation(Dependencies.wireRuntime)
-  implementation(Dependencies.wireSchema)
+  implementation(libs.kotlinLogging)
+  implementation(libs.kotlinReflect)
+  implementation(libs.okio)
+  implementation(libs.wireRuntime)
+  implementation(libs.wireSchema)
   implementation(project(":wisp:wisp-logging"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.okHttp)
-  testImplementation(Dependencies.protobufJava)
-  testImplementation(Dependencies.slf4jApi)
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.okHttp)
+  testImplementation(libs.protobufJava)
+  testImplementation(libs.slf4jApi)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-grpc-tests"))
   testImplementation(project(":misk-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

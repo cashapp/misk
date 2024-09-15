@@ -1,5 +1,6 @@
 package misk.web
 
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -13,7 +14,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import jakarta.inject.Inject
 
 @MiskTest
 internal class ZeroIdleTimeoutTest : AbstractJettyShutdownTest() {
@@ -80,6 +80,7 @@ internal abstract class AbstractJettyShutdownTest {
 
     jetty.stopAsync()
     try {
+      jetty.stop()
       jetty.awaitTerminated(timeoutMs, TimeUnit.MILLISECONDS)
     } catch (e: TimeoutException) {
       assertThat(timeoutExpected).isTrue()
@@ -108,7 +109,8 @@ internal abstract class AbstractJettyShutdownTest {
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             idle_timeout = idleTimeout,
             override_shutdown_idle_timeout = shutdownIdleTimeout,
-          )
+          ),
+          overrideShutdownTimeout = false
         )
       )
       install(MiskTestingServiceModule())

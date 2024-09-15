@@ -5,7 +5,7 @@ import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
-import kotlin.concurrent.thread
+import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
 import misk.inject.keyOf
 import misk.inject.toKey
@@ -14,7 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Optional
-import jakarta.inject.Inject
+import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
 internal class ActionScopedTest {
@@ -39,6 +39,9 @@ internal class ActionScopedTest {
   @Inject @Named("constant")
   private lateinit var optionalConstantString: ActionScoped<Optional<String>>
 
+  @Inject @Named("counting")
+  private lateinit var countingString: ActionScoped<String>
+
   @Inject private lateinit var scope: ActionScope
 
   @BeforeEach
@@ -56,6 +59,25 @@ internal class ActionScopedTest {
 
     )
     scope.enter(seedData).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+  }
+
+  @Test
+  fun overrideActionScopedProvider() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(
+      keyOf<String>(Names.named("from-seed")) to "seed-value"
+    )
+
+    val providerOverride = object : ActionScopedProvider<String> {
+      override fun get(): String = "overridden-bar"
+    }
+
+    scope.create(
+      seedData,
+      mapOf(keyOf<String>(Names.named("bar")) to providerOverride),
+    ).inScope { assertThat(foo.get()).isEqualTo("overridden-bar and foo!") }
   }
 
   @Test
@@ -224,6 +246,66 @@ internal class ActionScopedTest {
         }
       }.join()
       assertThat(thrown).isNull()
+    }
+  }
+
+  @Test
+  fun `allow getting scope things from scope`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(
+      keyOf<String>(Names.named("from-seed")) to "seed-value"
+    )
+
+    // exhibit A: trying to access scoped things in a new thread results in exceptions
+    scope.enter(seedData).use { _ ->
+      var thrown: Throwable? = null
+
+      thread {
+        try {
+          assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+        } catch (t: Throwable) {
+          thrown = t
+        }
+      }.join()
+      assertThat(thrown).isNotNull
+    }
+
+    // exhibit B: trying to access scoped things in a new thread can work, if you take
+    // a snapshot of the scope and use it to instantiate a scope in the new thread.
+    scope.enter(seedData).use { actionScope ->
+      var thrown: Throwable? = null
+
+      val instance = actionScope.snapshotActionScopeInstance()
+      thread {
+        try {
+          actionScope.enter(instance).use {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+          }
+        } catch (t: Throwable) {
+          thrown = t
+        }
+      }.join()
+      assertThat(thrown).isNull()
+    }
+  }
+
+  @Test
+  fun `providers are only called once per scope regardless of how many threads it propagates to`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    scope.create(mapOf()).inScope {
+      val instance = scope.snapshotActionScopeInstance()
+      repeat(3) {
+        thread {
+          instance.inScope {
+            assertThat(countingString.get()).isEqualTo("Called CountingProvider 1 time(s)")
+          }
+        }.join()
+      }
+      assertThat(countingString.get()).isEqualTo("Called CountingProvider 1 time(s)")
     }
   }
 }

@@ -1,14 +1,24 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
-    implementation(Dependencies.kotlinLogging)
-    implementation(Dependencies.okio)
+    implementation(libs.kotlinLogging)
+    implementation(libs.okio)
     implementation(project(":wisp:wisp-logging"))
-    runtimeOnly(Dependencies.bouncycastle)
+    runtimeOnly(libs.bouncycastle)
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.kotlinTest)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.junitParams)
+    testImplementation(libs.junitPioneer)
+    testImplementation(libs.kotlinTest)
+}
+
+// Allows us to set environment variables in tests using JUnit Pioneer
+tasks.test {
+  jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+  jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }

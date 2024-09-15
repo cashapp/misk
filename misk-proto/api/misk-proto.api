@@ -29,5 +29,6 @@ public final class misk/proto/Status$Builder : com/squareup/wire/Message$Builder
 }
 
 public final class misk/proto/Status$Companion {
+	public final synthetic fun build (Lkotlin/jvm/functions/Function1;)Lmisk/proto/Status;
 }
 

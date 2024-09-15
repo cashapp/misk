@@ -1,11 +1,13 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
     api(project(":wisp:wisp-deployment"))
 
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.kotlinTest)
-    testImplementation(Dependencies.mockitoCore)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.mockitoCore)
 }

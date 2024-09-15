@@ -15,10 +15,13 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import java.time.Duration
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @MiskTest(startService = true)
 class DynamoClusterTest {
@@ -29,15 +32,15 @@ class DynamoClusterTest {
       install(FakeClusterWeightModule())
       install(
         InProcessDynamoDbModule(
-          DynamoDbTable("misk-cluster-members", DyClusterMember::class),
+          DynamoDbTable("$TEST_SERVICE_NAME.misk-cluster-members", DyClusterMember::class),
         )
       )
-      install(DynamoClusterModule(DynamoClusterConfig()))
+      install(DynamoClusterModule(DynamoClusterConfig(appName = TEST_SERVICE_NAME)))
     }
   }
 
   @Inject private lateinit var clock: FakeClock
-  @Inject private lateinit var cluster: Cluster
+  @Inject private lateinit var cluster: DefaultCluster
   @Inject private lateinit var ddb: DynamoDbClient
   @Inject private lateinit var dynamoClusterWatcherTask: DynamoClusterWatcherTask
   @Inject private lateinit var fakeClusterWeight: FakeClusterWeight
@@ -45,21 +48,31 @@ class DynamoClusterTest {
   @Test
   fun basic() {
     assertThat(cluster.snapshot.readyMembers).hasSize(0)
-    dynamoClusterWatcherTask.run()
+    waitFor { dynamoClusterWatcherTask.run() }
+
     assertThat(cluster.snapshot.readyMembers).hasSize(1)
 
     clock.add(Duration.ofSeconds(45))
-    dynamoClusterWatcherTask.recordCurrentDynamoCluster()
+    waitFor { dynamoClusterWatcherTask.recordCurrentDynamoCluster() }
     assertThat(cluster.snapshot.readyMembers).hasSize(1)
 
     // Exceeded 1minute threshold, no longer considered part of cluster.
     clock.add(Duration.ofSeconds(30))
-    dynamoClusterWatcherTask.recordCurrentDynamoCluster()
+    waitFor { dynamoClusterWatcherTask.recordCurrentDynamoCluster() }
     assertThat(cluster.snapshot.readyMembers).hasSize(0)
 
     // Refreshed, now part of cluster again.
-    dynamoClusterWatcherTask.run()
+    waitFor { dynamoClusterWatcherTask.run() }
     assertThat(cluster.snapshot.readyMembers).hasSize(1)
+  }
+
+  @Test
+  fun watch() {
+    val changes = mutableListOf<Cluster.Changes>()
+    cluster.watch { changes.add(it) }
+    waitFor { dynamoClusterWatcherTask.run() }
+    assertThat(changes).hasSize(2)
+    assertThat(changes.last().snapshot.readyMembers).hasSize(1)
   }
 
   @Test
@@ -68,29 +81,63 @@ class DynamoClusterTest {
     val enhancedClient = DynamoDbEnhancedClient.builder()
       .dynamoDbClient(ddb)
       .build()
-    val table = enhancedClient.table("misk-cluster-members", DynamoClusterWatcherTask.TABLE_SCHEMA)
+    val table = enhancedClient.table("$TEST_SERVICE_NAME.misk-cluster-members", DynamoClusterWatcherTask.TABLE_SCHEMA)
 
     for (i in 0..150) {
       val member = DyClusterMember()
       member.name = "pod-${i}"
       member.updated_at = clock.instant().toEpochMilli()
+      member.expires_at = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
       table.putItem(member)
     }
-    dynamoClusterWatcherTask.run()
+    waitFor { dynamoClusterWatcherTask.run() }
     assertThat(cluster.snapshot.readyMembers).hasSize(152)
+  }
+
+  @Test
+  fun inspectAddedRecords() {
+    val enhancedClient = DynamoDbEnhancedClient.builder()
+      .dynamoDbClient(ddb)
+      .build()
+    val table = enhancedClient.table(
+      "$TEST_SERVICE_NAME.misk-cluster-members",
+      DynamoClusterWatcherTask.TABLE_SCHEMA
+    )
+
+    waitFor { dynamoClusterWatcherTask.run() }
+    assertThat(cluster.snapshot.readyMembers).hasSize(1)
+
+    val expiredTimeUnit = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
+
+    // Verify that all records expire in 24 hours!
+    assertTrue(
+      table.scan().items()
+        .all { m -> m.expires_at!! <= expiredTimeUnit && m.expires_at!! > m.updated_at!! / 1000 })
   }
 
   @Test
   fun inactiveNodeDoesntRecordItself() {
     fakeClusterWeight.setClusterWeight(0)
-    dynamoClusterWatcherTask.run()
+    waitFor {  dynamoClusterWatcherTask.run() }
     assertThat(cluster.snapshot.readyMembers).hasSize(0)
   }
 
   @Test
   fun resourceMapperStillWorks() {
-    dynamoClusterWatcherTask.run()
+    waitFor {  dynamoClusterWatcherTask.run() }
     val self = cluster.snapshot.self
     assertThat(cluster.snapshot.resourceMapper["a"]).isEqualTo(self)
+  }
+  private fun waitFor(f: () -> Unit) {
+    val latch = CountDownLatch(1)
+    f()
+    cluster.syncPoint {
+      latch.countDown()
+    }
+    check(latch.await(5, TimeUnit.SECONDS)) { "cluster change did not complete within 5 seconds " }
+  }
+
+  companion object {
+    const val TEST_SERVICE_NAME = "test-service"
   }
 }

@@ -1,5 +1,6 @@
 package misk.web.jetty
 
+import jakarta.inject.Inject
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -20,11 +21,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
 import wisp.client.UnixDomainSocketFactory
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.UUID
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class WebActionsServletTest {
@@ -35,6 +39,7 @@ class WebActionsServletTest {
   internal lateinit var jettyService: JettyService
 
   private var socketName: String = "@udstest" + UUID.randomUUID().toString()
+  private var fileSocketName: String = "/tmp/udstest" + UUID.randomUUID().toString()
 
   @Test
   fun networkSocketSuccess() {
@@ -47,7 +52,7 @@ class WebActionsServletTest {
   @Test
   fun parseNonAsciiHeaders() {
     val response = get(
-      "/potato", false,
+      "/potato", false, false,
       Headers.Builder()
         .addUnsafeNonAscii("X-device-name", "Walé Iphone")
         .build()
@@ -60,6 +65,14 @@ class WebActionsServletTest {
   fun udsSocketSuccess() {
     val response = get("/potato", true)
     assertThat(response.header("ActualSocketName")).isEqualTo(socketName)
+  }
+
+  @Test
+  fun fileUdsSocketSuccess() {
+    Assumptions.assumeTrue(isJEP380Supported(fileSocketName))
+    assertFilePermissions(fileSocketName)
+    val response = get("/potato", false, true)
+    assertThat(response.header("ActualSocketName")).isEqualTo(fileSocketName)
   }
 
   @Test
@@ -109,6 +122,7 @@ class WebActionsServletTest {
   private fun get(
     path: String,
     viaUDS: Boolean,
+    viaFileUDS: Boolean = false,
     headers: Headers = Headers.headersOf()
   ): okhttp3.Response =
     with(
@@ -123,7 +137,9 @@ class WebActionsServletTest {
         viaUDS -> {
           udsCall(get())
         }
-
+        viaFileUDS -> {
+          fileUdsCall(get())
+        }
         else -> {
           call(get())
         }
@@ -142,12 +158,27 @@ class WebActionsServletTest {
       .execute()
   }
 
+  private fun fileUdsCall(request: Request.Builder): okhttp3.Response {
+    return OkHttpClient().newBuilder()
+      .socketFactory(UnixDomainSocketFactory(File(fileSocketName)))
+      .build()
+      .newCall(request.build())
+      .execute()
+  }
+
+  private fun assertFilePermissions(path: String) {
+    val perm = Files.getPosixFilePermissions(Paths.get(path))
+    assertThat(PosixFilePermissions.toString(perm)).isEqualTo("rw-rw-rw-")
+  }
+
   inner class TestModule : KAbstractModule() {
     override fun configure() {
       install(
         WebServerTestingModule(
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            unix_domain_socket = WebUnixDomainSocketConfig(path = socketName)
+            unix_domain_sockets = listOf(
+              WebUnixDomainSocketConfig(path = socketName),
+              WebUnixDomainSocketConfig(path = fileSocketName))
           )
         )
       )

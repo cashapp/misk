@@ -8,4 +8,6 @@ internal class RealActionScoped<T> @Inject internal constructor(
   val scope: ActionScope
 ) : ActionScoped<T> {
   override fun get(): T = scope.get(key)
+
+  override fun getIfInScope(): T? = if (scope.inScope()) get() else null
 }

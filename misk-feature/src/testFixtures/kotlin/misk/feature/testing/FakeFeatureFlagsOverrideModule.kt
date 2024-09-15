@@ -1,6 +1,10 @@
 package misk.feature.testing
 
+import com.google.inject.Provides
 import misk.inject.KAbstractModule
+import misk.inject.KInstallOnceModule
+import misk.testing.TestFixture
+import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
@@ -35,4 +39,33 @@ class FakeFeatureFlagsOverrideModule private constructor(
   class FakeFeatureFlagsOverride(
     val overrideLambda: FakeFeatureFlags.() -> Unit
   )
+}
+
+internal class FakeFeatureFlagsTestFixtureModule: KInstallOnceModule() {
+
+  override fun configure() {
+    multibind<TestFixture>().to<FakeFeatureFlagsFixture>()
+  }
+
+  @Provides
+  @Singleton
+  internal fun providesFakeFeatureFlagsResource(
+    featureFlags: FakeFeatureFlags,
+    overrides: Set<FakeFeatureFlagsOverrideModule.FakeFeatureFlagsOverride>
+  ): FakeFeatureFlagsFixture {
+    return FakeFeatureFlagsFixture(featureFlags, block = { overrides.forEach { it.overrideLambda(this) } })
+  }
+}
+
+/**
+ * Applies the default feature flag overrides before every test.
+ */
+internal class FakeFeatureFlagsFixture(
+  private val featureFlags: FakeFeatureFlags,
+  private val block: (FakeFeatureFlags.() -> Unit)
+) : TestFixture {
+
+  override fun reset() {
+    block(featureFlags)
+  }
 }

@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
@@ -15,8 +16,8 @@ import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
+import java.sql.SQLException
 import java.time.LocalDate
-import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 import kotlin.test.fail
 
@@ -145,16 +146,19 @@ abstract class RealTransacterTest {
 
   @Test
   fun `exception in post commit hook does not cause the transaction to rollback`() {
-    assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
-      transacter.transactionWithSession { session ->
-        session.useConnection { connection ->
-          session.onPostCommit {
-            throw RuntimeException()
+    retryTransaction {
+      assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
+        transacter.transactionWithSession { session ->
+          session.useConnection { connection ->
+            session.onPostCommit {
+              throw RuntimeException()
+            }
+            connection.createStatement().execute("INSERT INTO movies (name) VALUES ('hello')")
           }
-          connection.createStatement().execute("INSERT INTO movies (name) VALUES ('hello')")
         }
       }
     }
+
     val afterCount = transacter.transactionWithSession { session -> session.useConnection(count) }
     assertThat(afterCount).isEqualTo(1)
   }
@@ -242,21 +246,49 @@ abstract class RealTransacterTest {
 
   @Test
   fun `a new transaction can be started in session close hook`() {
-    transacter.transactionWithSession { session ->
-      session.useConnection { connection ->
-        session.onSessionClose {
-          transacter.transactionWithSession { innerSession ->
-            innerSession.useConnection { innerConnection ->
-              innerConnection.createStatement().execute("INSERT INTO movies (name) VALUES ('1')")
+    retryTransaction {
+      transacter.transactionWithSession { session ->
+        session.useConnection { connection ->
+          session.onSessionClose {
+            transacter.transactionWithSession { innerSession ->
+              innerSession.useConnection { innerConnection ->
+                innerConnection.createStatement()
+                  .execute("INSERT INTO movies (name) VALUES ('1')")
+              }
             }
           }
+          connection.createStatement().execute("INSERT INTO movies (name) VALUES ('2')")
         }
-        connection.createStatement().execute("INSERT INTO movies (name) VALUES ('2')")
       }
     }
 
     val afterCount = transacter.transactionWithSession { session -> session.useConnection(count) }
     assertThat(afterCount).isEqualTo(2)
+  }
+
+  private fun retryTransaction(transaction: () -> Unit) {
+    val maxRetries = 3
+    var attempt = 0
+
+    while (attempt < maxRetries) {
+      try {
+        transaction() // Execute the transaction
+        return // Exit the function if successful
+      } catch (e: SQLException) {
+        if (isCockroachDbRetryableError(e)) {
+          attempt++
+          if (attempt >= maxRetries) {
+            throw e // Rethrow after max retries
+          }
+        } else {
+          throw e // Rethrow if it's not a retryable error
+        }
+      }
+    }
+  }
+
+  private fun isCockroachDbRetryableError(e: SQLException): Boolean {
+    return e.sqlState == "40001" // CockroachDB's serializable transaction error code
   }
 
   @Test
@@ -294,12 +326,16 @@ abstract class RealTransacterTest {
 
   data class RootConfig(
     val mysql_data_source: DataSourceConfig,
+    val mysql_enforce_writable_connections_data_source: DataSourceConfig,
     val cockroachdb_data_source: DataSourceConfig,
     val postgresql_data_source: DataSourceConfig,
     val tidb_data_source: DataSourceConfig,
   ) : Config
 
-  class RealTransacterTestModule(private val type: DataSourceType) : KAbstractModule() {
+  class RealTransacterTestModule(
+    private val type: DataSourceType,
+    private val dataSourceConfig: DataSourceConfig? = null
+  ) : KAbstractModule() {
     override fun configure() {
       install(
         Modules.override(MiskTestingServiceModule()).with(
@@ -309,11 +345,8 @@ abstract class RealTransacterTest {
       )
       install(DeploymentModule(TESTING))
       val config = MiskConfig.load<RootConfig>("test_transacter", TESTING)
-      val dataSourceConfig = selectDataSourceConfig(config)
       install(JdbcTestingModule(Movies::class))
-      install(
-        JdbcModule(Movies::class, dataSourceConfig)
-      )
+      install(JdbcModule(Movies::class, dataSourceConfig ?: selectDataSourceConfig(config)))
     }
 
     private fun selectDataSourceConfig(config: RootConfig): DataSourceConfig {
@@ -332,6 +365,16 @@ abstract class RealTransacterTest {
 class MySQLRealTransacterTest : RealTransacterTest() {
   @MiskTestModule
   val module = RealTransacterTestModule(DataSourceType.MYSQL)
+}
+
+@MiskTest(startService = true)
+class MySQLEnforceWritableConnectionsTransacterTest : RealTransacterTest() {
+  @MiskTestModule
+  val module = RealTransacterTestModule(
+    DataSourceType.MYSQL,
+    MiskConfig.load<RootConfig>("test_transacter", TESTING)
+      .mysql_enforce_writable_connections_data_source
+  )
 }
 
 @MiskTest(startService = true)

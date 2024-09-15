@@ -8,12 +8,12 @@ import misk.web.HttpCall
 import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
-import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.DashboardTabLoader
 import misk.web.dashboard.DashboardTabLoaderEntry
 import misk.web.mediatype.MediaTypes
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.web.dashboard.AdminDashboardAccess
 
 /**
  * Builds dashboard UI and loads IFrame tab.

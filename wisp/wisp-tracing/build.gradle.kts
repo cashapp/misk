@@ -1,15 +1,17 @@
 plugins {
-    `java-library`
-    `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
+  id("java-test-fixtures")
 }
 
 dependencies {
-    api(Dependencies.openTracingApi)
+    api(libs.openTracing)
 
-    testFixturesImplementation(Dependencies.openTracingMock)
+    testFixturesImplementation(libs.openTracingMock)
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.kotlinTest)
-    testImplementation(Dependencies.openTracingMock)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.openTracingMock)
 }

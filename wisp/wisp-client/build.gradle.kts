@@ -1,19 +1,21 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 sourceSets {
-    val main by getting {
+    main {
         java.srcDir("src/main/kotlin/")
     }
 }
 
 dependencies {
-    api(Dependencies.okHttp)
+    api(libs.okHttp)
     api(project(":wisp:wisp-ssl"))
-    implementation(Dependencies.jnrUnixsocket)
+    implementation(libs.jnrUnixsocket)
     implementation(project(":wisp:wisp-resource-loader"))
 
-    testImplementation(Dependencies.assertj)
-    testImplementation(Dependencies.junitApi)
+    testImplementation(libs.assertj)
+    testImplementation(libs.junitApi)
 }

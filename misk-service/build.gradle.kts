@@ -1,30 +1,32 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencies {
-  api(Dependencies.guava)
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
+  api(libs.guava)
+  api(libs.guice)
+  api(libs.jakartaInject)
+  api(project(":misk-config"))
   api(project(":misk-inject"))
-  implementation(Dependencies.kotlinLogging)
-  implementation(Dependencies.kotlinStdLibJdk8)
+  api(project(":wisp:wisp-config"))
+  implementation(libs.kotlinLogging)
+  implementation(libs.kotlinStdLibJdk8)
+  implementation(libs.moshiCore)
   implementation(project(":wisp:wisp-logging"))
+  implementation(project(":wisp:wisp-moshi"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.javaxInject)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.kotlinTest)
+  testImplementation(libs.assertj)
+  testImplementation(libs.javaxInject)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
   testImplementation(project(":misk-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

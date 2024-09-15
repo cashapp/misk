@@ -1,42 +1,41 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencies {
-  api(Dependencies.guice)
-  api(Dependencies.jakartaInject)
-  api(Dependencies.moshi)
-  api(Dependencies.okHttp)
-  api(Dependencies.retrofit)
+  api(libs.guice)
+  api(libs.jakartaInject)
+  api(libs.moshiCore)
+  api(libs.okHttp)
+  api(libs.retrofit)
   api(project(":misk"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
-  implementation(Dependencies.kotlinLogging)
-  implementation(Dependencies.kotlinReflect)
+  implementation(libs.kotlinLogging)
+  implementation(libs.kotlinReflect)
   implementation(project(":misk-actions"))
-  implementation(Dependencies.retrofitMoshi)
+  implementation(libs.retrofitMoshi)
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
+  implementation(libs.okio)
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.guava)
-  testImplementation(Dependencies.junitApi)
-  testImplementation(Dependencies.junitParams)
-  testImplementation(Dependencies.moshiKotlin)
-  testImplementation(Dependencies.okHttpMockWebServer)
+  testImplementation(libs.assertj)
+  testImplementation(libs.guava)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.junitParams)
+  testImplementation(libs.moshiKotlin)
+  testImplementation(libs.okHttpMockWebServer)
   testImplementation(project(":wisp:wisp-deployment"))
   testImplementation("com.squareup.okio:okio:3.3.0")
   testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

@@ -1,12 +1,14 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
     api(project(":wisp:wisp-deployment"))
-    implementation(platform(Dependencies.aws2Bom))
+    implementation(platform(libs.aws2Bom))
 
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.kotlinTest)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.kotlinTest)
     testImplementation(project(":wisp:wisp-deployment-testing"))
 }

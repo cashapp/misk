@@ -56,7 +56,8 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   private val action: Action,
   private val defaultLimiter: Limiter<String>,
   private val clock: Clock,
-  private val logLevel: Level
+  private val logLevel: Level,
+  private val enabledFeature: MiskConcurrencyLimiterFeature
 ) : NetworkInterceptor {
   /**
    * When this fails, it fails a lot. Log at most one error per minute per node and let the
@@ -66,6 +67,12 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   private var lastErrorLoggedAtMs = -1L
 
   override fun intercept(chain: NetworkChain) {
+    // Short circuit and just proceed
+    if (!enabledFeature.enabled()) {
+      chain.proceed(chain.httpCall)
+      return
+    }
+
     val quotaPath = chain.httpCall.requestHeaders["Quota-Path"]
     val metricsName = quotaPath ?: action.name
     val limiter = when {
@@ -90,6 +97,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
       factory.inFlightGauge.labels(metricsName).set(limiter.inflight.toDouble())
     }
 
+
     try {
       chain.proceed(chain.httpCall)
     } catch (unexpected: Throwable) {
@@ -104,10 +112,12 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
           factory.outcomeCounter.labels(metricsName, "ignored").inc()
           listener.onIgnore()
         }
+
         in 500 until 600 -> {
           factory.outcomeCounter.labels(metricsName, "dropped").inc()
           listener.onDropped() // Count 5XX errors as drops.
         }
+
         else -> {
           factory.outcomeCounter.labels(metricsName, "success").inc()
           listener.onSuccess()
@@ -139,6 +149,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     private val clock: Clock,
     private val limiterFactories: List<ConcurrencyLimiterFactory>,
     private val config: WebConfig,
+    private val enabledFeature: MiskConcurrencyLimiterFeature,
     metrics: Metrics,
   ) : NetworkInterceptor.Factory {
     val outcomeCounter = metrics.counter(
@@ -174,7 +185,8 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
         defaultLimiter = createLimiterForAction(action, quotaPath = null),
         clock = clock,
         logLevel = config.concurrency_limiter?.log_level
-          ?: config.concurrency_limiter_log_level
+          ?: config.concurrency_limiter_log_level,
+        enabledFeature = enabledFeature
       )
     }
 
@@ -205,5 +217,22 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
 
   private companion object {
     val logger = getLogger<ConcurrencyLimitsInterceptor>()
+
   }
 }
+
+/**
+ * Interface for a Feature flag that can dynamically enable/disable the concurrency limiter
+ */
+interface MiskConcurrencyLimiterFeature{
+  fun enabled(): Boolean
+}
+
+/**
+ * Simple implemenation of MiskConcurrencyLimiterFeature that always returns enabled=true
+ */
+internal object  AlwaysEnabledMiskConcurrencyLimiterFeature : MiskConcurrencyLimiterFeature{
+  override fun enabled(): Boolean = true
+}
+
+

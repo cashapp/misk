@@ -7,7 +7,6 @@ import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.redis.testing.DockerRedis
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
@@ -20,12 +19,8 @@ import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest
 class RedisAuthPasswordEnvTest {
-  @Suppress("unused")
-  @MiskExternalDependency
-  private val dockerRedis = DockerRedis // Start Redis so that we can properly provision a client.
-
   @Test fun `injection succeeds with password-less config in fake environments`() {
-    assertThat(DockerRedis.config.values.first().redis_auth_password).isEmpty()
+    assertThat(DockerRedis.replicationGroupConfig.redis_auth_password).isEmpty()
     val injector = createInjector(fakeEnv, realRedisModule)
     val redis = injector.getInstance(keyOf<RedisConsumer>()).redis
     assertThat(redis).isInstanceOf(RealRedis::class.java)
@@ -34,7 +29,7 @@ class RedisAuthPasswordEnvTest {
   }
 
   @Test fun `injection fails with password-less config in real environments`() {
-    assertThat(DockerRedis.config.values.first().redis_auth_password).isEmpty()
+    assertThat(DockerRedis.replicationGroupConfig.redis_auth_password).isEmpty()
     val injector = createInjector(realEnv, realRedisModule)
     val ex = assertThrows<ProvisionException> { injector.getInstance(keyOf<RedisConsumer>()) }
     assertThat(ex).hasCauseInstanceOf(IllegalStateException::class.java)
@@ -50,7 +45,7 @@ class RedisAuthPasswordEnvTest {
 
   private val realRedisModule = object : KAbstractModule() {
     override fun configure() {
-      install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
     }
   }

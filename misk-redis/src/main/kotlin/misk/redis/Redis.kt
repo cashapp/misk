@@ -5,9 +5,22 @@ import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.args.ListDirection
+import redis.clients.jedis.params.ZAddParams
+import redis.clients.jedis.util.JedisClusterCRC16
 import java.time.Duration
+import java.util.function.Supplier
 
-/** A Redis client. */
+/**
+ * A Redis client.
+ *
+ * Note: special care must be taken if your Redis is running in cluster mode,
+ * as keys **must** belong to the same slot in a single command operation like [lmove].
+ * You can control which hash slot a key belongs to a certain degree by making use of
+ * `{hashtags}` in the key name.
+ *
+ * See the [Redis Cluster Spec](https://redis.io/docs/reference/cluster-spec/#hash-tags) for more
+ * information.
+ */
 interface Redis {
   /**
    * Deletes a single key.
@@ -56,6 +69,14 @@ interface Redis {
    * @return a [ByteString] if the key was found, null if the key was not found
    */
   operator fun get(key: String): ByteString?
+
+  /**
+   * Retrieves the value for the given key as a [ByteString] and deletes the key.
+   *
+   * @param key the key to retrieve
+   * @return a [ByteString] if the key was found, null if the key was not found
+   */
+  fun getDel(key: String): ByteString?
 
   /**
    * Delete one or more hash [fields] stored at [key].
@@ -126,6 +147,21 @@ interface Redis {
    * Like [hrandFieldWithValues] but only returns the fields of the hash stored at [key].
    */
   fun hrandField(key: String, count: Long): List<String>
+
+  /**
+   * Performs a batched iteration of matching keys.
+   * If no pattern is provided, all keys will be scanned through.
+   *
+   * @param cursor The scan cursor. This should first be "0". Then subsequent cursor values will
+   *               be taken from the returned ScanResults.
+   * @param matchPattern A glob-like match pattern to filter keys by. If this is not provided,
+   *                     then all keys will be scanned.
+   * @param count A hinted desired batch size to be returned in each ScanResult. Note that this is
+   *              just a hint and there are no guarantees on the actual size of each ScanResult.
+   * @return A ScanResult containing the next cursor and the current batch of keys. If the
+   *         returned cursor is "0", then there are no more keys left in the iteration.
+   */
+  fun scan(cursor: String, matchPattern: String? = null, count: Int? = null): ScanResult
 
   /**
    * Sets the [ByteString] value for the given key.
@@ -246,9 +282,9 @@ interface Redis {
   fun brpoplpush(sourceKey: String, destinationKey: String, timeoutSeconds: Int): ByteString?
 
   /**
-   * Atomically returns and removes the first/last element (head/tail depending on the wherefrom
+   * Atomically returns and removes the first/last element (head/tail depending on the [from]
    * argument) of the list stored at source, and pushes the element at the first/last element
-   * (head/tail depending on the whereto argument) of the list stored at destination.
+   * (head/tail depending on the [to] argument) of the list stored at destination.
    *
    * For example: consider source holding the list a,b,c, and destination holding the list x,y,z.
    * Executing LMOVE source destination RIGHT LEFT results in source holding a,b and destination
@@ -257,7 +293,7 @@ interface Redis {
    * If source does not exist, the value nil is returned and no operation is performed. If source
    * and destination are the same, the operation is equivalent to removing the first/last element
    * from the list and pushing it as first/last element of the list, so it can be considered as a
-   * list rotation command (or a no-op if wherefrom is the same as whereto).
+   * list rotation command (or a no-op if [from] is the same as [to]).
    *
    * Throws an error if using Redis Cluster and source and destination are not in the same hash slot
    *
@@ -448,7 +484,18 @@ interface Redis {
   /**
    * Begin a pipeline operation to batch together several updates for optimal performance
    */
+  @Deprecated("Use pipelining instead.")
   fun pipelined(): Pipeline
+
+  /**
+   * Runs a block of Redis commands in a pipeline, for better performance.
+   * Pipelined command responses are not returned until the block completes.
+   * If you need to use the results of each command immediately, either save the [Supplier]s and call
+   * them later, or use non-pipelined operations.
+   *
+   * See [Redis pipelining](https://redis.io/docs/manual/pipelining/) for more information.
+   */
+  fun pipelining(block: DeferredRedis.() -> Unit)
 
   /**
    * Closes the client, so it may not be used further.
@@ -464,6 +511,294 @@ interface Redis {
    * Publish a message to a channel.
    */
   fun publish(channel: String, message: String)
+
+  /**
+   * Flushes all keys from all databases.
+   */
+  fun flushAll()
+
+  /**
+   * Adds the specified [member] with the specified [score] to the sorted set at the [key].
+   * If a specified [member] is already a member of the sorted set, the [score] is updated and the
+   * element reinserted at the right position to ensure the correct ordering.
+   *
+   * If [key] does not exist, a new sorted set with the specified [member] as sole member is
+   * created, like if the sorted set was empty. If the [key] exists but does not hold a sorted set,
+   * an error is returned.
+   *
+   * ZADD supports a list of [options], specified after the name of the key and before the first
+   * score argument. The complete list of options can be found in [ZAddOptions].
+   */
+  fun zadd(
+    key: String,
+    score: Double,
+    member: String,
+    vararg options: ZAddOptions
+  ): Long
+
+  /**
+   * Adds all the specified members with the specified scores in [scoreMembers] to the sorted set
+   * at the [key]. If a specified [member] is already a member of the sorted set, the [score] is
+   * updated and the element reinserted at the right position to ensure the correct ordering.
+   *
+   * If [key] does not exist, a new sorted set with the specified [member] as sole member is
+   * created, like if the sorted set was empty. If the [key] exists but does not hold a sorted set,
+   * an error is returned.
+   *
+   * ZADD supports a list of [options], specified after the name of the key and before the first
+   * score argument. The complete list of options can be found in [ZAddOptions]
+   */
+  fun zadd(
+    key: String,
+    scoreMembers: Map<String, Double>,
+    vararg options: ZAddOptions
+  ): Long
+
+  /**
+   * Returns the score of [member] in the sorted set at [key].
+   *
+   * If [member] does not exist in the sorted set, or [key] does not exist, nil is returned.
+   */
+  fun zscore(
+    key: String,
+    member: String
+  ): Double?
+
+  /**
+   * Returns the specified range of elements in the sorted set stored at [key].
+   *
+   * ZRANGE can perform different [type]s of range queries: by index (rank), by the score, or by
+   * lexicographical order. Currently only index and score type range queries are supported.
+   * See [ZRangeType] for different types of range queries.
+   *
+   * You can specify the [start] and [stop] of the range you want to filter by.
+   * Depending on the [type] you will have to use the appropriate type of [ZRangeMarker].
+   *
+   * The order of elements is from the lowest to the highest score.
+   * Elements with the same score are ordered lexicographically.
+   *
+   * Setting [reverse] reverses the ordering, so elements are ordered from highest to lowest score,
+   * and score ties are resolved by reverse lexicographical ordering.
+   *
+   * The [limit] argument can be used to obtain a sub-range from the matching elements.
+   * See [ZRangeLimit] for more info.
+   */
+  fun zrange(
+    key: String,
+    type: ZRangeType = ZRangeType.INDEX,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean = false,
+    limit: ZRangeLimit? = null,
+  ): List<ByteString?>
+
+  /**
+   * This is similar to [zrange] but returns the scores along with the members.
+   */
+  fun zrangeWithScores(
+    key: String,
+    type: ZRangeType = ZRangeType.INDEX,
+    start: ZRangeMarker,
+    stop: ZRangeMarker,
+    reverse: Boolean = false,
+    limit: ZRangeLimit? = null,
+  ): List<Pair<ByteString?, Double>>
+
+  /**
+   * Removes all elements in the sorted set stored at [key] with rank between [start] and [stop].
+   * Both start and stop are 0 -based indexes with 0 being the element with the lowest score.
+   * These indexes can be negative numbers, where they indicate offsets starting at the element
+   * with the highest score. For example: -1 is the element with the highest score, -2 the element
+   * with the second-highest score and so forth.
+   */
+  fun zremRangeByRank(
+    key: String,
+    start: ZRangeRankMarker,
+    stop: ZRangeRankMarker,
+  ): Long
+
+  /**
+   * Returns the sorted set cardinality (number of elements) of the sorted set stored at [key]
+   */
+  fun zcard(
+    key: String
+  ): Long
+
+  /**
+   * Different types of range queries.
+   */
+  enum class ZRangeType {
+    /**
+     * The <start> and <stop> arguments represent zero-based indexes.
+     * These arguments specify an inclusive range.
+     *
+     * The indexes can also be negative numbers indicating offsets from the end of the sorted set,
+     * with -1 being the last element of the sorted set and so on.
+     *
+     * Out of range indexes do not produce an error.
+     * If <start> is greater than either the end index of the sorted set or <stop>,
+     * an empty list is returned.
+     * If <stop> is greater than the end index of the sorted set, Redis will use the last element
+     * of the sorted set.
+     *
+     * Use [ZRangeIndexMarker] to specify the start and stop for this type.
+     */
+    INDEX,
+
+    /**
+     * returns the range of elements from the sorted set having scores equal or between <start>
+     * and <stop>
+     *
+     * <start> and <stop> can be -inf and +inf, denoting the negative and positive infinities,
+     * respectively. This means that you are not required to know the highest or lowest score in the
+     * sorted set to get all elements from or up to a certain score.
+     *
+     * By default, the score intervals specified by <start> and <stop> are closed (inclusive).
+     * It is possible to specify an open interval.
+     *
+     * Use [ZRangeScoreMarker] to specify the start and stop for this type.
+     */
+    SCORE
+  }
+
+  abstract class ZRangeMarker(
+    val value: Any,
+    val included: Boolean
+  )
+
+  data class ScanResult(
+    val cursor: String,
+    val keys: List<String>
+  )
+
+  data class ZRangeRankMarker(
+    val longValue: Long
+  ) : ZRangeMarker(longValue, true)
+
+  /**
+   * To be used when [ZRangeType] is [ZRangeType.INDEX].
+   * The [intValue] should be an integer specifying the index (start or stop)
+   */
+  data class ZRangeIndexMarker(
+    val intValue: Int
+  ) : ZRangeMarker(intValue, true)
+
+  /**
+   * To be used when [ZRangeType] is [ZRangeType.SCORE].
+   * The [doubleValue] should be a double specifying the score (start or stop)
+   * By default the range is included. Set [isIncluded] to false in order to exclude the start or
+   * stop.
+   */
+  data class ZRangeScoreMarker @JvmOverloads constructor(
+    val doubleValue: Double,
+    val isIncluded: Boolean = true,
+  ) : ZRangeMarker(doubleValue, isIncluded) {
+    override fun toString(): String {
+      var ans = when (this.doubleValue) {
+        Double.MAX_VALUE -> "+inf"
+        Double.MIN_VALUE -> "-inf"
+        else -> this.doubleValue.toString()
+      }
+
+      if (!this.isIncluded) ans = "($ans"
+      return ans
+    }
+  }
+
+  /**
+   * The limit argument in [zrange] and [zrangeWithScores] can be used to obtain a sub-range from
+   * the matching elements similar to SELECT LIMIT offset, count in SQL.
+   * A negative [count] returns all elements from the [offset].
+   * Keep in mind that if <offset> is large, the sorted set needs to be traversed for
+   * <offset> elements before getting to the elements to return, which can add up to O(N) time
+   * complexity.
+   */
+  data class ZRangeLimit(
+    val offset: Int,
+    val count: Int
+  )
+
+  /**
+   * Options for ZADD. Not all options are compatible with one another.
+   * See the [ZADD command documentation](https://redis.io/commands/zadd/) for more information.
+   *
+   * Note: misk-redis does not currently support the INCR option.
+   */
+  enum class ZAddOptions {
+    /**
+     * Only update elements that already exist. Don't add new elements.
+     */
+    XX,
+
+    /**
+     * Only add new elements. Don't update already existing elements.
+     */
+    NX,
+
+    /**
+     * Only update existing elements if the new score is less than the current score.
+     * This flag doesn't prevent adding new elements.
+     */
+    LT,
+
+    /**
+     * Only update existing elements if the new score is greater than the current score.
+     * This flag doesn't prevent adding new elements.
+     */
+    GT,
+
+    /**
+     * Modify the return value from the number of new elements added, to the total number of
+     * elements changed (CH is an abbreviation of changed). Changed elements are new elements
+     * added and elements already existing for which the score was updated. So elements specified
+     * in the command line having the same score as they had in the past are not counted.
+     * Note: normally the return value of ZADD only counts the number of new elements added.
+     */
+    CH,
+    ;
+
+    companion object {
+      fun getZAddParams(options: Array<out ZAddOptions>): ZAddParams {
+        val params = ZAddParams()
+
+        options.forEach {
+          when (it) {
+            XX -> params.xx()
+            NX -> params.nx()
+            LT -> params.lt()
+            GT -> params.gt()
+            CH -> params.ch()
+          }
+        }
+
+        return params
+      }
+
+      /**
+       * Checks that options will result in a valid ZADD command, conforming to the following:
+       *
+       * ```
+       * zadd key [NX|XX] [GT|LT] [CH] score member [score member ...]
+       * ```
+       *
+       * See the [ZADD command documentation](https://redis.io/commands/zadd) for more information.
+       */
+      internal fun verify(options: Array<out ZAddOptions>) {
+        // NX and XX are mutually exclusive.
+        require(!options.contains(NX) || !options.contains(XX)) {
+          "ERR XX and NX options at the same time are not compatible"
+        }
+        // GT, LT, NX are mutually exclusive.
+        require(
+          !(options.contains(NX) && options.contains(LT))
+            && !(options.contains(NX) && options.contains(GT))
+            && !(options.contains(GT) && options.contains(LT))
+        ) {
+          "ERR GT, LT, and/or NX options at the same time are not compatible"
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -482,5 +817,23 @@ inline fun checkHrandFieldCount(count: Long) {
   }
   require(count > 0) {
     "You must request at least 1 field."
+  }
+}
+
+internal fun getSlotErrorOrNull(op: String, keys: List<ByteArray>): Throwable? {
+  val slots = keys.map { JedisClusterCRC16.getSlot(it) }.distinct()
+  return if (slots.size == 1) {
+    null
+  } else {
+    RuntimeException(
+      """
+      |When using clustered Redis, keys used by one $op command must always map to the same slot, but mapped to slots $slots.
+      |You can use {hashtags} in your key name to control how Redis hashes keys to slots.
+      |For example, keys: `{customer9001}.contacts` and `{customer9001}.payments` will  hash to the same slot.
+      |
+      |See https://redis.io/topics/cluster-spec#hash-tags for more information.
+      |
+      """.trimMargin()
+    )
   }
 }

@@ -7,7 +7,7 @@ public class wisp/feature/Attributes {
 	public final fun copy ()Lwisp/feature/Attributes;
 	public final fun copy (Ljava/util/Map;)Lwisp/feature/Attributes;
 	public final fun copy (Ljava/util/Map;Ljava/util/Map;)Lwisp/feature/Attributes;
-	public final fun copy (Ljava/util/Map;Ljava/util/Map;Z)Lwisp/feature/Attributes;
+	public fun copy (Ljava/util/Map;Ljava/util/Map;Z)Lwisp/feature/Attributes;
 	public static synthetic fun copy$default (Lwisp/feature/Attributes;Ljava/util/Map;Ljava/util/Map;ZILjava/lang/Object;)Lwisp/feature/Attributes;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAnonymous ()Z
@@ -15,14 +15,22 @@ public class wisp/feature/Attributes {
 	public final fun getText ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun with (Ljava/lang/String;Ljava/lang/Number;)Lwisp/feature/Attributes;
-	public final fun with (Ljava/lang/String;Ljava/lang/String;)Lwisp/feature/Attributes;
+	public fun with (Ljava/lang/String;Ljava/lang/Number;)Lwisp/feature/Attributes;
+	public fun with (Ljava/lang/String;Ljava/lang/String;)Lwisp/feature/Attributes;
 }
 
 public abstract interface class wisp/feature/BooleanFeatureFlag : wisp/feature/FeatureFlag {
 }
 
+public final class wisp/feature/BooleanFeatureFlag$DefaultImpls {
+	public static fun getAttributes (Lwisp/feature/BooleanFeatureFlag;)Lwisp/feature/Attributes;
+}
+
 public abstract interface class wisp/feature/DoubleFeatureFlag : wisp/feature/FeatureFlag {
+}
+
+public final class wisp/feature/DoubleFeatureFlag$DefaultImpls {
+	public static fun getAttributes (Lwisp/feature/DoubleFeatureFlag;)Lwisp/feature/Attributes;
 }
 
 public abstract interface class wisp/feature/DynamicConfig {
@@ -45,6 +53,10 @@ public abstract interface class wisp/feature/EnumFeatureFlag : wisp/feature/Feat
 	public abstract fun getReturnType ()Ljava/lang/Class;
 }
 
+public final class wisp/feature/EnumFeatureFlag$DefaultImpls {
+	public static fun getAttributes (Lwisp/feature/EnumFeatureFlag;)Lwisp/feature/Attributes;
+}
+
 public class wisp/feature/Feature {
 	public fun <init> (Ljava/lang/String;)V
 	public fun equals (Ljava/lang/Object;)Z
@@ -57,6 +69,10 @@ public abstract interface class wisp/feature/FeatureFlag {
 	public abstract fun getAttributes ()Lwisp/feature/Attributes;
 	public abstract fun getFeature ()Lwisp/feature/Feature;
 	public abstract fun getKey ()Ljava/lang/String;
+}
+
+public final class wisp/feature/FeatureFlag$DefaultImpls {
+	public static fun getAttributes (Lwisp/feature/FeatureFlag;)Lwisp/feature/Attributes;
 }
 
 public final class wisp/feature/FeatureFlagValidation {
@@ -86,8 +102,16 @@ public final class wisp/feature/FeatureFlags$DefaultImpls {
 public abstract interface class wisp/feature/IntFeatureFlag : wisp/feature/FeatureFlag {
 }
 
+public final class wisp/feature/IntFeatureFlag$DefaultImpls {
+	public static fun getAttributes (Lwisp/feature/IntFeatureFlag;)Lwisp/feature/Attributes;
+}
+
 public abstract interface class wisp/feature/JsonFeatureFlag : wisp/feature/FeatureFlag {
 	public abstract fun getReturnType ()Ljava/lang/Class;
+}
+
+public final class wisp/feature/JsonFeatureFlag$DefaultImpls {
+	public static fun getAttributes (Lwisp/feature/JsonFeatureFlag;)Lwisp/feature/Attributes;
 }
 
 public abstract interface class wisp/feature/LegacyFeatureFlags {
@@ -156,6 +180,10 @@ public final class wisp/feature/MoshiExtKt {
 }
 
 public abstract interface class wisp/feature/StringFeatureFlag : wisp/feature/FeatureFlag {
+}
+
+public final class wisp/feature/StringFeatureFlag$DefaultImpls {
+	public static fun getAttributes (Lwisp/feature/StringFeatureFlag;)Lwisp/feature/Attributes;
 }
 
 public abstract interface class wisp/feature/StrongFeatureFlags {
