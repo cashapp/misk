@@ -118,6 +118,7 @@ public final class misk/random/FakeRandom : misk/random/Random {
 	public fun nextDouble ()D
 	public fun nextFloat ()F
 	public fun nextInt ()I
+	public fun nextInt (I)I
 	public fun nextLong ()J
 	public final fun setNextBoolean (Ljava/lang/Boolean;)V
 	public final fun setNextDouble (Ljava/lang/Double;)V
