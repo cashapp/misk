@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MiskTest(startService = false)
 internal class FakeRandomTest {
