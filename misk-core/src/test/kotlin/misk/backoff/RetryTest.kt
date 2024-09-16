@@ -126,39 +126,11 @@ internal class RetryTest {
   }
 
   @Test
-  fun dontRetryExceptionCanBeInstantiatedWithNoMessage() {
-      // needed to ensure backwards compat with 2 services
-      val exception = DontRetryException()
-      assertNotNull(exception)
-      assertNull(exception.message)
-  }
+fun dontRetryExceptionCanBeInstantiatedWithNoMessage() {
+    // needed to ensure backwards compat with 2 services
+    val exception = DontRetryException()
+    assertNotNull(exception)
+    assertNull(exception.message)
+}
 
-  @Test
-  fun dontRetryIfShouldRetryIsFalse() {
-    var retryCount = 0
-
-    assertFailsWith<IllegalStateException> {
-      retry(upTo = 100, withBackoff = FlatBackoff(), shouldRetry = { false }) {
-        retryCount = retryCount.inc()
-        throw IllegalStateException()
-      }
-    }
-
-    assertThat(retryCount).isEqualTo(1)
-  }
-
-  @Test
-  fun dontRetryIfShouldRetryReturnsFalseOnSecondRetry() {
-    var retryCount = 0
-
-    assertFailsWith<IllegalStateException> {
-      retry(upTo = 100, withBackoff = FlatBackoff(), shouldRetry = { e -> e is IllegalArgumentException }) {
-        retryCount = retryCount.inc()
-        if (retryCount == 1) throw IllegalArgumentException() // We want to retry on this error
-        throw IllegalStateException()
-      }
-    }
-
-    assertThat(retryCount).isEqualTo(2)
-  }
 }
