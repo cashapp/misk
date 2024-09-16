@@ -11,6 +11,7 @@ fun <A> retry(
   upTo: Int,
   withBackoff: Backoff,
   onRetry: ((retryCount: Int, exception: Exception) -> Unit)? = null,
+  shouldRetry: (e: Exception) -> Boolean = { true },
   block: (retryCount: Int) -> A,
 ): A {
   require(upTo > 0) { "must support at least one call" }
@@ -24,6 +25,9 @@ fun <A> retry(
     } catch (e: DontRetryException) {
       throw e
     } catch (e: Exception) {
+      if (!shouldRetry(e)) {
+        throw e
+      }
       onRetry?.invoke(i + 1, e)
       lastException = e
       if (i + 1 < upTo) {
