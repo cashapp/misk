@@ -3,8 +3,6 @@ package misk.jdbc
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
-import misk.backoff.FlatBackoff
-import misk.backoff.retry
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -148,7 +146,7 @@ abstract class RealTransacterTest {
 
   @Test
   fun `exception in post commit hook does not cause the transaction to rollback`() {
-    retry(upTo = 3, withBackoff = FlatBackoff(), shouldRetry = { it.isCockroachDbRetryableError() }) {
+    retryTransaction {
       assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
         transacter.transactionWithSession { session ->
           session.useConnection { connection ->
@@ -248,7 +246,7 @@ abstract class RealTransacterTest {
 
   @Test
   fun `a new transaction can be started in session close hook`() {
-    retry(upTo = 3, withBackoff = FlatBackoff(), shouldRetry = { it.isCockroachDbRetryableError() }) {
+    retryTransaction {
       transacter.transactionWithSession { session ->
         session.useConnection { connection ->
           session.onSessionClose {
@@ -268,8 +266,29 @@ abstract class RealTransacterTest {
     assertThat(afterCount).isEqualTo(2)
   }
 
-  private fun Exception.isCockroachDbRetryableError(): Boolean {
-    return this is SQLException && sqlState == "40001" // CockroachDB's serializable transaction error code
+  private fun retryTransaction(transaction: () -> Unit) {
+    val maxRetries = 3
+    var attempt = 0
+
+    while (attempt < maxRetries) {
+      try {
+        transaction() // Execute the transaction
+        return // Exit the function if successful
+      } catch (e: SQLException) {
+        if (isCockroachDbRetryableError(e)) {
+          attempt++
+          if (attempt >= maxRetries) {
+            throw e // Rethrow after max retries
+          }
+        } else {
+          throw e // Rethrow if it's not a retryable error
+        }
+      }
+    }
+  }
+
+  private fun isCockroachDbRetryableError(e: SQLException): Boolean {
+    return e.sqlState == "40001" // CockroachDB's serializable transaction error code
   }
 
   @Test
