@@ -14,6 +14,7 @@ import java.util.concurrent.PriorityBlockingQueue
 import jakarta.inject.Inject
 import com.google.inject.Provider
 import jakarta.inject.Singleton
+import misk.backoff.RetryConfig
 import misk.testing.FakeFixture
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.jvm.Throws
@@ -208,7 +209,8 @@ class FakeJobQueue @Inject constructor(
 
       val jobHandler = jobHandlers[job.queueName]!!
       try {
-        retry(retries, FlatBackoff(Duration.ofMillis(20))) {
+        val retryConfig = RetryConfig.Builder(retries, FlatBackoff(Duration.ofMillis(20)))
+        retry(retryConfig.build()) {
           // we re-enqueue the job if the backoff delayed time was called
           if (job.delayedForBackoff) {
             jobsToQueueBack += job

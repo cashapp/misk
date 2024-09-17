@@ -26,6 +26,7 @@ import java.util.concurrent.locks.ReentrantLock
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import jakarta.inject.Singleton
+import misk.backoff.RetryConfig
 import kotlin.concurrent.withLock
 import kotlin.test.assertEquals
 
@@ -625,8 +626,10 @@ internal class RepeatedTaskQueueTest {
     }
   }
 
-  private fun waitForNextPendingTask(): DelayedTask =
-    retry(5, FlatBackoff(Duration.ofMillis(200))) {
+  private fun waitForNextPendingTask(): DelayedTask {
+    val retryConfig = RetryConfig.Builder(5, FlatBackoff(Duration.ofMillis(200)))
+    return retry(retryConfig.build()) {
       pendingTasks.peekPending()!!
     }
+  }
 }

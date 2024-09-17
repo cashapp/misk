@@ -7,6 +7,9 @@ package misk.backoff
  * The retry function is provided with current retry count, in case this is relevant.
  */
 @JvmOverloads
+@Deprecated("Use retry(config: RetryConfig) instead",
+  replaceWith = ReplaceWith("retry(RetryConfig.Builder(upTo, withBackoff).build(), block)")
+)
 fun <A> retry(
   upTo: Int,
   withBackoff: Backoff,

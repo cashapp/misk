@@ -3,6 +3,7 @@ package misk.jdbc
 import com.google.common.base.Stopwatch
 import com.google.inject.Provider
 import misk.backoff.FlatBackoff
+import misk.backoff.RetryConfig
 import misk.backoff.retry
 import misk.testing.TestFixture
 import misk.vitess.shards
@@ -25,7 +26,8 @@ class JdbcTestFixture(
     }
     val stopwatch = Stopwatch.createStarted()
 
-    val truncatedTableNames = retry(3, FlatBackoff()) {
+    val retryConfig = RetryConfig.Builder(3, FlatBackoff())
+    val truncatedTableNames = retry(retryConfig.build()) {
       shards(dataSourceService).get().flatMap { shard ->
         transacterProvider.get().transaction { connection ->
           CheckDisabler.withoutChecks {
@@ -35,12 +37,15 @@ class JdbcTestFixture(
                 DataSourceType.MYSQL, DataSourceType.TIDB -> {
                   "SELECT table_name FROM information_schema.tables where table_schema='${config.database}' AND table_type='BASE TABLE'"
                 }
+
                 DataSourceType.HSQLDB -> {
                   "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE TABLE_TYPE='TABLE'"
                 }
+
                 DataSourceType.VITESS_MYSQL -> {
                   "SHOW VSCHEMA TABLES"
                 }
+
                 DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
                   "SELECT table_name FROM information_schema.tables WHERE table_catalog='${config.database}' AND table_schema='public'"
                 }
