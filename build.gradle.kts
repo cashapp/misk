@@ -252,6 +252,10 @@ subprojects {
           "dd.instrumentation.telemetry.enabled" to false,
         )
       )
+      develocity.testRetry {
+        maxRetries.set(1)
+        maxFailures.set(5)
+      }
     }
 
     val enableLogging = project.findProperty("misk.test.logging")?.toString().toBoolean()
