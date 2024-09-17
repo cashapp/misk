@@ -8,10 +8,22 @@ import java.time.Duration
 import kotlin.test.assertFailsWith
 
 internal class RetryTest {
-  @Test fun retries() {
+  @Test fun deprecatedFunction() {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
     val result = retry(3, backoff) { retry ->
+      if (retry < 2) throw IllegalStateException("this failed")
+      "succeeded on retry $retry"
+    }
+
+    assertThat(result).isEqualTo("succeeded on retry 2")
+  }
+
+  @Test fun retries() {
+    val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
+
+    val retryConfig = RetryConfig.Builder(3, backoff)
+    val result = retry(retryConfig.build()) { retry: Int ->
       if (retry < 2) throw IllegalStateException("this failed")
       "succeeded on retry $retry"
     }
@@ -23,7 +35,8 @@ internal class RetryTest {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
     assertFailsWith<IllegalStateException> {
-      retry(3, backoff) { throw IllegalStateException("this failed") }
+      val retryConfig = RetryConfig.Builder(3, backoff)
+      retry(retryConfig.build()) { throw IllegalStateException("this failed") }
     }
   }
 
@@ -31,7 +44,8 @@ internal class RetryTest {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
     assertFailsWith<IllegalStateException> {
-      retry(3, backoff) { throw IllegalStateException("this failed") }
+      val retryConfig = RetryConfig.Builder(3, backoff)
+      retry(retryConfig.build()) { throw IllegalStateException("this failed") }
     }
 
     // Backoff should have advanced
@@ -47,7 +61,8 @@ internal class RetryTest {
     backoff.nextRetry()
 
     assertFailsWith<IllegalStateException> {
-      retry(3, backoff) { throw IllegalStateException("this failed") }
+      val retryConfig = RetryConfig.Builder(3, backoff)
+      retry(retryConfig.build()) { throw IllegalStateException("this failed") }
     }
 
     // resets backoff prior to use
@@ -56,7 +71,8 @@ internal class RetryTest {
 
   @Test fun resetsBackoffAfterSuccess() {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
-    val result = retry(3, backoff) { retry ->
+    val retryConfig = RetryConfig.Builder(3, backoff)
+    val result = retry(retryConfig.build()) { retry: Int ->
       if (retry < 2) throw IllegalStateException("this failed")
       "hello"
     }
@@ -76,9 +92,10 @@ internal class RetryTest {
     }
 
     // f is a function that throws an exception twice in a row
-    retry(3, FlatBackoff(), onRetryFunction) {
+    val retryConfig = RetryConfig.Builder(3, FlatBackoff()).onRetry(onRetryFunction)
+    retry(retryConfig.build()) {
       retryCount = retryCount.inc()
-      if(retryCount < 3) throw Exception("a failure that triggers a retry")
+      if (retryCount < 3) throw Exception("a failure that triggers a retry")
     }
 
     assertThat(retried).isEqualTo(2)
@@ -89,7 +106,8 @@ internal class RetryTest {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
     val customMessage = "Custom message for DontRetryException"
     assertFailsWith<DontRetryException> {
-      retry(3, backoff) {
+      val retryConfig = RetryConfig.Builder(3, backoff)
+      retry(retryConfig.build()) {
         throw DontRetryException(customMessage)
       }
     }.also { exception ->
@@ -102,7 +120,9 @@ internal class RetryTest {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
     val cause = IllegalStateException("Underlying exception")
     assertFailsWith<DontRetryException> {
-      retry(3, backoff) {
+      val retryConfig = RetryConfig.Builder(3, backoff)
+
+      retry(retryConfig.build()) {
         throw DontRetryException(cause)
       }
     }.also { exception ->
@@ -116,7 +136,8 @@ internal class RetryTest {
     val customMessage = "Custom message for DontRetryException"
     val cause = IllegalStateException("Underlying exception")
     assertFailsWith<DontRetryException> {
-      retry(3, backoff) {
+      val retryConfig = RetryConfig.Builder(3, backoff)
+      retry(retryConfig.build()) {
         throw DontRetryException(customMessage, cause)
       }
     }.also { exception ->

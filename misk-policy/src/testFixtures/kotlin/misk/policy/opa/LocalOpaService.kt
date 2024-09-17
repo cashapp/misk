@@ -16,6 +16,7 @@ import com.github.dockerjava.core.command.PullImageResultCallback
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
 import misk.backoff.retry
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -124,13 +125,13 @@ class LocalOpaService(
       throw Exception("OPA is not running")
     }
     try {
-      retry(
+      val retryConfig = RetryConfig.Builder(
         5, ExponentialBackoff(
         Duration.ofSeconds(1),
         Duration.ofSeconds(5)
       )
       )
-      {
+      retry(retryConfig.build()) {
         val client = OkHttpClient()
         val request = Request.Builder()
           .url("http://localhost:$OPA_EXPOSED_PORT/health")

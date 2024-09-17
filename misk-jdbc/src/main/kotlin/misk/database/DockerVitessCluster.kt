@@ -15,6 +15,7 @@ import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
 import misk.backoff.retry
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -35,7 +36,6 @@ import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 import kotlin.reflect.KClass
-import kotlin.streams.toList
 
 class Table
 class Keyspace(val sharded: Boolean, val tables: Map<String, Table>) {
@@ -408,12 +408,13 @@ class DockerVitessCluster(
 
   private fun waitUntilHealthy() {
     try {
-      retry(
+      val retryConfig = RetryConfig.Builder(
         20, ExponentialBackoff(
         Duration.ofSeconds(1),
         Duration.ofSeconds(5)
       )
-      ) {
+      )
+      retry(retryConfig.build()) {
         cluster.openVtgateConnection().use { c ->
           try {
             val result =

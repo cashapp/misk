@@ -17,6 +17,7 @@ import java.time.Instant
 import java.time.ZoneId
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.backoff.RetryConfig
 
 @MiskTest(startService = true)
 class CronTest {
@@ -86,10 +87,11 @@ class CronTest {
     assertThat(minuteCron.counter).isEqualTo(1)
   }
 
-  private fun waitForNextPendingTask(): DelayedTask =
-    retry(5, FlatBackoff(Duration.ofMillis(200))) {
+  private fun waitForNextPendingTask(): DelayedTask {
+    return retry(RetryConfig.Builder(5, FlatBackoff(Duration.ofMillis(200))).build()) {
       pendingTasks.peekPending()!!
     }
+  }
 }
 
 @Singleton

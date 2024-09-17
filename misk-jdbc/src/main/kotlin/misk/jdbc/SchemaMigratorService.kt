@@ -9,6 +9,7 @@ import misk.healthchecks.HealthStatus
 import wisp.deployment.Deployment
 import java.time.Duration
 import com.google.inject.Provider
+import misk.backoff.RetryConfig
 import kotlin.reflect.KClass
 
 class SchemaMigratorService internal constructor(
@@ -26,10 +27,11 @@ class SchemaMigratorService internal constructor(
       val type = connector.config().type
       if (type != DataSourceType.VITESS_MYSQL) {
         // Retry wrapped to handle multiple JDBC modules racing to create the `schema_version` table.
-        retry(
+        val retryConfig = RetryConfig.Builder(
           10,
           ExponentialBackoff(Duration.ofMillis(100), Duration.ofSeconds(5))
-        ) {
+        )
+        retry(retryConfig.build()) {
           val appliedMigrations = schemaMigrator.initialize()
           migrationState = schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
         }

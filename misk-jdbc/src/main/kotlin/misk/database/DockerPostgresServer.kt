@@ -8,6 +8,7 @@ import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
 import misk.backoff.retry
 import misk.jdbc.DataSourceConfig
 import mu.KotlinLogging
@@ -138,12 +139,13 @@ class DockerPostgresServer(
 
   private fun waitUntilHealthy() {
     try {
-      retry(
+      val retryConfig = RetryConfig.Builder(
         20, ExponentialBackoff(
         Duration.ofSeconds(1),
         Duration.ofSeconds(5)
       )
-      ) {
+      )
+      retry(retryConfig.build()) {
         server.openConnection().use { c ->
           val resultSet =
             c.createStatement().executeQuery("SELECT COUNT(*) as count FROM pg_catalog.pg_database")

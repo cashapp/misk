@@ -10,6 +10,7 @@ import java.time.Duration
 import java.util.*
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.backoff.RetryConfig
 
 private val logger = getLogger<PingDatabaseService>()
 
@@ -26,7 +27,10 @@ class PingDatabaseService @Inject constructor(
     val jdbcUrl = config.buildJdbcUrl(deployment)
     val dataSource = createDataSource(jdbcUrl)
 
-    retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
+    val retryConfig = RetryConfig.Builder(
+      10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))
+    )
+    retry(retryConfig.build()) {
       try {
         connectToDataSource(dataSource)
       } catch (e: Exception) {
