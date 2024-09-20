@@ -9,7 +9,7 @@ plugins {
 
 dependencies {
   api(libs.awsDynamodb)
-  api(libs.awsSdkCore)
+  api(libs.awsCore)
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)

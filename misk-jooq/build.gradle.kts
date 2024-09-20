@@ -14,7 +14,7 @@ dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jooq)
-  api(libs.kotlinLogging)
+  api(libs.loggingApi)
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))

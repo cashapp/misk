@@ -11,7 +11,7 @@ dependencies {
   api(project(":misk-inject"))
   implementation(libs.guava)
   implementation(libs.jakartaInject)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk-core"))
 

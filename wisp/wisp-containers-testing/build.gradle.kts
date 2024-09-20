@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     api(libs.dockerApi)
-    api(libs.kotlinLogging)
+    api(libs.loggingApi)
     implementation(libs.dockerCore)
     implementation(libs.dockerTransport)
     implementation(libs.dockerTransportCore)

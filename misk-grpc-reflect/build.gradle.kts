@@ -26,7 +26,7 @@ dependencies {
   api(libs.wireReflector)
   api(project(":misk-actions"))
   api(project(":misk-inject"))
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.kotlinReflect)
   implementation(libs.okio)
   implementation(libs.wireRuntime)

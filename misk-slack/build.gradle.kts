@@ -15,7 +15,7 @@ dependencies {
   api(project(":misk"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.kotlinReflect)
   implementation(project(":misk-actions"))
   implementation(libs.retrofitMoshi)

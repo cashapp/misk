@@ -29,7 +29,7 @@ dependencies {
   testFixturesImplementation(libs.dockerTransport)
   testFixturesImplementation(libs.dockerTransportCore)
   testFixturesImplementation(libs.guice)
-  testFixturesImplementation(libs.kotlinLogging)
+  testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.okHttp)
   testFixturesImplementation(libs.okio)
   testFixturesImplementation(project(":wisp:wisp-logging"))

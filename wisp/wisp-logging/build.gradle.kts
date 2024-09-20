@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    api(libs.kotlinLogging)
+    api(libs.loggingApi)
     api(libs.slf4jApi)
     api(project(":wisp:wisp-sampling"))
   

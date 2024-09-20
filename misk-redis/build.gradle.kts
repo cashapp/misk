@@ -21,7 +21,7 @@ dependencies {
   implementation(libs.okio)
   implementation(libs.prometheusClient)
   implementation(project(":wisp:wisp-logging"))
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-service"))
 
@@ -33,7 +33,7 @@ dependencies {
   testFixturesImplementation(libs.dockerApi)
   testFixturesImplementation(libs.guava)
   testFixturesImplementation(libs.guice)
-  testFixturesImplementation(libs.kotlinLogging)
+  testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.okio)
   testFixturesImplementation(project(":wisp:wisp-containers-testing"))
   testFixturesImplementation(project(":wisp:wisp-logging"))

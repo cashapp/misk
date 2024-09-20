@@ -27,22 +27,22 @@ sqldelight = "2.0.0"
 wire = "5.0.0"
 
 [libraries]
+apacheCommonsIo = { module = "commons-io:commons-io", version = "2.16.1" }
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.16.0" }
 apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.0" }
-apacheCommonsIo = { module = "commons-io:commons-io", version = "2.16.1" }
 assertj = { module = "org.assertj:assertj-core", version = "3.26.3" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version.ref = "awaitility" }
 aws2Auth = { module = "software.amazon.awssdk:auth", version.ref = "aws2" }
 aws2Bom = { module = "software.amazon.awssdk:bom", version.ref = "aws2" }
+aws2Core = { module = "software.amazon.awssdk:aws-core", version.ref = "aws2" }
 aws2Dynamodb = { module = "software.amazon.awssdk:dynamodb", version.ref = "aws2" }
 aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", version.ref = "aws2" }
 aws2Regions = { module = "software.amazon.awssdk:regions" }
+awsCore = { module = "com.amazonaws:aws-java-sdk-core", version.ref = "aws1" }
 awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version.ref = "aws1" }
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version.ref = "aws1" }
-awsSdkAwsCore= { module = "software.amazon.awssdk:aws-core", version.ref = "aws2" }
-awsSdkCore = { module = "com.amazonaws:aws-java-sdk-core", version.ref = "aws1" }
-awsSdkSdkCore = { module = "software.amazon.awssdk:sdk-core", version.ref = "aws2" }
+awsSdkCore = { module = "software.amazon.awssdk:sdk-core", version.ref = "aws2" }
 awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version.ref = "aws1" }
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk15on", version = "1.70" }
 bouncycastlePgp = { module = "org.bouncycastle:bcpg-jdk15on", version = "1.70" }
@@ -54,8 +54,8 @@ concurrencyLimitsCore = { module = "com.netflix.concurrency-limits:concurrency-l
 cronUtils = { module = "com.cronutils:cron-utils", version = "9.2.1" }
 datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.10" }
 detektApi = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }
-detektParser = { module = "io.gitlab.arturbosch.detekt:detekt-parser", version.ref = "detekt" }
 detektGradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+detektParser = { module = "io.gitlab.arturbosch.detekt:detekt-parser", version.ref = "detekt" }
 detektPsiUtils = { module = "io.gitlab.arturbosch.detekt:detekt-psi-utils", version.ref = "detekt" }
 detektTest = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref = "detekt" }
 detektTestUtils = { module = "io.gitlab.arturbosch.detekt:detekt-test-utils", version.ref = "detekt" }
@@ -69,17 +69,18 @@ findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2"
 flywayGradlePlugin = { module = "org.flywaydb:flyway-gradle-plugin", version.ref = "flyway" }
 gax = { module = "com.google.api:gax", version = "2.52.0" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "1.95.4" }
-gcpCloudStorage = { module = "com.google.cloud:google-cloud-storage", version = "1.117.1" }
 gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.2.10" }
-gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version ="v1-rev20210622-1.31.5" }
+gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20210622-1.31.5" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "2.3.2" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.74.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "1.35.0" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20210127-1.31.5" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
-googleAuthLibraryOauth2 = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
+googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
 googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "1.96.1" }
+googleCloudStorage = { module = "com.google.cloud:google-cloud-storage", version = "1.117.1" }
+googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.43.0" }
 googleHttpClient = { module = "com.google.http-client:google-http-client", version.ref = "googleHttp" }
 googleHttpClientJackson = { module = "com.google.http-client:google-http-client-jackson2", version.ref = "googleHttp" }
 grpcApi = { module = "io.grpc:grpc-api", version = "1.60.0" }
@@ -92,10 +93,11 @@ guava = { module = "com.google.guava:guava" }
 guavaBom = { module = "com.google.guava:guava-bom", version = "33.3.0-jre" }
 guavaTestLib = { module = "com.google.guava:guava-testlib" }
 guice = { module = "com.google.inject:guice" }
-guiceBom = { module = "com.google.inject:guice-bom", version = "6.0.0" }
 guice7Bom = { module = "com.google.inject:guice-bom", version = "7.0.0" }
+guiceBom = { module = "com.google.inject:guice-bom", version = "6.0.0" }
 guiceTestLib = { module = "com.google.inject.extensions:guice-testlib" }
-hibernateCore = { module = "org.hibernate:hibernate-core", version = "5.6.15.Final" }
+hibernate5Core = { module = "org.hibernate:hibernate-core", version = "5.6.15.Final" }
+hibernateJpaApi = { module = "javax.persistence:javax.persistence-api", version = "2.2" }
 hikariCp = { module = "com.zaxxer:HikariCP", version = "4.0.3" }
 hopliteCore = { module = "com.sksamuel.hoplite:hoplite-core", version.ref = "hoplite" }
 hopliteHocon = { module = "com.sksamuel.hoplite:hoplite-hocon", version.ref = "hoplite" }
@@ -111,10 +113,9 @@ jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", vers
 jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 jacksonJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
 jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
-javaxAnnotation = { module = "javax.annotation:javax.annotation-api", version = "1.3.2" }
 jakartaInject = { module = "jakarta.inject:jakarta.inject-api", version = "2.0.1" }
+javaxAnnotation = { module = "javax.annotation:javax.annotation-api", version = "1.3.2" }
 javaxInject = { module = "javax.inject:javax.inject", version = "1" }
-javaxPersistenceApi = { module = "javax.persistence:javax.persistence-api", version = "2.2" }
 jedis = { module = "redis.clients:jedis", version = "5.1.5" }
 jerseyBom = { module = "org.glassfish.jersey:jersey-bom", version = "3.1.8" }
 jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "22.0.0" }
@@ -151,19 +152,19 @@ kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin"
 kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlinGradleBom = { module = "org.jetbrains.kotlin:kotlin-gradle-plugins-bom", version.ref = "kotlin" }
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlinLogging = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinRetry = { module = "com.michael-bull.kotlin-retry:kotlin-retry", version = "1.0.9" }
 kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinXHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.11.0" }
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.8.1" }
-kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.11.0" }
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "18.0.1" }
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "6.3.0" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.4.14" }
+loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "mavenPublish" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
@@ -186,11 +187,10 @@ openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", ver
 openTracingUtil = { module = "io.opentracing:opentracing-util", version = "0.33.0" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.3.9" }
 prometheusClient = { module = "io.prometheus:simpleclient" }
-prometheusClientCommon = { module = "io.prometheus:simpleclient_common" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version = "0.16.0" }
+prometheusClientCommon = { module = "io.prometheus:simpleclient_common" }
 prometheusHotspot = { module = "io.prometheus:simpleclient_hotspot" }
 prometheusHttpserver = { module = "io.prometheus:simpleclient_httpserver" }
-protoGoogleCommon = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.43.0" }
 protobufGradlePlugin = { module = "com.google.protobuf:protobuf-gradle-plugin", version.ref = "protobufPlugin" }
 protobufJava = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
 protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
@@ -202,6 +202,10 @@ retrofitScalars = { module = "com.squareup.retrofit2:converter-scalars", version
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version.ref = "retrofit" }
 servletApi = { module = "javax.servlet:javax.servlet-api", version = "3.1.0" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
+sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }
+sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
+sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
+sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
 tempest2Testing = { module = "app.cash.tempest:tempest2-testing" }
 tempest2TestingDocker = { module = "app.cash.tempest:tempest2-testing-docker" }
 tempest2TestingInternal = { module = "app.cash.tempest:tempest2-testing-internal" }
@@ -212,10 +216,6 @@ tempestTestingDocker = { module = "app.cash.tempest:tempest-testing-docker" }
 tempestTestingInternal = { module = "app.cash.tempest:tempest-testing-internal" }
 tempestTestingJvm = { module = "app.cash.tempest:tempest-testing-jvm" }
 threeTenBp = { module = "org.threeten:threetenbp", version = "1.6.9" }
-sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }
-sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
-sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
-sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
 tink = { module = "com.google.crypto.tink:tink", version = "1.12.0" }
 tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.9.1" }
 tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.10.0" }

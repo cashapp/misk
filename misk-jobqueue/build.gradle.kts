@@ -24,7 +24,7 @@ dependencies {
   testImplementation(libs.guice)
   testImplementation(libs.jakartaInject)
   testImplementation(libs.junitApi)
-  testImplementation(libs.kotlinLogging)
+  testImplementation(libs.loggingApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.logbackClassic)
   testImplementation(libs.moshiCore)

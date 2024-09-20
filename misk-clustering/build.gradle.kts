@@ -9,7 +9,7 @@ plugins {
 dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
-  api(libs.kotlinLogging)
+  api(libs.loggingApi)
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-lease-testing"))
   api(project(":misk-inject"))
