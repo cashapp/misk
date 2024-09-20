@@ -90,7 +90,7 @@ dependencies {
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.logbackClassic)
-  testImplementation(libs.protoGoogleCommon)
+  testImplementation(libs.googleCommonProtos)
   testImplementation(project(":wisp:wisp-logging-testing"))
 }
 

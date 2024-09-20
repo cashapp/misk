@@ -8,7 +8,7 @@ plugins {
 }
 
 dependencies {
-  api(libs.awsSdkCore)
+  api(libs.awsCore)
   api(libs.awsS3)
   api(libs.guice)
   api(libs.jakartaInject)
@@ -20,7 +20,7 @@ dependencies {
   implementation(libs.bouncycastle)
   implementation(libs.bouncycastlePgp)
   implementation(libs.guava)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(libs.okio)
   implementation(libs.tinkAwskms)

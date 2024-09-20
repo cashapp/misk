@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     api(libs.launchDarkly)
-    api(libs.kotlinLogging)
+    api(libs.loggingApi)
     api(libs.micrometerCore)
     api(libs.moshiCore)
     api(project(":wisp:wisp-client"))

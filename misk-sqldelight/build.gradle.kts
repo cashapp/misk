@@ -9,7 +9,7 @@ plugins {
 
 dependencies {
   api(libs.sqldelightRuntime)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)

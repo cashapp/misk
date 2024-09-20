@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinLogging)
+    implementation(libs.loggingApi)
     implementation(libs.okio)
     implementation(project(":wisp:wisp-logging"))
     runtimeOnly(libs.bouncycastle)

@@ -14,7 +14,7 @@ dependencies {
   api(libs.jakartaInject)
   api(libs.jettyServletApi)
   api(libs.junitApi)
-  api(libs.kotlinLogging)
+  api(libs.loggingApi)
   api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.openTracingMock)

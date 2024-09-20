@@ -19,7 +19,7 @@ dependencies {
   implementation(project(":wisp:wisp-logging"))
   implementation(libs.bucket4jCore)
   implementation(libs.bucket4jMySQL)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
 
   testImplementation(project(":misk"))
   testImplementation(project(":misk-config"))

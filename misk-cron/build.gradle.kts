@@ -13,7 +13,7 @@ dependencies {
   api(libs.jakartaInject)
   api(project(":misk"))
   api(project(":misk-inject"))
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(project(":wisp:wisp-lease"))
   implementation(project(":wisp:wisp-logging"))

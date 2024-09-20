@@ -9,7 +9,7 @@ plugins {
 dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
-  api(libs.kotlinLogging)
+  api(libs.loggingApi)
   api(libs.kotlinRetry)
   api(libs.okHttp)
   api(libs.slf4jApi)

@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-  api(libs.awsSdkCore)
+  api(libs.awsCore)
   api(libs.awsS3)
   api(libs.awsSqs)
   api(libs.guava)
@@ -21,7 +21,7 @@ dependencies {
   api(project(":misk-feature"))
   api(project(":misk-inject"))
   api(project(":misk-jobqueue"))
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(libs.openTracing)
   implementation(libs.openTracingDatadog)
