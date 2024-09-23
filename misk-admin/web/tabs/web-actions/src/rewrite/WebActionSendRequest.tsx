@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import _ from "lodash"
 import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core"
 import { WebActionMetadata } from "./types"
+import { MetadataCopyToClipboard } from "../components"
 import { FormComponent } from "./WebActionSendRequestFormComponents"
 import axios, { AxiosResponse } from "axios"
 import fileDownload from "js-file-download"
@@ -16,7 +17,7 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
   const [requestInput, setRequestInput] = useState<any>(null) // request view model
   const [requestRaw, setRequestRaw] = useState<any>({}) // request raw data
   const [loading, setLoading] = useState(false)
-  const [response, setResponse] = useState("")
+  const [responseRaw, setResponseRaw] = useState<any>({})
   const [url, setUrl] = useState(webActionMetadata.pathPattern)
 
   useEffect(() => {
@@ -60,20 +61,14 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
 
     axiosRequest
       .then(response => {
-        setResponse(JSON.stringify(response.data, null, 2))
+        setResponseRaw(response.data)
         maybeDownloadFile(response)
       })
       .catch(e => {
         if (e.response) {
-          setResponse(
-            JSON.stringify(
-              _.pick(e.response, "data", "status", "statusText"),
-              null,
-              2
-            )
-          )
+          setResponseRaw(_.pick(e.response, "data", "status", "statusText"))
         } else {
-          setResponse(e.message)
+          setResponseRaw(e.message)
         }
       })
       .finally(() => {
@@ -157,11 +152,18 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
             </Button>
           </div>
         </div>
+        <MetadataCopyToClipboard
+          data={requestRaw}
+          description={"Request Body"}
+        />
         <pre style={{ whiteSpace: "pre-wrap" }}>
           {JSON.stringify(requestRaw, null, 2)}
         </pre>
         <H5>Response</H5>
-        <pre style={{ whiteSpace: "pre-wrap" }}>{response}</pre>
+        <MetadataCopyToClipboard data={responseRaw} description={"Response"} />
+        <pre style={{ whiteSpace: "pre-wrap" }}>
+          {JSON.stringify(responseRaw, null, 2)}
+        </pre>
       </div>
     </div>
   )
