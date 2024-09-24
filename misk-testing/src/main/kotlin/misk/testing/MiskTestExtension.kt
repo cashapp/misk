@@ -196,19 +196,6 @@ private fun ExtensionContext.startService(): Boolean {
   }
 }
 
-
-private fun ServiceManager.jettyIsRunning() : Boolean {
-  return this
-    .servicesByState()
-    .values()
-    .toList()
-    .any { it.toString().startsWith("JettyService") }
-}
-
-private fun ExtensionContext.stopJetty() {
-  this.retrieve<Injector>("injector").getInstance<JettyService>().stop()
-}
-
 // The injector is reused across tests if
 //   1. The tests module(s) used in the test extend ReusableTestModules, AND
 //   2. The environment variable MISK_TEST_REUSE_INJECTOR is set to true
@@ -232,11 +219,4 @@ private fun ExtensionContext.getExternalDependencies(): Iterable<ExternalDepende
 
 private fun ServiceManager.stop(context: ExtensionContext) {
   this.stopAsync().awaitStopped(30, TimeUnit.SECONDS)
-  /**
-   * By default, Jetty shutdown is not managed by Guava so needs to be
-   * done explicitly. This is being done in MiskApplication.
-   */
-  if (this.jettyIsRunning()) {
-    context.stopJetty()
-  }
 }

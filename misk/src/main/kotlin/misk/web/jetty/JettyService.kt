@@ -400,9 +400,7 @@ class JettyService @Inject internal constructor(
     //
     // Ideally we could call jetty.awaitInflightRequests() but that's not available
     // for us.
-    //
-    // Default is to shutdown jetty after all guava managed services are shutdown.
-    if (webConfig.shutdown_sleep_ms >= 0) {
+    if (webConfig.shutdown_sleep_ms > 0) {
       sleep(webConfig.shutdown_sleep_ms.toLong())
     } else {
       stop()
