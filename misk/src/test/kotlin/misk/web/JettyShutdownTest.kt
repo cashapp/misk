@@ -80,7 +80,6 @@ internal abstract class AbstractJettyShutdownTest {
 
     jetty.stopAsync()
     try {
-      jetty.stop()
       jetty.awaitTerminated(timeoutMs, TimeUnit.MILLISECONDS)
     } catch (e: TimeoutException) {
       assertThat(timeoutExpected).isTrue()
