@@ -19,7 +19,7 @@ import misk.web.dashboard.AdminDashboardAccess
  * Builds dashboard UI and loads Hotwire tab.
  */
 @Singleton
-class DashboardHotwireTabAction @Inject constructor(
+internal class DashboardHotwireTabAction @Inject constructor(
   @JvmSuppressWildcards private val clientHttpCall: ActionScoped<HttpCall>,
   private val dashboardPageLayout: DashboardPageLayout,
   private val entries: List<DashboardTabLoaderEntry>,

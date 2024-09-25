@@ -51,14 +51,14 @@ class StaticResourceAction @Inject constructor(
   @Unauthenticated // TODO(adrw) https://github.com/square/misk/issues/429
   fun action(): Response<ResponseBody> {
     val httpCall = clientHttpCall.get()
-    return getResponse(httpCall)
+    return getResponse(httpCall.url)
   }
 
-  fun getResponse(httpCall: HttpCall): Response<ResponseBody> {
+  fun getResponse(url: HttpUrl): Response<ResponseBody> {
     val staticResourceEntry =
-      resourceEntryFinder.staticResource(httpCall.url) as StaticResourceEntry?
-        ?: return NotFoundAction.response(httpCall.url.encodedPath.drop(1))
-    return MatchedResource(staticResourceEntry).getResponse(httpCall)
+      resourceEntryFinder.staticResource(url) as StaticResourceEntry?
+        ?: return NotFoundAction.response(url.encodedPath.drop(1))
+    return MatchedResource(staticResourceEntry).getResponse(url)
   }
 
   private enum class Kind {
@@ -68,11 +68,11 @@ class StaticResourceAction @Inject constructor(
   }
 
   private inner class MatchedResource(var matchedEntry: StaticResourceEntry) {
-    fun getResponse(httpCall: HttpCall): Response<ResponseBody> {
-      val urlPath = httpCall.url.encodedPath
+    fun getResponse(url: HttpUrl): Response<ResponseBody> {
+      val urlPath = url.encodedPath
       return when (exists(urlPath)) {
         Kind.NO_MATCH -> when {
-          !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(httpCall.url))
+          !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(url))
           // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
           urlPath.endsWith("/") -> resourceResponse(
             normalizePath(matchedEntry.url_path_prefix)
@@ -82,8 +82,8 @@ class StaticResourceAction @Inject constructor(
         }
 
         Kind.RESOURCE -> resourceResponse(urlPath)
-        Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(httpCall.url))
-      } ?: NotFoundAction.response(httpCall.url.encodedPath.drop(1))
+        Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(url))
+      } ?: NotFoundAction.response(url.encodedPath.drop(1))
     }
 
     /** Returns true if the mapped path exists on either the resource path or file system. */

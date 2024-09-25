@@ -1,5 +1,7 @@
 package misk.web.dashboard
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.html.body
 import kotlinx.html.div
 import kotlinx.html.head
@@ -15,14 +17,14 @@ import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /**
  * Kotlin backed tab loader, equivalent to /_tab/slug/index.html
  */
 @Singleton
 class MiskWebTabIndexAction @Inject constructor(
+  // TODO this probably shouldn't be limited to AdminDashboard tabs only but Misk-Web is
+  //  deprecated so this can be solved if it's raised as a problem
   @AdminDashboard private val dashboardTabs: List<DashboardTab>,
 ) : WebAction {
   @Get("$PATH/{slug}/{rest:.*}")
@@ -33,6 +35,8 @@ class MiskWebTabIndexAction @Inject constructor(
       ?: throw NotFoundException("No Misk-Web tab found for slug: $slug")
     // TODO remove this hack when new Web Actions tab lands and old ones removed, v1 and v2 are in the same web-actions tab
     val normalizedSlug = if (dashboardTab.slug == "web-actions-v1") "web-actions" else dashboardTab.slug
+    val tabEntrypointJs = "/_tab/${normalizedSlug}/tab_${normalizedSlug}.js"
+
     return buildHtml {
       html {
         head {
@@ -73,7 +77,7 @@ class MiskWebTabIndexAction @Inject constructor(
           // Tab specific resources
           script {
             type = "text/javascript"
-            src = "/_tab/${normalizedSlug}/tab_${normalizedSlug}.js"
+            src = tabEntrypointJs
           }
         }
       }
