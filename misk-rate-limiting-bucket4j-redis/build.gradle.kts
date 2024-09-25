@@ -9,11 +9,10 @@ plugins {
 
 dependencies {
   api(project(":misk-inject"))
-  api(project(":wisp:wisp-rate-limiting"))
-  api(libs.guice)
-  api(libs.jakartaInject)
-  api(libs.jedis)
-  api(libs.micrometerCore)
+  implementation(project(":wisp:wisp-rate-limiting"))
+  implementation(libs.guice)
+  implementation(libs.jedis)
+  implementation(libs.micrometerCore)
 
   implementation(project(":wisp:wisp-rate-limiting:bucket4j"))
   implementation(libs.bucket4jCore)
