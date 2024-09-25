@@ -1,7 +1,7 @@
 public final class misk/ratelimiting/bucket4j/redis/RedisBucket4jRateLimiterModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Ljava/time/Duration;)V
-	public synthetic fun <init> (Ljava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun providedRateLimiter (Ljava/time/Clock;Lio/micrometer/core/instrument/MeterRegistry;Lredis/clients/jedis/UnifiedJedis;)Lwisp/ratelimiting/RateLimiter;
+	public fun <init> (Ljava/time/Duration;Ljava/lang/annotation/Annotation;)V
+	public synthetic fun <init> (Ljava/time/Duration;Ljava/lang/annotation/Annotation;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
