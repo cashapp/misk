@@ -985,16 +985,6 @@ public final class misk/web/metadata/webaction/WebActionsDashboardTabModule : mi
 	public fun <init> (Z)V
 }
 
-public final class misk/web/v2/DashboardHotwireTabAction : misk/web/actions/WebAction {
-	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/web/v2/DashboardPageLayout;Ljava/util/List;)V
-	public final fun get (Ljava/lang/String;)Ljava/lang/String;
-}
-
-public final class misk/web/v2/DashboardIFrameTabAction : misk/web/actions/WebAction {
-	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/web/v2/DashboardPageLayout;Ljava/util/List;)V
-	public final fun get (Ljava/lang/String;)Ljava/lang/String;
-}
-
 public final class misk/web/v2/DashboardIndexAccessBlock {
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function6;)V
 	public final fun component1 ()Lkotlin/reflect/KClass;

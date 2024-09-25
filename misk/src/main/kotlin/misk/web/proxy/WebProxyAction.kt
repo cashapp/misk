@@ -55,11 +55,15 @@ class WebProxyAction @Inject constructor(
   @Unauthenticated
   fun action(): Response<ResponseBody> {
     val httpCall = clientHttpCall.get()
-    val matchedEntry = resourceEntryFinder.webProxy(httpCall.url) as WebProxyEntry?
-      ?: return NotFoundAction.response(httpCall.url.toString())
+    return getResponse(httpCall.url)
+  }
+
+  fun getResponse(url: HttpUrl): Response<ResponseBody> {
+    val matchedEntry = resourceEntryFinder.webProxy(url) as WebProxyEntry?
+      ?: return NotFoundAction.response(url.toString())
     val proxyUrl = matchedEntry.web_proxy_url.newBuilder()
-      .encodedPath(httpCall.url.encodedPath)
-      .query(httpCall.url.query)
+      .encodedPath(url.encodedPath)
+      .query(url.query)
       .build()
     return forwardRequestTo(proxyUrl)
   }
@@ -70,7 +74,7 @@ class WebProxyAction @Inject constructor(
     return try {
       optionalBinder.proxyClient.newCall(proxyRequest).execute().toMisk()
     } catch (e: IOException) {
-      staticResourceAction.getResponse(httpCall)
+      staticResourceAction.getResponse(httpCall.url)
     }
   }
 

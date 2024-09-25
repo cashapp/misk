@@ -21,8 +21,9 @@ import misk.web.dashboard.DashboardModule
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
+import wisp.deployment.Deployment
 
-class ExemplarDashboardModule : KAbstractModule() {
+class ExemplarDashboardModule(private val deployment: Deployment) : KAbstractModule() {
   override fun configure() {
     // Favicon.ico and any other shared static assets available at /static/*
     multibind<StaticResourceEntry>()
@@ -95,6 +96,19 @@ class ExemplarDashboardModule : KAbstractModule() {
       url = { appName, deployment -> "https://internal-tool.cash.app/?app=$appName&deployment=$deployment" },
       category = "Internal"
     ))
+
+    // Custom Admin Dashboard Tab at /_admin/... which doesn't exist and shows graceful failure 404
+    install(WebActionModule.create<AlphaIndexAction>())
+    install(
+      DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
+        isDevelopment = deployment.isLocalDevelopment,
+        slug = "not-found",
+        urlPathPrefix = "/_admin/not-found/",
+        developmentWebProxyUrl = "http://localhost:3000/",
+        menuLabel = "Not Found",
+        menuCategory = "Admin Tools"
+      )
+    )
   }
 }
 

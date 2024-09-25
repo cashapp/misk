@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
     ConfigModule.create("exemplar", config),
     DeploymentModule(deployment),
     ExemplarAccessModule(),
-    ExemplarDashboardModule(),
+    ExemplarDashboardModule(deployment),
     ExemplarMetadataModule(),
     ExemplarWebActionsModule(),
     ExemplarCronModule(),

@@ -2296,6 +2296,7 @@ public final class misk/web/proxy/OptionalBinder {
 public final class misk/web/proxy/WebProxyAction : misk/web/actions/WebAction {
 	public fun <init> (Lmisk/web/proxy/OptionalBinder;Lmisk/scope/ActionScoped;Lmisk/web/resources/StaticResourceAction;Lmisk/web/resources/ResourceEntryFinder;)V
 	public final fun action ()Lmisk/web/Response;
+	public final fun getResponse (Lokhttp3/HttpUrl;)Lmisk/web/Response;
 }
 
 public final class misk/web/proxy/WebProxyEntry : misk/web/dashboard/ValidWebEntry {
@@ -2327,7 +2328,7 @@ public final class misk/web/resources/ResourceEntryFinder {
 public final class misk/web/resources/StaticResourceAction : misk/web/actions/WebAction {
 	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/resources/ResourceLoader;Lmisk/web/resources/ResourceEntryFinder;)V
 	public final fun action ()Lmisk/web/Response;
-	public final fun getResponse (Lmisk/web/HttpCall;)Lmisk/web/Response;
+	public final fun getResponse (Lokhttp3/HttpUrl;)Lmisk/web/Response;
 }
 
 public final class misk/web/resources/StaticResourceEntry : misk/web/dashboard/ValidWebEntry {
