@@ -312,6 +312,13 @@ class MiskWebModule @JvmOverloads constructor(
     return StatisticsHandler()
   }
 
+  @JettyHealthService
+  @Provides
+  @Singleton
+  internal fun provideJettyHealthStatisticsHandler(): StatisticsHandler {
+    return StatisticsHandler()
+  }
+
   @Provides
   @Singleton
   fun provideGzipHandler(): GzipHandler {
@@ -363,3 +370,7 @@ class MiskWebModule @JvmOverloads constructor(
 @BindingAnnotation
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 internal annotation class ReadinessRefreshQueue
+
+@BindingAnnotation
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+internal annotation class JettyHealthService

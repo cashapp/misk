@@ -13,6 +13,7 @@ import misk.security.ssl.TlsProtocols
 import misk.web.WebConfig
 import misk.web.WebSslConfig
 import misk.web.WebUnixDomainSocketConfig
+import misk.web.jetty.JettyHealthService.Companion.jettyHealthServiceEnabled
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
@@ -46,7 +47,6 @@ import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerI
 import wisp.logging.getLogger
 import java.io.File
 import java.io.IOException
-import java.lang.RuntimeException
 import java.lang.Thread.sleep
 import java.net.InetAddress
 import java.nio.file.Files
@@ -79,7 +79,7 @@ class JettyService @Inject internal constructor(
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting Jetty")
 
-    if (webConfig.health_port >= 0) {
+    if (!webConfig.jettyHealthServiceEnabled() && webConfig.health_port >= 0) {
       healthExecutor = ThreadPoolExecutor(
         // 2 threads for jetty acceptor and selector. 2 threads for k8s liveness/readiness.
         4,
@@ -274,7 +274,7 @@ class JettyService @Inject internal constructor(
 
         // set file permissions after socket creation so sidecars (e.g. envoy, istio) have access
         try {
-          udsConnector.start();
+          udsConnector.start()
           setFilePermissions(socketFile)
         } catch (e: Exception) {
           cleanAndThrow(udsConnector, e)
@@ -300,7 +300,7 @@ class JettyService @Inject internal constructor(
     val servletContextHandler = ServletContextHandler()
     servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
 
-    JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
+    JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null)
     server.addManaged(servletContextHandler)
 
     statisticsHandler.handler = servletContextHandler
@@ -392,15 +392,22 @@ class JettyService @Inject internal constructor(
   }
 
   override fun shutDown() {
-    // We need jetty to shut down at the very end to keep outbound connections alive
-    // (due to sidecars). As such, we wait for `shutdown_sleep_ms` so that our
-    // in flight requests drain, but we don't shut down dependencies until after.
-    //
-    // The true jetty shutdown occurs in stop() above, called from MiskApplication.
-    //
-    // Ideally we could call jetty.awaitInflightRequests() but that's not available
-    // for us.
-    if (webConfig.shutdown_sleep_ms > 0) {
+    if (webConfig.jettyHealthServiceEnabled()) {
+      // We will keep the health instance alive so the server continues to report liveness
+      // until graceful shutdown is complete.  It is therefore safe to gracefully shut down the
+      // web service while we continue orderly graceful cleanup.
+      stop()
+    } else if (webConfig.shutdown_sleep_ms > 0) {
+      // We need jetty to shut down at the very end to keep outbound connections alive
+      // (due to sidecars). As such, we wait for `shutdown_sleep_ms` so that our
+      // in flight requests drain, but we don't shut down dependencies until after.
+      //
+      // The true jetty shutdown occurs in stop() above, called from MiskApplication.
+      //
+      // Ideally we could call jetty.awaitInflightRequests() but that's not available
+      // for us.
+      //
+      // Default is to shutdown jetty after all guava managed services are shutdown.
       sleep(webConfig.shutdown_sleep_ms.toLong())
     } else {
       stop()
@@ -436,7 +443,7 @@ private val Server.httpsUrl: HttpUrl?
       ?.toHttpUrl()
   }
 
-private fun NetworkConnector.toHttpUrl(): HttpUrl {
+internal fun NetworkConnector.toHttpUrl(): HttpUrl {
   val context = server.getChildHandlerByClass(ContextHandler::class.java)
   val protocol = defaultConnectionFactory.protocol
   val scheme = if (protocol.startsWith("SSL-") || protocol == "SSL") "https" else "http"
@@ -488,17 +495,17 @@ private fun setFilePermissions(file: File) {
   try {
     Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rw-rw-rw-"))
   } catch (e: IOException) {
-    throw RuntimeException(e);
+    throw RuntimeException(e)
   }
 }
 
 private fun cleanAndThrow(connector: Connector, exception: Exception){
-  var runtimeException = RuntimeException(exception);
+  var runtimeException = RuntimeException(exception)
   if (connector.isStarted()){
     try {
-      connector.stop();
+      connector.stop()
     } catch (e: Exception) {
-      runtimeException.addSuppressed(e);
+      runtimeException.addSuppressed(e)
     }
   }
   throw runtimeException

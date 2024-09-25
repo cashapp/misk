@@ -1,5 +1,6 @@
 package misk.web
 
+import misk.annotation.ExperimentalMiskApi
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
@@ -17,7 +18,9 @@ data class WebConfig @JvmOverloads constructor(
   val idle_timeout: Long = 0,
 
   /**
-   * If >= 0, use a dedicated jetty thread pool for health checking.
+   * If >= 0,
+   *  By default, use a dedicated jetty thread pool for health checking.
+   *  With health_dedicated_jetty_instance = true, use a dedicated jetty instance.
    *
    * A dedicated thread pool ensures that health checks are not queued or rejected when the service
    * is saturated and queueing requests. If health checks are rejected and/or queued, the health
@@ -26,6 +29,22 @@ data class WebConfig @JvmOverloads constructor(
    * queues and more health checks failures.
    */
   val health_port: Int = -1,
+
+  /**
+   * @ExperimentalMiskApi - this feature is still being verified in production.
+   *
+   * health_port must be >= 0,
+   *
+   * A dedicated jetty instance ensures the service readiness and liveness endpoints
+   * remain available during graceful shutdown to prevent the container from being forcefully
+   * terminated and graceful failover from readiness check failures via HTTP 503.
+   *
+   * A separate jetty instance allows the primary instance to allow in flight connections to
+   * complete before shutting down and then shut down supporting services orderly until all
+   * are stopped and the health instance can shut down safely.
+   */
+  @property:ExperimentalMiskApi
+  val health_dedicated_jetty_instance: Boolean = false,
 
   /** The network interface to bind to. Null or 0.0.0.0 to bind to all interfaces. */
   val host: String? = null,
