@@ -85,9 +85,9 @@ class MiskApplication private constructor(
       val sb = StringBuilder().append('\n')
       e.message?.let { sb.append(it).append("\n\n") }
       if (e.jCommander?.parsedCommand != null) {
-        jc.usage(e.jCommander.parsedCommand, sb)
+        jc.usageFormatter.usage(e.jCommander.parsedCommand, sb)
       } else {
-        jc.usage(sb)
+        jc.usageFormatter.usage(sb)
       }
       throw CliException(sb.toString())
     }

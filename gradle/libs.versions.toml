@@ -105,7 +105,7 @@ hopliteJson = { module = "com.sksamuel.hoplite:hoplite-json", version.ref = "hop
 hopliteToml = { module = "com.sksamuel.hoplite:hoplite-toml", version.ref = "hoplite" }
 hopliteYaml = { module = "com.sksamuel.hoplite:hoplite-yaml", version.ref = "hoplite" }
 hsqldb = { module = "org.hsqldb:hsqldb", version = "2.7.3" }
-jCommander = { module = "com.beust:jcommander", version = "1.72" }
+jCommander = { module = "com.beust:jcommander", version = "1.82" }
 jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
 jacksonBom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
 jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
