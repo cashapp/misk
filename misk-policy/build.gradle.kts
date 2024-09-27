@@ -26,6 +26,7 @@ dependencies {
   testFixturesApi(libs.jakartaInject)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-policy"))
+  testFixturesApi(project(":misk-testing-api"))
   testFixturesImplementation(libs.dockerTransport)
   testFixturesImplementation(libs.dockerTransportCore)
   testFixturesImplementation(libs.guice)
