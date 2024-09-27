@@ -12,6 +12,9 @@ import misk.inject.getInstance
 import misk.web.jetty.JettyHealthService
 import misk.web.jetty.JettyService
 import wisp.logging.getLogger
+import kotlin.concurrent.thread
+import kotlin.system.measureTimeMillis
+import kotlin.time.Duration.Companion.milliseconds
 
 /** The entry point for misk applications */
 class MiskApplication private constructor(
@@ -104,8 +107,8 @@ class MiskApplication private constructor(
     log.info { "creating application injector" }
     val injector = injectorGenerator()
     val serviceManager = injector.getInstance<ServiceManager>()
-    shutdownHook = object : Thread() {
-      override fun run() {
+    shutdownHook = thread(start = false) {
+      measureTimeMillis {
         log.info { "received a shutdown hook! performing an orderly shutdown" }
         serviceManager.stopAsync()
         serviceManager.awaitStopped()
@@ -122,8 +125,8 @@ class MiskApplication private constructor(
         val jettyHealthService = injector.getInstance<JettyHealthService>()
         jettyHealthService.stopAsync()
         jettyHealthService.awaitTerminated()
-
-        log.info { "orderly shutdown complete" }
+      }.also {
+        log.info { "orderly shutdown complete in ${it.milliseconds}" }
       }
     }
 
@@ -131,14 +134,19 @@ class MiskApplication private constructor(
 
     // We manage JettyHealthService outside ServiceManager because it must start first and
     // shutdown last to keep the container alive via liveness checks.
-    log.info { "starting services" }
-    val jettyHealthService = injector.getInstance<JettyHealthService>()
-    jettyHealthService.startAsync()
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    jettyHealthService.awaitRunning()
 
-    log.info { "all services started successfully" }
+    val jettyHealthService: JettyHealthService
+    measureTimeMillis {
+      log.info { "starting services" }
+      jettyHealthService = injector.getInstance<JettyHealthService>()
+      jettyHealthService.startAsync()
+      serviceManager.startAsync()
+      serviceManager.awaitHealthy()
+      jettyHealthService.awaitRunning()
+    }.also {
+      log.info { "all services started successfully in ${it.milliseconds}" }
+    }
+
     serviceManager.awaitStopped()
     jettyHealthService.awaitTerminated()
     log.info { "all services stopped" }
