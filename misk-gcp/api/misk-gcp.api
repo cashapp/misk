@@ -264,6 +264,7 @@ public abstract class misk/cloud/gcp/storage/BaseCustomStorageRpc : com/google/c
 	public fun patchAcl (Lcom/google/api/services/storage/model/BucketAccessControl;Ljava/util/Map;)Lcom/google/api/services/storage/model/BucketAccessControl;
 	public fun patchAcl (Lcom/google/api/services/storage/model/ObjectAccessControl;)Lcom/google/api/services/storage/model/ObjectAccessControl;
 	public fun patchDefaultAcl (Lcom/google/api/services/storage/model/ObjectAccessControl;)Lcom/google/api/services/storage/model/ObjectAccessControl;
+	public fun queryCompletedResumableUpload (Ljava/lang/String;J)Lcom/google/api/services/storage/model/StorageObject;
 	public fun read (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;JI)Lcom/google/cloud/Tuple;
 	public fun setIamPolicy (Ljava/lang/String;Lcom/google/api/services/storage/model/Policy;Ljava/util/Map;)Lcom/google/api/services/storage/model/Policy;
 	public fun testIamPermissions (Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lcom/google/api/services/storage/model/TestIamPermissionsResponse;
