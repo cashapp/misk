@@ -11,20 +11,21 @@ import misk.jobqueue.QueueName
 internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
   private val attributeImporter: AwsSqsQueueAttributeImporter,
   private val consumer: SqsJobConsumer,
-  private val consumerMapping: ConsumerMapping,
+  private val individualConsumerMapping: Map<QueueName, JobHandler>,
+  private val batchConsumerMapping: Map<QueueName, BatchJobHandler>,
   private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
   private val config: AwsSqsJobQueueConfig
 ) : AbstractIdleService() {
   override fun startUp() {
-    check(consumerMapping.individual.isNotEmpty() || consumerMapping.batch.isNotEmpty()) {
+    check(individualConsumerMapping.isNotEmpty() || batchConsumerMapping.isNotEmpty()) {
       "No handlers have been registered"
     }
 
-    val duplicateQueues = consumerMapping.individual.keys.intersect(consumerMapping.batch.keys)
+    val duplicateQueues = individualConsumerMapping.keys.intersect(batchConsumerMapping.keys)
     check(duplicateQueues.isEmpty()) { "Queues $duplicateQueues have multiple handlers" }
 
-    consumerMapping.individual.forEach { consumer.subscribe(it.key, it.value) }
-    consumerMapping.batch.forEach { consumer.subscribe(it.key, it.value) }
+    individualConsumerMapping.forEach { consumer.subscribe(it.key, it.value) }
+    batchConsumerMapping.forEach { consumer.subscribe(it.key, it.value) }
     externalQueues.forEach { attributeImporter.import(it.key) }
   }
 
@@ -35,12 +36,4 @@ internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
       consumer.shutDown()
     }
   }
-}
-
-@Singleton
-internal class ConsumerMapping @Inject constructor() {
-  @com.google.inject.Inject(optional = true)
-  var individual: Map<QueueName, JobHandler> = emptyMap()
-  @com.google.inject.Inject(optional = true)
-  var batch: Map<QueueName, BatchJobHandler> = emptyMap()
 }

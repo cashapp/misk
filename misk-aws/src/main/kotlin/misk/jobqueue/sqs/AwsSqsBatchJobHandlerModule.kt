@@ -7,6 +7,7 @@ import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.jobqueue.BatchJobHandler
+import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
 import kotlin.reflect.KClass
 
@@ -22,6 +23,7 @@ class AwsSqsBatchJobHandlerModule<T : BatchJobHandler> private constructor(
 ) : KAbstractModule() {
   override fun configure() {
     newMapBinder<QueueName, BatchJobHandler>().addBinding(queueName).to(handler.java)
+    newMapBinder<QueueName, JobHandler>()
 
     if (installRetryQueue) {
       newMapBinder<QueueName, BatchJobHandler>().addBinding(queueName.retryQueue).to(handler.java)
