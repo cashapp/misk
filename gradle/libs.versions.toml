@@ -200,7 +200,7 @@ retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref
 retrofitProtobuf = { module = "com.squareup.retrofit2:converter-protobuf", version.ref = "retrofit" }
 retrofitScalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version.ref = "retrofit" }
-servletApi = { module = "javax.servlet:javax.servlet-api", version = "3.1.0" }
+servletApi = { module = "javax.servlet:javax.servlet-api", version = "4.0.1" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
 sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
