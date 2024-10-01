@@ -10,6 +10,7 @@ class FakeJobHandlerModule<T : JobHandler> private constructor(
 
   override fun configure() {
     newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
+    newMapBinder<QueueName, BatchJobHandler>()
   }
 
   companion object {

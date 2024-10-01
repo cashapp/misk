@@ -37,7 +37,8 @@ import kotlin.math.min
 @Singleton
 class FakeJobQueue @Inject constructor(
   private val clock: Clock,
-  private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
+  private val individualHandlers: Provider<Map<QueueName, JobHandler>>,
+  private val batchHandlers: Provider<Map<QueueName, BatchJobHandler>>,
   private val tokenGenerator: TokenGenerator
 ) : JobQueue, TransactionalJobQueue, FakeFixture() {
   private val jobQueues by resettable { ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>() }
@@ -192,48 +193,58 @@ class FakeJobQueue @Inject constructor(
     deadletter: Boolean,
     jobsSupplier: () -> FakeJob?
   ): List<FakeJob> {
-    val jobHandlers = jobHandlers.get()
+    val individualHandlers = individualHandlers.get()
+    val batchHandlers = batchHandlers.get()
     val resultedJobs = mutableListOf<FakeJob>()
     val jobsToQueueBack = mutableSetOf<FakeJob>()
-    // Used to prevent an infinite loop by mistake in supplier.
-    val touchedJobs = mutableSetOf<FakeJob>()
-    while (true) {
-      val job = jobsSupplier.invoke() ?: break
-      check(touchedJobs.add(job))
 
+    jobsSupplier.asJobBatchSequence().forEach { (queueName, jobs) ->
       if (deadletter) {
         // If we don't reset whether it's deadlettered we'll always add it back to the queue.
-        job.deadLettered = false
-        job.acknowledged = false
+        jobs.forEach { job ->
+          job.deadLettered = false
+          job.acknowledged = false
+        }
       }
 
-      val jobHandler = jobHandlers[job.queueName]!!
+      val jobHandler = (individualHandlers[queueName] ?: batchHandlers[queueName])!!
+      check((queueName in individualHandlers).xor(queueName in batchHandlers)) {
+        "Queue $queueName has multiple handlers"
+      }
       try {
         val retryConfig = RetryConfig.Builder(retries, FlatBackoff(Duration.ofMillis(20)))
         retry(retryConfig.build()) {
-          // we re-enqueue the job if the backoff delayed time was called
-          if (job.delayedForBackoff) {
-            jobsToQueueBack += job
-          } else {
-            jobHandler.handleJob(job)
+          // we re-enqueue jobs if the backoff delayed time was called
+          jobsToQueueBack.addAll(jobs.filter { it.delayedForBackoff })
+          // we have to check which jobs in the batch were not processed in the previous try
+          val validJobs = jobs.filter {
+            !it.delayedForBackoff && !it.deadLettered && !it.acknowledged
+          }
+
+          if (validJobs.isNotEmpty()) {
+            when (jobHandler) {
+              is JobHandler -> jobHandler.handleJob(validJobs.single())
+              is BatchJobHandler -> jobHandler.handleJobs(validJobs)
+              else -> error("Unknown job handler type $jobHandler")
+            }
           }
         }
       } catch (e: Throwable) {
-        deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
-        // Re-throwing also ensures that we won't cause an infinite loop.
+        deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque)
+          .addAll(jobs.filter { !it.acknowledged })
         throw e
       }
-      // validate that the job has been added to jobsToQueueBack
-      if (jobsToQueueBack.contains(job)) {
-        continue
-      } else {
-        resultedJobs += job
-      }
 
-      if (!job.deadLettered && assertAcknowledged && !job.acknowledged) {
-        deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
-        error("Expected $job to be acknowledged after handling")
-      }
+      // If a job was not added to jobsToQueueBack, the job has been handled.
+      jobs.asSequence()
+        .filter { !jobsToQueueBack.contains(it) }
+        .forEach { job ->
+          resultedJobs += job
+          if (!job.deadLettered && assertAcknowledged && !job.acknowledged) {
+            deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
+            error("Expected $job to be acknowledged after handling")
+          }
+        }
     }
 
     // Re-enqueue deadlettered jobs outside of the main loop to prevent an infinite loop.
@@ -268,6 +279,39 @@ class FakeJobQueue @Inject constructor(
       // If remove() is false, then we lost race to another worker and should retry.
       if (jobs.remove(job)) {
         return job
+      }
+    }
+  }
+
+  /**
+   * The sequence fetches jobs from the supplier and yields the jobs in batches. If the
+   * corresponding queue's handler is JobHandler, the queue will yield a series of 1-job
+   * batches. If the queue's handler is BatchJobHandler, the queue will yield one batch once
+   * the supplier is exhausted. The batch will consist of all jobs from that queue.
+   */
+  private fun (() -> FakeJob?).asJobBatchSequence(): Sequence<Pair<QueueName, List<FakeJob>>> {
+    val jobSupplier = this
+    val batchHandlers = batchHandlers.get()
+
+    return sequence {
+      // Used to prevent an infinite loop by mistake in supplier.
+      val touchedJobs = mutableSetOf<FakeJob>()
+      val batchedJobs = mutableMapOf<QueueName, MutableList<FakeJob>>()
+
+      while (true) {
+        val job = jobSupplier.invoke() ?: break
+        check(touchedJobs.add(job))
+
+        val accumulateBatch = batchHandlers.containsKey(job.queueName)
+        if (accumulateBatch) {
+          batchedJobs.getOrPut(job.queueName, ::mutableListOf).add(job)
+        } else {
+          yield(job.queueName to listOf(job))
+        }
+      }
+
+      for ((queueName, jobs) in batchedJobs) {
+        yield(queueName to jobs)
       }
     }
   }

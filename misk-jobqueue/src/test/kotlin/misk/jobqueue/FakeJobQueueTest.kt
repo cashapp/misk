@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import org.junit.jupiter.api.Nested
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -546,6 +547,93 @@ internal class FakeJobQueueTest {
       "received GREEN job with message: J2",
     )
   }
+
+  @Nested
+  inner class BatchJobHandlerTests {
+
+    @Test
+    fun batchHandlerJobsAreHandledInSingleBatch() {
+      assertThat(fakeJobQueue.peekJobs(BATCH_QUEUE)).isEmpty()
+      assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+      exampleJobEnqueuer.enqueueForBatchHandler("B1")
+      exampleJobEnqueuer.enqueueGreen("G1")
+      exampleJobEnqueuer.enqueueForBatchHandler("B2")
+      exampleJobEnqueuer.enqueueGreen("G2")
+
+      assertThat(fakeJobQueue.peekJobs(BATCH_QUEUE)).hasSize(2)
+      assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
+
+      assertThat(fakeJobQueue.handleJobs()).hasSize(4)
+
+      assertThat(
+        logCollector.takeMessages(ExampleBatchJobHandler::class, consumeUnmatchedLogs = false)
+      ).containsExactlyInAnyOrder(
+        "received 2 jobs",
+        "received RED job with message: B1",
+        "received RED job with message: B2",
+      )
+      assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+        "received GREEN job with message: G1",
+        "received GREEN job with message: G2",
+      )
+
+      assertThat(fakeJobQueue.peekJobs(BATCH_QUEUE)).isEmpty()
+      assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+    }
+
+    @Test
+    fun deadlettersPartialBatch() {
+      assertThat(fakeJobQueue.peekJobs(BATCH_QUEUE)).isEmpty()
+
+      exampleJobEnqueuer.enqueueForBatchHandler("happy-path")
+      exampleJobEnqueuer.enqueueForBatchHandler(
+        "deadletter-once",
+        hint = ExampleJobHint.DEAD_LETTER_ONCE
+      )
+
+      assertThat(fakeJobQueue.peekJobs(BATCH_QUEUE)).hasSize(2)
+
+      val handledJobs = fakeJobQueue.handleJobs(BATCH_QUEUE)
+      assertThat(handledJobs).hasSize(2)
+      assertThat(handledJobs[0].acknowledged).isTrue()
+      assertThat(handledJobs[1].deadLettered).isTrue()
+
+      assertThat(logCollector.takeMessages(ExampleBatchJobHandler::class)).containsExactlyInAnyOrder(
+        "received 2 jobs",
+        "received RED job with message: happy-path",
+        "received RED job with message: deadletter-once",
+      )
+
+      assertThat(fakeJobQueue.peekJobs(BATCH_QUEUE)).isEmpty()
+      assertThat(fakeJobQueue.peekDeadlettered(BATCH_QUEUE)).hasSize(1)
+    }
+
+    @Test
+    fun retriesPartialBatch() {
+      assertThat(fakeJobQueue.peekJobs(BATCH_QUEUE)).isEmpty()
+
+      exampleJobEnqueuer.enqueueForBatchHandler("happy-path")
+      exampleJobEnqueuer.enqueueForBatchHandler("throw-once", hint = ExampleJobHint.THROW_ONCE)
+
+      assertThat(fakeJobQueue.peekJobs(BATCH_QUEUE)).hasSize(2)
+
+      val handledJobs = fakeJobQueue.handleJobs(BATCH_QUEUE, retries = 2)
+      assertThat(handledJobs).hasSize(2)
+      assertThat(handledJobs[0].acknowledged).isTrue()
+      assertThat(handledJobs[1].acknowledged).isTrue()
+
+      assertThat(logCollector.takeMessages(ExampleBatchJobHandler::class)).containsExactlyInAnyOrder(
+        "received 2 jobs",
+        "received RED job with message: happy-path",
+        "received RED job with message: throw-once",
+        "received 1 jobs",
+        "received RED job with message: throw-once",
+      )
+
+      assertThat(fakeJobQueue.peekJobs(BATCH_QUEUE)).isEmpty()
+    }
+  }
 }
 
 private class TestModule : KAbstractModule() {
@@ -555,6 +643,7 @@ private class TestModule : KAbstractModule() {
     install(FakeJobHandlerModule.create<ExampleJobHandler>(RED_QUEUE))
     install(FakeJobHandlerModule.create<ExampleJobHandler>(GREEN_QUEUE))
     install(FakeJobHandlerModule.create<EnqueuerJobHandler>(ENQUEUER_QUEUE))
+    install(FakeBatchJobHandlerModule.create<ExampleBatchJobHandler>(BATCH_QUEUE))
     install(FakeJobQueueModule())
   }
 }
@@ -562,6 +651,7 @@ private class TestModule : KAbstractModule() {
 internal val RED_QUEUE = QueueName("red_queue")
 internal val GREEN_QUEUE = QueueName("green_queue")
 internal val ENQUEUER_QUEUE = QueueName("first_step_queue")
+internal val BATCH_QUEUE = QueueName("batch_queue")
 
 internal enum class Color {
   RED,
@@ -585,6 +675,31 @@ internal enum class ExampleJobHint {
   DELAY_ONCE,
 }
 
+internal fun Job.handle(hint: ExampleJobHint?, hasExecutedBefore: Boolean) =
+  when (hint) {
+    ExampleJobHint.DONT_ACK -> Unit
+    ExampleJobHint.DEAD_LETTER -> deadLetter()
+    ExampleJobHint.DEAD_LETTER_ONCE -> if (!hasExecutedBefore) {
+      deadLetter()
+    } else {
+      acknowledge()
+    }
+    ExampleJobHint.THROW -> throw ColorException()
+    ExampleJobHint.THROW_ONCE -> if (!hasExecutedBefore) {
+      throw ColorException()
+    } else {
+      acknowledge()
+    }
+    ExampleJobHint.DELAY_ONCE -> if (!hasExecutedBefore) {
+      delayWithBackoff()
+      throw ColorException()
+    } else {
+      acknowledge()
+    }
+
+    null -> acknowledge()
+  }
+
 internal class ExampleJobEnqueuer @Inject private constructor(
   private val jobQueue: JobQueue,
   moshi: Moshi
@@ -605,6 +720,15 @@ internal class ExampleJobEnqueuer @Inject private constructor(
       GREEN_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
       attributes = mapOf("key" to "value")
     )
+  }
+
+  fun enqueueForBatchHandler(
+    message: String,
+    deliveryDelay: Duration? = null,
+    hint: ExampleJobHint? = null
+  ) {
+    val job = ExampleJob(Color.RED, message, hint)
+    jobQueue.enqueue(BATCH_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay)
   }
 
   fun batchEnqueueRed(messages: List<String>, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
@@ -635,32 +759,34 @@ internal class ExampleJobHandler @Inject private constructor(moshi: Moshi) : Job
 
     val key = "${deserializedJob.color}:${deserializedJob.hint}:${deserializedJob.message}"
     val jobExecutedBefore = jobsExecutedOnce.putIfAbsent(key, true) == true
-    when (deserializedJob.hint) {
-      ExampleJobHint.DONT_ACK -> return
-      ExampleJobHint.DEAD_LETTER -> {
-        job.deadLetter()
-        return
-      }
-      ExampleJobHint.DEAD_LETTER_ONCE -> if (!jobExecutedBefore) {
-        job.deadLetter()
-        return
-      }
-      ExampleJobHint.THROW -> throw ColorException()
-      ExampleJobHint.THROW_ONCE -> if (!jobExecutedBefore) {
-        throw ColorException()
-      }
-      ExampleJobHint.DELAY_ONCE -> if (!jobExecutedBefore) {
-        job.delayWithBackoff()
-        throw ColorException()
-      }
-      else -> Unit
-    }
-
-    job.acknowledge()
+    job.handle(deserializedJob.hint, jobExecutedBefore)
   }
 
   companion object {
     private val log = getLogger<ExampleJobHandler>()
+  }
+}
+
+@Singleton
+internal class ExampleBatchJobHandler @Inject private constructor(moshi: Moshi) : BatchJobHandler {
+  private val jobAdapter = moshi.adapter<ExampleJob>()
+  private val jobsExecutedOnce = ConcurrentHashMap<String, Boolean>()
+
+  override fun handleJobs(jobs: Collection<Job>) {
+    log.info { "received ${jobs.size} jobs" }
+
+    jobs.forEach { job ->
+      val deserializedJob = jobAdapter.fromJson(job.body)!!
+      log.info { "received ${deserializedJob.color} job with message: ${deserializedJob.message}" }
+
+      val key = "${deserializedJob.color}:${deserializedJob.hint}:${deserializedJob.message}"
+      val jobExecutedBefore = jobsExecutedOnce.putIfAbsent(key, true) == true
+      job.handle(deserializedJob.hint, jobExecutedBefore)
+    }
+  }
+
+  companion object {
+    private val log = getLogger<ExampleBatchJobHandler>()
   }
 }
 
