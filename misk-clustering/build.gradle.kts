@@ -13,7 +13,6 @@ dependencies {
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-lease-testing"))
   api(project(":misk-inject"))
-  implementation(libs.errorproneAnnotations)
   implementation(libs.guice)
   implementation(libs.kubernetesClient)
   implementation(libs.kubernetesClientApi)

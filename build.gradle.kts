@@ -167,6 +167,7 @@ val doNotDetekt = listOf(
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
   apply(plugin = "io.gitlab.arturbosch.detekt")
+  apply(plugin = "com.autonomousapps.dependency-analysis")
 
   if (name !in doNotDetekt) {
     extensions.configure(DetektExtension::class) {
