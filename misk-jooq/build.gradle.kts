@@ -35,13 +35,15 @@ dependencies {
   jooqGenerator(libs.mysql)
 }
 
+val dbMigrations = "src/test/resources/db-migrations"
+
 // Needed to generate jooq test db classes
 flyway {
   url = "jdbc:mysql://localhost:3500/misk-jooq-test-codegen"
   user = "root"
   password = "root"
   schemas = arrayOf("jooq")
-  locations = arrayOf("filesystem:${project.projectDir}/src/test/resources/db-migrations")
+  locations = arrayOf("filesystem:${project.projectDir}/${dbMigrations}")
   sqlMigrationPrefix = "v"
 }
 // Needed to generate jooq test db classes
@@ -83,8 +85,15 @@ jooq {
 }
 
 // Needed to generate jooq test db classes
-tasks.named("generateJooq") {
+tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
   dependsOn("flywayMigrate")
+
+  // declare migration files as inputs on the jOOQ task and allow it to
+  // participate in build caching
+  inputs.files(fileTree(layout.projectDirectory.dir(dbMigrations)))
+    .withPropertyName("migrations")
+    .withPathSensitivity(PathSensitivity.RELATIVE)
+  allInputsDeclared.set(true)
 }
 
 // Needed to generate jooq test db classes
