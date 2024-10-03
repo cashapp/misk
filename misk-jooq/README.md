@@ -24,6 +24,7 @@ plugins {
   alias(libs.plugins.flyway)
   alias(libs.plugins.jooq)
 }
+val dbMigrations = "src/main/resources/db-migrations"
 // We are using flyway here in order to run the migrations to create a schema. 
 // Ensure the migration directory is not called `migrations`. There's more details as to why below.
 flyway {
@@ -31,7 +32,7 @@ flyway {
   user = "root"
   password = "root"
   schemas = arrayOf("jooq")
-  locations = arrayOf("filesystem:${project.projectDir}/src/main/resources/db-migrations")
+  locations = arrayOf("filesystem:${project.projectDir}/${dbMigrations}")
   sqlMigrationPrefix = "v"
 }
 // More details about the jooq plugin here - https://github.com/etiennestuder/gradle-jooq-plugin
@@ -73,8 +74,15 @@ jooq {
 }
 
 // Needed to generate jooq test db classes
-tasks.named("generateJooq") {
+tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
   dependsOn("flywayMigrate")
+
+  // declare migration files as inputs on the jOOQ task and allow it to
+  // participate in build caching
+  inputs.files(fileTree(layout.projectDirectory.dir(dbMigrations)))
+    .withPropertyName("migrations")
+    .withPathSensitivity(PathSensitivity.RELATIVE)
+  allInputsDeclared.set(true)
 }
 
 // Needed to generate jooq test db classes
@@ -162,4 +170,4 @@ ctx.select()
    [migrations](https://github.com/jOOQ/jOOQ/tree/main/jOOQ/src/main/resources/migrations) 
    we don't care about in it. When the service starts up it finds this folder as well and tries 
    to run those migrations. Renaming misk service migrations to somethinq like `db-migrations` works. 
-   
+
