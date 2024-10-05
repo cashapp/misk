@@ -393,7 +393,7 @@ class JettyService @Inject internal constructor(
       return
     }
 
-    if (webConfig.override_shutdown_idle_timeout <= udsConnector.idleTimeout) {
+    if (webConfig.override_shutdown_idle_timeout > udsConnector.idleTimeout) {
       logger.warn {
         "Setting override_shutdown_idle_timeout[${webConfig.override_shutdown_idle_timeout}]" +
           "greater than uds default timeout[${udsConnector.idleTimeout}]"
