@@ -55,8 +55,8 @@ class StaticResourceAction @Inject constructor(
   }
 
   fun getResponse(url: HttpUrl): Response<ResponseBody> {
-    val staticResourceEntry =
-      resourceEntryFinder.staticResource(url) as StaticResourceEntry?
+    val staticResourceEntry = resourceEntryFinder
+      .staticResource(url) as StaticResourceEntry?
         ?: return NotFoundAction.response(url.encodedPath.drop(1))
     return MatchedResource(staticResourceEntry).getResponse(url)
   }
