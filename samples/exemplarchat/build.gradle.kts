@@ -40,13 +40,6 @@ tasks.jar {
   archiveClassifier.set("unshaded")
 }
 
-tasks.compileKotlin {
-  kotlinOptions {
-    // TODO(alec): Enable again once Environment enum is deleted
-    allWarningsAsErrors = false
-  }
-}
-
 tasks.withType<Test> {
   dependsOn(":startRedis")
 }
