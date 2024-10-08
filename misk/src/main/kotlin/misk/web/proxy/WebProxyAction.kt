@@ -74,7 +74,7 @@ class WebProxyAction @Inject constructor(
     return try {
       optionalBinder.proxyClient.newCall(proxyRequest).execute().toMisk()
     } catch (e: IOException) {
-      staticResourceAction.getResponse(httpCall.url)
+      staticResourceAction.getResponse(proxyUrl)
     }
   }
 
