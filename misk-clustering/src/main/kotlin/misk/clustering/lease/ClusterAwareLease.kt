@@ -25,6 +25,10 @@ class ClusterAwareLease(
     return (clusterWeightProvider.get() != 0)
   }
 
+  override fun checkHeldElsewhere(): Boolean {
+    return (clusterWeightProvider.get() == 0)
+  }
+
   override fun release(): Boolean {
     return true
   }

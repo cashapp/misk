@@ -193,6 +193,7 @@ public final class misk/clustering/lease/ClusterAwareLease : wisp/lease/Lease {
 	public fun acquire ()Z
 	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public fun checkHeld ()Z
+	public fun checkHeldElsewhere ()Z
 	public fun getName ()Ljava/lang/String;
 	public fun release ()Z
 }

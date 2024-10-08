@@ -17,6 +17,11 @@ interface Lease {
     fun checkHeld(): Boolean
 
     /**
+     * @return true if the lease is owned by another process instance.
+     */
+    fun checkHeldElsewhere(): Boolean
+
+    /**
      * Attempts to acquire the lock on the lease.  If the lock was not already held and the lock
      * was successfully obtained, listeners should be notified.
      *

@@ -22,6 +22,8 @@ open class FakeLeaseManager : LeaseManager {
     }
   }
 
+  fun isLeaseHeldElsewhere(name: String) = leasesHeldElsewhere.containsKey(name)
+
   fun isLeaseHeld(name: String) = !leasesHeldElsewhere.containsKey(name)
 
   fun markLeaseHeld(name: String) {
