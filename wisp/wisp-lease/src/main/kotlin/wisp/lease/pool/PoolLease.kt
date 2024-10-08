@@ -18,6 +18,12 @@ class PoolLease(
     return held
   }
 
+  override fun checkHeldElsewhere(): Boolean {
+    if (checkHeld()) return false
+
+    return delegateLease.checkHeldElsewhere()
+  }
+
   override fun acquire(): Boolean {
     if (poolLeaseManager.isAcquiredPoolLeaseMapEntry(name)) {
       val acquired = delegateLease.acquire()
