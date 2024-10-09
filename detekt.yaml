@@ -40,6 +40,8 @@ style:
       # Until moved to Guice 7, jakarta.inject.Provider causes issues with type overloads in Guice 6
       - value: 'jakarta.inject.Provider'
         reason: 'To be Guice 6 compliant, use `com.google.inject.Provider`'
+    excludes:
+      - '**/wisp/wisp-moshi/src/*/kotlin/wisp/moshi/ProviderJsonAdapter*.kt'
 
 detektive:
   active: true

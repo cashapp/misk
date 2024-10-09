@@ -6,19 +6,21 @@ import misk.ServiceGraphBuilderMetadata
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.toFormattedJson
+import wisp.moshi.ProviderJsonAdapterFactory
 import wisp.moshi.adapter
-import wisp.moshi.defaultKotlinMoshi
+import wisp.moshi.buildMoshi
 
 data class ServiceGraphMetadata(
   val builderMetadata: ServiceGraphBuilderMetadata,
 ) : Metadata(
   metadata = builderMetadata,
-  prettyPrint = "Service Graph Ascii Visual\n\n${builderMetadata.asciiVisual}\n\nMetadata\n\n" + defaultKotlinMoshi
+  prettyPrint = "Service Graph Ascii Visual\n\n${builderMetadata.asciiVisual}\n\nMetadata\n\n" + buildMoshi(listOf(ProviderJsonAdapterFactory()))
     .adapter<ServiceGraphBuilderMetadata>()
     .toFormattedJson(builderMetadata),
   descriptionString = "Guava service graph metadata, including a ASCII art visualization for easier debugging."
 ) {
-  val graphVisual = generateGraphVisual()
+  /** Only evaluate this lazily to avoid initiating service startup through the [CoordinatedService::toMetadataProvider()] method. */
+  val graphVisual by lazy { generateGraphVisual() }
 
   data class GraphPairs(
     val source: String,
@@ -42,7 +44,7 @@ data class ServiceGraphMetadata(
     val output = mutableListOf<GraphPairs>()
 
     builderMetadata.serviceMap.forEach { (key, value) ->
-      val dependencies = value.dependencies
+      val dependencies = value.get().dependencies
 
       dependencies.forEach { target ->
         output.add(GraphPairs(extractType(key), extractType(target)))

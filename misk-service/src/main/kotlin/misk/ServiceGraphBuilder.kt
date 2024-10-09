@@ -8,12 +8,16 @@ import com.google.inject.Provider
 import misk.CoordinatedService.Companion.CycleValidity
 
 data class ServiceGraphBuilderMetadata(
-  val serviceMap: Map<String, CoordinatedServiceMetadata>,
+  val serviceMap: Map<String, Provider<CoordinatedServiceMetadata>>,
   val serviceNames: Map<String, String>,
   /** A map of downstream services -> their upstreams. */
   val dependencyMap: Map<String, String>,
   val asciiVisual: String,
-)
+) {
+  override fun toString(): String {
+    return "ServiceGraphBuilderMetadata(serviceMap=${serviceMap.mapValues { (_,v) -> v.get() }}, serviceNames=$serviceNames, dependencyMap=$dependencyMap, asciiVisual=$asciiVisual)"
+  }
+}
 
 /**
  * Builds a graph of [CoordinatedService]s which defer start up and shut down until their dependent
@@ -40,7 +44,7 @@ internal class ServiceGraphBuilder {
     check(serviceMap[key] == null) {
       "Service $key cannot be registered more than once"
     }
-    serviceMap[key] = CoordinatedService(serviceProvider)
+    serviceMap[key] = CoordinatedService(key, serviceProvider)
     serviceNames[key] = serviceName ?: "Anonymous Service(${key.typeLiteral.type.typeName})"
   }
 
@@ -155,7 +159,7 @@ internal class ServiceGraphBuilder {
   }
 
   fun toMetadata() = ServiceGraphBuilderMetadata(
-    serviceMap = serviceMap.map { it.key.toString() to it.value.toMetadata() }.toMap(),
+    serviceMap = serviceMap.map { it.key.toString() to it.value.toMetadataProvider() }.toMap(),
     serviceNames = serviceNames.mapKeys { it.key.toString() },
     dependencyMap = dependencyMap.asMap().map { (k,v) -> k.toString() to v.toString() }.toMap(),
     asciiVisual = toString()

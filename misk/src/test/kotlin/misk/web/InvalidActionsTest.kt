@@ -20,7 +20,7 @@ import jakarta.inject.Singleton
 
 class InvalidActionsTest {
   @Test fun failIdenticalActions() {
-    val exception = assertThrows<ProvisionException>("Should throw an exception") {
+    val exception = assertThrows<IllegalStateException>("Should throw an exception") {
       Guice.createInjector(IdenticalActionsModule()).getInstance(ServiceManager::class.java)
         .startAsync().awaitHealthy(Duration.ofSeconds(5))
     }

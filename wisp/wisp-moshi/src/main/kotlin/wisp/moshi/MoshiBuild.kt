@@ -7,7 +7,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 /**
  * Default build for Moshi using the Kotlin JSON adapter
  */
-val defaultKotlinMoshi = buildMoshi(emptyList())
+val defaultKotlinMoshi = buildMoshi(listOf(ProviderJsonAdapterFactory()))
 
 @JvmOverloads
 fun buildMoshi(

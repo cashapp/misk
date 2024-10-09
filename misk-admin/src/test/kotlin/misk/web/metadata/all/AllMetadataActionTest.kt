@@ -19,6 +19,8 @@ class AllMetadataActionTest {
 
   @Inject lateinit var action: AllMetadataAction
 
+  // TODO fix this test to rely on Misk injected moshi to generate response and assert against JSON instead of toString()
+  //    so then can remove the manual fix in ServiceGraphBuilder.kt
   @Test
   fun `get all`() {
     val actual = action.getAll("all")

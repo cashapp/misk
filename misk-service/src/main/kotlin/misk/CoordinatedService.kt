@@ -1,11 +1,15 @@
 package misk
 
 import com.google.common.util.concurrent.AbstractService
+import com.google.common.util.concurrent.Atomics
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.Listener
 import com.google.common.util.concurrent.Service.State
+import com.google.inject.Key
 import com.google.inject.Provider
+import com.google.inject.name.Named
+import misk.inject.toKey
 import java.util.concurrent.atomic.AtomicBoolean
 
 data class CoordinatedServiceMetadata(
@@ -13,11 +17,52 @@ data class CoordinatedServiceMetadata(
   val directDependsOn: Set<String>,
 )
 
+internal inline fun <reified T : Service> CoordinatedService(serviceProvider: Provider<T>) = CoordinatedService(
+  key = T::class.toKey(),
+  serviceProvider = serviceProvider
+)
+
 internal class CoordinatedService(
+  private val key: Key<*>,
   private val serviceProvider: Provider<out Service>
 ) : AbstractService(), DelegatingService {
+
+  /**
+   * To avoid accessing the by lazy service property for toString, use key until the service
+   * is initiated by the service graph.  This will be replaced with service.toString() during
+   * by lazy initialization.
+   */
+  private val toStringLazy = Atomics.newReference<() -> String> {
+    buildString {
+      key.annotationType?.let {
+        if (key.annotation is Named) {
+          append((key.annotation as Named).value)
+        } else {
+          append("@" + key.annotationType.simpleName + " ")
+          append(key.typeLiteral.rawType.simpleName)
+        }
+      } ?: append(key.typeLiteral.rawType.simpleName)
+
+      append(" [${this@CoordinatedService.state()}]")
+      if (this@CoordinatedService.state() == State.FAILED) {
+        append(" caused by: ${this@CoordinatedService.failureCause()}")
+      }
+    }
+  }
+
+  /**
+   * Use care when accessing this value as it will instantiate the instance of the class at this
+   * time.  We want the instantiation to follow the Coordinated Service Graph.
+   */
   override val service: Service by lazy {
-    serviceProvider.get()
+    val realService =
+      runCatching {
+        serviceProvider.get()
+      }
+      .onFailure {
+        this@CoordinatedService.notifyFailed(it)
+      }
+      .getOrThrow()
       .also { created ->
         created.checkNew("$created must be NEW for it to be coordinated")
         created.addListener(
@@ -42,6 +87,12 @@ internal class CoordinatedService(
           MoreExecutors.directExecutor()
         )
       }
+
+    toStringLazy.set {
+      realService.toString()
+    }
+
+    realService
   }
 
   /** Services this starts before aka enhancements or services who depend on this. */
@@ -57,15 +108,16 @@ internal class CoordinatedService(
   private val innerServiceStarted = AtomicBoolean(false)
 
   /**
-   * Marks every [services] as a dependency and marks itself as directDependsOn on each service.
+   * Marks every [coordinatedServices] as a dependency and marks itself as
+   * directDependsOn on each service.
    * */
-  fun addDependentServices(vararg services: CoordinatedService) {
+  fun addDependentServices(vararg coordinatedServices: CoordinatedService) {
     // Check that this service and all dependent services are new before modifying the graph.
     this.checkNew()
-    for (service in services) {
-      service.checkNew()
-      dependencies += service
-      service.directDependsOn += this
+    for (coordinatedService in coordinatedServices) {
+      coordinatedService.checkNew()
+      dependencies += coordinatedService
+      coordinatedService.directDependsOn += this
     }
   }
 
@@ -111,7 +163,11 @@ internal class CoordinatedService(
     }
   }
 
-  override fun toString() = service.toString()
+  /**
+   * Get the service name from the current string source.  This uses the key until the service
+   * is Injected to avoid early injecting the service out of band from the service graph.
+   */
+  override fun toString() = toStringLazy.get().invoke()
 
   /**
    * Traverses the dependency graph to detect cycles. If a cycle is found, then a
@@ -159,8 +215,10 @@ internal class CoordinatedService(
     }
   }
 
-  fun toMetadata() = CoordinatedServiceMetadata(
-    dependencies = dependencies.map { it.serviceProvider.get().javaClass.name }.toSet(),
-    directDependsOn = directDependsOn.map { it.serviceProvider.get().javaClass.name }.toSet(),
-  )
+  fun toMetadataProvider() = Provider {
+    CoordinatedServiceMetadata(
+      dependencies = dependencies.map { it.serviceProvider.get().javaClass.name }.toSet(),
+      directDependsOn = directDependsOn.map { it.serviceProvider.get().javaClass.name }.toSet(),
+    )
+  }
 }
