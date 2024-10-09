@@ -20,7 +20,6 @@ import misk.web.toResponseBody
 import okhttp3.Headers
 import okhttp3.MediaType
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.Random
 import kotlin.math.absoluteValue
@@ -29,7 +28,7 @@ import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
 
 @MiskTest(startService = true)
-class CustomMarshallerTest {
+class ResponseBodyWithHeadersTest {
   @MiskTestModule
   val module = TestModule()
 
