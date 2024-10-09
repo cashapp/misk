@@ -11,6 +11,7 @@ export interface MiskWebActionDefinition {
   requestType: string
   pathPattern: string
   types: MiskObjectTypes
+  requestMediaTypes: string[]
 }
 
 export interface MiskObjectType {

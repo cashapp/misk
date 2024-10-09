@@ -8,10 +8,10 @@ import MetadataClient from "@misk-console/api/MetadataClient"
 
 export default class RealMetadataClient implements MetadataClient {
   async fetchMetadata(): Promise<MiskActions> {
-    return fetchCached<MiskMetadataResponse>(
-      `/api/web-actions/metadata`
-    )
-      .then(it => it.all["web-actions"].metadata)
-      .then(it => associateBy(it, it => it.name))
+    const response =  await fetchCached<MiskMetadataResponse>(`/api/web-actions/metadata`)
+    const actions =
+      response.all["web-actions"].metadata
+        .filter(it => it.requestMediaTypes.includes("application/x-protobuf"))
+    return associateBy(actions, it => it.name)
   }
 }

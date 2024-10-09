@@ -15,7 +15,7 @@ interface State {
 }
 
 interface Props {
-  onResponse: (response: any) => void
+  onResponse: (response: string) => void
 }
 
 export default class RequestEditor extends React.Component<Props, State> {
@@ -59,9 +59,7 @@ export default class RequestEditor extends React.Component<Props, State> {
   async prefetchMetadata() {
     this.setState({ loading: true })
     try {
-      const actions = await fetchCached<MiskMetadataResponse>(
-        `/api/web-actions/metadata`
-      )
+      await fetchCached<MiskMetadataResponse>(`/api/web-actions/metadata`)
     } finally {
       this.setState({ loading: false })
     }
@@ -72,29 +70,36 @@ export default class RequestEditor extends React.Component<Props, State> {
   }
 
   async submitRequest() {
-    const content = this.editor!.getValue()
-    const topLevel = new CommandParser(content).parse()
-    const actions = await fetchCached<MiskMetadataResponse>(
-      `/api/web-actions/metadata`
-    )
-      .then(it => it.all["web-actions"].metadata)
-      .then(it => associateBy(it, it => it.name))
+    try {
+      const content = this.editor!.getValue()
+      const topLevel = new CommandParser(content).parse()
+      const actions = await fetchCached<MiskMetadataResponse>(`/api/web-actions/metadata`)
+        .then(it => it.all["web-actions"].metadata)
+        .then(it => associateBy(it, it => it.name))
 
-    const path = actions[topLevel.action!.name!].pathPattern
+      const path = actions[topLevel.action!.name!].pathPattern
 
-    this.setState({ loading: true })
+      this.setState({ loading: true })
 
-    const response = await fetch(path, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: topLevel.action?.body?.render()
-    })
+      const response = await fetch(path, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: topLevel.action?.body?.render()
+      })
 
-    this.setState({ loading: false })
+      let responseText = await response.text()
+      try {
+        responseText = JSON.stringify(JSON.parse(responseText), null, 2)
+      } catch (e) {
+        // ignore
+      }
 
-    this.props.onResponse(await response.json())
+      this.props.onResponse(responseText)
+    } finally {
+      this.setState({ loading: false })
+    }
   }
 
   public render() {
