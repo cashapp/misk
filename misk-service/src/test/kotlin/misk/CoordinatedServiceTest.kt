@@ -6,6 +6,7 @@ import com.google.inject.Key
 import com.google.inject.Provider
 import com.google.inject.name.Names
 import misk.ServiceGraphBuilderTest.AppendingService
+import misk.inject.toKey
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.RepeatedTest
@@ -23,7 +24,7 @@ class CoordinatedServiceTest {
       services.forEach { builder.addService(it) }
       val randomKeys = services.shuffled().map { it.first }.toMutableList()
       val dependencies = mutableListOf<Key<*>>()
-      while(randomKeys.isNotEmpty()) {
+      while (randomKeys.isNotEmpty()) {
         val next = randomKeys.removeFirst()
         if (dependencies.isNotEmpty()) {
           builder.addDependency(dependent = dependencies.random(), dependsOn = next)
@@ -51,8 +52,8 @@ class CoordinatedServiceTest {
 
     val canStartService = service("canStartService")
     val neverStartedService = service("neverStartedService")
-    val failOnStartService =
-      key("failOnStartService") to FailOnStartService().toCoordinated()
+    val failOnStartService = (key("failOnStartService") to FailOnStartService())
+      .toCoordinated()
 
     val manager = ServiceGraphBuilder().also { builder ->
       builder.addService(canStartService)
@@ -83,7 +84,7 @@ class CoordinatedServiceTest {
 
     val service = service("service")
     val failOnStopService =
-      key("failOnStopService") to FailOnStopService().toCoordinated()
+      (key("failOnStopService") to FailOnStopService()).toCoordinated()
 
     val manager = ServiceGraphBuilder().also { builder ->
       builder.addService(failOnStopService)
@@ -103,16 +104,13 @@ class CoordinatedServiceTest {
 
   @Test fun cannotAddRunningServiceAsDependency() {
     val target = StringBuilder()
-    val runningService = CoordinatedService(
-      Provider<Service> {
-        AppendingService(target, "I will be running")
-      }
-    )
-    val newService = CoordinatedService(
-      Provider<Service> {
-        AppendingService(target, "I will not run")
-      }
-    )
+    val runningService = CoordinatedService {
+      AppendingService(target, "I will be running")
+    }
+    val newService = CoordinatedService {
+      AppendingService(target, "I will not run")
+    }
+
 
     runningService.startAsync()
 
@@ -132,8 +130,9 @@ class CoordinatedServiceTest {
     service.startAsync()
 
     val failure = assertFailsWith<IllegalStateException> {
-      CoordinatedService(Provider<Service> { service }).startAsync().awaitRunning()
+      CoordinatedService{ service }.service.startAsync().awaitRunning()
     }
+
     assertThat(failure).hasMessage("Running Service must be NEW for it to be coordinated")
 
     service.stopAsync()
@@ -148,13 +147,17 @@ class CoordinatedServiceTest {
   }
 
   private fun service(id: String): Pair<Key<*>, CoordinatedService> =
-    key(id) to FakeService(id).toCoordinated()
+    (key(id) to FakeService(id)).toCoordinated()
 
   private fun ServiceGraphBuilder.addService(pair: Pair<Key<*>, Service>) {
     addService(pair.first, pair.second)
   }
 
-  private fun Service.toCoordinated() = CoordinatedService(Provider { this })
+  private fun Pair<Key<*>, Service>.toCoordinated() =
+    this.first to CoordinatedService(
+      this.first,
+      Provider { this.second }
+    )
 
   private fun key(name: String) = Key.get(Service::class.java, Names.named(name))
 }

@@ -17,8 +17,9 @@ import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.toFormattedJson
 import misk.web.v2.DashboardPageLayout
+import wisp.moshi.ProviderJsonAdapterFactory
 import wisp.moshi.adapter
-import wisp.moshi.defaultKotlinMoshi
+import wisp.moshi.buildMoshi
 
 @Singleton
 class ServiceGraphTabIndexAction @Inject constructor(
@@ -37,7 +38,7 @@ class ServiceGraphTabIndexAction @Inject constructor(
       }
     }
     .build { _, _, _ ->
-      val metadataArray = defaultKotlinMoshi
+      val metadataArray = buildMoshi(listOf(ProviderJsonAdapterFactory()))
         .adapter<List<ServiceGraphMetadata.GraphPairs>>()
         .toFormattedJson(serviceGraphMetadataProvider.get().graphVisual)
 

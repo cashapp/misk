@@ -1,7 +1,36 @@
+public final class wisp/moshi/GuiceProviderJsonAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> (Lcom/squareup/moshi/JsonAdapter;)V
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lcom/google/inject/Provider;
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lcom/google/inject/Provider;)V
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+}
+
+public final class wisp/moshi/JakartaProviderJsonAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> (Lcom/squareup/moshi/JsonAdapter;)V
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljakarta/inject/Provider;
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Ljakarta/inject/Provider;)V
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+}
+
+public final class wisp/moshi/JavaxProviderJsonAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> (Lcom/squareup/moshi/JsonAdapter;)V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljavax/inject/Provider;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Ljavax/inject/Provider;)V
+}
+
 public final class wisp/moshi/MoshiBuildKt {
 	public static final fun buildMoshi (Ljava/util/List;)Lcom/squareup/moshi/Moshi;
 	public static final fun buildMoshi (Ljava/util/List;Ljava/util/List;)Lcom/squareup/moshi/Moshi;
 	public static synthetic fun buildMoshi$default (Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/squareup/moshi/Moshi;
 	public static final fun getDefaultKotlinMoshi ()Lcom/squareup/moshi/Moshi;
+}
+
+public final class wisp/moshi/ProviderJsonAdapterFactory : com/squareup/moshi/JsonAdapter$Factory {
+	public fun <init> ()V
+	public fun create (Ljava/lang/reflect/Type;Ljava/util/Set;Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
 }
 

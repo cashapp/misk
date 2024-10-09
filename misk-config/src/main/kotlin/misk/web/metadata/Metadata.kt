@@ -2,7 +2,6 @@ package misk.web.metadata
 
 import com.squareup.moshi.JsonAdapter
 import kotlinx.html.TagConsumer
-import kotlinx.html.div
 import kotlinx.html.h3
 import misk.tailwind.components.AlertInfoHighlight
 import misk.tailwind.components.CodeBlock

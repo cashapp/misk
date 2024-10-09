@@ -9,9 +9,10 @@ import misk.moshi.okio.ByteStringAdapter
 import misk.moshi.time.InstantAdapter
 import misk.moshi.time.LocalDateAdapter
 import wisp.moshi.buildMoshi
-import java.util.Date
 import jakarta.inject.Singleton
 import misk.moshi.time.OffsetDateTimeAdapter
+import wisp.moshi.ProviderJsonAdapterFactory
+import java.util.Date
 import com.squareup.wire.WireJsonAdapterFactory as WireOnlyJsonAdapterFactory
 import misk.moshi.wire.WireMessageAdapter as MiskOnlyMessageAdapter
 
@@ -39,12 +40,10 @@ class MoshiModule @JvmOverloads constructor(
       )
     )
 
-    install(MoshiAdapterModule(ByteStringAdapter))
     install(MoshiAdapterModule<Date>(Rfc3339DateJsonAdapter()))
-    install(MoshiAdapterModule(InstantAdapter))
-    install(MoshiAdapterModule(BigDecimalAdapter))
-    install(MoshiAdapterModule(LocalDateAdapter))
-    install(MoshiAdapterModule(OffsetDateTimeAdapter))
+    defaultMoshiAdapters.forEach {
+      install(MoshiAdapterModule(it))
+    }
   }
 
   @Provides
@@ -54,5 +53,16 @@ class MoshiModule @JvmOverloads constructor(
     @MoshiJsonLastAdapter jsonLastAdapters: List<Any>,
   ): Moshi {
     return buildMoshi(jsonAdapters, jsonLastAdapters)
+  }
+
+  companion object {
+    val defaultMoshiAdapters = listOf(
+      ByteStringAdapter,
+      InstantAdapter,
+      BigDecimalAdapter,
+      LocalDateAdapter,
+      OffsetDateTimeAdapter,
+      ProviderJsonAdapterFactory(),
+    )
   }
 }
