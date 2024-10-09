@@ -1,6 +1,6 @@
 <img src="https://github.com/cashapp/misk/raw/master/misk.png" width="300">
 
-[<img src="https://img.shields.io/maven-central/v/com.squareup.misk/misk.svg?label=latest%20release"/>](http://search.maven.org/#search%7Cga%7C1%7Ccom.squareup.misk)
+[<img src="https://img.shields.io/maven-central/v/com.squareup.misk/misk.svg?label=latest%20release"/>](http://search.maven.org/#search%7Cga%7C1%7Ccom.squareup.misk) [![Mutable.ai Auto Wiki](https://img.shields.io/badge/Auto_Wiki-Mutable.ai-blue)](https://wiki.mutable.ai/cashapp/misk)
 
 * Releases
     * See most recent [public build][snap]
@@ -49,7 +49,7 @@ It has been powering hundreds of microservices within Cash App since 2018.
     * Integration with prometheus
     * Built-in metrics for JVM performance, networking and connection pooling
 * Testing framework with annotations
-* Kotlin utilities with minimal dependencies: Wisp
+* Kotlin utilities with minimal dependencies: [Wisp](wisp/README.md)
 
 ## What's Next?
 Want to jump right into it? Check out our [Getting Started Guide](./docs/getting-started.md).

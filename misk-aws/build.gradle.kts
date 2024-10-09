@@ -1,15 +1,13 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencies {
-  api(libs.awsSdkCore)
+  api(libs.awsCore)
   api(libs.awsS3)
   api(libs.awsSqs)
   api(libs.guava)
@@ -23,7 +21,7 @@ dependencies {
   api(project(":misk-feature"))
   api(project(":misk-inject"))
   api(project(":misk-jobqueue"))
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(libs.openTracing)
   implementation(libs.openTracingDatadog)
@@ -55,7 +53,7 @@ dependencies {
   testImplementation(project(":misk-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

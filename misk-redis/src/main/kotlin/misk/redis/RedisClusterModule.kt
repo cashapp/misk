@@ -31,9 +31,9 @@ import wisp.deployment.Deployment
  * ```
  *
  *
- * [redisClusterConfig]: Only one replication group config is supported; this module will use the first
- * configuration it finds. An empty [RedisReplicationGroupConfig.redis_auth_password] is only
- * permitted in fake environments. See [Deployment].
+ * [redisClusterGroupConfig]: Only one replication group config is supported.
+ * An empty [RedisReplicationGroupConfig.redis_auth_password] is only permitted in fake
+ * environments. See [Deployment].
  *
  * This initiates a [JedisCluster] which automatically discovers the topology of the Redis cluster,
  * and routes commands to the appropriate node based on the hash slot of the key.
@@ -47,13 +47,26 @@ import wisp.deployment.Deployment
  * https://redis.com/blog/redis-clustering-best-practices-with-keys/
  */
 class RedisClusterModule @JvmOverloads constructor(
-  private val redisClusterConfig: RedisClusterConfig,
+  private val redisClusterGroupConfig: RedisClusterReplicationGroupConfig,
   private val connectionPoolConfig: ConnectionPoolConfig,
   private val useSsl: Boolean = true
 ) : KAbstractModule() {
 
+  @Deprecated("Please use RedisClusterReplicationGroupConfig to pass specific redis cluster configuration.")
+  constructor(
+    redisClusterConfig: RedisClusterConfig,
+    connectionPoolConfig: ConnectionPoolConfig,
+    useSsl: Boolean = true,
+  ) : this(
+    // Get the first replication group, we only support 1 replication group per service.
+    redisClusterConfig.values.firstOrNull()
+      ?: throw RuntimeException("At least 1 replication group must be specified"),
+    connectionPoolConfig = connectionPoolConfig,
+    useSsl = useSsl,
+  )
+
   override fun configure() {
-    bind<RedisClusterConfig>().toInstance(redisClusterConfig)
+    bind<RedisClusterReplicationGroupConfig>().toInstance(redisClusterGroupConfig)
     install(ServiceModule<RedisService>().enhancedBy<ReadyService>())
     requireBinding<Metrics>()
   }
@@ -66,12 +79,9 @@ class RedisClusterModule @JvmOverloads constructor(
 
   @Provides @Singleton
   internal fun provideUnifiedJedis(
-    config: RedisClusterConfig,
+    replicationGroup: RedisClusterReplicationGroupConfig,
     deployment: Deployment
   ): UnifiedJedis {
-    // Get the first replication group, we only support 1 replication group per service.
-    val replicationGroup = config[config.keys.first()]
-      ?: throw RuntimeException("At least 1 replication group must be specified")
 
     // Create our jedis pool with client-side metrics.
     val jedisClientConfig = DefaultJedisClientConfig.builder()

@@ -1,11 +1,9 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencies {
@@ -14,7 +12,7 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
   implementation(libs.guice)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.prometheusClient)
   implementation(libs.prometheusHotspot)
   implementation(libs.prometheusHttpserver)
@@ -23,7 +21,7 @@ dependencies {
   implementation(project(":wisp:wisp-logging"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

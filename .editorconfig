@@ -4,7 +4,7 @@ continuation_indent_size=2
 max_line_length=100
 insert_final_newline=true
 # ktlint-specific rules:
-disabled_rules=import-ordering
+ktlint_disabled_rules=import-ordering
 # IntelliJ-specific rules:
 ij_visual_guides = none
 ij_kotlin_align_in_columns_case_branch = false

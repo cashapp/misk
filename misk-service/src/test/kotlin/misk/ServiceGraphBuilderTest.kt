@@ -3,9 +3,9 @@ package misk
 import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
-import com.google.inject.Provider
 import com.google.inject.name.Named
 import com.google.inject.name.Names
+import misk.inject.toKey
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
@@ -16,6 +16,8 @@ class ServiceGraphBuilderTest {
   private val keyC = key("Service C")
   private val keyD = key("Service D")
   private val keyE = key("Service E")
+  private val keyF = key("Service F")
+  private val keyG = key("Service G")
   private val unregistered = key("Unregistered Service")
   private val enhancementA = key("Enhancement A")
 
@@ -117,7 +119,7 @@ class ServiceGraphBuilderTest {
       addDependency(dependsOn = unregistered, dependent = keyC) // Unregistered doesn't exist.
     }
     assertThat(failure).hasMessage(
-      "Service C requires $unregistered but no such service was " +
+      "Service C [NEW] requires $unregistered but no such service was " +
         "registered with the builder"
     )
   }
@@ -276,7 +278,7 @@ class ServiceGraphBuilderTest {
     }
 
     assertThat(failure)
-      .hasMessage("Detected cycle: Service A -> Service D -> Service C -> Service A")
+      .hasMessage("Detected cycle: Service A [NEW] -> Service D [NEW] -> Service C [NEW] -> Service A [NEW]")
   }
 
   @Test fun simpleDependencyCycle() {
@@ -285,7 +287,7 @@ class ServiceGraphBuilderTest {
       addDependency(dependsOn = keyB, dependent = keyA)
     }
 
-    assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
+    assertThat(failure).hasMessage("Detected cycle: Service A [NEW] -> Service B [NEW] -> Service A [NEW]")
   }
 
   @Test fun enhancementCycle() {
@@ -293,14 +295,14 @@ class ServiceGraphBuilderTest {
       enhanceService(toBeEnhanced = keyA, enhancement = keyB)
       enhanceService(toBeEnhanced = keyB, enhancement = keyA)
     }
-    assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
+    assertThat(failure).hasMessage("Detected cycle: Service A [NEW] -> Service B [NEW] -> Service A [NEW]")
   }
 
   @Test fun selfEnhancement() {
     val failure = buildAndExpectFailure(listOf(keyA)) {
       enhanceService(toBeEnhanced = keyA, enhancement = keyA)
     }
-    assertThat(failure).hasMessage("Detected cycle: ${keyA.name} -> ${keyA.name}")
+    assertThat(failure).hasMessage("Detected cycle: ${keyA.name} [NEW] -> ${keyA.name} [NEW]")
   }
 
   @Test fun enhancementDependencyCycle() {
@@ -308,7 +310,7 @@ class ServiceGraphBuilderTest {
       enhanceService(toBeEnhanced = keyA, enhancement = keyB)
       addDependency(dependsOn = keyB, dependent = keyA)
     }
-    assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
+    assertThat(failure).hasMessage("Detected cycle: Service A [NEW] -> Service B [NEW] -> Service A [NEW]")
   }
 
   @Test fun cannotChangeGraphOnceRunning() {
@@ -316,16 +318,9 @@ class ServiceGraphBuilderTest {
     val builder = newBuilderWithServices(target, listOf(keyA))
     val serviceManager = builder.build()
     serviceManager.startAsync()
-    val badEnhancer = CoordinatedService(
-      Provider<Service> {
-        AppendingService(target, "bad enhancement")
-      }
-    )
-    val badDependency = CoordinatedService(
-      Provider<Service> {
-        AppendingService(target, "bad dependency")
-      }
-    )
+    val badDependency = CoordinatedService {
+      AppendingService(target, "bad dependency")
+    }
 
     serviceManager.awaitHealthy()
 
@@ -366,6 +361,59 @@ class ServiceGraphBuilderTest {
         |stopping Service D
         |stopping Service A
         |""".trimMargin()
+    )
+  }
+
+  @Test
+  fun canPrettyPrintTheGraphForDebugging() {
+    val graph = ServiceGraphBuilder().apply {
+      addService(keyA, AppendingService(StringBuilder(), keyA.name))
+      addService(keyB, AppendingService(StringBuilder(), keyB.name))
+      addService(keyC, AppendingService(StringBuilder(), keyC.name))
+      addService(keyD, AppendingService(StringBuilder(), keyD.name))
+      addService(keyE, AppendingService(StringBuilder(), keyE.name))
+      addService(keyF, AppendingService(StringBuilder(), keyF.name))
+      addService(keyG, AppendingService(StringBuilder(), keyG.name))
+      addDependency(keyA, keyB)
+      addDependency(keyB, keyC)
+      addDependency(keyB, keyD)
+      addDependency(keyD, keyE)
+      addDependency(keyA, keyF)
+    }.toString()
+
+    assertThat(graph).isEqualTo(
+      """
+      |@com.google.inject.name.Named("Service A") misk.ServiceGraphBuilderTest.AppendingService
+      |    |__ @com.google.inject.name.Named("Service B") misk.ServiceGraphBuilderTest.AppendingService
+      |    |   |__ @com.google.inject.name.Named("Service C") misk.ServiceGraphBuilderTest.AppendingService
+      |    |   \__ @com.google.inject.name.Named("Service D") misk.ServiceGraphBuilderTest.AppendingService
+      |    |       \__ @com.google.inject.name.Named("Service E") misk.ServiceGraphBuilderTest.AppendingService
+      |    \__ @com.google.inject.name.Named("Service F") misk.ServiceGraphBuilderTest.AppendingService
+      |@com.google.inject.name.Named("Service G") misk.ServiceGraphBuilderTest.AppendingService
+      |""".trimMargin()
+    )
+  }
+
+  @Test fun `debug graph shows all dependencies, including repeated subtrees`() {
+    val graph = ServiceGraphBuilder().apply {
+      addService(keyA, AppendingService(StringBuilder(), keyA.name))
+      addService(keyB, AppendingService(StringBuilder(), keyB.name))
+      addService(keyC, AppendingService(StringBuilder(), keyC.name))
+      addService(keyD, AppendingService(StringBuilder(), keyD.name))
+      addDependency(keyA, keyB)
+      addDependency(keyA, keyD)
+      addDependency(keyB, keyC)
+      addDependency(keyD, keyC)
+    }.toString()
+
+    assertThat(graph).isEqualTo(
+      """
+      |@com.google.inject.name.Named("Service A") misk.ServiceGraphBuilderTest.AppendingService
+      |    |__ @com.google.inject.name.Named("Service B") misk.ServiceGraphBuilderTest.AppendingService
+      |    |   \__ @com.google.inject.name.Named("Service C") misk.ServiceGraphBuilderTest.AppendingService
+      |    \__ @com.google.inject.name.Named("Service D") misk.ServiceGraphBuilderTest.AppendingService
+      |        \__ @com.google.inject.name.Named("Service C") misk.ServiceGraphBuilderTest.AppendingService
+      |""".trimMargin()
     )
   }
 

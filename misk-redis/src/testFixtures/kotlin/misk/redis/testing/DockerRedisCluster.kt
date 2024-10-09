@@ -24,7 +24,7 @@ import java.time.Duration
  * To use this in tests:
  *
  * 1. Install a `RedisClusterModule` instead of a `FakeRedisModule`.
- *    Make sure to supply the [DockerRedisCluster.config] as the [RedisClusterConfig].
+ *    Make sure to supply the [DockerRedisCluster.replicationGroupConfig] as the [RedisClusterReplicationGroupConfig].
  * 2. Add `@MiskExternalDependency private val dockerRedis: DockerRedisCluster` to your test class.
  */
 object DockerRedisCluster : ExternalDependency {
@@ -37,12 +37,12 @@ object DockerRedisCluster : ExternalDependency {
   private val jedis by lazy { JedisCluster(HostAndPort(hostname, initialPort)) }
 
   private val redisNodeConfig = RedisNodeConfig(hostname, initialPort)
-  private val groupConfig = RedisClusterReplicationGroupConfig(
+  val replicationGroupConfig = RedisClusterReplicationGroupConfig(
     configuration_endpoint = redisNodeConfig,
     redis_auth_password = "",
     timeout_ms = 1_000,
   )
-  val config = RedisClusterConfig(mapOf("test-group" to groupConfig))
+  val config = RedisClusterConfig(mapOf("test-group" to replicationGroupConfig))
 
   private const val containerName = "misk-redis-cluster-testing"
   private val composer = Composer(

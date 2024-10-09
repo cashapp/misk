@@ -9,8 +9,12 @@ import com.google.inject.Injector
 import com.google.inject.Module
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
+import misk.web.jetty.JettyHealthService
 import misk.web.jetty.JettyService
 import wisp.logging.getLogger
+import kotlin.concurrent.thread
+import kotlin.system.measureTimeMillis
+import kotlin.time.Duration.Companion.milliseconds
 
 /** The entry point for misk applications */
 class MiskApplication private constructor(
@@ -84,34 +88,67 @@ class MiskApplication private constructor(
       val sb = StringBuilder().append('\n')
       e.message?.let { sb.append(it).append("\n\n") }
       if (e.jCommander?.parsedCommand != null) {
-        jc.usage(e.jCommander.parsedCommand, sb)
+        jc.usageFormatter.usage(e.jCommander.parsedCommand, sb)
       } else {
-        jc.usage(sb)
+        jc.usageFormatter.usage(sb)
       }
       throw CliException(sb.toString())
     }
   }
 
+  /**
+   * Provides internal testing the ability to mimic system exit without actually
+   * exiting the process.
+   */
+  @VisibleForTesting
+  internal lateinit var shutdownHook : Thread
+
   private fun startServiceAndAwaitTermination() {
     log.info { "creating application injector" }
     val injector = injectorGenerator()
     val serviceManager = injector.getInstance<ServiceManager>()
-    Runtime.getRuntime().addShutdownHook(object : Thread() {
-      override fun run() {
+    shutdownHook = thread(start = false) {
+      measureTimeMillis {
         log.info { "received a shutdown hook! performing an orderly shutdown" }
         serviceManager.stopAsync()
         serviceManager.awaitStopped()
+
+        // Synchronously stops Jetty Service if it is still running, otherwise no-ops.
+        // Jetty will already be shut down when either:
+        // webConfig.sleep_in_ms is <= 0 OR
+        // (webConfig.health_port >= 0 AND webConfig.health_dedicated_jetty_instance == true)
         val jettyService = injector.getInstance<JettyService>()
         jettyService.stop()
-        log.info { "orderly shutdown complete" }
-      }
-    })
 
-    log.info { "starting services" }
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    log.info { "all services started successfully" }
+        // Synchronously stop Jetty Health Service if it is running, otherwise no-ops.
+        // Use Guava Service methods to ensure main thread awaitTerminated is handled correctly.
+        val jettyHealthService = injector.getInstance<JettyHealthService>()
+        jettyHealthService.stopAsync()
+        jettyHealthService.awaitTerminated()
+      }.also {
+        log.info { "orderly shutdown complete in ${it.milliseconds}" }
+      }
+    }
+
+    Runtime.getRuntime().addShutdownHook(shutdownHook)
+
+    // We manage JettyHealthService outside ServiceManager because it must start first and
+    // shutdown last to keep the container alive via liveness checks.
+
+    val jettyHealthService: JettyHealthService
+    measureTimeMillis {
+      log.info { "starting services" }
+      jettyHealthService = injector.getInstance<JettyHealthService>()
+      jettyHealthService.startAsync()
+      serviceManager.startAsync()
+      serviceManager.awaitHealthy()
+      jettyHealthService.awaitRunning()
+    }.also {
+      log.info { "all services started successfully in ${it.milliseconds}" }
+    }
+
     serviceManager.awaitStopped()
+    jettyHealthService.awaitTerminated()
     log.info { "all services stopped" }
   }
 

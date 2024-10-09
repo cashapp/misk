@@ -1,12 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  id("com.squareup.wire")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  alias(libs.plugins.wire)
 }
 
 dependencies {
@@ -20,6 +18,7 @@ dependencies {
   api(libs.jettyServer)
   api(libs.jettyServletApi)
   api(libs.jettyUtil)
+  api(libs.kotlinXHtml)
   api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.openTracing)
@@ -38,6 +37,7 @@ dependencies {
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
+  api(project(":misk-service"))
   implementation(libs.jCommander)
   implementation(libs.jettyAlpnServer)
   implementation(libs.jettyHttp)
@@ -49,7 +49,7 @@ dependencies {
   implementation(libs.jettyUnixSocket)
   implementation(libs.jettyWebsocketApi)
   implementation(libs.jettyWebsocketServer)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
   implementation(libs.moshiAdapters)
@@ -62,6 +62,7 @@ dependencies {
   implementation(libs.wireGrpcClient)
   implementation(libs.wireMoshiAdapter)
   implementation(libs.wireRuntime)
+  implementation(project(":misk-tailwind"))
   implementation(project(":wisp:wisp-deployment-testing"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
@@ -69,7 +70,6 @@ dependencies {
   implementation(project(":wisp:wisp-tracing"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-proto"))
-  implementation(project(":misk-service"))
   runtimeOnly(libs.jettyAlpnServerJava)
 
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
@@ -87,7 +87,7 @@ dependencies {
   testImplementation(project(":misk-testing"))
 }
 
-val generatedSourceDir = "$buildDir/generated/source/wire-test"
+val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
 
 wire {
   sourcePath {
@@ -125,10 +125,10 @@ afterEvaluate {
   val generatedSourceGlob = "$generatedSourceDir/**"
 
   sourceSets {
-    val main by getting {
+    main {
       java.setSrcDirs(java.srcDirs.filter { !it.path.contains(generatedSourceDir) })
     }
-    val test by getting {
+    test {
       java.srcDir(generatedSourceDir)
     }
   }
@@ -143,7 +143,7 @@ afterEvaluate {
   }
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

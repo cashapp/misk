@@ -965,7 +965,7 @@ function* handleMetadata() {
   const useTestData = false
   const url = useTestData
     ? "https://cashapp.github.io/misk-web/examples/data/demo/webactions.json"
-    : "/api/webaction/metadata"
+    : "/api/v1/webaction/metadata"
   try {
     const { data } = yield call(axios.get, url)
     const { webActionMetadata } = data

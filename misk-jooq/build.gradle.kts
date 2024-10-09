@@ -1,22 +1,20 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+
   // Needed to generate jooq test db classes
-  id("org.flywaydb.flyway") version "9.14.1"
-  id("nu.studer.jooq") version "8.2"
+  alias(libs.plugins.flyway)
+  alias(libs.plugins.jooq)
 }
 
 dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jooq)
-  api(libs.kotlinLogging)
+  api(libs.loggingApi)
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
@@ -37,13 +35,7 @@ dependencies {
   jooqGenerator(libs.mysql)
 }
 
-// Needed to generate jooq test db classes
-buildscript {
-  dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:9.14.1")
-    classpath(libs.mysql)
-  }
-}
+val dbMigrations = "src/test/resources/db-migrations"
 
 // Needed to generate jooq test db classes
 flyway {
@@ -51,7 +43,7 @@ flyway {
   user = "root"
   password = "root"
   schemas = arrayOf("jooq")
-  locations = arrayOf("filesystem:${project.projectDir}/src/test/resources/db-migrations")
+  locations = arrayOf("filesystem:${project.projectDir}/${dbMigrations}")
   sqlMigrationPrefix = "v"
 }
 // Needed to generate jooq test db classes
@@ -91,17 +83,29 @@ jooq {
     }
   }
 }
+
 // Needed to generate jooq test db classes
-val generateJooq by project.tasks
-generateJooq.dependsOn("flywayMigrate")
+tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
+  dependsOn("flywayMigrate")
+
+  // declare migration files as inputs on the jOOQ task and allow it to
+  // participate in build caching
+  inputs.files(fileTree(layout.projectDirectory.dir(dbMigrations)))
+    .withPropertyName("migrations")
+    .withPathSensitivity(PathSensitivity.RELATIVE)
+  allInputsDeclared.set(true)
+}
 
 // Needed to generate jooq test db classes
 // If you are using this as an example for your service, remember to add the generated code to your
 // main source set instead of your tests as it is done below.
-sourceSets.getByName("test").java.srcDirs
-  .add(File("${project.projectDir}/src/test/generated/kotlin"))
+sourceSets {
+  test {
+    java.srcDirs(layout.projectDirectory.dir("src/test/generated/kotlin"))
+  }
+}
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

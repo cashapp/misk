@@ -1,7 +1,6 @@
 package misk.redis
 
 import com.google.inject.Module
-import com.google.inject.Provider
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
@@ -23,7 +22,7 @@ class PipelinedRedisTest : AbstractRedisTest() {
   @MiskTestModule
   private val module: Module = object : KAbstractModule() {
     override fun configure() {
-      install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
 

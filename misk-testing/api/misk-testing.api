@@ -1,5 +1,7 @@
 public final class misk/MiskTestingServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/cloud/fake/security/keys/FakeKeyManagementModule : misk/inject/KAbstractModule {
@@ -100,6 +102,11 @@ public final class misk/mockito/Mockito {
 	public static final field INSTANCE Lmisk/mockito/Mockito;
 }
 
+public final class misk/mockito/MockitoTestFixture : misk/testing/TestFixture {
+	public fun <init> (Lcom/google/inject/Provider;)V
+	public fun reset ()V
+}
+
 public final class misk/random/FakeRandom : misk/random/Random {
 	public fun <init> ()V
 	public final fun getNextBoolean ()Ljava/lang/Boolean;
@@ -111,6 +118,7 @@ public final class misk/random/FakeRandom : misk/random/Random {
 	public fun nextDouble ()D
 	public fun nextFloat ()F
 	public fun nextInt ()I
+	public fun nextInt (I)I
 	public fun nextLong ()J
 	public final fun setNextBoolean (Ljava/lang/Boolean;)V
 	public final fun setNextDouble (Ljava/lang/Double;)V

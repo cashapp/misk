@@ -1,25 +1,21 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  alias(libs.plugins.kotlinAllOpen)
+  alias(libs.plugins.kotlinJpa)
 }
 
-apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
-apply(plugin = "kotlin-jpa")
-
-configure<AllOpenExtension> {
+allOpen {
   annotation("javax.persistence.Entity")
   annotation("javax.persistence.Embeddable")
   annotation("javax.persistence.MappedSuperclass")
 }
 
 sourceSets {
-  val test by getting {
+  test {
     java.srcDir("src/test/kotlin/")
   }
 }
@@ -27,21 +23,19 @@ sourceSets {
 dependencies {
   api(libs.guava)
   api(libs.guice)
-  api(libs.hibernateCore)
+  api(libs.hibernate5Core)
   api(libs.jakartaInject)
-  api(libs.javaxPersistenceApi)
+  api(libs.hibernateJpaApi)
   api(libs.slf4jApi)
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
   api(project(":wisp:wisp-config"))
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.kotlinReflect)
   implementation(libs.moshiCore)
   implementation(libs.okHttp)
   implementation(libs.okio)
   implementation(libs.tink)
-  implementation(libs.tinkAwskms)
-  implementation(libs.tinkGcpkms)
   implementation(libs.wireRuntime)
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk"))
@@ -51,7 +45,6 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-crypto"))
   implementation(project(":misk-service"))
-
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
@@ -70,7 +63,7 @@ dependencies {
   testImplementation(testFixtures(project(":misk-crypto")))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

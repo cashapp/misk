@@ -1,21 +1,18 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
   api(project(":misk-inject"))
-  api(project(":wisp:wisp-rate-limiting"))
-  api(libs.guice)
-  api(libs.jakartaInject)
-  api(libs.jedis)
-  api(libs.micrometerCore)
+  implementation(project(":wisp:wisp-rate-limiting"))
+  implementation(libs.guice)
+  implementation(libs.jedis)
+  implementation(libs.micrometerCore)
 
   implementation(project(":wisp:wisp-rate-limiting:bucket4j"))
   implementation(libs.bucket4jCore)
@@ -34,7 +31,11 @@ dependencies {
   testImplementation(libs.junitApi)
 }
 
-configure<MavenPublishBaseExtension> {
+tasks.withType<Test> {
+  dependsOn(":startRedis")
+}
+
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
   )

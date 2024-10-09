@@ -1,3 +1,9 @@
+public final class misk/jooq/IsolationLevelAwareConnectionProvider : org/jooq/ConnectionProvider {
+	public fun <init> (Lorg/jooq/impl/DataSourceConnectionProvider;Lmisk/jooq/JooqTransacter$TransacterOptions;)V
+	public fun acquire ()Ljava/sql/Connection;
+	public fun release (Ljava/sql/Connection;)V
+}
+
 public final class misk/jooq/JooqExtensionsKt {
 	public static final fun fetchOneOrNull (Lorg/jooq/ResultQuery;)Lorg/jooq/Record;
 	public static final fun getOrThrow (Ljava/lang/Object;)Ljava/lang/Object;
@@ -53,7 +59,10 @@ public final class misk/jooq/JooqSession$HookType : java/lang/Enum {
 
 public final class misk/jooq/JooqTransacter {
 	public static final field Companion Lmisk/jooq/JooqTransacter$Companion;
-	public fun <init> (Lkotlin/Lazy;)V
+	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;Ljava/lang/String;Ljava/time/Clock;)V
+	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;Ljava/lang/String;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Ljava/time/Clock;)V
+	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;Ljava/lang/String;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Ljava/time/Clock;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;Ljava/lang/String;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Ljava/time/Clock;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public final fun transaction (Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static synthetic fun transaction$default (Lmisk/jooq/JooqTransacter;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
@@ -67,16 +76,30 @@ public final class misk/jooq/JooqTransacter$TransacterOptions {
 	public fun <init> ()V
 	public fun <init> (I)V
 	public fun <init> (IJ)V
-	public synthetic fun <init> (IJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJLmisk/jooq/TransactionIsolationLevel;)V
+	public synthetic fun <init> (IJLmisk/jooq/TransactionIsolationLevel;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2 ()J
-	public final fun copy (IJ)Lmisk/jooq/JooqTransacter$TransacterOptions;
-	public static synthetic fun copy$default (Lmisk/jooq/JooqTransacter$TransacterOptions;IJILjava/lang/Object;)Lmisk/jooq/JooqTransacter$TransacterOptions;
+	public final fun component3 ()Lmisk/jooq/TransactionIsolationLevel;
+	public final fun copy (IJLmisk/jooq/TransactionIsolationLevel;)Lmisk/jooq/JooqTransacter$TransacterOptions;
+	public static synthetic fun copy$default (Lmisk/jooq/JooqTransacter$TransacterOptions;IJLmisk/jooq/TransactionIsolationLevel;ILjava/lang/Object;)Lmisk/jooq/JooqTransacter$TransacterOptions;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIsolationLevel ()Lmisk/jooq/TransactionIsolationLevel;
 	public final fun getMaxAttempts ()I
 	public final fun getMaxRetryDelayMillis ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jooq/TransactionIsolationLevel : java/lang/Enum {
+	public static final field READ_COMMITTED Lmisk/jooq/TransactionIsolationLevel;
+	public static final field READ_UNCOMMITTED Lmisk/jooq/TransactionIsolationLevel;
+	public static final field REPEATABLE_READ Lmisk/jooq/TransactionIsolationLevel;
+	public static final field SERIALIZABLE Lmisk/jooq/TransactionIsolationLevel;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lmisk/jooq/TransactionIsolationLevel;
+	public static fun values ()[Lmisk/jooq/TransactionIsolationLevel;
 }
 
 public final class misk/jooq/listeners/AvoidUsingSelectStarException : java/lang/RuntimeException {

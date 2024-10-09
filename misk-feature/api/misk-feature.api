@@ -4,6 +4,12 @@ public final class misk/feature/Attributes : wisp/feature/Attributes {
 	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
 	public fun <init> (Ljava/util/Map;Ljava/util/Map;Z)V
 	public synthetic fun <init> (Ljava/util/Map;Ljava/util/Map;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun copy (Ljava/util/Map;Ljava/util/Map;Z)Lmisk/feature/Attributes;
+	public synthetic fun copy (Ljava/util/Map;Ljava/util/Map;Z)Lwisp/feature/Attributes;
+	public fun with (Ljava/lang/String;Ljava/lang/Number;)Lmisk/feature/Attributes;
+	public synthetic fun with (Ljava/lang/String;Ljava/lang/Number;)Lwisp/feature/Attributes;
+	public fun with (Ljava/lang/String;Ljava/lang/String;)Lmisk/feature/Attributes;
+	public synthetic fun with (Ljava/lang/String;Ljava/lang/String;)Lwisp/feature/Attributes;
 }
 
 public abstract interface class misk/feature/DynamicConfig {

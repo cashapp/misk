@@ -1,8 +1,17 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
-    api(libs.moshiCore)
-    implementation(libs.moshiKotlin)
+  api(libs.moshiCore)
+  api(libs.guice)
+  api(libs.jakartaInject)
+  api(libs.javaxInject)
+  implementation(libs.moshiKotlin)
+
+  testRuntimeOnly(libs.junitEngine)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
 }

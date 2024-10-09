@@ -16,7 +16,7 @@ internal class PoolLeaseTest {
 
   @Test
   fun fakeDeploymentAndNoPoolConfigReturnsExpectedLease() {
-    val testLease = TestLease(LEASE_NAME, acquire = false)
+    val testLease = TestLease(LEASE_NAME, isAcquired = true, isHeld = true)
     val delegateLeaseManager = Mockito.mock(LeaseManager::class.java)
     `when`(delegateLeaseManager.requestLease(LEASE_NAME)).thenReturn(testLease)
     val poolLeaseManager = PoolLeaseManager(delegateLeaseManager, TESTING, emptyList())
@@ -29,7 +29,7 @@ internal class PoolLeaseTest {
 
   @Test
   fun fakeDeploymentAndPoolConfigReturnsExpectedLease() {
-    val testLease = TestLease(LEASE_NAME, acquire = false)
+    val testLease = TestLease(LEASE_NAME, isAcquired = true, isHeld = true)
     val delegateLeaseManager = Mockito.mock(LeaseManager::class.java)
     `when`(delegateLeaseManager.requestLease(LEASE_NAME)).thenReturn(testLease)
     val poolLeaseManager = PoolLeaseManager(delegateLeaseManager, TESTING, listOf(poolLeaseConfig))
@@ -42,7 +42,7 @@ internal class PoolLeaseTest {
 
   @Test
   fun realDeploymentAndNoPoolConfigReturnsExpectedLease() {
-    val testLease = TestLease(LEASE_NAME, acquire = false)
+    val testLease = TestLease(LEASE_NAME, isAcquired = false)
     val delegateLeaseManager = Mockito.mock(LeaseManager::class.java)
     `when`(delegateLeaseManager.requestLease(LEASE_NAME)).thenReturn(testLease)
     val poolLeaseManager = PoolLeaseManager(delegateLeaseManager, STAGING, emptyList())
@@ -55,7 +55,7 @@ internal class PoolLeaseTest {
 
   @Test
   fun realDeploymentAndPoolConfigReturnsExpectedLease() {
-    val testLease = TestLease(LEASE_NAME, acquire = true)
+    val testLease = TestLease(LEASE_NAME, isAcquired = false, isHeld = false)
     val delegateLeaseManager = Mockito.mock(LeaseManager::class.java)
     `when`(delegateLeaseManager.requestLease(LEASE_NAME)).thenReturn(testLease)
     val poolLeaseManager = PoolLeaseManager(delegateLeaseManager, STAGING, listOf(poolLeaseConfig))
@@ -68,9 +68,9 @@ internal class PoolLeaseTest {
 
   @Test
   fun fakeDeploymentAndPoolConfigMultipleLeaseTests() {
-    val testLease = TestLease(LEASE_NAME, acquire = true)
-    val anotherTestLease = TestLease(ANOTHER_LEASE_NAME, acquire = true)
-    val notInPoolTestLease = TestLease(NOT_IN_POOL_LEASE_NAME, acquire = true)
+    val testLease = TestLease(LEASE_NAME, isAcquired = false, isHeld = false)
+    val anotherTestLease = TestLease(ANOTHER_LEASE_NAME, isAcquired = false, isHeld = false)
+    val notInPoolTestLease = TestLease(NOT_IN_POOL_LEASE_NAME, isAcquired = false, isHeld = false)
 
     val delegateLeaseManager = Mockito.mock(LeaseManager::class.java)
     `when`(delegateLeaseManager.requestLease(LEASE_NAME)).thenReturn(testLease)
@@ -101,10 +101,39 @@ internal class PoolLeaseTest {
   }
 
   @Test
-  fun realDeploymentAndPoolConfigMultipleLeaseTests() {
-    val testLease = TestLease(LEASE_NAME, acquire = true)
-    val anotherTestLease = TestLease(ANOTHER_LEASE_NAME, acquire = true)
-    val notInPoolTestLease = TestLease(NOT_IN_POOL_LEASE_NAME, acquire = true)
+  fun realDeploymentAndPoolConfigCheckHeldTest() {
+    val testLease = TestLease(LEASE_NAME, isAcquired = false, isHeld = false)
+    val anotherTestLease = TestLease(ANOTHER_LEASE_NAME, isAcquired = false, isHeld = false)
+
+    val delegateLeaseManager = Mockito.mock(LeaseManager::class.java)
+    `when`(delegateLeaseManager.requestLease(LEASE_NAME)).thenReturn(testLease)
+    `when`(delegateLeaseManager.requestLease(ANOTHER_LEASE_NAME)).thenReturn(anotherTestLease)
+
+    val poolLeaseManager = PoolLeaseManager(delegateLeaseManager, STAGING, listOf(poolLeaseConfig))
+    val requestedLease = poolLeaseManager.requestLease(LEASE_NAME)
+    val requestedAnotherLease = poolLeaseManager.requestLease(ANOTHER_LEASE_NAME)
+
+    assertEquals(testLease.name, requestedLease.name)
+    assertEquals(anotherTestLease.name, requestedAnotherLease.name)
+
+    assertTrue(requestedLease.acquire())
+    assertTrue(anotherTestLease.checkHeldElsewhere())
+
+    assertFalse(poolLeaseManager.isEmptyPoolLeaseMapEntry(LEASE_NAME))
+    assertFalse(poolLeaseManager.isEmptyPoolLeaseMapEntry(ANOTHER_LEASE_NAME))
+
+    // release the lease in the pool so this should mean we're not tracking any lease
+    requestedLease.release()
+
+    assertFalse(requestedLease.checkHeld())
+    assertFalse(anotherTestLease.checkHeld())
+  }
+
+@Test
+fun realDeploymentAndPoolConfigMultipleLeaseTests() {
+    val testLease = TestLease(LEASE_NAME, isAcquired = false, isHeld = false)
+    val anotherTestLease = TestLease(ANOTHER_LEASE_NAME, isAcquired = false, isHeld = false)
+    val notInPoolTestLease = TestLease(NOT_IN_POOL_LEASE_NAME, isAcquired = false, isHeld = false)
 
     val delegateLeaseManager = Mockito.mock(LeaseManager::class.java)
     `when`(delegateLeaseManager.requestLease(LEASE_NAME)).thenReturn(testLease)
@@ -168,20 +197,33 @@ internal class PoolLeaseTest {
 
 internal class TestLease(
   override val name: String,
-  private val checkHeld: Boolean = true,
-  private val acquire: Boolean = true,
-  private val release: Boolean = true,
+  private var isHeld: Boolean = true,
+  private var isAcquired: Boolean = true,
 ) : Lease {
   override fun checkHeld(): Boolean {
-    return checkHeld
+    return isHeld
   }
 
   override fun acquire(): Boolean {
-    return acquire
+    if (!isHeld) {
+      isHeld = true
+      isAcquired = true
+      return true
+    }
+    return false
   }
 
   override fun release(): Boolean {
-    return release
+    if (isHeld) {
+      isHeld = false
+      isAcquired = false
+      return true
+    }
+    return false
+  }
+
+  override fun checkHeldElsewhere(): Boolean {
+    return !isHeld
   }
 
   override fun addListener(listener: Lease.StateChangeListener) {

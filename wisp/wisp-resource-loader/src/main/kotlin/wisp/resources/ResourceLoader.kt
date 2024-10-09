@@ -46,6 +46,7 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return null
+        backend.checkPath(path)
         return backend.open(path)
     }
 
@@ -60,6 +61,7 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return
+        backend.checkPath(path)
         backend.put(path, data)
     }
 
@@ -73,6 +75,11 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return false
+        try {
+          backend.checkPath(path)
+        } catch (e: IllegalArgumentException) {
+          return false
+        }
         return backend.exists(path)
     }
 
@@ -86,6 +93,11 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return listOf()
+        try {
+          backend.checkPath(path)
+        } catch (e: IllegalArgumentException) {
+          return listOf()
+        }
         return backend.list(path).map { scheme + it }
     }
 
@@ -118,8 +130,25 @@ open class ResourceLoader(
         return utf8(address) ?: error("could not load resource $address")
     }
 
+    /**
+     * Return the contents of `address` as bytes, or null if no such resource exists. Note that
+     * this method reads the resource on every use. It is the caller's responsibility to cache the
+     * result if it is to be loaded frequently.
+     */
+    fun bytes(address: String): ByteString? {
+      val source = open(address) ?: return null
+      return source.use { it.readByteString() }
+    }
+
+    /**
+     * Like [bytes], but throws [IllegalStateException] if the resource is missing.
+     */
+    fun requireBytes(address: String): ByteString {
+      return bytes(address) ?: error("could not load resource $address")
+    }
+
     private fun checkAddress(address: String) {
-        require(address.matches(Regex("([^/:]+:)(/[^/]+)+/?"))) { "unexpected address $address" }
+        require(address.matches(Regex("([^/:]+:).+"))) { "unexpected address $address" }
     }
 
     /**
@@ -161,6 +190,7 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return
+        backend.checkPath(path)
         backend.watch(path, resourceChangedListener)
     }
 
@@ -169,6 +199,7 @@ open class ResourceLoader(
 
         val (scheme, path) = parseAddress(address)
         val backend = backends[scheme] ?: return
+        backend.checkPath(path)
         backend.unwatch(path)
     }
 
@@ -211,13 +242,21 @@ open class ResourceLoader(
             throw UnsupportedOperationException("${this::class} doesn't support unwatch")
         }
 
+        /*
+         * By default, backends will assume a file-like address path (i.e. path/to/file.txt) unless
+         * a different implementation is provided in the backend.
+         */
+        open fun checkPath(path: String) {
+          require(path.matches(Regex("(/[^/]+)+/?"))) { "unexpected address $path" }
+        }
     }
 
     companion object {
         val SYSTEM = ResourceLoader(
             mapOf(
                 ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
-                FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend
+                FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend,
+                EnvironmentResourceLoaderBackend.SCHEME to EnvironmentResourceLoaderBackend,
             )
         )
     }

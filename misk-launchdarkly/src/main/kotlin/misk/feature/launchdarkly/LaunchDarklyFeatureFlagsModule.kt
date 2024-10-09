@@ -5,6 +5,8 @@ import com.google.inject.Provides
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
+import com.launchdarkly.sdk.server.integrations.EventProcessorBuilder.DEFAULT_CAPACITY
+import com.launchdarkly.sdk.server.integrations.EventProcessorBuilder.DEFAULT_FLUSH_INTERVAL
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import io.micrometer.core.instrument.MeterRegistry
@@ -61,13 +63,21 @@ class LaunchDarklyModule @JvmOverloads constructor(
   ): LDClientInterface {
     // TODO: This shouldn't exist. We should not be exposing LDClientInterface and the only users of this are
     //   apps who're installing this module but not even using the misk or wisp LaunchDarklyFeatureFlags.
-    val baseUri = URI.create(config.base_uri)
     val ldConfig = LDConfig.Builder()
       // Set wait to 0 to not block here. Block in service initialization instead.
       .startWait(Duration.ofMillis(0))
       .dataSource(Components.streamingDataSource())
-      .events(Components.sendEvents())
-      .serviceEndpoints(Components.serviceEndpoints().relayProxy(baseUri))
+      .events(
+        Components.sendEvents()
+          .capacity(config.event_capacity)
+          .flushInterval(config.flush_interval)
+      )
+
+    if (config.use_relay_proxy) {
+      ldConfig.serviceEndpoints(
+        Components.serviceEndpoints().relayProxy(URI.create(config.base_uri))
+      )
+    }
 
     config.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
@@ -89,5 +99,8 @@ data class LaunchDarklyConfig @JvmOverloads constructor(
   @Redact
   val sdk_key: String,
   val base_uri: String,
+  val use_relay_proxy: Boolean = true,
   val ssl: HttpClientSSLConfig? = null,
+  val event_capacity: Int = DEFAULT_CAPACITY,
+  val flush_interval: Duration = DEFAULT_FLUSH_INTERVAL,
 ) : Config

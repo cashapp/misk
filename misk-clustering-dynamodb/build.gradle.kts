@@ -1,15 +1,13 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
 }
 
 dependencies {
-  api(libs.kotlinLogging)
+  api(libs.loggingApi)
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
   implementation(libs.aws2Dynamodb)
@@ -29,8 +27,9 @@ dependencies {
   testImplementation(testFixtures(project(":misk-aws2-dynamodb")))
 
   if (org.apache.tools.ant.taskdefs.condition.Os.isArch("aarch64")) {
-    // Without this, we can't compile on Apple Silicon currently. This is likely not necessary to
-    // have longterm, so we should remove it when platform fixes things across Square.
+    // Without this, we can't compile on Apple Silicon currently.
+    // This is likely not necessary to have long term,
+    // so we should remove it when things get fixed upstream.
     testImplementation("io.github.ganadist.sqlite4java:libsqlite4java-osx-aarch64:1.0.392")
   }
 
@@ -42,7 +41,7 @@ dependencies {
   }
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

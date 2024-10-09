@@ -1,14 +1,29 @@
+public abstract interface class misk/jobqueue/BatchJobHandler {
+	public abstract fun handleJobs (Ljava/util/Collection;)V
+}
+
 public final class misk/jobqueue/DevelopmentJobProcessorModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
+}
+
+public final class misk/jobqueue/FakeBatchJobHandlerModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/jobqueue/FakeBatchJobHandlerModule$Companion;
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/FakeBatchJobHandlerModule;
+}
+
+public final class misk/jobqueue/FakeBatchJobHandlerModule$Companion {
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/FakeBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/jobqueue/FakeBatchJobHandlerModule;
 }
 
 public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/Job {
 	public static final field Companion Lmisk/jobqueue/FakeJob$Companion;
 	public static final field MAX_DELAY_DURATION J
 	public static final field MIN_DElAY_DURATION J
-	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;)V
-	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)V
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun acknowledge ()V
 	public synthetic fun compareTo (Ljava/lang/Object;)I
 	public fun compareTo (Lmisk/jobqueue/FakeJob;)I
@@ -19,8 +34,8 @@ public final class misk/jobqueue/FakeJob : java/lang/Comparable, misk/jobqueue/J
 	public final fun component5 ()Ljava/util/Map;
 	public final fun component6 ()Ljava/time/Instant;
 	public final fun component7 ()Ljava/time/Duration;
-	public final fun copy (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;)Lmisk/jobqueue/FakeJob;
-	public static synthetic fun copy$default (Lmisk/jobqueue/FakeJob;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;Ljava/time/Clock;ILjava/lang/Object;)Lmisk/jobqueue/FakeJob;
+	public final fun copy (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)Lmisk/jobqueue/FakeJob;
+	public static synthetic fun copy$default (Lmisk/jobqueue/FakeJob;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILjava/lang/Object;)Lmisk/jobqueue/FakeJob;
 	public fun deadLetter ()V
 	public fun delayWithBackoff ()V
 	public fun equals (Ljava/lang/Object;)Z
@@ -55,8 +70,8 @@ public final class misk/jobqueue/FakeJobHandlerModule$Companion {
 	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/jobqueue/FakeJobHandlerModule;
 }
 
-public final class misk/jobqueue/FakeJobQueue : misk/jobqueue/JobQueue, misk/jobqueue/TransactionalJobQueue {
-	public fun <init> (Ljava/time/Clock;Lcom/google/inject/Provider;Lwisp/token/TokenGenerator;)V
+public final class misk/jobqueue/FakeJobQueue : misk/testing/FakeFixture, misk/jobqueue/JobQueue, misk/jobqueue/TransactionalJobQueue {
+	public fun <init> (Ljava/time/Clock;Lcom/google/inject/Provider;Lcom/google/inject/Provider;Lwisp/token/TokenGenerator;)V
 	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;)V
 	public fun enqueue (Lmisk/hibernate/Session;Lmisk/hibernate/Gid;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 	public fun enqueue (Lmisk/hibernate/Session;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
@@ -94,6 +109,7 @@ public abstract interface class misk/jobqueue/Job {
 }
 
 public abstract interface class misk/jobqueue/JobConsumer {
+	public abstract fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/BatchJobHandler;)V
 	public abstract fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/JobHandler;)V
 	public abstract fun unsubscribe (Lmisk/jobqueue/QueueName;)V
 }

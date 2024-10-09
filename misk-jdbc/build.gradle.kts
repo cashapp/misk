@@ -1,12 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
@@ -27,7 +25,7 @@ dependencies {
   implementation(libs.dockerTransport)
   implementation(libs.dockerTransportCore)
   implementation(libs.hikariCp)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.mysql)
   implementation(libs.okio)
   implementation(project(":misk"))
@@ -44,9 +42,10 @@ dependencies {
   testFixturesApi(libs.okHttp)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-jdbc"))
+  testFixturesApi(project(":misk-testing-api"))
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.hikariCp)
-  testFixturesImplementation(libs.kotlinLogging)
+  testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.okio)
   testFixturesImplementation(project(":wisp:wisp-containers-testing"))
   testFixturesImplementation(project(":wisp:wisp-deployment"))
@@ -68,7 +67,7 @@ dependencies {
   testImplementation(testFixtures(project(":misk-jdbc")))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

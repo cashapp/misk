@@ -20,16 +20,11 @@ jooq-code-gen to it. There's an example of how to do this in this
 a. Add the below lines to your build.gradle.kts
 
 ```
-buildscript {
-  dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:7.15.0")
-    classpath(Dependencies.mysql)
-  }
-}
 plugins {
-  id("org.flywaydb.flyway") version "7.15.0"
-  id("nu.studer.jooq") version "5.2"
+  alias(libs.plugins.flyway)
+  alias(libs.plugins.jooq)
 }
+val dbMigrations = "src/main/resources/db-migrations"
 // We are using flyway here in order to run the migrations to create a schema. 
 // Ensure the migration directory is not called `migrations`. There's more details as to why below.
 flyway {
@@ -37,7 +32,7 @@ flyway {
   user = "root"
   password = "root"
   schemas = arrayOf("jooq")
-  locations = arrayOf("filesystem:${project.projectDir}/src/main/resources/db-migrations")
+  locations = arrayOf("filesystem:${project.projectDir}/${dbMigrations}")
   sqlMigrationPrefix = "v"
 }
 // More details about the jooq plugin here - https://github.com/etiennestuder/gradle-jooq-plugin
@@ -77,11 +72,27 @@ jooq {
     }
   }
 }
-val generateJooq by project.tasks
-generateJooq.dependsOn("flywayMigrate")
 
-sourceSets.getByName("main").java.srcDirs
-  .add(File("${project.projectDir}/src/main/generated/kotlin"))
+// Needed to generate jooq test db classes
+tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
+  dependsOn("flywayMigrate")
+
+  // declare migration files as inputs on the jOOQ task and allow it to
+  // participate in build caching
+  inputs.files(fileTree(layout.projectDirectory.dir(dbMigrations)))
+    .withPropertyName("migrations")
+    .withPathSensitivity(PathSensitivity.RELATIVE)
+  allInputsDeclared.set(true)
+}
+
+// Needed to generate jooq test db classes
+// If you are using this as an example for your service, remember to add the generated code to your
+// main source set instead of your tests as it is done below.
+sourceSets {
+  test {
+    java.srcDirs(layout.projectDirectory.dir("src/test/generated/kotlin"))
+  }
+}
 ```
 
 b. Have a look at `jooq-test-regenerate.sh`. Copy that into the root of your project and modify the database 
@@ -159,4 +170,4 @@ ctx.select()
    [migrations](https://github.com/jOOQ/jOOQ/tree/main/jOOQ/src/main/resources/migrations) 
    we don't care about in it. When the service starts up it finds this folder as well and tries 
    to run those migrations. Renaming misk service migrations to somethinq like `db-migrations` works. 
-   
+

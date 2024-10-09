@@ -87,7 +87,7 @@ class ServiceModule(
     key: Key<out Service>,
     dependsOn: List<Key<out Service>> = listOf(),
     enhancedBy: List<Key<out Service>> = listOf(),
-    enhances: Key<out Service>? = null
+    @Suppress("UNUSED_PARAMETER") enhances: Key<out Service>? = null
   ) : this(
     key = key,
     dependsOn = dependsOn,

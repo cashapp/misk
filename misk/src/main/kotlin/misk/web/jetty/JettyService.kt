@@ -13,6 +13,7 @@ import misk.security.ssl.TlsProtocols
 import misk.web.WebConfig
 import misk.web.WebSslConfig
 import misk.web.WebUnixDomainSocketConfig
+import misk.web.jetty.JettyHealthService.Companion.jettyHealthServiceEnabled
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
@@ -21,6 +22,7 @@ import org.eclipse.jetty.http2.server.AbstractHTTP2ServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
 import org.eclipse.jetty.io.ConnectionStatistics
+import org.eclipse.jetty.server.AbstractConnector
 import org.eclipse.jetty.server.ConnectionFactory
 import org.eclipse.jetty.server.Connector
 import org.eclipse.jetty.server.HttpConfiguration
@@ -46,7 +48,6 @@ import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerI
 import wisp.logging.getLogger
 import java.io.File
 import java.io.IOException
-import java.lang.RuntimeException
 import java.lang.Thread.sleep
 import java.net.InetAddress
 import java.nio.file.Files
@@ -58,6 +59,8 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 import javax.servlet.DispatcherType
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @Singleton
 class JettyService @Inject internal constructor(
@@ -79,7 +82,7 @@ class JettyService @Inject internal constructor(
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting Jetty")
 
-    if (webConfig.health_port >= 0) {
+    if (!webConfig.jettyHealthServiceEnabled() && webConfig.health_port >= 0) {
       healthExecutor = ThreadPoolExecutor(
         // 2 threads for jetty acceptor and selector. 2 threads for k8s liveness/readiness.
         4,
@@ -242,7 +245,7 @@ class JettyService @Inject internal constructor(
       server.addConnector(httpsConnector)
     }
 
-    var socketConfigs = newMutableList<WebUnixDomainSocketConfig>()
+    val socketConfigs = newMutableList<WebUnixDomainSocketConfig>()
     if (webConfig.unix_domain_socket != null) {
       socketConfigs.add(webConfig.unix_domain_socket)
     }
@@ -263,7 +266,7 @@ class JettyService @Inject internal constructor(
           null /* executor */,
           null /* scheduler */,
           null /* buffer pool */,
-          webConfig.acceptors ?: -1 ,
+          webConfig.acceptors ?: -1,
           webConfig.selectors ?: -1,
           *udsConnFactories.toTypedArray()
         )
@@ -271,10 +274,11 @@ class JettyService @Inject internal constructor(
         udsConnector.unixDomainPath = socketFile.toPath()
         udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
         udsConnector.name = "uds"
+        maybeOverrideUdsShutdownIdleTimeout(udsConnector)
 
         // set file permissions after socket creation so sidecars (e.g. envoy, istio) have access
         try {
-          udsConnector.start();
+          udsConnector.start()
           setFilePermissions(socketFile)
         } catch (e: Exception) {
           cleanAndThrow(udsConnector, e)
@@ -292,6 +296,8 @@ class JettyService @Inject internal constructor(
         udsConnector.setUnixSocket(socketConfig.path)
         udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
         udsConnector.name = "uds"
+        maybeOverrideUdsShutdownIdleTimeout(udsConnector)
+
         server.addConnector(udsConnector)
       }
     }
@@ -300,7 +306,7 @@ class JettyService @Inject internal constructor(
     val servletContextHandler = ServletContextHandler()
     servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
 
-    JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
+    JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null)
     server.addManaged(servletContextHandler)
 
     statisticsHandler.handler = servletContextHandler
@@ -368,7 +374,41 @@ class JettyService @Inject internal constructor(
     }
   }
 
-  internal fun stop() {
+  /**
+   * TODO: This is part of the experiment for improving graceful shutdown which is
+   * being gated behind the dedicated health service.
+   *
+   * The default shutdown idle timeout is 1s which prevents in-flight requests from
+   * gracefully completing as idle timeout is based on actual bytes flowing over the
+   * socket rather than outstanding requests.
+   *
+   * Once verified we will determine the correct way to model this.
+   * Either as a more reasonable default than 1s, or as a setting attached to
+   * WebUnixDomainSocketConfig
+   */
+  private fun maybeOverrideUdsShutdownIdleTimeout(udsConnector: AbstractConnector) {
+    if (!webConfig.jettyHealthServiceEnabled() ||
+      webConfig.override_shutdown_idle_timeout == null ||
+      webConfig.override_shutdown_idle_timeout.milliseconds <= 1.seconds) {
+      return
+    }
+
+    if (webConfig.override_shutdown_idle_timeout > udsConnector.idleTimeout) {
+      logger.warn {
+        "Setting override_shutdown_idle_timeout[${webConfig.override_shutdown_idle_timeout}]" +
+          "greater than uds default timeout[${udsConnector.idleTimeout}]"
+      }
+    } else {
+      logger.info {
+        "udsConnector idleTimeout:[${udsConnector.idleTimeout}], " +
+          "shutdownIdleTimeout[${webConfig.override_shutdown_idle_timeout}]"
+      }
+    }
+
+    udsConnector.shutdownIdleTimeout = webConfig.override_shutdown_idle_timeout
+  }
+
+  fun stop() {
     if (server.isRunning) {
       val stopwatch = Stopwatch.createStarted()
       logger.info("Stopping Jetty")
@@ -392,15 +432,22 @@ class JettyService @Inject internal constructor(
   }
 
   override fun shutDown() {
-    // We need jetty to shut down at the very end to keep outbound connections alive
-    // (due to sidecars). As such, we wait for `shutdown_sleep_ms` so that our
-    // in flight requests drain, but we don't shut down dependencies until after.
-    //
-    // The true jetty shutdown occurs in stop() above, called from MiskApplication.
-    //
-    // Ideally we could call jetty.awaitInflightRequests() but that's not available
-    // for us.
-    if (webConfig.shutdown_sleep_ms > 0) {
+    if (webConfig.jettyHealthServiceEnabled()) {
+      // We will keep the health instance alive so the server continues to report liveness
+      // until graceful shutdown is complete.  It is therefore safe to gracefully shut down the
+      // web service while we continue orderly graceful cleanup.
+      stop()
+    } else if (webConfig.shutdown_sleep_ms > 0) {
+      // We need jetty to shut down at the very end to keep outbound connections alive
+      // (due to sidecars). As such, we wait for `shutdown_sleep_ms` so that our
+      // in flight requests drain, but we don't shut down dependencies until after.
+      //
+      // The true jetty shutdown occurs in stop() above, called from MiskApplication.
+      //
+      // Ideally we could call jetty.awaitInflightRequests() but that's not available
+      // for us.
+      //
+      // Default is to shutdown jetty after all guava managed services are shutdown.
       sleep(webConfig.shutdown_sleep_ms.toLong())
     } else {
       stop()
@@ -436,7 +483,7 @@ private val Server.httpsUrl: HttpUrl?
       ?.toHttpUrl()
   }
 
-private fun NetworkConnector.toHttpUrl(): HttpUrl {
+internal fun NetworkConnector.toHttpUrl(): HttpUrl {
   val context = server.getChildHandlerByClass(ContextHandler::class.java)
   val protocol = defaultConnectionFactory.protocol
   val scheme = if (protocol.startsWith("SSL-") || protocol == "SSL") "https" else "http"
@@ -478,7 +525,7 @@ private fun AbstractHTTP2ServerConnectionFactory.customize(webConfig: WebConfig)
 internal fun isJEP380Supported(
   path: String,
   javaVersion: Int = JavaVersion.VERSION.major
-) : Boolean {
+): Boolean {
   return javaVersion >= 16 &&
     !Strings.isNullOrEmpty(path) &&
     !Pattern.compile("^@|\u0000").matcher(path).find()
@@ -488,17 +535,17 @@ private fun setFilePermissions(file: File) {
   try {
     Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rw-rw-rw-"))
   } catch (e: IOException) {
-    throw RuntimeException(e);
+    throw RuntimeException(e)
   }
 }
 
-private fun cleanAndThrow(connector: Connector, exception: Exception){
-  var runtimeException = RuntimeException(exception);
-  if (connector.isStarted()){
+private fun cleanAndThrow(connector: Connector, exception: Exception) {
+  val runtimeException = RuntimeException(exception)
+  if (connector.isStarted()) {
     try {
-      connector.stop();
+      connector.stop()
     } catch (e: Exception) {
-      runtimeException.addSuppressed(e);
+      runtimeException.addSuppressed(e)
     }
   }
   throw runtimeException

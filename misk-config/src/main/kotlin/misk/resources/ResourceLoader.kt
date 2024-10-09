@@ -7,6 +7,7 @@ import wisp.resources.FilesystemLoaderBackend
 import java.nio.file.Path
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import wisp.resources.EnvironmentResourceLoaderBackend
 import wisp.resources.ResourceLoader as WispResourceLoader
 
 /**
@@ -83,8 +84,9 @@ class ResourceLoader @Inject constructor(
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
     val SYSTEM = ResourceLoader(
       mapOf(
-        "classpath:" to ClasspathResourceLoaderBackend,
-        "filesystem:" to FilesystemLoaderBackend
+        ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
+        FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend,
+        EnvironmentResourceLoaderBackend.SCHEME to EnvironmentResourceLoaderBackend
       ) as java.util.Map<String, WispResourceLoader.Backend>
     )
   }

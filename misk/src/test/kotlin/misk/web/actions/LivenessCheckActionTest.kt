@@ -2,6 +2,7 @@ package misk.web.actions
 
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.services.FakeServiceModule
 import misk.testing.MiskTest
@@ -9,7 +10,6 @@ import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest
 class LivenessCheckActionTest {
@@ -30,6 +30,8 @@ class LivenessCheckActionTest {
     assertThat(livenessCheckAction.livenessCheck().statusCode).isEqualTo(200)
     serviceManager.stopAsync()
     serviceManager.awaitStopped()
-    assertThat(livenessCheckAction.livenessCheck().statusCode).isEqualTo(503)
+
+    // liveness should not fail for terminated services (only failed)
+    assertThat(livenessCheckAction.livenessCheck().statusCode).isEqualTo(200)
   }
 }

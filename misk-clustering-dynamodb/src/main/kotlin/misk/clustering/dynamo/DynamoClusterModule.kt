@@ -13,7 +13,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import java.util.UUID
 
-class DynamoClusterModule(private val config: DynamoClusterConfig = DynamoClusterConfig()) : KAbstractModule() {
+class DynamoClusterModule @JvmOverloads constructor(private val config: DynamoClusterConfig = DynamoClusterConfig()) : KAbstractModule() {
   override fun configure() {
     val defaultCluster = DefaultCluster(Cluster.Member(UUID.randomUUID().toString(), "invalid-ip"))
     bind<DynamoClusterConfig>().toInstance(config)

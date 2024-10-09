@@ -13,7 +13,7 @@ seconds of freshness.
 name = "misk-cluster-members"
 kind = "dynamodbv2"
 hash_key = "name"
-ttl_attribute = "updated_at"
+ttl_attribute = "expires_at"
 
 attribute {
   name = "name"

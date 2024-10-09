@@ -36,6 +36,7 @@ import wisp.logging.LogCollector
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -78,13 +79,15 @@ class MiskClientMiskServerTest {
     }
 
     // Confirm interceptors were invoked.
-    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
-      "GetFeatureGrpcAction principal=unknown time=0.000 ns code=200 " +
-        "request=[Point{latitude=43, longitude=-80}] " +
-        "requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]} " +
-        "response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}} " +
-        "responseHeaders={}"
-    )
+    val logs = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    assertEquals(1, logs.size)
+    assertThat(logs[0])
+      .contains("GetFeatureGrpcAction principal=unknown time=0.000 ns code=200")
+      .contains("request=[Point{latitude=43, longitude=-80}]")
+      // There could be additional headers (e.g. tests are run with tracing or javaagent)
+      .contains("requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]")
+      .contains("response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}}")
+      .contains("responseHeaders={}")
     assertThat(callCounter.counter("default.GetFeature").get()).isEqualTo(1)
     assertThat(callCounter.counter("default.RouteChat").get()).isEqualTo(0)
   }
@@ -101,13 +104,15 @@ class MiskClientMiskServerTest {
     }
 
     // Confirm interceptors were invoked.
-    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
-      "RouteChatGrpcAction principal=unknown time=0.000 ns code=200 " +
-        "request=[GrpcMessageSource, GrpcMessageSink] " +
-        "requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]} " +
-        "response=kotlin.Unit " +
-        "responseHeaders={content-type=[application/grpc]}"
-    )
+    val logs = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    assertEquals(1, logs.size)
+    assertThat(logs[0])
+      .contains("RouteChatGrpcAction principal=unknown time=0.000 ns code=200")
+      .contains("request=[GrpcMessageSource, GrpcMessageSink]")
+      // There could be additional headers (e.g. tests are run with tracing or javaagent)
+      .contains("requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]")
+      .contains("response=kotlin.Unit")
+      .contains("responseHeaders={content-type=[application/grpc]}")
     assertThat(callCounter.counter("default.GetFeature").get()).isEqualTo(0)
     assertThat(callCounter.counter("default.RouteChat").get()).isEqualTo(1)
   }

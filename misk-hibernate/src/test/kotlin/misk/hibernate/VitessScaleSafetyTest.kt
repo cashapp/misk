@@ -2,6 +2,7 @@ package misk.hibernate
 
 import jakarta.inject.Inject
 import misk.backoff.FlatBackoff
+import misk.backoff.RetryConfig
 import misk.backoff.retry
 import misk.hibernate.annotation.keyspace
 import misk.jdbc.Check
@@ -276,13 +277,16 @@ class NotThereYetException : RuntimeException()
 inline fun <reified T : DbRoot<T>> Transacter.createUntil(
   crossinline factory: () -> T,
   crossinline condition: (Session, Id<T>) -> Boolean,
-): Id<T> = retry(10, FlatBackoff()) {
-  transaction { session ->
-    val newId = session.save(factory())
-    if (!condition(session, newId)) {
-      throw NotThereYetException()
+): Id<T> {
+  val retryConfig = RetryConfig.Builder(10, FlatBackoff())
+  return retry(retryConfig.build()) {
+    transaction { session ->
+      val newId = session.save(factory())
+      if (!condition(session, newId)) {
+        throw NotThereYetException()
+      }
+      newId
     }
-    newId
   }
 }
 

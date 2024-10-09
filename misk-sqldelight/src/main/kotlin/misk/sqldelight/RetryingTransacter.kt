@@ -14,14 +14,14 @@ import java.time.Duration
 private val logger = getLogger<RetryingTransacter>()
 
 // NB: all options should be immutable types as copy() is shallow.
-data class TransacterOptions(
+data class TransacterOptions @JvmOverloads constructor(
   val maxAttempts: Int = 3,
   val minRetryDelayMillis: Long = 100,
   val maxRetryDelayMillis: Long = 500,
   val retryJitterMillis: Long = 400,
 )
 
-abstract class RetryingTransacter(
+abstract class RetryingTransacter @JvmOverloads constructor(
   private val delegate: Transacter,
   val options: TransacterOptions = TransacterOptions()
 ) : Transacter {

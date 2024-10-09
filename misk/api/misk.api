@@ -308,10 +308,15 @@ public abstract class misk/MiskCommand : java/lang/Runnable {
 
 public final class misk/MiskCommonServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Lmisk/ServiceManagerConfig;)V
+	public fun <init> (Lmisk/ServiceManagerConfig;Z)V
+	public synthetic fun <init> (Lmisk/ServiceManagerConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/MiskRealServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Lmisk/ServiceManagerConfig;)V
+	public synthetic fun <init> (Lmisk/ServiceManagerConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/client/BackwardsCompatibleClientsConfig {
@@ -866,11 +871,16 @@ public final class misk/moshi/MoshiAdapterModule$Companion {
 }
 
 public final class misk/moshi/MoshiModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/moshi/MoshiModule$Companion;
 	public fun <init> ()V
 	public fun <init> (Z)V
 	public fun <init> (ZZ)V
 	public synthetic fun <init> (ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun provideMoshi (Ljava/util/List;Ljava/util/List;)Lcom/squareup/moshi/Moshi;
+}
+
+public final class misk/moshi/MoshiModule$Companion {
+	public final fun getDefaultMoshiAdapters ()Ljava/util/List;
 }
 
 public final class misk/moshi/adapters/BigDecimalAdapter {
@@ -1315,19 +1325,26 @@ public final class misk/web/MiskWebFormBuilder {
 }
 
 public final class misk/web/MiskWebFormBuilder$Companion {
-	public final fun createEnumField (Ljava/lang/Class;Ljava/lang/String;Z)Lmisk/web/MiskWebFormBuilder$Field;
-	public final fun createSyntheticEnumField (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Z)Lmisk/web/MiskWebFormBuilder$Field;
-	public final fun maybeCreatePrimitiveField (Ljava/lang/Class;Ljava/lang/String;Z)Lmisk/web/MiskWebFormBuilder$Field;
+	public final fun createEnumField (Ljava/lang/Class;Ljava/lang/String;ZLjava/util/List;)Lmisk/web/MiskWebFormBuilder$Field;
+	public static synthetic fun createEnumField$default (Lmisk/web/MiskWebFormBuilder$Companion;Ljava/lang/Class;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
+	public final fun createSyntheticEnumField (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLjava/util/List;)Lmisk/web/MiskWebFormBuilder$Field;
+	public static synthetic fun createSyntheticEnumField$default (Lmisk/web/MiskWebFormBuilder$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLjava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
+	public final fun maybeCreatePrimitiveField (Ljava/lang/Class;Ljava/lang/String;ZLjava/util/List;)Lmisk/web/MiskWebFormBuilder$Field;
+	public static synthetic fun maybeCreatePrimitiveField$default (Lmisk/web/MiskWebFormBuilder$Companion;Ljava/lang/Class;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
 }
 
 public final class misk/web/MiskWebFormBuilder$Field {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Lmisk/web/MiskWebFormBuilder$Field;
-	public static synthetic fun copy$default (Lmisk/web/MiskWebFormBuilder$Field;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;)Lmisk/web/MiskWebFormBuilder$Field;
+	public static synthetic fun copy$default (Lmisk/web/MiskWebFormBuilder$Field;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnnotations ()Ljava/util/List;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getRepeated ()Z
 	public final fun getType ()Ljava/lang/String;
@@ -1426,78 +1443,80 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public fun <init> (I)V
 	public fun <init> (IJ)V
 	public fun <init> (IJI)V
-	public fun <init> (IJILjava/lang/String;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;Z)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;I)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;II)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;III)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZ)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;D)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZ)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZI)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;Z)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;I)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;I)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;II)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZ)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZ)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Z)V
-	public fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/util/List;)V
-	public synthetic fun <init> (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/util/List;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJIZ)V
+	public fun <init> (IJIZLjava/lang/String;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;Z)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;I)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;II)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;III)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZ)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;D)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZ)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZI)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;Z)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;I)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;I)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;II)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZ)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZ)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Z)V
+	public fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/util/List;)V
+	public synthetic fun <init> (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/util/List;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component10 ()Ljava/lang/Integer;
-	public final fun component11 ()I
+	public final fun component11 ()Ljava/lang/Integer;
 	public final fun component12 ()I
 	public final fun component13 ()I
-	public final fun component14 ()Z
-	public final fun component15 ()Lmisk/web/exceptions/ActionExceptionLogLevelConfig;
-	public final fun component16 ()Ljava/lang/Integer;
-	public final fun component17 ()D
-	public final fun component18 ()Z
-	public final fun component19 ()I
+	public final fun component14 ()I
+	public final fun component15 ()Z
+	public final fun component16 ()Lmisk/web/exceptions/ActionExceptionLogLevelConfig;
+	public final fun component17 ()Ljava/lang/Integer;
+	public final fun component18 ()D
+	public final fun component19 ()Z
 	public final fun component2 ()J
-	public final fun component20 ()Ljava/util/Map;
-	public final fun component21 ()Z
-	public final fun component22 ()Lorg/slf4j/event/Level;
-	public final fun component23 ()Lmisk/web/ConcurrencyLimiterConfig;
-	public final fun component24 ()I
-	public final fun component25 ()Ljava/lang/Integer;
+	public final fun component20 ()I
+	public final fun component21 ()Ljava/util/Map;
+	public final fun component22 ()Z
+	public final fun component23 ()Lorg/slf4j/event/Level;
+	public final fun component24 ()Lmisk/web/ConcurrencyLimiterConfig;
+	public final fun component25 ()I
 	public final fun component26 ()Ljava/lang/Integer;
-	public final fun component27 ()Ljava/lang/Long;
-	public final fun component28 ()I
+	public final fun component27 ()Ljava/lang/Integer;
+	public final fun component28 ()Ljava/lang/Long;
 	public final fun component29 ()I
 	public final fun component3 ()I
-	public final fun component30 ()Z
+	public final fun component30 ()I
 	public final fun component31 ()Z
-	public final fun component32 ()Ljava/lang/Integer;
+	public final fun component32 ()Z
 	public final fun component33 ()Ljava/lang/Integer;
 	public final fun component34 ()Ljava/lang/Integer;
-	public final fun component35 ()Z
-	public final fun component36 ()Ljava/util/List;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Lmisk/web/WebSslConfig;
-	public final fun component6 ()Lmisk/web/WebUnixDomainSocketConfig;
-	public final fun component7 ()Z
-	public final fun component8 ()Ljava/lang/Integer;
+	public final fun component35 ()Ljava/lang/Integer;
+	public final fun component36 ()Z
+	public final fun component37 ()Ljava/util/List;
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Lmisk/web/WebSslConfig;
+	public final fun component7 ()Lmisk/web/WebUnixDomainSocketConfig;
+	public final fun component8 ()Z
 	public final fun component9 ()Ljava/lang/Integer;
-	public final fun copy (IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/util/List;)Lmisk/web/WebConfig;
-	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJILjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/util/List;IILjava/lang/Object;)Lmisk/web/WebConfig;
+	public final fun copy (IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/util/List;)Lmisk/web/WebConfig;
+	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJIZLjava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/util/List;IILjava/lang/Object;)Lmisk/web/WebConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptors ()Ljava/lang/Integer;
 	public final fun getAction_exception_log_level ()Lmisk/web/exceptions/ActionExceptionLogLevelConfig;
@@ -1509,6 +1528,7 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun getEnable_thread_pool_health_check ()Z
 	public final fun getEnable_thread_pool_queue_metrics ()Z
 	public final fun getGzip ()Z
+	public final fun getHealth_dedicated_jetty_instance ()Z
 	public final fun getHealth_port ()I
 	public final fun getHost ()Ljava/lang/String;
 	public final fun getHttp2 ()Z
@@ -1931,6 +1951,7 @@ public final class misk/web/jetty/JettyService : com/google/common/util/concurre
 	public final fun getHealthServerUrl ()Lokhttp3/HttpUrl;
 	public final fun getHttpServerUrl ()Lokhttp3/HttpUrl;
 	public final fun getHttpsServerUrl ()Lokhttp3/HttpUrl;
+	public final fun stop ()V
 }
 
 public final class misk/web/jetty/JettyService$Companion {
@@ -2113,8 +2134,66 @@ public abstract interface class misk/web/mdc/LogContextProvider {
 	public abstract fun get (Ljavax/servlet/http/HttpServletRequest;)Ljava/lang/String;
 }
 
+public final class misk/web/metadata/guice/GuiceMetadata : misk/web/metadata/Metadata {
+	public fun <init> (Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;)V
+	public final fun component1 ()Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;
+	public final fun copy (Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;)Lmisk/web/metadata/guice/GuiceMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/guice/GuiceMetadata;Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;ILjava/lang/Object;)Lmisk/web/metadata/guice/GuiceMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGuice ()Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/guice/GuiceMetadataProvider : misk/web/metadata/MetadataProvider {
+	public field injector Lcom/google/inject/Injector;
+	public fun <init> ()V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/web/metadata/guice/GuiceMetadata;
+	public final fun getAllBindings ()Ljava/util/Map;
+	public fun getId ()Ljava/lang/String;
+	public final fun getInjector ()Lcom/google/inject/Injector;
+	public final fun setInjector (Lcom/google/inject/Injector;)V
+}
+
+public final class misk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/metadata/guice/GuiceMetadataProvider$BindingMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnnotation ()Ljava/lang/String;
+	public final fun getProvider ()Ljava/lang/String;
+	public final fun getScope ()Ljava/lang/String;
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getSubElements ()Ljava/util/List;
+	public final fun getSubElementsType ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getTypePackage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/metadata/guice/GuiceMetadataProvider$Metadata {
+	public fun <init> (Ljava/util/Set;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/Set;)Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;Ljava/util/Set;ILjava/lang/Object;)Lmisk/web/metadata/guice/GuiceMetadataProvider$Metadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBindingMetadata ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/metadata/webaction/WebActionMetadata {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KFunction;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lokhttp3/MediaType;Ljava/util/List;Ljava/util/List;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lmisk/web/PathPattern;Ljava/util/List;Ljava/util/List;Lmisk/web/DispatchMechanism;Ljava/util/Set;Ljava/util/Set;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()Ljava/lang/String;
@@ -2122,13 +2201,14 @@ public final class misk/web/metadata/webaction/WebActionMetadata {
 	public final fun component12 ()Ljava/lang/String;
 	public final fun component13 ()Ljava/util/Map;
 	public final fun component14 ()Ljava/util/Map;
-	public final fun component15 ()Ljava/lang/String;
-	public final fun component16 ()Ljava/util/List;
+	public final fun component15 ()Ljava/util/Map;
+	public final fun component16 ()Ljava/lang/String;
 	public final fun component17 ()Ljava/util/List;
-	public final fun component18 ()Ljava/lang/String;
-	public final fun component19 ()Ljava/util/Set;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component20 ()Ljava/util/Set;
+	public final fun component21 ()Ljava/util/Set;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/util/List;
@@ -2136,8 +2216,8 @@ public final class misk/web/metadata/webaction/WebActionMetadata {
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/util/List;
 	public final fun component9 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)Lmisk/web/metadata/webaction/WebActionMetadata;
-	public static synthetic fun copy$default (Lmisk/web/metadata/webaction/WebActionMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)Lmisk/web/metadata/webaction/WebActionMetadata;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)Lmisk/web/metadata/webaction/WebActionMetadata;
+	public static synthetic fun copy$default (Lmisk/web/metadata/webaction/WebActionMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)Lmisk/web/metadata/webaction/WebActionMetadata;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowedCapabilities ()Ljava/util/Set;
 	public final fun getAllowedServices ()Ljava/util/Set;
@@ -2158,6 +2238,7 @@ public final class misk/web/metadata/webaction/WebActionMetadata {
 	public final fun getResponseType ()Ljava/lang/String;
 	public final fun getResponseTypes ()Ljava/util/Map;
 	public final fun getReturnType ()Ljava/lang/String;
+	public final fun getReturnTypes ()Ljava/util/Map;
 	public final fun getTypes ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -2178,11 +2259,28 @@ public final class misk/web/metadata/webaction/WebActionMetadata$ParameterMetaDa
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/web/metadata/webaction/WebActionMetadataAction : misk/web/actions/WebAction {
+	public fun <init> ()V
+	public final fun getAll ()Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;
+}
+
+public final class misk/web/metadata/webaction/WebActionMetadataAction$Response {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;
+	public static synthetic fun copy$default (Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/metadata/webaction/WebActionMetadataAction$Response;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getWebActionMetadata ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/metadata/webaction/WebActionsMetadata : misk/web/metadata/Metadata {
 	public fun <init> (Ljava/util/List;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun copy (Ljava/util/List;)Lmisk/web/metadata/webaction/WebActionsMetadata;
 	public static synthetic fun copy$default (Lmisk/web/metadata/webaction/WebActionsMetadata;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/metadata/webaction/WebActionsMetadata;
+	public fun descriptionBlock (Lkotlinx/html/TagConsumer;)Lkotlinx/html/TagConsumer;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getWebActions ()Ljava/util/List;
 	public fun hashCode ()I
@@ -2194,6 +2292,7 @@ public final class misk/web/metadata/webaction/WebActionsMetadataProvider : misk
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lmisk/web/metadata/webaction/WebActionsMetadata;
 	public fun getId ()Ljava/lang/String;
+	public final fun getMetadata ()Lmisk/web/metadata/webaction/WebActionsMetadata;
 }
 
 public final class misk/web/proxy/OptionalBinder {
@@ -2205,6 +2304,7 @@ public final class misk/web/proxy/OptionalBinder {
 public final class misk/web/proxy/WebProxyAction : misk/web/actions/WebAction {
 	public fun <init> (Lmisk/web/proxy/OptionalBinder;Lmisk/scope/ActionScoped;Lmisk/web/resources/StaticResourceAction;Lmisk/web/resources/ResourceEntryFinder;)V
 	public final fun action ()Lmisk/web/Response;
+	public final fun getResponse (Lokhttp3/HttpUrl;)Lmisk/web/Response;
 }
 
 public final class misk/web/proxy/WebProxyEntry : misk/web/dashboard/ValidWebEntry {
@@ -2236,7 +2336,7 @@ public final class misk/web/resources/ResourceEntryFinder {
 public final class misk/web/resources/StaticResourceAction : misk/web/actions/WebAction {
 	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/resources/ResourceLoader;Lmisk/web/resources/ResourceEntryFinder;)V
 	public final fun action ()Lmisk/web/Response;
-	public final fun getResponse (Lmisk/web/HttpCall;)Lmisk/web/Response;
+	public final fun getResponse (Lokhttp3/HttpUrl;)Lmisk/web/Response;
 }
 
 public final class misk/web/resources/StaticResourceEntry : misk/web/dashboard/ValidWebEntry {

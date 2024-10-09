@@ -22,8 +22,8 @@ import okhttp3.Headers.Companion.toHeaders
 import okio.Buffer
 import okio.BufferedSink
 import okio.ByteString
+import wisp.logging.SmartTagsThreadLocalHandler
 import wisp.logging.Tag
-import wisp.logging.TaggedLogger
 import wisp.logging.error
 import wisp.logging.getLogger
 import wisp.logging.log
@@ -52,7 +52,7 @@ class ExceptionHandlingInterceptor(
       chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
       try {
-        val mdcTags = TaggedLogger.popThreadLocalMdcContext()
+        val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
 
         if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
           // This response object is only used for determining the status code. toGrpcResponse

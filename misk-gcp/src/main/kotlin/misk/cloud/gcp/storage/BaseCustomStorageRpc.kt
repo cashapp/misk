@@ -209,6 +209,10 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
+  override fun queryCompletedResumableUpload(p0: String?, p1: Long): StorageObject {
+    throw UnsupportedOperationException()
+  }
+
   override fun createHmacKey(p0: String?, p1: MutableMap<StorageRpc.Option, *>?): HmacKey {
     throw UnsupportedOperationException()
   }

@@ -3,6 +3,9 @@ package misk.jdbc
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
+import misk.backoff.FlatBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
+import java.sql.SQLException
 import java.time.LocalDate
 import kotlin.test.assertFailsWith
 import kotlin.test.fail
@@ -145,16 +149,19 @@ abstract class RealTransacterTest {
 
   @Test
   fun `exception in post commit hook does not cause the transaction to rollback`() {
-    assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
-      transacter.transactionWithSession { session ->
-        session.useConnection { connection ->
-          session.onPostCommit {
-            throw RuntimeException()
+    retry(RetryConfig.Builder(3, FlatBackoff()).shouldRetry { it.isCockroachDbRetryableError() }.build()) {
+      assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
+        transacter.transactionWithSession { session ->
+          session.useConnection { connection ->
+            session.onPostCommit {
+              throw RuntimeException()
+            }
+            connection.createStatement().execute("INSERT INTO movies (name) VALUES ('hello')")
           }
-          connection.createStatement().execute("INSERT INTO movies (name) VALUES ('hello')")
         }
       }
     }
+
     val afterCount = transacter.transactionWithSession { session -> session.useConnection(count) }
     assertThat(afterCount).isEqualTo(1)
   }
@@ -242,21 +249,28 @@ abstract class RealTransacterTest {
 
   @Test
   fun `a new transaction can be started in session close hook`() {
-    transacter.transactionWithSession { session ->
-      session.useConnection { connection ->
-        session.onSessionClose {
-          transacter.transactionWithSession { innerSession ->
-            innerSession.useConnection { innerConnection ->
-              innerConnection.createStatement().execute("INSERT INTO movies (name) VALUES ('1')")
+    retry(RetryConfig.Builder(3, FlatBackoff()).shouldRetry { it.isCockroachDbRetryableError() }.build()) {
+      transacter.transactionWithSession { session ->
+        session.useConnection { connection ->
+          session.onSessionClose {
+            transacter.transactionWithSession { innerSession ->
+              innerSession.useConnection { innerConnection ->
+                innerConnection.createStatement()
+                  .execute("INSERT INTO movies (name) VALUES ('1')")
+              }
             }
           }
+          connection.createStatement().execute("INSERT INTO movies (name) VALUES ('2')")
         }
-        connection.createStatement().execute("INSERT INTO movies (name) VALUES ('2')")
       }
     }
 
     val afterCount = transacter.transactionWithSession { session -> session.useConnection(count) }
     assertThat(afterCount).isEqualTo(2)
+  }
+
+  private fun Exception.isCockroachDbRetryableError(): Boolean {
+    return this is SQLException && sqlState == "40001" // CockroachDB's serializable transaction error code
   }
 
   @Test

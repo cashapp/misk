@@ -51,6 +51,7 @@ class WebServerTestingModule @JvmOverloads constructor(
       // 0 results in a random port
       port = 0,
       health_port = 0,
+      health_dedicated_jetty_instance = false,
       // use a deterministic number for selector/acceptor threads since the dynamic number can
       // vary local vs CI. this allows writing thread exhaustion tests.
       acceptors = 1,

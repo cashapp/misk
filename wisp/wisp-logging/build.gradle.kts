@@ -1,9 +1,11 @@
 plugins {
-    `java-library`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.protobuf)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
-    api(libs.kotlinLogging)
+    api(libs.loggingApi)
     api(libs.slf4jApi)
     api(project(":wisp:wisp-sampling"))
   

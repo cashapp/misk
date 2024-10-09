@@ -257,17 +257,43 @@ Use `@WithMiskCaller` for `ActionScoped<MiskCaller>`:
 
 ```kotlin
 @MiskTest
-@WithMiskCaller
+@WithMiskCaller(user = "test-user") // or @WithMiskCaller(service = "test-service")
 class MyTest {
   @MiskTestModule val module = MyModule()
-  @Inject lateinit var action: HelloWebAction
-  @Inject lateinit var miskCaller: ActionScoped<MiskCaller>
+  @Inject lateinit var action: HelloWebAction // or any other class that injects ActionScoped<MiskCaller>
 
   // use action...
 }
 ```
 
-Otherwise, use `ActionScope` directly:
+For types other than `MiskCaller`, use `ActionScope` directly either within your setup and teardown test methods:
+
+```kotlin
+@MiskTest
+class MyTest {
+  @MiskTestModule val module = MyModule()
+  @Inject lateinit var actionScope: ActionScope
+  @Inject lateinit var action: HelloWebAction // or any other class that injects ActionScoped<MyScopedObject>
+  
+  @BeforeEach fun setUp() {
+    actionScope.create(
+      mapOf(
+        keyOf<MyScopedObject>() to MyScopedObject()
+      )
+    ).enter()
+  }
+  
+  @AfterEach fun tearDown() {
+    actionScope.close()
+  }
+
+  @Test fun test() {
+    // use action...
+  }
+}
+```
+
+...or within the test itself:
 
 ```kotlin
 @MiskTest
@@ -275,21 +301,16 @@ class MyTest {
   @MiskTestModule val module = MyModule()
   @Inject lateinit var actionScope: ActionScope
   @Inject lateinit var action: HelloWebAction
-  @Inject lateinit var myScopedObject: ActionScoped<MyScopedObject>
   
-  @BeforeEach fun setUp() {
-    actionScope.enter(
+  @Test fun test() {
+    actionScope.create(
       mapOf(
         keyOf<MyScopedObject>() to MyScopedObject()
       )
-    )
+    ).inScope {
+      // use action or class which injects ActionScoped<MyScopedObject>...
+    }
   }
-  
-  @AfterEach fun tearDown() {
-    actionScope.provider.get().close()
-  }
-
-  // use action...
 }
 ```
 

@@ -24,7 +24,7 @@ class ChatWebSocketActionTest {
   private val module = Modules.combine(
     MiskTestingServiceModule(),
     DeploymentModule(TESTING),
-    RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false),
+    RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false),
     RedisTestFlushModule(),
     WebActionModule.create<ChatWebSocketAction>()
   )

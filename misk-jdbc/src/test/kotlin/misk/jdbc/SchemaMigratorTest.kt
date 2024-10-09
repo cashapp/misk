@@ -286,6 +286,14 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
   }
 
   @Test
+  fun traditionalMigratorIgnoresDeclarativeVersions() {
+    schemaMigrator.initialize()
+    addVersion("1001-skeemaautoversion")
+    val state = schemaMigrator.requireAll()
+    assertThat(state.toString()).isEqualTo("MigrationState(shards={keyspace/0=(all 0 migrations applied)})")
+  }
+
+  @Test
   fun healthChecks() {
     resourceLoader.put(
       "${config.migrations_resources!![0]}/v1002__movies.sql", """
@@ -342,6 +350,21 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
       return true
     } catch (e: SQLException) {
       return false
+    }
+  }
+
+  private fun addVersion(version: String) {
+    dataSourceService.dataSource.connection.use { connection ->
+      connection.prepareStatement(
+        """
+            |INSERT INTO schema_version (version, installed_by) VALUES (?, ?);
+            |""".trimMargin()
+      ).use { schemaVersion ->
+        schemaVersion.setString(1, version)
+        schemaVersion.setString(2, "TEST")
+        schemaVersion.executeUpdate()
+      }
+      connection.commit()
     }
   }
 

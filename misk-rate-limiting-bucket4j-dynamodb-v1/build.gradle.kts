@@ -1,12 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
-  id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublishBase)
+  id("java-test-fixtures")
 }
 
 dependencies {
@@ -21,7 +19,7 @@ dependencies {
   implementation(project(":wisp:wisp-logging"))
   implementation(libs.bucket4jCore)
   implementation(libs.bucket4jDynamoDbV1)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
 
   testImplementation(project(":misk"))
   testImplementation(project(":misk-rate-limiting-bucket4j-dynamodb-v1"))
@@ -33,7 +31,7 @@ dependencies {
   testImplementation(libs.junitApi)
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
   )
