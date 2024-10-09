@@ -29,7 +29,7 @@ internal class ResponseBodyFeatureBinding(
       val headersBuilder = httpCall.responseHeaders.newBuilder()
       val responseBody = responseBodyMarshaller.responseBody(returnValue, headersBuilder)
 
-      // TODO: httpCall.responseHeaders = headersBuilder.build()
+      // Apply the updated response headers from the Marshaller.
       headersBuilder.build().forEach { header ->
         httpCall.setResponseHeader(header.first, header.second)
       }
