@@ -20,6 +20,7 @@ import misk.web.toResponseBody
 import okhttp3.Headers
 import okhttp3.MediaType
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.Random
 import kotlin.math.absoluteValue
@@ -35,17 +36,22 @@ class CustomMarshallerTest {
   @Inject lateinit var webTestClient: WebTestClient
 
   @Test
-  fun `it writes both headers and body`() {
+  fun `it writes headers and body`() {
     val response = webTestClient.get("/custom-object").response
     assertThat(response.code).isEqualTo(200)
     val foo = response.headers["foo"]
     val bar = response.headers["bar"]
     assertThat(foo).matches("^\\d+$")
     assertThat(bar).matches("^\\d+$")
-    assertThat(response.body!!.string()).isEqualTo("Foo: $foo\nBar: $bar")
+    assertThat(response.body!!.string()).isEqualTo("Foo: $foo\nBar: $bar\n")
+  }
 
-    // TODO: uncomment this test
-    // assertThat(response.headers.names().contains("removeme")).isFalse()
+  @Disabled("need to get this working")
+  @Test
+  fun `it removes headers`() {
+    val response = webTestClient.get("/custom-object").response
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.headers.names().contains("removeme")).isFalse()
   }
 
   class CustomObject(val foo: String, val bar: String)
@@ -57,11 +63,11 @@ class CustomMarshallerTest {
     override fun responseBody(o: Any) = TODO("not implemented")
     override fun responseBody(o: Any, responseHeaders: Headers.Builder): ResponseBody {
       responseHeaders.removeAll("removeme")
-
-      o as CustomObject
-      responseHeaders["foo"] = o.foo
-      responseHeaders["bar"] = o.bar
-      return "Foo: ${o.foo}\nBar: ${o.bar}".toResponseBody()
+      with(o as CustomObject) {
+        responseHeaders["foo"] = foo
+        responseHeaders["bar"] = bar
+        return "Foo: $foo\nBar: $bar\n".toResponseBody()
+      }
     }
 
     class Factory @Inject constructor() : Marshaller.Factory {
