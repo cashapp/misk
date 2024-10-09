@@ -75,6 +75,7 @@ internal data class NamedspacedMigration(
     }
 
     private const val NAMESPACE_SEPARATOR = "/"
+    const val DECLARATIVE_MIGRATIONS_SUFFIX = "-skeemaautoversion"
   }
 }
 
@@ -205,7 +206,10 @@ internal class SchemaMigrator(
             results.add(resultSet.getString(1))
           }
         }
-        results.map { NamedspacedMigration.fromNamespacedVersion(it) }.toSortedSet()
+        results
+          .filterNot { it.endsWith(NamedspacedMigration.DECLARATIVE_MIGRATIONS_SUFFIX) }
+          .map { NamedspacedMigration.fromNamespacedVersion(it) }
+          .toSortedSet()
       }
     }
 
