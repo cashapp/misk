@@ -181,6 +181,7 @@ sourceSets {
     resources.srcDir(tabDirs.map { tabDir ->
       "$tabDir/lib"
     })
+    resources.srcDir("web/tabs/web-actions-v4/lib")
     resources.exclude("**/node_modules")
   }
 }

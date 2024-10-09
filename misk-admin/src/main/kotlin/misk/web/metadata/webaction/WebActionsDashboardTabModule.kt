@@ -18,6 +18,21 @@ class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstrac
     bind<WebActionsMetadata>().toProvider(WebActionsMetadataProvider())
     install(WebActionModule.create<WebActionMetadataAction>())
 
+    // Web Actions v4
+    install(
+      DashboardModule.createIFrameTab<AdminDashboard, AdminDashboardAccess>(
+        // TODO get development proxy working for IFrame tabs
+//        isDevelopment = isDevelopment,
+        slug = "web-actions-v4",
+        urlPathPrefix = "/_admin/web-actions-v4/",
+        iframePath = "/_tab/web-actions-v4/index.html",
+//        developmentWebProxyUrl = "http://localhost:3210/",
+        menuLabel = "Web Actions Beta",
+        menuCategory = "Container Admin",
+      )
+    )
+
+
     // Web Actions v2
     install(
       DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
