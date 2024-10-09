@@ -32,7 +32,7 @@ export default class ResponseViewer extends React.Component<Props> {
   }
 
   public render() {
-    this.editor?.setValue(JSON.stringify(this.props.toRender, null, 2), -1)
+    this.editor?.setValue(this.props.toRender, -1)
 
     return (
       <Box
