@@ -15,7 +15,7 @@ interface Marshaller<in T> {
   fun contentType(): MediaType?
 
   /** @return The object marshalled into a [ResponseBody] */
-  fun responseBody(o: T): ResponseBody = responseBody(o, Headers.Builder())
+  fun responseBody(o: T): ResponseBody
 
   /**
    * Alternate way to marshal the response body with access to response headers.
@@ -23,7 +23,7 @@ interface Marshaller<in T> {
    *
    * @return The object marshalled into a [ResponseBody]
    */
-  fun responseBody(o: T, responseHeaders: Headers.Builder): ResponseBody
+  fun responseBody(o: T, responseHeaders: Headers.Builder): ResponseBody = responseBody(o)
 
   /**
    * This interface is used with Guice multibindings. Register instances by calling `multibind()`

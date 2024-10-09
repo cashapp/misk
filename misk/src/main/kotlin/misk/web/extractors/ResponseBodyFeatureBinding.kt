@@ -1,5 +1,7 @@
 package misk.web.extractors
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.Action
 import misk.web.DispatchMechanism
 import misk.web.FeatureBinding
@@ -11,8 +13,6 @@ import misk.web.actions.WebSocketListener
 import misk.web.actions.findAnnotationWithOverrides
 import misk.web.interceptors.ResponseBodyMarshallerFactory
 import misk.web.marshal.Marshaller
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 internal class ResponseBodyFeatureBinding(
   private val responseBodyMarshaller: Marshaller<Any>
@@ -28,7 +28,12 @@ internal class ResponseBodyFeatureBinding(
 
       val headersBuilder = httpCall.responseHeaders.newBuilder()
       val responseBody = responseBodyMarshaller.responseBody(returnValue, headersBuilder)
-      httpCall.responseHeaders = headersBuilder.build()
+
+      // TODO: httpCall.responseHeaders = headersBuilder.build()
+      headersBuilder.build().forEach { header ->
+        httpCall.setResponseHeader(header.first, header.second)
+      }
+
       responseBody.writeTo(sink)
     }
   }

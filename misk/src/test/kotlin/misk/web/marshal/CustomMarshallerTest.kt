@@ -1,6 +1,9 @@
 package misk.web.marshal
 
 import jakarta.inject.Inject
+import misk.Action
+import misk.ApplicationInterceptor
+import misk.Chain
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -19,6 +22,7 @@ import okhttp3.MediaType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.Random
+import kotlin.math.absoluteValue
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
@@ -39,6 +43,9 @@ class CustomMarshallerTest {
     assertThat(foo).matches("^\\d+$")
     assertThat(bar).matches("^\\d+$")
     assertThat(response.body!!.string()).isEqualTo("Foo: $foo\nBar: $bar")
+
+    // TODO: uncomment this test
+    // assertThat(response.headers.names().contains("removeme")).isFalse()
   }
 
   class CustomObject(val foo: String, val bar: String)
@@ -47,7 +54,10 @@ class CustomMarshallerTest {
     private val mediaType: MediaType,
   ) : Marshaller<Any> {
     override fun contentType() = mediaType
+    override fun responseBody(o: Any) = TODO("not implemented")
     override fun responseBody(o: Any, responseHeaders: Headers.Builder): ResponseBody {
+      responseHeaders.removeAll("removeme")
+
       o as CustomObject
       responseHeaders["foo"] = o.foo
       responseHeaders["bar"] = o.bar
@@ -61,12 +71,23 @@ class CustomMarshallerTest {
     }
   }
 
-  class TestRoutes : WebAction {
+  class HeaderAddingInterceptor @Inject constructor() : ApplicationInterceptor {
+    override fun intercept(chain: Chain): Any {
+      chain.httpCall.setResponseHeader("removeme", "please")
+      return chain.proceed(chain.args)
+    }
+
+    class Factory @Inject constructor() : ApplicationInterceptor.Factory {
+      override fun create(action: Action): ApplicationInterceptor = HeaderAddingInterceptor()
+    }
+  }
+
+  class TestRoutes @Inject constructor() : WebAction {
     @Get("/custom-object")
     @ResponseContentType(MediaTypes.TEXT_HTML)
     fun call() = CustomObject(
-      Random().nextInt().toString(),
-      Random().nextInt().toString(),
+      Random().nextInt().absoluteValue.toString(),
+      Random().nextInt().absoluteValue.toString(),
     )
   }
 
@@ -75,6 +96,7 @@ class CustomMarshallerTest {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
 
+      multibind<ApplicationInterceptor.Factory>().to<HeaderAddingInterceptor.Factory>()
       multibind<Marshaller.Factory>().to<CustomObjectMarshaller.Factory>()
 
       install(WebActionModule.create<TestRoutes>())
