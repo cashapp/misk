@@ -3,6 +3,7 @@ package misk.web.marshal
 import misk.inject.typeLiteral
 import misk.web.Response
 import misk.web.ResponseBody
+import okhttp3.Headers
 import okhttp3.MediaType
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -14,7 +15,15 @@ interface Marshaller<in T> {
   fun contentType(): MediaType?
 
   /** @return The object marshalled into a [ResponseBody] */
-  fun responseBody(o: T): ResponseBody
+  fun responseBody(o: T): ResponseBody = responseBody(o, Headers.Builder())
+
+  /**
+   * Alternate way to marshal the response body with access to response headers.
+   * Invokes [responseBody] by default.
+   *
+   * @return The object marshalled into a [ResponseBody]
+   */
+  fun responseBody(o: T, responseHeaders: Headers.Builder): ResponseBody
 
   /**
    * This interface is used with Guice multibindings. Register instances by calling `multibind()`

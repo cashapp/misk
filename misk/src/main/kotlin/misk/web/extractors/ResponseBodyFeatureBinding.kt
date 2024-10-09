@@ -26,7 +26,9 @@ internal class ResponseBodyFeatureBinding(
         httpCall.setResponseHeader("Content-Type", contentType.toString())
       }
 
-      val responseBody = responseBodyMarshaller.responseBody(returnValue)
+      val headersBuilder = httpCall.responseHeaders.newBuilder()
+      val responseBody = responseBodyMarshaller.responseBody(returnValue, headersBuilder)
+      httpCall.responseHeaders = headersBuilder.build()
       responseBody.writeTo(sink)
     }
   }
