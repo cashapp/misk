@@ -4,7 +4,7 @@ import com.vanniktech.maven.publish.JavadocJar
 plugins {
   alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.mavenPublishBase)
-  `java-gradle-plugin`
+  id("java-gradle-plugin")
 }
 
 gradlePlugin {
