@@ -56,7 +56,7 @@ class ResponseBodyWithHeadersTest {
     private val mediaType: MediaType,
   ) : Marshaller<Any> {
     override fun contentType() = mediaType
-    override fun responseBody(o: Any) = TODO("not implemented")
+    override fun responseBody(o: Any) = error("not implemented")
     override fun responseBody(o: Any, responseHeaders: Headers.Builder): ResponseBody {
       responseHeaders.set("tobemodified", responseHeaders.get("tobemodified") + "-modified")
       with(o as CustomObject) {
@@ -89,10 +89,6 @@ class ResponseBodyWithHeadersTest {
     fun call() = CustomObject(randomInt())
   }
 
-  companion object {
-    private fun randomInt() = Random().nextInt().absoluteValue.toString()
-  }
-
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebServerTestingModule())
@@ -103,5 +99,9 @@ class ResponseBodyWithHeadersTest {
 
       install(WebActionModule.create<TestRoutes>())
     }
+  }
+
+  companion object {
+    private fun randomInt() = Random().nextInt().absoluteValue.toString()
   }
 }
