@@ -105,7 +105,11 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
               // The `ServiceManager` requires services to be in a NEW state when starting them,
               // so if services fail to start, we need to stop them and remove the injector from the cache,
               // so that the next test can start fresh.
-              serviceManager.stop(context)
+              try {
+                serviceManager.stop(context)
+              } catch (stopError: Exception) {
+                e.addSuppressed(stopError)
+              }
               injectedModules.remove(context.getActionTestModules())
               throw e
             }
