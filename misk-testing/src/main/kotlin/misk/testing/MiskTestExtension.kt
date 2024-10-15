@@ -12,7 +12,6 @@ import misk.inject.KAbstractModule
 import misk.inject.ReusableTestModule
 import misk.inject.getInstance
 import misk.inject.uninject
-import misk.web.jetty.JettyService
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -222,5 +221,5 @@ private fun ExtensionContext.getExternalDependencies(): Iterable<ExternalDepende
 }
 
 private fun ServiceManager.stop(context: ExtensionContext) {
-  this.stopAsync().awaitStopped(30, TimeUnit.SECONDS)
+  this.stopAsync().awaitStopped(45, TimeUnit.SECONDS)
 }
