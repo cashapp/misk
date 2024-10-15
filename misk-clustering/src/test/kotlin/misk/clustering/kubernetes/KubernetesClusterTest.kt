@@ -34,7 +34,8 @@ internal class KubernetesClusterTest {
             KubernetesConfig(
               my_pod_namespace = TEST_NAMESPACE,
               my_pod_name = TEST_SELF_NAME,
-              my_pod_ip = TEST_SELF_IP
+              my_pod_ip = TEST_SELF_IP,
+              my_deployment_version = TEST_DEPLOYMENT
             )
           )
         )
@@ -60,8 +61,8 @@ internal class KubernetesClusterTest {
 
     val changes = mutableListOf<Cluster.Changes>()
     cluster.watch { changes.add(it) }
-    handleWatch(CHANGE_TYPE_ADDED, newPod(TEST_SELF_NAME, true, TEST_SELF_IP))
-    handleWatch(CHANGE_TYPE_MODIFIED, newPod(TEST_SELF_NAME, false, TEST_SELF_IP))
+    handleWatch(CHANGE_TYPE_ADDED, newPod(TEST_SELF_NAME, true, TEST_SELF_IP, TEST_DEPLOYMENT))
+    handleWatch(CHANGE_TYPE_MODIFIED, newPod(TEST_SELF_NAME, false, TEST_SELF_IP, TEST_DEPLOYMENT))
     cluster.syncPoint { ready.countDown() }
 
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
@@ -101,8 +102,8 @@ internal class KubernetesClusterTest {
 
     val changes = mutableListOf<Cluster.Changes>()
     cluster.watch { changes.add(it) }
-    handleWatch("ADDED", newPod("larry-blerp", true, "10.0.0.3"))
-    handleWatch("ADDED", newPod("larry-blerp2", true, "10.0.0.4"))
+    handleWatch("ADDED", newPod("larry-blerp", true, "10.0.0.3", deployment = "currentDeployment"))
+    handleWatch("ADDED", newPod("larry-blerp2", true, "10.0.0.4", deployment = "currentDeployment"))
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
@@ -119,27 +120,27 @@ internal class KubernetesClusterTest {
         snapshot = Cluster.Snapshot(
           self = expectedSelf,
           selfReady = false,
-          readyMembers = setOf(Cluster.Member("larry-blerp", "10.0.0.3")),
-          resourceMapper = ClusterHashRing(setOf(Cluster.Member("larry-blerp", "10.0.0.3")))
+          readyMembers = setOf(Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment")),
+          resourceMapper = ClusterHashRing(setOf(Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment")))
         ),
-        added = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))
+        added = setOf(Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment"))
       ),
       Cluster.Changes(
         snapshot = Cluster.Snapshot(
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(
-            Cluster.Member("larry-blerp", "10.0.0.3"),
-            Cluster.Member("larry-blerp2", "10.0.0.4")
+            Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment"),
+            Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")
           ),
           resourceMapper = ClusterHashRing(
             setOf(
-              Cluster.Member("larry-blerp", "10.0.0.3"),
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+              Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment"),
+              Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")
             )
           )
         ),
-        added = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))
+        added = setOf(Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment"))
       )
     )
   }
@@ -149,8 +150,8 @@ internal class KubernetesClusterTest {
     val ready = CountDownLatch(1)
 
     // Start with members
-    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3"))
-    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4"))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3", "currentDeployment"))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4", "currentDeployment"))
 
     // Explicitly remove a member
     cluster.watch { changes.add(it) }
@@ -164,13 +165,13 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(
-            Cluster.Member("larry-blerp", "10.0.0.3"),
-            Cluster.Member("larry-blerp2", "10.0.0.4")
+            Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment"),
+            Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")
           ),
           resourceMapper = ClusterHashRing(
             setOf(
-              Cluster.Member("larry-blerp", "10.0.0.3"),
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+              Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment"),
+              Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")
             )
           )
         )
@@ -179,14 +180,14 @@ internal class KubernetesClusterTest {
         snapshot = Cluster.Snapshot(
           self = expectedSelf,
           selfReady = false,
-          readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+          readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")),
           resourceMapper = ClusterHashRing(
             setOf(
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+              Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")
             )
           )
         ),
-        removed = setOf(Cluster.Member("larry-blerp", ""))
+        removed = setOf(Cluster.Member("larry-blerp", "", ""))
       )
     )
   }
@@ -240,12 +241,12 @@ internal class KubernetesClusterTest {
     val changes = mutableListOf<Cluster.Changes>()
 
     // Start as an existing member
-    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3"))
-    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4"))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3", "currentDeployment"))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4", "currentDeployment"))
 
     // Transition to not ready - should remove from the list
     cluster.watch { changes.add(it) }
-    handleWatch(CHANGE_TYPE_MODIFIED, newPod("larry-blerp", false, "10.0.0.3"))
+    handleWatch(CHANGE_TYPE_MODIFIED, newPod("larry-blerp", false, "10.0.0.3", "currentDeployment"))
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
@@ -255,13 +256,13 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(
-            Cluster.Member("larry-blerp", "10.0.0.3"),
-            Cluster.Member("larry-blerp2", "10.0.0.4")
+            Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment"),
+            Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")
           ),
           resourceMapper = ClusterHashRing(
             setOf(
-              Cluster.Member("larry-blerp", "10.0.0.3"),
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+              Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment"),
+              Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")
             )
           )
         )
@@ -270,14 +271,14 @@ internal class KubernetesClusterTest {
         snapshot = Cluster.Snapshot(
           self = expectedSelf,
           selfReady = false,
-          readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+          readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")),
           resourceMapper = ClusterHashRing(
             setOf(
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+              Cluster.Member("larry-blerp2", "10.0.0.4", "currentDeployment")
             )
           )
         ),
-        removed = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))
+        removed = setOf(Cluster.Member("larry-blerp", "10.0.0.3", "currentDeployment"))
       )
     )
   }
@@ -302,13 +303,13 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(
-            Cluster.Member("larry-blerp", "10.0.0.3"),
-            Cluster.Member("larry-blerp2", "10.0.0.4")
+            Cluster.Member("larry-blerp", "10.0.0.3", ""),
+            Cluster.Member("larry-blerp2", "10.0.0.4", "")
           ),
           resourceMapper = ClusterHashRing(
             setOf(
-              Cluster.Member("larry-blerp", "10.0.0.3"),
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+              Cluster.Member("larry-blerp", "10.0.0.3", ""),
+              Cluster.Member("larry-blerp2", "10.0.0.4", "")
             )
           )
         )
@@ -317,23 +318,127 @@ internal class KubernetesClusterTest {
         snapshot = Cluster.Snapshot(
           self = expectedSelf,
           selfReady = false,
-          readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+          readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4", "")),
           resourceMapper = ClusterHashRing(
             setOf(
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+              Cluster.Member("larry-blerp2", "10.0.0.4", "")
             )
           )
         ),
-        removed = setOf(Cluster.Member("larry-blerp", ""))
+        removed = setOf(Cluster.Member("larry-blerp", "", ""))
       )
     )
   }
+
+  @Test fun deploymentChangesWatcherUpdated() {
+    val ready = CountDownLatch(1)
+    val changes = mutableListOf<Cluster.Changes>()
+
+    // Start as an existing member
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3", "oldDeployment"))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4", "oldDeployment"))
+
+    cluster.watch { changes.add(it) }
+    handleWatch(CHANGE_TYPE_DELETED, newPod("larry-blerp", true, "10.0.0.3", "oldDeployment"))
+    handleWatch(CHANGE_TYPE_DELETED, newPod("larry-blerp2", true, "10.0.0.4", "oldDeployment"))
+
+    handleWatch(CHANGE_TYPE_ADDED, newPod("harry-blerp", true, "10.0.0.3", "newDeployment"))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("harry-blerp2", true, "10.0.0.4", "newDeployment"))
+
+    cluster.syncPoint { ready.countDown() }
+    assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
+
+    assertThat(changes).containsExactly(
+      Cluster.Changes(
+        snapshot = Cluster.Snapshot(
+          self = expectedSelf,
+          selfReady = false,
+          readyMembers = setOf(
+            Cluster.Member("larry-blerp", "10.0.0.3", "oldDeployment"),
+            Cluster.Member("larry-blerp2", "10.0.0.4", "oldDeployment")
+          ),
+          resourceMapper = ClusterHashRing(
+            setOf(
+              Cluster.Member("larry-blerp", "10.0.0.3", "oldDeployment"),
+              Cluster.Member("larry-blerp2", "10.0.0.4", "oldDeployment")
+            )
+          )
+        )
+      ),
+      Cluster.Changes(
+        snapshot = Cluster.Snapshot(
+          self = expectedSelf,
+          selfReady = false,
+          readyMembers = setOf(
+            Cluster.Member("larry-blerp2", "10.0.0.4", "oldDeployment")
+          ),
+          resourceMapper = ClusterHashRing(
+            setOf(Cluster.Member("larry-blerp2", "10.0.0.4", "oldDeployment"))
+          )
+        ),
+        removed = setOf(
+          Cluster.Member("larry-blerp", "10.0.0.3", "oldDeployment")
+        )
+      ),
+      Cluster.Changes(
+        snapshot = Cluster.Snapshot(
+          self = expectedSelf,
+          selfReady = false,
+          readyMembers = setOf(),
+          resourceMapper = ClusterHashRing(setOf())
+        ),
+        removed = setOf(
+          Cluster.Member("larry-blerp2", "10.0.0.4", "oldDeployment")
+        )
+      ),
+      Cluster.Changes(
+        snapshot = Cluster.Snapshot(
+          self = expectedSelf,
+          selfReady = false,
+          readyMembers = setOf(
+            Cluster.Member("harry-blerp", "10.0.0.3", "newDeployment")
+          ),
+          resourceMapper = ClusterHashRing(
+            setOf(Cluster.Member("harry-blerp", "10.0.0.3", "newDeployment"))
+          )
+        ),
+        added = setOf(
+          Cluster.Member("harry-blerp", "10.0.0.3", "newDeployment")
+        )
+      ),
+      Cluster.Changes(
+        snapshot = Cluster.Snapshot(
+          self = expectedSelf,
+          selfReady = false,
+          readyMembers = setOf(
+            Cluster.Member("harry-blerp", "10.0.0.3", "newDeployment"),
+            Cluster.Member("harry-blerp2", "10.0.0.4", "newDeployment")
+          ),
+          resourceMapper = ClusterHashRing(
+            setOf(
+              Cluster.Member("harry-blerp", "10.0.0.3", "newDeployment"),
+              Cluster.Member("harry-blerp2", "10.0.0.4", "newDeployment")
+            )
+          )
+        ),
+        added = setOf(
+          Cluster.Member("harry-blerp2", "10.0.0.4", "newDeployment")
+        )
+      )
+    )
+  }
+
 
   private fun handleWatch(type: String, pod: V1Pod) {
     Watches.newResponse(type, pod).applyTo(cluster)
   }
 
-  private fun newPod(name: String, isReady: Boolean = false, ipAddress: String? = null): V1Pod {
+  private fun newPod(
+    name: String,
+    isReady: Boolean = false,
+    ipAddress: String? = null,
+    deployment: String = "",
+    ): V1Pod {
     val containerStatus = V1ContainerStatus()
     containerStatus.ready = isReady
     containerStatus.name = TEST_NAMESPACE
@@ -342,6 +447,9 @@ internal class KubernetesClusterTest {
     pod.metadata = V1ObjectMeta()
     pod.metadata!!.namespace = TEST_NAMESPACE
     pod.metadata!!.name = name
+    pod.metadata!!.labels = mutableMapOf<String, String>()
+    pod.metadata!!.labels!!["tags.datadoghq.com/version"] = deployment
+
     pod.status = V1PodStatus()
     pod.status!!.containerStatuses = listOf(containerStatus)
     pod.status!!.podIP = ipAddress
@@ -352,7 +460,8 @@ internal class KubernetesClusterTest {
     const val TEST_NAMESPACE = "larry"
     const val TEST_SELF_NAME = "larry-76485b7568-l5rmm"
     const val TEST_SELF_IP = "10.133.66.206"
+    const val TEST_DEPLOYMENT = "deployment-test"
 
-    val expectedSelf = Cluster.Member(TEST_SELF_NAME, TEST_SELF_IP)
+    val expectedSelf = Cluster.Member(TEST_SELF_NAME, TEST_SELF_IP, TEST_DEPLOYMENT)
   }
 }

@@ -86,7 +86,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
         .build()
       for (page in table.scan(request).stream()) {
         for (item in page.items()) {
-          members.add(Member(item.name!!, "invalid-ip"))
+          members.add(Member(item.name!!, "invalid-ip", "invalid-deployment"))
         }
       }
       cluster.clusterChanged(membersBecomingReady = members, membersBecomingNotReady = prevMembers - members)

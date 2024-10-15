@@ -61,7 +61,8 @@ class FakeCluster internal constructor(
   companion object {
     const val SELF_NAME = "fake-self-node"
     const val SELF_IP = "10.0.0.1"
-    @JvmStatic val self = Cluster.Member(name = SELF_NAME, ipAddress = SELF_IP)
+    const val SELF_DEPLOYMENT = "fake-deployment"
+    @JvmStatic val self = Cluster.Member(name = SELF_NAME, ipAddress = SELF_IP, deploymentVersion = SELF_DEPLOYMENT)
 
     private val log = getLogger<FakeCluster>()
   }

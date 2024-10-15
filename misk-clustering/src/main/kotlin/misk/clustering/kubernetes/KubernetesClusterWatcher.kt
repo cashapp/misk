@@ -128,7 +128,14 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
   }
 }
 
-private val V1Pod.asClusterMember get() = Cluster.Member(metadata!!.name!!, status!!.podIP ?: "")
+private val V1Pod.asClusterMember: Cluster.Member
+  get() {
+  return Cluster.Member(
+    name = metadata!!.name!!,
+    ipAddress = status!!.podIP ?: "",
+    deploymentVersion = metadata?.labels?.get("tags.datadoghq.com/version") ?: ""
+  )
+}
 
 private val V1Pod.isReady: Boolean
   get() {
