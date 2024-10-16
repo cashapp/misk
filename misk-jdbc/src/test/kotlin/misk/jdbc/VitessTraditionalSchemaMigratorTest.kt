@@ -21,7 +21,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Qualifier
 
 @MiskTest(startService = true)
-internal class VitessSchemaMigratorTest {
+internal class VitessTraditionalSchemaMigratorTest {
   val deploymentModule = DeploymentModule(TESTING)
   val config =
     MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", TESTING)
@@ -35,11 +35,13 @@ internal class VitessSchemaMigratorTest {
 
   @Inject @Movies lateinit var schemaMigrator: SchemaMigrator
   @Inject @Movies lateinit var databaseService: StartDatabaseService
+  private lateinit var traditionalSchemaMigrator : TraditionalSchemaMigrator
 
   private val shard = Shard(Keyspace("movies"), "-80")
 
   @BeforeEach fun createSchemaMigrationTable() {
-    schemaMigrator.initialize()
+    traditionalSchemaMigrator = schemaMigrator as TraditionalSchemaMigrator
+    traditionalSchemaMigrator.initialize()
   }
 
   @AfterEach fun cleanUpMigrationTable() {
@@ -54,26 +56,26 @@ internal class VitessSchemaMigratorTest {
   }
 
   @Test fun availableMigrations() {
-    val migrations = schemaMigrator.availableMigrations(Keyspace("movies"))
+    val migrations = traditionalSchemaMigrator.availableMigrations(Keyspace("movies"))
     assertThat(migrations.map { it.version }).containsAll(listOf(1, 2))
   }
 
   @Test fun appliedMigrations() {
-    assertThat(schemaMigrator.appliedMigrations(shard).map { it.version }).isEmpty()
+    assertThat(traditionalSchemaMigrator.appliedMigrations(shard).map { it.version }).isEmpty()
 
     insertSchemaMigration("1")
-    assertThat(schemaMigrator.appliedMigrations(shard).map { it.version }).contains(1)
+    assertThat(traditionalSchemaMigrator.appliedMigrations(shard).map { it.version }).contains(1)
   }
 
   @Test fun requireAll() {
-    schemaMigrator.initialize()
+    traditionalSchemaMigrator.initialize()
 
-    assertThat(schemaMigrator.appliedMigrations(shard).map { it.version }).isEmpty()
+    assertThat(traditionalSchemaMigrator.appliedMigrations(shard).map { it.version }).isEmpty()
 
     insertSchemaMigration("1")
     insertSchemaMigration("2")
     // Test that this does not throw an exception
-    schemaMigrator.requireAll(shard)
+    traditionalSchemaMigrator.requireAll(shard)
   }
 
   private fun insertSchemaMigration(version: String) {

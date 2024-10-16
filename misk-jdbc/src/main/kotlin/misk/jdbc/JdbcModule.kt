@@ -81,13 +81,18 @@ class JdbcModule @JvmOverloads constructor(
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
       @Inject
       lateinit var resourceLoader: ResourceLoader
-      override fun get(): SchemaMigrator = SchemaMigrator(
-        qualifier = qualifier,
-        resourceLoader = resourceLoader,
-        dataSourceConfig = config,
-        dataSourceService = dataSourceServiceProvider.get(),
-        connector = connectorProvider.get()
-      )
+      override fun get(): SchemaMigrator = when (config.migrations_format) {
+        MigrationsFormat.TRADITIONAL ->
+          TraditionalSchemaMigrator(
+            qualifier = qualifier,
+            resourceLoader = resourceLoader,
+            dataSourceConfig = config,
+            dataSourceService = dataSourceServiceProvider.get(),
+            connector = connectorProvider.get()
+          )
+        MigrationsFormat.DECLARATIVE ->
+          DeclarativeSchemaMigrator() //TODO implement DeclarativeSchemaMigrator
+      }
     }).asSingleton()
 
     val schemaMigratorServiceKey = keyOf<SchemaMigratorService>(qualifier)

@@ -22,18 +22,18 @@ import java.sql.SQLException
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = false)
-internal class MySQLSchemaMigratorTest : SchemaMigratorTest(DataSourceType.MYSQL)
+internal class MySQLTraditionalSchemaMigratorTest : TraditionalSchemaMigratorTest(DataSourceType.MYSQL)
 
 @MiskTest(startService = false)
-internal class PostgreSQLSchemaMigratorTest : SchemaMigratorTest(DataSourceType.POSTGRESQL)
+internal class PostgreSQLTraditionalSchemaMigratorTest : TraditionalSchemaMigratorTest(DataSourceType.POSTGRESQL)
 
 @MiskTest(startService = false)
-internal class CockroachdbSchemaMigratorTest : SchemaMigratorTest(DataSourceType.COCKROACHDB)
+internal class CockroachdbTraditionalSchemaMigratorTest : TraditionalSchemaMigratorTest(DataSourceType.COCKROACHDB)
 
 @MiskTest(startService = false)
-internal class TidbSchemaMigratorTest : SchemaMigratorTest(DataSourceType.TIDB)
+internal class TidbTraditionalSchemaMigratorTest : TraditionalSchemaMigratorTest(DataSourceType.TIDB)
 
-internal abstract class SchemaMigratorTest(val type: DataSourceType) {
+internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) {
   val deploymentModule = DeploymentModule(TESTING)
 
   val appConfig = MiskConfig.load<RootConfig>("test_schemamigrator_app", TESTING)
@@ -62,6 +62,7 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
   @Inject @Movies lateinit var schemaMigrator: SchemaMigrator
   @Inject @Movies lateinit var schemaMigratorService: SchemaMigratorService
   @Inject @Movies lateinit var startDatabaseService: StartDatabaseService
+  private lateinit var traditionalSchemaMigrator : TraditionalSchemaMigrator
 
   @AfterEach
   internal fun tearDown() {
@@ -78,6 +79,7 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
 
   @BeforeEach
   internal fun setUp() {
+    traditionalSchemaMigrator = schemaMigrator as TraditionalSchemaMigrator
     startDatabaseService.startAsync()
     startDatabaseService.awaitRunning()
     dataSourceService.startAsync()
@@ -132,12 +134,12 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     assertThat(tableExists("library_table")).isFalse
     assertThat(tableExists("merged_library_table")).isFalse
     assertFailsWith<SQLException> {
-      schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)
+      traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)
     }
 
     // Once we initialize, that table is present but empty.
-    schemaMigrator.initialize()
-    assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).isEmpty()
+    traditionalSchemaMigrator.initialize()
+    assertThat(traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).isEmpty()
     assertThat(tableExists("schema_version")).isTrue
     assertThat(tableExists("table_1")).isFalse
     assertThat(tableExists("table_2")).isFalse
@@ -147,8 +149,8 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     assertThat(tableExists("merged_library_table")).isFalse
 
     // When we apply migrations, the table is present and contains the applied migrations.
-    schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
-    assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
+    traditionalSchemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
+    assertThat(traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
       NamedspacedMigration(1001),
       NamedspacedMigration(1002),
       NamedspacedMigration(1001, "name/space/")
@@ -160,7 +162,7 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     assertThat(tableExists("table_3")).isFalse
     assertThat(tableExists("table_4")).isFalse
     assertThat(tableExists("merged_library_table")).isFalse
-    schemaMigrator.requireAll()
+    traditionalSchemaMigrator.requireAll()
 
     // When new migrations are added they can be applied.
     resourceLoader.put(
@@ -178,14 +180,14 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
         |CREATE TABLE merged_library_table (name varchar(255))
         |""".trimMargin()
     )
-    schemaMigrator.applyAll(
+    traditionalSchemaMigrator.applyAll(
       "SchemaMigratorTest", sortedSetOf(
         NamedspacedMigration(1001),
         NamedspacedMigration(1002),
         NamedspacedMigration(1001, "name/space/")
       )
     )
-    assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
+    assertThat(traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
       NamedspacedMigration(1001),
       NamedspacedMigration(1002),
       NamedspacedMigration(1003),
@@ -200,12 +202,12 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     assertThat(tableExists("table_4")).isTrue
     assertThat(tableExists("library_table")).isTrue
     assertThat(tableExists("merged_library_table")).isTrue
-    assertThatCode { schemaMigrator.requireAll() }.doesNotThrowAnyException()
+    assertThatCode { traditionalSchemaMigrator.requireAll() }.doesNotThrowAnyException()
   }
 
   @Test
   fun requireAllWithMissingMigrations() {
-    schemaMigrator.initialize()
+    traditionalSchemaMigrator.initialize()
 
     resourceLoader.put(
       "${config.migrations_resources!![0]}/v1001__foo.sql", """
@@ -219,7 +221,7 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     )
 
     assertThat(assertFailsWith<IllegalStateException> {
-      schemaMigrator.requireAll()
+      traditionalSchemaMigrator.requireAll()
     }).hasMessage(
       """
           |Movies has applied migrations:
@@ -232,14 +234,14 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
 
   @Test
   fun haveOneMissingOneMigration() {
-    schemaMigrator.initialize()
+    traditionalSchemaMigrator.initialize()
 
     resourceLoader.put(
       "${config.migrations_resources!![0]}/v1001__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin()
     )
-    schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
+    traditionalSchemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
 
     resourceLoader.put(
       "${config.migrations_resources!![1]}/v1002__foo.sql", """
@@ -248,7 +250,7 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     )
 
     assertThat(assertFailsWith<IllegalStateException> {
-      schemaMigrator.requireAll()
+      traditionalSchemaMigrator.requireAll()
     }).hasMessage(
       """
           |Movies has applied migrations:
@@ -277,7 +279,7 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     )
 
     val duplicateFailure = assertFailsWith<IllegalArgumentException> {
-      schemaMigrator.requireAll()
+      traditionalSchemaMigrator.requireAll()
     }
 
     assertThat(duplicateFailure).hasMessageContaining("Duplicate migrations found")
@@ -287,9 +289,9 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
 
   @Test
   fun traditionalMigratorIgnoresDeclarativeVersions() {
-    schemaMigrator.initialize()
+    traditionalSchemaMigrator.initialize()
     addVersion("1001-skeemaautoversion")
-    val state = schemaMigrator.requireAll()
+    val state = traditionalSchemaMigrator.requireAll()
     assertThat(state.toString()).isEqualTo("MigrationState(shards={keyspace/0=(all 0 migrations applied)})")
   }
 
@@ -330,10 +332,10 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
         |""".trimMargin()
     )
 
-    schemaMigrator.initialize()
-    schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
+    traditionalSchemaMigrator.initialize()
+    traditionalSchemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
 
-    assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
+    assertThat(traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
       NamedspacedMigration(1001)
     )
     assertThat(tableExists("table_1")).isTrue
