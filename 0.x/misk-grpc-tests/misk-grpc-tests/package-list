@@ -1,0 +1,44 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.grpc.miskclient////PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/index.md
+$dokka.location:misk.grpc.miskclient/MiskGrpcClientModule///PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/-misk-grpc-client-module/index.md
+$dokka.location:misk.grpc.miskclient/MiskGrpcClientModule/MiskGrpcClientModule/#okhttp3.HttpUrl/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/-misk-grpc-client-module/-misk-grpc-client-module.md
+$dokka.location:misk.grpc.miskclient/MiskGrpcClientModule/provideHttpClientsConfig/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/-misk-grpc-client-module/provide-http-clients-config.md
+$dokka.location:misk.grpc.miskclient/MiskGrpcClientModule/url/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/-misk-grpc-client-module/url.md
+$dokka.location:misk.grpc.miskclient/RouteGuideCallCounter///PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/-route-guide-call-counter/index.md
+$dokka.location:misk.grpc.miskclient/RouteGuideCallCounter/RouteGuideCallCounter/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/-route-guide-call-counter/-route-guide-call-counter.md
+$dokka.location:misk.grpc.miskclient/RouteGuideCallCounter/actionNameToCount/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/-route-guide-call-counter/action-name-to-count.md
+$dokka.location:misk.grpc.miskclient/RouteGuideCallCounter/counter/#kotlin.String/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/-route-guide-call-counter/counter.md
+$dokka.location:misk.grpc.miskclient/RouteGuideCallCounter/create/#misk.client.ClientAction/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskclient/-route-guide-call-counter/create.md
+$dokka.location:misk.grpc.miskserver////PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/index.md
+$dokka.location:misk.grpc.miskserver/GetFeatureGrpcAction///PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-get-feature-grpc-action/index.md
+$dokka.location:misk.grpc.miskserver/GetFeatureGrpcAction/GetFeature/#routeguide.Point/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-get-feature-grpc-action/-get-feature.md
+$dokka.location:misk.grpc.miskserver/GetFeatureGrpcAction/GetFeatureGrpcAction/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-get-feature-grpc-action/-get-feature-grpc-action.md
+$dokka.location:misk.grpc.miskserver/RouteChatGrpcAction///PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-route-chat-grpc-action/index.md
+$dokka.location:misk.grpc.miskserver/RouteChatGrpcAction/RouteChat/#com.squareup.wire.MessageSource[routeguide.RouteNote]#com.squareup.wire.MessageSink[routeguide.RouteNote]/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-route-chat-grpc-action/-route-chat.md
+$dokka.location:misk.grpc.miskserver/RouteChatGrpcAction/RouteChatGrpcAction/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-route-chat-grpc-action/-route-chat-grpc-action.md
+$dokka.location:misk.grpc.miskserver/RouteChatGrpcAction/welcomeMessage/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-route-chat-grpc-action/welcome-message.md
+$dokka.location:misk.grpc.miskserver/RouteGuideMiskServiceModule///PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-route-guide-misk-service-module/index.md
+$dokka.location:misk.grpc.miskserver/RouteGuideMiskServiceModule/RouteGuideMiskServiceModule/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-route-guide-misk-service-module/-route-guide-misk-service-module.md
+$dokka.location:misk.grpc.miskserver/RouteGuideMiskServiceModule/provideServerUrl/#misk.web.jetty.JettyService/PointingToDeclaration/misk-grpc-tests/misk.grpc.miskserver/-route-guide-misk-service-module/provide-server-url.md
+$dokka.location:misk.grpc.protocclient////PointingToDeclaration/misk-grpc-tests/misk.grpc.protocclient/index.md
+$dokka.location:misk.grpc.protocclient/GrpcChannelFactory///PointingToDeclaration/misk-grpc-tests/misk.grpc.protocclient/-grpc-channel-factory/index.md
+$dokka.location:misk.grpc.protocclient/GrpcChannelFactory/GrpcChannelFactory/#misk.resources.ResourceLoader/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocclient/-grpc-channel-factory/-grpc-channel-factory.md
+$dokka.location:misk.grpc.protocclient/GrpcChannelFactory/createClientChannel/#java.net.SocketAddress#kotlin.String/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocclient/-grpc-channel-factory/create-client-channel.md
+$dokka.location:misk.grpc.protocclient/GrpcChannelFactory/resourceLoader/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocclient/-grpc-channel-factory/resource-loader.md
+$dokka.location:misk.grpc.protocclient/ProtocGrpcClientModule///PointingToDeclaration/misk-grpc-tests/misk.grpc.protocclient/-protoc-grpc-client-module/index.md
+$dokka.location:misk.grpc.protocclient/ProtocGrpcClientModule/ProtocGrpcClientModule/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocclient/-protoc-grpc-client-module/-protoc-grpc-client-module.md
+$dokka.location:misk.grpc.protocclient/ProtocGrpcClientModule/provideChannel/#okhttp3.HttpUrl#misk.grpc.protocclient.GrpcChannelFactory/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocclient/-protoc-grpc-client-module/provide-channel.md
+$dokka.location:misk.grpc.protocserver////PointingToDeclaration/misk-grpc-tests/misk.grpc.protocserver/index.md
+$dokka.location:misk.grpc.protocserver/ProtocGrpcService///PointingToDeclaration/misk-grpc-tests/misk.grpc.protocserver/-protoc-grpc-service/index.md
+$dokka.location:misk.grpc.protocserver/ProtocGrpcService/ProtocGrpcService/#kotlin.collections.List[io.grpc.BindableService]#misk.resources.ResourceLoader/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocserver/-protoc-grpc-service/-protoc-grpc-service.md
+$dokka.location:misk.grpc.protocserver/ProtocGrpcService/server/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocserver/-protoc-grpc-service/server.md
+$dokka.location:misk.grpc.protocserver/ProtocGrpcService/url/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocserver/-protoc-grpc-service/url.md
+$dokka.location:misk.grpc.protocserver/RouteGuideProtocServiceModule///PointingToDeclaration/misk-grpc-tests/misk.grpc.protocserver/-route-guide-protoc-service-module/index.md
+$dokka.location:misk.grpc.protocserver/RouteGuideProtocServiceModule/RouteGuideProtocServiceModule/#/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocserver/-route-guide-protoc-service-module/-route-guide-protoc-service-module.md
+$dokka.location:misk.grpc.protocserver/RouteGuideProtocServiceModule/provideServerUrl/#misk.grpc.protocserver.ProtocGrpcService/PointingToDeclaration/misk-grpc-tests/misk.grpc.protocserver/-route-guide-protoc-service-module/provide-server-url.md
+misk.grpc.miskclient
+misk.grpc.miskserver
+misk.grpc.protocclient
+misk.grpc.protocserver
+

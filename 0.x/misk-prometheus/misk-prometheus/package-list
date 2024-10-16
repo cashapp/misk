@@ -1,0 +1,14 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.metrics.backends.prometheus////PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/index.md
+$dokka.location:misk.metrics.backends.prometheus/PrometheusConfig///PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/-prometheus-config/index.md
+$dokka.location:misk.metrics.backends.prometheus/PrometheusConfig/PrometheusConfig/#/PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/-prometheus-config/-prometheus-config.md
+$dokka.location:misk.metrics.backends.prometheus/PrometheusConfig/PrometheusConfig/#kotlin.String?#kotlin.Int#kotlin.Long?/PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/-prometheus-config/-prometheus-config.md
+$dokka.location:misk.metrics.backends.prometheus/PrometheusConfig/hostname/#/PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/-prometheus-config/hostname.md
+$dokka.location:misk.metrics.backends.prometheus/PrometheusConfig/http_port/#/PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/-prometheus-config/http_port.md
+$dokka.location:misk.metrics.backends.prometheus/PrometheusConfig/max_age_in_seconds/#/PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/-prometheus-config/max_age_in_seconds.md
+$dokka.location:misk.metrics.backends.prometheus/PrometheusHttpService///PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/-prometheus-http-service/index.md
+$dokka.location:misk.metrics.backends.prometheus/PrometheusMetricsServiceModule///PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/-prometheus-metrics-service-module/index.md
+$dokka.location:misk.metrics.backends.prometheus/PrometheusMetricsServiceModule/PrometheusMetricsServiceModule/#misk.metrics.backends.prometheus.PrometheusConfig/PointingToDeclaration/misk-prometheus/misk.metrics.backends.prometheus/-prometheus-metrics-service-module/-prometheus-metrics-service-module.md
+misk.metrics.backends.prometheus
+

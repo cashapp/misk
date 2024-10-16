@@ -1,0 +1,33 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.sampling////PointingToDeclaration/wisp-sampling/wisp.sampling/index.md
+$dokka.location:wisp.sampling/AlwaysSampler///PointingToDeclaration/wisp-sampling/wisp.sampling/-always-sampler/index.md
+$dokka.location:wisp.sampling/AlwaysSampler/AlwaysSampler/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-always-sampler/-always-sampler.md
+$dokka.location:wisp.sampling/AlwaysSampler/sample/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-always-sampler/sample.md
+$dokka.location:wisp.sampling/PercentageSampler///PointingToDeclaration/wisp-sampling/wisp.sampling/-percentage-sampler/index.md
+$dokka.location:wisp.sampling/PercentageSampler/PercentageSampler/#kotlin.Int#kotlin.Function0[kotlin.Int]/PointingToDeclaration/wisp-sampling/wisp.sampling/-percentage-sampler/-percentage-sampler.md
+$dokka.location:wisp.sampling/PercentageSampler/sample/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-percentage-sampler/sample.md
+$dokka.location:wisp.sampling/RateLimiter///PointingToDeclaration/wisp-sampling/wisp.sampling/-rate-limiter/index.md
+$dokka.location:wisp.sampling/RateLimiter/RateLimiter/#kotlin.Long#wisp.sampling.Ticker#wisp.sampling.Sleeper/PointingToDeclaration/wisp-sampling/wisp.sampling/-rate-limiter/-rate-limiter.md
+$dokka.location:wisp.sampling/RateLimiter/getPermitsRemaining/#java.util.concurrent.TimeUnit#kotlin.Long/PointingToDeclaration/wisp-sampling/wisp.sampling/-rate-limiter/get-permits-remaining.md
+$dokka.location:wisp.sampling/RateLimiter/permitsPerSecond/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-rate-limiter/permits-per-second.md
+$dokka.location:wisp.sampling/RateLimiter/tryAcquire/#kotlin.Long#kotlin.Long#java.util.concurrent.TimeUnit/PointingToDeclaration/wisp-sampling/wisp.sampling/-rate-limiter/try-acquire.md
+$dokka.location:wisp.sampling/RateLimitingSampler///PointingToDeclaration/wisp-sampling/wisp.sampling/-rate-limiting-sampler/index.md
+$dokka.location:wisp.sampling/RateLimitingSampler/RateLimitingSampler/#wisp.sampling.RateLimiter/PointingToDeclaration/wisp-sampling/wisp.sampling/-rate-limiting-sampler/-rate-limiting-sampler.md
+$dokka.location:wisp.sampling/RateLimitingSampler/sample/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-rate-limiting-sampler/sample.md
+$dokka.location:wisp.sampling/Sampler.Companion///PointingToDeclaration/wisp-sampling/wisp.sampling/-sampler/-companion/index.md
+$dokka.location:wisp.sampling/Sampler.Companion/always/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-sampler/-companion/always.md
+$dokka.location:wisp.sampling/Sampler.Companion/percentage/#kotlin.Int/PointingToDeclaration/wisp-sampling/wisp.sampling/-sampler/-companion/percentage.md
+$dokka.location:wisp.sampling/Sampler.Companion/rateLimiting/#kotlin.Long/PointingToDeclaration/wisp-sampling/wisp.sampling/-sampler/-companion/rate-limiting.md
+$dokka.location:wisp.sampling/Sampler///PointingToDeclaration/wisp-sampling/wisp.sampling/-sampler/index.md
+$dokka.location:wisp.sampling/Sampler/sample/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-sampler/sample.md
+$dokka.location:wisp.sampling/Sleeper.Companion///PointingToDeclaration/wisp-sampling/wisp.sampling/-sleeper/-companion/index.md
+$dokka.location:wisp.sampling/Sleeper.Companion/DEFAULT/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-sleeper/-companion/-d-e-f-a-u-l-t.md
+$dokka.location:wisp.sampling/Sleeper///PointingToDeclaration/wisp-sampling/wisp.sampling/-sleeper/index.md
+$dokka.location:wisp.sampling/Sleeper/sleep/#java.time.Duration/PointingToDeclaration/wisp-sampling/wisp.sampling/-sleeper/sleep.md
+$dokka.location:wisp.sampling/Ticker.Companion///PointingToDeclaration/wisp-sampling/wisp.sampling/-ticker/-companion/index.md
+$dokka.location:wisp.sampling/Ticker.Companion/DEFAULT/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-ticker/-companion/-d-e-f-a-u-l-t.md
+$dokka.location:wisp.sampling/Ticker///PointingToDeclaration/wisp-sampling/wisp.sampling/-ticker/index.md
+$dokka.location:wisp.sampling/Ticker/read/#/PointingToDeclaration/wisp-sampling/wisp.sampling/-ticker/read.md
+wisp.sampling
+
