@@ -72,6 +72,7 @@ class LaunchDarklyModule @JvmOverloads constructor(
           .capacity(config.event_capacity)
           .flushInterval(config.flush_interval)
       )
+      .offline(config.offline)
 
     if (config.use_relay_proxy) {
       ldConfig.serviceEndpoints(
@@ -103,4 +104,5 @@ data class LaunchDarklyConfig @JvmOverloads constructor(
   val ssl: HttpClientSSLConfig? = null,
   val event_capacity: Int = DEFAULT_CAPACITY,
   val flush_interval: Duration = DEFAULT_FLUSH_INTERVAL,
+  val offline: Boolean = false,
 ) : Config
