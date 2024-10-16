@@ -173,6 +173,7 @@ val isCi = System.getenv("CI") == "true" || System.getenv("GITHUB_ACTIONS") != n
 if (isCi || System.getProperty("misk.admin.buildMiskWeb") == "true") {
   tasks.named { it == "explodeCodeSourceMain" || it == "processResources" }.configureEach {
     dependsOn(buildMiskWeb)
+    dependsOn(buildMiskAdminWebActionsTabV4)
   }
 }
 
@@ -230,4 +231,64 @@ mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )
+}
+
+val buildMiskAdminWebActionsTabV4 = tasks.register("buildMiskAdminWebActionsTabV4", MiskAdminWebActionsTabV4BuildTask::class) {
+  val v4RootDir = rootDir.resolve("misk-admin/web/tabs/web-actions-v4")
+
+  v4Root.set(v4RootDir)
+  inputFiles.setFrom(
+    v4RootDir.listFiles().filter {
+      it.name in listOf(
+        "src",
+        "babel.config.json",
+        "jest.config.js",
+        "package.json",
+        "tsconfig.json",
+        "webpack.config.js",
+      )
+    }
+  )
+  outputFiles.setFrom(v4RootDir.resolve("lib"))
+}
+
+@CacheableTask
+abstract class MiskAdminWebActionsTabV4BuildTask @Inject constructor(
+  @Internal val execOps: ExecOperations
+) : DefaultTask() {
+
+  @get:Internal
+  abstract val v4Root: RegularFileProperty
+
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  @get:InputFiles
+  abstract val inputFiles: ConfigurableFileCollection
+
+  @get:OutputDirectories
+  abstract val outputFiles: ConfigurableFileCollection
+
+  @TaskAction
+  fun build() {
+    val v4Dir = v4Root.asFile.get()
+
+    ExecOperationsHelper(execOps).exec(
+      v4Dir.resolve("bin/npm").absolutePath,
+      "install"
+    ) {
+      workingDir = v4Dir
+    }
+
+    logger.lifecycle("Running misk-admin Web Actions Tab v4 build \uD83C\uDFD7\uFE0F")
+
+    val npmInstallResult = ExecOperationsHelper(execOps).exec(
+      v4Dir.resolve("bin/npx").absolutePath,
+      "webpack", "--mode", "production"
+    ) {
+      workingDir = v4Dir
+    }
+
+    logger.lifecycle(npmInstallResult.toString())
+
+    npmInstallResult.assertNormalExitValue()
+  }
 }
