@@ -44,6 +44,17 @@ enum class DataSourceType(
   ),
 }
 
+enum class MigrationsFormat {
+  /**
+   * Traditional migrations format where each migration file represents DB schema change
+   */
+  TRADITIONAL,
+  /**
+   * Declarative migrations format where each migration file represents a DB table
+   */
+  DECLARATIVE
+}
+
 /** Configuration element for an individual datasource */
 data class DataSourceConfig @JvmOverloads constructor(
   val type: DataSourceType,
@@ -114,7 +125,8 @@ data class DataSourceConfig @JvmOverloads constructor(
 
     Full details: https://github.com/cashapp/misk/pull/3094#issue-2080624417
   */
-  val mysql_enforce_writable_connections: Boolean = false
+  val mysql_enforce_writable_connections: Boolean = false,
+  val migrations_format: MigrationsFormat = MigrationsFormat.TRADITIONAL,
 ) {
   fun withDefaults(): DataSourceConfig {
     val isRunningInDocker = File("/proc/1/cgroup")
@@ -328,6 +340,7 @@ data class DataSourceConfig @JvmOverloads constructor(
       this.enabledTlsProtocols,
       this.show_sql,
       this.generate_hibernate_stats,
+      migrations_format = this.migrations_format
     )
   }
 

@@ -18,7 +18,7 @@ class SchemaMigratorService internal constructor(
   private val schemaMigratorProvider: Provider<SchemaMigrator>, // Lazy!
   private val connectorProvider: Provider<DataSourceConnector>
 ) : AbstractIdleService(), HealthCheck, DatabaseReadyService {
-  private lateinit var migrationState: MigrationState
+  private lateinit var migrationState: MigrationStatus
 
   override fun startUp() {
     val schemaMigrator = schemaMigratorProvider.get()
@@ -32,12 +32,11 @@ class SchemaMigratorService internal constructor(
           ExponentialBackoff(Duration.ofMillis(100), Duration.ofSeconds(5))
         )
         retry(retryConfig.build()) {
-          val appliedMigrations = schemaMigrator.initialize()
-          migrationState = schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
+          migrationState = schemaMigrator.applyAll("SchemaMigratorService")
         }
       } else {
         // vttestserver automatically applies migrations
-        migrationState = MigrationState(emptyMap())
+        migrationState = MigrationStatus.Empty
       }
     } else {
       migrationState = schemaMigrator.requireAll()
@@ -54,7 +53,7 @@ class SchemaMigratorService internal constructor(
     }
 
     return HealthStatus.healthy(
-      "SchemaMigratorService: ${qualifier.simpleName} is migrated: $migrationState"
+      "SchemaMigratorService: ${qualifier.simpleName} is migrated: ${migrationState.message()}"
     )
   }
 }
