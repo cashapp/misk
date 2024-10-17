@@ -22,6 +22,7 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-lease"))
   implementation(project(":misk-service"))
+  implementation(project(":misk-testing-api"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
