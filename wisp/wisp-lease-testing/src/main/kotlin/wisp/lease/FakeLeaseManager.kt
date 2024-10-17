@@ -1,14 +1,15 @@
 package wisp.lease
 
+import misk.testing.FakeFixture
 import java.util.concurrent.ConcurrentHashMap
 
 /**
  * A [FakeLeaseManager] provides explicit control over leases for the purposes of testing. By
  * default, a fake lease is considered held, but it can be explicitly marked as not held if desired
  */
-open class FakeLeaseManager : LeaseManager {
-  private val leasesHeldElsewhere = ConcurrentHashMap<String, Int>()
-  private val leases = ConcurrentHashMap<String, FakeLease>()
+open class FakeLeaseManager : LeaseManager, FakeFixture() {
+  private val leasesHeldElsewhere by resettable { ConcurrentHashMap<String, Int>() }
+  private val leases by resettable { ConcurrentHashMap<String, FakeLease>() }
 
   override fun requestLease(name: String): Lease {
     return leases.computeIfAbsent(name) {
