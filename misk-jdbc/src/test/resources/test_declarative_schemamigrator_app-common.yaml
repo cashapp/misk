@@ -1,0 +1,48 @@
+mysql_data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: schemamigrator
+  migrations_resources_exclusion:
+    - all-migrations.sql
+    - jooq-migrations.sql
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library
+  migrations_format: DECLARATIVE
+cockroachdb_data_source:
+  type: COCKROACHDB
+  database: schemamigrator
+  username: root
+  password: ""
+  migrations_resources_exclusion:
+    - all-migrations.sql
+    - jooq-migrations.sql
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library
+  migrations_format: DECLARATIVE
+tidb_data_source:
+  type: TIDB
+  database: schemamigrator
+  username: root
+  password: ""
+  migrations_resources_exclusion:
+    - all-migrations.sql
+    - jooq-migrations.sql
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library
+  migrations_format: DECLARATIVE
+postgresql_data_source:
+  type: POSTGRESQL
+  database: schemamigrator
+  username: postgres
+  password: password
+  migrations_resources_exclusion:
+    - all-migrations.sql
+    - jooq-migrations.sql
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library
+  migrations_format: DECLARATIVE
