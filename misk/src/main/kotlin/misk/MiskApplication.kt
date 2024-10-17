@@ -132,16 +132,18 @@ class MiskApplication private constructor(
 
     Runtime.getRuntime().addShutdownHook(shutdownHook)
 
-    // We manage JettyHealthService outside ServiceManager because it must start first and
+    // We manage JettyHealthService outside ServiceManager because it must start and
     // shutdown last to keep the container alive via liveness checks.
 
     val jettyHealthService: JettyHealthService
     measureTimeMillis {
       log.info { "starting services" }
-      jettyHealthService = injector.getInstance<JettyHealthService>()
-      jettyHealthService.startAsync()
       serviceManager.startAsync()
       serviceManager.awaitHealthy()
+
+      // Start Health Service Last to ensure any dependencies are started.
+      jettyHealthService = injector.getInstance<JettyHealthService>()
+      jettyHealthService.startAsync()
       jettyHealthService.awaitRunning()
     }.also {
       log.info { "all services started successfully in ${it.milliseconds}" }
