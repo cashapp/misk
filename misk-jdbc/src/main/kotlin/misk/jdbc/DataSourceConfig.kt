@@ -78,9 +78,10 @@ data class DataSourceConfig @JvmOverloads constructor(
    */
   val migrations_resources_exclusion: List<String>? = null,
   /**
-   * Regular expression migration files names should match.
+   * Regular expression *traditional* migration files names should match.
    * Any migration filename that doesn't match the given regular expression will cause an exception,
    * unless it was explicitly mentioned in [migrations_resources_exclusion].
+   * Declarative schema migrator will enforce the opposite - all migration files should not match the given regular expression.
    */
   val migrations_resources_regex: String = "(^|.*/)v(\\d+)__[^/]+\\.sql",
   val vitess_schema_resource_root: String? = null,

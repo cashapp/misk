@@ -105,39 +105,18 @@ internal class TraditionalSchemaMigrator(
   private val dataSourceConfig: DataSourceConfig,
   private val dataSourceService: DataSourceService,
   private val connector: DataSourceConnector,
-) : SchemaMigrator {
-  val shards = misk.vitess.shards(dataSourceService)
+) : BaseSchemaMigrator(resourceLoader, dataSourceService, connector) {
 
-  private fun getMigrationsResources(keyspace: Keyspace): List<String> {
-    val config = connector.config()
-    val migrationsResources = ImmutableList.builder<String>()
-    if (config.migrations_resource != null) {
-      migrationsResources.add(config.migrations_resource)
-    }
-    if (config.migrations_resources != null) {
-      migrationsResources.addAll(config.migrations_resources)
-    }
-    if (config.vitess_schema_resource_root != null) {
-      migrationsResources.add(config.vitess_schema_resource_root + "/" + keyspace.name)
-    }
-    return migrationsResources.build()
+  override fun validateMigrationFile(migrationFile: MigrationFile): Boolean {
+    return Pattern.compile(connector.config().migrations_resources_regex).matcher(migrationFile.filename).matches()
   }
 
   /** Returns a SortedSet of all migrations found in the source directories and subdirectories. */
   fun availableMigrations(keyspace: Keyspace): SortedSet<NamedspacedMigration> {
-    val migrations = mutableListOf<NamedspacedMigration>()
-    for (migrationsResource in getMigrationsResources(keyspace)) {
-      val migrationsFound = resourceLoader.walk(migrationsResource)
-        .filter { it.endsWith(".sql") }
-        .filter { resource ->
-          connector.config().migrations_resources_exclusion?.none { excludedResource ->
-            resource.contains(excludedResource)
-          } ?: true
-        }.map {
-          NamedspacedMigration.fromResourcePath(it, migrationsResource, connector.config().migrations_resources_regex)
-        }
-      migrations.addAll(migrationsFound)
+    val migrations = getMigrationFiles(keyspace).map {
+      NamedspacedMigration.fromResourcePath(it.filename, it.resource, connector.config().migrations_resources_regex)
     }
+
     val migrationMap = TreeMap<NamedspacedMigration, MutableList<NamedspacedMigration>>()
 
     migrations.forEach {

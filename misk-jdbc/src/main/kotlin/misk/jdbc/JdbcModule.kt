@@ -91,7 +91,13 @@ class JdbcModule @JvmOverloads constructor(
             connector = connectorProvider.get()
           )
         MigrationsFormat.DECLARATIVE ->
-          DeclarativeSchemaMigrator() //TODO implement DeclarativeSchemaMigrator
+          DeclarativeSchemaMigrator(
+            qualifier = qualifier,
+            resourceLoader = resourceLoader,
+            dataSourceConfig = config,
+            dataSourceService = dataSourceServiceProvider.get(),
+            connector = connectorProvider.get()
+          )
       }
     }).asSingleton()
 

@@ -318,6 +318,20 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
   }
 
   @Test
+  fun failsOnInvalidMigrations() {
+    val mainSource = config.migrations_resources!![0]
+    resourceLoader.put(
+      "$mainSource/invalid_migration.sql", """
+        |CREATE TABLE table_1 (name varchar(255))
+        |""".trimMargin()
+    )
+
+    assertFailsWith<IllegalArgumentException>(message = "unexpected resource: $mainSource/invalid_migration.sql") {
+      traditionalSchemaMigrator.requireAll()
+    }
+  }
+
+  @Test
   fun skipsExcludedMigrations() {
     val mainSource = config.migrations_resources!![0]
 
