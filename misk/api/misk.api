@@ -1995,21 +1995,27 @@ public final class misk/web/marshal/GenericMarshallers$FromByteString : misk/web
 	public fun <init> (Lokhttp3/MediaType;)V
 	public fun contentType ()Lokhttp3/MediaType;
 	public synthetic fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public synthetic fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 	public fun responseBody (Lokio/ByteString;)Lmisk/web/ResponseBody;
+	public fun responseBody (Lokio/ByteString;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 }
 
 public final class misk/web/marshal/GenericMarshallers$ToNothing : misk/web/marshal/Marshaller {
 	public fun <init> (Lokhttp3/MediaType;)V
 	public fun contentType ()Lokhttp3/MediaType;
 	public synthetic fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public synthetic fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 	public fun responseBody (Ljava/lang/Void;)Lmisk/web/ResponseBody;
+	public fun responseBody (Ljava/lang/Void;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 }
 
 public final class misk/web/marshal/GenericMarshallers$ToUnit : misk/web/marshal/Marshaller {
 	public fun <init> (Lokhttp3/MediaType;)V
 	public fun contentType ()Lokhttp3/MediaType;
 	public synthetic fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public synthetic fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 	public fun responseBody (Lkotlin/Unit;)Lmisk/web/ResponseBody;
+	public fun responseBody (Lkotlin/Unit;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 }
 
 public final class misk/web/marshal/GenericUnmarshallers {
@@ -2024,6 +2030,7 @@ public final class misk/web/marshal/JsonMarshaller : misk/web/marshal/Marshaller
 	public fun contentType ()Lokhttp3/MediaType;
 	public final fun getAdapter ()Lcom/squareup/moshi/JsonAdapter;
 	public fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 }
 
 public final class misk/web/marshal/JsonMarshaller$Factory : misk/web/marshal/Marshaller$Factory {
@@ -2046,10 +2053,15 @@ public abstract interface class misk/web/marshal/Marshaller {
 	public static final field Companion Lmisk/web/marshal/Marshaller$Companion;
 	public abstract fun contentType ()Lokhttp3/MediaType;
 	public abstract fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public abstract fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 }
 
 public final class misk/web/marshal/Marshaller$Companion {
 	public final fun actualResponseType (Lkotlin/reflect/KType;)Ljava/lang/reflect/Type;
+}
+
+public final class misk/web/marshal/Marshaller$DefaultImpls {
+	public static fun responseBody (Lmisk/web/marshal/Marshaller;Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 }
 
 public abstract interface class misk/web/marshal/Marshaller$Factory {
@@ -2071,6 +2083,7 @@ public final class misk/web/marshal/PlainTextMarshaller : misk/web/marshal/Marsh
 	public static final field INSTANCE Lmisk/web/marshal/PlainTextMarshaller;
 	public fun contentType ()Lokhttp3/MediaType;
 	public fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 }
 
 public final class misk/web/marshal/PlainTextMarshaller$Factory : misk/web/marshal/Marshaller$Factory {
@@ -2104,6 +2117,7 @@ public final class misk/web/marshal/ProtobufMarshaller : misk/web/marshal/Marsha
 	public fun contentType ()Lokhttp3/MediaType;
 	public final fun getAdapter ()Lcom/squareup/wire/ProtoAdapter;
 	public fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 }
 
 public final class misk/web/marshal/ProtobufMarshaller$Factory : misk/web/marshal/Marshaller$Factory {

@@ -1,6 +1,7 @@
 package misk.web.marshal
 
 import misk.inject.typeLiteral
+import misk.web.HttpCall
 import misk.web.Response
 import misk.web.ResponseBody
 import okhttp3.MediaType
@@ -27,6 +28,14 @@ interface Marshaller<in T> {
   interface Factory {
     fun create(mediaType: MediaType, type: KType): Marshaller<Any>?
   }
+
+  /**
+   * Alternate way to marshal the response body with access to the HttpCall.
+   * Invokes [responseBody] by default.
+   *
+   * @return The object marshalled into a [ResponseBody]
+   */
+  fun responseBody(o: T, httpCall: HttpCall): ResponseBody = responseBody(o)
 
   companion object {
     fun actualResponseType(type: KType): Type {
