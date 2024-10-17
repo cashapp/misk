@@ -29,8 +29,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * The JettyHealthService is a standalone Jetty Instance for managing health checks in Misk.
- * It is unique in that it needs to start first to begin responding to health probes, but stop
- * last to continue responding until the entire service is shutdown.
+ * It is unique in that it needs to start and stop last to continue responding until
+ * the entire service is shutdown.
  *
  * As this is not easily modelled in the service dependency graph, JettyHealthService is
  * managed externally to the graph by starting asynchronously before other services begin starting

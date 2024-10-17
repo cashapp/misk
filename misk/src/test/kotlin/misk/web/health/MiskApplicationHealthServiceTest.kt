@@ -71,6 +71,10 @@ class MiskApplicationHealthServiceTest {
       // An action that just returns ok.
       install(WebActionModule.create<AppTestHelloAction>())
 
+      // Waits for a latch to be counted down before starting.  Will delay the
+      // health service starting which happens after all other service start.
+      install(ServiceModule<DelayHealthStart>().dependsOn<JettyStartedService>())
+
       // Depends on Jetty and once started counts down a latch.
       install(ServiceModule<JettyStartedService>().dependsOn<JettyService>())
 
@@ -96,23 +100,21 @@ class MiskApplicationHealthServiceTest {
     val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as? Logger
     root?.let { it.level = INFO }
 
+    val miskStartedLatch = CountDownLatch(1)
     val miskShutdownLatch = CountDownLatch(1)
     val miskApplication = MiskApplication(TestModule())
 
     thread {
       logger.debug("Running Misk!")
       miskApplication.doRun(arrayOf())
+      miskStartedLatch.countDown()
       logger.debug("Misk shutdown!")
       miskShutdownLatch.countDown()
     }
 
-    // This service will countdown startedLatch once it starts, which indicates
-    // MiskApplication has started launching the health server and is now launching
-    // services.  Sleep an extra 5 seconds since the health service startup is async.
-    HealthCheckNotifyStartDelayStop.startedLatch.await(10, TimeUnit.SECONDS)
-    sleep(5.seconds.inWholeMilliseconds)
+    // Both services should be shutdown
+    miskStartedLatch.await(10, TimeUnit.SECONDS)
 
-    logger.info("--- Health Server Up ---")
     val webLivenessUrl = "http://127.0.0.1:$webPort/_liveness".toHttpUrl()
     val webReadinessUrl = "http://127.0.0.1:$webPort/_readiness".toHttpUrl()
     val webStatusUrl = "http://127.0.0.1:$webPort/_status".toHttpUrl()
@@ -123,24 +125,40 @@ class MiskApplicationHealthServiceTest {
     val healthStatusUrl = "http://127.0.0.1:$healthPort/_status".toHttpUrl()
     val healthHelloUrl = "http://127.0.0.1:$healthPort/hello".toHttpUrl()
 
+    logger.info("--- Not Started ---")
     get(webHelloUrl, "web", expectThrowable = ConnectException::class)
     get(webLivenessUrl, "web", expectThrowable = ConnectException::class)
     get(webReadinessUrl, "web", expectThrowable = ConnectException::class)
     get(webStatusUrl, "web", expectThrowable = ConnectException::class)
 
-    get(healthHelloUrl, "health", expectCode = 404)
-    get(healthLivenessUrl, "health", expectCode = 200)
-    get(healthReadinessUrl, "health", expectCode = 503)
-    get(healthStatusUrl, "health", expectCode = 200)
+    get(healthHelloUrl, "health", expectThrowable = ConnectException::class)
+    get(healthLivenessUrl, "health", expectThrowable = ConnectException::class)
+    get(healthReadinessUrl, "health", expectThrowable = ConnectException::class)
+    get(healthStatusUrl, "health", expectThrowable = ConnectException::class)
 
     // Jetty start has been delayed by DelayJettyStartNotifyStop, inform it that it is
     // now ok to start.
     DelayJettyStartNotifyStop.okToStartUp.countDown()
 
     // JettyStartedService dependsOn jetty so once it has started we know jetty has started.
-    JettyStartedService.startedLatch.await(10, TimeUnit.SECONDS)
+    JettyStartedService.startedLatch.await(5, TimeUnit.SECONDS)
 
     logger.info("--- Web Server Up ---")
+    get(webHelloUrl, "web", expectCode = 200)
+    get(webLivenessUrl, "web", expectCode = 200)
+    get(webReadinessUrl, "web", expectCode = 503)
+    get(webStatusUrl, "web", expectCode = 200)
+
+    get(healthHelloUrl, "health", expectThrowable = ConnectException::class)
+    get(healthLivenessUrl, "health", expectThrowable = ConnectException::class)
+    get(healthReadinessUrl, "health", expectThrowable = ConnectException::class)
+    get(healthStatusUrl, "health", expectThrowable = ConnectException::class)
+
+    // Health service will start after all running services so allow it to start.
+    DelayHealthStart.okToStartUp.countDown()
+    sleep(5.seconds.inWholeMilliseconds)
+
+    logger.info("--- Health Server Up ---")
     get(webHelloUrl, "web", expectCode = 200)
     get(webLivenessUrl, "web", expectCode = 200)
     get(webReadinessUrl, "web", expectCode = 200)
@@ -259,10 +277,26 @@ class MiskApplicationHealthServiceTest {
   }
 
   @Singleton
-  internal class HealthCheckNotifyStartDelayStop @Inject constructor() : AbstractIdleService() {
+  internal class DelayHealthStart @Inject constructor() : AbstractIdleService() {
     override fun startUp() {
       logger.info { "Starting up" }
-      startedLatch.countDown()
+      okToStartUp.await(20, TimeUnit.SECONDS)
+      logger.info { "Started " }
+    }
+
+    override fun shutDown() {
+      logger.info { "Shutdown" }
+    }
+
+    companion object {
+      private val logger = getLogger<DelayHealthStart>()
+      val okToStartUp = CountDownLatch(1)
+    }
+  }
+
+  @Singleton
+  internal class HealthCheckNotifyStartDelayStop @Inject constructor() : AbstractIdleService() {
+    override fun startUp() {
       logger.info { "Started" }
     }
 
@@ -275,7 +309,6 @@ class MiskApplicationHealthServiceTest {
     companion object {
       private val logger = getLogger<HealthCheckNotifyStartDelayStop>()
       val okToShutdownLatch = CountDownLatch(1)
-      val startedLatch = CountDownLatch(1)
     }
   }
 
