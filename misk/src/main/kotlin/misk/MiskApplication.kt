@@ -103,9 +103,15 @@ class MiskApplication private constructor(
   @VisibleForTesting
   internal lateinit var shutdownHook : Thread
 
+  /**
+   * Provides internal testing the ability to get instances this used by the application.
+   */
+  @VisibleForTesting
+  internal lateinit var injector : Injector
+
   private fun startServiceAndAwaitTermination() {
     log.info { "creating application injector" }
-    val injector = injectorGenerator()
+    injector = injectorGenerator()
     val serviceManager = injector.getInstance<ServiceManager>()
     shutdownHook = thread(start = false) {
       measureTimeMillis {
