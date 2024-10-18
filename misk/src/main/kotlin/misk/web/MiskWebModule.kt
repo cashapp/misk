@@ -90,6 +90,7 @@ import misk.web.mdc.RequestRemoteAddressLogContextProvider
 import misk.web.mdc.RequestURILogContextProvider
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
+import misk.web.shutdown.GracefulShutdownModule
 import org.eclipse.jetty.io.EofException
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -236,6 +237,9 @@ class MiskWebModule @JvmOverloads constructor(
     // Optionally log request and response body
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
       .to<RequestBodyLoggingInterceptor.Factory>()
+
+    // Optionally wait for service to drain before shutting down Jetty.
+    install(GracefulShutdownModule(config))
 
     newMultibinder<RequestLoggingTransformer>()
     newMultibinder<WebActionSeedDataTransformerFactory>()

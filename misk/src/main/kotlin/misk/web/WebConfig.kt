@@ -1,6 +1,7 @@
 package misk.web
 
 import misk.annotation.ExperimentalMiskApi
+import misk.client.HTTP_SERVICE_UNAVAILABLE
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
@@ -45,6 +46,23 @@ data class WebConfig @JvmOverloads constructor(
    */
   @property:ExperimentalMiskApi
   val health_dedicated_jetty_instance: Boolean = false,
+
+  /**
+   * @ExperimentalMiskApi - this feature is still being verified in production.
+   *
+   * health_port must be >= 0,
+   * health_dedicated_jetty_instance must be true
+   *
+   * An interceptor which delays service shutdown for in flight requests to complete and for no
+   * new incoming requests to have occurred during the idle time.  Once shutdown has commenced,
+   * incoming requests will be redirected to healthy pods by responding with 503 or the status
+   * code specified.
+   *
+   * This improves the ability for services to complete in-flight requests and safely terminate
+   * the underlying connection.
+   */
+  @property:ExperimentalMiskApi
+  val graceful_shutdown_config: GracefulShutdownConfig? = null,
 
   /** The network interface to bind to. Null or 0.0.0.0 to bind to all interfaces. */
   val host: String? = null,
@@ -261,4 +279,31 @@ data class ConcurrencyLimiterConfig @JvmOverloads constructor(
    * backwards compatibility.
    */
   val log_level: Level = Level.ERROR,
+)
+
+data class GracefulShutdownConfig @JvmOverloads constructor(
+  /**
+   * true to explicitly disable graceful shutdown service/interceptor.
+   */
+  val disabled: Boolean = false,
+
+  /**
+   * Milliseconds no new incoming requests have come in before proceeding with shutdown.
+   */
+  val idle_timeout: Long = 2000,
+
+  /**
+   * The maximum amount of time to wait for no in-flight requests and the idle timeout to expire.
+   * If <= 0 the service will not limit the amount of time to wait for idle, however it might
+   * be forcibly killed by an external source, like kubernetes.
+   */
+  val max_graceful_wait: Long = 0,
+
+  /**
+   * The status code to use for rejecting incoming requests after shutdown has begun.
+   * If <= 0 the service will not reject incoming requests and wait until new requests have
+   * processed and the idle_timeout is reached.
+   */
+  val rejection_status_code: Int = HTTP_SERVICE_UNAVAILABLE
+
 )

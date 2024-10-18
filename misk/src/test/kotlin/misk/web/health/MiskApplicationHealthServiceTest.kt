@@ -100,20 +100,18 @@ class MiskApplicationHealthServiceTest {
     val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as? Logger
     root?.let { it.level = INFO }
 
-    val miskStartedLatch = CountDownLatch(1)
     val miskShutdownLatch = CountDownLatch(1)
     val miskApplication = MiskApplication(TestModule())
 
     thread {
       logger.debug("Running Misk!")
       miskApplication.doRun(arrayOf())
-      miskStartedLatch.countDown()
       logger.debug("Misk shutdown!")
       miskShutdownLatch.countDown()
     }
 
     // Both services should be shutdown
-    miskStartedLatch.await(10, TimeUnit.SECONDS)
+    DelayJettyStartNotifyStop.startingLatch.await(10, TimeUnit.SECONDS)
 
     val webLivenessUrl = "http://127.0.0.1:$webPort/_liveness".toHttpUrl()
     val webReadinessUrl = "http://127.0.0.1:$webPort/_readiness".toHttpUrl()
@@ -259,6 +257,7 @@ class MiskApplicationHealthServiceTest {
   internal class DelayJettyStartNotifyStop @Inject constructor() : AbstractIdleService() {
     override fun startUp() {
       logger.info { "Starting up" }
+      startingLatch.countDown()
       okToStartUp.await(20, TimeUnit.SECONDS)
       logger.info { "Started " }
     }
@@ -272,6 +271,7 @@ class MiskApplicationHealthServiceTest {
     companion object {
       private val logger = getLogger<DelayJettyStartNotifyStop>()
       val okToStartUp = CountDownLatch(1)
+      val startingLatch = CountDownLatch(1)
       val shutdownLatch = CountDownLatch(1)
     }
   }
