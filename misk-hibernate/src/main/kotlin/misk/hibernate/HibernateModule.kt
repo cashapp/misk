@@ -57,6 +57,7 @@ class HibernateModule @JvmOverloads constructor(
   readerConfig: DataSourceConfig?,
   val databasePool: DatabasePool = RealDatabasePool,
   private val logLevelConfig: HibernateExceptionLogLevelConfig = HibernateExceptionLogLevelConfig(),
+  private val jdbcModuleAlreadySetup: Boolean = false,
 ) : KAbstractModule() {
 
   // Make sure Hibernate logs use slf4j. Otherwise, it will base its decision on the classpath and
@@ -88,6 +89,20 @@ class HibernateModule @JvmOverloads constructor(
     databasePool: DatabasePool = RealDatabasePool,
   ) : this(qualifier, cluster.writer, readerQualifier, cluster.reader, databasePool)
 
+  constructor(
+    qualifier: KClass<out Annotation>,
+    config: DataSourceConfig,
+    databasePool: DatabasePool = RealDatabasePool,
+    jdbcModuleAlreadySetup: Boolean,
+  ) : this(
+    qualifier = qualifier,
+    config  = config,
+    readerQualifier = null,
+    readerConfig = null,
+    databasePool = databasePool,
+    jdbcModuleAlreadySetup = jdbcModuleAlreadySetup
+  )
+
   override fun configure() {
     if (readerQualifier != null) {
       check(readerConfig != null) {
@@ -95,7 +110,9 @@ class HibernateModule @JvmOverloads constructor(
       }
     }
 
-    install(JdbcModule(qualifier, config, readerQualifier, readerConfig, databasePool))
+    if (!jdbcModuleAlreadySetup) {
+      install(JdbcModule(qualifier, config, readerQualifier, readerConfig, databasePool))
+    }
 
     bind<Query.Factory>().to<ReflectionQuery.Factory>()
     bind<QueryLimitsConfig>()
