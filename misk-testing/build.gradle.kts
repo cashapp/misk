@@ -43,6 +43,7 @@ dependencies {
   implementation(testFixtures(project(":misk-metrics")))
 
   testImplementation(libs.kotlinTest)
+  testImplementation(libs.mockitoKotlin)
 }
 
 mavenPublishing {

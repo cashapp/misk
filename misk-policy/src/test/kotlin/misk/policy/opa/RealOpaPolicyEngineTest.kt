@@ -8,7 +8,6 @@ import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
 import misk.metrics.v2.FakeMetrics
 import misk.metrics.v2.FakeMetricsModule
-import misk.mockito.Mockito
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.mediatype.MediaTypes.APPLICATION_JSON
@@ -16,7 +15,6 @@ import misk.web.mediatype.asMediaType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyString
 import retrofit2.Response
@@ -26,6 +24,10 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 import jakarta.inject.Singleton
 import okhttp3.ResponseBody.Companion.toResponseBody
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @MiskTest(startService = false)
 internal class RealOpaPolicyEngineTest {
@@ -41,7 +43,7 @@ internal class RealOpaPolicyEngineTest {
       OpaConfig("fake", null, true, true)
 
     @Provides @Singleton
-    fun opaApi(): OpaApi = Mockito.mock()
+    fun opaApi(): OpaApi = mock()
 
     @Provides @Singleton @Named("opa-moshi")
     fun provideMoshi(): Moshi = defaultKotlinMoshi
@@ -73,7 +75,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun metricsInResponse() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean()))
+    whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean()))
       .thenReturn(
         Calls.response(
           "{\"decision_id\": \"decisionIdString\", \"result\": {\"test\": \"a\"} ${metricsPayload}}"
@@ -162,7 +164,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun emptyInputQuery() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
+    whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         "{\"decision_id\": \"decisionIdString\", \"result\": {\"test\": \"a\"}}"
           .toResponseBody(APPLICATION_JSON.asMediaType())
@@ -174,8 +176,8 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun pojoInputQuery() {
-    val requestCaptor = Mockito.captor<String>()
-    Mockito.whenever(opaApi.queryDocument(anyString(), capture(requestCaptor), anyBoolean(), anyBoolean())).thenReturn(
+    val requestCaptor = argumentCaptor<String>()
+    whenever(opaApi.queryDocument(anyString(), requestCaptor.capture(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         "{\"decision_id\": \"decisionIdString\", \"result\": {\"test\": \"a\"}}"
           .toResponseBody(APPLICATION_JSON.asMediaType())
@@ -185,13 +187,13 @@ internal class RealOpaPolicyEngineTest {
     val evaluate: BasicResponse = opaPolicyEngine.evaluate("test", BasicRequest(1))
 
     assertThat(evaluate).isEqualTo(BasicResponse("a"))
-    assertThat(requestCaptor.value).isEqualTo("{\"input\":{\"someValue\":1}}")
+    assertThat(requestCaptor.firstValue).isEqualTo("{\"input\":{\"someValue\":1}}")
   }
 
   @Test
   fun rawJsonInputQuery() {
-    val requestCaptor = Mockito.captor<String>()
-    Mockito.whenever(opaApi.queryDocument(anyString(), capture(requestCaptor), anyBoolean(), anyBoolean())).thenReturn(
+    val requestCaptor = argumentCaptor<String>()
+    whenever(opaApi.queryDocument(anyString(), requestCaptor.capture(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         "{\"decision_id\": \"decisionIdString\", \"result\": {\"test\": \"a\"}}"
           .toResponseBody(APPLICATION_JSON.asMediaType())
@@ -201,12 +203,12 @@ internal class RealOpaPolicyEngineTest {
     val evaluate: BasicResponse = opaPolicyEngine.evaluate("test", "{\"input\":\"someValue\"}")
 
     assertThat(evaluate).isEqualTo(BasicResponse("a"))
-    assertThat(requestCaptor.value).isEqualTo("{\"input\":\"someValue\"}")
+    assertThat(requestCaptor.firstValue).isEqualTo("{\"input\":\"someValue\"}")
   }
 
   @Test
   fun responseIsNotOk() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
+    whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         Response.error(
           403,
@@ -223,7 +225,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun unableToParseResponseIntoRequestedShape() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
+    whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         "{\"decision_id\": \"decisionIdString\", \"result\": {\"wrongItem\": 1}}"
           .toResponseBody(APPLICATION_JSON.asMediaType())
@@ -240,7 +242,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun unknownPolicyDocument() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
+    whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         "{\"decision_id\": \"decisionIdString\"}"
           .toResponseBody(APPLICATION_JSON.asMediaType())
@@ -263,7 +265,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun returnsProvenanceBundleIfSpecified() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
+    whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         ("{\"provenance\":{\"version\":\"0.30.1\",\"build_commit\":\"03b0b1f\",\"bundles\"" +
           ":{\"xyz\":{\"revision\": \"revision123\"}}}, \"decision_id\": \"decisionIdString\"," +
@@ -279,7 +281,7 @@ internal class RealOpaPolicyEngineTest {
 
   @Test
   fun returnsProvenanceRevisionIfSpecified() {
-    Mockito.whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
+    whenever(opaApi.queryDocument(anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(
       Calls.response(
         ("{\"provenance\":{\"version\":\"0.30.1\",\"build_commit\":\"03b0b1f\",\"revision\":" +
           " \"revision123\"}, \"decision_id\": \"decisionIdString\"," +
@@ -292,9 +294,6 @@ internal class RealOpaPolicyEngineTest {
     assertThat(evaluate.provenance?.bundles).isNull()
     assertThat(evaluate.provenance?.revision ?: "").isEqualTo("revision123")
   }
-
-  // Weird kotlin workaround for mockito. T must not be nullable.
-  private fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
 
   data class BasicResponse(val test: String) : OpaResponse()
   data class BasicRequest(val someValue: Int) : OpaRequest()

@@ -40,6 +40,7 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.mockitoCore)
+  testImplementation(libs.mockitoKotlin)
   testImplementation(libs.retrofitMock)
   testImplementation(project(":misk-policy"))
   testImplementation(project(":misk-testing"))
