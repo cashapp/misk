@@ -12,7 +12,7 @@ import com.google.inject.Provider
 import misk.backoff.RetryConfig
 import kotlin.reflect.KClass
 
-class SchemaMigratorService internal constructor(
+class SchemaMigratorService  constructor(
   private val qualifier: KClass<out Annotation>,
   private val deployment: Deployment,
   private val schemaMigratorProvider: Provider<SchemaMigrator>, // Lazy!
