@@ -4,10 +4,14 @@ import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.annotation.ExperimentalMiskApi
-import misk.metrics.v2.Metrics
 import misk.web.GracefulShutdownConfig
 import misk.web.WebConfig
+import misk.web.shutdown.GracefulShutdownService.Companion.ShutdownReason.Idle
+import misk.web.shutdown.GracefulShutdownService.Companion.ShutdownReason.Interrupt
+import misk.web.shutdown.GracefulShutdownService.Companion.ShutdownReason.MaxWait
+import wisp.logging.Tag
 import wisp.logging.getLogger
+import wisp.logging.withTags
 import java.time.Clock
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
@@ -20,24 +24,8 @@ import kotlin.time.TimeSource
 @Singleton
 internal class GracefulShutdownService @Inject constructor(
   webConfig: WebConfig,
-  metrics: Metrics,
   clock: Clock,
 ) : AbstractIdleService() {
-  private val shutdownDurationMetric = metrics.histogram(
-    "graceful_shutdown_wait_duration_ms",
-    "duration to wait for in-flight requests and idle timeout",
-  )
-
-  private val shutdownInFlightRequestsMetric = metrics.gauge(
-    "graceful_shutdown_in_flight_requests",
-    "number of inflight requests during graceful shutdown"
-  )
-
-  private val shutdownRejectedRequestsMetric = metrics.counter(
-    "graceful_shutdown_rejected_requests_total",
-    "number of requests rejected during graceful shutdown"
-  )
-
   @OptIn(ExperimentalMiskApi::class)
   private val gracefulShutdownConfig =
     webConfig.graceful_shutdown_config ?:
@@ -88,7 +76,6 @@ internal class GracefulShutdownService @Inject constructor(
    */
   internal fun reportReject() {
     idleSince.set(timeSource.markNow())
-    shutdownRejectedRequestsMetric.inc()
   }
 
   /**
@@ -105,17 +92,14 @@ internal class GracefulShutdownService @Inject constructor(
    * service can proceed with shutdown once incoming idle timeout is reached.
    */
   internal fun reportRequestComplete(): Long {
-    val currentInFlightRequests = inFlightRequestsTracker.decrementAndGet()
-    if (shuttingDown) {
-      shutdownInFlightRequestsMetric.set(currentInFlightRequests.toDouble())
-    }
-    return currentInFlightRequests
+    return inFlightRequestsTracker.decrementAndGet()
   }
 
   override fun startUp() {
     shuttingDown = false
   }
 
+  @OptIn(ExperimentalMiskApi::class)
   override fun shutDown() {
     shuttingDown = true
 
@@ -124,8 +108,8 @@ internal class GracefulShutdownService @Inject constructor(
       return
     }
 
-    shutdownInFlightRequestsMetric.set(inFlightRequests.toDouble())
-
+    val initialInFlight = inFlightRequests
+    var shutdownReason = Idle
     val shutdownStarted = timeSource.markNow()
     var idleFor = idleSince.get().elapsedNow()
     var untilIdle = idleTimeout - idleFor
@@ -139,6 +123,7 @@ internal class GracefulShutdownService @Inject constructor(
       // Break if we have hit the max delay regardless of the current state.  This may result in
       // a non-graceful shutdown.
       if (untilMaxShutdown <= Duration.ZERO) {
+        shutdownReason = MaxWait
         break
       }
 
@@ -157,7 +142,7 @@ internal class GracefulShutdownService @Inject constructor(
       try {
         Thread.sleep(sleepFor.inWholeMilliseconds)
       } catch (_: InterruptedException) {
-        logger.info { "Exiting for interrupt."}
+        shutdownReason = Interrupt
         break
       }
 
@@ -167,13 +152,50 @@ internal class GracefulShutdownService @Inject constructor(
       untilMaxShutdown = maxShutdownWait - shutdownStarted.elapsedNow()
     }
 
-    val shutdownWait = shutdownStarted.elapsedNow().inWholeMilliseconds
-    shutdownDurationMetric.observe(shutdownWait.toDouble())
-    logger.info { "Graceful Shutdown proceeding after " + "${shutdownWait.milliseconds}" }
+    val shutdownWait = shutdownStarted.elapsedNow().inWholeMilliseconds.milliseconds
+    withTags(
+      Tag("misk.graceful.result.reason", shutdownReason),
+      Tag("misk.graceful.result.delay", shutdownWait.delayBucket()),
+      Tag("misk.graceful.result.start_inflight", initialInFlight.inFlightBucket()),
+      Tag("misk.graceful.result.end_inflight", inFlightRequests.inFlightBucket()),
+      Tag("misk.graceful.config.idle_timeout", gracefulShutdownConfig.idle_timeout),
+      Tag("misk.graceful.config.max_graceful_wait", gracefulShutdownConfig.max_graceful_wait),
+      Tag("misk.graceful.config.rejection_status_code", gracefulShutdownConfig.rejection_status_code)
+    ) {
+      logger.info { "Graceful Shutdown proceeding after $shutdownWait " +
+        "with $inFlightRequests in-flight requests" }
+    }
   }
 
   companion object {
     private val logger = getLogger<GracefulShutdownService>()
+
+    private enum class ShutdownReason {
+      Idle,
+      MaxWait,
+      Interrupt,
+    }
+
+    /**
+     * Bucket delays so they can be visualized as a time series from logs.
+     */
+    private fun Duration.delayBucket(): Long =
+      when {
+        inWholeMilliseconds <= 500 -> inWholeMilliseconds % 100
+        inWholeMilliseconds <= 10_000 -> inWholeMilliseconds % 500
+        else -> inWholeMilliseconds % 1000
+      }
+
+    /**
+     * Bucket in-flight so they can be visualized as a time series from logs.
+     */
+    private fun Long.inFlightBucket(): Long =
+      when {
+        this <= 5 -> this
+        this <= 100 -> this % 10
+        this <= 500 -> this % 50
+        else -> this % 100
+      }
 
     /**
      * Simple wrapper around java Clock to use kotlin TimeSource methods.

@@ -22,7 +22,6 @@ import org.eclipse.jetty.http2.server.AbstractHTTP2ServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
 import org.eclipse.jetty.io.ConnectionStatistics
-import org.eclipse.jetty.server.AbstractConnector
 import org.eclipse.jetty.server.ConnectionFactory
 import org.eclipse.jetty.server.Connector
 import org.eclipse.jetty.server.HttpConfiguration
@@ -59,8 +58,6 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 import javax.servlet.DispatcherType
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 @Singleton
 class JettyService @Inject internal constructor(
@@ -274,7 +271,6 @@ class JettyService @Inject internal constructor(
         udsConnector.unixDomainPath = socketFile.toPath()
         udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
         udsConnector.name = "uds"
-        maybeOverrideUdsShutdownIdleTimeout(udsConnector)
 
         // set file permissions after socket creation so sidecars (e.g. envoy, istio) have access
         try {
@@ -296,8 +292,6 @@ class JettyService @Inject internal constructor(
         udsConnector.setUnixSocket(socketConfig.path)
         udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
         udsConnector.name = "uds"
-        maybeOverrideUdsShutdownIdleTimeout(udsConnector)
-
         server.addConnector(udsConnector)
       }
     }
@@ -372,40 +366,6 @@ class JettyService @Inject internal constructor(
         "Started Jetty in $stopwatch on port ${webConfig.port}"
       }
     }
-  }
-
-  /**
-   * TODO: This is part of the experiment for improving graceful shutdown which is
-   * being gated behind the dedicated health service.
-   *
-   * The default shutdown idle timeout is 1s which prevents in-flight requests from
-   * gracefully completing as idle timeout is based on actual bytes flowing over the
-   * socket rather than outstanding requests.
-   *
-   * Once verified we will determine the correct way to model this.
-   * Either as a more reasonable default than 1s, or as a setting attached to
-   * WebUnixDomainSocketConfig
-   */
-  private fun maybeOverrideUdsShutdownIdleTimeout(udsConnector: AbstractConnector) {
-    if (!webConfig.jettyHealthServiceEnabled() ||
-      webConfig.override_shutdown_idle_timeout == null ||
-      webConfig.override_shutdown_idle_timeout.milliseconds <= 1.seconds) {
-      return
-    }
-
-    if (webConfig.override_shutdown_idle_timeout > udsConnector.idleTimeout) {
-      logger.warn {
-        "Setting override_shutdown_idle_timeout[${webConfig.override_shutdown_idle_timeout}]" +
-          "greater than uds default timeout[${udsConnector.idleTimeout}]"
-      }
-    } else {
-      logger.info {
-        "udsConnector idleTimeout:[${udsConnector.idleTimeout}], " +
-          "shutdownIdleTimeout[${webConfig.override_shutdown_idle_timeout}]"
-      }
-    }
-
-    udsConnector.shutdownIdleTimeout = webConfig.override_shutdown_idle_timeout
   }
 
   fun stop() {
