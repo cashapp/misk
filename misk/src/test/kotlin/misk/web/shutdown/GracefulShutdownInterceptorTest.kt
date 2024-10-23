@@ -23,6 +23,8 @@ import misk.web.WebServerTestingModule
 import misk.web.WebServerTestingModule.Companion.TESTING_WEB_CONFIG
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
+import misk.web.shutdown.GracefulShutdownService.Companion.delayBucket
+import misk.web.shutdown.GracefulShutdownService.Companion.inFlightBucket
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl
@@ -44,6 +46,7 @@ import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
+import kotlin.time.Duration.Companion.milliseconds
 
 // Must run isolated because it binds an available port to discover it and then releases it
 // for misk to use.
@@ -153,6 +156,64 @@ class GracefulShutdownInterceptorTest {
           graceful_shutdown_config = GracefulShutdownConfig()
         )
     }.assertServiceAndInterceptorNotInstalled()
+  }
+
+  @Test
+  fun `log delay bucketing scheme`() {
+
+    //inWholeMilliseconds <= 500 -> inWholeMilliseconds.toNearest(100)
+    assertThat(0.milliseconds.delayBucket()).isEqualTo(0L)
+    assertThat(1.milliseconds.delayBucket()).isEqualTo(0L)
+
+    assertThat(49.milliseconds.delayBucket()).isEqualTo(0L)
+    assertThat(50.milliseconds.delayBucket()).isEqualTo(100L)
+    assertThat(51.milliseconds.delayBucket()).isEqualTo(100L)
+
+    assertThat(149.milliseconds.delayBucket()).isEqualTo(100L)
+    assertThat(150.milliseconds.delayBucket()).isEqualTo(200L)
+    assertThat(151.milliseconds.delayBucket()).isEqualTo(200L)
+    assertThat(500.milliseconds.delayBucket()).isEqualTo(500L)
+
+    //inWholeMilliseconds <= 10_000 -> inWholeMilliseconds.toNearest(500)
+    assertThat(600.milliseconds.delayBucket()).isEqualTo(500L)
+    assertThat(749.milliseconds.delayBucket()).isEqualTo(500L)
+    assertThat(750.milliseconds.delayBucket()).isEqualTo(1000L)
+    assertThat(1749.milliseconds.delayBucket()).isEqualTo(1500L)
+    assertThat(1750.milliseconds.delayBucket()).isEqualTo(2000L)
+    assertThat(8750.milliseconds.delayBucket()).isEqualTo(9000L)
+
+    //else -> inWholeMilliseconds.toNearest(1000)
+    assertThat(10_499.milliseconds.delayBucket()).isEqualTo(10_000L)
+    assertThat(10_500.milliseconds.delayBucket()).isEqualTo(11_000L)
+    assertThat(21_700.milliseconds.delayBucket()).isEqualTo(22_000L)
+  }
+
+  @Test
+  fun `in flight bucketing scheme`() {
+    // this <= 5 -> this
+    assertThat(0L.inFlightBucket()).isEqualTo(0L)
+    assertThat(4L.inFlightBucket()).isEqualTo(4L)
+
+    // this <= 100 -> this.toNearest(10)
+    assertThat(6L.inFlightBucket()).isEqualTo(10L)
+    assertThat(14L.inFlightBucket()).isEqualTo(10L)
+
+    assertThat(94L.inFlightBucket()).isEqualTo(90L)
+    assertThat(95L.inFlightBucket()).isEqualTo(100L)
+    assertThat(100L.inFlightBucket()).isEqualTo(100L)
+
+    // this <= 500 -> this.toNearest(50)
+    assertThat(124L.inFlightBucket()).isEqualTo(100L)
+    assertThat(125L.inFlightBucket()).isEqualTo(150L)
+    assertThat(150L.inFlightBucket()).isEqualTo(150L)
+    assertThat(176L.inFlightBucket()).isEqualTo(200L)
+    assertThat(470L.inFlightBucket()).isEqualTo(450L)
+
+    // else -> this.toNearest(100)
+    assertThat(551L.inFlightBucket()).isEqualTo(600L)
+    assertThat(649L.inFlightBucket()).isEqualTo(600L)
+    assertThat(951L.inFlightBucket()).isEqualTo(1000L)
+    assertThat(1847L.inFlightBucket()).isEqualTo(1800L)
   }
 
   private fun GracefulInterceptorModule.assertServiceAndInterceptorNotInstalled() {

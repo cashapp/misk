@@ -9,6 +9,7 @@ import misk.web.WebConfig
 import misk.web.shutdown.GracefulShutdownService.Companion.ShutdownReason.Idle
 import misk.web.shutdown.GracefulShutdownService.Companion.ShutdownReason.Interrupt
 import misk.web.shutdown.GracefulShutdownService.Companion.ShutdownReason.MaxWait
+import org.jetbrains.annotations.VisibleForTesting
 import wisp.logging.Tag
 import wisp.logging.getLogger
 import wisp.logging.withTags
@@ -16,6 +17,7 @@ import java.time.Clock
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
+import kotlin.math.roundToLong
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeMark
@@ -179,23 +181,31 @@ internal class GracefulShutdownService @Inject constructor(
     /**
      * Bucket delays so they can be visualized as a time series from logs.
      */
-    private fun Duration.delayBucket(): Long =
+    @VisibleForTesting
+    internal fun Duration.delayBucket(): Long =
       when {
-        inWholeMilliseconds <= 500 -> inWholeMilliseconds % 100
-        inWholeMilliseconds <= 10_000 -> inWholeMilliseconds % 500
-        else -> inWholeMilliseconds % 1000
+        inWholeMilliseconds <= 500 -> inWholeMilliseconds.toNearest(100)
+        inWholeMilliseconds <= 10_000 -> inWholeMilliseconds.toNearest(500)
+        else -> inWholeMilliseconds.toNearest(1000)
       }
 
     /**
      * Bucket in-flight so they can be visualized as a time series from logs.
      */
-    private fun Long.inFlightBucket(): Long =
+    @VisibleForTesting
+    internal fun Long.inFlightBucket(): Long =
       when {
         this <= 5 -> this
-        this <= 100 -> this % 10
-        this <= 500 -> this % 50
-        else -> this % 100
+        this <= 100 -> this.toNearest(10)
+        this <= 500 -> this.toNearest(50)
+        else -> this.toNearest(100)
       }
+
+    /**
+     * Round to the nearest multiple of [multiple]
+     */
+    private fun Long.toNearest(multiple: Int): Long =
+      multiple * (toDouble() / multiple).roundToLong()
 
     /**
      * Simple wrapper around java Clock to use kotlin TimeSource methods.
