@@ -10,6 +10,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import kotlin.test.assertFailsWith
@@ -96,6 +97,12 @@ internal abstract class DeclarativeSchemaMigratorTest(val type: DataSourceType) 
       statement.executeBatch()
       connection.commit()
     }
+  }
+
+  @Test
+  fun verifySkeemaBinaryIsAvailable() {
+    // will fail if skeema binary is not available
+    declarativeSchemaMigrator.applyAll("test")
   }
 
   //@Test TODO enable when implemented
