@@ -76,6 +76,18 @@ class JdbcModule @JvmOverloads constructor(
     val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
     val schemaMigratorProvider = getProvider(schemaMigratorKey)
     val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
+    val skeemaWrapperKey = SkeemaWrapper::class.toKey(qualifier)
+    val skeemaWrapperProvider = getProvider(skeemaWrapperKey)
+
+    bind(skeemaWrapperKey).toProvider(object : Provider<SkeemaWrapper> {
+      @Inject
+      lateinit var resourceLoader: ResourceLoader
+      override fun get(): SkeemaWrapper = SkeemaWrapper(
+        qualifier = qualifier,
+        resourceLoader = resourceLoader,
+        dataSourceConfig = config,
+      )
+    }).asSingleton()
 
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
@@ -96,7 +108,8 @@ class JdbcModule @JvmOverloads constructor(
             resourceLoader = resourceLoader,
             dataSourceConfig = config,
             dataSourceService = dataSourceServiceProvider.get(),
-            connector = connectorProvider.get()
+            connector = connectorProvider.get(),
+            skeemaWrapper = skeemaWrapperProvider.get(),
           )
       }
     }).asSingleton()
