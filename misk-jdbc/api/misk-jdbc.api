@@ -604,6 +604,7 @@ public abstract interface class misk/jdbc/SchemaMigrator {
 }
 
 public final class misk/jdbc/SchemaMigratorService : com/google/common/util/concurrent/AbstractIdleService, misk/healthchecks/HealthCheck, misk/jdbc/DatabaseReadyService {
+	public fun <init> (Lkotlin/reflect/KClass;Lwisp/deployment/Deployment;Lcom/google/inject/Provider;Lcom/google/inject/Provider;)V
 	public fun status ()Lmisk/healthchecks/HealthStatus;
 }
 
