@@ -1,12 +1,12 @@
 package misk.testing.fieldbind
 
 import com.google.inject.testing.fieldbinder.Bind
-import misk.mockito.Mockito.mock
-import misk.mockito.Mockito.whenever
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @MiskTest
 class BindFieldUsingMockTest {

@@ -51,6 +51,7 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.logbackClassic)
   testImplementation(libs.mockitoCore)
+  testImplementation(libs.mockitoKotlin)
   testImplementation(libs.prometheusClient)
   testImplementation(project(":wisp:wisp-config"))
   testImplementation(project(":wisp:wisp-deployment"))

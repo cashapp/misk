@@ -4,14 +4,14 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Provider
 import jakarta.inject.Inject
 import misk.healthchecks.HealthCheck
-import misk.mockito.Mockito.mock
-import misk.mockito.Mockito.whenever
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.HibernateException
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import wisp.time.FakeClock
 import java.time.Instant
 

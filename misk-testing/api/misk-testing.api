@@ -98,10 +98,6 @@ public final class misk/logging/LogCollectorModule : misk/inject/KAbstractModule
 public abstract interface class misk/logging/LogCollectorService : com/google/common/util/concurrent/Service {
 }
 
-public final class misk/mockito/Mockito {
-	public static final field INSTANCE Lmisk/mockito/Mockito;
-}
-
 public final class misk/mockito/MockitoTestFixture : misk/testing/TestFixture {
 	public fun <init> (Lcom/google/inject/Provider;)V
 	public fun reset ()V

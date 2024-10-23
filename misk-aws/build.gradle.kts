@@ -44,6 +44,7 @@ dependencies {
   testImplementation(libs.junitParams)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.mockitoCore)
+  testImplementation(libs.mockitoKotlin)
   testImplementation(project(":wisp:wisp-containers-testing"))
   testImplementation(project(":wisp:wisp-feature-testing"))
   testImplementation(project(":wisp:wisp-time-testing"))
