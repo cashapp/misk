@@ -314,6 +314,11 @@ class FakeRedis : Redis {
   }
 
   @Synchronized
+  override fun llen(key: String): Long {
+    return lKeyValueStore[key]?.data?.size?.toLong() ?: 0L
+  }
+
+  @Synchronized
   override fun rpop(key: String): ByteString? = rpop(key, count = 1).firstOrNull()
 
   @Synchronized

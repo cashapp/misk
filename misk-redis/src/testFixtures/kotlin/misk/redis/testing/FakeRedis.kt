@@ -347,6 +347,10 @@ class FakeRedis @Inject constructor(
   }
 
   @Synchronized
+  override fun llen(key: String): Long {
+    return lKeyValueStore[key]?.data?.size?.toLong() ?: 0L
+  }
+
   override fun rpop(key: String): ByteString? = rpop(key, count = 1).firstOrNull()
 
   @Synchronized
@@ -597,6 +601,10 @@ class FakeRedis @Inject constructor(
 
     override fun rpop(key: String, count: Int): Supplier<List<ByteString?>> = Supplier {
       this@FakeRedis.rpop(key, count)
+    }
+
+    override fun llen(key: String): Supplier<Long> = Supplier {
+      this@FakeRedis.llen(key)
     }
 
     override fun rpop(key: String): Supplier<ByteString?> = Supplier {

@@ -20,6 +20,7 @@ public abstract interface class misk/redis/DeferredRedis {
 	public abstract fun hset (Ljava/lang/String;Ljava/util/Map;)Ljava/util/function/Supplier;
 	public abstract fun incr (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun incrBy (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun llen (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Ljava/util/function/Supplier;
 	public abstract fun lpop (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun lpop (Ljava/lang/String;I)Ljava/util/function/Supplier;
@@ -80,6 +81,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
+	public fun llen (Ljava/lang/String;)J
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
 	public fun lpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun lpop (Ljava/lang/String;I)Ljava/util/List;
@@ -145,6 +147,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
+	public fun llen (Ljava/lang/String;)J
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
 	public fun lpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun lpop (Ljava/lang/String;I)Ljava/util/List;
@@ -207,6 +210,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public abstract fun incr (Ljava/lang/String;)J
 	public abstract fun incrBy (Ljava/lang/String;J)J
+	public abstract fun llen (Ljava/lang/String;)J
 	public abstract fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
 	public abstract fun lpop (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun lpop (Ljava/lang/String;I)Ljava/util/List;
@@ -556,6 +560,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun hset (Ljava/lang/String;Ljava/util/Map;)J
 	public fun incr (Ljava/lang/String;)J
 	public fun incrBy (Ljava/lang/String;J)J
+	public fun llen (Ljava/lang/String;)J
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Lokio/ByteString;
 	public fun lpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun lpop (Ljava/lang/String;I)Ljava/util/List;
@@ -614,6 +619,7 @@ public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/
 	public fun hset (Ljava/lang/String;Ljava/util/Map;)Ljava/util/function/Supplier;
 	public fun incr (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun incrBy (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun llen (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun lmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;)Ljava/util/function/Supplier;
 	public fun lpop (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun lpop (Ljava/lang/String;I)Ljava/util/function/Supplier;

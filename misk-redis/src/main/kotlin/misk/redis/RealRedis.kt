@@ -312,6 +312,11 @@ class RealRedis(
       .map { it?.toByteString() }
   }
 
+  override fun llen(key: String): Long {
+    val keyBytes = key.toByteArray(charset)
+    return jedis { llen(keyBytes) }
+  }
+
   override fun rpop(key: String): ByteString? {
     val keyBytes = key.toByteArray(charset)
     return jedis { rpop(keyBytes) }?.toByteString()

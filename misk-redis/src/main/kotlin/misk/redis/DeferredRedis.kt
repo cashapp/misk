@@ -140,6 +140,8 @@ interface DeferredRedis {
     stop: Redis.ZRangeRankMarker,
   ): Supplier<Long>
 
+  fun llen(key: String): Supplier<Long>
+
   fun zcard(key: String): Supplier<Long>
 
   fun close()

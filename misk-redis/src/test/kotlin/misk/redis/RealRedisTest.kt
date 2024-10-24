@@ -44,6 +44,19 @@ class RealRedisTest : AbstractRedisTest() {
   }
 
   @Test
+  fun `llen returns correct length of list`() {
+    val listKey = "mylist"
+    assertThat(redis.llen(listKey)).isEqualTo(0L)
+
+    redis.rpush(listKey, "a".encodeUtf8(), "b".encodeUtf8(), "c".encodeUtf8())
+
+    assertThat(redis.llen(listKey)).isEqualTo(3L)
+
+    redis.lpop(listKey)
+    assertThat(redis.llen(listKey)).isEqualTo(2L)
+  }
+
+  @Test
   fun `transaction is completed if watched key is not modified before the EXEC command`() {
     redis.watch("key3")
     redis.multi().use { txn ->
