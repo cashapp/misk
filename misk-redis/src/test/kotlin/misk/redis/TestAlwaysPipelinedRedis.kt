@@ -115,6 +115,8 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
   override fun rpop(key: String, count: Int): List<ByteString?> =
     runPipeline { rpop(key, count) }
 
+  override fun llen(key: String): Long = runPipeline { llen(key) }
+
   override fun rpop(key: String): ByteString? = runPipeline { rpop(key) }
 
   override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> =

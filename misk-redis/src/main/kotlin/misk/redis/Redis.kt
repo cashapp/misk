@@ -618,6 +618,14 @@ interface Redis {
   ): Long
 
   /**
+   * Returns the length of the list stored at [key].
+   *
+   * @param key the key of the list
+   * @return the length of the list
+   */
+  fun llen(key: String): Long
+
+  /**
    * Returns the sorted set cardinality (number of elements) of the sorted set stored at [key]
    */
   fun zcard(
