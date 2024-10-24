@@ -302,6 +302,12 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get()?.map { it.toByteString() } ?: emptyList() }
   }
 
+  override fun llen(key: String): Supplier<Long> {
+    val keyBytes = key.toByteArray(charset)
+    val response = pipeline.llen(keyBytes)
+    return Supplier { response.get() }
+  }
+
   override fun rpop(key: String): Supplier<ByteString?> {
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.rpop(keyBytes)
