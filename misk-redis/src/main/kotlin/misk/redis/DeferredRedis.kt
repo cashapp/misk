@@ -86,6 +86,8 @@ interface DeferredRedis {
 
   fun lrange(key: String, start: Long, stop: Long): Supplier<List<ByteString?>>
 
+  fun ltrim(key: String, start: Long, stop: Long): Supplier<Unit>
+
   fun lrem(key: String, count: Long, element: ByteString): Supplier<Long>
 
   fun rpoplpush(sourceKey: String, destinationKey: String): Supplier<ByteString?>

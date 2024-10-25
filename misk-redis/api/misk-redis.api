@@ -27,6 +27,7 @@ public abstract interface class misk/redis/DeferredRedis {
 	public abstract fun lpush (Ljava/lang/String;[Lokio/ByteString;)Ljava/util/function/Supplier;
 	public abstract fun lrange (Ljava/lang/String;JJ)Ljava/util/function/Supplier;
 	public abstract fun lrem (Ljava/lang/String;JLokio/ByteString;)Ljava/util/function/Supplier;
+	public abstract fun ltrim (Ljava/lang/String;JJ)Ljava/util/function/Supplier;
 	public abstract fun mget ([Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun mset ([Lokio/ByteString;)Ljava/util/function/Supplier;
 	public abstract fun pExpire (Ljava/lang/String;J)Ljava/util/function/Supplier;
@@ -88,6 +89,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
 	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
 	public fun lrem (Ljava/lang/String;JLokio/ByteString;)J
+	public fun ltrim (Ljava/lang/String;JJ)V
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
 	public fun multi ()Lredis/clients/jedis/Transaction;
@@ -154,6 +156,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
 	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
 	public fun lrem (Ljava/lang/String;JLokio/ByteString;)J
+	public fun ltrim (Ljava/lang/String;JJ)V
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
 	public fun multi ()Lredis/clients/jedis/Transaction;
@@ -217,6 +220,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
 	public abstract fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
 	public abstract fun lrem (Ljava/lang/String;JLokio/ByteString;)J
+	public abstract fun ltrim (Ljava/lang/String;JJ)V
 	public abstract fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public abstract fun mset ([Lokio/ByteString;)V
 	public abstract fun multi ()Lredis/clients/jedis/Transaction;
@@ -567,6 +571,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis {
 	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)J
 	public fun lrange (Ljava/lang/String;JJ)Ljava/util/List;
 	public fun lrem (Ljava/lang/String;JLokio/ByteString;)J
+	public fun ltrim (Ljava/lang/String;JJ)V
 	public fun mget ([Ljava/lang/String;)Ljava/util/List;
 	public fun mset ([Lokio/ByteString;)V
 	public fun multi ()Lredis/clients/jedis/Transaction;
@@ -626,6 +631,7 @@ public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/
 	public fun lpush (Ljava/lang/String;[Lokio/ByteString;)Ljava/util/function/Supplier;
 	public fun lrange (Ljava/lang/String;JJ)Ljava/util/function/Supplier;
 	public fun lrem (Ljava/lang/String;JLokio/ByteString;)Ljava/util/function/Supplier;
+	public fun ltrim (Ljava/lang/String;JJ)Ljava/util/function/Supplier;
 	public fun mget ([Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun mset ([Lokio/ByteString;)Ljava/util/function/Supplier;
 	public fun pExpire (Ljava/lang/String;J)Ljava/util/function/Supplier;

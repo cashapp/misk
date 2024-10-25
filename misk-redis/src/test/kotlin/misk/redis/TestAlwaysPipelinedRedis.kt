@@ -122,6 +122,9 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
   override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> =
     runPipeline { lrange(key, start, stop) }
 
+  override fun ltrim(key: String, start: Long, stop: Long): Unit =
+    runPipeline { ltrim(key, start, stop) }
+
   override fun lrem(key: String, count: Long, element: ByteString): Long =
     runPipeline { lrem(key, count, element) }
 

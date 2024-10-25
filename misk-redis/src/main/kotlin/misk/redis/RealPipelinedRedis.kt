@@ -320,6 +320,12 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get()?.map { it.toByteString() } ?: emptyList() }
   }
 
+  override fun ltrim(key: String, start: Long, stop: Long): Supplier<Unit> {
+    val keyBytes = key.toByteArray(charset)
+    val response = pipeline.ltrim(keyBytes, start, stop)
+    return Supplier { response.get() }
+  }
+
   override fun lrem(key: String, count: Long, element: ByteString): Supplier<Long> {
     val keyBytes = key.toByteArray(charset)
     val elementBytes = element.toByteArray()

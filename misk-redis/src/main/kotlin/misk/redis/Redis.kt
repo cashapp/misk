@@ -370,6 +370,14 @@ interface Redis {
   fun lrange(key: String, start: Long, stop: Long): List<ByteString?>
 
   /**
+   * Trim the list at [key] to the specified range of elements.
+   *
+   * The offset [start] and [stop] are zero-based indexes. These offsets can also be
+   * negative numbers indicating offsets starting at the end of the list.
+   */
+  fun ltrim(key: String, start: Long, stop: Long)
+
+  /**
    * Removes the first count occurrences of elements equal to element from the list stored at key.
    * The count argument influences the operation in the following ways:
    *  count > 0: Remove elements equal to element moving from head to tail.

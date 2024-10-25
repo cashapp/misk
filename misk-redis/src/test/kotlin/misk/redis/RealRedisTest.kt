@@ -119,6 +119,26 @@ class RealRedisTest : AbstractRedisTest() {
 
   }
 
+  @Test
+  fun `ltrim trims list with positive indices`() {
+    val listKey = "mylist"
+
+    redis.rpush(listKey, "one".encodeUtf8(), "two".encodeUtf8(), "three".encodeUtf8())
+    redis.ltrim(listKey, 1, 2)
+
+    assertThat(redis.lrange(listKey, 0, -1).map { it?.utf8() }).containsExactly("two", "three")
+  }
+
+  @Test
+  fun `ltrim trims list with negative indices`() {
+    val listKey = "mylist"
+
+    redis.rpush(listKey, "one".encodeUtf8(), "two".encodeUtf8(), "three".encodeUtf8(), "four".encodeUtf8())
+    redis.ltrim(listKey, -3, -1)
+
+    assertThat(redis.lrange(listKey, 0, -1).map { it?.utf8() }).containsExactly("two", "three", "four")
+  }
+
   private fun scanAll(
     initialCursor: String = "0",
     matchPattern: String? = null,
