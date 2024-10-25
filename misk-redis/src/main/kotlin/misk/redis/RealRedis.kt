@@ -328,6 +328,11 @@ class RealRedis(
       .map { it?.toByteString() }
   }
 
+  override fun ltrim(key: String, start: Long, stop: Long) {
+    val keyBytes = key.toByteArray(charset)
+    jedis { ltrim(keyBytes, start, stop) }
+  }
+
   override fun lrem(key: String, count: Long, element: ByteString): Long {
     val keyBytes = key.toByteArray(charset)
     val elementBytes = element.toByteArray()

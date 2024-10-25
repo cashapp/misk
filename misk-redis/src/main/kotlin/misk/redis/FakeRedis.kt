@@ -335,6 +335,20 @@ class FakeRedis : Redis {
   }
 
   @Synchronized
+  override fun ltrim(key: String, start: Long, stop: Long) {
+    val list = lKeyValueStore[key]?.data ?: return
+
+    val trimmedList = if (stop >= 0 && start >= 0) {
+      list.subList(start.toInt(), min(list.size, stop.toInt() + 1))
+    } else {
+      val positiveStart = if (start < 0) list.size + start else start
+      val positiveStop = if (stop < 0) list.size + stop else stop
+      list.subList(positiveStart.toInt(), min(list.size, positiveStop.toInt() + 1))
+    }
+
+    lKeyValueStore[key] = Value(data = trimmedList, expiryInstant = Instant.MAX)
+  }
+
   override fun lrem(key: String, count: Long, element: ByteString): Long {
     val value = lKeyValueStore[key] ?: return 0L
     if (clock.instant() >= value.expiryInstant) {

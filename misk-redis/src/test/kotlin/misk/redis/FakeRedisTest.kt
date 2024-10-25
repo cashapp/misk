@@ -186,4 +186,25 @@ class FakeRedisTest: AbstractRedisTest() {
       expectedKeys.containsAll(scanResult.keys))
     assertEquals(expectedKeys.size, scanResult.keys.size)
   }
+
+  @Test
+  fun `ltrim with positive indices`() {
+    val key = "mylist"
+    redis.lpush(key, "one".encodeUtf8(), "two".encodeUtf8(), "three".encodeUtf8())
+
+    // Trim list to retain elements from index 1 to end
+    redis.ltrim(key, 1, -1)
+    assertEquals(listOf("two", "one"), redis.lrange(key, 0, -1).map { it?.utf8() })
+  }
+
+  @Test
+  fun `ltrim with negative indices`() {
+    val key = "myotherlist"
+    redis.lpush(key, "one".encodeUtf8(), "two".encodeUtf8(), "three".encodeUtf8(), "four".encodeUtf8())
+
+    // Trim list to retain last 2 elements
+    redis.ltrim(key, -2, -1)
+    assertEquals(listOf("two", "one"), redis.lrange(key, 0, -1).map { it?.utf8() })
+  }
+
 }

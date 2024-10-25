@@ -367,6 +367,19 @@ class FakeRedis @Inject constructor(
   }
 
   @Synchronized
+  override fun ltrim(key: String, start: Long, stop: Long) {
+    val list = lKeyValueStore[key]?.data ?: return
+
+    val startIdx = if (start < 0) list.size + start else start
+    val stopIdx = if (stop < 0) list.size + stop else stop
+    if (startIdx > stopIdx || startIdx >= list.size) {
+      lKeyValueStore[key] = Value(data = emptyList(), expiryInstant = Instant.MAX)
+      return
+    }
+    val trimmedList = list.subList(max(0, startIdx.toInt()), min(list.size, stopIdx.toInt() + 1))
+    lKeyValueStore[key] = Value(data = trimmedList, expiryInstant = Instant.MAX)
+  }
+
   override fun lrem(key: String, count: Long, element: ByteString): Long {
     val value = lKeyValueStore[key] ?: return 0L
     if (clock.instant() >= value.expiryInstant) {
@@ -617,6 +630,10 @@ class FakeRedis @Inject constructor(
       stop: Long
     ): Supplier<List<ByteString?>> = Supplier {
       this@FakeRedis.lrange(key, start, stop)
+    }
+
+    override fun ltrim(key: String, start: Long, stop: Long): Supplier<Unit> = Supplier {
+      this@FakeRedis.ltrim(key, start, stop)
     }
 
     override fun lrem(key: String, count: Long, element: ByteString): Supplier<Long> = Supplier {
