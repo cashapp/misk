@@ -36,11 +36,11 @@ module.exports = {
   ],
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'lib/web/_tab/web-actions-v4'),
+    path: path.resolve(__dirname, 'lib'),
   },
   devServer: {
     static: {
-      directory: path.join(__dirname, 'lib/web/_tab/web-actions-v4'),
+      directory: path.join(__dirname, 'lib'),
     },
     port: 9000,
     open: true,
