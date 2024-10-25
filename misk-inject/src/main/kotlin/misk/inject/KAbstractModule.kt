@@ -49,6 +49,10 @@ abstract class KAbstractModule : AbstractModule() {
     requireBinding(T::class.java)
   }
 
+  protected inline fun <reified T : Any, reified A : Annotation> requireBindingWithAnnotation() {
+    requireBinding(Key.get(T::class.java, A::class.java))
+  }
+
   protected inline fun <reified T : Any> multibind(
     annotation: KClass<out Annotation>? = null
   ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
