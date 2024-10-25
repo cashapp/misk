@@ -50,7 +50,11 @@ data class Destination(
       val tabletType = if (index == -1) {
         null
       } else {
-        TabletType.valueOf(string.substring(index + 1).toUpperCase())
+        var name = string.substring(index + 1).toUpperCase()
+        if (name == "PRIMARY") {
+          name = "MASTER"
+        }
+        TabletType.valueOf(name)
       }
       if (shardStr == "") {
         return Destination(null, null, tabletType)
