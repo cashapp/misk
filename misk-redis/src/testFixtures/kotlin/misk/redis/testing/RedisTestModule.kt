@@ -6,6 +6,7 @@ import misk.redis.Redis
 import misk.time.FakeClock
 
 import jakarta.inject.Qualifier
+import misk.testing.TestFixture
 import kotlin.random.Random
 
 /**
@@ -16,6 +17,7 @@ class RedisTestModule(private val random: Random = Random.Default) : KAbstractMo
     requireBinding<FakeClock>()
     bind(keyOf<Random>(ForFakeRedis::class)).toInstance(random)
     bind<Redis>().to(keyOf<FakeRedis>()).asEagerSingleton()
+    multibind<TestFixture>().to<FakeRedis>()
   }
 }
 
