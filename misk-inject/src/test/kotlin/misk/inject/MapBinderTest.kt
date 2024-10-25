@@ -29,18 +29,6 @@ class MapBinderTest {
   }
 }
 
-@Qualifier
-@Target(AnnotationTarget.FIELD)
-annotation class TestAnnotation
-
-interface Shape
-class Square : Shape
-class Circle : Shape
-
-interface Color
-class Blue : Color
-class Red : Color
-
 class TestModule : KAbstractModule() {
   override fun configure() {
     newMapBinder<Int, String>(TestAnnotation::class).addBinding(1).toInstance("one")
