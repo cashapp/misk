@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.State.NEW
+import com.google.common.util.concurrent.ServiceManager
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.MiskApplication
@@ -592,6 +593,12 @@ class GracefulShutdownInterceptorTest {
     }
 
     JettyStartedService.startedLatch.await(10, TimeUnit.SECONDS)
+
+    // Now that we know serviceManager is created and running make sure all services are healthy
+    // before proceeding.
+    val serviceManager = miskApplication.injector.getInstance(ServiceManager::class.java)
+    serviceManager.awaitHealthy()
+
     return miskApplication
   }
 

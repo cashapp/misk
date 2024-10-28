@@ -3,6 +3,7 @@ package misk.web.health
 import ch.qos.logback.classic.Level.INFO
 import ch.qos.logback.classic.Logger
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -151,6 +152,10 @@ class MiskApplicationHealthServiceTest {
     get(healthLivenessUrl, "health", expectThrowable = ConnectException::class)
     get(healthReadinessUrl, "health", expectThrowable = ConnectException::class)
     get(healthStatusUrl, "health", expectThrowable = ConnectException::class)
+
+    // Make sure all services are up before proceeding.
+    val serviceManager = miskApplication.injector.getInstance(ServiceManager::class.java)
+    serviceManager.awaitHealthy()
 
     // Health service will start after all running services so allow it to start.
     DelayHealthStart.okToStartUp.countDown()
