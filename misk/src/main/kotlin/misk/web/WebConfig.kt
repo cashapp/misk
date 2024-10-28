@@ -297,7 +297,7 @@ data class GracefulShutdownConfig @JvmOverloads constructor(
    * If <= 0 the service will not limit the amount of time to wait for idle, however it might
    * be forcibly killed by an external source, like kubernetes.
    */
-  val max_graceful_wait: Long = 0,
+  val max_graceful_wait: Long = 20_000,
 
   /**
    * The status code to use for rejecting incoming requests after shutdown has begun.
