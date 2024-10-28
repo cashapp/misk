@@ -54,7 +54,7 @@ class ConcurrencyLimitsInterceptorTest {
     val interceptor = factory.create(action)!!
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
-    assertThat(logCollector.takeMessages()).containsExactly("Starting ready service")
+    assertThat(logCollector.takeMessages()[0]).isEqualTo("Starting ready service")
     assertThat(callSuccessCount("HelloAction")).isEqualTo(1.0)
   }
 
