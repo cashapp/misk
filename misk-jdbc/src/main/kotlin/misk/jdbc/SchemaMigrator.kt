@@ -20,5 +20,11 @@ interface MigrationStatus {
     }
   }
 
+  object Success : MigrationStatus {
+    override fun toString(): String {
+      return "All migrations have been applied"
+    }
+  }
+
   fun message() = toString()
 }

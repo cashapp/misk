@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import wisp.containers.ContainerUtil
 import wisp.deployment.TESTING
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class DataSourceConfigTest {
   @Test
@@ -231,5 +232,16 @@ class DataSourceConfigTest {
         "sslMode=VERIFY_IDENTITY&enabledTLSProtocols=TLSv1.3",
       config.buildJdbcUrl(TESTING)
     )
+  }
+
+  @Test
+  fun errorWhenDeclarativeUsedOnUnsupportedDBs() {
+    DataSourceType.entries
+      .filter { it != DataSourceType.MYSQL }
+      .forEach {
+        assertFailsWith<IllegalArgumentException> {
+          DataSourceConfig(it, migrations_format = MigrationsFormat.DECLARATIVE)
+        }
+      }
   }
 }

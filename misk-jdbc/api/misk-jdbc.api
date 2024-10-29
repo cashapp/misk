@@ -541,6 +541,12 @@ public final class misk/jdbc/MigrationStatus$Empty : misk/jdbc/MigrationStatus {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/jdbc/MigrationStatus$Success : misk/jdbc/MigrationStatus {
+	public static final field INSTANCE Lmisk/jdbc/MigrationStatus$Success;
+	public fun message ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/jdbc/MigrationsFormat : java/lang/Enum {
 	public static final field DECLARATIVE Lmisk/jdbc/MigrationsFormat;
 	public static final field TRADITIONAL Lmisk/jdbc/MigrationsFormat;

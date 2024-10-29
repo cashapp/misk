@@ -129,6 +129,13 @@ data class DataSourceConfig @JvmOverloads constructor(
   val mysql_enforce_writable_connections: Boolean = false,
   val migrations_format: MigrationsFormat = MigrationsFormat.TRADITIONAL,
 ) {
+  init {
+    if (migrations_format == MigrationsFormat.DECLARATIVE) {
+      require(type == DataSourceType.MYSQL) {
+        "Declarative migrations are only supported for MySQL"
+      }
+    }
+  }
   fun withDefaults(): DataSourceConfig {
     val isRunningInDocker = File("/proc/1/cgroup")
       .takeIf { it.exists() }?.useLines { lines ->
