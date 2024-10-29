@@ -18,9 +18,15 @@ internal class DeclarativeSchemaMigrator(
     return !Pattern.compile(connector.config().migrations_resources_regex).matcher(migrationFile.filename).matches()
   }
   override fun applyAll(author: String): MigrationStatus {
-    val logger = getLogger<DeclarativeSchemaMigrator>()
-    logger.info { "Skeema output: ${skeemaWrapper.runSkeema()} " }
-    return MigrationStatus.Empty
+    var appliedMigrations = false
+    for (shard in shards.get()) {
+      val migrationFiles = getMigrationFiles(shard.keyspace)
+      if (migrationFiles.isNotEmpty()) {
+        skeemaWrapper.applyMigrations(migrationFiles)
+        appliedMigrations = true
+      }
+    }
+    return if (appliedMigrations) MigrationStatus.Success else MigrationStatus.Empty
   }
 
   override fun requireAll(): MigrationStatus {
