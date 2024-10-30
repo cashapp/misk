@@ -1,14 +1,14 @@
-import AstNode from "@misk-console/parsing/ast/AstNode"
+import AstNode from '@misk-console/parsing/ast/AstNode';
 
 export default class Unexpected extends AstNode {
-  value: string
+  value: string;
 
   constructor(value: string) {
-    super()
-    this.value = value
+    super();
+    this.value = value;
   }
 
   render() {
-    return this.value
+    return this.value;
   }
 }

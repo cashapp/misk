@@ -1,11 +1,11 @@
-import { cachedResponse } from "@misk-console/storage/cache"
+import { cachedResponse } from '@misk-console/storage/cache';
 
 export async function fetchCached<T>(url: string): Promise<T> {
   return cachedResponse<T>(url, async () => {
-    const response = await fetch(url)
+    const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(await response.text())
+      throw new Error(await response.text());
     }
-    return await response.json()
-  })
+    return await response.json();
+  });
 }
