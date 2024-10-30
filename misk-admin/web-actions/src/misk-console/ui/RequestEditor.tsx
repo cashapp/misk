@@ -20,8 +20,7 @@ interface Props {
 }
 
 export default class RequestEditor extends React.Component<Props, State> {
-
-  private id = randomToken()
+  private id = randomToken();
 
   public refEditor: HTMLElement | null = null;
   public editor: Ace.Editor | null = null;
@@ -31,15 +30,14 @@ export default class RequestEditor extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = {loading: false};
+    this.state = { loading: false };
     this.submitRequest = this.submitRequest.bind(this);
 
     this.completer = new ContextAwareCompleter();
   }
 
-
   componentDidMount() {
-    this.editor = ace.edit(this.refEditor!!, {
+    this.editor = ace.edit(this.refEditor, {
       minLines: 10,
       enableBasicAutocompletion: true,
       enableLiveAutocompletion: true,
@@ -53,7 +51,7 @@ export default class RequestEditor extends React.Component<Props, State> {
     editor.session.setTabSize(2);
     editor.commands.addCommand({
       name: 'executeCommand',
-      bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
+      bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
       exec: this.submitRequest,
       readOnly: false,
     });
@@ -65,10 +63,10 @@ export default class RequestEditor extends React.Component<Props, State> {
     this.props.endpointSelectionCallbacks.push((value) => {
       this.completer.setSelection(value);
       this.selectedAction = value;
-      editor.clearSelection()
+      editor.clearSelection();
       editor.setValue('{\n  \n}', -1);
       editor.moveCursorTo(1, 2);
-      editor.focus()
+      editor.focus();
     });
   }
 
@@ -88,7 +86,7 @@ export default class RequestEditor extends React.Component<Props, State> {
 
       const path = selection.pathPattern;
 
-      this.setState({loading: true});
+      this.setState({ loading: true });
 
       const response = await fetch(path, {
         method: 'POST',
@@ -101,14 +99,13 @@ export default class RequestEditor extends React.Component<Props, State> {
       let responseText = await response.text();
       try {
         responseText = JSON.stringify(JSON.parse(responseText), null, 2);
-      } catch (e) {
+      } catch {
         // ignore
       }
 
       this.props.onResponse(responseText);
-
     } finally {
-      this.setState({loading: false});
+      this.setState({ loading: false });
     }
   }
 
@@ -128,12 +125,12 @@ export default class RequestEditor extends React.Component<Props, State> {
             alignItems="center"
             zIndex="overlay"
           >
-            <Spinner size="xl" color="white" thickness="5px"/>
+            <Spinner size="xl" color="white" thickness="5px" />
           </Box>
         )}
         <IconButton
           aria-label="Run"
-          icon={<ArrowForwardIcon/>}
+          icon={<ArrowForwardIcon />}
           zIndex="100"
           position="absolute"
           top="2"
@@ -144,7 +141,7 @@ export default class RequestEditor extends React.Component<Props, State> {
         <Box
           width="100%"
           height="100%"
-          ref={it => this.updateRef(it)}
+          ref={(it) => this.updateRef(it)}
           id={'request-editor'}
         />
       </Box>

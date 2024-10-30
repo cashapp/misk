@@ -1,7 +1,10 @@
 import Select, { OnChangeValue } from 'react-select';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import React from 'react';
-import { MiskActions, MiskWebActionDefinition } from '@misk-console/api/responseTypes';
+import {
+  MiskActions,
+  MiskWebActionDefinition,
+} from '@misk-console/api/responseTypes';
 import RealMetadataClient from '@misk-console/api/RealMetadataClient';
 import { StylesConfig } from 'react-select/dist/declarations/src/styles';
 import Fuse from 'fuse.js';
@@ -11,7 +14,9 @@ export interface EndpointOption {
   label: string;
 }
 
-export type EndpointSelectionCallbacks = ((value: MiskWebActionDefinition) => void)[]
+export type EndpointSelectionCallbacks = ((
+  value: MiskWebActionDefinition,
+) => void)[];
 
 interface Props {
   endpointSelectionCallbacks: EndpointSelectionCallbacks;
@@ -28,7 +33,10 @@ export default function EndpointSelection(props: Props) {
 
   useEffect(() => {
     metadataClient.fetchMetadata().then((actions: MiskActions) => {
-      const options = Object.entries(actions).map(([key, value]) => ({value, label: key}));
+      const options = Object.entries(actions).map(([key, value]) => ({
+        value,
+        label: key,
+      }));
       fuse.current = new Fuse(options, {
         keys: ['label'],
         threshold: 0.3,
@@ -44,11 +52,10 @@ export default function EndpointSelection(props: Props) {
       return setFilterOptions(endpointOptions);
     }
 
-    const results = fuse.current!.search(inputValue)
-      .sort((a, b) => b.score! - a.score!)
-    setFilterOptions(
-      results.map(result => result.item)
-    )
+    const results = fuse
+      .current!.search(inputValue)
+      .sort((a, b) => b.score! - a.score!);
+    setFilterOptions(results.map((result) => result.item));
   }, [endpointOptions, inputValue, fuse.current]);
 
   return (
@@ -58,7 +65,6 @@ export default function EndpointSelection(props: Props) {
       defaultValue={null}
       filterOption={() => true}
       onInputChange={setInputValue}
-
       onChange={(value: OnChangeValue<EndpointOption, false>) => {
         if (value) {
           for (const callback of props.endpointSelectionCallbacks) {
@@ -67,10 +73,12 @@ export default function EndpointSelection(props: Props) {
         }
       }}
       options={filterOptions}
-      styles={{
-        container: base => ({...base, width: '100%'}),
-        menuPortal: base => ({...base, zIndex: 101}),
-      } as StylesConfig<any>}
+      styles={
+        {
+          container: (base) => ({ ...base, width: '100%' }),
+          menuPortal: (base) => ({ ...base, zIndex: 101 }),
+        } as StylesConfig<any>
+      }
       menuPortalTarget={document.body}
     />
   );

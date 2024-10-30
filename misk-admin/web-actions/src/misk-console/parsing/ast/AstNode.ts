@@ -1,42 +1,42 @@
-import Unexpected from "@misk-console/parsing/ast/Unexpected"
+import Unexpected from '@misk-console/parsing/ast/Unexpected';
 
 export default class AstNode {
-  start?: number
-  end?: number
-  hasCursor: boolean = false
-  unexpected: Unexpected[] = []
+  start?: number;
+  end?: number;
+  hasCursor: boolean = false;
+  unexpected: Unexpected[] = [];
 
-  parent?: AstNode
+  parent?: AstNode;
 
   childNodes(): AstNode[] {
-    return []
+    return [];
   }
 
-  onEvalCursor(index: number) {}
+  onEvalCursor() {}
 
   findCursor(): AstNode | null {
-    for (let child of this.childNodes()) {
+    for (const child of this.childNodes()) {
       if (child.hasCursor) {
-        return child.findCursor()
+        return child.findCursor();
       }
     }
-    return this.hasCursor ? this : null
+    return this.hasCursor ? this : null;
   }
 
   find(predicate: (a: AstNode) => boolean): AstNode | null {
     if (predicate(this)) {
-      return this
+      return this;
     }
-    for (let child of this.childNodes()) {
-      const result = child.find(predicate)
+    for (const child of this.childNodes()) {
+      const result = child.find(predicate);
       if (result) {
-        return result
+        return result;
       }
     }
-    return null
+    return null;
   }
 
   render(): string {
-    throw new Error("Method not implemented")
+    throw new Error('Method not implemented');
   }
 }

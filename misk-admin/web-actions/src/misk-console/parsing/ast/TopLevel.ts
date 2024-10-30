@@ -35,17 +35,17 @@ export default class TopLevel extends AstNode {
   applyTypes(actionDefinition: MiskWebActionDefinition | null) {
     if (this.obj) {
       if (actionDefinition) {
-        const type = actionDefinition.types[actionDefinition.requestType]
+        const type = actionDefinition.types[actionDefinition.requestType];
         if (type) {
           this.obj.applyTypes(
             new MiskType(actionDefinition.requestType, false),
-            actionDefinition.types
-          )
+            actionDefinition.types,
+          );
         } else {
           console.warn(
-            "Cannot find request type for",
-            actionDefinition.requestType
-          )
+            'Cannot find request type for',
+            actionDefinition.requestType,
+          );
         }
       }
     }
