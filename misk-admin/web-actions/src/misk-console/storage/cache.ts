@@ -52,6 +52,9 @@ function openTransaction(
   return transaction
 }
 
+
+const inflight = new Map<string, Promise<any>>()
+
 export async function cachedResponse<T>(
   key: string,
   fn: () => Promise<T>
@@ -59,19 +62,29 @@ export async function cachedResponse<T>(
   const db = await openDatabase()
   try {
     const readTransaction = openTransaction(db, "readonly")
+
     const existing = await fetch<T>(
       readTransaction.objectStore(STORE_NAME),
       key
     )
+
     if (existing) {
       return existing
     }
 
-    const value = await fn()
+    if (inflight.has(key)) {
+      return inflight.get(key)
+    }
+
+    const networkCall = fn()
+    inflight.set(key, networkCall)
+
+    const response = await networkCall
     const writeTransaction = openTransaction(db, "readwrite")
-    await insert<T>(writeTransaction.objectStore(STORE_NAME), key, value)
-    return value
+    await insert<T>(writeTransaction.objectStore(STORE_NAME), key, response)
+    return response
   } finally {
+    inflight.delete(key)
     db.close()
   }
 }

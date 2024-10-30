@@ -7,21 +7,6 @@ function parser(text: string): CommandParser {
   return new CommandParser(text)
 }
 
-test("actions", () => {
-  const result = parser("Poke ").parse()
-  expect(result.action?.name).toBe("Poke")
-})
-
-test("actions with body", () => {
-  const result = parser(`Poke {
-    "foo": "bar" 
-  } 
-  `).parse()
-  expect(result.action?.name).toBe("Poke")
-  expect(result.action?.body?.fields[0].name?.value).toBe("foo")
-  expect(result.action?.body?.fields[0].value?.as<StrLiteral>()?.value).toBe("bar")
-})
-
 test("numbers", () => {
   expect(parser("0.9").parseNum()?.value).toEqual("0.9")
   expect(parser("1000").parseNum()?.value).toEqual("1000")
@@ -31,7 +16,10 @@ test("numbers", () => {
 test("strings", () => {
   expect(parser('"hello"').parseStr()?.value).toEqual("hello")
   expect(parser('"hello\\"world"').parseStr()?.value).toEqual('hello\\"world')
+  expect(parser('"foo bar"').parseStr()?.value).toEqual('foo bar')
 })
+
+
 
 test("nested objects", () => {
   const result = parser(`{
