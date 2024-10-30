@@ -4,6 +4,7 @@ import CompletionProvider from "@misk-console/completion/CompletionProvider"
 import Completion from "@misk-console/completion/Completion"
 import RealMetadataClient from "@misk-console/api/RealMetadataClient"
 import AceEditor from "@misk-console/ui/AceEditor"
+import { MiskWebActionDefinition } from '@misk-console/api/responseTypes';
 
 export class ContextAwareCompleter implements Ace.Completer {
   completionProvider = new CompletionProvider(new RealMetadataClient())
@@ -15,6 +16,11 @@ export class ContextAwareCompleter implements Ace.Completer {
     if (completion.onSelected) {
       completion.onSelected(editor.getCursorPosition())
     }
+  }
+
+  public setSelection(selection: MiskWebActionDefinition | null) {
+
+    this.completionProvider.setSelection(selection)
   }
 
   markers: number[] = []

@@ -77,7 +77,7 @@ export class CommandParser {
         } else if (curr === "\n") {
           this.index++
           return new StrLiteral(str)
-        } else if (this.readNext("\r\n")) {
+        } else if (curr === "\r" && this.text[this.index + 1] === '\n') {
           return new StrLiteral(str)
         }
 
@@ -244,18 +244,7 @@ export class CommandParser {
     })
   }
 
-  parseAction(): Action | null {
-    return this.mark<Action>(() => {
-      const action = this.parseAlphaNum()
-      if (!action) {
-        return null
-      }
-
-      return new Action(action, this.parseObj() ?? this.readUnexpected())
-    })
-  }
-
   parseTopLevel(): TopLevel {
-    return new TopLevel(this.parseAction() ?? this.readUnexpected())
+    return new TopLevel(this.parseObj() ?? this.readUnexpected())
   }
 }

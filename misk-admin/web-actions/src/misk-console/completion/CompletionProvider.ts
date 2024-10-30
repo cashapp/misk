@@ -1,16 +1,13 @@
-import { MiskFieldDefinition } from "@misk-console/api/responseTypes"
+import { MiskFieldDefinition, MiskWebActionDefinition } from '@misk-console/api/responseTypes';
 import { parseDocument } from "@misk-console/parsing/CommandParser"
 import Obj from "@misk-console/parsing/ast/Obj"
 import Field from "@misk-console/parsing/ast/Field"
 import MiskType from "@misk-console/api/MiskType"
 import StrLiteral from "@misk-console/parsing/ast/StrLiteral"
-import Action from "@misk-console/parsing/ast/Action"
-import TopLevel from "@misk-console/parsing/ast/TopLevel"
 import PositionWithIndex from "@misk-console/completion/PositionWithIndex"
 import Completion from "@misk-console/completion/Completion"
 import Editor from "@misk-console/completion/Editor"
 import Position from "@misk-console/completion/Position"
-import MetadataClient from "@misk-console/api/RealMetadataClient"
 import CompletionBuilder from "@misk-console/completion/CompletionBuilder"
 import Arr from "@misk-console/parsing/ast/Arr"
 
@@ -23,11 +20,8 @@ interface CompletionArgs {
 }
 
 export default class CompletionProvider {
-  private metadataClient: MetadataClient
 
-  constructor(metadataClient: MetadataClient) {
-    this.metadataClient = metadataClient
-  }
+  private selection: MiskWebActionDefinition | null = null;
 
   private deleteTrailing(editor: Editor, curr: Position, values: string) {
     for (const c of values) {
@@ -177,10 +171,9 @@ export default class CompletionProvider {
   }
 
   async getCompletions(args: CompletionArgs): Promise<Completion[]> {
-    const metadata = await this.metadataClient.fetchMetadata()
-
     const topLevel = parseDocument(args.text, args.cursor.index)
-    topLevel.applyTypes(metadata)
+    topLevel.applyTypes(this.selection)
+
     const cursorNode = topLevel.findCursor()
 
     if (cursorNode instanceof Obj) {
@@ -209,19 +202,11 @@ export default class CompletionProvider {
         cursorNode.type,
         cursorNode.parent instanceof Arr
       )
-    } else if (cursorNode instanceof Action || cursorNode instanceof TopLevel) {
-      return Object.keys(metadata).map<Completion>(it => ({
-        value: `${it} {\n  \n}`,
-        docText: it,
-        caption: it,
-        completer: args.completerRef,
-        meta: "action",
-        prefix: args.prefix,
-        onSelected: (curr: Position) => {
-          args.editor.moveCursorTo(curr.row - 1, curr.column + 1)
-        }
-      }))
     }
     return []
+  }
+
+  setSelection(selection: MiskWebActionDefinition | null) {
+    this.selection = selection
   }
 }

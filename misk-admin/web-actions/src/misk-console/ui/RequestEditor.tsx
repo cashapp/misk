@@ -1,104 +1,114 @@
-import React from "react"
-import { Ace } from "ace-builds"
-import ace from "ace-builds/src-noconflict/ace"
-import "ace-builds/src-noconflict/ext-language_tools"
-import { ContextAwareCompleter } from "@misk-console/ui/ContextAwareCompleter"
-import { Box, IconButton, Spinner } from "@chakra-ui/react"
-import { ArrowForwardIcon } from "@chakra-ui/icons"
-import { CommandParser } from "@misk-console/parsing/CommandParser"
-import { fetchCached } from "@misk-console/network/http"
-import { MiskMetadataResponse } from "@misk-console/api/responseTypes"
-import { associateBy } from "@misk-console/utils/common"
+import React from 'react';
+import { Ace } from 'ace-builds';
+import ace from 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/ext-language_tools';
+import { ContextAwareCompleter } from '@misk-console/ui/ContextAwareCompleter';
+import { Box, IconButton, Spinner } from '@chakra-ui/react';
+import { ArrowForwardIcon } from '@chakra-ui/icons';
+import { CommandParser } from '@misk-console/parsing/CommandParser';
+import { MiskWebActionDefinition } from '@misk-console/api/responseTypes';
+import { EndpointSelectionCallbacks } from '@misk-console/ui/EndpointSelection';
+import { randomToken } from '@misk-console/utils/common';
 
 interface State {
-  loading: boolean
+  loading: boolean;
 }
 
 interface Props {
-  onResponse: (response: string) => void
+  endpointSelectionCallbacks: EndpointSelectionCallbacks;
+  onResponse: (response: string) => void;
 }
 
 export default class RequestEditor extends React.Component<Props, State> {
-  public refEditor: HTMLElement | null = null
-  public editor: Ace.Editor | null = null
+
+  private id = randomToken()
+
+  public refEditor: HTMLElement | null = null;
+  public editor: Ace.Editor | null = null;
+
+  private readonly completer;
+  private selectedAction: MiskWebActionDefinition | null = null;
 
   constructor(props: Props) {
-    super(props)
-    this.state = { loading: false }
-    this.submitRequest = this.submitRequest.bind(this)
+    super(props);
+    this.state = {loading: false};
+    this.submitRequest = this.submitRequest.bind(this);
+
+    this.completer = new ContextAwareCompleter();
   }
+
 
   componentDidMount() {
     this.editor = ace.edit(this.refEditor!!, {
       minLines: 10,
       enableBasicAutocompletion: true,
-      enableLiveAutocompletion: true
-    })
-    const editor = this.editor!
+      enableLiveAutocompletion: true,
+    });
+    const editor = this.editor!;
 
-    editor.setTheme("ace/theme/chrome")
-    editor.session.setMode("ace/mode/json")
-    editor.session.setUseWorker(false)
-    editor.session.setUseSoftTabs(true)
-    editor.session.setTabSize(2)
+    editor.setTheme('ace/theme/chrome');
+    editor.session.setMode('ace/mode/json');
+    editor.session.setUseWorker(false);
+    editor.session.setUseSoftTabs(true);
+    editor.session.setTabSize(2);
     editor.commands.addCommand({
-      name: "executeCommand",
-      bindKey: { win: "Ctrl-Enter", mac: "Command-Enter" },
+      name: 'executeCommand',
+      bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
       exec: this.submitRequest,
-      readOnly: false
-    })
+      readOnly: false,
+    });
 
-    editor.completers = [new ContextAwareCompleter()]
+    editor.completers = [this.completer];
 
-    editor.resize()
-    editor.focus()
+    editor.resize();
 
-    this.prefetchMetadata().then()
-  }
-
-  async prefetchMetadata() {
-    this.setState({ loading: true })
-    try {
-      await fetchCached<MiskMetadataResponse>(`/api/web-actions/metadata`)
-    } finally {
-      this.setState({ loading: false })
-    }
+    this.props.endpointSelectionCallbacks.push((value) => {
+      this.completer.setSelection(value);
+      this.selectedAction = value;
+      editor.clearSelection()
+      editor.setValue('{\n  \n}', -1);
+      editor.moveCursorTo(1, 2);
+      editor.focus()
+    });
   }
 
   public updateRef(item: HTMLElement | null) {
-    this.refEditor = item
+    this.refEditor = item;
   }
 
   async submitRequest() {
     try {
-      const content = this.editor!.getValue()
-      const topLevel = new CommandParser(content).parse()
-      const actions = await fetchCached<MiskMetadataResponse>(`/api/web-actions/metadata`)
-        .then(it => it.all["web-actions"].metadata)
-        .then(it => associateBy(it, it => it.name))
+      const content = this.editor!.getValue();
+      const topLevel = new CommandParser(content).parse();
 
-      const path = actions[topLevel.action!.name!].pathPattern
+      const selection = this.selectedAction;
+      if (selection == null) {
+        return;
+      }
 
-      this.setState({ loading: true })
+      const path = selection.pathPattern;
+
+      this.setState({loading: true});
 
       const response = await fetch(path, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json',
         },
-        body: topLevel.action?.body?.render()
-      })
+        body: topLevel?.render(),
+      });
 
-      let responseText = await response.text()
+      let responseText = await response.text();
       try {
-        responseText = JSON.stringify(JSON.parse(responseText), null, 2)
+        responseText = JSON.stringify(JSON.parse(responseText), null, 2);
       } catch (e) {
         // ignore
       }
 
-      this.props.onResponse(responseText)
+      this.props.onResponse(responseText);
+
     } finally {
-      this.setState({ loading: false })
+      this.setState({loading: false});
     }
   }
 
@@ -118,12 +128,12 @@ export default class RequestEditor extends React.Component<Props, State> {
             alignItems="center"
             zIndex="overlay"
           >
-            <Spinner size="xl" color="white" thickness="5px" />
+            <Spinner size="xl" color="white" thickness="5px"/>
           </Box>
         )}
         <IconButton
           aria-label="Run"
-          icon={<ArrowForwardIcon />}
+          icon={<ArrowForwardIcon/>}
           zIndex="100"
           position="absolute"
           top="2"
@@ -135,9 +145,9 @@ export default class RequestEditor extends React.Component<Props, State> {
           width="100%"
           height="100%"
           ref={it => this.updateRef(it)}
-          id={"request-editor"}
+          id={'request-editor'}
         />
       </Box>
-    )
+    );
   }
 }

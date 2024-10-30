@@ -1,11 +1,13 @@
-import React from "react"
+import React, { Dispatch, SetStateAction } from 'react';
 import { Ace } from "ace-builds"
 import ace from "ace-builds/src-noconflict/ace"
 import "ace-builds/src-noconflict/ext-language_tools"
 import { Box } from "@chakra-ui/react"
+import { ViewState } from 'src/viewState';
 
 interface Props {
-  toRender: any
+  viewState: ViewState,
+  setViewState: Dispatch<SetStateAction<ViewState>>;
 }
 
 export default class ResponseViewer extends React.Component<Props> {
@@ -32,7 +34,7 @@ export default class ResponseViewer extends React.Component<Props> {
   }
 
   public render() {
-    this.editor?.setValue(this.props.toRender, -1)
+    this.editor?.setValue(this.props.viewState.response || '', -1)
 
     return (
       <Box

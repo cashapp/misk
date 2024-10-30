@@ -1,37 +1,52 @@
-import AstNode from "@misk-console/parsing/ast/AstNode"
-import Action from "@misk-console/parsing/ast/Action"
-import Unexpected from "@misk-console/parsing/ast/Unexpected"
-import { MiskActions } from "@misk-console/api/responseTypes"
+import AstNode from '@misk-console/parsing/ast/AstNode';
+import Unexpected from '@misk-console/parsing/ast/Unexpected';
+import { MiskWebActionDefinition } from '@misk-console/api/responseTypes';
+import Obj from '@misk-console/parsing/ast/Obj';
+import MiskType from '@misk-console/api/MiskType';
 
 export default class TopLevel extends AstNode {
-  action: Action | null
+  obj: Obj | null;
 
-  constructor(action: Action | Unexpected | null) {
-    super()
-    if (action instanceof Action) {
-      this.action = action
-    } else if (action instanceof Unexpected) {
-      this.unexpected = [action]
-      this.action = null
+  constructor(obj: Obj | Unexpected | null) {
+    super();
+    if (obj instanceof Obj) {
+      this.obj = obj;
+    } else if (obj instanceof Unexpected) {
+      this.unexpected = [obj];
+      this.obj = null;
     } else {
-      this.action = null
+      this.obj = null;
     }
-    this.hasCursor = true
+    this.hasCursor = true;
 
-    if (this.action) {
-      this.action.parent = this
+    if (this.obj) {
+      this.obj.parent = this;
     }
   }
 
   childNodes(): AstNode[] {
-    return this.action ? [this.action] : []
+    return this.obj ? [this.obj] : [];
   }
 
-  applyTypes(metadata: MiskActions) {
-    if (this.action) {
-      const actionDefinition = metadata[this.action.name]
+  render(): string {
+    return this.obj?.render() ?? '';
+  }
+
+  applyTypes(actionDefinition: MiskWebActionDefinition | null) {
+    if (this.obj) {
       if (actionDefinition) {
-        this.action.applyTypes(actionDefinition)
+        const type = actionDefinition.types[actionDefinition.requestType]
+        if (type) {
+          this.obj.applyTypes(
+            new MiskType(actionDefinition.requestType, false),
+            actionDefinition.types
+          )
+        } else {
+          console.warn(
+            "Cannot find request type for",
+            actionDefinition.requestType
+          )
+        }
       }
     }
   }

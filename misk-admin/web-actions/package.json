@@ -31,6 +31,8 @@
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.2",
-    "ace-builds": "^1.36.2"
+    "ace-builds": "^1.36.2",
+    "fuse.js": "^7.0.0",
+    "react-select": "^5.8.2"
   }
 }

@@ -1,9 +1,10 @@
 import FakeEditor from "@misk-console/completion/__test__/FakeEditor"
-import CompletionProvider from "@misk-console/completion/CompletionProvider"
-import FakeMetadataClient, {
-  FakeObjectMetadataClient
-} from "@misk-console/completion/__test__/FakeMetadataClient"
+import {
+  MyAction,
+} from '@misk-console/completion/__test__/FakeMetadataClient';
 import Completion from "@misk-console/completion/Completion"
+import { providerWithAction } from '@misk-console/completion/__test__/completion.spec';
+import { MiskWebActionDefinition } from '@misk-console/api/responseTypes';
 
 class CompletionTester {
   private editor: FakeEditor
@@ -47,9 +48,9 @@ class CompletionTester {
   }
 }
 
-export function givenEditor(text: string): CompletionTester {
+export function givenEditor(text: string, action?: MiskWebActionDefinition): CompletionTester {
   const editor = new FakeEditor()
-  editor.completions = new CompletionProvider(new FakeMetadataClient())
+  editor.completions = providerWithAction(action || MyAction)
   editor.setTextWithCursor(text)
   return new CompletionTester(editor)
 }
