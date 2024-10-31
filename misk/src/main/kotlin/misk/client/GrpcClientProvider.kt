@@ -64,7 +64,6 @@ internal class GrpcClientProvider<T : Service, G : T>(
   private lateinit var appInterceptorFactories:Provider<List<ClientApplicationInterceptorFactory>>
   @Inject
   private lateinit var callFactoryWrappers: Provider<List<CallFactoryWrapper>>
-  @Inject private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
 
   override fun get(): T {
     val endpointConfig: HttpClientEndpointConfig = httpClientsConfigProvider.get()[name]
@@ -173,7 +172,6 @@ internal class GrpcClientProvider<T : Service, G : T>(
       config = endpointConfig.toWispConfig()
     )
 
-    clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(name))
     for (factory in appInterceptorFactories) {
       val interceptor = factory.create(action) ?: continue
       clientBuilder.addInterceptor(interceptor)

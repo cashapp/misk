@@ -193,7 +193,7 @@ class TypedClientFactory @Inject constructor() {
     retrofitBuilderProvider: Provider<Retrofit.Builder>?
   ): T {
     val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
-    val client = httpClientFactory.create(endpointConfig)
+    val client = httpClientFactory.create(endpointConfig, name)
 
     return typedClient(client, baseUrl, kclass, name, retrofitBuilderProvider)
   }
@@ -230,7 +230,6 @@ class TypedClientFactory @Inject constructor() {
       eventListenerFactory,
       tracer,
       moshi,
-      clientMetricsInterceptorFactory,
       callFactoryWrappers
     )
 

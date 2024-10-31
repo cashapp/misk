@@ -82,7 +82,7 @@ class PeerClientFactory(
           envoy = null
         )
 
-        return httpClientFactory.create(config).newBuilder()
+        return httpClientFactory.create(config, appName).newBuilder()
           .hostnameVerifier(object : HostnameVerifier {
             override fun verify(hostname: String?, session: SSLSession?): Boolean {
               val ou =
