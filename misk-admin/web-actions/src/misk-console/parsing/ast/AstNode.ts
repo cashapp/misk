@@ -12,7 +12,7 @@ export default class AstNode {
     return [];
   }
 
-  onEvalCursor() {}
+  onEvalCursor(index: number) {}
 
   findCursor(): AstNode | null {
     for (const child of this.childNodes()) {
