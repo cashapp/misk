@@ -77,15 +77,15 @@ abstract class MiskConsoleBuildTask : DefaultTask() {
     val npm = projectDir.resolve("bin/npm").absolutePath
     val npx = projectDir.resolve("bin/npx").absolutePath
 
-    ProcessBuilder()
-      .command(npm, "install")
-      .directory(projectDir)
-      .execute()
+    fun exec(vararg cmd: String) {
+      ProcessBuilder()
+        .command(*cmd)
+        .directory(projectDir)
+        .execute()
+    }
 
-    ProcessBuilder()
-      .command(npx, "webpack", "--mode", "production")
-      .directory(projectDir)
-      .execute()
-
+    exec(npm, "install")
+    exec(npx, "webpack", "--mode", "production")
+    exec(npm, "run-script", "lint")
   }
 }

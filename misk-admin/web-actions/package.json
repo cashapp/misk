@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack"
+    "build": "webpack",
+    "lint": "npx eslint src && npx prettier src --check",
+    "format": "npx prettier src --write"
   },
   "keywords": [],
   "author": "",
