@@ -1,6 +1,5 @@
 .git
 .DS_Store
-**/@misk/web
 cachedUrls
 logs
 *.log
@@ -13,5 +12,4 @@ dist
 lib
 .hash
 .old_build_files
-prettier.config.js
 *.js.map

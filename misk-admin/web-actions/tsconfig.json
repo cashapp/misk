@@ -21,7 +21,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@misk-console/*": ["src/misk-console/*"]
+      "@web-actions/*": ["src/web-actions/*"]
     },
     "downlevelIteration": true,
     "noImplicitAny": true,
