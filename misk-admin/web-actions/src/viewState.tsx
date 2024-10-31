@@ -1,4 +1,4 @@
-import { MiskWebActionDefinition } from '@misk-console/api/responseTypes';
+import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
 
 export interface ViewState {
   selectedAction: MiskWebActionDefinition | null;

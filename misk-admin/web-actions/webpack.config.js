@@ -20,7 +20,7 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js',],
     alias: {
-      '@misk-console': path.resolve(__dirname, 'src/misk-console/')
+      '@web-actions': path.resolve(__dirname, 'src/web-actions/')
     },
     plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })],
   },

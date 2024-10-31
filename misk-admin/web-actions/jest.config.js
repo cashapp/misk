@@ -4,6 +4,6 @@ module.exports = {
   testEnvironment: 'node',
   moduleNameMapper: {
     "^src/(.*)$": "<rootDir>/src/$1",
-    '^@misk-console/(.*)$': '<rootDir>/src/misk-console/$1'
+    '^@web-actions/(.*)$': '<rootDir>/src/web-actions/$1'
   }
 };

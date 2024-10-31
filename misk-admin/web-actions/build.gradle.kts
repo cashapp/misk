@@ -71,7 +71,7 @@ abstract class MiskConsoleBuildTask : DefaultTask() {
 
   @TaskAction
   fun build() {
-    logger.lifecycle("Running misk-console build \uD83C\uDFD7\uFE0F")
+    logger.lifecycle("Running misk web-actions build \uD83C\uDFD7\uFE0F")
 
     val projectDir = miskConsoleRootDir.get().asFile
     val npm = projectDir.resolve("bin/npm").absolutePath
@@ -87,5 +87,6 @@ abstract class MiskConsoleBuildTask : DefaultTask() {
     exec(npm, "install")
     exec(npx, "webpack", "--mode", "production")
     exec(npm, "run-script", "lint")
+    exec(npm, "run-script", "test")
   }
 }

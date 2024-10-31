@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 
 import { createRoot } from 'react-dom/client';
-import RequestEditor from '@misk-console/ui/RequestEditor';
+import RequestEditor from '@web-actions/ui/RequestEditor';
 import { Box, ChakraProvider, HStack, Spinner, VStack } from '@chakra-ui/react';
-import ResponseViewer from '@misk-console/ui/ResponseViewer';
+import ResponseViewer from '@web-actions/ui/ResponseViewer';
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
 import EndpointSelector, {
   EndpointSelectionCallbacks,
-} from '@misk-console/ui/EndpointSelection';
+} from '@web-actions/ui/EndpointSelection';
 import { ViewState } from 'src/viewState';
-import { fetchCached } from '@misk-console/network/http';
-import { MiskMetadataResponse } from '@misk-console/api/responseTypes';
+import { fetchCached } from '@web-actions/network/http';
+import { MiskMetadataResponse } from '@web-actions/api/responseTypes';
 
 const endpointSelectionCallbacks: EndpointSelectionCallbacks = [];
 
