@@ -122,6 +122,8 @@ class JettyService @Inject internal constructor(
     if (webConfig.jetty_output_buffer_size != null) {
       httpConfig.outputBufferSize = webConfig.jetty_output_buffer_size
     }
+    httpConfig.isUseInputDirectByteBuffers = webConfig.jetty_use_input_direct_byte_buffers
+    httpConfig.isUseOutputDirectByteBuffers = webConfig.jetty_use_output_direct_byte_buffers
     httpConnectionFactories += HttpConnectionFactory(httpConfig)
     if (webConfig.http2) {
       val http2 = HTTP2CServerConnectionFactory(httpConfig)
