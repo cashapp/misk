@@ -185,6 +185,16 @@ data class WebConfig @JvmOverloads constructor(
   /** The initial size of stream's flow control receive window. */
   val jetty_initial_stream_recv_window: Int? = null,
 
+  /**
+   * Whether to use direct ByteBuffers for reading.
+   */
+  val jetty_use_input_direct_byte_buffers: Boolean = true,
+
+  /**
+   * Whether to use direct ByteBuffers for writing.
+   */
+  val jetty_use_output_direct_byte_buffers: Boolean = true,
+
   /** Wires up health checks on whether Jetty's thread pool is low on threads. */
   val enable_thread_pool_health_check: Boolean = false,
 
