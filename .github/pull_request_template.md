@@ -6,11 +6,6 @@ Template sections are optional. Consider including relevant sections to better c
 
 <!-- Why is your change necessary? What does it solve? -->
 
-## Public Commit Message
-
-<!-- Don't include any sensitive or internal details. You may enclose any publicly sharable 
-relevant sections within `{public}{/public}` tags. -->
-
 ## Testing Strategy
 
 <!-- How did you test your solution? -->
