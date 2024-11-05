@@ -540,7 +540,7 @@ public final class misk/redis/testing/DockerRedisKt {
 	public static synthetic fun main ([Ljava/lang/String;)V
 }
 
-public final class misk/redis/testing/FakeRedis : misk/testing/FakeFixture, misk/redis/Redis {
+public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing/TestFixture {
 	public fun <init> (Ljava/time/Clock;Lkotlin/random/Random;)V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
@@ -580,6 +580,7 @@ public final class misk/redis/testing/FakeRedis : misk/testing/FakeFixture, misk
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public fun pipelining (Lkotlin/jvm/functions/Function1;)V
 	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
+	public fun reset ()V
 	public fun rpop (Ljava/lang/String;)Lokio/ByteString;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/List;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
