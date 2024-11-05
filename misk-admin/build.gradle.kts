@@ -183,6 +183,10 @@ tasks.register<Copy>("buildAndCopyWebActions") {
   })
   into(project.layout.buildDirectory.dir("resources/main/web/_tab/web-actions-v4"))
   dependsOn(":misk-admin:web-actions:build")
+  // misk-admin:web-actions:build uses a different version of node compared to
+  // misk-admin:buildMiskWeb, and running them concurrently may result in weird
+  // errors.
+  mustRunAfter("buildMiskWeb")
 }
 
 sourceSets {
