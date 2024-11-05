@@ -25,7 +25,7 @@ import misk.redis.Redis.ZRangeMarker
 import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
-import misk.testing.FakeFixture
+import misk.testing.TestFixture
 import okio.ByteString.Companion.encodeUtf8
 import org.apache.commons.io.FilenameUtils
 import java.util.SortedMap
@@ -48,17 +48,15 @@ import kotlin.random.Random
 class FakeRedis @Inject constructor(
   private val clock: Clock,
   @ForFakeRedis private val random: Random,
-) : Redis, FakeFixture() {
+) : Redis, TestFixture {
   /** The value type stored in our key-value store. */
   private data class Value<T>(val data: T, var expiryInstant: Instant)
 
   /** Acts as the Redis key-value store. */
-  private val keyValueStore by resettable { ConcurrentHashMap<String, Value<ByteString>>() }
+  private val keyValueStore = ConcurrentHashMap<String, Value<ByteString>>()
 
   /** A nested hash map for hash operations. */
-  private val hKeyValueStore by resettable {
-    ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
-  }
+  private val hKeyValueStore = ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
 
   /**
    * Note: Redis sorted set actually orders by value. It is quite complex to implement it here.
@@ -66,12 +64,17 @@ class FakeRedis @Inject constructor(
    * HashMap to key score->members. So any sorting based on values will have to be handled in the
    * implementation of the functions for this sorted set.
    */
-  private val sortedSetKeyValueStore by resettable {
-    ConcurrentHashMap<String, Value<SortedMap<Double, HashSet<String>>>>()
-  }
+  private val sortedSetKeyValueStore = ConcurrentHashMap<String, Value<SortedMap<Double, HashSet<String>>>>()
 
   /** A hash map for list operations. */
-  private val lKeyValueStore by resettable { ConcurrentHashMap<String, Value<List<ByteString>>>() }
+  private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
+
+  override fun reset() {
+    keyValueStore.clear()
+    hKeyValueStore.clear()
+    sortedSetKeyValueStore.clear()
+    lKeyValueStore.clear()
+  }
 
   @Synchronized
   override fun del(key: String): Boolean {
