@@ -165,6 +165,12 @@ val buildMiskWeb = tasks.register("buildMiskWeb", MiskWebBuildTask::class.java) 
   rootDir.set(project.rootDir)
   inputFiles.setFrom(inputs)
   outputFiles.setFrom(outputs)
+
+  // misk-admin:web-actions:build uses a different version of node compared to
+  // misk-admin:buildMiskWeb, and running them concurrently may result in weird
+  // errors. Adding this dummy output ensures tasks that share this output do
+  // not run concurrently.
+  this.outputs.dir(rootProject.layout.buildDirectory.dir("node.concurrency-blocker.dummy"))
 }
 
 // buildMiskWeb is expensive and generally not needed locally. Only build it on CI, or if
@@ -183,6 +189,7 @@ tasks.register<Copy>("buildAndCopyWebActions") {
   })
   into(project.layout.buildDirectory.dir("resources/main/web/_tab/web-actions-v4"))
   dependsOn(":misk-admin:web-actions:build")
+  mustRunAfter(buildMiskWeb)
 }
 
 sourceSets {
