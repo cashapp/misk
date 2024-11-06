@@ -84,7 +84,9 @@ abstract class MiskConsoleBuildTask : DefaultTask() {
         .execute()
     }
 
-    exec(npm, "install")
+    logger.info("ENV: " + System.getenv().toList().toString())
+
+    exec(npm, "install", "--loglevel", "verbose")
     exec(npx, "webpack", "--mode", "production")
     exec(npm, "run-script", "lint")
     exec(npm, "run-script", "test")
