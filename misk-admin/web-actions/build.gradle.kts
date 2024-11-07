@@ -28,12 +28,6 @@ tasks.register<MiskConsoleBuildTask>("build") {
   )
 
   outputFiles.setFrom(projectDir.resolve("lib"))
-
-  // misk-admin:web-actions:build uses a different version of node compared to
-  // misk-admin:buildMiskWeb, and running them concurrently may result in weird
-  // errors. Adding this dummy output ensures tasks that share this output do
-  // not run concurrently.
-  this.outputs.dir(rootProject.layout.buildDirectory.dir("node.concurrency-blocker.dummy"))
 }
 
 @CacheableTask
