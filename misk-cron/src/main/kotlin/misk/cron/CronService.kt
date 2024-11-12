@@ -19,7 +19,13 @@ internal class CronService @Inject constructor(
     cronRunnableEntries.forEach { cronRunnable ->
       val name = cronRunnable.runnableClass.qualifiedName!!
       val annotations = cronRunnable.runnableClass.annotations
-      val cronPattern = annotations.find { it is CronPattern } as? CronPattern
+      val annotationPattern = annotations.find { it is CronPattern } as? CronPattern
+      // Use the cron pattern specified in CronRunnableEntry if available.
+      // If it's null, fall back to the pattern from the @CronPattern annotation on the class.
+      // This allows the annotation pattern to serve as a default, while specifying
+      // a cron pattern in CronRunnableEntry will override it if provided.
+      val cronPattern = cronRunnable.cronPattern
+        ?: annotationPattern
         ?: throw IllegalArgumentException("Expected $name to have @CronPattern specified")
 
       val runnable = injector.getProvider(cronRunnable.runnableClass.java).get()

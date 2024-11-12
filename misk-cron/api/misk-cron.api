@@ -1,10 +1,11 @@
 public final class misk/cron/CronEntryModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/cron/CronEntryModule$Companion;
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/cron/CronPattern;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/cron/CronEntryModule$Companion {
-	public final fun create (Lkotlin/reflect/KClass;)Lmisk/cron/CronEntryModule;
+	public final fun create (Lkotlin/reflect/KClass;Lmisk/cron/CronPattern;)Lmisk/cron/CronEntryModule;
+	public static synthetic fun create$default (Lmisk/cron/CronEntryModule$Companion;Lkotlin/reflect/KClass;Lmisk/cron/CronPattern;ILjava/lang/Object;)Lmisk/cron/CronEntryModule;
 }
 
 public final class misk/cron/CronManager {
