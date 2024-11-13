@@ -20,6 +20,16 @@ internal class MiskCallerTest {
   @Test fun serviceNameIsNotRedactedFromToString() {
     assertThat("$testService").contains("${testService.service}")
   }
+
+  @Test fun `hasCapability should be true when capabilities contains an allowedCapability`() {
+    val hasCapability = testUser.hasCapability(setOf("not_testing", "testing", "other_capability"))
+    assertThat(hasCapability).isTrue()
+  }
+
+  @Test fun `hasCapability should be false when capabilities does not contain an allowedCapability`() {
+    val hasCapability = testUser.hasCapability(setOf("not_testing", "other_capability"))
+    assertThat(hasCapability).isFalse()
+  }
 }
 
 internal class MiskCallerTestModule : KAbstractModule() {

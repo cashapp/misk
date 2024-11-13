@@ -29,10 +29,10 @@ data class MiskCaller @JvmOverloads constructor(
   }
 
   /**
-   * Check whether the caller has one of allowedCapabilities.
+   * Check whether this caller has one or more of the [allowedCapabilities].
    */
-  fun hasCapability(allowedCapabilities: Set<String>) =
-    capabilities.any { allowedCapabilities.contains(it) }
+  fun hasCapability(allowedCapabilities: Set<String>): Boolean =
+    capabilities.intersect(allowedCapabilities).isNotEmpty()
 
   /**
    * Check whether this is a service-to-service call from one of allowedServices.
@@ -50,6 +50,6 @@ data class MiskCaller @JvmOverloads constructor(
     if (service != null && allowedServices.contains(service)) return true
 
     // Allow if the caller has provided an allowed capability
-    return capabilities.any { allowedCapabilities.contains(it) }
+    return hasCapability(allowedCapabilities)
   }
 }
