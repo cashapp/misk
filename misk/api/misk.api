@@ -1871,6 +1871,39 @@ public final class misk/web/interceptors/ActionLoggingConfig$Companion {
 public abstract interface annotation class misk/web/interceptors/BeforeContentEncoding : java/lang/annotation/Annotation {
 }
 
+public final class misk/web/interceptors/ExcludedTime {
+	public fun <init> ()V
+	public fun <init> (Ljava/time/Duration;)V
+	public synthetic fun <init> (Ljava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun add-LRDsOJo (J)V
+	public final fun clear ()V
+	public final fun getAdditionalData ()Ljava/util/Map;
+	public final fun setAdditionalData (Ljava/util/Map;)V
+	public final fun value ()Ljava/time/Duration;
+}
+
+public final class misk/web/interceptors/ExclusiveTimingInterceptor : misk/web/NetworkInterceptor {
+	public fun <init> (Ljava/lang/ThreadLocal;Lio/prometheus/client/Histogram;Lmisk/scope/ActionScoped;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun intercept (Lmisk/web/NetworkChain;)V
+}
+
+public class misk/web/interceptors/ExclusiveTimingInterceptor$Factory : misk/web/NetworkInterceptor$Factory {
+	public fun <init> (Ljava/lang/ThreadLocal;Lmisk/metrics/v2/Metrics;Lmisk/scope/ActionScoped;)V
+	public fun create (Lmisk/Action;)Lmisk/web/NetworkInterceptor;
+	public fun getAdditionalTagNames ()Ljava/util/List;
+	public fun getAdditionalTagValues (Lmisk/web/interceptors/ExcludedTime;)Ljava/util/List;
+	public fun getMetricName ()Ljava/lang/String;
+}
+
+public final class misk/web/interceptors/ExclusiveTimingInterceptor$Module : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/web/interceptors/ExclusiveTimingInterceptor$Module$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;)V
+}
+
+public final class misk/web/interceptors/ExclusiveTimingInterceptor$Module$Companion {
+	public final fun invoke ()Lmisk/web/interceptors/ExclusiveTimingInterceptor$Module;
+}
+
 public final class misk/web/interceptors/InternalErrorInterceptorFactory : misk/web/NetworkInterceptor$Factory {
 	public fun <init> ()V
 	public fun create (Lmisk/Action;)Lmisk/web/NetworkInterceptor;

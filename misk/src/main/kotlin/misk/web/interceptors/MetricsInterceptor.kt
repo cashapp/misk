@@ -51,7 +51,7 @@ internal class MetricsInterceptor internal constructor(
       labelNames = listOf("action", "caller", "code"),
       maxAgeSeconds = config.max_age_in_seconds,
     )
-    private val requestDurationHistogram = m.histogram(
+    internal val requestDurationHistogram = m.histogram(
       name = "histo_http_request_latency_ms",
       help = "count and duration in ms of incoming web requests",
       labelNames = listOf("action", "caller", "code")
