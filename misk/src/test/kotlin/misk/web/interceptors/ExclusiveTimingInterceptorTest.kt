@@ -20,24 +20,47 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
+import org.assertj.core.data.Offset
+import kotlin.time.Duration.Companion.milliseconds
 
 @MiskTest(startService = true)
-class MetricsInterceptorTest {
+class ExclusiveTimingInterceptorTest {
   @MiskTestModule
   val module = TestModule()
   val httpClient = OkHttpClient()
 
+  @Inject private lateinit var exclusiveTimingInterceptorFactory: ExclusiveTimingInterceptor.Factory
   @Inject private lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
   @Inject private lateinit var jettyService: JettyService
 
   private fun labels(code: Int, service: String = "unknown") =
-    arrayOf("MetricsInterceptorTestAction", service, code.toString())
+    arrayOf("ExclusiveTimingInterceptorTestAction", service, code.toString())
 
-  @BeforeEach
-  fun sendRequests() {
+  @Test
+  fun time() {
+    // Fire off a request
+    val response = invoke(200)
+    assertThat(response.code).isEqualTo(200)
+
+    // Figure out how long each of the latency metrics was
+    val requestDuration = metricsInterceptorFactory.requestDuration
+    val exclusiveRequestDuration = exclusiveTimingInterceptorFactory.requestDurationHistogram
+    val difference =
+      requestDuration.labels(*labels(200)).get().sum -
+        exclusiveRequestDuration.labels(*labels(200)).get().sum
+
+    // Verify that the sleep time was excluded
+    // (but leave some room for small differences due to execution time.)
+    assertThat(difference).isCloseTo(
+      /* expected = */ ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble(),
+      /* offset = */ Offset.offset(ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble() / 2)
+    )
+  }
+
+  @Test
+  fun responseCodes() {
     // Fire off a bunch of requests
     invoke(200)
     invoke(200)
@@ -50,41 +73,23 @@ class MetricsInterceptorTest {
     invoke(200, "my-peer")
     invoke(200, "my-peer")
     invoke(200, user = "some-user")
-  }
 
-  @Test
-  fun responseCodes() {
-    // Make sure all the right non-histo metrics were generated
-    val requestDuration = metricsInterceptorFactory.requestDuration
-    requestDuration.labels(*labels(200)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(200)).get().count.toInt()).isEqualTo(3)
-    requestDuration.labels(*labels(202)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(202)).get().count.toInt()).isEqualTo(2)
-    requestDuration.labels(*labels(404)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(404)).get().count.toInt()).isEqualTo(2)
-    requestDuration.labels(*labels(403)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(403)).get().count.toInt()).isEqualTo(3)
+    val metric = exclusiveTimingInterceptorFactory.requestDurationHistogram
 
-    requestDuration.labels(*labels(200, "my-peer")).observe(1.0)
-    assertThat(requestDuration.labels(*labels(200, "my-peer")).get().count.toInt()).isEqualTo(5)
-
-    requestDuration.labels(*labels(200, "<user>")).observe(1.0)
-    assertThat(requestDuration.labels(*labels(200, "<user>")).get().count.toInt()).isEqualTo(2)
-    
-    // Make sure all the right histo metrics were generated
-    val histoDuration = metricsInterceptorFactory.requestDurationHistogram
-    assertThat(histoDuration.labels(*labels(200)).get().count()).isEqualTo(2)
-    assertThat(histoDuration.labels(*labels(202)).get().count()).isEqualTo(1)
-    assertThat(histoDuration.labels(*labels(404)).get().count()).isEqualTo(1)
-    assertThat(histoDuration.labels(*labels(403)).get().count()).isEqualTo(2)
-    assertThat(histoDuration.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
-    assertThat(histoDuration.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    // Make sure all the right metrics were generated
+    // Note: buckets.last() always contains the count of samples
+    assertThat(metric.labels(*labels(200)).get().count()).isEqualTo(2)
+    assertThat(metric.labels(*labels(202)).get().count()).isEqualTo(1)
+    assertThat(metric.labels(*labels(404)).get().count()).isEqualTo(1)
+    assertThat(metric.labels(*labels(403)).get().count()).isEqualTo(2)
+    assertThat(metric.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
+    assertThat(metric.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
   }
 
   fun invoke(
     desiredStatusCode: Int,
     service: String? = null,
-    user: String? = null
+    user: String? = null,
   ): okhttp3.Response {
     val url = jettyService.httpServerUrl.newBuilder()
       .encodedPath("/call/$desiredStatusCode")
@@ -100,7 +105,7 @@ class MetricsInterceptorTest {
       assertThat(it.code).isEqualTo(desiredStatusCode)
     }
   }
-
+  
   private fun Histogram.Child.Value.count() = buckets.last().toInt()
 
   class TestModule : KAbstractModule() {
@@ -109,17 +114,25 @@ class MetricsInterceptorTest {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(WebActionModule.create<MetricsInterceptorTestAction>())
+      install(WebActionModule.create<ExclusiveTimingInterceptorTestAction>())
 
       bind<MetricsInterceptor.Factory>()
+      install(ExclusiveTimingInterceptor.Module())
     }
   }
 }
 
-internal class MetricsInterceptorTestAction @Inject constructor() : WebAction {
+internal class ExclusiveTimingInterceptorTestAction
+@Inject constructor(private val excludedTime: ThreadLocal<ExcludedTime>) : WebAction {
   @Get("/call/{desiredStatusCode}")
   @Unauthenticated
   fun call(@PathParam desiredStatusCode: Int): Response<String> {
+    Thread.sleep(SLEEP_TIME)
+    excludedTime.get().add(SLEEP_TIME.milliseconds)
     return Response("foo", statusCode = desiredStatusCode)
+  }
+
+  companion object {
+    const val SLEEP_TIME: Long = 10
   }
 }
