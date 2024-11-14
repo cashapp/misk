@@ -41,4 +41,5 @@ object ExampleRateLimitConfiguration : RateLimitConfiguration {
   override val name = "ExpensiveRateLimitedAction"
   override val refillAmount = 10L
   override val refillPeriod: Duration = Duration.ofMinutes(1L)
+  override val version = 0L // increment the version when updating the configuration
 }

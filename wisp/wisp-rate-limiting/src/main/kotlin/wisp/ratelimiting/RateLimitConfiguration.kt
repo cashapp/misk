@@ -26,4 +26,12 @@ interface RateLimitConfiguration {
    * The period of time over which [refillAmount] tokens are added back to the bucket
    */
   val refillPeriod: Duration
+
+  /**
+   * The version of the configuration. This allows implicit configuration replacement.
+   * Make sure to increase the version when changing the configuration.
+   * Desired version should start from 1
+   */
+  val version: Long?
+    get() = null // returns null to be backward compatible
 }

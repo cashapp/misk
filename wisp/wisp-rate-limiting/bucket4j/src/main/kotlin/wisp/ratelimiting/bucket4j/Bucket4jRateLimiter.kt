@@ -4,6 +4,7 @@ import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.BucketConfiguration
 import io.github.bucket4j.ConsumptionProbe
 import io.github.bucket4j.EstimationProbe
+import io.github.bucket4j.TokensInheritanceStrategy
 import io.github.bucket4j.distributed.BucketProxy
 import io.github.bucket4j.distributed.proxy.ProxyManager
 import io.micrometer.core.instrument.MeterRegistry
@@ -106,7 +107,11 @@ class Bucket4jRateLimiter @JvmOverloads constructor(
       .addLimit(configuration.toBandwidth())
       .build()
 
-    return bucketProxy.builder().build(key, bucketConfig)
+    return bucketProxy.builder().apply {
+      configuration.version?.let {
+        this.withImplicitConfigurationReplacement(it, TokensInheritanceStrategy.PROPORTIONALLY)
+      }
+    }.build(key, bucketConfig)
   }
 
   private fun RateLimitConfiguration.toBandwidth(): Bandwidth {
