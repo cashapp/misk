@@ -3,6 +3,11 @@ public abstract interface class wisp/ratelimiting/RateLimitConfiguration {
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun getRefillAmount ()J
 	public abstract fun getRefillPeriod ()Ljava/time/Duration;
+	public abstract fun getVersion ()Ljava/lang/Long;
+}
+
+public final class wisp/ratelimiting/RateLimitConfiguration$DefaultImpls {
+	public static fun getVersion (Lwisp/ratelimiting/RateLimitConfiguration;)Ljava/lang/Long;
 }
 
 public abstract interface class wisp/ratelimiting/RateLimitPruner {
@@ -119,5 +124,6 @@ public final class wisp/ratelimiting/testing/TestRateLimitConfig : wisp/ratelimi
 	public fun getName ()Ljava/lang/String;
 	public fun getRefillAmount ()J
 	public fun getRefillPeriod ()Ljava/time/Duration;
+	public fun getVersion ()Ljava/lang/Long;
 }
 
