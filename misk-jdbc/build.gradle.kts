@@ -32,6 +32,7 @@ dependencies {
   implementation(project(":misk-service"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
+  implementation(libs.jsqlparser)
   runtimeOnly(libs.hsqldb)
   runtimeOnly(libs.openTracingJdbc)
   runtimeOnly(libs.postgresql)
