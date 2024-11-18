@@ -10,14 +10,15 @@ dependencies {
   api(libs.loggingApi)
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
+
   implementation(libs.aws2Dynamodb)
   implementation(libs.aws2DynamodbEnhanced)
   implementation(libs.guava)
   implementation(libs.guice)
   implementation(libs.jakartaInject)
   implementation(project(":misk"))
+  implementation(project(":misk-backoff"))
   implementation(project(":misk-clustering"))
-  implementation(project(":misk-core"))
   implementation(project(":misk-service"))
   implementation(project(":wisp:wisp-logging"))
 

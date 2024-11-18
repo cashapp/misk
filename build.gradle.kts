@@ -57,6 +57,8 @@ dependencyAnalysis {
       onUnusedDependencies {
         exclude("com.github.docker-java:docker-java-api")
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
+        // TODO remove when all callsites using old :misk-core callsites are migrated to :misk-backoff
+        exclude(":misk-backoff")
       }
       onIncorrectConfiguration {
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
