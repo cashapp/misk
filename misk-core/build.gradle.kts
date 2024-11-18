@@ -13,6 +13,7 @@ dependencies {
   api(libs.kotlinRetry)
   api(libs.okHttp)
   api(libs.slf4jApi)
+  api(project(":misk-backoff")) // TODO remove once all usages depend on misk-backoff directly
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-ssl"))
   api(project(":wisp:wisp-token"))

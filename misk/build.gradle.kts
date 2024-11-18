@@ -32,6 +32,7 @@ dependencies {
   api(project(":misk-action-scopes"))
   api(project(":misk-actions"))
   api(project(":misk-api"))
+  api(project(":misk-backoff"))
   api(project(":misk-clustering"))
   api(project(":misk-config"))
   api(project(":misk-core"))

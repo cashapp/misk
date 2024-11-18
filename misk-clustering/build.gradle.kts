@@ -19,7 +19,7 @@ dependencies {
   implementation(libs.okHttp)
   api(project(":wisp:wisp-lease"))
   implementation(project(":wisp:wisp-logging"))
-  implementation(project(":misk-core"))
+  implementation(project(":misk-backoff"))
   implementation(project(":misk-lease"))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing-api"))
