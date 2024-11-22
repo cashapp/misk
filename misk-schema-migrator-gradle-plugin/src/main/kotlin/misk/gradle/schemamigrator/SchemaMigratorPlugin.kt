@@ -13,6 +13,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import java.time.Duration
 
 class SchemaMigratorPlugin : Plugin<Project> {
   override fun apply(project: Project) {
@@ -77,7 +78,8 @@ abstract class SchemaMigratorTask : DefaultTask() {
     )
 
     val serviceManager = injector.getInstance(ServiceManager::class.java)
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
+
+    serviceManager.startAsync().awaitHealthy()
+    serviceManager.stopAsync().awaitStopped(Duration.ofSeconds(5))
   }
 }
