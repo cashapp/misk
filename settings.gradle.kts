@@ -1,6 +1,5 @@
 pluginManagement {
   repositories {
-    maven(url = "https://maven.global.square/artifactory/maven-cash-backend")
     mavenCentral()
     gradlePluginPortal()
   }
