@@ -128,11 +128,16 @@ data class DataSourceConfig @JvmOverloads constructor(
   */
   val mysql_enforce_writable_connections: Boolean = false,
   val migrations_format: MigrationsFormat = MigrationsFormat.TRADITIONAL,
+  val declarative_schema_config: DeclarativeSchemaConfig? = null,
 ) {
   init {
     if (migrations_format == MigrationsFormat.DECLARATIVE) {
       require(type == DataSourceType.MYSQL) {
         "Declarative migrations are only supported for MySQL"
+      }
+    } else if (migrations_format == MigrationsFormat.TRADITIONAL) {
+      require(declarative_schema_config == null) {
+        "declarative_schmea_config.excluded_tables is only supported for declarative migrations"
       }
     }
   }
@@ -370,3 +375,10 @@ class DataSourceClustersConfig : LinkedHashMap<String, DataSourceClusterConfig>,
   constructor() : super()
   constructor(m: Map<String, DataSourceClusterConfig>) : super(m)
 }
+
+data class DeclarativeSchemaConfig @JvmOverloads constructor(
+  /**
+   * List of tables to exclude from schema validation
+   */
+  val excluded_tables: List<String> = listOf(),
+)

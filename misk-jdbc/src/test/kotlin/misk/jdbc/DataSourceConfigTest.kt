@@ -244,4 +244,14 @@ class DataSourceConfigTest {
         }
       }
   }
+
+  @Test
+  fun errorWhenTraditionalUsesDeclarativeSchemaConfig() {
+    assertFailsWith<IllegalArgumentException> {
+      DataSourceConfig(DataSourceType.MYSQL,
+        migrations_format = MigrationsFormat.TRADITIONAL,
+        declarative_schema_config = DeclarativeSchemaConfig(listOf("table")),
+      )
+    }
+  }
 }
