@@ -446,4 +446,17 @@ internal class DeclarativeSchemaMigratorTest {
       declarativeSchemaMigrator.requireAll()
     }
   }
+
+  @Test
+  fun skipsValidationForExcludedTables() {
+    val mainSource = config.migrations_resources!![0]
+
+    resourceLoader.put(
+      "$mainSource/t1.sql", """
+        CREATE TABLE excluded_table (id bigint, PRIMARY KEY (id))
+        """.trimMargin()
+    )
+
+    assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
+  }
 }

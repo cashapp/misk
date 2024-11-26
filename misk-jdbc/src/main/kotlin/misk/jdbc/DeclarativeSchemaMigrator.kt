@@ -39,10 +39,15 @@ internal class DeclarativeSchemaMigrator(
     for (shard in shards.get()) {
       val expectedTables = availableMigrations(shard)
       val actualTables = appliedMigrations(shard)
-      compareMigrations(expectedTables, actualTables)
+      val excludedTables = excludedTables()
+      compareMigrations(expectedTables, actualTables, excludedTables)
     }
 
     return MigrationStatus.Success
+  }
+
+  private fun excludedTables(): Set<String> {
+    return connector.config().declarative_schema_config?.excluded_tables?.toSet() ?: emptySet()
   }
 
   /**
@@ -50,9 +55,13 @@ internal class DeclarativeSchemaMigrator(
    */
   private fun compareMigrations(
     expectedTables: Map<String, Map<String, String>>,
-    actualTables: Map<String, Map<String, String>>
+    actualTables: Map<String, Map<String, String>>,
+    excludedTables: Set<String>
   ) {
     for ((expectedTable, expectedColumns) in expectedTables) {
+      if (excludedTables.contains(expectedTable)) {
+        continue
+      }
       // Check if table exists in the database
       val actualColumns = actualTables[expectedTable]
         ?: throw IllegalStateException("Error: Table $expectedTable missing in the database.")
@@ -118,13 +127,14 @@ internal class DeclarativeSchemaMigrator(
   private fun appliedMigrations(shard: Shard): Map<String, Map<String, String>> {
     // Store actual database tables and their columns
     val actualTables = mutableMapOf<String, MutableMap<String, String>>()
+    val dbName = connector.config().database
 
     dataSourceService.dataSource.connection.use {
       it.target(shard) { conn ->
         // Use DatabaseMetaData to get all table names
         val metaData = conn.metaData
         val tablesResultSet: ResultSet =
-          metaData.getTables(null, null, "%", arrayOf("TABLE"))
+          metaData.getTables(dbName, null, "%", arrayOf("TABLE"))
 
         // Iterate through all tables in the database
         while (tablesResultSet.next()) {
@@ -133,7 +143,7 @@ internal class DeclarativeSchemaMigrator(
           // For each table, get column names and types
           val actualColumns = mutableMapOf<String, String>()
           val columnsResultSet: ResultSet =
-            metaData.getColumns(null, null, tableName, "%")
+            metaData.getColumns(dbName, null, tableName, "%")
           while (columnsResultSet.next()) {
             val columnName = columnsResultSet.getString("COLUMN_NAME").lowercase()
             val columnType = columnsResultSet.getString("TYPE_NAME").lowercase()

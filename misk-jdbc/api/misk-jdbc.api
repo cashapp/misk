@@ -318,7 +318,8 @@ public final class misk/jdbc/DataSourceConfig {
 	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;)V
 	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;Z)V
 	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;)V
-	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun asReplica ()Lmisk/jdbc/DataSourceConfig;
 	public final fun buildJdbcUrl (Lwisp/deployment/Deployment;)Ljava/lang/String;
 	public final fun canRecoverOnReplica ()Z
@@ -350,14 +351,15 @@ public final class misk/jdbc/DataSourceConfig {
 	public final fun component32 ()Ljava/util/Map;
 	public final fun component33 ()Z
 	public final fun component34 ()Lmisk/jdbc/MigrationsFormat;
+	public final fun component35 ()Lmisk/jdbc/DeclarativeSchemaConfig;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()I
 	public final fun component8 ()Ljava/time/Duration;
 	public final fun component9 ()Ljava/time/Duration;
-	public final fun copy (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;)Lmisk/jdbc/DataSourceConfig;
-	public static synthetic fun copy$default (Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;IILjava/lang/Object;)Lmisk/jdbc/DataSourceConfig;
+	public final fun copy (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;)Lmisk/jdbc/DataSourceConfig;
+	public static synthetic fun copy$default (Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;IILjava/lang/Object;)Lmisk/jdbc/DataSourceConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllow_public_key_retrieval ()Z
 	public final fun getClient_certificate_key_store_password ()Ljava/lang/String;
@@ -367,6 +369,7 @@ public final class misk/jdbc/DataSourceConfig {
 	public final fun getConnection_max_lifetime ()Ljava/time/Duration;
 	public final fun getConnection_timeout ()Ljava/time/Duration;
 	public final fun getDatabase ()Ljava/lang/String;
+	public final fun getDeclarative_schema_config ()Lmisk/jdbc/DeclarativeSchemaConfig;
 	public final fun getEnabledTlsProtocols ()Ljava/util/List;
 	public final fun getFixed_pool_size ()I
 	public final fun getGenerate_hibernate_stats ()Ljava/lang/String;
@@ -442,6 +445,19 @@ public abstract interface class misk/jdbc/DatabasePool {
 }
 
 public abstract interface class misk/jdbc/DatabaseReadyService : com/google/common/util/concurrent/Service {
+}
+
+public final class misk/jdbc/DeclarativeSchemaConfig {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lmisk/jdbc/DeclarativeSchemaConfig;
+	public static synthetic fun copy$default (Lmisk/jdbc/DeclarativeSchemaConfig;Ljava/util/List;ILjava/lang/Object;)Lmisk/jdbc/DeclarativeSchemaConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExcluded_tables ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public class misk/jdbc/ExtendedQueryExecutionListener : net/ttddyy/dsproxy/listener/MethodExecutionListener, net/ttddyy/dsproxy/listener/QueryExecutionListener {

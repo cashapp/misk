@@ -10,3 +10,6 @@ mysql_data_source:
     - memory:/migrations/sql
     - memory:/migrations/library
   migrations_format: DECLARATIVE
+  declarative_schema_config:
+    excluded_tables:
+      - excluded_table
