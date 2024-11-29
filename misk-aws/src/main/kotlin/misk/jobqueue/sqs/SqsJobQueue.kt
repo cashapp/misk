@@ -43,7 +43,7 @@ internal class SqsJobQueue @Inject internal constructor(
     attributes: Map<String, String>
   ) {
     executeWithTracingAndErrorHandling(queueName, 1) { span: Span, queue: ResolvedQueue ->
-      val (sendDuration, _) = queue.call { client ->
+      val (sendDuration) = queue.call { client ->
         val sendRequest = SendMessageRequest().apply {
           queueUrl = queue.url
           messageBody = body

@@ -82,7 +82,7 @@ internal class SqsJob(
     metrics.visibilityTime.labels(queueName.value, queueName.value).set(visibilityTime.toDouble())
   }
   private fun deleteMessage(queue: ResolvedQueue, message: Message) {
-    val (deleteDuration, _) = queue.call {
+    val (deleteDuration) = queue.call {
       timed { it.deleteMessage(queue.url, message.receiptHandle) }
     }
     metrics.sqsDeleteTime.record(

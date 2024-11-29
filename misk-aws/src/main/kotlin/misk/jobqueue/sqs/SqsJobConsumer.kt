@@ -255,7 +255,7 @@ internal class SqsJobConsumer @Inject internal constructor(
                 MDC.put(SQS_JOB_ID_STRUCTURED_MDC, message.id)
                 MDC.put(SQS_QUEUE_NAME_MDC, message.queueName.value)
                 MDC.put(SQS_QUEUE_TYPE_MDC, SQS_QUEUE_TYPE)
-                val (duration, _) = timed { handler.handleJob(message) }
+                val (duration) = timed { handler.handleJob(message) }
                 metrics.handlerDispatchTime.record(
                   duration.toMillis().toDouble(), queue.queueName,
                   queue.queueName
@@ -322,7 +322,7 @@ internal class SqsJobConsumer @Inject internal constructor(
         try {
           MDC.put(SQS_QUEUE_NAME_MDC, messages.first().queueName.value)
           MDC.put(SQS_QUEUE_TYPE_MDC, SQS_QUEUE_TYPE)
-          val (duration, _) = timed { handler.handleJobs(messages) }
+          val (duration) = timed { handler.handleJobs(messages) }
           metrics.handlerDispatchTime.record(
             duration.toMillis().toDouble(), queue.queueName,
             queue.queueName

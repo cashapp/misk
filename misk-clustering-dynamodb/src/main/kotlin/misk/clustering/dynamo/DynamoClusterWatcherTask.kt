@@ -57,7 +57,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   }
 
   private fun updateOurselfInDynamo() {
-    val (duration, _) = timed {
+    val (duration) = timed {
       val self = cluster.snapshot.self.name
       val member = DyClusterMember()
       member.name = self
@@ -72,7 +72,7 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   }
 
   internal fun recordCurrentDynamoCluster() {
-    val (duration, _) = timed {
+    val (duration) = timed {
       val members = mutableSetOf<Member>()
       val threshold = clock.instant().minusSeconds(dynamoClusterConfig.stale_threshold_seconds).toEpochMilli()
       val request = ScanEnhancedRequest.builder()
