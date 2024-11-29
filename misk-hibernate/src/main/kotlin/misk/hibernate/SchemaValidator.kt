@@ -36,7 +36,7 @@ internal class SchemaValidator {
       allDbTables.addAll(dbSchema.tables)
     }
 
-    val (dbOnly, hibernateOnly, _) = splitChildren(
+    val (dbOnly, hibernateOnly) = splitChildren(
       allDbTables.toList(), hibernateSchema.tables
     )
 
