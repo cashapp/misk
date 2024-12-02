@@ -8,6 +8,7 @@ import java.util.regex.Pattern
 import kotlin.reflect.KClass
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.statement.create.table.CreateTable
+import wisp.logging.getLogger
 
 internal class DeclarativeSchemaMigrator(
   private val qualifier: KClass<out Annotation>,
@@ -17,6 +18,7 @@ internal class DeclarativeSchemaMigrator(
   private val connector: DataSourceConnector,
   private val skeemaWrapper: SkeemaWrapper,
 ) : BaseSchemaMigrator(resourceLoader, dataSourceService, connector) {
+  private val logger = getLogger<DeclarativeSchemaMigrator>()
 
   override fun validateMigrationFile(migrationFile: MigrationFile): Boolean {
     return !Pattern.compile(connector.config().migrations_resources_regex)
@@ -58,6 +60,7 @@ internal class DeclarativeSchemaMigrator(
     actualTables: Map<String, Map<String, String>>,
     excludedTables: Set<String>
   ) {
+    logger.info { "Comparing expected tables $expectedTables to actual tables $actualTables in the database" }
     for ((expectedTable, expectedColumns) in expectedTables) {
       if (excludedTables.contains(expectedTable)) {
         continue
@@ -94,12 +97,12 @@ internal class DeclarativeSchemaMigrator(
 
         // Check if the parsed statement is a CREATE TABLE statement
         if (statement is CreateTable) {
-          val tableName = statement.table.name.lowercase()
+          val tableName = statement.table.name.lowercase().removeSurrounding("`")
           val columns = mutableMapOf<String, String>()
 
           // Iterate over columns to extract names and data types
           statement.columnDefinitions?.forEach { columnDefinition ->
-            val columnName = columnDefinition.columnName.lowercase()
+            val columnName = columnDefinition.columnName.lowercase().removeSurrounding("`")
             val columnType = columnDefinition.colDataType.dataType.lowercase()
 
             // The type is returned in the format `type(precision, scale)`,

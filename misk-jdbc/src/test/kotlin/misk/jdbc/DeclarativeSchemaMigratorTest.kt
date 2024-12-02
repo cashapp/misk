@@ -195,7 +195,7 @@ internal class DeclarativeSchemaMigratorTest {
     )
     resourceLoader.put(
       "$mainSource/t2.sql", """
-        |CREATE TABLE table_2 (id bigint, PRIMARY KEY (id))
+        |CREATE TABLE `table_2` (`id` bigint, PRIMARY KEY (id))
         |""".trimMargin()
     )
 
