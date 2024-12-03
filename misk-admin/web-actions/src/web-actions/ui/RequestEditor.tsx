@@ -4,7 +4,7 @@ import ace from 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import { ContextAwareCompleter } from '@web-actions/ui/ContextAwareCompleter';
 import { Box, IconButton, Spinner } from '@chakra-ui/react';
-import { ArrowForwardIcon } from '@chakra-ui/icons';
+import { ArrowForwardIcon, CopyIcon } from '@chakra-ui/icons';
 import { CommandParser } from '@web-actions/parsing/CommandParser';
 import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
 import { EndpointSelectionCallbacks } from '@web-actions/ui/EndpointSelection';
@@ -32,6 +32,7 @@ export default class RequestEditor extends React.Component<Props, State> {
     super(props);
     this.state = { loading: false };
     this.submitRequest = this.submitRequest.bind(this);
+    this.copyToClipboard = this.copyToClipboard.bind(this);
 
     this.completer = new ContextAwareCompleter();
   }
@@ -109,6 +110,16 @@ export default class RequestEditor extends React.Component<Props, State> {
     }
   }
 
+  async copyToClipboard() {
+    try {
+      const content = this.editor!.getValue();
+      const normalizedJson = new CommandParser(content).parse()?.render();
+      await navigator.clipboard.writeText(normalizedJson);
+    } catch (err) {
+      console.error('Failed to copy with error:', err);
+    }
+  }
+
   public render() {
     return (
       <Box position="relative" width="100%" height="100%">
@@ -137,6 +148,16 @@ export default class RequestEditor extends React.Component<Props, State> {
           right="2"
           backgroundColor="green.200"
           onClick={this.submitRequest}
+        />
+        <IconButton
+          aria-label="Copy"
+          icon={<CopyIcon />}
+          zIndex="100"
+          position="absolute"
+          top="14"
+          right="2"
+          backgroundColor="grey"
+          onClick={this.copyToClipboard}
         />
         <Box
           width="100%"
