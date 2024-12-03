@@ -89,23 +89,27 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   }
 
   class StartServicesBeforeEach @Inject constructor() : BeforeEachCallback {
-    @Inject lateinit var serviceManager: ServiceManager
+    @com.google.inject.Inject(optional = true) var serviceManager: ServiceManager? = null
 
     override fun beforeEach(context: ExtensionContext) {
       if (context.startService()) {
+        if (serviceManager == null) {
+          throw IllegalStateException("This test is configured with `startService` set to true, " +
+            "but no ServiceManager is bound. Did you forget to install MiskTestingServiceModule?")
+        }
         if (context.reuseInjector() && runningServices.contains(context.getActionTestModules())) {
           return
         }
         try {
           try {
-            serviceManager.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
+            serviceManager!!.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
           } catch (e: Exception) {
             if (context.reuseInjector()) {
               // The `ServiceManager` requires services to be in a NEW state when starting them,
               // so if services fail to start, we need to stop them and remove the injector from the cache,
               // so that the next test can start fresh.
               try {
-                serviceManager.stop(context)
+                serviceManager!!.stop(context)
               } catch (stopError: Exception) {
                 e.addSuppressed(stopError)
               }
@@ -117,7 +121,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           if (context.reuseInjector()) {
             Runtime.getRuntime().addShutdownHook(
               thread(start = false) {
-                serviceManager.stop(context)
+                serviceManager!!.stop(context)
               }
             )
           }
