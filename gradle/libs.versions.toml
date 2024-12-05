@@ -1,10 +1,10 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.779"
-aws2 = "2.29.27"
+aws2 = "2.29.29"
 bucket4j = "8.8.0"
 datadog = "1.43.0"
-dependencyAnalysisPlugin = "2.5.0"
+dependencyAnalysisPlugin = "2.6.0"
 detekt = "1.23.7"
 docker = "3.4.0"
 flyway = "11.0.1"
