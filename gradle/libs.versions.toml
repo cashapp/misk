@@ -9,7 +9,7 @@ detekt = "1.23.7"
 docker = "3.4.0"
 flyway = "11.0.1"
 googleAuth = "1.30.0"
-googleHttp = "1.45.1"
+googleHttp = "1.45.2"
 hoplite = "2.7.5"
 jackson = "2.18.2"
 junit = "5.11.3"
@@ -171,9 +171,9 @@ micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micr
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.14.2" }
 mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.4.0" }
-moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.1" }
-moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.1" }
-moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.1" }
+moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.2" }
+moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
+moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.2" }
 mysql = { module = "com.mysql:mysql-connector-j", version = "8.4.0" }
 nettyBom = { module = "io.netty:netty-bom", version.ref = "netty" }
 nettyHandler = { module = "io.netty:netty-handler", version.ref = "netty" }
