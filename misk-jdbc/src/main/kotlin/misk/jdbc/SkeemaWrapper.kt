@@ -62,6 +62,6 @@ internal class SkeemaWrapper(
   }
 
   companion object {
-    val SKEEMA_BINARY = "${System.getenv("HERMIT_BIN")}/skeema"
+    val SKEEMA_BINARY = "skeema"
   }
 }
