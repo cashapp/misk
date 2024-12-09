@@ -23,7 +23,7 @@ misk-hibernate tests expect a mysql server running on `localhost:3306` with no p
 the root user. You might stand up a server with a docker image, e.g.
 
 ```shell
-docker run -d --rm --name "mysql-57" -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=true -e MYSQL_LOG_CONSOLE=true mysql:5.7 --sql-mode=""
+docker run -d --rm --name "mysql-80" -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=true -e MYSQL_LOG_CONSOLE=true mysql:8.0 --sql-mode=""
 ```
 
 Misk may download these Docker images as part of its tests. Because tests can time out, pre-downloading these can help resolve timeouts.
