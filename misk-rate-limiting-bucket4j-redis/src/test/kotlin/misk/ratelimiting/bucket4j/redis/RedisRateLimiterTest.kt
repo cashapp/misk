@@ -19,6 +19,7 @@ import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.testing.TestRateLimitConfig
+import wisp.ratelimiting.testing.TestRateLimitConfigRefillGreedily
 
 @MiskTest(startService = true)
 class RedisRateLimiterTest {
@@ -98,6 +99,70 @@ class RedisRateLimiterTest {
       }
     }
     assertThat(counter).isEqualTo(10)
+  }
+
+  @Test
+  fun `test bucket refilled at the end of the interval after consuming all tokens`() {
+    val increment = TestRateLimitConfig.refillPeriod.dividedBy(5)
+    repeat(5) {
+      val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
+      assertThat(result.didConsume).isTrue()
+      assertThat(result.remaining).isEqualTo(TestRateLimitConfig.capacity - 1 - it)
+      fakeClock.add(increment)
+    }
+
+    assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfig)).isEqualTo(5L)
+  }
+
+  @Test
+  fun `test bucket refilled at the end of the interval after consuming some tokens`() {
+    val increment = TestRateLimitConfig.refillPeriod.dividedBy(5)
+    repeat(3) {
+      val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
+      assertThat(result.didConsume).isTrue()
+      assertThat(result.remaining).isEqualTo(TestRateLimitConfig.capacity - 1 - it)
+      fakeClock.add(increment)
+    }
+
+    assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfig)).isEqualTo(2L)
+    fakeClock.add(increment)
+    assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfig)).isEqualTo(2L)
+    fakeClock.add(increment) // the clock now has past the end of the interval
+    assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfig)).isEqualTo(5L)
+  }
+
+  @Test
+  fun `test bucket refilled continuously after each increment`() {
+    repeat(5) {
+      val result = rateLimiter.consumeToken(KEY, TestRateLimitConfigRefillGreedily)
+      assertThat(result.didConsume).isTrue()
+      assertThat(result.remaining).isEqualTo(TestRateLimitConfigRefillGreedily.capacity - 1 - it)
+    }
+    assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfigRefillGreedily)).isEqualTo(0L)
+    assertThat(rateLimiter.consumeToken(KEY, TestRateLimitConfigRefillGreedily).didConsume).isFalse()
+
+    val increment = TestRateLimitConfigRefillGreedily.refillPeriod.dividedBy(5)
+    repeat(5) {
+      // One token is added back after each increment
+      fakeClock.add(increment)
+      assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfigRefillGreedily)).isEqualTo(it + 1L)
+    }
+  }
+
+  @Test
+  fun `test bucket refilled continuously`() {
+    val increment = TestRateLimitConfigRefillGreedily.refillPeriod.dividedBy(5)
+    repeat(5) {
+      val result = rateLimiter.consumeToken(KEY, TestRateLimitConfigRefillGreedily)
+      assertThat(result.didConsume).isTrue()
+      assertThat(result.remaining).isEqualTo(TestRateLimitConfigRefillGreedily.capacity - 1)
+
+      assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfigRefillGreedily)).isEqualTo(4L)
+      fakeClock.add(increment)
+      assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfigRefillGreedily)).isEqualTo(5L)
+    }
+
+    assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfigRefillGreedily)).isEqualTo(5L)
   }
 
   companion object {

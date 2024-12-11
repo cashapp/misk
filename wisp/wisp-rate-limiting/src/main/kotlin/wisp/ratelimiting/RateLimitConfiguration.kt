@@ -34,4 +34,7 @@ interface RateLimitConfiguration {
    */
   val version: Long?
     get() = null // returns null to be backward compatible
+
+  val refillStrategy: RateLimitBucketRefillStrategy
+    get() = RateLimitBucketRefillStrategy.INTERVAL
 }

@@ -9,6 +9,7 @@ import io.github.bucket4j.distributed.BucketProxy
 import io.github.bucket4j.distributed.proxy.ProxyManager
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Metrics
+import wisp.ratelimiting.RateLimitBucketRefillStrategy
 import wisp.ratelimiting.RateLimitConfiguration
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.RateLimiterMetrics
@@ -115,10 +116,19 @@ class Bucket4jRateLimiter @JvmOverloads constructor(
   }
 
   private fun RateLimitConfiguration.toBandwidth(): Bandwidth {
-    return Bandwidth.builder()
-      .capacity(capacity)
-      .refillIntervally(refillAmount, refillPeriod)
-      .initialTokens(capacity)
-      .build()
+    return if (refillStrategy == RateLimitBucketRefillStrategy.GREEDY) {
+      Bandwidth.builder()
+        .capacity(capacity)
+        .refillGreedy(refillAmount, refillPeriod)
+        .initialTokens(capacity)
+        .build()
+    }
+    else {
+      Bandwidth.builder()
+        .capacity(capacity)
+        .refillIntervally(refillAmount, refillPeriod)
+        .initialTokens(capacity)
+        .build()
+    }
   }
 }
