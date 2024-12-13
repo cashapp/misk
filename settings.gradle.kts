@@ -28,6 +28,11 @@ dependencyResolutionManagement {
 
 gradle.lifecycle.beforeProject {
   group = when {
+    // The root "misk" project isn't a code-containing project (it's not a module). It doesn't need
+    // a group, and in fact giving it a group confuses gradle when we `includeBuild("misk")`
+    // elsewhere, because doing that makes `misk/` and `misk/misk/` _identical_ in GA
+    // (group-artifact) terms.
+    path == ":" -> ""
     path.startsWith(":wisp") -> "app.cash.wisp"
     else -> "com.squareup.misk"
   }
