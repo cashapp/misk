@@ -6,13 +6,18 @@ import org.assertj.core.api.Assertions.assertThat
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import java.io.File
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.util.Properties
 
 class SchemaMigratorPluginTest {
-  @Test
-  fun `schema migrator plugin migrates schemas`() {
-    val testProjectDir = File(this.javaClass.getResource("/schema-migrator-plugin-test")!!.file)
+  @ParameterizedTest
+  @ValueSource(strings = [
+    "/schema-migrator-plugin-test",
+    "/schema-migrator-plugin-test-with-declarative-migrations-format"
+  ])
+  fun `schema migrator plugin migrates schemas`(projectDir: String) {
+    val testProjectDir = File(this.javaClass.getResource(projectDir)!!.file)
     val properties = Properties()
     properties.load(File(testProjectDir, "src/main/resources/db.properties").inputStream())
 

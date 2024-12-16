@@ -6,6 +6,7 @@ import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.JdbcModule
+import misk.jdbc.MigrationsFormat
 import misk.jdbc.RealDatabasePool
 import misk.resources.ResourceLoaderModule
 import wisp.deployment.TESTING
@@ -19,7 +20,8 @@ class SchemaMigratorModule(
   private val dbType: String,
   private val username: String,
   private val password: String,
-  private val schemaDir: File
+  private val schemaDir: File,
+  private val migrationsFormat: String
 ): KAbstractModule() {
 
   override fun configure() {
@@ -31,6 +33,7 @@ class SchemaMigratorModule(
       database = database,
       username = username,
       password = password,
+      migrations_format = MigrationsFormat.valueOf(migrationsFormat),
     )
 
     bind<Clock>().toInstance(Clock.systemUTC())

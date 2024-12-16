@@ -31,4 +31,7 @@ abstract class SchemaMigratorExtension @Inject constructor(objects: ObjectFactor
 
   @get:InputDirectory
   abstract val migrationsDir: DirectoryProperty
+
+  @get:Input
+  val migrationsFormat: Property<String> = objects.property(String::class.java).convention("TRADITIONAL")
 }

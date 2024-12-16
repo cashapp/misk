@@ -27,6 +27,7 @@ miskSchemaMigrator {
   username = dbConfig["user"]
   password = dbConfig["password"]
   migrationsDir = layout.projectDirectory.dir("src/main/resources/db-migrations")
+  migrationsFormat = "TRADITIONAL"
 }
 
 // If you want to integrate with JOOQ
