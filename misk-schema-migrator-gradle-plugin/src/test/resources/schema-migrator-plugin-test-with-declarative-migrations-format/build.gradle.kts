@@ -18,5 +18,5 @@ miskSchemaMigrator {
   username = properties.getProperty("username")
   password = properties.getProperty("password")
   migrationsDir.set(layout.projectDirectory.dir("src/main/resources/db-migrations"))
-  migrationsFormat = "TRADITIONAL"
+  migrationsFormat = "DECLARATIVE"
 }

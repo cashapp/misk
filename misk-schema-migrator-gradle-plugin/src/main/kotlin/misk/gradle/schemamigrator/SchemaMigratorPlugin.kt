@@ -2,6 +2,7 @@ package misk.gradle.schemamigrator
 
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
+import misk.jdbc.MigrationsFormat
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -27,6 +28,7 @@ class SchemaMigratorPlugin : Plugin<Project> {
       it.username.set(extension.username)
       it.password.set(extension.password)
       it.migrationsDir.set(extension.migrationsDir)
+      it.migrationsFormat.set(extension.migrationsFormat)
     }
   }
 
@@ -63,6 +65,10 @@ abstract class SchemaMigratorTask : DefaultTask() {
   @get:InputDirectory
   abstract val migrationsDir: DirectoryProperty
 
+  @get:Input
+  @get:Optional
+  abstract val migrationsFormat: Property<String>
+
   @TaskAction
   fun migrateSchemas() {
     val injector = Guice.createInjector(
@@ -73,7 +79,8 @@ abstract class SchemaMigratorTask : DefaultTask() {
         databaseType.get(),
         username.get(),
         password.get(),
-        migrationsDir.asFile.get()
+        migrationsDir.asFile.get(),
+        migrationsFormat.get()
       )
     )
 

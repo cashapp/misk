@@ -32,6 +32,7 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.hikariCp)
   testImplementation(libs.junitApi)
+  testImplementation(libs.junitParams)
 }
 
 mavenPublishing {
