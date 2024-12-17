@@ -10,6 +10,7 @@ import com.google.inject.multibindings.MapBinder
 import com.squareup.wire.GrpcException
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.Action
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
@@ -143,6 +144,7 @@ class MiskWebModule @JvmOverloads constructor(
         bindSeedData(HttpCall::class)
         bindSeedData(HttpRequest::class)
         bindSeedData(HttpServletRequest::class)
+        bindSeedData(Action::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)
         newMultibinder<MiskCallerAuthenticator>()
       }
