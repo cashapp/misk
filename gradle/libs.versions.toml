@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.29.34"
+aws2 = "2.29.35"
 bucket4j = "8.8.0"
 datadog = "1.44.1"
 dependencyAnalysisPlugin = "2.6.1"
@@ -12,13 +12,13 @@ googleAuth = "1.30.1"
 googleHttp = "1.45.3"
 hoplite = "2.7.5"
 jackson = "2.18.2"
-junit = "5.11.3"
+junit = "5.11.4"
 kotest = "5.9.1"
 kotlin = "1.9.25"
 kotlinBinaryCompatibilityPlugin = "0.16.3"
 mavenPublish = "0.28.0"
 micrometer = "1.12.13"
-netty = "4.1.115.Final"
+netty = "4.1.116.Final"
 okHttp = "5.0.0-alpha.14"
 protobuf = "3.25.5"
 protobufPlugin = "0.9.4"
@@ -90,7 +90,7 @@ grpcNetty = { module = "io.grpc:grpc-netty", version = "1.69.0" }
 grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.69.0" }
 grpcStub = { module = "io.grpc:grpc-stub", version = "1.69.0" }
 guava = { module = "com.google.guava:guava" }
-guavaBom = { module = "com.google.guava:guava-bom", version = "33.3.1-jre" }
+guavaBom = { module = "com.google.guava:guava-bom", version = "33.4.0-jre" }
 guavaTestLib = { module = "com.google.guava:guava-testlib" }
 guice = { module = "com.google.inject:guice" }
 guice7Bom = { module = "com.google.inject:guice-bom", version = "7.0.0" }
