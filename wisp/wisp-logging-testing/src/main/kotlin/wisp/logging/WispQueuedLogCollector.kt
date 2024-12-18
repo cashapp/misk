@@ -133,7 +133,6 @@ class WispQueuedLogCollector : LogCollector, FakeFixture() {
         for (i in 1..5) {
             if (queue.isEmpty()) sleep(100) else continue
         }
-        require(queue.isNotEmpty()) { "no events to take!" }
         val event = queue.find { matchLog(it, loggerClass, minLevel, pattern) }
             ?: error("no matching events for (logger=$loggerClass, minLevel=$minLevel, pattern=$pattern)")
         queue.remove(event)
