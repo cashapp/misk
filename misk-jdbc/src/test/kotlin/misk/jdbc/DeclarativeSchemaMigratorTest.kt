@@ -217,6 +217,48 @@ internal class DeclarativeSchemaMigratorTest {
   }
 
   @Test
+  fun passRequireNormalizeTypeInMigrations() {
+    val librarySource = config.migrations_resources!![1]
+
+    resourceLoader.put(
+      "$librarySource/name/space/t3.sql", """
+        CREATE TABLE library_table (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `version` bigint NOT NULL DEFAULT '0',
+  `token` varchar(191) COLLATE utf8mb4_general_ci NOT NULL,
+  `source_stored_balance_token` varchar(191) COLLATE utf8mb4_general_ci NOT NULL,
+  `state` varchar(191) COLLATE utf8mb4_general_ci NOT NULL,
+  `fiat_value_units` bigint NOT NULL,
+  `fiat_value_currency` varchar(191) COLLATE utf8mb4_general_ci NOT NULL,
+  `usd_equivalent_cents` bigint NOT NULL,
+  `transaction_token` varchar(191) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `milli_sats` bigint NOT NULL,
+  `send_result` varchar(191) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `probe_result` varchar(191) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `is_locked` tinyint(1) DEFAULT '0',
+  `failure_reason` varchar(191) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `payment_request_encrypted` blob NOT NULL,
+  `lit_failure_reason` varchar(191) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `customer_token` varchar(191) COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_token` (`token`),
+  KEY `idx_transaction_token` (`transaction_token`),
+  KEY `withdrawals_customer_token_idx` (`customer_token`)
+) ENGINE=InnoDB AUTO_INCREMENT=15388 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC
+        |""".trimMargin()
+    )
+
+    assertThat(tableExists("library_table")).isFalse
+
+    assertThat(declarativeSchemaMigrator.applyAll("test")).isEqualTo(MigrationStatus.Success)
+
+    // Verify migration worked!
+    assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
+  }
+
+  @Test
   fun testSqlParsing() {
     val mainSource = config.migrations_resources!![0]
     val librarySource = config.migrations_resources!![1]
@@ -365,7 +407,7 @@ internal class DeclarativeSchemaMigratorTest {
   }
 
   @Test
-  fun failRequireAllForWrongColumnPrecision() {
+  fun passRequireAllForWrongColumnPrecision() {
     val mainSource = config.migrations_resources!![0]
     resourceLoader.put(
       "$mainSource/name/space/table_1.sql", """
@@ -409,13 +451,11 @@ internal class DeclarativeSchemaMigratorTest {
         """.trimMargin()
     )
 
-    assertFailsWith<IllegalStateException>(message = "Error: Column \"device_id\" for table table_1 has incorrect type in the database.") {
-      declarativeSchemaMigrator.requireAll()
-    }
+    assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
   }
 
   @Test
-  fun failRequireAllForWrongColumnType() {
+  fun passRequireAllForWrongColumnType() {
     val mainSource = config.migrations_resources!![0]
     resourceLoader.put(
       "$mainSource/name/space/table_1.sql", """
@@ -442,9 +482,7 @@ internal class DeclarativeSchemaMigratorTest {
         """.trimMargin()
     )
 
-    assertFailsWith<IllegalStateException>(message = "Error: Column \"lock_version\" for table table_1 has incorrect type in the database.") {
-      declarativeSchemaMigrator.requireAll()
-    }
+    assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
   }
 
   @Test

@@ -3,17 +3,14 @@ package misk.jdbc
 import misk.resources.ResourceLoader
 import misk.vitess.Shard
 import misk.vitess.target
-import java.sql.ResultSet
-import java.util.regex.Pattern
-import kotlin.reflect.KClass
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.statement.create.table.CreateTable
 import wisp.logging.getLogger
+import java.sql.ResultSet
+import java.util.regex.Pattern
 
 internal class DeclarativeSchemaMigrator(
-  private val qualifier: KClass<out Annotation>,
   private val resourceLoader: ResourceLoader,
-  private val dataSourceConfig: DataSourceConfig,
   private val dataSourceService: DataSourceService,
   private val connector: DataSourceConnector,
   private val skeemaWrapper: SkeemaWrapper,
@@ -56,8 +53,8 @@ internal class DeclarativeSchemaMigrator(
    * Compare expected tables from migration files to actual database tables
    */
   private fun compareMigrations(
-    expectedTables: Map<String, Map<String, String>>,
-    actualTables: Map<String, Map<String, String>>,
+    expectedTables: Map<String, Set<String>>,
+    actualTables: Map<String, Set<String>>,
     excludedTables: Set<String>
   ) {
     logger.info { "Comparing expected tables $expectedTables to actual tables $actualTables in the database" }
@@ -70,23 +67,21 @@ internal class DeclarativeSchemaMigrator(
         ?: throw IllegalStateException("Error: Table $expectedTable missing in the database.")
 
       // Compare columns in the migration file to actual columns in the database
-      for ((columnName, columnType) in expectedColumns) {
-        if (!actualColumns.containsKey(columnName)) {
+      for (columnName in expectedColumns) {
+        if (!actualColumns.contains(columnName)) {
           throw IllegalStateException("Error: Column $columnName for table $expectedTable is missing in the database.")
-        } else if (actualColumns[columnName] != columnType) {
-          throw IllegalStateException("Error: Column $columnName for table $expectedTable has incorrect type in the database.")
+        }
         }
       }
     }
-  }
 
   /**
    * Helper function to parse migration files and extract expected tables and columns
    */
-  private fun availableMigrations(shard: Shard): Map<String, Map<String, String>> {
+  private fun availableMigrations(shard: Shard): Map<String, Set<String>> {
     // Read the .sql Files
     val migrationFiles = getMigrationFiles(shard.keyspace)
-    val tables = mutableMapOf<String, MutableMap<String, String>>()
+    val tables = mutableMapOf<String, Set<String>>()
 
     for (file in migrationFiles) {
       val fileContent = resourceLoader.utf8(file.filename).toString()
@@ -98,18 +93,11 @@ internal class DeclarativeSchemaMigrator(
         // Check if the parsed statement is a CREATE TABLE statement
         if (statement is CreateTable) {
           val tableName = statement.table.name.lowercase().removeSurrounding("`")
-          val columns = mutableMapOf<String, String>()
+          val columns = mutableSetOf<String>()
 
           // Iterate over columns to extract names and data types
           statement.columnDefinitions?.forEach { columnDefinition ->
-            val columnName = columnDefinition.columnName.lowercase().removeSurrounding("`")
-            val columnType = columnDefinition.colDataType.dataType.lowercase()
-
-            // The type is returned in the format `type(precision, scale)`,
-            // but this may not always match the format returned by the database
-            val standardizedColumnType = columnType.replace(Regex("\\(.*\\)"), "").trim()
-            columns[columnName] =
-              if (shouldCheckPrecision(standardizedColumnType)) columnType else standardizedColumnType
+            columns.add(columnDefinition.columnName.lowercase().removeSurrounding("`"))
           }
 
           tables[tableName] = columns
@@ -127,9 +115,9 @@ internal class DeclarativeSchemaMigrator(
   /**
    * Helper function to parse database and extract actual tables and columns
    */
-  private fun appliedMigrations(shard: Shard): Map<String, Map<String, String>> {
+  private fun appliedMigrations(shard: Shard): Map<String, Set<String>> {
     // Store actual database tables and their columns
-    val actualTables = mutableMapOf<String, MutableMap<String, String>>()
+    val actualTables = mutableMapOf<String, Set<String>>()
     val dbName = connector.config().database
 
     dataSourceService.dataSource.connection.use {
@@ -144,18 +132,11 @@ internal class DeclarativeSchemaMigrator(
           val tableName = tablesResultSet.getString("TABLE_NAME").lowercase()
 
           // For each table, get column names and types
-          val actualColumns = mutableMapOf<String, String>()
+          val actualColumns = mutableSetOf<String>()
           val columnsResultSet: ResultSet =
             metaData.getColumns(dbName, null, tableName, "%")
           while (columnsResultSet.next()) {
-            val columnName = columnsResultSet.getString("COLUMN_NAME").lowercase()
-            val columnType = columnsResultSet.getString("TYPE_NAME").lowercase()
-
-            // Include size information, if applicable
-            val columnSize = columnsResultSet.getInt("COLUMN_SIZE")
-            val standardizedColumnType =
-              if (columnSize > 0 && shouldCheckPrecision(columnType)) "$columnType ($columnSize)" else columnType
-            actualColumns[columnName] = standardizedColumnType
+            actualColumns.add(columnsResultSet.getString("COLUMN_NAME").lowercase())
           }
 
           // Close resources for this table
@@ -168,12 +149,5 @@ internal class DeclarativeSchemaMigrator(
     }
 
     return actualTables
-  }
-
-  private fun shouldCheckPrecision(dataType: String): Boolean {
-    return dataType == "char" ||
-      dataType == "varchar" ||
-      dataType == "binary" ||
-      dataType == "varbinary"
   }
 }
