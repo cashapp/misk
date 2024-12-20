@@ -104,9 +104,7 @@ class JdbcModule @JvmOverloads constructor(
           )
         MigrationsFormat.DECLARATIVE ->
           DeclarativeSchemaMigrator(
-            qualifier = qualifier,
             resourceLoader = resourceLoader,
-            dataSourceConfig = config,
             dataSourceService = dataSourceServiceProvider.get(),
             connector = connectorProvider.get(),
             skeemaWrapper = skeemaWrapperProvider.get(),
