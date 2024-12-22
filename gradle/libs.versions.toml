@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.29.37"
+aws2 = "2.29.39"
 bucket4j = "8.8.0"
 datadog = "1.44.1"
 dependencyAnalysisPlugin = "2.6.1"
@@ -15,7 +15,7 @@ jackson = "2.18.2"
 junit = "5.11.4"
 kotest = "5.9.1"
 kotlin = "1.9.25"
-kotlinBinaryCompatibilityPlugin = "0.16.3"
+kotlinBinaryCompatibilityPlugin = "0.17.0"
 mavenPublish = "0.28.0"
 micrometer = "1.12.13"
 netty = "4.1.116.Final"
@@ -30,7 +30,7 @@ wire = "5.0.0"
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.18.0" }
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
 apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.0" }
-assertj = { module = "org.assertj:assertj-core", version = "3.26.3" }
+assertj = { module = "org.assertj:assertj-core", version = "3.27.0" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version.ref = "awaitility" }
 aws2Auth = { module = "software.amazon.awssdk:auth", version.ref = "aws2" }
