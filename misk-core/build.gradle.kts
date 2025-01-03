@@ -19,6 +19,7 @@ dependencies {
   api(project(":wisp:wisp-token"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
+  api(project(":misk-testing-api"))
   implementation(libs.guice)
   implementation(libs.kotlinStdLibJdk8)
   implementation(project(":wisp:wisp-resource-loader"))
@@ -33,6 +34,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk-testing-api"))
 }
 
 mavenPublishing {

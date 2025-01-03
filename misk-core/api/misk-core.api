@@ -278,7 +278,7 @@ public final class misk/security/ssl/TrustStoreConfig {
 	public final fun toWispConfig ()Lwisp/security/ssl/TrustStoreConfig;
 }
 
-public final class misk/tokens/FakeTokenGenerator : wisp/token/TokenGenerator {
+public final class misk/tokens/FakeTokenGenerator : misk/testing/FakeFixture, wisp/token/TokenGenerator {
 	public fun <init> ()V
 	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
 }

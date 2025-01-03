@@ -1,13 +1,18 @@
 package wisp.token
 
+import misk.testing.FakeFixture
 import wisp.token.TokenGenerator.Companion.CANONICALIZE_LENGTH_MAX
 import wisp.token.TokenGenerator.Companion.CANONICALIZE_LENGTH_MIN
 import wisp.token.TokenGenerator.Companion.canonicalize
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
-class FakeTokenGenerator : TokenGenerator {
-    internal val nextByLabel = Collections.synchronizedMap<String, AtomicLong>(mutableMapOf())
+class FakeTokenGenerator : FakeFixture(), TokenGenerator {
+    internal val nextByLabel by resettable {
+      Collections.synchronizedMap<String, AtomicLong>(
+        mutableMapOf()
+      )
+    }
 
     override fun generate(label: String?, length: Int): String {
         require(length in CANONICALIZE_LENGTH_MIN..CANONICALIZE_LENGTH_MAX) {

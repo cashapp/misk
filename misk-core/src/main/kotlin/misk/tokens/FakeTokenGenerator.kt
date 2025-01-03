@@ -2,9 +2,10 @@ package misk.tokens
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.testing.FakeFixture
 
 @Singleton
-class FakeTokenGenerator @Inject constructor() : TokenGenerator by wisp.token.FakeTokenGenerator()
+class FakeTokenGenerator @Inject constructor() : FakeFixture(), TokenGenerator by wisp.token.FakeTokenGenerator()
 
 @Singleton
 class FakeTokenGenerator2 @Inject constructor() : TokenGenerator2 {
