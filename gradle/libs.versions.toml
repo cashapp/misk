@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.29.43"
+aws2 = "2.29.44"
 bucket4j = "8.8.0"
 datadog = "1.44.1"
 dependencyAnalysisPlugin = "2.6.1"
@@ -169,7 +169,7 @@ loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5"
 mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "mavenPublish" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
-mockitoCore = { module = "org.mockito:mockito-core", version = "5.14.2" }
+mockitoCore = { module = "org.mockito:mockito-core", version = "5.15.2" }
 mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.4.0" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.2" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
