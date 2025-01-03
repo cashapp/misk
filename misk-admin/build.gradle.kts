@@ -86,6 +86,9 @@ abstract class MiskWebBuildTask @Inject constructor(
   @get:Internal
   abstract val rootDir: RegularFileProperty
 
+  @get:Internal
+  abstract val projectDir: RegularFileProperty
+
   @get:PathSensitive(PathSensitivity.RELATIVE)
   @get:InputFiles
   abstract val inputFiles: ConfigurableFileCollection
@@ -96,6 +99,7 @@ abstract class MiskWebBuildTask @Inject constructor(
   @TaskAction
   fun buildTabs() {
     val rootFile = rootDir.asFile.get()
+    val projectDir = projectDir.asFile.get()
 
     logger.lifecycle("Running miskweb build...")
 
@@ -123,8 +127,9 @@ abstract class MiskWebBuildTask @Inject constructor(
       miskWebPath, "ci-build", "-e",
     ) {
       // this should run in one of the parent directories of the one containing the miskTab.json.
-      // By default, the execOps will run it in the project directory for the current project, which
-      // in our case will be the "service" directory, and that's just fine.
+      // What ExecOps does varies by gradle version, it seems, so use the project directory for
+      // the current project explicitly.
+      workingDir = projectDir
       isIgnoreExitValue = true // we will assert ourselves after dumping stdout
       // We need miskweb to be on the PATH. In some environments we have multiple hermit environments
       // and the misk hermit env is not the one that is active, so the misk/node_modules/.bin folder
@@ -163,6 +168,7 @@ val buildMiskWeb = tasks.register("buildMiskWeb", MiskWebBuildTask::class.java) 
     File(tabDir, "lib")
   }
   rootDir.set(project.rootDir)
+  projectDir.set(project.projectDir)
   inputFiles.setFrom(inputs)
   outputFiles.setFrom(outputs)
 }
