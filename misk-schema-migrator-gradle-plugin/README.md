@@ -32,6 +32,6 @@ miskSchemaMigrator {
 
 // If you want to integrate with JOOQ
 // tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
-//   dependsOn("migrateSchemas")
+//   dependsOn("migrateSchema")
 // }
 ```
