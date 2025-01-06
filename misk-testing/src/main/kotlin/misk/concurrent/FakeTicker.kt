@@ -5,9 +5,10 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.testing.TestFixture
 
 @Singleton
-class FakeTicker @Inject constructor() : Ticker(), Sleeper {
+class FakeTicker @Inject constructor() : Ticker(), Sleeper, TestFixture {
   private var nowNs = 0L
 
   val nowMs: Long
@@ -21,5 +22,9 @@ class FakeTicker @Inject constructor() : Ticker(), Sleeper {
 
   fun sleepMs(durationMs: Long) {
     nowNs += TimeUnit.MILLISECONDS.toNanos(durationMs)
+  }
+
+  override fun reset() {
+    nowNs = 0L
   }
 }

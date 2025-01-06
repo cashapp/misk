@@ -5,6 +5,7 @@ import java.time.Duration
 import java.util.concurrent.locks.ReentrantLock
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.testing.FakeFixture
 import kotlin.concurrent.withLock
 
 /**
@@ -12,13 +13,13 @@ import kotlin.concurrent.withLock
  * wake using the [tick()] method. An injected [Clock] is used to decide whether to wake a thread.
  */
 @Singleton
-class FakeSleeper @Inject constructor(private val clock: Clock) : Sleeper {
-  private var count: Int = 0
-  private var lastDuration: Duration? = null
-  private val lock = ReentrantLock()
-  private val wakeCondition = lock.newCondition()
-  private val waitForThreads = lock.newCondition()
-  private var numSleepingThreads = 0
+class FakeSleeper @Inject constructor(private val clock: Clock) : FakeFixture(), Sleeper {
+  private var count: Int by resettable { 0 }
+  private var lastDuration: Duration? by resettable { null }
+  private val lock by resettable { ReentrantLock() }
+  private val wakeCondition by resettable { lock.newCondition() }
+  private val waitForThreads by resettable { lock.newCondition() }
+  private var numSleepingThreads by resettable { 0 }
 
   /**
    * Check the current time and triggers any sleeping threads that are due to be awoken.

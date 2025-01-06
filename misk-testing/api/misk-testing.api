@@ -50,7 +50,7 @@ public final class misk/concurrent/FakeScheduledExecutorService$ScheduledFutureT
 	public final fun setExecuteAt (J)V
 }
 
-public final class misk/concurrent/FakeSleeper : misk/concurrent/Sleeper {
+public final class misk/concurrent/FakeSleeper : misk/testing/FakeFixture, misk/concurrent/Sleeper {
 	public fun <init> (Ljava/time/Clock;)V
 	public final fun lastSleepDuration ()Ljava/time/Duration;
 	public fun sleep (Ljava/time/Duration;)V
@@ -63,10 +63,11 @@ public final class misk/concurrent/FakeSleeperModule : misk/inject/KAbstractModu
 	public fun <init> ()V
 }
 
-public final class misk/concurrent/FakeTicker : com/google/common/base/Ticker, misk/concurrent/Sleeper {
+public final class misk/concurrent/FakeTicker : com/google/common/base/Ticker, misk/concurrent/Sleeper, misk/testing/TestFixture {
 	public fun <init> ()V
 	public final fun getNowMs ()J
 	public fun read ()J
+	public fun reset ()V
 	public fun sleep (Ljava/time/Duration;)V
 	public final fun sleepMs (J)V
 }
