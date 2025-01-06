@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.29.44"
+aws2 = "2.29.45"
 bucket4j = "8.8.0"
 datadog = "1.44.1"
 dependencyAnalysisPlugin = "2.6.1"
@@ -30,7 +30,7 @@ wire = "5.0.0"
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.18.0" }
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
 apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.0" }
-assertj = { module = "org.assertj:assertj-core", version = "3.27.1" }
+assertj = { module = "org.assertj:assertj-core", version = "3.27.2" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version.ref = "awaitility" }
 aws2Auth = { module = "software.amazon.awssdk:auth", version.ref = "aws2" }
@@ -73,7 +73,7 @@ gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20241111-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.0" }
-gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.83.0" }
+gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.84.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.7.1" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20241206-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
