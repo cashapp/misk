@@ -28,11 +28,12 @@ dependencyResolutionManagement {
 
 gradle.lifecycle.beforeProject {
   group = when {
-    // The root "misk" project isn't a code-containing project (it's not a module). It doesn't need
-    // a group, and in fact giving it a group confuses gradle when we `includeBuild("misk")`
-    // elsewhere, because doing that makes `misk/` and `misk/misk/` _identical_ in GA
-    // (group-artifact) terms.
-    path == ":" -> ""
+    // The root "misk" project must not have the same group as the misk/misk project, since that
+    // gives each identical group-artifact (GA) identifiers, which confuses Gradle when we use
+    // `includeBuild("misk")`. The root must still have some group, though, because of the
+    // requirements of the vanniktech maven.publish plugin. We use this group so that the plugin
+    // matches the `com.squareup.misk` staging profile.
+    path == ":" -> "com.squareup.misk.root"
     path.startsWith(":wisp") -> "app.cash.wisp"
     else -> "com.squareup.misk"
   }
