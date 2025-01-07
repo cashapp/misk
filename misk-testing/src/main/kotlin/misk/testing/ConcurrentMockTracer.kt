@@ -14,8 +14,13 @@ import jakarta.inject.Singleton
 // TODO(keefer): Deprecate this (or forward the type via delegate) when wisp-tracing-test-fixtures
 //  publication is fixed. wisp-tracing provides a preferred copy of this class.
 @Singleton
-class ConcurrentMockTracer @Inject constructor() : MockTracer() {
+class ConcurrentMockTracer @Inject constructor() : TestFixture, MockTracer() {
   private val queue = LinkedBlockingDeque<MockSpan>()
+
+  override fun reset() {
+    queue.clear()
+    super.reset()
+  }
 
   /** Awaits a span, removes it, and returns it. */
   fun take(): MockSpan {
