@@ -1,3 +1,4 @@
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
@@ -40,7 +41,7 @@ buildscript {
 plugins {
   alias(libs.plugins.dependencyAnalysis)
   alias(libs.plugins.binaryCompatibilityValidator)
-  alias(libs.plugins.mavenPublishBase)
+  alias(libs.plugins.mavenPublishBase) apply false
 }
 
 dependencyAnalysis {
@@ -319,11 +320,11 @@ subprojects {
   }
 }
 
-allprojects {
+subprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
     val publishUrl = System.getProperty("publish_url")
     if (!publishUrl.isNullOrBlank()) {
-      publishing {
+      configure<PublishingExtension> {
         repositories {
           maven {
             url = uri(publishUrl)
@@ -335,12 +336,12 @@ allprojects {
         }
       }
     } else {
-      mavenPublishing {
+      configure<MavenPublishBaseExtension> {
         publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
         signAllPublications()
       }
     }
-    mavenPublishing {
+    configure<MavenPublishBaseExtension> {
       pom {
         description.set("Open source application container in Kotlin")
         name.set(project.name)
