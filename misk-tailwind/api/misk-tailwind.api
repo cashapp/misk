@@ -148,7 +148,7 @@ public final class misk/tailwind/pages/MenuSection {
 }
 
 public final class misk/tailwind/pages/NavbarKt {
-	public static final fun Navbar (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun Navbar$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun Navbar (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/lang/String;Ljava/util/List;ZLkotlin/jvm/functions/Function1;)V
+	public static synthetic fun Navbar$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/lang/String;Ljava/util/List;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 

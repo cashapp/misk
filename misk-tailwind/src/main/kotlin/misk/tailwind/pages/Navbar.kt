@@ -31,6 +31,7 @@ fun TagConsumer<*>.Navbar(
   deployment: Deployment,
   homeHref: String,
   menuSections: List<MenuSection> = listOf(),
+  sortedMenuLinks: Boolean = true,
   content: TagConsumer<*>.() -> Unit = {}
 ) {
   div("bg-gray-900") {
@@ -111,7 +112,7 @@ fun TagConsumer<*>.Navbar(
 //                )
 //              }
 //            }
-            NavMenu(menuSections)
+            NavMenu(menuSections, sortedMenuLinks)
           }
         }
       }
@@ -130,7 +131,7 @@ fun TagConsumer<*>.Navbar(
             }
           }
         }
-        NavMenu(menuSections)
+        NavMenu(menuSections, sortedMenuLinks)
       }
     }
     div("xl:pl-72") {
@@ -187,7 +188,7 @@ private fun Deployment.asBorderColor() = when {
   else -> "border-b-blue-500"
 }
 
-private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
+private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>, sortedMenuLinks: Boolean) {
   if (menuSections.isNotEmpty()) {
     nav("flex flex-1 flex-col") {
       menuSections.mapIndexed { index, section ->
@@ -198,7 +199,12 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
             role = "list"
 
             li {
-              section.links.sortedBy { it.label }.map { link ->
+              val sectionLinks = if (sortedMenuLinks) {
+                section.links.sortedBy { it.label }
+              } else {
+                section.links
+              }
+              sectionLinks.map { link ->
                 ul("-mx-2 py-1") {
                   role = "list"
                   li {
