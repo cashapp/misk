@@ -786,22 +786,6 @@ public final class misk/concurrent/ExplicitReleaseDelayQueue : java/util/concurr
 	public fun toArray ([Ljava/lang/Object;)[Ljava/lang/Object;
 }
 
-public abstract class misk/concurrent/WrappingListeningExecutorService : com/google/common/util/concurrent/ForwardingListeningExecutorService {
-	public fun <init> ()V
-	public fun execute (Ljava/lang/Runnable;)V
-	public fun invokeAll (Ljava/util/Collection;)Ljava/util/List;
-	public fun invokeAll (Ljava/util/Collection;JLjava/util/concurrent/TimeUnit;)Ljava/util/List;
-	public fun invokeAny (Ljava/util/Collection;)Ljava/lang/Object;
-	public fun invokeAny (Ljava/util/Collection;JLjava/util/concurrent/TimeUnit;)Ljava/lang/Object;
-	public fun submit (Ljava/lang/Runnable;)Lcom/google/common/util/concurrent/ListenableFuture;
-	public synthetic fun submit (Ljava/lang/Runnable;)Ljava/util/concurrent/Future;
-	public fun submit (Ljava/lang/Runnable;Ljava/lang/Object;)Lcom/google/common/util/concurrent/ListenableFuture;
-	public synthetic fun submit (Ljava/lang/Runnable;Ljava/lang/Object;)Ljava/util/concurrent/Future;
-	public fun submit (Ljava/util/concurrent/Callable;)Lcom/google/common/util/concurrent/ListenableFuture;
-	public synthetic fun submit (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Future;
-	protected abstract fun wrap (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Callable;
-}
-
 public final class misk/environment/DeploymentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Lwisp/deployment/Deployment;)V
