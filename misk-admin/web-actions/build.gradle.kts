@@ -1,16 +1,8 @@
 import java.io.InputStream
 
-plugins {
-
-}
-
-dependencies {
-
-}
-
-tasks.register<MiskConsoleBuildTask>("build") {
+tasks.register<WebActionsTabBuildTask>("buildWebActionsTab") {
   group = "build"
-  description = "Run webpack build for misk console"
+  description = "Run webpack build for misk web actions"
 
   miskConsoleRootDir.set(projectDir)
 
@@ -31,7 +23,7 @@ tasks.register<MiskConsoleBuildTask>("build") {
 }
 
 @CacheableTask
-abstract class MiskConsoleBuildTask : DefaultTask() {
+abstract class WebActionsTabBuildTask : DefaultTask() {
 
   @get:Internal
   abstract val miskConsoleRootDir: RegularFileProperty
