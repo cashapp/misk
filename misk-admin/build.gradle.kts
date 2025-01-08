@@ -185,10 +185,10 @@ if (isCi || System.getProperty("misk.admin.buildMiskWeb") == "true") {
 
 tasks.register<Copy>("buildAndCopyWebActions") {
   from({
-    project(":misk-admin:web-actions").tasks.named("build").get().outputs.files
+    project(":misk-admin:web-actions").tasks.named("buildWebActionsTab").get().outputs.files
   })
   into(project.layout.buildDirectory.dir("resources/main/web/_tab/web-actions-v4"))
-  dependsOn(":misk-admin:web-actions:build")
+  dependsOn(":misk-admin:web-actions:buildWebActionsTab")
 }
 
 sourceSets {
