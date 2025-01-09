@@ -1,8 +1,3 @@
-public final class org/assertj/core/api/AssertExtensionsKt {
-	public static final fun assertOrdering ([Ljava/lang/Comparable;)V
-	public static final fun isEqualToAsJson (Lorg/assertj/core/api/AbstractCharSequenceAssert;Ljava/lang/CharSequence;)Lorg/assertj/core/api/AbstractCharSequenceAssert;
-}
-
 public abstract interface class wisp/logging/LogCollector : misk/testing/TestFixture {
 	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Lch/qos/logback/classic/spi/ILoggingEvent;
 	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Lch/qos/logback/classic/spi/ILoggingEvent;
