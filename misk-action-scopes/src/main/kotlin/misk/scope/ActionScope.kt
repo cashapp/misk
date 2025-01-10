@@ -31,6 +31,10 @@ class ActionScope @Inject internal constructor(
   /**
    * Wraps a [kotlinx.coroutines.runBlocking] to propagate the current action scope.
    */
+  @Deprecated(
+    message = "don't use runBlocking explicitly",
+    replaceWith = ReplaceWith("use suspending invocation")
+  )
   fun <T> runBlocking(block: suspend CoroutineScope.() -> T): T {
     return if (inScope()) {
       kotlinx.coroutines.runBlocking(asContextElement(), block)
@@ -44,6 +48,10 @@ class ActionScope @Inject internal constructor(
   /**
    * Wraps a [kotlinx.coroutines.runBlocking] to propagate the current action scope.
    */
+  @Deprecated(
+    message = "don't use runBlocking explicitly",
+    replaceWith = ReplaceWith("use suspending invocation")
+  )
   fun <T> runBlocking(context: CoroutineContext, block: suspend CoroutineScope.() -> T): T {
     return if (inScope()) {
       kotlinx.coroutines.runBlocking(context + asContextElement(), block)

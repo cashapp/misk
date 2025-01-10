@@ -187,6 +187,41 @@ class GreeterActionModule : KAbstractModule() {
 }
 ```
 
+Misk also supports `rpcCallStyle = "suspending"` for suspending gRPC actions.This is the preferred way to generate server 
+actions if you intend on using coroutines to implement the business logic of your action. See [coroutines](coroutines.md) for more information.
+
+```kotlin
+wire {
+  sourcePath {
+    srcDir("src/main/proto")
+  }
+
+  kotlin {
+    include("squareup.cash.hello.GreeterService")
+    rpcCallStyle = "suspending"
+    rpcRole = "server"
+    singleMethodServices = true
+  }
+
+  java {
+  }
+}
+```
+
+The above will generate a similar action class, but with a suspending action function
+
+```kotlin
+@Singleton
+class HelloGrpcAction @Inject internal constructor()
+  : GreeterServiceHelloBlockingServer, WebAction {
+
+  @Unauthorized
+  override suspend fun Hello(request: HelloRequest): HelloResponse {
+    return HelloResponse("message")
+  }
+}
+```
+
 Creating a gRPC action automatically creates a JSON endpoint with all of the same annotations in the 
 path defined by the `...BlockingServer`, typically `/<package>.<service name>/<rpc name>`.
 

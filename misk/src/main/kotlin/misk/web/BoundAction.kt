@@ -138,7 +138,7 @@ internal class BoundAction<A : WebAction>(
     val interceptors = networkInterceptors.toMutableList()
     interceptors.add(
       RequestBridgeInterceptor(
-        webActionBinding, applicationInterceptors, pathMatcher
+        webActionBinding, applicationInterceptors, pathMatcher, scope
       )
     )
 
@@ -248,14 +248,15 @@ private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
 private class RequestBridgeInterceptor(
   val webActionBinding: WebActionBinding,
   val applicationInterceptors: List<ApplicationInterceptor>,
-  val pathMatcher: Matcher
+  val pathMatcher: Matcher,
+  val actionScope: ActionScope,
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
     val httpCall = chain.httpCall
     val arguments = webActionBinding.beforeCall(chain.webAction, httpCall, pathMatcher)
 
     val applicationChain = chain.webAction.asChain(
-      chain.action.function, arguments, applicationInterceptors, httpCall
+      chain.action.function, arguments, applicationInterceptors, httpCall, actionScope
     )
 
     var returnValue = applicationChain.proceed(applicationChain.args)
