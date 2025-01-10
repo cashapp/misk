@@ -2,6 +2,8 @@ package misk.grpc
 
 import com.squareup.wire.MessageSink
 import com.squareup.wire.MessageSource
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
@@ -10,13 +12,15 @@ import kotlin.reflect.jvm.javaType
 
 /**
  * Returns the stream element type, like `MyRequest` if this is `MessageSource<MyRequest>`.
- * Returns null if this is not a [MessageSource] or [MessageSink].
+ * Returns null if this is not a [MessageSource], [MessageSink], [SendChannel] or [ReceiveChannel].
  */
 internal fun KType.streamElementType(): Type? {
   // Unbox the type parameter.
   val parameterizedType = javaType as? ParameterizedType ?: return null
   if (parameterizedType.rawType != MessageSource::class.java &&
-    parameterizedType.rawType != MessageSink::class.java
+    parameterizedType.rawType != MessageSink::class.java &&
+    parameterizedType.rawType != SendChannel::class.java &&
+    parameterizedType.rawType != ReceiveChannel::class.java
   ) return null
   // Remove the wildcard, like 'out MessageSource' (Kotlin) or '? super MessageSource' (Java).
   return when (val typeArgument = parameterizedType.actualTypeArguments[0]) {

@@ -1683,10 +1683,6 @@ public final class misk/web/actions/StatusAction$ServerStatus {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/web/actions/WebActionsKt {
-	public static final fun asChain (Lmisk/web/actions/WebAction;Lkotlin/reflect/KFunction;Ljava/util/List;Ljava/util/List;Lmisk/web/HttpCall;)Lmisk/Chain;
-}
-
 public abstract interface class misk/web/concurrencylimits/ConcurrencyLimiterFactory {
 	public abstract fun create (Lmisk/Action;)Lcom/netflix/concurrency/limits/Limiter;
 }

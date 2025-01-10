@@ -2,25 +2,33 @@ package misk.grpc
 
 import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.WireRpc
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
 import misk.Action
 import misk.web.DispatchMechanism
 import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
-import misk.web.Grpc
 import misk.web.PathPattern
+import misk.web.WebConfig
 import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaTypes
 import java.lang.reflect.Type
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 internal class GrpcFeatureBinding(
   private val requestAdapter: ProtoAdapter<Any>,
   private val responseAdapter: ProtoAdapter<Any>,
   private val streamingRequest: Boolean,
-  private val streamingResponse: Boolean
+  private val streamingResponse: Boolean,
+  private val isSuspend: Boolean,
+  private val grpcMessageSourceChannelContext: CoroutineContext
 ) : FeatureBinding {
+
   override fun beforeCall(subject: Subject) {
     val requestBody = subject.takeRequestBody()
     val messageSource = GrpcMessageSource(
@@ -29,7 +37,19 @@ internal class GrpcFeatureBinding(
     )
 
     if (streamingRequest) {
-      subject.setParameter(0, messageSource)
+      val param: Any = if (isSuspend) {
+        GrpcMessageSourceChannel(
+          channel = Channel(
+            capacity = RENDEZVOUS,
+            onBufferOverflow = BufferOverflow.SUSPEND,
+          ),
+          source = messageSource,
+          coroutineContext = grpcMessageSourceChannelContext,
+        )
+      } else {
+        messageSource
+      }
+      subject.setParameter(0, param)
     } else {
       val request = messageSource.read()!!
       subject.setParameter(0, request)
@@ -38,9 +58,20 @@ internal class GrpcFeatureBinding(
     if (streamingResponse) {
       val responseBody = subject.takeResponseBody()
       val messageSink = GrpcMessageSink(responseBody, responseAdapter, grpcEncoding = "identity")
+      val param: Any = if (isSuspend) {
+        GrpcMessageSinkChannel(
+          channel = Channel(
+            capacity = RENDEZVOUS,
+            onBufferOverflow = BufferOverflow.SUSPEND,
+          ),
+          sink = messageSink,
+        )
+      } else {
+        messageSink
+      }
 
       // It's a streaming response, give the call a SendChannel to write to.
-      subject.setParameter(1, messageSink)
+      subject.setParameter(1, param)
       setResponseHeaders(subject)
     }
   }
@@ -72,7 +103,19 @@ internal class GrpcFeatureBinding(
   }
 
   @Singleton
-  class Factory @Inject internal constructor() : FeatureBinding.Factory {
+  class Factory @Inject internal constructor(
+    webConfig: WebConfig
+  ) : FeatureBinding.Factory {
+
+    // This dispatcher is sized to the jetty thread pool size to make sure that
+    // no requests that are currently scheduled on a jetty thread are ever blocked
+    // from reading a streaming request
+    private val grpcMessageSourceChannelDispatcher =
+      Dispatchers.IO.limitedParallelism(
+        parallelism = webConfig.jetty_max_thread_pool_size,
+        name = "GrpcMessageSourceChannel.bridgeFromSource"
+      )
+
     override fun create(
       action: Action,
       pathPattern: PathPattern,
@@ -96,7 +139,7 @@ internal class GrpcFeatureBinding(
       val responseAdapter = if (action.parameters.size == 2) {
         claimer.claimParameter(1)
         val responseType: Type = action.parameters[1].type.streamElementType()
-          ?: error("@Grpc function's second parameter should be a MessageSource: $action")
+          ?: error("@Grpc function's second parameter should be a MessageSink(blocking) or SendChannel(suspending): $action")
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         ProtoAdapter.get(responseType as Class<Any>)
       } else {
@@ -104,6 +147,7 @@ internal class GrpcFeatureBinding(
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         ProtoAdapter.get(wireAnnotation.responseAdapter) as ProtoAdapter<Any>
       }
+      val isSuspending = action.function.isSuspend
 
       return if (streamingRequestType != null) {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
@@ -111,7 +155,9 @@ internal class GrpcFeatureBinding(
           requestAdapter = ProtoAdapter.get(streamingRequestType as Class<Any>),
           responseAdapter = responseAdapter,
           streamingRequest = true,
-          streamingResponse = streamingResponse
+          streamingResponse = streamingResponse,
+          isSuspend = isSuspending,
+          grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
         )
       } else {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
@@ -119,7 +165,9 @@ internal class GrpcFeatureBinding(
           requestAdapter = ProtoAdapter.get(wireAnnotation.requestAdapter) as ProtoAdapter<Any>,
           responseAdapter = responseAdapter,
           streamingRequest = false,
-          streamingResponse = streamingResponse
+          streamingResponse = streamingResponse,
+          isSuspend = isSuspending,
+          grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
         )
       }
     }
