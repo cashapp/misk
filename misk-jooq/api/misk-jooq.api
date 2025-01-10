@@ -106,7 +106,7 @@ public final class misk/jooq/listeners/AvoidUsingSelectStarException : java/lang
 	public fun <init> (Ljava/lang/String;)V
 }
 
-public final class misk/jooq/listeners/AvoidUsingSelectStarListener : org/jooq/impl/DefaultExecuteListener {
+public final class misk/jooq/listeners/AvoidUsingSelectStarListener : org/jooq/ExecuteListener {
 	public static final field Companion Lmisk/jooq/listeners/AvoidUsingSelectStarListener$Companion;
 	public fun <init> ()V
 	public fun renderEnd (Lorg/jooq/ExecuteContext;)V
@@ -116,7 +116,7 @@ public final class misk/jooq/listeners/AvoidUsingSelectStarListener$Companion {
 	public final fun getSelectStarFromRegex ()Lkotlin/text/Regex;
 }
 
-public final class misk/jooq/listeners/JooqSQLLogger : org/jooq/impl/DefaultExecuteListener {
+public final class misk/jooq/listeners/JooqSQLLogger : org/jooq/ExecuteListener {
 	public static final field Companion Lmisk/jooq/listeners/JooqSQLLogger$Companion;
 	public fun <init> ()V
 	public fun exception (Lorg/jooq/ExecuteContext;)V
@@ -131,7 +131,7 @@ public final class misk/jooq/listeners/JooqSQLLogger$Companion {
 	public final fun getLog ()Lmu/KLogger;
 }
 
-public final class misk/jooq/listeners/JooqTimestampRecordListener : org/jooq/impl/DefaultRecordListener {
+public final class misk/jooq/listeners/JooqTimestampRecordListener : org/jooq/RecordListener {
 	public fun <init> (Ljava/time/Clock;Ljava/lang/String;Ljava/lang/String;)V
 	public fun insertStart (Lorg/jooq/RecordContext;)V
 	public fun updateStart (Lorg/jooq/RecordContext;)V

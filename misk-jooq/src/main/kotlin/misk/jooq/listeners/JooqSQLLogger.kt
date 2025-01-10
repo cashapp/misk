@@ -2,20 +2,20 @@ package misk.jooq.listeners
 
 import org.jooq.Configuration
 import org.jooq.ExecuteContext
+import org.jooq.ExecuteListener
 import org.jooq.ExecuteType.BATCH
 import org.jooq.Param
 import org.jooq.TXTFormat
 import org.jooq.VisitContext
+import org.jooq.VisitListener
 import org.jooq.VisitListenerProvider
 import org.jooq.impl.DSL
-import org.jooq.impl.DefaultExecuteListener
-import org.jooq.impl.DefaultVisitListener
 import org.jooq.impl.DefaultVisitListenerProvider
 import org.jooq.tools.StringUtils
 import wisp.logging.getLogger
 import java.util.Arrays
 
-class JooqSQLLogger : DefaultExecuteListener() {
+class JooqSQLLogger : ExecuteListener {
   override fun renderEnd(ctx: ExecuteContext) {
     var configuration = ctx.configuration()
     val newline = if (configuration.settings().isRenderFormatted == true) "\n" else ""
@@ -88,7 +88,7 @@ class JooqSQLLogger : DefaultExecuteListener() {
     return configuration.derive(*newProviders)
   }
 
-  private class BindValueAbbreviator : DefaultVisitListener() {
+  private class BindValueAbbreviator : VisitListener {
     private var anyAbbreviations = false
     override fun visitStart(context: VisitContext) {
       if (context.renderContext() != null) {
