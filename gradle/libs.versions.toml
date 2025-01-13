@@ -1,10 +1,10 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.29.49"
+aws2 = "2.29.50"
 bucket4j = "8.8.0"
 datadog = "1.45.0"
-dependencyAnalysisPlugin = "2.6.1"
+dependencyAnalysisPlugin = "2.7.0"
 detekt = "1.23.7"
 docker = "3.4.1"
 flyway = "11.1.1"
@@ -69,11 +69,11 @@ findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2"
 flywayGradlePlugin = { module = "org.flywaydb:flyway-gradle-plugin", version.ref = "flyway" }
 gax = { module = "com.google.api:gax", version = "2.59.1" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.49.1" }
-gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.25.1" }
-gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20241111-2.0.0" }
+gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.25.2" }
+gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250102-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.0" }
-gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.84.0" }
+gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.85.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.7.1" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20241206-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
