@@ -84,6 +84,26 @@ abstract class HibernateEntityModule(
     addEntity(T::class)
   }
 
+  /** Bind just the HibernateEntities using the provided qualifier */
+  protected fun addHibernateEntities(vararg entities: KClass<out DbEntity<*>>) {
+    entities.forEach { entity ->
+      addHibernateEntity(dbEntityClass = entity)
+    }
+  }
+
+  /** Bind just the HibernateEntity using the provided qualifier */
+  protected fun <T : DbEntity<T>> addHibernateEntity(
+    dbEntityClass: KClass<T>
+  ) {
+    multibind<HibernateEntity>(qualifier)
+      .toInstance(HibernateEntity(dbEntityClass))
+  }
+
+  /** Bind just the HibernateEntity using the provided qualifier */
+  protected inline fun <reified T : DbEntity<T>> addHibernateEntity() {
+    addHibernateEntity(T::class)
+  }
+
   /** Adds a DbEntity to Database-Query Admin Dashboard Tab with a dynamic query
    * (not a static Misk.Query)
    */
