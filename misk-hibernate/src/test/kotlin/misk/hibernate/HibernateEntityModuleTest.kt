@@ -27,6 +27,26 @@ internal class HibernateEntityModuleTest {
       .containsExactly(Square::class, Circle::class)
   }
 
+  @Test fun multipleDataSourcesSameEntities() {
+    val injector = Guice.createInjector(
+      object : HibernateEntityModule(Dinosaurs::class) {
+        override fun configureHibernate() {
+          addHibernateEntities(Triceratops::class, Stegosaurus::class)
+        }
+      },
+      object : HibernateEntityModule(Shapes::class) {
+        override fun configureHibernate() {
+          addHibernateEntities(Triceratops::class, Stegosaurus::class)
+        }
+      }
+    )
+
+    assertThat(injector.getSetOf(HibernateEntity::class, Dinosaurs::class).unwrap())
+      .containsExactly(Triceratops::class, Stegosaurus::class)
+    assertThat(injector.getSetOf(HibernateEntity::class, Shapes::class).unwrap())
+      .containsExactly(Triceratops::class, Stegosaurus::class)
+  }
+
   @Test fun multipleModulesSameDataSource() {
     val injector = Guice.createInjector(
       object : HibernateEntityModule(Dinosaurs::class) {
