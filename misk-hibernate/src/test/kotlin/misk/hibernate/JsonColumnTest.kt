@@ -118,15 +118,15 @@ class JsonColumnTest {
     override lateinit var id: Id<DbWillFerrellMovie>
 
     @Column(nullable = false)
-    var name: String
+    lateinit var name: String
 
     @Column(nullable = false)
     @JsonColumn
-    var cameos: List<String>
+    lateinit var cameos: List<String>
 
     @Column
     @JsonColumn
-    var setting: Setting?
+    var setting: Setting? = null
 
     constructor(name: String, cameos: List<String>, setting: Setting? = null) {
       this.name = name
@@ -143,15 +143,15 @@ class JsonColumnTest {
     override lateinit var id: Id<DbWillFerrellMovieLegacy>
 
     @Column(nullable = false)
-    var name: String
+    lateinit var name: String
 
     @Column(nullable = false)
     @JsonColumn
-    var cameos: List<String>
+    lateinit var cameos: List<String>
 
     @Column
     @JsonColumn
-    var setting: SettingLegacy?
+    var setting: SettingLegacy? = null
 
     constructor(name: String, cameos: List<String>, setting: SettingLegacy? = null) {
       this.name = name
