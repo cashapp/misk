@@ -131,11 +131,11 @@ class ProtoColumnTest {
     override lateinit var id: Id<DbAvengersMovie>
 
     @Column(nullable = false)
-    var name: String
+    lateinit var name: String
 
     @Column(nullable = false)
     @ProtoColumn
-    var hero: SuperHero
+    lateinit var hero: SuperHero
 
     @Column
     @ProtoColumn
