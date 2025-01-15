@@ -36,7 +36,7 @@ internal class DynamicMdcContext(
   }
 
   override fun restoreThreadContext(context: CoroutineContext, oldState: MDCContext?) {
-    //NOOP
+    clear()
   }
 
   override fun copyForChild(): CopyableThreadContextElement<MDCContext?> {

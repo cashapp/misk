@@ -187,8 +187,10 @@ class GreeterActionModule : KAbstractModule() {
 }
 ```
 
-Misk also supports `rpcCallStyle = "suspending"` for suspending gRPC actions.This is the preferred way to generate server 
-actions if you intend on using coroutines to implement the business logic of your action. See [coroutines](coroutines.md) for more information.
+Misk also supports `rpcCallStyle = "suspending"` for suspending gRPC actions. This is the way to generate server 
+actions if you intend to use coroutines to implement the business logic of your action. The generated interface will 
+then expect you to implement a suspending function instead of a regular blocking function for your action's handler method. 
+See [coroutines](coroutines.md) for more information.
 
 ```kotlin
 wire {
@@ -208,7 +210,8 @@ wire {
 }
 ```
 
-The above will generate a similar action class, but with a suspending action function
+The above Wire Gradle plugin configuration will have a suspending function in the generated interface instead of a 
+regular function. Your implementing class will then look like this:
 
 ```kotlin
 @Singleton

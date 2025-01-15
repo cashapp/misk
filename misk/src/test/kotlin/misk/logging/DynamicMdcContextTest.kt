@@ -3,11 +3,11 @@ package misk.logging
 import io.kotest.assertions.assertSoftly
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.MDC
 import wisp.logging.getLogger
+import kotlin.test.assertEquals
 
 class DynamicMdcContextTest {
   @BeforeEach
@@ -33,9 +33,9 @@ class DynamicMdcContextTest {
             logger.info { "level2 added" }
           }
           assertSoftly {
-            assertThat(MDC.get("level0")).isEqualTo("value0")
-            assertThat(MDC.get("level1")).isEqualTo("value1")
-            assertThat(MDC.get("level2")).isEqualTo("value2")
+            assertEquals("value0", MDC.get("level0"))
+            assertEquals("value1", MDC.get("level1"))
+            assertEquals("value2", MDC.get("level2"))
           }
         }
       }

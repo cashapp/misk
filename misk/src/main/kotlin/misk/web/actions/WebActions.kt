@@ -35,22 +35,26 @@ internal fun WebAction.asChain(
         argsMap[param] = arg
       }
 
-      return if (function.isSuspend) {
+      return if (!function.isSuspend) {
+        function.callBy(argsMap)
+      } else {
         // Handle suspending invocation, this includes building out the context to propagate MDC
         // and action scope.
-        val context = EmptyCoroutineContext +
-          DynamicMdcContext() +
-          if (scope.inScope()) scope.asContextElement() else EmptyCoroutineContext
+        val context = DynamicMdcContext() +
+          if (scope.inScope()) {
+            scope.asContextElement()
+          } else {
+            EmptyCoroutineContext
+          }
 
         runBlocking(context) {
           // Build the list of Source and Sink Channels (should only be 0 or 1 of each)
           val sourceChannel = argsMap.values
             .mapNotNull { it as? GrpcMessageSourceChannel<*> }
             .singleOrNull()
-          val sinkChannel =
-            argsMap.values
-              .mapNotNull { it as? GrpcMessageSinkChannel<*> }
-              .singleOrNull()
+          val sinkChannel = argsMap.values
+            .mapNotNull { it as? GrpcMessageSinkChannel<*> }
+            .singleOrNull()
           // Launch a coroutine for each Source and Sink Channels to bridge the data
           sourceChannel?.let { launch { sourceChannel.bridgeFromSource() } }
           sinkChannel?.let { launch { sinkChannel.bridgeToSink() } }
@@ -63,8 +67,6 @@ internal fun WebAction.asChain(
             sinkChannel?.close()
           }
         }
-      } else {
-        function.callBy(argsMap)
       } ?: throw IllegalStateException("Null return from WebAction")
     }
   }

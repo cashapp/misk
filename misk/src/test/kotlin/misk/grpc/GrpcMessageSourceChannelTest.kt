@@ -7,13 +7,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import okio.Buffer
 import okio.ByteString.Companion.decodeHex
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
 
 class GrpcMessageSourceChannelTest {
-
   private val buffer = Buffer()
   private val reader = GrpcMessageSource(buffer, HelloRequest.ADAPTER)
 
@@ -35,17 +34,11 @@ class GrpcMessageSourceChannelTest {
     launch { GrpcMessageSourceChannel(channel, reader, coroutineContext).bridgeFromSource() }
 
     eventually(100.milliseconds) {
-      channel.receive().also { request ->
-        assertThat(request).isEqualTo(HelloRequest("localhost"))
-      }
+      assertEquals(HelloRequest("localhost"), channel.receive())
     }
 
     eventually(100.milliseconds) {
-      channel.receive().also { request ->
-        assertThat(request).isEqualTo(HelloRequest("proxy"))
-      }
+      assertEquals(HelloRequest("proxy"), channel.receive())
     }
   }
-
 }
-
