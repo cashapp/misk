@@ -107,9 +107,11 @@ internal class GrpcFeatureBinding(
     webConfig: WebConfig
   ) : FeatureBinding.Factory {
 
-    // This dispatcher is sized to the jetty thread pool size to make sure that
-    // no requests that are currently scheduled on a jetty thread are ever blocked
-    // from reading a streaming request
+    /**
+     * This dispatcher is sized to the jetty thread pool size to make sure that
+     * no requests that are currently scheduled on a jetty thread are ever blocked
+     * from reading a streaming request.
+     */
     private val grpcMessageSourceChannelDispatcher =
       Dispatchers.IO.limitedParallelism(
         parallelism = webConfig.jetty_max_thread_pool_size,
@@ -147,7 +149,7 @@ internal class GrpcFeatureBinding(
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         ProtoAdapter.get(wireAnnotation.responseAdapter) as ProtoAdapter<Any>
       }
-      val isSuspending = action.function.isSuspend
+      val isSuspend = action.function.isSuspend
 
       return if (streamingRequestType != null) {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
@@ -156,7 +158,7 @@ internal class GrpcFeatureBinding(
           responseAdapter = responseAdapter,
           streamingRequest = true,
           streamingResponse = streamingResponse,
-          isSuspend = isSuspending,
+          isSuspend = isSuspend,
           grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
         )
       } else {
@@ -166,7 +168,7 @@ internal class GrpcFeatureBinding(
           responseAdapter = responseAdapter,
           streamingRequest = false,
           streamingResponse = streamingResponse,
-          isSuspend = isSuspending,
+          isSuspend = isSuspend,
           grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
         )
       }

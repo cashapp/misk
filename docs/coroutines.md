@@ -1,4 +1,4 @@
-Misk Coroutines Rules
+# Misk Coroutines Rules
 
 Coroutines are cooperative concurrency. If you don't cooperate (ie. suspend regularly), things will not be as efficient 
 and may potentially deadlock.  
@@ -32,7 +32,7 @@ Example
 }```
 
 
-When an action is declared with the `suspend` modifier, it'll be called with a `Dispatcher` that has a single backing
+When an action is declared with the `suspend` modifier, it will be called with a `Dispatcher` that has a single backing
 thread (`runBlocking`). This thread is part of the Jetty Thread Pool and allocated to this specific request, therefore
 it is safe to make blocking calls on. This will also take care of request scoped features that are thread local, 
 such as ActionScoped values, MDC, tracing, etc.
@@ -43,6 +43,10 @@ The framework will release these resources for you.
 Follow structured concurrency best practices, including:
  - All coroutines should be in child scopes for the incoming request scope.
  - Don't use `GlobalScope` or create a new `CoroutineScope()` object.
+
+Misk is gradually adding experimental support for Kotlin coroutines. 
+Functionality may be partially implemented or buggy in the short term as support is added to core libraries 
+and implementations. Please report any issues encountered.
 
 
 
