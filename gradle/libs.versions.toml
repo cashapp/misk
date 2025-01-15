@@ -1,9 +1,9 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.29.51"
+aws2 = "2.29.52"
 bucket4j = "8.8.0"
-datadog = "1.45.0"
+datadog = "1.45.1"
 dependencyAnalysisPlugin = "2.7.0"
 detekt = "1.23.7"
 docker = "3.4.1"
@@ -136,7 +136,7 @@ jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api"
 jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version = "5.13.3.202401111512-r" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
-jooq = { module = "org.jooq:jooq", version = "3.18.24" }
+jooq = { module = "org.jooq:jooq", version = "3.18.25" }
 jooqGradlePlugin = { module = "nu.studer:gradle-jooq-plugin", version = "9.0" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.1" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
@@ -158,7 +158,7 @@ kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = 
 kotlinRetry = { module = "com.michael-bull.kotlin-retry:kotlin-retry", version = "1.0.9" }
 kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlinXHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.11.0" }
+kotlinXHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.12.0" }
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.9.0" }
 kotlinxCoroutinesDebug = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-debug", version = "1.9.0" }
 kotlinxCoroutinesJdk8 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8", version = "1.9.0" }
@@ -190,7 +190,7 @@ openTracingJdbc = { module = "io.opentracing.contrib:opentracing-jdbc", version 
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
 openTracingUtil = { module = "io.opentracing:opentracing-util", version = "0.33.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.4" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.5" }
 prometheusClient = { module = "io.prometheus:simpleclient" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version = "0.16.0" }
 prometheusClientCommon = { module = "io.prometheus:simpleclient_common" }
