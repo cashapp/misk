@@ -67,6 +67,30 @@ dependencies {
   testImplementation(project(":misk-jdbc"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-jdbc")))
+
+  testImplementation(libs.guice)
+  testImplementation(libs.hikariCp)
+  testImplementation(libs.loggingApi)
+  testImplementation(libs.okio)
+  testImplementation(project(":wisp:wisp-containers-testing"))
+  testImplementation(project(":wisp:wisp-deployment"))
+  testImplementation(project(":wisp:wisp-logging"))
+  testImplementation(project(":misk"))
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-service"))
+
+  testFixturesImplementation(libs.dockerTransport)
+  testFixturesImplementation(libs.dockerTransportCore)
+  testFixturesImplementation(libs.hikariCp)
+  testFixturesImplementation(libs.loggingApi)
+  testFixturesImplementation(libs.mysql)
+  testFixturesImplementation(libs.okio)
+  testFixturesImplementation(project(":misk"))
+  testFixturesImplementation(project(":misk-backoff"))
+  testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":wisp:wisp-moshi"))
+  testFixturesImplementation(libs.jsqlparser)
 }
 
 mavenPublishing {

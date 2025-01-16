@@ -46,6 +46,25 @@ dependencies {
   testImplementation(project(":misk-redis"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-redis")))
+
+  testImplementation(project(":misk-service"))
+  testImplementation(libs.dockerApi)
+  testImplementation(libs.guava)
+  testImplementation(libs.guice)
+  testImplementation(libs.loggingApi)
+  testImplementation(libs.okio)
+  testImplementation(project(":wisp:wisp-containers-testing"))
+  testImplementation(project(":wisp:wisp-logging"))
+
+  testFixturesImplementation(libs.apacheCommonsPool)
+  testFixturesImplementation(libs.apacheCommonsIo)
+  testFixturesImplementation(libs.guice)
+  testFixturesImplementation(libs.okio)
+  testFixturesImplementation(libs.prometheusClient)
+  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(libs.loggingApi)
+  testFixturesImplementation(project(":wisp:wisp-deployment"))
+  testFixturesImplementation(project(":misk-service"))
 }
 
 tasks.withType<Test> {

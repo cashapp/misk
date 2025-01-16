@@ -35,6 +35,10 @@ dependencies {
   testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-jobqueue"))
   testImplementation(project(":misk-testing"))
+
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-service"))
+  testImplementation(project(":misk-testing-api"))
 }
 
 mavenPublishing {

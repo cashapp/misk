@@ -32,6 +32,12 @@ dependencies {
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
+
+  testFixturesImplementation(project(":misk-jdbc"))
+  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(libs.bucket4jCore)
+  testFixturesImplementation(libs.bucket4jMySQL)
+  testFixturesImplementation(libs.loggingApi)
 }
 
 mavenPublishing {

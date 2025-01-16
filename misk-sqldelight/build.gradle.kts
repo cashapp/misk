@@ -29,6 +29,10 @@ dependencies {
   testImplementation(project(":wisp:wisp-config"))
   testImplementation(project(":wisp:wisp-deployment"))
   testImplementation(testFixtures(project(":misk-jdbc")))
+
+  testFixturesImplementation(libs.loggingApi)
+  testFixturesImplementation(project(":misk-backoff"))
+  testFixturesImplementation(project(":wisp:wisp-logging"))
 }
 
 mavenPublishing {

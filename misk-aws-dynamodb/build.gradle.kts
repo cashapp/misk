@@ -42,6 +42,17 @@ dependencies {
     // so we should remove it when things get fixed upstream.
     testImplementation("io.github.ganadist.sqlite4java:libsqlite4java-osx-aarch64:1.0.392")
   }
+
+  testImplementation(libs.kotlinReflect)
+  testImplementation(libs.tempestTesting)
+  testImplementation(libs.tempestTestingDocker)
+  testImplementation(libs.tempestTestingJvm)
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-service"))
+
+  testFixturesImplementation(libs.kotlinReflect)
+  testFixturesImplementation(project(":misk-exceptions-dynamodb"))
+  testFixturesImplementation(project(":misk-service"))
 }
 
 mavenPublishing {
