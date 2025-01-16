@@ -29,6 +29,14 @@ dependencies {
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
+
+  testFixturesImplementation(project(":wisp:wisp-rate-limiting"))
+  testFixturesImplementation(libs.guice)
+  testFixturesImplementation(libs.jedis)
+  testFixturesImplementation(libs.micrometerCore)
+  testFixturesImplementation(project(":wisp:wisp-rate-limiting:bucket4j"))
+  testFixturesImplementation(libs.bucket4jCore)
+  testFixturesImplementation(libs.bucket4jRedis)
 }
 
 tasks.withType<Test> {

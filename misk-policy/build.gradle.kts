@@ -45,6 +45,21 @@ dependencies {
   testImplementation(project(":misk-policy"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-metrics")))
+
+  testImplementation(libs.dockerTransport)
+  testImplementation(libs.dockerTransportCore)
+  testImplementation(libs.guice)
+  testImplementation(libs.loggingApi)
+  testImplementation(libs.okHttp)
+  testImplementation(libs.okio)
+  testImplementation(project(":wisp:wisp-logging"))
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-service"))
+
+  testFixturesImplementation(libs.prometheusClient)
+  testFixturesImplementation(libs.retrofitScalars)
+  testFixturesImplementation(project(":wisp:wisp-moshi"))
+  testFixturesImplementation(project(":misk"))
 }
 
 mavenPublishing {

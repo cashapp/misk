@@ -34,6 +34,14 @@ dependencies {
   testImplementation(project(":misk-feature"))
   testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-testing"))
+
+  testImplementation(libs.guice)
+  testImplementation(libs.kotlinStdLibJdk8)
+  testImplementation(libs.moshiCore)
+  testImplementation(project(":misk-service"))
+  testImplementation(project(":misk-testing-api"))
+
+  testFixturesImplementation(libs.kotlinStdLibJdk8)
 }
 
 mavenPublishing {

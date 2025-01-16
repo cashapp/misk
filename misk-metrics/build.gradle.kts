@@ -30,6 +30,18 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
 
+
+  testImplementation(libs.guava)
+  testImplementation(libs.guice)
+  testImplementation(libs.kotlinStdLibJdk8)
+  testImplementation(libs.micrometerCore)
+  testImplementation(libs.micrometerRegistryPrometheus)
+
+  testFixturesImplementation(libs.findbugsJsr305)
+  testFixturesImplementation(libs.guava)
+  testFixturesImplementation(libs.guice)
+  testFixturesImplementation(libs.jakartaInject)
+  testFixturesImplementation(libs.kotlinStdLibJdk8)
 }
 
 mavenPublishing {

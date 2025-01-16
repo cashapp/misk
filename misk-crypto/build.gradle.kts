@@ -46,6 +46,25 @@ dependencies {
   testImplementation(project(":misk-crypto"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-crypto")))
+
+  testImplementation(libs.bouncycastle)
+  testImplementation(libs.guice)
+  testImplementation(libs.tink)
+  testImplementation(libs.tinkAwskms)
+  testImplementation(libs.tinkGcpkms)
+  testImplementation(project(":wisp:wisp-deployment"))
+  testImplementation(project(":misk-config"))
+
+  testFixturesImplementation(libs.bouncycastle)
+  testFixturesImplementation(libs.bouncycastlePgp)
+  testFixturesImplementation(libs.guava)
+  testFixturesImplementation(libs.loggingApi)
+  testFixturesImplementation(libs.moshiCore)
+  testFixturesImplementation(libs.okio)
+  testFixturesImplementation(libs.tinkAwskms)
+  testFixturesImplementation(libs.tinkGcpkms)
+  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk"))
 }
 
 mavenPublishing {

@@ -23,6 +23,8 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.okio)
   testImplementation(project(":misk-testing"))
+
+  testImplementation(libs.guice)
 }
 
 mavenPublishing {

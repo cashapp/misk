@@ -29,6 +29,11 @@ dependencies {
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
+
+  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(libs.bucket4jCore)
+  testFixturesImplementation(libs.bucket4jDynamoDbV1)
+  testFixturesImplementation(libs.loggingApi)
 }
 
 mavenPublishing {
