@@ -15,8 +15,8 @@ import java.net.Socket
 
 buildscript {
   repositories {
-    mavenCentral()
-    gradlePluginPortal()
+    maven(url = "https://maven.global.square/artifactory/maven-central") { name = "Misk: mavenCentral mirror" }
+    maven(url = "https://maven.global.square/artifactory/gradle-plugins") { name = "Misk: gradlePluginsPortal mirror" }
   }
 
   dependencies {
