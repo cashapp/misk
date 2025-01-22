@@ -21,7 +21,6 @@ buildscript {
 
   dependencies {
     classpath(platform(libs.kotlinBom))
-    classpath(platform(libs.kotlinGradleBom))
     classpath(libs.detektGradlePlugin)
     classpath(libs.dokkaGradlePlugin)
     // TODO remove Flyway when Misk SchemaMigratorGradlePlugin merges
