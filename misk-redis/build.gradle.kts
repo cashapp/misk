@@ -67,7 +67,7 @@ dependencies {
   testFixturesImplementation(project(":misk-service"))
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
   dependsOn(":startRedis")
 }
 

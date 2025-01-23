@@ -192,12 +192,12 @@ subprojects {
 
   // Only apply if the project has the kotlin plugin added:
   plugins.withType<KotlinPluginWrapper> {
-    tasks.withType<KotlinCompile> {
+    tasks.withType<KotlinCompile>().configureEach {
       kotlinOptions {
         jvmTarget = "11"
       }
     }
-    tasks.withType<JavaCompile> {
+    tasks.withType<JavaCompile>().configureEach {
       sourceCompatibility = "11"
       targetCompatibility = "11"
     }
@@ -221,7 +221,7 @@ subprojects {
       add("api", platform(rootProject.libs.wireBom))
     }
 
-    tasks.withType<GenerateModuleMetadata> {
+    tasks.withType<GenerateModuleMetadata>().configureEach {
       suppressedValidationErrors.add("enforced-platform")
     }
   }
@@ -238,7 +238,7 @@ subprojects {
     }
   }
 
-  tasks.withType<Test> {
+  tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 
     if (System.getenv("CI") == "true") {
@@ -278,7 +278,7 @@ subprojects {
     }
   }
 
-  tasks.withType<Detekt> {
+  tasks.withType<Detekt>().configureEach {
     dependsOn(":detektive:assemble")
     exclude { it.file.absolutePath.contains("/generated/source/") || it.file.absolutePath.contains("SampledLogger") }
   }

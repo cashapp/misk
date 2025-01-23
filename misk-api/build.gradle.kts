@@ -19,7 +19,7 @@ mavenPublishing {
   )
 }
 
-tasks.withType<KotlinCompile> {
+tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
     freeCompilerArgs.add("-Xjvm-default=all-compatibility")
   }

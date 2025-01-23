@@ -39,7 +39,7 @@ dependencies {
   testFixturesImplementation(libs.bucket4jRedis)
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
   dependsOn(":startRedis")
 }
 

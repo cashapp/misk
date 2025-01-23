@@ -40,6 +40,6 @@ tasks.jar {
   archiveClassifier.set("unshaded")
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
   dependsOn(":startRedis")
 }
