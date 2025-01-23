@@ -61,8 +61,8 @@ detektTest = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref =
 detektTestUtils = { module = "io.gitlab.arturbosch.detekt:detekt-test-utils", version.ref = "detekt" }
 dockerApi = { module = "com.github.docker-java:docker-java-api", version.ref = "docker" }
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
-dockerTransport = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
 dockerTransportCore = { module = "com.github.docker-java:docker-java-transport", version.ref = "docker" }
+dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
 dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "2.0.0" }
 errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.36.0" }
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }

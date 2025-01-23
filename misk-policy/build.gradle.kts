@@ -27,7 +27,7 @@ dependencies {
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-policy"))
   testFixturesApi(project(":misk-testing-api"))
-  testFixturesImplementation(libs.dockerTransport)
+  testFixturesImplementation(libs.dockerTransportHttpClient)
   testFixturesImplementation(libs.dockerTransportCore)
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.loggingApi)
@@ -46,7 +46,7 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-metrics")))
 
-  testImplementation(libs.dockerTransport)
+  testImplementation(libs.dockerTransportHttpClient)
   testImplementation(libs.dockerTransportCore)
   testImplementation(libs.guice)
   testImplementation(libs.loggingApi)

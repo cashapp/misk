@@ -22,7 +22,7 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
-  implementation(libs.dockerTransport)
+  implementation(libs.dockerTransportHttpClient)
   implementation(libs.dockerTransportCore)
   implementation(libs.hikariCp)
   implementation(libs.loggingApi)
@@ -79,7 +79,7 @@ dependencies {
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-service"))
 
-  testFixturesImplementation(libs.dockerTransport)
+  testFixturesImplementation(libs.dockerTransportHttpClient)
   testFixturesImplementation(libs.dockerTransportCore)
   testFixturesImplementation(libs.hikariCp)
   testFixturesImplementation(libs.loggingApi)
