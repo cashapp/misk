@@ -7,7 +7,7 @@ dependencies {
     api(libs.dockerApi)
     api(libs.loggingApi)
     implementation(libs.dockerCore)
-    implementation(libs.dockerTransport)
+    implementation(libs.dockerTransportHttpClient)
     implementation(libs.dockerTransportCore)
     implementation(project(":wisp:wisp-logging"))
     implementation(libs.openTracing)

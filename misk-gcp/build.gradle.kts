@@ -51,7 +51,7 @@ dependencies {
 
   testFixturesApi(libs.dockerApi)
   testFixturesApi(libs.dockerCore)
-  testFixturesApi(libs.dockerTransport)
+  testFixturesApi(libs.dockerTransportHttpClient)
   testFixturesApi(libs.findbugsJsr305)
   testFixturesApi(libs.gcpCloudCore)
   testFixturesApi(libs.googleCloudStorage)
@@ -86,7 +86,7 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.dockerApi)
   testImplementation(libs.dockerCore)
-  testImplementation(libs.dockerTransport)
+  testImplementation(libs.dockerTransportHttpClient)
   testImplementation(libs.dockerTransportCore)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
