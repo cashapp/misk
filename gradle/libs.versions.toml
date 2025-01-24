@@ -1,14 +1,14 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.30.2"
+aws2 = "2.30.4"
 bucket4j = "8.8.0"
-datadog = "1.45.1"
+datadog = "1.45.2"
 dependencyAnalysisPlugin = "2.7.0"
 detekt = "1.23.7"
 docker = "3.4.1"
 flyway = "11.2.0"
-googleAuth = "1.30.1"
+googleAuth = "1.31.0"
 googleHttp = "1.45.3"
 hoplite = "2.7.5"
 jackson = "2.18.2"
@@ -24,7 +24,7 @@ protobuf = "3.25.5"
 protobufPlugin = "0.9.4"
 retrofit = "2.11.0"
 sqldelight = "2.0.2"
-wire = "5.0.0"
+wire = "5.2.1"
 
 [libraries]
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.18.0" }
@@ -74,7 +74,7 @@ gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.1" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.85.0" }
-googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.7.1" }
+googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.7.2" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20241206-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
@@ -83,12 +83,12 @@ googleCloudStorage = { module = "com.google.cloud:google-cloud-storage", version
 googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.50.1" }
 googleHttpClient = { module = "com.google.http-client:google-http-client", version.ref = "googleHttp" }
 googleHttpClientJackson = { module = "com.google.http-client:google-http-client-jackson2", version.ref = "googleHttp" }
-grpcApi = { module = "io.grpc:grpc-api", version = "1.69.1" }
-grpcBom = { module = "io.grpc:grpc-bom", version = "1.69.1" }
-grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.69.1" }
-grpcNetty = { module = "io.grpc:grpc-netty", version = "1.69.1" }
-grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.69.1" }
-grpcStub = { module = "io.grpc:grpc-stub", version = "1.69.1" }
+grpcApi = { module = "io.grpc:grpc-api", version = "1.70.0" }
+grpcBom = { module = "io.grpc:grpc-bom", version = "1.70.0" }
+grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.70.0" }
+grpcNetty = { module = "io.grpc:grpc-netty", version = "1.70.0" }
+grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.70.0" }
+grpcStub = { module = "io.grpc:grpc-stub", version = "1.70.0" }
 guava = { module = "com.google.guava:guava" }
 guavaBom = { module = "com.google.guava:guava-bom", version = "33.4.0-jre" }
 guavaTestLib = { module = "com.google.guava:guava-testlib" }
@@ -118,7 +118,7 @@ javaxAnnotation = { module = "javax.annotation:javax.annotation-api", version = 
 javaxInject = { module = "javax.inject:javax.inject", version = "1" }
 jedis = { module = "redis.clients:jedis", version = "5.2.0" }
 jerseyBom = { module = "org.glassfish.jersey:jersey-bom", version = "3.1.10" }
-jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "26.0.1" }
+jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "26.0.2" }
 jettyAlpnServer = { module = "org.eclipse.jetty:jetty-alpn-server" }
 jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
 jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "10.0.20" }
