@@ -203,6 +203,7 @@ public final class routeguide/RouteGuideGrpc {
 	public static fun getRouteChatMethod ()Lio/grpc/MethodDescriptor;
 	public static fun getServiceDescriptor ()Lio/grpc/ServiceDescriptor;
 	public static fun newBlockingStub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideBlockingStub;
+	public static fun newBlockingV2Stub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideBlockingV2Stub;
 	public static fun newFutureStub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideFutureStub;
 	public static fun newStub (Lio/grpc/Channel;)Lrouteguide/RouteGuideGrpc$RouteGuideStub;
 }
@@ -217,6 +218,13 @@ public abstract interface class routeguide/RouteGuideGrpc$AsyncService {
 public final class routeguide/RouteGuideGrpc$RouteGuideBlockingStub : io/grpc/stub/AbstractBlockingStub {
 	public fun getFeature (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Feature;
 	public fun listFeatures (Lrouteguide/RouteGuideProto$Rectangle;)Ljava/util/Iterator;
+}
+
+public final class routeguide/RouteGuideGrpc$RouteGuideBlockingV2Stub : io/grpc/stub/AbstractBlockingStub {
+	public fun getFeature (Lrouteguide/RouteGuideProto$Point;)Lrouteguide/RouteGuideProto$Feature;
+	public fun listFeatures (Lrouteguide/RouteGuideProto$Rectangle;)Lio/grpc/stub/BlockingClientCall;
+	public fun recordRoute ()Lio/grpc/stub/BlockingClientCall;
+	public fun routeChat ()Lio/grpc/stub/BlockingClientCall;
 }
 
 public final class routeguide/RouteGuideGrpc$RouteGuideFutureStub : io/grpc/stub/AbstractFutureStub {
