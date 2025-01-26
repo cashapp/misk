@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.30.4"
+aws2 = "2.30.6"
 bucket4j = "8.8.0"
 datadog = "1.45.2"
 dependencyAnalysisPlugin = "2.7.0"
@@ -20,7 +20,7 @@ mavenPublish = "0.28.0"
 micrometer = "1.12.13"
 netty = "4.1.117.Final"
 okHttp = "5.0.0-alpha.14"
-protobuf = "3.25.5"
+protobuf = "3.25.6"
 protobufPlugin = "0.9.4"
 retrofit = "2.11.0"
 sqldelight = "2.0.2"
@@ -69,7 +69,7 @@ findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2"
 flywayGradlePlugin = { module = "org.flywaydb:flyway-gradle-plugin", version.ref = "flyway" }
 gax = { module = "com.google.api:gax", version = "2.59.1" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.49.1" }
-gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.25.3" }
+gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.25.4" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250102-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.1" }
