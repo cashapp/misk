@@ -30,7 +30,7 @@ class HelloWebProtoAction @Inject constructor() : WebAction {
     return Response(
       HelloWebResponse().newBuilder()
         .greeting(greeting(request))
-        .name(request.nick_name?.toUpperCase() ?: request.name.toUpperCase())
+        .name(request.nick_name?.uppercase() ?: request.name.uppercase())
         .build()
     )
   }

@@ -50,7 +50,7 @@ data class Destination(
       val tabletType = if (index == -1) {
         null
       } else {
-        var name = string.substring(index + 1).toUpperCase()
+        var name = string.substring(index + 1).uppercase()
         if (name == "PRIMARY") {
           name = "MASTER"
         }

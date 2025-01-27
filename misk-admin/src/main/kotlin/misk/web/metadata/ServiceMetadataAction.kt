@@ -27,7 +27,7 @@ class ServiceMetadataAction @Inject constructor(
     // Misk-web expects an UPPERCASE environment. Since this action could get a serviceMetadata
     // object from anywhere, it must be transformed here.
     val metadata = with(optionalBinder.serviceMetadata) {
-      copy(environment = this.environment.toUpperCase())
+      copy(environment = this.environment.uppercase())
     }
     return Response(serviceMetadata = metadata)
   }
