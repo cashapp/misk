@@ -1,6 +1,6 @@
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.wire)
+  id("org.jetbrains.kotlin.jvm")
+  id("com.squareup.wire")
   id("application")
 }
 

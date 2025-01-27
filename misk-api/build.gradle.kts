@@ -3,8 +3,8 @@ import com.vanniktech.maven.publish.KotlinJvm
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.mavenPublishBase)
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {

@@ -1,6 +1,6 @@
 plugins {
   id("java-platform")
-  alias(libs.plugins.mavenPublishBase)
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {

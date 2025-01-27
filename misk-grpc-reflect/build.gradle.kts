@@ -2,9 +2,9 @@ import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.mavenPublishBase)
-  alias(libs.plugins.wire)
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish.base")
+  id("com.squareup.wire")
 }
 
 wire {

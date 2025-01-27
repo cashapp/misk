@@ -2,12 +2,12 @@ import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.mavenPublishBase)
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish.base")
 
   // Needed to generate jooq test db classes
-  alias(libs.plugins.flyway)
-  alias(libs.plugins.jooq)
+  id("org.flywaydb.flyway")
+  id("nu.studer.jooq")
 }
 
 dependencies {

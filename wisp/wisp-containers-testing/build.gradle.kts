@@ -1,6 +1,6 @@
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.mavenPublish)
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {

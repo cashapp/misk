@@ -2,8 +2,8 @@ import com.vanniktech.maven.publish.GradlePlugin
 import com.vanniktech.maven.publish.JavadocJar
 
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.mavenPublishBase)
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish.base")
   id("java-gradle-plugin")
 }
 

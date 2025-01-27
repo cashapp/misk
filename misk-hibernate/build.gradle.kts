@@ -2,10 +2,10 @@ import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.mavenPublishBase)
-  alias(libs.plugins.kotlinAllOpen)
-  alias(libs.plugins.kotlinJpa)
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish.base")
+  id("org.jetbrains.kotlin.plugin.allopen")
+  id("org.jetbrains.kotlin.plugin.jpa")
 }
 
 allOpen {
