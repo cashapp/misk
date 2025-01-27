@@ -348,7 +348,7 @@ object MiskConfig {
   private fun embeddedConfigFileNames(appName: String, deployment: Deployment) =
     listOf(
       "common",
-      deployment.mapToEnvironmentName().toLowerCase(Locale.US)
+      deployment.mapToEnvironmentName().lowercase(Locale.US)
     ).map { "$appName-$it.yaml" }
 
   class SecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :

@@ -59,7 +59,7 @@ class JdbcTestFixture(
               val truncatedTableNames = mutableListOf<String>()
               connection.createStatement().use { statement ->
                 for (tableName in allTableNames) {
-                  if (persistentTables.contains(tableName.toLowerCase(Locale.ROOT))) continue
+                  if (persistentTables.contains(tableName.lowercase(Locale.ROOT))) continue
                   if (tableName.endsWith("_seq") || tableName.equals("dual")) continue
 
                   if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.POSTGRESQL) {
