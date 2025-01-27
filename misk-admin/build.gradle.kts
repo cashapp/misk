@@ -4,9 +4,9 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.mavenPublishBase)
-  alias(libs.plugins.wire)
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish.base")
+  id("com.squareup.wire")
 }
 
 dependencies {

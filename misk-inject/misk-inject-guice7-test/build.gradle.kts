@@ -1,5 +1,5 @@
 plugins {
-  alias(libs.plugins.kotlinJvm)
+  id("org.jetbrains.kotlin.jvm")
 }
 
 dependencies {

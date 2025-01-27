@@ -13,34 +13,20 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.IOException
 import java.net.Socket
 
-buildscript {
-  repositories {
-    mavenCentral()
-    gradlePluginPortal()
-  }
-
-  dependencies {
-    classpath(platform(libs.kotlinBom))
-    classpath(libs.detektGradlePlugin)
-    classpath(libs.dokkaGradlePlugin)
-    // TODO remove Flyway when Misk SchemaMigratorGradlePlugin merges
-    classpath(libs.flywayGradlePlugin)
-    classpath(libs.jgit)
-    classpath(libs.jooqGradlePlugin)
-    classpath(libs.kotlinAllOpenPlugin)
-    classpath(libs.kotlinGradlePlugin)
-    classpath(libs.kotlinNoArgPlugin)
-    classpath(libs.mysql)
-    classpath(libs.protobufGradlePlugin)
-    classpath(libs.sqldelightGradlePlugin)
-    classpath(libs.wireGradlePlugin)
-  }
-}
-
 plugins {
   alias(libs.plugins.dependencyAnalysis)
   alias(libs.plugins.binaryCompatibilityValidator)
+  alias(libs.plugins.detekt) apply false
+  alias(libs.plugins.dokka) apply false
+  alias(libs.plugins.flyway) apply false
+  alias(libs.plugins.jooq) apply false
+  alias(libs.plugins.kotlinAllOpen) apply false
+  alias(libs.plugins.kotlinJpa) apply false
+  alias(libs.plugins.kotlinJvm) apply false
   alias(libs.plugins.mavenPublishBase) apply false
+  alias(libs.plugins.protobuf) apply false
+  alias(libs.plugins.sqldelight) apply false
+  alias(libs.plugins.wire) apply false
 }
 
 dependencyAnalysis {

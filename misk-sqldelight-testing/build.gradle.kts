@@ -1,6 +1,6 @@
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.sqldelight)
+  id("org.jetbrains.kotlin.jvm")
+  id("app.cash.sqldelight")
 }
 
 dependencies {

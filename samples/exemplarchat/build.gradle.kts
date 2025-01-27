@@ -1,6 +1,6 @@
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  application
+  id("org.jetbrains.kotlin.jvm")
+  id("application")
 }
 
 val applicationMainClass = "com.squareup.chat.ChatServiceKt"
