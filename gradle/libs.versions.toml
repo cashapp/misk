@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.30.6"
+aws2 = "2.30.7"
 bucket4j = "8.8.0"
 datadog = "1.45.2"
 dependencyAnalysisPlugin = "2.7.0"
@@ -27,7 +27,7 @@ wire = "5.2.1"
 [libraries]
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.18.0" }
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
-apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.0" }
+apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.1" }
 assertj = { module = "org.assertj:assertj-core", version = "3.27.3" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version.ref = "awaitility" }
@@ -62,8 +62,8 @@ dockerTransportCore = { module = "com.github.docker-java:docker-java-transport",
 dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
 errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.36.0" }
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
-gax = { module = "com.google.api:gax", version = "2.59.1" }
-gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.49.1" }
+gax = { module = "com.google.api:gax", version = "2.60.0" }
+gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.50.0" }
 gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.25.4" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250102-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
@@ -73,9 +73,9 @@ googleApiClient = { module = "com.google.api-client:google-api-client", version 
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20241206-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
-googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.49.1" }
+googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.50.0" }
 googleCloudStorage = { module = "com.google.cloud:google-cloud-storage", version = "1.118.1" }
-googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.50.1" }
+googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.51.0" }
 googleHttpClient = { module = "com.google.http-client:google-http-client", version.ref = "googleHttp" }
 googleHttpClientJackson = { module = "com.google.http-client:google-http-client-jackson2", version.ref = "googleHttp" }
 grpcApi = { module = "io.grpc:grpc-api", version = "1.70.0" }
