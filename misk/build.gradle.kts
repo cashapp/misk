@@ -18,7 +18,7 @@ dependencies {
   api(libs.jettyServer)
   api(libs.jettyServletApi)
   api(libs.jettyUtil)
-  api(libs.kotlinXHtml)
+  api(libs.kotlinxHtml)
   api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.openTracing)

@@ -12,7 +12,7 @@ plugins {
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
-  api(libs.kotlinXHtml)
+  api(libs.kotlinxHtml)
   api(libs.okio)
   api(project(":wisp:wisp-deployment"))
   api(project(":misk"))
@@ -21,7 +21,7 @@ dependencies {
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-service"))
-  api(libs.kotlinXHtml)
+  api(libs.kotlinxHtml)
   implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(libs.okHttp)
