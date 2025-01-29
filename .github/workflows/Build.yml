@@ -97,7 +97,8 @@ jobs:
 
       - name: Publish the artifacts
         run: |
-          gradle clean publish --stacktrace
+          # disable configuration cache because publishing to Maven Central with CC is not supported yet
+          gradle clean publish --stacktrace --no-configuration-cache
 
       - name: Tag Misk repo
         uses: mathieudutour/github-tag-action@v6.1
