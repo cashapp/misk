@@ -67,7 +67,7 @@ gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.50.
 gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.25.4" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250102-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
-gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.1" }
+gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.2" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.85.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.7.2" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20241206-2.0.0" }
@@ -172,7 +172,7 @@ nettyBom = { module = "io.netty:netty-bom", version.ref = "netty" }
 nettyHandler = { module = "io.netty:netty-handler", version.ref = "netty" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okHttp" }
 okHttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okHttp" }
-okio = { module = "com.squareup.okio:okio", version = "3.9.1" }
+okio = { module = "com.squareup.okio:okio", version = "3.10.2" }
 openTracing = { module = "io.opentracing:opentracing-api", version = "0.33.0" }
 openTracingConcurrent = { module = "io.opentracing.contrib:opentracing-concurrent", version = "0.4.0" }
 openTracingDatadog = { module = "com.datadoghq:dd-trace-ot", version.ref = "datadog" }
