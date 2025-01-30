@@ -3,6 +3,7 @@ package misk
 import misk.web.DispatchMechanism
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import okhttp3.MediaType
@@ -49,7 +50,7 @@ fun KFunction<*>.asAction(
     acceptedMediaRanges = acceptedMediaRange,
     responseContentType = when (dispatchMechanism) {
       DispatchMechanism.GRPC -> {
-        require(findAnnotation<ResponseContentType>() == null) {
+        require(findAnnotationWithOverrides<ResponseContentType>() == null) {
           "@Grpc cannot be used with @ResponseContentType on $this"
         }
         MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
@@ -64,4 +65,4 @@ fun KFunction<*>.asAction(
 }
 
 private fun KFunction<*>.singleOrNullResponseMediaType() =
-  findAnnotation<ResponseContentType>()?.value?.singleOrNull()?.toMediaTypeOrNull()
+  findAnnotationWithOverrides<ResponseContentType>()?.value?.singleOrNull()?.toMediaTypeOrNull()

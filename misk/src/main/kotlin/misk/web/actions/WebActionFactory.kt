@@ -160,7 +160,7 @@ internal class WebActionFactory @Inject constructor(
     pathPattern: String,
     dispatchMechanism: DispatchMechanism
   ) {
-    val responseContentTypes = function.findAnnotation<ResponseContentType>()
+    val responseContentTypes = function.findAnnotationWithOverrides<ResponseContentType>()
       ?.value
       ?.toList()
       // We have to have an element in the list to be able to flatMap over it below.
