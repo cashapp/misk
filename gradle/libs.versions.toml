@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.780"
-aws2 = "2.30.10"
+aws2 = "2.30.11"
 bucket4j = "8.8.0"
 datadog = "1.46.0"
 dependencyAnalysisPlugin = "2.8.0"
