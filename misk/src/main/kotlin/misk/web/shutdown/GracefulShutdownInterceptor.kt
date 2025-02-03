@@ -18,7 +18,6 @@ internal class GracefulShutdownInterceptorFactory @Inject constructor(
   @OptIn(ExperimentalMiskApi::class)
   private val rejectionStatusCode = webConfig.graceful_shutdown_config!!.rejection_status_code
 
-  @OptIn(ExperimentalMiskApi::class)
   private val interceptor = object : NetworkInterceptor {
     override fun intercept(chain: NetworkChain) {
       // Don't do anything for health checks.

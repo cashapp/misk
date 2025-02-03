@@ -7,7 +7,6 @@ import com.google.inject.Module
 import com.google.inject.testing.fieldbinder.BoundFieldModule
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
 import misk.inject.ReusableTestModule
 import misk.inject.getInstance
@@ -206,7 +205,6 @@ private fun ExtensionContext.startService(): Boolean {
 // The injector is reused across tests if
 //   1. The tests module(s) used in the test extend ReusableTestModules, AND
 //   2. The environment variable MISK_TEST_REUSE_INJECTOR is set to true
-@OptIn(ExperimentalMiskApi::class)
 private fun ExtensionContext.reuseInjector(): Boolean {
   return getFromStoreOrCompute("reuseInjector") {
     (System.getenv("MISK_TEST_REUSE_INJECTOR")?.toBoolean() ?: false) &&
