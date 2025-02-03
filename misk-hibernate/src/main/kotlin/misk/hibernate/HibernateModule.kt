@@ -58,6 +58,7 @@ class HibernateModule @JvmOverloads constructor(
   val databasePool: DatabasePool = RealDatabasePool,
   private val logLevelConfig: HibernateExceptionLogLevelConfig = HibernateExceptionLogLevelConfig(),
   private val jdbcModuleAlreadySetup: Boolean = false,
+  private val installHealthChecks: Boolean = true,
 ) : KAbstractModule() {
 
   // Make sure Hibernate logs use slf4j. Otherwise, it will base its decision on the classpath and
@@ -96,7 +97,7 @@ class HibernateModule @JvmOverloads constructor(
     jdbcModuleAlreadySetup: Boolean,
   ) : this(
     qualifier = qualifier,
-    config  = config,
+    config = config,
     readerQualifier = null,
     readerConfig = null,
     databasePool = databasePool,
@@ -111,7 +112,16 @@ class HibernateModule @JvmOverloads constructor(
     }
 
     if (!jdbcModuleAlreadySetup) {
-      install(JdbcModule(qualifier, config, readerQualifier, readerConfig, databasePool))
+      install(
+        JdbcModule(
+          qualifier = qualifier,
+          config = config,
+          readerQualifier = readerQualifier,
+          readerConfig = readerConfig,
+          databasePool = databasePool,
+          installHealthCheck = installHealthChecks
+        )
+      )
     }
 
     bind<Query.Factory>().to<ReflectionQuery.Factory>()
@@ -119,9 +129,9 @@ class HibernateModule @JvmOverloads constructor(
       .toInstance(QueryLimitsConfig(MAX_MAX_ROWS, ROW_COUNT_ERROR_LIMIT, ROW_COUNT_WARNING_LIMIT))
     bind<HibernateExceptionLogLevelConfig>().toInstance(logLevelConfig)
 
-    bindDataSource(qualifier, config, true)
+    bindDataSource(qualifier, true)
     if (readerQualifier != null && readerConfig != null) {
-      bindDataSource(readerQualifier, readerConfig, false)
+      bindDataSource(readerQualifier, false)
     }
 
     newMultibinder<DataSourceDecorator>(qualifier)
@@ -210,7 +220,6 @@ class HibernateModule @JvmOverloads constructor(
 
   private fun bindDataSource(
     qualifier: KClass<out Annotation>,
-    config: DataSourceConfig,
     isWriter: Boolean,
   ) {
     // These items are configured on the writer qualifier only
@@ -251,14 +260,16 @@ class HibernateModule @JvmOverloads constructor(
       )
     }
 
-    val healthCheckKey = keyOf<HealthCheck>(qualifier)
-    bind(healthCheckKey)
-      .toProvider(object : Provider<HibernateHealthCheck> {
-        @Inject lateinit var clock: Clock
+    if (this.installHealthChecks) {
+      val healthCheckKey = keyOf<HealthCheck>(qualifier)
+      bind(healthCheckKey)
+        .toProvider(object : Provider<HibernateHealthCheck> {
+          @Inject lateinit var clock: Clock
 
-        override fun get() = HibernateHealthCheck(qualifier, sessionFactoryServiceProvider, clock)
-      })
-      .asSingleton()
-    multibind<HealthCheck>().to(healthCheckKey)
+          override fun get() = HibernateHealthCheck(qualifier, sessionFactoryServiceProvider, clock)
+        })
+        .asSingleton()
+      multibind<HealthCheck>().to(healthCheckKey)
+    }
   }
 }
