@@ -1,11 +1,9 @@
 package misk.inject
 
-import misk.annotation.ExperimentalMiskApi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-@OptIn(ExperimentalMiskApi::class)
 class ReusableTestModuleTest {
 
   class NoArgTestModuleOne: ReusableTestModule()

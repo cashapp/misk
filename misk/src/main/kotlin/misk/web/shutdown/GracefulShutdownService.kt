@@ -101,7 +101,6 @@ internal class GracefulShutdownService @Inject constructor(
     shuttingDown = false
   }
 
-  @OptIn(ExperimentalMiskApi::class)
   override fun shutDown() {
     shuttingDown = true
 

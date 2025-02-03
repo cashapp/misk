@@ -1,6 +1,5 @@
 package misk.inject
 
-import misk.annotation.ExperimentalMiskApi
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
@@ -9,7 +8,6 @@ import kotlin.reflect.jvm.isAccessible
  * This class should be extended by test modules used in tests,
  * for Misk to reuse the Guice injector across tests for significantly faster test suite performance.
  */
-@ExperimentalMiskApi
 abstract class ReusableTestModule: KAbstractModule() {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
