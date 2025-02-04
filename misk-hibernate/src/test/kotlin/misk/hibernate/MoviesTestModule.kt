@@ -23,6 +23,7 @@ class MoviesTestModule(
       addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
     }
   },
+  private val installHealthChecks: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
@@ -45,8 +46,10 @@ class MoviesTestModule(
     )
     install(
       HibernateModule(
-        Movies::class, MoviesReader::class,
-        DataSourceClusterConfig(writer = dataSourceConfig, reader = dataSourceConfig)
+        qualifier = Movies::class,
+        readerQualifier = MoviesReader::class,
+        cluster = DataSourceClusterConfig(writer = dataSourceConfig, reader = dataSourceConfig),
+        installHealthChecks = installHealthChecks
       )
     )
     install(entitiesModule)
