@@ -117,6 +117,9 @@ jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "26.0.2
 jettyAlpnServer = { module = "org.eclipse.jetty:jetty-alpn-server" }
 jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
 jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "12.1.0.alpha1" }
+jettyCompressionServer = { module = "org.eclipse.jetty.compression:jetty-compression-server", version = "12.1.0.alpha1" }
+jettyCompressionGzip = { module = "org.eclipse.jetty.compression:jetty-compression-gzip", version = "12.1.0.alpha1" }
+jettyCompressionZstandard = { module = "org.eclipse.jetty.compression:jetty-compression-zstandard", version = "12.1.0.alpha1" }
 jettyEe8Bom = { module = "org.eclipse.jetty.ee8:jetty-ee8-bom", version = "12.1.0.alpha1" }
 jettyEe8WebsocketServer = { module = "org.eclipse.jetty.ee8.websocket:jetty-ee8-websocket-jetty-server" }
 jettyHttp = { module = "org.eclipse.jetty:jetty-http" }

@@ -92,9 +92,9 @@ import misk.web.mdc.RequestURILogContextProvider
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
 import misk.web.shutdown.GracefulShutdownModule
+import org.eclipse.jetty.compression.server.CompressionHandler
 import org.eclipse.jetty.io.EofException
 import org.eclipse.jetty.server.handler.StatisticsHandler
-import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.VirtualThreads
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
@@ -327,8 +327,8 @@ class MiskWebModule @JvmOverloads constructor(
 
   @Provides
   @Singleton
-  fun provideGzipHandler(): GzipHandler {
-    return GzipHandler()
+  fun provideCompressionHandler(): CompressionHandler {
+    return CompressionHandler()
   }
 
   @Provides
