@@ -16,6 +16,10 @@ import misk.web.jetty.JettyHealthService.Companion.jettyHealthServiceEnabled
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
+import org.eclipse.jetty.compression.gzip.GzipCompression
+import org.eclipse.jetty.compression.server.CompressionConfig
+import org.eclipse.jetty.compression.server.CompressionHandler
+import org.eclipse.jetty.compression.zstandard.ZstandardCompression
 import org.eclipse.jetty.ee8.servlet.FilterHolder
 import org.eclipse.jetty.ee8.servlet.ServletContextHandler
 import org.eclipse.jetty.ee8.servlet.ServletHolder
@@ -36,7 +40,6 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.StatisticsHandler
-import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
@@ -62,7 +65,7 @@ class JettyService @Inject internal constructor(
   threadPool: ThreadPool,
   private val connectionMetricsCollector: JettyConnectionMetricsCollector,
   private val statisticsHandler: StatisticsHandler,
-  private val gzipHandler: GzipHandler,
+  private val compressionHandler: CompressionHandler,
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val healthServerUrl: HttpUrl? get() = server.healthUrl
@@ -293,16 +296,33 @@ class JettyService @Inject internal constructor(
     val serverStats = ConnectionStatistics()
     server.addBean(serverStats)
 
-    gzipHandler.server = server
+    compressionHandler.server = server
     if (webConfig.gzip) {
-      gzipHandler.minGzipSize = webConfig.minGzipSize
-      gzipHandler.addIncludedMethods("POST")
-      gzipHandler.addExcludedMimeTypes(MediaTypes.APPLICATION_GRPC)
+      compressionHandler.putCompression(ZstandardCompression().apply {
+        this.minCompressSize = webConfig.minGzipSize
+      })
+      compressionHandler.putCompression(GzipCompression().apply {
+        this.minCompressSize = webConfig.minGzipSize
+      })
+      compressionHandler.putConfiguration("/", CompressionConfig.builder()
+        .defaults()
+        .compressExcludeMimeType(MediaTypes.APPLICATION_GRPC)
+        .decompressExcludeMimeType(MediaTypes.APPLICATION_GRPC)
+        .compressPreferredEncodings(listOf("zstd"))
+        .build()
+      )
     } else {
-      // GET is enabled by default for gzipHandler.
-      gzipHandler.addExcludedMethods("GET", "POST")
+      compressionHandler.putConfiguration("/", CompressionConfig.builder()
+        .compressExcludeMethod("GET")
+        .compressExcludeMethod("POST")
+        .decompressExcludeMethod("GET")
+        .decompressExcludeMethod("POST")
+        .compressExcludeMimeType(MediaTypes.APPLICATION_GRPC)
+        .decompressExcludeMimeType(MediaTypes.APPLICATION_GRPC)
+        .build()
+      )
     }
-    servletContextHandler.insertHandler(gzipHandler)
+    servletContextHandler.insertHandler(compressionHandler)
 
     server.handler = statisticsHandler
 
