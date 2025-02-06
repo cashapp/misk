@@ -2,11 +2,11 @@ package misk.web.actions
 
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
 import misk.ApplicationInterceptor
 import misk.Chain
 import misk.grpc.GrpcMessageSinkChannel
 import misk.grpc.GrpcMessageSourceChannel
-import misk.logging.DynamicMdcContext
 import misk.scope.ActionScope
 import misk.web.HttpCall
 import misk.web.RealChain
@@ -40,7 +40,7 @@ internal fun WebAction.asChain(
       } else {
         // Handle suspending invocation, this includes building out the context to propagate MDC
         // and action scope.
-        val context = DynamicMdcContext() +
+        val context = MDCContext() +
           if (scope.inScope()) {
             scope.asContextElement()
           } else {

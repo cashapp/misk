@@ -13,4 +13,14 @@ object MiskMdc : Mdc {
   override fun clear() {
     MDC.clear()
   }
+
+  override fun setContextMap(context: MdcContextMap) {
+    if (context.isNotEmpty()) {
+      MDC.setContextMap(context)
+    } else {
+      MDC.clear()
+    }
+  }
+
+  override fun getCopyOfContextMap(): MdcContextMap? = MDC.getCopyOfContextMap()
 }

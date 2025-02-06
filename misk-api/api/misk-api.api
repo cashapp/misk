@@ -50,7 +50,9 @@ public final class misk/client/NetworkInterceptorWrapper : okhttp3/Interceptor {
 public abstract interface class misk/logging/Mdc {
 	public abstract fun clear ()V
 	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun getCopyOfContextMap ()Ljava/util/Map;
 	public abstract fun put (Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun setContextMap (Ljava/util/Map;)V
 }
 
 public abstract interface class misk/scope/ActionScoped {

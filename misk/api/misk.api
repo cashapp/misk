@@ -835,7 +835,19 @@ public final class misk/logging/MiskMdc : misk/logging/Mdc {
 	public static final field INSTANCE Lmisk/logging/MiskMdc;
 	public fun clear ()V
 	public fun get (Ljava/lang/String;)Ljava/lang/String;
+	public fun getCopyOfContextMap ()Ljava/util/Map;
 	public fun put (Ljava/lang/String;Ljava/lang/String;)V
+	public fun setContextMap (Ljava/util/Map;)V
+}
+
+public final class misk/logging/ScopedMdcKt {
+	public static final fun withMdc (Lmisk/logging/Mdc;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static final fun withMdc (Lmisk/logging/Mdc;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class misk/logging/coroutines/ScopedMdcKt {
+	public static final fun withMdc (Lmisk/logging/Mdc;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun withMdc (Lmisk/logging/Mdc;[Lkotlin/Pair;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/monitoring/JvmMetrics {
