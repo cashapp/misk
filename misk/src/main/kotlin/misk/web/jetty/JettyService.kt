@@ -1,7 +1,6 @@
 package misk.web.jetty
 
 import com.google.common.base.Stopwatch
-import com.google.common.base.Strings
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.squareup.wire.internal.newMutableList
@@ -17,6 +16,11 @@ import misk.web.jetty.JettyHealthService.Companion.jettyHealthServiceEnabled
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
+import org.eclipse.jetty.ee8.servlet.FilterHolder
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler
+import org.eclipse.jetty.ee8.servlet.ServletHolder
+import org.eclipse.jetty.ee8.servlets.CrossOriginFilter
+import org.eclipse.jetty.ee8.websocket.server.config.JettyWebSocketServletContainerInitializer
 import org.eclipse.jetty.http.UriCompliance
 import org.eclipse.jetty.http2.server.AbstractHTTP2ServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
@@ -31,19 +35,11 @@ import org.eclipse.jetty.server.SecureRequestCustomizer
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
-import org.eclipse.jetty.server.handler.ContextHandler
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
-import org.eclipse.jetty.servlet.FilterHolder
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.eclipse.jetty.servlet.ServletHolder
-import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
-import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
-import org.eclipse.jetty.util.JavaVersion
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import wisp.logging.getLogger
 import java.io.File
 import java.io.IOException
@@ -56,7 +52,6 @@ import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern
 import javax.servlet.DispatcherType
 
 @Singleton
@@ -258,44 +253,29 @@ class JettyService @Inject internal constructor(
         udsConnFactories.add(HTTP2CServerConnectionFactory(httpConfig))
       }
 
-      if (isJEP380Supported(socketConfig.path)) {
-        logger.info("Using UnixDomainServerConnector for ${socketConfig.path}")
-        val udsConnector = UnixDomainServerConnector(
-          server,
-          null /* executor */,
-          null /* scheduler */,
-          null /* buffer pool */,
-          webConfig.acceptors ?: -1,
-          webConfig.selectors ?: -1,
-          *udsConnFactories.toTypedArray()
-        )
-        val socketFile = File(socketConfig.path)
-        udsConnector.unixDomainPath = socketFile.toPath()
-        udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
-        udsConnector.name = "uds"
+      logger.info("Using UnixDomainServerConnector for ${socketConfig.path}")
+      val udsConnector = UnixDomainServerConnector(
+        server,
+        null /* executor */,
+        null /* scheduler */,
+        null /* buffer pool */,
+        webConfig.acceptors ?: -1,
+        webConfig.selectors ?: -1,
+        *udsConnFactories.toTypedArray()
+      )
+      val socketFile = File(socketConfig.path)
+      udsConnector.unixDomainPath = socketFile.toPath()
+      udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
+      udsConnector.name = "uds"
 
-        // set file permissions after socket creation so sidecars (e.g. envoy, istio) have access
-        try {
-          udsConnector.start()
-          setFilePermissions(socketFile)
-        } catch (e: Exception) {
-          cleanAndThrow(udsConnector, e)
-        }
-        server.addConnector(udsConnector)
-      } else {
-        val udsConnector = UnixSocketConnector(
-          server,
-          null /* executor */,
-          null /* scheduler */,
-          null /* buffer pool */,
-          webConfig.selectors ?: -1,
-          *udsConnFactories.toTypedArray()
-        )
-        udsConnector.setUnixSocket(socketConfig.path)
-        udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
-        udsConnector.name = "uds"
-        server.addConnector(udsConnector)
+      // set file permissions after socket creation so sidecars (e.g. envoy, istio) have access
+      try {
+        udsConnector.start()
+        setFilePermissions(socketFile)
+      } catch (e: Exception) {
+        cleanAndThrow(udsConnector, e)
       }
+      server.addConnector(udsConnector)
     }
 
     // TODO(mmihic): Force security handler?
@@ -305,7 +285,7 @@ class JettyService @Inject internal constructor(
     JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null)
     server.addManaged(servletContextHandler)
 
-    statisticsHandler.handler = servletContextHandler
+    statisticsHandler.handler = servletContextHandler.get()
     statisticsHandler.server = server
 
     // Kubernetes sends a SIG_TERM and gives us 30 seconds to stop gracefully.
@@ -446,11 +426,11 @@ private val Server.httpsUrl: HttpUrl?
   }
 
 internal fun NetworkConnector.toHttpUrl(): HttpUrl {
-  val context = server.getChildHandlerByClass(ContextHandler::class.java)
+  val context = server.context
   val protocol = defaultConnectionFactory.protocol
   val scheme = if (protocol.startsWith("SSL-") || protocol == "SSL") "https" else "http"
 
-  val virtualHosts = context?.virtualHosts ?: arrayOf<String>()
+  val virtualHosts = context?.virtualHosts ?: listOf<String>()
   val explicitHost = if (virtualHosts.isEmpty()) host else virtualHosts[0]
 
   return HttpUrl.Builder()
@@ -465,6 +445,7 @@ internal fun NetworkConnector.toHttpUrl(): HttpUrl {
  * the response stream before the request stream is completed. It also wants to send HTTP trailers.
  */
 private fun HttpConfiguration.customizeForGrpc() {
+  @Suppress("DEPRECATION")
   isDelayDispatchUntilContent = false
 }
 
@@ -478,19 +459,6 @@ private fun AbstractHTTP2ServerConnectionFactory.customize(webConfig: WebConfig)
   if (webConfig.jetty_initial_stream_recv_window != null) {
     initialStreamRecvWindow = webConfig.jetty_initial_stream_recv_window
   }
-}
-
-/**
- * JEP-380 is supported when running Java 16+ and the provided socket path is non-abstract. Abstract
- * socket paths are identified by paths prefixed with an `@` symbol or a null byte.
- */
-internal fun isJEP380Supported(
-  path: String,
-  javaVersion: Int = JavaVersion.VERSION.major
-): Boolean {
-  return javaVersion >= 16 &&
-    !Strings.isNullOrEmpty(path) &&
-    !Pattern.compile("^@|\u0000").matcher(path).find()
 }
 
 private fun setFilePermissions(file: File) {

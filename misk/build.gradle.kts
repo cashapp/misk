@@ -41,6 +41,7 @@ dependencies {
   api(project(":misk-service"))
   implementation(libs.jCommander)
   implementation(libs.jettyAlpnServer)
+  implementation(libs.jettyEe8WebsocketServer)
   implementation(libs.jettyHttp)
   implementation(libs.jettyHttp2)
   implementation(libs.jettyIo)

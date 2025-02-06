@@ -3,6 +3,8 @@ package misk.web.ssl
 import ch.qos.logback.classic.Level
 import com.google.inject.Guice
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.Action
 import misk.MiskDefault
 import misk.MiskTestingServiceModule
@@ -48,8 +50,6 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import kotlin.test.assertFailsWith
 
@@ -264,7 +264,7 @@ class Http2ConnectivityTest {
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun disconnect(): Response<String> {
       val request = actionScopedServletRequest.get() as org.eclipse.jetty.server.Request
-      request.httpChannel.abort(Exception("boom")) // Synthesize a connectivity failure.
+      request.fail(Exception("boom")) // Synthesize a connectivity failure.
 
       return Response(body = "")
     }
@@ -278,7 +278,7 @@ class Http2ConnectivityTest {
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun disconnect(): ResponseBody {
       val request = actionScopedServletRequest.get() as org.eclipse.jetty.server.Request
-      request.httpChannel.abort(Exception("boom")) // Synthesize a connectivity failure.
+      request.fail(Exception("boom")) // Synthesize a connectivity failure.
 
       return object : ResponseBody {
         override fun writeTo(sink: BufferedSink) {

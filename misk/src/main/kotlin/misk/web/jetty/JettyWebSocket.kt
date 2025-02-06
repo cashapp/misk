@@ -10,12 +10,12 @@ import okhttp3.Headers
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import okio.utf8Size
-import org.eclipse.jetty.websocket.api.Session
-import org.eclipse.jetty.websocket.api.WebSocketAdapter
-import org.eclipse.jetty.websocket.api.WriteCallback
-import org.eclipse.jetty.websocket.server.JettyServerUpgradeRequest
-import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
-import org.eclipse.jetty.websocket.server.JettyWebSocketCreator
+import org.eclipse.jetty.ee8.websocket.api.Session
+import org.eclipse.jetty.ee8.websocket.api.WebSocketAdapter
+import org.eclipse.jetty.ee8.websocket.api.WriteCallback
+import org.eclipse.jetty.ee8.websocket.server.JettyServerUpgradeRequest
+import org.eclipse.jetty.ee8.websocket.server.JettyServerUpgradeResponse
+import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketCreator
 import java.util.ArrayDeque
 
 private const val MAX_QUEUE_SIZE = 16 * 1024 * 1024

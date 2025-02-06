@@ -116,19 +116,21 @@ jerseyBom = { module = "org.glassfish.jersey:jersey-bom", version = "3.1.10" }
 jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "26.0.2" }
 jettyAlpnServer = { module = "org.eclipse.jetty:jetty-alpn-server" }
 jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
-jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "10.0.20" }
+jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "12.1.0.alpha1" }
+jettyEe8Bom = { module = "org.eclipse.jetty.ee8:jetty-ee8-bom", version = "12.1.0.alpha1" }
+jettyEe8WebsocketServer = { module = "org.eclipse.jetty.ee8.websocket:jetty-ee8-websocket-jetty-server" }
 jettyHttp = { module = "org.eclipse.jetty:jetty-http" }
-jettyHttp2 = { module = "org.eclipse.jetty.http2:http2-server" }
+jettyHttp2 = { module = "org.eclipse.jetty.http2:jetty-http2-server" }
 jettyIo = { module = "org.eclipse.jetty:jetty-io" }
 jettyServer = { module = "org.eclipse.jetty:jetty-server" }
-jettyServlet = { module = "org.eclipse.jetty:jetty-servlet" }
+jettyServlet = { module = "org.eclipse.jetty.ee8:jetty-ee8-servlet" }
 jettyServletApi = { module = "org.eclipse.jetty.toolchain:jetty-servlet-api", version = "4.0.6" }
-jettyServlets = { module = "org.eclipse.jetty:jetty-servlets" }
+jettyServlets = { module = "org.eclipse.jetty.ee8:jetty-ee8-servlets" }
 jettyUds = { module = "org.eclipse.jetty:jetty-unixdomain-server" }
-jettyUnixSocket = { module = "org.eclipse.jetty:jetty-unixsocket-server" }
+jettyUnixSocket = { module = "org.eclipse.jetty:jetty-unixdomain-server" }
 jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
-jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api" }
-jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
+jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:jetty-websocket-jetty-api" }
+jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:jetty-websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
 jooq = { module = "org.jooq:jooq", version = "3.18.25" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.1" }

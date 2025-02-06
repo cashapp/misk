@@ -4,8 +4,8 @@ import misk.web.ServletHttpCall
 import misk.web.actions.WebSocketListener
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
+import org.eclipse.jetty.ee8.nested.Response
 import org.eclipse.jetty.http.HttpFields
-import org.eclipse.jetty.server.Response
 import java.util.function.Supplier
 
 internal class JettyServletUpstreamResponse(

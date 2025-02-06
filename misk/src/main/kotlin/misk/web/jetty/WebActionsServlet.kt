@@ -20,17 +20,17 @@ import okio.BufferedSink
 import okio.buffer
 import okio.sink
 import okio.source
+import org.eclipse.jetty.ee8.nested.Request
+import org.eclipse.jetty.ee8.nested.Response
+import org.eclipse.jetty.ee8.websocket.server.JettyServerUpgradeResponse
+import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketServlet
+import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketServletFactory
 import org.eclipse.jetty.http.HttpMethod
-import org.eclipse.jetty.server.Request
-import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
-import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
-import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
-import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
-import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
 import wisp.logging.getLogger
 import java.net.HttpURLConnection
+import java.net.InetSocketAddress
 import java.net.ProtocolException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -128,12 +128,8 @@ internal class WebActionsServlet @Inject constructor(
               (this.connector as UnixDomainServerConnector).unixDomainPath.toString()
             )
 
-            is UnixSocketConnector -> SocketAddress.Unix(
-              (this.connector as UnixSocketConnector).unixSocket
-            )
-
             is ServerConnector -> SocketAddress.Network(
-              this.endPoint.remoteAddress.address.hostAddress,
+              (this.remoteAddress as InetSocketAddress).hostString,
               (this.connector as ServerConnector).localPort
             )
 
