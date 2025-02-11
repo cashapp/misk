@@ -41,12 +41,8 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       override fun configure() {
         binder().requireAtInjectOnConstructors()
 
-        multibind<BeforeEachCallback>().to<LogLevelExtension>()
-        if (context.startService() || context.reuseInjector()) {
-          multibind<BeforeEachCallback>().to<StartServicesBeforeEach>()
-          if (!context.reuseInjector()) {
-            multibind<AfterEachCallback>().to<StopServicesAfterEach>()
-          }
+        if (context.startService() && !context.reuseInjector()) {
+          multibind<AfterEachCallback>().to<StopServicesAfterEach>()
         }
 
         for (module in context.getActionTestModules()) {
@@ -87,10 +83,10 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
   }
 
-  class StartServicesBeforeEach @Inject constructor() : BeforeEachCallback {
+  class StartServicesBeforeEach @Inject constructor() {
     @com.google.inject.Inject(optional = true) var serviceManager: ServiceManager? = null
 
-    override fun beforeEach(context: ExtensionContext) {
+    fun beforeEach(context: ExtensionContext) {
       if (context.startService()) {
         if (serviceManager == null) {
           throw IllegalStateException("This test is configured with `startService` set to true, " +
@@ -162,6 +158,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   }
 
   class Callbacks @Inject constructor(
+    private val startServicesBeforeEach: StartServicesBeforeEach,
     private val beforeEachCallbacks: Set<BeforeEachCallback>,
     private val afterEachCallbacks: Set<AfterEachCallback>,
     private val testFixtures: Set<TestFixture>,
@@ -172,10 +169,15 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
 
     override fun beforeEach(context: ExtensionContext) {
-      beforeEachCallbacks.forEach { it.beforeEach(context) }
+      // Starting services first given some fixtures rely on services being started. For example,
+      // the dynamo DB fixture needs the service to be started, in order to be able to delete data.
+      startServicesBeforeEach.beforeEach(context)
       if (context.reuseInjector()) {
         testFixtures.forEach { it.reset() }
       }
+      // Call the beforeEach callbacks after resetting fixtures, so that things like seeding test
+      // data can be done in these callback and not be reset.
+      beforeEachCallbacks.forEach { it.beforeEach(context) }
     }
   }
 

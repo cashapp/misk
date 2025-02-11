@@ -2,12 +2,11 @@ package misk.testing
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
-import jakarta.inject.Inject
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.slf4j.LoggerFactory
 
-class LogLevelExtension @Inject constructor() : BeforeEachCallback {
+class LogLevelExtension : BeforeEachCallback {
   override fun beforeEach(context: ExtensionContext?) {
     // Note that the root logger will be a org.slf4j.Logger, but may not
     // be a ch.qos.logback.class.Logger instance. In particular, it can
