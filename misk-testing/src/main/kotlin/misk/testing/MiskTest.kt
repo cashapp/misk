@@ -5,6 +5,9 @@ import com.google.inject.util.Modules
 import org.junit.jupiter.api.extension.ExtendWith
 
 @Target(AnnotationTarget.CLASS)
+// The order is important here. LogLevelExtension goes before the MiskTestExtension,
+// so that logs are set up before services starts.
+@ExtendWith(LogLevelExtension::class)
 @ExtendWith(MiskTestExtension::class)
 
 /**

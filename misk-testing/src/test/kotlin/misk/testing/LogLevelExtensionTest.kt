@@ -85,5 +85,4 @@ class LogLevelExtensionTest {
   companion object {
     val logger = getLogger<LogLevelExtensionTest>()
   }
-
 }
