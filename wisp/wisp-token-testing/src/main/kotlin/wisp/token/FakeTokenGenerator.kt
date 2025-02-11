@@ -6,8 +6,9 @@ import wisp.token.TokenGenerator.Companion.CANONICALIZE_LENGTH_MIN
 import wisp.token.TokenGenerator.Companion.canonicalize
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
+import jakarta.inject.Inject
 
-class FakeTokenGenerator : FakeFixture(), TokenGenerator {
+class FakeTokenGenerator @Inject constructor(): FakeFixture(), TokenGenerator {
     internal val nextByLabel by resettable {
       Collections.synchronizedMap<String, AtomicLong>(
         mutableMapOf()
