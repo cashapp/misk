@@ -204,3 +204,42 @@ public final class misk/jobqueue/QueueName {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class misk/jobqueue/v2/BlockingJobHandler : misk/jobqueue/v2/JobHandler {
+	public abstract fun handleJob (Lmisk/jobqueue/v2/Job;)Lmisk/jobqueue/v2/JobStatus;
+}
+
+public abstract interface class misk/jobqueue/v2/Job {
+	public abstract fun getAttributes ()Ljava/util/Map;
+	public abstract fun getBody ()Ljava/lang/String;
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getIdempotenceKey ()Ljava/lang/String;
+	public abstract fun getQueueName ()Lmisk/jobqueue/QueueName;
+}
+
+public abstract interface class misk/jobqueue/v2/JobConsumer {
+	public abstract fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;)V
+	public abstract fun unsubscribe (Lmisk/jobqueue/QueueName;)V
+}
+
+public abstract interface class misk/jobqueue/v2/JobEnqueuer {
+	public abstract fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun enqueueAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+}
+
+public abstract interface class misk/jobqueue/v2/JobHandler {
+}
+
+public final class misk/jobqueue/v2/JobStatus : java/lang/Enum {
+	public static final field DEAD_LETTER Lmisk/jobqueue/v2/JobStatus;
+	public static final field OK Lmisk/jobqueue/v2/JobStatus;
+	public static final field RETRY_LATER Lmisk/jobqueue/v2/JobStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/jobqueue/v2/JobStatus;
+	public static fun values ()[Lmisk/jobqueue/v2/JobStatus;
+}
+
+public abstract interface class misk/jobqueue/v2/SuspendingJobHandler : misk/jobqueue/v2/JobHandler {
+	public abstract fun handleJob (Lmisk/jobqueue/v2/Job;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
