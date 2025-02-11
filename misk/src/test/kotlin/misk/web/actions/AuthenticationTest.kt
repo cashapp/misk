@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import jakarta.inject.Inject
 import misk.security.authz.AccessInterceptor
+import misk.web.toResponseBody
 import wisp.logging.LogCollector
 import kotlin.test.assertFailsWith
 
@@ -271,6 +272,34 @@ class AuthenticationTest {
     assertThat(exception.message).contains(
       "MixesUnauthenticatedWithOtherAnnotations::get() is annotated with @Unauthenticated, but also annotated with the following access annotations: @Authenticated. This is a contradiction."
     )
+  }
+
+  @Test
+  fun `stacking @Authenticated with other access annotations is an error`() {
+    val unauthService = MiskCaller(service = "test")
+    assertThat(
+      executeRequest(
+        path = "/auth-and-custom-capability",
+        service = unauthService.service
+      )
+    ).isEqualTo("unauthorized")
+
+    val authService = MiskCaller(service = "dingo")
+    assertThat(
+      executeRequest(
+        path = "/auth-and-custom-capability",
+        service = authService.service
+      )
+    ).isEqualTo("$authService authorized with custom capability")
+
+    val caller = MiskCaller(user = "bob", capabilities = setOf("admin"))
+    assertThat(
+      executeRequest(
+        path = "/auth-and-custom-capability",
+        user = caller.user,
+        capabilities = caller.capabilities.first()
+      )
+    ).isEqualTo("$caller authorized with custom capability")
   }
 
   /** Executes a request and returns the response body as a string. */

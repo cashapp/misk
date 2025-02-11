@@ -45,10 +45,10 @@ class TestWebActionModule : KAbstractModule() {
     install(WebActionModule.create<GreetServiceWebAction>())
     install(WebActionModule.create<EmptyAuthenticatedAccessAction>())
     install(WebActionModule.create<EmptyAuthenticatedWithCustomAnnototationAccessAction>())
-    install(WebActionModule.create<EmptyAuthenticatedAccessAction>())
     install(WebActionModule.create<AllowAnyServiceAccessAction>())
     install(WebActionModule.create<AllowAnyServicePlusAuthenticatedAccessAction>())
     install(WebActionModule.create<AllowAnyUserAccessAction>())
+    install(WebActionModule.create<AuthenticatedServiceWithCustomAnnotations>())
 
     multibind<AccessAnnotationEntry>().toInstance(
       AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments"))
@@ -165,6 +165,16 @@ class EmptyAuthenticatedWithCustomAnnototationAccessAction @Inject constructor()
   @Authenticated
   @CustomCapabilityAccess
   fun get() = "${scopedCaller.get()} authorized with CustomCapabilityAccess".toResponseBody()
+}
+
+class AuthenticatedServiceWithCustomAnnotations @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/auth-and-custom-capability")
+  @Authenticated(services = ["dingo"])
+  @CustomCapabilityAccess
+  fun get() = "${scopedCaller.get()} authorized with custom capability".toResponseBody()
 }
 
 class AllowAnyServiceAccessAction @Inject constructor() : WebAction {
