@@ -3,26 +3,18 @@ package misk.web.actions
 import java.lang.reflect.Method
 import java.util.ArrayDeque
 import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.callSuspendBy
 import kotlin.reflect.jvm.javaMethod
 
-/** Returns an instance of [T] annotating this method or a method it overrides. */
-internal inline fun <reified T : Annotation> KFunction<*>.findAnnotationWithOverrides(): T? {
-  return javaMethod!!.findAnnotationWithOverrides(T::class.java)
-}
-
 /**
- * Returns an instance of [T] annotating this method or a method it overrides. If multiple
- * overridden methods have the annotation, one is chosen arbitrarily.
+ * Returns a function that delegates everything to this. It promotes all annotations from overridden
+ * functions to the returned function, and all annotations from overridden parameters to the
+ * returned function.
+ *
+ * Use this to make it easy to get annotations on overridden functions 'for free'.
  */
-internal fun <T : Annotation> Method.findAnnotationWithOverrides(annotationClass: Class<T>): T? {
-  for (method in overrides()) {
-    val annotation = method.getAnnotation(annotationClass)
-    if (annotation != null) {
-      return annotation
-    }
-  }
-  return null
-}
+internal fun <R> KFunction<R>.withOverrides(): KFunction<R> = FunctionWithOverrides(this)
 
 /** Returns the overrides of this method with overriding methods preceding overridden methods. */
 internal fun Method.overrides(): Set<Method> {
@@ -32,7 +24,7 @@ internal fun Method.overrides(): Set<Method> {
 }
 
 /** Returns the method that [override] overrides. */
-internal fun Class<*>.getOverriddenMethod(override: Method): Method? {
+private fun Class<*>.getOverriddenMethod(override: Method): Method? {
   return try {
     check(this.isAssignableFrom(override.declaringClass))
     val overridden = getDeclaredMethod(override.name, *override.parameterTypes)
@@ -105,3 +97,51 @@ internal fun Method.preferNonSynthetic(): Method {
 
   return this
 }
+
+internal val KFunction<*>.javaMethod: Method?
+  get() = (this as? FunctionWithOverrides)?.function?.javaMethod ?: this.javaMethod
+
+internal class FunctionWithOverrides<out R>(
+  val function: KFunction<R>
+) : KFunction<R> by function {
+  private val methodOverrides = function.javaMethod!!.overrides()
+
+  override val annotations: List<Annotation> =
+    methodOverrides.flatMap { it.annotations.toList() }
+
+  override val parameters: List<KParameter> =
+    function.parameters.mapIndexed { index, parameter ->
+      ParameterWithOverrides(
+        parameter,
+        methodOverrides.flatMap { override ->
+          when (index) {
+            0 -> listOf()
+            else -> override.parameters[index - 1].annotations.toList()
+          }
+        }
+      )
+    }
+
+  override fun callBy(args: Map<KParameter, Any?>): R {
+    val parameters = args.mapKeys { (key, _) ->
+      function.parameters[key.index]
+    }
+    return function.callBy(parameters)
+  }
+
+  suspend fun callSuspendBy(args: Map<KParameter, Any?>): R {
+    val parameters = args.mapKeys { (key, _) ->
+      function.parameters[key.index]
+    }
+    return function.callSuspendBy(parameters)
+  }
+
+  override fun toString(): String {
+    return function.toString()
+  }
+}
+
+private class ParameterWithOverrides(
+  val parameter: KParameter,
+  override val annotations: List<Annotation>,
+) : KParameter by parameter

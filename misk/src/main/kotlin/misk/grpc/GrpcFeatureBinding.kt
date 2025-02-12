@@ -15,10 +15,10 @@ import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
 import misk.web.PathPattern
 import misk.web.WebConfig
-import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaTypes
 import java.lang.reflect.Type
 import kotlin.coroutines.CoroutineContext
+import kotlin.reflect.full.findAnnotation
 
 internal class GrpcFeatureBinding(
   private val requestAdapter: ProtoAdapter<Any>,
@@ -129,7 +129,7 @@ internal class GrpcFeatureBinding(
         "@Grpc functions must have either 1 or 2 parameters: $action"
       }
 
-      val wireAnnotation = action.function.findAnnotationWithOverrides<WireRpc>() ?: return null
+      val wireAnnotation = action.function.findAnnotation<WireRpc>() ?: return null
 
       claimer.claimParameter(0)
       claimer.claimRequestBody()

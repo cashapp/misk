@@ -59,7 +59,8 @@ internal fun WebAction.asChain(
           sourceChannel?.let { launch { sourceChannel.bridgeFromSource() } }
           sinkChannel?.let { launch { sinkChannel.bridgeToSink() } }
           try {
-            function.callSuspendBy(argsMap)
+            (function as? FunctionWithOverrides)?.callSuspendBy(argsMap)
+              ?: function.callSuspendBy(argsMap)
           } finally {
             // Once the action is complete, close the send channel and wait for the jobs to finish
             // This blocks any additional sends to the channel, but will allow existing responses in
