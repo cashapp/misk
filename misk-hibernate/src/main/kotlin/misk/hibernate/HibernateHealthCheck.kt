@@ -29,7 +29,7 @@ internal class HibernateHealthCheck(
     val databaseInstant = try {
       val sessionFactory = sessionFactoryService.get().sessionFactory
       sessionFactory.openSession().use { session ->
-        session.createNativeQuery("SELECT NOW()").uniqueResult() as Timestamp
+        session.createNativeQuery("SELECT SYSDATE()").uniqueResult() as Timestamp
       }.toInstant()
     } catch (e: Exception) {
       logger.error(e) { "error performing hibernate health check" }
