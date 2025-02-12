@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runInterruptible
+import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.BlockingJobHandler
 import misk.jobqueue.v2.JobHandler
@@ -27,14 +28,13 @@ import java.util.concurrent.CompletableFuture
  */
 class Subscriber(
   val queueName: QueueName,
-  val queueUrl: String,
-  val client: SqsAsyncClient,
+  val queueConfig: SqsQueueConfig,
+  val deadLetterQueueName: QueueName,
   val handler: JobHandler,
   val channel: Channel<SqsJob>,
-  val retryQueueUrl: String,
-  val deadLetterQueueName: QueueName,
-  val sqsMetrics: SqsMetrics,
+  val client: SqsAsyncClient,
   val queueResolver: QueueResolver,
+  val sqsMetrics: SqsMetrics,
   val moshi: Moshi,
   val clock: Clock,
 ) {
@@ -42,7 +42,8 @@ class Subscriber(
     while (true) {
       val job = channel.receive()
       val receiveFromChannelTimestamp = clock.instant().nano
-      sqsMetrics.channelReceiveLag.labels(queueName.value).observe((receiveFromChannelTimestamp - job.publishToChannelTimestamp).toDouble())
+      sqsMetrics.channelReceiveLag.labels(queueName.value)
+        .observe((receiveFromChannelTimestamp - job.publishToChannelTimestamp).toDouble())
       val result = try {
         val timer = sqsMetrics.handlerDispatchTime.labels(queueName.value).startTimer()
         val result = when (handler) {
@@ -97,16 +98,17 @@ class Subscriber(
    * Polls the messages from both the regular and the retry queue.
    */
   suspend fun poll() {
-    merge(
-      messageFlow(queueName, queueUrl),
-      messageFlow(queueName, retryQueueUrl)
-    )
-      .collect {
-          received -> channel.send(received)
-      }
+    if (queueConfig.install_retry_queue) {
+      merge(messageFlow(queueName), messageFlow(queueName.retryQueue))
+    } else {
+      messageFlow(queueName)
+    }.collect { received ->
+      channel.send(received)
+    }
   }
 
-  private fun messageFlow(queueName: QueueName, queueUrl: String) = flow {
+  private fun messageFlow(queueName: QueueName) = flow {
+    val queueUrl = queueResolver.getQueueUrl(queueName)
     while (true) {
       val timer = sqsMetrics.sqsReceiveTime.labels(queueName.value).startTimer()
       val response = fetchMessages(queueUrl).await()
@@ -134,12 +136,12 @@ class Subscriber(
   }
 
   private fun fetchMessages(queueUrl: String): CompletableFuture<ReceiveMessageResponse> {
-    // TODO configure batch size here
-    val batchSize = 1
     val request = ReceiveMessageRequest.builder()
       .queueUrl(queueUrl)
       .messageAttributeNames("All")
-      .maxNumberOfMessages(batchSize)
+      .maxNumberOfMessages(queueConfig.max_number_of_messages)
+      .waitTimeSeconds(queueConfig.wait_timeout)
+      .visibilityTimeout(queueConfig.visibility_timeout)
       .build()
     return client.receiveMessage(request)
   }

@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture
 class SqsJobEnqueuer @Inject constructor(
   private val client: SqsAsyncClient,
   private val queueResolver: QueueResolver,
-  private val sqsMetrics: misk.aws2.sqs.jobqueue.SqsMetrics,
+  private val sqsMetrics: SqsMetrics,
   private val moshi: Moshi,
 ) : JobEnqueuer<SendMessageResponse> {
   /**

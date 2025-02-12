@@ -17,6 +17,7 @@ dependencies {
   api(libs.jakartaInject)
   api(libs.moshiCore)
   api(libs.prometheusClient)
+  api(project(":wisp:wisp-config"))
   implementation(libs.aws2Core)
   implementation(project(":misk"))
   implementation(project(":misk-api"))

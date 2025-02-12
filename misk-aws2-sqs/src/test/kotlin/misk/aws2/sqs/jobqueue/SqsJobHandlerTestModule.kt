@@ -4,6 +4,7 @@ import misk.MiskTestingServiceModule
 import misk.ReadyService
 import misk.ServiceModule
 import misk.annotation.ExperimentalMiskApi
+import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.cloud.aws.AwsEnvironmentModule
 import misk.cloud.aws.FakeAwsEnvironmentModule
 import misk.inject.KAbstractModule
@@ -28,7 +29,7 @@ class SqsJobHandlerTestModule(
     bind<Region>().toInstance(dockerSqs.region)
 
     install(SqsJobQueueModule { endpointOverride(dockerSqs.endpointUri) })
-    install(SqsJobHandlerModule.create<ExampleHandler>(QueueName("test-queue-1")))
+    install(SqsJobHandlerModule.create<ExampleHandler>(QueueName("test-queue-1"), SqsConfig()))
     install(ServiceModule<SubscriptionService>().dependsOn<ReadyService>())
   }
 }

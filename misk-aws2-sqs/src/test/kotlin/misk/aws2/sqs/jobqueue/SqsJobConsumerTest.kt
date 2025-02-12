@@ -2,6 +2,7 @@ package misk.aws2.sqs.jobqueue
 
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
+import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.BlockingJobHandler
 import misk.jobqueue.v2.Job
@@ -56,7 +57,11 @@ class SqsJobConsumerTest {
       sendMessage(result.queueUrl, "message")
     }
 
-    jobConsumer.subscribe(queueName, getHandler(latch), parallelism = 1, concurrency = 7, channelCapacity = 0)
+    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(
+      parallelism = 1,
+      concurrency = 1,
+      channel_capacity = 0
+    ))
 
     latch.await(10, SECONDS)
     assertEquals(0, latch.count)
@@ -103,8 +108,16 @@ class SqsJobConsumerTest {
       }
     }
 
-    jobConsumer.subscribe(queueName1, getHandler(latch1), parallelism = 1, concurrency = 3, channelCapacity = 0)
-    jobConsumer.subscribe(queueName2, getHandler(latch2), parallelism = 1, concurrency = 5, channelCapacity = 0)
+    jobConsumer.subscribe(queueName1, getHandler(latch1), SqsQueueConfig(
+      parallelism = 1,
+      concurrency = 3,
+      channel_capacity = 0
+    ))
+    jobConsumer.subscribe(queueName2, getHandler(latch2), SqsQueueConfig(
+      parallelism = 1,
+      concurrency = 5,
+      channel_capacity = 0
+    ))
 
     latch1.await(10, SECONDS)
     assertEquals(0, latch1.count)
@@ -114,13 +127,17 @@ class SqsJobConsumerTest {
 
   @Test
   fun `retrying works`() {
-    // TODO adjust visibility timeout explicitly
     val queueName = QueueName("test-queue-1")
     val result = createQueue(queueName)
     val latch = CountDownLatch(1)
     sendMessage(result.queueUrl, "message")
 
-    jobConsumer.subscribe(queueName, getIntermittentIssuesHandler(latch))
+    // Use explicit 2 seconds visibility timeout. After that messages should be reconsumed
+    // and processed successfully. Intermittent issues handler will fail on the first processing
+    jobConsumer.subscribe(queueName, getIntermittentIssuesHandler(latch), SqsQueueConfig(
+      visibility_timeout = 2
+    )
+    )
 
     latch.await(10, SECONDS)
     assertEquals(0, latch.count)
@@ -175,6 +192,24 @@ class SqsJobConsumerTest {
   }
 
   @Test
+  fun `don't consume from retry queue if it's not enabled`() {
+    val queueName = QueueName("test-queue-1")
+    val result = createQueue(queueName)
+
+    val latch = CountDownLatch(1)
+    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(install_retry_queue = false))
+
+    sendMessage(result.queueUrl, "message")
+    sendMessage(result.retryQueueUrl, "message")
+
+    latch.await(10, SECONDS)
+    assertEquals(0, latch.count, "Not all messages were consumed")
+
+    assertQueueSize(0, result.queueUrl)
+    assertQueueSize(1, result.retryQueueUrl)
+  }
+
+  @Test
   fun `long running tests - simulates high traffic`() {
     val queueName = QueueName("test-queue-1")
     val result = createQueue(queueName)
@@ -185,7 +220,11 @@ class SqsJobConsumerTest {
     }
 
     val latch = CountDownLatch(20000)
-    jobConsumer.subscribe(queueName, getDelayingHandler(latch), concurrency = 50, parallelism = 10, channelCapacity = 5)
+    jobConsumer.subscribe(queueName, getDelayingHandler(latch), SqsQueueConfig(
+      parallelism = 10,
+      concurrency = 50,
+      channel_capacity = 5
+    ))
 
     // and push the subscriber a little bit more
     repeat(10000) {
@@ -247,7 +286,6 @@ class SqsJobConsumerTest {
         .attributes(
           mapOf(
             QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
-            QueueAttributeName.VISIBILITY_TIMEOUT to "1",
           ))
         .build()
     ).join()
@@ -256,7 +294,6 @@ class SqsJobConsumerTest {
         .attributes(
           mapOf(
             QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
-            QueueAttributeName.VISIBILITY_TIMEOUT to "2",
           ))
         .build()
     ).join()
@@ -265,7 +302,6 @@ class SqsJobConsumerTest {
         .attributes(
           mapOf(
             QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
-            QueueAttributeName.VISIBILITY_TIMEOUT to "2",
           ))
         .build()
     ).join()
