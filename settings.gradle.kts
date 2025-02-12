@@ -19,7 +19,8 @@ develocity {
 }
 
 dependencyResolutionManagement {
-  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  // https://localazy.com/docs/android/how-to-fix-prefer-settings-repositories-over-project-repositories
+//  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
   repositories {
     mavenCentral()
     maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
@@ -126,5 +127,6 @@ include(":misk-testing")
 include(":misk-testing-api")
 include(":misk-transactional-jobqueue")
 include(":misk-warmup")
+include(":misk-wasm")
 include(":samples:exemplar")
 include(":samples:exemplarchat")
