@@ -60,15 +60,17 @@ internal class WebActionFactory @Inject constructor(
   ): List<BoundAction<A>> {
     // Find the function with Get, Post, Put, Delete or ConnectWebSocket annotation.
     // Only one such function is allowed.
-    val actionFunctions = webActionClass.functions.mapNotNull {
-      if (it.findAnnotationWithOverrides<Get>() != null ||
-        it.findAnnotationWithOverrides<Post>() != null ||
-        it.findAnnotationWithOverrides<Patch>() != null ||
-        it.findAnnotationWithOverrides<Put>() != null ||
-        it.findAnnotationWithOverrides<Grpc>() != null ||
-        it.findAnnotationWithOverrides<Delete>() != null ||
-        it.findAnnotationWithOverrides<ConnectWebSocket>() != null ||
-        it.findAnnotationWithOverrides<WireRpc>() != null
+    val functionsWithOverrides = webActionClass.functions.map { it.withOverrides() }
+
+    val actionFunctions = functionsWithOverrides.mapNotNull {
+      if (it.findAnnotation<Get>() != null ||
+        it.findAnnotation<Post>() != null ||
+        it.findAnnotation<Patch>() != null ||
+        it.findAnnotation<Put>() != null ||
+        it.findAnnotation<Grpc>() != null ||
+        it.findAnnotation<Delete>() != null ||
+        it.findAnnotation<ConnectWebSocket>() != null ||
+        it.findAnnotation<WireRpc>() != null
       ) {
         it as? KFunction<*>
           ?: throw IllegalArgumentException("expected $it to be a function")
@@ -91,14 +93,14 @@ internal class WebActionFactory @Inject constructor(
     val effectivePrefix = pathPrefix.dropLast(1)
 
     actionFunctions.forEach { actionFunction ->
-      val get = actionFunction.findAnnotationWithOverrides<Get>()
-      val post = actionFunction.findAnnotationWithOverrides<Post>()
-      val patch = actionFunction.findAnnotationWithOverrides<Patch>()
-      val put = actionFunction.findAnnotationWithOverrides<Put>()
-      val delete = actionFunction.findAnnotationWithOverrides<Delete>()
-      val webActionGrpc = actionFunction.findAnnotationWithOverrides<Grpc>()
-      val connectWebSocket = actionFunction.findAnnotationWithOverrides<ConnectWebSocket>()
-      val grpc = actionFunction.findAnnotationWithOverrides<WireRpc>()
+      val get = actionFunction.findAnnotation<Get>()
+      val post = actionFunction.findAnnotation<Post>()
+      val patch = actionFunction.findAnnotation<Patch>()
+      val put = actionFunction.findAnnotation<Put>()
+      val delete = actionFunction.findAnnotation<Delete>()
+      val webActionGrpc = actionFunction.findAnnotation<Grpc>()
+      val connectWebSocket = actionFunction.findAnnotation<ConnectWebSocket>()
+      val grpc = actionFunction.findAnnotation<WireRpc>()
 
       if (get != null) {
         collectBoundActions(
@@ -222,7 +224,7 @@ internal class WebActionFactory @Inject constructor(
     pathPattern: String,
     action: Action
   ): BoundAction<A> {
-    // Ensure that default interceptors are called before any user provided interceptors
+    // Ensure that default interceptors are called before any user provided interceptors.
     val networkInterceptors =
       beforeContentEncodingNetworkInterceptorFactories.mapNotNull { it.create(action) } +
         forContentEncodingNetworkInterceptorFactories.mapNotNull { it.create(action) } +

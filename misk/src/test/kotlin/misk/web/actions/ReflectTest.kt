@@ -3,6 +3,9 @@ package misk.web.actions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.lang.reflect.Method
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.functions
+import kotlin.reflect.jvm.javaMethod
 
 internal class ReflectTest {
   @Test
@@ -55,17 +58,73 @@ internal class ReflectTest {
   @Test
   internal fun annotationWithOverrides() {
     assertThat(
-      Square::class.java.getDeclaredMethod("area")
-        .findAnnotationWithOverrides(Tag::class.java)!!.name
+      Square::class.functions.first { it.name == "area" }
+        .withOverrides()
+        .findAnnotation<Tag>()!!.name
     ).isEqualTo("square")
     assertThat(
-      Square::class.java.getDeclaredMethod("perimeter")
-        .findAnnotationWithOverrides(Tag::class.java)
+      Square::class.functions.first { it.name == "perimeter" }
+        .withOverrides()
+        .findAnnotation<Tag>()
     ).isNull()
     assertThat(
-      Square::class.java.getDeclaredMethod("edgeCount")
-        .findAnnotationWithOverrides(Tag::class.java)!!.name
+      Square::class.functions.first { it.name == "edgeCount" }
+        .withOverrides()
+        .findAnnotation<Tag>()!!.name
     ).isEqualTo("polygon")
+  }
+
+  @Test
+  internal fun parameterAnnotationWithOverridesRequestWithoutValue() {
+    val greetEmptyFunction = RealGreetingAction::class.functions.single { it.name == "greetEmpty" }
+      .withOverrides()
+    assertThat(greetEmptyFunction.findAnnotation<Tag>()!!.name).isEqualTo("/greet-empty")
+
+    val messageEmptyParameter = greetEmptyFunction.parameters.single { it.name == "message"  }
+    assertThat(messageEmptyParameter.findAnnotation<RequestEmpty>()).isNotNull()
+
+    assertThat(greetEmptyFunction.callBy(
+      mapOf(
+        greetEmptyFunction.parameters[0] to RealGreetingAction(),
+        greetEmptyFunction.parameters[1] to "hello",
+      )
+    )).isEqualTo("806")
+  }
+
+  @Test
+  internal fun parameterAnnotationWithOverridesParameterWithValue() {
+    val greetFunction = RealGreetingAction::class.functions.single { it.name == "greet" }
+      .withOverrides()
+    assertThat(greetFunction.findAnnotation<Tag>()!!.name).isEqualTo("/greet")
+
+    val messageParameter = greetFunction.parameters.single { it.name == "message"  }
+    assertThat(messageParameter.findAnnotation<RequestPayload>()!!.name).isEqualTo("hello")
+
+    assertThat(greetFunction.callBy(
+      mapOf(
+        greetFunction.parameters[0] to RealGreetingAction(),
+        greetFunction.parameters[1] to "hello",
+      )
+    )).isEqualTo("33")
+  }
+
+  @Target(AnnotationTarget.VALUE_PARAMETER)
+  annotation class RequestPayload(val name: String)
+
+  @Target(AnnotationTarget.VALUE_PARAMETER)
+  annotation class RequestEmpty
+
+  interface GreetingAction {
+    @Tag("/greet")
+    fun greet(@RequestPayload("hello") message: String): String
+
+    @Tag("/greet-empty")
+    fun greetEmpty(@RequestEmpty message: String): String
+  }
+
+  class RealGreetingAction:GreetingAction {
+    override fun greet(message: String): String  = "33"
+    override fun greetEmpty(message: String): String = "806"
   }
 
   class Square : Polygon(), Territory {

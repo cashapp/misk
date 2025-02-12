@@ -8,11 +8,11 @@ import misk.web.FeatureBinding.Subject
 import misk.web.Grpc
 import misk.web.PathPattern
 import misk.web.actions.WebSocketListener
-import misk.web.actions.findAnnotationWithOverrides
 import misk.web.interceptors.ResponseBodyMarshallerFactory
 import misk.web.marshal.Marshaller
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlin.reflect.full.findAnnotation
 
 internal class ResponseBodyFeatureBinding(
   private val responseBodyMarshaller: Marshaller<Any>
@@ -41,7 +41,7 @@ internal class ResponseBodyFeatureBinding(
       pathPattern: PathPattern,
       claimer: Claimer
     ): FeatureBinding? {
-      if (action.dispatchMechanism == DispatchMechanism.GRPC && action.function.findAnnotationWithOverrides<Grpc>() == null) return null
+      if (action.dispatchMechanism == DispatchMechanism.GRPC && action.function.findAnnotation<Grpc>() == null) return null
       if (action.returnType.classifier == Unit::class) return null
       if (action.returnType.classifier == WebSocketListener::class) return null
 

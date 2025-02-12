@@ -9,7 +9,6 @@ import misk.scope.SeedDataTransformer
 import misk.security.authz.AccessInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.asChain
-import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.compareTo
@@ -22,6 +21,7 @@ import com.google.inject.Provider
 import misk.api.HttpRequest
 import javax.servlet.http.HttpServletRequest
 import kotlin.reflect.KType
+import kotlin.reflect.full.findAnnotation
 
 /**
  * Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP
@@ -150,7 +150,7 @@ internal class BoundAction<A : WebAction>(
     WebActionMetadata(
       name = action.name,
       function = action.function,
-      description = action.function.findAnnotationWithOverrides<Description>()?.text,
+      description = action.function.findAnnotation<Description>()?.text,
       functionAnnotations = action.function.annotations,
       acceptedMediaRanges = action.acceptedMediaRanges,
       responseContentType = action.responseContentType,
