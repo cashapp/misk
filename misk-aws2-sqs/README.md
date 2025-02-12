@@ -40,6 +40,39 @@ It's advised to start with the default settings and adjust based on specific wor
 
 ![image](concurrency.jpg)
 
+## Configuration
+
+You can define default configuration for all queue or choose to override it per queue.
+
+Example YAML configuration:
+
+```yaml
+aws_sqs:
+  all_queues:
+    parallelism: 1
+    concurrency: 5
+    channel_capacity: 0
+    wait_timeout: 20
+    max_number_of_messages: 20
+    install_retry_queue: true
+  per_queue_overrides:
+    ledger_validation_queue:
+      parallelism: 5
+      concurrency: 10
+      channel_capacity: 5
+    refund_delay_queue:
+      concurrency: 5
+```
+
+You also need to add this configuration to your service configuration class, for example:
+
+```kotlin
+data class MiskSuspendingExemplarConfig(
+  val skim: SkimServiceConfig,
+  val aws_sqs: SqsConfig,
+) : Config
+```
+
 ## Outstanding todo items
 
 The module will not be considered beta/GA state until the below items are completed.
@@ -50,9 +83,7 @@ Outstanding work that needs to be done:
 * test fixtures
 * external queues
 * installing retry queue only on request
-* pass in configuration (make it compatible with previous implementation if needed)
 * detailed documentation
-* batch size configuration
 
 Things that are supported in the old documentation but are questionable:
 * aws queue attribute importer

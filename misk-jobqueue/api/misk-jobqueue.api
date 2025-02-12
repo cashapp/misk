@@ -227,6 +227,12 @@ public abstract interface class misk/jobqueue/v2/JobEnqueuer {
 	public abstract fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 }
 
+public final class misk/jobqueue/v2/JobEnqueuer$DefaultImpls {
+	public static synthetic fun enqueue$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun enqueueAsync$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)Ljava/util/concurrent/CompletableFuture;
+	public static synthetic fun enqueueBlocking$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)V
+}
+
 public abstract interface class misk/jobqueue/v2/JobHandler {
 }
 

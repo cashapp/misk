@@ -2,6 +2,7 @@ package misk.jobqueue.v2
 
 import misk.jobqueue.QueueName
 import java.time.Duration
+import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 interface JobEnqueuer<T> {
@@ -11,9 +12,9 @@ interface JobEnqueuer<T> {
   suspend fun enqueue(
     queueName: QueueName,
     body: String,
-    idempotencyKey: String,
-    deliveryDelay: Duration?,
-    attributes: Map<String, String>,
+    idempotencyKey: String = UUID.randomUUID().toString(),
+    deliveryDelay: Duration? = Duration.ZERO,
+    attributes: Map<String, String> = emptyMap(),
   )
 
   /**
@@ -22,9 +23,9 @@ interface JobEnqueuer<T> {
   fun enqueueBlocking(
     queueName: QueueName,
     body: String,
-    idempotencyKey: String,
-    deliveryDelay: Duration?,
-    attributes: Map<String, String>,
+    idempotencyKey: String = UUID.randomUUID().toString(),
+    deliveryDelay: Duration? = Duration.ZERO,
+    attributes: Map<String, String> = emptyMap(),
   )
 
   /**
@@ -35,8 +36,8 @@ interface JobEnqueuer<T> {
   fun enqueueAsync(
     queueName: QueueName,
     body: String,
-    idempotencyKey: String,
-    deliveryDelay: Duration?,
-    attributes: Map<String, String>,
+    idempotencyKey: String = UUID.randomUUID().toString(),
+    deliveryDelay: Duration? = Duration.ZERO,
+    attributes: Map<String, String> = emptyMap(),
   ): CompletableFuture<T>
 }

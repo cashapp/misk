@@ -11,6 +11,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
@@ -54,34 +55,31 @@ class SqsJobConsumer @Inject constructor(
   private val handlingScopes = ConcurrentHashMap<QueueName, CoroutineScope>()
 
   override fun subscribe(queueName: QueueName, handler: JobHandler) {
-    subscribe(queueName, handler, 1, 1, 1)
+    subscribe(queueName = queueName, handler = handler, queueConfig = SqsQueueConfig())
   }
 
-  fun subscribe(queueName: QueueName, handler: JobHandler, parallelism: Int, concurrency: Int, channelCapacity: Int) {
+  fun subscribe(queueName: QueueName, handler: JobHandler, queueConfig: SqsQueueConfig) {
     val subscriber = runBlocking {
-      val queueUrl = queueResolver.getQueueUrl(queueName)
-      val retryQueueUrl = queueResolver.getQueueUrl(QueueName("${queueName.value}_retryq"))
       // We won't resolve dead letter queue yet to skip it for local development and testing
       val deadLetterQueueName = dlqProvider.deadLetterQueueFor(queueName)
 
       Subscriber(
-        queueName,
-        queueUrl,
-        client,
-        handler,
-        Channel(channelCapacity),
-        retryQueueUrl,
-        deadLetterQueueName,
-        sqsMetrics,
-        queueResolver,
-        moshi,
-        clock,
+        queueName = queueName,
+        queueConfig = queueConfig,
+        deadLetterQueueName = deadLetterQueueName,
+        handler = handler,
+        channel = Channel(queueConfig.channel_capacity),
+        client = client,
+        queueResolver = queueResolver,
+        sqsMetrics = sqsMetrics,
+        moshi = moshi,
+        clock = clock,
       )
     }
 
     scope.launch { subscriber.poll() }
-    handlingScopes[queueName] = CoroutineScope(Dispatchers.IO.limitedParallelism(parallelism) + SupervisorJob())
-    repeat(concurrency) {
+    handlingScopes[queueName] = CoroutineScope(Dispatchers.IO.limitedParallelism(queueConfig.parallelism) + SupervisorJob())
+    repeat(queueConfig.concurrency) {
       handlingScopes[queueName]?.launch { subscriber.run() }
     }
   }
