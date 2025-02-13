@@ -5,13 +5,22 @@ import jakarta.inject.Singleton
 import misk.testing.FakeFixture
 
 @Singleton
-class FakeTokenGenerator @Inject constructor() : FakeFixture(), TokenGenerator by wisp.token.FakeTokenGenerator()
-
-@Singleton
-class FakeTokenGenerator2 @Inject constructor() : TokenGenerator2 {
+class FakeTokenGenerator @Inject constructor() : FakeFixture(), TokenGenerator {
   private val tokenGenerator = wisp.token.FakeTokenGenerator()
 
-  override fun generate(label: String?, length: Int): String {
-    return tokenGenerator.generate(label, length)
-  }
+  override fun reset() =
+    tokenGenerator.reset()
+
+  override fun generate(label: String?, length: Int) =
+    tokenGenerator.generate(label, length)
+}
+
+@Singleton
+class FakeTokenGenerator2 @Inject constructor() : FakeFixture(), TokenGenerator2 {
+  private val tokenGenerator = wisp.token.FakeTokenGenerator()
+
+  override fun generate(label: String?, length: Int) =
+    tokenGenerator.generate(label, length)
+
+  override fun reset() = tokenGenerator.reset()
 }

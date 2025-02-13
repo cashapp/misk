@@ -22,8 +22,8 @@ dependencies {
   api(project(":misk-testing-api"))
   implementation(libs.guice)
   implementation(libs.kotlinStdLibJdk8)
-  implementation(project(":wisp:wisp-resource-loader"))
   implementation(project(":wisp:wisp-token-testing"))
+  implementation(project(":wisp:wisp-resource-loader"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
