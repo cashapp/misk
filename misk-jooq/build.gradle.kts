@@ -48,7 +48,6 @@ flyway {
 }
 // Needed to generate jooq test db classes
 jooq {
-  version.set("3.18.2")
   edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
 
   configurations {

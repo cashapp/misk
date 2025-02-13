@@ -11,4 +11,4 @@ import misk.jooq.testgen.tables.Movie
 /**
  * The table <code>jooq.movie</code>.
  */
-val MOVIE = Movie.MOVIE
+val MOVIE: Movie = Movie.MOVIE

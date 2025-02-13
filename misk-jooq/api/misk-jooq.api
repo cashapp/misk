@@ -187,21 +187,19 @@ public class misk/jooq/testgen/tables/Movie : org/jooq/impl/TableImpl {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Lorg/jooq/Name;)V
-	public fun <init> (Lorg/jooq/Name;Lorg/jooq/Table;Lorg/jooq/ForeignKey;Lorg/jooq/Table;[Lorg/jooq/Field;)V
-	public fun <init> (Lorg/jooq/Table;Lorg/jooq/ForeignKey;)V
+	public fun <init> (Lorg/jooq/Name;Lorg/jooq/Table;Lorg/jooq/ForeignKey;Lorg/jooq/InverseForeignKey;Lorg/jooq/Table;[Lorg/jooq/Field;Lorg/jooq/Condition;)V
 	public fun as (Ljava/lang/String;)Lmisk/jooq/testgen/tables/Movie;
 	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/SelectField;
 	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/Table;
 	public fun as (Lorg/jooq/Name;)Lmisk/jooq/testgen/tables/Movie;
 	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/SelectField;
 	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/Table;
-	public fun fieldsRow ()Lorg/jooq/Row6;
-	public synthetic fun fieldsRow ()Lorg/jooq/Row;
+	public fun as (Lorg/jooq/Table;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun as (Lorg/jooq/Table;)Lorg/jooq/Table;
 	public final fun getCREATED_AT ()Lorg/jooq/TableField;
 	public final fun getGENRE ()Lorg/jooq/TableField;
 	public final fun getID ()Lorg/jooq/TableField;
 	public fun getIdentity ()Lorg/jooq/Identity;
-	public fun getKeys ()Ljava/util/List;
 	public final fun getNAME ()Lorg/jooq/TableField;
 	public fun getPrimaryKey ()Lorg/jooq/UniqueKey;
 	public fun getRecordType ()Ljava/lang/Class;
@@ -213,80 +211,52 @@ public class misk/jooq/testgen/tables/Movie : org/jooq/impl/TableImpl {
 	public synthetic fun rename (Ljava/lang/String;)Lorg/jooq/Table;
 	public fun rename (Lorg/jooq/Name;)Lmisk/jooq/testgen/tables/Movie;
 	public synthetic fun rename (Lorg/jooq/Name;)Lorg/jooq/Table;
+	public fun rename (Lorg/jooq/Table;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun rename (Lorg/jooq/Table;)Lorg/jooq/Table;
+	public fun where (Ljava/lang/String;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun where (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun where (Ljava/lang/String;[Ljava/lang/Object;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun where (Ljava/lang/String;[Ljava/lang/Object;)Lorg/jooq/Table;
+	public fun where (Ljava/lang/String;[Lorg/jooq/QueryPart;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun where (Ljava/lang/String;[Lorg/jooq/QueryPart;)Lorg/jooq/Table;
+	public fun where (Ljava/util/Collection;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun where (Ljava/util/Collection;)Lorg/jooq/Table;
+	public fun where (Lorg/jooq/Condition;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun where (Lorg/jooq/Condition;)Lorg/jooq/Table;
+	public fun where (Lorg/jooq/Field;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun where (Lorg/jooq/Field;)Lorg/jooq/Table;
+	public fun where (Lorg/jooq/SQL;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun where (Lorg/jooq/SQL;)Lorg/jooq/Table;
+	public fun where ([Lorg/jooq/Condition;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun where ([Lorg/jooq/Condition;)Lorg/jooq/Table;
+	public fun whereExists (Lorg/jooq/Select;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun whereExists (Lorg/jooq/Select;)Lorg/jooq/Table;
+	public fun whereNotExists (Lorg/jooq/Select;)Lmisk/jooq/testgen/tables/Movie;
+	public synthetic fun whereNotExists (Lorg/jooq/Select;)Lorg/jooq/Table;
 }
 
 public final class misk/jooq/testgen/tables/Movie$Companion {
 	public final fun getMOVIE ()Lmisk/jooq/testgen/tables/Movie;
 }
 
-public class misk/jooq/testgen/tables/records/MovieRecord : org/jooq/impl/UpdatableRecordImpl, org/jooq/Record6 {
+public class misk/jooq/testgen/tables/records/MovieRecord : org/jooq/impl/UpdatableRecordImpl {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;)V
 	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun component1 ()Ljava/lang/Long;
-	public synthetic fun component1 ()Ljava/lang/Object;
-	public synthetic fun component2 ()Ljava/lang/Object;
-	public fun component2 ()Ljava/lang/String;
-	public synthetic fun component3 ()Ljava/lang/Object;
-	public fun component3 ()Ljava/lang/String;
-	public fun component4 ()Ljava/lang/Integer;
-	public synthetic fun component4 ()Ljava/lang/Object;
-	public synthetic fun component5 ()Ljava/lang/Object;
-	public fun component5 ()Ljava/time/LocalDateTime;
-	public synthetic fun component6 ()Ljava/lang/Object;
-	public fun component6 ()Ljava/time/LocalDateTime;
-	public fun field1 ()Lorg/jooq/Field;
-	public fun field2 ()Lorg/jooq/Field;
-	public fun field3 ()Lorg/jooq/Field;
-	public fun field4 ()Lorg/jooq/Field;
-	public fun field5 ()Lorg/jooq/Field;
-	public fun field6 ()Lorg/jooq/Field;
-	public fun fieldsRow ()Lorg/jooq/Row6;
-	public synthetic fun fieldsRow ()Lorg/jooq/Row;
-	public final fun getCreatedAt ()Ljava/time/LocalDateTime;
-	public final fun getGenre ()Ljava/lang/String;
-	public final fun getId ()Ljava/lang/Long;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getUpdatedAt ()Ljava/time/LocalDateTime;
-	public final fun getVersion ()Ljava/lang/Integer;
+	public fun getCreatedAt ()Ljava/time/LocalDateTime;
+	public fun getGenre ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/Long;
+	public fun getName ()Ljava/lang/String;
+	public fun getUpdatedAt ()Ljava/time/LocalDateTime;
+	public fun getVersion ()Ljava/lang/Integer;
 	public fun key ()Lorg/jooq/Record1;
 	public synthetic fun key ()Lorg/jooq/Record;
-	public final fun setCreatedAt (Ljava/time/LocalDateTime;)V
-	public final fun setGenre (Ljava/lang/String;)V
-	public final fun setId (Ljava/lang/Long;)V
-	public final fun setName (Ljava/lang/String;)V
-	public final fun setUpdatedAt (Ljava/time/LocalDateTime;)V
-	public final fun setVersion (Ljava/lang/Integer;)V
-	public fun value1 ()Ljava/lang/Long;
-	public synthetic fun value1 ()Ljava/lang/Object;
-	public fun value1 (Ljava/lang/Long;)Lmisk/jooq/testgen/tables/records/MovieRecord;
-	public synthetic fun value1 (Ljava/lang/Object;)Lorg/jooq/Record6;
-	public synthetic fun value2 ()Ljava/lang/Object;
-	public fun value2 ()Ljava/lang/String;
-	public synthetic fun value2 (Ljava/lang/Object;)Lorg/jooq/Record6;
-	public fun value2 (Ljava/lang/String;)Lmisk/jooq/testgen/tables/records/MovieRecord;
-	public synthetic fun value3 ()Ljava/lang/Object;
-	public fun value3 ()Ljava/lang/String;
-	public synthetic fun value3 (Ljava/lang/Object;)Lorg/jooq/Record6;
-	public fun value3 (Ljava/lang/String;)Lmisk/jooq/testgen/tables/records/MovieRecord;
-	public fun value4 ()Ljava/lang/Integer;
-	public synthetic fun value4 ()Ljava/lang/Object;
-	public fun value4 (Ljava/lang/Integer;)Lmisk/jooq/testgen/tables/records/MovieRecord;
-	public synthetic fun value4 (Ljava/lang/Object;)Lorg/jooq/Record6;
-	public synthetic fun value5 ()Ljava/lang/Object;
-	public fun value5 ()Ljava/time/LocalDateTime;
-	public synthetic fun value5 (Ljava/lang/Object;)Lorg/jooq/Record6;
-	public fun value5 (Ljava/time/LocalDateTime;)Lmisk/jooq/testgen/tables/records/MovieRecord;
-	public synthetic fun value6 ()Ljava/lang/Object;
-	public fun value6 ()Ljava/time/LocalDateTime;
-	public synthetic fun value6 (Ljava/lang/Object;)Lorg/jooq/Record6;
-	public fun value6 (Ljava/time/LocalDateTime;)Lmisk/jooq/testgen/tables/records/MovieRecord;
-	public fun values (Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;)Lmisk/jooq/testgen/tables/records/MovieRecord;
-	public synthetic fun values (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Lorg/jooq/Record6;
-	public fun valuesRow ()Lorg/jooq/Row6;
-	public synthetic fun valuesRow ()Lorg/jooq/Row;
-	public synthetic fun with (Lorg/jooq/Field;Ljava/lang/Object;)Lorg/jooq/Record6;
-	public synthetic fun with (Lorg/jooq/Field;Ljava/lang/Object;Lorg/jooq/Converter;)Lorg/jooq/Record6;
+	public fun setCreatedAt (Ljava/time/LocalDateTime;)V
+	public fun setGenre (Ljava/lang/String;)V
+	public fun setId (Ljava/lang/Long;)V
+	public fun setName (Ljava/lang/String;)V
+	public fun setUpdatedAt (Ljava/time/LocalDateTime;)V
+	public fun setVersion (Ljava/lang/Integer;)V
 }
 
 public final class misk/jooq/testgen/tables/references/TablesKt {

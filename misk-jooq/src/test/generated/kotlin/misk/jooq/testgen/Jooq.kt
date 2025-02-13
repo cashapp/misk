@@ -18,18 +18,18 @@ import org.jooq.impl.SchemaImpl
  */
 @Suppress("UNCHECKED_CAST")
 open class Jooq : SchemaImpl("jooq", DefaultCatalog.DEFAULT_CATALOG) {
-    companion object {
+    public companion object {
 
         /**
          * The reference instance of <code>jooq</code>
          */
-        val JOOQ = Jooq()
+        val JOOQ: Jooq = Jooq()
     }
 
     /**
      * The table <code>jooq.movie</code>.
      */
-    val MOVIE get() = Movie.MOVIE
+    val MOVIE: Movie get() = Movie.MOVIE
 
     override fun getCatalog(): Catalog = DefaultCatalog.DEFAULT_CATALOG
 
