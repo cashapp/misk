@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinJsCompile
+
 plugins {
   id("org.jetbrains.kotlin.multiplatform")
 }
@@ -25,5 +27,14 @@ kotlin {
 }
 
 tasks.named("jvmTest") {
-  dependsOn("compileKotlinWasmWasi")
+  dependsOn("compileDevelopmentExecutableKotlinWasmWasi")
+  // dependsOn("compileDevelopmentExecutableKotlinWasmWasiOptimize")
+}
+
+// The Kotlin Wasm compiler generates legacy opcodes for the exception proposal by default. Chasm
+// supports the new exception opcodes.
+tasks.withType<KotlinJsCompile>().configureEach {
+  compilerOptions {
+    freeCompilerArgs.addAll("-Xwasm-use-new-exception-proposal")
+  }
 }

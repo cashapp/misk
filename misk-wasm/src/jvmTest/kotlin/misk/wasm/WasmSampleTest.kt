@@ -8,6 +8,7 @@ import io.github.charlietap.chasm.embedding.invoke
 import io.github.charlietap.chasm.embedding.module
 import io.github.charlietap.chasm.embedding.shapes.ChasmResult
 import io.github.charlietap.chasm.embedding.shapes.Module
+import io.github.charlietap.chasm.embedding.shapes.expect
 import io.github.charlietap.chasm.embedding.store
 import io.github.charlietap.chasm.stream.SourceReader
 import okio.BufferedSource
@@ -21,34 +22,34 @@ import org.junit.jupiter.api.Test
 
 class WasmSampleTest {
   private val fileSystem = FileSystem.SYSTEM
+  // I changed this as it had a reference to a dir called "optimized" which doesn't exist in my build
   private val wasmFile =
-    "build/compileSync/wasmWasi/main/productionExecutable/optimized/misk-misk-wasm-wasm-wasi.wasm".toPath()
+    "build/compileSync/wasmWasi/main/developmentExecutable/kotlin/misk-misk-wasm-wasm-wasi.wasm".toPath()
 
   @Test
   fun test() {
-    val module = (fileSystem.readModule(wasmFile) as ChasmResult.Success).result
+    val bridge = MiskBridge()
+    val module = fileSystem.readModule(wasmFile).expect("read success")
 
     for (export in module.exports) {
       println(export)
     }
 
     val store = store()
-    val instance = (instance(
+    val instance = instance(
       store = store,
       module = module,
-      imports = listOf(),
+      imports = bridge.imports(store) + wasiImports(store),
       config = RuntimeConfig.default(),
-    ) as ChasmResult.Success).result
+    ).expect("failed to instantiate module")
 
-    val greetResult = invoke(store, instance, "greet")
-    val result = (greetResult as ChasmResult.Success).result
+    invoke(store, instance, "_initialize")
+    val result = invoke(store, instance, "greet").expect("Failed to invoke greet")
 
     println(result)
-
   }
 
 }
-
 fun FileSystem.readModule(path: Path) =
   source(path).buffer().use { it.readModule() }
 
@@ -68,3 +69,4 @@ private class BufferedSourceReader(
 
   override fun peek() = BufferedSourceReader(source.peek())
 }
+
