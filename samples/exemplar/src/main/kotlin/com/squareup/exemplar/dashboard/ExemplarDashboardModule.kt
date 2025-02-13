@@ -99,16 +99,41 @@ class ExemplarDashboardModule(private val deployment: Deployment) : KAbstractMod
 
     // Custom Admin Dashboard Tab at /_admin/... which doesn't exist and shows graceful failure 404
     install(WebActionModule.create<AlphaIndexAction>())
+
+    // Tests 404 error message for misconfigured tabs
     install(
-      DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
-        isDevelopment = deployment.isLocalDevelopment,
+      DashboardModule.createIFrameTab<AdminDashboard, AdminDashboardAccess>(
         slug = "not-found",
-        urlPathPrefix = "/_admin/not-found/",
-        developmentWebProxyUrl = "http://localhost:3000/",
-        menuLabel = "Not Found",
+        urlPathPrefix = "/_admin/not-found-iframe/",
+        iframePath = "/path/to/not-found-iframe/index.html",
+        menuLabel = "Not Found IFrame",
         menuCategory = "Admin Tools"
       )
     )
+    install(
+      DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
+        isDevelopment = deployment.isLocalDevelopment,
+        slug = "not-found-misk-web",
+        urlPathPrefix = "/_admin/not-found-misk-web/",
+        developmentWebProxyUrl = "http://localhost:3000/",
+        menuLabel = "Not Found Misk-Web",
+        menuCategory = "Admin Tools"
+      )
+    )
+    install(
+      DashboardModule.createIFrameTab<AdminDashboard, AdminDashboardAccess>(
+        slug = "not-found-react",
+        urlPathPrefix = "/_admin/not-found-react/",
+        iframePath = "/_tab/not-found-react/index.html",
+        menuLabel = "Not Found React",
+        menuCategory = "Admin Tools"
+      )
+    )
+    install(DashboardModule.createMenuLink<AdminDashboard, AdminDashboardAccess>(
+      label = "Not Found Link",
+      url = "/_admin/not-found-link/",
+      category = "Admin Tools"
+    ))
   }
 }
 

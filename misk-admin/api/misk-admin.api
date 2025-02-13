@@ -1001,7 +1001,7 @@ public final class misk/web/v2/DashboardIndexAccessBlock {
 public final class misk/web/v2/DashboardIndexAction : misk/web/actions/WebAction {
 	public static final field Companion Lmisk/web/v2/DashboardIndexAction$Companion;
 	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/web/v2/DashboardPageLayout;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lwisp/deployment/Deployment;)V
-	public final fun get ()Ljava/lang/String;
+	public final fun get (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class misk/web/v2/DashboardIndexAction$Companion {
