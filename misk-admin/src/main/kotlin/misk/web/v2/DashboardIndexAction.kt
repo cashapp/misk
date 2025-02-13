@@ -10,7 +10,10 @@ import kotlinx.html.span
 import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
+import misk.tailwind.components.AlertError
+import misk.tailwind.components.AlertInfo
 import misk.web.Get
+import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.DashboardTab
@@ -34,11 +37,18 @@ class DashboardIndexAction @Inject constructor(
   @Get("/{rest:.*}")
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Unauthenticated
-  fun get(): String = dashboardPageLayout
+  fun get(@PathParam rest: String?): String = dashboardPageLayout
     .newBuilder()
     .title { appName, dashboardHomeUrl, _ -> "Home | $appName ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase() ?: ""}" }
     .build { appName, dashboardHomeUrl, _ ->
       div("center container p-8") {
+        if (rest?.isNotBlank() == true) {
+          // Show 404 message if the tab is not found.
+          AlertError("""Dashboard tab not found for: ${rest.removeSuffix("/")}""")
+          AlertInfo("Check your DashboardModule installation to ensure that the slug, urlPathPrefix, and iframePath matches your frontend location.")
+        }
+
+        // Welcome
         h1("text-2xl") {
           +"""Welcome, """
           span("font-bold font-mono") { +"""${callerProvider.get()?.user}""" }
@@ -49,8 +59,6 @@ class DashboardIndexAction @Inject constructor(
           span("font-bold font-mono") { +appName }
           +"""."""
         }
-
-        // TODO setup better 404 for dashboard /*
 
         // Access notice block.
         val dashboardTabs =

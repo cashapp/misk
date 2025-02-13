@@ -21,6 +21,8 @@ import misk.web.mediatype.MediaTypes
 import misk.web.proxy.WebProxyAction
 import misk.web.resources.StaticResourceAction
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 
@@ -53,6 +55,9 @@ internal class DashboardIFrameTabAction @Inject constructor(
       if (iframeTab != null) {
         // If the tab is found, render the iframe
 
+        val iframeSrc = "${iframeTab.iframePath}$suffix"
+        val hostname = "http://localhost/"
+
         if (iframeTab.iframePath.startsWith(MiskWebTabIndexAction.PATH)) {
           // If tab is Misk-Web, do extra validation to show a more helpful error message
 
@@ -72,8 +77,8 @@ internal class DashboardIFrameTabAction @Inject constructor(
             // If tab is Misk-Web do additional checks and show separate development and real errors
             if (deployment.isLocalDevelopment) {
               // If local development, check web proxy action and show fuller development 404 message
-              val tabEntrypointJsResponse =
-                webProxyAction.getResponse(("http://localhost" + tabEntrypointJs).toHttpUrl())
+              val tabEntrypointJsResponse = webProxyAction
+                .getResponse((hostname / tabEntrypointJs).toHttpUrl())
               if (tabEntrypointJsResponse.statusCode != 200) {
                 div("container mx-auto p-8") {
                   AlertError("Failed to load Misk-Web tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel}")
@@ -83,9 +88,9 @@ internal class DashboardIFrameTabAction @Inject constructor(
             } else if (deployment.isReal) {
               // If real environment, only check static resource action and show limited 404 message
               val tabEntrypointJsResponse = staticResourceAction
-                .getResponse(("http://localhost" + tabEntrypointJs).toHttpUrl())
+                .getResponse((hostname / tabEntrypointJs).toHttpUrl())
               if (tabEntrypointJsResponse.statusCode != 200) {
-                logger.info("Failed to load Misk-Web tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel} Responsse: $tabEntrypointJsResponse")
+                logger.info("Failed to load Misk-Web tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel} Response: $tabEntrypointJsResponse")
                 div("container mx-auto p-8") {
                   AlertError("Failed to load Misk-Web tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel}")
                   AlertInfo("In real environments, this is usually because of a web build failure in CI. Try checking CI logs and report this bug to your platform team. If the CI web build fails or is not run, the web assets will be missing from the Docker context when deployed and fail to load.")
@@ -93,11 +98,68 @@ internal class DashboardIFrameTabAction @Inject constructor(
               }
             }
           }
+        } else if (iframeTab.iframePath.endsWith("index.html")) {
+          // If tab is a non Misk-Web frontend, do extra validation to show a more helpful error message
+
+          val slug = iframeTab.urlPathPrefix.split("/").last { it.isNotBlank() }
+          val dashboardTab = dashboardTabs.firstOrNull { slug == it.slug }
+
+          if (dashboardTab == null) {
+            div("container mx-auto p-8") {
+              AlertError("No tab found for slug: $slug")
+              AlertInfo("Check your DashboardModule installation to ensure that the slug, urlPathPrefix, and iframePath matches your frontend location.")
+            }
+          } else {
+            // If tab is Misk-Web do additional checks and show separate development and real errors
+            if (deployment.isLocalDevelopment) {
+              // If local development, check web proxy action and show fuller development 404 message
+              val tabEntrypointJsResponse = webProxyAction
+                .getResponse((hostname / iframeTab.iframePath).toHttpUrl())
+              if (tabEntrypointJsResponse.statusCode != 200) {
+                div("container mx-auto p-8") {
+                  AlertError("Failed to load tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel}")
+                  if (iframeTab.iframePath == "/_tab/web-actions-v4/index.html") {
+                    AlertInfo("In local development, this can be from not having your local dev server (ie. Webpack) running or not doing an initial local frontend build to generate the necessary web assets. Try running in your Terminal: \$ gradle :misk:misk-admin:web-actions:buildWebActionsTab.")
+                  } else {
+                    AlertInfo("In local development, this can be from not having your local dev server (ie. Webpack) running or not doing an initial local frontend build to generate the necessary web assets. Try running in your Terminal: \$ gradle buildMiskWeb OR \$ misk-web ci-build -e.")
+                  }
+                }
+              }
+            } else if (deployment.isReal) {
+              // If real environment, only check static resource action and show limited 404 message
+              val tabEntrypointJsResponse = staticResourceAction
+                .getResponse((hostname / iframeTab.iframePath).toHttpUrl())
+              if (tabEntrypointJsResponse.statusCode != 200) {
+                logger.info("Failed to load tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel} Response: $tabEntrypointJsResponse")
+                div("container mx-auto p-8") {
+                  AlertError("Failed to load tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel}")
+                  AlertInfo("In real environments, this is usually because of a web build failure in CI. Try checking CI logs and report this bug to your platform team. If the CI web build fails or is not run, the web assets will be missing from the Docker context when deployed and fail to load.")
+                }
+              }
+            }
+          }
+        } else {
+          // If tab is not Misk-Web, show generic error message if src doesn't resolve
+          try {
+            OkHttpClient.Builder().build().newCall(Request((hostname / iframeSrc).toHttpUrl()))
+              .execute()
+              .use { response ->
+                if (!response.isSuccessful) {
+                  div("container mx-auto p-8") {
+                    AlertError("Failed to load tab at $iframeSrc")
+                  }
+                }
+              }
+          } catch (e: Exception) {
+            div("container mx-auto p-8") {
+              AlertError("Failed to load tab at $iframeSrc")
+            }
+          }
         }
 
         // Always still show iframe so that full load errors show up in browser console
         iframe(classes = "h-full w-full") {
-          src = "${iframeTab.iframePath}$suffix"
+          src = iframeSrc
         }
       } else {
         div("container mx-auto p-8") {
@@ -106,6 +168,13 @@ internal class DashboardIFrameTabAction @Inject constructor(
         }
       }
     }
+
+  // Allow easier concatenation of URL paths with auto-stripping of extra slashes
+  private operator fun String.div(other: String): String = StringBuilder()
+    .append(this.removeSuffix("/"))
+    .append("/")
+    .append(other.removePrefix("/"))
+    .toString()
 
   companion object {
     private val logger = getLogger<DashboardIFrameTabAction>()
