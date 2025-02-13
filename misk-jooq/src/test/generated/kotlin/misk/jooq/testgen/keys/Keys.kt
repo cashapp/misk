@@ -17,4 +17,6 @@ import org.jooq.impl.Internal
 // UNIQUE and PRIMARY KEY definitions
 // -------------------------------------------------------------------------
 
-val KEY_MOVIE_PRIMARY: UniqueKey<MovieRecord> = Internal.createUniqueKey(Movie.MOVIE, DSL.name("KEY_movie_PRIMARY"), arrayOf(Movie.MOVIE.ID), true)
+val KEY_MOVIE_PRIMARY: UniqueKey<MovieRecord> = Internal.createUniqueKey(
+  Movie.MOVIE, DSL.name("KEY_movie_PRIMARY"), arrayOf(
+    Movie.MOVIE.ID), true)

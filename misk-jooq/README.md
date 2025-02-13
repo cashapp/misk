@@ -37,7 +37,6 @@ miskSchemaMigrator {
 }
 // More details about the jooq plugin here - https://github.com/etiennestuder/gradle-jooq-plugin
 jooq {
-  version.set("3.14.8")
   edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
 
   configurations {

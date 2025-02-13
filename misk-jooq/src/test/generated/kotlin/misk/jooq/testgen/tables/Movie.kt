@@ -4,27 +4,32 @@
 package misk.jooq.testgen.tables
 
 
-import java.time.LocalDateTime
-
-import kotlin.collections.List
-
 import misk.jooq.testgen.Jooq
 import misk.jooq.testgen.keys.KEY_MOVIE_PRIMARY
 import misk.jooq.testgen.tables.records.MovieRecord
 
+import java.time.LocalDateTime
+
+import kotlin.collections.Collection
+
+import org.jooq.Condition
 import org.jooq.Field
 import org.jooq.ForeignKey
 import org.jooq.Identity
+import org.jooq.InverseForeignKey
 import org.jooq.Name
+import org.jooq.PlainSQL
+import org.jooq.QueryPart
 import org.jooq.Record
-import org.jooq.Row6
+import org.jooq.SQL
 import org.jooq.Schema
+import org.jooq.Select
+import org.jooq.Stringly
 import org.jooq.Table
 import org.jooq.TableField
 import org.jooq.TableOptions
 import org.jooq.UniqueKey
 import org.jooq.impl.DSL
-import org.jooq.impl.Internal
 import org.jooq.impl.SQLDataType
 import org.jooq.impl.TableImpl
 
@@ -35,26 +40,30 @@ import org.jooq.impl.TableImpl
 @Suppress("UNCHECKED_CAST")
 open class Movie(
     alias: Name,
-    child: Table<out Record>?,
-    path: ForeignKey<out Record, MovieRecord>?,
+    path: Table<out Record>?,
+    childPath: ForeignKey<out Record, MovieRecord>?,
+    parentPath: InverseForeignKey<out Record, MovieRecord>?,
     aliased: Table<MovieRecord>?,
-    parameters: Array<Field<*>?>?
+    parameters: Array<Field<*>?>?,
+    where: Condition?
 ): TableImpl<MovieRecord>(
     alias,
     Jooq.JOOQ,
-    child,
     path,
+    childPath,
+    parentPath,
     aliased,
     parameters,
     DSL.comment(""),
-    TableOptions.table()
+    TableOptions.table(),
+    where,
 ) {
     companion object {
 
         /**
          * The reference instance of <code>jooq.movie</code>
          */
-        val MOVIE = Movie()
+        val MOVIE: Movie = Movie()
     }
 
     /**
@@ -85,15 +94,16 @@ open class Movie(
     /**
      * The column <code>jooq.movie.created_at</code>.
      */
-    val CREATED_AT: TableField<MovieRecord, LocalDateTime?> = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(3).nullable(false).defaultValue(DSL.field("CURRENT_TIMESTAMP(3)", SQLDataType.LOCALDATETIME)), this, "")
+    val CREATED_AT: TableField<MovieRecord, LocalDateTime?> = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(3).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP(3)"), SQLDataType.LOCALDATETIME)), this, "")
 
     /**
      * The column <code>jooq.movie.updated_at</code>.
      */
-    val UPDATED_AT: TableField<MovieRecord, LocalDateTime?> = createField(DSL.name("updated_at"), SQLDataType.LOCALDATETIME(3).nullable(false).defaultValue(DSL.field("CURRENT_TIMESTAMP(3)", SQLDataType.LOCALDATETIME)), this, "")
+    val UPDATED_AT: TableField<MovieRecord, LocalDateTime?> = createField(DSL.name("updated_at"), SQLDataType.LOCALDATETIME(3).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP(3)"), SQLDataType.LOCALDATETIME)), this, "")
 
-    private constructor(alias: Name, aliased: Table<MovieRecord>?): this(alias, null, null, aliased, null)
-    private constructor(alias: Name, aliased: Table<MovieRecord>?, parameters: Array<Field<*>?>?): this(alias, null, null, aliased, parameters)
+    private constructor(alias: Name, aliased: Table<MovieRecord>?): this(alias, null, null, null, aliased, null, null)
+    private constructor(alias: Name, aliased: Table<MovieRecord>?, parameters: Array<Field<*>?>?): this(alias, null, null, null, aliased, parameters, null)
+    private constructor(alias: Name, aliased: Table<MovieRecord>?, where: Condition): this(alias, null, null, null, aliased, null, where)
 
     /**
      * Create an aliased <code>jooq.movie</code> table reference
@@ -109,15 +119,13 @@ open class Movie(
      * Create a <code>jooq.movie</code> table reference
      */
     constructor(): this(DSL.name("movie"), null)
-
-    constructor(child: Table<out Record>, key: ForeignKey<out Record, MovieRecord>): this(Internal.createPathAlias(child, key), child, key, MOVIE, null)
-    override fun getSchema(): Schema = Jooq.JOOQ
+    override fun getSchema(): Schema? = if (aliased()) null else Jooq.JOOQ
     override fun getIdentity(): Identity<MovieRecord, Long?> = super.getIdentity() as Identity<MovieRecord, Long?>
     override fun getPrimaryKey(): UniqueKey<MovieRecord> = KEY_MOVIE_PRIMARY
-    override fun getKeys(): List<UniqueKey<MovieRecord>> = listOf(KEY_MOVIE_PRIMARY)
     override fun getRecordVersion(): TableField<MovieRecord, Int?> = VERSION
     override fun `as`(alias: String): Movie = Movie(DSL.name(alias), this)
     override fun `as`(alias: Name): Movie = Movie(alias, this)
+    override fun `as`(alias: Table<*>): Movie = Movie(alias.qualifiedName, this)
 
     /**
      * Rename this table
@@ -129,8 +137,58 @@ open class Movie(
      */
     override fun rename(name: Name): Movie = Movie(name, null)
 
-    // -------------------------------------------------------------------------
-    // Row6 type methods
-    // -------------------------------------------------------------------------
-    override fun fieldsRow(): Row6<Long?, String?, String?, Int?, LocalDateTime?, LocalDateTime?> = super.fieldsRow() as Row6<Long?, String?, String?, Int?, LocalDateTime?, LocalDateTime?>
+    /**
+     * Rename this table
+     */
+    override fun rename(name: Table<*>): Movie = Movie(name.qualifiedName, null)
+
+    /**
+     * Create an inline derived table from this table
+     */
+    override fun where(condition: Condition): Movie = Movie(qualifiedName, if (aliased()) this else null, condition)
+
+    /**
+     * Create an inline derived table from this table
+     */
+    override fun where(conditions: Collection<Condition>): Movie = where(DSL.and(conditions))
+
+    /**
+     * Create an inline derived table from this table
+     */
+    override fun where(vararg conditions: Condition): Movie = where(DSL.and(*conditions))
+
+    /**
+     * Create an inline derived table from this table
+     */
+    override fun where(condition: Field<Boolean?>): Movie = where(DSL.condition(condition))
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @PlainSQL override fun where(condition: SQL): Movie = where(DSL.condition(condition))
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @PlainSQL override fun where(@Stringly.SQL condition: String): Movie = where(DSL.condition(condition))
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @PlainSQL override fun where(@Stringly.SQL condition: String, vararg binds: Any?): Movie = where(DSL.condition(condition, *binds))
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @PlainSQL override fun where(@Stringly.SQL condition: String, vararg parts: QueryPart): Movie = where(DSL.condition(condition, *parts))
+
+    /**
+     * Create an inline derived table from this table
+     */
+    override fun whereExists(select: Select<*>): Movie = where(DSL.exists(select))
+
+    /**
+     * Create an inline derived table from this table
+     */
+    override fun whereNotExists(select: Select<*>): Movie = where(DSL.notExists(select))
 }
