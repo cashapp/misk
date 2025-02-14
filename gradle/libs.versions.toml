@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.2.2"
 aws1 = "1.12.781"
-aws2 = "2.30.19"
+aws2 = "2.30.20"
 bucket4j = "8.8.0"
 datadog = "1.46.0"
 dependencyAnalysisPlugin = "2.8.2"
@@ -131,7 +131,7 @@ jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
 jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api" }
 jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
-jooq = { module = "org.jooq:jooq", version = "3.19.11" }
+jooq = { module = "org.jooq:jooq", version = "3.19.18" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.1" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
