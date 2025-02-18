@@ -1,20 +1,15 @@
 import React from 'react';
 import Select, { OnChangeValue, StylesConfig } from 'react-select';
 import Fuse from 'fuse.js';
-import {
-  MiskActions,
-  MiskWebActionDefinition,
-} from '@web-actions/api/responseTypes';
+import { ActionGroup, MiskActions } from '@web-actions/api/responseTypes';
 import RealMetadataClient from '@web-actions/api/RealMetadataClient';
 
 export interface EndpointOption {
-  value: MiskWebActionDefinition;
+  value: ActionGroup;
   label: string;
 }
 
-export type EndpointSelectionCallbacks = ((
-  value: MiskWebActionDefinition,
-) => void)[];
+export type EndpointSelectionCallbacks = ((value: ActionGroup) => void)[];
 
 interface Props {
   endpointSelectionCallbacks?: EndpointSelectionCallbacks;
