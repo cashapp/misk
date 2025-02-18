@@ -1,13 +1,11 @@
-import Select, { OnChangeValue } from 'react-select';
-import { useEffect, useState } from 'react';
 import React from 'react';
+import Select, { OnChangeValue, StylesConfig } from 'react-select';
+import Fuse from 'fuse.js';
 import {
   MiskActions,
   MiskWebActionDefinition,
 } from '@web-actions/api/responseTypes';
 import RealMetadataClient from '@web-actions/api/RealMetadataClient';
-import { StylesConfig } from 'react-select/dist/declarations/src/styles';
-import Fuse from 'fuse.js';
 
 export interface EndpointOption {
   value: MiskWebActionDefinition;
@@ -19,67 +17,130 @@ export type EndpointSelectionCallbacks = ((
 ) => void)[];
 
 interface Props {
-  endpointSelectionCallbacks: EndpointSelectionCallbacks;
+  endpointSelectionCallbacks?: EndpointSelectionCallbacks;
+  onDismiss?: () => void;
 }
 
-const metadataClient = new RealMetadataClient();
+interface State {
+  endpointOptions: EndpointOption[];
+  filterOptions: EndpointOption[];
+  inputValue: string;
+  menuIsOpen: boolean;
+}
 
-export default function EndpointSelection(props: Props) {
-  const [endpointOptions, setEndpointOptions] = useState<EndpointOption[]>([]);
-  const [filterOptions, setFilterOptions] = useState<EndpointOption[]>([]);
-  const [inputValue, setInputValue] = useState<string>('');
-  const ref = React.createRef<any>();
-  const fuse = React.useRef<Fuse<EndpointOption>>();
+export default class EndpointSelection extends React.Component<Props, State> {
+  private selectRef = React.createRef<any>();
+  private fuse: Fuse<EndpointOption> | null = null;
+  private metadataClient = new RealMetadataClient();
 
-  useEffect(() => {
-    metadataClient.fetchMetadata().then((actions: MiskActions) => {
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      endpointOptions: [],
+      filterOptions: [],
+      inputValue: '',
+      menuIsOpen: false,
+    };
+  }
+
+  componentDidMount() {
+    this.metadataClient.fetchMetadata().then((actions: MiskActions) => {
       const options = Object.entries(actions).map(([key, value]) => ({
         value,
         label: key,
       }));
-      fuse.current = new Fuse(options, {
+      this.fuse = new Fuse(options, {
         keys: ['label'],
         threshold: 0.3,
         useExtendedSearch: true,
       });
-      setEndpointOptions(options);
-      ref.current?.focus();
+      this.setState({
+        endpointOptions: options,
+        filterOptions: options,
+      });
+      this.focusSelect();
     });
-  }, []);
+  }
 
-  useEffect(() => {
-    if (!inputValue.trim() || fuse.current === null) {
-      return setFilterOptions(endpointOptions);
+  componentDidUpdate(_: any, prevState: State) {
+    if (
+      prevState.inputValue !== this.state.inputValue ||
+      prevState.endpointOptions !== this.state.endpointOptions
+    ) {
+      this.updateFilterOptions();
+    }
+  }
+
+  updateFilterOptions() {
+    const { inputValue, endpointOptions } = this.state;
+    if (!inputValue.trim() || !this.fuse) {
+      this.setState({ filterOptions: endpointOptions });
+      return;
     }
 
-    const results = fuse
-      .current!.search(inputValue)
+    const results = this.fuse
+      .search(inputValue)
       .sort((a, b) => b.score! - a.score!);
-    setFilterOptions(results.map((result) => result.item));
-  }, [endpointOptions, inputValue, fuse.current]);
+    this.setState({
+      filterOptions: results.map((result) => result.item),
+    });
+  }
 
-  return (
-    <Select<EndpointOption, false>
-      ref={ref}
-      placeholder={'🔍 Select Endpoint'}
-      defaultValue={null}
-      filterOption={() => true}
-      onInputChange={setInputValue}
-      onChange={(value: OnChangeValue<EndpointOption, false>) => {
-        if (value) {
-          for (const callback of props.endpointSelectionCallbacks) {
-            callback(value.value);
-          }
-        }
-      }}
-      options={filterOptions}
-      styles={
-        {
-          container: (base) => ({ ...base, width: '100%' }),
-          menuPortal: (base) => ({ ...base, zIndex: 101 }),
-        } as StylesConfig<any>
+  handleInputChange = (inputValue: string) => {
+    this.setState({ inputValue });
+  };
+
+  handleChange = (value: OnChangeValue<EndpointOption, false>) => {
+    if (value) {
+      for (const callback of this.props?.endpointSelectionCallbacks ?? []) {
+        callback(value.value);
       }
-      menuPortalTarget={document.body}
-    />
-  );
+    }
+  };
+
+  handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      this.props?.onDismiss?.();
+    }
+  };
+
+  setMenuOpen = (menuIsOpen: boolean) => {
+    this.setState((state) => ({ ...state, menuIsOpen }));
+  };
+
+  focusSelect = () => {
+    this.setMenuOpen(true);
+    this.selectRef.current?.focus();
+  };
+
+  handleFocus = (_: React.FocusEvent<HTMLInputElement>) => {
+    this.setMenuOpen(true);
+  };
+
+  render() {
+    const { filterOptions } = this.state;
+    return (
+      <Select<EndpointOption, false>
+        ref={this.selectRef}
+        placeholder={'🔍 Select Endpoint'}
+        defaultValue={null}
+        filterOption={() => true}
+        onFocus={this.handleFocus}
+        onKeyDown={this.handleKeyDown}
+        menuIsOpen={this.state.menuIsOpen}
+        onMenuClose={() => this.setMenuOpen(false)}
+        onInputChange={this.handleInputChange}
+        onChange={this.handleChange}
+        options={filterOptions}
+        styles={
+          {
+            container: (base) => ({ ...base, width: '100%' }),
+            menuPortal: (base) => ({ ...base, zIndex: 101 }),
+          } as StylesConfig<any>
+        }
+        menuPortalTarget={document.body}
+      />
+    );
+  }
 }
