@@ -25,6 +25,12 @@ export interface MiskFieldDefinition {
   annotations: any[];
 }
 
-export type MiskActions = Record<string, MiskWebActionDefinition>;
+export interface ActionGroup {
+  name: string;
+  defaultCallable?: MiskWebActionDefinition;
+  all: MiskWebActionDefinition[];
+}
+
+export type MiskActions = Record<string, ActionGroup>;
 
 export type MiskObjectTypes = Record<string, MiskObjectType>;

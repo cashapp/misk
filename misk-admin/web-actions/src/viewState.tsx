@@ -1,6 +1,6 @@
-import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
+import { ActionGroup } from '@web-actions/api/responseTypes';
 
 export interface ViewState {
-  selectedAction: MiskWebActionDefinition | null;
+  selectedAction: ActionGroup | null;
   response: string | null;
 }

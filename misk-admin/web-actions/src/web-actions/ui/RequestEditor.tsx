@@ -4,11 +4,11 @@ import ace from 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import { ContextAwareCompleter } from '@web-actions/ui/ContextAwareCompleter';
 import { Box, IconButton, Spinner } from '@chakra-ui/react';
-import { ArrowForwardIcon, CopyIcon } from '@chakra-ui/icons';
+import { CopyIcon } from '@chakra-ui/icons';
 import { CommandParser } from '@web-actions/parsing/CommandParser';
 import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
 import { EndpointSelectionCallbacks } from '@web-actions/ui/EndpointSelection';
-import { randomToken } from '@web-actions/utils/common';
+import { createIcon } from '@chakra-ui/icons';
 
 interface State {
   loading: boolean;
@@ -20,8 +20,6 @@ interface Props {
 }
 
 export default class RequestEditor extends React.Component<Props, State> {
-  private id = randomToken();
-
   public refEditor: HTMLElement | null = null;
   public editor: Ace.Editor | null = null;
 
@@ -62,8 +60,9 @@ export default class RequestEditor extends React.Component<Props, State> {
     editor.resize();
 
     this.props.endpointSelectionCallbacks.push((value) => {
-      this.completer.setSelection(value);
-      this.selectedAction = value;
+      this.completer.setSelection(value.defaultCallable ?? null);
+      this.selectedAction = value.defaultCallable ?? null;
+
       editor.clearSelection();
       editor.setValue('{\n  \n}', -1);
       editor.moveCursorTo(1, 2);
@@ -125,6 +124,12 @@ export default class RequestEditor extends React.Component<Props, State> {
   }
 
   public render() {
+    const ActionIcon = createIcon({
+      displayName: 'ActionIcon',
+      viewBox: '0 0 24 24',
+      path: <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />,
+    });
+
     return (
       <Box position="relative" width="100%" height="100%">
         {this.state.loading && (
@@ -145,24 +150,27 @@ export default class RequestEditor extends React.Component<Props, State> {
         )}
         <IconButton
           aria-label="Run"
-          icon={<ArrowForwardIcon />}
           zIndex="100"
           position="absolute"
-          top="2"
-          right="2"
-          backgroundColor="green.200"
+          top="4"
+          right="4"
+          colorScheme={'green'}
+          opacity={0.7}
           onClick={this.submitRequest}
-        />
+        >
+          <ActionIcon />
+        </IconButton>
         <IconButton
           aria-label="Copy"
-          icon={<CopyIcon />}
           zIndex="100"
           position="absolute"
-          top="14"
-          right="2"
-          backgroundColor="grey"
+          top="16"
+          right="4"
+          colorScheme={'blackAlpha'}
           onClick={this.copyToClipboard}
-        />
+        >
+          <CopyIcon />
+        </IconButton>
         <Box
           width="100%"
           height="100%"

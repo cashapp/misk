@@ -3,16 +3,13 @@ import { Ace } from 'ace-builds';
 import ace from 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import { Box, IconButton } from '@chakra-ui/react';
-import { ViewState } from 'src/viewState';
 import { CopyIcon } from '@chakra-ui/icons';
-import { CommandParser } from '@web-actions/parsing/CommandParser';
 
 interface Props {
-  viewState: ViewState;
-  setViewState: Dispatch<SetStateAction<ViewState>>;
+  content: () => string | null;
 }
 
-export default class ResponseViewer extends React.Component<Props> {
+export default class ReadOnlyEditor extends React.Component<Props> {
   public refEditor: HTMLElement | null = null;
   public editor: Ace.Editor | null = null;
 
@@ -50,18 +47,18 @@ export default class ResponseViewer extends React.Component<Props> {
   }
 
   public render() {
-    this.editor?.setValue(this.props.viewState.response || '', -1);
+    this.editor?.setValue(this.props.content() || '', -1);
 
     return (
-      <>
+      <Box position="relative" width="100%" height="100%">
         <IconButton
           aria-label="Copy"
           icon={<CopyIcon />}
           zIndex="100"
           position="absolute"
-          top="14"
-          right="2"
-          backgroundColor="grey"
+          colorScheme={'blackAlpha'}
+          top="4"
+          right="4"
           onClick={this.copyToClipboard}
         />
         <Box
@@ -70,7 +67,7 @@ export default class ResponseViewer extends React.Component<Props> {
           height="100%"
           ref={(it) => this.updateRef(it)}
         />
-      </>
+      </Box>
     );
   }
 }

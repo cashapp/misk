@@ -2,8 +2,15 @@ import React, { useEffect, useState, useRef } from 'react';
 
 import { createRoot } from 'react-dom/client';
 import RequestEditor from '@web-actions/ui/RequestEditor';
-import { Box, ChakraProvider, HStack, Spinner, VStack } from '@chakra-ui/react';
-import ResponseViewer from '@web-actions/ui/ResponseViewer';
+import {
+  Box,
+  ChakraProvider,
+  HStack,
+  Spinner,
+  VStack,
+  Heading,
+} from '@chakra-ui/react';
+import ReadOnlyEditor from '@web-actions/ui/ReadOnlyViewer';
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
 import EndpointSelector, {
@@ -23,6 +30,12 @@ function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const endPointSelectorRef = useRef<EndpointSelector>();
   const requestEditorRef = useRef<RequestEditor>();
+
+  useEffect(() => {
+    endpointSelectionCallbacks.push((selectedAction) => {
+      setViewState((curr) => ({ ...curr, selectedAction }));
+    });
+  }, []);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -60,7 +73,13 @@ function App() {
           <Spinner size="xl" color="white" thickness="5px" />
         </Box>
       )}
-      <VStack height="100vh" spacing={0} bg="gray.600" alignItems="start">
+      <VStack
+        height="100vh"
+        padding={2}
+        spacing={2}
+        bg="gray.600"
+        alignItems="start"
+      >
         <EndpointSelector
           ref={endPointSelectorRef as any}
           onDismiss={() => {
@@ -68,15 +87,36 @@ function App() {
           }}
           endpointSelectionCallbacks={endpointSelectionCallbacks}
         />
-        <HStack bg="gray.200" spacing={2} p={2} flexGrow={1} width="100%">
-          <RequestEditor
-            ref={requestEditorRef as any}
-            endpointSelectionCallbacks={endpointSelectionCallbacks}
-            onResponse={(response) => {
-              setViewState({ ...viewState, response });
-            }}
-          />
-          <ResponseViewer viewState={viewState} setViewState={setViewState} />
+        <HStack spacing={2} flexGrow={1} width="100%">
+          <VStack height="100%" flexGrow={1} alignItems="start">
+            <Heading color="white" size="sm" fontWeight="semibold">
+              Request
+            </Heading>
+            <RequestEditor
+              ref={requestEditorRef as any}
+              endpointSelectionCallbacks={endpointSelectionCallbacks}
+              onResponse={(response) => {
+                setViewState({ ...viewState, response });
+              }}
+            />
+            <Heading color="white" size="sm" fontWeight="semibold">
+              Response
+            </Heading>
+            <ReadOnlyEditor content={() => viewState.response} />
+          </VStack>
+          <VStack height="100%" flexGrow={1} alignItems="start">
+            <Heading color="white" size="sm" fontWeight="semibold">
+              Endpoint Details
+            </Heading>
+            <ReadOnlyEditor
+              content={() => {
+                if (viewState.selectedAction === null) {
+                  return null;
+                }
+                return JSON.stringify(viewState.selectedAction.all, null, 2);
+              }}
+            />
+          </VStack>
         </HStack>
       </VStack>
     </Box>
