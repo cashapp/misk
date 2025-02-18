@@ -34,7 +34,7 @@ open class Metadata @JvmOverloads constructor(
   }
 }
 
-private const val JSON_TRUNCATION_LIMIT = 100_000
+private const val JSON_TRUNCATION_LIMIT = 4_000
 fun <T> JsonAdapter<T>.toFormattedJson(value: T): String {
   val json = serializeNulls()
     .indent("  ")
