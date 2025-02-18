@@ -119,7 +119,7 @@ internal class DashboardIFrameTabAction @Inject constructor(
                 div("container mx-auto p-8") {
                   AlertError("Failed to load tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel}")
                   if (iframeTab.iframePath == "/_tab/web-actions-v4/index.html") {
-                    AlertInfo("In local development, this can be from not having your local dev server (ie. Webpack) running or not doing an initial local frontend build to generate the necessary web assets. Try running in your Terminal: \$ gradle :misk:misk-admin:web-actions:buildWebActionsTab.")
+                    AlertInfo("In local development, this can be from not having your local dev server (ie. Webpack) running or not doing an initial local frontend build to generate the necessary web assets. Try running in your Terminal: \$ gradle :misk:misk-admin:buildAndCopyWebActions.")
                   } else {
                     AlertInfo("In local development, this can be from not having your local dev server (ie. Webpack) running or not doing an initial local frontend build to generate the necessary web assets. Try running in your Terminal: \$ gradle buildMiskWeb OR \$ misk-web ci-build -e.")
                   }
