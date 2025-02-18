@@ -16,6 +16,7 @@ import misk.web.dashboard.DashboardNavbarItem
 import misk.web.dashboard.DashboardTab
 import misk.web.v2.DashboardIndexAction.Companion.titlecase
 import wisp.deployment.Deployment
+import wisp.logging.getLogger
 
 /**
  * Builds dashboard UI for index homepage.
@@ -80,6 +81,8 @@ class DashboardPageLayout @Inject constructor(
       dashboardTabs = allTabs.filter { dashboardHomeUrl?.dashboard_slug == it.dashboard_slug },
       currentPath = path
     )
+
+    logger.info("${callerProvider.get()} visited dashboard tab $dashboardTab")
 
     return buildHtml {
       HtmlLayout(
@@ -146,5 +149,7 @@ class DashboardPageLayout @Inject constructor(
 
   companion object {
     const val ADMIN_DASHBOARD_PATH = "/_admin"
+
+    private val logger = getLogger<DashboardPageLayout>()
   }
 }
