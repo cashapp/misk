@@ -71,6 +71,10 @@ export default class RequestEditor extends React.Component<Props, State> {
     });
   }
 
+  public focusEditor() {
+    this.editor?.focus();
+  }
+
   public updateRef(item: HTMLElement | null) {
     this.refEditor = item;
   }

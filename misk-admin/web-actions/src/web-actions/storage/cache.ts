@@ -1,6 +1,7 @@
 const DB_NAME = 'networkCacheDB';
-const STORE_NAME = 'responses';
-const DB_VERSION = 1;
+const STORE_NAME = 'responses_v2';
+const DB_VERSION = 2;
+const CACHE_DURATION_MS = 1000 * 60 * 60;
 
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -37,7 +38,7 @@ function insert<T>(
   value: T,
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const request = store.add(value, key);
+    const request = store.put(value, key);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve();
   });
@@ -54,6 +55,11 @@ function openTransaction(
 
 const inflight = new Map<string, Promise<any>>();
 
+interface CacheEntry<T> {
+  lastUpdatedAtMs: number;
+  value: T;
+}
+
 export async function cachedResponse<T>(
   key: string,
   fn: () => Promise<T>,
@@ -62,13 +68,13 @@ export async function cachedResponse<T>(
   try {
     const readTransaction = openTransaction(db, 'readonly');
 
-    const existing = await fetch<T>(
+    const existing = await fetch<CacheEntry<T>>(
       readTransaction.objectStore(STORE_NAME),
       key,
     );
 
-    if (existing) {
-      return existing;
+    if (existing && Date.now() - existing.lastUpdatedAtMs < CACHE_DURATION_MS) {
+      return existing.value;
     }
 
     if (inflight.has(key)) {
@@ -80,7 +86,11 @@ export async function cachedResponse<T>(
 
     const response = await networkCall;
     const writeTransaction = openTransaction(db, 'readwrite');
-    await insert<T>(writeTransaction.objectStore(STORE_NAME), key, response);
+
+    await insert<CacheEntry<T>>(writeTransaction.objectStore(STORE_NAME), key, {
+      lastUpdatedAtMs: Date.now(),
+      value: response,
+    });
     return response;
   } finally {
     inflight.delete(key);
