@@ -19,10 +19,10 @@ internal class FakeClusterTest {
   @Inject lateinit var cluster: FakeCluster
 
   @Test fun clusterRespondsToChanges() {
-    cluster.clusterChanged(membersBecomingReady = setOf(Cluster.Member("blerp", "192.168.12.3")))
+    cluster.clusterChanged(membersBecomingReady = setOf(Cluster.Member("blerp", "192.168.12.3", "fakeDeployment")))
     assertThat(cluster.snapshot.readyMembers)
-      .containsExactlyInAnyOrder(Cluster.Member("blerp", "192.168.12.3"))
-    cluster.clusterChanged(membersBecomingNotReady = setOf(Cluster.Member("blerp", "192.168.12.3")))
+      .containsExactlyInAnyOrder(Cluster.Member("blerp", "192.168.12.3", "fakeDeployment"))
+    cluster.clusterChanged(membersBecomingNotReady = setOf(Cluster.Member("blerp", "192.168.12.3", "fakeDeployment")))
     assertThat(cluster.snapshot.readyMembers).isEmpty()
   }
 
@@ -32,14 +32,14 @@ internal class FakeClusterTest {
       FakeCluster.self
     )
 
-    cluster.resourceMapper.setDefaultMapping(Cluster.Member("zork", "192.168.12.0"))
-    cluster.resourceMapper.addMapping("my-object", Cluster.Member("bork", "192.168.12.1"))
+    cluster.resourceMapper.setDefaultMapping(Cluster.Member("zork", "192.168.12.0", "fakeDeployment"))
+    cluster.resourceMapper.addMapping("my-object", Cluster.Member("bork", "192.168.12.1", "fakeDeployment"))
 
     assertThat(cluster.snapshot.resourceMapper["my-object"].name).isEqualTo("bork")
     assertThat(cluster.snapshot.resourceMapper["other-object"].name).isEqualTo("zork")
 
     // Ensure resource mapper remains the same even through cluster changes
-    cluster.clusterChanged(membersBecomingReady = setOf(Cluster.Member("blerp", "192.168.12.3")))
+    cluster.clusterChanged(membersBecomingReady = setOf(Cluster.Member("blerp", "192.168.12.3", "fakeDeployment")))
     assertThat(cluster.snapshot.resourceMapper["my-object"].name).isEqualTo("bork")
     assertThat(cluster.snapshot.resourceMapper["other-object"].name).isEqualTo("zork")
 

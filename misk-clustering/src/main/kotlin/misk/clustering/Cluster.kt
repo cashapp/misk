@@ -8,7 +8,7 @@ typealias ClusterWatch = (Cluster.Changes) -> Unit
  * to monitor the state of its peers
  */
 interface Cluster {
-  data class Member(val name: String, val ipAddress: String)
+  data class Member(val name: String, val ipAddress: String, val deploymentVersion: String)
 
   data class Changes @JvmOverloads constructor(
     val snapshot: Snapshot,
