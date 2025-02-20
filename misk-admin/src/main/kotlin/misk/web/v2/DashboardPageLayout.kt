@@ -82,7 +82,8 @@ class DashboardPageLayout @Inject constructor(
       currentPath = path
     )
 
-    logger.info("${callerProvider.get()} visited dashboard tab $dashboardTab")
+    val analyticsTitle = if (dashboardTab != null) " ${dashboardTab.menuCategory}/${dashboardTab.menuLabel}" else ""
+    logger.info("${callerProvider.get()} visited dashboard tab$analyticsTitle at $path [dashboard=${dashboardHomeUrl?.dashboardAnnotationKClass?.simpleName}]")
 
     return buildHtml {
       HtmlLayout(
