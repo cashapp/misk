@@ -168,7 +168,7 @@ data class DataSourceConfig @JvmOverloads constructor(
       DataSourceType.VITESS_MYSQL -> {
         copy(
           port = port ?: 27003,
-          host = host ?: server_hostname,
+          host = host ?: System.getenv("VITESS_HOST") ?: server_hostname,
           database = database ?: "@master"
         )
       }
