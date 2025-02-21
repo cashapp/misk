@@ -66,6 +66,7 @@ internal class FakeFeatureFlagsFixture(
 ) : TestFixture {
 
   override fun reset() {
+    featureFlags.reset()
     block(featureFlags)
   }
 }
