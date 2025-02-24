@@ -1,12 +1,12 @@
 import React from 'react';
 import Select, { OnChangeValue, StylesConfig } from 'react-select';
-import Fuse from 'fuse.js';
 import { ActionGroup, MiskActions } from '@web-actions/api/responseTypes';
 import RealMetadataClient from '@web-actions/api/RealMetadataClient';
 
 export interface EndpointOption {
   value: ActionGroup;
   label: string;
+  lowerCaseLabel: string;
 }
 
 export type EndpointSelectionCallbacks = ((value: ActionGroup) => void)[];
@@ -17,23 +17,21 @@ interface Props {
 }
 
 interface State {
-  endpointOptions: EndpointOption[];
-  filterOptions: EndpointOption[];
+  filteredOptions: EndpointOption[];
   inputValue: string;
   menuIsOpen: boolean;
 }
 
 export default class EndpointSelection extends React.Component<Props, State> {
   private selectRef = React.createRef<any>();
-  private fuse: Fuse<EndpointOption> | null = null;
   private metadataClient = new RealMetadataClient();
+  private options: EndpointOption[] = [];
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      endpointOptions: [],
-      filterOptions: [],
+      filteredOptions: [],
       inputValue: '',
       menuIsOpen: false,
     };
@@ -41,45 +39,38 @@ export default class EndpointSelection extends React.Component<Props, State> {
 
   componentDidMount() {
     this.metadataClient.fetchMetadata().then((actions: MiskActions) => {
-      const options = Object.entries(actions)
-        .map(([key, value]) => ({
-          value: value,
-          label: key,
-        }))
-        .sort((a, b) => a.value.name.localeCompare(b.value.name));
-      this.fuse = new Fuse(options, {
-        keys: ['label'],
-        useExtendedSearch: true,
-      });
-      this.setState({
-        endpointOptions: options,
-        filterOptions: options,
-      });
+      this.options = Object.values(actions)
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((it) => ({
+          label: it.name,
+          lowerCaseLabel: it.name.toLowerCase(),
+          value: it,
+        }));
+      this.setState({ filteredOptions: this.options });
       this.focusSelect();
     });
   }
 
   componentDidUpdate(_: any, prevState: State) {
-    if (
-      prevState.inputValue !== this.state.inputValue ||
-      prevState.endpointOptions !== this.state.endpointOptions
-    ) {
+    if (prevState.inputValue !== this.state.inputValue) {
       this.updateFilterOptions();
     }
   }
 
   updateFilterOptions() {
-    const { inputValue, endpointOptions } = this.state;
-    if (!inputValue.trim() || !this.fuse) {
-      this.setState({ filterOptions: endpointOptions });
+    const terms = this.state.inputValue
+      .split(/\s+/)
+      .filter((it) => it.length > 0)
+      .map((it) => it.toLowerCase());
+    if (terms.length === 0) {
+      this.setState({ filteredOptions: this.options });
       return;
     }
 
-    const results = this.fuse
-      .search(inputValue)
-      .sort((a, b) => b.score! - a.score!);
     this.setState({
-      filterOptions: results.map((result) => result.item),
+      filteredOptions: this.options.filter((option) =>
+        terms.every((term) => option.lowerCaseLabel.includes(term)),
+      ),
     });
   }
 
@@ -115,7 +106,6 @@ export default class EndpointSelection extends React.Component<Props, State> {
   };
 
   render() {
-    const { filterOptions } = this.state;
     return (
       <Select<EndpointOption, false>
         ref={this.selectRef}
@@ -128,7 +118,7 @@ export default class EndpointSelection extends React.Component<Props, State> {
         onMenuClose={() => this.setMenuOpen(false)}
         onInputChange={this.handleInputChange}
         onChange={this.handleChange}
-        options={filterOptions}
+        options={this.state.filteredOptions}
         styles={
           {
             container: (base) => ({ ...base, width: '100%' }),
