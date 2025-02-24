@@ -8,12 +8,14 @@ plugins {
 
 dependencies {
   api(libs.guice)
+  api(libs.kotlinxCoroutinesCore)
   api(project(":misk-inject"))
   implementation(libs.guava)
   implementation(libs.jakartaInject)
   implementation(libs.loggingApi)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-api"))
   implementation(project(":misk-core"))
+  implementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
