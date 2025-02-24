@@ -20,22 +20,22 @@ internal class KeyStoreX509KeyManager(
     constructor(passphrase: CharArray, keyStore: KeyStore) : this(passphrase, { keyStore })
 
     override fun chooseServerAlias(
-        keyType: String,
-        issuers: Array<out Principal>,
-        socket: Socket
+        keyType: String?,
+        issuers: Array<out Principal>?,
+        socket: Socket?
     ) = getPrivateKeyAlias()
 
     override fun chooseClientAlias(
-        keyTypes: Array<out String>,
-        issuers: Array<out Principal>,
-        socket: Socket
+        keyTypes: Array<out String>?,
+        issuers: Array<out Principal>?,
+        socket: Socket?
     ) = getPrivateKeyAlias()
 
-    override fun getClientAliases(keyType: String, issuers: Array<out Principal>): Array<String> {
+    override fun getClientAliases(keyType: String?, issuers: Array<out Principal>?): Array<String> {
         return arrayOf(getPrivateKeyAlias())
     }
 
-    override fun getServerAliases(keyType: String, issuers: Array<out Principal>): Array<String> {
+    override fun getServerAliases(keyType: String?, issuers: Array<out Principal>?): Array<String> {
         return arrayOf(getPrivateKeyAlias())
     }
 
