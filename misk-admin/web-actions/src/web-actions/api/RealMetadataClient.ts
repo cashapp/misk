@@ -2,9 +2,14 @@ import {
   ActionGroup,
   MiskActions,
   MiskMetadataResponse,
+  MiskWebActionDefinition,
 } from '@web-actions/api/responseTypes';
 import { fetchCached } from '@web-actions/network/http';
 import MetadataClient from '@web-actions/api/MetadataClient';
+
+function containsJson(mediaType: string[]) {
+  return mediaType.some((it) => it.startsWith('application/json'));
+}
 
 export default class RealMetadataClient implements MetadataClient {
   async fetchMetadata(): Promise<MiskActions> {
@@ -13,19 +18,41 @@ export default class RealMetadataClient implements MetadataClient {
     );
     const actionMap: Record<string, ActionGroup> = {};
     response.all['web-actions'].metadata.forEach((it) => {
-      let group = actionMap[it.name];
+      const qualifiedName = it.packageName + '.' + it.name;
+
+      let group = actionMap[qualifiedName];
       if (group === undefined) {
-        group = { name: it.name, all: [] };
-        actionMap[it.name] = group;
+        group = {
+          name: qualifiedName,
+          callables: {},
+          getCallablesByMethod(): MiskWebActionDefinition[] {
+            return [
+              this.callables['POST'],
+              this.callables['PUT'],
+              this.callables['GET'],
+            ].filter((it) => it !== undefined);
+          },
+          all: [],
+        };
+        actionMap[qualifiedName] = group;
       }
 
-      if (
-        it.requestMediaTypes.some((mediaType) =>
-          mediaType.startsWith('application/json'),
-        )
+      function maybeAddCallable(
+        method: string,
+        predicate: (it: MiskWebActionDefinition) => boolean = () => true,
       ) {
-        group.defaultCallable = it;
+        if (
+          it.httpMethod === method &&
+          group.callables[method] === undefined &&
+          predicate(it)
+        ) {
+          group.callables[method] = it;
+        }
       }
+
+      maybeAddCallable('POST', (it) => containsJson(it.requestMediaTypes));
+      maybeAddCallable('PUT', (it) => containsJson(it.requestMediaTypes));
+      maybeAddCallable('GET');
 
       group.all.push(it);
     });

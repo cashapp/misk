@@ -8,6 +8,8 @@ export interface MiskMetadataResponse {
 
 export interface MiskWebActionDefinition {
   name: string;
+  httpMethod?: string;
+  packageName: string;
   requestType: string;
   pathPattern: string;
   types: MiskObjectTypes;
@@ -27,7 +29,8 @@ export interface MiskFieldDefinition {
 
 export interface ActionGroup {
   name: string;
-  defaultCallable?: MiskWebActionDefinition;
+  callables: Record<string, MiskWebActionDefinition>;
+  getCallablesByMethod(): MiskWebActionDefinition[];
   all: MiskWebActionDefinition[];
 }
 

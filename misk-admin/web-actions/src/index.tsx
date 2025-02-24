@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 import { createRoot } from 'react-dom/client';
 import RequestEditor from '@web-actions/ui/RequestEditor';
@@ -9,6 +9,8 @@ import {
   Spinner,
   VStack,
   Heading,
+  Input,
+  IconButton,
 } from '@chakra-ui/react';
 import ReadOnlyEditor from '@web-actions/ui/ReadOnlyViewer';
 import 'ace-builds';
@@ -19,13 +21,17 @@ import EndpointSelector, {
 import { ViewState } from 'src/viewState';
 import { fetchCached } from '@web-actions/network/http';
 import { MiskMetadataResponse } from '@web-actions/api/responseTypes';
+import { Select } from '@chakra-ui/react';
+import { createIcon } from '@chakra-ui/icons';
 
 const endpointSelectionCallbacks: EndpointSelectionCallbacks = [];
 
 function App() {
   const [viewState, setViewState] = useState<ViewState>({
+    path: '',
     selectedAction: null,
     response: null,
+    callables: [],
   });
   const [loading, setLoading] = useState<boolean>(true);
   const endPointSelectorRef = useRef<EndpointSelector>();
@@ -33,7 +39,21 @@ function App() {
 
   useEffect(() => {
     endpointSelectionCallbacks.push((selectedAction) => {
-      setViewState((curr) => ({ ...curr, selectedAction }));
+      const callables = selectedAction.getCallablesByMethod();
+      const defaultCallable = callables[0];
+
+      requestEditorRef.current?.setEndpointSelection(defaultCallable);
+
+      setViewState((curr) => ({
+        ...curr,
+        selectedAction: selectedAction,
+        path:
+          defaultCallable?.pathPattern ||
+          selectedAction.all[0]?.pathPattern ||
+          '',
+        selectedCallable: defaultCallable,
+        callables: callables,
+      }));
     });
   }, []);
 
@@ -43,6 +63,8 @@ function App() {
       if (isShortcutKey && event.key === 'k') {
         event.preventDefault();
         endPointSelectorRef.current?.focusSelect();
+      } else if (isShortcutKey && event.key === 'Enter') {
+        requestEditorRef.current?.submitRequest();
       }
     };
     document.addEventListener('keydown', handleKeyPress);
@@ -54,7 +76,11 @@ function App() {
   fetchCached<MiskMetadataResponse>(`/api/web-actions/metadata`).finally(() => {
     setLoading(false);
   });
-
+  const ActionIcon = createIcon({
+    displayName: 'ActionIcon',
+    viewBox: '0 0 24 24',
+    path: <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />,
+  });
   return (
     <Box>
       {loading && (
@@ -92,6 +118,60 @@ function App() {
             <Heading color="white" size="sm" fontWeight="semibold">
               Request
             </Heading>
+            <HStack flexGrow={1} w="100%">
+              {viewState.callables.length > 0 && (
+                <Select
+                  value={viewState.selectedCallable?.httpMethod}
+                  bg="white"
+                  width="fit-content"
+                  minWidth="fit-content"
+                  onChange={(e) => {
+                    const selected = viewState.callables.find(
+                      (it) => it.httpMethod === e.target.value,
+                    );
+                    requestEditorRef.current?.setEndpointSelection(selected);
+                    setViewState({
+                      ...viewState,
+                      path: selected?.pathPattern || '',
+                      selectedCallable: selected,
+                    });
+                  }}
+                >
+                  {viewState.callables.map((callable) => (
+                    <option
+                      key={callable.httpMethod}
+                      value={callable.httpMethod}
+                    >
+                      {callable.httpMethod}
+                    </option>
+                  ))}
+                </Select>
+              )}
+              <Input
+                value={viewState.path}
+                placeholder="Path"
+                bg="white"
+                onChange={(e) => {
+                  requestEditorRef.current?.setPath(e.target.value);
+                  setViewState({
+                    ...viewState,
+                    path: e.target.value,
+                  });
+                }}
+              />
+              {viewState.selectedCallable && (
+                <IconButton
+                  aria-label="Run"
+                  colorScheme={'green'}
+                  onClick={() => {}}
+                >
+                  <ActionIcon />
+                </IconButton>
+              )}
+            </HStack>
+            <Heading color="white" size="xs" fontWeight="semibold">
+              Body
+            </Heading>
             <RequestEditor
               ref={requestEditorRef as any}
               endpointSelectionCallbacks={endpointSelectionCallbacks}
@@ -106,7 +186,7 @@ function App() {
           </VStack>
           <VStack height="100%" flexGrow={1} alignItems="start">
             <Heading color="white" size="sm" fontWeight="semibold">
-              Endpoint Details
+              Endpoint Metadata
             </Heading>
             <ReadOnlyEditor
               content={() => {
