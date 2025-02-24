@@ -41,13 +41,14 @@ export default class EndpointSelection extends React.Component<Props, State> {
 
   componentDidMount() {
     this.metadataClient.fetchMetadata().then((actions: MiskActions) => {
-      const options = Object.entries(actions).map(([key, value]) => ({
-        value,
-        label: key,
-      }));
+      const options = Object.entries(actions)
+        .map(([key, value]) => ({
+          value: value,
+          label: key,
+        }))
+        .sort((a, b) => a.value.name.localeCompare(b.value.name));
       this.fuse = new Fuse(options, {
         keys: ['label'],
-        threshold: 0.3,
         useExtendedSearch: true,
       });
       this.setState({

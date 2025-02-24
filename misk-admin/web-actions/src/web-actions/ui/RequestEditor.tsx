@@ -8,10 +8,10 @@ import { CopyIcon } from '@chakra-ui/icons';
 import { CommandParser } from '@web-actions/parsing/CommandParser';
 import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
 import { EndpointSelectionCallbacks } from '@web-actions/ui/EndpointSelection';
-import { createIcon } from '@chakra-ui/icons';
 
 interface State {
   loading: boolean;
+  isDisabled: boolean;
 }
 
 interface Props {
@@ -25,10 +25,11 @@ export default class RequestEditor extends React.Component<Props, State> {
 
   private readonly completer;
   private selectedAction: MiskWebActionDefinition | null = null;
+  private path: string = '';
 
   constructor(props: Props) {
     super(props);
-    this.state = { loading: false };
+    this.state = { loading: false, isDisabled: false };
     this.submitRequest = this.submitRequest.bind(this);
     this.copyToClipboard = this.copyToClipboard.bind(this);
 
@@ -48,26 +49,39 @@ export default class RequestEditor extends React.Component<Props, State> {
     editor.session.setUseWorker(false);
     editor.session.setUseSoftTabs(true);
     editor.session.setTabSize(2);
-    editor.commands.addCommand({
-      name: 'executeCommand',
-      bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-      exec: this.submitRequest,
-      readOnly: false,
-    });
-
     editor.completers = [this.completer];
 
     editor.resize();
+  }
 
-    this.props.endpointSelectionCallbacks.push((value) => {
-      this.completer.setSelection(value.defaultCallable ?? null);
-      this.selectedAction = value.defaultCallable ?? null;
+  public setPath(path: string | undefined) {
+    this.path = path ?? '';
+  }
 
-      editor.clearSelection();
-      editor.setValue('{\n  \n}', -1);
-      editor.moveCursorTo(1, 2);
-      editor.focus();
-    });
+  public setEndpointSelection(action: MiskWebActionDefinition | undefined) {
+    this.completer.setSelection(action ?? null);
+    this.selectedAction = action ?? null;
+    this.path = action?.pathPattern ?? '';
+    this.editor?.clearSelection();
+
+    if (action?.httpMethod === 'GET') {
+      this.setState({
+        ...this.state,
+        isDisabled: true,
+      });
+      this.editor?.setReadOnly(true);
+      this.editor?.setValue('', -1);
+    } else {
+      this.setState({
+        ...this.state,
+        isDisabled: false,
+      });
+
+      this.editor?.setReadOnly(false);
+      this.editor?.setValue('{\n  \n}', -1);
+      this.editor?.moveCursorTo(1, 2);
+      this.editor?.focus();
+    }
   }
 
   public focusEditor() {
@@ -80,25 +94,29 @@ export default class RequestEditor extends React.Component<Props, State> {
 
   async submitRequest() {
     try {
-      const content = this.editor!.getValue();
-      const topLevel = new CommandParser(content).parse();
-
       const selection = this.selectedAction;
       if (selection == null) {
         return;
       }
 
-      const path = selection.pathPattern;
-
       this.setState({ loading: true });
 
-      const response = await fetch(path, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: topLevel?.render(),
-      });
+      let response: Response;
+      if (selection.httpMethod === 'GET') {
+        response = await fetch(this.path, { method: 'GET' });
+      } else {
+        const content = this.editor!.getValue();
+        const topLevel = new CommandParser(content).parse();
+
+        this.setState({ loading: true });
+        response = await fetch(this.path, {
+          method: selection.httpMethod,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: topLevel?.render(),
+        });
+      }
 
       let responseText = await response.text();
       try {
@@ -124,15 +142,9 @@ export default class RequestEditor extends React.Component<Props, State> {
   }
 
   public render() {
-    const ActionIcon = createIcon({
-      displayName: 'ActionIcon',
-      viewBox: '0 0 24 24',
-      path: <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />,
-    });
-
     return (
       <Box position="relative" width="100%" height="100%">
-        {this.state.loading && (
+        {(this.state.loading || this.state.isDisabled) && (
           <Box
             position="absolute"
             top="0"
@@ -143,28 +155,19 @@ export default class RequestEditor extends React.Component<Props, State> {
             display="flex"
             justifyContent="center"
             alignItems="center"
-            zIndex="overlay"
+            zIndex="100"
           >
-            <Spinner size="xl" color="white" thickness="5px" />
+            {this.state.loading && (
+              <Spinner size="xl" color="white" thickness="5px" />
+            )}
           </Box>
         )}
-        <IconButton
-          aria-label="Run"
-          zIndex="100"
-          position="absolute"
-          top="4"
-          right="4"
-          colorScheme={'green'}
-          opacity={0.7}
-          onClick={this.submitRequest}
-        >
-          <ActionIcon />
-        </IconButton>
+
         <IconButton
           aria-label="Copy"
           zIndex="100"
           position="absolute"
-          top="16"
+          top="4"
           right="4"
           colorScheme={'blackAlpha'}
           onClick={this.copyToClipboard}

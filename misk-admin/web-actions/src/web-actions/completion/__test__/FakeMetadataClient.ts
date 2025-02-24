@@ -1,8 +1,8 @@
-import MetadataClient from '@web-actions/api/MetadataClient';
-import { MiskActions } from '@web-actions/api/responseTypes';
+import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
 
-export const MyAction = {
+export const MyAction: MiskWebActionDefinition = {
   name: 'MyAction',
+  packageName: 'xyz.block',
   requestType: 'MyActionRequest',
   pathPattern: '/api/v1/my-action',
   requestMediaTypes: ['application/x-protobuf'],
@@ -34,21 +34,6 @@ export const MyAction = {
           annotations: [],
         },
       ],
-      'my-object-type': {
-        fields: [],
-      },
     },
   },
 };
-
-export default class FakeMetadataClient implements MetadataClient {
-  async fetchMetadata(): Promise<MiskActions> {
-    return Promise.resolve({
-      MyAction: {
-        name: 'MyAction',
-        defaultCallable: MyAction,
-        all: [MyAction],
-      },
-    });
-  }
-}
