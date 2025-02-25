@@ -22,6 +22,8 @@ export default class FakeEditor implements Editor {
   cursor: PositionWithIndex = { row: 0, column: 0, index: 0 };
   completions?: CompletionProvider;
 
+  triggerCompletionDialog() {}
+
   moveCursorTo(row: number, column: number) {
     let index = 0;
     for (let i = 0; i < row; i++) {

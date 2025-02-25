@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { createRoot } from 'react-dom/client';
 import RequestEditor from '@web-actions/ui/RequestEditor';
@@ -11,7 +11,9 @@ import {
   Heading,
   Input,
   IconButton,
+  Button,
 } from '@chakra-ui/react';
+import HelpPanel from '@web-actions/ui/HelpPanel';
 import ReadOnlyEditor from '@web-actions/ui/ReadOnlyViewer';
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
@@ -34,6 +36,7 @@ function App() {
     callables: [],
   });
   const [loading, setLoading] = useState<boolean>(true);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const endPointSelectorRef = useRef<EndpointSelector>();
   const requestEditorRef = useRef<RequestEditor>();
 
@@ -60,6 +63,14 @@ function App() {
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       const isShortcutKey = event.ctrlKey || event.metaKey;
+
+      if (isShortcutKey && event.key === '/') {
+        event.preventDefault();
+        event.stopPropagation();
+        setIsHelpOpen((prev) => !prev);
+        return;
+      }
+
       if (isShortcutKey && event.key === 'k') {
         event.preventDefault();
         endPointSelectorRef.current?.focusSelect();
@@ -67,9 +78,11 @@ function App() {
         requestEditorRef.current?.submitRequest();
       }
     };
-    document.addEventListener('keydown', handleKeyPress);
+
+    document.addEventListener('keydown', handleKeyPress, true);
+
     return () => {
-      document.removeEventListener('keydown', handleKeyPress);
+      document.removeEventListener('keydown', handleKeyPress, true);
     };
   }, []);
 
@@ -106,13 +119,23 @@ function App() {
         bg="gray.600"
         alignItems="start"
       >
-        <EndpointSelector
-          ref={endPointSelectorRef as any}
-          onDismiss={() => {
-            requestEditorRef?.current?.focusEditor();
-          }}
-          endpointSelectionCallbacks={endpointSelectionCallbacks}
-        />
+        <HStack width="100%" justifyContent="space-between">
+          <EndpointSelector
+            ref={endPointSelectorRef as any}
+            onDismiss={() => {
+              requestEditorRef?.current?.focusEditor();
+            }}
+            endpointSelectionCallbacks={endpointSelectionCallbacks}
+          />
+          <Button
+            colorScheme="blue"
+            size="sm"
+            onClick={() => setIsHelpOpen(true)}
+          >
+            Help (⌘/)
+          </Button>
+        </HStack>
+        <HelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
         <HStack spacing={2} flexGrow={1} width="100%">
           <VStack height="100%" flexGrow={1} alignItems="start">
             <Heading color="white" size="sm" fontWeight="semibold">
