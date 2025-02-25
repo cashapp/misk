@@ -77,6 +77,9 @@ export default class CompletionProvider {
             currIndex - completion.cursorOffset - 1,
           );
           editor.moveCursorTo(moveCursorTo.row, moveCursorTo.column);
+          if (type.isObject()) {
+            editor.triggerCompletionDialog();
+          }
         },
         prefix,
       };

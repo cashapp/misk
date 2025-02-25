@@ -2,8 +2,17 @@ import Editor from '@web-actions/completion/Editor';
 import { Ace, Range } from 'ace-builds';
 import Position from '@web-actions/completion/Position';
 
+export function triggerCompletionDialog(editor: Ace.Editor | null | undefined) {
+  if (!editor) {
+    return;
+  }
+  setTimeout(() => {
+    editor.commands?.byName?.startAutocomplete?.exec(editor);
+  }, 100);
+}
+
 export default class AceEditor implements Editor {
-  private editor: Ace.Editor;
+  private readonly editor: Ace.Editor;
 
   constructor(editor: Ace.Editor) {
     this.editor = editor;
@@ -27,6 +36,10 @@ export default class AceEditor implements Editor {
 
   delete(row: number, column: number): void {
     this.editor.session.remove(charRange(row, column));
+  }
+
+  triggerCompletionDialog() {
+    triggerCompletionDialog(this.editor);
   }
 }
 

@@ -6,4 +6,5 @@ export default interface Editor {
   delete(row: number, column: number): void;
   indexToPosition(index: number): Position;
   positionToIndex(position: Position): number;
+  triggerCompletionDialog(): void;
 }

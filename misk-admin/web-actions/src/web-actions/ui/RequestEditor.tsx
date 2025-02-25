@@ -8,6 +8,7 @@ import { CopyIcon } from '@chakra-ui/icons';
 import { CommandParser } from '@web-actions/parsing/CommandParser';
 import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
 import { EndpointSelectionCallbacks } from '@web-actions/ui/EndpointSelection';
+import { triggerCompletionDialog } from '@web-actions/ui/AceEditor';
 
 interface State {
   loading: boolean;
@@ -81,6 +82,8 @@ export default class RequestEditor extends React.Component<Props, State> {
       this.editor?.setValue('{\n  \n}', -1);
       this.editor?.moveCursorTo(1, 2);
       this.editor?.focus();
+
+      triggerCompletionDialog(this.editor);
     }
   }
 
