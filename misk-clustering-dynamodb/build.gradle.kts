@@ -7,7 +7,6 @@ plugins {
 }
 
 dependencies {
-  api(libs.loggingApi)
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
 
@@ -20,7 +19,6 @@ dependencies {
   implementation(project(":misk-backoff"))
   implementation(project(":misk-clustering"))
   implementation(project(":misk-service"))
-  implementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
