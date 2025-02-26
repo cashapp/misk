@@ -93,7 +93,7 @@ export default class EndpointSelection extends React.Component<Props, State> {
   };
 
   setMenuOpen = (menuIsOpen: boolean) => {
-    this.setState((state) => ({ ...state, menuIsOpen }));
+    this.setState({ menuIsOpen });
   };
 
   focusSelect = () => {
