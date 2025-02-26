@@ -51,6 +51,7 @@ import misk.web.extractors.PathParamFeatureBinding
 import misk.web.extractors.QueryParamFeatureBinding
 import misk.web.extractors.RequestBodyException
 import misk.web.extractors.RequestBodyFeatureBinding
+import misk.web.extractors.RequestHeaderFeatureBinding
 import misk.web.extractors.RequestHeadersFeatureBinding
 import misk.web.extractors.ResponseBodyFeatureBinding
 import misk.web.extractors.WebSocketFeatureBinding
@@ -256,6 +257,7 @@ class MiskWebModule @JvmOverloads constructor(
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().toInstance(QueryParamFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().toInstance(FormValueFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(RequestHeaderFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().toInstance(RequestHeadersFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().toInstance(WebSocketFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().toInstance(WebSocketListenerFeatureBinding.Factory)

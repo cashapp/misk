@@ -199,6 +199,10 @@ public abstract interface annotation class misk/web/RequestContentType : java/la
 	public abstract fun value ()[Ljava/lang/String;
 }
 
+public abstract interface annotation class misk/web/RequestHeader : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
 public abstract interface annotation class misk/web/RequestHeaders : java/lang/annotation/Annotation {
 }
 
