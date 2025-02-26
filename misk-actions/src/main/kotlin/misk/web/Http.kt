@@ -27,6 +27,13 @@ annotation class Description(val text: String)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class RequestHeaders
 
+/**
+ * Extracts the named request header as a `String` or a `String?`. If the parameter is not nullable,
+ * and has no default value, and the header is absent, the request will fail with an HTTP 400.
+ */
+@Target(AnnotationTarget.VALUE_PARAMETER)
+annotation class RequestHeader(val value: String = "")
+
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class PathParam(val value: String = "")
 
