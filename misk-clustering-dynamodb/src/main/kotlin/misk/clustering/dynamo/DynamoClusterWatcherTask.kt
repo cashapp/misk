@@ -8,14 +8,12 @@ import misk.clustering.DefaultCluster
 import misk.clustering.weights.ClusterWeightProvider
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
-import misk.time.timed
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.numberValue
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 
@@ -57,49 +55,44 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   }
 
   private fun updateOurselfInDynamo() {
-    val (duration) = timed {
-      val self = cluster.snapshot.self.name
-      val member = DyClusterMember()
-      member.name = self
-      member.updated_at = clock.instant().toEpochMilli()
-      // TTL should be in seconds
-      member.expires_at = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
-      podName?.let { member.pod_name = it }
-      table.putItem(member)
-    }
-
-    logger.info { "Updated dynamodb with my information in ${duration.toMillis()}ms" }
+    val self = cluster.snapshot.self.name
+    val member = DyClusterMember()
+    member.name = self
+    member.updated_at = clock.instant().toEpochMilli()
+    // TTL should be in seconds
+    member.expires_at = clock.instant().plus(Duration.ofDays(1)).toEpochMilli() / 1000
+    podName?.let { member.pod_name = it }
+    table.putItem(member)
   }
 
   internal fun recordCurrentDynamoCluster() {
-    val (duration) = timed {
-      val members = mutableSetOf<Member>()
-      val threshold = clock.instant().minusSeconds(dynamoClusterConfig.stale_threshold_seconds).toEpochMilli()
-      val request = ScanEnhancedRequest.builder()
-        .consistentRead(true)
-        .filterExpression(
-          Expression.builder()
-            .expression("updated_at >= :threshold")
-            .expressionValues(mapOf(":threshold" to numberValue(threshold)))
-            .build()
-        )
-        .build()
-      for (page in table.scan(request).stream()) {
-        for (item in page.items()) {
-          members.add(Member(item.name!!, "invalid-ip"))
-        }
+    val members = mutableSetOf<Member>()
+    val threshold =
+      clock.instant().minusSeconds(dynamoClusterConfig.stale_threshold_seconds).toEpochMilli()
+    val request = ScanEnhancedRequest.builder()
+      .consistentRead(true)
+      .filterExpression(
+        Expression.builder()
+          .expression("updated_at >= :threshold")
+          .expressionValues(mapOf(":threshold" to numberValue(threshold)))
+          .build()
+      )
+      .build()
+    for (page in table.scan(request).stream()) {
+      for (item in page.items()) {
+        members.add(Member(item.name!!, "invalid-ip"))
       }
-      cluster.clusterChanged(membersBecomingReady = members, membersBecomingNotReady = prevMembers - members)
-      prevMembers = members
     }
-
-    logger.info { "Updated cluster information from dynamodb in ${duration.toMillis()}ms" }
+    cluster.clusterChanged(
+      membersBecomingReady = members,
+      membersBecomingNotReady = prevMembers - members
+    )
+    prevMembers = members
   }
 
   override fun shutDown() {}
 
   companion object {
     internal val TABLE_SCHEMA = TableSchema.fromClass(DyClusterMember::class.java)
-    private val logger = getLogger<DynamoClusterWatcherTask>()
   }
 }
