@@ -160,8 +160,14 @@ export default class RequestEditor extends React.Component<Props, State> {
             alignItems="center"
             zIndex="100"
           >
-            {this.state.loading && (
+            {this.state.loading ? (
               <Spinner size="xl" color="white" thickness="5px" />
+            ) : (
+              this.state.isDisabled && (
+                <Box color="white" fontSize="lg" textAlign="center" padding="4">
+                  Request body not supported for GET requests
+                </Box>
+              )
             )}
           </Box>
         )}

@@ -36,7 +36,10 @@ function App() {
     callables: [],
   });
   const [loading, setLoading] = useState<boolean>(true);
-  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(() => {
+    const hasSeenHelp = localStorage.getItem('hasSeenHelp');
+    return hasSeenHelp !== 'true';
+  });
   const endPointSelectorRef = useRef<EndpointSelector>();
   const requestEditorRef = useRef<RequestEditor>();
 
@@ -135,7 +138,18 @@ function App() {
             Help (⌘/)
           </Button>
         </HStack>
-        <HelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+        <HelpPanel
+          isOpen={isHelpOpen}
+          onClose={() => {
+            setIsHelpOpen(false);
+            if (!localStorage.getItem('hasSeenHelp')) {
+              setTimeout(() => {
+                endPointSelectorRef.current?.focusSelect();
+              }, 500);
+            }
+            localStorage.setItem('hasSeenHelp', 'true');
+          }}
+        />
         <HStack spacing={2} flexGrow={1} width="100%">
           <VStack height="100%" flexGrow={1} alignItems="start">
             <Heading color="white" size="sm" fontWeight="semibold">
@@ -186,7 +200,7 @@ function App() {
                 <IconButton
                   aria-label="Run"
                   colorScheme={'green'}
-                  onClick={() => {}}
+                  onClick={() => requestEditorRef.current?.submitRequest()}
                 >
                   <ActionIcon />
                 </IconButton>
