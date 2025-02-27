@@ -175,8 +175,7 @@ class JdbcModule @JvmOverloads constructor(
           deployment = deploymentProvider.get(),
           dataSourceDecorators = dataSourceDecoratorsProvider.get(),
           databasePool = databasePool,
-          // TODO provide metrics to the reader pool but need a different metric key prefix
-          collectorRegistry = if (isWriter) registry else null
+          collectorRegistry = registry,
         )
       }
     }).asSingleton()
