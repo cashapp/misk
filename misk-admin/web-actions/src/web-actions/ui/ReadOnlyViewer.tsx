@@ -29,6 +29,10 @@ export default class ReadOnlyEditor extends React.Component<Props> {
       highlightGutterLine: false,
     });
     const editor = this.editor!;
+
+    editor.commands.removeCommand('showSettingsMenu');
+    editor.commands.removeCommand('gotoline');
+
     editor.setReadOnly(true);
     editor.resize();
   }
