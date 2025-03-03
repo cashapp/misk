@@ -94,7 +94,7 @@ guiceBom = { module = "com.google.inject:guice-bom", version = "6.0.0" }
 guiceTestLib = { module = "com.google.inject.extensions:guice-testlib" }
 hibernate5Core = { module = "org.hibernate:hibernate-core", version = "5.6.15.Final" }
 hibernateJpaApi = { module = "javax.persistence:javax.persistence-api", version = "2.2" }
-hikariCp = { module = "com.zaxxer:HikariCP", version = "4.0.3" }
+hikariCp = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
 hopliteCore = { module = "com.sksamuel.hoplite:hoplite-core", version.ref = "hoplite" }
 hopliteHocon = { module = "com.sksamuel.hoplite:hoplite-hocon", version.ref = "hoplite" }
 hopliteJson = { module = "com.sksamuel.hoplite:hoplite-json", version.ref = "hoplite" }
