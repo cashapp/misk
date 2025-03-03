@@ -1,23 +1,23 @@
 [versions]
-awaitility = "4.2.2"
-aws1 = "1.12.781"
-aws2 = "2.30.23"
+awaitility = "4.3.0"
+aws1 = "1.12.782"
+aws2 = "2.30.30"
 bucket4j = "8.8.0"
-datadog = "1.46.0"
-dependencyAnalysisPlugin = "2.8.2"
-detekt = "1.23.7"
+datadog = "1.46.1"
+dependencyAnalysisPlugin = "2.10.1"
+detekt = "1.23.8"
 docker = "3.4.1"
-googleAuth = "1.32.1"
-googleHttp = "1.46.1"
+googleAuth = "1.33.1"
+googleHttp = "1.46.3"
 hoplite = "2.7.5"
 jackson = "2.18.2"
-junit = "5.11.4"
+junit = "5.12.0"
 kotest = "5.9.1"
 kotlin = "2.1.10"
 kotlinBinaryCompatibilityPlugin = "0.17.0"
 mavenPublish = "0.28.0"
 micrometer = "1.12.13"
-netty = "4.1.118.Final"
+netty = "4.1.119.Final"
 okHttp = "5.0.0-alpha.14"
 protobuf = "3.25.6"
 retrofit = "2.11.0"
@@ -63,20 +63,20 @@ dockerTransportCore = { module = "com.github.docker-java:docker-java-transport",
 dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
 errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.36.0" }
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
-gax = { module = "com.google.api:gax", version = "2.61.0" }
-gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.51.0" }
-gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.26.2" }
-gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250102-2.0.0" }
+gax = { module = "com.google.api:gax", version = "2.62.0" }
+gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.52.0" }
+gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.26.4" }
+gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250213-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
-gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.3" }
-gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.86.0" }
+gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.4" }
+gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.88.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.7.2" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20241206-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
-googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.51.0" }
+googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.52.0" }
 googleCloudStorage = { module = "com.google.cloud:google-cloud-storage", version = "1.118.1" }
-googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.52.0" }
+googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.53.0" }
 googleHttpClient = { module = "com.google.http-client:google-http-client", version.ref = "googleHttp" }
 googleHttpClientJackson = { module = "com.google.http-client:google-http-client-jackson2", version.ref = "googleHttp" }
 grpcApi = { module = "io.grpc:grpc-api", version = "1.70.0" }
@@ -135,6 +135,7 @@ jooq = { module = "org.jooq:jooq", version = "3.19.18" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.1" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junitLauncher = { module = "org.junit.platform:junit-platform-launcher" }
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
 junitPioneer = { module = "org.junit-pioneer:junit-pioneer", version = "2.3.0" }
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
@@ -195,7 +196,7 @@ retrofitProtobuf = { module = "com.squareup.retrofit2:converter-protobuf", versi
 retrofitScalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version.ref = "retrofit" }
 servletApi = { module = "javax.servlet:javax.servlet-api", version = "4.0.1" }
-slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
+slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
 sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
@@ -225,7 +226,7 @@ binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibilit
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
-flyway = { id = "org.flywaydb.flyway", version = "11.3.3" }
+flyway = { id = "org.flywaydb.flyway", version = "11.3.4" }
 jooq = { id = "nu.studer.jooq", version = "9.0" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }

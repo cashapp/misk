@@ -190,6 +190,7 @@ subprojects {
 
     dependencies {
       add("testRuntimeOnly", rootProject.libs.junitEngine)
+      add("testRuntimeOnly", rootProject.libs.junitLauncher)
 
       // Platform/BOM dependencies constrain versions only.
       // Enforce misk-bom -- it should take priority over external BOMs.
