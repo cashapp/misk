@@ -52,6 +52,9 @@ export default class RequestEditor extends React.Component<Props, State> {
     editor.session.setTabSize(2);
     editor.completers = [this.completer];
 
+    editor.commands.removeCommand('showSettingsMenu');
+    editor.commands.removeCommand('gotoline');
+
     editor.resize();
   }
 
