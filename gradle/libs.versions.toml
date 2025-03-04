@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.30.30"
+aws2 = "2.30.32"
 bucket4j = "8.8.0"
 datadog = "1.46.1"
 dependencyAnalysisPlugin = "2.10.1"
@@ -10,7 +10,7 @@ docker = "3.4.1"
 googleAuth = "1.33.1"
 googleHttp = "1.46.3"
 hoplite = "2.7.5"
-jackson = "2.18.2"
+jackson = "2.18.3"
 junit = "5.12.0"
 kotest = "5.9.1"
 kotlin = "2.1.10"
@@ -71,7 +71,7 @@ gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.4" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.88.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.7.2" }
-googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20241206-2.0.0" }
+googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250224-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
 googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.52.0" }
@@ -79,12 +79,12 @@ googleCloudStorage = { module = "com.google.cloud:google-cloud-storage", version
 googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.53.0" }
 googleHttpClient = { module = "com.google.http-client:google-http-client", version.ref = "googleHttp" }
 googleHttpClientJackson = { module = "com.google.http-client:google-http-client-jackson2", version.ref = "googleHttp" }
-grpcApi = { module = "io.grpc:grpc-api", version = "1.70.0" }
-grpcBom = { module = "io.grpc:grpc-bom", version = "1.70.0" }
-grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.70.0" }
-grpcNetty = { module = "io.grpc:grpc-netty", version = "1.70.0" }
-grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.70.0" }
-grpcStub = { module = "io.grpc:grpc-stub", version = "1.70.0" }
+grpcApi = { module = "io.grpc:grpc-api", version = "1.71.0" }
+grpcBom = { module = "io.grpc:grpc-bom", version = "1.71.0" }
+grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.71.0" }
+grpcNetty = { module = "io.grpc:grpc-netty", version = "1.71.0" }
+grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.71.0" }
+grpcStub = { module = "io.grpc:grpc-stub", version = "1.71.0" }
 guava = { module = "com.google.guava:guava" }
 guavaBom = { module = "com.google.guava:guava-bom", version = "33.4.0-jre" }
 guavaTestLib = { module = "com.google.guava:guava-testlib" }
@@ -163,7 +163,7 @@ logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
-mockitoCore = { module = "org.mockito:mockito-core", version = "5.15.2" }
+mockitoCore = { module = "org.mockito:mockito-core", version = "5.16.0" }
 mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.4.0" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.2" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
