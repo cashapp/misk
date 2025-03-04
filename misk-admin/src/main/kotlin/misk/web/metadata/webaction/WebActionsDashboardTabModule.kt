@@ -27,7 +27,7 @@ class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstrac
         urlPathPrefix = "/_admin/web-actions-v4/",
         iframePath = "/_tab/web-actions-v4/index.html",
 //        developmentWebProxyUrl = "http://localhost:3210/",
-        menuLabel = "Web Actions Beta",
+        menuLabel = "Web Actions",
         menuCategory = "Container Admin",
       )
     )
@@ -40,7 +40,7 @@ class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstrac
         slug = "web-actions",
         urlPathPrefix = "/_admin/web-actions/",
         developmentWebProxyUrl = "http://localhost:3201/",
-        menuLabel = "Web Actions",
+        menuLabel = "Old Web Actions v2",
         menuCategory = "Container Admin"
       )
     )
@@ -53,7 +53,7 @@ class WebActionsDashboardTabModule(private val isDevelopment: Boolean): KAbstrac
         urlPathPrefix = "/_admin/web-actions-v1/",
         developmentWebProxyUrl = "http://localhost:3201/",
         classpathResourcePathPrefix = "classpath:/web/_tab/web-actions/",
-        menuLabel = "Web Actions v1",
+        menuLabel = "Old Web Actions v1",
         menuCategory = "Container Admin"
       )
     )
