@@ -208,6 +208,73 @@ public abstract interface class misk/jobqueue/v2/BlockingJobHandler : misk/jobqu
 	public abstract fun handleJob (Lmisk/jobqueue/v2/Job;)Lmisk/jobqueue/v2/JobStatus;
 }
 
+public final class misk/jobqueue/v2/FakeJob : java/lang/Comparable, misk/jobqueue/v2/Job {
+	public fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)V
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Lmisk/jobqueue/v2/FakeJob;)I
+	public final fun component1 ()Lmisk/jobqueue/QueueName;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/util/Map;
+	public final fun component6 ()Ljava/time/Instant;
+	public final fun component7 ()Ljava/time/Duration;
+	public final fun copy (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;)Lmisk/jobqueue/v2/FakeJob;
+	public static synthetic fun copy$default (Lmisk/jobqueue/v2/FakeJob;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/time/Instant;Ljava/time/Duration;ILjava/lang/Object;)Lmisk/jobqueue/v2/FakeJob;
+	public final fun delayWithBackoff ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAcknowledged ()Z
+	public fun getAttributes ()Ljava/util/Map;
+	public fun getBody ()Ljava/lang/String;
+	public final fun getDeadLettered ()Z
+	public final fun getDelayDuration ()Ljava/lang/Long;
+	public final fun getDelayedForBackoff ()Z
+	public final fun getDeliverAt ()Ljava/time/Instant;
+	public final fun getDeliveryDelay ()Ljava/time/Duration;
+	public final fun getEnqueuedAt ()Ljava/time/Instant;
+	public fun getId ()Ljava/lang/String;
+	public fun getIdempotenceKey ()Ljava/lang/String;
+	public fun getQueueName ()Lmisk/jobqueue/QueueName;
+	public fun hashCode ()I
+	public final fun setDeliveryDelay (Ljava/time/Duration;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/jobqueue/v2/FakeJobEnqueuer : misk/testing/FakeFixture, misk/jobqueue/v2/JobEnqueuer {
+	public fun <init> (Ljava/time/Clock;Lcom/google/inject/Provider;Lwisp/token/TokenGenerator;)V
+	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueueAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
+	public fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+	public final fun handleJob (Lmisk/jobqueue/v2/Job;ZI)Z
+	public static synthetic fun handleJob$default (Lmisk/jobqueue/v2/FakeJobEnqueuer;Lmisk/jobqueue/v2/Job;ZIILjava/lang/Object;)Z
+	public final fun handleJobs (Lmisk/jobqueue/QueueName;ZIZ)Ljava/util/List;
+	public final fun handleJobs (ZZ)Ljava/util/List;
+	public static synthetic fun handleJobs$default (Lmisk/jobqueue/v2/FakeJobEnqueuer;Lmisk/jobqueue/QueueName;ZIZILjava/lang/Object;)Ljava/util/List;
+	public static synthetic fun handleJobs$default (Lmisk/jobqueue/v2/FakeJobEnqueuer;ZZILjava/lang/Object;)Ljava/util/List;
+	public final fun peekDeadlettered (Lmisk/jobqueue/QueueName;)Ljava/util/List;
+	public final fun peekJobs (Lmisk/jobqueue/QueueName;)Ljava/util/List;
+	public final fun pushFailure (Ljava/lang/Exception;Lmisk/jobqueue/QueueName;)V
+	public static synthetic fun pushFailure$default (Lmisk/jobqueue/v2/FakeJobEnqueuer;Ljava/lang/Exception;Lmisk/jobqueue/QueueName;ILjava/lang/Object;)V
+	public final fun reprocessDeadlettered (Lmisk/jobqueue/QueueName;ZI)Ljava/util/List;
+	public final fun reprocessDeadlettered (Lmisk/jobqueue/v2/Job;ZI)Z
+	public static synthetic fun reprocessDeadlettered$default (Lmisk/jobqueue/v2/FakeJobEnqueuer;Lmisk/jobqueue/QueueName;ZIILjava/lang/Object;)Ljava/util/List;
+	public static synthetic fun reprocessDeadlettered$default (Lmisk/jobqueue/v2/FakeJobEnqueuer;Lmisk/jobqueue/v2/Job;ZIILjava/lang/Object;)Z
+}
+
+public final class misk/jobqueue/v2/FakeJobEnqueuerModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/jobqueue/v2/FakeJobHandlerModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/jobqueue/v2/FakeJobHandlerModule$Companion;
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/jobqueue/v2/FakeJobHandlerModule$Companion {
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/jobqueue/v2/FakeJobHandlerModule;
+}
+
 public abstract interface class misk/jobqueue/v2/Job {
 	public abstract fun getAttributes ()Ljava/util/Map;
 	public abstract fun getBody ()Ljava/lang/String;
