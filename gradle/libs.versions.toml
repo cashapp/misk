@@ -22,7 +22,7 @@ okHttp = "5.0.0-alpha.14"
 protobuf = "3.25.6"
 retrofit = "2.11.0"
 sqldelight = "2.0.2"
-wire = "5.2.1"
+wire = "5.3.1"
 
 [libraries]
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.18.0" }
