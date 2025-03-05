@@ -1,6 +1,8 @@
 package misk.aws2.sqs.jobqueue
 
 import com.squareup.moshi.Moshi
+import io.opentracing.Tracer
+import io.opentracing.tag.Tags
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
@@ -37,35 +39,58 @@ class Subscriber(
   val sqsMetrics: SqsMetrics,
   val moshi: Moshi,
   val clock: Clock,
+  val tracer: Tracer,
 ) {
   suspend fun run() {
     while (true) {
-      val job = channel.receive()
-      val receiveFromChannelTimestamp = clock.instant().nano
-      sqsMetrics.channelReceiveLag.labels(queueName.value)
-        .observe((receiveFromChannelTimestamp - job.publishToChannelTimestamp).toDouble())
-      val result = try {
-        val timer = sqsMetrics.handlerDispatchTime.labels(queueName.value).startTimer()
-        val result = when (handler) {
-          is SuspendingJobHandler -> handler.handleJob(job)
-          is BlockingJobHandler -> runInterruptible {
-            handler.handleJob(job)
+      val job = tracer.withSpan("channel-receive-queue-${queueName.value}") {
+        channel.receive()
+      }
+      tracer.withSpan("process-queue-${queueName.value}") {
+        val receiveFromChannelTimestamp = clock.instant().nano
+        sqsMetrics.channelReceiveLag.labels(queueName.value)
+          .observe((receiveFromChannelTimestamp - job.publishToChannelTimestamp).toDouble())
+        val result = try {
+          val timer = sqsMetrics.handlerDispatchTime.labels(queueName.value).startTimer()
+          val result = tracer.withSpan("handle-queue-${queueName.value}") {
+            when (handler) {
+              is SuspendingJobHandler -> handler.handleJob(job)
+              is BlockingJobHandler -> runInterruptible {
+                handler.handleJob(job)
+              }
+            }
+          }
+          timer.observeDuration()
+          result
+        } catch (e: Exception) {
+          sqsMetrics.handlerFailures.labels(queueName.value).inc()
+          return@withSpan
+        }
+        when (result) {
+          JobStatus.OK -> deleteMessage(job)
+          JobStatus.DEAD_LETTER -> {
+            deadLetterMessage(job)
+            deleteMessage(job)
+          }
+
+          JobStatus.RETRY_LATER -> { /* no-op, will be retried after visibility timeout passes */
           }
         }
-        timer.observeDuration()
-        result
-      } catch (e: Exception) {
-        sqsMetrics.handlerFailures.labels(queueName.value).inc()
-        continue
       }
-      when (result) {
-        JobStatus.OK -> deleteMessage(job)
-        JobStatus.DEAD_LETTER -> {
-          deadLetterMessage(job)
-          deleteMessage(job)
-        }
-        JobStatus.RETRY_LATER -> { /* no-op, will be retried after visibility timeout passes */ }
-      }
+    }
+  }
+
+  private suspend fun <T> Tracer.withSpan(spanName: String, block: suspend () -> T): T {
+    val span = tracer.buildSpan(spanName).start()
+    val scope = scopeManager().activate(span)
+    try {
+      return block()
+    } catch (t: Throwable) {
+      Tags.ERROR.set(span, true)
+      throw t
+    } finally {
+      scope.close()
+      span.finish()
     }
   }
 

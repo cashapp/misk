@@ -22,6 +22,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJob : misk/jobqueue/v2/Job {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/SqsJob$Companion;
 	public static final field JOBQUEUE_METADATA_ATTR Ljava/lang/String;
 	public static final field JOBQUEUE_METADATA_IDEMPOTENCE_KEY Ljava/lang/String;
+	public static final field JOBQUEUE_METADATA_ORIGINAL_TRACE_ID Ljava/lang/String;
 	public static final field JOBQUEUE_METADATA_ORIGIN_QUEUE Ljava/lang/String;
 	public fun <init> (Lmisk/jobqueue/QueueName;Lcom/squareup/moshi/Moshi;Lsoftware/amazon/awssdk/services/sqs/model/Message;Ljava/lang/String;J)V
 	public fun getAttributes ()Ljava/util/Map;
@@ -39,7 +40,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJob$Companion {
 
 public final class misk/aws2/sqs/jobqueue/SqsJobConsumer : com/google/common/util/concurrent/AbstractService, misk/jobqueue/v2/JobConsumer {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/SqsJobConsumer$Companion;
-	public fun <init> (Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lcom/squareup/moshi/Moshi;Lmisk/aws2/sqs/jobqueue/DeadLetterQueueProvider;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Ljava/time/Clock;)V
+	public fun <init> (Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lcom/squareup/moshi/Moshi;Lmisk/aws2/sqs/jobqueue/DeadLetterQueueProvider;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Ljava/time/Clock;Lio/opentracing/Tracer;)V
 	public fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;)V
 	public final fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;)V
 	public fun unsubscribe (Lmisk/jobqueue/QueueName;)V
@@ -50,7 +51,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJobConsumer$Companion {
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobEnqueuer {
-	public fun <init> (Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lwisp/token/TokenGenerator;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;)V
+	public fun <init> (Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lwisp/token/TokenGenerator;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;)V
 	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun enqueueAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
 	public fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
@@ -98,7 +99,7 @@ public final class misk/aws2/sqs/jobqueue/StaticDeadLetterQueueProvider : misk/a
 
 public final class misk/aws2/sqs/jobqueue/Subscriber {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/Subscriber$Companion;
-	public fun <init> (Lmisk/jobqueue/QueueName;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lkotlinx/coroutines/channels/Channel;Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Ljava/time/Clock;)V
+	public fun <init> (Lmisk/jobqueue/QueueName;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lkotlinx/coroutines/channels/Channel;Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Ljava/time/Clock;Lio/opentracing/Tracer;)V
 	public final fun getChannel ()Lkotlinx/coroutines/channels/Channel;
 	public final fun getClient ()Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;
 	public final fun getClock ()Ljava/time/Clock;
@@ -109,6 +110,7 @@ public final class misk/aws2/sqs/jobqueue/Subscriber {
 	public final fun getQueueName ()Lmisk/jobqueue/QueueName;
 	public final fun getQueueResolver ()Lmisk/aws2/sqs/jobqueue/QueueResolver;
 	public final fun getSqsMetrics ()Lmisk/aws2/sqs/jobqueue/SqsMetrics;
+	public final fun getTracer ()Lio/opentracing/Tracer;
 	public final fun poll (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun run (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }

@@ -3,6 +3,7 @@ package misk.aws2.sqs.jobqueue
 import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Singleton
 import com.squareup.moshi.Moshi
+import io.opentracing.Tracer
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +50,7 @@ class SqsJobConsumer @Inject constructor(
   private val dlqProvider: DeadLetterQueueProvider,
   private val sqsMetrics: SqsMetrics,
   private val clock: Clock,
+  private val tracer: Tracer,
 ) : JobConsumer, AbstractService() {
   private val scope = CoroutineScope(Dispatchers.IO.limitedParallelism(1) + SupervisorJob())
 
@@ -74,6 +76,7 @@ class SqsJobConsumer @Inject constructor(
         sqsMetrics = sqsMetrics,
         moshi = moshi,
         clock = clock,
+        tracer = tracer,
       )
     }
 
