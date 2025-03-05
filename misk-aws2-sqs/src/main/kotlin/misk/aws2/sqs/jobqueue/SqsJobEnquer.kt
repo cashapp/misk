@@ -8,10 +8,10 @@ import misk.jobqueue.QueueName
 import misk.jobqueue.sqs.parentQueue
 import misk.jobqueue.v2.JobEnqueuer
 import misk.moshi.adapter
+import misk.tokens.TokenGenerator
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 
@@ -19,16 +19,17 @@ import java.util.concurrent.CompletableFuture
 class SqsJobEnqueuer @Inject constructor(
   private val client: SqsAsyncClient,
   private val queueResolver: QueueResolver,
+  private val tokenGenerator: TokenGenerator,
   private val sqsMetrics: SqsMetrics,
   private val moshi: Moshi,
-) : JobEnqueuer<SendMessageResponse> {
+) : JobEnqueuer {
   /**
    * Enqueue the job and suspend waiting for the confirmation
    */
   override suspend fun enqueue(
     queueName: QueueName,
     body: String,
-    idempotencyKey: String,
+    idempotencyKey: String?,
     deliveryDelay: Duration?,
     attributes: Map<String, String>,
   ) {
@@ -47,7 +48,7 @@ class SqsJobEnqueuer @Inject constructor(
   override fun enqueueBlocking(
     queueName: QueueName,
     body: String,
-    idempotencyKey: String,
+    idempotencyKey: String?,
     deliveryDelay: Duration?,
     attributes: Map<String, String>,
   ) {
@@ -68,16 +69,17 @@ class SqsJobEnqueuer @Inject constructor(
   override fun enqueueAsync(
     queueName: QueueName,
     body: String,
-    idempotencyKey: String,
+    idempotencyKey: String?,
     deliveryDelay: Duration?,
     attributes: Map<String, String>,
-  ): CompletableFuture<SendMessageResponse> {
+  ): CompletableFuture<Boolean> {
     val queueUrl = queueResolver.getQueueUrl(queueName)
+    val resolvedIdempotencyKey = idempotencyKey ?: tokenGenerator.generate()
 
     val attrs = attributes.map {
       it.key to MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
     }.toMap().toMutableMap()
-    attrs[SqsJob.JOBQUEUE_METADATA_ATTR] = createMetadataMessageAttributeValue(queueName, idempotencyKey)
+    attrs[SqsJob.JOBQUEUE_METADATA_ATTR] = createMetadataMessageAttributeValue(queueName, resolvedIdempotencyKey)
 
     val request = SendMessageRequest.builder()
       .queueUrl(queueUrl)
@@ -92,7 +94,7 @@ class SqsJobEnqueuer @Inject constructor(
       sqsMetrics.jobsEnqueued.labels(queueName.value).inc()
       response.whenComplete { _, _ ->
         timer.observeDuration()
-      }
+      }.thenCompose { CompletableFuture.supplyAsync { true } }
     } catch (e: Exception) {
       sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
       throw e

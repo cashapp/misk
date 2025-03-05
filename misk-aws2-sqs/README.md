@@ -80,13 +80,13 @@ The module will not be considered beta/GA state until the below items are comple
 Outstanding work that needs to be done:
 * detailed test 
 * tracing
-* test fixtures
 * external queues
-* installing retry queue only on request
 * detailed documentation
 
 Things that are supported in the old documentation but are questionable:
 * aws queue attribute importer
+* delayed backoff - old implementation does not take into account the original visibility timeout,
+  only count of retries
 
 Outstanding things to document:
 * how batch size plays out with channel size and visibility timeout
