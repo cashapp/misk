@@ -3,7 +3,6 @@ package misk.aws2.sqs.jobqueue
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
-import misk.aws2.sqs.jobqueue.DockerSqs.clientPort
 import misk.testing.ExternalDependency
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider

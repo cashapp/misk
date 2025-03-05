@@ -29,7 +29,8 @@ class SqsJob(
   }
 
   companion object {
-    /** Message attribute used to store metadata specific to jobqueue functionality.
+    /**
+     * Message attribute used to store metadata specific to jobqueue functionality.
      * JSON-encoded.
      */
     const val JOBQUEUE_METADATA_ATTR = "_jobqueue-metadata"
@@ -45,5 +46,11 @@ class SqsJob(
      * Client-assigned identifier, useful to detect duplicate messages.
      */
     const val JOBQUEUE_METADATA_IDEMPOTENCE_KEY = "idempotence_key"
+
+    /**
+     * Name attribute used to pass the original trace id, so that we
+     * can track from enqueueing to handling.
+     */
+    const val JOBQUEUE_METADATA_ORIGINAL_TRACE_ID = "original_trace_id"
   }
 }
