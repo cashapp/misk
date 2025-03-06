@@ -5,6 +5,7 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.core.DefaultDockerClientConfig
+import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.core.command.LogContainerResultCallback
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
@@ -82,7 +83,10 @@ class GoogleSpannerEmulator @Inject constructor(
   companion object {
     val logger = KotlinLogging.logger {}
     val defaultDockerClientConfig =
-      DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+      DefaultDockerClientConfig
+      .createDefaultConfigBuilder()
+      .withMiskDefaults()
+      .build()
     val httpClient = ApacheDockerHttpClient.Builder()
       .dockerHost(defaultDockerClientConfig.dockerHost)
       .sslConfig(defaultDockerClientConfig.sslConfig)

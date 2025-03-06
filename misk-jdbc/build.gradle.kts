@@ -30,6 +30,7 @@ dependencies {
   implementation(libs.okio)
   implementation(project(":misk"))
   implementation(project(":misk-backoff"))
+  implementation(project(":misk-docker"))
   implementation(project(":misk-service"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))

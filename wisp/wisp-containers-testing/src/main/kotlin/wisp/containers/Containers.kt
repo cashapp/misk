@@ -8,6 +8,7 @@ import com.github.dockerjava.api.command.WaitContainerResultCallback
 import com.github.dockerjava.api.exception.NotFoundException
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.core.DefaultDockerClientConfig
+import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import wisp.logging.getLogger
@@ -187,8 +188,10 @@ class Composer(private val name: String, private vararg val containers: Containe
 
     companion object {
         private val log = getLogger<Composer>()
-        private val defaultDockerClientConfig =
-            DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+        private val defaultDockerClientConfig = DefaultDockerClientConfig
+          .createDefaultConfigBuilder()
+          .withMiskDefaults()
+          .build()
         private val httpClient = ApacheDockerHttpClient.Builder()
             .dockerHost(defaultDockerClientConfig.dockerHost)
             .sslConfig(defaultDockerClientConfig.sslConfig)

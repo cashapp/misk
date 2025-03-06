@@ -10,6 +10,7 @@ import com.github.dockerjava.api.model.PortBinding
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
 import com.github.dockerjava.core.DefaultDockerClientConfig
+import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.github.dockerjava.core.command.PullImageResultCallback
@@ -33,7 +34,10 @@ class LocalOpaService(
 ) : AbstractIdleService() {
   private var containerId: String = ""
   private val defaultDockerClientConfig =
-    DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+    DefaultDockerClientConfig
+      .createDefaultConfigBuilder()
+      .withMiskDefaults()
+      .build()
   private val httpClient = ApacheDockerHttpClient.Builder()
     .dockerHost(defaultDockerClientConfig.dockerHost)
     .sslConfig(defaultDockerClientConfig.sslConfig)

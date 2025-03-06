@@ -67,6 +67,7 @@ dependencies {
   testFixturesApi(libs.loggingApi)
   testFixturesApi(project(":misk-gcp"))
   testFixturesApi(project(":misk-inject"))
+  testFixturesApi(project(":misk-docker"))
   testFixturesImplementation(libs.assertj)
   testFixturesImplementation(libs.dockerTransportCore)
   testFixturesImplementation(libs.gax)
@@ -95,6 +96,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-tracing"))
   testImplementation(project(":misk-gcp"))
   testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk-docker"))
   testImplementation(testFixtures(project(":misk-gcp")))
 
   testImplementation(libs.assertj)
@@ -128,7 +130,6 @@ dependencies {
   testFixturesImplementation(project(":wisp:wisp-logging"))
   testFixturesImplementation(project(":wisp:wisp-moshi"))
   testFixturesImplementation(project(":misk"))
-  testFixturesImplementation(project(":misk-service"))
 }
 
 mavenPublishing {
