@@ -1,9 +1,9 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.30.33"
+aws2 = "2.30.34"
 bucket4j = "8.8.0"
-datadog = "1.46.1"
+datadog = "1.47.0"
 dependencyAnalysisPlugin = "2.10.1"
 detekt = "1.23.8"
 docker = "3.4.1"
