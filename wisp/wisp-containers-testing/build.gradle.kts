@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.dockerCore)
     implementation(libs.dockerTransportHttpClient)
     implementation(libs.dockerTransportCore)
+    implementation(project(":misk-docker"))
     implementation(project(":wisp:wisp-logging"))
     implementation(libs.openTracing)
     implementation(libs.openTracingUtil)

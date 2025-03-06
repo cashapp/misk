@@ -60,6 +60,7 @@ dependencies {
   testFixturesImplementation(libs.retrofitScalars)
   testFixturesImplementation(project(":wisp:wisp-moshi"))
   testFixturesImplementation(project(":misk"))
+  testFixturesImplementation(project(":misk-docker"))
 }
 
 mavenPublishing {

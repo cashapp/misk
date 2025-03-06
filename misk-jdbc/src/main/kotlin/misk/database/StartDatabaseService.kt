@@ -8,6 +8,7 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import com.google.common.util.concurrent.AbstractIdleService
+import misk.docker.withMiskDefaults
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.resources.ResourceLoader
@@ -89,7 +90,10 @@ class StartDatabaseService(
   private fun shouldStartServer() = deployment.isTest || deployment.isLocalDevelopment
 
   private val defaultDockerClientConfig =
-    DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+    DefaultDockerClientConfig
+      .createDefaultConfigBuilder()
+      .withMiskDefaults()
+      .build()
   private val httpClient = ApacheDockerHttpClient.Builder()
     .dockerHost(defaultDockerClientConfig.dockerHost)
     .sslConfig(defaultDockerClientConfig.sslConfig)

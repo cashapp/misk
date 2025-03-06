@@ -2,6 +2,7 @@ package misk.cloud.gcp.spanner
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.core.DefaultDockerClientConfig
+import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.google.cloud.spanner.DatabaseId
@@ -50,7 +51,10 @@ class GoogleSpannerEmulatorTest {
   @Inject lateinit var emulator: GoogleSpannerEmulator
 
   val defaultDockerClientConfig =
-    DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+    DefaultDockerClientConfig
+      .createDefaultConfigBuilder()
+      .withMiskDefaults()
+      .build()
   val httpClient = ApacheDockerHttpClient.Builder()
     .dockerHost(GoogleSpannerEmulator.defaultDockerClientConfig.dockerHost)
     .sslConfig(GoogleSpannerEmulator.defaultDockerClientConfig.sslConfig)

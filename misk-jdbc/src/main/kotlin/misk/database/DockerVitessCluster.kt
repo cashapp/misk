@@ -17,6 +17,7 @@ import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
 import misk.backoff.RetryConfig
 import misk.backoff.retry
+import misk.docker.withMiskDefaults
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueInt
@@ -236,8 +237,10 @@ class DockerVitessCluster(
       /** Config for the Vitess cluster */
       config: DataSourceConfig
     ) {
-      val defaultDockerClientConfig =
-        DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+      val defaultDockerClientConfig = DefaultDockerClientConfig
+        .createDefaultConfigBuilder()
+        .withMiskDefaults()
+        .build()
       val httpClient = ApacheDockerHttpClient.Builder()
         .dockerHost(defaultDockerClientConfig.dockerHost)
         .sslConfig(defaultDockerClientConfig.sslConfig)
