@@ -144,6 +144,27 @@ class SqsJobConsumerTest {
   }
 
   @Test
+  fun `retrying with delayed backoff works`() {
+    val queueName = QueueName("test-queue-1")
+    val result = createQueue(queueName)
+    val latch = CountDownLatch(3)
+    sendMessage(result.queueUrl, "message")
+
+    // Use explicit 1 seconds visibility timeout to start with
+    // it should be increased exponentially and retried at most 3 times in 8 seconds
+    jobConsumer.subscribe(
+      queueName,
+      getRetryWithBackoffHandler(latch),
+      SqsQueueConfig(
+        visibility_timeout = 1
+      )
+    )
+
+    latch.await(8, SECONDS)
+    assertEquals(0, latch.count)
+  }
+
+  @Test
   fun `queue is empty after success`() {
     val queueName = QueueName("test-queue-1")
     val result = createQueue(queueName)
@@ -347,6 +368,16 @@ class SqsJobConsumerTest {
         }
         latch.countDown()
         return JobStatus.OK
+      }
+    }
+  }
+
+  private fun getRetryWithBackoffHandler(latch: CountDownLatch): SuspendingJobHandler {
+    return object : SuspendingJobHandler {
+      override suspend fun handleJob(job: Job): JobStatus {
+        logger.info { "Handling job: body=${job.body} queue=${job.queueName.value} ${job.attributes}" }
+        latch.countDown()
+        return JobStatus.RETRY_WITH_BACKOFF
       }
     }
   }

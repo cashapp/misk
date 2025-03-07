@@ -40,7 +40,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJob$Companion {
 
 public final class misk/aws2/sqs/jobqueue/SqsJobConsumer : com/google/common/util/concurrent/AbstractService, misk/jobqueue/v2/JobConsumer {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/SqsJobConsumer$Companion;
-	public fun <init> (Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lcom/squareup/moshi/Moshi;Lmisk/aws2/sqs/jobqueue/DeadLetterQueueProvider;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Ljava/time/Clock;Lio/opentracing/Tracer;)V
+	public fun <init> (Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;Lcom/squareup/moshi/Moshi;Lmisk/aws2/sqs/jobqueue/DeadLetterQueueProvider;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Ljava/time/Clock;Lio/opentracing/Tracer;)V
 	public fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;)V
 	public final fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;)V
 	public fun unsubscribe (Lmisk/jobqueue/QueueName;)V
@@ -90,6 +90,7 @@ public final class misk/aws2/sqs/jobqueue/SqsMetrics {
 	public final fun getSqsDeleteTime ()Lio/prometheus/client/Histogram;
 	public final fun getSqsReceiveTime ()Lio/prometheus/client/Histogram;
 	public final fun getSqsSendTime ()Lio/prometheus/client/Histogram;
+	public final fun getVisibilityTime ()Lio/prometheus/client/Histogram;
 }
 
 public final class misk/aws2/sqs/jobqueue/StaticDeadLetterQueueProvider : misk/aws2/sqs/jobqueue/DeadLetterQueueProvider {
@@ -99,7 +100,7 @@ public final class misk/aws2/sqs/jobqueue/StaticDeadLetterQueueProvider : misk/a
 
 public final class misk/aws2/sqs/jobqueue/Subscriber {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/Subscriber$Companion;
-	public fun <init> (Lmisk/jobqueue/QueueName;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lkotlinx/coroutines/channels/Channel;Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Ljava/time/Clock;Lio/opentracing/Tracer;)V
+	public fun <init> (Lmisk/jobqueue/QueueName;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lkotlinx/coroutines/channels/Channel;Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Ljava/time/Clock;Lio/opentracing/Tracer;Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;)V
 	public final fun getChannel ()Lkotlinx/coroutines/channels/Channel;
 	public final fun getClient ()Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;
 	public final fun getClock ()Ljava/time/Clock;
@@ -111,6 +112,7 @@ public final class misk/aws2/sqs/jobqueue/Subscriber {
 	public final fun getQueueResolver ()Lmisk/aws2/sqs/jobqueue/QueueResolver;
 	public final fun getSqsMetrics ()Lmisk/aws2/sqs/jobqueue/SqsMetrics;
 	public final fun getTracer ()Lio/opentracing/Tracer;
+	public final fun getVisibilityTimeoutCalculator ()Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;
 	public final fun poll (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun run (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -124,6 +126,17 @@ public final class misk/aws2/sqs/jobqueue/SubscriptionService : com/google/commo
 }
 
 public final class misk/aws2/sqs/jobqueue/SubscriptionService$Companion {
+}
+
+public final class misk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator {
+	public static final field Companion Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator$Companion;
+	public static final field MAX_JOB_DELAY J
+	public static final field MAX_RECEIVE_COUNT_FOR_BACKOFF I
+	public fun <init> ()V
+	public final fun calculateVisibilityTimeout (II)I
+}
+
+public final class misk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator$Companion {
 }
 
 public final class misk/aws2/sqs/jobqueue/config/SqsConfig : wisp/config/Config {

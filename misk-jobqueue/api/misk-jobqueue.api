@@ -295,8 +295,10 @@ public abstract interface class misk/jobqueue/v2/JobEnqueuer {
 }
 
 public final class misk/jobqueue/v2/JobEnqueuer$DefaultImpls {
+	public static fun enqueue (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun enqueue$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun enqueueAsync$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)Ljava/util/concurrent/CompletableFuture;
+	public static fun enqueueBlocking (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 	public static synthetic fun enqueueBlocking$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)V
 }
 
@@ -307,6 +309,7 @@ public final class misk/jobqueue/v2/JobStatus : java/lang/Enum {
 	public static final field DEAD_LETTER Lmisk/jobqueue/v2/JobStatus;
 	public static final field OK Lmisk/jobqueue/v2/JobStatus;
 	public static final field RETRY_LATER Lmisk/jobqueue/v2/JobStatus;
+	public static final field RETRY_WITH_BACKOFF Lmisk/jobqueue/v2/JobStatus;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/jobqueue/v2/JobStatus;
 	public static fun values ()[Lmisk/jobqueue/v2/JobStatus;

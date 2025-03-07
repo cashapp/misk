@@ -215,6 +215,7 @@ class FakeJobEnqueuer @Inject constructor(
               JobStatus.OK -> job.acknowledged = true
               JobStatus.DEAD_LETTER -> job.deadLettered = true
               JobStatus.RETRY_LATER -> job.acknowledged = false
+              JobStatus.RETRY_WITH_BACKOFF -> job.acknowledged = false
             }
           }
         }

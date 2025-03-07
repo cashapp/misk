@@ -19,12 +19,12 @@ class QueueResolver @Inject constructor(
    * Results are cached in-memory, call to SQS is effectively blocking.
    */
   fun getQueueUrl(queueName: QueueName): String {
-    return queueUrlCache.getOrPut(queueName) {
+    return queueUrlCache.computeIfAbsent(queueName) {
       val retryQueueUrlRequest = GetQueueUrlRequest.builder()
         .queueName(queueName.value)
         .build()
       val response = client.getQueueUrl(retryQueueUrlRequest).join()
-      return response.queueUrl()
+      response.queueUrl()
     }
   }
 }

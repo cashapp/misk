@@ -1,41 +1,44 @@
 package misk.aws2.sqs.jobqueue
 
-import jakarta.inject.Inject
 import misk.jobqueue.QueueName
-import misk.testing.MiskExternalDependency
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
+import java.util.concurrent.CompletableFuture
 import kotlin.test.assertEquals
 
-@MiskTest(startService = true)
 class SqsQueueResolverTest {
-  @MiskExternalDependency private val dockerSqs = DockerSqs
-  @MiskTestModule private val module = SqsJobQueueTestModule(dockerSqs)
+  private val client = mock<SqsAsyncClient>()
+  private var queueResolver = QueueResolver(client)
 
-  @Inject
-  private lateinit var queueResolver: QueueResolver
+  @BeforeEach
+  fun setup() {
+    whenever(client.getQueueUrl(any<GetQueueUrlRequest>())).thenReturn(CompletableFuture.supplyAsync {
+      GetQueueUrlResponse.builder()
+        .queueUrl("url://test-queue")
+        .build()
+    })
+  }
 
   @Test
-  @Disabled("Disabled test until docker authorization issues are resolvedc")
   fun `caches queue URL`() {
     val queueName = QueueName("test-queue")
 
-    DockerSqs.client.createQueue(
-      CreateQueueRequest.builder().queueName(queueName.value)
-        .attributes(
-          mapOf(
-            QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
-          ))
-        .build()
-    ).join()
-
+    // Calling this twice should result in a single call to AWS
     val result = queueResolver.getQueueUrl(queueName)
     queueResolver.getQueueUrl(queueName)
 
-    assertEquals("test", result)
+    assertEquals("url://test-queue", result)
+
+    verify(client).getQueueUrl(any<GetQueueUrlRequest>())
   }
 }
