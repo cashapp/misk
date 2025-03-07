@@ -850,8 +850,8 @@ public final class misk/logging/MiskMdc : misk/logging/Mdc {
 }
 
 public final class misk/logging/ScopedMdcKt {
-	public static final fun withMdc (Lmisk/logging/Mdc;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
-	public static final fun withMdc (Lmisk/logging/Mdc;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
+	public static final fun withMdc (Lmisk/logging/Mdc;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun withMdc (Lmisk/logging/Mdc;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
 public final class misk/logging/coroutines/ScopedMdcKt {
