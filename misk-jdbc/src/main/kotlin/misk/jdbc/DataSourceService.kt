@@ -9,6 +9,7 @@ import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import com.zaxxer.hikari.util.DriverDataSource
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Singleton
+import misk.vitess.VitessExceptionHandler
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.time.Duration
@@ -29,7 +30,7 @@ class DataSourceService @JvmOverloads constructor(
   private val deployment: Deployment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
-  private val collectorRegistry: CollectorRegistry? = null,
+  private val collectorRegistry: CollectorRegistry? = null
 ) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
   private lateinit var config: DataSourceConfig
 
@@ -95,9 +96,16 @@ class DataSourceService @JvmOverloads constructor(
         hikariConfig.minimumIdle = 5
       }
 
-      if (config.type == DataSourceType.MYSQL) {
-        hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
+      when (config.type) {
+        DataSourceType.MYSQL -> {
+          hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
+        }
+        DataSourceType.VITESS_MYSQL -> {
+          hikariConfig.exceptionOverride  = VitessExceptionHandler(collectorRegistry)
+        }
+        else -> {}
       }
+
 
       // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
       hikariConfig.dataSourceProperties["cachePrepStmts"] = "true"
