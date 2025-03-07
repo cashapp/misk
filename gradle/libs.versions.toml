@@ -1,12 +1,12 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.30.34"
+aws2 = "2.30.35"
 bucket4j = "8.8.0"
 datadog = "1.47.0"
 dependencyAnalysisPlugin = "2.10.1"
 detekt = "1.23.8"
-docker = "3.4.1"
+docker = "3.4.2"
 googleAuth = "1.33.1"
 googleHttp = "1.46.3"
 hoplite = "2.7.5"
@@ -198,7 +198,7 @@ retrofitProtobuf = { module = "com.squareup.retrofit2:converter-protobuf", versi
 retrofitScalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version.ref = "retrofit" }
 servletApi = { module = "javax.servlet:javax.servlet-api", version = "4.0.1" }
-slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
+slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
 sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
