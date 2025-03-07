@@ -46,6 +46,7 @@ import java.util.concurrent.ConcurrentHashMap
 class SqsJobConsumer @Inject constructor(
   private val client: SqsAsyncClient,
   private val queueResolver: QueueResolver,
+  private val visibilityTimeoutCalculator: VisibilityTimeoutCalculator,
   private val moshi: Moshi,
   private val dlqProvider: DeadLetterQueueProvider,
   private val sqsMetrics: SqsMetrics,
@@ -77,6 +78,7 @@ class SqsJobConsumer @Inject constructor(
         moshi = moshi,
         clock = clock,
         tracer = tracer,
+        visibilityTimeoutCalculator = visibilityTimeoutCalculator,
       )
     }
 

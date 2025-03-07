@@ -4,4 +4,5 @@ enum class JobStatus {
   OK,
   RETRY_LATER,
   DEAD_LETTER,
+  RETRY_WITH_BACKOFF,
 }

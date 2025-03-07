@@ -8,6 +8,8 @@ plugins {
 }
 
 dependencies {
+  api(libs.kotlinxCoroutinesCore)
+
   testFixturesApi(libs.guice)
   testFixturesApi(libs.jakartaInject)
   testFixturesApi(project(":wisp:wisp-token"))

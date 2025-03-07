@@ -30,44 +30,6 @@ class SqsJobEnqueuer @Inject constructor(
   private val tracer: Tracer,
 ) : JobEnqueuer {
   /**
-   * Enqueue the job and suspend waiting for the confirmation
-   */
-  override suspend fun enqueue(
-    queueName: QueueName,
-    body: String,
-    idempotencyKey: String?,
-    deliveryDelay: Duration?,
-    attributes: Map<String, String>,
-  ) {
-    enqueueAsync(
-      queueName = queueName,
-      body = body,
-      idempotencyKey = idempotencyKey,
-      deliveryDelay = deliveryDelay,
-      attributes = attributes
-    ).await()
-  }
-
-  /**
-   * Enqueue the job and block waiting for the confirmation.
-   */
-  override fun enqueueBlocking(
-    queueName: QueueName,
-    body: String,
-    idempotencyKey: String?,
-    deliveryDelay: Duration?,
-    attributes: Map<String, String>,
-  ) {
-    enqueueAsync(
-      queueName = queueName,
-      body = body,
-      idempotencyKey = idempotencyKey,
-      deliveryDelay = deliveryDelay,
-      attributes = attributes
-    ).join()
-  }
-
-  /**
    * Enqueue the job and return a CompletableFuture.
    *
    * This call does not record sending metrics as it's asynchronous.

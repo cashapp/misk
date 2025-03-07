@@ -15,12 +15,18 @@ import misk.jobqueue.v2.JobHandler
 import misk.jobqueue.v2.JobStatus
 import misk.jobqueue.v2.SuspendingJobHandler
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.ChangeMessageVisibilityRequest
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest
+import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import wisp.logging.getLogger
+import java.math.BigInteger
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
+import kotlin.math.log
+import kotlin.random.Random
 
 /**
  * Subscriber reads jobs from the channel and passes them to handler.
@@ -40,6 +46,7 @@ class Subscriber(
   val moshi: Moshi,
   val clock: Clock,
   val tracer: Tracer,
+  val visibilityTimeoutCalculator: VisibilityTimeoutCalculator,
 ) {
   suspend fun run() {
     while (true) {
@@ -72,7 +79,7 @@ class Subscriber(
             deadLetterMessage(job)
             deleteMessage(job)
           }
-
+          JobStatus.RETRY_WITH_BACKOFF -> retryWithBackoff(job)
           JobStatus.RETRY_LATER -> { /* no-op, will be retried after visibility timeout passes */
           }
         }
@@ -92,6 +99,24 @@ class Subscriber(
       scope.close()
       span.finish()
     }
+  }
+
+  private suspend fun retryWithBackoff(job: SqsJob) {
+    val visibilityTime = visibilityTimeoutCalculator.calculateVisibilityTimeout(
+      currentReceiveCount = job.message.attributes()[MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT]?.toInt() ?: 1,
+      queueVisibilityTimeout = queueConfig.visibility_timeout ?: 1
+    )
+
+    client.changeMessageVisibility(
+      ChangeMessageVisibilityRequest.builder()
+        .queueUrl(job.queueUrl)
+        .receiptHandle(job.message.receiptHandle())
+        .visibilityTimeout(visibilityTime)
+        .build()
+    ).await()
+
+    sqsMetrics.visibilityTime.labels(queueName.value)
+      .observe(visibilityTime.toDouble())
   }
 
   private suspend fun deleteMessage(job: SqsJob) {
@@ -164,6 +189,7 @@ class Subscriber(
     val request = ReceiveMessageRequest.builder()
       .queueUrl(queueUrl)
       .messageAttributeNames("All")
+      .messageSystemAttributeNames(MessageSystemAttributeName.ALL)
       .maxNumberOfMessages(queueConfig.max_number_of_messages)
       .waitTimeSeconds(queueConfig.wait_timeout)
       .visibilityTimeout(queueConfig.visibility_timeout)
