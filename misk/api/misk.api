@@ -817,6 +817,15 @@ public final class misk/grpc/GrpcKt {
 	public static final fun consumeEachAndClose (Lcom/squareup/wire/MessageSource;Lkotlin/jvm/functions/Function1;)V
 }
 
+public final class misk/grpc/GrpcMessageSource : com/squareup/wire/MessageSource, java/io/Closeable {
+	public fun <init> (Lokio/BufferedSource;Lcom/squareup/wire/ProtoAdapter;)V
+	public fun <init> (Lokio/BufferedSource;Lcom/squareup/wire/ProtoAdapter;Ljava/lang/String;)V
+	public synthetic fun <init> (Lokio/BufferedSource;Lcom/squareup/wire/ProtoAdapter;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun close ()V
+	public fun read ()Ljava/lang/Object;
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/io/PathExtensionsKt {
 	public static final fun listRecursively (Ljava/nio/file/Path;Z)Ljava/util/List;
 	public static synthetic fun listRecursively$default (Ljava/nio/file/Path;ZILjava/lang/Object;)Ljava/util/List;

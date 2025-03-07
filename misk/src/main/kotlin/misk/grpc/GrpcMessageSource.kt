@@ -18,7 +18,8 @@ import java.net.ProtocolException
  * @param messageAdapter a proto adapter for each message.
  * @param grpcEncoding the "grpc-encoding" header, or null if it is absent.
  */
-internal class GrpcMessageSource<T : Any>(
+
+class GrpcMessageSource<T : Any> @JvmOverloads constructor(
   private val source: BufferedSource,
   private val messageAdapter: ProtoAdapter<T>,
   private val grpcEncoding: String? = null
