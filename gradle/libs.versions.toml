@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.30.35"
+aws2 = "2.30.36"
 bucket4j = "8.8.0"
 datadog = "1.47.0"
 dependencyAnalysisPlugin = "2.10.1"
@@ -66,8 +66,8 @@ errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotation
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.62.0" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.52.0" }
-gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.26.4" }
-gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250213-2.0.0" }
+gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.27.0" }
+gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250227-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.4" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.88.0" }
