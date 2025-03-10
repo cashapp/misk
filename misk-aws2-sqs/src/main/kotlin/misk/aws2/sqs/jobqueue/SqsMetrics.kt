@@ -78,6 +78,12 @@ class SqsMetrics @Inject internal constructor(metrics: Metrics) {
     listOf("QueueName")
   )
 
+  val queueFirstProcessingLag = metrics.histogram(
+    "jobs_sqs_first_processing_lag_v2",
+    "time it took to receive a job from when it was enqueued",
+    listOf("QueueName")
+  )
+
   val queueProcessingLag = metrics.histogram(
     "jobs_sqs_processing_lag_v2",
     "time it took to receive a job from when it was enqueued",
@@ -88,21 +94,5 @@ class SqsMetrics @Inject internal constructor(metrics: Metrics) {
     "jobs_sqs_channel_receive_lag_v2",
     "time a job spent it the channel between receiver and handler",
     listOf("QueueName")
-  )
-
-  val sqsApproxNumberOfMessages = metrics.gauge(
-    "ApproximateNumberOfMessagesVisible",
-    "the approximate number of messages available for retrieval from SQS",
-    // `namespace` and `stat` is to emulate the CloudWatch metrics.
-    listOf("namespace", "stat", "QueueName")
-  )
-
-  val sqsApproxNumberOfMessagesNotVisible = metrics.gauge(
-    "ApproximateNumberOfMessagesNotVisible",
-    "the  approximate number of messages that are in flight. Messages are considered to " +
-      "be in flight if they have been sent to a client but have not yet been deleted or have " +
-      "not yet reached the end of their visibility window.",
-    // `namespace` and `stat` is to emulate the CloudWatch metrics.
-    listOf("namespace", "stat", "QueueName")
   )
 }

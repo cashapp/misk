@@ -84,9 +84,8 @@ public final class misk/aws2/sqs/jobqueue/SqsMetrics {
 	public final fun getJobsDeadLettered ()Lio/prometheus/client/Counter;
 	public final fun getJobsEnqueued ()Lio/prometheus/client/Counter;
 	public final fun getJobsReceived ()Lio/prometheus/client/Counter;
+	public final fun getQueueFirstProcessingLag ()Lio/prometheus/client/Histogram;
 	public final fun getQueueProcessingLag ()Lio/prometheus/client/Histogram;
-	public final fun getSqsApproxNumberOfMessages ()Lio/prometheus/client/Gauge;
-	public final fun getSqsApproxNumberOfMessagesNotVisible ()Lio/prometheus/client/Gauge;
 	public final fun getSqsDeleteTime ()Lio/prometheus/client/Histogram;
 	public final fun getSqsReceiveTime ()Lio/prometheus/client/Histogram;
 	public final fun getSqsSendTime ()Lio/prometheus/client/Histogram;
@@ -99,7 +98,6 @@ public final class misk/aws2/sqs/jobqueue/StaticDeadLetterQueueProvider : misk/a
 }
 
 public final class misk/aws2/sqs/jobqueue/Subscriber {
-	public static final field Companion Lmisk/aws2/sqs/jobqueue/Subscriber$Companion;
 	public fun <init> (Lmisk/jobqueue/QueueName;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lkotlinx/coroutines/channels/Channel;Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/QueueResolver;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Ljava/time/Clock;Lio/opentracing/Tracer;Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;)V
 	public final fun getChannel ()Lkotlinx/coroutines/channels/Channel;
 	public final fun getClient ()Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;
@@ -115,9 +113,6 @@ public final class misk/aws2/sqs/jobqueue/Subscriber {
 	public final fun getVisibilityTimeoutCalculator ()Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;
 	public final fun poll (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun run (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class misk/aws2/sqs/jobqueue/Subscriber$Companion {
 }
 
 public final class misk/aws2/sqs/jobqueue/SubscriptionService : com/google/common/util/concurrent/AbstractIdleService {
