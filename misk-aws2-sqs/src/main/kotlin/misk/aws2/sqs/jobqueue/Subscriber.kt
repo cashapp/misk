@@ -166,10 +166,14 @@ class Subscriber(
 
       sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
       response.messages().forEach { message ->
-        message.messageAttributes()[SQS_ATTRIBUTE_SENT_TIMESTAMP]?.let {
-          val sentTimestamp = it.stringValue().toLong()
-          val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli()
-          sqsMetrics.queueProcessingLag.labels(queueName.value).observe(processingLag.toDouble())
+        message.attributes()[MessageSystemAttributeName.SENT_TIMESTAMP]?.let {
+          val sentTimestamp = it.toLong()
+          val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli().toDouble()
+          val receiveCounter = message.attributes()[MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT]?.toInt()
+          if (receiveCounter == 1) {
+            sqsMetrics.queueFirstProcessingLag.labels(queueName.value).observe(processingLag)
+          }
+          sqsMetrics.queueProcessingLag.labels(queueName.value).observe(processingLag)
         }
         val publishToChannelTimestamp = clock.instant()
         emit(
@@ -188,16 +192,12 @@ class Subscriber(
   private fun fetchMessages(queueUrl: String): CompletableFuture<ReceiveMessageResponse> {
     val request = ReceiveMessageRequest.builder()
       .queueUrl(queueUrl)
-      .messageAttributeNames("All")
+      .messageAttributeNames(MessageSystemAttributeName.ALL.name)
       .messageSystemAttributeNames(MessageSystemAttributeName.ALL)
       .maxNumberOfMessages(queueConfig.max_number_of_messages)
       .waitTimeSeconds(queueConfig.wait_timeout)
       .visibilityTimeout(queueConfig.visibility_timeout)
       .build()
     return client.receiveMessage(request)
-  }
-
-  companion object {
-    private const val SQS_ATTRIBUTE_SENT_TIMESTAMP = "SentTimestamp"
   }
 }
