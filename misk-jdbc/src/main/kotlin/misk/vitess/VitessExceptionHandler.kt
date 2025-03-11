@@ -3,15 +3,14 @@ package misk.vitess
 import com.zaxxer.hikari.SQLExceptionOverride
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
-import java.lang.ref.WeakReference
 import java.sql.SQLException
-import java.util.Collections
-import java.util.WeakHashMap
 import java.util.concurrent.ConcurrentHashMap
+import wisp.logging.getLogger
 
 internal class VitessExceptionHandler(
   registry: CollectorRegistry? = null,
 ) : SQLExceptionOverride {
+  private val logger = getLogger<VitessExceptionHandler>()
 
   private val errorCounter = registry?.let { registry ->
     Counter
@@ -56,6 +55,15 @@ internal class VitessExceptionHandler(
 
   override fun adjudicate(sqlException: SQLException): SQLExceptionOverride.Override {
     return adjudicateInternal(sqlException).also { result ->
+      logger.error(
+        "Hikari exception adjudicate: " +
+          "errorCode=${sqlException.errorCode}, " +
+          // the logic around sqlState kotlin this is null safe, but the Java shows it being set
+          // as null. Let's be explicit at the behavir.
+          "state=${sqlException?.sqlState ?: "null"}, " +
+          "message=${sqlException.message}, " +
+          "adjudicate=$result"
+      )
       errorCounter?.labels(
         sqlException.errorCode.toString(),
         sqlException.sqlState,
@@ -67,8 +75,8 @@ internal class VitessExceptionHandler(
 
   companion object {
     /**
-     * This uses a similar that Hikari does internally. We can't register the same counter twice.
-     * instead we use some global memory to find the existing reference and return it instead.
+     * This uses a similar check that Hikari does internally. We can't register the same counter twice.
+     * Instead we use some global memory to find the existing reference and return it instead.
      */
     private val registrationStatuses: ConcurrentHashMap<CollectorRegistry, Counter> =
       ConcurrentHashMap()
@@ -76,6 +84,8 @@ internal class VitessExceptionHandler(
       val existingCounter = registrationStatuses.putIfAbsent(registry, this)
       return if (existingCounter == null) {
         registry.register(this)
+        // make sure we have some baseline labels
+        this.labels("", "", "", "CONTINUE_EVICT")
         this
       } else {
        existingCounter
