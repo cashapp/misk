@@ -1,7 +1,14 @@
 pluginManagement {
   repositories {
-    mavenCentral()
-    gradlePluginPortal()
+    maven(url = "https://maven.global.square/artifactory/maven-central") {
+      name = "Misk: mavenCentral mirror"
+    }
+    maven(url = "https://maven.global.square/artifactory/gradle-plugins") {
+      name = "Misk: gradlePluginsPortal mirror"
+    }
+    maven(url = "https://maven.global.square/artifactory/releases") {
+      name = "Misk: Internal build-logic plugins"
+    }
   }
 }
 
@@ -21,8 +28,12 @@ develocity {
 dependencyResolutionManagement {
   repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
   repositories {
-    mavenCentral()
-    maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
+    maven(url = "https://maven.global.square/artifactory/maven-central") {
+      name = "Misk: mavenCentral mirror"
+    }
+    maven(url = "https://maven.global.square/artifactory/dynamodb-local-release") {
+      name = "Misk: dynamoDB mirror"
+    }
   }
 }
 
