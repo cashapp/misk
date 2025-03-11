@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.30.36"
+aws2 = "2.30.37"
 bucket4j = "8.8.0"
 datadog = "1.47.0"
 dependencyAnalysisPlugin = "2.10.1"
@@ -211,7 +211,7 @@ tempestTesting = { module = "app.cash.tempest:tempest-testing" }
 tempestTestingDocker = { module = "app.cash.tempest:tempest-testing-docker" }
 tempestTestingInternal = { module = "app.cash.tempest:tempest-testing-internal" }
 tempestTestingJvm = { module = "app.cash.tempest:tempest-testing-jvm" }
-threeTenBp = { module = "org.threeten:threetenbp", version = "1.7.0" }
+threeTenBp = { module = "org.threeten:threetenbp", version = "1.7.1" }
 tink = { module = "com.google.crypto.tink:tink", version = "1.12.0" }
 tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.9.1" }
 tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.10.0" }
