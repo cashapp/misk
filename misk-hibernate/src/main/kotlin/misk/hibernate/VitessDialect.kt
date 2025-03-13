@@ -4,10 +4,10 @@ package misk.hibernate
 
 import misk.jdbc.CheckException
 import misk.vitess.CowriteException
-import org.hibernate.dialect.MySQL57Dialect
+import org.hibernate.dialect.MySQL8Dialect
 import org.hibernate.exception.spi.SQLExceptionConversionDelegate
 
-class VitessDialect : MySQL57Dialect() {
+class VitessDialect : MySQL8Dialect() {
   override fun useInputStreamToInsertBlob() = false
 
   override fun buildSQLExceptionConversionDelegate(): SQLExceptionConversionDelegate {
