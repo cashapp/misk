@@ -17,6 +17,7 @@ class RedisTestModule(private val random: Random = Random.Default) : KAbstractMo
     requireBinding<FakeClock>()
     bind(keyOf<Random>(ForFakeRedis::class)).toInstance(random)
     bind<Redis>().to(keyOf<FakeRedis>()).asEagerSingleton()
+    bind<FakeRedis>().asEagerSingleton()
     multibind<TestFixture>().to<FakeRedis>()
   }
 }
