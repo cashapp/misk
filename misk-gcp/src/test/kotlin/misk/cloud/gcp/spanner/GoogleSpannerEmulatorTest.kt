@@ -1,36 +1,22 @@
 package misk.cloud.gcp.spanner
 
-import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.core.DefaultDockerClientConfig
-import misk.docker.withMiskDefaults
-import com.github.dockerjava.core.DockerClientImpl
-import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.google.cloud.spanner.DatabaseId
 import com.google.cloud.spanner.Key
 import com.google.cloud.spanner.KeySet
 import com.google.cloud.spanner.Mutation
 import com.google.cloud.spanner.Spanner
 import com.google.cloud.spanner.SpannerOptions
-import com.google.inject.util.Modules
-import misk.environment.DeploymentModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import wisp.containers.ContainerUtil
-import wisp.deployment.TESTING
-import java.time.Duration
 import jakarta.inject.Inject
+import org.junit.jupiter.api.RepeatedTest
 
-@MiskTest
-@Disabled("Flaky test")
+@MiskTest(startService = true)
 class GoogleSpannerEmulatorTest {
   val spannerConfig = SpannerConfig(
     project_id = "test-project",
@@ -38,32 +24,15 @@ class GoogleSpannerEmulatorTest {
     database = "test-database",
     emulator = SpannerEmulatorConfig(
       enabled = true,
-      hostname = ContainerUtil.dockerTargetOrLocalHost()
+      hostname = ContainerUtil.dockerTargetOrLocalHost(),
+      version = "1.4.9",
     )
   )
 
   @MiskTestModule
-  val module = Modules.combine(
-    DeploymentModule(TESTING),
-    GoogleSpannerModule(spannerConfig),
-  )
+  val module = GoogleSpannerTestModule(spannerConfig)
 
   @Inject lateinit var emulator: GoogleSpannerEmulator
-
-  val defaultDockerClientConfig =
-    DefaultDockerClientConfig
-      .createDefaultConfigBuilder()
-      .withMiskDefaults()
-      .build()
-  val httpClient = ApacheDockerHttpClient.Builder()
-    .dockerHost(GoogleSpannerEmulator.defaultDockerClientConfig.dockerHost)
-    .sslConfig(GoogleSpannerEmulator.defaultDockerClientConfig.sslConfig)
-    .maxConnections(100)
-    .connectionTimeout(Duration.ofSeconds(60))
-    .responseTimeout(Duration.ofSeconds(120))
-    .build()
-  val dockerClient: DockerClient =
-    DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
 
   val spannerClient: Spanner = SpannerOptions.newBuilder()
     .setProjectId(spannerConfig.project_id)
@@ -74,95 +43,69 @@ class GoogleSpannerEmulatorTest {
     .service
 
   @Nested
-  inner class `#startUp` {
-    @BeforeEach
-    fun startEmulator() {
-      if (!emulator.isRunning) {
-        emulator.startAsync()
-        emulator.awaitRunning()
-      }
-    }
+  inner class `#reset` {
+    @RepeatedTest(3)
+    fun `clears tables on each test when using reusable test module`() {
+      // The emulator will create the database and instance for us using the
+      // config, so we don't need to worry about checking for their existence.
+      val adminClient = spannerClient.instanceAdminClient
+        .getInstance(spannerConfig.instance_id)
+        .getDatabase(spannerConfig.database)
+      val dataClient = spannerClient.getDatabaseClient(
+        DatabaseId.of(
+          spannerConfig.project_id,
+          spannerConfig.instance_id,
+          spannerConfig.database,
+        )
+      )
+      val personId = "abc123"
+      fun personExists(): Boolean {
+        val query = dataClient.singleUseReadOnlyTransaction().read(
+          "people",
+          KeySet.singleKey(
+            Key.of(personId)
+          ),
+          listOf("id")
+        )
 
-    @AfterEach
-    fun stopEmulator() {
-      if (emulator.isRunning) {
-        emulator.stopAsync()
-        emulator.awaitTerminated()
-      }
-    }
-
-    @Test fun `starts the Docker container`() {
-      // The Docker container should be running
-      val isRunning: Boolean = dockerClient.inspectContainerCmd(
-        GoogleSpannerEmulator.CONTAINER_NAME
-      ).exec().state.running ?: false
-      assertTrue(isRunning)
-    }
-
-    @Test fun `can receive requests`() {
-      // If it can receive requests, it will respond and not timeout or throw
-      // an error.
-      assertDoesNotThrow {
-        spannerClient.instanceAdminClient.listInstances().values
-      }
-    }
-  }
-
-  @Nested
-  inner class `#shutDown` {
-    @Test fun `leaves the Docker container running`() {
-      // Start emulator if it's not already running
-      if (!emulator.isRunning) {
-        emulator.startAsync()
-        emulator.awaitRunning()
+        // Load results
+        if (query.next()) {
+          return personId == query.getString(0)
+        } else {
+          return false
+        }
       }
 
-      // Stop emulator
-      emulator.stopAsync()
-      emulator.awaitTerminated()
+      // Check if there's a people table.
+      val hasPeopleTable = adminClient.ddl.any { it.contains("CREATE TABLE people") }
 
-      // Check if emulator is running
-      val isRunning: Boolean = dockerClient.inspectContainerCmd(
-        GoogleSpannerEmulator.CONTAINER_NAME
-      ).exec().state.running ?: false
-
-      // It should still be running to avoid expensive setup costs
-      assertTrue(isRunning)
-    }
-  }
-
-  @Nested
-  inner class `#pullsImage` {
-    @Test fun `pulls a Docker image of the emulator`() {
-      var imageId: String? = null
-
-      emulator.pullImage()
-
-      // Throws a NotFoundError if the image isn't present locally.
-      assertDoesNotThrow {
-        imageId = dockerClient.inspectImageCmd(
-          GoogleSpannerEmulator.IMAGE_NAME
-        ).exec().id
+      // If it doesn't exist, create it
+      if (!hasPeopleTable) {
+        // Create a "people" table
+        adminClient.updateDdl(
+          listOf(
+            """
+            CREATE TABLE people (id STRING(6)) PRIMARY KEY (id)
+            """.trimIndent()
+          ),
+          null
+        ).get()
       }
 
-      // ID of the image should be present if it's local.
-      assertNotNull(imageId)
-    }
+      // Expect that no person exists when test is started
+      assertFalse(personExists())
 
-    @Test fun `pulls a Docker image of the emulator with specified version`() {
-      var imageId: String? = null
+      // Insert a person
+      dataClient.write(
+        listOf(
+          Mutation.newInsertBuilder("people")
+            .set("id").to(personId)
+            .build()
+        )
+      )
 
-      emulator.pullImage("1.4.9")
-
-      // Throws a NotFoundError if the image isn't present locally.
-      assertDoesNotThrow {
-        imageId = dockerClient.inspectImageCmd(
-          GoogleSpannerEmulator.IMAGE_NAME
-        ).exec().id
-      }
-
-      // ID of the image should be present if it's local.
-      assertNotNull(imageId)
+      // Expect that the person exists in the DB
+      assertTrue(personExists())
     }
   }
 
