@@ -14,7 +14,7 @@ enum class DataSourceType(
 ) {
   MYSQL(
     driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
-    hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
+    hibernateDialect = "org.hibernate.dialect.MySQL8Dialect",
     isVitess = false
   ),
   HSQLDB(
@@ -39,7 +39,7 @@ enum class DataSourceType(
   ),
   TIDB(
     driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
-    hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
+    hibernateDialect = "org.hibernate.dialect.MySQL8Dialect",
     isVitess = false
   ),
 }
