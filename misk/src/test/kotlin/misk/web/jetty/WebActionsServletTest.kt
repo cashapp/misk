@@ -62,6 +62,19 @@ class WebActionsServletTest {
   }
 
   @Test
+  fun malformedUriQueryParamsResponseDoesNotContainStacktrace() {
+    val response = get(
+      path = "/potato",
+      viaUDS = false,
+      viaFileUDS = false,
+      encodedQuery = "test" to "%3C%a%3C",
+    )
+
+    assertThat(response.body.string()).isEqualTo("400: Unable to parse URI query")
+    assertThat(response.code).isEqualTo(400)
+  }
+
+  @Test
   fun udsSocketSuccess() {
     val response = get("/potato", true)
     assertThat(response.header("ActualSocketName")).isEqualTo(socketName)
@@ -123,13 +136,21 @@ class WebActionsServletTest {
     path: String,
     viaUDS: Boolean,
     viaFileUDS: Boolean = false,
-    headers: Headers = Headers.headersOf()
+    headers: Headers = Headers.headersOf(),
+    encodedQuery: Pair<String, String?>? = null,
   ): okhttp3.Response =
     with(
       Request.Builder()
         .headers(headers)
         .url(
           jettyService.httpServerUrl.newBuilder().encodedPath(path)
+            .run {
+              if (encodedQuery != null) {
+                addEncodedQueryParameter(encodedQuery.first, encodedQuery.second)
+              } else {
+                this
+              }
+            }
             .build()
         )
     ) {
@@ -137,9 +158,11 @@ class WebActionsServletTest {
         viaUDS -> {
           udsCall(get())
         }
+
         viaFileUDS -> {
           fileUdsCall(get())
         }
+
         else -> {
           call(get())
         }
@@ -178,7 +201,8 @@ class WebActionsServletTest {
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             unix_domain_sockets = listOf(
               WebUnixDomainSocketConfig(path = socketName),
-              WebUnixDomainSocketConfig(path = fileSocketName))
+              WebUnixDomainSocketConfig(path = fileSocketName)
+            )
           )
         )
       )

@@ -20,6 +20,7 @@ import okio.BufferedSink
 import okio.buffer
 import okio.sink
 import okio.source
+import org.eclipse.jetty.http.BadMessageException
 import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.Response
@@ -70,7 +71,7 @@ internal class WebActionsServlet @Inject constructor(
     if (boundActions.any { it.action.dispatchMechanism == DispatchMechanism.GRPC }) {
       val isHttp2Enabled = config.http2
         || config.unix_domain_socket?.h2c ?: false
-        || config.unix_domain_sockets?.any { it.h2c?: false } ?: false
+        || config.unix_domain_sockets?.any { it.h2c ?: false } ?: false
       if (!isHttp2Enabled) {
         log.warn {
           "HTTP/2 must be enabled either via a unix domain socket or HTTP listener if any " +
@@ -86,12 +87,20 @@ internal class WebActionsServlet @Inject constructor(
     }
   }
 
-  override fun service(request: HttpServletRequest?, response: HttpServletResponse?) {
-    if (request?.method == "PATCH" && response != null) {
+  override fun service(request: HttpServletRequest, response: HttpServletResponse) {
+    if (request.method == "PATCH") {
       doPatch(request, response)
       return
     }
-    super.service(request, response)
+    try {
+      super.service(request, response)
+    } catch (e: Throwable) {
+      handleThrowable(
+        request,
+        response,
+        e,
+      )
+    }
   }
 
   override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
@@ -162,12 +171,37 @@ internal class WebActionsServlet @Inject constructor(
       // which are covered by the NotFoundAction.
       sendNotFound(request, response, responseBody)
     } catch (e: Throwable) {
-      log.error(e) { "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}" }
-
-      response.status = HttpURLConnection.HTTP_INTERNAL_ERROR
-      response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-      response.writer.close()
+      handleThrowable(
+        request,
+        response,
+        e,
+      )
     }
+  }
+
+  private fun handleThrowable(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    throwable: Throwable,
+  ) {
+    log.error(throwable) {
+      "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}"
+    }
+
+    when (throwable) {
+      is BadMessageException -> {
+        response.status = HttpURLConnection.HTTP_BAD_REQUEST
+        if (throwable.message != null) {
+          response.writer.append(throwable.message)
+        }
+      }
+
+      else -> {
+        response.status = HttpURLConnection.HTTP_INTERNAL_ERROR
+      }
+    }
+    response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
+    response.writer.close()
   }
 
   private fun sendNotFound(
