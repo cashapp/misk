@@ -6,10 +6,13 @@ import com.google.cloud.storage.StorageOptions
 import com.google.inject.Provides
 import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
+import misk.testing.TestFixture
 
 /** Installs an embeddable version of [Storage] that works in-memory */
 class FakeStorageModule : KAbstractModule() {
-  override fun configure() {}
+  override fun configure() {
+    multibind<TestFixture>().to<InMemoryStorageRpc>()
+  }
 
   @Provides
   @Singleton

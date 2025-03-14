@@ -23,7 +23,8 @@ import misk.docker.withMiskDefaults
 
 val defaultDockerClientConfig = DefaultDockerClientConfig
     .createDefaultConfigBuilder()
-    .withMiskDefaults("https://custom.registry.url/v1/")
+    .withMiskDefaults()
+    .withLocalDockerCredentials("https://custom.registry.url/v1/")
     .build()
 ```
 

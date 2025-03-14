@@ -68,6 +68,7 @@ dependencies {
   testFixturesApi(project(":misk-gcp"))
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-docker"))
+  testFixturesApi(project(":misk-testing-api"))
   testFixturesImplementation(libs.assertj)
   testFixturesImplementation(libs.dockerTransportCore)
   testFixturesImplementation(libs.gax)
@@ -136,4 +137,8 @@ mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )
+}
+
+tasks.withType<Test>().configureEach {
+  environment("MISK_TEST_REUSE_INJECTOR", "true")
 }

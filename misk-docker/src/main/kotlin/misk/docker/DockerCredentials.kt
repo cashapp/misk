@@ -88,5 +88,5 @@ fun DefaultDockerClientConfig.Builder.withLocalDockerCredentials(registryUrl: St
   }
 
 fun DefaultDockerClientConfig.Builder.withMiskDefaults() = apply {
-  withLocalDockerCredentials(DEFAULT_DOCKER_REGISTRY_URL)
+  withLocalDockerCredentials()
 }
