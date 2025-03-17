@@ -1,13 +1,17 @@
 import React from 'react';
-import Select, { OnChangeValue, StylesConfig } from 'react-select';
+import Select, {
+  OnChangeValue,
+  StylesConfig,
+  components,
+  OptionProps,
+} from 'react-select';
 import { ActionGroup, MiskActions } from '@web-actions/api/responseTypes';
 import RealMetadataClient from '@web-actions/api/RealMetadataClient';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 export interface EndpointOption {
   value: ActionGroup;
-  label: string;
-  lowerCaseLabel: string;
+  termsString: string;
 }
 
 interface Props {
@@ -38,12 +42,18 @@ export default class EndpointSelection extends React.Component<Props, State> {
   componentDidMount() {
     this.metadataClient.fetchMetadata().then((actions: MiskActions) => {
       this.options = Object.values(actions)
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((it) => ({
-          label: it.name,
-          lowerCaseLabel: it.name.toLowerCase(),
-          value: it,
-        }));
+        .map((actionGroup) => ({
+          termsString:
+            `${actionGroup.httpMethod} ${actionGroup.path} ${actionGroup.actionName}`.toLowerCase(),
+          value: actionGroup,
+        }))
+        .sort((a, b) => {
+          // Sort by path first, then by HTTP method
+          const pathCompare = a.value.path.localeCompare(b.value.path);
+          if (pathCompare !== 0) return pathCompare;
+          return a.value.httpMethod.localeCompare(b.value.httpMethod);
+        });
+
       this.setState({ filteredOptions: this.options });
       this.focusSelect();
     });
@@ -67,7 +77,7 @@ export default class EndpointSelection extends React.Component<Props, State> {
 
     this.setState({
       filteredOptions: this.options.filter((option) =>
-        terms.every((term) => option.lowerCaseLabel.includes(term)),
+        terms.every((term) => option.termsString.includes(term)),
       ),
     });
   }
@@ -102,6 +112,16 @@ export default class EndpointSelection extends React.Component<Props, State> {
   };
 
   render() {
+    const Option = (props: OptionProps<EndpointOption, false>) => {
+      const endpoint = props.data.value;
+      return (
+        <components.Option {...props}>
+          {endpoint.httpMethod} {endpoint.path}{' '}
+          <span style={{ color: '#888' }}>({endpoint.actionName})</span>
+        </components.Option>
+      );
+    };
+
     return (
       <Select<EndpointOption, false>
         ref={this.selectRef}
@@ -115,6 +135,7 @@ export default class EndpointSelection extends React.Component<Props, State> {
         onInputChange={this.handleInputChange}
         onChange={this.handleChange}
         options={this.state.filteredOptions}
+        components={{ Option }}
         styles={
           {
             container: (base) => ({ ...base, width: '100%' }),

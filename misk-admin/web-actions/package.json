@@ -6,10 +6,10 @@
   "scripts": {
     "test": " npx jest src",
     "build": "webpack",
+    "start": "webpack serve --mode development",
     "lint": "npx eslint src && npx prettier src --check",
     "format": "npx prettier src --write",
-    "proxy": "cd development-proxy && npm install && npm start",
-    "proxy:build": "cd development-proxy && npm install && npm run build"
+    "proxy": "cd development-proxy && npm install && npm run dev"
   },
   "keywords": [],
   "author": "",
