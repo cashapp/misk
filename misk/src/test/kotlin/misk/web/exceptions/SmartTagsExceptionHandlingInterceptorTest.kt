@@ -24,7 +24,6 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import mu.KLogger
-import mu.KotlinLogging
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
@@ -34,6 +33,7 @@ import org.slf4j.MDC
 import wisp.logging.LogCollector
 import wisp.logging.SmartTagsThreadLocalHandler
 import wisp.logging.Tag
+import wisp.logging.error
 import wisp.logging.getLogger
 import wisp.logging.info
 import wisp.logging.withSmartTags
@@ -41,7 +41,6 @@ import wisp.logging.withTags
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlin.reflect.KClass
 
 @MiskTest(startService = true)
 internal class SmartTagsExceptionHandlingInterceptorTest {
@@ -62,6 +61,7 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
       install(WebActionModule.create<NestedWithSmartTagsAndWithTagsThrowsException>())
       install(WebActionModule.create<NestedLoggersOuterExceptionHandled>())
       install(WebActionModule.create<NestedLoggersOuterExceptionHandledNoneThrown>())
+      install(WebActionModule.create<NestedLoggersExceptionCaughtAndPeekedThenRethrown>())
       install(WebActionModule.create<NestedSmartTagsBothSucceed>())
       install(WebActionModule.create<DetectWrappedExceptionsUsingCausedBy>())
     }
@@ -614,12 +614,12 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(): String {
       withSmartTags("testTag" to "SpecialTagValue123") {
-          try {
-            functionWithNestedSmartTags()
-          } catch (_: NestedSmartTagsException) {
-            // Just squash for this test
-          }
+        try {
+          functionWithNestedSmartTags()
+        } catch (_: NestedSmartTagsException) {
+          // Just squash for this test
         }
+      }
 
       // This is testing the ThreadLocal cleanup function within SmartTags when asContext() exits
       // without throwing an exception
@@ -629,9 +629,9 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
     }
 
     private fun functionWithNestedSmartTags(): String {
-      return withSmartTags("testTag" to "SpecialTagValue123") {
-          throw NestedSmartTagsException("Nested logger test exception")
-        }
+      return withSmartTags("testTagNested" to "SpecialTagValue123") {
+        throw NestedSmartTagsException("Nested logger test exception")
+      }
     }
 
     class NestedSmartTagsException(message: String) : Exception(message)
@@ -640,6 +640,58 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
     companion object {
       val logger = getLogger<NestedLoggersOuterExceptionHandledNoneThrown>()
       const val URL = "/log/NestedLoggersOuterExceptionHandledNoneThrown/test"
+    }
+  }
+
+  @Test
+  fun shouldLeaveSmartTagsInThreadLocalWhenExceptionCaughtAndPeekedThenRethrown() {
+    val response = invoke(NestedLoggersExceptionCaughtAndPeekedThenRethrown.URL, "caller")
+    assertThat(response.code).isEqualTo(500)
+
+    val serviceLogs = logCollector.takeEvents(NestedLoggersExceptionCaughtAndPeekedThenRethrown::class, consumeUnmatchedLogs = false)
+    val miskExceptionLogs = logCollector.takeEvents(ExceptionHandlingInterceptor::class)
+
+    assertThat(serviceLogs).hasSize(1)
+
+    val exceptionLog = serviceLogs.single()
+    assertThat(exceptionLog.message).isEqualTo("Should include peeked tags")
+    assertThat(exceptionLog.level).isEqualTo(Level.ERROR)
+    assertThat(exceptionLog.mdcPropertyMap).containsKeys("testTag", "testTagNested")
+
+    assertThat(miskExceptionLogs).hasSize(1)
+    assertThat(miskExceptionLogs.single().mdcPropertyMap).containsKeys("testTag", "testTagNested")
+  }
+
+  class NestedLoggersExceptionCaughtAndPeekedThenRethrown @Inject constructor() : WebAction {
+    @Get(URL)
+    @Unauthenticated
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun call(): String {
+      withSmartTags("testTag" to "SpecialTagValue123") {
+        try {
+          functionWithNestedSmartTags()
+        } catch (e: NestedSmartTagsException) {
+          val smartTags = SmartTagsThreadLocalHandler.peekThreadLocalSmartTags()
+          logger.error(e, *smartTags.toTypedArray()) { "Should include peeked tags" }
+          throw e
+        }
+      }
+
+      return ""
+    }
+
+    private fun functionWithNestedSmartTags(): String {
+      return withSmartTags("testTagNested" to "SpecialTagValue123") {
+        throw NestedSmartTagsException("Nested logger test exception")
+      }
+    }
+
+    class NestedSmartTagsException(message: String) : Exception(message)
+    class OuterSmartTagsException(message: String) : Exception(message)
+
+    companion object {
+      val logger = getLogger<NestedLoggersExceptionCaughtAndPeekedThenRethrown>()
+      const val URL = "/log/NestedLoggersOuterExceptionCaughtAndPeekedThenRethrown/test"
     }
   }
 
