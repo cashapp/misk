@@ -28,7 +28,9 @@ export interface MiskFieldDefinition {
 }
 
 export interface ActionGroup {
-  name: string;
+  actionName: string;
+  path: string;
+  httpMethod: string;
   callables: Record<string, MiskWebActionDefinition>;
   getCallablesByMethod(): MiskWebActionDefinition[];
   all: MiskWebActionDefinition[];

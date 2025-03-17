@@ -17,13 +17,16 @@ export default class RealMetadataClient implements MetadataClient {
       `/api/web-actions/metadata`,
     );
     const actionMap: Record<string, ActionGroup> = {};
-    response.all['web-actions'].metadata.forEach((it) => {
-      const qualifiedName = it.packageName + '.' + it.name;
 
-      let group = actionMap[qualifiedName];
+    response.all['web-actions'].metadata.forEach((it) => {
+      const qualifiedName = `${it.packageName}.${it.name}`;
+      const groupKey = `${it.httpMethod} ${it.pathPattern} ${qualifiedName}`;
+      let group = actionMap[groupKey];
       if (group === undefined) {
         group = {
-          name: qualifiedName,
+          actionName: qualifiedName,
+          path: it.pathPattern,
+          httpMethod: it.httpMethod || '',
           callables: {},
           getCallablesByMethod(): MiskWebActionDefinition[] {
             return [
@@ -34,7 +37,7 @@ export default class RealMetadataClient implements MetadataClient {
           },
           all: [],
         };
-        actionMap[qualifiedName] = group;
+        actionMap[groupKey] = group;
       }
 
       function maybeAddCallable(
