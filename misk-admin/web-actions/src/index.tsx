@@ -13,93 +13,120 @@ import {
   IconButton,
   Button,
 } from '@chakra-ui/react';
+import { DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import HelpPanel from '@web-actions/ui/HelpPanel';
 import ReadOnlyEditor from '@web-actions/ui/ReadOnlyViewer';
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
-import EndpointSelector, {
-  EndpointSelectionCallbacks,
-} from '@web-actions/ui/EndpointSelection';
+import EndpointSelector from '@web-actions/ui/EndpointSelection';
 import { ViewState } from 'src/viewState';
 import { fetchCached } from '@web-actions/network/http';
-import { MiskMetadataResponse } from '@web-actions/api/responseTypes';
-import { Select } from '@chakra-ui/react';
+import {
+  ActionGroup,
+  MiskMetadataResponse,
+} from '@web-actions/api/responseTypes';
 import { createIcon } from '@chakra-ui/icons';
-
-const endpointSelectionCallbacks: EndpointSelectionCallbacks = [];
+import { useSubmitRequest } from '@web-actions/hooks/useSubmitRequest';
+import { useKeyboardShortcuts } from '@web-actions/hooks/useKeyboardShortcuts';
+import { useAppEvent } from '@web-actions/hooks/useAppEvent';
+import { Select } from '@chakra-ui/react';
+import { APP_EVENTS } from '@web-actions/events/appEvents';
 
 function App() {
-  const [viewState, setViewState] = useState<ViewState>({
+  const [viewState, setViewState] = useState<ViewState>(() => ({
     path: '',
     selectedAction: null,
-    response: null,
     callables: [],
+    loading: true,
+    isHelpOpen: localStorage.getItem('hasSeenHelp') !== 'true',
+    headers: [],
+  }));
+  const endPointSelectorRef = useRef<EndpointSelector>(null);
+  const requestEditorRef = useRef<RequestEditor>(null);
+
+  const {
+    submit: handleSubmitRequest,
+    submitting,
+    response,
+  } = useSubmitRequest(
+    viewState.selectedCallable ?? null,
+    viewState.path,
+    viewState.headers,
+    () => requestEditorRef.current?.editor?.getValue() ?? '',
+  );
+
+  useAppEvent<ActionGroup>(APP_EVENTS.ENDPOINT_SELECTED, (selectedAction) => {
+    const callables = selectedAction.getCallablesByMethod();
+    const defaultCallable = callables[0];
+
+    requestEditorRef.current?.setEndpointSelection(defaultCallable);
+
+    setViewState((curr) => ({
+      ...curr,
+      selectedAction: selectedAction,
+      path:
+        defaultCallable?.pathPattern ||
+        selectedAction.all[0]?.pathPattern ||
+        '',
+      selectedCallable: defaultCallable,
+      callables: callables,
+    }));
   });
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(() => {
-    const hasSeenHelp = localStorage.getItem('hasSeenHelp');
-    return hasSeenHelp !== 'true';
+
+  useKeyboardShortcuts();
+
+  useAppEvent(APP_EVENTS.TOGGLE_HELP, () =>
+    setViewState((prev) => ({ ...prev, isHelpOpen: !prev.isHelpOpen })),
+  );
+  useAppEvent(APP_EVENTS.SUBMIT_REQUEST, handleSubmitRequest);
+  useAppEvent(APP_EVENTS.FOCUS_ENDPOINT_SELECTOR, () => {
+    endPointSelectorRef.current?.focusSelect();
   });
-  const endPointSelectorRef = useRef<EndpointSelector>();
-  const requestEditorRef = useRef<RequestEditor>();
 
   useEffect(() => {
-    endpointSelectionCallbacks.push((selectedAction) => {
-      const callables = selectedAction.getCallablesByMethod();
-      const defaultCallable = callables[0];
+    fetchCached<MiskMetadataResponse>(`/api/web-actions/metadata`).finally(
+      () => {
+        setViewState((prev) => ({ ...prev, loading: false }));
+      },
+    );
+  }, [setViewState]);
 
-      requestEditorRef.current?.setEndpointSelection(defaultCallable);
-
-      setViewState((curr) => ({
-        ...curr,
-        selectedAction: selectedAction,
-        path:
-          defaultCallable?.pathPattern ||
-          selectedAction.all[0]?.pathPattern ||
-          '',
-        selectedCallable: defaultCallable,
-        callables: callables,
-      }));
-    });
-  }, []);
-
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      const isShortcutKey = event.ctrlKey || event.metaKey;
-
-      if (isShortcutKey && event.key === '/') {
-        event.preventDefault();
-        event.stopPropagation();
-        setIsHelpOpen((prev) => !prev);
-        return;
-      }
-
-      if (isShortcutKey && event.key === 'k') {
-        event.preventDefault();
-        endPointSelectorRef.current?.focusSelect();
-      } else if (isShortcutKey && event.key === 'Enter') {
-        requestEditorRef.current?.submitRequest();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyPress, true);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress, true);
-    };
-  }, []);
-
-  fetchCached<MiskMetadataResponse>(`/api/web-actions/metadata`).finally(() => {
-    setLoading(false);
-  });
   const ActionIcon = createIcon({
     displayName: 'ActionIcon',
     viewBox: '0 0 24 24',
     path: <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />,
   });
+
+  const addHeader = () => {
+    setViewState((prev) => ({
+      ...prev,
+      headers: [...prev.headers, { key: '', value: '' }],
+    }));
+  };
+
+  const removeHeader = (index: number) => {
+    setViewState((prev) => ({
+      ...prev,
+      headers: prev.headers.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateHeader = (
+    index: number,
+    field: 'key' | 'value',
+    value: string,
+  ) => {
+    setViewState((prev) => ({
+      ...prev,
+      headers: prev.headers.map((header, i) =>
+        i === index ? { ...header, [field]: value } : header,
+      ),
+    }));
+  };
+
   return (
     <Box>
-      {loading && (
+      {viewState.loading && (
         <Box
           position="absolute"
           top="0"
@@ -128,20 +155,21 @@ function App() {
             onDismiss={() => {
               requestEditorRef?.current?.focusEditor();
             }}
-            endpointSelectionCallbacks={endpointSelectionCallbacks}
           />
           <Button
             colorScheme="blue"
             size="sm"
-            onClick={() => setIsHelpOpen(true)}
+            onClick={() =>
+              setViewState((prev) => ({ ...prev, isHelpOpen: true }))
+            }
           >
             Help (⌘/)
           </Button>
         </HStack>
         <HelpPanel
-          isOpen={isHelpOpen}
+          isOpen={viewState.isHelpOpen}
           onClose={() => {
-            setIsHelpOpen(false);
+            setViewState((prev) => ({ ...prev, isHelpOpen: false }));
             if (!localStorage.getItem('hasSeenHelp')) {
               setTimeout(() => {
                 endPointSelectorRef.current?.focusSelect();
@@ -189,7 +217,6 @@ function App() {
                 placeholder="Path"
                 bg="white"
                 onChange={(e) => {
-                  requestEditorRef.current?.setPath(e.target.value);
                   setViewState({
                     ...viewState,
                     path: e.target.value,
@@ -200,26 +227,61 @@ function App() {
                 <IconButton
                   aria-label="Run"
                   colorScheme={'green'}
-                  onClick={() => requestEditorRef.current?.submitRequest()}
+                  onClick={handleSubmitRequest}
                 >
                   <ActionIcon />
                 </IconButton>
               )}
             </HStack>
             <Heading color="white" size="xs" fontWeight="semibold">
+              Headers
+            </Heading>
+            <Box width="100%">
+              <VStack spacing={2} align="stretch">
+                {viewState.headers.map((header, index) => (
+                  <HStack key={index} spacing={2}>
+                    <Input
+                      placeholder="Header Key"
+                      value={header.key}
+                      onChange={(e) =>
+                        updateHeader(index, 'key', e.target.value)
+                      }
+                      bg="white"
+                    />
+                    <Input
+                      placeholder="Header Value"
+                      value={header.value}
+                      onChange={(e) =>
+                        updateHeader(index, 'value', e.target.value)
+                      }
+                      bg="white"
+                    />
+                    <IconButton
+                      aria-label="Remove header"
+                      icon={<DeleteIcon />}
+                      onClick={() => removeHeader(index)}
+                      colorScheme="red"
+                    />
+                  </HStack>
+                ))}
+                <Button
+                  leftIcon={<AddIcon />}
+                  onClick={addHeader}
+                  colorScheme="blue"
+                  size="sm"
+                >
+                  Add Header
+                </Button>
+              </VStack>
+            </Box>
+            <Heading color="white" size="xs" fontWeight="semibold">
               Body
             </Heading>
-            <RequestEditor
-              ref={requestEditorRef as any}
-              endpointSelectionCallbacks={endpointSelectionCallbacks}
-              onResponse={(response) => {
-                setViewState({ ...viewState, response });
-              }}
-            />
+            <RequestEditor ref={requestEditorRef as any} loading={submitting} />
             <Heading color="white" size="sm" fontWeight="semibold">
               Response
             </Heading>
-            <ReadOnlyEditor content={() => viewState.response} />
+            <ReadOnlyEditor content={() => response} />
           </VStack>
           <VStack height="100%" flexGrow={1} alignItems="start">
             <Heading color="white" size="sm" fontWeight="semibold">

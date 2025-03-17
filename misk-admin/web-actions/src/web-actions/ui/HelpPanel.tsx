@@ -14,7 +14,10 @@ import {
   Code,
   VStack,
   useColorModeValue,
+  Button,
+  HStack,
 } from '@chakra-ui/react';
+import { clearCache } from '@web-actions/storage/cache';
 
 interface HelpPanelProps {
   isOpen: boolean;
@@ -27,11 +30,21 @@ export default function HelpPanel({
 }: HelpPanelProps): JSX.Element {
   const bgColor = useColorModeValue('white', 'gray.800');
 
+  const handleClearCache = async () => {
+    await clearCache();
+    localStorage.clear();
+    window.location.reload();
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
       <ModalOverlay backdropFilter="blur(2px)" />
       <ModalContent bg={bgColor} maxW="600px">
-        <ModalHeader>Web Actions Help</ModalHeader>
+        <ModalHeader>
+          <HStack justify="space-between">
+            <Text>Web Actions Help</Text>
+          </HStack>
+        </ModalHeader>
         <ModalCloseButton />
 
         <ModalBody pb={6}>
@@ -78,6 +91,16 @@ export default function HelpPanel({
                 </ListItem>
               </UnorderedList>
             </section>
+            <Button
+              size="sm"
+              colorScheme="red"
+              variant="ghost"
+              onClick={handleClearCache}
+              width="fit-content"
+              alignSelf="end"
+            >
+              Clear Cache
+            </Button>
           </VStack>
         </ModalBody>
       </ModalContent>

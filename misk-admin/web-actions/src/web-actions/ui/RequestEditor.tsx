@@ -6,18 +6,18 @@ import { ContextAwareCompleter } from '@web-actions/ui/ContextAwareCompleter';
 import { Box, IconButton, Spinner } from '@chakra-ui/react';
 import { CopyIcon } from '@chakra-ui/icons';
 import { CommandParser } from '@web-actions/parsing/CommandParser';
-import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
-import { EndpointSelectionCallbacks } from '@web-actions/ui/EndpointSelection';
+import {
+  MiskWebActionDefinition,
+  MiskFieldDefinition,
+} from '@web-actions/api/responseTypes';
 import { triggerCompletionDialog } from '@web-actions/ui/AceEditor';
 
-interface State {
+interface Props {
   loading: boolean;
-  isDisabled: boolean;
 }
 
-interface Props {
-  endpointSelectionCallbacks: EndpointSelectionCallbacks;
-  onResponse: (response: string) => void;
+interface State {
+  isDisabled: boolean;
 }
 
 export default class RequestEditor extends React.Component<Props, State> {
@@ -25,15 +25,12 @@ export default class RequestEditor extends React.Component<Props, State> {
   public editor: Ace.Editor | null = null;
 
   private readonly completer;
-  private selectedAction: MiskWebActionDefinition | null = null;
-  private path: string = '';
 
   constructor(props: Props) {
     super(props);
-    this.state = { loading: false, isDisabled: false };
-    this.submitRequest = this.submitRequest.bind(this);
-    this.copyToClipboard = this.copyToClipboard.bind(this);
+    this.state = { isDisabled: false };
 
+    this.copyToClipboard = this.copyToClipboard.bind(this);
     this.completer = new ContextAwareCompleter();
   }
 
@@ -58,14 +55,64 @@ export default class RequestEditor extends React.Component<Props, State> {
     editor.resize();
   }
 
-  public setPath(path: string | undefined) {
-    this.path = path ?? '';
+  private generateDefaultValue(type: string, field: MiskFieldDefinition): any {
+    if (field.repeated) {
+      return [];
+    }
+
+    switch (type.toLowerCase()) {
+      case 'string':
+        return '';
+      case 'int':
+      case 'long':
+      case 'float':
+      case 'double':
+        return 0;
+      case 'boolean':
+        return false;
+      default:
+        return '';
+    }
+  }
+
+  private generateRequestBody(action: MiskWebActionDefinition): string {
+    if (!action.requestType || !action.types) {
+      return '{\n  \n}';
+    }
+
+    const requestType = action.types[action.requestType];
+    if (!requestType) {
+      return '{\n  \n}';
+    }
+
+    const body: Record<string, any> = {};
+
+    requestType.fields.forEach((field) => {
+      const fieldType = field.type;
+      if (action.types[fieldType]) {
+        if (field.repeated) {
+          body[field.name] = [];
+        } else {
+          const nestedBody: Record<string, any> = {};
+          action.types[fieldType].fields.forEach((nestedField) => {
+            nestedBody[nestedField.name] = this.generateDefaultValue(
+              nestedField.type,
+              nestedField,
+            );
+          });
+          body[field.name] = nestedBody;
+        }
+      } else {
+        body[field.name] = this.generateDefaultValue(fieldType, field);
+      }
+    });
+
+    const jsonString = JSON.stringify(body, null, 2);
+    return jsonString.replace(/\n}$/, ',\n  \n}');
   }
 
   public setEndpointSelection(action: MiskWebActionDefinition | undefined) {
     this.completer.setSelection(action ?? null);
-    this.selectedAction = action ?? null;
-    this.path = action?.pathPattern ?? '';
     this.editor?.clearSelection();
 
     if (action?.httpMethod === 'GET') {
@@ -80,10 +127,13 @@ export default class RequestEditor extends React.Component<Props, State> {
         ...this.state,
         isDisabled: false,
       });
-
       this.editor?.setReadOnly(false);
-      this.editor?.setValue('{\n  \n}', -1);
-      this.editor?.moveCursorTo(1, 2);
+      const requestBody = this.generateRequestBody(action!);
+      this.editor?.setValue(requestBody, -1);
+      const lines = this.editor?.session.getLength();
+      if (lines) {
+        this.editor?.gotoLine(lines - 1, 2, false);
+      }
       this.editor?.focus();
 
       triggerCompletionDialog(this.editor);
@@ -96,45 +146,6 @@ export default class RequestEditor extends React.Component<Props, State> {
 
   public updateRef(item: HTMLElement | null) {
     this.refEditor = item;
-  }
-
-  async submitRequest() {
-    try {
-      const selection = this.selectedAction;
-      if (selection == null) {
-        return;
-      }
-
-      this.setState({ loading: true });
-
-      let response: Response;
-      if (selection.httpMethod === 'GET') {
-        response = await fetch(this.path, { method: 'GET' });
-      } else {
-        const content = this.editor!.getValue();
-        const topLevel = new CommandParser(content).parse();
-
-        this.setState({ loading: true });
-        response = await fetch(this.path, {
-          method: selection.httpMethod,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: topLevel?.render(),
-        });
-      }
-
-      let responseText = await response.text();
-      try {
-        responseText = JSON.stringify(JSON.parse(responseText), null, 2);
-      } catch {
-        // ignore
-      }
-
-      this.props.onResponse(responseText);
-    } finally {
-      this.setState({ loading: false });
-    }
   }
 
   async copyToClipboard() {
@@ -150,7 +161,7 @@ export default class RequestEditor extends React.Component<Props, State> {
   public render() {
     return (
       <Box position="relative" width="100%" height="100%">
-        {(this.state.loading || this.state.isDisabled) && (
+        {(this.props.loading || this.state.isDisabled) && (
           <Box
             position="absolute"
             top="0"
@@ -163,7 +174,7 @@ export default class RequestEditor extends React.Component<Props, State> {
             alignItems="center"
             zIndex="100"
           >
-            {this.state.loading ? (
+            {this.props.loading ? (
               <Spinner size="xl" color="white" thickness="5px" />
             ) : (
               this.state.isDisabled && (
