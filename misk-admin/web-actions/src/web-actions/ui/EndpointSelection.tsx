@@ -2,6 +2,7 @@ import React from 'react';
 import Select, { OnChangeValue, StylesConfig } from 'react-select';
 import { ActionGroup, MiskActions } from '@web-actions/api/responseTypes';
 import RealMetadataClient from '@web-actions/api/RealMetadataClient';
+import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 export interface EndpointOption {
   value: ActionGroup;
@@ -9,10 +10,7 @@ export interface EndpointOption {
   lowerCaseLabel: string;
 }
 
-export type EndpointSelectionCallbacks = ((value: ActionGroup) => void)[];
-
 interface Props {
-  endpointSelectionCallbacks?: EndpointSelectionCallbacks;
   onDismiss?: () => void;
 }
 
@@ -80,9 +78,7 @@ export default class EndpointSelection extends React.Component<Props, State> {
 
   handleChange = (value: OnChangeValue<EndpointOption, false>) => {
     if (value) {
-      for (const callback of this.props?.endpointSelectionCallbacks ?? []) {
-        callback(value.value);
-      }
+      appEvents.emit(APP_EVENTS.ENDPOINT_SELECTED, value.value);
     }
   };
 

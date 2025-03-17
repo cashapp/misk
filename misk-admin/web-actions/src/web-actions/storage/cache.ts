@@ -97,3 +97,11 @@ export async function cachedResponse<T>(
     db.close();
   }
 }
+
+export async function clearCache(): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(DB_NAME);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve();
+  });
+}
