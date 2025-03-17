@@ -117,6 +117,7 @@ public class wisp/logging/SampledLogger : mu/KLogger {
 
 public final class wisp/logging/SmartTagsThreadLocalHandler {
 	public static final field INSTANCE Lwisp/logging/SmartTagsThreadLocalHandler;
+	public final fun peekThreadLocalSmartTags ()Ljava/util/Set;
 	public final fun popThreadLocalSmartTags ()Ljava/util/Set;
 }
 
