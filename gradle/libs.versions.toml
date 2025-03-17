@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.31.0"
+aws2 = "2.31.1"
 bucket4j = "8.8.0"
 datadog = "1.47.1"
 dependencyAnalysisPlugin = "2.12.0"
@@ -11,7 +11,7 @@ googleAuth = "1.33.1"
 googleHttp = "1.46.3"
 hoplite = "2.7.5"
 jackson = "2.18.3"
-junit = "5.12.0"
+junit = "5.12.1"
 kotest = "5.9.1"
 kotlin = "2.1.10"
 kotlinBinaryCompatibilityPlugin = "0.17.0"
@@ -164,7 +164,7 @@ logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
-mockitoCore = { module = "org.mockito:mockito-core", version = "5.16.0" }
+mockitoCore = { module = "org.mockito:mockito-core", version = "5.16.1" }
 mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.4.0" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.2" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
