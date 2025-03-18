@@ -20,13 +20,16 @@ internal class VitessExceptionHandler(
     .registerOrReplace(registry)
   }
 
-  private val probablyBadState = setOf(
+  private val probablyBadState =
+    setOf(
     // VT05005: typical of a connection error if we can't find the keyspace. Abort the connection
-    KnownErrors(sqlState = "42S02", errorCode = 1146)
+    KnownErrors(sqlState = "42S02", errorCode = 1146),
+    KnownErrors(sqlState = "hy000", errorCode = 1105)
   )
 
   private val badErrorString = listOf(
-    Regex("connection")
+    Regex("connection"),
+    Regex("vttable")
   )
 
   private data class KnownErrors(
