@@ -7,11 +7,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class DataSourceConfigTest {
+  private val dockerVitessPort = 27103
+
   @Test
   fun buildVitessJDBCUrlNoSSL() {
-    val config = DataSourceConfig(DataSourceType.VITESS_MYSQL)
+    val config = DataSourceConfig(
+      DataSourceType.VITESS_MYSQL,
+      port = dockerVitessPort)
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&sslMode=PREFERRED&" +
         "enabledTLSProtocols=TLSv1.2,TLSv1.3",
@@ -23,11 +27,12 @@ class DataSourceConfigTest {
   fun buildVitessJDBCUrlWithTruststore() {
     val config = DataSourceConfig(
       DataSourceType.VITESS_MYSQL,
+      port = dockerVitessPort,
       trust_certificate_key_store_url = "path/to/truststore",
       trust_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&" +
@@ -41,11 +46,12 @@ class DataSourceConfigTest {
   fun buildVitessJDBCUrlWithKeystore() {
     val config = DataSourceConfig(
       DataSourceType.VITESS_MYSQL,
+      port = dockerVitessPort,
       client_certificate_key_store_url = "path/to/keystore",
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "clientCertificateKeyStoreUrl=path/to/keystore&clientCertificateKeyStorePassword=" +
@@ -59,13 +65,14 @@ class DataSourceConfigTest {
   fun buildVitessJDBCUrlWithFullTLS() {
     val config = DataSourceConfig(
       DataSourceType.VITESS_MYSQL,
+      port = dockerVitessPort,
       trust_certificate_key_store_url = "path/to/truststore",
       trust_certificate_key_store_password = "changeit",
       client_certificate_key_store_url = "path/to/keystore",
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&trustCertificateKeyStorePassword=" +
@@ -80,13 +87,14 @@ class DataSourceConfigTest {
   fun buildVitessJDBCUrlWithPath() {
     val config = DataSourceConfig(
       DataSourceType.VITESS_MYSQL,
+      port = 27103,
       trust_certificate_key_store_path = "path/to/truststore",
       trust_certificate_key_store_password = "changeit",
       client_certificate_key_store_path = "path/to/keystore",
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&trustCertificateKeyStorePassword" +
@@ -101,13 +109,14 @@ class DataSourceConfigTest {
   fun buildVitessJDBCUrlWithActualUrl() {
     val config = DataSourceConfig(
       DataSourceType.VITESS_MYSQL,
+      port = dockerVitessPort,
       trust_certificate_key_store_url = "file://path/to/truststore",
       trust_certificate_key_store_password = "changeit",
       client_certificate_key_store_url = "file://path/to/keystore",
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:27003/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&" +

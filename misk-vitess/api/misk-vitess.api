@@ -1,0 +1,201 @@
+public final class misk/vitess/testing/ApplySchemaResult {
+	public fun <init> (ZLjava/lang/String;ZLjava/util/List;Ljava/util/List;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (ZLjava/lang/String;ZLjava/util/List;Ljava/util/List;)Lmisk/vitess/testing/ApplySchemaResult;
+	public static synthetic fun copy$default (Lmisk/vitess/testing/ApplySchemaResult;ZLjava/lang/String;ZLjava/util/List;Ljava/util/List;ILjava/lang/Object;)Lmisk/vitess/testing/ApplySchemaResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDdlUpdates ()Ljava/util/List;
+	public final fun getNewContainerNeeded ()Z
+	public final fun getNewContainerNeededReason ()Ljava/lang/String;
+	public final fun getSchemaChangesProcessed ()Z
+	public final fun getVschemaUpdates ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/testing/DdlUpdate {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/vitess/testing/DdlUpdate;
+	public static synthetic fun copy$default (Lmisk/vitess/testing/DdlUpdate;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/vitess/testing/DdlUpdate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDdl ()Ljava/lang/String;
+	public final fun getKeyspace ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/testing/DefaultSettings {
+	public static final field AUTO_APPLY_SCHEMA_CHANGES Z
+	public static final field CONTAINER_NAME Ljava/lang/String;
+	public static final field DEBUG_STARTUP Z
+	public static final field ENABLE_DECLARATIVE_SCHEMA_CHANGES Z
+	public static final field ENABLE_SCATTERS Z
+	public static final field INSTANCE Lmisk/vitess/testing/DefaultSettings;
+	public static final field KEEP_ALIVE Z
+	public static final field LINT_SCHEMA Z
+	public static final field MYSQL_VERSION Ljava/lang/String;
+	public static final field PORT I
+	public static final field SCHEMA_DIR Ljava/lang/String;
+	public static final field SQL_MODE Ljava/lang/String;
+	public static field TRANSACTION_ISOLATION_LEVEL Lmisk/vitess/testing/TransactionIsolationLevel;
+	public static field TRANSACTION_TIMEOUT_SECONDS Ljava/time/Duration;
+	public static final field VITESS_IMAGE Ljava/lang/String;
+	public static final field VITESS_VERSION I
+	public static final field VTCTLD_CLIENT_IMAGE Ljava/lang/String;
+}
+
+public final class misk/vitess/testing/TransactionIsolationLevel : java/lang/Enum {
+	public static final field READ_COMMITTED Lmisk/vitess/testing/TransactionIsolationLevel;
+	public static final field READ_UNCOMMITTED Lmisk/vitess/testing/TransactionIsolationLevel;
+	public static final field REPEATABLE_READ Lmisk/vitess/testing/TransactionIsolationLevel;
+	public static final field SERIALIZABLE Lmisk/vitess/testing/TransactionIsolationLevel;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/vitess/testing/TransactionIsolationLevel;
+	public static fun values ()[Lmisk/vitess/testing/TransactionIsolationLevel;
+}
+
+public final class misk/vitess/testing/VSchemaUpdate {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/vitess/testing/VSchemaUpdate;
+	public static synthetic fun copy$default (Lmisk/vitess/testing/VSchemaUpdate;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/vitess/testing/VSchemaUpdate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKeyspace ()Ljava/lang/String;
+	public final fun getVschema ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/testing/VitessTestDb {
+	public static final field Companion Lmisk/vitess/testing/VitessTestDb$Companion;
+	public fun <init> ()V
+	public fun <init> (ZLjava/lang/String;ZZZZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Ljava/time/Duration;Ljava/lang/String;I)V
+	public synthetic fun <init> (ZLjava/lang/String;ZZZZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Ljava/time/Duration;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun Builder ()Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun applySchema ()Lmisk/vitess/testing/ApplySchemaResult;
+	public final fun run ()Lmisk/vitess/testing/VitessTestDbStartupResult;
+	public final fun truncate ()V
+	public final fun truncate (Ljava/sql/Connection;)V
+}
+
+public final class misk/vitess/testing/VitessTestDb$Builder {
+	public fun <init> ()V
+	public final fun autoApplySchemaChanges (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun build ()Lmisk/vitess/testing/VitessTestDb;
+	public final fun containerName (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun debugStartup (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun enableDeclarativeSchemaChanges (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun enableScatters (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun keepAlive (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun lintSchema (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun mysqlVersion (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun port (I)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun schemaDir (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun sqlMode (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun transactionIsolationLevel (Lmisk/vitess/testing/TransactionIsolationLevel;)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun transactionTimeoutSeconds (Ljava/time/Duration;)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun vitessImage (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun vitessVersion (I)Lmisk/vitess/testing/VitessTestDb$Builder;
+}
+
+public final class misk/vitess/testing/VitessTestDb$Companion {
+	public final fun Builder ()Lmisk/vitess/testing/VitessTestDb$Builder;
+}
+
+public class misk/vitess/testing/VitessTestDbException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/testing/VitessTestDbSchemaLintException : misk/vitess/testing/VitessTestDbException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/testing/VitessTestDbSchemaParseException : misk/vitess/testing/VitessTestDbException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/testing/VitessTestDbStartupException : misk/vitess/testing/VitessTestDbException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/testing/VitessTestDbStartupResult {
+	public fun <init> (JLjava/lang/String;ZLjava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (JLjava/lang/String;ZLjava/lang/String;)Lmisk/vitess/testing/VitessTestDbStartupResult;
+	public static synthetic fun copy$default (Lmisk/vitess/testing/VitessTestDbStartupResult;JLjava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lmisk/vitess/testing/VitessTestDbStartupResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContainerId ()Ljava/lang/String;
+	public final fun getNewContainerCreated ()Z
+	public final fun getNewContainerReason ()Ljava/lang/String;
+	public final fun getStartupTimeMs ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/testing/VitessTestDbTruncateException : misk/vitess/testing/VitessTestDbException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/testing/internal/LogContainerResultCallback : com/github/dockerjava/api/async/ResultCallbackTemplate {
+	public fun <init> ()V
+	public final fun getLogs ()Ljava/lang/String;
+	public fun onNext (Lcom/github/dockerjava/api/model/Frame;)V
+	public synthetic fun onNext (Ljava/lang/Object;)V
+}
+
+public final class misk/vitess/testing/internal/VitessClusterConfig {
+	public fun <init> (I)V
+	public final fun allPorts ()Ljava/util/List;
+	public final fun getBasePort ()I
+	public final fun getDbaUser ()Ljava/lang/String;
+	public final fun getDbaUserPassword ()Ljava/lang/String;
+	public final fun getGrpcPort ()I
+	public final fun getHostname ()Ljava/lang/String;
+	public final fun getMysqlPort ()I
+	public final fun getVtgatePort ()I
+	public final fun getVtgateUser ()Ljava/lang/String;
+	public final fun getVtgateUserPassword ()Ljava/lang/String;
+}
+
+public final class misk/vitess/testing/internal/VitessQueryExecutorException : misk/vitess/testing/VitessTestDbException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/testing/internal/VitessSchemaManagerException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/vitess/testing/internal/VitessTableType : java/lang/Enum {
+	public static final field REFERENCE Lmisk/vitess/testing/internal/VitessTableType;
+	public static final field SEQUENCE Lmisk/vitess/testing/internal/VitessTableType;
+	public static final field STANDARD Lmisk/vitess/testing/internal/VitessTableType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/vitess/testing/internal/VitessTableType;
+	public static fun values ()[Lmisk/vitess/testing/internal/VitessTableType;
+}
+
+public final class misk/vitess/testing/internal/VschemaAdapter {
+	public fun <init> ()V
+	public final fun fromJson (Ljava/lang/String;)Ljava/util/Map;
+	public final fun toListMap (Ljava/lang/Object;)Ljava/util/List;
+	public final fun toMap (Ljava/lang/Object;)Ljava/util/Map;
+}
+

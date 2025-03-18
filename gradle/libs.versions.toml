@@ -58,6 +58,7 @@ detektParser = { module = "io.gitlab.arturbosch.detekt:detekt-parser", version.r
 detektPsiUtils = { module = "io.gitlab.arturbosch.detekt:detekt-psi-utils", version.ref = "detekt" }
 detektTest = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref = "detekt" }
 detektTestUtils = { module = "io.gitlab.arturbosch.detekt:detekt-test-utils", version.ref = "detekt" }
+docker = { module = "com.github.docker-java:docker-java", version.ref = "docker" }
 dockerApi = { module = "com.github.docker-java:docker-java-api", version.ref = "docker" }
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
 dockerTransportCore = { module = "com.github.docker-java:docker-java-transport", version.ref = "docker" }
@@ -170,6 +171,7 @@ moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.2" }
 mysql = { module = "com.mysql:mysql-connector-j", version = "8.4.0" }
+mysqlConnector = { module = "mysql:mysql-connector-java", version = "8.0.33" }
 nettyBom = { module = "io.netty:netty-bom", version.ref = "netty" }
 nettyHandler = { module = "io.netty:netty-handler", version.ref = "netty" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okHttp" }

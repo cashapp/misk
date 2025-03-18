@@ -144,7 +144,7 @@ class VitessCluster @JvmOverloads constructor(
     )
   }
 
-  val httpPort = 27000
+  val httpPort = 27100
   val grpcPort = httpPort + 1
   val mysqlPort = httpPort + 2
   val vtgateMysqlPort = httpPort + 3
