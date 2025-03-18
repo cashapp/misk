@@ -4,6 +4,7 @@ vitess_mysql_data_source:
   password: whatever
   vitess_schema_resource_root: classpath:/misk/hibernate/moviestestmodule-schema
   generate_hibernate_stats: "true"
+  port: 27103
 mysql_data_source:
   type: MYSQL
   database: movies

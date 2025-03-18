@@ -224,8 +224,9 @@ class VitessScaleSafetyChecks(
    * Figure out how many total full scatter queries we've executed so far.
    */
   private fun extractScatterQueryCount(): Int {
+    val basePort =  (config.port ?: DEFAULT_VTGATE_PORT) - 3
     val request = Request.Builder()
-      .url("http://${ContainerUtil.dockerTargetOrLocalHost()}:27000/debug/vars")
+      .url("http://${ContainerUtil.dockerTargetOrLocalHost()}:$basePort/debug/vars")
       .build()
     val adapter = moshi.adapter<Variables>()
     val variables = okHttpClient.newCall(request).execute().use {
@@ -261,6 +262,7 @@ class VitessScaleSafetyChecks(
   }
 
   companion object {
+    private const val DEFAULT_VTGATE_PORT = 27103
     private val vtgateKeyspaceIdRegex = "vtgate:: keyspace_id:([^ ]+)".toRegex()
   }
 }
