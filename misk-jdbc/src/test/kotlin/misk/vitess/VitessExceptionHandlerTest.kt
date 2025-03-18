@@ -34,5 +34,25 @@ class VitessExceptionHandlerTest {
         )
       )
     ).isEqualTo(SQLExceptionOverride.Override.CONTINUE_EVICT)
+
+    assertThat(
+      handler.adjudicate(
+        SQLException(
+          "",
+          "hy000",
+          1105
+        )
+      )
+    ).isEqualTo(SQLExceptionOverride.Override.MUST_EVICT)
+
+    assertThat(
+      handler.adjudicate(
+        SQLException(
+          "one of the vttablets: has turned into a pile of slag",
+          "",
+          0
+        )
+      )
+    ).isEqualTo(SQLExceptionOverride.Override.MUST_EVICT)
   }
 }
