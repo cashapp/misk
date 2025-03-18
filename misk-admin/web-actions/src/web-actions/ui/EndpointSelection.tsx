@@ -11,6 +11,7 @@ import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 export interface EndpointOption {
   value: ActionGroup;
+  label: string;
   termsString: string;
 }
 
@@ -43,6 +44,7 @@ export default class EndpointSelection extends React.Component<Props, State> {
     this.metadataClient.fetchMetadata().then((actions: MiskActions) => {
       this.options = Object.values(actions)
         .map((actionGroup) => ({
+          label: `${actionGroup.httpMethod} ${actionGroup.path} (${actionGroup.actionName})`,
           termsString:
             `${actionGroup.httpMethod} ${actionGroup.path} ${actionGroup.actionName}`.toLowerCase(),
           value: actionGroup,
