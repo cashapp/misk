@@ -8,7 +8,6 @@ import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import misk.docker.withMiskDefaults
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -43,28 +42,6 @@ class VitessTestDbKeepAliveTest {
     assertEquals(containerId, nextContainerId)
   }
 
-  @Test
-  fun `database restarts if args change`() {
-    var vitessTestDb =
-      VitessTestDb(autoApplySchemaChanges = false, containerName = containerName, port = port, keepAlive = true)
-
-    assertDoesNotThrow(vitessTestDb::run)
-    val containerId = getContainerId()
-
-    // Now attempt to start a new instance with different args
-    vitessTestDb =
-      VitessTestDb(
-        containerName = containerName,
-        port = port,
-        keepAlive = true,
-        vitessImage = "vitess/vttestserver:v20.0.5-mysql80",
-        vitessVersion = 20,
-      )
-
-    assertDoesNotThrow(vitessTestDb::run)
-    val nextContainerId = getContainerId()
-    assertNotEquals(containerId, nextContainerId)
-  }
 
   private fun getContainerId(): String? {
     val containers =

@@ -194,7 +194,8 @@ class DockerVitessCluster(
   companion object {
     val logger = KotlinLogging.logger {}
 
-    const val VITESS_SHA = "5ab282b99cd5f8d6a8a6f60f0b956f2905ffa3db84ba9aabac7df6425516b3fe"
+    // https://hub.docker.com/layers/vitess/base/v5.0.0/images/sha256-9f342b8d2b903863aa8f01fe4d8e73ac1166cd224ac40b23bf5cd90b43274ae0
+    const val VITESS_SHA = "9f342b8d2b903863aa8f01fe4d8e73ac1166cd224ac40b23bf5cd90b43274ae0"
     const val VITESS_IMAGE = "vitess/base@sha256:$VITESS_SHA"
     const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
