@@ -15,9 +15,10 @@ import org.junit.jupiter.api.assertThrows
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VitessTestDbScatterTest {
 
-  private var url = "jdbc:mysql://localhost:27003/@primary"
-  private var user = "root"
-  private var password = ""
+  private val url = "jdbc:mysql://localhost:27203/@primary"
+  private val user = "root"
+  private val password = ""
+  private val port = 27203
 
   @Test
   fun `test scatter queries fail`() {
@@ -40,11 +41,19 @@ class VitessTestDbScatterTest {
   }
 
   private fun createNoScatterDb(): VitessTestDb {
-    return VitessTestDb(enableScatters = false, vitessImage = "vitess/vttestserver:v20.0.5-mysql80", vitessVersion = 20)
+    return VitessTestDb(
+      containerName = "no_scatter_vitess_db",
+      enableScatters = false, port = port,
+      vitessImage = "vitess/vttestserver:v20.0.5-mysql80",
+      vitessVersion = 20)
   }
 
   private fun createUnsupportedNoScatterDb(): VitessTestDb {
-    return VitessTestDb(enableScatters = false, vitessImage = "vitess/vttestserver:v19.0.9-mysql80")
+    return VitessTestDb(
+      containerName = "unsupported_scatter_vitess_db",
+      enableScatters = false,
+      port = port,
+      vitessImage = "vitess/vttestserver:v19.0.9-mysql80")
   }
 
   private fun executeQuery(query: String): ResultSet {
