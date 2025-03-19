@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
 import misk.exceptions.UnauthorizedException
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
@@ -7,7 +8,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
-import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -16,7 +16,6 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
-import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 
 abstract class TransacterTest {
@@ -368,16 +367,15 @@ abstract class TransacterTest {
 
   @Test
   fun constraintViolationCausesTransactionToRollback() {
-    // Uniqueness constraints aren't reliably enforced on Vitess
-    assumeTrue(!transacter.config().type.isVitess)
-
     transacter.transaction { session ->
       session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
     }
     assertFailsWith<ConstraintViolationException> {
       transacter.transaction { session ->
         session.save(DbMovie("Beauty and the Beast", LocalDate.of(1991, 11, 22)))
-        session.save(DbMovie("Cinderella", LocalDate.of(2015, 3, 13)))
+        repeat(5) { // Repeat 5 times to trigger Vitess constraint on a single shard
+          session.save(DbMovie("Cinderella", LocalDate.of(2015, 3, 13)))
+        }
       }
     }
     transacter.transaction { session ->
