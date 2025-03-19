@@ -100,7 +100,7 @@ class ExceptionHandlingInterceptor(
     httpCall.setResponseTrailer("grpc-status-details-bin", response.toEncodedStatusProto)
     httpCall.setResponseTrailer("grpc-message", response.message ?: response.status.name)
     httpCall.takeResponseBody()?.use { responseBody: BufferedSink ->
-      GrpcMessageSink(responseBody, ProtoAdapter.BYTES, grpcEncoding = "identity")
+      GrpcMessageSink(responseBody, 0, ProtoAdapter.BYTES, grpcEncoding = "identity")
         .use { messageSink ->
           messageSink.write(ByteString.EMPTY)
         }

@@ -29,7 +29,7 @@ class GrpcSourceSinkTest {
   @Test
   fun grpcMessageSinkHelloRequest() {
     val buffer = Buffer()
-    val writer = GrpcMessageSink(buffer, HelloRequest.ADAPTER, "identity")
+    val writer = GrpcMessageSink(buffer, 0, HelloRequest.ADAPTER, "identity")
     writer.write(HelloRequest("localhost"))
     writer.close()
 
@@ -39,10 +39,55 @@ class GrpcSourceSinkTest {
   @Test
   fun grpcMessageSinkHelloReply() {
     val buffer = Buffer()
-    val writer = GrpcMessageSink(buffer, HelloReply.ADAPTER, "identity")
+    val writer = GrpcMessageSink(buffer, 0, HelloReply.ADAPTER, "identity")
     writer.write(HelloReply("Hello localhost"))
     writer.close()
 
     assertEquals("00000000110a0f48656c6c6f206c6f63616c686f7374".decodeHex(), buffer.readByteString())
+  }
+
+  @Test
+  fun helloRequestSize() {
+    val encodedRequest = HelloRequest.ADAPTER.encode(HelloRequest("localhost"))
+    assertEquals(encodedRequest.size, 11)
+  }
+
+  @Test
+  fun grpcMessageSourceCompressedHelloRequest() {
+    val buffer = Buffer()
+    buffer.write(
+      "010000001f1f8b0800000000000000e3e2ccc94f4eccc9c82f2e01002fdef60d0b000000".decodeHex()
+    )
+    val reader = GrpcMessageSource(buffer, HelloRequest.ADAPTER, "gzip")
+
+    assertEquals(HelloRequest("localhost"), reader.read())
+  }
+
+  @Test
+  fun messageLargerThanMinimumSizeIsCompressed() {
+    val buffer = Buffer()
+    val writer = GrpcMessageSink(buffer, 10, HelloRequest.ADAPTER, "gzip")
+
+    writer.write(HelloRequest("localhost"))
+    writer.close()
+
+    assertEquals(
+      "010000001f1f8b0800000000000000e3e2ccc94f4eccc9c82f2e01002fdef60d0b000000".decodeHex(),
+      buffer.readByteString()
+    )
+  }
+
+  @Test
+  fun messageSmallerThanMinimumSizeIsNotCompressed() {
+    val buffer = Buffer()
+    val writer = GrpcMessageSink(buffer, 12, HelloRequest.ADAPTER, "gzip")
+
+    writer.write(HelloRequest("localhost"))
+    writer.close()
+
+    assertEquals(
+      "000000000b0a096c6f63616c686f7374".decodeHex(),
+      buffer.readByteString()
+    )
   }
 }

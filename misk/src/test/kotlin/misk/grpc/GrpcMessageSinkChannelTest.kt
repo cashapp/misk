@@ -14,7 +14,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class GrpcMessageSinkChannelTest {
   private val buffer = Buffer()
-  private val writer = GrpcMessageSink(buffer, HelloRequest.ADAPTER, "identity")
+  private val writer = GrpcMessageSink(buffer, 0, HelloRequest.ADAPTER, "identity")
 
   @AfterEach
   fun tearDown() {
