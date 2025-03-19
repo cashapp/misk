@@ -33,6 +33,16 @@ internal class VitessQueryExecutor(private val vitessClusterConfig: VitessCluste
     return connection.use { conn -> executeUpdate(conn, query, target) }
   }
 
+  fun executeTransaction(query: String, target: String = "@primary"): Boolean {
+    val connection = getVtgateConnection()
+    return connection.use { conn ->
+      conn.autoCommit = false
+      val result = execute(conn, query, target)
+      conn.commit()
+      result
+    }
+  }
+
   fun getKeyspaces(): List<String> {
     val result = executeQuery("SHOW KEYSPACES;")
     return result.map { it["Database"] as String }.sorted()
