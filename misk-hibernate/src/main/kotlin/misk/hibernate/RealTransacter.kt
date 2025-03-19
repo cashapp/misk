@@ -18,6 +18,7 @@ import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.ConstraintViolationException
+import org.hibernate.exception.GenericJDBCException
 import org.hibernate.exception.LockAcquisitionException
 import wisp.logging.getLogger
 import java.io.Closeable
@@ -27,7 +28,7 @@ import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException
 import java.time.Duration
-import java.util.*
+import java.util.EnumSet
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
@@ -498,12 +499,23 @@ internal class RealTransacter private constructor(
         try {
           function()
         } finally {
-          use(previous)
+          try {
+            use(previous)
+          } catch (th: GenericJDBCException) {
+            // Ignore the exception if the connection is already closed.
+            if (!isConnectionClosed(th)) {
+              throw th
+            }
+          }
         }
       } else {
         function()
       }
     }
+
+    private fun isConnectionClosed(th: GenericJDBCException) =
+      th.cause?.javaClass == SQLException::class.java &&
+        th.cause?.message.equals("Connection is closed")
 
     private fun use(destination: Destination) = useConnection { connection ->
       check(config.type.isVitess)
