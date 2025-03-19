@@ -1,9 +1,9 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.31.2"
+aws2 = "2.31.3"
 bucket4j = "8.8.0"
-datadog = "1.47.1"
+datadog = "1.47.2"
 dependencyAnalysisPlugin = "2.12.0"
 detekt = "1.23.8"
 docker = "3.4.2"
@@ -70,7 +70,7 @@ gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.53.
 gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.27.0" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250227-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
-gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.21.4" }
+gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.22.0" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.88.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.7.2" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250224-2.0.0" }
