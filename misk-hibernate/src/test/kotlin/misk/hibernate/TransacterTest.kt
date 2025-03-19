@@ -373,9 +373,7 @@ abstract class TransacterTest {
     assertFailsWith<ConstraintViolationException> {
       transacter.transaction { session ->
         session.save(DbMovie("Beauty and the Beast", LocalDate.of(1991, 11, 22)))
-        repeat(5) { // Repeat 5 times to trigger Vitess constraint on a single shard
-          session.save(DbMovie("Cinderella", LocalDate.of(2015, 3, 13)))
-        }
+        session.save(DbMovie("Cinderella", LocalDate.of(2015, 3, 13)))
       }
     }
     transacter.transaction { session ->
