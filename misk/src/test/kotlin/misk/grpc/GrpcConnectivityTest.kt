@@ -41,7 +41,7 @@ import jakarta.inject.Singleton
  * That sample includes a client and a server that connect to each other. You can also connect this
  * test's client to that sample server, or that sample client to this test's server.
  */
-//@Disabled("gRPC tests are flaky in CI, see https://github.com/cashapp/misk/issues/1853")
+@Disabled("gRPC tests are flaky in CI, see https://github.com/cashapp/misk/issues/1853")
 @MiskTest(startService = true)
 class GrpcConnectivityTest {
   @MiskTestModule
