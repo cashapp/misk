@@ -121,7 +121,7 @@ data class WebConfig @JvmOverloads constructor(
   /**
    * If true gRPC responses which are larger than the minGzipSize will be compressed.
    */
-  val grpcGzip: Boolean = true,
+  val grpcGzip: Boolean = false,
 
   /** The minimum size in bytes before the response body will be compressed. */
   val minGzipSize: Int = 1024,

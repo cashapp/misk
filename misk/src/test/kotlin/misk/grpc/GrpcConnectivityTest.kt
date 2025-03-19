@@ -179,7 +179,7 @@ class GrpcConnectivityTest {
     override fun configure() {
       install(
         WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(grpcGzip = true)
         )
       )
       install(MiskTestingServiceModule())
