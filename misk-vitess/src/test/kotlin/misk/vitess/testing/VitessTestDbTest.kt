@@ -1,35 +1,40 @@
 package misk.vitess.testing
 
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.ResultSet
-import java.sql.Statement
-import org.junit.jupiter.api.Assertions
+import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientBuilder
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
+import misk.docker.withMiskDefaults
+import misk.vitess.testing.internal.VitessClusterConfig
+import misk.vitess.testing.internal.VitessQueryExecutor
+import misk.vitess.testing.internal.VitessQueryExecutorException
+import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class VitessTestDbTest {
+  companion object {
+    private lateinit var vitessTestDb: VitessTestDb
+    private lateinit var vitessTestDbRunResult: VitessTestDbStartupResult
+    private lateinit var vitessQueryExecutor: VitessQueryExecutor
 
-  private var url = "jdbc:mysql://localhost:27003/@primary"
-  private var user = "root"
-  private var password = ""
+    @JvmStatic
+    @BeforeAll
+    fun setup() {
+      vitessTestDb = VitessTestDb()
+      vitessTestDbRunResult = vitessTestDb.run()
+      vitessQueryExecutor = VitessQueryExecutor(VitessClusterConfig(DefaultSettings.PORT))
+    }
+  }
 
   @Test
   fun `test querying the database`() {
-    val vitessTestDb = VitessTestDb()
-    assertDoesNotThrow(vitessTestDb::run)
-    val resultSet: ResultSet = executeQuery("SHOW KEYSPACES;")
-    var rowCount = 0
-    while (resultSet.next()) {
-      rowCount++
-    }
-
-    assertEquals(2, rowCount)
+    val results = vitessQueryExecutor.executeQuery("SHOW KEYSPACES;")
+    assertEquals(2, results.size)
   }
 
   @Test
@@ -43,9 +48,6 @@ class VitessTestDbTest {
 
   @Test
   fun `test truncate succeeds`() {
-    val vitessTestDb = VitessTestDb()
-    vitessTestDb.run()
-
     val insertCustomersSql =
       """
         INSERT INTO customers (email, token)
@@ -53,7 +55,7 @@ class VitessTestDbTest {
     """
         .trimIndent()
 
-    val insertCustomersResultCount = executeUpdate(insertCustomersSql)
+    val insertCustomersResultCount = vitessQueryExecutor.executeUpdate(insertCustomersSql)
     assertEquals(1, insertCustomersResultCount)
 
     val insertGamesSql =
@@ -63,7 +65,7 @@ class VitessTestDbTest {
     """
         .trimIndent()
 
-    val insertGamesResultCount = executeUpdate(insertGamesSql)
+    val insertGamesResultCount = vitessQueryExecutor.executeUpdate(insertGamesSql)
     assertEquals(1, insertGamesResultCount)
 
     assertDoesNotThrow(vitessTestDb::truncate)
@@ -84,15 +86,14 @@ class VitessTestDbTest {
 
   @Test
   fun `test each shard has expected tablet types`() {
-    VitessTestDb().run()
-    val resultSet: ResultSet = executeQuery("SHOW VITESS_REPLICATION_STATUS;")
+    val results = vitessQueryExecutor.executeQuery("SHOW VITESS_REPLICATION_STATUS;")
     val shardReplicaMap = mutableMapOf<String, Int>()
     val shardRdonlyMap = mutableMapOf<String, Int>()
 
-    while (resultSet.next()) {
-      val keyspace = resultSet.getString("Keyspace")
-      val shard = resultSet.getString("Shard")
-      val tabletType = resultSet.getString("TabletType")
+    for (result in results) {
+      val keyspace = result["Keyspace"]
+      val shard = result["Shard"]
+      val tabletType = result["TabletType"]
 
       if (tabletType == "REPLICA") {
         shardReplicaMap["$keyspace:$shard"] = shardReplicaMap.getOrDefault("$keyspace:$shard", 0) + 1
@@ -112,7 +113,6 @@ class VitessTestDbTest {
 
   @Test
   fun `test sequence tables are auto-initialized`() {
-    VitessTestDb().run()
     val customersSeqRowCount = getRowCount("customers_seq")
     assertEquals(1, customersSeqRowCount)
 
@@ -121,38 +121,76 @@ class VitessTestDbTest {
   }
 
   @Test
+  fun `test schema changes are auto-applied`() {
+    val vitessQueryExecutor = VitessQueryExecutor(VitessClusterConfig(27003))
+    val keyspaces = vitessQueryExecutor.getKeyspaces()
+    assertArrayEquals(arrayOf("gameworld", "gameworld_sharded"), keyspaces.toTypedArray())
+
+    val unshardedTables = vitessQueryExecutor.getTables("gameworld").map { it.tableName }
+    assertArrayEquals(arrayOf("customers_seq", "games_seq"), unshardedTables.toTypedArray())
+
+    val shardedTables = vitessQueryExecutor.getTables("gameworld_sharded").map { it.tableName }
+    assertArrayEquals(arrayOf("customers", "games"), shardedTables.toTypedArray())
+  }
+
+  @Test
+  fun `test database stays alive when keepAlive is true and args are the same`() {
+    val containerId = vitessTestDbRunResult.containerId
+
+    // Now attempt to start a new instance with the same args
+    val newRunResult = VitessTestDb().run()
+    assertEquals(containerId, newRunResult.containerId)
+  }
+
+  @Test
   fun `test default timezone set to UTC`() {
-    VitessTestDb().run()
-    val resultSet: ResultSet = executeQuery("SELECT @@global.time_zone;")
-
-    if (resultSet.next()) {
-      val actualTimeZone = resultSet.getString(1)
-      assertEquals("+00:00", actualTimeZone)
-    } else {
-      Assertions.fail("Failed to get the time zone.")
-    }
+    val results = vitessQueryExecutor.executeQuery("SELECT @@global.time_zone;")
+    val actualTimeZone = results[0]["@@global.time_zone"]
+    assertEquals("+00:00", actualTimeZone)
   }
 
-  private fun executeQuery(query: String): ResultSet {
-    val connection: Connection = DriverManager.getConnection(url, user, password)
-    val statement: Statement = connection.createStatement()
-    return statement.executeQuery(query)
+  @Test
+  fun `test default MySql version`() {
+    val results = vitessQueryExecutor.executeQuery("SELECT @@global.version;")
+    val actualMysqlVersion = results[0]["@@global.version"]
+    assertEquals("${DefaultSettings.MYSQL_VERSION}-Vitess", actualMysqlVersion)
   }
 
-  private fun executeUpdate(query: String): Int {
-    val connection: Connection = DriverManager.getConnection(url, user, password)
-    val statement: Statement = connection.createStatement()
-    return statement.executeUpdate(query)
+  @Test
+  fun `test default SQL mode`() {
+    val results = vitessQueryExecutor.executeQuery("SELECT @@global.sql_mode;")
+    val actualSqlMode = results[0]["@@global.sql_mode"]
+    assertEquals(DefaultSettings.SQL_MODE, actualSqlMode)
+  }
+
+  @Test
+  fun `test default transaction isolation level`() {
+    val results = vitessQueryExecutor.executeQuery("SELECT @@global.transaction_ISOLATION;")
+    val actualTransactionIsolationLevel = results[0]["@@global.transaction_ISOLATION"]
+    assertEquals(DefaultSettings.TRANSACTION_ISOLATION_LEVEL.value, actualTransactionIsolationLevel)
+  }
+
+  @Test
+  fun `explicit exception thrown on query errors`() {
+    val executeQueryException =
+      assertThrows<VitessQueryExecutorException> {
+        vitessQueryExecutor.executeQuery("SELECT * FROM non_existent_table")
+      }
+    assertEquals("Failed to run executeQuery on query: SELECT * FROM non_existent_table", executeQueryException.message)
+
+    val executeException =
+      assertThrows<VitessQueryExecutorException> {
+        vitessQueryExecutor.execute("UPDATE non_existent_table SET column = value WHERE id = 1")
+      }
+    assertEquals(
+      "Failed to run execute on query: UPDATE non_existent_table SET column = value WHERE id = 1",
+      executeException.message,
+    )
   }
 
   private fun getRowCount(table: String): Int {
     val query = "SELECT COUNT(*) FROM $table;"
-    val connection: Connection = DriverManager.getConnection(url, user, password)
-    val statement: Statement = connection.createStatement()
-    val resultSet: ResultSet = statement.executeQuery(query)
-    if (resultSet.next()) {
-      return resultSet.getInt(1)
-    }
-    throw RuntimeException("Failed to get row count.")
+    val results = vitessQueryExecutor.executeQuery(query)
+    return (results[0]["count(*)"] as Long).toInt()
   }
 }
