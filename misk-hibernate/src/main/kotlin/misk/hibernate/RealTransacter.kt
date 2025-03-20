@@ -18,6 +18,7 @@ import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.ConstraintViolationException
+import org.hibernate.exception.GenericJDBCException
 import org.hibernate.exception.LockAcquisitionException
 import wisp.logging.getLogger
 import java.io.Closeable
@@ -498,12 +499,23 @@ internal class RealTransacter private constructor(
         try {
           function()
         } finally {
-          use(previous)
+          try {
+            use(previous)
+          } catch (exception: GenericJDBCException) {
+            // Ignore the exception if the connection is already closed.
+            if (!isConnectionClosed(exception)) {
+              throw exception
+            }
+          }
         }
       } else {
         function()
       }
     }
+
+    private fun isConnectionClosed(exception: GenericJDBCException) =
+      exception.cause?.javaClass == SQLException::class.java &&
+        exception.cause?.message.equals("Connection is closed")
 
     private fun use(destination: Destination) = useConnection { connection ->
       check(config.type.isVitess)
