@@ -129,9 +129,9 @@ class ExceptionHandlingInterceptor(
     if (mapper != null) {
       if (!suppressLog) {
         log.log(
-          mapper.loggingLevel(th),
-          th,
-          *mdcTags.toTypedArray()
+          level = mapper.loggingLevel(th),
+          th = th,
+          tags = *mdcTags.toTypedArray(),
         ) { "exception dispatching to $actionName" }
       }
       return mapper.toResponse(th)
@@ -148,9 +148,9 @@ class ExceptionHandlingInterceptor(
     is UncheckedExecutionException -> toGrpcResponse(th.cause!!, mdcTags)
     else -> mapperResolver.mapperFor(th)?.let {
       log.log(
-        it.loggingLevel(th),
-        th,
-        *mdcTags.toTypedArray()
+        level = it.loggingLevel(th),
+        th = th,
+        tags = *mdcTags.toTypedArray(),
       ) { "exception dispatching to $actionName" }
       val grpcResponse = it.toGrpcResponse(th)
       if (grpcResponse == null) {
