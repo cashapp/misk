@@ -56,6 +56,7 @@ dependencies {
   testFixturesImplementation(project(":misk"))
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":misk-testing"))
   testFixturesRuntimeOnly(libs.hsqldb)
 
   testImplementation(libs.assertj)
