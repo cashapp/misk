@@ -57,12 +57,6 @@ class GrpcSourceSinkTest {
   }
 
   @Test
-  fun helloRequestSize() {
-    val encodedRequest = HelloRequest.ADAPTER.encode(HelloRequest("localhost"))
-    assertEquals(encodedRequest.size, 11)
-  }
-
-  @Test
   fun grpcMessageSourceCompressedHelloRequest() {
     val buffer = Buffer()
     buffer.write(
@@ -75,6 +69,10 @@ class GrpcSourceSinkTest {
 
   @Test
   fun messageLargerThanMinimumSizeIsCompressed() {
+    val message = HelloRequest("localhost")
+    val encodedMessage = HelloRequest.ADAPTER.encode(message)
+    assertEquals(encodedMessage.size, 11)
+
     val buffer = Buffer()
     val writer = GrpcMessageSink(
       sink = buffer,
@@ -83,7 +81,30 @@ class GrpcSourceSinkTest {
       grpcEncoding = "gzip"
     )
 
-    writer.write(HelloRequest("localhost"))
+    writer.write(message)
+    writer.close()
+
+    assertEquals(
+      "010000001f1f8b0800000000000000e3e2ccc94f4eccc9c82f2e01002fdef60d0b000000".decodeHex(),
+      buffer.readByteString()
+    )
+  }
+
+  @Test
+  fun messageEqualToMinimumSizeIsCompressed() {
+    val message = HelloRequest("localhost")
+    val encodedMessage = HelloRequest.ADAPTER.encode(message)
+    assertEquals(encodedMessage.size, 11)
+
+    val buffer = Buffer()
+    val writer = GrpcMessageSink(
+      sink = buffer,
+      minMessageToCompress = 11,
+      messageAdapter = HelloRequest.ADAPTER,
+      grpcEncoding = "gzip"
+    )
+
+    writer.write(message)
     writer.close()
 
     assertEquals(
@@ -94,6 +115,10 @@ class GrpcSourceSinkTest {
 
   @Test
   fun messageSmallerThanMinimumSizeIsNotCompressed() {
+    val message = HelloRequest("localhost")
+    val encodedMessage = HelloRequest.ADAPTER.encode(message)
+    assertEquals(encodedMessage.size, 11)
+
     val buffer = Buffer()
     val writer = GrpcMessageSink(
       sink = buffer,
@@ -102,7 +127,7 @@ class GrpcSourceSinkTest {
       grpcEncoding = "gzip"
     )
 
-    writer.write(HelloRequest("localhost"))
+    writer.write(message)
     writer.close()
 
     assertEquals(
