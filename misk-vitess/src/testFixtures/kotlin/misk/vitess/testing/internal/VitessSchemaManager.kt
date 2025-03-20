@@ -24,6 +24,7 @@ import misk.vitess.testing.DefaultSettings.VTCTLD_CLIENT_IMAGE
 import misk.vitess.testing.VSchemaUpdate
 import misk.vitess.testing.VitessTestDbStartupException
 import wisp.resources.ClasspathResourceLoaderBackend
+import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.ResourceLoader
 
 /**
@@ -44,8 +45,14 @@ internal class VitessSchemaManager(
   val keyspaces: List<VitessKeyspace>
 
   init {
-    // We may be able to remove the temp schema directory logic if we can parse the schema files directly from
-    // resources.
+    val supportedSchemaPrefixes = listOf(ClasspathResourceLoaderBackend.SCHEME, FilesystemLoaderBackend.SCHEME)
+    val usesSupportedPrefix = supportedSchemaPrefixes.any { schemaDir.startsWith(it) }
+    if (!usesSupportedPrefix) {
+      throw VitessTestDbStartupException(
+        "Schema directory `$schemaDir` must start with one of the supported prefixes: $supportedSchemaPrefixes"
+      )
+    }
+
     val tempSchemaDir = createTempSchemaDirectory()
 
     currentSchemaDirPath = tempSchemaDir
@@ -326,16 +333,20 @@ internal class VitessSchemaManager(
   private fun createTempSchemaDirectory(): Path {
     val tempDir = Files.createTempDirectory("schema-")
 
-    val resourceLoader = ResourceLoader(mapOf(ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend))
+    val resourceLoader = ResourceLoader(
+      mapOf(
+        ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
+        FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend
+      )
+    )
 
     tempDir.createDirectories()
 
-    val resourcePath = "classpath:/$schemaDir"
-    if (!resourceLoader.exists(resourcePath)) {
-      throw VitessTestDbStartupException("Schema directory `$schemaDir` does not exist in resources")
+    if (!resourceLoader.exists(schemaDir)) {
+      throw VitessTestDbStartupException("Schema directory `$schemaDir` does not exist")
     }
 
-    resourceLoader.copyTo(resourcePath, tempDir)
+    resourceLoader.copyTo(schemaDir, tempDir)
 
     return tempDir
   }

@@ -25,11 +25,12 @@ This will start a minified Vitess cluster in a Docker container that will be rea
 
 ### Configuration
 
-`VitessTestDb`  depends on the existence of a schema directory ( i.e., `schemaDir`),
-which contains `.sql` schema change and `vschema.json` files.  The expected input format is shown below:
+`VitessTestDb`  depends on the existence of a schema directory ( i.e., `schemaDir`), which contains `.sql` schema change and `vschema.json` files. The location can be a classpath or filesystem path, which is designated by the prefix `classpath:` or `filesystem:`. When using `classpath:`, `VitessTestDb` looks within `resources`.
+
+The expected input format is shown below:
 
 ```
-/vitess/schema
+/resources/vitess/schema
 ├── keyspace1
 │   ├── v0001__add_table.sql
 │   ├── vschema.json
@@ -38,10 +39,16 @@ which contains `.sql` schema change and `vschema.json` files.  The expected inpu
 │   ├── vschema.json
 ```
 
-The `schemaDir` option defaults to `vitess/schema`, but can take in any custom resource path to the constructor, e.g.,
+`VitessTestDb` will throw exceptions if an invalid directory structure is provided. The default value is `classpath:/vitess/schema`, it but can take in any custom resource path to the constructor, e.g.,
 
 ```
-testDb = VitessTestDb(schemaDir = "prefix/my_schema")
+testDb = VitessTestDb(schemaDir = "classpath:/prefix/my_schema")
+```
+
+To use a filesystem path, the prefix `filesystem:` should be used, e.g.,
+
+```
+testDb = VitessTestDb(schemaDir = "filesystem:/some_path/some_path2/my_schema")
 ```
 
 Other configurable parameters include:

@@ -19,9 +19,12 @@ import kotlin.time.measureTime
  * @property keepAlive Whether to keep the database running after the test suite completes. Default is `true`.
  * @property mysqlVersion The MySQL version to use. Default is `8.0.36`.
  * @property port The port to connect to the database, which represents the vtgate. Default is `27003`.
- * @property schemaDir Location of vschema and SQL migration files in resources. The expected input format looks like:
+ * @property schemaDir The location of vschema and SQL schema change files, which can be a classpath or filesystem path, which
+ * is designated by the prefix `classpath:` or `filesystem:`. When using `classpath:`, `VitessTestDb` looks within `resources`.
+ *
+ * The expected input format of a schema directory looks like:
  * ```
- * /resources
+ * /resources/vitess
  * ├── schema
  * │   ├── keyspace1
  * │   │   ├── v0001__add_table.sql
@@ -31,7 +34,7 @@ import kotlin.time.measureTime
  * │   │   ├── vschema.json
  * ```
  *
- * In this example, schema would be the expected arg. The default is `vitess/schema`.
+ * `VitessTestDb` will throw exceptions if an invalid directory structure is provided. The default value is `classpath:/vitess/schema`.
  *
  * @property sqlMode The server SQL mode. Defaults to the MySQL8 defaults:
  *   `ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION`.

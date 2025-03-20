@@ -1,10 +1,5 @@
 package misk.vitess.testing
 
-import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.core.DefaultDockerClientConfig
-import com.github.dockerjava.core.DockerClientBuilder
-import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
-import misk.docker.withMiskDefaults
 import misk.vitess.testing.internal.VitessClusterConfig
 import misk.vitess.testing.internal.VitessQueryExecutor
 import misk.vitess.testing.internal.VitessQueryExecutorException
@@ -43,7 +38,6 @@ class CustomArgsTest {
     private const val DB2_PORT = 34003
 
     private val executorService = Executors.newFixedThreadPool(2)
-    private val dockerClient = setupDockerClient()
 
     @JvmStatic
     @BeforeAll
@@ -56,6 +50,7 @@ class CustomArgsTest {
         port = DB1_PORT,
         keepAlive = true,
         mysqlVersion = DB1_MYSQL_VERSION,
+        schemaDir = "filesystem:${Paths.get(System.getProperty("user.dir"), "src/test/resources/vitess/schema")}",
         sqlMode = DB1_SQL_MODE,
         transactionIsolationLevel = DB1_TXN_ISO_LEVEL,
         transactionTimeoutSeconds = Duration.ofSeconds(5),
@@ -76,16 +71,6 @@ class CustomArgsTest {
 
       testDb1QueryExecutor = VitessQueryExecutor(VitessClusterConfig(DB1_PORT))
       testDb2QueryExecutor = VitessQueryExecutor(VitessClusterConfig(DB2_PORT))
-    }
-
-    private fun setupDockerClient(): DockerClient {
-      val dockerClientConfig =
-        DefaultDockerClientConfig.createDefaultConfigBuilder().withMiskDefaults().build()
-      return DockerClientBuilder.getInstance(dockerClientConfig)
-        .withDockerHttpClient(
-          ApacheDockerHttpClient.Builder().dockerHost(dockerClientConfig.dockerHost).build()
-        )
-        .build()
     }
   }
 
@@ -192,6 +177,15 @@ class CustomArgsTest {
     assertTablesApplied()
   }
 
+  @Test
+  fun `test unsupported schema directory prefix `() {
+    val exception = assertThrows<VitessTestDbStartupException> { createUnsupportedSchemaDirectoryDb().applySchema() }
+    assertEquals(
+      "Schema directory `some/path/without/filesystem/or/classpath` must start with one of the supported prefixes: [classpath:, filesystem:]",
+      exception.message,
+    )
+  }
+
   private fun assertTraditionalSchemaUpdatesApplied(applySchemaResult: ApplySchemaResult) {
     // The vschema is always applied for each keyspace.
     assertEquals(2, applySchemaResult.vschemaUpdates.size)
@@ -225,5 +219,11 @@ class CustomArgsTest {
       enableScatters = false,
       port = DB1_PORT,
       vitessImage = "vitess/vttestserver:v19.0.9-mysql80")
+  }
+
+  private fun createUnsupportedSchemaDirectoryDb(): VitessTestDb {
+    return VitessTestDb(
+      containerName = "unsupported_schema_dir_vitess_db",
+      schemaDir = "some/path/without/filesystem/or/classpath")
   }
 }
