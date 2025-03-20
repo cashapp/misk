@@ -1,3 +1,5 @@
+import org.gradle.plugins.ide.idea.model.IdeaModel
+
 pluginManagement {
   repositories {
     mavenCentral()
@@ -43,6 +45,13 @@ gradle.lifecycle.beforeProject {
   }
 
   version = findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
+
+  apply(plugin = "idea")
+
+  configure<IdeaModel> {
+    module.isDownloadSources = false
+    module.isDownloadJavadoc = false
+  }
 }
 
 include(":detektive")
