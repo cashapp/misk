@@ -71,7 +71,12 @@ class GrpcConnectivityTest {
         }
 
         override fun writeTo(sink: BufferedSink) {
-          val writer = GrpcMessageSink(sink, 0, HelloRequest.ADAPTER, "gzip")
+          val writer = GrpcMessageSink(
+            sink = sink,
+            minMessageToCompress = 0,
+            messageAdapter = HelloRequest.ADAPTER,
+            grpcEncoding = "gzip"
+          )
           writer.write(HelloRequest("jesse!"))
         }
       })
@@ -110,7 +115,12 @@ class GrpcConnectivityTest {
         }
 
         override fun writeTo(sink: BufferedSink) {
-          val writer = GrpcMessageSink(sink, 0, HelloRequest.ADAPTER, "gzip")
+          val writer = GrpcMessageSink(
+            sink = sink,
+            minMessageToCompress = 0,
+            messageAdapter = HelloRequest.ADAPTER,
+            grpcEncoding = "gzip"
+          )
           writer.write(HelloRequest("jesse!"))
         }
       })
@@ -142,7 +152,12 @@ class GrpcConnectivityTest {
         }
 
         override fun writeTo(sink: BufferedSink) {
-          val writer = GrpcMessageSink(sink, 0, HelloRequest.ADAPTER, "gzip")
+          val writer = GrpcMessageSink(
+            sink = sink,
+            minMessageToCompress = 0,
+            messageAdapter = HelloRequest.ADAPTER,
+            grpcEncoding = "gzip"
+          )
           writer.write(HelloRequest("jp!"))
         }
       })
