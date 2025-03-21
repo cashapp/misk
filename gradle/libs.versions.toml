@@ -1,10 +1,10 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.31.3"
+aws2 = "2.31.4"
 bucket4j = "8.8.0"
 datadog = "1.47.2"
-dependencyAnalysisPlugin = "2.12.0"
+dependencyAnalysisPlugin = "2.13.0"
 detekt = "1.23.8"
 docker = "3.4.2"
 googleAuth = "1.33.1"
@@ -63,7 +63,7 @@ dockerApi = { module = "com.github.docker-java:docker-java-api", version.ref = "
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
 dockerTransportCore = { module = "com.github.docker-java:docker-java-transport", version.ref = "docker" }
 dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
-errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.36.0" }
+errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.37.0" }
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.63.1" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.53.1" }
@@ -73,7 +73,7 @@ gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.22.0" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.88.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.7.2" }
-googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250224-2.0.0" }
+googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250312-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
 googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.53.1" }
