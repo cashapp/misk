@@ -11,6 +11,7 @@ public abstract class misk/vitess/gradle/StartVitessDatabaseTask : org/gradle/ap
 	public abstract fun getPort ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSchemaDir ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSqlMode ()Lorg/gradle/api/provider/Property;
+	public abstract fun getTransactionIsolationLevel ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTransactionTimeoutSeconds ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVitessImage ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVitessVersion ()Lorg/gradle/api/provider/Property;
