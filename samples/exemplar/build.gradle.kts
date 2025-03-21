@@ -15,7 +15,7 @@ dependencies {
   implementation(libs.guice)
   implementation(libs.jakartaInject)
   implementation(libs.loggingApi)
-  implementation(libs.kotlinxHtml)
+  implementation(libs.kotlinXHtml)
   implementation(libs.logbackClassic)
   implementation(libs.slf4jApi)
   implementation(libs.okHttp)

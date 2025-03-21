@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-  api(libs.kotlinxHtml)
+  api(libs.kotlinXHtml)
   api(project(":misk-actions"))
   implementation(libs.okio)
 }
