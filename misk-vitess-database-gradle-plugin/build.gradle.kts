@@ -17,7 +17,8 @@ gradlePlugin {
 }
 
 dependencies {
-  implementation(testFixtures(project(":misk-vitess")))
+  api(testFixtures(project(":misk-vitess")))
+
   testImplementation(gradleTestKit())
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)

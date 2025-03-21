@@ -25,13 +25,18 @@ class VitessDatabasePluginTest {
 
     assertThat(result.task(":startVitessDatabase")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
 
-    val resultSet: ResultSet = executeQuery("SHOW KEYSPACES;")
+    val keyspaceResults: ResultSet = executeQuery("SHOW KEYSPACES;")
     var rowCount = 0
-    while (resultSet.next()) {
+    while (keyspaceResults.next()) {
       rowCount++
     }
 
     assertEquals(2, rowCount)
+
+    val txnIsoLevelResults = executeQuery("SELECT @@global.transaction_ISOLATION;")
+    txnIsoLevelResults.next()
+    val actualTransactionIsolationLevel = txnIsoLevelResults.getString(1)
+    assertEquals("READ-COMMITTED", actualTransactionIsolationLevel)
   }
 
   private fun executeQuery(query: String): ResultSet {

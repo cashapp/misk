@@ -18,6 +18,7 @@ class VitessDatabasePlugin: Plugin<Project> {
       it.port.convention(DefaultSettings.PORT)
       it.schemaDir.convention("filesystem:${project.layout.projectDirectory.dir("src/main/resources/vitess/schema").asFile.absolutePath}")
       it.sqlMode.convention(DefaultSettings.SQL_MODE)
+      it.transactionIsolationLevel.convention(DefaultSettings.TRANSACTION_ISOLATION_LEVEL)
       it.transactionTimeoutSeconds.convention(DefaultSettings.TRANSACTION_TIMEOUT_SECONDS)
       it.vitessImage.convention(DefaultSettings.VITESS_IMAGE)
       it.vitessVersion.convention(DefaultSettings.VITESS_VERSION)
