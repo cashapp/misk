@@ -11,7 +11,7 @@ dependencies {
   api(libs.jacksonAnnotations)
   api(libs.jacksonDatabind)
   api(libs.jakartaInject)
-  api(libs.kotlinxHtml)
+  api(libs.kotlinXHtml)
   api(libs.moshiCore)
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
