@@ -1,0 +1,10 @@
+{
+  "tables": {
+    "customers_seq": {
+      "type": "sequence"
+    },
+    "games_seq": {
+      "type": "sequence"
+    }
+  }
+}
