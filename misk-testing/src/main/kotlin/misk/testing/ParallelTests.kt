@@ -11,7 +11,7 @@ internal object ParallelTests {
    *
    * This assumes that the environment variable `MAX_TEST_PARALLEL_FORKS` is set to the number of `maxParallelForks`.
    */
-  internal fun partitioned(): PartitionedTest {
+  internal fun isPartitioned(): PartitionedTest {
     val maxTestPartitions = System.getenv("MAX_TEST_PARALLEL_FORKS")?.toInt()
     return if (maxTestPartitions != null && maxTestPartitions > 1) {
       val testWorkerId = System.getProperty("org.gradle.test.worker", "0").toInt()
@@ -29,8 +29,8 @@ internal sealed interface PartitionedTest {
 }
 
 /**
- * Applies the `update` function to the given `T`, if the tests are running in parallel
- * (with Gradle's `maxParallelForks`). The `update` function is also passed the partition ID.
+ * Applies the `update` lambda to the given `T`, if the tests are running in parallel
+ * (with Gradle's `maxParallelForks`).
  *
  * This can be used for updating configurations for the purpose of providing isolation between
  * tests running across different parallel processes, such as appending the partition ID to the database name,
@@ -39,7 +39,7 @@ internal sealed interface PartitionedTest {
  * This assumes that the environment variable `MAX_TEST_PARALLEL_FORKS` is set to the number of `maxParallelForks`.
  */
 fun <T> T.updateForParallelTests(update: (T, Int) -> T): T {
-  return when (val partitionedTest = ParallelTests.partitioned()) {
+  return when (val partitionedTest = ParallelTests.isPartitioned()) {
     is PartitionedTest.Partitioned -> {
       update(this, partitionedTest.partitionId)
     }
