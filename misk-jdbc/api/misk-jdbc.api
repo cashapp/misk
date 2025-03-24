@@ -590,7 +590,7 @@ public final class misk/jdbc/MySqlTestDatabasePoolBackend : misk/jdbc/TestDataba
 	public fun showDatabases ()Ljava/util/Set;
 }
 
-public final class misk/jdbc/ParitionedDataSourceConfigKt {
+public final class misk/jdbc/PartitionedDataSourceConfigKt {
 	public static final fun updateForParallelTests (Lmisk/jdbc/DataSourceClusterConfig;)Lmisk/jdbc/DataSourceClusterConfig;
 	public static final fun updateForParallelTests (Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/DataSourceConfig;
 }
