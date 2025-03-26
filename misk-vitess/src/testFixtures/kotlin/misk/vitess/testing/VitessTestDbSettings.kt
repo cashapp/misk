@@ -12,7 +12,7 @@ object DefaultSettings {
   const val LINT_SCHEMA = false
   const val MYSQL_VERSION = "8.0.36"
   const val PORT = 27003
-  const val SCHEMA_DIR = "vitess/schema"
+  const val SCHEMA_DIR = "classpath:/vitess/schema"
   const val SQL_MODE: String =
     "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
   @JvmField var TRANSACTION_ISOLATION_LEVEL: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ

@@ -23,17 +23,23 @@ internal class RequestHeaderFeatureBinding private constructor(
   internal class ParameterBinding(
     val parameter: KParameter,
     private val converter: StringConverter,
-    private val name: String
+    private val name: String,
+    // private val throwOnDuplicate: Boolean todo("if a throwOnDuplicate flag is required")
   ) {
     fun bind(subject: Subject) {
-      val rawValue = subject.httpCall.requestHeaders[name]
-      if (rawValue == null) {
-        when {
-          parameter.isOptional -> return
-          parameter.type.isMarkedNullable -> return
-          else -> throw BadRequestException("Required request header $name not present")
-        }
+      val requestHeaders = subject.httpCall.requestHeaders
+      val rawValue = requestHeaders[name] ?:
+      when {
+        parameter.isOptional -> return
+        parameter.type.isMarkedNullable -> return
+        else -> throw BadRequestException("Required request header $name not present")
       }
+
+      // todo(if required we could add a throwOnDuplicate flag)
+      if (requestHeaders.values(name).size > 1) {
+        throw BadRequestException("Multiple values found for [header=$name], consider using @misk.web.RequestHeaders instead")
+      }
+
       val value = try {
         converter(rawValue)
       } catch (e: IllegalArgumentException) {
@@ -59,9 +65,9 @@ internal class RequestHeaderFeatureBinding private constructor(
       return RequestHeaderFeatureBinding(bindings)
     }
 
-    internal fun KParameter.toRequestHeaderBinding(): ParameterBinding? {
+    private fun KParameter.toRequestHeaderBinding(): ParameterBinding? {
       val annotation = findAnnotation<RequestHeader>() ?: return null
-      val name = if (annotation.value.isBlank()) name!! else annotation.value
+      val name = annotation.value.ifBlank { name!! }
 
       val stringConverter = converterFor(type)
         ?: throw IllegalArgumentException("Unable to create converter for $name")

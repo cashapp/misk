@@ -32,7 +32,7 @@ annotation class RequestHeaders
  * and has no default value, and the header is absent, the request will fail with an HTTP 400.
  */
 @Target(AnnotationTarget.VALUE_PARAMETER)
-annotation class RequestHeader(val value: String = "")
+annotation class RequestHeader(val value: String)
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class PathParam(val value: String = "")

@@ -1,3 +1,5 @@
+import org.gradle.plugins.ide.idea.model.IdeaModel
+
 pluginManagement {
   repositories {
     mavenCentral()
@@ -43,6 +45,13 @@ gradle.lifecycle.beforeProject {
   }
 
   version = findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
+
+  apply(plugin = "idea")
+
+  configure<IdeaModel> {
+    module.isDownloadSources = false
+    module.isDownloadJavadoc = false
+  }
 }
 
 include(":detektive")
@@ -75,7 +84,7 @@ include(":misk")
 include(":misk-action-scopes")
 include(":misk-actions")
 include(":misk-admin")
-include(":misk-admin:web-actions")
+include(":misk-admin-web-actions")
 include(":misk-api")
 include(":misk-aws")
 include(":misk-aws-dynamodb")
@@ -115,6 +124,7 @@ include(":misk-policy")
 include(":misk-prometheus")
 include(":misk-proto")
 include(":misk-rate-limiting-bucket4j-dynamodb-v1")
+include(":misk-rate-limiting-bucket4j-dynamodb-v2")
 include(":misk-rate-limiting-bucket4j-mysql")
 include(":misk-rate-limiting-bucket4j-redis")
 include(":misk-redis")
@@ -129,5 +139,6 @@ include(":misk-testing-api")
 include(":misk-transactional-jobqueue")
 include(":misk-warmup")
 include(":misk-vitess")
+include(":misk-vitess-database-gradle-plugin")
 include(":samples:exemplar")
 include(":samples:exemplarchat")

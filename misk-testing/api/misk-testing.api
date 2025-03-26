@@ -222,6 +222,10 @@ public final class misk/testing/MockTracingBackendModule : misk/inject/KAbstract
 	public fun <init> ()V
 }
 
+public final class misk/testing/ParallelTestsKt {
+	public static final fun updateForParallelTests (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
+}
+
 public final class misk/testing/TemporaryFolder {
 	public fun <init> (Ljava/nio/file/Path;)V
 	public final fun delete ()V

@@ -12,7 +12,7 @@ plugins {
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
-  api(libs.kotlinxHtml)
+  api(libs.kotlinXHtml)
   api(libs.okio)
   api(project(":wisp:wisp-deployment"))
   api(project(":misk"))
@@ -21,7 +21,7 @@ dependencies {
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-service"))
-  api(libs.kotlinxHtml)
+  api(libs.kotlinXHtml)
   implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(libs.okHttp)
@@ -185,10 +185,10 @@ if (isCi || System.getProperty("misk.admin.buildMiskWeb") == "true") {
 
 tasks.register<Copy>("buildAndCopyWebActions") {
   from({
-    project(":misk-admin:web-actions").tasks.named("buildWebActionsTab").get().outputs.files
+    project(":misk-admin-web-actions").tasks.named("buildWebActionsTab").get().outputs.files
   })
   into(project.layout.buildDirectory.dir("resources/main/web/_tab/web-actions-v4"))
-  dependsOn(":misk-admin:web-actions:buildWebActionsTab")
+  dependsOn(":misk-admin-web-actions:buildWebActionsTab")
 }
 
 sourceSets {
