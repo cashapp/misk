@@ -20,6 +20,8 @@ tasks.register<WebActionsTabBuildTask>("buildWebActionsTab") {
   )
 
   outputFiles.setFrom(projectDir.resolve("lib"))
+
+  dependsOn("checkInternalRepos")
 }
 
 @CacheableTask
@@ -81,4 +83,62 @@ abstract class WebActionsTabBuildTask : DefaultTask() {
     exec(npm, "run-script", "lint")
     exec(npm, "run-script", "test")
   }
+}
+
+abstract class CheckInternalReposTask : DefaultTask() {
+  @get:InputFiles
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val packageLockFiles: ConfigurableFileCollection
+
+  init {
+    packageLockFiles.setFrom(
+      project.projectDir.walk()
+        .filter { it.name == "package-lock.json" }
+        .toList()
+    )
+  }
+
+  @TaskAction
+  fun check() {
+    val internalRepos = listOf(
+      "global.block-artifacts.com",
+      "artifactory.global.square"
+    )
+
+    val violations = mutableListOf<Pair<File, List<String>>>()
+
+    packageLockFiles.forEach { file ->
+      try {
+        val content = file.readText()
+        val foundRepos = internalRepos.filter { repo -> repo in content }
+
+        if (foundRepos.isNotEmpty()) {
+          violations.add(file to foundRepos)
+        }
+      } catch (e: Exception) {
+        logger.error("Error processing ${file.relativeTo(project.projectDir)}: ${e.message}")
+      }
+    }
+
+    if (violations.isNotEmpty()) {
+      val message = buildString {
+        appendLine("Found internal repository references:")
+        violations.forEach { (file, repos) ->
+          appendLine("- ${file.relativeTo(project.projectDir)} contains references to:")
+          repos.forEach { repo ->
+            appendLine("  * '$repo'")
+          }
+        }
+        appendLine("\nPlease remove references to internal npm repositories.")
+      }
+      throw GradleException(message)
+    } else {
+      logger.lifecycle("No internal repository references found.")
+    }
+  }
+}
+
+tasks.register<CheckInternalReposTask>("checkInternalRepos") {
+  group = "verification"
+  description = "Check for internal repository references in package-lock.json files"
 }
