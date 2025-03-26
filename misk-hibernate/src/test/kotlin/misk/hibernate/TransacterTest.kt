@@ -368,17 +368,43 @@ abstract class TransacterTest {
 
   @Test
   fun constraintViolationCausesTransactionToRollback() {
-    transacter.transaction { session ->
+    val movieId = transacter.transaction { session ->
       session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
     }
-    assertFailsWith<ConstraintViolationException> {
+
+    val actorId1 = transacter.transaction { session ->
+      session.save(DbActor("Lily James"))
+    }
+
+    val actorId2 = transacter.transaction { session ->
+      session.save(DbActor("Holliday Grainger"))
+    }
+
+    val movie = transacter.transaction { session ->
+      queryFactory.newQuery<MovieQuery>().id(movieId).uniqueResult(session)!!
+    }
+
+    val actor1 = transacter.transaction { session ->
+      queryFactory.newQuery<ActorQuery>().id(actorId1).uniqueResult(session)!!
+    }
+
+    val actor2 = transacter.transaction { session ->
+      queryFactory.newQuery<ActorQuery>().id(actorId2).uniqueResult(session)!!
+    }
+
+    transacter.transaction { session ->
+      session.save(DbCharacter("Cinderella", movie, actor1))
+    }
+
+    assertThrows<ConstraintViolationException> {
       transacter.transaction { session ->
-        session.save(DbMovie("Beauty and the Beast", LocalDate.of(1991, 11, 22)))
-        session.save(DbMovie("Cinderella", LocalDate.of(2015, 3, 13)))
+        session.save(DbCharacter("Anastasia", movie, actor2))
+        session.save(DbCharacter("Cinderella", movie, actor1))
       }
     }
+
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().allowTableScan().list(session)).hasSize(1)
+      assertThat(queryFactory.newQuery<CharacterQuery>().allowTableScan().list(session)).hasSize(1)
     }
   }
 
