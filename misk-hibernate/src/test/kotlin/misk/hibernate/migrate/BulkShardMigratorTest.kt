@@ -12,10 +12,10 @@ import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.SessionFactoryService
 import misk.hibernate.Transacter
+import misk.hibernate.VitessTransacterExtensions.createInSameShard
+import misk.hibernate.VitessTransacterExtensions.createInSeparateShard
+import misk.hibernate.VitessTransacterExtensions.shard
 import misk.hibernate.allowTableScan
-import misk.hibernate.createInSameShard
-import misk.hibernate.createInSeparateShard
-import misk.hibernate.shard
 import misk.hibernate.shards
 import misk.hibernate.transaction
 import misk.jdbc.DataSourceType
