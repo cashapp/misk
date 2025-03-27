@@ -41,6 +41,12 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      redis:
+        image: redis:7.2
+        ports:
+          - 6379:6379
+        options: >-
+          --loglevel debug
 
     strategy:
       matrix:
