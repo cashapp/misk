@@ -7,6 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import jakarta.inject.Inject
+import misk.hibernate.VitessTransacterExtensions.shard
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

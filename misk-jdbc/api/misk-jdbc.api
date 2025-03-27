@@ -163,15 +163,6 @@ public final class misk/database/StartDatabaseServiceKt {
 	public static final fun runCommand (Ljava/lang/String;)I
 }
 
-public final class misk/database/StartVitessService {
-	public static final field Companion Lmisk/database/StartVitessService$Companion;
-	public fun <init> ()V
-}
-
-public final class misk/database/StartVitessService$Companion {
-	public final fun startVitessDaemon (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;)V
-}
-
 public final class misk/database/Table {
 	public fun <init> ()V
 }
@@ -851,31 +842,5 @@ public final class misk/vitess/TabletType : java/lang/Enum {
 	public final fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lmisk/vitess/TabletType;
 	public static fun values ()[Lmisk/vitess/TabletType;
-}
-
-public final class misk/vitess/VitessScaleSafetyChecks : misk/jdbc/DataSourceDecorator {
-	public static final field Companion Lmisk/vitess/VitessScaleSafetyChecks$Companion;
-	public fun <init> (Lmisk/jdbc/DataSourceConfig;Lokhttp3/OkHttpClient;Lcom/squareup/moshi/Moshi;Lmisk/database/StartDatabaseService;)V
-	public final fun connect ()Ljava/sql/Connection;
-	public fun decorate (Ljavax/sql/DataSource;)Ljavax/sql/DataSource;
-	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
-	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
-	public final fun getOkHttpClient ()Lokhttp3/OkHttpClient;
-	public final fun getStartDatabaseService ()Lmisk/database/StartDatabaseService;
-}
-
-public final class misk/vitess/VitessScaleSafetyChecks$Companion {
-}
-
-public final class misk/vitess/VitessScaleSafetyChecks$CowriteDetector : misk/jdbc/ExtendedQueryExecutionListener {
-	public fun <init> (Lmisk/vitess/VitessScaleSafetyChecks;)V
-}
-
-public final class misk/vitess/VitessScaleSafetyChecks$FullScatterDetector : misk/jdbc/ExtendedQueryExecutionListener {
-	public fun <init> (Lmisk/vitess/VitessScaleSafetyChecks;)V
-}
-
-public final class misk/vitess/VitessScaleSafetyChecks$TableScanDetector : misk/jdbc/ExtendedQueryExecutionListener {
-	public fun <init> (Lmisk/vitess/VitessScaleSafetyChecks;)V
 }
 

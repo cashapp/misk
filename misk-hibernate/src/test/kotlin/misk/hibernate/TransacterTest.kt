@@ -1,13 +1,16 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
 import misk.exceptions.UnauthorizedException
+import misk.hibernate.VitessTransacterExtensions.createInSeparateShard
+import misk.hibernate.VitessTransacterExtensions.save
+import misk.hibernate.VitessTransacterExtensions.shard
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
-import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -16,7 +19,6 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
-import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 
 abstract class TransacterTest {
