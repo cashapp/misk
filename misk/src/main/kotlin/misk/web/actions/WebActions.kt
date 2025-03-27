@@ -15,7 +15,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.callSuspendBy
 
-internal fun WebAction.asChain(
+fun WebAction.asChain(
   function: KFunction<*>,
   args: List<Any?>,
   interceptors: List<ApplicationInterceptor>,
