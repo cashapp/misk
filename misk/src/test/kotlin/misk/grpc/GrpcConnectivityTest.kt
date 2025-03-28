@@ -71,7 +71,12 @@ class GrpcConnectivityTest {
         }
 
         override fun writeTo(sink: BufferedSink) {
-          val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER, "gzip")
+          val writer = GrpcMessageSink(
+            sink = sink,
+            minMessageToCompress = 0,
+            messageAdapter = HelloRequest.ADAPTER,
+            grpcEncoding = "gzip"
+          )
           writer.write(HelloRequest("jesse!"))
         }
       })
@@ -82,7 +87,7 @@ class GrpcConnectivityTest {
     response.use {
       assertThat(response.code).isEqualTo(200)
       assertThat(response.headers["grpc-status"]).isNull() // Sent in the trailers!
-      assertThat(response.headers["grpc-encoding"]).isEqualTo("identity")
+      assertThat(response.headers["grpc-encoding"]).isEqualTo("gzip")
       assertThat(response.body!!.contentType()).isEqualTo("application/grpc".toMediaType())
 
       val reader = GrpcMessageSource(
@@ -110,7 +115,12 @@ class GrpcConnectivityTest {
         }
 
         override fun writeTo(sink: BufferedSink) {
-          val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER, "gzip")
+          val writer = GrpcMessageSink(
+            sink = sink,
+            minMessageToCompress = 0,
+            messageAdapter = HelloRequest.ADAPTER,
+            grpcEncoding = "gzip"
+          )
           writer.write(HelloRequest("jesse!"))
         }
       })
@@ -142,7 +152,12 @@ class GrpcConnectivityTest {
         }
 
         override fun writeTo(sink: BufferedSink) {
-          val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER, "gzip")
+          val writer = GrpcMessageSink(
+            sink = sink,
+            minMessageToCompress = 0,
+            messageAdapter = HelloRequest.ADAPTER,
+            grpcEncoding = "gzip"
+          )
           writer.write(HelloRequest("jp!"))
         }
       })
@@ -169,8 +184,8 @@ class GrpcConnectivityTest {
   interface GreeterSayHello : Service {
     @WireRpc(
       path = "/helloworld.Greeter/SayHello",
-      requestAdapter = "com.squareup.protos.test.grpc.HelloRequest.ADAPTER",
-      responseAdapter = "com.squareup.protos.test.grpc.HelloReply.ADAPTER"
+      requestAdapter = "com.squareup.protos.test.grpc.HelloRequest#ADAPTER",
+      responseAdapter = "com.squareup.protos.test.grpc.HelloReply#ADAPTER"
     )
     fun sayHello(request: HelloRequest): HelloReply
   }
@@ -179,7 +194,7 @@ class GrpcConnectivityTest {
     override fun configure() {
       install(
         WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(grpcGzip = true)
         )
       )
       install(MiskTestingServiceModule())

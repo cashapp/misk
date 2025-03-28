@@ -100,10 +100,14 @@ class ExceptionHandlingInterceptor(
     httpCall.setResponseTrailer("grpc-status-details-bin", response.toEncodedStatusProto)
     httpCall.setResponseTrailer("grpc-message", response.message ?: response.status.name)
     httpCall.takeResponseBody()?.use { responseBody: BufferedSink ->
-      GrpcMessageSink(responseBody, ProtoAdapter.BYTES, grpcEncoding = "identity")
-        .use { messageSink ->
-          messageSink.write(ByteString.EMPTY)
-        }
+      GrpcMessageSink(
+        sink = responseBody,
+        minMessageToCompress = 0,
+        messageAdapter = ProtoAdapter.BYTES,
+        grpcEncoding = "identity"
+      ).use { messageSink ->
+        messageSink.write(ByteString.EMPTY)
+      }
     }
   }
 
@@ -124,7 +128,11 @@ class ExceptionHandlingInterceptor(
     val mapper = mapperResolver.mapperFor(th)
     if (mapper != null) {
       if (!suppressLog) {
-        log.log(mapper.loggingLevel(th), th, *mdcTags.toTypedArray()) { "exception dispatching to $actionName" }
+        log.log(
+          level = mapper.loggingLevel(th),
+          th = th,
+          tags = *mdcTags.toTypedArray(),
+        ) { "exception dispatching to $actionName" }
       }
       return mapper.toResponse(th)
     }
@@ -139,7 +147,11 @@ class ExceptionHandlingInterceptor(
     is InvocationTargetException -> toGrpcResponse(th.targetException, mdcTags)
     is UncheckedExecutionException -> toGrpcResponse(th.cause!!, mdcTags)
     else -> mapperResolver.mapperFor(th)?.let {
-      log.log(it.loggingLevel(th), th, *mdcTags.toTypedArray()) { "exception dispatching to $actionName" }
+      log.log(
+        level = it.loggingLevel(th),
+        th = th,
+        tags = *mdcTags.toTypedArray(),
+      ) { "exception dispatching to $actionName" }
       val grpcResponse = it.toGrpcResponse(th)
       if (grpcResponse == null) {
         val httpResponse = toResponse(th, suppressLog = true, mdcTags)

@@ -12,11 +12,14 @@ import okio.BufferedSink
  * https://github.com/square/wire/search?q=GrpcMessageSink&type=Code
  *
  * @param sink the HTTP/2 stream body.
+ * @param minMessageToCompress the minimum message size for compression
+ *   when [grpcEncoding] is not "identity".
  * @param messageAdapter a proto adapter for each message.
  * @param grpcEncoding the content coding for the stream body.
  */
-internal class GrpcMessageSink<T : Any> constructor(
+internal class GrpcMessageSink<T : Any>(
   private val sink: BufferedSink,
+  private val minMessageToCompress: Long,
   private val messageAdapter: ProtoAdapter<T>,
   private val grpcEncoding: String
 ) : MessageSink<T> {
@@ -25,15 +28,23 @@ internal class GrpcMessageSink<T : Any> constructor(
     check(!closed) { "closed" }
 
     val encodedMessage = Buffer()
-    grpcEncoding.toGrpcEncoder().encode(encodedMessage).use { encodingSink ->
-      messageAdapter.encode(encodingSink, message)
+    messageAdapter.encode(encodedMessage, message)
+
+    if (grpcEncoding == "identity" || encodedMessage.size < minMessageToCompress) {
+      sink.writeByte(0) // 0 = Not encoded.
+      sink.writeInt(encodedMessage.size.toInt())
+      sink.writeAll(encodedMessage)
+    } else {
+      val compressedMessage = Buffer()
+      grpcEncoding.toGrpcEncoder().encode(compressedMessage).use { sink ->
+        sink.writeAll(encodedMessage)
+      }
+      sink.writeByte(1) // 1 = Compressed.
+      sink.writeInt(compressedMessage.size.toInt())
+      sink.writeAll(compressedMessage)
     }
 
-    val compressedFlag = if (grpcEncoding == "identity") 0 else 1
-    sink.writeByte(compressedFlag)
     // TODO: fail if the message size is more than MAX_INT
-    sink.writeInt(encodedMessage.size.toInt())
-    sink.writeAll(encodedMessage)
     sink.flush()
   }
 
