@@ -259,6 +259,7 @@ public final class misk/Action {
 	public final fun getAcceptedMediaRanges ()Ljava/util/List;
 	public final fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
 	public final fun getFunction ()Lkotlin/reflect/KFunction;
+	public final fun getFunctionAsJavaMethod ()Ljava/lang/reflect/Method;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getParameterTypes ()Ljava/util/List;
 	public final fun getParameters ()Ljava/util/List;

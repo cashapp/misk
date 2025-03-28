@@ -31,6 +31,12 @@ internal class ActionsTest {
     assertThat(action.name).isEqualTo("NestedAction.InnerAction")
   }
 
+  @Test fun functionAsJavaMethod() {
+    val action = TestAction::myActionMethod.asAction(DispatchMechanism.GET)
+    val functionAsJavaMethod = action.functionAsJavaMethod
+    assertThat(functionAsJavaMethod?.declaringClass).isEqualTo(TestAction::class.java)
+  }
+
   @Test fun methodReferenceNotAllowedAsAction() {
     assertFailsWith<IllegalArgumentException> {
       val t = TestAction()

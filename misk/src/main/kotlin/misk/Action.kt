@@ -2,8 +2,10 @@ package misk
 
 import misk.web.DispatchMechanism
 import misk.web.RequestBody
+import misk.web.actions.javaMethod
 import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
+import java.lang.reflect.Method
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -55,6 +57,9 @@ data class Action(
   }
 
   fun hasReturnValue() = returnType.classifier != Unit::class
+
+  val functionAsJavaMethod: Method?
+    get() = function.javaMethod
 
   override fun toString() = function.toString()
 }

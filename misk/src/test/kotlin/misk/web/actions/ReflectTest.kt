@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import java.lang.reflect.Method
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
-import kotlin.reflect.jvm.javaMethod
 
 internal class ReflectTest {
   @Test
