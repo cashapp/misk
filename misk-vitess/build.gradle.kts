@@ -16,6 +16,7 @@ dependencies {
   testFixturesApi(libs.dockerCore)
   testFixturesApi(libs.dockerTransportHttpClient)
   testFixturesApi(project(":misk-docker"))
+  testFixturesApi(project(":misk-testing"))
 
   testFixturesImplementation(libs.mysqlConnector)
   testFixturesImplementation(libs.moshiKotlin)

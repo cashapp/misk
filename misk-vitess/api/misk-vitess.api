@@ -199,3 +199,12 @@ public final class misk/vitess/testing/internal/VschemaAdapter {
 	public final fun toMap (Ljava/lang/Object;)Ljava/util/Map;
 }
 
+public final class misk/vitess/testing/utilities/DockerVitess : misk/testing/ExternalDependency {
+	public static final field INSTANCE Lmisk/vitess/testing/utilities/DockerVitess;
+	public fun afterEach ()V
+	public fun beforeEach ()V
+	public fun getId ()Ljava/lang/String;
+	public fun shutdown ()V
+	public fun startup ()V
+}
+

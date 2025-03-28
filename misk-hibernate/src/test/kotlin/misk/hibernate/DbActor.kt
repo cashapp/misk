@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import misk.hibernate.annotation.Keyspace
 import java.time.Instant
 import java.time.LocalDate
 import javax.persistence.Column
@@ -10,6 +11,7 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "actors")
+@Keyspace("movies_sharded")
 class DbActor() : DbRoot<DbActor>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

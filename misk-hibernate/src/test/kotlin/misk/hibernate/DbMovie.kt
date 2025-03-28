@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import misk.hibernate.annotation.Keyspace
 import java.time.Instant
 import java.time.LocalDate
 import javax.persistence.Column
@@ -10,8 +11,8 @@ import javax.persistence.Table
 import javax.persistence.Transient
 
 @Entity
-@misk.hibernate.annotation.Keyspace("movies")
 @Table(name = "movies")
+@Keyspace("movies_sharded")
 class DbMovie() : DbRoot<DbMovie>, DbTimestampedEntity {
   @Transient private val transientField: String = "foo"
 

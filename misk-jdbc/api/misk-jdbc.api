@@ -93,42 +93,6 @@ public final class misk/database/DockerTidbCluster$LogContainerResultCallback : 
 	public synthetic fun onNext (Ljava/lang/Object;)V
 }
 
-public final class misk/database/DockerVitessCluster : misk/database/DatabaseServer {
-	public static final field CONTAINER_NAME_PREFIX Ljava/lang/String;
-	public static final field Companion Lmisk/database/DockerVitessCluster$Companion;
-	public static final field VITESS_IMAGE Ljava/lang/String;
-	public static final field VITESS_SHA Ljava/lang/String;
-	public fun <init> (Ljava/lang/String;Lcom/squareup/moshi/Moshi;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/github/dockerjava/api/DockerClient;)V
-	public final fun getCluster ()Lmisk/database/VitessCluster;
-	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
-	public final fun getDocker ()Lcom/github/dockerjava/api/DockerClient;
-	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
-	public fun pullImage ()V
-	public fun start ()V
-	public fun stop ()V
-}
-
-public final class misk/database/DockerVitessCluster$Companion {
-	public final fun getLogger ()Lmu/KLogger;
-	public final fun pullImage ()V
-	public final fun startVitessDaemon (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;)V
-}
-
-public final class misk/database/DockerVitessCluster$LogContainerResultCallback : com/github/dockerjava/core/async/ResultCallbackTemplate {
-	public fun <init> ()V
-	public fun onNext (Lcom/github/dockerjava/api/model/Frame;)V
-	public synthetic fun onNext (Ljava/lang/Object;)V
-}
-
-public final class misk/database/Keyspace {
-	public fun <init> (ZLjava/util/Map;)V
-	public final fun getSharded ()Z
-	public final fun getTables ()Ljava/util/Map;
-	public final fun shardCount ()I
-}
-
 public final class misk/database/StartDatabaseService : com/google/common/util/concurrent/AbstractIdleService {
 	public static final field Companion Lmisk/database/StartDatabaseService$Companion;
 	public static field servers Lcom/google/common/cache/LoadingCache;
@@ -163,10 +127,6 @@ public final class misk/database/StartDatabaseServiceKt {
 	public static final fun runCommand (Ljava/lang/String;)I
 }
 
-public final class misk/database/Table {
-	public fun <init> ()V
-}
-
 public final class misk/database/TidbCluster {
 	public fun <init> (Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;)V
 	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
@@ -175,25 +135,6 @@ public final class misk/database/TidbCluster {
 	public final fun getMysqlPort ()I
 	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
 	public final fun openConnection ()Ljava/sql/Connection;
-}
-
-public final class misk/database/VitessCluster {
-	public fun <init> (Ljava/lang/String;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;)V
-	public fun <init> (Ljava/lang/String;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/squareup/moshi/Moshi;)V
-	public synthetic fun <init> (Ljava/lang/String;Lmisk/resources/ResourceLoader;Lmisk/jdbc/DataSourceConfig;Lcom/squareup/moshi/Moshi;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
-	public final fun getConfigDir ()Ljava/nio/file/Path;
-	public final fun getGrpcPort ()I
-	public final fun getHttpPort ()I
-	public final fun getKeyspaceAdapter ()Lcom/squareup/moshi/JsonAdapter;
-	public final fun getMoshi ()Lcom/squareup/moshi/Moshi;
-	public final fun getMysqlPort ()I
-	public final fun getName ()Ljava/lang/String;
-	public final fun getSchemaDir ()Ljava/nio/file/Path;
-	public final fun getVtgateMysqlPort ()I
-	public final fun keyspaces ()Ljava/util/Map;
-	public final fun openMysqlConnection ()Ljava/sql/Connection;
-	public final fun openVtgateConnection ()Ljava/sql/Connection;
 }
 
 public final class misk/jdbc/Check : java/lang/Enum {

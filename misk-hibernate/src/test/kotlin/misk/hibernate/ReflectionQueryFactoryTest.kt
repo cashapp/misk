@@ -15,10 +15,15 @@ import wisp.time.FakeClock
 import java.time.Duration.ofSeconds
 import java.time.LocalDate
 import jakarta.inject.Inject
+import misk.testing.MiskExternalDependency
+import misk.vitess.testing.utilities.DockerVitess
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class ReflectionQueryFactoryTest {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess
+
   @MiskTestModule
   val module = MoviesTestModule()
 
@@ -887,7 +892,9 @@ class ReflectionQueryFactoryTest {
         .uniqueResult(session)
     }
 
-    assertThat(character?.actor?.name).isEqualTo(actorName)
+    assertThat(character).isNotNull()
+    assertThat(character!!.actor).isNotNull()
+    assertThat(character.actor!!.name).isEqualTo(actorName)
   }
 
   @Test

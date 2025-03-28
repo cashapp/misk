@@ -107,15 +107,6 @@ class StartDatabaseService(
 
   private fun createDatabaseServer(config: CacheKey): DatabaseServer? =
     when (config.config.type) {
-      DataSourceType.VITESS_MYSQL -> {
-        DockerVitessCluster(
-          name = config.name,
-          config = config.config,
-          resourceLoader = ResourceLoader.SYSTEM,
-          moshi = moshi,
-          docker = docker
-        )
-      }
       DataSourceType.COCKROACHDB -> {
         DockerCockroachCluster(
           name = config.name,

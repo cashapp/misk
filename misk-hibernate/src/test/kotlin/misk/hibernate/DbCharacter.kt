@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import misk.hibernate.annotation.Keyspace
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Parameter
 import java.time.Instant
@@ -13,9 +14,11 @@ import javax.persistence.GeneratedValue
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
+import javax.persistence.criteria.JoinType
 
 @Entity
 @Table(name = "characters")
+@Keyspace("movies_sharded")
 class DbCharacter() : DbChild<DbMovie, DbCharacter>, DbTimestampedEntity {
   @EmbeddedId
   @AttributeOverride(name = "rootId", column = Column(name = "movie_id"))
@@ -101,7 +104,7 @@ interface CharacterQuery : Query<DbCharacter> {
   @Order(path = "name", asc = false)
   fun nameDesc(): CharacterQuery
 
-  @Fetch(path = "actor")
+  @Fetch(path = "actor", joinType = JoinType.INNER)
   fun withActor(): CharacterQuery
 
   @Fetch(path = "actor", forProjection = true)

@@ -28,7 +28,6 @@ dependencies {
   implementation(libs.loggingApi)
   implementation(libs.mysql)
   implementation(libs.okio)
-  implementation(project(":misk"))
   implementation(project(":misk-backoff"))
   implementation(project(":misk-docker"))
   implementation(project(":misk-service"))
@@ -57,6 +56,7 @@ dependencies {
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
   testFixturesImplementation(project(":misk-testing"))
+  testFixturesImplementation(testFixtures(project(":misk-vitess")))
   testFixturesRuntimeOnly(libs.hsqldb)
 
   testImplementation(libs.assertj)
@@ -80,6 +80,7 @@ dependencies {
   testImplementation(project(":misk"))
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-service"))
+  testImplementation(testFixtures(project(":misk-vitess")))
 
   testFixturesImplementation(libs.dockerTransportHttpClient)
   testFixturesImplementation(libs.dockerTransportCore)
