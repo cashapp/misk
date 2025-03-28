@@ -1,5 +1,6 @@
 package com.squareup.exemplar
 
+import misk.audit.AuditClientConfig
 import misk.config.Redact
 import misk.config.Secret
 import misk.metrics.backends.prometheus.PrometheusConfig
@@ -11,5 +12,6 @@ data class ExemplarConfig(
   val web: WebConfig,
   val prometheus: PrometheusConfig,
   @Redact
-  val redacted: String
+  val redacted: String,
+  val audit: AuditClientConfig,
 ) : Config

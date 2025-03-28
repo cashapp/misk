@@ -1,0 +1,77 @@
+public abstract interface class misk/audit/AuditClient {
+	public abstract fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class misk/audit/AuditClient$DefaultImpls {
+	public static synthetic fun logEvent$default (Lmisk/audit/AuditClient;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public final class misk/audit/AuditClientConfig {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/audit/AuditClientConfig;
+	public static synthetic fun copy$default (Lmisk/audit/AuditClientConfig;Ljava/lang/String;ILjava/lang/Object;)Lmisk/audit/AuditClientConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/audit/FakeAuditClient : misk/testing/FakeFixture, misk/audit/AuditClient {
+	public static final field Companion Lmisk/audit/FakeAuditClient$Companion;
+	public fun <init> (Ljava/lang/String;Lmisk/scope/ActionScoped;Ljava/time/Clock;Lwisp/deployment/Deployment;)V
+	public final fun getEnableLogging ()Z
+	public final fun getSentEvents ()Ljava/util/List;
+	public fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun setEnableLogging (Z)V
+}
+
+public final class misk/audit/FakeAuditClient$Companion {
+}
+
+public final class misk/audit/FakeAuditClient$FakeAuditEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component11 ()Ljava/lang/String;
+	public final fun component12 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Z
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/audit/FakeAuditClient$FakeAuditEvent;
+	public static synthetic fun copy$default (Lmisk/audit/FakeAuditClient$FakeAuditEvent;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/audit/FakeAuditClient$FakeAuditEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApplicationName ()Ljava/lang/String;
+	public final fun getApproverLDAP ()Ljava/lang/String;
+	public final fun getAutomatedChange ()Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getDetailURL ()Ljava/lang/String;
+	public final fun getEnvironment ()Ljava/lang/String;
+	public final fun getEventSource ()Ljava/lang/String;
+	public final fun getEventTarget ()Ljava/lang/String;
+	public final fun getRegion ()Ljava/lang/String;
+	public final fun getRequestorLDAP ()Ljava/lang/String;
+	public final fun getRichDescription ()Ljava/lang/String;
+	public final fun getTimestampSent ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/audit/FakeAuditClientModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/audit/NoOpAuditClient : misk/audit/AuditClient {
+	public fun <init> ()V
+	public fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class misk/audit/NoOpAuditClientModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+

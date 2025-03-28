@@ -1,5 +1,6 @@
 package com.squareup.exemplar
 
+import com.squareup.exemplar.audit.ExemplarAuditClientModule
 import com.squareup.exemplar.dashboard.ExemplarDashboardModule
 import misk.MiskApplication
 import misk.MiskRealServiceModule
@@ -19,6 +20,7 @@ fun main(args: Array<String>) {
     ConfigModule.create("exemplar", config),
     DeploymentModule(deployment),
     ExemplarAccessModule(),
+    ExemplarAuditClientModule(config.audit),
     ExemplarDashboardModule(deployment),
     ExemplarMetadataModule(),
     ExemplarWebActionsModule(),

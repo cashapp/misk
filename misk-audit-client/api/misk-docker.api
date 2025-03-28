@@ -1,0 +1,26 @@
+public final class misk/docker/DockerCredential {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/docker/DockerCredential;
+	public static synthetic fun copy$default (Lmisk/docker/DockerCredential;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/docker/DockerCredential;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPassword ()Ljava/lang/String;
+	public final fun getUsername ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/docker/DockerCredentials {
+	public static final field DEFAULT_DOCKER_REGISTRY_URL Ljava/lang/String;
+	public static final field INSTANCE Lmisk/docker/DockerCredentials;
+	public final fun getDockerCredentials (Ljava/lang/String;Lokio/FileSystem;)Lmisk/docker/DockerCredential;
+	public static synthetic fun getDockerCredentials$default (Lmisk/docker/DockerCredentials;Ljava/lang/String;Lokio/FileSystem;ILjava/lang/Object;)Lmisk/docker/DockerCredential;
+}
+
+public final class misk/docker/DockerCredentialsKt {
+	public static final fun withLocalDockerCredentials (Lcom/github/dockerjava/core/DefaultDockerClientConfig$Builder;Ljava/lang/String;)Lcom/github/dockerjava/core/DefaultDockerClientConfig$Builder;
+	public static synthetic fun withLocalDockerCredentials$default (Lcom/github/dockerjava/core/DefaultDockerClientConfig$Builder;Ljava/lang/String;ILjava/lang/Object;)Lcom/github/dockerjava/core/DefaultDockerClientConfig$Builder;
+	public static final fun withMiskDefaults (Lcom/github/dockerjava/core/DefaultDockerClientConfig$Builder;)Lcom/github/dockerjava/core/DefaultDockerClientConfig$Builder;
+}
+
