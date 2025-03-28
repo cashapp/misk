@@ -63,6 +63,7 @@ dependencies {
   testImplementation(testFixtures(project(":misk-jdbc")))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-crypto")))
+  testImplementation(testFixtures(project(":misk-vitess")))
 }
 
 mavenPublishing {

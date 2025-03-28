@@ -3,8 +3,6 @@ package misk.jdbc
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
-import misk.database.DockerVitessCluster
-import misk.database.StartDatabaseService
 import misk.environment.DeploymentModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -19,6 +17,10 @@ import wisp.deployment.TESTING
 import java.sql.Connection
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
+import misk.testing.MiskExternalDependency
+import misk.vitess.testing.DefaultSettings
+import misk.vitess.testing.utilities.DockerVitess
+import java.sql.DriverManager
 
 @MiskTest(startService = true)
 internal class VitessTraditionalSchemaMigratorTest {
@@ -26,6 +28,7 @@ internal class VitessTraditionalSchemaMigratorTest {
   val config =
     MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", TESTING)
 
+  @MiskExternalDependency private val dockerVitess = DockerVitess
   @MiskTestModule
   val module = Modules.combine(
     deploymentModule,
@@ -34,10 +37,9 @@ internal class VitessTraditionalSchemaMigratorTest {
   )
 
   @Inject @Movies lateinit var schemaMigrator: SchemaMigrator
-  @Inject @Movies lateinit var databaseService: StartDatabaseService
   private lateinit var traditionalSchemaMigrator : TraditionalSchemaMigrator
 
-  private val shard = Shard(Keyspace("movies"), "-80")
+  private val shard = Shard(Keyspace("movies_sharded"), "-80")
 
   @BeforeEach fun createSchemaMigrationTable() {
     traditionalSchemaMigrator = schemaMigrator as TraditionalSchemaMigrator
@@ -46,18 +48,14 @@ internal class VitessTraditionalSchemaMigratorTest {
 
   @AfterEach fun cleanUpMigrationTable() {
     openDirectConnection()?.use { c ->
-      val schemaVersion = c.prepareStatement(
-        """
-            |DELETE FROM `vt_movies_-80`.schema_version
-            |""".trimMargin()
-      )
-      schemaVersion.executeUpdate()
+      c.createStatement().execute("USE `movies_sharded/-80`")
+      c.prepareStatement("DELETE FROM `schema_version`").executeUpdate()
     }
   }
 
   @Test fun availableMigrations() {
-    val migrations = traditionalSchemaMigrator.availableMigrations(Keyspace("movies"))
-    assertThat(migrations.map { it.version }).containsAll(listOf(1, 2))
+    val migrations = traditionalSchemaMigrator.availableMigrations(Keyspace("movies_sharded"))
+    assertThat(migrations.map { it.version }).containsAll(listOf(4, 5, 6, 7, 8))
   }
 
   @Test fun appliedMigrations() {
@@ -72,8 +70,11 @@ internal class VitessTraditionalSchemaMigratorTest {
 
     assertThat(traditionalSchemaMigrator.appliedMigrations(shard).map { it.version }).isEmpty()
 
-    insertSchemaMigration("1")
-    insertSchemaMigration("2")
+    insertSchemaMigration("4")
+    insertSchemaMigration("5")
+    insertSchemaMigration("6")
+    insertSchemaMigration("7")
+    insertSchemaMigration("8")
     // Test that this does not throw an exception
     traditionalSchemaMigrator.requireAll(shard)
   }
@@ -83,9 +84,10 @@ internal class VitessTraditionalSchemaMigratorTest {
     // but we can't insert into it (unless we specify -queryserver-config-allowunsafe-dmls which
     // vttestserver currently does not). So we bypass Vitess to insert into it directly.
     openDirectConnection()?.use { c ->
+      c.createStatement().execute("USE `movies_sharded/-80`")
       val schemaVersion = c.prepareStatement(
         """
-              |INSERT INTO `vt_movies_-80`.schema_version (version, installed_by) VALUES (?, ?)
+              |INSERT INTO `schema_version` (version, installed_by) VALUES (?, ?)
               |""".trimMargin()
       )
       schemaVersion.setString(1, version)
@@ -96,8 +98,11 @@ internal class VitessTraditionalSchemaMigratorTest {
 
   /** Open a direct connection to the Vitess MySQL instance. */
   private fun openDirectConnection(): Connection? {
-    val cluster = databaseService.server?.let { (it as DockerVitessCluster).cluster }
-    return cluster?.openMysqlConnection()
+    val vtgatePort = config.data_source.port ?: DefaultSettings.PORT
+    val url = "jdbc:mysql://localhost:$vtgatePort/@primary"
+    val dataSourceConfig = config.data_source
+    val connection = DriverManager.getConnection(url, dataSourceConfig.username, dataSourceConfig.password)
+    return connection
   }
 }
 

@@ -7,9 +7,14 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
+import misk.testing.MiskExternalDependency
+import misk.vitess.testing.utilities.DockerVitess
 
 @MiskTest(startService = true)
 internal class SchemaValidatorSuccessTest {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess
+
   @MiskTestModule
   val module = MoviesTestModule()
 

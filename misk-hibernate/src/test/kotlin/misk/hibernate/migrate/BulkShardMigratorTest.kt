@@ -19,9 +19,11 @@ import misk.hibernate.allowTableScan
 import misk.hibernate.shards
 import misk.hibernate.transaction
 import misk.jdbc.DataSourceType
+import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.vitess.Shard
+import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.IntegerAssert
 import org.assertj.core.api.ListAssert
@@ -125,13 +127,16 @@ abstract class BulkShardMigratorTest {
 
 @MiskTest(startService = true)
 class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess
+
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 
   @BeforeEach
   fun setup() {
     val movieShards = transacter.shards().filter { it.keyspace.name.startsWith("movie") }
-    assertThat(movieShards).hasSize(2)
+    assertThat(movieShards).hasSize(3)
   }
 
   /** Create a root entity and some child entities on one shard and migrate them to another.  */

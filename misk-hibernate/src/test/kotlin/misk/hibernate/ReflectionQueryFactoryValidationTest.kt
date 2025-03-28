@@ -6,10 +6,15 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
+import misk.testing.MiskExternalDependency
+import misk.vitess.testing.utilities.DockerVitess
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class ReflectionQueryFactoryValidationTest {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess
+
   @MiskTestModule
   val module = MoviesTestModule()
 

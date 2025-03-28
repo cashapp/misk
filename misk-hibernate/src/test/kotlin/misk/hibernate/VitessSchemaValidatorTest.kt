@@ -6,9 +6,14 @@ import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
 import com.google.inject.Provider
+import misk.testing.MiskExternalDependency
+import misk.vitess.testing.utilities.DockerVitess
 
 @MiskTest(startService = true)
 class VitessSchemaValidatorTest {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess
+
   @MiskTestModule
   val module = MoviesTestModule()
 

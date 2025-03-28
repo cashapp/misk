@@ -7,8 +7,10 @@ import misk.hibernate.VitessTransacterExtensions.save
 import misk.hibernate.VitessTransacterExtensions.shard
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
+import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.Disabled
@@ -820,6 +822,9 @@ class MySQLTransacterTest : TransacterTest() {
 
 @MiskTest(startService = true)
 class VitessMySQLTransacterTest : TransacterTest() {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess
+
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 }

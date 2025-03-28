@@ -1,5 +1,6 @@
 package misk.jdbc
 
+import misk.vitess.testing.DefaultSettings
 import org.junit.jupiter.api.Test
 import wisp.containers.ContainerUtil
 import wisp.deployment.TESTING
@@ -7,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class DataSourceConfigTest {
-  private val dockerVitessPort = 27103
+  private val dockerVitessPort = DefaultSettings.PORT;
 
   @Test
   fun buildVitessJDBCUrlNoSSL() {
@@ -87,7 +88,7 @@ class DataSourceConfigTest {
   fun buildVitessJDBCUrlWithPath() {
     val config = DataSourceConfig(
       DataSourceType.VITESS_MYSQL,
-      port = 27103,
+      port = dockerVitessPort,
       trust_certificate_key_store_path = "path/to/truststore",
       trust_certificate_key_store_password = "changeit",
       client_certificate_key_store_path = "path/to/keystore",

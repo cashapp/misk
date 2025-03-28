@@ -8,9 +8,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import jakarta.inject.Inject
+import misk.testing.MiskExternalDependency
+import misk.vitess.testing.utilities.DockerVitess
 
 @MiskTest(startService = true)
 class ChildEntityTest {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess
+
   @MiskTestModule
   val module = MoviesTestModule()
 

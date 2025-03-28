@@ -8,9 +8,14 @@ import org.hibernate.event.spi.EventType
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import jakarta.inject.Inject
+import misk.testing.MiskExternalDependency
+import misk.vitess.testing.utilities.DockerVitess
 
 @MiskTest(startService = true)
 class EventListenersTest {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess
+
   @MiskTestModule
   val module = Modules.combine(
     MoviesTestModule(),

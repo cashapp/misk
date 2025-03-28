@@ -1,6 +1,6 @@
 data_source:
   type: VITESS_MYSQL
-  username: vt_app
-  password: whatever
-  vitess_schema_resource_root: classpath:/misk/jdbc/vitess-schema
-  port: 27103
+  username: root
+  password: ""
+  vitess_schema_resource_root: classpath:/vitess/schema
+  port: 27003

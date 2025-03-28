@@ -1,8 +1,10 @@
 package misk.hibernate
 
 import jakarta.inject.Inject
+import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -10,6 +12,9 @@ import java.time.LocalDate
 /** Test that we can access Hibernate's SessionFactory directly. */
 @MiskTest(startService = true)
 class RawHibernateApiTest {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess
+
   @MiskTestModule
   val module = MoviesTestModule()
 

@@ -1,6 +1,0 @@
-data_source_clusters:
-  exemplar:
-    writer:
-      type: VITESS_MYSQL
-      username: vt_app
-      password: whatever

@@ -8,6 +8,8 @@ import misk.backoff.retry
 import misk.testing.TestFixture
 import misk.vitess.shards
 import misk.vitess.target
+import misk.vitess.testing.DefaultSettings
+import misk.vitess.testing.VitessTestDb
 import wisp.logging.getLogger
 import java.util.Locale
 import kotlin.reflect.KClass
@@ -26,6 +28,13 @@ class JdbcTestFixture(
     }
     val stopwatch = Stopwatch.createStarted()
 
+    if (dataSourceService.config().type == DataSourceType.VITESS_MYSQL) {
+      val vtgatePort = dataSourceService.config().port ?: DefaultSettings.PORT
+      VitessTestDb(port = vtgatePort).truncate()
+      logger.info("@${qualifier.simpleName} tables truncated via VitessTestDb in $stopwatch")
+      return
+    }
+
     val retryConfig = RetryConfig.Builder(3, FlatBackoff())
     val truncatedTableNames = retry(retryConfig.build()) {
       shards(dataSourceService).get().flatMap { shard ->
@@ -42,12 +51,12 @@ class JdbcTestFixture(
                   "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE TABLE_TYPE='TABLE'"
                 }
 
-                DataSourceType.VITESS_MYSQL -> {
-                  "SHOW VSCHEMA TABLES"
-                }
-
                 DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
                   "SELECT table_name FROM information_schema.tables WHERE table_catalog='${config.database}' AND table_schema='public'"
+                }
+
+                else -> {
+                  throw IllegalArgumentException("Unsupported database type for table truncation: ${config.type}")
                 }
               }
 
@@ -60,7 +69,7 @@ class JdbcTestFixture(
               connection.createStatement().use { statement ->
                 for (tableName in allTableNames) {
                   if (persistentTables.contains(tableName.lowercase(Locale.ROOT))) continue
-                  if (tableName.endsWith("_seq") || tableName.equals("dual")) continue
+                  if (tableName.equals("dual")) continue
 
                   if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.POSTGRESQL) {
                     statement.addBatch("TRUNCATE $tableName CASCADE")
