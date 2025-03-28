@@ -114,9 +114,14 @@ data class WebConfig @JvmOverloads constructor(
   val close_connection_percent: Double = 0.0,
 
   /**
-   * If true responses which are larger than the minGzipSize will be compressed.
+   * If true non-gRPC responses which are larger than the minGzipSize will be compressed.
    */
   val gzip: Boolean = true,
+
+  /**
+   * If true gRPC responses which are larger than the minGzipSize will be compressed.
+   */
+  val grpcGzip: Boolean = false,
 
   /** The minimum size in bytes before the response body will be compressed. */
   val minGzipSize: Int = 1024,

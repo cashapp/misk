@@ -26,7 +26,9 @@ internal class GrpcFeatureBinding(
   private val streamingRequest: Boolean,
   private val streamingResponse: Boolean,
   private val isSuspend: Boolean,
-  private val grpcMessageSourceChannelContext: CoroutineContext
+  private val grpcMessageSourceChannelContext: CoroutineContext,
+  private val grpcEncoding: String,
+  private val minMessageToCompress: Long,
 ) : FeatureBinding {
 
   override fun beforeCall(subject: Subject) {
@@ -35,6 +37,7 @@ internal class GrpcFeatureBinding(
       requestBody, requestAdapter,
       subject.httpCall.requestHeaders["grpc-encoding"]
     )
+    // TODO: support the "grpc-accept-encoding" header
 
     if (streamingRequest) {
       val param: Any = if (isSuspend) {
@@ -57,7 +60,12 @@ internal class GrpcFeatureBinding(
 
     if (streamingResponse) {
       val responseBody = subject.takeResponseBody()
-      val messageSink = GrpcMessageSink(responseBody, responseAdapter, grpcEncoding = "identity")
+      val messageSink = GrpcMessageSink(
+        sink = responseBody,
+        minMessageToCompress = minMessageToCompress,
+        messageAdapter = responseAdapter,
+        grpcEncoding = grpcEncoding,
+      )
       val param: Any = if (isSuspend) {
         GrpcMessageSinkChannel(
           channel = Channel(
@@ -82,7 +90,12 @@ internal class GrpcFeatureBinding(
     setResponseHeaders(subject)
 
     val responseBody = subject.takeResponseBody()
-    val messageSink = GrpcMessageSink(responseBody, responseAdapter, grpcEncoding = "identity")
+    val messageSink = GrpcMessageSink(
+      sink = responseBody,
+      minMessageToCompress = minMessageToCompress,
+      messageAdapter = responseAdapter,
+      grpcEncoding = grpcEncoding,
+    )
 
     // It's a single response, write the return value out.
     val returnValue = subject.takeReturnValue()!!
@@ -93,8 +106,7 @@ internal class GrpcFeatureBinding(
   private fun setResponseHeaders(subject: Subject) {
     subject.httpCall.requireTrailers()
 
-    // TODO(jwilson): permit non-identity GRPC encoding.
-    subject.httpCall.setResponseHeader("grpc-encoding", "identity")
+    subject.httpCall.setResponseHeader("grpc-encoding", grpcEncoding)
     subject.httpCall.setResponseHeader("grpc-accept-encoding", "gzip")
     subject.httpCall.setResponseHeader("Content-Type", MediaTypes.APPLICATION_GRPC)
 
@@ -117,6 +129,10 @@ internal class GrpcFeatureBinding(
         parallelism = webConfig.jetty_max_thread_pool_size,
         name = "GrpcMessageSourceChannel.bridgeFromSource"
       )
+
+    private val grpcEncoding = if (webConfig.grpcGzip) "gzip" else "identity"
+
+    private val minMessageToCompress = webConfig.minGzipSize.toLong()
 
     override fun create(
       action: Action,
@@ -160,6 +176,8 @@ internal class GrpcFeatureBinding(
           streamingResponse = streamingResponse,
           isSuspend = isSuspend,
           grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
+          grpcEncoding = grpcEncoding,
+          minMessageToCompress = minMessageToCompress,
         )
       } else {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
@@ -170,6 +188,8 @@ internal class GrpcFeatureBinding(
           streamingResponse = streamingResponse,
           isSuspend = isSuspend,
           grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
+          grpcEncoding = grpcEncoding,
+          minMessageToCompress = minMessageToCompress,
         )
       }
     }
