@@ -1,23 +1,21 @@
 package misk.resources
 
-import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.ProvidesIntoMap
 import com.google.inject.multibindings.StringMapKey
+import jakarta.inject.Qualifier
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import wisp.resources.ClasspathResourceLoaderBackend
+import wisp.resources.EnvironmentResourceLoaderBackend
 import wisp.resources.FakeFilesystemLoaderBackend
 import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.MemoryResourceLoaderBackend
-import jakarta.inject.Qualifier
-import jakarta.inject.Singleton
-import wisp.resources.EnvironmentResourceLoaderBackend
 import wisp.resources.ResourceLoader as WispResourceLoader
 
 class ResourceLoaderModule : KAbstractModule() {
   override fun configure() {
-    val mapBinder = MapBinder.newMapBinder(
-      binder(), String::class.java, WispResourceLoader.Backend::class.java
-    )
+    val mapBinder = newMapBinder<String, WispResourceLoader.Backend>()
+
     mapBinder.addBinding(ClasspathResourceLoaderBackend.SCHEME).toInstance(ClasspathResourceLoaderBackend)
     mapBinder.addBinding(FilesystemLoaderBackend.SCHEME).toInstance(FilesystemLoaderBackend)
     mapBinder.addBinding(MemoryResourceLoaderBackend.SCHEME).toInstance(MemoryResourceLoaderBackend())
@@ -31,9 +29,8 @@ class ResourceLoaderModule : KAbstractModule() {
  */
 class TestingResourceLoaderModule : KAbstractModule() {
   override fun configure() {
-    val mapBinder = MapBinder.newMapBinder(
-      binder(), String::class.java, WispResourceLoader.Backend::class.java
-    )
+    val mapBinder = newMapBinder<String, WispResourceLoader.Backend>()
+
     mapBinder.addBinding(ClasspathResourceLoaderBackend.SCHEME).toInstance(ClasspathResourceLoaderBackend)
     mapBinder.addBinding(MemoryResourceLoaderBackend.SCHEME).toInstance(MemoryResourceLoaderBackend())
     mapBinder.addBinding(EnvironmentResourceLoaderBackend.SCHEME).toInstance(EnvironmentResourceLoaderBackend)
