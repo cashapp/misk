@@ -42,6 +42,12 @@ class SqsMetrics @Inject internal constructor(metrics: Metrics) {
     listOf("QueueName")
   )
 
+  val jobsFailedToAcknowledge = metrics.counter(
+    "jobs_failed_acknowledge_v2_total",
+    "total # of jobs that we failed to acknowledge",
+    listOf("QueueName")
+  )
+
   val handlerFailures = metrics.counter(
     "job_handler_failures_v2_total",
     "total # of jobs whose handlers threw an exception",

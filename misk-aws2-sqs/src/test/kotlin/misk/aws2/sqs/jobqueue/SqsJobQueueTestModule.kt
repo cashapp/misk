@@ -1,8 +1,11 @@
 package misk.aws2.sqs.jobqueue
 
+import com.google.inject.Provides
 import misk.MiskTestingServiceModule
 import misk.annotation.ExperimentalMiskApi
+import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.cloud.aws.AwsEnvironmentModule
+import misk.cloud.aws.AwsRegion
 import misk.cloud.aws.FakeAwsEnvironmentModule
 import misk.inject.KAbstractModule
 import misk.inject.ReusableTestModule
@@ -23,6 +26,6 @@ class SqsJobQueueTestModule(
 
     bind<AwsCredentialsProvider>().toInstance(dockerSqs.credentialsProvider)
     bind<Region>().toInstance(dockerSqs.region)
-    install(SqsJobQueueModule { endpointOverride(dockerSqs.endpointUri) })
+    install(SqsJobQueueModule(SqsConfig()) { endpointOverride(dockerSqs.endpointUri) })
   }
 }

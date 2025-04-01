@@ -22,7 +22,7 @@ class SubscriptionService @Inject constructor(
       consumer.subscribe(
         queueName,
         handler,
-        config.per_queue_overrides[queueName.value] ?: config.all_queues,
+        config.getQueueConfig(queueName),
       )
     }
   }

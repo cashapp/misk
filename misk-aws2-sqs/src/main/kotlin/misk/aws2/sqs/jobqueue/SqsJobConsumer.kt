@@ -11,12 +11,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
-import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import wisp.logging.getLogger
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
@@ -44,8 +42,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 @Singleton
 class SqsJobConsumer @Inject constructor(
-  private val client: SqsAsyncClient,
-  private val queueResolver: QueueResolver,
+  private val sqsClientFactory: SqsClientFactory,
+  private val sqsQueueResolver: SqsQueueResolver,
   private val visibilityTimeoutCalculator: VisibilityTimeoutCalculator,
   private val moshi: Moshi,
   private val dlqProvider: DeadLetterQueueProvider,
@@ -62,28 +60,27 @@ class SqsJobConsumer @Inject constructor(
   }
 
   fun subscribe(queueName: QueueName, handler: JobHandler, queueConfig: SqsQueueConfig) {
-    val subscriber = runBlocking {
-      // We won't resolve dead letter queue yet to skip it for local development and testing
-      val deadLetterQueueName = dlqProvider.deadLetterQueueFor(queueName)
+    // We won't resolve dead letter queue yet to skip it for local development and testing
+    val deadLetterQueueName = dlqProvider.deadLetterQueueFor(queueName)
 
-      Subscriber(
-        queueName = queueName,
-        queueConfig = queueConfig,
-        deadLetterQueueName = deadLetterQueueName,
-        handler = handler,
-        channel = Channel(queueConfig.channel_capacity),
-        client = client,
-        queueResolver = queueResolver,
-        sqsMetrics = sqsMetrics,
-        moshi = moshi,
-        clock = clock,
-        tracer = tracer,
-        visibilityTimeoutCalculator = visibilityTimeoutCalculator,
-      )
-    }
+    val subscriber = Subscriber(
+      queueName = queueName,
+      queueConfig = queueConfig,
+      deadLetterQueueName = deadLetterQueueName,
+      handler = handler,
+      channel = Channel(queueConfig.channel_capacity),
+      client = sqsClientFactory.get(queueConfig.region!!),
+      sqsQueueResolver = sqsQueueResolver,
+      sqsMetrics = sqsMetrics,
+      moshi = moshi,
+      clock = clock,
+      tracer = tracer,
+      visibilityTimeoutCalculator = visibilityTimeoutCalculator,
+    )
 
     scope.launch { subscriber.poll() }
-    handlingScopes[queueName] = CoroutineScope(Dispatchers.IO.limitedParallelism(queueConfig.parallelism) + SupervisorJob())
+    handlingScopes[queueName] =
+      CoroutineScope(Dispatchers.IO.limitedParallelism(queueConfig.parallelism) + SupervisorJob())
     repeat(queueConfig.concurrency) {
       handlingScopes[queueName]?.launch { subscriber.run() }
     }
