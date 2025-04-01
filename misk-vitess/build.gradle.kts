@@ -26,6 +26,7 @@ dependencies {
   testFixturesImplementation(project(":misk-docker"))
   testFixturesImplementation(project(":wisp:wisp-moshi"))
   testFixturesImplementation(project(":wisp:wisp-resource-loader"))
+  testFixturesImplementation(project(":wisp:wisp-containers-testing"))
 
   testImplementation(libs.mysqlConnector)
   testImplementation(libs.junitApi)
