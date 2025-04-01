@@ -26,5 +26,4 @@ data class SqsQueueConfig @JvmOverloads constructor(
   val visibility_timeout: Int? = null,
   val region: String? = null,
   val account_id: String? = null,
-  val queue_name: String? = null,
 )

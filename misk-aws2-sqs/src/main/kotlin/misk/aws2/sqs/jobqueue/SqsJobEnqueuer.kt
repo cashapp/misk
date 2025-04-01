@@ -8,7 +8,7 @@ import io.opentracing.Scope
 import io.opentracing.Span
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
-import kotlinx.coroutines.future.await
+import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.jobqueue.QueueName
 import misk.jobqueue.sqs.parentQueue
 import misk.jobqueue.v2.JobEnqueuer
@@ -17,17 +17,20 @@ import misk.tokens.TokenGenerator
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 
 @Singleton
 class SqsJobEnqueuer @Inject constructor(
-  private val client: SqsAsyncClient,
-  private val queueResolver: QueueResolver,
+  private val sqsClientFactory: SqsClientFactory,
+  private val sqsConfig: SqsConfig,
+  private val sqsQueueResolver: SqsQueueResolver,
   private val tokenGenerator: TokenGenerator,
   private val sqsMetrics: SqsMetrics,
   private val moshi: Moshi,
   private val tracer: Tracer,
+  private val clock: Clock,
 ) : JobEnqueuer {
   /**
    * Enqueue the job and return a CompletableFuture.
@@ -42,7 +45,7 @@ class SqsJobEnqueuer @Inject constructor(
     attributes: Map<String, String>,
   ): CompletableFuture<Boolean> {
     return tracer.withSpanAsync("enqueue-job-${queueName.value}") { span, scope ->
-      val queueUrl = queueResolver.getQueueUrl(queueName)
+      val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
       val resolvedIdempotencyKey = idempotencyKey ?: tokenGenerator.generate()
 
       val attrs = attributes.map {
@@ -58,12 +61,14 @@ class SqsJobEnqueuer @Inject constructor(
         .messageAttributes(attrs)
         .build()
 
-      val timer = sqsMetrics.sqsSendTime.labels(queueName.value).startTimer()
+      val startTime = clock.millis()
       try {
+        val region = sqsConfig.getQueueConfig(queueName).region!!
+        val client = sqsClientFactory.get(region)
         val response = client.sendMessage(request)
         sqsMetrics.jobsEnqueued.labels(queueName.value).inc()
         response.whenComplete { _, _ ->
-          timer.observeDuration()
+          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
           span.finish()
           scope.close()
         }.thenCompose { CompletableFuture.supplyAsync { true } }

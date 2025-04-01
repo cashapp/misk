@@ -17,6 +17,7 @@ import software.amazon.awssdk.regions.Region
 @OptIn(ExperimentalMiskApi::class)
 class SqsJobHandlerTestModule(
   private val dockerSqs: DockerSqs,
+  private val sqsConfig: SqsConfig,
 ) : ReusableTestModule() {
   override fun configure() {
     install(MiskTestingServiceModule())
@@ -28,8 +29,9 @@ class SqsJobHandlerTestModule(
     bind<AwsCredentialsProvider>().toInstance(dockerSqs.credentialsProvider)
     bind<Region>().toInstance(dockerSqs.region)
 
-    install(SqsJobQueueModule { endpointOverride(dockerSqs.endpointUri) })
-    install(SqsJobHandlerModule.create<ExampleHandler>(QueueName("test-queue-1"), SqsConfig()))
+    install(SqsJobQueueModule(sqsConfig) { endpointOverride(dockerSqs.endpointUri) })
+    install(SqsJobHandlerModule.create<ExampleHandler>(QueueName("test-queue-1")))
+    install(SqsJobHandlerModule.create<ExampleExternalQueueHandler>(QueueName("external-test-queue")))
     install(ServiceModule<SubscriptionService>().dependsOn<ReadyService>())
   }
 }

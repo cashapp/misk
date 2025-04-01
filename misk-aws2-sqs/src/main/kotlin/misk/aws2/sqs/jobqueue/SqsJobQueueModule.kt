@@ -4,6 +4,7 @@ import com.google.inject.Provides
 import misk.ReadyService
 import misk.ServiceModule
 import misk.annotation.ExperimentalMiskApi
+import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import misk.jobqueue.v2.JobConsumer
@@ -18,6 +19,7 @@ import java.net.URI
 
 @ExperimentalMiskApi
 open class SqsJobQueueModule @JvmOverloads constructor(
+  private val config: SqsConfig,
   private val configureClient: SqsAsyncClientBuilder.() -> Unit = {}
 ) : KAbstractModule() {
   override fun configure() {
@@ -29,15 +31,22 @@ open class SqsJobQueueModule @JvmOverloads constructor(
   }
 
   @Provides
-  fun sqsAsyncClient(
-    credentialsProvider: AwsCredentialsProvider,
-    awsRegion: AwsRegion,
-  ): SqsAsyncClient {
-    val builder = SqsAsyncClient.builder()
-      .credentialsProvider(credentialsProvider)
-      .region(Region.of(awsRegion.name))
+  fun sqsConfig(awsRegion: AwsRegion): SqsConfig {
+    return if (config.all_queues.region != null) {
+      config
+    } else {
+      config.copy(
+        all_queues = config.all_queues.copy(
+          region = awsRegion.name
+        )
+      )
+    }
+  }
 
-    builder.configureClient()
-    return builder.build()
+  @Provides
+  fun sqsClientClientFactory(
+    credentialsProvider: AwsCredentialsProvider,
+  ) : SqsClientFactory {
+    return SqsClientFactory(credentialsProvider, configureClient)
   }
 }

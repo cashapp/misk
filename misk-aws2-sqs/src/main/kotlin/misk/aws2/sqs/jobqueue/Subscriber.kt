@@ -22,11 +22,8 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import wisp.logging.getLogger
-import java.math.BigInteger
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
-import kotlin.math.log
-import kotlin.random.Random
 
 /**
  * Subscriber reads jobs from the channel and passes them to handler.
@@ -41,7 +38,7 @@ class Subscriber(
   val handler: JobHandler,
   val channel: Channel<SqsJob>,
   val client: SqsAsyncClient,
-  val queueResolver: QueueResolver,
+  val sqsQueueResolver: SqsQueueResolver,
   val sqsMetrics: SqsMetrics,
   val moshi: Moshi,
   val clock: Clock,
@@ -54,11 +51,11 @@ class Subscriber(
         channel.receive()
       }
       tracer.withSpan("process-queue-${queueName.value}") {
-        val receiveFromChannelTimestamp = clock.instant().nano
+        val receiveFromChannelTimestamp = clock.millis()
         sqsMetrics.channelReceiveLag.labels(queueName.value)
           .observe((receiveFromChannelTimestamp - job.publishToChannelTimestamp).toDouble())
         val result = try {
-          val timer = sqsMetrics.handlerDispatchTime.labels(queueName.value).startTimer()
+          val startTime = clock.millis()
           val result = tracer.withSpan("handle-queue-${queueName.value}") {
             when (handler) {
               is SuspendingJobHandler -> handler.handleJob(job)
@@ -67,7 +64,7 @@ class Subscriber(
               }
             }
           }
-          timer.observeDuration()
+          sqsMetrics.handlerDispatchTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
           result
         } catch (e: Exception) {
           sqsMetrics.handlerFailures.labels(queueName.value).inc()
@@ -119,28 +116,40 @@ class Subscriber(
       .observe(visibilityTime.toDouble())
   }
 
+  /**
+   * Removes job from the queue.
+   *
+   * We may fail to acknowledge a job if visibility timeout is too short comparing to processing
+   * time, and we get concurrent acknowledgments
+   */
   private suspend fun deleteMessage(job: SqsJob) {
-    val timer = sqsMetrics.sqsDeleteTime.labels(queueName.value).startTimer()
-    client.deleteMessage(
-      DeleteMessageRequest.builder()
-        .queueUrl(job.queueUrl)
-        .receiptHandle(job.message.receiptHandle())
-        .build()
-    ).await()
-    timer.observeDuration()
+    val startTime = clock.millis()
+    try {
+      client.deleteMessage(
+        DeleteMessageRequest.builder()
+          .queueUrl(job.queueUrl)
+          .receiptHandle(job.message.receiptHandle())
+          .build()
+      ).await()
+    } catch (e: Exception) {
+      logger.warn { "Failed to acknowledge job ${job.idempotenceKey} from queue ${job.queueName.value}"}
+      sqsMetrics.jobsFailedToAcknowledge.labels(queueName.value).inc()
+      return
+    }
+    sqsMetrics.sqsDeleteTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
     sqsMetrics.jobsAcknowledged.labels(queueName.value).inc()
   }
 
   private suspend fun deadLetterMessage(job: SqsJob) {
-    val deadLetterQueueUrl = queueResolver.getQueueUrl(deadLetterQueueName)
-    val timer = sqsMetrics.sqsSendTime.labels(deadLetterQueueName.value).startTimer()
+    val deadLetterQueueUrl = sqsQueueResolver.getQueueUrl(deadLetterQueueName)
+    val startTime = clock.millis()
     client.sendMessage(
       SendMessageRequest.builder()
         .queueUrl(deadLetterQueueUrl)
         .messageBody(job.body)
         .build()
     ).await()
-    timer.observeDuration()
+    sqsMetrics.sqsSendTime.labels(deadLetterQueueName.value).observe((clock.millis() - startTime).toDouble())
     sqsMetrics.jobsDeadLettered.labels(queueName.value).inc()
   }
 
@@ -158,14 +167,15 @@ class Subscriber(
   }
 
   private fun messageFlow(queueName: QueueName) = flow {
-    val queueUrl = queueResolver.getQueueUrl(queueName)
+    val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
     while (true) {
-      val timer = sqsMetrics.sqsReceiveTime.labels(queueName.value).startTimer()
+      val startTime = clock.millis()
       val response = fetchMessages(queueUrl).await()
-      timer.observeDuration()
+      sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
 
       sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
       response.messages().forEach { message ->
+        logger.info { "Receipt handler ${message.receiptHandle()}" }
         message.attributes()[MessageSystemAttributeName.SENT_TIMESTAMP]?.let {
           val sentTimestamp = it.toLong()
           val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli().toDouble()
@@ -175,14 +185,14 @@ class Subscriber(
           }
           sqsMetrics.queueProcessingLag.labels(queueName.value).observe(processingLag)
         }
-        val publishToChannelTimestamp = clock.instant()
+        val publishToChannelTimestamp = clock.millis()
         emit(
           SqsJob(
             queueName = queueName,
             moshi = moshi,
             message = message,
             queueUrl = queueUrl,
-            publishToChannelTimestamp = publishToChannelTimestamp.toEpochMilli()
+            publishToChannelTimestamp = publishToChannelTimestamp
           )
         )
       }
@@ -199,5 +209,9 @@ class Subscriber(
       .visibilityTimeout(queueConfig.visibility_timeout)
       .build()
     return client.receiveMessage(request)
+  }
+
+  companion object {
+    val logger = getLogger<Subscriber>()
   }
 }

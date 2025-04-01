@@ -36,7 +36,11 @@ class SqsJobConsumerTest {
     val result = createQueue(queueName)
 
     val latch = CountDownLatch(10)
-    jobConsumer.subscribe(queueName, getHandler(latch))
+    jobConsumer.subscribe(
+      queueName, getHandler(latch), SqsQueueConfig(
+      region = "us-west-2",
+    )
+    )
     repeat(10) {
       sendMessage(result.queueUrl, "message")
     }
@@ -57,11 +61,14 @@ class SqsJobConsumerTest {
       sendMessage(result.queueUrl, "message")
     }
 
-    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(
+    jobConsumer.subscribe(
+      queueName, getHandler(latch), SqsQueueConfig(
       parallelism = 1,
       concurrency = 1,
-      channel_capacity = 0
-    ))
+      channel_capacity = 0,
+      region = "us-west-2",
+    )
+    )
 
     latch.await(10, SECONDS)
     assertEquals(0, latch.count)
@@ -83,8 +90,8 @@ class SqsJobConsumerTest {
       }
     }
 
-    jobConsumer.subscribe(queueName1, getHandler(latch1))
-    jobConsumer.subscribe(queueName2, getHandler(latch2))
+    jobConsumer.subscribe(queueName1, getHandler(latch1), SqsQueueConfig(region = "us-west-2"))
+    jobConsumer.subscribe(queueName2, getHandler(latch2), SqsQueueConfig(region = "us-west-2"))
 
     latch1.await(10, SECONDS)
     assertEquals(0, latch1.count)
@@ -108,16 +115,22 @@ class SqsJobConsumerTest {
       }
     }
 
-    jobConsumer.subscribe(queueName1, getHandler(latch1), SqsQueueConfig(
+    jobConsumer.subscribe(
+      queueName1, getHandler(latch1), SqsQueueConfig(
       parallelism = 1,
       concurrency = 3,
-      channel_capacity = 0
-    ))
-    jobConsumer.subscribe(queueName2, getHandler(latch2), SqsQueueConfig(
+      channel_capacity = 0,
+      region = "us-west-2",
+    )
+    )
+    jobConsumer.subscribe(
+      queueName2, getHandler(latch2), SqsQueueConfig(
       parallelism = 1,
       concurrency = 5,
-      channel_capacity = 0
-    ))
+      channel_capacity = 0,
+      region = "us-west-2",
+    )
+    )
 
     latch1.await(10, SECONDS)
     assertEquals(0, latch1.count)
@@ -134,8 +147,10 @@ class SqsJobConsumerTest {
 
     // Use explicit 2 seconds visibility timeout. After that messages should be reconsumed
     // and processed successfully. Intermittent issues handler will fail on the first processing
-    jobConsumer.subscribe(queueName, getIntermittentIssuesHandler(latch), SqsQueueConfig(
-      visibility_timeout = 2
+    jobConsumer.subscribe(
+      queueName, getIntermittentIssuesHandler(latch), SqsQueueConfig(
+      visibility_timeout = 2,
+      region = "us-west-2",
     )
     )
 
@@ -156,7 +171,8 @@ class SqsJobConsumerTest {
       queueName,
       getRetryWithBackoffHandler(latch),
       SqsQueueConfig(
-        visibility_timeout = 1
+        visibility_timeout = 1,
+        region = "us-west-2",
       )
     )
 
@@ -171,7 +187,7 @@ class SqsJobConsumerTest {
     val latch = CountDownLatch(1)
     sendMessage(result.queueUrl, "message")
 
-    jobConsumer.subscribe(queueName, getHandler(latch))
+    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(region = "us-west-2"))
 
     latch.await(5, SECONDS)
     assertEquals(0, latch.count)
@@ -186,7 +202,7 @@ class SqsJobConsumerTest {
     sendMessage(result.queueUrl, "message")
 
     val latch = CountDownLatch(1)
-    jobConsumer.subscribe(queueName, getFailingHandler())
+    jobConsumer.subscribe(queueName, getFailingHandler(), SqsQueueConfig(region = "us-west-2"))
 
     latch.await(1, SECONDS)
 
@@ -200,7 +216,7 @@ class SqsJobConsumerTest {
     val result = createQueue(queueName)
 
     val latch = CountDownLatch(2)
-    jobConsumer.subscribe(queueName, getHandler(latch))
+    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(region = "us-west-2"))
 
     sendMessage(result.queueUrl, "message")
     sendMessage(result.retryQueueUrl, "message")
@@ -218,7 +234,11 @@ class SqsJobConsumerTest {
     val result = createQueue(queueName)
 
     val latch = CountDownLatch(1)
-    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(install_retry_queue = false))
+    jobConsumer.subscribe(
+      queueName,
+      getHandler(latch),
+      SqsQueueConfig(install_retry_queue = false, region = "us-west-2")
+    )
 
     sendMessage(result.queueUrl, "message")
     sendMessage(result.retryQueueUrl, "message")
@@ -241,11 +261,14 @@ class SqsJobConsumerTest {
     }
 
     val latch = CountDownLatch(20000)
-    jobConsumer.subscribe(queueName, getDelayingHandler(latch), SqsQueueConfig(
+    jobConsumer.subscribe(
+      queueName, getDelayingHandler(latch), SqsQueueConfig(
       parallelism = 10,
       concurrency = 50,
-      channel_capacity = 5
-    ))
+      channel_capacity = 5,
+      region = "us-west-2",
+    )
+    )
 
     // and push the subscriber a little bit more
     repeat(10000) {
@@ -262,13 +285,16 @@ class SqsJobConsumerTest {
     val result = createQueue(queueName)
 
     val latch = CountDownLatch(10)
-    jobConsumer.subscribe(queueName, object : BlockingJobHandler {
-      override fun handleJob(job: Job): JobStatus {
-        logger.info { "Handling job: body=${job.body} queue=${job.queueName.value}" }
-        latch.countDown()
-        return JobStatus.OK
-      }
-    })
+    jobConsumer.subscribe(
+      queueName, object : BlockingJobHandler {
+        override fun handleJob(job: Job): JobStatus {
+          logger.info { "Handling job: body=${job.body} queue=${job.queueName.value}" }
+          latch.countDown()
+          return JobStatus.OK
+        }
+      },
+      SqsQueueConfig(region = "us-west-2")
+    )
 
     repeat(10) {
       sendMessage(result.queueUrl, "message $it")
@@ -307,7 +333,8 @@ class SqsJobConsumerTest {
         .attributes(
           mapOf(
             QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
-          ))
+          )
+        )
         .build()
     ).join()
     val retryResult = DockerSqs.client.createQueue(
@@ -315,7 +342,8 @@ class SqsJobConsumerTest {
         .attributes(
           mapOf(
             QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
-          ))
+          )
+        )
         .build()
     ).join()
     val dlqResult = DockerSqs.client.createQueue(
@@ -323,7 +351,8 @@ class SqsJobConsumerTest {
         .attributes(
           mapOf(
             QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
-          ))
+          )
+        )
         .build()
     ).join()
     return CreatedQueues(result.queueUrl(), retryResult.queueUrl(), dlqResult.queueUrl())
