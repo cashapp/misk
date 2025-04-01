@@ -12,7 +12,7 @@ import MiskType from '@web-actions/api/MiskType';
 
 export default class Field extends AstNode {
   name: StrLiteral;
-  value: JsonValue | null;
+  value: JsonValue | Unexpected | null;
 
   colonIndex: number | null;
   cursorInValuePosition: boolean = false;
@@ -27,14 +27,7 @@ export default class Field extends AstNode {
     super();
     this.colonIndex = colonIndex;
     this.name = name;
-    if (value instanceof JsonValue) {
-      this.value = value ?? null;
-    } else if (value instanceof Unexpected) {
-      this.unexpected = [value];
-      this.value = null;
-    } else {
-      this.value = null;
-    }
+    this.value = value ?? null;
 
     if (this.value) {
       this.value.parent = this;

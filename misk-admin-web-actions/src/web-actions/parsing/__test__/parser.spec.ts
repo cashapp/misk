@@ -2,6 +2,7 @@ import { CommandParser } from '@web-actions/parsing/CommandParser';
 import StrLiteral from '@web-actions/parsing/ast/StrLiteral';
 import Obj from '@web-actions/parsing/ast/Obj';
 import Arr from '@web-actions/parsing/ast/Arr';
+import Unexpected from 'src/web-actions/parsing/ast/Unexpected';
 
 function parser(text: string): CommandParser {
   return new CommandParser(text);
@@ -54,8 +55,7 @@ test('array', () => {
 test('array error', () => {
   const result = parser(`["a" ! ]`).parseArr();
 
-  expect(result?.values.length).toEqual(1);
+  expect(result?.values.length).toEqual(2);
   expect(result?.values[0].as<StrLiteral>()?.value).toEqual('a');
-  expect(result?.unexpected.length).toEqual(1);
-  expect(result?.unexpected[0].value).toEqual('!');
+  expect(result?.values[1].as<Unexpected>()?.value).toEqual('!');
 });

@@ -1,7 +1,6 @@
 import AstNode from '@web-actions/parsing/ast/AstNode';
 
 import JsonValue from '@web-actions/parsing/ast/JsonValue';
-import Unexpected from '@web-actions/parsing/ast/Unexpected';
 import MiskType from '@web-actions/api/MiskType';
 import { MiskObjectTypes } from '@web-actions/api/responseTypes';
 
@@ -9,10 +8,9 @@ export default class Arr extends JsonValue {
   values: JsonValue[];
   type?: MiskType;
 
-  constructor(values: JsonValue[], unexpected: Unexpected[]) {
+  constructor(values: JsonValue[]) {
     super();
     this.values = values;
-    this.unexpected = unexpected;
 
     for (const value of values) {
       value.parent = this;
