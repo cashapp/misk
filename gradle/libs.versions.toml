@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.31.11"
+aws2 = "2.31.12"
 bucket4j = "8.8.0"
 datadog = "1.47.3"
 dependencyAnalysisPlugin = "2.13.3"
@@ -237,6 +237,6 @@ kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 mavenPublishBase = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublish" }
-protobuf = { id = "com.google.protobuf", version = "0.9.4" }
+protobuf = { id = "com.google.protobuf", version = "0.9.5" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
