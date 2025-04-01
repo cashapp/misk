@@ -69,9 +69,7 @@ internal class DashboardIFrameTabAction @Inject constructor(
               AlertError("No Misk-Web tab found for slug: $slug. Check your install bindings or Misk-Web build.")
             }
           } else {
-            // TODO remove this hack when new Web Actions tab lands and old ones removed, v1 and v2 are in the same web-actions tab
-            val normalizedSlug =
-              if (dashboardTab.slug == "web-actions-v1") "web-actions" else dashboardTab.slug
+            val normalizedSlug = dashboardTab.slug
             val tabEntrypointJs = "/_tab/${normalizedSlug}/tab_${normalizedSlug}.js"
 
             // If tab is Misk-Web do additional checks and show separate development and real errors
@@ -113,12 +111,14 @@ internal class DashboardIFrameTabAction @Inject constructor(
             // If tab is Misk-Web do additional checks and show separate development and real errors
             if (deployment.isLocalDevelopment) {
               // If local development, check web proxy action and show fuller development 404 message
-              val tabEntrypointJsResponse = webProxyAction
+              val proxyResponse = webProxyAction
                 .getResponse((hostname / iframeTab.iframePath).toHttpUrl())
-              if (tabEntrypointJsResponse.statusCode != 200) {
+              val staticResponse = staticResourceAction
+                .getResponse((hostname / iframeTab.iframePath).toHttpUrl())
+              if (proxyResponse.statusCode != 200 && staticResponse.statusCode != 200) {
                 div("container mx-auto p-8") {
                   AlertError("Failed to load tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel}")
-                  if (iframeTab.iframePath == "/_tab/web-actions-v4/index.html") {
+                  if (iframeTab.iframePath == "/_tab/web-actions/index.html") {
                     AlertInfo("In local development, this can be from not having your local dev server (ie. Webpack) running or not doing an initial local frontend build to generate the necessary web assets. Try running in your Terminal: \$ gradle :misk:misk-admin:buildAndCopyWebActions.")
                   } else {
                     AlertInfo("In local development, this can be from not having your local dev server (ie. Webpack) running or not doing an initial local frontend build to generate the necessary web assets. Try running in your Terminal: \$ gradle buildMiskWeb OR \$ misk-web ci-build -e.")

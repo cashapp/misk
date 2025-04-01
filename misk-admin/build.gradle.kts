@@ -146,7 +146,6 @@ abstract class MiskWebBuildTask @Inject constructor(
 
 val tabDirs = listOf(
   "web/tabs/database",
-  "web/tabs/web-actions",
 )
 
 val buildMiskWeb = tasks.register("buildMiskWeb", MiskWebBuildTask::class.java) {
@@ -187,7 +186,7 @@ tasks.register<Copy>("buildAndCopyWebActions") {
   from({
     project(":misk-admin-web-actions").tasks.named("buildWebActionsTab").get().outputs.files
   })
-  into(project.layout.buildDirectory.dir("resources/main/web/_tab/web-actions-v4"))
+  into(project.layout.buildDirectory.dir("resources/main/web/_tab/web-actions"))
   dependsOn(":misk-admin-web-actions:buildWebActionsTab")
 }
 

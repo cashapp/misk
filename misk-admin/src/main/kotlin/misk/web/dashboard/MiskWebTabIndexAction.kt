@@ -33,9 +33,7 @@ class MiskWebTabIndexAction @Inject constructor(
   fun get(@PathParam slug: String?): String {
     val dashboardTab = dashboardTabs.firstOrNull { slug == it.slug }
       ?: throw NotFoundException("No Misk-Web tab found for slug: $slug")
-    // TODO remove this hack when new Web Actions tab lands and old ones removed, v1 and v2 are in the same web-actions tab
-    val normalizedSlug = if (dashboardTab.slug == "web-actions-v1") "web-actions" else dashboardTab.slug
-    val tabEntrypointJs = "/_tab/${normalizedSlug}/tab_${normalizedSlug}.js"
+    val tabEntrypointJs = "/_tab/${dashboardTab.slug}/tab_${dashboardTab.slug}.js"
 
     return buildHtml {
       html {
@@ -52,7 +50,7 @@ class MiskWebTabIndexAction @Inject constructor(
 
             // App anchor
             div {
-              id = normalizedSlug
+              id = dashboardTab.slug
             }
           }
 
