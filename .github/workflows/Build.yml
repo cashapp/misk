@@ -45,8 +45,9 @@ jobs:
         image: redis:7.2
         ports:
           - 6379:6379
-        options: >-
-          --loglevel debug
+# TODO: fix and re-enable, this was failing in CI with `unknown flag: --loglevel`
+#        options: >-
+#          --loglevel debug
 
     strategy:
       matrix:
