@@ -1,11 +1,13 @@
 package misk.vitess.testing.internal
 
+import wisp.containers.ContainerUtil
+
 class VitessClusterConfig(port: Int) {
   val vtgatePort: Int = port
   val mysqlPort: Int = port - 1
   val grpcPort: Int = port - 2
   val basePort: Int = port - 3
-  val hostname: String = System.getenv("VITESS_HOST") ?: "localhost"
+  val hostname: String = System.getenv("VITESS_HOST") ?: ContainerUtil.dockerTargetOrLocalHost()
   val vtgateUser: String = "root"
   val vtgateUserPassword: String = ""
   val dbaUser: String = "vt_dba_tcp_full"
