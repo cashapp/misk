@@ -1,11 +1,7 @@
-import Unexpected from '@web-actions/parsing/ast/Unexpected';
-
 export default class AstNode {
   start?: number;
   end?: number;
   hasCursor: boolean = false;
-  unexpected: Unexpected[] = [];
-
   parent?: AstNode;
 
   childNodes(): AstNode[] {
@@ -34,6 +30,18 @@ export default class AstNode {
       }
     }
     return null;
+  }
+
+  findAll(predicate: (a: AstNode) => boolean): AstNode[] {
+    const arr: AstNode[] = [];
+    if (predicate(this)) {
+      arr.push(this);
+    }
+    for (const child of this.childNodes()) {
+      const result = child.findAll(predicate);
+      arr.push(...result);
+    }
+    return arr;
   }
 
   render(): string {

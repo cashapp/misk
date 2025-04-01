@@ -2,13 +2,15 @@ export type AppEventType =
   | 'focus-endpoint-selector'
   | 'toggle-help'
   | 'submit-request'
-  | 'endpoint-selected';
+  | 'endpoint-selected'
+  | 'show-error-toast';
 
 export const APP_EVENTS = {
   FOCUS_ENDPOINT_SELECTOR: 'focus-endpoint-selector' as const,
   TOGGLE_HELP: 'toggle-help' as const,
   SUBMIT_REQUEST: 'submit-request' as const,
   ENDPOINT_SELECTED: 'endpoint-selected' as const,
+  SHOW_ERROR_TOAST: 'show-error-toast' as const,
 };
 
 class AppEventBus {

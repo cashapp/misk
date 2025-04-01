@@ -13,7 +13,7 @@ import Unexpected from '@web-actions/parsing/ast/Unexpected';
 import NumLiteral from '@web-actions/parsing/ast/NumLiteral';
 import BoolLiteral from '@web-actions/parsing/ast/BoolLiteral';
 
-export function parseDocument(text: string, cursorIndex: number): TopLevel {
+export function parseDocument(text: string, cursorIndex?: number): TopLevel {
   return new CommandParser(text, cursorIndex).parse();
 }
 
@@ -172,13 +172,13 @@ export class CommandParser {
         } else {
           const u = this.readUnexpected();
           if (u) {
-            unexpected.push(u);
+            arr.push(u);
           } else {
             break;
           }
         }
       }
-      return new Arr(arr, unexpected);
+      return new Arr(arr);
     });
   }
 

@@ -5,18 +5,11 @@ import Obj from '@web-actions/parsing/ast/Obj';
 import MiskType from '@web-actions/api/MiskType';
 
 export default class TopLevel extends AstNode {
-  obj: Obj | null;
+  obj: Obj | Unexpected | null;
 
   constructor(obj: Obj | Unexpected | null) {
     super();
-    if (obj instanceof Obj) {
-      this.obj = obj;
-    } else if (obj instanceof Unexpected) {
-      this.unexpected = [obj];
-      this.obj = null;
-    } else {
-      this.obj = null;
-    }
+    this.obj = obj;
     this.hasCursor = true;
 
     if (this.obj) {
@@ -30,6 +23,14 @@ export default class TopLevel extends AstNode {
 
   render(): string {
     return this.obj?.render() ?? '';
+  }
+
+  firstError(): Unexpected | null {
+    return (
+      (this.findAll(
+        (node): node is Unexpected => node instanceof Unexpected,
+      )[0] as Unexpected) ?? null
+    );
   }
 
   applyTypes(actionDefinition: MiskWebActionDefinition | null) {

@@ -1,5 +1,6 @@
-import { CommandParser } from '@web-actions/parsing/CommandParser';
+import { parseDocument } from '@web-actions/parsing/CommandParser';
 import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
+import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 export interface Header {
   key: string;
@@ -22,8 +23,16 @@ export class ApiService {
   }: RequestOptions): Promise<string> {
     const headers: Record<string, string> = {};
 
+    let body: string | undefined = undefined;
     if (action.httpMethod !== 'GET') {
       headers['Content-Type'] = 'application/json';
+
+      const topLevel = parseDocument(requestBody ?? '');
+      if (topLevel?.firstError() !== null) {
+        appEvents.emit(APP_EVENTS.SHOW_ERROR_TOAST);
+        return '';
+      }
+      body = topLevel.render();
     }
 
     additionalHeaders.forEach((header) => {
@@ -35,10 +44,7 @@ export class ApiService {
     const fetchOptions = {
       method: action.httpMethod,
       headers: headers,
-      body:
-        action.httpMethod !== 'GET'
-          ? new CommandParser(requestBody ?? '').parse()?.render()
-          : undefined,
+      body: body,
     };
 
     const response = await fetch(path, fetchOptions);

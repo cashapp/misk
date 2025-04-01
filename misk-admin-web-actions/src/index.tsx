@@ -12,6 +12,7 @@ import {
   Input,
   IconButton,
   Button,
+  useToast,
 } from '@chakra-ui/react';
 import { DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import HelpPanel from '@web-actions/ui/HelpPanel';
@@ -43,6 +44,7 @@ function App() {
   }));
   const endPointSelectorRef = useRef<EndpointSelector>(null);
   const requestEditorRef = useRef<RequestEditor>(null);
+  const toast = useToast();
 
   const {
     submit: handleSubmitRequest,
@@ -55,7 +57,7 @@ function App() {
     () => requestEditorRef.current?.editor?.getValue() ?? '',
   );
 
-  useAppEvent<ActionGroup>(APP_EVENTS.ENDPOINT_SELECTED, (selectedAction) => {
+  useAppEvent(APP_EVENTS.ENDPOINT_SELECTED, (selectedAction: ActionGroup) => {
     const callables = selectedAction.getCallablesByMethod();
     const defaultCallable = callables[0];
 
@@ -81,6 +83,16 @@ function App() {
   useAppEvent(APP_EVENTS.SUBMIT_REQUEST, handleSubmitRequest);
   useAppEvent(APP_EVENTS.FOCUS_ENDPOINT_SELECTOR, () => {
     endPointSelectorRef.current?.focusSelect();
+  });
+
+  useAppEvent(APP_EVENTS.SHOW_ERROR_TOAST, () => {
+    toast({
+      title: 'Error',
+      description: 'There are syntax or field name errors in the JSON Request',
+      status: 'error',
+      duration: 5000,
+      isClosable: true,
+    });
   });
 
   useEffect(() => {

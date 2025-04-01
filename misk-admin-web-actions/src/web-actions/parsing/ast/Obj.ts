@@ -13,6 +13,7 @@ import MiskType from '@web-actions/api/MiskType';
 export default class Obj extends JsonValue {
   fields: Field[];
   type?: MiskObjectType;
+  unexpected: Unexpected[];
 
   constructor(fields: Field[], unexpected: Unexpected[]) {
     super();
@@ -24,7 +25,7 @@ export default class Obj extends JsonValue {
   }
 
   childNodes(): AstNode[] {
-    return this.fields;
+    return [...this.fields, ...this.unexpected];
   }
 
   render(): string {

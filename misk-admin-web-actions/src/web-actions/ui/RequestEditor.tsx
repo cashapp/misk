@@ -5,12 +5,13 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 import { ContextAwareCompleter } from '@web-actions/ui/ContextAwareCompleter';
 import { Box, IconButton, Spinner } from '@chakra-ui/react';
 import { CopyIcon } from '@chakra-ui/icons';
-import { CommandParser } from '@web-actions/parsing/CommandParser';
+import { parseDocument } from '@web-actions/parsing/CommandParser';
 import {
   MiskWebActionDefinition,
   MiskFieldDefinition,
 } from '@web-actions/api/responseTypes';
 import { triggerCompletionDialog } from '@web-actions/ui/AceEditor';
+import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 interface Props {
   loading: boolean;
@@ -23,6 +24,7 @@ interface State {
 export default class RequestEditor extends React.Component<Props, State> {
   public refEditor: HTMLElement | null = null;
   public editor: Ace.Editor | null = null;
+  private errorMarkers: number[] = [];
 
   private readonly completer;
 
@@ -31,6 +33,7 @@ export default class RequestEditor extends React.Component<Props, State> {
     this.state = { isDisabled: false };
 
     this.copyToClipboard = this.copyToClipboard.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.completer = new ContextAwareCompleter();
   }
 
@@ -52,7 +55,49 @@ export default class RequestEditor extends React.Component<Props, State> {
     editor.commands.removeCommand('showSettingsMenu');
     editor.commands.removeCommand('gotoline');
 
+    editor.session.on('change', this.handleChange);
     editor.resize();
+  }
+
+  componentWillUnmount() {
+    if (this.editor) {
+      this.editor.session.off('change', this.handleChange);
+    }
+  }
+
+  private handleChange() {
+    const editor = this.editor;
+    if (!editor) return;
+
+    const session = editor.session;
+
+    this.errorMarkers.forEach((markerId) => {
+      session.removeMarker(markerId);
+    });
+    this.errorMarkers = [];
+
+    const ast = parseDocument(editor.getValue());
+    const unexpectedNodes = ast?.firstError();
+    if (unexpectedNodes !== null) {
+      const node = unexpectedNodes;
+      if (node.start !== undefined && node.end !== undefined) {
+        const startPoint = session.doc.indexToPosition(node.start);
+        const endPoint = session.doc.indexToPosition(node.end);
+        const markerId = session.addMarker(
+          new ace.Range(
+            startPoint.row,
+            startPoint.column,
+            endPoint.row,
+            endPoint.column,
+          ),
+          'error-marker',
+          'text',
+        );
+        if (markerId !== undefined) {
+          this.errorMarkers.push(markerId);
+        }
+      }
+    }
   }
 
   private generateDefaultValue(type: string, field: MiskFieldDefinition): any {
@@ -150,8 +195,16 @@ export default class RequestEditor extends React.Component<Props, State> {
 
   async copyToClipboard() {
     try {
-      const content = this.editor!.getValue();
-      const normalizedJson = new CommandParser(content).parse()?.render();
+      const editor = this.editor;
+      if (!editor) return;
+
+      const ast = parseDocument(editor.getValue());
+      if (ast?.firstError() !== null) {
+        appEvents.emit(APP_EVENTS.SHOW_ERROR_TOAST);
+        return;
+      }
+
+      const normalizedJson = ast?.render();
       await navigator.clipboard.writeText(normalizedJson);
     } catch (err) {
       console.error('Failed to copy with error:', err);
