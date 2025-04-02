@@ -39,7 +39,7 @@ class FakeAuditClientTest {
         eventTarget = "the-database-001",
         timestampSent = 2147483647,
         applicationName = "test-app",
-        approverLDAP = "default-user",
+        approverLDAP = null,
         automatedChange = false,
         description = "description",
         richDescription = null,
@@ -60,7 +60,7 @@ class FakeAuditClientTest {
       target = "the-database-001",
     )
     assertThat(logCollector.takeMessage(FakeAuditClient::class))
-      .isEqualTo("Audit Event Logged [event=FakeAuditEvent(eventSource=test-app, eventTarget=the-database-001, timestampSent=2147483647, applicationName=test-app, approverLDAP=default-user, automatedChange=false, description=description, richDescription=null, environment=testing, detailURL=null, region=us-west-2, requestorLDAP=default-user)]")
+      .isEqualTo("Audit Event Logged [event=FakeAuditEvent(eventSource=test-app, eventTarget=the-database-001, timestampSent=2147483647, applicationName=test-app, approverLDAP=null, automatedChange=false, description=description, richDescription=null, environment=testing, detailURL=null, region=us-west-2, requestorLDAP=default-user)]")
   }
 
   class TestModule : KAbstractModule() {

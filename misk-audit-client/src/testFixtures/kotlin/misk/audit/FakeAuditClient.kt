@@ -54,14 +54,14 @@ class FakeAuditClient @Inject constructor(
         eventTarget = target,
         timestampSent = clock.instant().toEpochMilli().nanoseconds.toInt(DurationUnit.NANOSECONDS),
         applicationName = applicationName ?: appName,
-        approverLDAP = approverLDAP ?: callerProvider.get()?.principal,
+        approverLDAP = approverLDAP,
         automatedChange = automatedChange,
         description = description,
         richDescription = richDescription,
         environment = deployment.mapToEnvironmentName(),
         detailURL = detailURL,
         region = region,
-        requestorLDAP = requestorLDAP ?: callerProvider.get()?.principal,
+        requestorLDAP = requestorLDAP ?: if (automatedChange) null else callerProvider.get()?.principal,
       )
 
     sentEvents.add(event)
