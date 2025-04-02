@@ -119,7 +119,7 @@ jerseyBom = { module = "org.glassfish.jersey:jersey-bom", version = "3.1.10" }
 jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "26.0.2" }
 jettyAlpnServer = { module = "org.eclipse.jetty:jetty-alpn-server" }
 jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
-jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "10.0.20" }
+jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "10.0.24" }
 jettyHttp = { module = "org.eclipse.jetty:jetty-http" }
 jettyHttp2 = { module = "org.eclipse.jetty.http2:http2-server" }
 jettyIo = { module = "org.eclipse.jetty:jetty-io" }
