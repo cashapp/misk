@@ -111,9 +111,34 @@ apiValidation {
   additionalSourceSets.add("testFixtures")
 }
 
-val testShardNonHibernate = tasks.register("testShardNonHibernate") {
+val testShardHibernate = tasks.register("testShardHibernate") {
   group = "Continuous integration"
-  description = "These tests don't have shared infra and can run in parallel"
+  description = "These tests use a DB and thus can't run in parallel"
+}
+
+val testShardMiskAws = tasks.register("testShardMiskAws") {
+  group = "Continuous integration"
+  description = "Misk AWS tests"
+}
+
+val testShardMiskJdbc = tasks.register("testShardMiskJdbc") {
+  group = "Continuous integration"
+  description = "Misk JDBC tests"
+}
+
+val testShardSchemaMigratorGradlePlugin = tasks.register("testShardSchemaMigratorGradlePlugin") {
+  group = "Continuous integration"
+  description = "Misk JDBC tests"
+}
+
+val testShardVitess = tasks.register("testShardVitess") {
+  group = "Continuous integration"
+  description = "These tests stand-up a lot of Vitess containers and are run in an isolated shard to reduce test times"
+}
+
+val testShardVitessGradlePlugin = tasks.register("testShardVitessGradlePlugin") {
+  group = "Continuous integration"
+  description = "These tests stand-up a Vitess container and are run in an isolated shard to reduce test times"
 }
 
 val testShardRedis = tasks.register("testShardRedis") {
@@ -121,9 +146,9 @@ val testShardRedis = tasks.register("testShardRedis") {
   description = "These tests use redis and thus can't run in parallel"
 }
 
-val testShardHibernate = tasks.register("testShardHibernate") {
+val testShardNonHibernate = tasks.register("testShardNonHibernate") {
   group = "Continuous integration"
-  description = "These tests use a DB and thus can't run in parallel"
+  description = "These tests don't have shared infra and can run in parallel"
 }
 
 val hibernateProjects = listOf(
@@ -274,6 +299,16 @@ subprojects {
     val subproj = project
     if (hibernateProjects.contains(project.name)) {
       testShardHibernate.configure { dependsOn("${subproj.path}:check") }
+    } else if (project.name.equals("misk-aws")) {
+      testShardMiskAws.configure { dependsOn("${subproj.path}:check") }
+    } else if (project.name.equals("misk-jdbc")) {
+      testShardMiskJdbc.configure { dependsOn("${subproj.path}:check") }
+    } else if (project.name.equals("misk-schema-migrator-gradle-plugin")) {
+      testShardSchemaMigratorGradlePlugin.configure { dependsOn("${subproj.path}:check") }
+    } else if (project.name.equals("misk-vitess")) {
+      testShardVitess.configure { dependsOn("${subproj.path}:check") }
+    } else if (project.name.equals("misk-vitess-database-gradle-plugin")) {
+      testShardVitessGradlePlugin.configure { dependsOn("${subproj.path}:check") }
     } else if (redisProjects.contains(project.name)) {
       testShardRedis.configure { dependsOn("${subproj.path}:check") }
     } else {
