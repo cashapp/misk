@@ -259,14 +259,7 @@ internal class VitessDockerContainer(
         // If we are here, we likely obtained a vttestserver start-up error.
         if (statusCode != 0) {
           if (debugStartup) {
-            val logCallback = LogContainerResultCallback()
-            dockerClient
-              .logContainerCmd(containerId)
-              .withStdOut(true)
-              .withStdErr(true)
-              .exec(logCallback)
-              .awaitCompletion()
-            println("Container start up logs:\n${logCallback.getLogs()}")
+            emitStartupLogs(containerId)
             throw VitessTestDbStartupException("Failed to start Docker container for `$containerName`.")
           }
           throw VitessTestDbStartupException(
@@ -286,10 +279,22 @@ internal class VitessDockerContainer(
         retryCount++
         if (retryCount == CONTAINER_START_RETRIES) {
           println("Failed to start Docker container for `$containerName` after max retries.")
+          emitStartupLogs(containerId)
           throw VitessTestDbStartupException("Container health check failed after `$CONTAINER_START_RETRIES` attempts.")
         }
       }
     }
+  }
+
+  private fun emitStartupLogs(containerId: String) {
+    val logCallback = LogContainerResultCallback()
+    dockerClient
+      .logContainerCmd(containerId)
+      .withStdOut(true)
+      .withStdErr(true)
+      .exec(logCallback)
+      .awaitCompletion()
+    println("Container start up logs:\n${logCallback.getLogs()}")
   }
 
   private fun getContainerHealthStatus(containerId: String): String {
