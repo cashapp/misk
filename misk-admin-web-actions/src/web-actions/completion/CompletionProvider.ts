@@ -178,9 +178,7 @@ export default class CompletionProvider {
 
   async getCompletions(args: CompletionArgs): Promise<Completion[]> {
     const topLevel = parseDocument(args.text, args.cursor.index);
-    const callables = this.selection?.callables ?? [];
-
-    topLevel.applyTypes(callables[0] ?? null);
+    topLevel.applyTypes(this.selection);
 
     const cursorNode = topLevel.findCursor();
 

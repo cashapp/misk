@@ -7,11 +7,9 @@ import { Box, IconButton, Spinner } from '@chakra-ui/react';
 import { CopyIcon } from '@chakra-ui/icons';
 import { parseDocument } from '@web-actions/parsing/CommandParser';
 import {
-  MiskWebActionDefinition,
   MiskFieldDefinition,
   ActionGroup,
 } from '@web-actions/api/responseTypes';
-import { triggerCompletionDialog } from '@web-actions/ui/AceEditor';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 interface Props {
@@ -193,8 +191,6 @@ export default class RequestEditor extends React.Component<Props, State> {
         this.editor?.gotoLine(lines - 1, 2, false);
       }
       this.editor?.focus();
-
-      triggerCompletionDialog(this.editor);
     }
   }
 
