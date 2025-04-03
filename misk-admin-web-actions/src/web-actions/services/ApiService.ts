@@ -1,5 +1,5 @@
 import { parseDocument } from '@web-actions/parsing/CommandParser';
-import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
+import { ActionGroup } from '@web-actions/api/responseTypes';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 export interface Header {
@@ -8,31 +8,39 @@ export interface Header {
 }
 
 interface RequestOptions {
-  action: MiskWebActionDefinition;
+  action: ActionGroup;
   path: string;
   requestBody?: string;
   headers?: Array<Header>;
 }
 
 export class ApiService {
-  public static async submitRequest({
-    action,
-    path,
-    requestBody,
-    headers: additionalHeaders = [],
-  }: RequestOptions): Promise<string> {
+  public static async submitRequest(request: RequestOptions): Promise<string> {
+    const { action, path } = request;
+    const requestBody = request.requestBody?.trim() ?? '';
+    const additionalHeaders = request.headers ?? [];
+
     const headers: Record<string, string> = {};
+
+    const returnsJson = action.responseMediaTypes.some((mediaType) =>
+      mediaType.startsWith('application/json'),
+    );
+    if (returnsJson) {
+      headers['Accept'] = 'application/json;charset=utf-8';
+    }
 
     let body: string | undefined = undefined;
     if (action.httpMethod !== 'GET') {
-      headers['Content-Type'] = 'application/json';
+      if (requestBody) {
+        headers['Content-Type'] = 'application/json';
 
-      const topLevel = parseDocument(requestBody ?? '');
-      if (topLevel?.firstError() !== null) {
-        appEvents.emit(APP_EVENTS.SHOW_ERROR_TOAST);
-        return '';
+        const topLevel = parseDocument(requestBody);
+        if (topLevel?.firstError() !== null) {
+          appEvents.emit(APP_EVENTS.SHOW_ERROR_TOAST);
+          return '';
+        }
+        body = topLevel.render();
       }
-      body = topLevel.render();
     }
 
     additionalHeaders.forEach((header) => {

@@ -47,7 +47,7 @@ module.exports = {
     hot: true,
     proxy: [
       {
-        context: ['/api', '/squareup'],
+        context: ['/api', '/squareup', '/admin', '/internal'],
         target: 'http://127.0.0.1:8080',
       },
     ],

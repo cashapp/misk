@@ -3,7 +3,10 @@ import CompletionProvider from '@web-actions/completion/CompletionProvider';
 
 import Completion from '@web-actions/completion/Completion';
 import AceEditor from '@web-actions/ui/AceEditor';
-import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
+import {
+  ActionGroup,
+  MiskWebActionDefinition,
+} from '@web-actions/api/responseTypes';
 
 export class ContextAwareCompleter implements Ace.Completer {
   completionProvider = new CompletionProvider();
@@ -17,7 +20,7 @@ export class ContextAwareCompleter implements Ace.Completer {
     }
   }
 
-  public setSelection(selection: MiskWebActionDefinition | null) {
+  public setSelection(selection: ActionGroup | null) {
     this.completionProvider.setSelection(selection);
   }
 

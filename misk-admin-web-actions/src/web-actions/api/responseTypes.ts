@@ -10,10 +10,11 @@ export interface MiskWebActionDefinition {
   name: string;
   httpMethod?: string;
   packageName: string;
-  requestType: string;
+  requestType: string | null;
   pathPattern: string;
   types: MiskObjectTypes;
   requestMediaTypes: string[];
+  responseMediaType: string;
 }
 
 export interface MiskObjectType {
@@ -31,9 +32,13 @@ export interface ActionGroup {
   actionName: string;
   path: string;
   httpMethod: string;
-  callables: Record<string, MiskWebActionDefinition>;
-  getCallablesByMethod(): MiskWebActionDefinition[];
+  responseMediaTypes: string[];
+  requestMediaTypes: string[];
+  canCall: boolean;
+  callables: MiskWebActionDefinition[];
   all: MiskWebActionDefinition[];
+  types: MiskObjectTypes;
+  requestType: string | null;
 }
 
 export type MiskActions = Record<string, ActionGroup>;

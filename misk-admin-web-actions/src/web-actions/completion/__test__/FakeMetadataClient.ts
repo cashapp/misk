@@ -1,4 +1,7 @@
-import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
+import {
+  ActionGroup,
+  MiskWebActionDefinition,
+} from '@web-actions/api/responseTypes';
 
 export const MyAction: MiskWebActionDefinition = {
   name: 'MyAction',
@@ -6,6 +9,7 @@ export const MyAction: MiskWebActionDefinition = {
   requestType: 'MyActionRequest',
   pathPattern: '/api/v1/my-action',
   requestMediaTypes: ['application/x-protobuf'],
+  responseMediaType: 'application/json',
   types: {
     MyActionRequest: {
       fields: [
@@ -36,4 +40,17 @@ export const MyAction: MiskWebActionDefinition = {
       ],
     },
   },
+};
+
+export const MyActionGroup: ActionGroup = {
+  actionName: MyAction.name,
+  path: MyAction.pathPattern,
+  httpMethod: MyAction.httpMethod || '',
+  responseMediaTypes: [MyAction.responseMediaType],
+  requestMediaTypes: MyAction.requestMediaTypes,
+  canCall: true,
+  callables: [MyAction],
+  all: [MyAction],
+  types: MyAction.types,
+  requestType: MyAction.requestType,
 };

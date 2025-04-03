@@ -7,8 +7,12 @@ import {
 import { fetchCached } from '@web-actions/network/http';
 import MetadataClient from '@web-actions/api/MetadataClient';
 
-function containsJson(mediaType: string[]) {
-  return mediaType.some((it) => it.startsWith('application/json'));
+function containsJsonOrAny(mediaType: string[]) {
+  return (
+    mediaType.length == 0 ||
+    mediaType.some((it) => it.startsWith('application/json')) ||
+    mediaType.some((it) => it.startsWith('*/*'))
+  );
 }
 
 export default class RealMetadataClient implements MetadataClient {
@@ -19,43 +23,35 @@ export default class RealMetadataClient implements MetadataClient {
     const actionMap: Record<string, ActionGroup> = {};
 
     response.all['web-actions'].metadata.forEach((it) => {
+      it.requestType = it.requestType === 'null' ? null : it.requestType;
+
       const qualifiedName = `${it.packageName}.${it.name}`;
       const groupKey = `${it.httpMethod} ${it.pathPattern} ${qualifiedName}`;
       let group = actionMap[groupKey];
+
       if (group === undefined) {
         group = {
           actionName: qualifiedName,
           path: it.pathPattern,
           httpMethod: it.httpMethod || '',
-          callables: {},
-          getCallablesByMethod(): MiskWebActionDefinition[] {
-            return [
-              this.callables['POST'],
-              this.callables['PUT'],
-              this.callables['GET'],
-            ].filter((it) => it !== undefined);
-          },
+          callables: [],
           all: [],
+          responseMediaTypes: [],
+          requestMediaTypes: [],
+          canCall: false,
+          types: it.types,
+          requestType: it.requestType,
         };
         actionMap[groupKey] = group;
       }
 
-      function maybeAddCallable(
-        method: string,
-        predicate: (it: MiskWebActionDefinition) => boolean = () => true,
-      ) {
-        if (
-          it.httpMethod === method &&
-          group.callables[method] === undefined &&
-          predicate(it)
-        ) {
-          group.callables[method] = it;
-        }
+      if (it.httpMethod === 'GET' || containsJsonOrAny(it.requestMediaTypes)) {
+        group.canCall = true;
+        group.callables.push(it);
       }
 
-      maybeAddCallable('POST', (it) => containsJson(it.requestMediaTypes));
-      maybeAddCallable('PUT', (it) => containsJson(it.requestMediaTypes));
-      maybeAddCallable('GET');
+      group.requestMediaTypes.push(...it.requestMediaTypes);
+      group.responseMediaTypes.push(it.responseMediaType);
 
       group.all.push(it);
     });

@@ -1,12 +1,10 @@
 import CompletionProvider from '@web-actions/completion/CompletionProvider';
 import FakeEditor from '@web-actions/completion/__test__/FakeEditor';
-import { MyAction } from '@web-actions/completion/__test__/FakeMetadataClient';
+import { MyActionGroup } from '@web-actions/completion/__test__/FakeMetadataClient';
 import { givenEditor } from '@web-actions/completion/__test__/CompletionTester';
-import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
+import { ActionGroup } from '@web-actions/api/responseTypes';
 
-export function providerWithAction(
-  action: MiskWebActionDefinition,
-): CompletionProvider {
+export function providerWithAction(action: ActionGroup): CompletionProvider {
   const p = new CompletionProvider();
   p.setSelection(action);
   return p;
@@ -14,7 +12,7 @@ export function providerWithAction(
 
 test('completion from object body', async () => {
   const editor = new FakeEditor();
-  editor.completions = providerWithAction(MyAction);
+  editor.completions = providerWithAction(MyActionGroup);
 
   editor.setTextWithCursor(`
     {
@@ -30,7 +28,7 @@ test('completion from object body', async () => {
 
 test('completion from object body within field name', async () => {
   const editor = new FakeEditor();
-  editor.completions = providerWithAction(MyAction);
+  editor.completions = providerWithAction(MyActionGroup);
   editor.setTextWithCursor(`
     {
       "|"
@@ -45,7 +43,7 @@ test('completion from object body within field name', async () => {
 
 test('completion from object body within field value', async () => {
   const editor = new FakeEditor();
-  editor.completions = providerWithAction(MyAction);
+  editor.completions = providerWithAction(MyActionGroup);
   editor.setTextWithCursor(`
     {
       "text": |
@@ -60,7 +58,7 @@ test('completion from object body within field value', async () => {
 
 test('completion from literal in quotes', async () => {
   const editor = new FakeEditor();
-  editor.completions = providerWithAction(MyAction);
+  editor.completions = providerWithAction(MyActionGroup);
   editor.setTextWithCursor(`
     {
       "text": "|",
@@ -75,13 +73,6 @@ test('completion from literal in quotes', async () => {
 
 test('completion from enum', async () => {
   const startingWith = [
-    // `
-    // {
-    //   "enum": "|",
-    // }`, `
-    // {
-    //   "enum": |,
-    // }`,
     `
     {
       "enum": |

@@ -30,7 +30,6 @@ import { createIcon } from '@chakra-ui/icons';
 import { useSubmitRequest } from '@web-actions/hooks/useSubmitRequest';
 import { useKeyboardShortcuts } from '@web-actions/hooks/useKeyboardShortcuts';
 import { useAppEvent } from '@web-actions/hooks/useAppEvent';
-import { Select } from '@chakra-ui/react';
 import { APP_EVENTS } from '@web-actions/events/appEvents';
 
 function App() {
@@ -51,27 +50,19 @@ function App() {
     submitting,
     response,
   } = useSubmitRequest(
-    viewState.selectedCallable ?? null,
+    viewState.selectedAction ?? null,
     viewState.path,
     viewState.headers,
     () => requestEditorRef.current?.editor?.getValue() ?? '',
   );
 
   useAppEvent(APP_EVENTS.ENDPOINT_SELECTED, (selectedAction: ActionGroup) => {
-    const callables = selectedAction.getCallablesByMethod();
-    const defaultCallable = callables[0];
-
-    requestEditorRef.current?.setEndpointSelection(defaultCallable);
+    requestEditorRef.current?.setEndpointSelection(selectedAction);
 
     setViewState((curr) => ({
       ...curr,
       selectedAction: selectedAction,
-      path:
-        defaultCallable?.pathPattern ||
-        selectedAction.all[0]?.pathPattern ||
-        '',
-      selectedCallable: defaultCallable,
-      callables: callables,
+      path: selectedAction.path,
     }));
   });
 
@@ -196,34 +187,6 @@ function App() {
               Request
             </Heading>
             <HStack flexGrow={1} w="100%">
-              {viewState.callables.length > 0 && (
-                <Select
-                  value={viewState.selectedCallable?.httpMethod}
-                  bg="white"
-                  width="fit-content"
-                  minWidth="fit-content"
-                  onChange={(e) => {
-                    const selected = viewState.callables.find(
-                      (it) => it.httpMethod === e.target.value,
-                    );
-                    requestEditorRef.current?.setEndpointSelection(selected);
-                    setViewState({
-                      ...viewState,
-                      path: selected?.pathPattern || '',
-                      selectedCallable: selected,
-                    });
-                  }}
-                >
-                  {viewState.callables.map((callable) => (
-                    <option
-                      key={callable.httpMethod}
-                      value={callable.httpMethod}
-                    >
-                      {callable.httpMethod}
-                    </option>
-                  ))}
-                </Select>
-              )}
               <Input
                 value={viewState.path}
                 placeholder="Path"
@@ -235,7 +198,7 @@ function App() {
                   });
                 }}
               />
-              {viewState.selectedCallable && (
+              {viewState.selectedAction?.canCall === true && (
                 <IconButton
                   aria-label="Run"
                   colorScheme={'green'}
