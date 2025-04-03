@@ -136,6 +136,7 @@ export default class EndpointSelection extends React.Component<Props, State> {
         onMenuClose={() => this.setMenuOpen(false)}
         onInputChange={this.handleInputChange}
         onChange={this.handleChange}
+        onMenuOpen={() => this.setMenuOpen(true)}
         options={this.state.filteredOptions}
         components={{ Option }}
         styles={
