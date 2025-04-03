@@ -52,14 +52,8 @@ jobs:
     strategy:
       matrix:
         cmd:
-          - gradle testShardHibernate -i --scan --no-parallel
-          - gradle testShardMiskAws -i --scan --no-parallel
-          - gradle testShardMiskJdbc -i --scan --no-parallel
-          - gradle testShardSchemaMigratorGradlePlugin -i --scan --no-parallel
-          - gradle testShardVitess -i --scan --no-parallel
-          - gradle testShardVitessGradlePlugin -i --scan --no-parallel
-          - gradle testShardRedis -i --scan --no-parallel
-          - gradle testShardNonHibernate -i --scan --parallel
+          - gradle -i --scan --no-parallel testShardHibernate testShardRedis
+          - gradle -i --scan               testShardMiskAws testShardMiskHibernate testShardMiskJdbc testShardSchemaMigratorGradlePlugin testShardVitess testShardVitessGradlePlugin testShardNonHibernate
 
     steps:
       - name: Checkout

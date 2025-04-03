@@ -121,6 +121,11 @@ val testShardMiskAws = tasks.register("testShardMiskAws") {
   description = "Misk AWS tests"
 }
 
+val testShardMiskHibernate = tasks.register("testShardMiskHibernate") {
+  group = "Continuous integration"
+  description = "misk-hibernate tests"
+}
+
 val testShardMiskJdbc = tasks.register("testShardMiskJdbc") {
   group = "Continuous integration"
   description = "Misk JDBC tests"
@@ -152,12 +157,9 @@ val testShardNonHibernate = tasks.register("testShardNonHibernate") {
 }
 
 val hibernateProjects = listOf(
-  "misk-aws",
   "misk-events",
-  "misk-hibernate",
   "misk-jobqueue",
   "misk-jobqueue-testing",
-  "misk-jdbc",
   "misk-jdbc-testing",
   "misk-hibernate-testing",
   "misk-rate-limiting-bucket4j-mysql",
@@ -301,6 +303,8 @@ subprojects {
       testShardHibernate.configure { dependsOn("${subproj.path}:check") }
     } else if (project.name.equals("misk-aws")) {
       testShardMiskAws.configure { dependsOn("${subproj.path}:check") }
+    } else if (project.name.equals("misk-hibernate")) {
+      testShardMiskHibernate.configure { dependsOn("${subproj.path}:check") }
     } else if (project.name.equals("misk-jdbc")) {
       testShardMiskJdbc.configure { dependsOn("${subproj.path}:check") }
     } else if (project.name.equals("misk-schema-migrator-gradle-plugin")) {
