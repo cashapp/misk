@@ -1,4 +1,5 @@
 import {
+  ActionGroup,
   MiskFieldDefinition,
   MiskWebActionDefinition,
 } from '@web-actions/api/responseTypes';
@@ -23,7 +24,7 @@ interface CompletionArgs {
 }
 
 export default class CompletionProvider {
-  private selection: MiskWebActionDefinition | null = null;
+  private selection: ActionGroup | null = null;
 
   private deleteTrailing(editor: Editor, curr: Position, values: string) {
     for (const c of values) {
@@ -177,7 +178,9 @@ export default class CompletionProvider {
 
   async getCompletions(args: CompletionArgs): Promise<Completion[]> {
     const topLevel = parseDocument(args.text, args.cursor.index);
-    topLevel.applyTypes(this.selection);
+    const callables = this.selection?.callables ?? [];
+
+    topLevel.applyTypes(callables[0] ?? null);
 
     const cursorNode = topLevel.findCursor();
 
@@ -211,7 +214,7 @@ export default class CompletionProvider {
     return [];
   }
 
-  setSelection(selection: MiskWebActionDefinition | null) {
+  setSelection(selection: ActionGroup | null) {
     this.selection = selection;
   }
 }

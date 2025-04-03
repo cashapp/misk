@@ -1,6 +1,9 @@
 import AstNode from '@web-actions/parsing/ast/AstNode';
 import Unexpected from '@web-actions/parsing/ast/Unexpected';
-import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
+import {
+  ActionGroup,
+  MiskWebActionDefinition,
+} from '@web-actions/api/responseTypes';
 import Obj from '@web-actions/parsing/ast/Obj';
 import MiskType from '@web-actions/api/MiskType';
 
@@ -33,9 +36,9 @@ export default class TopLevel extends AstNode {
     );
   }
 
-  applyTypes(actionDefinition: MiskWebActionDefinition | null) {
+  applyTypes(actionDefinition: ActionGroup | null) {
     if (this.obj) {
-      if (actionDefinition) {
+      if (actionDefinition && actionDefinition.requestType) {
         const type = actionDefinition.types[actionDefinition.requestType];
         if (type) {
           this.obj.applyTypes(

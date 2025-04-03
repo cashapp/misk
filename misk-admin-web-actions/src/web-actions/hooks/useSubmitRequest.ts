@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
+import { ActionGroup } from '@web-actions/api/responseTypes';
 import { ApiService, Header } from '@web-actions/services/ApiService';
 
 export interface SubmitRequestState {
@@ -9,7 +9,7 @@ export interface SubmitRequestState {
 }
 
 export function useSubmitRequest(
-  selectedCallable: MiskWebActionDefinition | null,
+  selectedCallable: ActionGroup | null,
   path: string,
   headers: Header[],
   getRequestBody: () => string,

@@ -9,6 +9,7 @@ import { parseDocument } from '@web-actions/parsing/CommandParser';
 import {
   MiskWebActionDefinition,
   MiskFieldDefinition,
+  ActionGroup,
 } from '@web-actions/api/responseTypes';
 import { triggerCompletionDialog } from '@web-actions/ui/AceEditor';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
@@ -120,7 +121,15 @@ export default class RequestEditor extends React.Component<Props, State> {
     }
   }
 
-  private generateRequestBody(action: MiskWebActionDefinition): string {
+  private generateRequestBody(action: ActionGroup): string {
+    if (
+      !action.requestMediaTypes.some((mediaType) =>
+        mediaType.startsWith('application/json'),
+      )
+    ) {
+      return '';
+    }
+
     if (!action.requestType || !action.types) {
       return '{\n  \n}';
     }
@@ -156,9 +165,13 @@ export default class RequestEditor extends React.Component<Props, State> {
     return jsonString.replace(/\n}$/, ',\n  \n}');
   }
 
-  public setEndpointSelection(action: MiskWebActionDefinition | undefined) {
+  public setEndpointSelection(action: ActionGroup | undefined) {
     this.completer.setSelection(action ?? null);
     this.editor?.clearSelection();
+
+    if (action === undefined) {
+      return;
+    }
 
     if (action?.httpMethod === 'GET') {
       this.setState({

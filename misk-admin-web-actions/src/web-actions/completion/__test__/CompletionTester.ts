@@ -1,8 +1,14 @@
 import FakeEditor from '@web-actions/completion/__test__/FakeEditor';
-import { MyAction } from '@web-actions/completion/__test__/FakeMetadataClient';
+import {
+  MyAction,
+  MyActionGroup,
+} from '@web-actions/completion/__test__/FakeMetadataClient';
 import Completion from '@web-actions/completion/Completion';
 import { providerWithAction } from '@web-actions/completion/__test__/completion.spec';
-import { MiskWebActionDefinition } from '@web-actions/api/responseTypes';
+import {
+  ActionGroup,
+  MiskWebActionDefinition,
+} from '@web-actions/api/responseTypes';
 
 class CompletionTester {
   private editor: FakeEditor;
@@ -48,10 +54,10 @@ class CompletionTester {
 
 export function givenEditor(
   text: string,
-  action?: MiskWebActionDefinition,
+  action?: ActionGroup,
 ): CompletionTester {
   const editor = new FakeEditor();
-  editor.completions = providerWithAction(action || MyAction);
+  editor.completions = providerWithAction(action || MyActionGroup);
   editor.setTextWithCursor(text);
   return new CompletionTester(editor);
 }
