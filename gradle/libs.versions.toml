@@ -1,10 +1,10 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.31.13"
+aws2 = "2.31.15"
 bucket4j = "8.8.0"
 datadog = "1.47.3"
-dependencyAnalysisPlugin = "2.13.3"
+dependencyAnalysisPlugin = "2.14.0"
 detekt = "1.23.8"
 docker = "3.4.2"
 googleAuth = "1.33.1"
@@ -17,7 +17,7 @@ kotlin = "2.1.20"
 kotlinBinaryCompatibilityPlugin = "0.17.0"
 mavenPublish = "0.28.0"
 micrometer = "1.12.13"
-netty = "4.1.119.Final"
+netty = "4.2.0.Final"
 okHttp = "5.0.0-alpha.14"
 okio = "3.10.2"
 protobuf = "3.25.6"
@@ -230,7 +230,7 @@ binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibilit
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
-flyway = { id = "org.flywaydb.flyway", version = "11.4.0" }
+flyway = { id = "org.flywaydb.flyway", version = "11.6.0" }
 jooq = { id = "nu.studer.jooq", version = "9.0" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
