@@ -59,6 +59,7 @@ internal class VitessDockerContainer(
     const val READONLY_COUNT =
       -1 // Set to -1 to actually set the read-only count to 0. This overrides a defaults issue in the vtcombo codebase.
 
+    const val DOCKER_HEALTH_CHECK_HOST = "localhost"
     const val DOCKER_START_RETRIES = 6
     const val DOCKER_START_RETRY_DELAY_MS = 5000L
     const val CONTAINER_START_RETRIES = 10
@@ -338,12 +339,13 @@ internal class VitessDockerContainer(
           !debugStartup // If `debugStartup` is `true`, we keep the container running to inspect logs.
         ) // Otherwise, remove container when it stops.
 
+    // The health check is run from the Docker daemon, so it needs to target localhost.
     val healthCheck =
       HealthCheck()
         .withTest(
           listOf(
             "CMD-SHELL",
-            "mysql -h ${vitessClusterConfig.hostname} --protocol=tcp -P ${vitessClusterConfig.vtgatePort} -u=${vitessClusterConfig.vtgateUser} --execute 'USE @primary;'",
+            "mysql -h $DOCKER_HEALTH_CHECK_HOST --protocol=tcp -P ${vitessClusterConfig.vtgatePort} -u=${vitessClusterConfig.vtgateUser} --execute 'USE @primary;'",
           )
         )
         .withInterval(Duration.ofSeconds(CONTAINER_HEALTH_CHECK_INTERVAL_SECONDS).toNanos())
