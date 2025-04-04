@@ -10,9 +10,11 @@ import wisp.resources.EnvironmentResourceLoaderBackend
 import wisp.resources.FakeFilesystemLoaderBackend
 import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.MemoryResourceLoaderBackend
+import wisp.resources.FakeResourceLoaderBackend
+import wisp.resources.OnePasswordResourceLoaderBackend
 import wisp.resources.ResourceLoader as WispResourceLoader
 
-class ResourceLoaderModule : KAbstractModule() {
+class ResourceLoaderModule @JvmOverloads constructor(private val isReal: Boolean = true) : KAbstractModule() {
   override fun configure() {
     val mapBinder = newMapBinder<String, WispResourceLoader.Backend>()
 
@@ -20,6 +22,9 @@ class ResourceLoaderModule : KAbstractModule() {
     mapBinder.addBinding(FilesystemLoaderBackend.SCHEME).toInstance(FilesystemLoaderBackend)
     mapBinder.addBinding(MemoryResourceLoaderBackend.SCHEME).toInstance(MemoryResourceLoaderBackend())
     mapBinder.addBinding(EnvironmentResourceLoaderBackend.SCHEME).toInstance(EnvironmentResourceLoaderBackend)
+    if (!isReal) {
+      mapBinder.addBinding(OnePasswordResourceLoaderBackend.SCHEME).toInstance(OnePasswordResourceLoaderBackend)
+    }
   }
 }
 
@@ -45,6 +50,14 @@ class TestingResourceLoaderModule : KAbstractModule() {
   internal fun fakeFilesystemLoaderBackend(
     @ForFakeFiles fakeFiles: Map<String, String>
   ): WispResourceLoader.Backend = FakeFilesystemLoaderBackend(fakeFiles)
+
+  @ProvidesIntoMap
+  @StringMapKey(OnePasswordResourceLoaderBackend.SCHEME)
+  @Singleton
+  @Suppress("unused")
+  internal fun fakeOnePasswordResourceLoaderBackend(
+    @ForFakeFiles fakeFiles: Map<String, String>
+  ): WispResourceLoader.Backend = FakeResourceLoaderBackend(fakeFiles)
 }
 
 @Qualifier
