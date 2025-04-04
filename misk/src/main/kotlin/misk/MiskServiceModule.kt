@@ -27,7 +27,7 @@ class MiskRealServiceModule @JvmOverloads constructor(
   private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig(),
 ) : KAbstractModule() {
   override fun configure() {
-    install(ResourceLoaderModule())
+    install(ResourceLoaderModule(isReal = true))
     install(RealEnvVarModule())
     install(ClockModule())
     install(SleeperModule())

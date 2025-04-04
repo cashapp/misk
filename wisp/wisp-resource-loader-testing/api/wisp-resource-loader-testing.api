@@ -4,3 +4,11 @@ public final class wisp/resources/FakeFilesystemLoaderBackend : wisp/resources/R
 	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
 }
 
+public final class wisp/resources/FakeResourceLoaderBackend : wisp/resources/ResourceLoader$Backend {
+	public fun <init> (Ljava/util/Map;)V
+	public fun checkPath (Ljava/lang/String;)V
+	public fun exists (Ljava/lang/String;)Z
+	public fun list (Ljava/lang/String;)Ljava/util/List;
+	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
+}
+
