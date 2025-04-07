@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.moshi.adapter
+import wisp.containers.ContainerUtil
 
 @Singleton
 internal class QueueResolver @Inject internal constructor(
@@ -97,13 +98,8 @@ internal class QueueResolver @Inject internal constructor(
     }
   }
 
-  private fun isRunningInDocker() = File("/proc/1/cgroup")
-    .takeIf { it.exists() }?.useLines { lines ->
-      lines.any { it.contains("/docker") }
-    } ?: false
-
   private fun ensureUrlWithProperTarget(url: String): String {
-    if (isRunningInDocker())
+    if (ContainerUtil.isRunningInDocker)
       return url.replace("localhost", hostInternalTarget).replace("127.0.0.1", hostInternalTarget)
     else
       return url
