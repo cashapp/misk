@@ -1,7 +1,8 @@
 import {
-  ActionGroup,
+  MiskRoute,
   MiskWebActionDefinition,
 } from '@web-actions/api/responseTypes';
+import { buildRoutes } from 'src/web-actions/api/BuildRoutes';
 
 export const MyAction: MiskWebActionDefinition = {
   name: 'MyAction',
@@ -42,15 +43,4 @@ export const MyAction: MiskWebActionDefinition = {
   },
 };
 
-export const MyActionGroup: ActionGroup = {
-  actionName: MyAction.name,
-  path: MyAction.pathPattern,
-  httpMethod: MyAction.httpMethod || '',
-  responseMediaTypes: [MyAction.responseMediaType],
-  requestMediaTypes: MyAction.requestMediaTypes,
-  canCall: true,
-  callables: [MyAction],
-  all: [MyAction],
-  types: MyAction.types,
-  requestType: MyAction.requestType,
-};
+export const MyActionGroup: MiskRoute = buildRoutes([MyAction])[0];

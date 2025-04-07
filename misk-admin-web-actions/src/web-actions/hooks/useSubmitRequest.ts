@@ -1,6 +1,11 @@
 import { useCallback, useState } from 'react';
-import { ActionGroup } from '@web-actions/api/responseTypes';
-import { ApiService, Header } from '@web-actions/services/ApiService';
+import { MiskRoute } from '@web-actions/api/responseTypes';
+import {
+  ApiService,
+  JsonValidationError,
+} from '@web-actions/services/ApiService';
+import { APP_EVENTS, appEvents } from 'src/web-actions/events/appEvents';
+import { Header } from 'src/viewState';
 
 export interface SubmitRequestState {
   submit: () => Promise<void>;
@@ -9,7 +14,7 @@ export interface SubmitRequestState {
 }
 
 export function useSubmitRequest(
-  selectedCallable: ActionGroup | null,
+  selectedCallable: MiskRoute | null,
   path: string,
   headers: Header[],
   getRequestBody: () => string,
@@ -25,13 +30,17 @@ export function useSubmitRequest(
     setLoading(true);
     try {
       const response = await ApiService.submitRequest({
-        action: selectedCallable,
+        route: selectedCallable,
         path: path,
         requestBody: getRequestBody(),
         headers: headers,
       });
 
       setResponse(response);
+    } catch (e) {
+      if (e instanceof JsonValidationError) {
+        appEvents.emit(APP_EVENTS.SHOW_ERROR_TOAST);
+      }
     } finally {
       setLoading(false);
     }

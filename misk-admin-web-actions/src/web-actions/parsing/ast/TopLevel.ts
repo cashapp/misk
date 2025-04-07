@@ -1,7 +1,7 @@
 import AstNode from '@web-actions/parsing/ast/AstNode';
 import Unexpected from '@web-actions/parsing/ast/Unexpected';
 import {
-  ActionGroup,
+  MiskRoute,
   MiskWebActionDefinition,
 } from '@web-actions/api/responseTypes';
 import Obj from '@web-actions/parsing/ast/Obj';
@@ -36,7 +36,7 @@ export default class TopLevel extends AstNode {
     );
   }
 
-  applyTypes(actionDefinition: ActionGroup | null) {
+  applyTypes(actionDefinition: MiskRoute | null) {
     if (this.obj) {
       if (actionDefinition && actionDefinition.requestType) {
         const type = actionDefinition.types[actionDefinition.requestType];

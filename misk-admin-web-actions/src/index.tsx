@@ -23,7 +23,7 @@ import EndpointSelector from '@web-actions/ui/EndpointSelection';
 import { ViewState } from 'src/viewState';
 import { fetchCached } from '@web-actions/network/http';
 import {
-  ActionGroup,
+  MiskRoute,
   MiskMetadataResponse,
 } from '@web-actions/api/responseTypes';
 import { createIcon } from '@chakra-ui/icons';
@@ -56,7 +56,7 @@ function App() {
     () => requestEditorRef.current?.editor?.getValue() ?? '',
   );
 
-  useAppEvent(APP_EVENTS.ENDPOINT_SELECTED, (selectedAction: ActionGroup) => {
+  useAppEvent(APP_EVENTS.ENDPOINT_SELECTED, (selectedAction: MiskRoute) => {
     requestEditorRef.current?.setEndpointSelection(selectedAction);
 
     setViewState((curr) => ({
@@ -198,7 +198,7 @@ function App() {
                   });
                 }}
               />
-              {viewState.selectedAction?.canCall === true && (
+              {viewState.selectedAction?.callable === true && (
                 <IconButton
                   aria-label="Run"
                   colorScheme={'green'}

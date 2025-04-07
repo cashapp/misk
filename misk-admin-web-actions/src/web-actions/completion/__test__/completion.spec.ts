@@ -2,9 +2,9 @@ import CompletionProvider from '@web-actions/completion/CompletionProvider';
 import FakeEditor from '@web-actions/completion/__test__/FakeEditor';
 import { MyActionGroup } from '@web-actions/completion/__test__/FakeMetadataClient';
 import { givenEditor } from '@web-actions/completion/__test__/CompletionTester';
-import { ActionGroup } from '@web-actions/api/responseTypes';
+import { MiskRoute } from '@web-actions/api/responseTypes';
 
-export function providerWithAction(action: ActionGroup): CompletionProvider {
+export function providerWithAction(action: MiskRoute): CompletionProvider {
   const p = new CompletionProvider();
   p.setSelection(action);
   return p;

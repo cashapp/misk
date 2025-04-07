@@ -1,3 +1,5 @@
+import { MediaTypes } from 'src/web-actions/api/MediaTypes';
+
 export interface MiskMetadataResponse {
   all: {
     'web-actions': {
@@ -28,19 +30,16 @@ export interface MiskFieldDefinition {
   annotations: any[];
 }
 
-export interface ActionGroup {
+export interface MiskRoute {
   actionName: string;
   path: string;
   httpMethod: string;
-  responseMediaTypes: string[];
-  requestMediaTypes: string[];
-  canCall: boolean;
-  callables: MiskWebActionDefinition[];
+  responseMediaTypes: MediaTypes;
+  requestMediaTypes: MediaTypes;
   all: MiskWebActionDefinition[];
   types: MiskObjectTypes;
   requestType: string | null;
+  callable?: boolean;
 }
-
-export type MiskActions = Record<string, ActionGroup>;
 
 export type MiskObjectTypes = Record<string, MiskObjectType>;
