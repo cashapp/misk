@@ -29,6 +29,7 @@ dependencies {
   implementation(libs.slf4jApi)
   implementation(libs.tracingDatadog)
   implementation(project(":misk-api"))
+  implementation(project(":wisp:wisp-containers-testing"))
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-tracing"))

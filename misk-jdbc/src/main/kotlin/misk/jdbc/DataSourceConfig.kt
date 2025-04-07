@@ -2,8 +2,8 @@ package misk.jdbc
 
 import misk.config.Redact
 import wisp.config.Config
+import wisp.containers.ContainerUtil
 import wisp.deployment.Deployment
-import java.io.File
 import java.time.Duration
 
 /** Defines a type of datasource */
@@ -142,19 +142,12 @@ data class DataSourceConfig @JvmOverloads constructor(
     }
   }
   fun withDefaults(): DataSourceConfig {
-    val isRunningInDocker = File("/proc/1/cgroup")
-      .takeIf { it.exists() }?.useLines { lines ->
-        lines.any { it.contains("/docker") }
-      } ?: false
-    val server_hostname = if (isRunningInDocker)
-        "host.docker.internal"
-      else
-        "127.0.0.1"
+    val server_hostname = ContainerUtil.dockerTargetOrLocalIp()
     return when (type) {
       DataSourceType.MYSQL -> {
         copy(
           port = port ?: 3306,
-          host = host ?: System.getenv("MYSQL_HOST") ?: "127.0.0.1",
+          host = host ?: System.getenv("MYSQL_HOST") ?: server_hostname,
           database = database ?: ""
         )
       }

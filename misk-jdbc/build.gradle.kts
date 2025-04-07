@@ -31,6 +31,7 @@ dependencies {
   implementation(project(":misk-backoff"))
   implementation(project(":misk-docker"))
   implementation(project(":misk-service"))
+  implementation(project(":wisp:wisp-containers-testing"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
   implementation(libs.jsqlparser)

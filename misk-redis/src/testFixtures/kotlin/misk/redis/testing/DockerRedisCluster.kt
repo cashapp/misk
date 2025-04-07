@@ -30,7 +30,7 @@ import java.time.Duration
 object DockerRedisCluster : ExternalDependency {
   private val REDIS_CLUSTER_PORTS = listOf(7000, 7001, 7002, 7003, 7004, 7005)
   private const val initialPort = 7000
-  private val hostname = if (ContainerUtil.isRunningInDocker) "host.docker.internal" else "localhost"
+  private val hostname = ContainerUtil.dockerTargetOrLocalHost()
   private val logger = getLogger<DockerRedisCluster>()
   private const val redisVersion = "7.0.10"
 

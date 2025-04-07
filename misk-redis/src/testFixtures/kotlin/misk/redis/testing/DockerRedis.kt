@@ -11,7 +11,7 @@ import misk.testing.ExternalDependency
 import redis.clients.jedis.JedisPooled
 import wisp.containers.Composer
 import wisp.containers.Container
-import wisp.containers.ContainerUtil.isRunningInDocker
+import wisp.containers.ContainerUtil
 import wisp.logging.getLogger
 import java.lang.Thread.sleep
 import java.time.Duration
@@ -28,7 +28,7 @@ import java.time.Duration
  */
 object DockerRedis : ExternalDependency {
   private const val port = 6379
-  private val hostname = if (isRunningInDocker) "host.docker.internal" else "localhost"
+  private val hostname = ContainerUtil.dockerTargetOrLocalHost()
   private val logger = getLogger<DockerRedis>()
   private const val redisVersion = "6.2"
 
