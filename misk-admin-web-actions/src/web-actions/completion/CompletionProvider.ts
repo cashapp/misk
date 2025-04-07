@@ -1,8 +1,4 @@
-import {
-  ActionGroup,
-  MiskFieldDefinition,
-  MiskWebActionDefinition,
-} from '@web-actions/api/responseTypes';
+import { MiskRoute, MiskFieldDefinition } from '@web-actions/api/responseTypes';
 import { parseDocument } from '@web-actions/parsing/CommandParser';
 import Obj from '@web-actions/parsing/ast/Obj';
 import Field from '@web-actions/parsing/ast/Field';
@@ -24,7 +20,7 @@ interface CompletionArgs {
 }
 
 export default class CompletionProvider {
-  private selection: ActionGroup | null = null;
+  private selection: MiskRoute | null = null;
 
   private deleteTrailing(editor: Editor, curr: Position, values: string) {
     for (const c of values) {
@@ -212,7 +208,7 @@ export default class CompletionProvider {
     return [];
   }
 
-  setSelection(selection: ActionGroup | null) {
+  setSelection(selection: MiskRoute | null) {
     this.selection = selection;
   }
 }

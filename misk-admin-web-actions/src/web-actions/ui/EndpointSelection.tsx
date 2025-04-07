@@ -5,12 +5,12 @@ import Select, {
   components,
   OptionProps,
 } from 'react-select';
-import { ActionGroup, MiskActions } from '@web-actions/api/responseTypes';
+import { MiskRoute } from '@web-actions/api/responseTypes';
 import RealMetadataClient from '@web-actions/api/RealMetadataClient';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 export interface EndpointOption {
-  value: ActionGroup;
+  value: MiskRoute;
   label: string;
   termsString: string;
 }
@@ -41,8 +41,8 @@ export default class EndpointSelection extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.metadataClient.fetchMetadata().then((actions: MiskActions) => {
-      this.options = Object.values(actions)
+    this.metadataClient.fetchMetadata().then((actions: MiskRoute[]) => {
+      this.options = actions
         .map((actionGroup) => ({
           label: `${actionGroup.httpMethod} ${actionGroup.path} (${actionGroup.actionName})`,
           termsString:

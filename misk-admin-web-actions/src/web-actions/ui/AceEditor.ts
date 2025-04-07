@@ -7,7 +7,12 @@ export function triggerCompletionDialog(editor: Ace.Editor | null | undefined) {
     return;
   }
   setTimeout(() => {
-    editor.commands?.byName?.startAutocomplete?.exec(editor);
+    const startAutocomplete = editor.commands?.byName?.startAutocomplete?.exec;
+    if (startAutocomplete !== undefined) {
+      startAutocomplete(editor);
+    } else {
+      console.warn('startAutocomplete is not defined');
+    }
   }, 100);
 }
 

@@ -136,3 +136,7 @@ export function randomToken(): string {
     .join('')
     .slice(0, length);
 }
+
+export function parseNull(s: string | null): string | null {
+  return s === 'null' ? null : s;
+}

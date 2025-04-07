@@ -1,13 +1,14 @@
-import {
-  ActionGroup,
-  MiskWebActionDefinition,
-} from '@web-actions/api/responseTypes';
-import { Header } from '@web-actions/services/ApiService';
+import { MiskRoute } from '@web-actions/api/responseTypes';
 
 export interface ViewState {
   path: string;
-  selectedAction: ActionGroup | null;
+  selectedAction: MiskRoute | null;
   loading: boolean;
   isHelpOpen: boolean;
   headers: Header[];
+}
+
+export interface Header {
+  key: string;
+  value: string;
 }

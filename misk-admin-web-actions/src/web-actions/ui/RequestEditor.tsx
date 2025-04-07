@@ -6,10 +6,7 @@ import { ContextAwareCompleter } from '@web-actions/ui/ContextAwareCompleter';
 import { Box, IconButton, Spinner } from '@chakra-ui/react';
 import { CopyIcon } from '@chakra-ui/icons';
 import { parseDocument } from '@web-actions/parsing/CommandParser';
-import {
-  MiskFieldDefinition,
-  ActionGroup,
-} from '@web-actions/api/responseTypes';
+import { MiskFieldDefinition, MiskRoute } from '@web-actions/api/responseTypes';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 interface Props {
@@ -119,12 +116,8 @@ export default class RequestEditor extends React.Component<Props, State> {
     }
   }
 
-  private generateRequestBody(action: ActionGroup): string {
-    if (
-      !action.requestMediaTypes.some((mediaType) =>
-        mediaType.startsWith('application/json'),
-      )
-    ) {
+  private generateRequestBody(action: MiskRoute): string {
+    if (!action.requestMediaTypes.hasJson()) {
       return '';
     }
 
@@ -163,7 +156,7 @@ export default class RequestEditor extends React.Component<Props, State> {
     return jsonString.replace(/\n}$/, ',\n  \n}');
   }
 
-  public setEndpointSelection(action: ActionGroup | undefined) {
+  public setEndpointSelection(action: MiskRoute | undefined) {
     this.completer.setSelection(action ?? null);
     this.editor?.clearSelection();
 

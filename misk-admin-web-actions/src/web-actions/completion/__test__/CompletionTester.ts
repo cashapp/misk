@@ -1,14 +1,8 @@
 import FakeEditor from '@web-actions/completion/__test__/FakeEditor';
-import {
-  MyAction,
-  MyActionGroup,
-} from '@web-actions/completion/__test__/FakeMetadataClient';
+import { MyActionGroup } from '@web-actions/completion/__test__/FakeMetadataClient';
 import Completion from '@web-actions/completion/Completion';
 import { providerWithAction } from '@web-actions/completion/__test__/completion.spec';
-import {
-  ActionGroup,
-  MiskWebActionDefinition,
-} from '@web-actions/api/responseTypes';
+import { MiskRoute } from '@web-actions/api/responseTypes';
 
 class CompletionTester {
   private editor: FakeEditor;
@@ -54,7 +48,7 @@ class CompletionTester {
 
 export function givenEditor(
   text: string,
-  action?: ActionGroup,
+  action?: MiskRoute,
 ): CompletionTester {
   const editor = new FakeEditor();
   editor.completions = providerWithAction(action || MyActionGroup);

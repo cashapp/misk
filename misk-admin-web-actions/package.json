@@ -7,7 +7,7 @@
     "test": " npx jest src",
     "build": "webpack",
     "start": "webpack serve --mode development",
-    "lint": "npx eslint src && npx prettier src --check",
+    "lint": " tsc --noEmit && npx eslint src && npx prettier src --check",
     "format": "npx prettier src --write",
     "proxy": "cd development-proxy && npm install && npm run dev"
   },
