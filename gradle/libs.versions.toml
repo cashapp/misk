@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.31.16"
+aws2 = "2.31.17"
 bucket4j = "8.8.0"
 datadog = "1.47.3"
 dependencyAnalysisPlugin = "2.14.0"
@@ -154,9 +154,9 @@ kotlinRetry = { module = "com.michael-bull.kotlin-retry:kotlin-retry", version =
 kotlinStdLibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinXHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.12.0" }
-kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.1" }
-kotlinxCoroutinesSlf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version = "1.10.1" }
-kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.10.1" }
+kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2" }
+kotlinxCoroutinesSlf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version = "1.10.2" }
+kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.10.2" }
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "18.0.1" }
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "6.3.0" }
