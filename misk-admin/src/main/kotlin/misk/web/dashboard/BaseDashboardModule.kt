@@ -49,8 +49,8 @@ class BaseDashboardModule(
         slug = "@misk",
         web_proxy_url = "http://localhost:3201/",
         url_path_prefix = "/@misk/",
-        // Serve the @misk dependencies from the Web Actions tab lib directory
-        resourcePath = "classpath:/web/_tab/web-actions/@misk/"
+        // Serve the @misk dependencies from the Database tab lib directory
+        resourcePath = "classpath:/web/_tab/database/@misk/"
       )
     )
   }

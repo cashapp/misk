@@ -81,7 +81,7 @@ fun TagConsumer<*>.Alert(
           }
           p("mt-3 text-sm md:ml-6 md:mt-0") {
             a(classes = "whitespace-nowrap font-medium ${theme.textColor} hover:${theme.hoverTextColor}") {
-              if (link in listOf("/_admin/database/", "/_admin/web-actions/")) {
+              if (link in listOf("/_admin/database/")) {
                 // TODO Expose non-hardcoded configurability, this disables turbo for existing Misk-Web tabs so browser history works as expected
                 attributes["data-turbo"] = "false"
               }
