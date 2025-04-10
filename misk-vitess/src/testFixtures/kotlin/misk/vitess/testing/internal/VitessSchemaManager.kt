@@ -26,6 +26,7 @@ import misk.vitess.testing.VitessTestDbStartupException
 import wisp.resources.ClasspathResourceLoaderBackend
 import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.ResourceLoader
+import java.util.concurrent.TimeUnit
 
 /**
  * VitessSchemaManager is responsible for applying the schema defined in the schema directory. It validates the schema
@@ -39,6 +40,11 @@ internal class VitessSchemaManager(
   private val enableDeclarativeSchemaChanges: Boolean,
   private val vitessClusterConfig: VitessClusterConfig,
 ) {
+  private companion object {
+    const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 5000L
+    const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
+  }
+
   private val dockerClient: DockerClient = setupDockerClient()
   private val skeema = VitessSkeema(vitessClusterConfig)
   private val currentSchemaDirPath: Path
@@ -269,6 +275,7 @@ internal class VitessSchemaManager(
         "ApplyVSchema",
         keyspace.name,
         "--strict",
+        "--action_timeout=$VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS",
         "--server=${vitessClusterConfig.hostname}:${vitessClusterConfig.grpcPort}",
         "--vschema=${keyspace.vschema}",
       )
@@ -287,9 +294,11 @@ internal class VitessSchemaManager(
     val vtctldClientContainerName = "${containerName}_${keyspace}_vtctldclient"
     val existingContainer = findExistingContainer(vtctldClientContainerName)
     if (existingContainer != null) {
+      printDebug("Found existing vtctldclient container, proceeding to remove.")
       dockerClient.removeContainerCmd(existingContainer.id).withForce(true).exec()
     }
 
+    printDebug("Creating new vtctldclient container.")
     val createContainerResponse =
       dockerClient
         .createContainerCmd(VTCTLD_CLIENT_IMAGE)
@@ -301,8 +310,11 @@ internal class VitessSchemaManager(
         .exec()
 
     dockerClient.startContainerCmd(createContainerResponse.id).exec()
-
-    val statusCode = dockerClient.waitContainerCmd(createContainerResponse.id).start().awaitStatusCode()
+    val statusCode = dockerClient
+      .waitContainerCmd(createContainerResponse.id)
+      .start()
+      .awaitStatusCode(VTCTLDCLIENT_CONTAINER_START_DELAY_MS, TimeUnit.MILLISECONDS)
+    printDebug("vtctldclient container create status code: $statusCode")
 
     val logCallback = LogContainerResultCallback()
     dockerClient
