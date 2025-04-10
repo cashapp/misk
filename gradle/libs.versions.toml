@@ -1,10 +1,10 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.31.17"
+aws2 = "2.31.18"
 bucket4j = "8.8.0"
 datadog = "1.47.3"
-dependencyAnalysisPlugin = "2.14.0"
+dependencyAnalysisPlugin = "2.15.0"
 detekt = "1.23.8"
 docker = "3.4.2"
 googleAuth = "1.33.1"
