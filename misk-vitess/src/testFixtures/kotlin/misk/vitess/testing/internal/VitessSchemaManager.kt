@@ -1,6 +1,7 @@
 package misk.vitess.testing.internal
 
 import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.exception.DockerClientException
 import com.github.dockerjava.api.model.Container
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Image
@@ -41,7 +42,7 @@ internal class VitessSchemaManager(
   private val vitessClusterConfig: VitessClusterConfig,
 ) {
   private companion object {
-    const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 5000L
+    const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 10000L
     const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
   }
 
@@ -308,31 +309,35 @@ internal class VitessSchemaManager(
         .withAttachStdout(true)
         .withAttachStdin(true)
         .exec()
+    printDebug("Created vtctldclient container with id `${createContainerResponse.id}`")
 
     dockerClient.startContainerCmd(createContainerResponse.id).exec()
-    val statusCode = dockerClient
-      .waitContainerCmd(createContainerResponse.id)
-      .start()
-      .awaitStatusCode(VTCTLDCLIENT_CONTAINER_START_DELAY_MS, TimeUnit.MILLISECONDS)
-    printDebug("vtctldclient container create status code: $statusCode")
 
-    val logCallback = LogContainerResultCallback()
-    dockerClient
-      .logContainerCmd(createContainerResponse.id)
-      .withStdOut(true)
-      .withStdErr(true)
-      .exec(logCallback)
-      .awaitCompletion()
+    try {
+      val statusCode = dockerClient
+        .waitContainerCmd(createContainerResponse.id)
+        .start()
+        .awaitStatusCode(VTCTLDCLIENT_CONTAINER_START_DELAY_MS, TimeUnit.MILLISECONDS)
+      printDebug("vtctldclient container command wait status code: `$statusCode`")
 
-    printDebug("Vtctld response:\n${logCallback.getLogs()}")
+      val containerLogs = getContainerLogs(createContainerResponse.id)
+      printDebug("Vtctld response:\n$containerLogs")
 
-    if (statusCode != 0) {
+      if (statusCode != 0) {
+        throw VitessSchemaManagerException(
+          "Failed to execute command: `${command.joinToString(" ")}`. Logs: $containerLogs}"
+        )
+      }
+
+      return containerLogs
+    } catch (e: DockerClientException) {
+      val containerLogs = getContainerLogs(createContainerResponse.id)
+      println("Failed to await vtctld container command for `${command.joinToString(" ")}`. Logs: $containerLogs")
       throw VitessSchemaManagerException(
-        "Failed to execute command: `${command.joinToString(" ")}`. Logs: ${logCallback.getLogs()}"
-      )
+        "Failed to await vtctld container command: `${command.joinToString(" ")}`, check logs for details.", e)
+    } finally {
+      dockerClient.removeContainerCmd(createContainerResponse.id).withForce(true).exec()
     }
-
-    return logCallback.getLogs()
   }
 
   private fun setupDockerClient(): DockerClient {
@@ -461,6 +466,18 @@ internal class VitessSchemaManager(
       .withNameFilter(listOf("^/$containerName$"))
       .exec()
       .firstOrNull()
+  }
+
+  private fun getContainerLogs(containerId: String): String {
+    val logCallback = LogContainerResultCallback()
+    dockerClient
+      .logContainerCmd(containerId)
+      .withStdOut(true)
+      .withStdErr(true)
+      .exec(logCallback)
+      .awaitCompletion()
+
+    return logCallback.getLogs()
   }
 
   private fun printDebug(message: String) {
