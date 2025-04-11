@@ -23,6 +23,7 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.pathString
 import misk.docker.withMiskDefaults
+import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK
 import misk.vitess.testing.TransactionIsolationLevel
 import misk.vitess.testing.VitessTestDbStartupException
 
@@ -86,7 +87,7 @@ internal class VitessDockerContainer(
 
     println("Starting new container `$containerName`.")
     if (shouldCreateContainerResult.newContainerReason != null) {
-      println("Reason for new container: ${shouldCreateContainerResult.newContainerReason}")
+      printDebug("Reason for new container: ${shouldCreateContainerResult.newContainerReason}")
     }
 
     stopExistingContainers(containerName)
@@ -328,6 +329,9 @@ internal class VitessDockerContainer(
       dockerClient.pullImageCmd(vitessImage).start().awaitCompletion()
     }
 
+    val networkId = getOrCreateVitessNetwork()
+    printDebug("Using Docker network `$networkId` for container `$containerName`.")
+
     val portBindings =
       vitessClusterConfig.allPorts().map { port -> PortBinding(Ports.Binding.bindPort(port), ExposedPort(port)) }
     val optionsFileDest = "$TEST_DB_DIR/my.cnf"
@@ -335,6 +339,7 @@ internal class VitessDockerContainer(
       HostConfig()
         .withPortBindings(portBindings)
         .withBinds(Bind(vitessMyCnf.optionsFilePath.pathString, Volume(optionsFileDest)))
+        .withNetworkMode(VITESS_DOCKER_NETWORK)
         .withAutoRemove(
           !debugStartup // If `debugStartup` is `true`, we keep the container running to inspect logs.
         ) // Otherwise, remove container when it stops.
@@ -524,6 +529,36 @@ internal class VitessDockerContainer(
     val exitCode = dockerClient.inspectExecCmd(exec.id).exec().exitCodeLong
     if (exitCode != 0L) {
       throw VitessTestDbStartupException("Failed to create side car dba user: ${logCallback.getLogs()}")
+    }
+  }
+
+  /**
+   *   Create or get a network for Vitess docker containers to communicate with each other.
+   */
+  private fun getOrCreateVitessNetwork(): String {
+    val networks = dockerClient.listNetworksCmd().exec()
+    val vitessNetworkType = "bridge"
+    val existingNetwork = networks.find { it.name == VITESS_DOCKER_NETWORK }
+    if (existingNetwork == null) {
+      val newNetworkId = dockerClient.createNetworkCmd()
+        .withName(VITESS_DOCKER_NETWORK)
+        .withDriver(vitessNetworkType)
+        .exec()
+        .id
+      return newNetworkId
+    }
+
+    if (existingNetwork.driver != vitessNetworkType) {
+      throw VitessTestDbStartupException("Network `$VITESS_DOCKER_NETWORK` exists for network id `${existingNetwork.id}` but is not of type `$vitessNetworkType`. " +
+        "Found type: `${existingNetwork.driver}`. Tear down the existing network to use this version of VitessTestDb.")
+    }
+
+    return existingNetwork.id
+  }
+
+  private fun printDebug(message: String) {
+    if (debugStartup) {
+      println(message)
     }
   }
 }

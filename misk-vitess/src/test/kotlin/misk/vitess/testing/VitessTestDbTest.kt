@@ -1,10 +1,5 @@
 package misk.vitess.testing
 
-import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.core.DefaultDockerClientConfig
-import com.github.dockerjava.core.DockerClientBuilder
-import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
-import misk.docker.withMiskDefaults
 import misk.vitess.testing.internal.VitessClusterConfig
 import misk.vitess.testing.internal.VitessQueryExecutor
 import misk.vitess.testing.internal.VitessQueryExecutorException
