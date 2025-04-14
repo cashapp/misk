@@ -317,7 +317,7 @@ abstract class TransacterTest {
             it.executeQuery("SHOW VITESS_TARGET").uniqueString()
           }
         }
-        assertThat(target).isEqualTo("@master")
+        assertThat(target).isEqualTo("@primary")
       }
 
       val character = queryFactory.newQuery<CharacterQuery>()

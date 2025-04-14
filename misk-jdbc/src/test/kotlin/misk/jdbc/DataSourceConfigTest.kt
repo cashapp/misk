@@ -16,7 +16,7 @@ class DataSourceConfigTest {
       DataSourceType.VITESS_MYSQL,
       port = dockerVitessPort)
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&sslMode=PREFERRED&" +
         "enabledTLSProtocols=TLSv1.2,TLSv1.3",
@@ -33,7 +33,7 @@ class DataSourceConfigTest {
       trust_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&" +
@@ -52,7 +52,7 @@ class DataSourceConfigTest {
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "clientCertificateKeyStoreUrl=path/to/keystore&clientCertificateKeyStorePassword=" +
@@ -73,7 +73,7 @@ class DataSourceConfigTest {
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&trustCertificateKeyStorePassword=" +
@@ -95,7 +95,7 @@ class DataSourceConfigTest {
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&trustCertificateKeyStorePassword" +
@@ -117,7 +117,7 @@ class DataSourceConfigTest {
       client_certificate_key_store_password = "changeit"
     )
     assertEquals(
-      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@master?useLegacyDatetimeCode=false&" +
+      "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&" +

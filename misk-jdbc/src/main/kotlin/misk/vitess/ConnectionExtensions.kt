@@ -24,14 +24,14 @@ private fun <T> Connection.target(destination: Destination, function: () -> T): 
 
 private fun Connection.targetDestination(destination: Destination) =
     createStatement().use { statement ->
-      val catalog = if (destination.isBlank()) "@master" else destination.toString()
+      val catalog = if (destination.isBlank()) "@primary" else destination.toString()
       this.catalog = catalog
     }
 
 private fun Connection.currentTarget(): Destination = Destination.parse(catalog)
 
 /**
- * Runs a read on master first then tries it on replicas on failure. This method is here only for
+ * Runs a read on primary first then tries it on replicas on failure. This method is here only for
  * health check purpose for standby regions.
  */
 fun <T> Connection.failSafeRead(block: (conn: Connection) -> T): T =
@@ -52,11 +52,11 @@ fun <T> Connection.failSafeRead(shard: Shard, block: (conn: Connection) -> T): T
 
 fun tabletDoesNotExists(e: Exception): Boolean {
   val rootCause = getRootCause(e)
-  val noMasterTabletRegex = ".*target:.*master.*no valid tablet:.*".toRegex(RegexOption.IGNORE_CASE)
+  val noPrimaryTabletRegex = ".*target:.*primary.*no valid tablet:.*".toRegex(RegexOption.IGNORE_CASE)
   val isSQLException = rootCause is SQLException
-  val isNoMasterTablet = noMasterTabletRegex.matches(rootCause.message!!)
+  val isNoPrimaryTablet = noPrimaryTabletRegex.matches(rootCause.message!!)
 
-  return isSQLException && isNoMasterTablet
+  return isSQLException && isNoPrimaryTablet
 }
 
 fun getRootCause(throwable: Throwable): Throwable {

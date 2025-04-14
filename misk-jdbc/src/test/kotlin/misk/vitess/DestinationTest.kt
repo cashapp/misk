@@ -7,10 +7,8 @@ class DestinationTest {
   @Test
   fun parse() {
     Assertions.assertThat(Destination.parse("").isBlank()).isTrue()
-    Assertions.assertThat(Destination.parse("@master").tabletType)
-        .isEqualTo(TabletType.MASTER)
     Assertions.assertThat(Destination.parse("@primary").tabletType)
-      .isEqualTo(TabletType.MASTER)
+      .isEqualTo(TabletType.PRIMARY)
     Assertions.assertThat(Destination.parse("ks/-80").shard)
         .isEqualTo(Shard(Keyspace("ks"), "-80"))
     Assertions.assertThat(Destination.parse("ks/-80@replica").tabletType)

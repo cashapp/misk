@@ -162,7 +162,7 @@ data class DataSourceConfig @JvmOverloads constructor(
         copy(
           port = port ?: 27003,
           host = host ?: System.getenv("VITESS_HOST") ?: server_hostname,
-          database = database ?: "@master"
+          database = database ?: "@primary"
         )
       }
       DataSourceType.HSQLDB -> {

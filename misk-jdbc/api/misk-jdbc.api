@@ -777,7 +777,7 @@ public final class misk/vitess/ShardsKt {
 }
 
 public final class misk/vitess/TabletType : java/lang/Enum {
-	public static final field MASTER Lmisk/vitess/TabletType;
+	public static final field PRIMARY Lmisk/vitess/TabletType;
 	public static final field REPLICA Lmisk/vitess/TabletType;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getValue ()I
