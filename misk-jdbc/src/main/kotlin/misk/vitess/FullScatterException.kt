@@ -5,7 +5,7 @@ import misk.jdbc.CheckException
 /**
  * Exception thrown if we use a scatter query that is too wide in the wrong context.
  *
- * Strongly consistent reads require reads from the master of a cluster. The master of a cluster is
+ * Strongly consistent reads require reads from the primary of a cluster. The primary of a cluster is
  * a limited resource that we can't add more of. We can split shards but a wide scatter query will
  * still hit all of the shards so we can't scale if we have too many wide scatters. For this reason we do not allow wide scatters for strongly consistent reads.
  *

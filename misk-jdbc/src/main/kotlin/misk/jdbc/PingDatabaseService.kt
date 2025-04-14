@@ -34,8 +34,8 @@ class PingDatabaseService @Inject constructor(
       try {
         connectToDataSource(dataSource)
       } catch (e: Exception) {
-        if (config.type == DataSourceType.VITESS_MYSQL && config.database == "@master") {
-          logger.warn("ping master database unsuccessful, trying to ping the replica")
+        if (config.type == DataSourceType.VITESS_MYSQL && config.database == "@primary") {
+          logger.warn("ping primary database unsuccessful, trying to ping the replica")
           val replicaDataSource = createDataSource(config.asReplica().buildJdbcUrl(deployment))
 
           connectToDataSource(replicaDataSource)

@@ -109,7 +109,7 @@ fun <T> Transacter.transaction(shard: Shard, block: (session: Session) -> T): T 
   transaction { it.target(shard) { block(it) } }
 
 /**
- * Runs a read on master first then tries it on replicas on failure. This method is here only for
+ * Runs a read on primary first then tries it on replicas on failure. This method is here only for
  * health check purpose for standby regions.
  */
 fun <T> Transacter.failSafeRead(block: (session: Session) -> T): T =

@@ -213,7 +213,7 @@ internal class RealTransacter private constructor(
 
   private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
     return withSession { session ->
-      session.target(Destination(TabletType.MASTER)) {
+      session.target(Destination(TabletType.PRIMARY)) {
         val transaction = session.hibernateSession.beginTransaction()!!
         try {
           val result = block(session)
@@ -374,7 +374,7 @@ internal class RealTransacter private constructor(
 
   /**
    * We get this error as a MySQLQueryInterruptedException when a tablet gracefully terminates, we
-   * just need to retry the transaction and the new master should handle it.
+   * just need to retry the transaction and the new primary should handle it.
    *
    * ```
    * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557:
@@ -521,7 +521,7 @@ internal class RealTransacter private constructor(
       check(config.type.isVitess)
       connection.createStatement().use { statement ->
         if (config.type == DataSourceType.VITESS_MYSQL) {
-          val catalog = if (destination.isBlank()) "@master" else destination.toString()
+          val catalog = if (destination.isBlank()) "@primary" else destination.toString()
           connection.catalog = catalog
         } else {
           withoutChecks {
