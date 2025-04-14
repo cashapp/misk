@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.782"
-aws2 = "2.31.20"
+aws2 = "2.31.21"
 bucket4j = "8.8.0"
 datadog = "1.48.1"
 dependencyAnalysisPlugin = "2.16.0"
@@ -11,7 +11,7 @@ googleAuth = "1.33.1"
 googleHttp = "1.46.3"
 hoplite = "2.7.5"
 jackson = "2.18.3"
-junit = "5.12.1"
+junit = "5.12.2"
 kotest = "5.9.1"
 kotlin = "2.1.20"
 kotlinBinaryCompatibilityPlugin = "0.17.0"
@@ -26,7 +26,7 @@ sqldelight = "2.0.2"
 wire = "5.3.1"
 
 [libraries]
-apacheCommonsIo = { module = "commons-io:commons-io", version = "2.18.0" }
+apacheCommonsIo = { module = "commons-io:commons-io", version = "2.19.0" }
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
 apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.1" }
 assertj = { module = "org.assertj:assertj-core", version = "3.27.3" }
