@@ -2,6 +2,7 @@ package misk.web
 
 import com.google.inject.TypeLiteral
 import com.squareup.wire.Message
+import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.WireEnum
 import com.squareup.wire.WireField
 import okio.ByteString
@@ -13,6 +14,7 @@ import java.util.LinkedList
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.javaField
 
@@ -101,7 +103,15 @@ class MiskWebFormBuilder {
         handleField(TypeLiteral.get(valueType), fieldName, fields, stack, true, annotations)
       }
       else -> {
-        fields.add(Field(fieldName, fieldClass.canonicalName!!, repeated, annotations.toStrings()))
+        fields.add(
+          Field(
+            name = fieldName,
+            type = fieldClass.canonicalName!!,
+            repeated = repeated,
+            annotations = annotations.toStrings(),
+            protobufType = fieldClass.kotlin.getProtobufType(),
+          )
+        )
         stack.push(fieldClass.kotlin)
       }
     }
@@ -200,7 +210,7 @@ class MiskWebFormBuilder {
       fieldName = fieldName,
       enumValues = fieldClass.enumConstants.map { (it as Enum<*>).name },
       repeated = repeated,
-      annotations = annotations
+      annotations = annotations,
     )
 
     /**
@@ -216,11 +226,18 @@ class MiskWebFormBuilder {
     ) = Field(
       fieldName,
       "Enum<$fieldClassName,${enumValues.joinToString(",")}>",
-      repeated, 
+      repeated,
       annotations.toStrings()
     )
 
     private fun List<Annotation>.toStrings(): List<String> = this.map { it.toString() }
+
+    private fun KClass<*>.getProtobufType(): String? {
+      return when {
+        isSubclassOf(Message::class) -> ProtoAdapter.get(this.java)
+        else -> null
+      }?.typeUrl?.split("/")?.lastOrNull()
+    }
   }
 
   /** Akin to a Proto Message, a Type has a list of fields */
@@ -237,5 +254,8 @@ class MiskWebFormBuilder {
     val name: String,
     val type: String,
     val repeated: Boolean,
-    val annotations: List<String> = listOf())
+    val annotations: List<String> = listOf(),
+    val protobufType: String? = null,
+  )
+
 }
