@@ -26,6 +26,8 @@ import misk.docker.withMiskDefaults
 import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK
 import misk.vitess.testing.TransactionIsolationLevel
 import misk.vitess.testing.VitessTestDbStartupException
+import java.net.InetSocketAddress
+import java.net.Socket
 
 /** VitessDockerContainer validates user arguments and starts a Docker container with a vttestserver image. */
 internal class VitessDockerContainer(
@@ -67,6 +69,8 @@ internal class VitessDockerContainer(
     const val CONTAINER_START_RETRY_DELAY_MS = 10000L
     const val CONTAINER_HEALTH_CHECK_INTERVAL_SECONDS = 5L
     const val CONTAINER_HEALTH_CHECK_RETRIES = 10
+    const val CONTAINER_STOP_TIMEOUT_SECONDS = 10
+    const val PORT_CHECK_TIMEOUT_MS = 200
   }
 
   private val dockerClient: DockerClient = setupDockerClient()
@@ -204,13 +208,20 @@ internal class VitessDockerContainer(
     // Also remove any containers that are using the same ports as the new container.
     vitessClusterConfig.allPorts().forEach { port ->
       val containers = dockerClient.listContainersCmd().withShowAll(true).withFilter("publish", listOf("$port")).exec()
-      containers.forEach { container -> stopContainer(container) }
+      containers.forEach {
+        container -> stopContainer(container)
+        if (isPortInUse(port)) {
+          val containerName = container.names?.firstOrNull() ?: "unknown"
+          println("Port `$port` is still in use by container with id `${container.id}` and name `$containerName` after stopping container. Force removing container.")
+          removeContainer(container)
+        }
+      }
     }
   }
 
   private fun stopContainer(container: Container) {
     try {
-      dockerClient.stopContainerCmd(container.id).withTimeout(5).exec()
+      dockerClient.stopContainerCmd(container.id).withTimeout(CONTAINER_STOP_TIMEOUT_SECONDS).exec()
     } catch (e: NotFoundException) {
       // If we are in this state, the container is already removed.
     } catch (e: NotModifiedException) {
@@ -554,6 +565,23 @@ internal class VitessDockerContainer(
     }
 
     return existingNetwork.id
+  }
+
+  /**
+   *  Check if a port is in use via a socket connection. If there is a successful connection,
+   *  it means the port is already in use by another process; the socket is immediately closed after
+   *  the connection is made via the "use block", so it does not bind or occupy the port itself.
+   *  If an exception is thrown, it means the port is not in use.
+   */
+  private fun isPortInUse(port: Int): Boolean {
+    return try {
+      Socket().use { socket ->
+        socket.connect(InetSocketAddress(vitessClusterConfig.hostname, port), PORT_CHECK_TIMEOUT_MS)
+        true
+      }
+    } catch (e: SocketException) {
+      false
+    }
   }
 
   private fun printDebug(message: String) {
