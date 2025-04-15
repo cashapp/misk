@@ -50,13 +50,14 @@ internal class MiskWebFormBuilderTest {
         name = "alternates",
         type = Warehouse::class.qualifiedName!!,
         repeated = true,
-        annotations = emptyList()
+        annotations = emptyList(),
+        protobufType = "test.Warehouse",
       )
     )
 
     // Check map value types are included
     assertThat(warehouseType.fields).contains(Field("robots", "com.squareup.protos.test.parsing.Robot",
-      true, listOf("@com.squareup.protos.test.SemanticDataTypeOption({ROBOTS})")))
+      true, listOf("@com.squareup.protos.test.SemanticDataTypeOption({ROBOTS})"), "test.Robot"))
     // Check that we recurse into value types in Maps
     assertThat(robotType.fields).contains(Field("robot_token", "String", false,
       listOf("@com.squareup.protos.test.SemanticDataTypeOption({ROBOT_TOKEN})")))
@@ -111,13 +112,14 @@ internal class MiskWebFormBuilderTest {
         name = "alternates",
         type = KotlinProtoWarehouse::class.qualifiedName!!,
         repeated = true,
-        annotations = emptyList()
+        annotations = emptyList(),
+        protobufType = "test.kt.Warehouse",
       )
     )
 
     // Check map value types are included
     assertThat(warehouseType.fields).contains(Field("robots", "com.squareup.protos.test.kt.parsing.Robot",
-      true, listOf("@com.squareup.protos.test.kt.SemanticDataTypeOption({ROBOTS})")))
+      true, listOf("@com.squareup.protos.test.kt.SemanticDataTypeOption({ROBOTS})"), "test.kt.Robot"))
     // Check that we recurse into value types in Maps
     assertThat(robotType.fields).contains(Field("robot_token", "String", false,
       listOf("@com.squareup.protos.test.kt.SemanticDataTypeOption({ROBOT_TOKEN})")))
@@ -130,6 +132,7 @@ internal class MiskWebFormBuilderTest {
           "DELIVERING,CONSUMING>",
         repeated = false,
         annotations = listOf("@com.squareup.protos.test.kt.SemanticDataTypeOption({STATUS})")
+
       )
     )
 
