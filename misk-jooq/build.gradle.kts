@@ -65,7 +65,6 @@ jooq {
           database.apply {
             name = "org.jooq.meta.mysql.MySQLDatabase"
             inputSchema = "jooq"
-            outputSchema = "jooq"
             includes = ".*"
             excludes = "(.*?FLYWAY_SCHEMA_HISTORY)|(.*?schema_version)"
             recordVersionFields = "version"
