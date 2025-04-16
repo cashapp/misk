@@ -19,22 +19,25 @@ jooq-code-gen to it. There's an example of how to do this in this
    
 a. Add the below lines to your build.gradle.kts
 
-```
+```kotlin
 plugins {
   alias(libs.plugins.miskSchemaMigrator)
   alias(libs.plugins.jooq)
 }
+
+val schema = "<your service name>" // change this to your service name
 val dbMigrations = "src/main/resources/db-migrations"
 // We are using the schema migrator plugin here in order to run the migrations to create a schema.
 // Ensure the migration directory is not called `migrations`. There's more details as to why below.
 miskSchemaMigrator {
-  database = "misk-jooq-test-codegen" // change this to your service name
+  database = schema
   username = "root"
   password = "root"
   host = "localhost"
   port = 3500
   migrationsDir.set(layout.projectDirectory.dir(dbMigrations))
 }
+
 // More details about the jooq plugin here - https://github.com/etiennestuder/gradle-jooq-plugin
 jooq {
   edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
@@ -45,7 +48,7 @@ jooq {
       jooqConfiguration.apply {
         jdbc.apply {
           driver = "com.mysql.cj.jdbc.Driver"
-          url = "jdbc:mysql://localhost:3500/misk-jooq-test-codegen" // change this to your service name
+          url = "jdbc:mysql://localhost:3500/$schema"
           user = "root"
           password = "root"
         }
@@ -53,8 +56,7 @@ jooq {
           name = "org.jooq.codegen.KotlinGenerator"
           database.apply {
             name = "org.jooq.meta.mysql.MySQLDatabase"
-            inputSchema = "jooq"
-            outputSchema = "jooq"
+            inputSchema = schema
             includes = ".*"
             excludes = "(.*?FLYWAY_SCHEMA_HISTORY)|(.*?schema_version)"
             recordVersionFields = "version"
@@ -62,10 +64,7 @@ jooq {
           generate.apply {
             isJavaTimeTypes = true
           }
-          target.apply {
-            packageName = "<your service package name>"
-            directory   = "${project.projectDir}/src/main/generated/kotlin"
-          }
+          target.packageName = "<your service package name>"
         }
       }
     }
@@ -83,15 +82,6 @@ tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
     .withPathSensitivity(PathSensitivity.RELATIVE)
   allInputsDeclared.set(true)
 }
-
-// Needed to generate jooq test db classes
-// If you are using this as an example for your service, remember to add the generated code to your
-// main source set instead of your tests as it is done below.
-sourceSets {
-  test {
-    java.srcDirs(layout.projectDirectory.dir("src/test/generated/kotlin"))
-  }
-}
 ```
 
 b. Have a look at `jooq-test-regenerate.sh`. Copy that into the root of your project and modify the database
@@ -100,7 +90,6 @@ name and docker container name.
 c. Run `jooq-test-regenerate.sh` to have your model generated for you and ready to use.
 
 d. Make sure to run `jooq-test-regenerate.sh` every time you add a migration.
-
 
 ## Examples of how to use this module
 
@@ -156,8 +145,6 @@ ctx.select()
 }
 
 ```
-
-
 
 ## Future 
 
