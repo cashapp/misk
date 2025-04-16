@@ -1,0 +1,34 @@
+vitess_mysql_data_source:
+  type: VITESS_MYSQL
+  username: root
+  password: ""
+  vitess_schema_resource_root: classpath:/vitess/schema
+  generate_hibernate_stats: "true"
+  port: 27003
+  show_sql: "true"
+mysql_data_source:
+  type: MYSQL
+  database: idtype
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/hibernate/idtype-schema
+  jdbc_url_query_parameters:
+    serverTimezone: UTC
+cockroachdb_data_source:
+  type: COCKROACHDB
+  database: idtype
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/hibernate/idtype-cockroachdb
+tidb_data_source:
+  type: TIDB
+  database: idtype
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/hibernate/idtype-tidb
+postgresql_data_source:
+  type: POSTGRESQL
+  database: idtype
+  username: postgres
+  password: password
+  migrations_resource: classpath:/misk/hibernate/idtype-cockroachdb

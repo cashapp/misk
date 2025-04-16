@@ -52,9 +52,16 @@ class IdType : UserType, ResultSetIdentifierConsumer {
 
   override fun sqlTypes() = intArrayOf(Types.BIGINT)
 
-  override fun consumeIdentifier(resultSet: ResultSet): Serializable = Id<DbPlaceholder>(
-    resultSet.getLong(1)
-  )
+  override fun consumeIdentifier(resultSet: ResultSet): Serializable {
+    val id = if (resultSet.metaData.columnCount > 1) {
+      // PostgreSQL will to INSERT (...) VALUES (...) RETURNING *, and id might not be the first.
+      // But what if the column isn't named id?  How else can we find it?
+      resultSet.getLong("id")
+    } else {
+      resultSet.getLong(1);
+    }
+    return Id<DbPlaceholder>(id)
+  }
 
   /** This placeholder exists so we can create an Id<*>() without a type parameter. */
   private class DbPlaceholder : DbEntity<DbPlaceholder> {
