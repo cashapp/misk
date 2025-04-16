@@ -209,24 +209,21 @@ internal class LaunchDarklyFeatureFlagsTest {
             .stringVariationDetail(eq("key"), userCaptor.capture(), eq(""))
 
         val user = userCaptor.value
-        // NB: LDUser properties are package-local so we can't read them here.
+        // NB: LDContext properties are package-local so we can't read them here.
         // Create expected user and compare against actual.
-        val expected = LDContext.fromUser(LDUser.Builder("user")
-            .ip("127.0.0.1")
-            .email("email@value.com")
+        val expected = LDContext.builder("user")
             .name("name value")
-            .avatar("avatar value")
-            .firstName("firstName value")
-            .lastName("lastName value")
-            .country("US")
-            .privateCustom("secondary", "secondary value")
-            .privateCustom("custom1", "custom1 value")
-            .privateCustom("custom2", "custom2 value")
-            .build())
+            .set("ip", "127.0.0.1")
+            .set("email", "email@value.com")
+            .set("avatar", "avatar value")
+            .set("firstName", "firstName value")
+            .set("lastName", "lastName value")
+            .set("country", "US")
+            .set("secondary", "secondary value").privateAttributes("secondary")
+            .set("custom1", "custom1 value").privateAttributes("custom1")
+            .set("custom2", "custom2 value").privateAttributes("custom2")
+            .build()
 
-        // isEqualTo() would be more appropriate, since LDUser overrides equals(). However, failures would offer no
-        // meaningful output, given that LDUser does not override toString. Doing a field-by-field comparison is overkill
-        // for the test to pass but produces output that identifies the problematic attribute(s) when the test fails.
-        assertThat(user).usingRecursiveComparison().isEqualTo(expected)
+        assertThat(user).isEqualTo(expected)
     }
 }

@@ -3,7 +3,6 @@ package wisp.launchdarkly
 import com.launchdarkly.sdk.EvaluationDetail
 import com.launchdarkly.sdk.EvaluationReason
 import com.launchdarkly.sdk.LDContext
-import com.launchdarkly.sdk.LDUser
 import com.launchdarkly.sdk.LDValue
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
@@ -81,12 +80,12 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     feature: Feature,
     key: String,
     attributes: Attributes,
-    callLdVariation: (String, LDUser) -> EvaluationDetail<T>,
+    callLdVariation: (String, LDContext) -> EvaluationDetail<T>,
   ): T {
     checkInitialized()
     val result = callLdVariation(
       feature.name,
-      buildUser(feature, key, attributes),
+      buildContext(feature, key, attributes),
     )
     checkDefaultNotUsed(feature, result)
     return result.value
@@ -112,23 +111,23 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     getJson(flag.feature, flag.key, flag.returnType, flag.attributes)
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
-    get(feature, key, attributes) { name, user ->
-      ldClient.value.boolVariationDetail(name, LDContext.fromUser(user), false)
+    get(feature, key, attributes) { name, context ->
+      ldClient.value.boolVariationDetail(name, context, false)
     }
 
   override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
-    get(feature, key, attributes) { name, user ->
-      ldClient.value.doubleVariationDetail(name, LDContext.fromUser(user), 0.0)
+    get(feature, key, attributes) { name, context ->
+      ldClient.value.doubleVariationDetail(name, context, 0.0)
     }
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
-    get(feature, key, attributes) { name, user ->
-      ldClient.value.intVariationDetail(name, LDContext.fromUser(user), 0)
+    get(feature, key, attributes) { name, context ->
+      ldClient.value.intVariationDetail(name, context, 0)
     }
 
   override fun getString(feature: Feature, key: String, attributes: Attributes): String =
-    get(feature, key, attributes) { name, user ->
-      ldClient.value.stringVariationDetail(name, LDContext.fromUser(user), "")
+    get(feature, key, attributes) { name, context ->
+      ldClient.value.stringVariationDetail(name, context, "")
     }
 
   override fun <T : Enum<T>> getEnum(
@@ -137,8 +136,8 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     clazz: Class<T>,
     attributes: Attributes,
   ): T {
-    val result = get(feature, key, attributes) { name, user ->
-      ldClient.value.stringVariationDetail(name, LDContext.fromUser(user), "")
+    val result = get(feature, key, attributes) { name, context ->
+      ldClient.value.stringVariationDetail(name, context, "")
     }
     return java.lang.Enum.valueOf(clazz, result.uppercase(Locale.getDefault()))
   }
@@ -149,8 +148,8 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     clazz: Class<T>,
     attributes: Attributes,
   ): T {
-    val result = get(feature, key, attributes) { name, user ->
-      ldClient.value.jsonValueVariationDetail(name, LDContext.fromUser(user), LDValue.ofNull())
+    val result = get(feature, key, attributes) { name, context ->
+      ldClient.value.jsonValueVariationDetail(name, context, LDValue.ofNull())
     }
     return moshi.adapter(clazz)
       .fromSafeJson(result.toJsonString()) { exception ->
@@ -160,8 +159,8 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
   }
 
   override fun getJsonString(feature: Feature, key: String, attributes: Attributes): String {
-    val result = get(feature, key, attributes) { name, user ->
-      ldClient.value.jsonValueVariationDetail(name, LDContext.fromUser(user), LDValue.ofNull())
+    val result = get(feature, key, attributes) { name, context ->
+      ldClient.value.jsonValueVariationDetail(name, context, LDValue.ofNull())
     }
     return result.toJsonString()
   }
@@ -177,7 +176,7 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     checkInitialized()
     val listener = ldClient.value.flagTracker.addFlagValueChangeListener(
       feature.name,
-      LDContext.fromUser(buildUser(feature, key, attributes))
+      buildContext(feature, key, attributes)
     ) { event ->
       executor.execute {
         tracker(mapper(event.newValue))
@@ -288,40 +287,39 @@ class LaunchDarklyFeatureFlags @JvmOverloads constructor(
     )
   }
 
-  private fun buildUser(feature: Feature, key: String, attributes: Attributes): LDUser {
+  private fun buildContext(feature: Feature, key: String, attributes: Attributes): LDContext {
     FeatureFlagValidation.checkValidKey(feature, key)
-    val builder = LDUser.Builder(key)
+    val builder = LDContext.builder(key)
     attributes.text.forEach { (k, v) ->
       when (k) {
-        // LaunchDarkly has some built-in keys that have to be initialized with their named
-        // methods.
-        "ip" -> builder.ip(v)
-        "email" -> builder.email(v)
-        "name" -> builder.name(v)
-        "avatar" -> builder.avatar(v)
-        "firstName" -> builder.firstName(v)
-        "lastName" -> builder.lastName(v)
-        "country" -> builder.country(v)
-        else -> builder.privateCustom(k, v)
+        // Deprecated LDUser had these non-private built in attributes:
+        "ip" -> builder.set(k, v)
+        "email" -> builder.set(k, v)
+        "name" -> builder.set(k, v)
+        "avatar" -> builder.set(k, v)
+        "firstName" -> builder.set(k, v)
+        "lastName" -> builder.set(k, v)
+        "country" -> builder.set(k, v)
+        else -> builder.set(k, v).privateAttributes(k)
       }
     }
     if (attributes.number != null) {
       attributes.number!!.forEach { (k, v) ->
         when (v) {
           is Long -> {
-            builder.privateCustom(k, LDValue.of(v))
+            builder.set(k, LDValue.of(v)).privateAttributes(k)
           }
 
           is Int -> {
-            builder.privateCustom(k, LDValue.of(v))
+            builder.set(k, LDValue.of(v)).privateAttributes(k)
           }
 
           is Double -> {
-            builder.privateCustom(k, LDValue.of(v))
+            builder.set(k, LDValue.of(v)).privateAttributes(k)
           }
 
           is Float -> {
-            builder.privateCustom(k, LDValue.of(v))
+            builder.set(k, LDValue.of(v)).privateAttributes(k)
           }
         }
       }
