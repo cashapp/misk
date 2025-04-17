@@ -51,6 +51,9 @@ data class Destination(
         null
       } else {
         var name = string.substring(index + 1).uppercase()
+        if (name == "MASTER") {
+          name = "PRIMARY"
+        }
         TabletType.valueOf(name)
       }
       if (shardStr == "") {
