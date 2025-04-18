@@ -51,6 +51,17 @@ public final class misk/vitess/testing/DefaultSettings {
 	public static final field VTCTLD_CLIENT_IMAGE Ljava/lang/String;
 }
 
+public abstract interface class misk/vitess/testing/RemoveContainerResult {
+	public abstract fun getContainerId ()Ljava/lang/String;
+	public abstract fun getContainerRemoved ()Z
+}
+
+public abstract interface class misk/vitess/testing/StartContainerResult {
+	public abstract fun getContainerId ()Ljava/lang/String;
+	public abstract fun getNewContainerCreated ()Z
+	public abstract fun getNewContainerReason ()Ljava/lang/String;
+}
+
 public final class misk/vitess/testing/TransactionIsolationLevel : java/lang/Enum {
 	public static final field READ_COMMITTED Lmisk/vitess/testing/TransactionIsolationLevel;
 	public static final field READ_UNCOMMITTED Lmisk/vitess/testing/TransactionIsolationLevel;
@@ -83,6 +94,7 @@ public final class misk/vitess/testing/VitessTestDb {
 	public static final fun Builder ()Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun applySchema ()Lmisk/vitess/testing/ApplySchemaResult;
 	public final fun run ()Lmisk/vitess/testing/VitessTestDbStartupResult;
+	public final fun shutdown ()Lmisk/vitess/testing/VitessTestDbShutdownResult;
 	public final fun truncate ()V
 	public final fun truncate (Ljava/sql/Connection;)V
 }
@@ -126,12 +138,25 @@ public final class misk/vitess/testing/VitessTestDbSchemaParseException : misk/v
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
+public final class misk/vitess/testing/VitessTestDbShutdownResult : misk/vitess/testing/RemoveContainerResult {
+	public fun <init> (Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/String;Z)Lmisk/vitess/testing/VitessTestDbShutdownResult;
+	public static synthetic fun copy$default (Lmisk/vitess/testing/VitessTestDbShutdownResult;Ljava/lang/String;ZILjava/lang/Object;)Lmisk/vitess/testing/VitessTestDbShutdownResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getContainerId ()Ljava/lang/String;
+	public fun getContainerRemoved ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/vitess/testing/VitessTestDbStartupException : misk/vitess/testing/VitessTestDbException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
-public final class misk/vitess/testing/VitessTestDbStartupResult {
+public final class misk/vitess/testing/VitessTestDbStartupResult : misk/vitess/testing/StartContainerResult {
 	public fun <init> (JLjava/lang/String;ZLjava/lang/String;)V
 	public final fun component1 ()J
 	public final fun component2 ()Ljava/lang/String;
@@ -140,9 +165,9 @@ public final class misk/vitess/testing/VitessTestDbStartupResult {
 	public final fun copy (JLjava/lang/String;ZLjava/lang/String;)Lmisk/vitess/testing/VitessTestDbStartupResult;
 	public static synthetic fun copy$default (Lmisk/vitess/testing/VitessTestDbStartupResult;JLjava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lmisk/vitess/testing/VitessTestDbStartupResult;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getContainerId ()Ljava/lang/String;
-	public final fun getNewContainerCreated ()Z
-	public final fun getNewContainerReason ()Ljava/lang/String;
+	public fun getContainerId ()Ljava/lang/String;
+	public fun getNewContainerCreated ()Z
+	public fun getNewContainerReason ()Ljava/lang/String;
 	public final fun getStartupTimeMs ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -158,6 +183,51 @@ public final class misk/vitess/testing/internal/LogContainerResultCallback : com
 	public final fun getLogs ()Ljava/lang/String;
 	public fun onNext (Lcom/github/dockerjava/api/model/Frame;)V
 	public synthetic fun onNext (Ljava/lang/Object;)V
+}
+
+public final class misk/vitess/testing/internal/RemoveVitessContainerResult : misk/vitess/testing/RemoveContainerResult {
+	public fun <init> (Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/String;Z)Lmisk/vitess/testing/internal/RemoveVitessContainerResult;
+	public static synthetic fun copy$default (Lmisk/vitess/testing/internal/RemoveVitessContainerResult;Ljava/lang/String;ZILjava/lang/Object;)Lmisk/vitess/testing/internal/RemoveVitessContainerResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getContainerId ()Ljava/lang/String;
+	public fun getContainerRemoved ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/testing/internal/ShouldCreateVitessContainerResult {
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (ZLjava/lang/String;Ljava/lang/String;)Lmisk/vitess/testing/internal/ShouldCreateVitessContainerResult;
+	public static synthetic fun copy$default (Lmisk/vitess/testing/internal/ShouldCreateVitessContainerResult;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/vitess/testing/internal/ShouldCreateVitessContainerResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExistingContainerId ()Ljava/lang/String;
+	public final fun getNewContainerNeeded ()Z
+	public final fun getNewContainerReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/vitess/testing/internal/StartVitessContainerResult : misk/vitess/testing/StartContainerResult {
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;ZLjava/lang/String;)Lmisk/vitess/testing/internal/StartVitessContainerResult;
+	public static synthetic fun copy$default (Lmisk/vitess/testing/internal/StartVitessContainerResult;Ljava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lmisk/vitess/testing/internal/StartVitessContainerResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getContainerId ()Ljava/lang/String;
+	public fun getNewContainerCreated ()Z
+	public fun getNewContainerReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/vitess/testing/internal/VitessClusterConfig {

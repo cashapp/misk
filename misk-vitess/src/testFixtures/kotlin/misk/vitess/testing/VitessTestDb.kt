@@ -1,6 +1,5 @@
 package misk.vitess.testing
 
-import misk.vitess.testing.internal.StartVitessContainerResult
 import misk.vitess.testing.internal.VitessClusterConfig
 import misk.vitess.testing.internal.VitessDockerContainer
 import misk.vitess.testing.internal.VitessQueryExecutor
@@ -165,28 +164,13 @@ class VitessTestDb(
   fun run(): VitessTestDbStartupResult {
     println("Starting VitessTestDb.")
 
-    var containerStartResult: StartVitessContainerResult
+    var containerStartResult: StartContainerResult
 
     val elapsed = measureTime {
-      val container =
-        VitessDockerContainer(
-          containerName,
-          debugStartup,
-          enableScatters,
-          keepAlive,
-          mysqlVersion,
-          sqlMode,
-          transactionIsolationLevel,
-          transactionTimeoutSeconds,
-          vitessClusterConfig,
-          vitessImage,
-          vitessSchemaManager,
-          vitessVersion,
-        )
-
+      val container = getVitessDockerContainer()
       containerStartResult = container.start()
 
-      if (containerStartResult.newContainerNeeded) {
+      if (containerStartResult.newContainerCreated) {
         println("🐳 Started new VitessTestDb Docker container `$containerName`.")
       } else {
         println("🐳 Reusing existing VitessTestDb Docker container `$containerName`.")
@@ -203,9 +187,24 @@ class VitessTestDb(
 
     return VitessTestDbStartupResult(
       startupTimeMs = elapsed.inWholeMilliseconds,
-      newContainerCreated = containerStartResult.newContainerNeeded,
+      newContainerCreated = containerStartResult.newContainerCreated,
       newContainerReason = containerStartResult.newContainerReason,
       containerId = containerStartResult.containerId,
+    )
+  }
+
+  /**
+   * Shut down the running Vitess database, which removes the Docker container and used volumes.
+   *
+   * @return [VitessTestDbShutdownResult] which contains information about the shutdown state.
+   */
+  fun shutdown(): VitessTestDbShutdownResult {
+    val container = getVitessDockerContainer()
+    val shutdownResult = container.shutdown()
+
+    return VitessTestDbShutdownResult(
+      containerId = shutdownResult.containerId,
+      containerRemoved = shutdownResult.containerRemoved,
     )
   }
 
@@ -244,6 +243,25 @@ class VitessTestDb(
       throw VitessTestDbTruncateException("Failed to truncate tables", e)
     }
   }
+
+  private fun getVitessDockerContainer(): VitessDockerContainer {
+    val container =
+      VitessDockerContainer(
+        containerName,
+        debugStartup,
+        enableScatters,
+        keepAlive,
+        mysqlVersion,
+        sqlMode,
+        transactionIsolationLevel,
+        transactionTimeoutSeconds,
+        vitessClusterConfig,
+        vitessImage,
+        vitessSchemaManager,
+        vitessVersion,
+      )
+    return container
+  }
 }
 
 /**
@@ -257,10 +275,33 @@ class VitessTestDb(
  */
 data class VitessTestDbStartupResult(
   val startupTimeMs: Long,
-  val containerId: String,
-  val newContainerCreated: Boolean,
-  val newContainerReason: String?,
-)
+  override val containerId: String,
+  override val newContainerCreated: Boolean,
+  override val newContainerReason: String?,
+) : StartContainerResult
+
+/**
+ * This class contains information about a shutdown operation of VitessTestDb, which attempts
+ * to remove the container and its volumes.
+ *
+ * @property containerId The ID of the Docker container that was removed.
+ * @property containerRemoved Whether the container was removed after.
+ */
+data class VitessTestDbShutdownResult(
+  override val containerId: String?,
+  override val containerRemoved: Boolean
+) : RemoveContainerResult
+
+interface StartContainerResult {
+  val containerId: String
+  val newContainerCreated: Boolean
+  val newContainerReason: String?
+}
+
+interface RemoveContainerResult {
+  val containerId: String?
+  val containerRemoved: Boolean
+}
 
 open class VitessTestDbException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
 

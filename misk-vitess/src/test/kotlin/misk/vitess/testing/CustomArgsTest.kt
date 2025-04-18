@@ -3,6 +3,7 @@ package misk.vitess.testing
 import misk.vitess.testing.internal.VitessClusterConfig
 import misk.vitess.testing.internal.VitessQueryExecutor
 import misk.vitess.testing.internal.VitessQueryExecutorException
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -71,6 +72,13 @@ class CustomArgsTest {
 
       testDb1QueryExecutor = VitessQueryExecutor(VitessClusterConfig(DB1_PORT))
       testDb2QueryExecutor = VitessQueryExecutor(VitessClusterConfig(DB2_PORT))
+    }
+
+    @JvmStatic
+    @AfterAll
+    fun tearDown() {
+      testDb1.shutdown()
+      testDb2.shutdown()
     }
   }
 
