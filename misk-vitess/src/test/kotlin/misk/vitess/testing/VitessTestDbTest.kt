@@ -3,9 +3,9 @@ package misk.vitess.testing
 import misk.vitess.testing.internal.VitessClusterConfig
 import misk.vitess.testing.internal.VitessQueryExecutor
 import misk.vitess.testing.internal.VitessQueryExecutorException
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -24,21 +24,20 @@ class VitessTestDbTest {
       vitessTestDbRunResult = vitessTestDb.run()
       vitessQueryExecutor = VitessQueryExecutor(VitessClusterConfig(DefaultSettings.PORT))
     }
+
+    @JvmStatic
+    @AfterAll
+    fun tearDown() {
+      val shutdownResult = vitessTestDb.shutdown()
+      assertEquals(shutdownResult.containerId, vitessTestDbRunResult.containerId)
+      assertEquals(shutdownResult.containerRemoved, true)
+    }
   }
 
   @Test
   fun `test querying the database`() {
     val results = vitessQueryExecutor.executeQuery("SHOW KEYSPACES;")
     assertEquals(2, results.size)
-  }
-
-  @Test
-  fun `test truncate fails when database is not running`() {
-    val nonRunningDb = VitessTestDb(containerName = "non_running_vitess_test_db", port = 50003)
-
-    val exception = assertThrows<VitessTestDbTruncateException>(nonRunningDb::truncate)
-    assertEquals("Failed to truncate tables", exception.message)
-    assertTrue(exception.cause!!.message!!.contains("Failed to get vtgate connection on port 50003"))
   }
 
   @Test

@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.io.path.pathString
 import misk.docker.withMiskDefaults
 import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK
+import misk.vitess.testing.RemoveContainerResult
+import misk.vitess.testing.StartContainerResult
 import misk.vitess.testing.TransactionIsolationLevel
 import misk.vitess.testing.VitessTestDbStartupException
 import java.net.InetSocketAddress
@@ -76,7 +78,7 @@ internal class VitessDockerContainer(
   private val dockerClient: DockerClient = setupDockerClient()
   private val vitessMyCnf = VitessMyCnf(containerName, sqlMode, transactionIsolationLevel)
 
-  fun start(): StartVitessContainerResult {
+  fun start(): StartContainerResult {
     validateVitessVersionArgs()
     startDockerIfNotRunning()
 
@@ -84,7 +86,7 @@ internal class VitessDockerContainer(
 
     if (!shouldCreateContainerResult.newContainerNeeded) {
       return StartVitessContainerResult(
-        newContainerNeeded = false,
+        newContainerCreated = false,
         containerId = shouldCreateContainerResult.existingContainerId.toString(),
       )
     }
@@ -102,10 +104,34 @@ internal class VitessDockerContainer(
     createDbaUserForSideCarDb(containerId)
 
     return StartVitessContainerResult(
-      newContainerNeeded = true,
+      newContainerCreated = true,
       newContainerReason = shouldCreateContainerResult.newContainerReason,
       containerId = containerId,
     )
+  }
+
+  fun shutdown(): RemoveContainerResult {
+    val existingContainer = findExistingContainer(containerName)
+    if (existingContainer != null) {
+      printDebug("Shutting down container `$containerName`...")
+      val removeResult = removeContainer(existingContainer)
+      if (!removeResult) {
+        println("Container `$containerName` is already shut down.")
+        return RemoveVitessContainerResult(
+          containerId = existingContainer.id,
+          containerRemoved = false
+        )
+      }
+
+      println("Container `$containerName` has been successfully shut down.")
+      return RemoveVitessContainerResult(
+        containerId = existingContainer.id,
+        containerRemoved = true
+      )
+    }
+
+    println("No container found with name `$containerName` to shut down.")
+    return RemoveVitessContainerResult(containerId = null, containerRemoved = false)
   }
 
   private fun setupDockerClient(): DockerClient {
@@ -219,13 +245,20 @@ internal class VitessDockerContainer(
     }
   }
 
-  private fun stopContainer(container: Container) {
+  /**
+   * This method stops the container. If the container is already stopped or removed, it returns
+   * `false`.
+   */
+  private fun stopContainer(container: Container): Boolean {
     try {
       dockerClient.stopContainerCmd(container.id).withTimeout(CONTAINER_STOP_TIMEOUT_SECONDS).exec()
+      return true
     } catch (e: NotFoundException) {
       // If we are in this state, the container is already removed.
+      return false
     } catch (e: NotModifiedException) {
       // If we are in this state, the container is already stopped.
+      return false
     }
   }
 
@@ -241,11 +274,16 @@ internal class VitessDockerContainer(
     }
   }
 
-  private fun removeContainer(container: Container) {
+  /**
+   * This method removes the container. If the container is already removed, it returns `false`.
+   */
+  private fun removeContainer(container: Container): Boolean {
     try {
       dockerClient.removeContainerCmd(container.id).withForce(true).exec()
+      return true
     } catch (e: NotFoundException) {
       // If we are in this state, the container is already removed.
+      return false
     }
   }
 
@@ -599,22 +637,33 @@ internal class VitessDockerContainer(
  * @property newContainerReason The reason for creating a new container, if applicable.
  * @property existingContainerId The ID of the existing container that should be reused, if applicable.
  */
-internal data class ShouldCreateVitessContainerResult(
+data class ShouldCreateVitessContainerResult(
   val newContainerNeeded: Boolean,
   val newContainerReason: String? = null,
   val existingContainerId: String? = null,
 )
 
 /**
- * Thia class contains information about the result of starting a Vitess Docker container. If the Docker container fails
+ * This class contains information about the result of starting a Vitess Docker container. If the Docker container fails
  * to start, a [VitessTestDbStartupException] will be thrown instead.
  *
  * @property containerId The ID of the Docker container that was started.
- * @property newContainerNeeded Whether a new container was created or an existing one was reused.
+ * @property newContainerCreated Whether a new container was created or an existing one was reused.
  * @property newContainerReason The reason for creating a new container, if applicable.
  */
-internal data class StartVitessContainerResult(
-  val containerId: String,
-  val newContainerNeeded: Boolean,
-  val newContainerReason: String? = null,
-)
+data class StartVitessContainerResult(
+  override val containerId: String,
+  override val newContainerCreated: Boolean,
+  override val newContainerReason: String? = null
+) : StartContainerResult
+
+/**
+ * This class contains information about the result of removing a Vitess Docker container.
+ *
+ * @property containerId The ID of the Docker container that was removed.
+ * @property containerRemoved Whether the container was removed.
+ */
+data class RemoveVitessContainerResult(
+  override val containerId: String?,
+  override val containerRemoved: Boolean
+) : RemoveContainerResult
