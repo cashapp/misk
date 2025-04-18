@@ -1192,6 +1192,14 @@ public final class misk/time/TimedKt {
 	public static final fun timed (Lkotlin/jvm/functions/Function0;)Lkotlin/Pair;
 }
 
+public final class misk/time/ValidateZoneRulesProviderService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/time/ValidateZoneRulesProviderService$Companion;
+	public fun <init> ()V
+}
+
+public final class misk/time/ValidateZoneRulesProviderService$Companion {
+}
+
 public final class misk/tracing/TracerExtKt {
 	public static final fun trace (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public static synthetic fun trace$default (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
