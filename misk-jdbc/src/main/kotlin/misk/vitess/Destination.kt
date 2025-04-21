@@ -18,14 +18,12 @@ data class Destination(
   constructor(shard: Shard, tabletType: TabletType) : this(shard.keyspace, shard, tabletType)
 
   override fun toString(): String {
-    val tabletType = (if (tabletType != null) "@$tabletType" else "").lowercase()
-    if (shard != null) {
-      return "$shard$tabletType"
+    val destinationQualifier = tabletType?.toDestinationQualifier() ?: ""
+    return when {
+      shard != null -> "$shard$destinationQualifier"
+      keyspace != null -> "$keyspace$destinationQualifier"
+      else -> destinationQualifier
     }
-    if (keyspace != null) {
-      return "$keyspace$tabletType"
-    }
-    return tabletType
   }
 
   fun mergedWith(other: Destination) =
@@ -40,28 +38,56 @@ data class Destination(
   }
 
   companion object {
-    fun parse(string: String): Destination {
-      val index = string.lastIndexOf('@')
-      val shardStr = if (index == -1) {
-        string
-      } else {
-        string.substring(0, index)
-      }
-      val tabletType = if (index == -1) {
-        null
-      } else {
-        var name = string.substring(index + 1).uppercase()
-        if (name == "MASTER") {
-          name = "PRIMARY"
-        }
-        TabletType.valueOf(name)
-      }
-      if (shardStr == "") {
+    /**
+     * Parse a Destination from a catalog string. Examples:
+     *
+     * `@primary` -> should map to a Destination with `TabletType.PRIMARY` and no specific keyspace or shard
+     * `@replica` -> should map to a Destination with `TabletType.REPLICA`, and no specific keyspace or shard
+     * `@master` -> should map to a Destination with `TabletType.PRIMARY` (for backwards compatability) and no specific keyspace or shard
+     * `ks/-80@primary` -> should map to a Destination with `TabletType.PRIMARY`, keyspace `ks`, and shard `-80`
+     * `ks/-80@replica` -> should map to a Destination with `TabletType.REPLICA`, `keyspace `ks`, and shard `-80`
+     * `ks/-80` -> should map to a Destination with no specific tablet type, keyspace `ks`, and shard -80
+     * `ks` -> should map to a Destination with keyspace `ks` and no specific shard and no tablet type
+     * `""` -> should map to a Destination with no specific keyspace, shard, and tablet type
+     */
+    fun parse(catalogString: String): Destination {
+      val qualifierIndex = catalogString.lastIndexOf('@')
+      val qualifierSymbolFound = qualifierIndex != -1
+      val keyspaceShardStr = if (!qualifierSymbolFound) catalogString else catalogString.take(qualifierIndex)
+      val tabletType = if (!qualifierSymbolFound) null else TabletType.fromDestinationQualifier(catalogString.substring(qualifierIndex + 1))
+
+      if (keyspaceShardStr.isEmpty()) {
         return Destination(null, null, tabletType)
-      } else {
-        val shard = Shard.parse(shardStr)
-        return Destination(shard.keyspace, shard, tabletType)
       }
+
+      val shard = Shard.parse(keyspaceShardStr)
+      if (shard == null) {
+        return Destination(Keyspace(keyspaceShardStr), null, tabletType)
+      }
+
+      return Destination(shard.keyspace, shard, tabletType)
+    }
+
+    /**
+     * Return a `Destination` that targets `@primary` with no specific keyspace or shard.
+     * To get the destination string of `@primary`, call `Destination.primary().toString()`
+     * or `"${Destination.primary()}"`
+     *
+     * @return `Destination` with `tabletType` set to `PRIMARY`
+     */
+    fun primary(): Destination {
+      return Destination(tabletType = TabletType.PRIMARY)
+    }
+
+    /**
+     * Return a `Destination` that targets `@replica` with no specific keyspace or shard.
+     * To get the destination string of `@replica`, call `Destination.replica().toString()`
+     * or `"${Destination.replica()}"`
+     *
+     * @return `Destination` with `tabletType` set to `REPLICA`
+     */
+    fun replica(): Destination {
+      return Destination(tabletType = TabletType.REPLICA)
     }
   }
 }

@@ -24,7 +24,7 @@ private fun <T> Connection.target(destination: Destination, function: () -> T): 
 
 private fun Connection.targetDestination(destination: Destination) =
     createStatement().use { statement ->
-      val catalog = if (destination.isBlank()) "@primary" else destination.toString()
+      val catalog = if (destination.isBlank()) "${Destination.primary()}" else "$destination"
       this.catalog = catalog
     }
 
