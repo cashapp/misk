@@ -11,7 +11,6 @@ import {
   UnorderedList,
   OrderedList,
   ListItem,
-  Code,
   VStack,
   useColorModeValue,
   Button,

@@ -2,7 +2,7 @@ import { CommandParser } from '@web-actions/parsing/CommandParser';
 import StrLiteral from '@web-actions/parsing/ast/StrLiteral';
 import Obj from '@web-actions/parsing/ast/Obj';
 import Arr from '@web-actions/parsing/ast/Arr';
-import Unexpected from 'src/web-actions/parsing/ast/Unexpected';
+import Unexpected from '@web-actions/parsing/ast/Unexpected';
 
 function parser(text: string): CommandParser {
   return new CommandParser(text);

@@ -140,3 +140,7 @@ export function randomToken(): string {
 export function parseNull(s: string | null): string | null {
   return s === 'null' ? null : s;
 }
+
+export function distinct<T>(array: T[]): T[] {
+  return [...new Set(array)];
+}

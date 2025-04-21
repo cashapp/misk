@@ -1,4 +1,4 @@
-import { MediaTypes } from 'src/web-actions/api/MediaTypes';
+import { MediaTypes } from '@web-actions/api/MediaTypes';
 
 export interface MiskMetadataResponse {
   all: {
@@ -13,10 +13,13 @@ export interface MiskWebActionDefinition {
   httpMethod?: string;
   packageName: string;
   requestType: string | null;
+  returnType: string | null;
   pathPattern: string;
   types: MiskObjectTypes;
   requestMediaTypes: string[];
   responseMediaType: string;
+  allowedServices: string[];
+  allowedCapabilities: string[];
 }
 
 export interface MiskObjectType {
@@ -39,6 +42,9 @@ export interface MiskRoute {
   all: MiskWebActionDefinition[];
   types: MiskObjectTypes;
   requestType: string | null;
+  returnType: string | null;
+  allowedServices: string[];
+  allowedCapabilities: string[];
   callable?: boolean;
 }
 

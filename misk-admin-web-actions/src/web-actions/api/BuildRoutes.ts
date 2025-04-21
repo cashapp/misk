@@ -1,7 +1,7 @@
 import {
   MiskRoute,
   MiskWebActionDefinition,
-} from 'src/web-actions/api/responseTypes';
+} from '@web-actions/api/responseTypes';
 import { MediaTypes } from '@web-actions/api/MediaTypes';
 import { parseNull } from '@web-actions/utils/common';
 
@@ -22,12 +22,17 @@ export function buildRoutes(actions: MiskWebActionDefinition[]): MiskRoute[] {
         requestMediaTypes: new MediaTypes(),
         types: it.types,
         requestType: it.requestType,
+        returnType: it.returnType,
+        allowedServices: [],
+        allowedCapabilities: [],
         all: [],
       };
       routeMap[groupKey] = group;
     }
     group.requestMediaTypes.push(...it.requestMediaTypes);
     group.responseMediaTypes.push(it.responseMediaType);
+    group.allowedServices.push(...it.allowedServices);
+    group.allowedCapabilities.push(...it.allowedCapabilities);
     group.all.push({
       ...it,
       requestType: parseNull(it.requestType),

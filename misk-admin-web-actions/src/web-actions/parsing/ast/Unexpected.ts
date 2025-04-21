@@ -1,6 +1,6 @@
-import JsonValue from 'src/web-actions/parsing/ast/JsonValue';
-import MiskType from 'src/web-actions/api/MiskType';
-import { MiskObjectTypes } from 'src/web-actions/api/responseTypes';
+import JsonValue from '@web-actions/parsing/ast/JsonValue';
+import MiskType from '@web-actions/api/MiskType';
+import { MiskObjectTypes } from '@web-actions/api/responseTypes';
 
 export default class Unexpected extends JsonValue {
   value: string;

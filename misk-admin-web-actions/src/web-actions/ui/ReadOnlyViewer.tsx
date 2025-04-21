@@ -34,7 +34,12 @@ export default class ReadOnlyEditor extends React.Component<Props> {
     editor.commands.removeCommand('gotoline');
 
     editor.setReadOnly(true);
-    editor.resize();
+
+    this.editor?.setValue(this.props.content() || '', -1);
+  }
+
+  componentDidUpdate() {
+    this.editor?.setValue(this.props.content() || '', -1);
   }
 
   public updateRef(item: HTMLDivElement | null) {
@@ -51,8 +56,6 @@ export default class ReadOnlyEditor extends React.Component<Props> {
   }
 
   public render() {
-    this.editor?.setValue(this.props.content() || '', -1);
-
     return (
       <Box position="relative" width="100%" height="100%">
         <IconButton
