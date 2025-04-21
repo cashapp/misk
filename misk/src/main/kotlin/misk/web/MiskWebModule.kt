@@ -314,6 +314,7 @@ class MiskWebModule @JvmOverloads constructor(
       multibind<HealthCheck>().to<JettyThreadPoolHealthCheck>()
     }
 
+    // TODO(adrw) replace this with a config YAML approach to avoid optional Guice bindings
     OptionalBinder.newOptionalBinder(binder(), ProtoDocumentationProvider::class.java)
   }
 
