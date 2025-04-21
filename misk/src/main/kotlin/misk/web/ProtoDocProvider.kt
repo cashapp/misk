@@ -11,5 +11,5 @@ package misk.web
  *
  */
 fun interface ProtoDocumentationProvider {
-  fun get(qualifiedTypeName: String): String?
+  fun get(qualifiedTypeName: String?): String?
 }

@@ -69,10 +69,7 @@ class MiskWebFormBuilder @JvmOverloads constructor(
         }
       }
 
-      val documentationUrl = if (documentationProvider != null) {
-        clazz.getProtobufType()?.let(documentationProvider::get)
-      } else null
-
+      val documentationUrl = documentationProvider?.get(clazz.getProtobufType())
       typesMap[clazz.java.canonicalName!!] = Type(fields.toList(), documentationUrl)
     }
 
