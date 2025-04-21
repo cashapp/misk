@@ -30,6 +30,9 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.MediaType.Companion.toMediaType
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.web.ProtoDocumentationProvider
+import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -51,6 +54,7 @@ internal class WebActionFactory @Inject constructor(
   private val webActionBindingFactory: WebActionBinding.Factory,
   private val scope: ActionScope,
   private val actionScopeSeedDataTransformerFactories: List<WebActionSeedDataTransformerFactory>,
+  private val documentationProvider: Optional<ProtoDocumentationProvider>
 ) {
 
   /** Returns the bound actions for `webActionClass`. */
@@ -254,6 +258,7 @@ internal class WebActionFactory @Inject constructor(
       applicationInterceptors,
       webActionBinding,
       httpActionScopeSeedDataInterceptors,
+      documentationProvider.getOrNull(),
       parsedPathPattern,
       action,
     )
