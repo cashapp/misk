@@ -2,6 +2,7 @@ package misk.jdbc
 
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.database.StartDatabaseService
@@ -121,3 +122,11 @@ internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
     val tidb_data_source: DataSourceConfig,
   ) : Config
 }
+
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+internal annotation class Movies
+
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+internal annotation class Movies2

@@ -1,13 +1,7 @@
 package misk.jdbc
 
-import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
-import com.google.common.collect.ImmutableList
 import misk.resources.ResourceLoader
-import misk.vitess.Keyspace
-import misk.vitess.Shard
-import misk.vitess.failSafeRead
-import misk.vitess.target
 import wisp.logging.getLogger
 import java.sql.Connection
 import java.sql.SQLException
@@ -105,15 +99,15 @@ internal class TraditionalSchemaMigrator(
   private val dataSourceConfig: DataSourceConfig,
   private val dataSourceService: DataSourceService,
   private val connector: DataSourceConnector,
-) : BaseSchemaMigrator(resourceLoader, dataSourceService, connector) {
+) : BaseSchemaMigrator(resourceLoader, dataSourceService) {
 
   override fun validateMigrationFile(migrationFile: MigrationFile): Boolean {
     return Pattern.compile(connector.config().migrations_resources_regex).matcher(migrationFile.filename).matches()
   }
 
   /** Returns a SortedSet of all migrations found in the source directories and subdirectories. */
-  fun availableMigrations(keyspace: Keyspace): SortedSet<NamedspacedMigration> {
-    val migrations = getMigrationFiles(keyspace).map {
+  fun availableMigrations(): SortedSet<NamedspacedMigration> {
+    val migrations = getMigrationFiles().map {
       NamedspacedMigration.fromResourcePath(it.filename, it.resource, connector.config().migrations_resources_regex)
     }
 
@@ -135,45 +129,41 @@ internal class TraditionalSchemaMigrator(
   }
 
   override fun applyAll(author: String) : MigrationStatus {
+    if (connector.config().type.isVitess) {
+      // VitessTestDb handles applying traditional schema changes.
+      throw UnsupportedOperationException("Traditional schema changes `applyAll` is not supported for Vitess in Misk.")
+    }
+
     val appliedMigrations = initialize()
     return applyAll("SchemaMigratorService", appliedMigrations)
   }
 
   /** Creates the `schema_version` table if it does not exist. Returns the applied migrations. */
   fun initialize(): SortedSet<NamedspacedMigration> {
-    val noMigrations =
-      shards.get().all { shard -> getMigrationsResources(shard.keyspace).isEmpty() }
-    if (noMigrations) {
-      return sortedSetOf()
-    }
-    return shards.get().flatMapTo(TreeSet()) { shard ->
-      try {
-        val result = appliedMigrations(shard)
-        logger.info {
-          "${qualifier.simpleName} has ${result.size} migrations applied;" +
-            " latest is ${result.lastOrNull()}"
-        }
-        return result
-      } catch (e: SQLException) {
-        dataSourceService.dataSource.connection.use {
-          it.target(shard) { c ->
-            c.createStatement().use { statement ->
-              statement.execute(
-                """
+    try {
+      val result = appliedMigrations()
+      logger.info {
+        "${qualifier.simpleName} has ${result.size} migrations applied;" +
+          " latest is ${result.lastOrNull()}"
+      }
+      return result
+    } catch (e: SQLException) {
+      dataSourceService.dataSource.connection.use { c ->
+        c.createStatement().use { statement ->
+          statement.execute(
+            """
                 |CREATE TABLE schema_version (
                 |  version varchar(50) PRIMARY KEY,
                 |  installed_by varchar(30) DEFAULT NULL
                 |);
                 |""".trimMargin()
-              )
-            }
-            c.createStatement().use { statement ->
-              statement.execute("COMMIT")
-            }
-          }
-          sortedSetOf<NamedspacedMigration>()
+          )
+        }
+        c.createStatement().use { statement ->
+          statement.execute("COMMIT")
         }
       }
+      return sortedSetOf<NamedspacedMigration>()
     }
   }
 
@@ -181,7 +171,7 @@ internal class TraditionalSchemaMigrator(
    * Returns the versions of applied migrations. Throws a [java.sql.SQLException]
    * if the migrations table has not been initialized.
    */
-  fun appliedMigrations(shard: Shard): SortedSet<NamedspacedMigration> {
+  fun appliedMigrations(): SortedSet<NamedspacedMigration> {
     val listMigrations = { conn: Connection ->
       conn.createStatement().use { stmt ->
         val results = mutableSetOf<String>()
@@ -196,118 +186,88 @@ internal class TraditionalSchemaMigrator(
           .toSortedSet()
       }
     }
-
-    return if (dataSourceConfig.type.isVitess) {
-      dataSourceService.dataSource.connection.use {
-        it.failSafeRead(shard, listMigrations)
-      }
-    } else {
-      dataSourceService.dataSource.connection.use {
+      return dataSourceService.dataSource.connection.use {
         listMigrations(it)
       }
-    }
   }
 
   /** Applies all available migrations that haven't yet been applied. */
   fun applyAll(author: String, appliedMigrations: SortedSet<NamedspacedMigration>): MigrationState {
     require(author.matches(Regex("\\w+"))) // Prevent SQL injection.
 
-    val result = mutableMapOf<Shard, ShardMigrationState>()
-    for (shard in shards.get()) {
-      val availableMigrations = availableMigrations(shard.keyspace)
-      val shardMigrationState = ShardMigrationState(availableMigrations, appliedMigrations)
-      for (migration in shardMigrationState.missingMigrations()) {
-        val migrationSql = resourceLoader.utf8(migration.path)
-        val stopwatch = Stopwatch.createStarted()
+    val availableMigrations = availableMigrations()
+    val migrationState = MigrationState(availableMigrations, appliedMigrations)
+    for (migration in migrationState.missingMigrations()) {
+      val migrationSql = resourceLoader.utf8(migration.path)
+      val stopwatch = Stopwatch.createStarted()
 
-        dataSourceService.dataSource.connection.use {
-          it.target(shard) { c ->
-            c.createStatement().use { migrationStatement ->
-              migrationStatement.addBatch(migrationSql)
-              migrationStatement.executeBatch()
-            }
-
-            c.prepareStatement(
-              """
-            |INSERT INTO schema_version (version, installed_by) VALUES (?, ?);
-            |""".trimMargin()
-            ).use { schemaVersion ->
-              schemaVersion.setString(1, migration.toNamespacedVersion())
-              schemaVersion.setString(2, author)
-              schemaVersion.executeUpdate()
-            }
-
-            c.commit()
+      dataSourceService.dataSource.connection.use { c ->
+          c.createStatement().use { migrationStatement ->
+            migrationStatement.addBatch(migrationSql)
+            migrationStatement.executeBatch()
           }
 
-          logger.info { "${qualifier.simpleName} applied $migration in $stopwatch" }
+          c.prepareStatement(
+            """
+          |INSERT INTO schema_version (version, installed_by) VALUES (?, ?);
+          |""".trimMargin()
+          ).use { schemaVersion ->
+            schemaVersion.setString(1, migration.toNamespacedVersion())
+            schemaVersion.setString(2, author)
+            schemaVersion.executeUpdate()
+          }
+
+          c.commit()
         }
+
+        logger.info { "${qualifier.simpleName} applied $migration in $stopwatch" }
       }
 
-      // All available migrations are applied, so use availableMigrations for both properties.
-      result[shard] = ShardMigrationState(
-        availableMigrations, TreeSet(appliedMigrations + availableMigrations)
-      )
-    }
-    return MigrationState(result)
+    // All available migrations are applied, so use availableMigrations for both properties.
+    return MigrationState(availableMigrations, TreeSet(appliedMigrations + availableMigrations))
   }
 
   /** Throws an exception unless all available migrations have been applied. */
   override fun requireAll(): MigrationStatus {
+    if (connector.config().type.isVitess) {
+      throw UnsupportedOperationException("Traditional schema changes `requireAll` is not supported for Vitess in Misk.")
+    }
+
     try {
-      val result = mutableMapOf<Shard, ShardMigrationState>()
-      for (it in shards.get()) {
-        result[it] = requireAll(it)
+      val availableMigrations = availableMigrations()
+      val appliedMigrations = appliedMigrations()
+      val state = MigrationState(availableMigrations, appliedMigrations)
+      val missingMigrations = state.missingMigrations()
+
+      check(missingMigrations.isEmpty()) {
+        val qualifiedAppliedMigrations = availableMigrations - missingMigrations
+        return@check """
+          |${qualifier.simpleName} has applied migrations:
+          |  ${qualifiedAppliedMigrations.joinToString(separator = "\n  ") { it.path }}
+	        |${qualifier.simpleName} is missing migrations:
+          |  ${missingMigrations.joinToString(separator = "\n  ") { it.path }}
+          """.trimMargin()
       }
-      return MigrationState(result)
+
+      return state
     } catch (e: SQLException) {
       throw IllegalStateException("${qualifier.simpleName} is not ready", e)
     }
-  }
-
-  @VisibleForTesting
-  internal fun requireAll(shard: Shard): ShardMigrationState {
-    val availableMigrations = availableMigrations(shard.keyspace)
-    val appliedMigrations = appliedMigrations(shard)
-    val state = ShardMigrationState(availableMigrations, appliedMigrations)
-    val missingMigrations = state.missingMigrations()
-
-    check(missingMigrations.isEmpty()) {
-      val shardMessage = if (shard != Shard.SINGLE_SHARD) {
-        " shard $shard"
-      } else {
-        ""
-      }
-      val qualifiedAppliedMigrations = availableMigrations - missingMigrations
-      return@check """
-          |${qualifier.simpleName}$shardMessage has applied migrations:
-          |  ${qualifiedAppliedMigrations.joinToString(separator = "\n  ") { it.path }}
-	        |${qualifier.simpleName}$shardMessage is missing migrations:
-          |  ${missingMigrations.joinToString(separator = "\n  ") { it.path }}
-          """.trimMargin()
-    }
-
-    return state
   }
 }
 
 /** Snapshot of all shards in a cluster. */
 internal data class MigrationState(
-  val shards: Map<Shard, ShardMigrationState>,
-) : MigrationStatus
-
-/** Snapshot of the migration state of a single shard. */
-internal data class ShardMigrationState(
   val available: SortedSet<NamedspacedMigration>,
   val applied: SortedSet<NamedspacedMigration>,
-) {
+) : MigrationStatus {
   fun missingMigrations() = available - applied
 
   override fun toString(): String {
     return if (available == applied) {
-      "(all " + available.size + " migrations applied)"
+      "MigrationState(all " + available.size + " migrations applied)"
     } else {
-      "(not applied=${available - applied}, not tracked=${applied - available})"
+      "MigrationState(not applied=${available - applied}, not tracked=${applied - available})"
     }
   }
 }

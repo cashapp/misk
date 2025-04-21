@@ -1,8 +1,6 @@
 package misk.jdbc
 
 import misk.resources.ResourceLoader
-import misk.vitess.Shard
-import misk.vitess.target
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.statement.create.table.CreateTable
 import wisp.logging.getLogger
@@ -14,7 +12,7 @@ internal class DeclarativeSchemaMigrator(
   private val dataSourceService: DataSourceService,
   private val connector: DataSourceConnector,
   private val skeemaWrapper: SkeemaWrapper,
-) : BaseSchemaMigrator(resourceLoader, dataSourceService, connector) {
+) : BaseSchemaMigrator(resourceLoader, dataSourceService) {
   private val logger = getLogger<DeclarativeSchemaMigrator>()
 
   override fun validateMigrationFile(migrationFile: MigrationFile): Boolean {
@@ -23,24 +21,30 @@ internal class DeclarativeSchemaMigrator(
   }
 
   override fun applyAll(author: String): MigrationStatus {
-    var appliedMigrations = false
-    for (shard in shards.get()) {
-      val migrationFiles = getMigrationFiles(shard.keyspace)
-      if (migrationFiles.isNotEmpty()) {
-        skeemaWrapper.applyMigrations(migrationFiles)
-        appliedMigrations = true
-      }
+    if (connector.config().type.isVitess) {
+      // VitessTestDb handles applying declarative schema changes.
+      throw UnsupportedOperationException("Declarative schema changes `applyAll()` is not supported for Vitess in Misk.")
     }
+    var appliedMigrations = false
+    val migrationFiles = getMigrationFiles()
+    if (migrationFiles.isNotEmpty()) {
+      skeemaWrapper.applyMigrations(migrationFiles)
+      appliedMigrations = true
+    }
+
     return if (appliedMigrations) MigrationStatus.Success else MigrationStatus.Empty
   }
 
   override fun requireAll(): MigrationStatus {
-    for (shard in shards.get()) {
-      val expectedTables = availableMigrations(shard)
-      val actualTables = appliedMigrations(shard)
-      val excludedTables = excludedTables()
-      compareMigrations(expectedTables, actualTables, excludedTables)
+    if (connector.config().type.isVitess) {
+      // TODO(aparajon): evaluate if we want to support this, as this can theoretically play nicely with VitessTestDb.
+      throw UnsupportedOperationException("Declarative schema changes `requireAll()` is not currently supported for Vitess in Misk.")
     }
+
+    val expectedTables = availableMigrations()
+    val actualTables = appliedMigrations()
+    val excludedTables = excludedTables()
+    compareMigrations(expectedTables, actualTables, excludedTables)
 
     return MigrationStatus.Success
   }
@@ -78,9 +82,9 @@ internal class DeclarativeSchemaMigrator(
   /**
    * Helper function to parse migration files and extract expected tables and columns
    */
-  private fun availableMigrations(shard: Shard): Map<String, Set<String>> {
+  private fun availableMigrations(): Map<String, Set<String>> {
     // Read the .sql Files
-    val migrationFiles = getMigrationFiles(shard.keyspace)
+    val migrationFiles = getMigrationFiles()
     val tables = mutableMapOf<String, Set<String>>()
 
     for (file in migrationFiles) {
@@ -115,13 +119,13 @@ internal class DeclarativeSchemaMigrator(
   /**
    * Helper function to parse database and extract actual tables and columns
    */
-  private fun appliedMigrations(shard: Shard): Map<String, Set<String>> {
+  private fun appliedMigrations(): Map<String, Set<String>> {
     // Store actual database tables and their columns
     val actualTables = mutableMapOf<String, Set<String>>()
     val dbName = connector.config().database
 
     dataSourceService.dataSource.connection.use {
-      it.target(shard) { conn ->
+      conn ->
         // Use DatabaseMetaData to get all table names
         val metaData = conn.metaData
         val tablesResultSet: ResultSet =
@@ -145,7 +149,6 @@ internal class DeclarativeSchemaMigrator(
         }
 
         tablesResultSet.close()
-      }
     }
 
     return actualTables

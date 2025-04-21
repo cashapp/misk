@@ -10,7 +10,6 @@ import misk.environment.DeploymentModule
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.vitess.Shard
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.AfterEach
@@ -134,12 +133,12 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
     assertThat(tableExists("library_table")).isFalse
     assertThat(tableExists("merged_library_table")).isFalse
     assertFailsWith<SQLException> {
-      traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)
+      traditionalSchemaMigrator.appliedMigrations()
     }
 
     // Once we initialize, that table is present but empty.
     traditionalSchemaMigrator.initialize()
-    assertThat(traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).isEmpty()
+    assertThat(traditionalSchemaMigrator.appliedMigrations().isEmpty())
     assertThat(tableExists("schema_version")).isTrue
     assertThat(tableExists("table_1")).isFalse
     assertThat(tableExists("table_2")).isFalse
@@ -150,7 +149,7 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
 
     // When we apply migrations, the table is present and contains the applied migrations.
     traditionalSchemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
-    assertThat(traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
+    assertThat(traditionalSchemaMigrator.appliedMigrations()).containsExactly(
       NamedspacedMigration(1001),
       NamedspacedMigration(1002),
       NamedspacedMigration(1001, "name/space/")
@@ -187,7 +186,7 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
         NamedspacedMigration(1001, "name/space/")
       )
     )
-    assertThat(traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
+    assertThat(traditionalSchemaMigrator.appliedMigrations()).containsExactly(
       NamedspacedMigration(1001),
       NamedspacedMigration(1002),
       NamedspacedMigration(1003),
@@ -292,7 +291,7 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
     traditionalSchemaMigrator.initialize()
     addVersion("1001-skeemaautoversion")
     val state = traditionalSchemaMigrator.requireAll()
-    assertThat(state.toString()).isEqualTo("MigrationState(shards={keyspace/0=(all 0 migrations applied)})")
+    assertThat(state.toString()).isEqualTo("MigrationState(all 0 migrations applied)")
   }
 
   @Test
@@ -313,7 +312,7 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
 
     assertThat(getOnlyElement(schemaMigratorService.status().messages)).isEqualTo(
       "SchemaMigratorService: Movies is migrated: " +
-        "MigrationState(shards={keyspace/0=(all 2 migrations applied)})"
+        "MigrationState(all 2 migrations applied)"
     )
   }
 
@@ -349,7 +348,7 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
     traditionalSchemaMigrator.initialize()
     traditionalSchemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
 
-    assertThat(traditionalSchemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
+    assertThat(traditionalSchemaMigrator.appliedMigrations()).containsExactly(
       NamedspacedMigration(1001)
     )
     assertThat(tableExists("table_1")).isTrue
