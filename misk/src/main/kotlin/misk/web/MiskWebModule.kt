@@ -7,6 +7,7 @@ import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
+import com.google.inject.multibindings.OptionalBinder
 import com.squareup.wire.GrpcException
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -312,6 +313,8 @@ class MiskWebModule @JvmOverloads constructor(
     if (config.enable_thread_pool_health_check) {
       multibind<HealthCheck>().to<JettyThreadPoolHealthCheck>()
     }
+
+    OptionalBinder.newOptionalBinder(binder(), ProtoDocumentationProvider::class.java)
   }
 
   @Provides

@@ -34,6 +34,7 @@ internal class BoundAction<A : WebAction>(
   private val applicationInterceptors: List<ApplicationInterceptor>,
   private val webActionBinding: WebActionBinding,
   private val seedDataTransformers: List<SeedDataTransformer>,
+  private val documentationProvider: ProtoDocumentationProvider?,
   val pathPattern: PathPattern,
   val action: Action,
 ) {
@@ -169,7 +170,8 @@ internal class BoundAction<A : WebAction>(
       allowedCapabilities = fetchAllowedCallers(
         applicationInterceptors,
         AccessInterceptor::allowedCapabilities
-      )
+      ),
+      documentationProvider = documentationProvider
     )
   }
 
