@@ -110,6 +110,7 @@ internal class RealTransacter private constructor(
                     connection.createStatement().use { s ->
                       val shards = s.executeQuery("SHOW VITESS_SHARDS")
                         .map { rs -> Shard.parse(rs.getString(1)) }
+                        .filterNotNull()
                         .toSet()
                       if (shards.isEmpty()) {
                         throw SQLRecoverableException("Failed to load list of shards")
@@ -521,7 +522,7 @@ internal class RealTransacter private constructor(
       check(config.type.isVitess)
       connection.createStatement().use { statement ->
         if (config.type == DataSourceType.VITESS_MYSQL) {
-          val catalog = if (destination.isBlank()) "@primary" else destination.toString()
+          val catalog = if (destination.isBlank()) "${Destination.primary()}" else "$destination"
           connection.catalog = catalog
         } else {
           withoutChecks {

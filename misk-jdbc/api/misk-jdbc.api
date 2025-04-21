@@ -704,6 +704,8 @@ public final class misk/vitess/Destination {
 
 public final class misk/vitess/Destination$Companion {
 	public final fun parse (Ljava/lang/String;)Lmisk/vitess/Destination;
+	public final fun primary ()Lmisk/vitess/Destination;
+	public final fun replica ()Lmisk/vitess/Destination;
 }
 
 public final class misk/vitess/FullScatterException : misk/jdbc/CheckException {
@@ -777,11 +779,17 @@ public final class misk/vitess/ShardsKt {
 }
 
 public final class misk/vitess/TabletType : java/lang/Enum {
+	public static final field Companion Lmisk/vitess/TabletType$Companion;
 	public static final field PRIMARY Lmisk/vitess/TabletType;
 	public static final field REPLICA Lmisk/vitess/TabletType;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getValue ()I
+	public final fun toDestinationQualifier ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/vitess/TabletType;
 	public static fun values ()[Lmisk/vitess/TabletType;
+}
+
+public final class misk/vitess/TabletType$Companion {
+	public final fun fromDestinationQualifier (Ljava/lang/String;)Lmisk/vitess/TabletType;
 }
 
