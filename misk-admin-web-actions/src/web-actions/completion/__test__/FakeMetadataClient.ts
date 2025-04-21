@@ -2,7 +2,7 @@ import {
   MiskRoute,
   MiskWebActionDefinition,
 } from '@web-actions/api/responseTypes';
-import { buildRoutes } from 'src/web-actions/api/BuildRoutes';
+import { buildRoutes } from '@web-actions/api/BuildRoutes';
 
 export const MyAction: MiskWebActionDefinition = {
   name: 'MyAction',
@@ -11,6 +11,9 @@ export const MyAction: MiskWebActionDefinition = {
   pathPattern: '/api/v1/my-action',
   requestMediaTypes: ['application/x-protobuf'],
   responseMediaType: 'application/json',
+  allowedCapabilities: [],
+  allowedServices: [],
+  returnType: null,
   types: {
     MyActionRequest: {
       fields: [

@@ -4,7 +4,7 @@ import {
   ApiService,
   JsonValidationError,
 } from '@web-actions/services/ApiService';
-import { APP_EVENTS, appEvents } from 'src/web-actions/events/appEvents';
+import { APP_EVENTS, appEvents } from '@web-actions/events/appEvents';
 import { Header } from 'src/viewState';
 
 export interface SubmitRequestState {

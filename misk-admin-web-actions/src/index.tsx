@@ -8,15 +8,10 @@ import {
   HStack,
   Spinner,
   VStack,
-  Heading,
-  Input,
-  IconButton,
   Button,
   useToast,
 } from '@chakra-ui/react';
-import { DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import HelpPanel from '@web-actions/ui/HelpPanel';
-import ReadOnlyEditor from '@web-actions/ui/ReadOnlyViewer';
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
 import EndpointSelector from '@web-actions/ui/EndpointSelection';
@@ -26,29 +21,32 @@ import {
   MiskRoute,
   MiskMetadataResponse,
 } from '@web-actions/api/responseTypes';
-import { createIcon } from '@chakra-ui/icons';
 import { useSubmitRequest } from '@web-actions/hooks/useSubmitRequest';
 import { useKeyboardShortcuts } from '@web-actions/hooks/useKeyboardShortcuts';
 import { useAppEvent } from '@web-actions/hooks/useAppEvent';
 import { APP_EVENTS } from '@web-actions/events/appEvents';
+import MetadataView from '@web-actions/ui/MetadataView';
+import RequestResponseView from '@web-actions/ui/RequestResponseView';
+import CollapsibleSplitView from '@web-actions/ui/CollapsibleSplitView';
 
 function App() {
-  const [viewState, setViewState] = useState<ViewState>(() => ({
-    path: '',
+  const [viewState, setViewState] = useState<ViewState>({
     selectedAction: null,
-    callables: [],
-    loading: true,
-    isHelpOpen: localStorage.getItem('hasSeenHelp') !== 'true',
+    path: '',
     headers: [],
-  }));
+    isHelpOpen: localStorage.getItem('hasSeenHelp') !== 'true',
+    loading: true,
+    showRawMetadata: false,
+    isCollapsed: true,
+  });
   const endPointSelectorRef = useRef<EndpointSelector>(null);
   const requestEditorRef = useRef<RequestEditor>(null);
   const toast = useToast();
 
   const {
     submit: handleSubmitRequest,
-    submitting,
-    response,
+    submitting: submitRequestSubmitting,
+    response: submitRequestResponse,
   } = useSubmitRequest(
     viewState.selectedAction ?? null,
     viewState.path,
@@ -93,39 +91,6 @@ function App() {
       },
     );
   }, [setViewState]);
-
-  const ActionIcon = createIcon({
-    displayName: 'ActionIcon',
-    viewBox: '0 0 24 24',
-    path: <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />,
-  });
-
-  const addHeader = () => {
-    setViewState((prev) => ({
-      ...prev,
-      headers: [...prev.headers, { key: '', value: '' }],
-    }));
-  };
-
-  const removeHeader = (index: number) => {
-    setViewState((prev) => ({
-      ...prev,
-      headers: prev.headers.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateHeader = (
-    index: number,
-    field: 'key' | 'value',
-    value: string,
-  ) => {
-    setViewState((prev) => ({
-      ...prev,
-      headers: prev.headers.map((header, i) =>
-        i === index ? { ...header, [field]: value } : header,
-      ),
-    }));
-  };
 
   return (
     <Box>
@@ -181,97 +146,40 @@ function App() {
             localStorage.setItem('hasSeenHelp', 'true');
           }}
         />
-        <HStack spacing={2} flexGrow={1} width="100%">
-          <VStack height="100%" flexGrow={1} alignItems="start">
-            <Heading color="white" size="sm" fontWeight="semibold">
-              Request
-            </Heading>
-            <HStack flexGrow={1} w="100%">
-              <Input
-                value={viewState.path}
-                placeholder="Path"
-                bg="white"
-                onChange={(e) => {
-                  setViewState({
-                    ...viewState,
-                    path: e.target.value,
-                  });
-                }}
-              />
-              {viewState.selectedAction?.callable === true && (
-                <IconButton
-                  aria-label="Run"
-                  colorScheme={'green'}
-                  onClick={handleSubmitRequest}
-                >
-                  <ActionIcon />
-                </IconButton>
-              )}
-            </HStack>
-            <Heading color="white" size="xs" fontWeight="semibold">
-              Headers
-            </Heading>
-            <Box width="100%">
-              <VStack spacing={2} align="stretch">
-                {viewState.headers.map((header, index) => (
-                  <HStack key={index} spacing={2}>
-                    <Input
-                      placeholder="Header Key"
-                      value={header.key}
-                      onChange={(e) =>
-                        updateHeader(index, 'key', e.target.value)
-                      }
-                      bg="white"
-                    />
-                    <Input
-                      placeholder="Header Value"
-                      value={header.value}
-                      onChange={(e) =>
-                        updateHeader(index, 'value', e.target.value)
-                      }
-                      bg="white"
-                    />
-                    <IconButton
-                      aria-label="Remove header"
-                      icon={<DeleteIcon />}
-                      onClick={() => removeHeader(index)}
-                      colorScheme="red"
-                    />
-                  </HStack>
-                ))}
-                <Button
-                  leftIcon={<AddIcon />}
-                  onClick={addHeader}
-                  colorScheme="blue"
-                  size="sm"
-                >
-                  Add Header
-                </Button>
-              </VStack>
-            </Box>
-            <Heading color="white" size="xs" fontWeight="semibold">
-              Body
-            </Heading>
-            <RequestEditor ref={requestEditorRef as any} loading={submitting} />
-            <Heading color="white" size="sm" fontWeight="semibold">
-              Response
-            </Heading>
-            <ReadOnlyEditor content={() => response} />
-          </VStack>
-          <VStack height="100%" flexGrow={1} alignItems="start">
-            <Heading color="white" size="sm" fontWeight="semibold">
-              Endpoint Metadata
-            </Heading>
-            <ReadOnlyEditor
-              content={() => {
-                if (viewState.selectedAction === null) {
-                  return null;
-                }
-                return JSON.stringify(viewState.selectedAction.all, null, 2);
-              }}
+        <CollapsibleSplitView
+          leftContent={
+            <RequestResponseView
+              viewState={viewState}
+              setViewState={setViewState}
+              handleSubmitRequest={handleSubmitRequest}
+              submitting={submitRequestSubmitting}
+              response={submitRequestResponse}
+              requestEditorRef={requestEditorRef}
+              onToggleCollapse={() =>
+                setViewState((prev) => ({
+                  ...prev,
+                  isCollapsed: !prev.isCollapsed,
+                }))
+              }
             />
-          </VStack>
-        </HStack>
+          }
+          rightContent={
+            <MetadataView
+              metadata={viewState.selectedAction}
+              showRaw={viewState.showRawMetadata}
+            />
+          }
+          isCollapsed={viewState.isCollapsed}
+          setIsCollapsed={(value) =>
+            setViewState((prev) => ({ ...prev, isCollapsed: value }))
+          }
+          onToggleRaw={() =>
+            setViewState((prev) => ({
+              ...prev,
+              showRawMetadata: !prev.showRawMetadata,
+            }))
+          }
+        />
       </VStack>
     </Box>
   );

@@ -1,12 +1,14 @@
+import { distinct } from '@web-actions/utils/common';
+
 export class MediaTypes {
-  private readonly types: string[];
+  private types: string[];
 
   constructor(types: string[] = []) {
-    this.types = types;
+    this.types = distinct(types);
   }
 
   push(...types: string[]) {
-    this.types.push(...types);
+    this.types = distinct([...this.types, ...types]);
   }
 
   static of(types: string[]): MediaTypes {
@@ -23,5 +25,9 @@ export class MediaTypes {
 
   isUnspecified(): boolean {
     return this.types.length === 0;
+  }
+
+  toString(): string {
+    return this.types.join(', ');
   }
 }
