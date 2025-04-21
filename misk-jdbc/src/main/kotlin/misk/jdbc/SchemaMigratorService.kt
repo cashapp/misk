@@ -23,20 +23,23 @@ class SchemaMigratorService  constructor(
   override fun startUp() {
     val schemaMigrator = schemaMigratorProvider.get()
     val connector = connectorProvider.get()
+    val type = connector.config().type
+    if (type == DataSourceType.VITESS_MYSQL) {
+      // Vitess migrations are applied externally. However, we can explore validating
+      // that the schema in the target environment is actually applied
+      // using the declarative validation checks in schemaMigrator.requireAll().
+      migrationState = MigrationStatus.Empty
+      return
+    }
+
     if (deployment.isTest || deployment.isLocalDevelopment) {
-      val type = connector.config().type
-      if (type != DataSourceType.VITESS_MYSQL) {
-        // Retry wrapped to handle multiple JDBC modules racing to create the `schema_version` table.
-        val retryConfig = RetryConfig.Builder(
-          10,
-          ExponentialBackoff(Duration.ofMillis(100), Duration.ofSeconds(5))
-        )
-        retry(retryConfig.build()) {
-          migrationState = schemaMigrator.applyAll("SchemaMigratorService")
-        }
-      } else {
-        // vttestserver automatically applies migrations
-        migrationState = MigrationStatus.Empty
+      // Retry wrapped to handle multiple JDBC modules racing to create the `schema_version` table.
+      val retryConfig = RetryConfig.Builder(
+        10,
+        ExponentialBackoff(Duration.ofMillis(100), Duration.ofSeconds(5))
+      )
+      retry(retryConfig.build()) {
+        migrationState = schemaMigrator.applyAll("SchemaMigratorService")
       }
     } else {
       migrationState = schemaMigrator.requireAll()

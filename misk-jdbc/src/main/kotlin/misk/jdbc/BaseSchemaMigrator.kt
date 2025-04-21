@@ -2,23 +2,19 @@ package misk.jdbc
 
 import com.google.common.collect.ImmutableList
 import misk.resources.ResourceLoader
-import misk.vitess.Keyspace
-import java.util.regex.Pattern
 
 internal data class MigrationFile(val filename: String, val resource: String)
 
 internal abstract class BaseSchemaMigrator(
   private val resourceLoader: ResourceLoader,
-  private val dataSourceService: DataSourceService,
   private val connector: DataSourceConnector,
 ) : SchemaMigrator {
-  val shards = misk.vitess.shards(dataSourceService)
 
   protected abstract fun validateMigrationFile(migrationFile: MigrationFile): Boolean
 
   /* Reads and validates migration files from the configured resources */
-  protected fun getMigrationFiles(keyspace: Keyspace): List<MigrationFile> {
-    val migrationResources = getMigrationsResources(keyspace)
+  protected fun getMigrationFiles(): List<MigrationFile> {
+    val migrationResources = getMigrationsResources()
     val migrationFilesForShard = mutableListOf<MigrationFile>()
 
     for (migrationResource in migrationResources) {
@@ -40,7 +36,7 @@ internal abstract class BaseSchemaMigrator(
     return migrationFilesForShard.toList()
   }
 
-  protected fun getMigrationsResources(keyspace: Keyspace): List<String> {
+  protected fun getMigrationsResources(): List<String> {
     val config = connector.config()
     val migrationsResources = ImmutableList.builder<String>()
     if (config.migrations_resource != null) {
@@ -49,9 +45,7 @@ internal abstract class BaseSchemaMigrator(
     if (config.migrations_resources != null) {
       migrationsResources.addAll(config.migrations_resources)
     }
-    if (config.vitess_schema_resource_root != null) {
-      migrationsResources.add(config.vitess_schema_resource_root + "/" + keyspace.name)
-    }
+
     return migrationsResources.build()
   }
 }
