@@ -104,11 +104,15 @@ class CustomArgsTest {
   }
 
   @Test
-  fun `test scatter queries fail`() {
-    val scatterQuery = "SELECT * FROM customers;"
-    val exception = assertThrows<VitessQueryExecutorException> { testDb1QueryExecutor.executeQuery(scatterQuery) }
+  fun `test scatter queries fail by default but succeed with query hint`() {
+    testDb1.truncate()
+    testDb1QueryExecutor.executeUpdate("INSERT INTO customers (email, token) VALUES ('jack@xyz.com', 'token');")
 
+    val exception = assertThrows<VitessQueryExecutorException> { testDb1QueryExecutor.executeQuery( "SELECT * FROM customers;") }
     assertTrue(exception.cause?.message!!.contains("plan includes scatter, which is disallowed"))
+
+    val results = testDb1QueryExecutor.executeQuery("SELECT /*vt+ ALLOW_SCATTER */ * FROM customers;")
+    assertEquals(1, results.size )
   }
 
   @Test
