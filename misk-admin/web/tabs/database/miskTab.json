@@ -5,7 +5,9 @@
   "rawGitginore": "",
   "rawIndex": false,
   "rawPackageJson": {},
-  "rawTsconfig": {},
+  "rawTsconfig": {
+    "declaration": false
+  },
   "rawTslint": {},
   "rawWebpackConfig": {},
   "relative_path_prefix": "",
