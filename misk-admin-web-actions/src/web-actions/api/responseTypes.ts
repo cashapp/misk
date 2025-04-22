@@ -16,6 +16,7 @@ export interface MiskWebActionDefinition {
   returnType: string | null;
   pathPattern: string;
   types: MiskObjectTypes;
+  returnTypes?: MiskObjectTypes;
   requestMediaTypes: string[];
   responseMediaType: string;
   allowedServices: string[];
@@ -24,6 +25,7 @@ export interface MiskWebActionDefinition {
 
 export interface MiskObjectType {
   fields: MiskFieldDefinition[];
+  documentationUrl?: string;
 }
 
 export interface MiskFieldDefinition {
