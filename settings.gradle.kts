@@ -8,6 +8,9 @@ pluginManagement {
 }
 
 plugins {
+  // When updating the cash plugin versions, update .buildkite/scripts/copy.bara.sky too
+  id("com.squareup.cash.develocity") version "1.227.0"
+  id("com.squareup.cash.remotecache") version "1.227.0"
   id("com.gradle.develocity") version "3.18.2"
 }
 
