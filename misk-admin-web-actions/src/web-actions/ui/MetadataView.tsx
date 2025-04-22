@@ -1,9 +1,10 @@
-import React from 'react';
-import { Box, VStack } from '@chakra-ui/react';
+import React, { ReactNode } from 'react';
+import { Box, Link, VStack } from '@chakra-ui/react';
 import { MiskRoute } from '@web-actions/api/responseTypes';
 import ReadOnlyEditor from '@web-actions/ui/ReadOnlyViewer';
 import { distinct } from '@web-actions/utils/common';
 import PropertyView from '@web-actions/ui/PropertyView';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
 
 interface Props {
   metadata: MiskRoute | null;
@@ -13,6 +14,18 @@ interface Props {
 const MetadataView: React.FC<Props> = ({ metadata, showRaw }) => {
   if (!metadata) {
     return <></>;
+  }
+
+  function renderType(type: string): ReactNode {
+    const docUrl = metadata?.types[type]?.documentationUrl;
+    if (!docUrl) {
+      return type;
+    }
+    return (
+      <Link fontFamily="mono" textColor="black" href={docUrl} isExternal>
+        {type} <ExternalLinkIcon mx="2px" />
+      </Link>
+    );
   }
 
   return (
@@ -26,11 +39,17 @@ const MetadataView: React.FC<Props> = ({ metadata, showRaw }) => {
           <PropertyView label="Action Name" value={metadata.actionName} />
 
           {metadata.requestType && (
-            <PropertyView label="Request Type" value={metadata.requestType} />
+            <PropertyView
+              label="Request Type"
+              value={renderType(metadata.requestType)}
+            />
           )}
 
           {metadata.returnType && (
-            <PropertyView label="Return Type" value={metadata.returnType} />
+            <PropertyView
+              label="Return Type"
+              value={renderType(metadata.returnType)}
+            />
           )}
 
           <PropertyView

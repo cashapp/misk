@@ -11,29 +11,29 @@ export function buildRoutes(actions: MiskWebActionDefinition[]): MiskRoute[] {
   for (const it of actions) {
     const qualifiedName = `${it.packageName}.${it.name}`;
     const groupKey = `${it.httpMethod} ${it.pathPattern} ${qualifiedName}`;
-    let group = routeMap[groupKey];
+    let route = routeMap[groupKey];
 
-    if (group === undefined) {
-      group = {
+    if (route === undefined) {
+      route = {
         actionName: qualifiedName,
         path: it.pathPattern,
         httpMethod: it.httpMethod || '',
         responseMediaTypes: new MediaTypes(),
         requestMediaTypes: new MediaTypes(),
-        types: it.types,
+        types: { ...it.returnTypes, ...it.types },
         requestType: it.requestType,
         returnType: it.returnType,
         allowedServices: [],
         allowedCapabilities: [],
         all: [],
       };
-      routeMap[groupKey] = group;
+      routeMap[groupKey] = route;
     }
-    group.requestMediaTypes.push(...it.requestMediaTypes);
-    group.responseMediaTypes.push(it.responseMediaType);
-    group.allowedServices.push(...it.allowedServices);
-    group.allowedCapabilities.push(...it.allowedCapabilities);
-    group.all.push({
+    route.requestMediaTypes.push(...it.requestMediaTypes);
+    route.responseMediaTypes.push(it.responseMediaType);
+    route.allowedServices.push(...it.allowedServices);
+    route.allowedCapabilities.push(...it.allowedCapabilities);
+    route.all.push({
       ...it,
       requestType: parseNull(it.requestType),
     });
