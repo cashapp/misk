@@ -17,6 +17,9 @@ object MediaTypes {
   const val APPLICATION_GRPC = "application/grpc"
   val APPLICATION_GRPC_MEDIA_TYPE = APPLICATION_GRPC.asMediaType()
 
+  const val APPLICATION_GRPC_PROTOBUF = "application/grpc+proto"
+  val APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE = APPLICATION_GRPC_PROTOBUF.asMediaType()
+
   const val APPLICATION_JAVASCRIPT = "application/javascript"
   val APPLICATION_JAVASCRIPT_MEDIA_TYPE = APPLICATION_JAVASCRIPT.asMediaType()
 
