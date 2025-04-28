@@ -377,6 +377,7 @@ public final class misk/web/mediatype/MediaTypes {
 	public static final field APPLICATION_GRPC_PROTOBUF Ljava/lang/String;
 	public static final field APPLICATION_JAVASCRIPT Ljava/lang/String;
 	public static final field APPLICATION_JSON Ljava/lang/String;
+	public static final field APPLICATION_JWT Ljava/lang/String;
 	public static final field APPLICATION_OCTETSTREAM Ljava/lang/String;
 	public static final field APPLICATION_PROTOBUF Ljava/lang/String;
 	public static final field APPLICATION_XML Ljava/lang/String;
@@ -400,6 +401,7 @@ public final class misk/web/mediatype/MediaTypes {
 	public final fun getAPPLICATION_GRPC_PROTOBUF_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getAPPLICATION_JAVASCRIPT_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getAPPLICATION_JSON_MEDIA_TYPE ()Lokhttp3/MediaType;
+	public final fun getAPPLICATION_JWT_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getAPPLICATION_OCTETSTREAM_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getAPPLICATION_PROTOBUF_MEDIA_TYPE ()Lokhttp3/MediaType;
 	public final fun getAPPLICATION_XML_MEDIA_TYPE ()Lokhttp3/MediaType;
