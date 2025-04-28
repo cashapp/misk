@@ -26,6 +26,9 @@ object MediaTypes {
   const val APPLICATION_JSON = "application/json;charset=utf-8"
   val APPLICATION_JSON_MEDIA_TYPE = APPLICATION_JSON.asMediaType()
 
+  const val APPLICATION_JWT = "application/jwt"
+  val APPLICATION_JWT_MEDIA_TYPE = APPLICATION_JWT.asMediaType()
+
   const val APPLICATION_OCTETSTREAM = "application/octetstream"
   val APPLICATION_OCTETSTREAM_MEDIA_TYPE = APPLICATION_OCTETSTREAM.asMediaType()
 
@@ -81,6 +84,7 @@ object MediaTypes {
       "jpeg", "jpg" -> IMAGE_JPEG_MEDIA_TYPE
       "js" -> APPLICATION_JAVASCRIPT_MEDIA_TYPE
       "json" -> APPLICATION_JSON_MEDIA_TYPE
+      "jwt" -> APPLICATION_JWT_MEDIA_TYPE
       "png" -> IMAGE_PNG_MEDIA_TYPE
       "svg" -> IMAGE_SVG_MEDIA_TYPE
       "tiff" -> IMAGE_TIFF_MEDIA_TYPE
