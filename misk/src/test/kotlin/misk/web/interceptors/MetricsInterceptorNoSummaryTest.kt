@@ -4,6 +4,7 @@ import io.prometheus.client.Histogram
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.metrics.backends.prometheus.PrometheusConfig
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.FakeCallerAuthenticator.Companion.SERVICE_HEADER
@@ -25,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
-class MetricsInterceptorTest {
+class MetricsInterceptorNoSummaryTest {
   @MiskTestModule
   val module = TestModule()
   val httpClient = OkHttpClient()
@@ -34,7 +35,7 @@ class MetricsInterceptorTest {
   @Inject private lateinit var jettyService: JettyService
 
   private fun labels(code: Int, service: String = "unknown") =
-    arrayOf("MetricsInterceptorTestAction", service, code.toString())
+    arrayOf("MetricsInterceptorNoSummaryTestAction", service, code.toString())
 
   @BeforeEach
   fun sendRequests() {
@@ -54,22 +55,8 @@ class MetricsInterceptorTest {
 
   @Test
   fun responseCodes() {
-    // Make sure all the right non-histo metrics were generated
-    val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
-    requestDuration.labels(*labels(200)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(200)).get().count.toInt()).isEqualTo(3)
-    requestDuration.labels(*labels(202)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(202)).get().count.toInt()).isEqualTo(2)
-    requestDuration.labels(*labels(404)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(404)).get().count.toInt()).isEqualTo(2)
-    requestDuration.labels(*labels(403)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(403)).get().count.toInt()).isEqualTo(3)
-
-    requestDuration.labels(*labels(200, "my-peer")).observe(1.0)
-    assertThat(requestDuration.labels(*labels(200, "my-peer")).get().count.toInt()).isEqualTo(5)
-
-    requestDuration.labels(*labels(200, "<user>")).observe(1.0)
-    assertThat(requestDuration.labels(*labels(200, "<user>")).get().count.toInt()).isEqualTo(2)
+    // Make sure all the right non-histo metrics were not generated.
+    assertThat(metricsInterceptorFactory.requestDurationSummary).isNull()
 
     // Make sure all the right histo metrics were generated
     val histoDuration = metricsInterceptorFactory.requestDurationHistogram
@@ -109,14 +96,15 @@ class MetricsInterceptorTest {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(WebActionModule.create<MetricsInterceptorTestAction>())
+      install(WebActionModule.create<MetricsInterceptorNoSummaryTestAction>())
 
+      bind<PrometheusConfig>().toInstance(PrometheusConfig(disable_default_summary_metrics = true))
       bind<MetricsInterceptor.Factory>()
     }
   }
 }
 
-internal class MetricsInterceptorTestAction @Inject constructor() : WebAction {
+internal class MetricsInterceptorNoSummaryTestAction @Inject constructor() : WebAction {
   @Get("/call/{desiredStatusCode}")
   @Unauthenticated
   fun call(@PathParam desiredStatusCode: Int): Response<String> {

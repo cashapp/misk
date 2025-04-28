@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 class ClientMetricsInterceptor private constructor(
   val clientName: String,
-  private val requestDurationSummary: Summary,
+  private val requestDurationSummary: Summary?,
   private val requestDurationHistogram: Histogram,
 ) : Interceptor {
 
@@ -48,14 +48,14 @@ class ClientMetricsInterceptor private constructor(
 
     } catch (e: SocketTimeoutException) {
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
-      requestDurationSummary.labels(actionName, "timeout").observe(elapsedMillis)
+      requestDurationSummary?.labels(actionName, "timeout")?.observe(elapsedMillis)
       requestDurationHistogram.labels(actionName, "timeout").observe(elapsedMillis)
       throw e
     } catch (e: Exception) {
       // Something else happened while the connection was in progress and we didn't receive
       // a complete response. We still want to record any long-running calls, however.
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
-      requestDurationSummary.labels(actionName, "incomplete-response").observe(elapsedMillis)
+      requestDurationSummary?.labels(actionName, "incomplete-response")?.observe(elapsedMillis)
       requestDurationHistogram.labels(actionName, "incomplete-response").observe(elapsedMillis)
       throw e
     }
@@ -89,7 +89,7 @@ class ClientMetricsInterceptor private constructor(
     }
     val grpcStatus = grpcStatusHeader?.toIntOrNull()
     val code = grpcStatusToHttpCode(grpcStatus) ?: response.code
-    requestDurationSummary.labels(actionName, "$code").observe(elapsedMillis)
+    requestDurationSummary?.labels(actionName, "$code")?.observe(elapsedMillis)
     requestDurationHistogram.labels(actionName, "$code").observe(elapsedMillis)
   }
 
@@ -128,12 +128,16 @@ class ClientMetricsInterceptor private constructor(
     m: Metrics,
     config: PrometheusConfig,
   ) {
-    internal val requestDuration = m.summary(
-      name = "client_http_request_latency_ms",
-      help = "count and duration in ms of outgoing client requests",
-      labelNames = listOf("action", "code"),
-      maxAgeSeconds = config.max_age_in_seconds,
-    )
+    internal val requestDurationSummary = when (config.disable_default_summary_metrics) {
+      true -> null
+      false -> m.summary(
+        name = "client_http_request_latency_ms",
+        help = "count and duration in ms of outgoing client requests",
+        labelNames = listOf("action", "code"),
+        maxAgeSeconds = config.max_age_in_seconds,
+      )
+    }
+
     internal val requestDurationHistogram = m.histogram(
       name = "histo_client_http_request_latency_ms",
       help = "histogram in ms of outgoing client requests",
@@ -142,7 +146,7 @@ class ClientMetricsInterceptor private constructor(
 
     fun create(clientName: String) = ClientMetricsInterceptor(
       clientName,
-      requestDuration,
+      requestDurationSummary,
       requestDurationHistogram
     )
   }

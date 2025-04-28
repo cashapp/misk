@@ -3,6 +3,8 @@ package misk.web.ssl
 import ch.qos.logback.classic.Level
 import com.google.inject.Guice
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.Action
 import misk.MiskDefault
 import misk.MiskTestingServiceModule
@@ -48,8 +50,6 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import kotlin.test.assertFailsWith
 
@@ -157,7 +157,7 @@ class Http2ConnectivityTest {
     val code = module.lockInterceptorFactory.queue.take()
     assertThat(code).isEqualTo(500)
 
-    val requestDuration = metricsInterceptorFactory.requestDuration
+    val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
     assertThat(
       requestDuration.labels(
         "Http2ConnectivityTest.DisconnectWithLargeResponseAction",
@@ -202,7 +202,7 @@ class Http2ConnectivityTest {
     val code = module.lockInterceptorFactory.queue.take()
     assertThat(code).isEqualTo(499)
 
-    val requestDuration = metricsInterceptorFactory.requestDuration
+    val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
     assertThat(
       requestDuration.labels(
         "Http2ConnectivityTest.DisconnectWithLargeRequestAction",
@@ -211,6 +211,7 @@ class Http2ConnectivityTest {
       ).get().count.toInt()
     ).isEqualTo(1)
   }
+
   @Test
   fun clientCancelsWritingTheRequest() {
     val http1Client = client.newBuilder()
@@ -241,7 +242,7 @@ class Http2ConnectivityTest {
     val code = module.lockInterceptorFactory.queue.take()
     assertThat(code).isEqualTo(499)
 
-    val requestDuration = metricsInterceptorFactory.requestDuration
+    val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
     assertThat(
       requestDuration.labels(
         "Http2ConnectivityTest.DisconnectWithLargeRequestAction",
@@ -321,7 +322,7 @@ class Http2ConnectivityTest {
 
   class LockInterceptor constructor(val queue: ArrayBlockingQueue<Int>) : NetworkInterceptor {
     override fun intercept(chain: NetworkChain) {
-      val statusCode =  try {
+      val statusCode = try {
         chain.proceed(chain.httpCall)
         chain.httpCall.statusCode
       } catch (e: Exception) {
@@ -340,7 +341,6 @@ class Http2ConnectivityTest {
 
     }
   }
-
 
   // NB: The server doesn't get a port until after it starts so we create the client module
   // _after_ we start the services
