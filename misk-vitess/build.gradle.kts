@@ -18,7 +18,7 @@ dependencies {
   testFixturesApi(project(":misk-docker"))
   testFixturesApi(project(":misk-testing"))
 
-  testFixturesImplementation(libs.mysqlConnector)
+  testFixturesImplementation(libs.mysql)
   testFixturesImplementation(libs.moshiKotlin)
   testFixturesImplementation(libs.dockerApi)
   testFixturesImplementation(libs.dockerTransportCore)
@@ -28,7 +28,7 @@ dependencies {
   testFixturesImplementation(project(":wisp:wisp-resource-loader"))
   testFixturesImplementation(project(":wisp:wisp-containers-testing"))
 
-  testImplementation(libs.mysqlConnector)
+  testImplementation(libs.mysql)
   testImplementation(libs.junitApi)
   testImplementation(libs.docker)
   testImplementation(libs.dockerApi)
