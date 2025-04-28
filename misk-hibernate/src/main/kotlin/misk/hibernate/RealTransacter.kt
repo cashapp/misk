@@ -99,7 +99,12 @@ internal class RealTransacter private constructor(
       if (!config.type.isVitess) {
         this.supplier = Suppliers.ofInstance(CompletableFuture.completedFuture(SINGLE_SHARD_SET))
       } else {
-        val executorService = executorServiceFactory.single("shard-list-fetcher-%d")
+        // Add randomness to the executor service name, to avoid
+        // contention with multiple ShardListFetchers/Transacters.
+        val uuid = UUID.randomUUID().toString()
+        val executorService = executorServiceFactory.single(
+          nameFormat = "shard-list-fetcher-$uuid-%d"
+        )
         this.supplier = Suppliers.memoizeWithExpiration(
           {
             // Needs to be fetched on a separate thread to avoid nested transactions
