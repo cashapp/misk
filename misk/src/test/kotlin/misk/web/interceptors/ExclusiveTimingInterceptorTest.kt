@@ -1,6 +1,7 @@
 package misk.web.interceptors
 
 import io.prometheus.client.Histogram
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessControlModule
@@ -20,9 +21,8 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 import org.assertj.core.data.Offset
+import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.milliseconds
 
 @MiskTest(startService = true)
@@ -45,7 +45,7 @@ class ExclusiveTimingInterceptorTest {
     assertThat(response.code).isEqualTo(200)
 
     // Figure out how long each of the latency metrics was
-    val requestDuration = metricsInterceptorFactory.requestDuration
+    val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
     val exclusiveRequestDuration = exclusiveTimingInterceptorFactory.requestDurationHistogram
     val difference =
       requestDuration.labels(*labels(200)).get().sum -
@@ -105,7 +105,7 @@ class ExclusiveTimingInterceptorTest {
       assertThat(it.code).isEqualTo(desiredStatusCode)
     }
   }
-  
+
   private fun Histogram.Child.Value.count() = buckets.last().toInt()
 
   class TestModule : KAbstractModule() {

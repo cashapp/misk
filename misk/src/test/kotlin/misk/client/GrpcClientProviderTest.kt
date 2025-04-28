@@ -13,13 +13,8 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
-import misk.ApplicationInterceptor
-import misk.Chain
-import java.time.Duration
-import java.util.concurrent.LinkedBlockingDeque
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -37,6 +32,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.Duration
+import java.util.concurrent.LinkedBlockingDeque
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class GrpcClientProviderTest {
@@ -97,8 +95,16 @@ internal class GrpcClientProviderTest {
       "<< NetworkInterceptor robots.Locate /RobotLocator/Locate 200",
       "<< ApplicationInterceptor robots.Locate /RobotLocator/Locate 200",
     )
-    assertThat(clientMetricsInterceptorFactory.requestDuration.labels("robots.SayHello", "200").get().count.toInt()).isEqualTo(1)
-    assertThat(clientMetricsInterceptorFactory.requestDurationHistogram.labels("robots.SayHello", "200").get().buckets.last().toInt()).isEqualTo(1)
+    assertThat(
+      clientMetricsInterceptorFactory.requestDurationSummary!!.labels("robots.SayHello", "200")
+        .get().count.toInt()
+    ).isEqualTo(1)
+    assertThat(
+      clientMetricsInterceptorFactory.requestDurationHistogram.labels(
+        "robots.SayHello",
+        "200"
+      ).get().buckets.last().toInt()
+    ).isEqualTo(1)
   }
 
   @Test
@@ -129,8 +135,8 @@ internal class GrpcClientProviderTest {
       multibind<ClientNetworkInterceptor.Factory>().toInstance(SimpleInterceptorFactory())
       multibind<ClientApplicationInterceptorFactory>().toInstance(
         object : ClientApplicationInterceptorFactory {
-        override fun create(action: ClientAction) = SimpleApplicationInterceptor(action)
-      })
+          override fun create(action: ClientAction) = SimpleApplicationInterceptor(action)
+        })
     }
 
     @Provides
