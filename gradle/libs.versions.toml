@@ -104,13 +104,13 @@ hopliteToml = { module = "com.sksamuel.hoplite:hoplite-toml", version.ref = "hop
 hopliteYaml = { module = "com.sksamuel.hoplite:hoplite-yaml", version.ref = "hoplite" }
 hsqldb = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 jCommander = { module = "com.beust:jcommander", version = "1.82" }
-jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
+jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations" }
 jacksonBom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
-jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
-jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
-jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
-jacksonJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
-jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core" }
+jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind" }
+jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml" }
+jacksonJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
+jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
 jakartaInject = { module = "jakarta.inject:jakarta.inject-api", version = "2.0.1" }
 javaxAnnotation = { module = "javax.annotation:javax.annotation-api", version = "1.3.2" }
 javaxInject = { module = "javax.inject:javax.inject", version = "1" }
