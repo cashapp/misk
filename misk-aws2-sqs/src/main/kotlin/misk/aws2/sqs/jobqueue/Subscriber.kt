@@ -175,7 +175,6 @@ class Subscriber(
 
       sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
       response.messages().forEach { message ->
-        logger.info { "Receipt handler ${message.receiptHandle()}" }
         message.attributes()[MessageSystemAttributeName.SENT_TIMESTAMP]?.let {
           val sentTimestamp = it.toLong()
           val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli().toDouble()
