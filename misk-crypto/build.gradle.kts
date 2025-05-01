@@ -17,8 +17,8 @@ dependencies {
   api(project(":wisp:wisp-deployment"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
-  implementation(libs.bouncycastle)
-  implementation(libs.bouncycastlePgp)
+  implementation(libs.bouncyCastleProvider)
+  implementation(libs.bouncyCastlePgp)
   implementation(libs.guava)
   implementation(libs.loggingApi)
   implementation(libs.moshiCore)
@@ -28,9 +28,11 @@ dependencies {
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":misk"))
 
+  runtimeOnly(libs.bouncyCastlePkix)
+
   testFixturesApi(project(":misk-crypto"))
   testFixturesApi(project(":misk-inject"))
-  testFixturesImplementation(libs.bouncycastle)
+  testFixturesImplementation(libs.bouncyCastleProvider)
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.tink)
   testFixturesImplementation(libs.tinkAwskms)
@@ -47,7 +49,7 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-crypto")))
 
-  testImplementation(libs.bouncycastle)
+  testImplementation(libs.bouncyCastleProvider)
   testImplementation(libs.guice)
   testImplementation(libs.tink)
   testImplementation(libs.tinkAwskms)
@@ -55,8 +57,8 @@ dependencies {
   testImplementation(project(":wisp:wisp-deployment"))
   testImplementation(project(":misk-config"))
 
-  testFixturesImplementation(libs.bouncycastle)
-  testFixturesImplementation(libs.bouncycastlePgp)
+  testFixturesImplementation(libs.bouncyCastleProvider)
+  testFixturesImplementation(libs.bouncyCastlePgp)
   testFixturesImplementation(libs.guava)
   testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.moshiCore)
