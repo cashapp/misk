@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     api(project(":wisp:wisp-resource-loader"))
-    implementation(libs.bouncycastle)
+    implementation(libs.bouncyCastleProvider)
     implementation(libs.okio)
 
     testImplementation(libs.assertj)

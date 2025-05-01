@@ -7,7 +7,7 @@ dependencies {
     implementation(libs.loggingApi)
     implementation(libs.okio)
     implementation(project(":wisp:wisp-logging"))
-    runtimeOnly(libs.bouncycastle)
+    runtimeOnly(libs.bouncyCastleProvider)
 
     testImplementation(libs.assertj)
     testImplementation(libs.junitApi)

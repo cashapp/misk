@@ -44,8 +44,9 @@ awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version.ref = "a
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version.ref = "aws1" }
 awsSdkCore = { module = "software.amazon.awssdk:sdk-core", version.ref = "aws2" }
 awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version.ref = "aws1" }
-bouncycastle = { module = "org.bouncycastle:bcprov-jdk15on", version = "1.70" }
-bouncycastlePgp = { module = "org.bouncycastle:bcpg-jdk15on", version = "1.70" }
+bouncyCastlePgp = { module = "org.bouncycastle:bcpg-jdk18on", version = "1.80" }
+bouncyCastlePkix = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.80" }
+bouncyCastleProvider = { module = "org.bouncycastle:bcprov-jdk18on", version = "1.80" }
 bucket4jCore = { module = "com.bucket4j:bucket4j-core", version.ref = "bucket4j" }
 bucket4jDynamoDbV1 = { module = "com.bucket4j:bucket4j-dynamodb-sdk-v1", version = "8.6.0" }
 bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version.ref = "bucket4j" }
