@@ -21,7 +21,7 @@ import kotlin.io.path.pathString
 import misk.docker.withMiskDefaults
 import misk.vitess.testing.ApplySchemaResult
 import misk.vitess.testing.DdlUpdate
-import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK
+import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
 import misk.vitess.testing.DefaultSettings.VTCTLD_CLIENT_IMAGE
 import misk.vitess.testing.VSchemaUpdate
 import misk.vitess.testing.VitessTestDbStartupException
@@ -301,15 +301,15 @@ internal class VitessSchemaManager(
     }
 
     val networks = dockerClient.listNetworksCmd().exec()
-    networks.find { it.name == VITESS_DOCKER_NETWORK}
-      ?: throw VitessSchemaManagerException("VitessSchemaManager could not find the correct Docker Network named `$VITESS_DOCKER_NETWORK`. The network may have failed to initialize or VitessDockerContainer.createContainer may not have been run.")
+    networks.find { it.name == VITESS_DOCKER_NETWORK_NAME}
+      ?: throw VitessSchemaManagerException("VitessSchemaManager could not find the correct Docker Network named `$VITESS_DOCKER_NETWORK_NAME`. The network may have failed to initialize or VitessDockerContainer.createContainer may not have been run.")
 
     printDebug("Creating new vtctldclient container.")
     val createContainerResponse =
       dockerClient
         .createContainerCmd(VTCTLD_CLIENT_IMAGE)
         .withName(vtctldClientContainerName)
-        .withHostConfig(HostConfig.newHostConfig().withNetworkMode(VITESS_DOCKER_NETWORK))
+        .withHostConfig(HostConfig.newHostConfig().withNetworkMode(VITESS_DOCKER_NETWORK_NAME))
         .withCmd(command)
         .withAttachStdout(true)
         .withAttachStdin(true)

@@ -172,7 +172,8 @@ public final class misk/vitess/testing/DefaultSettings {
 	public static final field SQL_MODE Ljava/lang/String;
 	public static field TRANSACTION_ISOLATION_LEVEL Lmisk/vitess/testing/TransactionIsolationLevel;
 	public static field TRANSACTION_TIMEOUT_SECONDS Ljava/time/Duration;
-	public static final field VITESS_DOCKER_NETWORK Ljava/lang/String;
+	public static final field VITESS_DOCKER_NETWORK_NAME Ljava/lang/String;
+	public static final field VITESS_DOCKER_NETWORK_TYPE Ljava/lang/String;
 	public static final field VITESS_IMAGE Ljava/lang/String;
 	public static final field VITESS_VERSION I
 	public static final field VTCTLD_CLIENT_IMAGE Ljava/lang/String;
