@@ -4,6 +4,7 @@ import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.command.CreateContainerResponse
 import com.github.dockerjava.api.exception.ConflictException
 import com.github.dockerjava.api.exception.DockerClientException
+import com.github.dockerjava.api.exception.InternalServerErrorException
 import com.github.dockerjava.api.exception.NotFoundException
 import com.github.dockerjava.api.exception.NotModifiedException
 import com.github.dockerjava.api.model.Bind
@@ -12,6 +13,7 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HealthCheck
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Image
+import com.github.dockerjava.api.model.Network
 import com.github.dockerjava.api.model.PortBinding
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
@@ -23,7 +25,8 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.pathString
 import misk.docker.withMiskDefaults
-import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK
+import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
+import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_TYPE
 import misk.vitess.testing.RemoveContainerResult
 import misk.vitess.testing.StartContainerResult
 import misk.vitess.testing.TransactionIsolationLevel
@@ -73,6 +76,11 @@ internal class VitessDockerContainer(
     const val CONTAINER_HEALTH_CHECK_RETRIES = 10
     const val CONTAINER_STOP_TIMEOUT_SECONDS = 10
     const val PORT_CHECK_TIMEOUT_MS = 200
+
+    // Used for synchronizing to prevent race-conditions.
+    val startContainerLock = Any()
+    val removeContainerLock = Any()
+    val vitessNetworkLock = Any()
   }
 
   private val dockerClient: DockerClient = setupDockerClient()
@@ -243,6 +251,13 @@ internal class VitessDockerContainer(
         }
       }
     }
+
+    // Ports can still be occupied by other processes.
+    val occupiedPorts = vitessClusterConfig.allPorts().filter { isPortInUse(it) }
+    if (occupiedPorts.isNotEmpty()) {
+      println("Ports `[${occupiedPorts.joinToString(", ")}]` are still in use.")
+      throw VitessTestDbStartupException("Ports `[${occupiedPorts.joinToString(", ")}]` are in use by another process.")
+    }
   }
 
   /**
@@ -275,25 +290,47 @@ internal class VitessDockerContainer(
   }
 
   /**
-   * This method removes the container. If the container is already removed, it returns `false`.
+   * This method removes the container. If the container is already removed or being removed, it returns `false`.
    */
   private fun removeContainer(container: Container): Boolean {
-    try {
-      dockerClient.removeContainerCmd(container.id).withForce(true).exec()
-      return true
-    } catch (e: NotFoundException) {
-      // If we are in this state, the container is already removed.
-      return false
+    synchronized(removeContainerLock) {
+      try {
+        dockerClient.removeContainerCmd(container.id).withForce(true).exec()
+        return true
+      } catch (e: NotFoundException) {
+        // If we are in this state, the container is already removed.
+        return false
+      } catch (e: ConflictException) {
+        // If we are in this state, the container is already being removed.
+        return false
+      }
     }
   }
 
   private fun startContainer(containerId: String) {
-    try {
-      dockerClient.startContainerCmd(containerId).exec()
-    } catch (notModifiedException: NotModifiedException) {
-      // The container is already started, ignore the exception.
-    } catch (notFoundException: NotFoundException) {
-      throw VitessTestDbStartupException("Container for `$containerId` was not found during start up.")
+    synchronized(startContainerLock) {
+      try {
+        // Check if the container is already running
+        val containerInfo = dockerClient.inspectContainerCmd(containerId).exec()
+        if (containerInfo.state.running == true) {
+          println("Container `$containerId` is already running. Skipping startContainer.")
+          return
+        }
+
+        // Start the container
+        dockerClient.startContainerCmd(containerId).exec()
+      } catch (notModifiedException: NotModifiedException) {
+        // The container is already started, ignore the exception.
+        println("Container `$containerId` is already started.")
+      } catch (notFoundException: NotFoundException) {
+        throw VitessTestDbStartupException("Container for `$containerId` was not found during start up.")
+      } catch (internalServerException: InternalServerErrorException) {
+        // Handle port binding issues or other internal server errors
+        throw VitessTestDbStartupException(
+          "Failed to start Docker container for `$containerName`. Possible port conflict or race condition.",
+          internalServerException
+        )
+      }
     }
   }
 
@@ -388,7 +425,7 @@ internal class VitessDockerContainer(
       HostConfig()
         .withPortBindings(portBindings)
         .withBinds(Bind(vitessMyCnf.optionsFilePath.pathString, Volume(optionsFileDest)))
-        .withNetworkMode(VITESS_DOCKER_NETWORK)
+        .withNetworkMode(VITESS_DOCKER_NETWORK_NAME)
         .withAutoRemove(
           !debugStartup // If `debugStartup` is `true`, we keep the container running to inspect logs.
         ) // Otherwise, remove container when it stops.
@@ -585,24 +622,44 @@ internal class VitessDockerContainer(
    *   Create or get a network for Vitess docker containers to communicate with each other.
    */
   private fun getOrCreateVitessNetwork(): String {
+    synchronized(vitessNetworkLock) {
+      var existingNetwork = findExistingNetwork()
+
+      if (existingNetwork == null) {
+        try {
+          val newNetworkId = dockerClient.createNetworkCmd()
+            .withName(VITESS_DOCKER_NETWORK_NAME)
+            .withDriver(VITESS_DOCKER_NETWORK_TYPE)
+            .exec()
+            .id
+          return newNetworkId
+        } catch (conflictException: ConflictException) {
+          // If we are in this state, the network was already created.
+          println("Network `$VITESS_DOCKER_NETWORK_NAME` was already created, attempting to find it.")
+          existingNetwork = findExistingNetwork()
+          if (existingNetwork == null) {
+            throw VitessTestDbStartupException(
+              "Network `$VITESS_DOCKER_NETWORK_NAME` was created but not found.", conflictException)
+          }
+        }
+      }
+
+      // Validate the existing network we found has the expected network type.
+      if (existingNetwork!!.driver != VITESS_DOCKER_NETWORK_TYPE) {
+        throw VitessTestDbStartupException(
+          "Network `$VITESS_DOCKER_NETWORK_NAME` exists for network id `${existingNetwork.id}` but is not of type `$VITESS_DOCKER_NETWORK_TYPE`. " +
+            "Found type: `${existingNetwork.driver}`. Tear down the existing network to use this version of VitessTestDb."
+        )
+      }
+
+      return existingNetwork.id
+    }
+  }
+
+  private fun findExistingNetwork(): Network? {
     val networks = dockerClient.listNetworksCmd().exec()
-    val vitessNetworkType = "bridge"
-    val existingNetwork = networks.find { it.name == VITESS_DOCKER_NETWORK }
-    if (existingNetwork == null) {
-      val newNetworkId = dockerClient.createNetworkCmd()
-        .withName(VITESS_DOCKER_NETWORK)
-        .withDriver(vitessNetworkType)
-        .exec()
-        .id
-      return newNetworkId
-    }
-
-    if (existingNetwork.driver != vitessNetworkType) {
-      throw VitessTestDbStartupException("Network `$VITESS_DOCKER_NETWORK` exists for network id `${existingNetwork.id}` but is not of type `$vitessNetworkType`. " +
-        "Found type: `${existingNetwork.driver}`. Tear down the existing network to use this version of VitessTestDb.")
-    }
-
-    return existingNetwork.id
+    val existingNetwork = networks.find { it.name == VITESS_DOCKER_NETWORK_NAME }
+    return existingNetwork
   }
 
   /**
