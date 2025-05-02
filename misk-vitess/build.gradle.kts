@@ -8,8 +8,10 @@ plugins {
 }
 
 dependencies {
-
   api(libs.dockerApi)
+  api(libs.guava)
+  api(project(":misk-jdbc"))
+  implementation(libs.okio)
 
   testFixturesApi(libs.docker)
   testFixturesApi(libs.dockerApi)

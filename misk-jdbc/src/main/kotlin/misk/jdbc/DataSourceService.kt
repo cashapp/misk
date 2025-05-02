@@ -9,7 +9,6 @@ import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import com.zaxxer.hikari.util.DriverDataSource
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Singleton
-import misk.vitess.VitessExceptionHandler
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.time.Duration
