@@ -27,7 +27,6 @@ dependencies {
   implementation(libs.hikariCp)
   implementation(libs.loggingApi)
   implementation(libs.mysql)
-  implementation(libs.okio)
   implementation(project(":misk-backoff"))
   implementation(project(":misk-docker"))
   implementation(project(":misk-service"))

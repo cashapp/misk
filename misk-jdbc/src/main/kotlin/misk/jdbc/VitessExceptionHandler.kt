@@ -1,11 +1,11 @@
-package misk.vitess
+package misk.jdbc
 
 import com.zaxxer.hikari.SQLExceptionOverride
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
+import wisp.logging.getLogger
 import java.sql.SQLException
 import java.util.concurrent.ConcurrentHashMap
-import wisp.logging.getLogger
 
 internal class VitessExceptionHandler(
   registry: CollectorRegistry? = null,

@@ -29,6 +29,7 @@ dependencies {
   api(libs.slf4jApi)
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
+  api(project(":misk-vitess"))
   api(project(":wisp:wisp-config"))
   implementation(libs.loggingApi)
   implementation(libs.kotlinReflect)

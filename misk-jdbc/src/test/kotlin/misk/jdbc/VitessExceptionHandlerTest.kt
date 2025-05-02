@@ -1,4 +1,4 @@
-package misk.vitess
+package misk.jdbc
 
 import com.zaxxer.hikari.SQLExceptionOverride
 import org.junit.jupiter.api.Test
