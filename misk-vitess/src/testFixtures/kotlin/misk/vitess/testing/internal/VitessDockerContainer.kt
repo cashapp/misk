@@ -78,8 +78,7 @@ internal class VitessDockerContainer(
     const val PORT_CHECK_TIMEOUT_MS = 200
 
     // Used for synchronizing to prevent race-conditions.
-    val startContainerLock = Any()
-    val removeContainerLock = Any()
+    val containerLock = Any() // Use the same mutex for both starting and removing containers.
     val vitessNetworkLock = Any()
   }
 
@@ -293,7 +292,7 @@ internal class VitessDockerContainer(
    * This method removes the container. If the container is already removed or being removed, it returns `false`.
    */
   private fun removeContainer(container: Container): Boolean {
-    synchronized(removeContainerLock) {
+    synchronized(containerLock) {
       try {
         dockerClient.removeContainerCmd(container.id).withForce(true).exec()
         return true
@@ -308,7 +307,7 @@ internal class VitessDockerContainer(
   }
 
   private fun startContainer(containerId: String) {
-    synchronized(startContainerLock) {
+    synchronized(containerLock) {
       try {
         // Check if the container is already running
         val containerInfo = dockerClient.inspectContainerCmd(containerId).exec()
