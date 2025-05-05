@@ -439,6 +439,7 @@ public final class misk/jdbc/JDBCSession$HookType : java/lang/Enum {
 
 public final class misk/jdbc/JdbcExtensionsKt {
 	public static final fun map (Ljava/sql/ResultSet;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
+	public static final fun mapNotNull (Ljava/sql/ResultSet;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
 	public static final fun maybeInt (Ljava/sql/ResultSet;)Ljava/lang/Integer;
 	public static final fun maybeLong (Ljava/sql/ResultSet;)Ljava/lang/Long;
 	public static final fun maybeResult (Ljava/sql/ResultSet;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
