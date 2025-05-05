@@ -1,5 +1,7 @@
 package misk.hibernate.actions
 
+import jakarta.inject.Inject
+import misk.audit.FakeAuditClient
 import misk.exceptions.UnauthorizedException
 import misk.hibernate.DbActor
 import misk.hibernate.DbCharacter
@@ -15,7 +17,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import jakarta.inject.Inject
 import javax.persistence.Transient
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaField
@@ -34,6 +35,7 @@ class HibernateDatabaseQueryStaticActionTest {
       HibernateDatabaseQueryStaticAction.Response
       >
   @Inject @Movies lateinit var transacter: Transacter
+  @Inject lateinit var auditClient: FakeAuditClient
 
   @BeforeEach
   fun before() {
@@ -181,5 +183,20 @@ class HibernateDatabaseQueryStaticActionTest {
       ),
       results.results
     )
+
+    assertEquals(FakeAuditClient.FakeAuditEvent(
+      eventSource = "test-app",
+      eventTarget = "HibernateDatabaseQueryStaticAction",
+      timestampSent = 2147483647,
+      applicationName = "test-app",
+      approverLDAP = null,
+      automatedChange = false,
+      description = "HibernateDatabaseQueryStaticAction principal=joey",
+      richDescription = "HibernateDatabaseQueryStaticAction principal=joey time=0.000 ns code=200",
+      environment = "testing",
+      detailURL = null,
+      region = "us-west-2",
+      requestorLDAP = "joey"
+    ), auditClient.sentEvents.take())
   }
 }

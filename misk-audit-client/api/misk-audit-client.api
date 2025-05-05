@@ -17,11 +17,25 @@ public final class misk/audit/AuditClientConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface annotation class misk/audit/AuditRequestResponse : java/lang/annotation/Annotation {
+	public abstract fun applicationName ()Ljava/lang/String;
+	public abstract fun automatedChange ()Z
+	public abstract fun description ()Ljava/lang/String;
+	public abstract fun detailURL ()Ljava/lang/String;
+	public abstract fun includeRequest ()Z
+	public abstract fun includeRequestHeaders ()Z
+	public abstract fun includeReseponseHeaders ()Z
+	public abstract fun includeResponse ()Z
+	public abstract fun richDescription ()Ljava/lang/String;
+	public abstract fun target ()Ljava/lang/String;
+}
+
 public final class misk/audit/FakeAuditClient : misk/testing/FakeFixture, misk/audit/AuditClient {
 	public static final field Companion Lmisk/audit/FakeAuditClient$Companion;
-	public fun <init> (Ljava/lang/String;Lmisk/scope/ActionScoped;Ljava/time/Clock;Lwisp/deployment/Deployment;)V
+	public static final field DEFAULT_USER Ljava/lang/String;
+	public fun <init> (Lmisk/audit/FakeAuditClient$OptionalBinder;)V
 	public final fun getEnableLogging ()Z
-	public final fun getSentEvents ()Ljava/util/List;
+	public final fun getSentEvents ()Ljava/util/concurrent/LinkedBlockingDeque;
 	public fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun setEnableLogging (Z)V
 }
@@ -60,6 +74,18 @@ public final class misk/audit/FakeAuditClient$FakeAuditEvent {
 	public final fun getTimestampSent ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/audit/FakeAuditClient$OptionalBinder {
+	public fun <init> ()V
+	public final fun getAppName ()Ljava/lang/String;
+	public final fun getCallerProvider ()Lmisk/scope/ActionScoped;
+	public final fun getClock ()Ljava/time/Clock;
+	public final fun getDeployment ()Lwisp/deployment/Deployment;
+	public final fun setAppName (Ljava/lang/String;)V
+	public final fun setCallerProvider (Lmisk/scope/ActionScoped;)V
+	public final fun setClock (Ljava/time/Clock;)V
+	public final fun setDeployment (Lwisp/deployment/Deployment;)V
 }
 
 public final class misk/audit/FakeAuditClientModule : misk/inject/KAbstractModule {

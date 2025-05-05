@@ -1994,7 +1994,6 @@ public final class misk/web/interceptors/RequestLoggingConfig {
 
 public final class misk/web/interceptors/RequestLoggingInterceptor : misk/web/NetworkInterceptor {
 	public fun intercept (Lmisk/web/NetworkChain;)V
-	public final fun maybeLog (Lmisk/web/HttpCall;Lcom/google/common/base/Stopwatch;Ljava/lang/Throwable;)V
 }
 
 public final class misk/web/interceptors/RequestLoggingInterceptor$Factory : misk/web/NetworkInterceptor$Factory {
@@ -2037,6 +2036,24 @@ public final class misk/web/interceptors/WideOpenDevelopmentInterceptor : misk/w
 public final class misk/web/interceptors/WideOpenDevelopmentInterceptorFactory : misk/web/NetworkInterceptor$Factory {
 	public fun <init> (Lmisk/web/interceptors/WideOpenDevelopmentInterceptor;Lwisp/deployment/Deployment;)V
 	public fun create (Lmisk/Action;)Lmisk/web/NetworkInterceptor;
+}
+
+public final class misk/web/interceptors/hooks/AuditClientHook : misk/web/interceptors/hooks/RequestResponseHook {
+	public synthetic fun <init> (Lmisk/Action;Lmisk/audit/AuditClient;Lmisk/audit/AuditRequestResponse;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun handle (Lmisk/MiskCaller;Lmisk/web/HttpCall;Lmisk/web/interceptors/RequestResponseBody;Ljava/time/Duration;Ljava/lang/String;Ljava/lang/Throwable;)V
+}
+
+public final class misk/web/interceptors/hooks/AuditClientHook$Factory : misk/web/interceptors/hooks/RequestResponseHook$Factory {
+	public fun <init> (Lmisk/audit/AuditClient;)V
+	public fun create (Lmisk/Action;)Lmisk/web/interceptors/hooks/RequestResponseHook;
+}
+
+public abstract interface class misk/web/interceptors/hooks/RequestResponseHook {
+	public abstract fun handle (Lmisk/MiskCaller;Lmisk/web/HttpCall;Lmisk/web/interceptors/RequestResponseBody;Ljava/time/Duration;Ljava/lang/String;Ljava/lang/Throwable;)V
+}
+
+public abstract interface class misk/web/interceptors/hooks/RequestResponseHook$Factory {
+	public abstract fun create (Lmisk/Action;)Lmisk/web/interceptors/hooks/RequestResponseHook;
 }
 
 public final class misk/web/jetty/JettyService : com/google/common/util/concurrent/AbstractIdleService {

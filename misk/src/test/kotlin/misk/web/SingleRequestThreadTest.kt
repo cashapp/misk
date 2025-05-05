@@ -18,7 +18,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
 import misk.web.interceptors.LogRequestResponse
-import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
@@ -31,6 +30,7 @@ import org.slf4j.MDC
 import wisp.logging.LogCollector
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.web.interceptors.RequestLoggingInterceptor
 
 private const val s = "WriteMdc"
 
@@ -65,7 +65,7 @@ class SingleRequestThreadTest {
     ).execute().body!!.string()
 
     // Verify MDC tag survived to the request/response log    
-    val contexts = logCollector.takeEvents(RequestLoggingInterceptor::class).single().mdcPropertyMap    
+    val contexts = logCollector.takeEvents(RequestLoggingInterceptor::class).single().mdcPropertyMap
     assertThat(contexts).containsEntry(HelloAction.TAG_NAME, HelloAction.TAG_VALUE)
     
     // These requests will not trigger an MDC tag to be set

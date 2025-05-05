@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import jakarta.inject.Inject
+import misk.audit.FakeAuditClient
 import javax.persistence.Transient
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaField
@@ -34,6 +35,7 @@ class HibernateDatabaseQueryDynamicActionTest {
       HibernateDatabaseQueryDynamicAction.Response
       >
   @Inject @Movies lateinit var transacter: Transacter
+  @Inject lateinit var auditClient: FakeAuditClient
 
   @BeforeEach
   fun before() {
@@ -225,5 +227,20 @@ class HibernateDatabaseQueryDynamicActionTest {
       ),
       results.results
     )
+
+    assertEquals(FakeAuditClient.FakeAuditEvent(
+      eventSource = "test-app",
+      eventTarget = "HibernateDatabaseQueryDynamicAction",
+      timestampSent = 2147483647,
+      applicationName = "test-app",
+      approverLDAP = null,
+      automatedChange = false,
+      description = "HibernateDatabaseQueryDynamicAction principal=joey",
+      richDescription = "HibernateDatabaseQueryDynamicAction principal=joey time=0.000 ns code=200",
+      environment = "testing",
+      detailURL = null,
+      region = "us-west-2",
+      requestorLDAP = "joey"
+    ), auditClient.sentEvents.take())
   }
 }

@@ -2,21 +2,15 @@ package misk.web.interceptors
 
 import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
-import misk.Action
-import misk.MiskCaller
-import misk.random.ThreadLocalRandom
-import misk.scope.ActionScoped
-import misk.web.HttpCall
-import misk.web.NetworkChain
-import misk.web.NetworkInterceptor
-import misk.web.interceptors.LogRateLimiter.LogBucketId
-import wisp.deployment.Deployment
-import wisp.logging.getLogger
-import wisp.logging.info
-import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlin.reflect.full.findAnnotation
+import misk.Action
+import misk.MiskCaller
+import misk.scope.ActionScoped
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
+import misk.web.interceptors.hooks.RequestResponseHook
+import wisp.logging.getLogger
 
 private val logger = getLogger<RequestLoggingInterceptor>()
 
@@ -25,64 +19,31 @@ private val logger = getLogger<RequestLoggingInterceptor>()
  * Timing information doesn't count time writing the response to the remote client.
  */
 class RequestLoggingInterceptor internal constructor(
-  private val action: Action,
   private val caller: ActionScoped<MiskCaller?>,
   private val ticker: Ticker,
-  private val random: ThreadLocalRandom,
-  private val logRateLimiter: LogRateLimiter,
-  private val ratePerSecond: Long,
-  private val errorRatePerSecond: Long,
-  private val bodySampling: Double,
-  private val errorBodySampling: Double,
   private val bodyCapture: RequestResponseCapture,
+  private val requestResponseHooks: List<RequestResponseHook>,
   private val requestLoggingTransformers: List<RequestLoggingTransformer>,
-  private val requestLoggingMode: RequestLoggingMode,
 ) : NetworkInterceptor {
   @Singleton
   class Factory @Inject internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val ticker: Ticker,
-    private val random: ThreadLocalRandom,
     private val bodyCapture: RequestResponseCapture,
-    private val logRateLimiter: LogRateLimiter,
-    private val deployment: Deployment,
-    private val configs: Set<RequestLoggingConfig>,
+    private val requestResponseHookFactories: List<RequestResponseHook.Factory>,
     private val requestLoggingTransformers: List<RequestLoggingTransformer>,
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
-      // Only bother with endpoints that have the annotation
-      val annotation = action.function.findAnnotation<LogRequestResponse>() ?: return null
-      val config = ActionLoggingConfig.fromConfigMapOrAnnotation(action, configs, annotation)
-
-      if (config.excludedEnvironments.contains(deployment.name)) {
-        return null
-      }
-      require(config.ratePerSecond >= 0L) {
-        "${action.name} @LogRequestResponse ratePerSecond must be >= 0"
-      }
-      require(config.errorRatePerSecond >= 0L) {
-        "${action.name} @LogRequestResponse errorRatePerSecond must be >= 0"
-      }
-      require(config.bodySampling in 0.0..1.0) {
-        "${action.name} @LogRequestResponse bodySampling must be in the range (0.0, 1.0]"
-      }
-      require(config.errorBodySampling in 0.0..1.0) {
-        "${action.name} @LogRequestResponse errorBodySampling must be in the range (0.0, 1.0]"
-      }
+      // Only bother with endpoints that have a hook annotation
+      val requestResponseHooks = requestResponseHookFactories.mapNotNull { it.create(action) }
+      if (requestResponseHooks.isEmpty()) return null
 
       return RequestLoggingInterceptor(
-        action,
-        caller,
-        ticker,
-        random,
-        logRateLimiter,
-        config.ratePerSecond,
-        config.errorRatePerSecond,
-        config.bodySampling,
-        config.errorBodySampling,
-        bodyCapture,
-        requestLoggingTransformers,
-        config.requestLoggingMode,
+        caller = caller,
+        ticker = ticker,
+        bodyCapture = bodyCapture,
+        requestResponseHooks = requestResponseHooks,
+        requestLoggingTransformers = requestLoggingTransformers,
       )
     }
   }
@@ -97,12 +58,30 @@ class RequestLoggingInterceptor internal constructor(
       chain.proceed(chain.httpCall)
     } catch (e: Throwable) {
       error = e
-    } finally {
-      stopwatch.stop()
     }
+    val elapsedToString = stopwatch.toString()
+    val elapsed = stopwatch.elapsed()
 
     try {
-      maybeLog(chain.httpCall, stopwatch, error)
+      val requestResponse = bodyCapture.get()
+
+      // Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
+      // and cannot be reliably controlled by services.
+      // In practice, they will be applied in the order that they happened to be bound.
+      val transformedRequestResponseBody =
+        requestLoggingTransformers.fold(requestResponse) { body, transformer ->
+          transformer.tryTransform(body)
+        }
+      requestResponseHooks.forEach { hook ->
+          hook.handle(
+            caller = caller.get(),
+            httpCall = chain.httpCall,
+            requestResponse = transformedRequestResponseBody,
+            elapsed = elapsed,
+            elapsedToString = elapsedToString,
+            error = error,
+          )
+      }
     } catch (e: Throwable) {
       logger.error(e) { "Unexpected error while logging request" }
     }
@@ -110,64 +89,6 @@ class RequestLoggingInterceptor internal constructor(
     if (error != null) {
       throw error
     }
-  }
-
-  fun maybeLog(httpCall: HttpCall, stopwatch: Stopwatch, error: Throwable?) {
-    val principal = caller.get()?.principal ?: "unknown"
-
-    val builder = StringBuilder()
-    builder.append("${action.name} principal=$principal time=$stopwatch")
-
-    val statusCode = httpCall.statusCode
-    if (error != null) {
-      builder.append(" failed")
-    } else {
-      builder.append(" code=$statusCode")
-    }
-
-    val isError = statusCode > 299 || error != null
-
-    if (!isError && requestLoggingMode == RequestLoggingMode.ERROR_ONLY) {
-      return
-    }
-
-    val rateLimit = if (isError) errorRatePerSecond else ratePerSecond
-    val loggingBucketId = LogBucketId(actionClass = action.name, isError = isError)
-    if (!logRateLimiter.tryAcquire(loggingBucketId, rateLimit)) {
-      return
-    }
-
-    val sampling = if (isError) errorBodySampling else bodySampling
-    val randomDouble = random.current().nextDouble()
-    if (randomDouble < sampling) {
-      // Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
-      // and cannot be reliably controlled by services.
-      // In practice, they will be applied in the order that they happened to be bound.
-      val requestResponseBody =
-        requestLoggingTransformers.fold(bodyCapture.get()) { body, transformer ->
-          transformer.tryTransform(body)
-        }
-      
-      requestResponseBody?.let {
-        requestResponseBody.request?.let {
-          builder.append(" request=${requestResponseBody.request}")
-        }
-        requestResponseBody.requestHeaders?.let {
-          builder.append(" requestHeaders=${requestResponseBody.requestHeaders}")
-        }
-        requestResponseBody.response?.let {
-          builder.append(" response=${requestResponseBody.response}")
-        }
-        requestResponseBody.responseHeaders?.let {
-          builder.append(" responseHeaders=${requestResponseBody.responseHeaders}")
-        }
-      }
-    }
-
-    logger.info(
-      "response_code" to statusCode,
-      "response_time_millis" to stopwatch.elapsed(TimeUnit.MILLISECONDS)
-    ) { builder.toString() }
   }
 }
 

@@ -28,6 +28,7 @@ import wisp.logging.getLogger
 import java.lang.reflect.ParameterizedType
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.audit.AuditRequestResponse
 import misk.web.dashboard.AdminDashboardAccess
 import kotlin.reflect.KClass
 
@@ -45,6 +46,7 @@ internal class HibernateDatabaseQueryStaticAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
+  @AuditRequestResponse
   fun query(@RequestBody request: Request): Response {
     val caller = callerProvider.get()!!
     val queryClass = request.queryClass
