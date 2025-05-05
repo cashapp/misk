@@ -3,6 +3,9 @@ package wisp.client
 import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient.Builder
+import java.net.InetSocketAddress
+import java.net.Proxy
+import java.net.Proxy.Type.HTTP
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -16,15 +19,20 @@ class OkHttpClientCommonConfigurator {
         configureReadTimeout(builder = builder, config = config)
         configureWriteTimeout(builder = builder, config = config)
         configureRetryOnConnectionFailure(builder = builder, config = config)
+        configureProxy(builder = builder, config = config)
         return builder
     }
 
+    private fun configureProxy(builder: Builder, config: HttpClientEndpointConfig) {
+      config.clientConfig.proxy?.also { builder.proxy(Proxy(HTTP, InetSocketAddress(it.hostName, it.port))) }
+    }
+
     private fun configureCallTimeout(builder: Builder, config: HttpClientEndpointConfig) {
-        config.clientConfig.callTimeout?.let { builder.callTimeout(it) }
+        config.clientConfig.callTimeout?.also { builder.callTimeout(it) }
     }
 
     private fun configureConnectTimeout(builder: Builder, config: HttpClientEndpointConfig) {
-        config.clientConfig.connectTimeout?.let { builder.connectTimeout(it) }
+        config.clientConfig.connectTimeout?.also { builder.connectTimeout(it) }
     }
 
     private fun configureConnectionPool(builder: Builder, config: HttpClientEndpointConfig) {
@@ -38,21 +46,21 @@ class OkHttpClientCommonConfigurator {
 
     private fun configureDispatcher(builder: Builder, config: HttpClientEndpointConfig) {
         val dispatcher = Dispatcher()
-        config.clientConfig.maxRequests?.let { dispatcher.maxRequests = it }
-        config.clientConfig.maxRequestsPerHost?.let { dispatcher.maxRequestsPerHost = it }
+        config.clientConfig.maxRequests?.also { dispatcher.maxRequests = it }
+        config.clientConfig.maxRequestsPerHost?.also { dispatcher.maxRequestsPerHost = it }
         builder.dispatcher(dispatcher)
     }
 
     private fun configurePingInterval(builder: Builder, config: HttpClientEndpointConfig) {
-        config.clientConfig.pingInterval?.let { builder.pingInterval(it) }
+        config.clientConfig.pingInterval?.also { builder.pingInterval(it) }
     }
 
     private fun configureReadTimeout(builder: Builder, config: HttpClientEndpointConfig) {
-        config.clientConfig.readTimeout?.let { builder.readTimeout(it) }
+        config.clientConfig.readTimeout?.also { builder.readTimeout(it) }
     }
 
     private fun configureWriteTimeout(builder: Builder, config: HttpClientEndpointConfig) {
-        config.clientConfig.writeTimeout?.let { builder.writeTimeout(it) }
+        config.clientConfig.writeTimeout?.also { builder.writeTimeout(it) }
     }
 
     private fun configureRetryOnConnectionFailure(

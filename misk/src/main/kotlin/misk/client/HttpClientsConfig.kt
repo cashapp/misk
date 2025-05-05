@@ -101,6 +101,13 @@ data class HttpClientSSLConfig(
   )
 }
 
+data class ProxyConfig(
+  val hostName: String,
+  val port: Int
+) {
+  fun toWispConfig(): wisp.client.ProxyConfig = wisp.client.ProxyConfig(hostName, port)
+}
+
 data class HttpClientConfig @JvmOverloads constructor(
   val connectTimeout: Duration? = null,
   val writeTimeout: Duration? = null,
@@ -114,7 +121,8 @@ data class HttpClientConfig @JvmOverloads constructor(
   val ssl: HttpClientSSLConfig? = null,
   val unixSocketFile: String? = null,
   val protocols: List<String>? = null,
-  val retryOnConnectionFailure: Boolean? = null
+  val retryOnConnectionFailure: Boolean? = null,
+  val proxy: ProxyConfig? = null,
 ) {
   fun toWispConfig() = wisp.client.HttpClientConfig(
     connectTimeout,
@@ -129,7 +137,8 @@ data class HttpClientConfig @JvmOverloads constructor(
     ssl?.toWispConfig(),
     unixSocketFile,
     protocols,
-    retryOnConnectionFailure
+    retryOnConnectionFailure,
+    proxy?.toWispConfig()
   )
 }
 
