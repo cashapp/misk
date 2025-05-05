@@ -42,6 +42,7 @@ class SchemaMigratorService  constructor(
         migrationState = schemaMigrator.applyAll("SchemaMigratorService")
       }
     } else {
+      //TODO: update this as a part of the changes to the DataSourceService
       migrationState = schemaMigrator.requireAll()
     }
   }
