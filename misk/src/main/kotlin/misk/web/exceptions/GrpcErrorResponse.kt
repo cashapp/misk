@@ -10,7 +10,8 @@ data class GrpcErrorResponse @JvmOverloads constructor(
 ) {
 
   companion object {
-    val INTERNAL_SERVER_ERROR = GrpcErrorResponse(GrpcStatus.UNKNOWN, "internal server error")
+    fun internalServerError(th: Throwable) =
+      GrpcErrorResponse(GrpcStatus.UNKNOWN, "$th\n${th.stackTraceToString()}")
   }
 
   // backward compatibility
