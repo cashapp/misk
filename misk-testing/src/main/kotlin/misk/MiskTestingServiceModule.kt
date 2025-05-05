@@ -19,7 +19,7 @@ import misk.tokens.FakeTokenGeneratorModule
  */
 class MiskTestingServiceModule @JvmOverloads constructor(
   private val installFakeMetrics: Boolean = false
-): KAbstractModule() {
+) : KAbstractModule() {
   override fun configure() {
     install(TestingResourceLoaderModule())
     install(FakeEnvVarModule())

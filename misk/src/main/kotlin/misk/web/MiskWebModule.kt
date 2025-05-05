@@ -70,6 +70,8 @@ import misk.web.interceptors.RequestLoggingConfig
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.RequestLoggingTransformer
 import misk.web.interceptors.TracingInterceptor
+import misk.web.interceptors.hooks.RequestResponseHook
+import misk.web.interceptors.hooks.RequestResponseLoggingHook
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolHealthCheck
@@ -229,7 +231,9 @@ class MiskWebModule @JvmOverloads constructor(
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
       .to<ExceptionHandlingInterceptor.Factory>()
 
-    // Optionally log request and response details
+    // Optionally audit, log...etc request and response details
+    newMultibinder<RequestResponseHook.Factory>()
+    multibind<RequestResponseHook.Factory>().to<RequestResponseLoggingHook.Factory>()
     newMultibinder<RequestLoggingConfig>()
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
       .to<RequestLoggingInterceptor.Factory>()

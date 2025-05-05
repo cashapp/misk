@@ -32,6 +32,7 @@ dependencies {
   api(project(":misk-action-scopes"))
   api(project(":misk-actions"))
   api(project(":misk-api"))
+  api(project(":misk-audit-client"))
   api(project(":misk-backoff"))
   api(project(":misk-clustering"))
   api(project(":misk-config"))
@@ -91,6 +92,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":misk"))
   testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-audit-client")))
 }
 
 val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path

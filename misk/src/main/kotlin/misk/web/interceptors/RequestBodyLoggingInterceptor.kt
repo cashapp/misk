@@ -1,15 +1,16 @@
 package misk.web.interceptors
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.Action
 import misk.ApplicationInterceptor
 import misk.Chain
 import misk.MiskCaller
 import misk.scope.ActionScoped
+import misk.web.interceptors.hooks.RequestResponseHook
+import misk.web.interceptors.hooks.RequestResponseLoggingHook
 import okhttp3.Headers
 import wisp.logging.getLogger
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import kotlin.reflect.full.findAnnotation
 
 private val logger = getLogger<RequestBodyLoggingInterceptor>()
 
@@ -22,34 +23,42 @@ private val logger = getLogger<RequestBodyLoggingInterceptor>()
 class RequestBodyLoggingInterceptor @Inject internal constructor(
   private val action: Action,
   private val caller: ActionScoped<MiskCaller?>,
-  private val bodyCapture: RequestResponseCapture
+  private val bodyCapture: RequestResponseCapture,
 ) : ApplicationInterceptor {
 
   @Singleton
   class Factory @Inject internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val bodyCapture: RequestResponseCapture,
-    private val configs: Set<RequestLoggingConfig>,
+    private val requestResponseHookFactories: List<RequestResponseHook.Factory>,
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
-      // Only bother with endpoints that have the annotation
-      val annotation = action.function.findAnnotation<LogRequestResponse>() ?: return null
-      val config = ActionLoggingConfig.fromConfigMapOrAnnotation(action, configs, annotation)
+      // Only bother with endpoints that have a hook annotation
+      val requestResponseHooks = requestResponseHookFactories.mapNotNull { it.create(action) }
+      if (requestResponseHooks.isEmpty()) return null
 
-      require(config.bodySampling in 0.0..1.0) {
-        "${action.name} @LogRequestResponse bodySampling must be in the range (0.0, 1.0]"
-      }
-      require(config.errorBodySampling in 0.0..1.0) {
-        "${action.name} @LogRequestResponse errorBodySampling must be in the range (0.0, 1.0]"
-      }
-      if (config.bodySampling == 0.0 && config.errorBodySampling == 0.0) {
-        return null
+      requestResponseHooks.forEach { hook ->
+        when (hook) {
+          is RequestResponseLoggingHook -> {
+            val config = hook.config
+
+            require(config.bodySampling in 0.0..1.0) {
+              "${action.name} @LogRequestResponse bodySampling must be in the range (0.0, 1.0]"
+            }
+            require(config.errorBodySampling in 0.0..1.0) {
+              "${action.name} @LogRequestResponse errorBodySampling must be in the range (0.0, 1.0]"
+            }
+            if (config.bodySampling == 0.0 && config.errorBodySampling == 0.0) {
+              return null
+            }
+          }
+        }
       }
 
       return RequestBodyLoggingInterceptor(
-        action,
-        caller,
-        bodyCapture
+        action = action,
+        caller = caller,
+        bodyCapture = bodyCapture
       )
     }
   }
@@ -63,10 +72,10 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
     val args = chain.args.filter { it !is Headers }
     bodyCapture.set(
       RequestResponseBody(
-        args,
-        null,
-        redactedRequestHeaders.headers,
-        null,
+        request = args,
+        response = null,
+        requestHeaders = redactedRequestHeaders.headers,
+        responseHeaders = null,
       )
     )
 
@@ -75,10 +84,10 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
       val redactedResponseHeaders = HeadersCapture(chain.httpCall.responseHeaders)
       bodyCapture.set(
         RequestResponseBody(
-          args,
-          result,
-          redactedRequestHeaders.headers,
-          redactedResponseHeaders.headers,
+          request = args,
+          response = result,
+          requestHeaders = redactedRequestHeaders.headers,
+          responseHeaders = redactedResponseHeaders.headers,
         )
       )
       return result
