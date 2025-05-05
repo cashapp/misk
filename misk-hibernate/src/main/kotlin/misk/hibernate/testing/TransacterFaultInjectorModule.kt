@@ -3,6 +3,7 @@ package misk.hibernate.testing
 import com.google.inject.Key
 import jakarta.inject.Singleton
 import misk.hibernate.HibernateEntityModule
+import misk.inject.asSingleton
 import org.hibernate.event.spi.EventType
 import kotlin.reflect.KClass
 
@@ -19,7 +20,7 @@ class TransacterFaultInjectorModule @JvmOverloads constructor(
 
     bind(key)
       .to<TransacterFaultInjector>()
-      .`in`(Singleton::class.java)
+      .asSingleton()
 
     bindListener(EventType.SAVE_UPDATE).to(key)
     bindListener(EventType.SAVE).to(key)
