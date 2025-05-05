@@ -135,7 +135,7 @@ jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api"
 jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
 jooq = { module = "org.jooq:jooq", version = "3.19.18" }
-jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.1" }
+jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.2" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junitLauncher = { module = "org.junit.platform:junit-platform-launcher" }
