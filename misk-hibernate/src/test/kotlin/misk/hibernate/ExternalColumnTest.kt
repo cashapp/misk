@@ -58,7 +58,7 @@ class ExternalColumnTest {
       install(DeploymentModule(TESTING))
 
       val config = MiskConfig.load<RootConfig>("externalcolumn", TESTING)
-      install(HibernateTestingModule(ExternalColumnDb::class, config.data_source))
+      install(HibernateTestingModule(ExternalColumnDb::class))
       install(HibernateModule(ExternalColumnDb::class, config.data_source))
       install(object : HibernateEntityModule(ExternalColumnDb::class) {
         override fun configureHibernate() {

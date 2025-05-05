@@ -100,7 +100,7 @@ class ByteStringColumnTest {
       install(DeploymentModule(TESTING))
 
       val config = MiskConfig.load<RootConfig>("bytestringcolumn", TESTING)
-      install(HibernateTestingModule(ByteStringColumn::class, config.data_source))
+      install(HibernateTestingModule(ByteStringColumn::class))
       install(HibernateModule(ByteStringColumn::class, config.data_source))
       install(object : HibernateEntityModule(ByteStringColumn::class) {
         override fun configureHibernate() {

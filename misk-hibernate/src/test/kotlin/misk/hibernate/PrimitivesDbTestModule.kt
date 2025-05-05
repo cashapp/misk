@@ -15,7 +15,7 @@ class PrimitivesDbTestModule : KAbstractModule() {
     install(DeploymentModule(TESTING))
 
     val config = MiskConfig.load<RootConfig>("primitivecolumns", TESTING)
-    install(HibernateTestingModule(PrimitivesDb::class, config.data_source))
+    install(HibernateTestingModule(PrimitivesDb::class))
     install(HibernateModule(PrimitivesDb::class, config.data_source))
     install(object : HibernateEntityModule(PrimitivesDb::class) {
       override fun configureHibernate() {

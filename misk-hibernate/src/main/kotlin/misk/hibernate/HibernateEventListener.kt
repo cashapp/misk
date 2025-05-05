@@ -33,6 +33,9 @@ internal class ListenerRegistration(
       EventType.PRE_DELETE -> Unit
       EventType.POST_DELETE -> Unit
       EventType.SAVE_UPDATE -> Unit
+      EventType.UPDATE -> Unit
+      EventType.SAVE -> Unit
+      EventType.DELETE -> Unit
       EventType.FLUSH_ENTITY -> Unit
       else -> throw UnsupportedOperationException("$type not currently supported")
     }

@@ -40,7 +40,6 @@ class MoviesTestModule(
     install(
       HibernateTestingModule(
         Movies::class,
-        dataSourceConfig,
         scaleSafetyChecks = scaleSafetyChecks
       )
     )
