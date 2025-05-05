@@ -479,7 +479,7 @@ class TransformedColumnTest {
 
       val conf =
         MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", TESTING)
-      install(HibernateTestingModule(TransformedColumnTestDb::class, conf.data_source))
+      install(HibernateTestingModule(TransformedColumnTestDb::class))
       install(HibernateModule(TransformedColumnTestDb::class, conf.data_source))
       install(object : HibernateEntityModule(TransformedColumnTestDb::class) {
         override fun configureHibernate() {

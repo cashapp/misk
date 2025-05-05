@@ -28,6 +28,8 @@ import org.hibernate.jpa.event.spi.CallbackRegistry
 import org.hibernate.jpa.event.spi.CallbackRegistryConsumer
 import org.hibernate.persister.entity.EntityPersister
 import com.google.inject.Provider
+import org.hibernate.event.spi.DeleteEvent
+import org.hibernate.event.spi.DeleteEventListener
 
 /**
  * This class delegates to other event listeners registered with Guice. This allows us to defer
@@ -43,7 +45,7 @@ internal class AggregateListener(
   PostUpdateEventListener,
   PreInsertEventListener,
   PostInsertEventListener,
-  SaveOrUpdateEventListener,
+  DeleteEventListener,
   FlushEntityEventListener,
   CallbackRegistryConsumer {
   private val multimap = LinkedHashMultimap.create<EventType<*>, Provider<*>>()!!
@@ -57,14 +59,26 @@ internal class AggregateListener(
   }
 
   fun registerAll(eventListenerRegistry: EventListenerRegistry) {
-    for (eventType in multimap.keySet()) {
+    for ((eventType, providers) in multimap.asMap().entries) {
       @Suppress("UNCHECKED_CAST") // We don't have static type information for the event type.
       eventType as EventType<Any>
 
+      // SaveOrUpdateEventListener is annoying because it shares one interface across 3 event types.
+      var listener: Any? = this
+      if (eventType == EventType.SAVE || eventType == EventType.UPDATE
+        || eventType == EventType.SAVE_UPDATE
+        ) {
+        listener = SaveOrUpdateEventListener { event ->
+          for (provider in providers) {
+            (provider.get() as SaveOrUpdateEventListener).onSaveOrUpdate(event)
+          }
+        }
+      }
+
       when (listenerAddPolicy[eventType]) {
-        BindPolicy.PREPEND -> eventListenerRegistry.prependListeners(eventType, this)
-        BindPolicy.REPLACE -> eventListenerRegistry.setListeners(eventType, this)
-        BindPolicy.APPEND -> eventListenerRegistry.appendListeners(eventType, this)
+        BindPolicy.PREPEND -> eventListenerRegistry.prependListeners(eventType, listener)
+        BindPolicy.REPLACE -> eventListenerRegistry.setListeners(eventType, listener)
+        BindPolicy.APPEND -> eventListenerRegistry.appendListeners(eventType, listener)
         else -> Unit
       }
     }
@@ -141,9 +155,15 @@ internal class AggregateListener(
     }
   }
 
-  override fun onSaveOrUpdate(event: SaveOrUpdateEvent?) {
-    for (provider in multimap[EventType.SAVE_UPDATE]) {
-      (provider.get() as SaveOrUpdateEventListener).onSaveOrUpdate(event)
+  override fun onDelete(event: DeleteEvent?) {
+    for (provider in multimap[EventType.DELETE]) {
+      (provider.get() as DeleteEventListener).onDelete(event)
+    }
+  }
+
+  override fun onDelete(event: DeleteEvent?, transientEntities: MutableSet<Any?>?) {
+    for (provider in multimap[EventType.DELETE]) {
+      (provider.get() as DeleteEventListener).onDelete(event, transientEntities)
     }
   }
 

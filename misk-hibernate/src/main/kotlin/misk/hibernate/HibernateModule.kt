@@ -8,6 +8,7 @@ import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.healthchecks.HealthCheck
 import misk.hibernate.ReflectionQuery.QueryLimitsConfig
+import misk.hibernate.testing.TransacterFaultInjector
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
@@ -23,6 +24,7 @@ import misk.jdbc.DatabasePool
 import misk.jdbc.JdbcModule
 import misk.jdbc.RealDatabasePool
 import misk.jdbc.SchemaMigratorService
+import misk.testing.TestFixture
 import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
@@ -60,7 +62,6 @@ class HibernateModule @JvmOverloads constructor(
   private val jdbcModuleAlreadySetup: Boolean = false,
   private val installHealthChecks: Boolean = true,
 ) : KAbstractModule() {
-
   // Make sure Hibernate logs use slf4j. Otherwise, it will base its decision on the classpath and
   // prefer log4j: https://docs.jboss.org/hibernate/orm/4.3/topical/html/logging/Logging.html
   init {
@@ -165,8 +166,6 @@ class HibernateModule @JvmOverloads constructor(
         .enhancedBy<ReadyService>()
     )
 
-    val transacterServiceProvider = getProvider(keyOf<TransacterService>(qualifier))
-
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
       @Inject lateinit var injector: Injector
@@ -196,7 +195,7 @@ class HibernateModule @JvmOverloads constructor(
         @Inject lateinit var injector: Injector
         override fun get(): Transacter {
           val sessionFactoryService = readerSessionFactoryServiceProvider!!.get()
-          return RealTransacter(
+          val realTransacter = RealTransacter(
             qualifier = readerQualifier,
             sessionFactoryService = sessionFactoryService,
             readerSessionFactoryService = sessionFactoryService,
@@ -207,6 +206,7 @@ class HibernateModule @JvmOverloads constructor(
                 it.provider.get()
               }.toSet()
           ).readOnly()
+          return realTransacter
         }
       }).asSingleton()
     }

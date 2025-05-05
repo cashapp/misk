@@ -509,3 +509,21 @@ public abstract interface class misk/hibernate/pagination/Paginator {
 	public abstract fun getOffset (Ljava/lang/Object;)Lmisk/hibernate/pagination/Offset;
 }
 
+public final class misk/hibernate/testing/TransacterFaultInjector : misk/testing/FakeFixture, org/hibernate/event/spi/DeleteEventListener, org/hibernate/event/spi/SaveOrUpdateEventListener {
+	public fun <init> ()V
+	public final fun enqueueNoThrow ()V
+	public final fun enqueueNoThrow (I)V
+	public static synthetic fun enqueueNoThrow$default (Lmisk/hibernate/testing/TransacterFaultInjector;IILjava/lang/Object;)V
+	public final fun enqueueThrow (Ljava/lang/Exception;)V
+	public final fun enqueueThrow (Ljava/lang/Exception;I)V
+	public static synthetic fun enqueueThrow$default (Lmisk/hibernate/testing/TransacterFaultInjector;Ljava/lang/Exception;IILjava/lang/Object;)V
+	public fun onDelete (Lorg/hibernate/event/spi/DeleteEvent;)V
+	public fun onDelete (Lorg/hibernate/event/spi/DeleteEvent;Ljava/util/Set;)V
+	public fun onSaveOrUpdate (Lorg/hibernate/event/spi/SaveOrUpdateEvent;)V
+}
+
+public final class misk/hibernate/testing/TransacterFaultInjectorModule : misk/hibernate/HibernateEntityModule {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public fun configureHibernate ()V
+}
+

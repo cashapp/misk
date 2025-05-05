@@ -54,7 +54,7 @@ class JsonColumnTest {
       install(DeploymentModule(TESTING))
 
       val config = MiskConfig.load<RootConfig>("jsoncolumn", TESTING)
-      install(HibernateTestingModule(WillFerrellDb::class, config.data_source))
+      install(HibernateTestingModule(WillFerrellDb::class))
       install(HibernateModule(WillFerrellDb::class, config.data_source))
       install(object : HibernateEntityModule(WillFerrellDb::class) {
         override fun configureHibernate() {
