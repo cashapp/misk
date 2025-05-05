@@ -64,6 +64,14 @@ class AwsSqsJobQueueConfig @JvmOverloads constructor(
    * incorporated as the default behavior of the library.
    */
   val safe_shutdown: Boolean = true,
+
+  /**
+   * BETA: this field might be removed soon from the framework. It was added as temporary measure
+   * and the added complexity makes it, so it's not something we want to keep for long.
+   *
+   * Allows override the default feature flag name for [POD_CONSUMERS_PER_QUEUE].
+   */
+  val pod_consumers_queue_feature_flag: String?,
 ) : Config
 
 
@@ -75,18 +83,21 @@ class AwsSqsJobQueueConfig @JvmOverloads constructor(
  *  * [CONSUMERS_PER_QUEUE]: This flag specifies the total number of consumers across the entire
  *    cluster.
  *  * [POD_CONSUMERS_PER_QUEUE]: This flag specifies the number of consumers a single pod should
- *    have.
+ *    have. This feature flag can be overridden by using
+ *    [AwsSqsJobQueueConfig.pod_consumers_queue_feature_flag].
  *
  * The [AwsSqsJobReceiverPolicy] gives two options for how consumers are created based on the flags.
  */
 enum class AwsSqsJobReceiverPolicy {
   /**
    * This is the original policy. Naming is hard, but this policy will compute receivers as follows.
-   * First we choose one flag. If there is a configuration in [POD_CONSUMERS_PER_QUEUE], choose that
-   * flag; otherwise choose the [CONSUMERS_PER_QUEUE] flag.
+   * First we choose one flag. If there is a configuration in [POD_CONSUMERS_PER_QUEUE] (or
+   * [AwsSqsJobQueueConfig.pod_consumers_queue_feature_flag]), choose that flag; otherwise choose
+   * the [CONSUMERS_PER_QUEUE] flag.
    *
-   * If the [POD_CONSUMERS_PER_QUEUE] is chosen, ALL pods will spin up the configured number of
-   * consumers. Imagine the flag is configured for 5 consumers, then
+   * If the [POD_CONSUMERS_PER_QUEUE] or AwsSqsJobQueueConfig.pod_consumers_queue_feature_flag is
+   * chosen, ALL pods will spin up the configured number of consumers. Imagine the flag is
+   * configured for 5 consumers, then:
    *  5 pods => 25 sqs consumers
    *  10 pods => 50 sqs consumers
    *  100 pods => 500 sqs consumers
@@ -103,8 +114,8 @@ enum class AwsSqsJobReceiverPolicy {
    * This policy uses a combination of these two flags to avoid the worst of both as used in
    * [ONE_FLAG_ONLY] above.
    *
-   * The [POD_CONSUMERS_PER_QUEUE] is subject to DOS a service when it scales up. This is especially
-   * problematic with auto scaling.
+   * The [POD_CONSUMERS_PER_QUEUE] or AwsSqsJobQueueConfig.pod_consumers_queue_feature_flag is
+   * subject to DOS a service when it scales up. This is especially problematic with auto scaling.
    *
    * The [CONSUMERS_PER_QUEUE] leads to really unbalanced nodes. Throughput suffers and it is really
    * difficult to process high backlogs of messages since usually very few nodes have enough
