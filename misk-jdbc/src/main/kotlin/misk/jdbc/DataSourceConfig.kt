@@ -24,7 +24,7 @@ enum class DataSourceType(
   ),
   VITESS_MYSQL(
     driverClassName = MYSQL.driverClassName,
-    hibernateDialect = "misk.hibernate.VitessDialect",
+    hibernateDialect = "misk.hibernate.vitess.VitessDialect",
     isVitess = true
   ),
   COCKROACHDB(
