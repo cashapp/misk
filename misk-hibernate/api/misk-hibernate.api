@@ -380,12 +380,6 @@ public final class misk/hibernate/ValidationReport {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/hibernate/VitessDialect : org/hibernate/dialect/MySQL8Dialect {
-	public fun <init> ()V
-	public fun buildSQLExceptionConversionDelegate ()Lorg/hibernate/exception/spi/SQLExceptionConversionDelegate;
-	public fun useInputStreamToInsertBlob ()Z
-}
-
 public abstract interface annotation class misk/hibernate/annotation/Keyspace : java/lang/annotation/Annotation {
 	public abstract fun value ()Ljava/lang/String;
 }
@@ -525,5 +519,46 @@ public final class misk/hibernate/testing/TransacterFaultInjector : misk/testing
 public final class misk/hibernate/testing/TransacterFaultInjectorModule : misk/hibernate/HibernateEntityModule {
 	public fun <init> (Lkotlin/reflect/KClass;)V
 	public fun configureHibernate ()V
+}
+
+public final class misk/hibernate/vitess/PoolWaiterCountExhaustedException : org/hibernate/JDBCException {
+	public fun <init> (Ljava/sql/SQLException;)V
+}
+
+public final class misk/hibernate/vitess/VitessDialect : org/hibernate/dialect/MySQL8Dialect {
+	public fun <init> ()V
+	public fun buildSQLExceptionConversionDelegate ()Lorg/hibernate/exception/spi/SQLExceptionConversionDelegate;
+	public fun useInputStreamToInsertBlob ()Z
+}
+
+public final class misk/hibernate/vitess/VitessExceptionDetector {
+	public static final field INSTANCE Lmisk/hibernate/vitess/VitessExceptionDetector;
+	public final fun isWaiterPoolExhausted (Ljava/lang/Throwable;)Z
+}
+
+public final class misk/hibernate/vitess/VitessShardException : org/hibernate/JDBCException {
+	public fun <init> (Lmisk/hibernate/vitess/VitessShardExceptionData;)V
+	public final fun getExceptionData ()Lmisk/hibernate/vitess/VitessShardExceptionData;
+}
+
+public final class misk/hibernate/vitess/VitessShardExceptionData {
+	public fun <init> (Lmisk/vitess/Shard;Ljava/lang/String;ZZLjava/lang/Throwable;)V
+	public final fun getCauseException ()Ljava/lang/Throwable;
+	public final fun getExceptionMessage ()Ljava/lang/String;
+	public final fun getShard ()Lmisk/vitess/Shard;
+	public final fun isPrimary ()Z
+	public final fun isShardHealthError ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/vitess/VitessShardExceptionParser {
+	public static final field Companion Lmisk/hibernate/vitess/VitessShardExceptionParser$Companion;
+	public fun <init> ()V
+	public final fun configureStackDepth (I)V
+	public final fun parseShardInfo (Ljava/lang/Exception;)Ljava/util/Optional;
+}
+
+public final class misk/hibernate/vitess/VitessShardExceptionParser$Companion {
+	public final fun getLogger ()Lmu/KLogger;
 }
 
