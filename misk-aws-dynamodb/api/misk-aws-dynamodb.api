@@ -49,6 +49,15 @@ public final class misk/aws/dynamodb/testing/TestDynamoDb : com/google/common/ut
 	public fun stopAsync ()Lcom/google/common/util/concurrent/Service;
 }
 
+public final class misk/aws/dynamodb/testing/TestDynamoDbClientModule : misk/inject/KAbstractModule {
+	public fun <init> (ILjava/util/List;)V
+	public fun <init> (I[Lmisk/aws/dynamodb/testing/DynamoDbTable;)V
+	public final fun provideRequiredTables ()Ljava/util/List;
+	public final fun providesAmazonDynamoDB (Lapp/cash/tempest/testing/TestDynamoDbClient;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDB;
+	public final fun providesAmazonDynamoDBStreams (Lapp/cash/tempest/testing/TestDynamoDbClient;)Lcom/amazonaws/services/dynamodbv2/AmazonDynamoDBStreams;
+	public final fun providesTestDynamoDbClient ()Lapp/cash/tempest/testing/TestDynamoDbClient;
+}
+
 public abstract interface class misk/dynamodb/DyTimestampedEntity {
 	public abstract fun getCreated_at ()Ljava/util/Date;
 	public abstract fun getUpdated_at ()Ljava/util/Date;
