@@ -29,6 +29,15 @@ class MDCScopeListener {
   }
 
   fun afterScopeClosed() {
+    if (true) {
+      // Dont remove MDC trace_ids on scope closed due to bugs in
+      // the balance of activated/closed calls.  The activated call is
+      // correct on scope changes, so it will properly keep the traceId
+      // up-to-date.
+      // https://github.com/DataDog/dd-trace-java/issues/7215#issuecomment-2841316047
+      return
+    }
+
     try {
       MDC.remove(MDC_TRACE_ID)
       MDC.remove(MDC_SPAN_ID)
