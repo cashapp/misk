@@ -1,9 +1,9 @@
 public abstract interface class misk/audit/AuditClient {
-	public abstract fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;)V
 }
 
 public final class misk/audit/AuditClient$DefaultImpls {
-	public static synthetic fun logEvent$default (Lmisk/audit/AuditClient;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun logEvent$default (Lmisk/audit/AuditClient;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;ILjava/lang/Object;)V
 }
 
 public final class misk/audit/AuditClientConfig {
@@ -36,7 +36,7 @@ public final class misk/audit/FakeAuditClient : misk/testing/FakeFixture, misk/a
 	public fun <init> (Lmisk/audit/FakeAuditClient$OptionalBinder;)V
 	public final fun getEnableLogging ()Z
 	public final fun getSentEvents ()Ljava/util/concurrent/LinkedBlockingDeque;
-	public fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;)V
 	public final fun setEnableLogging (Z)V
 }
 
@@ -94,7 +94,7 @@ public final class misk/audit/FakeAuditClientModule : misk/inject/KAbstractModul
 
 public final class misk/audit/NoOpAuditClient : misk/audit/AuditClient {
 	public fun <init> ()V
-	public fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;)V
 }
 
 public final class misk/audit/NoOpAuditClientModule : misk/inject/KAbstractModule {
