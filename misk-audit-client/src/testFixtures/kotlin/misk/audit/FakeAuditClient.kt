@@ -11,6 +11,7 @@ import wisp.deployment.TESTING
 import wisp.logging.getLogger
 import wisp.time.FakeClock
 import java.time.Clock
+import java.time.Instant
 import java.util.concurrent.LinkedBlockingDeque
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.DurationUnit
@@ -47,20 +48,22 @@ class FakeAuditClient @Inject constructor(
     detailURL: String?,
     approverLDAP: String?,
     requestorLDAP: String?,
-    applicationName: String?
+    applicationName: String?,
+    environment: String?,
+    timestampSent: Instant?,
   ) {
     val event =
       FakeAuditEvent(
         eventSource = optionalBinder.appName,
         eventTarget = target,
-        timestampSent = optionalBinder.clock.instant()
+        timestampSent = (timestampSent ?: optionalBinder.clock.instant())
           .toEpochMilli().nanoseconds.toInt(DurationUnit.NANOSECONDS),
         applicationName = applicationName ?: optionalBinder.appName,
         approverLDAP = approverLDAP,
         automatedChange = automatedChange,
         description = description,
         richDescription = richDescription,
-        environment = optionalBinder.deployment.mapToEnvironmentName(),
+        environment = environment ?: optionalBinder.deployment.mapToEnvironmentName(),
         detailURL = detailURL,
         region = region,
         requestorLDAP = requestorLDAP

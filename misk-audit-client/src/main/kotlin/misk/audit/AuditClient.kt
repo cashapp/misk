@@ -1,5 +1,7 @@
 package misk.audit
 
+import java.time.Instant
+
 /**
  * Exposes a simple interface to log events from various services or platforms to a single audit data store.
  */
@@ -21,6 +23,13 @@ interface AuditClient {
     requestorLDAP: String? = null,
     /** Name of the application (slug) if different from the eventSource, otherwise null. */
     applicationName: String? = null,
+    /**
+     * Name of the environment where this event occurred, like 'production' or 'staging'. Defaults to the current
+     * environment name if unspecified.
+     */
+    environment: String? = null,
+    /** Time that the event occurred. Defaults to the current time if unspecified. */
+    timestampSent: Instant? = null,
   )
 }
 

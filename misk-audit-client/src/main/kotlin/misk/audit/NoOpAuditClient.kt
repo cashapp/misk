@@ -2,6 +2,7 @@ package misk.audit
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.time.Instant
 
 /**
  * No-op implementation of [AuditClient] that does nothing when logEvent is called.
@@ -18,7 +19,9 @@ class NoOpAuditClient @Inject constructor(): AuditClient {
     detailURL: String?,
     approverLDAP: String?,
     requestorLDAP: String?,
-    applicationName: String?
+    applicationName: String?,
+    environment: String?,
+    timestampSent: Instant?,
   ) {
     Unit
   }

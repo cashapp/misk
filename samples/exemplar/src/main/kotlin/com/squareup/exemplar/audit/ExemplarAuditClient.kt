@@ -15,6 +15,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.time.Clock
+import java.time.Instant
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.DurationUnit
 
@@ -39,18 +40,20 @@ class ExemplarAuditClient @Inject constructor(
     detailURL: String?,
     approverLDAP: String?,
     requestorLDAP: String?,
-    applicationName: String?
+    applicationName: String?,
+    environment: String?,
+    timestampSent: Instant?,
   ) {
     val event = Event(
       eventSource = appName,
       eventTarget = target,
-      timestampSent = clock.instant().toEpochMilli().nanoseconds.toInt(DurationUnit.NANOSECONDS),
+      timestampSent = (timestampSent ?: clock.instant()).toEpochMilli().nanoseconds.toInt(DurationUnit.NANOSECONDS),
       applicationName = applicationName ?: appName,
       approverLDAP = approverLDAP ?: callerProvider.get()?.principal,
       automatedChange = automatedChange,
       description = description,
       richDescription = richDescription,
-      environment = deployment.mapToEnvironmentName(),
+      environment = environment ?: deployment.mapToEnvironmentName(),
       detailURL = detailURL,
       region = region,
       requestorLDAP = requestorLDAP ?: callerProvider.get()?.principal,
