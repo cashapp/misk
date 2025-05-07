@@ -9,6 +9,7 @@ plugins {
 
 dependencies {
   api(libs.aws2Dynamodb)
+  api(libs.aws2DynamodbEnhanced)
   api(libs.aws2Auth)
   api(libs.awsSdkCore)
   api(libs.guava)
