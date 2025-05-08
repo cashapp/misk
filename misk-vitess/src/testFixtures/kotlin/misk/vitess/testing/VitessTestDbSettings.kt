@@ -19,9 +19,9 @@ object DefaultSettings {
   @JvmField var TRANSACTION_TIMEOUT_SECONDS: Duration = Duration.ofSeconds(30)
   const val VITESS_DOCKER_NETWORK_NAME = "vitess-network"
   const val VITESS_DOCKER_NETWORK_TYPE = "bridge"
-  const val VITESS_IMAGE = "vitess/vttestserver:v19.0.9-mysql80"
-  const val VITESS_VERSION = 19
-  const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v21.0.2"
+  const val VITESS_IMAGE = "vitess/vttestserver:v21.0.4-mysql80"
+  const val VITESS_VERSION = 21
+  const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v21.0.4"
 }
 
 enum class TransactionIsolationLevel(val value: String) {
