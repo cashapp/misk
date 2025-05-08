@@ -15,6 +15,7 @@ dependencies {
   implementation(libs.jakartaInject)
   implementation(libs.kotlinStdLibJdk8)
   implementation(libs.launchDarkly)
+  implementation(libs.loggingApi)
   implementation(libs.micrometerCore)
   implementation(libs.moshiCore)
   implementation(project(":misk-core"))
@@ -24,6 +25,7 @@ dependencies {
   implementation(project(":wisp:wisp-feature"))
   implementation(project(":wisp:wisp-launchdarkly"))
   implementation(project(":wisp:wisp-ssl"))
+  implementation(project(":wisp:wisp-logging"))
 }
 
 mavenPublishing {
