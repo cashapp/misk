@@ -55,8 +55,8 @@ class CustomArgsTest {
         sqlMode = DB1_SQL_MODE,
         transactionIsolationLevel = DB1_TXN_ISO_LEVEL,
         transactionTimeoutSeconds = Duration.ofSeconds(5),
-        vitessImage = "vitess/vttestserver:v20.0.6-mysql80",
-        vitessVersion = 20)
+        vitessImage = "vitess/vttestserver:v21.0.4-mysql80",
+        vitessVersion = 21)
 
       testDb2 = VitessTestDb(
         autoApplySchemaChanges = false,
@@ -84,8 +84,8 @@ class CustomArgsTest {
 
   @Test
   fun `test user defined MySql version`() {
-    val results = testDb1QueryExecutor.executeQuery("SELECT @@global.version;")
-    val actualMysqlVersion = results[0]["@@global.version"]
+    val results = testDb1QueryExecutor.executeQuery("SELECT version();")
+    val actualMysqlVersion = results[0]["version()"]
     assertEquals("$DB1_MYSQL_VERSION-Vitess", actualMysqlVersion)
   }
 
@@ -230,7 +230,8 @@ class CustomArgsTest {
       containerName = "unsupported_scatter_vitess_db",
       enableScatters = false,
       port = DB1_PORT,
-      vitessImage = "vitess/vttestserver:v19.0.9-mysql80")
+      vitessImage = "vitess/vttestserver:v19.0.9-mysql80",
+      vitessVersion = 19)
   }
 
   private fun createUnsupportedSchemaDirectoryDb(): VitessTestDb {

@@ -145,8 +145,9 @@ class VitessTestDbTest {
 
   @Test
   fun `test default MySql version`() {
-    val results = vitessQueryExecutor.executeQuery("SELECT @@global.version;")
-    val actualMysqlVersion = results[0]["@@global.version"]
+    // The version behavior was changed in v21+, using SELECT version() is more reliable.
+    val results = vitessQueryExecutor.executeQuery("SELECT version();")
+    val actualMysqlVersion = results[0]["version()"]
     assertEquals("${DefaultSettings.MYSQL_VERSION}-Vitess", actualMysqlVersion)
   }
 
