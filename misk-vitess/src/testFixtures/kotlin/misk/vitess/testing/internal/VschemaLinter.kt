@@ -39,7 +39,9 @@ internal class VschemaLinter(val vschemaAdapter: VschemaAdapter) {
             "The vindex `$vindexName` in the vschema of `$keyspaceName` must contain a `type` field"
           )
         }
-        if ((vindexMap["type"] as? String)?.contains("lookup") == true) {
+        val vindexType = (vindexMap["type"] as? String)
+
+        if (vindexType?.contains("lookup") == true) {
           val orderedLookupFields = listOf("type", "params", "owner")
           ensureFields(
             vindexMap,
@@ -57,6 +59,14 @@ internal class VschemaLinter(val vschemaAdapter: VschemaAdapter) {
               params,
               orderedParamsFields,
               "The `params` fields in the `lookup` vindex `$vindexName` in the vschema of `$keyspaceName` must be ordered as: $orderedParamsFields",
+            )
+
+            // Check if "to" field exists and equals "keyspace_id"
+            validateLookupVindex(
+              vindexType,
+              params,
+              keyspaceName,
+              vindexName
             )
           }
         }
@@ -148,6 +158,36 @@ internal class VschemaLinter(val vschemaAdapter: VschemaAdapter) {
           )
         }
       }
+    }
+  }
+
+  private fun validateLookupVindex(
+    vindexType: String,
+    params: Map<String, Any>,
+    keyspaceName: String,
+    vindexName: String,
+  ) {
+    // if vindexType is "lookup_hash" or "lookup_unicodeloosemd5_hash", check we want to ensure that the
+    // "to" field is not "keyspace_id"
+    var vIndexIsHashBased = vindexType.endsWith("_hash")
+    var toIsKeyspaceId = params["to"] == "keyspace_id"
+    var toParam = params["to"]
+
+    when {
+      // hash based vindex should not have a `to = "keyspace_id"`
+      vIndexIsHashBased && toIsKeyspaceId ->
+        throw VitessTestDbSchemaLintException(
+          "The lookup vindex `$vindexName` in keyspace `$keyspaceName` " +
+            "has an invalid `to` parameter of `keyspace_id`,  as `keyspace_id` is reserved for new lookup types."
+        )
+
+      // if it is not hashbased, we require `keyspace_id` to be set in the `to` field.
+      !vIndexIsHashBased && !toIsKeyspaceId ->
+        throw VitessTestDbSchemaLintException(
+          "The lookup vindex `$vindexName` in keyspace `$keyspaceName` has an invalid `to` parameter of " +
+            "`$toParam`, expected `keyspace_id` for modern lookup types."
+        )
+      else -> {}
     }
   }
 
