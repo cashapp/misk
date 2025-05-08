@@ -173,6 +173,74 @@ class VschemaLinterTest {
   }
 
   @Test
+  fun `test sharded vschema with invalid lookup vindex with`() {
+    val vschemaJson =
+      vschemaAdapter.fromJson(
+        """
+            {
+                "sharded": true,
+                "vindexes": {
+                    "customers_email_lookup": {
+                        "type": "lookup",
+                        "params": {
+                            "autocommit": "true",
+                            "from": "email",
+                            "ignore_nulls": "true",
+                            "table": "customers_email_lookup",
+                            "to": "customer_id",
+                            "write_only": "true"
+                        },
+                        "owner": "customers"
+                    }
+                },
+                "tables": {}
+            }
+        """
+      )
+
+    val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
+    assertEquals(
+      "The lookup vindex `customers_email_lookup` in keyspace `sharded` has an invalid " +
+        "`to` parameter of `customer_id`, expected `keyspace_id` for modern lookup types.",
+      exception.message,
+    )
+  }
+
+  @Test
+  fun `test sharded vschema with invalid lookup_hash vindex with`() {
+    val vschemaJson =
+      vschemaAdapter.fromJson(
+        """
+            {
+                "sharded": true,
+                "vindexes": {
+                    "customers_email_lookup": {
+                        "type": "lookup_hash",
+                        "params": {
+                            "autocommit": "true",
+                            "from": "email",
+                            "ignore_nulls": "true",
+                            "table": "customers_email_lookup",
+                            "to": "keyspace_id",
+                            "write_only": "true"
+                        },
+                        "owner": "customers"
+                    }
+                },
+                "tables": {}
+            }
+        """
+      )
+
+    val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
+    assertEquals(
+      "The lookup vindex `customers_email_lookup` in keyspace `sharded` has an invalid " +
+        "`to` parameter of `keyspace_id`,  as `keyspace_id` is reserved for new lookup types.",
+      exception.message,
+    )
+  }
+
+  @Test
   fun `test sharded vschema with valid lookup vindex`() {
     val vschemaJson =
       vschemaAdapter.fromJson(
