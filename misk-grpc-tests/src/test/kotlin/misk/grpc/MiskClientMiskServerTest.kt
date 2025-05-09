@@ -83,7 +83,7 @@ class MiskClientMiskServerTest {
     assertEquals(1, logs.size)
     assertThat(logs[0])
       .contains("GetFeatureGrpcAction principal=unknown time=0.000 ns code=200")
-      .contains("request=[Point{latitude=43, longitude=-80}]")
+      .contains("request=Point{latitude=43, longitude=-80}")
       // There could be additional headers (e.g. tests are run with tracing or javaagent)
       .contains("requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]")
       .contains("response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}}")

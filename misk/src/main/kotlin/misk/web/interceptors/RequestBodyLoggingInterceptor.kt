@@ -69,7 +69,14 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
     // Only log some request headers.
     val redactedRequestHeaders = HeadersCapture(chain.httpCall.requestHeaders)
     // Since we already log headers separately, no need to log them if they are in args.
-    val args = chain.args.filter { it !is Headers }
+    val args = chain.args.filter { it !is Headers }.let {
+      when {
+        it.isEmpty() -> null
+        it.size == 1 -> it[0]
+        else -> it
+      }
+    }
+
     bodyCapture.set(
       RequestResponseBody(
         request = args,
