@@ -12,6 +12,7 @@ public abstract interface class misk/redis/DeferredRedis {
 	public abstract fun hget (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun hkeys (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun hlen (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun hrandField (Ljava/lang/String;J)Ljava/util/function/Supplier;
@@ -74,6 +75,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
+	public fun hkeys (Ljava/lang/String;)Ljava/util/List;
 	public fun hlen (Ljava/lang/String;)J
 	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public fun hrandField (Ljava/lang/String;J)Ljava/util/List;
@@ -141,6 +143,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
+	public fun hkeys (Ljava/lang/String;)Ljava/util/List;
 	public fun hlen (Ljava/lang/String;)J
 	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public fun hrandField (Ljava/lang/String;J)Ljava/util/List;
@@ -205,6 +208,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public abstract fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
+	public abstract fun hkeys (Ljava/lang/String;)Ljava/util/List;
 	public abstract fun hlen (Ljava/lang/String;)J
 	public abstract fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public abstract fun hrandField (Ljava/lang/String;J)Ljava/util/List;
@@ -556,6 +560,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)J
+	public fun hkeys (Ljava/lang/String;)Ljava/util/List;
 	public fun hlen (Ljava/lang/String;)J
 	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/List;
 	public fun hrandField (Ljava/lang/String;J)Ljava/util/List;
@@ -617,6 +622,7 @@ public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun hincrBy (Ljava/lang/String;Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun hkeys (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun hlen (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun hmget (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun hrandField (Ljava/lang/String;J)Ljava/util/function/Supplier;

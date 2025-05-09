@@ -137,6 +137,12 @@ class RealRedis(
     return jedis { hlen(keyBytes) }
   }
 
+  override fun hkeys(key: String): List<ByteString> {
+    val keyBytes = key.toByteArray(charset)
+    return jedis { hkeys(keyBytes) }
+      .map { it.toByteString() }
+  }
+
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
     val fieldsAsByteArrays = fields.map { it.toByteArray(charset) }.toTypedArray()
     val keyBytes = key.toByteArray(charset)

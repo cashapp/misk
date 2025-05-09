@@ -43,6 +43,8 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
 
   override fun hlen(key: String): Long = runPipeline { hlen(key) }
 
+  override fun hkeys(key: String): List<ByteString> = runPipeline { hkeys(key) }
+
   override fun hmget(key: String, vararg fields: String): List<ByteString?> =
     runPipeline { hmget(key, *fields) }
 
