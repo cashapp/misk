@@ -74,7 +74,7 @@ internal class RequestResponseLoggingHookTest {
     assertEquals(1, messages.size)
     assertThat(messages[0]).contains(
       "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms code=200 " +
-        "request=[hello] requestHeaders={accept-encoding=[gzip], connection=[keep-alive]"
+        "request=hello requestHeaders={accept-encoding=[gzip], connection=[keep-alive]"
     )
     assertThat(messages[0]).contains("response=echo: hello responseHeaders={}")
 
@@ -103,7 +103,7 @@ internal class RequestResponseLoggingHookTest {
     assertEquals(1, messages.size)
     assertThat(messages[0]).contains(
       "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms " +
-        "code=200 request=[hello3] " +
+        "code=200 request=hello3 " +
         "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]"
     )
     assertThat(messages[0]).contains("response=echo: hello3 responseHeaders={}")
@@ -163,7 +163,7 @@ internal class RequestResponseLoggingHookTest {
     // There could be additional headers (e.g. if tests are run with tracing or java agent)
     assertThat(messages[0]).contains(
       "ExceptionThrowingRequestLoggingAction principal=caller time=100.0 ms failed " +
-        "request=[fail] " +
+        "request=fail " +
         "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]"
     )
   }
@@ -234,7 +234,7 @@ internal class RequestResponseLoggingHookTest {
     assertEquals(1, messages.size)
     assertThat(messages[0]).contains(
       "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms code=200 " +
-        "request=[hello] " +
+        "request=hello " +
         "requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], " +
         "content-length=[5], content-type=[application/json;charset=UTF-8]"
     )
@@ -258,7 +258,7 @@ internal class RequestResponseLoggingHookTest {
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertEquals(1, messages.size)
     assertThat(messages[0]).contains(
-      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms failed request=[fail] " +
+      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms failed request=fail " +
         "requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], " +
         "content-length=[4], content-type=[application/json;charset=UTF-8]"
     )
@@ -277,7 +277,7 @@ internal class RequestResponseLoggingHookTest {
       // the RequestLoggingConfig injected will override it to no rate limiting and 1.0 sampling
       assertEquals(1, messages.size)
       assertThat(messages[0]).contains(
-        "ConfigOverrideAction principal=caller time=100.0 ms code=200 request=[foo] " +
+        "ConfigOverrideAction principal=caller time=100.0 ms code=200 request=foo " +
           "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]"
       )
       assertThat(messages[0]).contains("response=echo: foo responseHeaders={}")
@@ -293,7 +293,7 @@ internal class RequestResponseLoggingHookTest {
     // [EvanHatingTransformer] which added "dumb" to the response, so it doesn't get applied here.
     assertEquals(1, messages.size)
     assertThat(messages[0]).contains(
-      "LogEverythingAction principal=caller time=100.0 ms code=200 request=[Quokka] " +
+      "LogEverythingAction principal=caller time=100.0 ms code=200 request=Quokka " +
         "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]"
     )
     assertThat(messages[0]).contains(
@@ -308,7 +308,7 @@ internal class RequestResponseLoggingHookTest {
 
     // Transformer exception is logged
     val allLogs = events.map { it.formattedMessage }
-    assertThat(allLogs).contains("RequestLoggingTransformer of type [misk.web.interceptors.hooks.ThrowingTransformer] failed to transform: request=[Oppenheimer-the-bestest] response=echo: Oppenheimer-the-bestest")
+    assertThat(allLogs).contains("RequestLoggingTransformer of type [misk.web.interceptors.hooks.ThrowingTransformer] failed to transform: request=Oppenheimer-the-bestest response=echo: Oppenheimer-the-bestest")
 
     // Regular request logging still happened, and [DontSayJerkTransformer] still ran
     val interceptorLogs = events
@@ -317,7 +317,7 @@ internal class RequestResponseLoggingHookTest {
     assertEquals(1, interceptorLogs.size)
     assertThat(interceptorLogs[0]).contains(
       "LogEverythingAction principal=caller time=100.0 ms code=200 " +
-        "request=[Oppenheimer-the-bestest] " +
+        "request=Oppenheimer-the-bestest " +
         "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]"
     )
     assertThat(interceptorLogs[0]).contains(

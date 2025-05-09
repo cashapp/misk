@@ -90,7 +90,7 @@ internal class AuditClientHookTest {
         approverLDAP = null,
         automatedChange = false,
         description = "AuditEverythingAction principal=test-user",
-        richDescription = "AuditEverythingAction principal=test-user time=100.0 ms code=200 request=[hello] response=echo: hello",
+        richDescription = "AuditEverythingAction principal=test-user time=100.0 ms code=200 request=hello response=echo: hello",
         environment = "testing",
         detailURL = null,
         region = "us-west-2",
@@ -145,7 +145,7 @@ internal class AuditClientHookTest {
         automatedChange = false,
         description = "AuditRequestActionWithHeaders principal=unknown",
         richDescription =
-          "AuditRequestActionWithHeaders principal=unknown time=100.0 ms code=200 request=[hello] requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], content-length=[5], content-type=[application/json;charset=UTF-8]} response=echo: hello responseHeaders={}",
+          "AuditRequestActionWithHeaders principal=unknown time=100.0 ms code=200 request=hello requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], content-length=[5], content-type=[application/json;charset=UTF-8]} response=echo: hello responseHeaders={}",
         environment = "testing",
         detailURL = null,
         region = "us-west-2",

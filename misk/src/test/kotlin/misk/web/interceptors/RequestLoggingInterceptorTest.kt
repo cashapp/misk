@@ -85,7 +85,7 @@ internal class RequestLoggingInterceptorTest {
     messages = logCollector.takeMessages(FakeRequestResponseHook::class)
     assertEquals(1, messages.size)
     assertEquals(
-      "/call/logEverything/hello principal=caller time=100.0 ms code=200 request=[[hello]] response=[echo: hello]",
+      "/call/logEverything/hello principal=caller time=100.0 ms code=200 request=[hello] response=[echo: hello]",
       messages[0]
     )
   }
@@ -99,7 +99,7 @@ internal class RequestLoggingInterceptorTest {
     messages = logCollector.takeMessages(FakeRequestResponseHook::class)
     assertEquals(1, messages.size)
     assertEquals(
-      "/call/exceptionThrowingRequestLogging/fail principal=caller time=100.0 ms code=200 request=[[fail]] response=[null]",
+      "/call/exceptionThrowingRequestLogging/fail principal=caller time=100.0 ms code=200 request=[fail] response=[null]",
       messages[0]
     )
   }
