@@ -525,6 +525,10 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.hlen(key)
     }
 
+    override fun hkeys(key: String): Supplier<List<ByteString>?> = Supplier {
+      this@FakeRedis.hkeys(key)
+    }
+
     override fun hmget(
       key: String,
       vararg fields: String
