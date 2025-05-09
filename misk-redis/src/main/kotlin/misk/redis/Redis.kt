@@ -116,7 +116,7 @@ interface Redis {
    * @param key the key
    * @return a List<ByteString> of the field names stored for the given key
    */
-  fun hkeys(key: String): List<ByteString>?
+  fun hkeys(key: String): List<ByteString>
 
   /**
    * Retrieve the values associated to the specified fields.

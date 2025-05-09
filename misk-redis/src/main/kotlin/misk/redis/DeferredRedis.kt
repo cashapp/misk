@@ -31,7 +31,7 @@ interface DeferredRedis {
 
   fun hlen(key: String): Supplier<Long>
 
-  fun hkeys(key: String): Supplier<List<ByteString>?>
+  fun hkeys(key: String): Supplier<List<ByteString>>
 
   fun hmget(key: String, vararg fields: String): Supplier<List<ByteString?>>
 

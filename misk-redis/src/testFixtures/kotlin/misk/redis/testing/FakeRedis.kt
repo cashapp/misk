@@ -166,13 +166,13 @@ class FakeRedis @Inject constructor(
   override fun hlen(key: String): Long = hKeyValueStore[key]?.data?.size?.toLong() ?: 0L
 
   @Synchronized
-  override fun hkeys(key: String): List<ByteString>? {
-    val value = hKeyValueStore[key] ?: return null
+  override fun hkeys(key: String): List<ByteString> {
+    val value = hKeyValueStore[key] ?: return emptyList()
 
     // Check if the key has expired
     if (clock.instant() >= value.expiryInstant) {
       hKeyValueStore.remove(key)
-      return null
+      return emptyList()
     }
 
     return value.data.keys().toList().map { it.encode(Charsets.UTF_8) }
@@ -525,7 +525,7 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.hlen(key)
     }
 
-    override fun hkeys(key: String): Supplier<List<ByteString>?> = Supplier {
+    override fun hkeys(key: String): Supplier<List<ByteString>> = Supplier {
       this@FakeRedis.hkeys(key)
     }
 

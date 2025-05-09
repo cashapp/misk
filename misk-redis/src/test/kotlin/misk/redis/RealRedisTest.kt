@@ -8,6 +8,7 @@ import misk.inject.KAbstractModule
 import misk.redis.testing.DockerRedis
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -137,6 +138,29 @@ class RealRedisTest : AbstractRedisTest() {
     redis.ltrim(listKey, -3, -1)
 
     assertThat(redis.lrange(listKey, 0, -1).map { it?.utf8() }).containsExactly("two", "three", "four")
+  }
+
+  @Test
+  fun `hkeys returns all map keys within a given key`() {
+    val hashKey = "myhash"
+
+    val map = mapOf(
+      "field1" to "value1".encodeUtf8(),
+      "field2" to "value2".encodeUtf8(),
+      "field3" to "value3".encodeUtf8()
+    )
+
+    redis.hset(hashKey, map)
+
+    assertThat(redis.hkeys(hashKey).map { it.utf8() })
+      .containsExactly("field1", "field2", "field3")
+  }
+
+  @Test
+  fun `hkeys returns empty list if given key is not set`() {
+    val hashKey = "myhash"
+
+    assertThat(redis.hkeys(hashKey)).isEmpty()
   }
 
   private fun scanAll(
