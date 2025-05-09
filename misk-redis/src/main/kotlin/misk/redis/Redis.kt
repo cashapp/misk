@@ -111,6 +111,14 @@ interface Redis {
   fun hlen(key: String): Long
 
   /**
+   * Returns all field names in the hash stored for the given key.
+   *
+   * @param key the key
+   * @return a List<ByteString> of the field names stored for the given key
+   */
+  fun hkeys(key: String): List<ByteString>
+
+  /**
    * Retrieve the values associated to the specified fields.
    *
    * If some specified fields do not exist, nil values are returned. Non-existing keys are

@@ -132,6 +132,19 @@ class FakeRedis : Redis {
   override fun hlen(key: String): Long = hKeyValueStore[key]?.data?.size?.toLong() ?: 0L
 
   @Synchronized
+  override fun hkeys(key: String): List<ByteString> {
+    val value = hKeyValueStore[key] ?: return emptyList()
+
+    // Check if the key has expired
+    if (clock.instant() >= value.expiryInstant) {
+      hKeyValueStore.remove(key)
+      return emptyList()
+    }
+
+    return value.data.keys().toList().map { it.encode(Charsets.UTF_8) }
+  }
+
+  @Synchronized
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
     return hgetAll(key)?.filter { fields.contains(it.key) }?.values?.toList() ?: emptyList()
   }

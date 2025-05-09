@@ -142,6 +142,12 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get() }
   }
 
+  override fun hkeys(key: String): Supplier<List<ByteString>> {
+    val keyBytes = key.toByteArray(charset)
+    val response = pipeline.hkeys(keyBytes)
+    return Supplier { response.get().map { it.toByteString() } }
+  }
+
   override fun hmget(key: String, vararg fields: String): Supplier<List<ByteString?>> {
     val keyBytes = key.toByteArray(charset)
     val fieldsAsByteArrays = fields.map { it.toByteArray(charset) }.toTypedArray()
