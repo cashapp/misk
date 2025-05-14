@@ -83,25 +83,20 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
         response = null,
         requestHeaders = redactedRequestHeaders.headers,
         responseHeaders = null,
-      )
+      ),
     )
 
-    try {
-      val result = chain.proceed(chain.args)
-      val redactedResponseHeaders = HeadersCapture(chain.httpCall.responseHeaders)
-      bodyCapture.set(
-        RequestResponseBody(
-          request = args,
-          response = result,
-          requestHeaders = redactedRequestHeaders.headers,
-          responseHeaders = redactedResponseHeaders.headers,
-        )
-      )
-      return result
-    } catch (t: Throwable) {
-      logger.info { "${action.name} principal=$principal failed" }
-      throw t
-    }
+    val result = chain.proceed(chain.args)
+    val redactedResponseHeaders = HeadersCapture(chain.httpCall.responseHeaders)
+    bodyCapture.set(
+      RequestResponseBody(
+        request = args,
+        response = result,
+        requestHeaders = redactedRequestHeaders.headers,
+        responseHeaders = redactedResponseHeaders.headers,
+      ),
+    )
+    return result
   }
 }
 
