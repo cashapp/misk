@@ -4,7 +4,6 @@ import com.vanniktech.maven.publish.KotlinJvm
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  id("java-test-fixtures")
 }
 
 dependencies {
@@ -29,9 +28,6 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
 
-  testFixturesImplementation(project(":wisp:wisp-logging"))
-  testFixturesImplementation(libs.bucket4jCore)
-  testFixturesImplementation(libs.loggingApi)
 }
 
 mavenPublishing {
