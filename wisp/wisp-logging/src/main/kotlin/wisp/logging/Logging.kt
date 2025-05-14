@@ -87,7 +87,7 @@ fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
 }
 
 // This logger takes care of adding the mdc tags and cleaning them up when done
-fun KLogger.log(level: Level, th: Throwable, vararg tags: Tag, message: () -> Any?) {
+fun KLogger.log(level: Level, th: Throwable?, vararg tags: Tag, message: () -> Any?) {
   withTags(*tags) {
     when (level) {
       Level.ERROR -> error(th, message)

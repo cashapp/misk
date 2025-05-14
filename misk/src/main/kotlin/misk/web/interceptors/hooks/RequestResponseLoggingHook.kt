@@ -106,40 +106,34 @@ internal class RequestResponseLoggingHook private constructor(
     val randomDouble = random.current().nextDouble()
     val includeBody = randomDouble < sampling
 
-    val additionalTags: MutableSet<Tag> = mutableSetOf(
+    var additionalTags: Set<Tag> = setOf(
       "response_code" to statusCode,
       "response_time_millis" to elapsed.toMillis(),
-    )
+   )
+
+    val error = error?.unwrap()
+    var level = Level.INFO
+
+    if (error != null) {
+      // Log with the exception and smart tags applied on error.
+      level = mapperResolver.mapperFor(error)?.loggingLevel(error) ?: Level.ERROR
+      additionalTags = additionalTags + SmartTagsThreadLocalHandler.peekThreadLocalSmartTags()
+    }
 
     requestResponseLoggedCapture.onLogged()
 
-    val error = error?.unwrap()
-    fun buildDescriptionImpl(): Any? {
-      return buildDescription(
+    logger.log(
+      level = level,
+      th = error,
+      tags = additionalTags.toTypedArray(),
+    ) {
+      buildDescription(
         caller = caller,
         httpCall = httpCall,
         elapsedToString = elapsedToString,
         requestResponse = requestResponse,
         error = error,
         includeBody = includeBody,
-      )
-    }
-
-    if (error != null) {
-      // Log with the exception and smart tags applied on error.
-      val level = mapperResolver.mapperFor(error)?.loggingLevel(error) ?: Level.ERROR
-
-      logger.log(
-        level = level,
-        th = error,
-        tags = (SmartTagsThreadLocalHandler.peekThreadLocalSmartTags() + additionalTags).toTypedArray(),
-        message = ::buildDescriptionImpl,
-      )
-    } else {
-      logger.log(
-        level = Level.INFO,
-        tags = additionalTags.toTypedArray(),
-        message = ::buildDescriptionImpl,
       )
     }
   }
