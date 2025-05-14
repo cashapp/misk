@@ -1,8 +1,18 @@
 package misk.web.interceptors.hooks
 
+import ch.qos.logback.classic.Level
 import com.google.common.testing.FakeTicker
+import com.google.common.util.concurrent.UncheckedExecutionException
+import jakarta.inject.Inject
+import java.lang.reflect.InvocationTargetException
+import java.util.concurrent.TimeUnit
+import jdk.internal.joptsimple.internal.Messages.message
+import kotlin.test.assertEquals
 import misk.MiskTestingServiceModule
+import misk.audit.FakeAuditClientModule
+import misk.config.AppNameModule
 import misk.exceptions.BadRequestException
+import misk.exceptions.NotFoundException
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
 import misk.random.FakeRandom
@@ -22,6 +32,15 @@ import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.WebTestClient
 import misk.web.actions.WebAction
+import misk.web.exceptions.ExceptionHandlingInterceptor
+import misk.web.interceptors.ActionLoggingConfig
+import misk.web.interceptors.LogRequestResponse
+import misk.web.interceptors.RequestBodyLoggingInterceptor
+import misk.web.interceptors.RequestLoggingConfig
+import misk.web.interceptors.RequestLoggingInterceptor
+import misk.web.interceptors.RequestLoggingMode
+import misk.web.interceptors.RequestLoggingTransformer
+import misk.web.interceptors.RequestResponseBody
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
@@ -31,18 +50,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import misk.audit.FakeAuditClientModule
-import misk.config.AppNameModule
-import misk.web.interceptors.ActionLoggingConfig
-import misk.web.interceptors.LogRequestResponse
-import misk.web.interceptors.RequestLoggingConfig
-import misk.web.interceptors.RequestLoggingInterceptor
-import misk.web.interceptors.RequestLoggingMode
-import misk.web.interceptors.RequestLoggingTransformer
-import misk.web.interceptors.RequestResponseBody
-import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
 internal class RequestResponseLoggingHookTest {
@@ -158,14 +165,18 @@ internal class RequestResponseLoggingHookTest {
   fun exceptionThrown() {
     assertThat(invoke("/call/exceptionThrowingRequestLogging/fail", "caller").code)
       .isEqualTo(500)
-    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class, Level.ERROR)
     assertEquals(1, messages.size)
     // There could be additional headers (e.g. if tests are run with tracing or java agent)
     assertThat(messages[0]).contains(
       "ExceptionThrowingRequestLoggingAction principal=caller time=100.0 ms failed " +
         "request=fail " +
-        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]"
+        "requestHeaders={accept-encoding=[gzip], connection=[keep-alive]",
     )
+
+    // Other interceptors should not log.
+    assertThat(logCollector.takeMessages(RequestBodyLoggingInterceptor::class)).isEmpty()
+    assertThat(logCollector.takeMessages(ExceptionHandlingInterceptor::class)).isEmpty()
   }
 
   @Test
@@ -195,16 +206,76 @@ internal class RequestResponseLoggingHookTest {
   }
 
   @Test
-  fun noNonErrorRequestLogging() {
+  fun noNonErrorRequestLogging5xxAtError() {
     assertThat(invoke("/call/errorOnlyRequestLoggingAction/fail", "caller").code)
       .isEqualTo(500)
     assertThat(invoke("/call/errorOnlyRequestLoggingAction/hello", "caller")
       .isSuccessful
     ).isTrue()
-    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
-    assertThat(messages).containsExactly(
-      "errorOnlyRequestLoggingAction principal=caller time=100.0 ms failed"
+    val event =
+      logCollector.takeEvents(RequestLoggingInterceptor::class, Level.ERROR, consumeUnmatchedLogs = false).single()
+    assertThat(event.message).isEqualTo(
+      "errorOnlyRequestLoggingAction principal=caller time=100.0 ms failed",
     )
+
+    assertThat(event.throwableProxy.className).isEqualTo(IllegalStateException::class.qualifiedName)
+    assertThat(event.throwableProxy.message).isEqualTo("fail")
+
+    // Other interceptors should not log.
+    assertThat(logCollector.takeMessages(RequestBodyLoggingInterceptor::class, consumeUnmatchedLogs = false)).isEmpty()
+    assertThat(logCollector.takeMessages(ExceptionHandlingInterceptor::class, consumeUnmatchedLogs = false)).isEmpty()
+  }
+
+  @Test
+  fun noNonErrorRequestLogging4xxAtWarn() {
+    assertThat(invoke("/call/errorOnlyRequestLoggingAction/4xx", "caller").code)
+      .isEqualTo(404)
+
+    assertThat(
+      logCollector.takeMessages(
+        RequestLoggingInterceptor::class,
+        Level.ERROR,
+        consumeUnmatchedLogs = false,
+      ),
+    ).isEmpty()
+    val event =
+      logCollector.takeEvents(RequestLoggingInterceptor::class, Level.WARN, consumeUnmatchedLogs = false).single()
+    assertThat(event.message).isEqualTo(
+      "errorOnlyRequestLoggingAction principal=caller time=100.0 ms failed",
+    )
+
+    assertThat(event.throwableProxy.className).isEqualTo(NotFoundException::class.qualifiedName)
+    assertThat(event.throwableProxy.message).isEqualTo("4xx")
+
+    // Other interceptors should not log.
+    assertThat(logCollector.takeMessages(RequestBodyLoggingInterceptor::class, consumeUnmatchedLogs = false)).isEmpty()
+    assertThat(logCollector.takeMessages(ExceptionHandlingInterceptor::class, consumeUnmatchedLogs = false)).isEmpty()
+  }
+
+  @Test
+  fun noNonErrorRequestLoggingWrapped() {
+    assertThat(invoke("/call/errorOnlyRequestLoggingAction/wrapped", "caller").code)
+      .isEqualTo(404)
+
+    assertThat(
+      logCollector.takeMessages(
+        RequestLoggingInterceptor::class,
+        Level.ERROR,
+        consumeUnmatchedLogs = false,
+      ),
+    ).isEmpty()
+    val event =
+      logCollector.takeEvents(RequestLoggingInterceptor::class, Level.WARN, consumeUnmatchedLogs = false).single()
+    assertThat(event.message).isEqualTo(
+      "errorOnlyRequestLoggingAction principal=caller time=100.0 ms failed",
+    )
+
+    assertThat(event.throwableProxy.className).isEqualTo(NotFoundException::class.qualifiedName)
+    assertThat(event.throwableProxy.message).isEqualTo("wrapped")
+
+    // Other interceptors should not log.
+    assertThat(logCollector.takeMessages(RequestBodyLoggingInterceptor::class, consumeUnmatchedLogs = false)).isEmpty()
+    assertThat(logCollector.takeMessages(ExceptionHandlingInterceptor::class, consumeUnmatchedLogs = false)).isEmpty()
   }
 
   fun invoke(path: String, asService: String? = null): okhttp3.Response {
@@ -265,6 +336,10 @@ internal class RequestResponseLoggingHookTest {
     assertThat(messages[0]).doesNotContain(headerToNotLog)
     assertThat(messages[0]).doesNotContain(headerToNotLog.lowercase())
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
+
+    // Other interceptors should not log.
+    assertThat(logCollector.takeMessages(RequestBodyLoggingInterceptor::class)).isEmpty()
+    assertThat(logCollector.takeMessages(ExceptionHandlingInterceptor::class)).isEmpty()
   }
 
   @Test
@@ -415,12 +490,19 @@ internal class errorOnlyRequestLoggingAction @Inject constructor() : WebAction {
   @Unauthenticated
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @LogRequestResponse(requestLoggingMode = RequestLoggingMode.ERROR_ONLY)
-  fun call(@PathParam message: String) : String {
-    if (message == "fail") {
-      throw IllegalStateException(message)
-    } else {
-      return "echo: $message"
-    }
+  fun call(@PathParam message: String): String = when (message) {
+    "fail" -> throw IllegalStateException(message)
+    "4xx" -> throw NotFoundException(message)
+    "wrapped" -> throw InvocationTargetException(
+      UncheckedExecutionException(
+        InvocationTargetException(
+          UncheckedExecutionException(
+            NotFoundException(message),
+          ),
+        ),
+      ),
+    )
+    else -> "echo: $message"
   }
 }
 

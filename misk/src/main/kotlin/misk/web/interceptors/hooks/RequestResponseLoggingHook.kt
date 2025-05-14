@@ -4,8 +4,11 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.Action
 import misk.MiskCaller
+import misk.annotation.ExperimentalMiskApi
 import misk.random.ThreadLocalRandom
 import misk.web.HttpCall
+import misk.web.exceptions.ExceptionMapperResolver
+import misk.web.exceptions.unwrap
 import misk.web.interceptors.ActionLoggingConfig
 import misk.web.interceptors.LogRateLimiter
 import misk.web.interceptors.LogRateLimiter.LogBucketId
@@ -14,19 +17,25 @@ import misk.web.interceptors.RequestLoggingConfig
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.RequestLoggingMode
 import misk.web.interceptors.RequestResponseBody
+import org.slf4j.event.Level
 import wisp.deployment.Deployment
+import wisp.logging.SmartTagsThreadLocalHandler
+import wisp.logging.Tag
 import wisp.logging.getLogger
-import wisp.logging.info
+import wisp.logging.log
 import java.time.Duration
 import kotlin.reflect.full.findAnnotation
 
 /** For backwards compatibility, the interceptor logger is used since that is where the functionality used to live. */
 private val logger = getLogger<RequestLoggingInterceptor>()
 
+@OptIn(ExperimentalMiskApi::class)
 internal class RequestResponseLoggingHook private constructor(
   private val action: Action,
   private val random: ThreadLocalRandom,
   private val logRateLimiter: LogRateLimiter,
+  private val mapperResolver: ExceptionMapperResolver,
+  private val requestResponseLoggedCapture: RequestResponseLoggedCapture,
   val config: ActionLoggingConfig,
 ) : RequestResponseHook {
   @Singleton
@@ -34,6 +43,8 @@ internal class RequestResponseLoggingHook private constructor(
     private val random: ThreadLocalRandom,
     private val logRateLimiter: LogRateLimiter,
     private val deployment: Deployment,
+    private val mapperResolver: ExceptionMapperResolver,
+    private val requestResponseLoggedCapture: RequestResponseLoggedCapture,
     private val configs: Set<RequestLoggingConfig>,
   ) : RequestResponseHook.Factory {
     override fun create(action: Action): RequestResponseHook? {
@@ -58,7 +69,14 @@ internal class RequestResponseLoggingHook private constructor(
         "${action.name} @LogRequestResponse errorBodySampling must be in the range (0.0, 1.0]"
       }
 
-      return RequestResponseLoggingHook(action, random, logRateLimiter, config)
+      return RequestResponseLoggingHook(
+        action,
+        random,
+        logRateLimiter,
+        mapperResolver,
+        requestResponseLoggedCapture,
+        config,
+      )
     }
   }
 
@@ -70,6 +88,8 @@ internal class RequestResponseLoggingHook private constructor(
     elapsedToString: String,
     error: Throwable?
   ) {
+    requestResponseLoggedCapture.reset()
+
     val statusCode = httpCall.statusCode
     val isError = statusCode > 299 || error != null
     if (!isError && config.requestLoggingMode == RequestLoggingMode.ERROR_ONLY) {
@@ -86,17 +106,40 @@ internal class RequestResponseLoggingHook private constructor(
     val randomDouble = random.current().nextDouble()
     val includeBody = randomDouble < sampling
 
-    logger.info(
+    val additionalTags: MutableSet<Tag> = mutableSetOf(
       "response_code" to statusCode,
       "response_time_millis" to elapsed.toMillis(),
-    ) {
-      buildDescription(
+    )
+
+    requestResponseLoggedCapture.onLogged()
+
+    val error = error?.unwrap()
+    fun buildDescriptionImpl(): Any? {
+      return buildDescription(
         caller = caller,
         httpCall = httpCall,
         elapsedToString = elapsedToString,
         requestResponse = requestResponse,
         error = error,
         includeBody = includeBody,
+      )
+    }
+
+    if (error != null) {
+      // Log with the exception and smart tags applied on error.
+      val level = mapperResolver.mapperFor(error)?.loggingLevel(error) ?: Level.ERROR
+
+      logger.log(
+        level = level,
+        th = error,
+        tags = (SmartTagsThreadLocalHandler.peekThreadLocalSmartTags() + additionalTags).toTypedArray(),
+        message = ::buildDescriptionImpl,
+      )
+    } else {
+      logger.log(
+        level = Level.INFO,
+        tags = additionalTags.toTypedArray(),
+        message = ::buildDescriptionImpl,
       )
     }
   }
@@ -135,5 +178,26 @@ internal class RequestResponseLoggingHook private constructor(
         }
       }
     }
+  }
+}
+
+/**
+ * Captures whether the RequestResponseLogger has already logged the response to avoid double logging.
+ */
+internal class RequestResponseLoggedCapture @Inject constructor() {
+  companion object {
+    private val capture = object : ThreadLocal<Boolean>() {
+      override fun initialValue() = false
+    }
+  }
+
+  fun isLogged(): Boolean = capture.get()
+
+  fun onLogged() {
+    capture.set(true)
+  }
+
+  fun reset() {
+    return capture.set(false)
   }
 }

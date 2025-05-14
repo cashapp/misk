@@ -1768,7 +1768,7 @@ public final class misk/web/exceptions/ActionExceptionLogLevelConfig : wisp/conf
 }
 
 public final class misk/web/exceptions/ExceptionHandlingInterceptor : misk/web/NetworkInterceptor {
-	public fun <init> (Ljava/lang/String;Lmisk/web/exceptions/ExceptionMapperResolver;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/web/exceptions/ExceptionMapperResolver;Lmisk/web/interceptors/hooks/RequestResponseLoggedCapture;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun intercept (Lmisk/web/NetworkChain;)V
 }
 
