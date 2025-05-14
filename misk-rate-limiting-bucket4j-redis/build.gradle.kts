@@ -4,7 +4,6 @@ import com.vanniktech.maven.publish.KotlinJvm
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  id("java-test-fixtures")
 }
 
 dependencies {
@@ -18,7 +17,6 @@ dependencies {
   implementation(libs.bucket4jCore)
   implementation(libs.bucket4jRedis)
 
-  testFixturesApi(project(":misk-testing"))
 
   testImplementation(project(":misk"))
   testImplementation(project(":misk-rate-limiting-bucket4j-redis"))
@@ -30,13 +28,6 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
 
-  testFixturesImplementation(project(":wisp:wisp-rate-limiting"))
-  testFixturesImplementation(libs.guice)
-  testFixturesImplementation(libs.jedis)
-  testFixturesImplementation(libs.micrometerCore)
-  testFixturesImplementation(project(":wisp:wisp-rate-limiting:bucket4j"))
-  testFixturesImplementation(libs.bucket4jCore)
-  testFixturesImplementation(libs.bucket4jRedis)
 }
 
 tasks.withType<Test>().configureEach {
