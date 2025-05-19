@@ -39,14 +39,14 @@ abstract class TransacterTest {
     // Query that data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .name("Ian Malcolm")
         .uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
 
       val lauraDernMovies = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .actorName("Laura Dern")
         .listAsMovieNameAndReleaseDate(session)
       assertThat(lauraDernMovies).containsExactlyInAnyOrder(
@@ -55,7 +55,7 @@ abstract class TransacterTest {
       )
 
       val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
         .listAsActorAndReleaseDate(session)
       assertThat(actorsInOldMovies).containsExactlyInAnyOrder(
@@ -98,14 +98,14 @@ abstract class TransacterTest {
     // Delete some data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .name("Ian Malcolm")
         .uniqueResult(session)!!
 
       session.delete(ianMalcolm)
 
       val afterDelete = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .name("Ian Malcolm")
         .uniqueResult(session)
       assertThat(afterDelete).isNull()
@@ -357,14 +357,16 @@ abstract class TransacterTest {
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
         assertThat(
           queryFactory.newQuery<MovieQuery>()
-            .allowFullScatter().allowTableScan().list(session)
+            .allowTableScan()
+            .list(session)
         ).isNotEmpty
         throw UnauthorizedException("boom!")
       }
     }
     transacter.transaction { session ->
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).isEmpty()
     }
@@ -480,7 +482,8 @@ abstract class TransacterTest {
     transacter.transaction { session ->
       session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).isNotEmpty
 
@@ -489,7 +492,8 @@ abstract class TransacterTest {
     assertThat(callCount.get()).isEqualTo(2)
     transacter.transaction { session ->
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).hasSize(1)
     }
@@ -528,7 +532,8 @@ abstract class TransacterTest {
     }
     transacter.transaction { session ->
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).isEmpty()
     }

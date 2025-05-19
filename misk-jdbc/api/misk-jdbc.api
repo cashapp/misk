@@ -139,7 +139,6 @@ public final class misk/database/TidbCluster {
 
 public final class misk/jdbc/Check : java/lang/Enum {
 	public static final field COWRITE Lmisk/jdbc/Check;
-	public static final field FULL_SCATTER Lmisk/jdbc/Check;
 	public static final field TABLE_SCAN Lmisk/jdbc/Check;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/jdbc/Check;

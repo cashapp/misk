@@ -68,7 +68,7 @@ class AggregationQueryTest {
     // Find the latest movie (MAX).
     val latestMovieReleaseDate = movieTransacter.transaction { session ->
       queryFactory.newQuery<OperatorsMovieQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .releaseDateMax(session)
     }
     assertThat(latestMovieReleaseDate).isEqualTo(christmas23)
@@ -141,7 +141,7 @@ class AggregationQueryTest {
     // Simple count in one table.
     val releaseCountByDate = movieTransacter.transaction { session ->
       queryFactory.newQuery<OperatorsMovieQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .groupByReleaseDate()
         .datesWithReleaseCount(session)
     }
@@ -168,7 +168,7 @@ class AggregationQueryTest {
     // Count with a join.
     val charactersPerActor = movieTransacter.transaction { session ->
       queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .withActorForProjection()
         .groupByActorName()
         .listAsActorAndCharacterCount(session)

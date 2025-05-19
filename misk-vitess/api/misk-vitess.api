@@ -40,13 +40,6 @@ public final class misk/vitess/Destination$Companion {
 	public final fun replica ()Lmisk/vitess/Destination;
 }
 
-public final class misk/vitess/FullScatterException : misk/jdbc/CheckException {
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
 public final class misk/vitess/Keyspace {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
