@@ -3,7 +3,6 @@ package misk.jdbc
 import java.util.EnumSet
 
 enum class Check {
-  FULL_SCATTER,
   TABLE_SCAN,
   COWRITE
 }

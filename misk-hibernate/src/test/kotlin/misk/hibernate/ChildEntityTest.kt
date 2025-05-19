@@ -33,7 +33,7 @@ class ChildEntityTest {
 
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .name("Ian Malcolm")
         .uniqueResult(session)!!
       val ianMalcolmByGid = session.loadSharded(ianMalcolm.gid)

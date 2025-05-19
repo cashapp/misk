@@ -40,7 +40,7 @@ abstract class TimestampListenerTest {
     val updatedAt = clock.instant()
     transacter.transaction { session ->
       val movie = queryFactory.newQuery<MovieQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .uniqueResult(session)!!
       movie.name = "A New Hope"
       session.hibernateSession.update(movie) // TODO(jwilson): expose session.update() directly.

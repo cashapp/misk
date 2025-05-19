@@ -113,11 +113,6 @@ inline fun <T, reified Q : Query<T>> Q.allowTableScan(): Q {
   return this
 }
 
-inline fun <T, reified Q : Query<T>> Q.allowFullScatter(): Q {
-  this.disableCheck(Check.FULL_SCATTER)
-  return this
-}
-
 /**
  * Equivalent to Query.addConstraint, but takes the [CriteriaBuilder] as a receiver and returns
  * this. This may be easier to use with method chaining.

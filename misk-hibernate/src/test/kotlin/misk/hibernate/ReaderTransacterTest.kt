@@ -54,7 +54,8 @@ class MySQLReaderTransacterTest {
     }
     transacter.transaction { session ->
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).isEmpty()
     }

@@ -161,11 +161,7 @@ internal class RealTransacter private constructor(
     return transactionWithRetriesInternal {
       replicaReadWithoutTransactionInternalSession { session ->
         session.target(Destination(TabletType.REPLICA)) {
-          // Full scatters are allowed on replica reads as you can increase availability by
-          // adding additional replicas.
-          session.withoutChecks(Check.FULL_SCATTER) {
-            block(session)
-          }
+          block(session)
         }
       }
     }

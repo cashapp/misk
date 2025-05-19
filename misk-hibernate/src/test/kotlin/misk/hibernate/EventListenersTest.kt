@@ -48,7 +48,8 @@ class EventListenersTest {
     }
 
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+      val movie = queryFactory.newQuery<MovieQuery>()
+        .allowTableScan()
         .uniqueResult(session)!!
       assertThat(eventListener.takeEvents()).containsExactly("preload")
 
