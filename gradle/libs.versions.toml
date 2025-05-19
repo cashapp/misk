@@ -21,7 +21,7 @@ netty = "4.2.1.Final"
 okHttp = "5.0.0-alpha.14"
 okio = "3.11.0"
 protobuf = "3.25.7"
-retrofit = "2.12.0"
+retrofit = "3.0.0"
 sqldelight = "2.0.2"
 wire = "5.3.1"
 
