@@ -4,6 +4,8 @@ import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import misk.backoff.ExponentialBackoff
 import misk.concurrent.ExecutorServiceFactory
+import misk.hibernate.advisorylocks.tryAcquireLock
+import misk.hibernate.advisorylocks.tryReleaseLock
 import misk.jdbc.CheckDisabler
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -20,6 +22,7 @@ import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.ConstraintViolationException
 import org.hibernate.exception.GenericJDBCException
 import org.hibernate.exception.LockAcquisitionException
+import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
 import wisp.logging.getLogger
 import java.io.Closeable
 import java.sql.Connection
@@ -28,7 +31,8 @@ import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException
 import java.time.Duration
-import java.util.*
+import java.util.EnumSet
+import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
@@ -164,6 +168,28 @@ internal class RealTransacter private constructor(
           block(session)
         }
       }
+    }
+  }
+
+  override fun <T> withLock(lockKey: String, block: () -> T): T {
+    // This connection handling mode is required to use advisory locks sanely. Without this, hibernate will release the
+    // java.sql.Connection underlying the org.hibernate.Session back to the connection pool after each transaction,
+    // which means any subsequent transaction that gets that connection will think it holds the lock, when it does not.
+    val connectionHandlingMode = PhysicalConnectionHandlingMode.IMMEDIATE_ACQUISITION_AND_HOLD
+    return withNewHibernateSession(sessionFactory, connectionHandlingMode) { hibernateSession ->
+      val didAcquireLock = hibernateSession.tryAcquireLock(lockKey)
+      check(didAcquireLock) { "Unable to acquire lock $lockKey" }
+
+      val blockResult = runCatching { block() }
+
+      try {
+        hibernateSession.tryReleaseLock(lockKey)
+      } catch (e: Throwable) {
+        val originalFailure = blockResult.exceptionOrNull()?.apply { addSuppressed(e) }
+        throw originalFailure ?: e
+      }
+
+      blockResult.getOrThrow()
     }
   }
 
@@ -325,11 +351,41 @@ internal class RealTransacter private constructor(
       hibernateEntities = hibernateEntities
     )
 
+  /**
+   * Creates a new Hibernate [org.hibernate.Session] and stashes it in a [ThreadLocal]
+   * Note that this does *not* start a transaction on the created session.
+   * @param sessionFactory The session factory to use when creating the session
+   * @param connectionHandlingMode The Hibernate connection handling mode the new session will use. You should
+   * change this only for a specific use case, preferring the default from Hibernate.
+   */
+  private fun <T> withNewHibernateSession(
+    sessionFactory: SessionFactory = this.sessionFactory,
+    connectionHandlingMode: PhysicalConnectionHandlingMode =
+      sessionFactory.sessionFactoryOptions.physicalConnectionHandlingMode,
+    block: (session: org.hibernate.Session) -> T
+  ) : T {
+    check(sessionFactoryService.threadLocalHibernateSession.get() == null) { "nested session"}
+    val hibernateSession =
+      sessionFactory.withOptions()
+        .connectionHandlingMode(connectionHandlingMode)
+        .openSession()
+    sessionFactoryService.threadLocalHibernateSession.set(hibernateSession)
+    try {
+      hibernateSession.use {
+        return block(hibernateSession)
+      }
+    } finally {
+      sessionFactoryService.threadLocalHibernateSession.remove()
+    }
+  }
+
   private fun <T> withSession(
     sessionFactory: SessionFactory = this.sessionFactory,
     block: (session: RealSession) -> T
   ): T {
-    val hibernateSession = sessionFactory.openSession()
+    val threadLocalHibernateSession = sessionFactoryService.threadLocalHibernateSession.get()
+    val openedNewSession = threadLocalHibernateSession == null
+    val hibernateSession = threadLocalHibernateSession ?: sessionFactory.openSession()
     val realSession = RealSession(
       hibernateSession = hibernateSession,
       readOnly = options.readOnly,
@@ -341,7 +397,14 @@ internal class RealTransacter private constructor(
     // Note that the RealSession is closed last so that close hooks run after the thread locals and
     // Hibernate Session have been released. This way close hooks can start their own transactions.
     realSession.use {
-      hibernateSession.use {
+      // If we opened a session, we also must close it.
+      if (openedNewSession) {
+        hibernateSession.use {
+          useSession(realSession) {
+            return block(realSession)
+          }
+        }
+      } else {
         useSession(realSession) {
           return block(realSession)
         }
