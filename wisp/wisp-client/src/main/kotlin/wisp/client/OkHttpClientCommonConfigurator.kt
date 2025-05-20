@@ -70,7 +70,7 @@ class OkHttpClientCommonConfigurator {
         builder: Builder,
         config: HttpClientEndpointConfig,
     ) {
-        builder.retryOnConnectionFailure(
+        builder.followRedirects(
             config.clientConfig.followRedirect ?: followRedirects
         )
     }
@@ -79,7 +79,7 @@ class OkHttpClientCommonConfigurator {
         builder: Builder,
         config: HttpClientEndpointConfig,
     ) {
-        builder.retryOnConnectionFailure(
+        builder.followSslRedirects(
             config.clientConfig.followSslRedirects ?: followSslRedirects
         )
     }
