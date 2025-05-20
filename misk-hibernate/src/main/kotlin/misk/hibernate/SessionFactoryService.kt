@@ -50,6 +50,8 @@ internal class SessionFactoryService(
     override fun initialValue() = false
   }
 
+  val threadLocalHibernateSession = ThreadLocal<org.hibernate.Session?>()
+
   lateinit var hibernateMetadata: Metadata
 
   override fun startUp() {

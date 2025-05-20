@@ -110,6 +110,24 @@ abstract class TransacterTest {
         .uniqueResult(session)
       assertThat(afterDelete).isNull()
     }
+
+    // Delete some data with a lock.
+    transacter.withLock("actorLock") {
+      transacter.transaction { session ->
+        val luxoJr = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .name("Luxo Jr.")
+          .uniqueResult(session)!!
+
+        session.delete(luxoJr)
+
+        val afterDelete = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .name("Luxo Jr.")
+          .uniqueResult(session)
+        assertThat(afterDelete).isNull()
+      }
+    }
   }
 
   // TODO TiDB are working on fixing this bug: https://github.com/pingcap/tidb/issues/13791

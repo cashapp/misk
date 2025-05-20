@@ -78,6 +78,19 @@ interface Transacter {
 
   /** Returns KClasses for the bound DbEntities for the transacter */
   fun entities(): Set<KClass<out DbEntity<*>>>
+
+  /**
+   * Opens a Hibernate session and acquires a MySQL advisory lock with the name [lockKey].
+   * It is safe to call [Transacter.transaction] within [block] one or more times.
+   * The lock will be released only when this method return.
+   *
+   * @param lockKey The string uniquely identifying the lock to acquire. Must be <= 64 characters.
+   * @param block The lambda to execute while the lock is held.
+   * @throws IllegalArgumentException if the lockKey violates database specific constraints. Known constraints:
+   * - MySQL: The lockKey must be <= 64 characters.
+   * @throws IllegalStateException if the lock could not be acquired.
+   */
+  fun <T> withLock(lockKey: String, block: () -> T): T
 }
 
 fun Transacter.shards() = transaction { it.shards() }
