@@ -115,14 +115,14 @@ abstract class TransacterTest {
     transacter.withLock("actorLock") {
       transacter.transaction { session ->
         val luxoJr = queryFactory.newQuery<CharacterQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .name("Luxo Jr.")
           .uniqueResult(session)!!
 
         session.delete(luxoJr)
 
         val afterDelete = queryFactory.newQuery<CharacterQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .name("Luxo Jr.")
           .uniqueResult(session)
         assertThat(afterDelete).isNull()
