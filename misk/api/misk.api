@@ -573,8 +573,10 @@ public final class misk/client/HttpClientFactory {
 	public static synthetic fun create$default (Lmisk/client/HttpClientFactory;Lmisk/client/HttpClientEndpointConfig;Ljava/lang/String;ILjava/lang/Object;)Lokhttp3/OkHttpClient;
 	public final fun getEnvoyClientEndpointProvider ()Lwisp/client/EnvoyClientEndpointProvider;
 	public final fun getOkhttpInterceptors ()Lcom/google/inject/Provider;
+	public final fun getProxySelector ()Ljava/net/ProxySelector;
 	public final fun setEnvoyClientEndpointProvider (Lwisp/client/EnvoyClientEndpointProvider;)V
 	public final fun setOkhttpInterceptors (Lcom/google/inject/Provider;)V
+	public final fun setProxySelector (Ljava/net/ProxySelector;)V
 }
 
 public final class misk/client/HttpClientFactory$Companion {

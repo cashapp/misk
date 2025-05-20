@@ -8,6 +8,7 @@ import wisp.client.EnvoyClientEndpointProvider
 import jakarta.inject.Inject
 import com.google.inject.Provider
 import jakarta.inject.Singleton
+import java.net.ProxySelector
 
 @Singleton
 class HttpClientFactory @Inject constructor(
@@ -25,6 +26,9 @@ class HttpClientFactory @Inject constructor(
 
   @com.google.inject.Inject(optional = true)
   var okhttpInterceptors: Provider<List<Interceptor>>? = null
+
+  @com.google.inject.Inject(optional = true)
+  var proxySelector: ProxySelector? = null
 
   /**
    * Returns a client initialized based on `config`.
@@ -49,7 +53,8 @@ class HttpClientFactory @Inject constructor(
       sslContextFactory = sslContextFactory.delegate,
       okHttpClientCommonConfigurator = okHttpClientCommonConfigurator.delegate,
       envoyClientEndpointProvider = envoyClientEndpointProvider,
-      okhttpInterceptors = interceptors.toList()
+      okhttpInterceptors = interceptors.toList(),
+      proxySelector = proxySelector
     )
 
     val okHttpClient = delegate.create(config.toWispConfig())
