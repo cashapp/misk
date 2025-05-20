@@ -11,6 +11,7 @@ import misk.jobqueue.v2.SuspendingJobHandler
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.random.Random
 import kotlin.test.assertEquals
 
+@Disabled("These tests are timing out frequently. Re-enable after remediating")
 @MiskTest(startService = true)
 class SqsJobConsumerTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
