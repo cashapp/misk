@@ -39,9 +39,9 @@ public final class misk/sqldelight/testing/MoviesDatabase$Companion {
 
 public final class misk/sqldelight/testing/MoviesQueries : app/cash/sqldelight/TransacterImpl {
 	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;)V
-	public final fun createMovie (JLjava/lang/String;)V
+	public final fun createMovie (JLjava/lang/String;)Lapp/cash/sqldelight/db/QueryResult;
 	public final fun getMovie (J)Lapp/cash/sqldelight/Query;
 	public final fun getMovie (JLkotlin/jvm/functions/Function3;)Lapp/cash/sqldelight/Query;
-	public final fun updateMovie-RbX51dc (Ljava/lang/String;JJ)V
+	public final fun updateMovie-RbX51dc (Ljava/lang/String;JJ)Lapp/cash/sqldelight/db/QueryResult;
 }
 
