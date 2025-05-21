@@ -114,7 +114,9 @@ data class HttpClientConfig @JvmOverloads constructor(
   val ssl: HttpClientSSLConfig? = null,
   val unixSocketFile: String? = null,
   val protocols: List<String>? = null,
-  val retryOnConnectionFailure: Boolean? = null
+  val retryOnConnectionFailure: Boolean? = null,
+  val followRedirects: Boolean? = null,
+  val followSslRedirects: Boolean? = null
 ) {
   fun toWispConfig() = wisp.client.HttpClientConfig(
     connectTimeout,
@@ -129,7 +131,9 @@ data class HttpClientConfig @JvmOverloads constructor(
     ssl?.toWispConfig(),
     unixSocketFile,
     protocols,
-    retryOnConnectionFailure
+    retryOnConnectionFailure,
+    followRedirects,
+    followSslRedirects
   )
 }
 
@@ -147,7 +151,9 @@ fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
     ssl = this.ssl ?: other.ssl,
     unixSocketFile = this.unixSocketFile ?: other.unixSocketFile,
     protocols = this.protocols ?: other.protocols,
-    retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure
+    retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure,
+    followRedirects = this.followRedirects ?: other.followRedirects,
+    followSslRedirects = this.followSslRedirects ?: other.followSslRedirects
   )
 
 data class HttpClientEndpointConfig @JvmOverloads constructor(
