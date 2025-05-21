@@ -161,14 +161,18 @@ internal class RequestResponseLoggingHook private constructor(
         requestResponse.request?.let {
           append(" request=${requestResponse.request}")
         }
-        requestResponse.requestHeaders?.let {
-          append(" requestHeaders=${requestResponse.requestHeaders}")
+        if (config.includeRequestHeaders) {
+          requestResponse.requestHeaders?.let {
+            append(" requestHeaders=${requestResponse.requestHeaders}")
+          }
         }
         requestResponse.response?.let {
           append(" response=${requestResponse.response}")
         }
-        requestResponse.responseHeaders?.let {
-          append(" responseHeaders=${requestResponse.responseHeaders}")
+        if (config.includeResponseHeaders) {
+          requestResponse.responseHeaders?.let {
+            append(" responseHeaders=${requestResponse.responseHeaders}")
+          }
         }
       }
     }
