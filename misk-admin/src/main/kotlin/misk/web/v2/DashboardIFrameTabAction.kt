@@ -108,7 +108,6 @@ internal class DashboardIFrameTabAction @Inject constructor(
               AlertInfo("Check your DashboardModule installation to ensure that the slug, urlPathPrefix, and iframePath matches your frontend location.")
             }
           } else {
-            // If tab is Misk-Web do additional checks and show separate development and real errors
             if (deployment.isLocalDevelopment) {
               // If local development, check web proxy action and show fuller development 404 message
               val proxyResponse = webProxyAction
@@ -119,7 +118,7 @@ internal class DashboardIFrameTabAction @Inject constructor(
                 div("container mx-auto p-8") {
                   AlertError("Failed to load tab: ${dashboardTab.menuCategory} / ${dashboardTab.menuLabel}")
                   if (iframeTab.iframePath == "/_tab/web-actions/index.html") {
-                    AlertInfo("In local development, this can be from not having your local dev server (ie. Webpack) running or not doing an initial local frontend build to generate the necessary web assets. Try running in your Terminal: \$ gradle :misk:misk-admin:buildAndCopyWebActions.")
+                    AlertInfo("To use the Web Actions tab in local development, start the dev server (run in your terminal: \$ cd misk/misk-admin-web-actions/ && npm start) or run a build to generate the necessary web assets (run in your terminal: \$ gradle :misk:misk-admin:buildAndCopyWebActions).")
                   } else {
                     AlertInfo("In local development, this can be from not having your local dev server (ie. Webpack) running or not doing an initial local frontend build to generate the necessary web assets. Try running in your Terminal: \$ gradle buildMiskWeb OR \$ misk-web ci-build -e.")
                   }
@@ -139,7 +138,7 @@ internal class DashboardIFrameTabAction @Inject constructor(
             }
           }
         } else {
-          // If tab is not Misk-Web, show generic error message if src doesn't resolve
+          // If tab is not Misk-Web or JS frontend, show generic error message if src doesn't resolve
           try {
             OkHttpClient.Builder().build().newCall(Request((hostname / iframeSrc).toHttpUrl()))
               .execute()

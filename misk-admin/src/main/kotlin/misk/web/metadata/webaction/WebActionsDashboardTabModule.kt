@@ -15,12 +15,11 @@ class WebActionsDashboardTabModule(private val isDevelopment: Boolean) : KAbstra
 
     install(
       DashboardModule.createIFrameTab<AdminDashboard, AdminDashboardAccess>(
-        // TODO get development proxy working for IFrame tabs
-//        isDevelopment = isDevelopment,
+        isDevelopment = isDevelopment,
         slug = "web-actions",
         urlPathPrefix = "/_admin/web-actions/",
         iframePath = "/_tab/web-actions/index.html",
-//        developmentWebProxyUrl = "http://localhost:3210/",
+        developmentWebProxyUrl = "http://localhost:9000/",
         menuLabel = "Web Actions",
         menuCategory = "Container Admin",
       )
