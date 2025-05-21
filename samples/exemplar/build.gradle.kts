@@ -35,6 +35,7 @@ dependencies {
   implementation(project(":misk-clustering"))
   implementation(project(":misk-core"))
   implementation(project(":misk-cron"))
+  implementation(project(":misk-grpc-reflect"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-prometheus"))
@@ -69,18 +70,22 @@ tasks.jar {
   archiveClassifier.set("unshaded")
 }
 
-sourceSets {
-  main {
-    java.srcDir(layout.buildDirectory.dir("generated/source/wire"))
-  }
-}
-
 wire {
-  sourcePath {
-    srcDir("src/main/proto/")
+  // Necessary to support Grpc Reflection so proto files are available in the runtime classpath, otherwise can remove
+  protoLibrary = true
+
+  // Generate service interfaces also.
+  kotlin {
+    includes = listOf("com.squareup.exemplar.protos.HelloWebService")
+    rpcRole = "server"
+    rpcCallStyle = "blocking"
+    singleMethodServices = true
   }
 
   kotlin {
+    rpcRole = "client"
     javaInterop = true
   }
+
+
 }

@@ -35,7 +35,10 @@ fun KFunction<*>.asAction(
         require(findAnnotation<RequestContentType>() == null) {
           "@Grpc cannot be used with @RequestContentType on $this"
         }
-        listOf(MediaRange.parse(MediaTypes.APPLICATION_GRPC))
+        listOf(
+          MediaRange.parse(MediaTypes.APPLICATION_GRPC),
+          MediaRange.parse(MediaTypes.APPLICATION_GRPC_PROTOBUF)
+        )
       }
 
       else -> findAnnotation<RequestContentType>()?.value?.flatMap {

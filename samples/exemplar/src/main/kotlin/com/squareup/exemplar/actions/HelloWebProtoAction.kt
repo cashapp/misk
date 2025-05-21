@@ -28,10 +28,10 @@ class HelloWebProtoAction @Inject constructor() : WebAction {
     @RequestBody request: HelloWebRequest
   ): Response<HelloWebResponse> {
     return Response(
-      HelloWebResponse().newBuilder()
-        .greeting(greeting(request))
-        .name(request.nick_name?.uppercase() ?: request.name.uppercase())
-        .build()
+      HelloWebResponse(
+        greeting = greeting(request),
+        name = (request.nick_name?.uppercase() ?: request.name.uppercase())
+      )
     )
   }
 
