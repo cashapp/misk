@@ -46,7 +46,7 @@ internal class WebSocketsTest {
     // Confirm interceptors were invoked.
     assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class)).matches(
       "EchoWebSocket principal=unknown time=0.000 ns code=200 " +
-        "request=JettyWebSocket\\[.* to /echo] .* response=EchoListener .*"
+        "request=JettyWebSocket\\[.* to /echo] response=EchoListener"
     )
   }
 

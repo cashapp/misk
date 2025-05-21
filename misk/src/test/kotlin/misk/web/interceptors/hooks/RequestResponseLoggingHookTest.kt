@@ -343,6 +343,25 @@ internal class RequestResponseLoggingHookTest {
   }
 
   @Test
+  fun noHeadersByDefault() {
+    assertThat(
+      webTestClient.call("/call/withoutHeaders") {
+        post("hello".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
+      }.response.isSuccessful
+    )
+      .isTrue()
+    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    assertEquals(1, messages.size)
+    assertThat(messages[0]).contains(
+      "RequestLoggingActionWithoutHeaders principal=unknown time=100.0 ms code=200 " +
+        "request=hello response=echo: hello"
+    )
+    assertThat(messages[0]).contains("response=echo: hello")
+    assertThat(messages[0]).doesNotContain("requestHeaders")
+    assertThat(messages[0]).doesNotContain("responseHeaders")
+  }
+
+  @Test
   fun configOverride() {
     for (i in 0..10) {
       assertThat(invoke("/call/configOverride/foo", "caller").isSuccessful).isTrue()
@@ -409,7 +428,14 @@ internal class RequestResponseLoggingHookTest {
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(TestActionsModule())
       multibind<RequestLoggingConfig>().toInstance(
-        RequestLoggingConfig(mapOf("ConfigOverrideAction" to ActionLoggingConfig(0, 0, 1.0, 1.0)))
+        RequestLoggingConfig(mapOf("ConfigOverrideAction" to ActionLoggingConfig(
+          ratePerSecond = 0,
+          errorRatePerSecond = 0,
+          bodySampling = 1.0,
+          errorBodySampling = 1.0,
+          includeRequestHeaders = true,
+          includeResponseHeaders = true,
+        )))
       )
 
       install(AppNameModule("test"))
@@ -433,6 +459,7 @@ internal class RequestResponseLoggingHookTest {
       install(WebActionModule.create<ExceptionThrowingRequestLoggingAction>())
       install(WebActionModule.create<NoRequestLoggingAction>())
       install(WebActionModule.create<RequestLoggingActionWithHeaders>())
+      install(WebActionModule.create<RequestLoggingActionWithoutHeaders>())
       install(WebActionModule.create<ConfigOverrideAction>())
     }
   }
@@ -446,7 +473,9 @@ internal class LogEverythingAction @Inject constructor() : WebAction {
     ratePerSecond = 0,
     errorRatePerSecond = 0,
     bodySampling = 1.0,
-    errorBodySampling = 1.0
+    errorBodySampling = 1.0,
+    includeRequestHeaders = true,
+    includeResponseHeaders = true,
   )
   fun call(@PathParam message: String) = "echo: $message"
 }
@@ -455,7 +484,12 @@ internal class RateLimitingRequestLoggingAction @Inject constructor() : WebActio
   @Get("/call/rateLimitingRequestLogging/{message}")
   @Unauthenticated
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L)
+  @LogRequestResponse(
+    ratePerSecond = 1L,
+    errorRatePerSecond = 2L,
+    includeRequestHeaders = true,
+    includeResponseHeaders = true,
+  )
   fun call(@PathParam message: String) = "echo: $message"
 }
 
@@ -467,7 +501,9 @@ internal class RateLimitingIncludesBodyRequestLoggingAction @Inject constructor(
     ratePerSecond = 1L,
     errorRatePerSecond = 2L,
     bodySampling = 0.5,
-    errorBodySampling = 1.0
+    errorBodySampling = 1.0,
+    includeRequestHeaders = true,
+    includeResponseHeaders = true,
   )
   fun call(@PathParam message: String) = "echo: $message"
 }
@@ -480,7 +516,9 @@ internal class NoRateLimitingRequestLoggingAction @Inject constructor() : WebAct
     ratePerSecond = 0L,
     errorRatePerSecond = 0L,
     bodySampling = 0.5,
-    errorBodySampling = 0.5
+    errorBodySampling = 0.5,
+    includeRequestHeaders = true,
+    includeResponseHeaders = true,
   )
   fun call(@PathParam message: String) = "echo: $message"
 }
@@ -514,7 +552,9 @@ internal class ExceptionThrowingRequestLoggingAction @Inject constructor() : Web
     ratePerSecond = 1L,
     errorRatePerSecond = 2L,
     bodySampling = 0.1,
-    errorBodySampling = 1.0
+    errorBodySampling = 1.0,
+    includeRequestHeaders = true,
+    includeResponseHeaders = true,
   )
   fun call(@PathParam message: String): String = throw IllegalStateException(message)
 }
@@ -526,6 +566,22 @@ internal class NoRequestLoggingAction @Inject constructor() : WebAction {
   fun call(@PathParam message: String) = "echo: $message"
 }
 
+internal class RequestLoggingActionWithoutHeaders @Inject constructor() : WebAction {
+  @Post("/call/withoutHeaders")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 1L,
+    errorRatePerSecond = 2L,
+    bodySampling = 1.0,
+    errorBodySampling = 1.0,
+  )
+  fun call(@RequestBody message: String, @RequestHeaders headers: Headers): String {
+    if (message == "fail") throw BadRequestException(message = "boom")
+    return "echo: $message"
+  }
+}
+
 internal class RequestLoggingActionWithHeaders @Inject constructor() : WebAction {
   @Post("/call/withHeaders")
   @Unauthenticated
@@ -534,7 +590,9 @@ internal class RequestLoggingActionWithHeaders @Inject constructor() : WebAction
     ratePerSecond = 1L,
     errorRatePerSecond = 2L,
     bodySampling = 1.0,
-    errorBodySampling = 1.0
+    errorBodySampling = 1.0,
+    includeRequestHeaders = true,
+    includeResponseHeaders = true,
   )
   fun call(@RequestBody message: String, @RequestHeaders headers: Headers): String {
     if (message == "fail") throw BadRequestException(message = "boom")
@@ -550,7 +608,7 @@ internal class ConfigOverrideAction @Inject constructor() : WebAction {
     ratePerSecond = 1L,
     errorRatePerSecond = 1L,
     bodySampling = 0.0,
-    errorBodySampling = 0.0
+    errorBodySampling = 0.0,
   ) // these values overridden by RequestLoggingConfig binding above
   fun call(@PathParam message: String): String = "echo: $message"
 }

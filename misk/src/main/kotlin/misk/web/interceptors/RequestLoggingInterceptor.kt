@@ -108,6 +108,8 @@ data class ActionLoggingConfig @JvmOverloads constructor(
   val errorBodySampling: Double = 0.0,
   val excludedEnvironments: List<String> = listOf(),
   val requestLoggingMode: RequestLoggingMode = RequestLoggingMode.ALL,
+  val includeRequestHeaders: Boolean = false,
+  val includeResponseHeaders: Boolean = false,
 ) {
   companion object {
     fun fromAnnotation(logRequestResponse: LogRequestResponse): ActionLoggingConfig = ActionLoggingConfig(
@@ -117,6 +119,8 @@ data class ActionLoggingConfig @JvmOverloads constructor(
       errorBodySampling = logRequestResponse.errorBodySampling,
       excludedEnvironments = logRequestResponse.excludedEnvironments.toList(),
       requestLoggingMode = logRequestResponse.requestLoggingMode,
+      includeRequestHeaders = logRequestResponse.includeRequestHeaders,
+      includeResponseHeaders = logRequestResponse.includeResponseHeaders,
     )
 
     fun fromConfigMapOrAnnotation(

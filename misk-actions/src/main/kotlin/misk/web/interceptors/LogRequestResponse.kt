@@ -30,15 +30,19 @@ package misk.web.interceptors
 @Target(AnnotationTarget.FUNCTION)
 annotation class LogRequestResponse(
   val ratePerSecond: Long = 10,
-  /** By default, rate limiting is off for error logs **/
+  /** By default, rate limiting is off for error logs. **/
   val errorRatePerSecond: Long = 0,
-  /** By default do not log request and response bodies **/
+  /** By default, do not log request and response bodies. **/
   val bodySampling: Double = 0.0,
   val errorBodySampling: Double = 0.0,
-  /** which deploy environments will not have request/response logging enabled **/
+  /** Which deploy environments will not have request/response logging enabled. **/
   val excludedEnvironments: Array<String> = [],
-  /** By default log non-error responses **/
+  /** By default, log non-error responses. **/
   val requestLoggingMode: RequestLoggingMode = RequestLoggingMode.ALL,
+  /** By default, request headers will not be included. */
+  val includeRequestHeaders: Boolean = false,
+  /** By default, response headers will not be included. */
+  val includeResponseHeaders: Boolean = false,
 )
 
 enum class RequestLoggingMode {

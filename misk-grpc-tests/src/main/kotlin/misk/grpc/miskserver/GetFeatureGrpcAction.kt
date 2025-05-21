@@ -13,7 +13,7 @@ import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import jakarta.inject.Inject
 
 class GetFeatureGrpcAction @Inject constructor() : WebAction, RouteGuideGetFeatureBlockingServer {
-  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
+  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0, includeRequestHeaders = true, includeResponseHeaders = true)
   override fun GetFeature(request: Point): Feature {
     if (request.latitude == -1) {
       throw WebActionException(request.longitude ?: 500, "unexpected latitude error!")
