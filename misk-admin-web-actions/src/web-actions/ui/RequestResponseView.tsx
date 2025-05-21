@@ -78,8 +78,8 @@ const RequestResponseView: React.FC<RequestResponseProps> = ({
             });
           }}
         />
-        {viewState.selectedAction?.callable === true && (
-          <HStack>
+        <HStack>
+          {viewState.selectedAction?.callable === true && (
             <IconButton
               aria-label="Run"
               colorScheme={'green'}
@@ -87,15 +87,15 @@ const RequestResponseView: React.FC<RequestResponseProps> = ({
             >
               <ActionIcon />
             </IconButton>
-            <Tooltip label={'Endpoint Details'} placement="top">
-              <IconButton
-                aria-label="Expand panel"
-                icon={<InfoOutlineIcon />}
-                onClick={onToggleCollapse}
-              />
-            </Tooltip>
-          </HStack>
-        )}
+          )}
+          <Tooltip label={'Endpoint Details'} placement="top">
+            <IconButton
+              aria-label="Expand panel"
+              icon={<InfoOutlineIcon />}
+              onClick={onToggleCollapse}
+            />
+          </Tooltip>
+        </HStack>
       </HStack>
       <Heading color="white" size="xs" fontWeight="semibold">
         Headers
@@ -137,7 +137,11 @@ const RequestResponseView: React.FC<RequestResponseProps> = ({
       <Heading color="white" size="xs" fontWeight="semibold">
         Body
       </Heading>
-      <RequestEditor ref={requestEditorRef as any} loading={submitting} />
+      <RequestEditor
+        ref={requestEditorRef as any}
+        loading={submitting}
+        isCallable={viewState.selectedAction?.callable || false}
+      />
       <Heading color="white" size="sm" fontWeight="semibold">
         Response
       </Heading>

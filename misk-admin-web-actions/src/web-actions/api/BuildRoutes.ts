@@ -42,17 +42,27 @@ export function buildRoutes(actions: MiskWebActionDefinition[]): MiskRoute[] {
   const routes = Object.values(routeMap);
 
   for (const group of routes) {
-    if (group.httpMethod === 'GET') {
-      group.callable = true;
-    } else if (group.httpMethod === 'PUT' || group.httpMethod === 'POST') {
-      if (
-        group.requestMediaTypes.hasJson() ||
-        group.requestMediaTypes.hasAny() ||
-        group.requestMediaTypes.isUnspecified()
-      ) {
-        group.callable = true;
-      }
-    }
+    group.callable = isCallable(group);
   }
   return routes;
+}
+
+function isCallable(group: MiskRoute): boolean {
+  if (group.httpMethod === 'GET' || group.httpMethod === 'DELETE') {
+    return true;
+  }
+
+  if (
+    group.httpMethod === 'PUT' ||
+    group.httpMethod === 'POST' ||
+    group.httpMethod === 'PATCH'
+  ) {
+    return (
+      group.requestMediaTypes.hasJson() ||
+      group.requestMediaTypes.hasAny() ||
+      group.requestMediaTypes.isUnspecified()
+    );
+  }
+
+  return false;
 }
