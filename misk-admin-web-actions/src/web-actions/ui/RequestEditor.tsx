@@ -10,6 +10,7 @@ import { MiskFieldDefinition, MiskRoute } from '@web-actions/api/responseTypes';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 interface Props {
+  isCallable: boolean;
   loading: boolean;
 }
 
@@ -216,7 +217,9 @@ export default class RequestEditor extends React.Component<Props, State> {
   public render() {
     return (
       <Box position="relative" width="100%" height="100%">
-        {(this.props.loading || this.state.isDisabled) && (
+        {(this.props.loading ||
+          this.state.isDisabled ||
+          !this.props.isCallable) && (
           <Box
             position="absolute"
             top="0"
@@ -231,10 +234,19 @@ export default class RequestEditor extends React.Component<Props, State> {
           >
             {this.props.loading ? (
               <Spinner size="xl" color="white" thickness="5px" />
+            ) : this.state.isDisabled ? (
+              <Box color="white" fontSize="lg" textAlign="center" padding="4">
+                Request body not supported for GET requests.
+              </Box>
             ) : (
-              this.state.isDisabled && (
+              !this.props.isCallable && (
                 <Box color="white" fontSize="lg" textAlign="center" padding="4">
-                  Request body not supported for GET requests
+                  This endpoint can&apos;t be called from the browser.
+                  <br />
+                  To be called from the browser, endpoints must support JSON and
+                  use method GET, POST, PUT, PATCH, or DELETE.
+                  <br />
+                  Check Endpoint Details for more.
                 </Box>
               )
             )}

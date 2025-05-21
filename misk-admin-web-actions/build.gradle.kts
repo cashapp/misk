@@ -78,7 +78,7 @@ abstract class WebActionsTabBuildTask : DefaultTask() {
 
     exec(npm, "install")
     exec(npx, "webpack", "--mode", "production")
-    exec(npm, "run-script", "lint")
+    exec(npm, "run-script", "format")
     exec(npm, "run-script", "test")
   }
 }
