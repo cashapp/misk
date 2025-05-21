@@ -14,7 +14,7 @@ import misk.vitess.testing.utilities.DockerVitess
 @MiskTest(startService = true)
 class ChildEntityTest {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule()

@@ -22,7 +22,7 @@ import kotlin.test.assertFailsWith
 @MiskTest(startService = true)
 class ReflectionQueryFactoryTest {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule()
@@ -931,7 +931,8 @@ class ReflectionQueryFactoryTest {
         transacter.transaction { session ->
           queryFactory.newQuery<OperatorsMovieQuery>()
             .allowTableScan()
-            .releaseDateAsc().delete(session)
+            .releaseDateAsc()
+            .delete(session)
         }
       }
     ).hasMessageContaining("orderBy shouldn't be used for a delete")

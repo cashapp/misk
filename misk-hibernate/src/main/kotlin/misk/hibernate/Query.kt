@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import misk.vitess.VitessQueryHints
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.JoinType.LEFT
@@ -110,6 +111,16 @@ inline fun <T, reified Q : Query<T>> Q.or(lambda: OrBuilder<Q>.() -> Unit): Q {
 
 inline fun <T, reified Q : Query<T>> Q.allowTableScan(): Q {
   this.disableCheck(Check.TABLE_SCAN)
+  return this
+}
+
+/**
+ * Query extension to allow scatter queries in Vitess by applying a query hint.
+ * For Vitess, this works when `no_scatter` is set at the vtgate, otherwise this serves as a no-op.
+ * For non-Vitess, this function will not work and should not be used.
+ */
+inline fun <T, reified Q : Query<T>> Q.allowScatter(): Q {
+  this.addQueryHint(VitessQueryHints.allowScatter())
   return this
 }
 

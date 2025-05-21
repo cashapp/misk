@@ -16,6 +16,7 @@ import wisp.deployment.TESTING
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule(
   private val type: DataSourceType = DataSourceType.VITESS_MYSQL,
+  private val allowScatters: Boolean = true,
   private val scaleSafetyChecks: Boolean = false,
   private val entitiesModule: HibernateEntityModule = object :
     HibernateEntityModule(Movies::class) {
@@ -55,6 +56,10 @@ class MoviesTestModule(
   }
 
   internal fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
+    if (!allowScatters && type == DataSourceType.VITESS_MYSQL) {
+      return config.vitess_mysql_no_scatter_data_source
+    }
+
     return when (type) {
       DataSourceType.VITESS_MYSQL -> config.vitess_mysql_data_source
       DataSourceType.MYSQL -> config.mysql_data_source

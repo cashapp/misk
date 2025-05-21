@@ -12,9 +12,9 @@ import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.SessionFactoryService
 import misk.hibernate.Transacter
-import misk.hibernate.VitessTransacterExtensions.createInSameShard
-import misk.hibernate.VitessTransacterExtensions.createInSeparateShard
-import misk.hibernate.VitessTransacterExtensions.shard
+import misk.hibernate.VitessTestExtensions.createInSameShard
+import misk.hibernate.VitessTestExtensions.createInSeparateShard
+import misk.hibernate.VitessTestExtensions.shard
 import misk.hibernate.allowTableScan
 import misk.hibernate.shards
 import misk.hibernate.transaction
@@ -128,7 +128,7 @@ abstract class BulkShardMigratorTest {
 @MiskTest(startService = true)
 class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)

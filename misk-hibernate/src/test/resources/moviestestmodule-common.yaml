@@ -5,7 +5,12 @@ vitess_mysql_data_source:
   vitess_schema_resource_root: classpath:/vitess/schema
   generate_hibernate_stats: "true"
   port: 27003
-  show_sql: "true"
+vitess_mysql_no_scatter_data_source:
+  type: VITESS_MYSQL
+  username: root
+  password: ""
+  vitess_schema_resource_root: classpath:/vitess/schema
+  port: 28003
 mysql_data_source:
   type: MYSQL
   database: movies

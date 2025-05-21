@@ -83,7 +83,7 @@ class MySQLTimestampListenerTest : TimestampListenerTest() {
 @MiskTest(startService = true)
 class VitessMySQLTimestampListenerTest : TimestampListenerTest() {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)

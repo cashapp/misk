@@ -526,15 +526,30 @@ public final class misk/hibernate/vitess/PoolWaiterCountExhaustedException : org
 	public fun <init> (Ljava/sql/SQLException;)V
 }
 
+public final class misk/hibernate/vitess/ScatterQueryException : org/hibernate/JDBCException {
+	public fun <init> (Ljava/sql/SQLException;)V
+}
+
 public final class misk/hibernate/vitess/VitessDialect : org/hibernate/dialect/MySQL8Dialect {
 	public fun <init> ()V
 	public fun buildSQLExceptionConversionDelegate ()Lorg/hibernate/exception/spi/SQLExceptionConversionDelegate;
+	public fun getQueryHintString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 	public fun useInputStreamToInsertBlob ()Z
 }
 
 public final class misk/hibernate/vitess/VitessExceptionDetector {
 	public static final field INSTANCE Lmisk/hibernate/vitess/VitessExceptionDetector;
 	public final fun isWaiterPoolExhausted (Ljava/lang/Throwable;)Z
+}
+
+public final class misk/hibernate/vitess/VitessQueryHintHandler : org/hibernate/dialect/hint/QueryHintHandler {
+	public static final field Companion Lmisk/hibernate/vitess/VitessQueryHintHandler$Companion;
+	public fun <init> ()V
+	public fun addQueryHints (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/hibernate/vitess/VitessQueryHintHandler$Companion {
+	public final fun getQueryStringWithHints (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class misk/hibernate/vitess/VitessShardException : org/hibernate/JDBCException {

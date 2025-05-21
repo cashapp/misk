@@ -6,7 +6,7 @@ import misk.backoff.retry
 import misk.hibernate.annotation.keyspace
 import misk.vitess.Shard
 
-object VitessTransacterExtensions {
+object VitessTestExtensions {
   fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(entity) }
 
   inline fun <reified T : DbRoot<T>> Id<T>.shard(session: Session): Shard {

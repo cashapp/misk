@@ -45,6 +45,8 @@ class VitessDialect : MySQL8Dialect() {
           sql,
           null
         )
+      } else if (exceptionMessage != null && exceptionMessage.contains("plan includes scatter, which is disallowed")) {
+        return@SQLExceptionConversionDelegate ScatterQueryException(sqlException)
       } else if (exceptionMessage != null && exceptionMessage.contains("multi-db transaction attempted")) {
         throw CowriteException(message, sqlException)
       } else if (VitessExceptionDetector.isWaiterPoolExhausted(sqlException)) {
@@ -62,6 +64,18 @@ class VitessDialect : MySQL8Dialect() {
         )
       }
     }
+  }
+
+  override fun getQueryHintString(query: String, hints: String): String {
+    val vitessQuery = VitessQueryHintHandler.getQueryStringWithHints(query, hints)
+
+    // After we process Vitess query hints, we need to pass any non-Vitess query hints to the MySQL handler.
+    val nonVitessHints = hints.split(",")
+      .map { it.trim() }
+      .filter { !it.startsWith("vt+") }
+      .joinToString(",")
+
+    return super.getQueryHintString(vitessQuery, nonVitessHints)
   }
 }
 

@@ -2,9 +2,9 @@ package misk.hibernate
 
 import jakarta.inject.Inject
 import misk.exceptions.UnauthorizedException
-import misk.hibernate.VitessTransacterExtensions.createInSeparateShard
-import misk.hibernate.VitessTransacterExtensions.save
-import misk.hibernate.VitessTransacterExtensions.shard
+import misk.hibernate.VitessTestExtensions.createInSeparateShard
+import misk.hibernate.VitessTestExtensions.save
+import misk.hibernate.VitessTestExtensions.shard
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
 import misk.testing.MiskExternalDependency
@@ -192,16 +192,12 @@ abstract class TransacterTest {
   @Test
   fun `can do comparison query on ids`() {
     createTestData()
-
     transacter.replicaRead { session ->
-      val cb = session.hibernateSession.criteriaBuilder
-      val cr = cb.createQuery(DbCharacter::class.java)
-      val root = cr.from(DbCharacter::class.java)
-      val idProperty = root.get<Id<DbCharacter>>("id")
-      val characters = session.hibernateSession.createQuery(
-        cr.where(cb.greaterThan(idProperty, Id(0)))
-          .orderBy(cb.asc(idProperty))
-      ).resultList
+        val characters = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .idMoreThan(Id(0))
+          .idAsc()
+          .list(session)
       assertThat(characters).hasSize(5)
     }
   }
@@ -373,11 +369,10 @@ abstract class TransacterTest {
     assertFailsWith<UnauthorizedException> {
       transacter.transaction { session ->
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-        assertThat(
-          queryFactory.newQuery<MovieQuery>()
-            .allowTableScan()
-            .list(session)
-        ).isNotEmpty
+
+        val query = queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
+        assertThat(query.list(session)).isNotEmpty
         throw UnauthorizedException("boom!")
       }
     }
@@ -428,7 +423,9 @@ abstract class TransacterTest {
     }
 
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<CharacterQuery>().allowTableScan().list(session)).hasSize(1)
+      assertThat(queryFactory.newQuery<CharacterQuery>()
+        .allowTableScan()
+        .list(session)).hasSize(1)
     }
   }
 
@@ -828,7 +825,8 @@ abstract class TransacterTest {
     assertThat(futureResults).hasSize(2)
 
     val movies = transacter.transaction { session ->
-      queryFactory.newQuery(MovieQuery::class).list(session)
+      queryFactory.newQuery(MovieQuery::class)
+        .list(session)
     }
     assertThat(movies.size).isEqualTo(1)
     assertThat(movies[0].release_date == LocalDate.of(1977, 5, 25))
@@ -846,7 +844,7 @@ class MySQLTransacterTest : TransacterTest() {
 @MiskTest(startService = true)
 class VitessMySQLTransacterTest : TransacterTest() {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
