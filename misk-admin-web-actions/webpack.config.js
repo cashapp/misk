@@ -41,6 +41,7 @@ module.exports = {
   devServer: {
     static: {
       directory: path.join(__dirname, 'lib'),
+      publicPath: '/_tab/web-actions/'
     },
     port: 9000,
     open: true,
