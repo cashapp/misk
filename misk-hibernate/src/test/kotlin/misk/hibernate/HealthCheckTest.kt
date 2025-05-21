@@ -20,7 +20,7 @@ import java.time.Instant
 @MiskTest(startService = true)
 class HealthCheckTest {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule()

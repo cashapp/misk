@@ -13,7 +13,7 @@ import kotlin.test.assertFailsWith
 @MiskTest(startService = true)
 class ReflectionQueryFactoryValidationTest {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule()

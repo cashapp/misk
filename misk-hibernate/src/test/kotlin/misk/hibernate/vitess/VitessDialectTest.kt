@@ -29,6 +29,22 @@ class VitessDialectTest {
       .hasMessageContaining("Duplicate entry")
   }
 
+  @Test fun testBuildSQLExceptionConversionDelegate_ScatterQuery() {
+    val sqlException = SQLException("plan includes scatter, which is disallowed")
+
+    val delegate: SQLExceptionConversionDelegate =
+      vitessDialect.buildSQLExceptionConversionDelegate()
+
+    Assertions.assertThatThrownBy {
+      throw delegate.convert(
+        sqlException,
+        "could not extract ResultSet",
+        "n/a"
+      )
+    }.isInstanceOf(ScatterQueryException::class.java)
+      .hasMessageContaining("Scatter query detected. Must be opted-in through the `allow scatter` Vitess query hint")
+  }
+
   @Test fun testBuildSQLExceptionConversionDelegate_WaiterPoolExhausted() {
     val sqlException = SQLException("pool waiter count exceeded")
 

@@ -5,6 +5,7 @@ import wisp.config.Config
 
 internal data class MoviesConfig(
   val vitess_mysql_data_source: DataSourceConfig,
+  val vitess_mysql_no_scatter_data_source: DataSourceConfig,
   val mysql_data_source: DataSourceConfig,
   val cockroachdb_data_source: DataSourceConfig,
   val postgresql_data_source: DataSourceConfig,

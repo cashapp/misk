@@ -14,7 +14,7 @@ import java.util.Collections
 @MiskTest(startService = true)
 class HikariMetricsTest {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule()
