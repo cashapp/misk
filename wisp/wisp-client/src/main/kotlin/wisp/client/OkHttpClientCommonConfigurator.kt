@@ -16,6 +16,8 @@ class OkHttpClientCommonConfigurator {
         configureReadTimeout(builder = builder, config = config)
         configureWriteTimeout(builder = builder, config = config)
         configureRetryOnConnectionFailure(builder = builder, config = config)
+        configureFollowRedirects(builder = builder, config = config)
+        configureFollowSslRedirects(builder = builder, config = config)
         return builder
     }
 
@@ -64,6 +66,24 @@ class OkHttpClientCommonConfigurator {
         )
     }
 
+    private fun configureFollowRedirects(
+      builder: Builder,
+      config: HttpClientEndpointConfig,
+    ) {
+      builder.followRedirects(
+        config.clientConfig.followRedirect ?: followRedirects
+      )
+    }
+
+    private fun configureFollowSslRedirects(
+      builder: Builder,
+      config: HttpClientEndpointConfig,
+    ) {
+      builder.followSslRedirects(
+        config.clientConfig.followSslRedirects ?: followSslRedirects
+      )
+    }
+
     companion object {
         // Copied from okhttp3.ConnectionPool, as it does not provide "use default" option
         const val maxIdleConnections = 5
@@ -73,5 +93,13 @@ class OkHttpClientCommonConfigurator {
 
         // For backwards-compat with previous behavior of always setting this to false
         const val retryOnConnectionFailure = false
+
+        // Default value is true
+        // https://square.github.io/okhttp/5.x/okhttp/okhttp3/-ok-http-client/-builder/follow-redirects.html
+        const val followRedirects = true
+
+        // Default value is true
+        // https://square.github.io/okhttp/5.x/okhttp/okhttp3/-ok-http-client/-builder/follow-ssl-redirects.html
+        const val followSslRedirects = true
     }
 }

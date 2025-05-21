@@ -102,7 +102,9 @@ data class HttpClientConfig @JvmOverloads constructor(
     val ssl: HttpClientSSLConfig? = null,
     val unixSocketFile: String? = null,
     val protocols: List<String>? = null,
-    val retryOnConnectionFailure: Boolean? = null
+    val retryOnConnectionFailure: Boolean? = null,
+    val followRedirect: Boolean? = null,
+    val followSslRedirects: Boolean? = null
 )
 
 fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
@@ -119,7 +121,9 @@ fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
         ssl = this.ssl ?: other.ssl,
         unixSocketFile = this.unixSocketFile ?: other.unixSocketFile,
         protocols = this.protocols ?: other.protocols,
-        retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure
+      retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure,
+      followRedirect = this.followRedirect ?: other.followRedirect,
+      followSslRedirects = this.followSslRedirects ?: other.followSslRedirects
     )
 
 data class HttpClientEndpointConfig @JvmOverloads constructor(
