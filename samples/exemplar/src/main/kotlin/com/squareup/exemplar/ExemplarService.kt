@@ -7,6 +7,7 @@ import misk.MiskRealServiceModule
 import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
+import misk.grpc.reflect.GrpcReflectModule
 import misk.metrics.backends.prometheus.PrometheusMetricsServiceModule
 import misk.monitoring.MonitoringModule
 import misk.web.MiskWebModule
@@ -30,5 +31,6 @@ fun main(args: Array<String>) {
     MiskWebModule(config.web),
     PrometheusMetricsServiceModule(config.prometheus),
     MonitoringModule(),
+    GrpcReflectModule(),
   ).run(args)
 }

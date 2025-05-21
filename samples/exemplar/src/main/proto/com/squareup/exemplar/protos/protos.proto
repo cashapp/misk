@@ -11,3 +11,7 @@ message HelloWebResponse {
   string greeting = 1;
   string name = 2;
 }
+
+service HelloWebService {
+  rpc Hello(HelloWebRequest) returns (HelloWebResponse);
+}

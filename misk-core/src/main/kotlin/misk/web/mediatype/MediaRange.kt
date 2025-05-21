@@ -3,7 +3,11 @@ package misk.web.mediatype
 import okhttp3.MediaType
 import java.nio.charset.Charset
 
-/** An RFC-2616 media range */
+/**
+ * An RFC-2616 media range.
+ *
+ * This does not yet support structured syntax suffixes (ie. +json, +xml, etc) from RFC-6838.
+ */
 data class MediaRange @JvmOverloads constructor(
   val type: String,
   val subtype: String,
