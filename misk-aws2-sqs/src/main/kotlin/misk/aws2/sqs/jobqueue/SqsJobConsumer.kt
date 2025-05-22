@@ -15,6 +15,8 @@ import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
+import misk.testing.FakeFixture
+import misk.testing.TestFixture
 import wisp.logging.getLogger
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
@@ -50,7 +52,7 @@ class SqsJobConsumer @Inject constructor(
   private val sqsMetrics: SqsMetrics,
   private val clock: Clock,
   private val tracer: Tracer,
-) : JobConsumer, AbstractService() {
+) : JobConsumer, AbstractService(), TestFixture {
   private val scope = CoroutineScope(Dispatchers.IO.limitedParallelism(1) + SupervisorJob())
 
   private val handlingScopes = ConcurrentHashMap<QueueName, CoroutineScope>()
@@ -88,6 +90,13 @@ class SqsJobConsumer @Inject constructor(
 
   override fun unsubscribe(queueName: QueueName) {
     handlingScopes[queueName]?.cancel()
+  }
+
+  /** Called automatically between every test to prevent long-running scopes or test timeouts. */
+  override fun reset() {
+    handlingScopes.forEach { _,  scope ->
+      scope.cancel()
+    }
   }
 
   override fun doStart() {

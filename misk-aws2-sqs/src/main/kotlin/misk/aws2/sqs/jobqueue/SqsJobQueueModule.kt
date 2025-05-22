@@ -9,6 +9,7 @@ import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobEnqueuer
+import misk.testing.TestFixture
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder
 import software.amazon.awssdk.regions.Region
@@ -28,6 +29,7 @@ open class SqsJobQueueModule @JvmOverloads constructor(
     install(ServiceModule<SqsJobConsumer>().dependsOn<ReadyService>())
     bind<JobConsumer>().to<SqsJobConsumer>()
     bind<JobEnqueuer>().to<SqsJobEnqueuer>()
+    multibind<TestFixture>().to<SqsJobConsumer>()
   }
 
   @Provides
