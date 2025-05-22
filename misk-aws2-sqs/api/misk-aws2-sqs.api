@@ -40,9 +40,10 @@ public final class misk/aws2/sqs/jobqueue/SqsJob : misk/jobqueue/v2/Job {
 public final class misk/aws2/sqs/jobqueue/SqsJob$Companion {
 }
 
-public final class misk/aws2/sqs/jobqueue/SqsJobConsumer : com/google/common/util/concurrent/AbstractService, misk/jobqueue/v2/JobConsumer {
+public final class misk/aws2/sqs/jobqueue/SqsJobConsumer : com/google/common/util/concurrent/AbstractService, misk/jobqueue/v2/JobConsumer, misk/testing/TestFixture {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/SqsJobConsumer$Companion;
 	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;Lcom/squareup/moshi/Moshi;Lmisk/aws2/sqs/jobqueue/DeadLetterQueueProvider;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Ljava/time/Clock;Lio/opentracing/Tracer;)V
+	public fun reset ()V
 	public fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;)V
 	public final fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;)V
 	public fun unsubscribe (Lmisk/jobqueue/QueueName;)V

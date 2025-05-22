@@ -20,6 +20,7 @@ dependencies {
   api(project(":misk-aws"))
   api(project(":misk-inject"))
   api(project(":misk-jobqueue"))
+  api(project(":misk-testing-api"))
   api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-token"))
   implementation(libs.aws2Core)
