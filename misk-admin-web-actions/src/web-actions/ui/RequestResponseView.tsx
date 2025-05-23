@@ -63,21 +63,25 @@ const RequestResponseView: React.FC<RequestResponseProps> = ({
 
   return (
     <VStack height="100%" alignItems="start">
-      <Heading color="white" size="sm" fontWeight="semibold">
-        Request
-      </Heading>
+      {viewState.selectedAction !== null && (
+        <Heading color="white" size="sm" fontWeight="semibold">
+          Request
+        </Heading>
+      )}
       <HStack flexGrow={1} w="100%">
-        <Input
-          value={viewState.path}
-          placeholder="Path"
-          bg="white"
-          onChange={(e) => {
-            setViewState({
-              ...viewState,
-              path: e.target.value,
-            });
-          }}
-        />
+        {viewState.selectedAction !== null && (
+          <Input
+            value={viewState.path}
+            placeholder="Path"
+            bg="white"
+            onChange={(e) => {
+              setViewState({
+                ...viewState,
+                path: e.target.value,
+              });
+            }}
+          />
+        )}
         <HStack>
           {viewState.selectedAction?.callable === true && (
             <IconButton
@@ -88,64 +92,93 @@ const RequestResponseView: React.FC<RequestResponseProps> = ({
               <ActionIcon />
             </IconButton>
           )}
-          <Tooltip label={'Endpoint Details'} placement="top">
-            <IconButton
-              aria-label="Expand panel"
-              icon={<InfoOutlineIcon />}
-              onClick={onToggleCollapse}
-            />
-          </Tooltip>
+          {viewState.selectedAction !== null && (
+            <Tooltip label={'Endpoint Details'} placement="top">
+              <IconButton
+                aria-label="Expand panel"
+                icon={<InfoOutlineIcon />}
+                onClick={onToggleCollapse}
+              />
+            </Tooltip>
+          )}
         </HStack>
       </HStack>
-      <Heading color="white" size="xs" fontWeight="semibold">
-        Headers
-      </Heading>
-      <Box width="100%">
-        <VStack spacing={2} align="stretch">
-          {viewState.headers.map((header, index) => (
-            <HStack key={index} spacing={2}>
-              <Input
-                placeholder="Header Key"
-                value={header.key}
-                onChange={(e) => updateHeader(index, 'key', e.target.value)}
-                bg="white"
-              />
-              <Input
-                placeholder="Header Value"
-                value={header.value}
-                onChange={(e) => updateHeader(index, 'value', e.target.value)}
-                bg="white"
-              />
-              <IconButton
-                aria-label="Remove header"
-                icon={<DeleteIcon />}
-                onClick={() => removeHeader(index)}
-                colorScheme="red"
-              />
-            </HStack>
-          ))}
-          <Button
-            leftIcon={<AddIcon />}
-            onClick={addHeader}
-            colorScheme="blue"
-            size="sm"
+      {viewState.selectedAction !== null ? (
+        <>
+          <Heading color="white" size="xs" fontWeight="semibold">
+            Headers
+          </Heading>
+          <Box width="100%">
+            <VStack spacing={2} align="stretch">
+              {viewState.headers.map((header, index) => (
+                <HStack key={index} spacing={2}>
+                  <Input
+                    placeholder="Header Key"
+                    value={header.key}
+                    onChange={(e) => updateHeader(index, 'key', e.target.value)}
+                    bg="white"
+                  />
+                  <Input
+                    placeholder="Header Value"
+                    value={header.value}
+                    onChange={(e) =>
+                      updateHeader(index, 'value', e.target.value)
+                    }
+                    bg="white"
+                  />
+                  <IconButton
+                    aria-label="Remove header"
+                    icon={<DeleteIcon />}
+                    onClick={() => removeHeader(index)}
+                    colorScheme="red"
+                  />
+                </HStack>
+              ))}
+              <Button
+                leftIcon={<AddIcon />}
+                onClick={addHeader}
+                colorScheme="blue"
+                size="sm"
+              >
+                Add Header
+              </Button>
+            </VStack>
+          </Box>
+          <Heading color="white" size="xs" fontWeight="semibold">
+            Body
+          </Heading>
+          <RequestEditor
+            ref={requestEditorRef as any}
+            loading={submitting}
+            isCallable={viewState.selectedAction?.callable || false}
+          />
+          <Heading color="white" size="sm" fontWeight="semibold">
+            Response
+          </Heading>
+          <ReadOnlyEditor content={() => response} />
+        </>
+      ) : (
+        <VStack
+          marginTop="25%"
+          width="100%"
+          height="100%"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Heading
+            color="white"
+            size="xl"
+            fontWeight="bold"
+            textAlign="center"
           >
-            Add Header
-          </Button>
+            Web Actions
+          </Heading>
+          <Heading color="white" size="sm" fontWeight="semibold">
+            Select an endpoint to begin
+          </Heading>
         </VStack>
-      </Box>
-      <Heading color="white" size="xs" fontWeight="semibold">
-        Body
-      </Heading>
-      <RequestEditor
-        ref={requestEditorRef as any}
-        loading={submitting}
-        isCallable={viewState.selectedAction?.callable || false}
-      />
-      <Heading color="white" size="sm" fontWeight="semibold">
-        Response
-      </Heading>
-      <ReadOnlyEditor content={() => response} />
+      )}
     </VStack>
   );
 };
