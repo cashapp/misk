@@ -21,6 +21,7 @@ import misk.api.HttpRequest
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
+import misk.grpc.reflect.GrpcReflectModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.toKey
@@ -272,6 +273,7 @@ class MiskWebModule @JvmOverloads constructor(
 
     // Install infrastructure support
     install(CertificatesModule())
+    install(GrpcReflectModule())
 
     // Bind build-in actions.
     install(WebActionModule.create<StatusAction>())

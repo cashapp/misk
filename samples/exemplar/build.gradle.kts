@@ -35,7 +35,6 @@ dependencies {
   implementation(project(":misk-clustering"))
   implementation(project(":misk-core"))
   implementation(project(":misk-cron"))
-  implementation(project(":misk-grpc-reflect"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-prometheus"))
