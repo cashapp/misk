@@ -3,6 +3,7 @@ package misk.redis.testing
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
+import misk.testing.TestFixture
 
 /**
  * Installs a service that flushes all Redis keys in all databases on startup.
@@ -14,5 +15,6 @@ class RedisTestFlushModule : KAbstractModule() {
       ServiceModule<RedisFlushService>()
         .enhancedBy<ReadyService>()
     )
+    bind<TestFixture>().to<RedisFlushService>()
   }
 }
