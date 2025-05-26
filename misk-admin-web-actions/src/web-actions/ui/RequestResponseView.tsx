@@ -166,12 +166,7 @@ const RequestResponseView: React.FC<RequestResponseProps> = ({
           alignItems="center"
           justifyContent="center"
         >
-          <Heading
-            color="white"
-            size="xl"
-            fontWeight="bold"
-            textAlign="center"
-          >
+          <Heading color="white" size="xl" fontWeight="bold" textAlign="center">
             Web Actions
           </Heading>
           <Heading color="white" size="sm" fontWeight="semibold">
