@@ -176,7 +176,7 @@ val buildMiskWeb = tasks.register("buildMiskWeb", MiskWebBuildTask::class.java) 
 // specifically requested.
 val isCi = System.getenv("CI") == "true" || System.getenv("GITHUB_ACTIONS") != null
 if (isCi || System.getProperty("misk.admin.buildMiskWeb") == "true") {
-  tasks.named { it == "explodeCodeSourceMain" || it == "processResources" }.configureEach {
+  tasks.named { it == "explodeCodeSourceMain" || it == "processResources" || it == "sourcesJar" }.configureEach {
     dependsOn(buildMiskWeb)
     dependsOn("buildAndCopyWebActions")
   }
