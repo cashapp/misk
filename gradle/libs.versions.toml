@@ -185,7 +185,7 @@ openTracingJdbc = { module = "io.opentracing.contrib:opentracing-jdbc", version 
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
 openTracingUtil = { module = "io.opentracing:opentracing-util", version = "0.33.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.5" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.6" }
 prometheusClient = { module = "io.prometheus:simpleclient" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version = "0.16.0" }
 prometheusClientCommon = { module = "io.prometheus:simpleclient_common" }
