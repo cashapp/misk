@@ -421,6 +421,15 @@ interface Redis {
   fun rpoplpush(sourceKey: String, destinationKey: String): ByteString?
 
   /**
+   * Remove the existing timeout on key, turning the key from volatile (a key with an expire set)
+   * to persistent (a key that will never expire as no timeout is associated).
+   *
+   * @return true if the timeout has been removed. false if the key does not exist or does not have
+   * an associated timeout.
+   */
+  fun persist(key: String): Boolean
+
+  /**
    * Set a timeout on key. After the timeout has expired, the key will automatically be deleted. A
    * key with an associated timeout is often said to be volatile in Redis terminology.
    *

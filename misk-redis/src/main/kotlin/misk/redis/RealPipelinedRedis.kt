@@ -350,6 +350,12 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get()?.toByteString() }
   }
 
+  override fun persist(key: String): Supplier<Boolean> {
+    val keyBytes = key.toByteArray(charset)
+    val response = pipeline.persist(keyBytes)
+    return Supplier { response.get() == 1L }
+  }
+
   override fun expire(key: String, seconds: Long): Supplier<Boolean> {
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.expire(keyBytes, seconds)

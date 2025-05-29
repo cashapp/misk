@@ -397,6 +397,21 @@ class FakeRedis : Redis {
   )
 
   @Synchronized
+  override fun persist(key: String): Boolean {
+    val value = keyValueStore[key]
+    val hValue = hKeyValueStore[key]
+    val lValue = lKeyValueStore[key]
+
+    when {
+      value != null -> value.expiryInstant = Instant.MAX
+      hValue != null -> hValue.expiryInstant = Instant.MAX
+      lValue != null -> lValue.expiryInstant = Instant.MAX
+      else -> return false
+    }
+    return true
+  }
+
+  @Synchronized
   override fun expire(key: String, seconds: Long): Boolean {
     val ttlMillis = Duration.ofSeconds(seconds).toMillis()
     return pExpireAt(key, clock.millis().plus(ttlMillis))

@@ -94,6 +94,8 @@ interface DeferredRedis {
 
   fun rpoplpush(sourceKey: String, destinationKey: String): Supplier<ByteString?>
 
+  fun persist(key: String): Supplier<Boolean>
+
   fun expire(key: String, seconds: Long): Supplier<Boolean>
 
   fun expireAt(key: String, timestampSeconds: Long): Supplier<Boolean>

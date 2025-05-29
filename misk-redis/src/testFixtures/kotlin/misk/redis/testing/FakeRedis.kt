@@ -433,6 +433,20 @@ class FakeRedis @Inject constructor(
     to = ListDirection.LEFT
   )
 
+  override fun persist(key: String): Boolean {
+    val value = keyValueStore[key]
+    val hValue = hKeyValueStore[key]
+    val lValue = lKeyValueStore[key]
+
+    when {
+      value != null -> value.expiryInstant = Instant.MAX
+      hValue != null -> hValue.expiryInstant = Instant.MAX
+      lValue != null -> lValue.expiryInstant = Instant.MAX
+      else -> return false
+    }
+    return true
+  }
+
   @Synchronized
   override fun expire(key: String, seconds: Long): Boolean {
     val ttlMillis = Duration.ofSeconds(seconds).toMillis()
@@ -668,6 +682,10 @@ class FakeRedis @Inject constructor(
       destinationKey: String
     ): Supplier<ByteString?> = Supplier {
       this@FakeRedis.rpoplpush(sourceKey, destinationKey)
+    }
+
+    override fun persist(key: String): Supplier<Boolean> = Supplier {
+      this@FakeRedis.persist(key)
     }
 
     override fun expire(key: String, seconds: Long): Supplier<Boolean> = Supplier {
