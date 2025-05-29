@@ -133,6 +133,9 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
   override fun rpoplpush(sourceKey: String, destinationKey: String): ByteString? =
     runPipeline { rpoplpush(sourceKey, destinationKey) }
 
+  override fun persist(key: String): Boolean =
+    runPipeline { persist(key) }
+
   override fun expire(key: String, seconds: Long): Boolean =
     runPipeline { expire(key, seconds) }
 

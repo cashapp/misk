@@ -33,6 +33,7 @@ public abstract interface class misk/redis/DeferredRedis {
 	public abstract fun mset ([Lokio/ByteString;)Ljava/util/function/Supplier;
 	public abstract fun pExpire (Ljava/lang/String;J)Ljava/util/function/Supplier;
 	public abstract fun pExpireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public abstract fun persist (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun rpop (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun rpop (Ljava/lang/String;I)Ljava/util/function/Supplier;
 	public abstract fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
@@ -97,6 +98,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun multi ()Lredis/clients/jedis/Transaction;
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
+	public fun persist (Ljava/lang/String;)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public fun pipelining (Lkotlin/jvm/functions/Function1;)V
 	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
@@ -165,6 +167,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun multi ()Lredis/clients/jedis/Transaction;
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
+	public fun persist (Ljava/lang/String;)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public fun pipelining (Lkotlin/jvm/functions/Function1;)V
 	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
@@ -230,6 +233,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun multi ()Lredis/clients/jedis/Transaction;
 	public abstract fun pExpire (Ljava/lang/String;J)Z
 	public abstract fun pExpireAt (Ljava/lang/String;J)Z
+	public abstract fun persist (Ljava/lang/String;)Z
 	public abstract fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public abstract fun pipelining (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun publish (Ljava/lang/String;Ljava/lang/String;)V
@@ -582,6 +586,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing
 	public fun multi ()Lredis/clients/jedis/Transaction;
 	public fun pExpire (Ljava/lang/String;J)Z
 	public fun pExpireAt (Ljava/lang/String;J)Z
+	public fun persist (Ljava/lang/String;)Z
 	public fun pipelined ()Lredis/clients/jedis/Pipeline;
 	public fun pipelining (Lkotlin/jvm/functions/Function1;)V
 	public fun publish (Ljava/lang/String;Ljava/lang/String;)V
@@ -643,6 +648,7 @@ public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/
 	public fun mset ([Lokio/ByteString;)Ljava/util/function/Supplier;
 	public fun pExpire (Ljava/lang/String;J)Ljava/util/function/Supplier;
 	public fun pExpireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
+	public fun persist (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun rpop (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun rpop (Ljava/lang/String;I)Ljava/util/function/Supplier;
 	public fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;

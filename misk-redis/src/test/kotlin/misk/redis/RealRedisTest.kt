@@ -13,6 +13,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
+import java.time.Duration
 
 @MiskTest
 class RealRedisTest : AbstractRedisTest() {
@@ -160,6 +161,20 @@ class RealRedisTest : AbstractRedisTest() {
     val hashKey = "myhash"
 
     assertThat(redis.hkeys(hashKey)).isEmpty()
+  }
+
+  @Test
+  fun `persist returns true if the timeout for a key was removed`() {
+    val key = "mykey"
+
+    redis.set(key, Duration.ofSeconds(10), "value".encodeUtf8())
+
+    assertThat(redis.persist(key)).isTrue()
+  }
+
+  @Test
+  fun `persist returns false if the key does not exist`() {
+    assertThat(redis.persist("persist_false_key")).isFalse()
   }
 
   private fun scanAll(

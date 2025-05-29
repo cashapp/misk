@@ -352,6 +352,11 @@ class RealRedis(
     return jedis { rpoplpush(sourceKeyBytes, destKeyBytes) }?.toByteString()
   }
 
+  override fun persist(key: String): Boolean {
+    val keyBytes = key.toByteArray(charset)
+    return jedis { persist(keyBytes) == 1L }
+  }
+
   override fun expire(key: String, seconds: Long): Boolean {
     val keyBytes = key.toByteArray(charset)
     return jedis { expire(keyBytes, seconds) == 1L }
