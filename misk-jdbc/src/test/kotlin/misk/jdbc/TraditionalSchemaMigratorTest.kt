@@ -223,11 +223,11 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
       traditionalSchemaMigrator.requireAll()
     }).hasMessage(
       """
-          |Movies has applied migrations:
-          |  
           |Movies is missing migrations:
           |  ${config.migrations_resources!![0]}/v1001__foo.sql
-          |  ${config.migrations_resources!![1]}/v1002__foo.sql""".trimMargin()
+          |  ${config.migrations_resources!![1]}/v1002__foo.sql
+          |Movies has applied migrations:
+          |  """.trimMargin()
     )
   }
 
@@ -252,10 +252,10 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
       traditionalSchemaMigrator.requireAll()
     }).hasMessage(
       """
-          |Movies has applied migrations:
-          |  ${config.migrations_resources!![0]}/v1001__foo.sql
           |Movies is missing migrations:
-          |  ${config.migrations_resources!![1]}/v1002__foo.sql""".trimMargin()
+          |  ${config.migrations_resources!![1]}/v1002__foo.sql
+          |Movies has applied migrations:
+          |  ${config.migrations_resources!![0]}/v1001__foo.sql""".trimMargin()
     )
   }
 

@@ -242,10 +242,10 @@ internal class TraditionalSchemaMigrator(
       check(missingMigrations.isEmpty()) {
         val qualifiedAppliedMigrations = availableMigrations - missingMigrations
         return@check """
-          |${qualifier.simpleName} has applied migrations:
-          |  ${qualifiedAppliedMigrations.joinToString(separator = "\n  ") { it.path }}
 	        |${qualifier.simpleName} is missing migrations:
           |  ${missingMigrations.joinToString(separator = "\n  ") { it.path }}
+          |${qualifier.simpleName} has applied migrations:
+          |  ${qualifiedAppliedMigrations.joinToString(separator = "\n  ") { it.path }}
           """.trimMargin()
       }
 
