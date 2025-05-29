@@ -18,9 +18,10 @@ class VitessQueryHints {
     fun bestEffortScatter(): String = "vt+ SCATTER_ERRORS_AS_WARNINGS"
 
     /**
-     * Return a hint to Vitess to enforce a query timeout. <b>Important</b>: This is <b>dangerous</b> if
-     * you set a timeout greater than the default Vitess query timeout (queryserver-config-query-timeout),
-     * and ideally this should only be used to set lower query timeouts, so <b>use with extreme caution</b>.
+     * Return a hint to Vitess to enforce a query timeout. This only works for
+     * `SELECT` (read queries), and the value passed in cannot set a higher limit
+     * to evade the server-side settings for `--queryserver-config-query-timeout`
+     * and/or `--queryserver-config-transaction-timeout`.
      */
     fun queryTimeoutMs(ms: Long): String = "vt+ QUERY_TIMEOUT_MS=$ms"
   }
