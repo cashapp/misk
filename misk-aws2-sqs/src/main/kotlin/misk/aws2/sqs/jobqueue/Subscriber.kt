@@ -132,7 +132,7 @@ class Subscriber(
           .build()
       ).await()
     } catch (e: Exception) {
-      logger.warn { "Failed to acknowledge job ${job.idempotenceKey} from queue ${job.queueName.value}"}
+      logger.warn(e) { "Failed to acknowledge job ${job.idempotenceKey} from queue ${job.queueName.value}"}
       sqsMetrics.jobsFailedToAcknowledge.labels(queueName.value).inc()
       return
     }
@@ -143,10 +143,12 @@ class Subscriber(
   private suspend fun deadLetterMessage(job: SqsJob) {
     val deadLetterQueueUrl = sqsQueueResolver.getQueueUrl(deadLetterQueueName)
     val startTime = clock.millis()
-    client.sendMessage(
+
+    val response = client.sendMessage(
       SendMessageRequest.builder()
         .queueUrl(deadLetterQueueUrl)
         .messageBody(job.body)
+        .messageAttributes(job.message.messageAttributes())
         .build()
     ).await()
     sqsMetrics.sqsSendTime.labels(deadLetterQueueName.value).observe((clock.millis() - startTime).toDouble())
@@ -201,7 +203,7 @@ class Subscriber(
   private fun fetchMessages(queueUrl: String): CompletableFuture<ReceiveMessageResponse> {
     val request = ReceiveMessageRequest.builder()
       .queueUrl(queueUrl)
-      .messageAttributeNames(MessageSystemAttributeName.ALL.name)
+      .messageAttributeNames(MessageSystemAttributeName.ALL.toString())
       .messageSystemAttributeNames(MessageSystemAttributeName.ALL)
       .maxNumberOfMessages(queueConfig.max_number_of_messages)
       .waitTimeSeconds(queueConfig.wait_timeout)

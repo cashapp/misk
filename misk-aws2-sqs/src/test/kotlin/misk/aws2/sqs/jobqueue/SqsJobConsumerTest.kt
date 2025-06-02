@@ -15,10 +15,13 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest
+import software.amazon.awssdk.services.sqs.model.MessageAttributeValue
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import wisp.logging.getLogger
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.random.Random
@@ -213,7 +216,12 @@ class SqsJobConsumerTest {
     latch.await(1, SECONDS)
 
     assertQueueSize(0, result.queueUrl)
-    assertQueueSize(1, result.dlqQueueUrl)
+    val receivedMessages = assertQueueSize(1, result.dlqQueueUrl)
+
+    // Assert that metadata attributes are passed to deadlettered event
+    // This is relevant for dead-letter-office
+    val metadata = receivedMessages.messages()[0].messageAttributes()[SqsJob.JOBQUEUE_METADATA_ATTR]
+    assertEquals("Test", metadata?.stringValue())
   }
 
   @Test
@@ -325,15 +333,17 @@ class SqsJobConsumerTest {
     }
   }
 
-  private fun assertQueueSize(expectedSize: Int, queueUrl: String) {
+  private fun assertQueueSize(expectedSize: Int, queueUrl: String): ReceiveMessageResponse {
     val receivedMessages = DockerSqs.client.receiveMessage(
       ReceiveMessageRequest.builder()
         .queueUrl(queueUrl)
         .maxNumberOfMessages(10)
         .waitTimeSeconds(1)
+        .messageAttributeNames(".*")
         .build(),
     ).join()
     assertEquals(expectedSize, receivedMessages.messages().size)
+    return receivedMessages
   }
 
   private fun createQueue(queueName: QueueName): CreatedQueues {
@@ -368,10 +378,18 @@ class SqsJobConsumerTest {
   }
 
   private fun sendMessage(queueUrl: String, message: String) {
+    val attrs = mapOf(
+      SqsJob.JOBQUEUE_METADATA_ATTR to MessageAttributeValue.builder()
+        .dataType("String")
+        .stringValue("Test")
+        .build()
+    )
+
     DockerSqs.client.sendMessage(
       SendMessageRequest.builder()
         .queueUrl(queueUrl)
         .messageBody(message)
+        .messageAttributes(attrs)
         .build(),
     ).join()
   }
