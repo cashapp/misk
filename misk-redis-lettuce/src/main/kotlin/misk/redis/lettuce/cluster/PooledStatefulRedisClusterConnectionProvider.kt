@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture
  * - For shared connections: No-op (connection remains active)
  */
 internal class PooledStatefulRedisClusterConnectionProvider<K : Any, V : Any>(
-  private val poolFuture: CompletableFuture<BoundedAsyncPool<StatefulRedisClusterConnection<K, V>>>,
+  internal val poolFuture: CompletableFuture<BoundedAsyncPool<StatefulRedisClusterConnection<K, V>>>,
   override val replicationGroupId: String
 ) : StatefulRedisClusterConnectionProvider<K, V> {
 

@@ -1,4 +1,4 @@
-package misk.redis
+package misk.redis.lettuce
 
 
 val redisPort: Int by lazy {

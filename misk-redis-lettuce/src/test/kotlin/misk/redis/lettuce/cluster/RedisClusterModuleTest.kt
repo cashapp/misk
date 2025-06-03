@@ -1,6 +1,7 @@
 package misk.redis.lettuce.cluster
 
 import com.google.inject.Module
+import io.lettuce.core.cluster.RedisClusterClient
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
@@ -9,7 +10,9 @@ import misk.redis.lettuce.RedisClusterConfig
 import misk.redis.lettuce.RedisClusterGroupConfig
 import misk.redis.lettuce.RedisModule
 import misk.redis.lettuce.RedisNodeConfig
-import misk.redis.redisSeedPort
+import misk.redis.lettuce.redisSeedPort
+import misk.redis.lettuce.metrics.RedisClientMetrics
+import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.DisplayName
@@ -44,14 +47,19 @@ internal class RedisClusterModuleTest {
             ),
           ),
         ),
-
       )
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
     }
   }
 
-  @Inject lateinit var connectionProvider: ClusterConnectionProvider
+
+  @Inject
+  lateinit var client: RedisClusterClient
+  @Inject
+  lateinit var metrics: RedisClientMetrics
+  @Inject
+  lateinit var connectionProvider: ClusterConnectionProvider
 
   @Test
   fun `verify the connectionProvider is a POOLED`() {
@@ -73,9 +81,29 @@ internal class RedisClusterModuleTest {
   @Test
   fun `test ping with connectionProvider`() {
     assertEquals(
-      message = "result is PONG",
-      expected = "PONG",
-      actual = connectionProvider.withConnectionBlocking { ping() }
+        message = "result is PONG",
+        expected = "PONG",
+        actual = connectionProvider.withConnectionBlocking { ping() },
+    )
+  }
+
+  @Test
+  fun `test redis client has CommandLatencyRecorder registered`() {
+    assertTrue(
+      message = "RedisClient should have CommandLatencyRecorder registered",
+      actual = client.resources.commandLatencyRecorder() is RedisClientMetricsCommandLatencyRecorder,
+    )
+  }
+
+  @Test
+  fun `verify that the pooled connection provider is registered in the RedisClientMetrics`() {
+    val providerPool =
+      (connectionProvider as PooledStatefulRedisClusterConnectionProvider<String, String>).poolFuture.get()
+    val metricsReference =
+      metrics.maxTotalConnectionsGauge.labels(clientName, replicationGroupId).reference
+    assertTrue(
+        message = "pool in '$clientName' should be registered in the RedisClientMetrics",
+        actual = metricsReference.get() === providerPool,
     )
   }
 }

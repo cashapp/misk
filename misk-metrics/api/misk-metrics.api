@@ -94,6 +94,7 @@ public final class misk/metrics/v2/FakeMetrics : misk/metrics/v2/Metrics {
 	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
 	public fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
 	public fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
+	public fun providedGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/ProvidedGauge;
 	public fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
 	public final fun summaryCount (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
 	public final fun summaryMean (Ljava/lang/String;[Lkotlin/Pair;)Ljava/lang/Double;
@@ -115,6 +116,7 @@ public abstract interface class misk/metrics/v2/Metrics {
 	public abstract fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
 	public abstract fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
 	public abstract fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
+	public abstract fun providedGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/ProvidedGauge;
 	public abstract fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
 }
 
@@ -133,6 +135,8 @@ public final class misk/metrics/v2/Metrics$DefaultImpls {
 	public static synthetic fun legacyHistogram$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lmisk/metrics/Histogram;
 	public static fun peakGauge (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
 	public static synthetic fun peakGauge$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v2/PeakGauge;
+	public static fun providedGauge (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/ProvidedGauge;
+	public static synthetic fun providedGauge$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v2/ProvidedGauge;
 	public static fun summary (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
 	public static synthetic fun summary$default (Lmisk/metrics/v2/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lio/prometheus/client/Summary;
 }
@@ -167,5 +171,32 @@ public final class misk/metrics/v2/PeakGauge$Child {
 
 public final class misk/metrics/v2/PeakGauge$Companion {
 	public final fun builder (Ljava/lang/String;Ljava/lang/String;)Lmisk/metrics/v2/PeakGauge$Builder;
+}
+
+public final class misk/metrics/v2/ProvidedGauge : io/prometheus/client/SimpleCollector {
+	public static final field Companion Lmisk/metrics/v2/ProvidedGauge$Companion;
+	public synthetic fun <init> (Lmisk/metrics/v2/ProvidedGauge$Builder;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun collect ()Ljava/util/List;
+	public synthetic fun newChild ()Ljava/lang/Object;
+	public final fun registerProvider (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun setChild (Ljava/lang/Object;[Ljava/lang/String;)Lio/prometheus/client/Collector;
+	public fun setChild (Lmisk/metrics/v2/ProvidedGauge$Child;[Ljava/lang/String;)Lio/prometheus/client/Collector;
+}
+
+public final class misk/metrics/v2/ProvidedGauge$Builder : io/prometheus/client/SimpleCollector$Builder {
+	public fun <init> ()V
+	public synthetic fun create ()Lio/prometheus/client/SimpleCollector;
+	public fun create ()Lmisk/metrics/v2/ProvidedGauge;
+}
+
+public final class misk/metrics/v2/ProvidedGauge$Child {
+	public fun <init> ()V
+	public final fun get ()D
+	public final fun getReference ()Ljava/lang/ref/WeakReference;
+	public final fun registerProvider (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class misk/metrics/v2/ProvidedGauge$Companion {
+	public final fun builder (Ljava/lang/String;Ljava/lang/String;)Lmisk/metrics/v2/ProvidedGauge$Builder;
 }
 

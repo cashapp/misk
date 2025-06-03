@@ -43,6 +43,9 @@ class FakeMetrics @Inject internal constructor(
     labelNames
   )
 
+  override fun providedGauge(name: String, help: String, labelNames: List<String>) =
+    super.providedGauge(name, help, labelNames)
+
   override fun histogram(
     name: String,
     help: String,
