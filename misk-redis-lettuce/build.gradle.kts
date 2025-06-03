@@ -22,7 +22,10 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":wisp:wisp-config"))
   implementation(libs.guice)
+  implementation(libs.jakartaInject)
   implementation(libs.kotlinxCoroutinesCore)
+  implementation(libs.prometheusClient)
+  implementation(project(":misk-metrics"))
   
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)

@@ -10,7 +10,7 @@ import misk.redis.lettuce.RedisClusterConfig
 import misk.redis.lettuce.RedisClusterGroupConfig
 import misk.redis.lettuce.RedisModule
 import misk.redis.lettuce.RedisNodeConfig
-import misk.redis.redisSeedPort
+import misk.redis.lettuce.redisSeedPort
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.DisplayName

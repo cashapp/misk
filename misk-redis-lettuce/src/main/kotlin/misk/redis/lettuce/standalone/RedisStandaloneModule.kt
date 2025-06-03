@@ -10,6 +10,8 @@ import misk.redis.lettuce.RedisConfig
 import misk.redis.lettuce.RedisReplicationGroupConfig
 import misk.redis.lettuce.connectionProviderTypeLiteral
 import misk.redis.lettuce.redisUri
+import misk.redis.lettuce.metrics.RedisClientMetrics
+import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.toJavaDuration
@@ -24,6 +26,8 @@ import kotlin.time.toJavaDuration
  *
  * 1. **Creates a binding for a** [RedisClient] **for each replication group.**
  *    Each client will be configured using the corresponding [RedisConfig] object
+ *    and will install a [RedisClientMetricsCommandLatencyRecorder] to record
+ *    command latencies for [RedisClientMetrics].
  *
  * 2. **Creates a binding for a** [ReadWriteStatefulRedisConnectionProvider] **using the** [RedisConfig]'s
  *    `writer_endpoint`.
@@ -57,6 +61,8 @@ internal class RedisStandaloneModule<K : Any, V : Any> internal constructor(
       val qualifier = if (config.size == 1) null else Names.named(replicationGroupId)
       val redisClientKey = keyOf<RedisClient>(qualifier)
 
+      val redisClientMetricsProvider = getProvider(RedisClientMetrics::class.java)
+
       val redisPrimaryUri = redisUri {
         with(replicationGroupConfig.writer_endpoint) {
           withHost(hostname)
@@ -74,6 +80,14 @@ internal class RedisStandaloneModule<K : Any, V : Any> internal constructor(
             socketOptions {
               connectTimeout(replicationGroupConfig.timeout_ms.milliseconds.toJavaDuration())
             }
+          },
+          clientResources = clientResources {
+            commandLatencyRecorder(
+              RedisClientMetricsCommandLatencyRecorder(
+                replicationGroupId = replicationGroupId,
+                clientMetrics = redisClientMetricsProvider.get(),
+              ),
+            )
           },
         )
       }.asSingleton()

@@ -10,6 +10,9 @@ import misk.inject.keyOf
 import misk.redis.lettuce.RedisClusterConfig
 import misk.redis.lettuce.connectionProviderTypeLiteral
 import misk.redis.lettuce.redisUri
+import misk.redis.lettuce.standalone.clientResources
+import misk.redis.lettuce.metrics.RedisClientMetrics
+import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -25,6 +28,8 @@ import kotlin.time.toJavaDuration
  *
  * 1. **Creates a binding for a** [RedisClient] **for each replication group.**
  *    Each client will be configured using the corresponding [RedisConfig] object
+ *    and will install a [RedisClientMetricsCommandLatencyRecorder] to record
+ *    command latencies for [RedisClientMetrics].
  *
  * 2. **Creates a binding for a** [StatefulRedisClusterConnectionProvider] **using the** [RedisClusterConfig]'s
  *    `writer_endpoint`.
@@ -51,26 +56,36 @@ internal class RedisClusterModule<K : Any, V : Any> internal constructor(
       val qualifier = if (config.size == 1) null else Names.named(replicationGroupId)
       val clusterClientKey = keyOf<RedisClusterClient>(qualifier)
 
+      val redisClientMetricsProvider = getProvider(RedisClientMetrics::class.java)
+
       bind(clusterClientKey).toProvider {
         redisClusterClient(
-          with(clusterGroupConfig.configuration_endpoint) {
-            redisUri {
-              withHost(hostname)
-              withPort(port)
-              withPassword(clusterGroupConfig.redis_auth_password.toCharArray())
-              withSsl(clusterGroupConfig.use_ssl)
-            }
-          },
-          clientOptions = clusterClientOptions {
-            clusterTopologyRefreshOptions {
-              enablePeriodicRefresh()
-              refreshPeriod(15.seconds.toJavaDuration())
-              enableAllAdaptiveRefreshTriggers()
-            }
-            socketOptions {
-              connectTimeout(clusterGroupConfig.timeout_ms.milliseconds.toJavaDuration())
-            }
-          }
+            with(clusterGroupConfig.configuration_endpoint) {
+              redisUri {
+                withHost(hostname)
+                withPort(port)
+                withPassword(clusterGroupConfig.redis_auth_password.toCharArray())
+                withSsl(clusterGroupConfig.use_ssl)
+              }
+            },
+            clientOptions = clusterClientOptions {
+              clusterTopologyRefreshOptions {
+                enablePeriodicRefresh()
+                refreshPeriod(15.seconds.toJavaDuration())
+                enableAllAdaptiveRefreshTriggers()
+              }
+              socketOptions {
+                connectTimeout(clusterGroupConfig.timeout_ms.milliseconds.toJavaDuration())
+              }
+            },
+            clientResources = clientResources {
+              commandLatencyRecorder(
+                  RedisClientMetricsCommandLatencyRecorder(
+                      replicationGroupId = replicationGroupId,
+                      clientMetrics = redisClientMetricsProvider.get(),
+                  ),
+              )
+            },
         )
       }.asSingleton()
 

@@ -412,6 +412,33 @@ RedisConnectionPoolConfig(
 - Default pool minimum idle connections: 1
 - Default connection testing settings: all disabled
 
+## Metrics
+
+The misk-redis2 module provides metrics for monitoring Redis operations and connection pool health. These metrics are exposed via Prometheus and can be used for monitoring and alerting.
+
+| Metric Name                                | Slug                                        | Description                                 |
+|--------------------------------------------|---------------------------------------------|---------------------------------------------|
+| Operation Time                             | `redis_client_operation_time_millis`        | Initial response time for Redis operations  |
+| First Response Time                        | `redis_client_first_response_time_millis`   | Complete duration time for Redis operations |
+| Connection Pool Max Connections            | `redis_client_max_total_connections`        | Maximum  total connections                  |
+| Connection Pool Max Idle Connections       | `redis_client_max_idle_connections`         | Maximum number of idle connections          |
+| Connection Pool Min Idle Connections       | `redis_client_min_idle_connections`         | Minimum number of idle connections          |
+| Connection Pool Idle Connections           | `redis_client_idle_connections`             | Current number of idle connections          |
+| Connection Pool Active Connection          | `redis_client_active_connections`           | Current number of active connections        |
+
+
+### Common Tags
+
+All metrics include these common tags:
+- `replication_group`: The Redis replication group identifier
+- `client_name`: The configured client name (if set)
+- `local_address`: The ip address of the local client  
+- `remote_address`: The ip address of the Redis server
+
+Command-specific metrics also include:
+- `command`: The Redis command name (e.g., "GET", "SET", "HGET")
+
+
 ## Security
 - Passwords in configuration are marked with `@misk.config.Redact` to prevent leaking in admin UI or logs
 - Client names can be set for monitoring and auditing

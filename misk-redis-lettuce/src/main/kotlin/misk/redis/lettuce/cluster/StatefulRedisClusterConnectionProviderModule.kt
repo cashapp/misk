@@ -1,6 +1,5 @@
 package misk.redis.lettuce.cluster
 
-import com.google.inject.Provider
 import com.google.inject.TypeLiteral
 import io.lettuce.core.cluster.RedisClusterClient
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection
@@ -12,6 +11,7 @@ import misk.inject.keyOf
 import misk.inject.toKey
 import misk.redis.lettuce.RedisConnectionPoolConfig
 import misk.redis.lettuce.toBoundedPoolConfig
+import misk.redis.lettuce.metrics.RedisClientMetrics
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.atomic.AtomicInteger
@@ -30,7 +30,9 @@ import java.util.function.Supplier
  *    - If the [Annotation] is non-null, it will be used to qualify the binding.
  *    - The [RedisConnectionPoolConfig] is used to configure the underlying connection pool.
  *    - The provided [clientName] will be used to set the connection's client name.
- *    - The [RedisCodec] will be used to configure the connection's provider function.
+ *    - The [RedisNodeConfig], [RedisCodec], and [useSsl] will be used to configure the
+ *      connection's provider function.
+ *    - The [PooledConnectionProvider] is registered as a provider for the ConnectionPool Metrics
  * 
  * The provider supports both exclusive and shared connections:
  * - Exclusive connections are acquired from the pool and returned when closed
@@ -48,6 +50,8 @@ internal class StatefulRedisClusterConnectionProviderModule<K : Any, V : Any, T 
   override fun configure() {
     val clientKey = keyOf<RedisClusterClient>(annotation)
     val redisClientProvider = getProvider(clientKey)
+    val clientMetricsProvider = getProvider(RedisClientMetrics::class.java)
+
     val connectionProviderKey = connectionProviderType.toKey(annotation)
 
     bind(connectionProviderKey).toProvider{
@@ -70,7 +74,11 @@ internal class StatefulRedisClusterConnectionProviderModule<K : Any, V : Any, T 
           },
           connectionPoolConfig.toBoundedPoolConfig(),
           false, // this is handled directly in the connection provider
-        ).toCompletableFuture(),
+        ).thenApply {
+          clientMetricsProvider.get()
+            .registerConnectionPoolMetrics(clientName, replicationGroupId, it)
+          it
+        }.toCompletableFuture(),
         replicationGroupId,
       ) as T
     }.asSingleton()

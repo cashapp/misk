@@ -1,6 +1,7 @@
 package misk.redis.lettuce.standalone
 
 import com.google.inject.Module
+import io.lettuce.core.RedisClient
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
@@ -9,12 +10,15 @@ import misk.redis.lettuce.RedisConfig
 import misk.redis.lettuce.RedisModule
 import misk.redis.lettuce.RedisNodeConfig
 import misk.redis.lettuce.RedisReplicationGroupConfig
-import misk.redis.redisPort
+import misk.redis.lettuce.redisPort
+import misk.redis.lettuce.metrics.RedisClientMetrics
+import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import wisp.deployment.TESTING
 import kotlin.test.DefaultAsserter.assertEquals
@@ -44,7 +48,7 @@ internal class RedisStandaloneModuleTest {
                 use_ssl = false,
               ),
 
-            ),
+              ),
           ),
         ),
       )
@@ -53,8 +57,17 @@ internal class RedisStandaloneModuleTest {
     }
   }
 
-  @Inject lateinit var readWriteConnectionProvider: ReadWriteConnectionProvider
-  @Inject lateinit var readOnlyConnectionProvider: ReadOnlyConnectionProvider
+  @Inject
+  lateinit var client: RedisClient
+
+  @Inject
+  lateinit var metrics: RedisClientMetrics
+
+  @Inject
+  lateinit var readWriteConnectionProvider: ReadWriteConnectionProvider
+
+  @Inject
+  lateinit var readOnlyConnectionProvider: ReadOnlyConnectionProvider
   private val connectionProviders: Map<String, StatefulRedisConnectionProvider<String, String>> by lazy {
     mapOf(
       "readWrite" to readWriteConnectionProvider,
@@ -103,5 +116,29 @@ internal class RedisStandaloneModuleTest {
         )
       }
     }
+
+  @Test
+  fun `test redis client has CommandLatencyRecorder registered`() {
+    assertTrue(
+      message = "should have CommandLatencyRecorder registered",
+      actual = client.resources.commandLatencyRecorder() is RedisClientMetricsCommandLatencyRecorder,
+    )
+  }
+
+  @TestFactory
+  fun `verify that the pooled connection provider is registered in the RedisClientMetrics`() {
+    connectionProviders.map { (name, connectionProvider) ->
+      dynamicTest("testthe connection provider '$name' is registered in the RedisClientMetrics ") {
+        val providerPool =
+          (connectionProvider as PooledStatefulRedisConnectionProvider<String, String>).poolFuture.get()
+        val metricsReference =
+          metrics.maxTotalConnectionsGauge.labels(clientName, replicationGroupId).reference
+        assertTrue(
+          message = "pool in '$clientName' should be registered in the RedisClientMetrics",
+          actual = metricsReference.get() === providerPool,
+        )
+      }
+    }
+  }
 }
 
