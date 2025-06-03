@@ -7,6 +7,7 @@ import io.lettuce.core.codec.StringCodec
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
+import misk.metrics.v2.Metrics
 import misk.redis.lettuce.cluster.RedisClusterModule
 import misk.redis.lettuce.standalone.RedisStandaloneModule
 import kotlin.reflect.KClass
@@ -111,6 +112,7 @@ class RedisModule<K : Any, V : Any> internal constructor(
     Multibinder.newSetBinder(binder(), connectionProviderTypeLiteral)
     newMultibinder<AbstractRedisClient>()
     newMultibinder<FunctionCodeLoader>()
+    requireBinding<Metrics>()
 
     when (config) {
       is RedisConfig ->

@@ -3,10 +3,6 @@ package misk.redis.lettuce.cluster.testing
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import misk.redis.lettuce.cluster.redisClusterClient
 import misk.redis.lettuce.cluster.withConnectionBlocking
 import misk.redis.lettuce.redisUri
@@ -92,8 +88,6 @@ class DockerRedisCluster(
     }
   )
 
-  private val coroutineScope =
-    CoroutineScope(SupervisorJob() + CoroutineName("docker-redis-cluster"))
 
   override fun startup() {
     try {
@@ -125,7 +119,6 @@ class DockerRedisCluster(
   }
 
   override fun shutdown() {
-    coroutineScope.cancel("Shutting down DockerRedisCluster")
     redisClient.shutdown()
     composer.stop()
   }
