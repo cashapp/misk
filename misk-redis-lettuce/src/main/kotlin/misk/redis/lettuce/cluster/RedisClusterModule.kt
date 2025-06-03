@@ -1,6 +1,7 @@
 package misk.redis.lettuce.cluster
 
 import com.google.inject.name.Names
+import io.lettuce.core.AbstractRedisClient
 import io.lettuce.core.RedisClient
 import io.lettuce.core.cluster.RedisClusterClient
 import io.lettuce.core.codec.RedisCodec
@@ -88,6 +89,7 @@ internal class RedisClusterModule<K : Any, V : Any> internal constructor(
             },
         )
       }.asSingleton()
+      multibind<AbstractRedisClient>().to(clusterClientKey)
 
       with(clusterGroupConfig) {
         install(

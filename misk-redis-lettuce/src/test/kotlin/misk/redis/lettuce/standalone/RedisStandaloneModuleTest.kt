@@ -11,6 +11,7 @@ import misk.redis.lettuce.RedisModule
 import misk.redis.lettuce.RedisNodeConfig
 import misk.redis.lettuce.RedisReplicationGroupConfig
 import misk.redis.lettuce.redisPort
+import misk.redis.lettuce.RedisService
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import misk.testing.MiskTest
@@ -57,17 +58,11 @@ internal class RedisStandaloneModuleTest {
     }
   }
 
-  @Inject
-  lateinit var client: RedisClient
-
-  @Inject
-  lateinit var metrics: RedisClientMetrics
-
-  @Inject
-  lateinit var readWriteConnectionProvider: ReadWriteConnectionProvider
-
-  @Inject
-  lateinit var readOnlyConnectionProvider: ReadOnlyConnectionProvider
+  @Inject lateinit var client: RedisClient
+  @Inject lateinit var metrics: RedisClientMetrics
+  @Inject lateinit var redisService: RedisService
+  @Inject lateinit var readWriteConnectionProvider: ReadWriteConnectionProvider
+  @Inject lateinit var readOnlyConnectionProvider: ReadOnlyConnectionProvider
   private val connectionProviders: Map<String, StatefulRedisConnectionProvider<String, String>> by lazy {
     mapOf(
       "readWrite" to readWriteConnectionProvider,
@@ -139,6 +134,13 @@ internal class RedisStandaloneModuleTest {
         )
       }
     }
+  }
+  @Test
+  fun `test RedisService is started`() {
+    assertTrue(
+      message = "RedisService should be started",
+      actual = redisService.isRunning
+    )
   }
 }
 

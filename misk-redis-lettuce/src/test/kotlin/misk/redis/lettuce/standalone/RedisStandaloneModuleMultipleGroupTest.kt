@@ -11,10 +11,12 @@ import misk.redis.lettuce.RedisModule
 import misk.redis.lettuce.RedisNodeConfig
 import misk.redis.lettuce.RedisReplicationGroupConfig
 import misk.redis.lettuce.redisPort
+import misk.redis.lettuce.RedisService
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import wisp.deployment.TESTING
 import kotlin.test.DefaultAsserter.assertTrue
@@ -56,17 +58,18 @@ internal class RedisStandaloneModuleMultipleGroupTest {
                 use_ssl = false,
               ),
             ),
-        ),
-      ))
-      install(MiskTestingServiceModule())
-      install(DeploymentModule(TESTING))
-    }
+          )
+        ))
+        install(MiskTestingServiceModule())
+        install(DeploymentModule(TESTING))
+      }
   }
 
   @Inject @Named(REPLICATION_GROUP_ID1) lateinit var readWriteConnectionProvider1: ReadWriteConnectionProvider
   @Inject @Named(REPLICATION_GROUP_ID1) lateinit var readOnlyConnectionProvider1: ReadOnlyConnectionProvider
   @Inject @Named(REPLICATION_GROUP_ID2) lateinit var readWriteConnectionProvider2: ReadWriteConnectionProvider
   @Inject @Named(REPLICATION_GROUP_ID2) lateinit var readOnlyConnectionProvider2: ReadOnlyConnectionProvider
+  @Inject lateinit var redisService: RedisService
   private val connectionProviders: Map<String, Map<String, StatefulRedisConnectionProvider<String, String>>> by lazy {
     mapOf(
       REPLICATION_GROUP_ID1 to mapOf(
@@ -92,6 +95,14 @@ internal class RedisStandaloneModuleMultipleGroupTest {
         }
       }
     }
+
+  @Test
+  fun `test RedisService is started`() {
+    assertTrue(
+      message = "RedisService should be started",
+      actual = redisService.isRunning
+    )
+  }
 }
 
 

@@ -1,6 +1,7 @@
 package misk.redis.lettuce.standalone
 
 import com.google.inject.TypeLiteral
+import com.google.inject.multibindings.Multibinder
 import io.lettuce.core.ConnectionFuture
 import io.lettuce.core.RedisClient
 import io.lettuce.core.api.StatefulRedisConnection
@@ -12,6 +13,7 @@ import misk.inject.keyOf
 import misk.inject.toKey
 import misk.redis.lettuce.RedisConnectionPoolConfig
 import misk.redis.lettuce.RedisNodeConfig
+import misk.redis.lettuce.connectionProviderTypeLiteral
 import misk.redis.lettuce.redisUri
 import misk.redis.lettuce.toBoundedPoolConfig
 import misk.redis.lettuce.metrics.RedisClientMetrics
@@ -36,6 +38,9 @@ import java.util.function.Supplier
  *    - The [RedisNodeConfig], [RedisCodec], and [useSsl] will be used to configure the
  *      connection's provider function.
  *     - For [PooledConnectionProvider], the pool is registered as a provider for the ConnectionPool Metrics
+ *
+ * 2. **Adds a binding for the** [StatefulRedisConnectionProvider] **to a multibinder set**.
+ *   - Provides access to all [StatefulRedisConnectionProvider]s for lifecycle management.
  *
  * The provider supports both exclusive and shared connections:
  * - Exclusive connections are acquired from the pool and returned when closed
@@ -69,7 +74,7 @@ internal class StatefulRedisConnectionProviderModule<K : Any, V : Any, T : State
 
     val connectionProviderKey = connectionProviderType.toKey(annotation)
 
-    bind(connectionProviderKey).toProvider{
+    bind(connectionProviderKey).toProvider {
       @Suppress("UNCHECKED_CAST")
       PooledStatefulRedisConnectionProvider(
         AsyncConnectionPoolSupport.createBoundedObjectPoolAsync(
@@ -91,6 +96,9 @@ internal class StatefulRedisConnectionProviderModule<K : Any, V : Any, T : State
         replicationGroupId,
       ) as T
     }.asSingleton()
+
+    Multibinder.newSetBinder(binder(), connectionProviderTypeLiteral).addBinding()
+      .to(connectionProviderKey)
   }
 
   /**
