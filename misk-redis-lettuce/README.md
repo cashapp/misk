@@ -243,6 +243,53 @@ class CustomCacheService @Inject constructor(
 }
 ```
 
+### Using Command Arguments
+
+The misk-redis2 module provides type-safe command arguments through the `CommandArguments` class. This allows you to 
+specify additional options for Redis commands in an idiomatic, Kotlin way.
+Example: the `setArgs` builder provides type-safe configuration for the SET command options:
+```kotlin
+class CacheService @Inject constructor(
+  private val writeProvider: ReadWriteConnectionProvider
+) {
+  // Set with expiration using NX (only set if key doesn't exist)
+  suspend fun setIfNotExists(key: String, value: String, expirationSeconds: Long): Boolean {
+    return writeProvider.withConnection {
+      // Use setArgs to specify command options
+      set(key, value, setArgs {
+        // Only set if key doesn't exist
+        nx()
+        // Set expiration in seconds
+        ex(expirationSeconds)
+      }) == "OK"
+    }
+  }
+
+  // Set with expiration using XX (only set if key exists)
+  suspend fun updateWithTtl(key: String, value: String, expirationSeconds: Long): Boolean {
+    return writeProvider.withConnection {
+      set(key, value, setArgs {
+        // Only set if key exists
+        xx()
+        // Set expiration in seconds
+        ex(expirationSeconds)
+      }) == "OK"
+    }
+  }
+
+  // Set with KEEPTTL to preserve existing TTL
+  suspend fun updatePreservingTtl(key: String, value: String): Boolean {
+    return writeProvider.withConnection {
+      set(key, value, setArgs {
+        keepttl()
+      }) == "OK"
+    }
+  }
+}
+```
+
+Similar command argument builders are available for other Redis commands. Check the `CommandArguments.kt` file for the complete list of supported arguments.
+
 ### Custom Types and Codec
 
 For custom data types, implement a custom codec:
