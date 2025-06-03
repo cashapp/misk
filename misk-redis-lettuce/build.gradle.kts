@@ -19,14 +19,20 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 dependencies {
   api(libs.lettuceCore)
   api(project(":misk-config"))
+  api(libs.guava)
   api(project(":misk-inject"))
+  api(libs.jakartaInject)
   api(project(":wisp:wisp-config"))
   implementation(libs.guice)
-  implementation(libs.jakartaInject)
   implementation(libs.kotlinxCoroutinesCore)
+  implementation(libs.loggingApi)
   implementation(libs.prometheusClient)
+  implementation(project(":misk-backoff"))
   implementation(project(":misk-metrics"))
-  
+  implementation(project(":misk-service"))
+  implementation(project(":wisp:wisp-logging"))
+
+
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesTest)

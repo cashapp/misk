@@ -38,7 +38,7 @@ public final class misk/redis/lettuce/CommandArgumentsKt {
 	public static final fun zAggregateArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/ZAggregateArgs;
 }
 
-public abstract interface class misk/redis/lettuce/ConnectionProvider {
+public abstract interface class misk/redis/lettuce/ConnectionProvider : io/lettuce/core/api/AsyncCloseable {
 	public abstract fun acquire (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun acquireAsync (Z)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun acquireBlocking (Z)Lio/lettuce/core/api/StatefulConnection;
@@ -224,6 +224,14 @@ public final class misk/redis/lettuce/RedisReplicationGroupConfig {
 	public final fun getWriter_endpoint ()Lmisk/redis/lettuce/RedisNodeConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/redis/lettuce/RedisService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/redis/lettuce/RedisService$Companion;
+	public fun <init> (Ljava/util/Set;Ljava/util/Set;)V
+}
+
+public final class misk/redis/lettuce/RedisService$Companion {
 }
 
 public final class misk/redis/lettuce/RedisUriKt {

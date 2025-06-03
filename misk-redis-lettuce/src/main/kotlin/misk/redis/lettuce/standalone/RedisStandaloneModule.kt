@@ -1,6 +1,7 @@
 package misk.redis.lettuce.standalone
 
 import com.google.inject.name.Names
+import io.lettuce.core.AbstractRedisClient
 import io.lettuce.core.RedisClient
 import io.lettuce.core.codec.RedisCodec
 import misk.inject.KAbstractModule
@@ -91,6 +92,7 @@ internal class RedisStandaloneModule<K : Any, V : Any> internal constructor(
           },
         )
       }.asSingleton()
+      multibind<AbstractRedisClient>().to(redisClientKey)
 
       with(replicationGroupConfig) {
         install(

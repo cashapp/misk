@@ -11,6 +11,7 @@ import misk.redis.lettuce.RedisClusterGroupConfig
 import misk.redis.lettuce.RedisModule
 import misk.redis.lettuce.RedisNodeConfig
 import misk.redis.lettuce.redisSeedPort
+import misk.redis.lettuce.RedisService
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import misk.testing.MiskTest
@@ -53,13 +54,10 @@ internal class RedisClusterModuleTest {
     }
   }
 
-
-  @Inject
-  lateinit var client: RedisClusterClient
-  @Inject
-  lateinit var metrics: RedisClientMetrics
-  @Inject
-  lateinit var connectionProvider: ClusterConnectionProvider
+  @Inject lateinit var client: RedisClusterClient
+  @Inject lateinit var redisService: RedisService
+  @Inject lateinit var metrics: RedisClientMetrics
+  @Inject lateinit var connectionProvider: ClusterConnectionProvider
 
   @Test
   fun `verify the connectionProvider is a POOLED`() {
@@ -77,6 +75,8 @@ internal class RedisClusterModuleTest {
         .startsWith("$replicationGroupId:$clientName:"),
     )
   }
+
+
 
   @Test
   fun `test ping with connectionProvider`() {
@@ -103,7 +103,14 @@ internal class RedisClusterModuleTest {
       metrics.maxTotalConnectionsGauge.labels(clientName, replicationGroupId).reference
     assertTrue(
         message = "pool in '$clientName' should be registered in the RedisClientMetrics",
-        actual = metricsReference.get() === providerPool,
+        actual = metricsReference.get() === providerPool)
+  }
+
+  @Test
+  fun `test RedisService is started`() {
+    assertTrue(
+      message = "RedisService should be started",
+      actual = redisService.isRunning
     )
   }
 }

@@ -63,6 +63,9 @@ internal class PooledStatefulRedisConnectionProvider<K : Any, V : Any>(
       // Return the shared connection for non-exclusive requests
       sharedConnection
     }
+
+  override fun closeAsync(): CompletableFuture<Void> =
+    poolFuture.thenCompose { it.closeAsync() }
 }
 
 class PooledStatefulRedisConnection<K : Any, V : Any>(

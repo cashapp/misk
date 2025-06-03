@@ -10,11 +10,13 @@ import misk.redis.lettuce.RedisClusterConfig
 import misk.redis.lettuce.RedisClusterGroupConfig
 import misk.redis.lettuce.RedisModule
 import misk.redis.lettuce.RedisNodeConfig
+import misk.redis.lettuce.RedisService
 import misk.redis.lettuce.redisSeedPort
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import wisp.deployment.TESTING
 import kotlin.test.DefaultAsserter.assertTrue
@@ -62,9 +64,10 @@ internal class RedisClusterModuleMultipleGroupTest {
       install(DeploymentModule(TESTING))
     }
   }
-
+  
   @Inject @Named(REPLICATION_GROUP_ID1) lateinit var clusterConnectionProvider1: ClusterConnectionProvider
   @Inject @Named(REPLICATION_GROUP_ID2) lateinit var clusterConnectionProvider2: ClusterConnectionProvider
+  @Inject lateinit var redisService: RedisService
   private val connectionProviders: Map<String, StatefulRedisClusterConnectionProvider<String, String>> by lazy {
     mapOf(
       REPLICATION_GROUP_ID1 to clusterConnectionProvider1,
@@ -82,4 +85,13 @@ internal class RedisClusterModuleMultipleGroupTest {
         )
       }
     }
+
+  @Test
+  fun `test RedisService is started`() {
+    assertTrue(
+      message = "RedisService should be started",
+      actual = redisService.isRunning
+    )
+  }
+
 }

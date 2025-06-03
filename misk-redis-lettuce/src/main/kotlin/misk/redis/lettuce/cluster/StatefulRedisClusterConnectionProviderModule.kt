@@ -1,6 +1,7 @@
 package misk.redis.lettuce.cluster
 
 import com.google.inject.TypeLiteral
+import com.google.inject.multibindings.Multibinder
 import io.lettuce.core.cluster.RedisClusterClient
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection
 import io.lettuce.core.codec.RedisCodec
@@ -10,6 +11,7 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.toKey
 import misk.redis.lettuce.RedisConnectionPoolConfig
+import misk.redis.lettuce.connectionProviderTypeLiteral
 import misk.redis.lettuce.toBoundedPoolConfig
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import java.util.concurrent.CompletableFuture
@@ -33,7 +35,10 @@ import java.util.function.Supplier
  *    - The [RedisNodeConfig], [RedisCodec], and [useSsl] will be used to configure the
  *      connection's provider function.
  *    - The [PooledConnectionProvider] is registered as a provider for the ConnectionPool Metrics
- * 
+ *
+ *  2. **Adds a binding for the** [StatefulRedisClusterConnectionProvider] **to a multibinder set**.
+ *    - Provides access to all [StatefulRedisClusterConnectionProvider]s for lifecycle management.
+ *
  * The provider supports both exclusive and shared connections:
  * - Exclusive connections are acquired from the pool and returned when closed
  * - A single shared connection is maintained for non-exclusive operations
@@ -54,7 +59,7 @@ internal class StatefulRedisClusterConnectionProviderModule<K : Any, V : Any, T 
 
     val connectionProviderKey = connectionProviderType.toKey(annotation)
 
-    bind(connectionProviderKey).toProvider{
+    bind(connectionProviderKey).toProvider {
       @Suppress("UNCHECKED_CAST")
       PooledStatefulRedisClusterConnectionProvider(
         AsyncConnectionPoolSupport.createBoundedObjectPoolAsync(
@@ -82,6 +87,9 @@ internal class StatefulRedisClusterConnectionProviderModule<K : Any, V : Any, T 
         replicationGroupId,
       ) as T
     }.asSingleton()
+
+    Multibinder.newSetBinder(binder(), connectionProviderTypeLiteral).addBinding()
+      .to(connectionProviderKey)
 
   }
 

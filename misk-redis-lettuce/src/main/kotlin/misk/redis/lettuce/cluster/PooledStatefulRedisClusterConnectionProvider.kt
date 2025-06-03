@@ -1,10 +1,7 @@
 package misk.redis.lettuce.cluster
 
-import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection
 import io.lettuce.core.support.BoundedAsyncPool
-import misk.redis.lettuce.standalone.PooledStatefulRedisConnection
-import misk.redis.lettuce.standalone.SharedStatefulRedisConnection
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -53,7 +50,7 @@ internal class PooledStatefulRedisClusterConnectionProvider<K : Any, V : Any>(
     }
   }
 
-  override fun acquireAsync(exclusive:Boolean): CompletableFuture<StatefulRedisClusterConnection<K, V>> =
+  override fun acquireAsync(exclusive: Boolean): CompletableFuture<StatefulRedisClusterConnection<K, V>> =
     if (exclusive) {
       // If an exclusive connection is requested, acquire a new connection from the pool
       poolFuture.thenCompose { pool ->
@@ -65,6 +62,9 @@ internal class PooledStatefulRedisClusterConnectionProvider<K : Any, V : Any>(
       // Return the shared connection for non-exclusive requests
       sharedConnection
     }
+
+  override fun closeAsync(): CompletableFuture<Void> =
+    poolFuture.thenCompose { it.closeAsync() }
 }
 
 class PooledStatefulRedisClusterConnection<K : Any, V : Any>(

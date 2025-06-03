@@ -27,7 +27,7 @@ import kotlin.reflect.KClass
  * - Blocking (Synchronous)
  *
  */
-interface ConnectionProvider<K : Any, V : Any, T : StatefulConnection<K, V>> {
+interface ConnectionProvider<K : Any, V : Any, T : StatefulConnection<K, V>> : AsyncCloseable {
 
   /**
    * Asynchronously acquires a connection from the provider.
@@ -83,3 +83,6 @@ internal inline fun <reified T : ConnectionProvider<*, *, *>> connectionProvider
       valueType.java
     )
   }) as TypeLiteral<T>
+
+internal val connectionProviderTypeLiteral: TypeLiteral<ConnectionProvider<*, *, *>> =
+  object : TypeLiteral<ConnectionProvider<*, *, *>>() {}
