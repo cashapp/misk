@@ -15,6 +15,29 @@ public final class misk/redis/lettuce/AsyncCloseableExtensionsKt$sam$i$java_util
 	public final synthetic fun apply (Ljava/lang/Object;)Ljava/lang/Object;
 }
 
+public final class misk/redis/lettuce/CommandArgumentsKt {
+	public static final fun aclSetuserArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/AclSetuserArgs;
+	public static final fun bitFieldArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/BitFieldArgs;
+	public static final fun ex-HG0u8IE (Lio/lettuce/core/SetArgs;J)Lio/lettuce/core/SetArgs;
+	public static final fun exAt (Lio/lettuce/core/SetArgs;Lkotlin/time/Instant;)Lio/lettuce/core/SetArgs;
+	public static final fun geoArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/GeoArgs;
+	public static final fun getExArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/GetExArgs;
+	public static final fun lPosArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/LPosArgs;
+	public static final fun migrateArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/MigrateArgs;
+	public static final fun px-HG0u8IE (Lio/lettuce/core/SetArgs;J)Lio/lettuce/core/SetArgs;
+	public static final fun pxAt (Lio/lettuce/core/SetArgs;Lkotlin/time/Instant;)Lio/lettuce/core/SetArgs;
+	public static final fun restoreArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/RestoreArgs;
+	public static final fun scanArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/ScanArgs;
+	public static final fun setArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/SetArgs;
+	public static final fun sortArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/SortArgs;
+	public static final fun xAddArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/XAddArgs;
+	public static final fun xClaimArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/XClaimArgs;
+	public static final fun xGroupCreateArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/XGroupCreateArgs;
+	public static final fun xReadArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/XReadArgs;
+	public static final fun zAddArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/ZAddArgs;
+	public static final fun zAggregateArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/ZAggregateArgs;
+}
+
 public abstract interface class misk/redis/lettuce/ConnectionProvider {
 	public abstract fun acquire (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun acquireAsync (Z)Ljava/util/concurrent/CompletableFuture;
