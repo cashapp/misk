@@ -106,5 +106,4 @@ internal class StatefulRedisClusterConnectionProviderModule<K : Any, V : Any, T 
         connection.async().clientSetname(it).thenApply { connection }
       }
     } ?: this
-
 }

@@ -10,8 +10,8 @@ import misk.redis.lettuce.RedisClusterConfig
 import misk.redis.lettuce.RedisClusterGroupConfig
 import misk.redis.lettuce.RedisModule
 import misk.redis.lettuce.RedisNodeConfig
-import misk.redis.lettuce.redisSeedPort
 import misk.redis.lettuce.RedisService
+import misk.redis.lettuce.redisSeedPort
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import misk.testing.MiskTest
@@ -37,13 +37,14 @@ internal class RedisClusterModuleTest {
           config = RedisClusterConfig(
             mapOf(
               replicationGroupId to RedisClusterGroupConfig(
-                client_name = clientName,
-                configuration_endpoint = RedisNodeConfig(
-                  hostname = "localhost",
-                  port = redisSeedPort,
-                ),
-                redis_auth_password = "",
-                use_ssl = false,
+                  client_name = clientName,
+                  configuration_endpoint = RedisNodeConfig(
+                      hostname = "localhost",
+                      port = redisSeedPort,
+                  ),
+                  redis_auth_password = "",
+                  use_ssl = false,
+                  function_code_file_path = "redis/testlib.lua",
               ),
             ),
           ),
@@ -77,13 +78,12 @@ internal class RedisClusterModuleTest {
   }
 
 
-
   @Test
   fun `test ping with connectionProvider`() {
     assertEquals(
-        message = "result is PONG",
-        expected = "PONG",
-        actual = connectionProvider.withConnectionBlocking { ping() },
+      message = "result is PONG",
+      expected = "PONG",
+      actual = connectionProvider.withConnectionBlocking { ping() },
     )
   }
 
@@ -103,15 +103,29 @@ internal class RedisClusterModuleTest {
       metrics.maxTotalConnectionsGauge.labels(clientName, replicationGroupId).reference
     assertTrue(
         message = "pool in '$clientName' should be registered in the RedisClientMetrics",
-        actual = metricsReference.get() === providerPool)
+        actual = metricsReference.get() === providerPool,
+    )
   }
 
   @Test
   fun `test RedisService is started`() {
     assertTrue(
-      message = "RedisService should be started",
-      actual = redisService.isRunning
+        message = "RedisService should be started",
+        actual = redisService.isRunning,
     )
+  }
+
+  @Test
+  fun `verify RedisService loaded function code`() {
+    connectionProvider.withConnectionBlocking {
+      assertTrue(
+          message = "should have testlib registered",
+          functionList().let { functions: MutableList<MutableMap<String, Any>> ->
+            functions.size == 1 &&
+                functions.first()["library_name"] == "testlib"
+          },
+      )
+    }
   }
 }
 

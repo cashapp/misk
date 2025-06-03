@@ -10,6 +10,7 @@ A Misk module providing Redis connectivity for both standalone and cluster confi
 - Automatic connection management and pooling
 - SSL/TLS support for secure connections
 - Support for Redis replication with read/write splitting
+- Support for Redis Functions with type-safe function loading and execution
 
 ## Installation
 
@@ -325,6 +326,107 @@ class CustomRedisModule : KAbstractModule() {
 }
 ```
 
+### Using Redis Functions with FunctionCodeLoader
+
+The misk-redis2 module provides support for Redis Functions through the `FunctionCodeLoader` class. Redis Functions, introduced in Redis 7.0, offer several advantages over traditional EVAL scripts and MULTI/EXEC transactions:
+
+1. **Persistence and Replication**:
+   - Functions are stored as first-class database entities
+   - Persist across server restarts and failovers
+   - Automatically replicated to replica nodes
+   - No need for client-side script management
+
+2. **Performance Benefits**:
+   - Functions are loaded once and cached server-side
+   - No need to resend code with each invocation
+   - Reduced network overhead compared to EVAL scripts
+   - Better than MULTI/EXEC for complex operations
+
+3. **Better Development Experience**:
+   - Functions are organized into libraries for better code organization
+   - Support for modular code development
+   - Independent testing and deployment
+   - Version control friendly
+
+The `FunctionCodeLoader` automatically loads Redis Functions from resource files specified in your configuration. Here's how to use it:
+
+1. **Create Function Resource Files**:
+   Create your Redis Function library files in your resources directory, for example at `src/main/resources/redis/`:
+
+   `testlib.lua`:
+   ```lua
+    #!lua name=testlib
+   
+    -- Delete a key if its value is equal to the given value
+    local function del_ifeq(keys, args)
+    local key = keys[1]
+    local value = args[1]
+        if redis.call("get", key) == value
+        then
+            return redis.call("del", key)
+        else
+            return 0
+        end
+    end
+
+    redis.register_function('del_ifeq', del_ifeq)
+   ```
+
+2. **Configure Function Loading**:
+   In your YAML configuration, specify the path to your function files:
+
+   ```yaml
+   redis:
+     cash-misk-exemplar-001:
+       client_name: "exemplar"
+       primary_endpoint:
+         hostname: "redis.example.com"
+         port: 6379
+       redis_auth_password: "secret"
+       # Specify the path to your Redis Function files
+       function_code_file_path: "redis/testlib.lua"
+   ```
+
+3. **Use the Functions**:
+   The functions are automatically loaded when the Redis connection is established. You can then use them in your services:
+
+   ```kotlin
+   class RedisCalculatorService @Inject constructor(
+     private val writeProvider: ReadWriteConnectionProvider
+   ) {
+     suspend fun calculateSum(keys: List<String>): Long {
+       return writeProvider.withConnection { connection ->
+         // Execute the pre-loaded function
+         connection.fcall("del_ifeq", "balance", "0")
+       }
+     }
+   }
+   ```
+
+4. **Function Execution Modes**:
+   ```kotlin
+   // Execute function with keys and arguments
+   val result = connection.fcall("functionName", numKeys, *keys, *args)
+   
+   // Execute in read-only mode (can run on replicas)
+   val result = connection.fcallReadOnly("functionName", numKeys, *keys, *args)
+   ```
+
+The `FunctionCodeLoader` handles:
+- Automatic loading of functions on startup
+- Reloading functions when Redis connections are re-established
+- Validation of function code and error reporting
+- Management of function libraries across Redis nodes
+
+Redis Functions are preferred over EVAL scripts and MULTI/EXEC transactions when:
+- You need persistent, reusable server-side logic
+- The operation requires complex conditional logic or loops
+- You want to ensure consistent behavior across all Redis nodes
+- Performance and network efficiency are critical
+- You need better code organization and maintainability
+
+see: https://redis.io/docs/latest/develop/interact/programmability/functions-intro/
+
 ### Redis Cluster Setup
 
 For Redis Cluster deployments:
@@ -446,12 +548,11 @@ Command-specific metrics also include:
 
 ## Best Practices
 
-1. Evaluate if you really need connection pooling before enabling it
-2. Configure appropriate timeouts based on your use case
-3. Set meaningful client names for better monitoring
-4. Use read replicas when available for read-heavy workloads
-5. Implement custom codecs for complex data types
-6. Enable SSL/TLS in production environments
-7. Use async operations for non-blocking workflows
-8. Properly handle errors in async operations
-9. Consider using coroutines with suspending functions for simpler async code
+1. Consider using coroutines with suspending functions for simpler async code
+2. Use async operations for non-blocking workflows
+3. Evaluate if you really need connection pooling before enabling it
+4. Configure appropriate timeouts based on your use case
+5. Set meaningful client names for better monitoring
+6. Use read replicas when available for read-heavy workloads
+7. Use Redis Functions for atomic server-side logic instead of EVAL scripts or transactions
+8. Implement custom codecs for complex data types

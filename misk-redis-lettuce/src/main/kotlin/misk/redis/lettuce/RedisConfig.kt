@@ -87,7 +87,8 @@ data class RedisReplicationGroupConfig @JvmOverloads constructor(
   @Redact val redis_auth_password: String,
   val use_ssl: Boolean = true,
   val timeout_ms: Int = DEFAULT_TIMEOUT_MS,
-  val connection_pool: RedisConnectionPoolConfig = RedisConnectionPoolConfig()
+  val connection_pool: RedisConnectionPoolConfig = RedisConnectionPoolConfig(),
+  val function_code_file_path: String? = null,
 )
 
 /**
@@ -138,6 +139,7 @@ data class RedisClusterGroupConfig @JvmOverloads constructor(
   val use_ssl: Boolean = true,
   val timeout_ms: Int = DEFAULT_TIMEOUT_MS,
   val connection_pool: RedisConnectionPoolConfig = RedisConnectionPoolConfig(),
+  val function_code_file_path: String? = null,
 )
 
 /**
