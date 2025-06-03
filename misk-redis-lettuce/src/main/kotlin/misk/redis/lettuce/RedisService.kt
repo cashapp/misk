@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.TimeUnit
 
+
 /**
  * Service that manages the lifecycle of Redis standalone connections.
  *
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit
  * - Connection validation during startup
  * - Graceful shutdown of all Redis connections
  * - Management of multiple connection providers
+ * - Automatic loading of Redis Function code
  *
  * The service works with both read-write and read-only connections, managed through
  * [ConnectionProvider]s. During startup, it validates each connection by attempting
@@ -38,6 +40,7 @@ import java.util.concurrent.TimeUnit
  *   - Validates all configured Redis connections
  *   - Ensures connectivity to Redis instances
  *   - Fails fast if connections cannot be established
+ *   - If there is a configured ResourcePath for function code, load it
  *
  * - **Shutdown**:
  *   - Gracefully closes all Redis connections
@@ -53,6 +56,7 @@ import java.util.concurrent.TimeUnit
 class RedisService @Inject constructor(
   private val clients: Set<AbstractRedisClient>,
   private val connectionProviders: Set<ConnectionProvider<*, *, *>>,
+  private val functionCodeLoaders: Set<FunctionCodeLoader>
 ) : AbstractIdleService() {
 
   override fun startUp() {
@@ -64,6 +68,9 @@ class RedisService @Inject constructor(
     clients.map { client -> retryableFuture(verifyRetry) { client.verify().toCompletableFuture() }
       .orTimeout(30, TimeUnit.SECONDS) }
       .joinAll()
+
+    // Load the  function code for the supplied loaders
+    functionCodeLoaders.map { it.load() }.joinAll()
   }
 
   override fun shutDown() {

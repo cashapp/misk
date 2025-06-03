@@ -12,6 +12,7 @@ import misk.redis.lettuce.RedisClusterConfig
 import misk.redis.lettuce.connectionProviderTypeLiteral
 import misk.redis.lettuce.redisUri
 import misk.redis.lettuce.standalone.clientResources
+import misk.redis.lettuce.FunctionCodeLoader
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import kotlin.reflect.KClass
@@ -89,7 +90,20 @@ internal class RedisClusterModule<K : Any, V : Any> internal constructor(
             },
         )
       }.asSingleton()
+
+      // Add the client binding to the multibind for all clients
       multibind<AbstractRedisClient>().to(clusterClientKey)
+
+      // Add a binding for a function loader if there is configuration
+      val clientProvider = getProvider(clusterClientKey)
+      clusterGroupConfig.function_code_file_path?.also { codeResourcePath ->
+        multibind<FunctionCodeLoader>().toProvider {
+          ClusterFunctionCodeLoader(
+            clientProvider = clientProvider,
+            codeResourcePath = codeResourcePath
+          )
+        }
+      }
 
       with(clusterGroupConfig) {
         install(

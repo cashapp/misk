@@ -11,6 +11,7 @@ import misk.redis.lettuce.RedisConfig
 import misk.redis.lettuce.RedisReplicationGroupConfig
 import misk.redis.lettuce.connectionProviderTypeLiteral
 import misk.redis.lettuce.redisUri
+import misk.redis.lettuce.FunctionCodeLoader
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import kotlin.reflect.KClass
@@ -92,7 +93,21 @@ internal class RedisStandaloneModule<K : Any, V : Any> internal constructor(
           },
         )
       }.asSingleton()
+
+      // Add the client binding to the multibind for all clients
       multibind<AbstractRedisClient>().to(redisClientKey)
+
+      // Add a binding for a function loader if there is configuration
+      val clientProvider = getProvider(redisClientKey)
+      replicationGroupConfig.function_code_file_path?.also { codeResourcePath ->
+        multibind<FunctionCodeLoader>().toProvider {
+          StandaloneFunctionCodeLoader(
+            clientProvider = clientProvider,
+            uri = redisPrimaryUri,
+            codeResourcePath = codeResourcePath,
+          )
+        }
+      }
 
       with(replicationGroupConfig) {
         install(

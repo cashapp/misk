@@ -2,7 +2,6 @@ package misk.redis.lettuce
 
 import com.google.inject.multibindings.Multibinder
 import io.lettuce.core.AbstractRedisClient
-import io.lettuce.core.RedisClient
 import io.lettuce.core.codec.RedisCodec
 import io.lettuce.core.codec.StringCodec
 import misk.ReadyService
@@ -111,6 +110,7 @@ class RedisModule<K : Any, V : Any> internal constructor(
   override fun configure() {
     Multibinder.newSetBinder(binder(), connectionProviderTypeLiteral)
     newMultibinder<AbstractRedisClient>()
+    newMultibinder<FunctionCodeLoader>()
 
     when (config) {
       is RedisConfig ->

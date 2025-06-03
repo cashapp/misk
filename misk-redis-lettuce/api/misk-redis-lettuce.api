@@ -53,6 +53,10 @@ public final class misk/redis/lettuce/ConnectionProvider$DefaultImpls {
 	public static synthetic fun acquireBlocking$default (Lmisk/redis/lettuce/ConnectionProvider;ZILjava/lang/Object;)Lio/lettuce/core/api/StatefulConnection;
 }
 
+public abstract interface class misk/redis/lettuce/FunctionCodeLoader {
+	public abstract fun load ()Ljava/util/concurrent/CompletionStage;
+}
+
 public final class misk/redis/lettuce/RedisClusterConfig : java/util/LinkedHashMap, misk/redis/lettuce/AbstractRedisConfig {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/Map;)V
@@ -87,7 +91,8 @@ public final class misk/redis/lettuce/RedisClusterGroupConfig {
 	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;Z)V
 	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZI)V
 	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;)V
-	public synthetic fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lmisk/redis/lettuce/RedisNodeConfig;
@@ -95,12 +100,14 @@ public final class misk/redis/lettuce/RedisClusterGroupConfig {
 	public final fun component4 ()Z
 	public final fun component5 ()I
 	public final fun component6 ()Lmisk/redis/lettuce/RedisConnectionPoolConfig;
-	public final fun copy (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
-	public static synthetic fun copy$default (Lmisk/redis/lettuce/RedisClusterGroupConfig;Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;ILjava/lang/Object;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;Ljava/lang/String;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public static synthetic fun copy$default (Lmisk/redis/lettuce/RedisClusterGroupConfig;Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;Ljava/lang/String;ILjava/lang/Object;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getClient_name ()Ljava/lang/String;
 	public final fun getConfiguration_endpoint ()Lmisk/redis/lettuce/RedisNodeConfig;
 	public final fun getConnection_pool ()Lmisk/redis/lettuce/RedisConnectionPoolConfig;
+	public final fun getFunction_code_file_path ()Ljava/lang/String;
 	public final fun getRedis_auth_password ()Ljava/lang/String;
 	public final fun getTimeout_ms ()I
 	public final fun getUse_ssl ()Z
@@ -203,7 +210,8 @@ public final class misk/redis/lettuce/RedisReplicationGroupConfig {
 	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;Z)V
 	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZI)V
 	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;)V
-	public synthetic fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lmisk/redis/lettuce/RedisNodeConfig;
@@ -212,11 +220,13 @@ public final class misk/redis/lettuce/RedisReplicationGroupConfig {
 	public final fun component5 ()Z
 	public final fun component6 ()I
 	public final fun component7 ()Lmisk/redis/lettuce/RedisConnectionPoolConfig;
-	public final fun copy (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
-	public static synthetic fun copy$default (Lmisk/redis/lettuce/RedisReplicationGroupConfig;Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;ILjava/lang/Object;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;Ljava/lang/String;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public static synthetic fun copy$default (Lmisk/redis/lettuce/RedisReplicationGroupConfig;Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;Ljava/lang/String;ILjava/lang/Object;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getClient_name ()Ljava/lang/String;
 	public final fun getConnection_pool ()Lmisk/redis/lettuce/RedisConnectionPoolConfig;
+	public final fun getFunction_code_file_path ()Ljava/lang/String;
 	public final fun getReader_endpoint ()Lmisk/redis/lettuce/RedisNodeConfig;
 	public final fun getRedis_auth_password ()Ljava/lang/String;
 	public final fun getTimeout_ms ()I
@@ -228,7 +238,7 @@ public final class misk/redis/lettuce/RedisReplicationGroupConfig {
 
 public final class misk/redis/lettuce/RedisService : com/google/common/util/concurrent/AbstractIdleService {
 	public static final field Companion Lmisk/redis/lettuce/RedisService$Companion;
-	public fun <init> (Ljava/util/Set;Ljava/util/Set;)V
+	public fun <init> (Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;)V
 }
 
 public final class misk/redis/lettuce/RedisService$Companion {
