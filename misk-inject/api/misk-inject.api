@@ -8,7 +8,9 @@ public final class misk/inject/GuiceKt {
 	public static final fun mapOfType (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lcom/google/inject/TypeLiteral;
 	public static final fun setOfType (Lcom/google/inject/TypeLiteral;)Lcom/google/inject/TypeLiteral;
 	public static final fun setOfType (Lkotlin/reflect/KClass;)Lcom/google/inject/TypeLiteral;
+	public static final fun toKey (Lcom/google/inject/TypeLiteral;Ljava/lang/annotation/Annotation;)Lcom/google/inject/Key;
 	public static final fun toKey (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;)Lcom/google/inject/Key;
+	public static final fun toKey (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)Lcom/google/inject/Key;
 	public static final fun toKey (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lcom/google/inject/Key;
 	public static synthetic fun toKey$default (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/Key;
 	public static synthetic fun toKey$default (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/Key;

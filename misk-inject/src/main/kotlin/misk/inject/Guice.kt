@@ -88,7 +88,8 @@ fun <T : Any> Injector.getSetOf(
 ): Set<T> = getInstance(setOfType(type).toKey(annotation))
 
 inline fun <reified T : Any> keyOf(): Key<T> = Key.get(T::class.java)
-inline fun <reified T : Any> keyOf(a: Annotation): Key<T> = Key.get(T::class.java, a)
+inline fun <reified T : Any> keyOf(a: Annotation?): Key<T> =
+  if (a == null) Key.get(T::class.java) else Key.get(T::class.java, a)
 /**
  * If annotation is not null, returns a key for @Annotation T, otherwise a key for T.
  */
@@ -102,7 +103,17 @@ fun <T : Any> TypeLiteral<T>.toKey(annotation: KClass<out Annotation>? = null): 
   }
 }
 
+fun <T : Any> TypeLiteral<T>.toKey(annotation: Annotation?): Key<T> {
+  return when (annotation) {
+    null -> Key.get(this)
+    else -> Key.get(this, annotation)
+  }
+}
+
 fun <T : Any> KClass<T>.toKey(qualifier: KClass<out Annotation>? = null): Key<T> =
+  typeLiteral().toKey(qualifier)
+
+fun <T : Any> KClass<T>.toKey(qualifier: Annotation): Key<T> =
   typeLiteral().toKey(qualifier)
 
 fun uninject(target: Any) {
