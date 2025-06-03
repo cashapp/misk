@@ -364,6 +364,28 @@ public final class misk/redis/lettuce/cluster/testing/DockerRedisCluster : misk/
 public final class misk/redis/lettuce/cluster/testing/DockerRedisCluster$Companion {
 }
 
+public final class misk/redis/lettuce/cluster/testing/RedisClusterReadyService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/redis/lettuce/cluster/testing/RedisClusterReadyService$Companion;
+	public fun <init> (Ljava/util/Set;)V
+}
+
+public final class misk/redis/lettuce/cluster/testing/RedisClusterReadyService$Companion {
+}
+
+public final class misk/redis/lettuce/cluster/testing/RedisClusterReadyService$inlined$sam$i$java_util_function_Function$0 : java/util/function/Function {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final synthetic fun apply (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class misk/redis/lettuce/cluster/testing/RedisClusterReadyServiceModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/redis/lettuce/cluster/testing/WaitForRedisClusterKt {
+	public static final fun waitForRedisClusterReady-VTINZ0E (Lio/lettuce/core/cluster/api/StatefulRedisClusterConnection;IJJ)Ljava/util/concurrent/CompletableFuture;
+	public static synthetic fun waitForRedisClusterReady-VTINZ0E$default (Lio/lettuce/core/cluster/api/StatefulRedisClusterConnection;IJJILjava/lang/Object;)Ljava/util/concurrent/CompletableFuture;
+}
+
 public final class misk/redis/lettuce/standalone/ClientExtensionsKt {
 	public static final fun clientOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/ClientOptions;
 	public static final fun clientResources (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/resource/ClientResources;
