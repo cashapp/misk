@@ -69,6 +69,7 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
   dependsOn(":startRedis")
+  dependsOn(":startRedisCluster")
 }
 
 mavenPublishing {

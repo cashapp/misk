@@ -12,6 +12,9 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.IOException
 import java.net.Socket
+import java.time.Duration
+import java.time.Instant
+import kotlin.time.Duration.Companion.seconds
 
 plugins {
   alias(libs.plugins.dependencyAnalysis)
@@ -168,6 +171,7 @@ val hibernateProjects = listOf(
 
 val redisProjects = listOf(
   "misk-redis",
+  "misk-redis-lettuce",
   "misk-rate-limiting-bucket4j-redis"
 )
 
@@ -409,12 +413,12 @@ abstract class StartRedisTask @Inject constructor(
   @TaskAction
   fun startRedis() {
     val redisVersion = "7.2"
-    val redisPort = System.getenv("REDIS_PORT") ?: "6379"
+    val redisPort = System.getenv("REDIS_PORT")?.toInt() ?: 6379
     val redisContainerName = "miskTestRedis-$redisPort"
     val redisImage = "public.ecr.aws/docker/library/redis:$redisVersion"
 
     val portIsOccupied = try {
-      Socket("localhost", redisPort.toInt()).close()
+      Socket("localhost", redisPort).close()
       true
     } catch (e: IOException) {
       false
@@ -443,9 +447,96 @@ abstract class StartRedisTask @Inject constructor(
   }
 }
 
-tasks.register("startRedis", StartRedisTask::class.java) {
+tasks.register<StartRedisTask>("startRedis") {
   group = "other"
   description = "Ensures a Redis instance is available; " +
     "starts a redis docker container if there isn't something already there."
+  rootDir.set(project.rootDir)
+}
+
+abstract class StartRedisClusterTask @Inject constructor(
+  @get:Internal
+  val execOperations: ExecOperations
+) : DefaultTask() {
+  @get:Internal
+  abstract val rootDir: DirectoryProperty
+
+  @TaskAction
+  fun startRedisCluster() {
+    val redisVersion = "7.0.10"
+    val redisSeedPort = System.getenv("REDIS_CLUSTER_SEED_PORT")?.toInt() ?: 7000
+    val redisContainerName = "miskTestRedisCluster-$redisSeedPort"
+    val redisImage = "grokzen/redis-cluster:$redisVersion"
+
+    val portIsOccupied = try {
+      Socket("localhost", redisSeedPort).close()
+      true
+    } catch (e: IOException) {
+      false
+    }
+    if (portIsOccupied) {
+      logger.info("Port $redisSeedPort is bound, assuming Redis Cluster is already running")
+      return
+    }
+
+    logger.info("Attempting to start Redis Cluster docker image $redisImage on seed port $redisSeedPort...")
+    val dockerArguments = arrayOf(
+      "docker", "run",
+      "--detach",
+      "--rm",
+      "--name", redisContainerName,
+      "-e", "IP=0.0.0.0",
+      "-e", "INITIAL_PORT=$redisSeedPort",
+      "-e", "MASTERS=3",
+      "-e", "SLAVES_PER_MASTER=1",
+      "-p", "7000-7005:7000-7005",
+      redisImage
+    )
+    execOperations.exec {
+      workingDir(rootDir.get().asFile)
+      commandLine(*dockerArguments)
+    }
+
+    waitForRedisCluster(redisContainerName,redisSeedPort)
+
+    logger.info("Started Redis Cluster docker image $redisImage on port $redisSeedPort")
+  }
+
+  private fun waitForRedisCluster(containerName:String, port:Int){
+    println("Waiting for Redis cluster to become available...")
+    val deadline = System.currentTimeMillis() + 60.seconds.inWholeMilliseconds
+
+    fun clusterReady(): Boolean {
+      try {
+        val process = ProcessBuilder("docker", "exec", containerName,
+          "redis-cli", "-c", "-p", port.toString(), "cluster", "info")
+          .redirectErrorStream(true)
+          .start()
+
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor(5, TimeUnit.SECONDS)
+
+        return "cluster_state:ok" in output && "slots_assigned:16384" in output
+      } catch (e: Exception) {
+        return false
+      }
+    }
+
+    while (System.currentTimeMillis() < deadline) {
+      if (clusterReady()) {
+        println("✅ Redis Cluster is ready.")
+        return
+      }
+      Thread.sleep(1000)
+    }
+
+    throw GradleException("Redis Cluster did not become ready within timeout.")
+  }
+}
+
+tasks.register<StartRedisClusterTask>("startRedisCluster") {
+  group = "other"
+  description = "Ensures a Redis Cluster instance is available: " +
+    "starts a redis cluster docker container if there isn't something already there."
   rootDir.set(project.rootDir)
 }

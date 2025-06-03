@@ -1,0 +1,440 @@
+public abstract interface class misk/redis/lettuce/AbstractRedisConfig : wisp/config/Config {
+}
+
+public final class misk/redis/lettuce/AsyncCloseableExtensionsKt {
+	public static final fun closeFinallyAsync (Lio/lettuce/core/api/AsyncCloseable;Ljava/lang/Throwable;)Ljava/util/concurrent/CompletionStage;
+	public static synthetic fun closeFinallyAsync$default (Lio/lettuce/core/api/AsyncCloseable;Ljava/lang/Throwable;ILjava/lang/Object;)Ljava/util/concurrent/CompletionStage;
+	public static final fun closeOnCompletion (Ljava/util/concurrent/CompletionStage;Lio/lettuce/core/api/AsyncCloseable;)Ljava/util/concurrent/CompletionStage;
+	public static final fun suspendingUse (Lio/lettuce/core/api/AsyncCloseable;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun thenApplyUsing (Ljava/util/concurrent/CompletionStage;Lkotlin/jvm/functions/Function1;)Ljava/util/concurrent/CompletionStage;
+	public static final fun thenComposeUsing (Ljava/util/concurrent/CompletionStage;Lkotlin/jvm/functions/Function1;)Ljava/util/concurrent/CompletionStage;
+}
+
+public final class misk/redis/lettuce/AsyncCloseableExtensionsKt$sam$i$java_util_function_Function$0 : java/util/function/Function {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final synthetic fun apply (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/redis/lettuce/ConnectionProvider {
+	public abstract fun acquire (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun acquireAsync (Z)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun acquireBlocking (Z)Lio/lettuce/core/api/StatefulConnection;
+	public abstract fun getReplicationGroupId ()Ljava/lang/String;
+}
+
+public final class misk/redis/lettuce/ConnectionProvider$DefaultImpls {
+	public static fun acquire (Lmisk/redis/lettuce/ConnectionProvider;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun acquire$default (Lmisk/redis/lettuce/ConnectionProvider;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun acquireAsync$default (Lmisk/redis/lettuce/ConnectionProvider;ZILjava/lang/Object;)Ljava/util/concurrent/CompletableFuture;
+	public static fun acquireBlocking (Lmisk/redis/lettuce/ConnectionProvider;Z)Lio/lettuce/core/api/StatefulConnection;
+	public static synthetic fun acquireBlocking$default (Lmisk/redis/lettuce/ConnectionProvider;ZILjava/lang/Object;)Lio/lettuce/core/api/StatefulConnection;
+}
+
+public final class misk/redis/lettuce/RedisClusterConfig : java/util/LinkedHashMap, misk/redis/lettuce/AbstractRedisConfig {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun containsKey (Ljava/lang/Object;)Z
+	public fun containsKey (Ljava/lang/String;)Z
+	public final fun containsValue (Ljava/lang/Object;)Z
+	public fun containsValue (Lmisk/redis/lettuce/RedisClusterGroupConfig;)Z
+	public final fun entrySet ()Ljava/util/Set;
+	public final synthetic fun get (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun get (Ljava/lang/Object;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public fun get (Ljava/lang/String;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public fun getEntries ()Ljava/util/Set;
+	public fun getKeys ()Ljava/util/Set;
+	public final synthetic fun getOrDefault (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun getOrDefault (Ljava/lang/Object;Lmisk/redis/lettuce/RedisClusterGroupConfig;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public fun getOrDefault (Ljava/lang/String;Lmisk/redis/lettuce/RedisClusterGroupConfig;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public fun getSize ()I
+	public fun getValues ()Ljava/util/Collection;
+	public final fun keySet ()Ljava/util/Set;
+	public final synthetic fun remove (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun remove (Ljava/lang/Object;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public final fun remove (Ljava/lang/Object;Ljava/lang/Object;)Z
+	public fun remove (Ljava/lang/String;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public fun remove (Ljava/lang/String;Lmisk/redis/lettuce/RedisClusterGroupConfig;)Z
+	public final fun size ()I
+	public final fun values ()Ljava/util/Collection;
+}
+
+public final class misk/redis/lettuce/RedisClusterGroupConfig {
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZI)V
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lmisk/redis/lettuce/RedisNodeConfig;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()I
+	public final fun component6 ()Lmisk/redis/lettuce/RedisConnectionPoolConfig;
+	public final fun copy (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public static synthetic fun copy$default (Lmisk/redis/lettuce/RedisClusterGroupConfig;Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;ILjava/lang/Object;)Lmisk/redis/lettuce/RedisClusterGroupConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClient_name ()Ljava/lang/String;
+	public final fun getConfiguration_endpoint ()Lmisk/redis/lettuce/RedisNodeConfig;
+	public final fun getConnection_pool ()Lmisk/redis/lettuce/RedisConnectionPoolConfig;
+	public final fun getRedis_auth_password ()Ljava/lang/String;
+	public final fun getTimeout_ms ()I
+	public final fun getUse_ssl ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/redis/lettuce/RedisConfig : java/util/LinkedHashMap, misk/redis/lettuce/AbstractRedisConfig {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun containsKey (Ljava/lang/Object;)Z
+	public fun containsKey (Ljava/lang/String;)Z
+	public final fun containsValue (Ljava/lang/Object;)Z
+	public fun containsValue (Lmisk/redis/lettuce/RedisReplicationGroupConfig;)Z
+	public final fun entrySet ()Ljava/util/Set;
+	public final synthetic fun get (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun get (Ljava/lang/Object;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public fun get (Ljava/lang/String;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public fun getEntries ()Ljava/util/Set;
+	public fun getKeys ()Ljava/util/Set;
+	public final synthetic fun getOrDefault (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun getOrDefault (Ljava/lang/Object;Lmisk/redis/lettuce/RedisReplicationGroupConfig;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public fun getOrDefault (Ljava/lang/String;Lmisk/redis/lettuce/RedisReplicationGroupConfig;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public fun getSize ()I
+	public fun getValues ()Ljava/util/Collection;
+	public final fun keySet ()Ljava/util/Set;
+	public final synthetic fun remove (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun remove (Ljava/lang/Object;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public final fun remove (Ljava/lang/Object;Ljava/lang/Object;)Z
+	public fun remove (Ljava/lang/String;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public fun remove (Ljava/lang/String;Lmisk/redis/lettuce/RedisReplicationGroupConfig;)Z
+	public final fun size ()I
+	public final fun values ()Ljava/util/Collection;
+}
+
+public final class misk/redis/lettuce/RedisConfigKt {
+	public static final field DEFAULT_POOL_MAX_IDLE I
+	public static final field DEFAULT_POOL_MAX_TOTAL I
+	public static final field DEFAULT_POOL_MIN_IDLE I
+	public static final field DEFAULT_POOL_TEST_ON_ACQUIRE Z
+	public static final field DEFAULT_POOL_TEST_ON_CREATE Z
+	public static final field DEFAULT_POOL_TEST_ON_RELEASE Z
+	public static final field DEFAULT_TIMEOUT_MS I
+}
+
+public final class misk/redis/lettuce/RedisConnectionPoolConfig {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public fun <init> (II)V
+	public fun <init> (III)V
+	public fun <init> (IIIZ)V
+	public fun <init> (IIIZZ)V
+	public fun <init> (IIIZZZ)V
+	public synthetic fun <init> (IIIZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()Z
+	public final fun component5 ()Z
+	public final fun component6 ()Z
+	public final fun copy (IIIZZZ)Lmisk/redis/lettuce/RedisConnectionPoolConfig;
+	public static synthetic fun copy$default (Lmisk/redis/lettuce/RedisConnectionPoolConfig;IIIZZZILjava/lang/Object;)Lmisk/redis/lettuce/RedisConnectionPoolConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMax_idle ()I
+	public final fun getMax_total ()I
+	public final fun getMin_idle ()I
+	public final fun getTest_on_acquire ()Z
+	public final fun getTest_on_create ()Z
+	public final fun getTest_on_release ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/redis/lettuce/RedisModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/redis/lettuce/RedisModule$Companion;
+}
+
+public final class misk/redis/lettuce/RedisModule$Companion {
+	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/redis/lettuce/AbstractRedisConfig;Lio/lettuce/core/codec/RedisCodec;)Lmisk/redis/lettuce/RedisModule;
+	public final fun create (Lmisk/redis/lettuce/AbstractRedisConfig;)Lmisk/redis/lettuce/RedisModule;
+}
+
+public final class misk/redis/lettuce/RedisNodeConfig {
+	public fun <init> (Ljava/lang/String;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun copy (Ljava/lang/String;I)Lmisk/redis/lettuce/RedisNodeConfig;
+	public static synthetic fun copy$default (Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;IILjava/lang/Object;)Lmisk/redis/lettuce/RedisNodeConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHostname ()Ljava/lang/String;
+	public final fun getPort ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/redis/lettuce/RedisReplicationGroupConfig {
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZI)V
+	public fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lmisk/redis/lettuce/RedisNodeConfig;
+	public final fun component3 ()Lmisk/redis/lettuce/RedisNodeConfig;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Z
+	public final fun component6 ()I
+	public final fun component7 ()Lmisk/redis/lettuce/RedisConnectionPoolConfig;
+	public final fun copy (Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public static synthetic fun copy$default (Lmisk/redis/lettuce/RedisReplicationGroupConfig;Ljava/lang/String;Lmisk/redis/lettuce/RedisNodeConfig;Lmisk/redis/lettuce/RedisNodeConfig;Ljava/lang/String;ZILmisk/redis/lettuce/RedisConnectionPoolConfig;ILjava/lang/Object;)Lmisk/redis/lettuce/RedisReplicationGroupConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClient_name ()Ljava/lang/String;
+	public final fun getConnection_pool ()Lmisk/redis/lettuce/RedisConnectionPoolConfig;
+	public final fun getReader_endpoint ()Lmisk/redis/lettuce/RedisNodeConfig;
+	public final fun getRedis_auth_password ()Ljava/lang/String;
+	public final fun getTimeout_ms ()I
+	public final fun getUse_ssl ()Z
+	public final fun getWriter_endpoint ()Lmisk/redis/lettuce/RedisNodeConfig;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/redis/lettuce/RedisUriKt {
+	public static final fun redisUri (Ljava/lang/String;)Lio/lettuce/core/RedisURI;
+	public static final fun redisUri (Ljava/lang/String;Ljava/lang/Integer;Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/RedisURI;
+	public static final fun redisUri (Ljava/net/URI;)Lio/lettuce/core/RedisURI;
+	public static final fun redisUri (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/RedisURI;
+	public static synthetic fun redisUri$default (Ljava/lang/String;Ljava/lang/Integer;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/lettuce/core/RedisURI;
+}
+
+public final class misk/redis/lettuce/cluster/ClientExtensionsKt {
+	public static final fun clusterClientOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/cluster/ClusterClientOptions;
+	public static final fun clusterTopologyRefreshOptions (Lio/lettuce/core/cluster/ClusterClientOptions$Builder;Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/cluster/ClusterClientOptions$Builder;
+	public static final fun clusterTopologyRefreshOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/cluster/ClusterTopologyRefreshOptions;
+	public static final fun redisClusterClient (Lio/lettuce/core/RedisURI;Lio/lettuce/core/resource/ClientResources;Lio/lettuce/core/cluster/ClusterClientOptions;)Lio/lettuce/core/cluster/RedisClusterClient;
+	public static synthetic fun redisClusterClient$default (Lio/lettuce/core/RedisURI;Lio/lettuce/core/resource/ClientResources;Lio/lettuce/core/cluster/ClusterClientOptions;ILjava/lang/Object;)Lio/lettuce/core/cluster/RedisClusterClient;
+	public static final fun socketOptions (Lio/lettuce/core/cluster/ClusterClientOptions$Builder;Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/cluster/ClusterClientOptions$Builder;
+	public static final fun socketOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/SocketOptions;
+	public static final fun sslOptions (Lio/lettuce/core/cluster/ClusterClientOptions$Builder;Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/cluster/ClusterClientOptions$Builder;
+	public static final fun sslOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/SslOptions;
+	public static final fun timeoutOptions (Lio/lettuce/core/cluster/ClusterClientOptions$Builder;Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/cluster/ClusterClientOptions$Builder;
+	public static final fun timeoutOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/TimeoutOptions;
+	public static final fun withConnection (Lio/lettuce/core/cluster/RedisClusterClient;Lio/lettuce/core/codec/RedisCodec;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun withConnection (Lio/lettuce/core/cluster/RedisClusterClient;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun withConnectionBlocking (Lio/lettuce/core/cluster/RedisClusterClient;Lio/lettuce/core/codec/RedisCodec;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun withConnectionBlocking (Lio/lettuce/core/cluster/RedisClusterClient;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/redis/lettuce/cluster/PooledStatefulRedisClusterConnection : io/lettuce/core/cluster/api/StatefulRedisClusterConnection {
+	public fun <init> (Lio/lettuce/core/support/BoundedAsyncPool;Lio/lettuce/core/cluster/api/StatefulRedisClusterConnection;)V
+	public fun addListener (Lio/lettuce/core/RedisConnectionStateListener;)V
+	public fun addListener (Lio/lettuce/core/cluster/api/push/RedisClusterPushListener;)V
+	public fun async ()Lio/lettuce/core/cluster/api/async/RedisAdvancedClusterAsyncCommands;
+	public fun close ()V
+	public fun closeAsync ()Ljava/util/concurrent/CompletableFuture;
+	public fun dispatch (Lio/lettuce/core/protocol/RedisCommand;)Lio/lettuce/core/protocol/RedisCommand;
+	public fun dispatch (Ljava/util/Collection;)Ljava/util/Collection;
+	public fun flushCommands ()V
+	public fun getChannelWriter ()Lio/lettuce/core/RedisChannelWriter;
+	public fun getConnection (Ljava/lang/String;ILio/lettuce/core/protocol/ConnectionIntent;)Lio/lettuce/core/api/StatefulRedisConnection;
+	public fun getConnection (Ljava/lang/String;Lio/lettuce/core/protocol/ConnectionIntent;)Lio/lettuce/core/api/StatefulRedisConnection;
+	public fun getConnectionAsync (Ljava/lang/String;ILio/lettuce/core/protocol/ConnectionIntent;)Ljava/util/concurrent/CompletableFuture;
+	public fun getConnectionAsync (Ljava/lang/String;Lio/lettuce/core/protocol/ConnectionIntent;)Ljava/util/concurrent/CompletableFuture;
+	public fun getOptions ()Lio/lettuce/core/ClientOptions;
+	public fun getPartitions ()Lio/lettuce/core/cluster/models/partitions/Partitions;
+	public fun getReadFrom ()Lio/lettuce/core/ReadFrom;
+	public fun getResources ()Lio/lettuce/core/resource/ClientResources;
+	public fun getTimeout ()Ljava/time/Duration;
+	public fun isOpen ()Z
+	public fun reactive ()Lio/lettuce/core/cluster/api/reactive/RedisAdvancedClusterReactiveCommands;
+	public fun removeListener (Lio/lettuce/core/RedisConnectionStateListener;)V
+	public fun removeListener (Lio/lettuce/core/cluster/api/push/RedisClusterPushListener;)V
+	public fun reset ()V
+	public fun setAutoFlushCommands (Z)V
+	public fun setReadFrom (Lio/lettuce/core/ReadFrom;)V
+	public fun setTimeout (Ljava/time/Duration;)V
+	public fun sync ()Lio/lettuce/core/cluster/api/sync/RedisAdvancedClusterCommands;
+}
+
+public final class misk/redis/lettuce/cluster/SharedStatefulRedisClusterConnection : io/lettuce/core/cluster/api/StatefulRedisClusterConnection {
+	public fun <init> (Lio/lettuce/core/cluster/api/StatefulRedisClusterConnection;)V
+	public fun addListener (Lio/lettuce/core/RedisConnectionStateListener;)V
+	public fun addListener (Lio/lettuce/core/cluster/api/push/RedisClusterPushListener;)V
+	public fun async ()Lio/lettuce/core/cluster/api/async/RedisAdvancedClusterAsyncCommands;
+	public fun close ()V
+	public fun closeAsync ()Ljava/util/concurrent/CompletableFuture;
+	public fun dispatch (Lio/lettuce/core/protocol/RedisCommand;)Lio/lettuce/core/protocol/RedisCommand;
+	public fun dispatch (Ljava/util/Collection;)Ljava/util/Collection;
+	public fun flushCommands ()V
+	public fun getChannelWriter ()Lio/lettuce/core/RedisChannelWriter;
+	public fun getConnection (Ljava/lang/String;ILio/lettuce/core/protocol/ConnectionIntent;)Lio/lettuce/core/api/StatefulRedisConnection;
+	public fun getConnection (Ljava/lang/String;Lio/lettuce/core/protocol/ConnectionIntent;)Lio/lettuce/core/api/StatefulRedisConnection;
+	public fun getConnectionAsync (Ljava/lang/String;ILio/lettuce/core/protocol/ConnectionIntent;)Ljava/util/concurrent/CompletableFuture;
+	public fun getConnectionAsync (Ljava/lang/String;Lio/lettuce/core/protocol/ConnectionIntent;)Ljava/util/concurrent/CompletableFuture;
+	public fun getOptions ()Lio/lettuce/core/ClientOptions;
+	public fun getPartitions ()Lio/lettuce/core/cluster/models/partitions/Partitions;
+	public fun getReadFrom ()Lio/lettuce/core/ReadFrom;
+	public fun getResources ()Lio/lettuce/core/resource/ClientResources;
+	public fun getTimeout ()Ljava/time/Duration;
+	public fun isOpen ()Z
+	public fun reactive ()Lio/lettuce/core/cluster/api/reactive/RedisAdvancedClusterReactiveCommands;
+	public fun removeListener (Lio/lettuce/core/RedisConnectionStateListener;)V
+	public fun removeListener (Lio/lettuce/core/cluster/api/push/RedisClusterPushListener;)V
+	public fun reset ()V
+	public fun setAutoFlushCommands (Z)V
+	public fun setReadFrom (Lio/lettuce/core/ReadFrom;)V
+	public fun setTimeout (Ljava/time/Duration;)V
+	public fun sync ()Lio/lettuce/core/cluster/api/sync/RedisAdvancedClusterCommands;
+}
+
+public abstract interface class misk/redis/lettuce/cluster/StatefulRedisClusterConnectionProvider : misk/redis/lettuce/ConnectionProvider {
+}
+
+public final class misk/redis/lettuce/cluster/StatefulRedisClusterConnectionProvider$DefaultImpls {
+	public static fun acquire (Lmisk/redis/lettuce/cluster/StatefulRedisClusterConnectionProvider;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun acquireBlocking (Lmisk/redis/lettuce/cluster/StatefulRedisClusterConnectionProvider;Z)Lio/lettuce/core/cluster/api/StatefulRedisClusterConnection;
+}
+
+public final class misk/redis/lettuce/cluster/StatefulRedisClusterConnectionProviderKt {
+	public static final fun withConnection (Lmisk/redis/lettuce/cluster/StatefulRedisClusterConnectionProvider;ZLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun withConnection$default (Lmisk/redis/lettuce/cluster/StatefulRedisClusterConnectionProvider;ZLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun withConnectionBlocking (Lmisk/redis/lettuce/cluster/StatefulRedisClusterConnectionProvider;ZLkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static synthetic fun withConnectionBlocking$default (Lmisk/redis/lettuce/cluster/StatefulRedisClusterConnectionProvider;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class misk/redis/lettuce/cluster/testing/DockerRedisCluster : misk/testing/ExternalDependency {
+	public static final field Companion Lmisk/redis/lettuce/cluster/testing/DockerRedisCluster$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun afterEach ()V
+	public fun beforeEach ()V
+	public fun getId ()Ljava/lang/String;
+	public final fun getSeedHost ()Ljava/lang/String;
+	public final fun getSeedPort ()I
+	public fun shutdown ()V
+	public fun startup ()V
+}
+
+public final class misk/redis/lettuce/cluster/testing/DockerRedisCluster$Companion {
+}
+
+public final class misk/redis/lettuce/standalone/ClientExtensionsKt {
+	public static final fun clientOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/ClientOptions;
+	public static final fun clientResources (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/resource/ClientResources;
+	public static final fun redisClient (Lio/lettuce/core/RedisURI;Lio/lettuce/core/resource/ClientResources;Lio/lettuce/core/ClientOptions;)Lio/lettuce/core/RedisClient;
+	public static synthetic fun redisClient$default (Lio/lettuce/core/RedisURI;Lio/lettuce/core/resource/ClientResources;Lio/lettuce/core/ClientOptions;ILjava/lang/Object;)Lio/lettuce/core/RedisClient;
+	public static final fun socketOptions (Lio/lettuce/core/ClientOptions$Builder;Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/ClientOptions$Builder;
+	public static final fun socketOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/SocketOptions;
+	public static final fun sslOptions (Lio/lettuce/core/ClientOptions$Builder;Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/ClientOptions$Builder;
+	public static final fun sslOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/SslOptions;
+	public static final fun timeoutOptions (Lio/lettuce/core/ClientOptions$Builder;Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/ClientOptions$Builder;
+	public static final fun timeoutOptions (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/TimeoutOptions;
+	public static final fun withConnection (Lio/lettuce/core/RedisClient;Lio/lettuce/core/RedisURI;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun withConnection (Lio/lettuce/core/RedisClient;Lio/lettuce/core/codec/RedisCodec;Lio/lettuce/core/RedisURI;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun withConnectionBlocking (Lio/lettuce/core/RedisClient;Lio/lettuce/core/RedisURI;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun withConnectionBlocking (Lio/lettuce/core/RedisClient;Lio/lettuce/core/codec/RedisCodec;Lio/lettuce/core/RedisURI;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static synthetic fun withConnectionBlocking$default (Lio/lettuce/core/RedisClient;Lio/lettuce/core/RedisURI;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun withConnectionBlocking$default (Lio/lettuce/core/RedisClient;Lio/lettuce/core/codec/RedisCodec;Lio/lettuce/core/RedisURI;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class misk/redis/lettuce/standalone/PooledStatefulRedisConnection : io/lettuce/core/api/StatefulRedisConnection {
+	public fun <init> (Lio/lettuce/core/support/BoundedAsyncPool;Lio/lettuce/core/api/StatefulRedisConnection;)V
+	public fun addListener (Lio/lettuce/core/RedisConnectionStateListener;)V
+	public fun addListener (Lio/lettuce/core/api/push/PushListener;)V
+	public fun async ()Lio/lettuce/core/api/async/RedisAsyncCommands;
+	public fun close ()V
+	public fun closeAsync ()Ljava/util/concurrent/CompletableFuture;
+	public fun dispatch (Lio/lettuce/core/protocol/RedisCommand;)Lio/lettuce/core/protocol/RedisCommand;
+	public fun dispatch (Ljava/util/Collection;)Ljava/util/Collection;
+	public fun flushCommands ()V
+	public fun getOptions ()Lio/lettuce/core/ClientOptions;
+	public fun getResources ()Lio/lettuce/core/resource/ClientResources;
+	public fun getTimeout ()Ljava/time/Duration;
+	public fun isMulti ()Z
+	public fun isOpen ()Z
+	public fun reactive ()Lio/lettuce/core/api/reactive/RedisReactiveCommands;
+	public fun removeListener (Lio/lettuce/core/RedisConnectionStateListener;)V
+	public fun removeListener (Lio/lettuce/core/api/push/PushListener;)V
+	public fun reset ()V
+	public fun setAutoFlushCommands (Z)V
+	public fun setTimeout (Ljava/time/Duration;)V
+	public fun sync ()Lio/lettuce/core/api/sync/RedisCommands;
+}
+
+public abstract interface class misk/redis/lettuce/standalone/ReadOnlyStatefulRedisConnectionProvider : misk/redis/lettuce/standalone/StatefulRedisConnectionProvider {
+}
+
+public final class misk/redis/lettuce/standalone/ReadOnlyStatefulRedisConnectionProvider$DefaultImpls {
+	public static fun acquire (Lmisk/redis/lettuce/standalone/ReadOnlyStatefulRedisConnectionProvider;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun acquireBlocking (Lmisk/redis/lettuce/standalone/ReadOnlyStatefulRedisConnectionProvider;Z)Lio/lettuce/core/api/StatefulRedisConnection;
+}
+
+public abstract interface class misk/redis/lettuce/standalone/ReadWriteStatefulRedisConnectionProvider : misk/redis/lettuce/standalone/StatefulRedisConnectionProvider {
+}
+
+public final class misk/redis/lettuce/standalone/ReadWriteStatefulRedisConnectionProvider$DefaultImpls {
+	public static fun acquire (Lmisk/redis/lettuce/standalone/ReadWriteStatefulRedisConnectionProvider;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun acquireBlocking (Lmisk/redis/lettuce/standalone/ReadWriteStatefulRedisConnectionProvider;Z)Lio/lettuce/core/api/StatefulRedisConnection;
+}
+
+public final class misk/redis/lettuce/standalone/SharedStatefulRedisConnection : io/lettuce/core/api/StatefulRedisConnection {
+	public fun <init> (Lio/lettuce/core/api/StatefulRedisConnection;)V
+	public fun addListener (Lio/lettuce/core/RedisConnectionStateListener;)V
+	public fun addListener (Lio/lettuce/core/api/push/PushListener;)V
+	public fun async ()Lio/lettuce/core/api/async/RedisAsyncCommands;
+	public fun close ()V
+	public fun closeAsync ()Ljava/util/concurrent/CompletableFuture;
+	public fun dispatch (Lio/lettuce/core/protocol/RedisCommand;)Lio/lettuce/core/protocol/RedisCommand;
+	public fun dispatch (Ljava/util/Collection;)Ljava/util/Collection;
+	public fun flushCommands ()V
+	public fun getOptions ()Lio/lettuce/core/ClientOptions;
+	public fun getResources ()Lio/lettuce/core/resource/ClientResources;
+	public fun getTimeout ()Ljava/time/Duration;
+	public fun isMulti ()Z
+	public fun isOpen ()Z
+	public fun reactive ()Lio/lettuce/core/api/reactive/RedisReactiveCommands;
+	public fun removeListener (Lio/lettuce/core/RedisConnectionStateListener;)V
+	public fun removeListener (Lio/lettuce/core/api/push/PushListener;)V
+	public fun reset ()V
+	public fun setAutoFlushCommands (Z)V
+	public fun setTimeout (Ljava/time/Duration;)V
+	public fun sync ()Lio/lettuce/core/api/sync/RedisCommands;
+}
+
+public abstract interface class misk/redis/lettuce/standalone/StatefulRedisConnectionProvider : misk/redis/lettuce/ConnectionProvider {
+}
+
+public final class misk/redis/lettuce/standalone/StatefulRedisConnectionProvider$DefaultImpls {
+	public static fun acquire (Lmisk/redis/lettuce/standalone/StatefulRedisConnectionProvider;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun acquireBlocking (Lmisk/redis/lettuce/standalone/StatefulRedisConnectionProvider;Z)Lio/lettuce/core/api/StatefulRedisConnection;
+}
+
+public final class misk/redis/lettuce/standalone/StatefulRedisConnectionProviderKt {
+	public static final fun withConnection (Lmisk/redis/lettuce/standalone/StatefulRedisConnectionProvider;ZLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun withConnection$default (Lmisk/redis/lettuce/standalone/StatefulRedisConnectionProvider;ZLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun withConnectionBlocking (Lmisk/redis/lettuce/standalone/StatefulRedisConnectionProvider;ZLkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static synthetic fun withConnectionBlocking$default (Lmisk/redis/lettuce/standalone/StatefulRedisConnectionProvider;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class misk/redis/lettuce/testing/standalone/DockerRedis : misk/testing/ExternalDependency {
+	public static final field Companion Lmisk/redis/lettuce/testing/standalone/DockerRedis$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun afterEach ()V
+	public fun beforeEach ()V
+	public final fun getHost ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public final fun getPort ()I
+	public fun shutdown ()V
+	public fun startup ()V
+}
+
+public final class misk/redis/lettuce/testing/standalone/DockerRedis$Companion {
+}
+

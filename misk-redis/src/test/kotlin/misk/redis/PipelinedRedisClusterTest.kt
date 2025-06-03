@@ -7,7 +7,6 @@ import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.redis.testing.DockerRedisCluster
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import redis.clients.jedis.ConnectionPoolConfig
@@ -33,10 +32,6 @@ class PipelinedRedisClusterTest : AbstractRedisTest() {
       }.asSingleton()
     }
   }
-
-  @Suppress("unused")
-  @MiskExternalDependency
-  private val dockerRedisCluster = DockerRedisCluster
 
   @Inject @AlwaysPipelined override lateinit var redis: Redis
 }
