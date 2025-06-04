@@ -40,21 +40,58 @@ export default class EndpointSelection extends React.Component<Props, State> {
     };
   }
 
+  // TODO consider moving this to an isMiskEndpoint boolean on the metadata from the server
+  private isMiskEndpoint(route: MiskRoute): boolean {
+    const routes = [
+      '/',
+      '/_liveness',
+      '/_readiness',
+      '/_status',
+      '/api/{id}/metadata',
+      '/api/v1/database/query/metadata',
+      '/api/service/metadata',
+      '/{path:.*}',
+    ];
+    const routePrefixes = [
+      '/_admin',
+      '/v2/_admin',
+      '/_tab',
+      '/api/dashboard/',
+      '/@misk',
+      '/static',
+    ];
+    return (
+      routes.includes(route.path) ||
+      routePrefixes.some((prefix) => route.path.startsWith(prefix))
+    );
+  }
+
   componentDidMount() {
     this.metadataClient.fetchMetadata().then((actions: MiskRoute[]) => {
-      this.options = actions
-        .map((actionGroup) => ({
-          label: `${actionGroup.httpMethod} ${actionGroup.path} (${actionGroup.actionName})`,
-          termsString:
-            `${actionGroup.httpMethod} ${actionGroup.path} ${actionGroup.actionName}`.toLowerCase(),
-          value: actionGroup,
-        }))
+      const appEndpoints = actions
+        .filter((action) => !this.isMiskEndpoint(action))
         .sort((a, b) => {
           // Sort by path first, then by HTTP method
-          const pathCompare = a.value.path.localeCompare(b.value.path);
+          const pathCompare = a.path.localeCompare(b.path);
           if (pathCompare !== 0) return pathCompare;
-          return a.value.httpMethod.localeCompare(b.value.httpMethod);
+          return a.httpMethod.localeCompare(b.httpMethod);
         });
+      const miskEndpoints = actions
+        .filter((action) => this.isMiskEndpoint(action))
+        .sort((a, b) => {
+          // Sort by path first, then by HTTP method
+          const pathCompare = a.path.localeCompare(b.path);
+          if (pathCompare !== 0) return pathCompare;
+          return a.httpMethod.localeCompare(b.httpMethod);
+        });
+
+      // Combine app and Misk endpoints, ensuring Misk endpoints are always after app endpoints for less scrolling
+      this.options = [...appEndpoints, ...miskEndpoints].map((actionGroup) => ({
+        label: `${actionGroup.httpMethod} ${actionGroup.path} (${actionGroup.actionName})`,
+        termsString:
+          `${actionGroup.httpMethod} ${actionGroup.path} ${actionGroup.actionName}`.toLowerCase(),
+        value: actionGroup,
+      }));
 
       this.setState({ filteredOptions: this.options });
       this.focusSelect();
