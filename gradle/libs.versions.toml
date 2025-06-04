@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
-aws1 = "1.12.784"
-aws2 = "2.31.55"
+aws1 = "1.12.785"
+aws2 = "2.31.56"
 bucket4j = "8.8.0"
 datadog = "1.49.0"
 dependencyAnalysisPlugin = "2.18.0"
@@ -44,9 +44,9 @@ awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version.ref = "a
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version.ref = "aws1" }
 awsSdkCore = { module = "software.amazon.awssdk:sdk-core", version.ref = "aws2" }
 awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version.ref = "aws1" }
-bouncyCastlePgp = { module = "org.bouncycastle:bcpg-jdk18on", version = "1.80" }
-bouncyCastlePkix = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.80" }
-bouncyCastleProvider = { module = "org.bouncycastle:bcprov-jdk18on", version = "1.80" }
+bouncyCastlePgp = { module = "org.bouncycastle:bcpg-jdk18on", version = "1.81" }
+bouncyCastlePkix = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.81" }
+bouncyCastleProvider = { module = "org.bouncycastle:bcprov-jdk18on", version = "1.81" }
 bucket4jCore = { module = "com.bucket4j:bucket4j-core", version.ref = "bucket4j" }
 bucket4jDynamoDbV1 = { module = "com.bucket4j:bucket4j-dynamodb-sdk-v1", version = "8.6.0" }
 bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version.ref = "bucket4j" }
@@ -69,7 +69,7 @@ findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2"
 gax = { module = "com.google.api:gax", version = "2.67.0" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.57.0" }
 gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.28.2" }
-gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250516-2.0.0" }
+gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250523-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.22.4" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.94.0" }
@@ -161,7 +161,7 @@ kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-tes
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "18.0.1" }
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "7.7.0" }
-lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.7.0.RELEASE" }
+lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.7.1.RELEASE" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.6" }
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
@@ -209,7 +209,7 @@ tempest2Testing = { module = "app.cash.tempest:tempest2-testing" }
 tempest2TestingDocker = { module = "app.cash.tempest:tempest2-testing-docker" }
 tempest2TestingInternal = { module = "app.cash.tempest:tempest2-testing-internal" }
 tempest2TestingJvm = { module = "app.cash.tempest:tempest2-testing-jvm" }
-tempestBom = { module = "app.cash.tempest:tempest-bom", version = "2025.05.02.195945-d393c44" }
+tempestBom = { module = "app.cash.tempest:tempest-bom", version = "2025.06.03.162437-8f485e7" }
 tempestTesting = { module = "app.cash.tempest:tempest-testing" }
 tempestTestingDocker = { module = "app.cash.tempest:tempest-testing-docker" }
 tempestTestingInternal = { module = "app.cash.tempest:tempest-testing-internal" }
