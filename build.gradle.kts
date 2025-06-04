@@ -8,6 +8,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.STARTED
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.IOException
@@ -210,8 +211,8 @@ subprojects {
   // Only apply if the project has the kotlin plugin added:
   plugins.withType<KotlinPluginWrapper> {
     tasks.withType<KotlinCompile>().configureEach {
-      kotlinOptions {
-        jvmTarget = "11"
+      compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
       }
     }
     tasks.withType<JavaCompile>().configureEach {
