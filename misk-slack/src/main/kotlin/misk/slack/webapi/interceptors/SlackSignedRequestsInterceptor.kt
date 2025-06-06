@@ -21,7 +21,14 @@ class SlackSignedRequestsInterceptor @Inject constructor(
   private val clock: Clock,
   slackConfig: SlackConfig,
 ) : NetworkInterceptor {
-  private val signingSecret = slackConfig.signing_secret.value.decodeHex()
+  // Trim to remove errant newlines or whitespace that could be in the secret text.
+  private val signingSecret = try {
+    slackConfig.signing_secret.value.trim().decodeHex()
+  } catch (e: IllegalArgumentException) {
+    // Okio will throw an exception containing the secret if it cannot decode it.
+    // Suppress that to avoid leaking the secret in logs.
+    throw IllegalArgumentException("Could not parse the slackConfig.signing_secret.value")
+  }
 
   /**
    * The SlackSignedRequestsInterceptor verifies that the incoming request is
