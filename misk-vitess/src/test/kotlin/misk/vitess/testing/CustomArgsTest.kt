@@ -1,7 +1,5 @@
 package misk.vitess.testing
 
-import misk.vitess.testing.internal.VitessClusterConfig
-import misk.vitess.testing.internal.VitessQueryExecutor
 import misk.vitess.testing.internal.VitessQueryExecutorException
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertArrayEquals
@@ -24,8 +22,6 @@ class CustomArgsTest {
     private lateinit var testDb2: VitessTestDb
     private lateinit var testDb1RunResult: VitessTestDbStartupResult
     private lateinit var testDb2RunResult: VitessTestDbStartupResult
-    private lateinit var testDb1QueryExecutor: VitessQueryExecutor
-    private lateinit var testDb2QueryExecutor: VitessQueryExecutor
 
     // testDb1 args
     private const val DB1_CONTAINER_NAME = "custom_args_test_vitess_db"
@@ -69,9 +65,6 @@ class CustomArgsTest {
       val future2: Future<VitessTestDbStartupResult> = executorService.submit<VitessTestDbStartupResult> { testDb2.run() }
       testDb1RunResult = future1.get()
       testDb2RunResult = future2.get()
-
-      testDb1QueryExecutor = VitessQueryExecutor(VitessClusterConfig(DB1_PORT))
-      testDb2QueryExecutor = VitessQueryExecutor(VitessClusterConfig(DB2_PORT))
     }
 
     @JvmStatic
@@ -84,21 +77,21 @@ class CustomArgsTest {
 
   @Test
   fun `test user defined MySql version`() {
-    val results = testDb1QueryExecutor.executeQuery("SELECT version();")
+    val results = testDb1.executeQuery("SELECT version();")
     val actualMysqlVersion = results[0]["version()"]
     assertEquals("$DB1_MYSQL_VERSION-Vitess", actualMysqlVersion)
   }
 
   @Test
   fun `test user defined SQL mode`() {
-    val results = testDb1QueryExecutor.executeQuery("SELECT @@global.sql_mode;")
+    val results = testDb1.executeQuery("SELECT @@global.sql_mode;")
     val actualSqlMode = results[0]["@@global.sql_mode"]
     assertEquals(DB1_SQL_MODE, actualSqlMode)
   }
 
   @Test
   fun `test user defined transaction isolation level`() {
-    val results = testDb1QueryExecutor.executeQuery("SELECT @@global.transaction_ISOLATION;")
+    val results = testDb1.executeQuery("SELECT @@global.transaction_ISOLATION;")
     val actualTransactionIsolationLevel = results[0]["@@global.transaction_ISOLATION"]
     assertEquals(DB1_TXN_ISO_LEVEL.value, actualTransactionIsolationLevel)
   }
@@ -106,18 +99,18 @@ class CustomArgsTest {
   @Test
   fun `test scatter queries fail by default but succeed with query hint`() {
     testDb1.truncate()
-    testDb1QueryExecutor.executeUpdate("INSERT INTO customers (email, token) VALUES ('jack@xyz.com', 'token');")
+    testDb1.executeUpdate("INSERT INTO customers (email, token) VALUES ('jack@xyz.com', 'token');")
 
-    val exception = assertThrows<VitessQueryExecutorException> { testDb1QueryExecutor.executeQuery( "SELECT * FROM customers;") }
+    val exception = assertThrows<VitessQueryExecutorException> { testDb1.executeQuery( "SELECT * FROM customers;") }
     assertTrue(exception.cause?.message!!.contains("plan includes scatter, which is disallowed"))
 
-    val results = testDb1QueryExecutor.executeQuery("SELECT /*vt+ ALLOW_SCATTER */ * FROM customers;")
+    val results = testDb1.executeQuery("SELECT /*vt+ ALLOW_SCATTER */ * FROM customers;")
     assertEquals(1, results.size )
   }
 
   @Test
   fun `test transaction timeout`() {
-    val exception = assertThrows<VitessQueryExecutorException> { testDb1QueryExecutor.executeTransaction("SELECT SLEEP(6);") }
+    val exception = assertThrows<VitessQueryExecutorException> { testDb1.executeTransaction("SELECT SLEEP(6);") }
     val actualMessage = exception.cause?.message!!
     val expectedMessageSubstring = "maximum statement execution time exceeded"
     assertTrue(
@@ -137,22 +130,20 @@ class CustomArgsTest {
 
   @Test
   fun `test declarative schema changes are auto applied`() {
-    val vitessQueryExecutor = VitessQueryExecutor(VitessClusterConfig(DB1_PORT))
-    val keyspaces = vitessQueryExecutor.getKeyspaces()
+    val keyspaces = testDb1.getKeyspaces()
     assertArrayEquals(arrayOf("gameworld", "gameworld_sharded"), keyspaces.toTypedArray())
 
-    val unshardedTables = vitessQueryExecutor.getTables("gameworld").map { it.tableName }
+    val unshardedTables = testDb1.getTables("gameworld").map { it.tableName }
     assertArrayEquals(arrayOf("customers_seq", "games_seq"), unshardedTables.toTypedArray())
 
-    val shardedTables = vitessQueryExecutor.getTables("gameworld_sharded").map { it.tableName }
+    val shardedTables = testDb1.getTables("gameworld_sharded").map { it.tableName }
     assertArrayEquals(arrayOf("customers", "games"), shardedTables.toTypedArray())
   }
 
   @Test
   fun `test applySchema after run with keepAlive = false`() {
-    val vitessQueryExecutor = VitessQueryExecutor(VitessClusterConfig(DB2_PORT))
     // Keyspaces are still applied even if autoApplySchemaChanges is false.
-    var keyspaces = vitessQueryExecutor.getKeyspaces()
+    var keyspaces = testDb2.getKeyspaces()
     assertArrayEquals(arrayOf("gameworld", "gameworld_sharded"), keyspaces.toTypedArray())
 
     // However tables should not yet be applied.
@@ -213,15 +204,15 @@ class CustomArgsTest {
   }
 
   private fun assertTablesNotApplied() {
-    assertEquals(testDb2QueryExecutor.getTables("gameworld").size, 0)
-    assertEquals(testDb2QueryExecutor.getTables("gameworld_sharded").size, 0)
+    assertEquals(testDb2.getTables("gameworld").size, 0)
+    assertEquals(testDb2.getTables("gameworld_sharded").size, 0)
   }
 
   private fun assertTablesApplied() {
-    val unshardedTables = testDb2QueryExecutor.getTables("gameworld").map { it.tableName }
+    val unshardedTables = testDb2.getTables("gameworld").map { it.tableName }
     assertArrayEquals(arrayOf("customers_seq", "games_seq"), unshardedTables.toTypedArray())
 
-    val shardedTables = testDb2QueryExecutor.getTables("gameworld_sharded").map { it.tableName }
+    val shardedTables = testDb2.getTables("gameworld_sharded").map { it.tableName }
     assertArrayEquals(arrayOf("customers", "games"), shardedTables.toTypedArray())
   }
 

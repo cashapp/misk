@@ -1,5 +1,7 @@
 package misk.vitess.testing.internal
 
+import misk.vitess.testing.VitessTable
+
 /** Represents a Vitess keyspace with its tables and sharding information. */
 internal data class VitessKeyspace(
   val name: String,
