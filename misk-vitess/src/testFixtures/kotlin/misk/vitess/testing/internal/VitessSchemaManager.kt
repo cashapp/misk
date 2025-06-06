@@ -24,6 +24,7 @@ import misk.vitess.testing.DdlUpdate
 import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
 import misk.vitess.testing.DefaultSettings.VTCTLD_CLIENT_IMAGE
 import misk.vitess.testing.VSchemaUpdate
+import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbStartupException
 import wisp.resources.ClasspathResourceLoaderBackend
 import wisp.resources.FilesystemLoaderBackend
@@ -234,13 +235,13 @@ internal class VitessSchemaManager(
     }
 
     val tables = vitessQueryExecutor.getTables(keyspace.name)
-    tables.forEach { vitessQueryExecutor.execute("DROP TABLE ${it.tableName};", keyspace.name) }
+    tables.forEach { vitessQueryExecutor.executeUpdate("DROP TABLE ${it.tableName};", keyspace.name) }
 
     keyspace.ddlCommands
       .sortedBy { it.first }
       .map { it.second }
       .forEach {
-        vitessQueryExecutor.execute(query = it, target = keyspace.name)
+        vitessQueryExecutor.executeUpdate(query = it, target = keyspace.name)
         ddlUpdates.add(DdlUpdate(ddl = it, keyspace = keyspace.name))
       }
 
@@ -261,7 +262,7 @@ internal class VitessSchemaManager(
                 "Initializing sequence table `${table.tableName}` in keyspace `${keyspace.name}` with query: $query"
               )
             }
-            vitessQueryExecutor.execute(query, keyspace.name)
+            vitessQueryExecutor.executeUpdate(query, keyspace.name)
           }
       }
   }
@@ -289,7 +290,7 @@ internal class VitessSchemaManager(
 
   private fun applyDdlCommands(ddl: String, keyspace: VitessKeyspace, vitessQueryExecutor: VitessQueryExecutor) {
     printDebug("Applying schema changes:\n$ddl")
-    vitessQueryExecutor.execute(ddl, keyspace.name)
+    vitessQueryExecutor.executeUpdate(ddl, keyspace.name)
   }
 
   private fun executeDockerCommand(command: List<String>, keyspace: String): String {

@@ -1,5 +1,7 @@
 package misk.vitess.testing.internal
 
+import misk.vitess.testing.VitessTable
+import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbException
 import java.sql.Connection
 import java.sql.DriverManager
@@ -21,11 +23,6 @@ internal class VitessQueryExecutor(private val vitessClusterConfig: VitessCluste
   fun executeQuery(query: String, target: String = "@primary"): List<Map<String, Any>> {
     val connection = getVtgateConnection()
     return connection.use { conn -> executeQuery(conn, query, target) }
-  }
-
-  fun execute(query: String, target: String = "@primary"): Boolean {
-    val connection = getVtgateConnection()
-    return connection.use { conn -> execute(conn, query, target) }
   }
 
   fun executeUpdate(query: String, target: String = "@primary"): Int {

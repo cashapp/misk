@@ -244,6 +244,63 @@ class VitessTestDb(
     }
   }
 
+  /**
+   * Get the list of keyspaces that are present on the vtgate.
+   *
+   * @return A list of keyspace names as strings.
+   */
+  fun getKeyspaces(): List<String> {
+    return VitessQueryExecutor(vitessClusterConfig).getKeyspaces()
+  }
+
+  /**
+   * Get the list of tables for a specific keyspace.
+   *
+   * @param keyspace The name of the keyspace to retrieve tables from.
+   *
+   * @return A list of [VitessTable] objects representing the tables in the specified keyspace.
+   */
+  fun getTables(keyspace: String): List<VitessTable> {
+    return VitessQueryExecutor(vitessClusterConfig).getTables(keyspace)
+  }
+
+  /**
+   * Execute a SELECT SQL query against the vtgate.
+   *
+   * @param query The SQL query to execute.
+   * @param target The target for the query, which defaults to "@primary". This can be used to specify a specific shard.
+   *
+   * @return A list of maps representing the rows returned by the query, where each map corresponds to a row and each
+   *   key-value pair corresponds to a column name and its value.
+   */
+  fun executeQuery(query: String, target: String = "@primary"): List<Map<String, Any>> {
+    return VitessQueryExecutor(vitessClusterConfig).executeQuery(query, target)
+  }
+
+  /**
+   * Execute a SQL statement (i.e. INSERT, UPDATE, DELETE, DDL) against the vtgate.
+   *
+   * @param query The SQL statement to execute.
+   * @param target The target for the query, which defaults to "@primary". This can be used to specify a specific shard.
+   *
+   * @return `true` if the execution was successful, `false` otherwise.
+   */
+  fun executeUpdate(query: String, target: String = "@primary"): Int {
+    return VitessQueryExecutor(vitessClusterConfig).executeUpdate(query, target)
+  }
+
+  /**
+   * Execute a transaction against the vtgate.
+   *
+   * @param query The SQL statement to execute as a transaction.
+   * @param target The target for the query, which defaults to "@primary". This can be used to specify a specific shard.
+   *
+   * @return `true` if the transaction was successful, `false` otherwise.
+   */
+  fun executeTransaction(query: String, target: String = "@primary"): Boolean {
+    return VitessQueryExecutor(vitessClusterConfig).executeTransaction(query, target)
+  }
+
   private fun getVitessDockerContainer(): VitessDockerContainer {
     val container =
       VitessDockerContainer(
@@ -326,3 +383,12 @@ data class ApplySchemaResult(
 data class VSchemaUpdate(val vschema: String, val keyspace: String)
 
 data class DdlUpdate(val ddl: String, val keyspace: String)
+
+data class VitessTable(val tableName: String, val type: VitessTableType)
+
+enum class VitessTableType {
+  SEQUENCE,
+  REFERENCE,
+  STANDARD,
+}
+
