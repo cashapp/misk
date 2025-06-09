@@ -165,6 +165,7 @@ public final class misk/vitess/testing/DefaultSettings {
 	public static final field AUTO_APPLY_SCHEMA_CHANGES Z
 	public static final field CONTAINER_NAME Ljava/lang/String;
 	public static final field DEBUG_STARTUP Z
+	public static final field DYNAMIC_PORT I
 	public static final field ENABLE_DECLARATIVE_SCHEMA_CHANGES Z
 	public static final field ENABLE_SCATTERS Z
 	public static final field INSTANCE Lmisk/vitess/testing/DefaultSettings;
@@ -254,7 +255,9 @@ public final class misk/vitess/testing/VitessTestDb {
 	public final fun executeUpdate (Ljava/lang/String;Ljava/lang/String;)I
 	public static synthetic fun executeUpdate$default (Lmisk/vitess/testing/VitessTestDb;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)I
 	public final fun getKeyspaces ()Ljava/util/List;
+	public final fun getQueryPlanDebugPort ()I
 	public final fun getTables (Ljava/lang/String;)Ljava/util/List;
+	public final fun getVtgatePort ()I
 	public final fun run ()Lmisk/vitess/testing/VitessTestDbStartupResult;
 	public final fun shutdown ()Lmisk/vitess/testing/VitessTestDbShutdownResult;
 	public final fun truncate ()V
@@ -393,17 +396,36 @@ public final class misk/vitess/testing/internal/StartVitessContainerResult : mis
 }
 
 public final class misk/vitess/testing/internal/VitessClusterConfig {
-	public fun <init> (I)V
-	public final fun allPorts ()Ljava/util/List;
-	public final fun getBasePort ()I
+	public static final field Companion Lmisk/vitess/testing/internal/VitessClusterConfig$Companion;
+	public synthetic fun <init> (Lmisk/vitess/testing/internal/VitessPortMapping;Lmisk/vitess/testing/internal/VitessPortMapping;Lmisk/vitess/testing/internal/VitessPortMapping;Lmisk/vitess/testing/internal/VitessPortMapping;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun allHostPorts ()Ljava/util/List;
+	public final fun allPortMappings ()Ljava/util/List;
+	public final fun getBasePort ()Lmisk/vitess/testing/internal/VitessPortMapping;
 	public final fun getDbaUser ()Ljava/lang/String;
 	public final fun getDbaUserPassword ()Ljava/lang/String;
-	public final fun getGrpcPort ()I
+	public final fun getGrpcPort ()Lmisk/vitess/testing/internal/VitessPortMapping;
 	public final fun getHostname ()Ljava/lang/String;
-	public final fun getMysqlPort ()I
-	public final fun getVtgatePort ()I
+	public final fun getMysqlPort ()Lmisk/vitess/testing/internal/VitessPortMapping;
+	public final fun getVtgatePort ()Lmisk/vitess/testing/internal/VitessPortMapping;
 	public final fun getVtgateUser ()Ljava/lang/String;
 	public final fun getVtgateUserPassword ()Ljava/lang/String;
+}
+
+public final class misk/vitess/testing/internal/VitessClusterConfig$Companion {
+	public final fun create (I)Lmisk/vitess/testing/internal/VitessClusterConfig;
+}
+
+public final class misk/vitess/testing/internal/VitessPortMapping {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Lmisk/vitess/testing/internal/VitessPortMapping;
+	public static synthetic fun copy$default (Lmisk/vitess/testing/internal/VitessPortMapping;IIILjava/lang/Object;)Lmisk/vitess/testing/internal/VitessPortMapping;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContainerPort ()I
+	public final fun getHostPort ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/vitess/testing/internal/VitessQueryExecutorException : misk/vitess/testing/VitessTestDbException {

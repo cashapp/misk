@@ -9,7 +9,7 @@ import java.nio.file.Files
  */
 internal class VitessSkeema(private val vitessClusterConfig: VitessClusterConfig) {
   companion object {
-    val SKEEMA_BINARY = "${System.getenv("HERMIT_BIN")}/skeema"
+    val SKEEMA_BINARY = "skeema"
   }
 
   /**
@@ -65,7 +65,7 @@ internal class VitessSkeema(private val vitessClusterConfig: VitessClusterConfig
     skeemaFile.writeText(
       """
           host=${vitessClusterConfig.hostname}
-          port=${vitessClusterConfig.mysqlPort}
+          port=${vitessClusterConfig.mysqlPort.hostPort}
           user=${vitessClusterConfig.dbaUser}
           password=${vitessClusterConfig.dbaUserPassword}
           schema=$databaseName

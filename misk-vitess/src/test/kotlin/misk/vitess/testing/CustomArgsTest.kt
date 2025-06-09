@@ -25,14 +25,12 @@ class CustomArgsTest {
 
     // testDb1 args
     private const val DB1_CONTAINER_NAME = "custom_args_test_vitess_db"
-    private const val DB1_PORT = 33003
     private const val DB1_MYSQL_VERSION = "8.0.42"
     private const val DB1_SQL_MODE = "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
     private val DB1_TXN_ISO_LEVEL = TransactionIsolationLevel.READ_COMMITTED
 
     // testDb2 args
     private const val DB2_CONTAINER_NAME = "custom_args2_test_vitess_db"
-    private const val DB2_PORT = 34003
 
     private val executorService = Executors.newFixedThreadPool(2)
 
@@ -44,7 +42,7 @@ class CustomArgsTest {
         containerName = DB1_CONTAINER_NAME,
         enableScatters = false,
         enableDeclarativeSchemaChanges = true,
-        port = DB1_PORT,
+        port = DefaultSettings.DYNAMIC_PORT,
         keepAlive = true,
         mysqlVersion = DB1_MYSQL_VERSION,
         schemaDir = "filesystem:${Paths.get(System.getProperty("user.dir"), "src/test/resources/vitess/schema")}",
@@ -57,7 +55,7 @@ class CustomArgsTest {
       testDb2 = VitessTestDb(
         autoApplySchemaChanges = false,
         containerName = DB2_CONTAINER_NAME,
-        port = DB2_PORT,
+        port = DefaultSettings.DYNAMIC_PORT,
         keepAlive = false)
 
       // Containers should be able to be run in parallel
@@ -167,7 +165,7 @@ class CustomArgsTest {
       autoApplySchemaChanges = false,
       containerName = DB2_CONTAINER_NAME,
       enableDeclarativeSchemaChanges = true,
-      port = DB2_PORT,
+      port = DefaultSettings.DYNAMIC_PORT,
       keepAlive = false)
 
     // This will start a new container since keepAlive is set to false.
@@ -220,7 +218,7 @@ class CustomArgsTest {
     return VitessTestDb(
       containerName = "unsupported_scatter_vitess_db",
       enableScatters = false,
-      port = DB1_PORT,
+      port = DefaultSettings.DYNAMIC_PORT,
       vitessImage = "vitess/vttestserver:v19.0.9-mysql80",
       vitessVersion = 19)
   }

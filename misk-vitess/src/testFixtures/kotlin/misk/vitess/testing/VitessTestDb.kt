@@ -61,7 +61,7 @@ class VitessTestDb(
   private var vitessImage: String = DefaultSettings.VITESS_IMAGE,
   private var vitessVersion: Int = DefaultSettings.VITESS_VERSION,
 ) {
-  private val vitessClusterConfig = VitessClusterConfig(port)
+  private val vitessClusterConfig = VitessClusterConfig.create(userPort = port)
   private val vitessSchemaManager by lazy {
     VitessSchemaManager(
       containerName = containerName,
@@ -243,6 +243,35 @@ class VitessTestDb(
       throw VitessTestDbTruncateException("Failed to truncate tables", e)
     }
   }
+
+  /**
+   * Get the exposed Docker port of the vtgate, which is used to connect to the Vitess database.
+   *
+   * @return The exposed Docker port of the vtgate.
+   * @throws [VitessTestDbException] if `VitessTestDb` has not been initialized by calling `run()`.
+   */
+  val vtgatePort: Int
+    get() {
+      if (!isInitialized) {
+        throw VitessTestDbException("VitessTestDb must be initialized by calling run() before accessing the vtgate port.")
+      }
+      return vitessClusterConfig.vtgatePort.hostPort
+    }
+
+  /**
+   * Get the port used to debug query plans at {hostname}:/{query_debug_port}/debug/query_plans
+   *
+   * @return The port used for vtgate query plan debugging.
+   * @throws [VitessTestDbException] if `VitessTestDb` has not been initialized by calling `run()`.
+   */
+  val queryPlanDebugPort: Int
+    get() {
+      if (!isInitialized) {
+        throw VitessTestDbException("VitessTestDb must be initialized by calling run() before accessing the query debug port.")
+      }
+      return vitessClusterConfig.basePort.hostPort
+    }
+
 
   /**
    * Get the list of keyspaces that are present on the vtgate.

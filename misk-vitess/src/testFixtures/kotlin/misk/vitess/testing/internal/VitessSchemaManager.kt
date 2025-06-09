@@ -83,7 +83,7 @@ internal class VitessSchemaManager(
     } catch (e: VitessQueryExecutorException) {
       return ApplySchemaResult(
         newContainerNeeded = true,
-        newContainerNeededReason = "Failed to connect to vtgate running on port ${vitessClusterConfig.vtgatePort}.",
+        newContainerNeededReason = "Failed to connect to vtgate running on port ${vitessClusterConfig.vtgatePort.hostPort}.",
         schemaChangesProcessed = false,
         vschemaUpdates = emptyList(),
         ddlUpdates = emptyList(),
@@ -279,7 +279,7 @@ internal class VitessSchemaManager(
         keyspace.name,
         "--strict",
         "--action_timeout=$VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS",
-        "--server=$containerName:${vitessClusterConfig.grpcPort}",
+        "--server=$containerName:${vitessClusterConfig.grpcPort.containerPort}",
         "--vschema=${keyspace.vschema}",
       )
 
