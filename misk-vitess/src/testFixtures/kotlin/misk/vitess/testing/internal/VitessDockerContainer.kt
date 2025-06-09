@@ -209,7 +209,7 @@ internal class VitessDockerContainer(
         ENABLE_SCATTERS_ENV to ("$enableScatters" to "enableScatters"),
         KEYSPACES_ENV to (getKeyspacesString() to "keyspaces"),
         MYSQL_VERSION_ENV to (mysqlVersion to "mysqlVersion"),
-        PORT_ENV to ("${vitessClusterConfig.basePort}" to "port"),
+        PORT_ENV to ("${vitessClusterConfig.vtgatePort.hostPort}" to "port"),
         SQL_MODE_ENV to (sqlMode to "sqlMode"),
         TRANSACTION_ISOLATION_LEVEL_ENV to (transactionIsolationLevel.value to "transactionIsolationLevel"),
         TRANSACTION_TIMEOUT_SECONDS_ENV to ("${transactionTimeoutSeconds.seconds}" to "transactionTimeoutSeconds"),
@@ -239,7 +239,7 @@ internal class VitessDockerContainer(
     existingContainer?.let { stopContainer(it) }
 
     // Also remove any containers that are using the same ports as the new container.
-    vitessClusterConfig.allPorts().forEach { port ->
+    vitessClusterConfig.allHostPorts().forEach { port ->
       val containers = dockerClient.listContainersCmd().withShowAll(true).withFilter("publish", listOf("$port")).exec()
       containers.forEach {
         container -> stopContainer(container)
@@ -252,7 +252,7 @@ internal class VitessDockerContainer(
     }
 
     // Ports can still be occupied by other processes.
-    val occupiedPorts = vitessClusterConfig.allPorts().filter { isPortInUse(it) }
+    val occupiedPorts = vitessClusterConfig.allHostPorts().filter { isPortInUse(it) }
     if (occupiedPorts.isNotEmpty()) {
       println("Ports `[${occupiedPorts.joinToString(", ")}]` are still in use.")
       throw VitessTestDbStartupException("Ports `[${occupiedPorts.joinToString(", ")}]` are in use by another process.")
@@ -282,7 +282,7 @@ internal class VitessDockerContainer(
     existingContainer?.let { removeContainer(it) }
 
     // Also remove any containers that are using the same ports as the new container.
-    vitessClusterConfig.allPorts().forEach { port ->
+    vitessClusterConfig.allHostPorts().forEach { port ->
       val containers = dockerClient.listContainersCmd().withShowAll(true).withFilter("publish", listOf("$port")).exec()
       containers.forEach { container -> removeContainer(container) }
     }
@@ -417,8 +417,7 @@ internal class VitessDockerContainer(
     val networkId = getOrCreateVitessNetwork()
     printDebug("Using Docker network `$networkId` for container `$containerName`.")
 
-    val portBindings =
-      vitessClusterConfig.allPorts().map { port -> PortBinding(Ports.Binding.bindPort(port), ExposedPort(port)) }
+    val portBindings = vitessClusterConfig.allPortMappings().map { portMapping -> PortBinding.parse("${portMapping.hostPort}:${portMapping.containerPort}") }
     val optionsFileDest = "$TEST_DB_DIR/my.cnf"
     val hostConfig =
       HostConfig()
@@ -435,7 +434,7 @@ internal class VitessDockerContainer(
         .withTest(
           listOf(
             "CMD-SHELL",
-            "mysql -h $DOCKER_HEALTH_CHECK_HOST --protocol=tcp -P ${vitessClusterConfig.vtgatePort} -u=${vitessClusterConfig.vtgateUser} --execute 'USE @primary;'",
+            "mysql -h $DOCKER_HEALTH_CHECK_HOST --protocol=tcp -P ${vitessClusterConfig.vtgatePort.containerPort} -u=${vitessClusterConfig.vtgateUser} --execute 'USE @primary;'",
           )
         )
         .withInterval(Duration.ofSeconds(CONTAINER_HEALTH_CHECK_INTERVAL_SECONDS).toNanos())
@@ -446,7 +445,7 @@ internal class VitessDockerContainer(
         "/vt/bin/vttestserver",
         "--alsologtostderr",
         "--port",
-        "${vitessClusterConfig.basePort}",
+        "${vitessClusterConfig.basePort.containerPort}",
         "--mysql_bind_host",
         "0.0.0.0",
         "--keyspaces",
@@ -495,13 +494,13 @@ internal class VitessDockerContainer(
         .withHostConfig(hostConfig)
         .withPlatform("linux/amd64")
         .withHealthcheck(healthCheck)
-        .withExposedPorts(*vitessClusterConfig.allPorts().map { ExposedPort(it) }.toTypedArray())
+        .withExposedPorts(*vitessClusterConfig.allPortMappings().map { ExposedPort(it.containerPort) }.toTypedArray())
         .withEnv(
           "$ENABLE_SCATTERS_ENV=$enableScatters",
           "$KEEP_ALIVE_ENV=$keepAlive",
           "$KEYSPACES_ENV=${getKeyspacesString()}",
           "$MYSQL_VERSION_ENV=$mysqlVersion",
-          "$PORT_ENV=${vitessClusterConfig.basePort}",
+          "$PORT_ENV=${vitessClusterConfig.vtgatePort.hostPort}",
           "$SQL_MODE_ENV=$sqlMode",
           "$TRANSACTION_ISOLATION_LEVEL_ENV=${transactionIsolationLevel.value}",
           "$TRANSACTION_TIMEOUT_SECONDS_ENV=${transactionTimeoutSeconds.seconds}",

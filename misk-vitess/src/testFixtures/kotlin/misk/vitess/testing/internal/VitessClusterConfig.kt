@@ -1,17 +1,60 @@
 package misk.vitess.testing.internal
 
+import misk.vitess.testing.DefaultSettings
 import wisp.containers.ContainerUtil
+import java.net.ServerSocket
 
-class VitessClusterConfig(port: Int) {
-  val vtgatePort: Int = port
-  val mysqlPort: Int = port - 1
-  val grpcPort: Int = port - 2
-  val basePort: Int = port - 3
-  val hostname: String = System.getenv("VITESS_HOST") ?: ContainerUtil.dockerTargetOrLocalHost()
-  val vtgateUser: String = "root"
-  val vtgateUserPassword: String = ""
-  val dbaUser: String = "vt_dba_tcp_full"
-  val dbaUserPassword: String = ""
+/**
+ * This class represents the Vitess ports to be used by Vitess Docker components.
+ */
+class VitessClusterConfig private constructor(
+  val vtgatePort: VitessPortMapping,
+  val mysqlPort: VitessPortMapping,
+  val grpcPort: VitessPortMapping,
+  val basePort: VitessPortMapping,
+  val hostname: String,
+  val vtgateUser: String,
+  val vtgateUserPassword: String,
+  val dbaUser: String,
+  val dbaUserPassword: String
 
-  fun allPorts(): List<Int> = listOf(basePort, grpcPort, mysqlPort, vtgatePort)
+) {
+  companion object {
+    /**
+     * Creates a [VitessClusterConfig] using the specified user port.
+     *
+     * The `userPort` arg represents the user desired location of where the vtagte lives.
+     * If the user port is set to [DefaultSettings.DYNAMIC_PORT], a dynamic port will instead be assigned.
+     * All other Vitess ports are dynamic. Dynamic port mode is generally preferred to avoid port conflicts.
+     *
+     * @param userPort The port to expose for vtgate. Use [DefaultSettings.DYNAMIC_PORT] for dynamic assignment.
+     *
+     * @return A new instance of [VitessClusterConfig].
+     */
+    fun create(userPort: Int): VitessClusterConfig {
+      fun getDynamicPort() = ServerSocket(0).use { it.localPort }
+      val vtgateExposedPort = if (userPort == DefaultSettings.DYNAMIC_PORT) getDynamicPort() else userPort
+      return VitessClusterConfig(
+        vtgatePort = VitessPortMapping(hostPort = vtgateExposedPort, containerPort = 27003),
+        mysqlPort = VitessPortMapping(hostPort = getDynamicPort(), containerPort = 27002),
+        grpcPort = VitessPortMapping(hostPort = getDynamicPort(), containerPort = 27001),
+        basePort = VitessPortMapping(hostPort = getDynamicPort(), containerPort = 27000),
+        hostname = System.getenv("VITESS_HOST") ?: ContainerUtil.dockerTargetOrLocalHost(),
+        vtgateUser = "root",
+        vtgateUserPassword = "",
+        dbaUser = "vt_dba_tcp_full",
+        dbaUserPassword = ""
+      )
+    }
+  }
+
+  fun allPortMappings(): List<VitessPortMapping> = listOf(basePort, grpcPort, mysqlPort, vtgatePort)
+
+  fun allHostPorts(): List<Int> = allPortMappings().map { it.hostPort }
 }
+
+data class VitessPortMapping(
+  val containerPort: Int,
+  val hostPort: Int
+)
+

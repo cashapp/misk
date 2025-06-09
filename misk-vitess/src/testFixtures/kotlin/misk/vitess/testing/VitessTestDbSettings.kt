@@ -6,6 +6,7 @@ object DefaultSettings {
   const val AUTO_APPLY_SCHEMA_CHANGES = true
   const val CONTAINER_NAME = "vitess_test_db"
   const val DEBUG_STARTUP = false
+  const val DYNAMIC_PORT: Int = 0
   const val ENABLE_DECLARATIVE_SCHEMA_CHANGES = false
   const val ENABLE_SCATTERS = true
   const val KEEP_ALIVE = true
