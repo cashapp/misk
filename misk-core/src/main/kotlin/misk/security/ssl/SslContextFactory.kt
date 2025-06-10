@@ -17,7 +17,7 @@ class SslContextFactory @Inject constructor(private val sslLoader: SslLoader) {
   /** @return A new [SSLContext] for the given certstore and optional truststore config */
   @JvmOverloads
   fun create(certStore: CertStore?, pin: CharArray?, trustStore: TrustStore? = null): SSLContext =
-    delegate.create(certStore, pin, trustStore)
+    delegate.create(certStore?.let { wisp.security.ssl.CertStore(it.keyStore) }, pin, trustStore)
 
   /** @return a set of [TrustManager]s based on the certificates in the given truststore */
   fun loadTrustManagers(trustStore: KeyStore): Array<TrustManager> =

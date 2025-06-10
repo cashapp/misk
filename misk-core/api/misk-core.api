@@ -196,6 +196,17 @@ public final class misk/sampling/Sampler$DefaultImpls {
 	public static fun sampledCall (Lmisk/sampling/Sampler;Lkotlin/jvm/functions/Function0;)V
 }
 
+public final class misk/security/ssl/CertStore {
+	public fun <init> (Ljava/security/KeyStore;)V
+	public final fun component1 ()Ljava/security/KeyStore;
+	public final fun copy (Ljava/security/KeyStore;)Lmisk/security/ssl/CertStore;
+	public static synthetic fun copy$default (Lmisk/security/ssl/CertStore;Ljava/security/KeyStore;ILjava/lang/Object;)Lmisk/security/ssl/CertStore;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKeyStore ()Ljava/security/KeyStore;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/security/ssl/CertStoreConfig {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -229,12 +240,12 @@ public final class misk/security/ssl/KeystoreExtensionsKt {
 public final class misk/security/ssl/SslContextFactory {
 	public fun <init> (Lmisk/security/ssl/SslLoader;)V
 	public final fun create ()Ljavax/net/ssl/SSLContext;
+	public final fun create (Lmisk/security/ssl/CertStore;[C)Ljavax/net/ssl/SSLContext;
+	public final fun create (Lmisk/security/ssl/CertStore;[CLwisp/security/ssl/TrustStore;)Ljavax/net/ssl/SSLContext;
 	public final fun create (Lmisk/security/ssl/CertStoreConfig;)Ljavax/net/ssl/SSLContext;
 	public final fun create (Lmisk/security/ssl/CertStoreConfig;Lmisk/security/ssl/TrustStoreConfig;)Ljavax/net/ssl/SSLContext;
-	public final fun create (Lwisp/security/ssl/CertStore;[C)Ljavax/net/ssl/SSLContext;
-	public final fun create (Lwisp/security/ssl/CertStore;[CLwisp/security/ssl/TrustStore;)Ljavax/net/ssl/SSLContext;
+	public static synthetic fun create$default (Lmisk/security/ssl/SslContextFactory;Lmisk/security/ssl/CertStore;[CLwisp/security/ssl/TrustStore;ILjava/lang/Object;)Ljavax/net/ssl/SSLContext;
 	public static synthetic fun create$default (Lmisk/security/ssl/SslContextFactory;Lmisk/security/ssl/CertStoreConfig;Lmisk/security/ssl/TrustStoreConfig;ILjava/lang/Object;)Ljavax/net/ssl/SSLContext;
-	public static synthetic fun create$default (Lmisk/security/ssl/SslContextFactory;Lwisp/security/ssl/CertStore;[CLwisp/security/ssl/TrustStore;ILjava/lang/Object;)Ljavax/net/ssl/SSLContext;
 	public final fun getDelegate ()Lwisp/security/ssl/SslContextFactory;
 	public final fun loadTrustManagers (Ljava/security/KeyStore;)[Ljavax/net/ssl/TrustManager;
 }
@@ -246,11 +257,11 @@ public final class misk/security/ssl/SslLoader {
 	public static final field FORMAT_PEM Ljava/lang/String;
 	public final fun getDelegate ()Lwisp/security/ssl/SslLoader;
 	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
-	public final fun loadCertStore (Ljava/lang/String;)Lwisp/security/ssl/CertStore;
-	public final fun loadCertStore (Ljava/lang/String;Ljava/lang/String;)Lwisp/security/ssl/CertStore;
-	public final fun loadCertStore (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lwisp/security/ssl/CertStore;
-	public final fun loadCertStore (Lmisk/security/ssl/CertStoreConfig;)Lwisp/security/ssl/CertStore;
-	public static synthetic fun loadCertStore$default (Lmisk/security/ssl/SslLoader;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lwisp/security/ssl/CertStore;
+	public final fun loadCertStore (Ljava/lang/String;)Lmisk/security/ssl/CertStore;
+	public final fun loadCertStore (Ljava/lang/String;Ljava/lang/String;)Lmisk/security/ssl/CertStore;
+	public final fun loadCertStore (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/security/ssl/CertStore;
+	public final fun loadCertStore (Lmisk/security/ssl/CertStoreConfig;)Lmisk/security/ssl/CertStore;
+	public static synthetic fun loadCertStore$default (Lmisk/security/ssl/SslLoader;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/security/ssl/CertStore;
 	public final fun loadTrustStore (Ljava/lang/String;)Lwisp/security/ssl/TrustStore;
 	public final fun loadTrustStore (Ljava/lang/String;Ljava/lang/String;)Lwisp/security/ssl/TrustStore;
 	public final fun loadTrustStore (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lwisp/security/ssl/TrustStore;

@@ -24,9 +24,10 @@ class SslLoader @Inject internal constructor(
     path: String,
     format: String = FORMAT_PEM,
     passphrase: String? = null
-  ): CertStore? = delegate.loadCertStore(path, format, passphrase)
+  ): CertStore? = delegate.loadCertStore(path, format, passphrase)?.let { CertStore(it.keyStore) }
 
-  fun loadCertStore(config: CertStoreConfig) = delegate.loadCertStore(config.toWispConfig())
+  fun loadCertStore(config: CertStoreConfig): CertStore? = 
+    delegate.loadCertStore(config.toWispConfig())?.let { CertStore(it.keyStore) }
 
   companion object {
     const val FORMAT_PEM = "PEM"
