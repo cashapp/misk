@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.785"
-aws2 = "2.31.59"
+aws2 = "2.31.60"
 bucket4j = "8.8.0"
 datadog = "1.49.0"
 dependencyAnalysisPlugin = "2.18.0"
@@ -68,13 +68,13 @@ errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotation
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.67.0" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.57.0" }
-gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.29.0" }
+gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.29.1" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250523-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.22.5" }
-gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.95.0" }
+gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.95.1" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.8.0" }
-googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250524-2.0.0" }
+googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250605-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
 googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.57.0" }
