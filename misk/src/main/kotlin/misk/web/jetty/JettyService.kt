@@ -274,6 +274,11 @@ class JettyService @Inject internal constructor(
         udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
         udsConnector.name = "uds"
 
+        // try to clean up any leftover socket files before connecting
+        if (socketFile.exists() && !socketFile.delete()) {
+          logger.warn("Could not delete file $socketFile")
+        }
+
         // set file permissions after socket creation so sidecars (e.g. envoy, istio) have access
         try {
           udsConnector.start()
