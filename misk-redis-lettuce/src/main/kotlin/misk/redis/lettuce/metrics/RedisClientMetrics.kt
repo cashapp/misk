@@ -110,19 +110,15 @@ internal class RedisClientMetrics @Inject constructor(
    *
    * @param replicationGroupId Redis replication group identifier
    * @param commandType The Redis command being executed
-   * @param remoteAddress Redis server address
-   * @param localAddress Client address
    * @param value The measured duration
    */
   fun recordFirstResponseTime(
     replicationGroupId: String,
     commandType: String,
-    remoteAddress: String,
-    localAddress: String,
     value: Duration
   ) {
     firstResponseTime
-      .labels(replicationGroupId, commandType, remoteAddress, localAddress)
+      .labels(replicationGroupId, commandType)
       .observe(value.inWholeMilliseconds.toDouble())
   }
 
@@ -141,19 +137,15 @@ internal class RedisClientMetrics @Inject constructor(
    *
    * @param replicationGroupId Redis replication group identifier
    * @param commandType The Redis command being executed
-   * @param remoteAddress Redis server address
-   * @param localAddress Client address
    * @param value The measured duration
    */
   fun recordOperationTime(
     replicationGroupId: String,
     commandType: String,
-    remoteAddress: String,
-    localAddress: String,
     value: Duration
   ) {
     operationTime
-      .labels(replicationGroupId, commandType, remoteAddress, localAddress)
+      .labels(replicationGroupId, commandType)
       .observe(value.inWholeMilliseconds.toDouble())
   }
 
@@ -202,8 +194,6 @@ internal class RedisClientMetrics @Inject constructor(
     labelNames = listOf(
       REPLICATION_GROUP_ID_LABEL,
       COMMAND_LABEL,
-      REMOTE_ADDRESS_LABEL,
-      LOCAL_ADDRESS_LABEL
     ),
   )
 
@@ -213,8 +203,6 @@ internal class RedisClientMetrics @Inject constructor(
     labelNames = listOf(
       REPLICATION_GROUP_ID_LABEL,
       COMMAND_LABEL,
-      REMOTE_ADDRESS_LABEL,
-      LOCAL_ADDRESS_LABEL
     ),
   )
 

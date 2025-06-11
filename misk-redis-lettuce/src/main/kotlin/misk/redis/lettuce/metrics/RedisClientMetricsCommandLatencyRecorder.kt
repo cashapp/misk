@@ -39,16 +39,12 @@ internal class RedisClientMetricsCommandLatencyRecorder(
       recordFirstResponseTime(
         replicationGroupId = replicationGroupId,
         commandType = commandType.toString(),
-        remoteAddress = remote.toString(),
-        localAddress = local.toString(),
         value = firstResponseLatency.nanoseconds
       )
 
       recordOperationTime(
         replicationGroupId = replicationGroupId,
         commandType = commandType.toString(),
-        remoteAddress = remote.toString(),
-        localAddress = local.toString(),
         value = completionLatency.nanoseconds
       )
     }
