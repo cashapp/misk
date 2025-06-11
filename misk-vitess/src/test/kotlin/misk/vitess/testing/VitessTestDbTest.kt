@@ -4,6 +4,7 @@ import misk.vitess.testing.internal.VitessQueryExecutorException
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -176,6 +177,15 @@ class VitessTestDbTest {
       "Failed to run executeUpdate on query: UPDATE non_existent_table SET column = value WHERE id = 1",
       executeException.message,
     )
+  }
+
+  @Test
+  fun `port getters return valid host ports`() {
+    val vtgatePort = vitessTestDb.vtgatePort
+    val queryPlanDebugPort = vitessTestDb.queryPlanDebugPort
+
+    assertTrue(vtgatePort > 0, "vtgatePort should be a positive port number")
+    assertTrue(queryPlanDebugPort > 0, "queryPlanDebugPort should be a positive port number")
   }
 
   private fun getRowCount(table: String): Int {
