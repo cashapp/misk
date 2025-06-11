@@ -1,5 +1,7 @@
 package misk.vitess.testing
 
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_BASE
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_VTGATE
 import misk.vitess.testing.internal.VitessClusterConfig
 import misk.vitess.testing.internal.VitessDockerContainer
 import misk.vitess.testing.internal.VitessQueryExecutor
@@ -248,28 +250,22 @@ class VitessTestDb(
    * Get the exposed Docker port of the vtgate, which is used to connect to the Vitess database.
    *
    * @return The exposed Docker port of the vtgate.
-   * @throws [VitessTestDbException] if `VitessTestDb` has not been initialized by calling `run()`.
    */
   val vtgatePort: Int
     get() {
-      if (!isInitialized) {
-        throw VitessTestDbException("VitessTestDb must be initialized by calling run() before accessing the vtgate port.")
-      }
-      return vitessClusterConfig.vtgatePort.hostPort
+      val container = getVitessDockerContainer()
+      return container.getMappedHostPort(CONTAINER_PORT_VTGATE)
     }
 
   /**
    * Get the port used to debug query plans at {hostname}:/{query_debug_port}/debug/query_plans
    *
    * @return The port used for vtgate query plan debugging.
-   * @throws [VitessTestDbException] if `VitessTestDb` has not been initialized by calling `run()`.
    */
   val queryPlanDebugPort: Int
     get() {
-      if (!isInitialized) {
-        throw VitessTestDbException("VitessTestDb must be initialized by calling run() before accessing the query debug port.")
-      }
-      return vitessClusterConfig.basePort.hostPort
+      val container = getVitessDockerContainer()
+      return container.getMappedHostPort(CONTAINER_PORT_BASE)
     }
 
 

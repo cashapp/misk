@@ -30,6 +30,7 @@ import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_TYPE
 import misk.vitess.testing.RemoveContainerResult
 import misk.vitess.testing.StartContainerResult
 import misk.vitess.testing.TransactionIsolationLevel
+import misk.vitess.testing.VitessTestDbException
 import misk.vitess.testing.VitessTestDbStartupException
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -139,6 +140,19 @@ internal class VitessDockerContainer(
 
     println("No container found with name `$containerName` to shut down.")
     return RemoveVitessContainerResult(containerId = null, containerRemoved = false)
+  }
+
+  fun getMappedHostPort(containerPort: Int): Int {
+    val existingContainer = findExistingContainer(containerName)
+      ?: throw VitessTestDbException("Container `$containerName` not found, unable to get host port mapping for container port `$containerPort`.")
+
+    val inspect = dockerClient.inspectContainerCmd(existingContainer.id).exec()
+    val portBindings = inspect.networkSettings.ports
+    val exposedPort = ExposedPort.tcp(containerPort)
+    val bindings: Array<Ports.Binding>? = portBindings.bindings[exposedPort]
+    val hostPort = bindings?.firstOrNull()?.hostPortSpec
+      ?: throw VitessTestDbException("No host port mapped for container port `$containerPort` for container `$containerName`.")
+    return hostPort.toInt()
   }
 
   private fun setupDockerClient(): DockerClient {

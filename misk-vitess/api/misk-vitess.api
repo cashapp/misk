@@ -164,6 +164,10 @@ public final class misk/vitess/testing/DdlUpdate {
 public final class misk/vitess/testing/DefaultSettings {
 	public static final field AUTO_APPLY_SCHEMA_CHANGES Z
 	public static final field CONTAINER_NAME Ljava/lang/String;
+	public static final field CONTAINER_PORT_BASE I
+	public static final field CONTAINER_PORT_GRPC I
+	public static final field CONTAINER_PORT_MYSQL I
+	public static final field CONTAINER_PORT_VTGATE I
 	public static final field DEBUG_STARTUP Z
 	public static final field DYNAMIC_PORT I
 	public static final field ENABLE_DECLARATIVE_SCHEMA_CHANGES Z

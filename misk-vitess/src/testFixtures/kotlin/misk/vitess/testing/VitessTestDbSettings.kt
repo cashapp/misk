@@ -5,6 +5,10 @@ import java.time.Duration
 object DefaultSettings {
   const val AUTO_APPLY_SCHEMA_CHANGES = true
   const val CONTAINER_NAME = "vitess_test_db"
+  const val CONTAINER_PORT_VTGATE = 27003
+  const val CONTAINER_PORT_MYSQL = 27002
+  const val CONTAINER_PORT_GRPC = 27001
+  const val CONTAINER_PORT_BASE = 27000
   const val DEBUG_STARTUP = false
   const val DYNAMIC_PORT: Int = 0
   const val ENABLE_DECLARATIVE_SCHEMA_CHANGES = false

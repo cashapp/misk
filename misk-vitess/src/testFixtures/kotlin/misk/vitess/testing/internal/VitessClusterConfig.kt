@@ -1,6 +1,10 @@
 package misk.vitess.testing.internal
 
 import misk.vitess.testing.DefaultSettings
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_BASE
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_GRPC
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_MYSQL
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_VTGATE
 import wisp.containers.ContainerUtil
 import java.net.ServerSocket
 
@@ -35,10 +39,10 @@ class VitessClusterConfig private constructor(
       fun getDynamicPort() = ServerSocket(0).use { it.localPort }
       val vtgateExposedPort = if (userPort == DefaultSettings.DYNAMIC_PORT) getDynamicPort() else userPort
       return VitessClusterConfig(
-        vtgatePort = VitessPortMapping(hostPort = vtgateExposedPort, containerPort = 27003),
-        mysqlPort = VitessPortMapping(hostPort = getDynamicPort(), containerPort = 27002),
-        grpcPort = VitessPortMapping(hostPort = getDynamicPort(), containerPort = 27001),
-        basePort = VitessPortMapping(hostPort = getDynamicPort(), containerPort = 27000),
+        vtgatePort = VitessPortMapping(hostPort = vtgateExposedPort, containerPort = CONTAINER_PORT_VTGATE),
+        mysqlPort = VitessPortMapping(hostPort = getDynamicPort(), containerPort = CONTAINER_PORT_MYSQL),
+        grpcPort = VitessPortMapping(hostPort = getDynamicPort(), containerPort = CONTAINER_PORT_GRPC),
+        basePort = VitessPortMapping(hostPort = getDynamicPort(), containerPort = CONTAINER_PORT_BASE),
         hostname = System.getenv("VITESS_HOST") ?: ContainerUtil.dockerTargetOrLocalHost(),
         vtgateUser = "root",
         vtgateUserPassword = "",
