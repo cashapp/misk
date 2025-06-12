@@ -3,6 +3,10 @@ package misk.redis.lettuce.cluster.testing
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
+import io.lettuce.core.cluster.RedisClusterClient
+import misk.backoff.FlatBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
 import misk.redis.lettuce.cluster.redisClusterClient
 import misk.redis.lettuce.cluster.withConnectionBlocking
 import misk.redis.lettuce.redisUri
@@ -10,8 +14,8 @@ import misk.testing.ExternalDependency
 import wisp.containers.Composer
 import wisp.containers.Container
 import wisp.logging.getLogger
-import java.lang.Thread.sleep
-import kotlin.time.Clock
+import java.util.concurrent.TimeoutException
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
@@ -69,6 +73,14 @@ class DockerRedisCluster(
 
   val seedPort: Int = SEED_PORT
 
+  private val redisClient: RedisClusterClient by lazy {
+    redisClusterClient(
+      redisURI = redisUri(seedHost, seedPort) {
+        withTimeout(10.seconds.toJavaDuration())
+      },
+    )
+  }
+
   private val composer = Composer(
     CONTAINER_NAME,
     Container {
@@ -78,14 +90,16 @@ class DockerRedisCluster(
       withName(CONTAINER_NAME)
       withExposedPorts(*REDIS_CLUSTER_PORTS.map { ExposedPort.tcp(it) }.toTypedArray())
       withHostConfig(
-        HostConfig().withPortBindings(Ports().apply {
-          REDIS_CLUSTER_PORTS.forEach { port ->
-            bind(ExposedPort.tcp(port), Ports.Binding.bindPort(port))
-          }
-        })
+        HostConfig().withPortBindings(
+          Ports().apply {
+            REDIS_CLUSTER_PORTS.forEach { port ->
+              bind(ExposedPort.tcp(port), Ports.Binding.bindPort(port))
+            }
+          },
+        ),
       )
       withEnv(envVars)
-    }
+    },
   )
 
 
@@ -95,27 +109,25 @@ class DockerRedisCluster(
     } catch (tr: Throwable) {
       throw IllegalStateException("Could not start Docker client. Is Docker running?", tr)
     }
-    val timeoutAt = Clock.System.now() + 30.seconds
 
-    while (true) {
-      try {
-        redisClient.withConnectionBlocking {
-          check(sync().clusterInfo().contains("cluster_state:ok"))
-        }
-
-        break
-      } catch (e: Exception) {
-        if (Clock.System.now() >= timeoutAt) {
-          throw IllegalStateException(
-            "Could not get a reply from Redis within 30 seconds. Is the Redis cluster container running?",
-            e
-          )
-        }
-        sleep(200)
+    val connection =
+      retry(RetryConfig.Builder(upTo = 100, withBackoff = FlatBackoff(200.milliseconds.toJavaDuration())).build()) {
+        redisClient.connect()
       }
 
+    val slots = try {
+      connection.waitForRedisClusterReady(
+        timeout = 30.seconds,
+        pollInterval = 200.milliseconds,
+      ).get()
+    } catch (e: TimeoutException) {
+      throw IllegalStateException(
+        "Could not get a reply from Redis within 30 seconds. Is the Redis cluster container running?",
+        e,
+      )
     }
-    logger.info { "Redis Cluster v$version is ready!" }
+
+    logger.info { "Redis Cluster v$version is ready with $slots slots!" }
   }
 
   override fun shutdown() {
@@ -141,11 +153,7 @@ class DockerRedisCluster(
     private const val SEED_PORT = 7000
     private val REDIS_CLUSTER_PORTS = listOf(7000, 7001, 7002, 7003, 7004, 7005)
 
-    private val redisClient = redisClusterClient(
-      redisURI = redisUri(SEED_HOSTNAME, SEED_PORT) {
-        withTimeout(10.seconds.toJavaDuration())
-      },
-    )
+
     private val logger = getLogger<DockerRedisCluster>()
   }
 

@@ -270,6 +270,151 @@ public final class misk/redis/lettuce/cluster/ClientExtensionsKt {
 	public static final fun withConnectionBlocking (Lio/lettuce/core/cluster/RedisClusterClient;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
 
+public final class misk/redis/lettuce/cluster/ClusterCommandsKt {
+	public static final fun clusterInfo (Lkotlin/jvm/functions/Function1;)Lmisk/redis/lettuce/cluster/ClusterInfo;
+	public static final fun clusterNode (Lkotlin/jvm/functions/Function1;)Lmisk/redis/lettuce/cluster/ClusterNode;
+	public static final fun toClusterInfo (Ljava/lang/String;)Lmisk/redis/lettuce/cluster/ClusterInfo;
+	public static final fun toClusterInfo (Ljava/util/concurrent/CompletionStage;)Ljava/util/concurrent/CompletionStage;
+	public static final fun toClusterNodes (Ljava/lang/String;)Ljava/util/List;
+	public static final fun toClusterNodes (Ljava/util/concurrent/CompletionStage;)Ljava/util/concurrent/CompletionStage;
+}
+
+public final class misk/redis/lettuce/cluster/ClusterInfo {
+	public fun <init> (Lmisk/redis/lettuce/cluster/ClusterInfo$State;IIIIII)V
+	public final fun component1 ()Lmisk/redis/lettuce/cluster/ClusterInfo$State;
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()I
+	public final fun copy (Lmisk/redis/lettuce/cluster/ClusterInfo$State;IIIIII)Lmisk/redis/lettuce/cluster/ClusterInfo;
+	public static synthetic fun copy$default (Lmisk/redis/lettuce/cluster/ClusterInfo;Lmisk/redis/lettuce/cluster/ClusterInfo$State;IIIIIIILjava/lang/Object;)Lmisk/redis/lettuce/cluster/ClusterInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKnownNodes ()I
+	public final fun getSize ()I
+	public final fun getSlotsAssigned ()I
+	public final fun getSlotsFail ()I
+	public final fun getSlotsOk ()I
+	public final fun getSlotsPfail ()I
+	public final fun getState ()Lmisk/redis/lettuce/cluster/ClusterInfo$State;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/redis/lettuce/cluster/ClusterInfo$Builder {
+	public fun <init> ()V
+	public final fun build ()Lmisk/redis/lettuce/cluster/ClusterInfo;
+	public final fun getKnownNodes ()I
+	public final fun getSize ()I
+	public final fun getSlotsAssigned ()I
+	public final fun getSlotsFail ()I
+	public final fun getSlotsOk ()I
+	public final fun getSlotsPfail ()I
+	public final fun getState ()Lmisk/redis/lettuce/cluster/ClusterInfo$State;
+	public final fun setKnownNodes (I)V
+	public final fun setSize (I)V
+	public final fun setSlotsAssigned (I)V
+	public final fun setSlotsFail (I)V
+	public final fun setSlotsOk (I)V
+	public final fun setSlotsPfail (I)V
+	public final fun setState (Lmisk/redis/lettuce/cluster/ClusterInfo$State;)V
+}
+
+public final class misk/redis/lettuce/cluster/ClusterInfo$State : java/lang/Enum {
+	public static final field Fail Lmisk/redis/lettuce/cluster/ClusterInfo$State;
+	public static final field Ok Lmisk/redis/lettuce/cluster/ClusterInfo$State;
+	public static final field Undefined Lmisk/redis/lettuce/cluster/ClusterInfo$State;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/lettuce/cluster/ClusterInfo$State;
+	public static fun values ()[Lmisk/redis/lettuce/cluster/ClusterInfo$State;
+}
+
+public final class misk/redis/lettuce/cluster/ClusterNode {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;Lmisk/redis/lettuce/cluster/ClusterNode$Role;Ljava/util/List;Ljava/lang/String;JJJLmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()J
+	public final fun component11 ()Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+	public final fun component12 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun component5 ()Lmisk/redis/lettuce/cluster/ClusterNode$Role;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()J
+	public final fun component9 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;Lmisk/redis/lettuce/cluster/ClusterNode$Role;Ljava/util/List;Ljava/lang/String;JJJLmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;Ljava/util/List;)Lmisk/redis/lettuce/cluster/ClusterNode;
+	public static synthetic fun copy$default (Lmisk/redis/lettuce/cluster/ClusterNode;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;Lmisk/redis/lettuce/cluster/ClusterNode$Role;Ljava/util/List;Ljava/lang/String;JJJLmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;Ljava/util/List;ILjava/lang/Object;)Lmisk/redis/lettuce/cluster/ClusterNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClusterBusPort ()Ljava/lang/Integer;
+	public final fun getConfigEpoch ()J
+	public final fun getConnectionState ()Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+	public final fun getFlags ()Ljava/util/List;
+	public final fun getHasSlots ()Z
+	public final fun getHost ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMasterId ()Ljava/lang/String;
+	public final fun getPingSent ()J
+	public final fun getPongRecv ()J
+	public final fun getPort ()I
+	public final fun getRole ()Lmisk/redis/lettuce/cluster/ClusterNode$Role;
+	public final fun getSlots ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun isConnected ()Z
+	public final fun isFailing ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/redis/lettuce/cluster/ClusterNode$Builder {
+	public fun <init> ()V
+	public final fun build ()Lmisk/redis/lettuce/cluster/ClusterNode;
+	public final fun getClusterBusPort ()Ljava/lang/Integer;
+	public final fun getConfigEpoch ()J
+	public final fun getConnectionState ()Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+	public final fun getFlags ()Ljava/util/List;
+	public final fun getHost ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMasterId ()Ljava/lang/String;
+	public final fun getPingSent ()J
+	public final fun getPongRecv ()J
+	public final fun getPort ()I
+	public final fun getRole ()Lmisk/redis/lettuce/cluster/ClusterNode$Role;
+	public final fun getSlots ()Ljava/util/List;
+	public final fun setClusterBusPort (Ljava/lang/Integer;)V
+	public final fun setConfigEpoch (J)V
+	public final fun setConnectionState (Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;)V
+	public final fun setFlags (Ljava/util/List;)V
+	public final fun setHost (Ljava/lang/String;)V
+	public final fun setId (Ljava/lang/String;)V
+	public final fun setMasterId (Ljava/lang/String;)V
+	public final fun setPingSent (J)V
+	public final fun setPongRecv (J)V
+	public final fun setPort (I)V
+	public final fun setRole (Lmisk/redis/lettuce/cluster/ClusterNode$Role;)V
+	public final fun setSlots (Ljava/util/List;)V
+}
+
+public final class misk/redis/lettuce/cluster/ClusterNode$ConnectionState : java/lang/Enum {
+	public static final field Connected Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+	public static final field Fail Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+	public static final field Handshake Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+	public static final field NoAddr Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+	public static final field Undefined Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+	public static fun values ()[Lmisk/redis/lettuce/cluster/ClusterNode$ConnectionState;
+}
+
+public final class misk/redis/lettuce/cluster/ClusterNode$Role : java/lang/Enum {
+	public static final field Primary Lmisk/redis/lettuce/cluster/ClusterNode$Role;
+	public static final field Replica Lmisk/redis/lettuce/cluster/ClusterNode$Role;
+	public static final field Undefined Lmisk/redis/lettuce/cluster/ClusterNode$Role;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/lettuce/cluster/ClusterNode$Role;
+	public static fun values ()[Lmisk/redis/lettuce/cluster/ClusterNode$Role;
+}
+
 public final class misk/redis/lettuce/cluster/PooledStatefulRedisClusterConnection : io/lettuce/core/cluster/api/StatefulRedisClusterConnection {
 	public fun <init> (Lio/lettuce/core/support/BoundedAsyncPool;Lio/lettuce/core/cluster/api/StatefulRedisClusterConnection;)V
 	public fun addListener (Lio/lettuce/core/RedisConnectionStateListener;)V
