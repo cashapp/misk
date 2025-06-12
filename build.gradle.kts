@@ -367,7 +367,7 @@ subprojects {
       }
     } else {
       configure<MavenPublishBaseExtension> {
-        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+        publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
         signAllPublications()
       }
     }
