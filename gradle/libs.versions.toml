@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.786"
-aws2 = "2.31.61"
+aws2 = "2.31.62"
 bucket4j = "8.8.0"
 datadog = "1.49.0"
 dependencyAnalysisPlugin = "2.18.0"
@@ -186,7 +186,7 @@ openTracingJdbc = { module = "io.opentracing.contrib:opentracing-jdbc", version 
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
 openTracingUtil = { module = "io.opentracing:opentracing-util", version = "0.33.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.6" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.7" }
 prometheusClient = { module = "io.prometheus:simpleclient" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version = "0.16.0" }
 prometheusClientCommon = { module = "io.prometheus:simpleclient_common" }
@@ -209,7 +209,7 @@ tempest2Testing = { module = "app.cash.tempest:tempest2-testing" }
 tempest2TestingDocker = { module = "app.cash.tempest:tempest2-testing-docker" }
 tempest2TestingInternal = { module = "app.cash.tempest:tempest2-testing-internal" }
 tempest2TestingJvm = { module = "app.cash.tempest:tempest2-testing-jvm" }
-tempestBom = { module = "app.cash.tempest:tempest-bom", version = "2025.06.03.162437-8f485e7" }
+tempestBom = { module = "app.cash.tempest:tempest-bom", version = "2025.06.11.195708-6267180" }
 tempestTesting = { module = "app.cash.tempest:tempest-testing" }
 tempestTestingDocker = { module = "app.cash.tempest:tempest-testing-docker" }
 tempestTestingInternal = { module = "app.cash.tempest:tempest-testing-internal" }
