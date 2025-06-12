@@ -3,7 +3,10 @@ package misk.redis.lettuce.testing.standalone
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
-import io.lettuce.core.api.sync.RedisCommands
+import io.lettuce.core.RedisClient
+import misk.backoff.FlatBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
 import misk.redis.lettuce.redisUri
 import misk.redis.lettuce.standalone.redisClient
 import misk.redis.lettuce.standalone.withConnectionBlocking
@@ -11,9 +14,9 @@ import misk.testing.ExternalDependency
 import wisp.containers.Composer
 import wisp.containers.Container
 import wisp.logging.getLogger
-import java.lang.Thread.sleep
-import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 
 /**
  * A test fixture that provides a Redis instance running in Docker.
@@ -62,19 +65,26 @@ class DockerRedis(
 
   val port: Int = DEFAULT_REDIS_PORT
 
-  private val composer = Composer(
-    CONTAINER_NAME,
-    Container {
-      val exposedClientPort = ExposedPort.tcp(DEFAULT_REDIS_PORT)
-      withImage("redis:$version-alpine")
-      withName(CONTAINER_NAME)
-      withExposedPorts(exposedClientPort)
-      withHostConfig(
-        HostConfig().withPortBindings(Ports().apply {
-          bind(exposedClientPort, Ports.Binding.bindPort(DEFAULT_REDIS_PORT))
-        })
-      )
+  private val redisClient: RedisClient by lazy { redisClient(
+    redisURI = redisUri(host, port) {
+      withTimeout(10.seconds.toJavaDuration())
     }
+  ) }
+  private val composer = Composer(
+      CONTAINER_NAME,
+      Container {
+        val exposedClientPort = ExposedPort.tcp(DEFAULT_REDIS_PORT)
+        withImage("redis:$version-alpine")
+        withName(CONTAINER_NAME)
+        withExposedPorts(exposedClientPort)
+        withHostConfig(
+            HostConfig().withPortBindings(
+                Ports().apply {
+                  bind(exposedClientPort, Ports.Binding.bindPort(DEFAULT_REDIS_PORT))
+                },
+            ),
+        )
+      },
   )
 
   override fun startup() {
@@ -83,23 +93,20 @@ class DockerRedis(
     } catch (tr: Throwable) {
       throw IllegalStateException("Could not start Docker client. Is Docker running?", tr)
     }
-    val timeoutAt = Clock.System.now() + 30.seconds
 
-    while (true) {
-      try {
-        val pong = withRedisConnection { ping() }
-        check(pong == "PONG") { "Unexpected reply from Redis. Aborting!" }
-        logger.info { "Sent command PING, got reply $pong" }
-        break
-      } catch (e: Exception) {
-        if (Clock.System.now() >= timeoutAt) {
-          throw IllegalStateException(
-            "Could not get a reply from Redis within 30 seconds. Is the Redis container running?", e
-          )
-        }
-        sleep(200)
+    retry(
+        RetryConfig.Builder(
+            upTo = 100,
+            FlatBackoff(
+                duration = 200.milliseconds.toJavaDuration(),
+            ),
+        ).build(),
+    ) {
+      redisClient.withConnectionBlocking {
+        check(sync().ping() == "PONG") { "Unexpected reply from Redis. Aborting!" }
       }
     }
+
     logger.info { "Redis v$version is ready!" }
   }
 
@@ -109,13 +116,8 @@ class DockerRedis(
   }
 
   override fun beforeEach() {
-    withRedisConnection { flushall() }
+    redisClient.withConnectionBlocking { sync().flushall() }
   }
-
-  private fun <T> withRedisConnection(block: RedisCommands<String, String>.() -> T): T =
-    redisClient.withConnectionBlocking(redisUri(host, port)) {
-      block(sync())
-    }
 
   override fun afterEach() {
     // No op.
@@ -125,8 +127,6 @@ class DockerRedis(
     private const val HOSTNAME: String = "localhost" // For local development
     private const val DEFAULT_REDIS_PORT = 6379
     private const val CONTAINER_NAME = "misk-redis-testing"
-
-    private val redisClient = redisClient()
 
     private val logger = getLogger<DockerRedis>()
   }

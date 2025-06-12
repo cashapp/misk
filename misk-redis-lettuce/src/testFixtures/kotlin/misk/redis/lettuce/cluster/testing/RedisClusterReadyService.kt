@@ -16,6 +16,22 @@ import java.util.concurrent.CompletableFuture
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * A service that ensures Redis clusters are ready before application startup.
+ *
+ * This service is designed for testing environments where Redis clusters need to be
+ * verified as operational before tests begin. It:
+ * 1. Attempts to connect to all Redis cluster clients with exponential backoff
+ * 2. Waits for each cluster to be fully ready (all slots assigned and healthy)
+ * 3. Blocks startup until all clusters are ready or timeout is reached
+ *
+ * The service will:
+ * - Retry client connections for up to 10 seconds with exponential backoff (10ms to 5s)
+ * - Wait up to 30 seconds for each cluster to be ready after connection
+ * - Log connection attempts and cluster readiness status
+ *
+ * @property clients The set of Redis clients to verify. Only [RedisClusterClient] instances are processed.
+ */
 @Singleton
 class RedisClusterReadyService @Inject constructor(
   private val clients: Set<AbstractRedisClient>
@@ -64,5 +80,3 @@ class RedisClusterReadyService @Inject constructor(
     internal val logger = getLogger<RedisClusterReadyService>()
   }
 }
-
-
