@@ -61,6 +61,8 @@ const RequestResponseView: React.FC<RequestResponseProps> = ({
     }));
   };
 
+  const displayIfEndpointNull = viewState.selectedAction === null && 'none';
+
   return (
     <VStack height="100%" alignItems="start">
       {viewState.selectedAction !== null && (
@@ -103,61 +105,75 @@ const RequestResponseView: React.FC<RequestResponseProps> = ({
           )}
         </HStack>
       </HStack>
-      {viewState.selectedAction !== null ? (
-        <>
-          <Heading color="white" size="xs" fontWeight="semibold">
-            Headers
-          </Heading>
-          <Box width="100%">
-            <VStack spacing={2} align="stretch">
-              {viewState.headers.map((header, index) => (
-                <HStack key={index} spacing={2}>
-                  <Input
-                    placeholder="Header Key"
-                    value={header.key}
-                    onChange={(e) => updateHeader(index, 'key', e.target.value)}
-                    bg="white"
-                  />
-                  <Input
-                    placeholder="Header Value"
-                    value={header.value}
-                    onChange={(e) =>
-                      updateHeader(index, 'value', e.target.value)
-                    }
-                    bg="white"
-                  />
-                  <IconButton
-                    aria-label="Remove header"
-                    icon={<DeleteIcon />}
-                    onClick={() => removeHeader(index)}
-                    colorScheme="red"
-                  />
-                </HStack>
-              ))}
-              <Button
-                leftIcon={<AddIcon />}
-                onClick={addHeader}
-                colorScheme="blue"
-                size="sm"
-              >
-                Add Header
-              </Button>
-            </VStack>
-          </Box>
-          <Heading color="white" size="xs" fontWeight="semibold">
-            Body
-          </Heading>
-          <RequestEditor
-            ref={requestEditorRef as any}
-            loading={submitting}
-            isCallable={viewState.selectedAction?.callable || false}
-          />
-          <Heading color="white" size="sm" fontWeight="semibold">
-            Response
-          </Heading>
-          <ReadOnlyEditor content={() => response} />
-        </>
-      ) : (
+      <Heading
+        display={displayIfEndpointNull}
+        color="white"
+        size="xs"
+        fontWeight="semibold"
+      >
+        Headers
+      </Heading>
+      <Box display={displayIfEndpointNull} width="100%">
+        <VStack spacing={2} align="stretch">
+          {viewState.headers.map((header, index) => (
+            <HStack key={index} spacing={2}>
+              <Input
+                placeholder="Header Key"
+                value={header.key}
+                onChange={(e) => updateHeader(index, 'key', e.target.value)}
+                bg="white"
+              />
+              <Input
+                placeholder="Header Value"
+                value={header.value}
+                onChange={(e) => updateHeader(index, 'value', e.target.value)}
+                bg="white"
+              />
+              <IconButton
+                aria-label="Remove header"
+                icon={<DeleteIcon />}
+                onClick={() => removeHeader(index)}
+                colorScheme="red"
+              />
+            </HStack>
+          ))}
+          <Button
+            leftIcon={<AddIcon />}
+            onClick={addHeader}
+            colorScheme="blue"
+            size="sm"
+          >
+            Add Header
+          </Button>
+        </VStack>
+      </Box>
+      <Heading
+        display={displayIfEndpointNull}
+        color="white"
+        size="xs"
+        fontWeight="semibold"
+      >
+        Body
+      </Heading>
+      <RequestEditor
+        display={displayIfEndpointNull}
+        ref={requestEditorRef as any}
+        loading={submitting}
+        isCallable={viewState.selectedAction?.callable || false}
+      />
+      <Heading
+        display={displayIfEndpointNull}
+        color="white"
+        size="sm"
+        fontWeight="semibold"
+      >
+        Response
+      </Heading>
+      <ReadOnlyEditor
+        display={displayIfEndpointNull}
+        content={() => response}
+      />
+      {viewState.selectedAction === null && (
         <VStack
           marginTop="25%"
           width="100%"
