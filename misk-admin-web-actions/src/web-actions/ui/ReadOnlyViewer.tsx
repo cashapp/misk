@@ -7,6 +7,7 @@ import { CopyIcon } from '@chakra-ui/icons';
 
 interface Props {
   content: () => string | null;
+  display: string;
 }
 
 export default class ReadOnlyEditor extends React.Component<Props> {
@@ -51,13 +52,25 @@ export default class ReadOnlyEditor extends React.Component<Props> {
       const content = this.editor!.getValue();
       await navigator.clipboard.writeText(content);
     } catch (err) {
-      console.error('Failed to copy with error:', err);
+      if (window.isSecureContext) {
+        console.error('Failed to copy with error:', err);
+      } else {
+        console.error(
+          'Copy-to-clipboard functionality only works for https secure contexts, error:',
+          err,
+        );
+      }
     }
   }
 
   public render() {
     return (
-      <Box position="relative" width="100%" height="100%">
+      <Box
+        display={this.props.display}
+        position="relative"
+        width="100%"
+        height="100%"
+      >
         <IconButton
           aria-label="Copy"
           icon={<CopyIcon />}

@@ -10,6 +10,7 @@ import { MiskFieldDefinition, MiskRoute } from '@web-actions/api/responseTypes';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 
 interface Props {
+  display: string;
   isCallable: boolean;
   loading: boolean;
 }
@@ -210,13 +211,25 @@ export default class RequestEditor extends React.Component<Props, State> {
       const normalizedJson = ast?.render();
       await navigator.clipboard.writeText(normalizedJson);
     } catch (err) {
-      console.error('Failed to copy with error:', err);
+      if (window.isSecureContext) {
+        console.error('Failed to copy with error:', err);
+      } else {
+        console.error(
+          'Copy-to-clipboard functionality only works for https secure contexts, error:',
+          err,
+        );
+      }
     }
   }
 
   public render() {
     return (
-      <Box position="relative" width="100%" height="100%">
+      <Box
+        display={this.props.display}
+        position="relative"
+        width="100%"
+        height="100%"
+      >
         {(this.props.loading ||
           this.state.isDisabled ||
           !this.props.isCallable) && (
