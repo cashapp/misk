@@ -338,11 +338,12 @@ internal class VitessDockerContainer(
       } catch (notFoundException: NotFoundException) {
         throw VitessTestDbStartupException("Container for `$containerId` was not found during start up.")
       } catch (internalServerException: InternalServerErrorException) {
-        // Handle port binding issues or other internal server errors
-        throw VitessTestDbStartupException(
-          "Failed to start Docker container for `$containerName`. Possible port conflict or race condition.",
-          internalServerException
-        )
+        val message = internalServerException.message ?: ""
+        if (message.contains("port is already allocated")) {
+          return handlePortAlreadyAllocatedError(containerId, internalServerException)
+        }
+
+        throw VitessTestDbStartupException("Failed to start Docker container for `$containerName`.", internalServerException)
       }
     }
   }
@@ -675,6 +676,62 @@ internal class VitessDockerContainer(
   }
 
   /**
+   * This method handles an error that happens in CI environments where the port is already allocated by another container or process,
+   * specifically errors of the form:
+   *
+   * com.github.dockerjava.api.exception.InternalServerErrorException: Status 500:
+   * {"message":"driver failed programming external connectivity on endpoint <container_name>
+   * (<container_id>): Bind for 0.0.0.0:<port> failed: port is already allocated"}
+   *
+   * If the `container_id` found using the port is the same as the one we are trying to start, we return gracefully,
+   * otherwise we throw a `VitessTestDbStartupException` with a message indicating the port conflict.
+   */
+  private fun handlePortAlreadyAllocatedError(
+    containerId: String,
+    internalServerException: Exception,
+  ) {
+    val message = internalServerException.message!!
+    val allocatedPort = parseAllocatedPort(message)
+    if (allocatedPort != null) {
+      val containers = dockerClient.listContainersCmd()
+        .withShowAll(true)
+        .withFilter("publish", listOf(allocatedPort))
+        .exec()
+      val conflictingContainer = containers.firstOrNull()
+      when {
+        conflictingContainer == null -> {
+          throw VitessTestDbStartupException(
+            "Port `$allocatedPort` is already allocated, but no container found using it.",
+            internalServerException
+          )
+        }
+        conflictingContainer.id == containerId -> {
+          println("Port `$allocatedPort` is already allocated by the same container `$containerId`. Returning gracefully.")
+          return
+        }
+        else -> {
+          val names = conflictingContainer.names?.joinToString() ?: "unknown"
+          throw VitessTestDbStartupException(
+            "Port `$allocatedPort` is already allocated by container: `id=${conflictingContainer.id}`, `names=$names`.",
+            internalServerException
+          )
+        }
+      }
+    }
+
+    throw VitessTestDbStartupException(
+      "Failed to start Docker container for `$containerName` due to possible port conflict or race condition.",
+      internalServerException
+    )
+  }
+
+  private fun parseAllocatedPort(message: String): String? {
+    val portRegex = Regex("Bind for 0.0.0.0:(\\d+) failed: port is already allocated")
+    val match = portRegex.find(message)
+    return match?.groupValues?.get(1)
+  }
+
+    /**
    *  Check if a port is in use via a socket connection. If there is a successful connection,
    *  it means the port is already in use by another process; the socket is immediately closed after
    *  the connection is made via the "use block", so it does not bind or occupy the port itself.
