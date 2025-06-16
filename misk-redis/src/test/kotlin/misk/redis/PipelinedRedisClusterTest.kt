@@ -16,7 +16,7 @@ import wisp.deployment.TESTING
 /**
  * Provides test coverage/parity for pipelined operations on a Redis cluster.
  */
-@MiskTest
+@MiskTest(startService = true)
 class PipelinedRedisClusterTest : AbstractRedisTest() {
   @Suppress("unused")
   @MiskTestModule

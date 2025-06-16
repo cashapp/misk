@@ -11,7 +11,7 @@ import misk.testing.MiskTestModule
 import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
 
-@MiskTest
+@MiskTest(startService = true)
 class RealRedisClusterTest : AbstractRedisClusterTest() {
   @Suppress("unused")
   @MiskTestModule
