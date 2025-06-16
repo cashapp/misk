@@ -1,15 +1,12 @@
 package misk.redis
 
-import com.google.inject.Provides
-import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
+import misk.inject.keyOf
 import misk.metrics.v2.Metrics
-import redis.clients.jedis.ClientSetInfoConfig
 import redis.clients.jedis.ConnectionPoolConfig
-import redis.clients.jedis.DefaultJedisClientConfig
-import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.UnifiedJedis
 import wisp.deployment.Deployment
@@ -67,54 +64,20 @@ class RedisClusterModule @JvmOverloads constructor(
 
   override fun configure() {
     bind<RedisClusterReplicationGroupConfig>().toInstance(redisClusterGroupConfig)
-    install(ServiceModule<RedisService>().enhancedBy<ReadyService>())
+
+    // Bind the redis service to a one-off provider - doing this here instead of annotating the class with @Singleton
+    // primarily to avoid injecting the useSsl boolean via @Named or similar
+    bind(keyOf<RedisJedisClusterService>()).toProvider {
+      RedisJedisClusterService(connectionPoolConfig, redisClusterGroupConfig, useSsl)
+    }.asSingleton()
+    // The services, in addition to normal lifecycle management, provide the actual clients
+    bind<UnifiedJedis>().toProvider(keyOf<RedisJedisClusterService>())
+    bind<Redis>().toProvider(keyOf<RedisFacadeClusterService>())
+
+    // RedisFacadeClusterService must depend on the Jedis service, as it provides the UnifiedJedis
+    // that RedisFacadeClusterService uses to build RealRedis
+    install(ServiceModule<RedisJedisClusterService>().enhancedBy<ReadyService>())
+    install(ServiceModule<RedisFacadeClusterService>().dependsOn<RedisJedisClusterService>())
     requireBinding<Metrics>()
-  }
-
-  @Provides @Singleton
-  internal fun provideRedisClusterClient(
-    clientMetrics: RedisClientMetrics,
-    unifiedJedis: UnifiedJedis
-  ): Redis = RealRedis(unifiedJedis, clientMetrics)
-
-  @Provides @Singleton
-  internal fun provideUnifiedJedis(
-    replicationGroup: RedisClusterReplicationGroupConfig,
-    deployment: Deployment
-  ): UnifiedJedis {
-
-    // Create our jedis pool with client-side metrics.
-    val jedisClientConfig = DefaultJedisClientConfig.builder()
-      .connectionTimeoutMillis(replicationGroup.timeout_ms)
-      .socketTimeoutMillis(replicationGroup.timeout_ms)
-      .password(replicationGroup.redis_auth_password
-        .ifEmpty {
-          check(!deployment.isReal) {
-            "This Redis client is configured to require an auth password, but none was provided!"
-          }
-          null
-        }
-      )
-      .clientName(replicationGroup.client_name)
-      .ssl(useSsl)
-      //CLIENT SETINFO is only supported in Redis v7.2+
-      .clientSetInfoConfig(ClientSetInfoConfig.DISABLED)
-      .build()
-
-    // We want to support services running both under docker and localhost when running locally and this is a way to support that.
-    // If a hostname is provided, it will always take precedence over the environment variable.
-    val redisHost = replicationGroup.configuration_endpoint.hostname?.takeUnless { it.isNullOrBlank() } ?: System.getenv("REDIS_HOST") ?: "127.0.0.1"
-
-    return JedisCluster(
-      setOf(
-        HostAndPort(
-          redisHost,
-          replicationGroup.configuration_endpoint.port
-        )
-      ),
-      jedisClientConfig,
-      replicationGroup.max_attempts,
-      connectionPoolConfig
-    )
   }
 }
