@@ -192,7 +192,7 @@ class ExceptionHandlingInterceptor private constructor(
 /** https://grpc.github.io/grpc/core/md_doc_http-grpc-status-mapping.html */
 fun toGrpcStatus(statusCode: Int): GrpcStatus {
   return when (statusCode) {
-    400 -> GrpcStatus.INTERNAL
+    400 -> GrpcStatus.INVALID_ARGUMENT
     401 -> GrpcStatus.UNAUTHENTICATED
     403 -> GrpcStatus.PERMISSION_DENIED
     404 -> GrpcStatus.NOT_FOUND
