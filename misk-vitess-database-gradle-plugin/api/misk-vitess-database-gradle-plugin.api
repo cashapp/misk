@@ -4,7 +4,9 @@ public abstract class misk/vitess/gradle/StartVitessDatabaseTask : org/gradle/ap
 	public abstract fun getContainerName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getDebugStartup ()Lorg/gradle/api/provider/Property;
 	public abstract fun getEnableDeclarativeSchemaChanges ()Lorg/gradle/api/provider/Property;
+	public abstract fun getEnableInMemoryStorage ()Lorg/gradle/api/provider/Property;
 	public abstract fun getEnableScatters ()Lorg/gradle/api/provider/Property;
+	public abstract fun getInMemoryStorageSize ()Lorg/gradle/api/provider/Property;
 	public abstract fun getKeepAlive ()Lorg/gradle/api/provider/Property;
 	public abstract fun getLintSchema ()Lorg/gradle/api/provider/Property;
 	public abstract fun getMysqlVersion ()Lorg/gradle/api/provider/Property;

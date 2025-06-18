@@ -56,7 +56,9 @@ Other configurable parameters include:
 - `containerName` (default `vitess_test_db`): The name assigned to the Docker container that gets created.
 - `debugStartup` (default `false`): Whether to print debug logs during the startup process.
 - `enableDeclarativeSchemaChanges` (default `false`): Whether to use declarative schema changes.
+- `enableInMemoryStorage` (default `false`): Whether to use in-memory storage (tmpfs) for faster performance.
 - `enableScatters` (default `true`): Whether to enable scatter queries, which are queries that fan out to all shards. Requires a Vitess image version >= 20.
+- `inMemoryStorageSize` (default `1024M`): The size of in-memory storage (tmpfs) when `enableInMemoryStorage` is set to `true`.
 - `keepAlive` (default `true`): Whether to keep the container running between test runs. It will detect schema changes and argument changes and restart the container if needed.
 - `lintSchema` (default `false`): Whether to lint the schema before starting the test database, which can help detect errors early.
 - `mysqlVersion` (default `8.0.36`): The MySQL version to use.
@@ -64,8 +66,8 @@ Other configurable parameters include:
 - `sqlMode` (defaults to the [MySQL8 defaults](https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html)): The server side `sql_mode` setting.
 - `transactionIsolationLevel` (default `REPEATABLE_READ`): The transaction isolation level.
 - `transactionTimeoutSeconds` (default `30s`): the duration in seconds before Vitess times out a transaction. Setting a higher value may be useful for debugging.
-- `vitessImage` (default: `vitess/vttestserver:v19.0.9-mysql80`): The Docker image to use for the container. DockerHub Images can be  found at https://hub.docker.com/r/vitess/vttestserver/tags. Custom ECR images can also be passed in.
-- `vitessVersion` (default: `19`): The version of Vitess to use, which must match the version of `vitessImage`.
+- `vitessImage` (default: `vitess/vttestserver:v21.0.4-mysql80`): The Docker image to use for the container. DockerHub Images can be  found at https://hub.docker.com/r/vitess/vttestserver/tags. Custom ECR images can also be passed in.
+- `vitessVersion` (default: `21`): The version of Vitess to use, which must match the version of `vitessImage`.
 
 ### Connecting to the test database
 After you start the test database, you can connect to it via a standard connection or through the MySQL CLI.

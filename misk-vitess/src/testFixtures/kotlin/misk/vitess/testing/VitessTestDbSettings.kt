@@ -12,7 +12,9 @@ object DefaultSettings {
   const val DEBUG_STARTUP = false
   const val DYNAMIC_PORT: Int = 0
   const val ENABLE_DECLARATIVE_SCHEMA_CHANGES = false
+  const val ENABLE_IN_MEMORY_STORAGE = false
   const val ENABLE_SCATTERS = true
+  const val IN_MEMORY_STORAGE_SIZE = "1024M"
   const val KEEP_ALIVE = true
   const val LINT_SCHEMA = false
   const val MYSQL_VERSION = "8.0.36"

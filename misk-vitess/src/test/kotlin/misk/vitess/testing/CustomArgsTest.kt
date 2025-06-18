@@ -55,6 +55,8 @@ class CustomArgsTest {
       testDb2 = VitessTestDb(
         autoApplySchemaChanges = false,
         containerName = DB2_CONTAINER_NAME,
+        enableInMemoryStorage = true,
+        inMemoryStorageSize = "1G",
         port = DefaultSettings.DYNAMIC_PORT,
         keepAlive = false)
 
@@ -185,6 +187,17 @@ class CustomArgsTest {
       "Schema directory `some/path/without/filesystem/or/classpath` must start with one of the supported prefixes: [classpath:, filesystem:]",
       exception.message,
     )
+  }
+
+  @Test
+  fun `test invalid inMemoryStorageSize`() {
+    val exception = assertThrows<IllegalArgumentException> {
+      VitessTestDb(
+        containerName = "invalid_in_memory_storage_size_vitess_db",
+        enableInMemoryStorage = true,
+        inMemoryStorageSize = "100A").run()
+    }
+    assertEquals("Invalid `inMemoryStorageSize`: `100A`. Must match pattern '\\d+[KMG]', e.g., '1G', '512M', or '1024K'.", exception.message)
   }
 
   private fun assertTraditionalSchemaUpdatesApplied(applySchemaResult: ApplySchemaResult) {

@@ -25,7 +25,13 @@ abstract class StartVitessDatabaseTask: DefaultTask() {
   abstract val enableDeclarativeSchemaChanges: Property<Boolean>
 
   @get:Input
+  abstract val enableInMemoryStorage: Property<Boolean>
+
+  @get:Input
   abstract val enableScatters: Property<Boolean>
+
+  @get:Input
+  abstract val inMemoryStorageSize: Property<String>
 
   @get:Input
   abstract val keepAlive: Property<Boolean>
@@ -64,7 +70,9 @@ abstract class StartVitessDatabaseTask: DefaultTask() {
       containerName = containerName.get(),
       debugStartup = debugStartup.get(),
       enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges.get(),
+      enableInMemoryStorage = enableInMemoryStorage.get(),
       enableScatters = enableScatters.get(),
+      inMemoryStorageSize = inMemoryStorageSize.get(),
       keepAlive = keepAlive.get(),
       lintSchema = lintSchema.get(),
       mysqlVersion = mysqlVersion.get(),
