@@ -16,7 +16,10 @@ import kotlin.time.measureTime
  * @property autoApplySchemaChanges Whether to automatically apply schema changes. Default is `true`.
  * @property containerName The name of the container that runs the database. Default is `vitess_test_db`.
  * @property debugStartup Whether to print debug logs during the startup process. Default is `false`.
+ * @property enableDeclarativeSchemaChanges Whether to use declarative schema changes. Default is `false`.
+ * @property enableInMemoryStorage Whether to use in-memory storage (tmpfs) for faster performance. Default is `false`.
  * @property enableScatters Whether to enable scatter queries, which fan out to all shards. Default is `true`.
+ * @property inMemoryStorageSize The size of in-memory storage (tmpfs) if `enableInMemoryStorage` is `true` (e.g., "1G", "512M"). Default is "1024M".
  * @property keepAlive Whether to keep the database running after the test suite completes. Default is `true`.
  * @property mysqlVersion The MySQL version to use. Default is `8.0.36`.
  * @property port The port to connect to the database, which represents the vtgate. Default is `27003`.
@@ -40,18 +43,19 @@ import kotlin.time.measureTime
  * @property sqlMode The server SQL mode. Defaults to the MySQL8 defaults:
  *   `ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION`.
  * @property transactionTimeoutSeconds The transaction timeout in seconds. Default is `null`.
- * @property enableDeclarativeSchemaChanges Whether to use declarative schema changes. Default is `false`.
  * @property vitessImage The Vitess image to be used. Open-source Vitess images can be found at
- *   [Docker Hub](https://hub.docker.com/r/vitess/vttestserver/tags). Default is `vitess/vttestserver:v19.0.9-mysql80`.
+ *   [Docker Hub](https://hub.docker.com/r/vitess/vttestserver/tags). Default is `vitess/vttestserver:v21.0.4-mysql80`.
  * @property vitessVersion The Vitess major version to be used, which must match the version in `vitessImage`. Default
- *   is `19`.
+ *   is `21`.
  */
 class VitessTestDb(
   private var autoApplySchemaChanges: Boolean = DefaultSettings.AUTO_APPLY_SCHEMA_CHANGES,
   private var containerName: String = DefaultSettings.CONTAINER_NAME,
   private var debugStartup: Boolean = DefaultSettings.DEBUG_STARTUP,
   private var enableDeclarativeSchemaChanges: Boolean = DefaultSettings.ENABLE_DECLARATIVE_SCHEMA_CHANGES,
+  private var enableInMemoryStorage: Boolean = DefaultSettings.ENABLE_IN_MEMORY_STORAGE,
   private var enableScatters: Boolean = DefaultSettings.ENABLE_SCATTERS,
+  private var inMemoryStorageSize: String = DefaultSettings.IN_MEMORY_STORAGE_SIZE,
   private var keepAlive: Boolean = DefaultSettings.KEEP_ALIVE,
   private var lintSchema: Boolean = DefaultSettings.LINT_SCHEMA,
   private var mysqlVersion: String = DefaultSettings.MYSQL_VERSION,
@@ -83,7 +87,9 @@ class VitessTestDb(
     private var containerName: String = DefaultSettings.CONTAINER_NAME
     private var debugStartup: Boolean = DefaultSettings.DEBUG_STARTUP
     private var enableDeclarativeSchemaChanges: Boolean = DefaultSettings.ENABLE_DECLARATIVE_SCHEMA_CHANGES
+    private var enableInMemoryStorage: Boolean = DefaultSettings.ENABLE_IN_MEMORY_STORAGE
     private var enableScatters: Boolean = DefaultSettings.ENABLE_SCATTERS
+    private var inMemoryStorageSize: String = DefaultSettings.IN_MEMORY_STORAGE_SIZE
     private var keepAlive: Boolean = DefaultSettings.KEEP_ALIVE
     private var lintSchema: Boolean = DefaultSettings.LINT_SCHEMA
     private var mysqlVersion: String = DefaultSettings.MYSQL_VERSION
@@ -107,7 +113,11 @@ class VitessTestDb(
       this.enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges
     }
 
+    fun enableInMemoryStorage(enableInMemoryStorage: Boolean) = apply { this.enableInMemoryStorage = enableInMemoryStorage }
+
     fun enableScatters(enableScatters: Boolean) = apply { this.enableScatters = enableScatters }
+
+    fun inMemoryStorageSize(inMemoryStorageSize: String) = apply { this.inMemoryStorageSize = inMemoryStorageSize }
 
     fun keepAlive(keepAlive: Boolean) = apply { this.keepAlive = keepAlive }
 
@@ -139,7 +149,9 @@ class VitessTestDb(
         containerName,
         debugStartup,
         enableDeclarativeSchemaChanges,
+        enableInMemoryStorage,
         enableScatters,
+        inMemoryStorageSize,
         keepAlive,
         lintSchema,
         mysqlVersion,
@@ -331,7 +343,9 @@ class VitessTestDb(
       VitessDockerContainer(
         containerName,
         debugStartup,
+        enableInMemoryStorage,
         enableScatters,
+        inMemoryStorageSize,
         keepAlive,
         mysqlVersion,
         sqlMode,
@@ -416,4 +430,3 @@ enum class VitessTableType {
   REFERENCE,
   STANDARD,
 }
-

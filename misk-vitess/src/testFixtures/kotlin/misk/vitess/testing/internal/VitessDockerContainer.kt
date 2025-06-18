@@ -39,7 +39,9 @@ import java.net.Socket
 internal class VitessDockerContainer(
   private val containerName: String,
   private val debugStartup: Boolean,
+  private val enableInMemoryStorage: Boolean,
   private val enableScatters: Boolean,
+  private val inMemoryStorageSize: String,
   private val keepAlive: Boolean,
   private val mysqlVersion: String,
   private val sqlMode: String,
@@ -51,7 +53,9 @@ internal class VitessDockerContainer(
   private val vitessVersion: Int,
 ) {
   private companion object {
+    const val ENABLE_IN_MEMORY_STORAGE_ENV = "ENABLE_IN_MEMORY_STORAGE"
     const val ENABLE_SCATTERS_ENV = "ENABLE_SCATTERS"
+    const val IN_MEMORY_STORAGE_SIZE_ENV = "IN_MEMORY_STORAGE_SIZE"
     const val KEEP_ALIVE_ENV = "KEEP_ALIVE"
     const val KEYSPACES_ENV = "KEYSPACES"
     const val MYSQL_VERSION_ENV = "MYSQL_VERSION"
@@ -88,6 +92,7 @@ internal class VitessDockerContainer(
 
   fun start(): StartContainerResult {
     validateVitessVersionArgs()
+    validateInMemoryStorageSize()
     startDockerIfNotRunning()
 
     val shouldCreateContainerResult = shouldCreateContainer(containerName)
@@ -172,6 +177,15 @@ internal class VitessDockerContainer(
     }
   }
 
+  private fun validateInMemoryStorageSize() {
+    if (enableInMemoryStorage) {
+      val pattern = Regex("""\d+[KMG]""")
+      require(pattern.matches(inMemoryStorageSize.uppercase())) {
+        "Invalid `inMemoryStorageSize`: `$inMemoryStorageSize`. Must match pattern '\\d+[KMG]', e.g., '1G', '512M', or '1024K'."
+      }
+    }
+  }
+
   /**
    * This method checks if the container should be created based on the user arguments and the schema directory
    * contents.
@@ -220,7 +234,9 @@ internal class VitessDockerContainer(
      */
     val argsToValidate: Map<String, Pair<String, String>> =
       mapOf(
+        ENABLE_IN_MEMORY_STORAGE_ENV to ("$enableInMemoryStorage" to "enableInMemoryStorage"),
         ENABLE_SCATTERS_ENV to ("$enableScatters" to "enableScatters"),
+        IN_MEMORY_STORAGE_SIZE_ENV to (inMemoryStorageSize to "inMemoryStorageSize"),
         KEYSPACES_ENV to (getKeyspacesString() to "keyspaces"),
         MYSQL_VERSION_ENV to (mysqlVersion to "mysqlVersion"),
         PORT_ENV to ("${vitessClusterConfig.vtgatePort.hostPort}" to "port"),
@@ -434,14 +450,30 @@ internal class VitessDockerContainer(
 
     val portBindings = vitessClusterConfig.allPortMappings().map { portMapping -> PortBinding.parse("${portMapping.hostPort}:${portMapping.containerPort}") }
     val optionsFileDest = "$TEST_DB_DIR/my.cnf"
-    val hostConfig =
-      HostConfig()
-        .withPortBindings(portBindings)
-        .withBinds(Bind(vitessMyCnf.optionsFilePath.pathString, Volume(optionsFileDest)))
-        .withNetworkMode(VITESS_DOCKER_NETWORK_NAME)
-        .withAutoRemove(
-          !debugStartup // If `debugStartup` is `true`, we keep the container running to inspect logs.
-        ) // Otherwise, remove container when it stops.
+    
+    val hostConfig = HostConfig().apply {
+      withPortBindings(portBindings)
+      withBinds(Bind(vitessMyCnf.optionsFilePath.pathString, Volume(optionsFileDest)))
+      withNetworkMode(VITESS_DOCKER_NETWORK_NAME)
+      withAutoRemove(
+        !debugStartup // If `debugStartup` is `true`, we keep the container running to inspect logs.
+      ) // Otherwise, remove container when it stops.
+      if (enableInMemoryStorage) {
+        /**
+         * Tmpfs options using `/vt/vtdataroot` as the source to mount:
+         * - "rw": Mount the filesystem as read-write.
+         * - "noexec": Disallow execution of binaries from this mount for security.
+         * - "nosuid": Ignore set-user-ID and set-group-ID bits on files for security.
+         * - "mode=0777": Set the permissions of the /vt/vtdataroot mount point to be world-writable to
+         *                ensure the vttestserver process can create directories and files within the tmpfs.
+         * - "size=$inMemoryStorageSize": Limit the total size of the tmpfs to the value specified by the user (e.g., "1G").
+         */
+        val tmpfsOptions = "rw,noexec,nosuid,mode=0777,size=${inMemoryStorageSize.uppercase()}"
+        withTmpFs(mapOf("/vt/vtdataroot" to tmpfsOptions))
+        printDebug("Enabled in-memory storage (tmpfs) for /vt/vtdataroot with options: $tmpfsOptions")
+      }
+    }
+
 
     // The health check is run from the Docker daemon, so it needs to target localhost.
     val healthCheck =
@@ -511,7 +543,9 @@ internal class VitessDockerContainer(
         .withHealthcheck(healthCheck)
         .withExposedPorts(*vitessClusterConfig.allPortMappings().map { ExposedPort(it.containerPort) }.toTypedArray())
         .withEnv(
+          "$ENABLE_IN_MEMORY_STORAGE_ENV=$enableInMemoryStorage",
           "$ENABLE_SCATTERS_ENV=$enableScatters",
+          "$IN_MEMORY_STORAGE_SIZE_ENV=$inMemoryStorageSize",
           "$KEEP_ALIVE_ENV=$keepAlive",
           "$KEYSPACES_ENV=${getKeyspacesString()}",
           "$MYSQL_VERSION_ENV=$mysqlVersion",
@@ -731,7 +765,7 @@ internal class VitessDockerContainer(
     return match?.groupValues?.get(1)
   }
 
-    /**
+  /**
    *  Check if a port is in use via a socket connection. If there is a successful connection,
    *  it means the port is already in use by another process; the socket is immediately closed after
    *  the connection is made via the "use block", so it does not bind or occupy the port itself.

@@ -171,8 +171,10 @@ public final class misk/vitess/testing/DefaultSettings {
 	public static final field DEBUG_STARTUP Z
 	public static final field DYNAMIC_PORT I
 	public static final field ENABLE_DECLARATIVE_SCHEMA_CHANGES Z
+	public static final field ENABLE_IN_MEMORY_STORAGE Z
 	public static final field ENABLE_SCATTERS Z
 	public static final field INSTANCE Lmisk/vitess/testing/DefaultSettings;
+	public static final field IN_MEMORY_STORAGE_SIZE Ljava/lang/String;
 	public static final field KEEP_ALIVE Z
 	public static final field LINT_SCHEMA Z
 	public static final field MYSQL_VERSION Ljava/lang/String;
@@ -248,8 +250,8 @@ public final class misk/vitess/testing/VitessTableType : java/lang/Enum {
 public final class misk/vitess/testing/VitessTestDb {
 	public static final field Companion Lmisk/vitess/testing/VitessTestDb$Companion;
 	public fun <init> ()V
-	public fun <init> (ZLjava/lang/String;ZZZZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Ljava/time/Duration;Ljava/lang/String;I)V
-	public synthetic fun <init> (ZLjava/lang/String;ZZZZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Ljava/time/Duration;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;ZZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Ljava/time/Duration;Ljava/lang/String;I)V
+	public synthetic fun <init> (ZLjava/lang/String;ZZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Ljava/time/Duration;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun Builder ()Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun applySchema ()Lmisk/vitess/testing/ApplySchemaResult;
 	public final fun executeQuery (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
@@ -275,7 +277,9 @@ public final class misk/vitess/testing/VitessTestDb$Builder {
 	public final fun containerName (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun debugStartup (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun enableDeclarativeSchemaChanges (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun enableInMemoryStorage (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun enableScatters (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun inMemoryStorageSize (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun keepAlive (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun lintSchema (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun mysqlVersion (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
