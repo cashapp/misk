@@ -255,6 +255,7 @@ public final class misk/security/ssl/SslLoader {
 	public static final field FORMAT_JCEKS Ljava/lang/String;
 	public static final field FORMAT_JKS Ljava/lang/String;
 	public static final field FORMAT_PEM Ljava/lang/String;
+	public fun <init> (Lmisk/resources/ResourceLoader;)V
 	public final fun getDelegate ()Lwisp/security/ssl/SslLoader;
 	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
 	public final fun loadCertStore (Ljava/lang/String;)Lmisk/security/ssl/CertStore;

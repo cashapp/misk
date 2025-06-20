@@ -5,7 +5,7 @@ import jakarta.inject.Inject
 import wisp.security.ssl.SslLoader as WispSslLoader
 
 /** Loads keys and certificates from the file system. */
-class SslLoader @Inject internal constructor(
+class SslLoader @Inject constructor(
   val resourceLoader: ResourceLoader
 ) {
   val delegate: WispSslLoader = WispSslLoader(resourceLoader.delegate)
