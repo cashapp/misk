@@ -332,7 +332,7 @@ subprojects {
   }
 
   val configurationNames = setOf("kapt", "wire", "proto", "Proto")
-  configurations.all {
+  configurations.configureEach {
     // Workaround the Gradle bug resolving multiplatform dependencies.
     // https://github.com/square/okio/issues/647
     if (name in configurationNames) {
