@@ -212,9 +212,7 @@ data class DataSourceConfig @JvmOverloads constructor(
         }
 
         if (type == DataSourceType.VITESS_MYSQL) {
-          // TODO(jontirsen): Try turning on server side prepared statements again when this issue
-          //  has been fixed: https://github.com/vitessio/vitess/issues/5075
-          queryParams += "&useServerPrepStmts=false"
+          queryParams += "&useServerPrepStmts=true"
           queryParams += "&useUnicode=true"
           // If we leave this as the default (true) the logs get spammed with the following errors:
           // "Ignored inapplicable SET {sql_mode } = strict_trans_tables"
