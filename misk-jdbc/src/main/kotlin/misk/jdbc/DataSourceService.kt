@@ -110,9 +110,7 @@ class DataSourceService @JvmOverloads constructor(
       hikariConfig.dataSourceProperties["cachePrepStmts"] = "true"
       hikariConfig.dataSourceProperties["prepStmtCacheSize"] = "250"
       hikariConfig.dataSourceProperties["prepStmtCacheSqlLimit"] = "2048"
-      if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.TIDB) {
-        // TODO(jontirsen): Try turning on server side prepared statements again when this issue
-        //  has been fixed: https://github.com/vitessio/vitess/issues/5075
+      if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS_MYSQL || config.type == DataSourceType.TIDB) {
         hikariConfig.dataSourceProperties["useServerPrepStmts"] = "true"
       }
       hikariConfig.dataSourceProperties["useLocalSessionState"] = "true"
