@@ -241,10 +241,10 @@ public final class misk/security/ssl/SslContextFactory {
 	public fun <init> (Lmisk/security/ssl/SslLoader;)V
 	public final fun create ()Ljavax/net/ssl/SSLContext;
 	public final fun create (Lmisk/security/ssl/CertStore;[C)Ljavax/net/ssl/SSLContext;
-	public final fun create (Lmisk/security/ssl/CertStore;[CLwisp/security/ssl/TrustStore;)Ljavax/net/ssl/SSLContext;
+	public final fun create (Lmisk/security/ssl/CertStore;[CLmisk/security/ssl/TrustStore;)Ljavax/net/ssl/SSLContext;
 	public final fun create (Lmisk/security/ssl/CertStoreConfig;)Ljavax/net/ssl/SSLContext;
 	public final fun create (Lmisk/security/ssl/CertStoreConfig;Lmisk/security/ssl/TrustStoreConfig;)Ljavax/net/ssl/SSLContext;
-	public static synthetic fun create$default (Lmisk/security/ssl/SslContextFactory;Lmisk/security/ssl/CertStore;[CLwisp/security/ssl/TrustStore;ILjava/lang/Object;)Ljavax/net/ssl/SSLContext;
+	public static synthetic fun create$default (Lmisk/security/ssl/SslContextFactory;Lmisk/security/ssl/CertStore;[CLmisk/security/ssl/TrustStore;ILjava/lang/Object;)Ljavax/net/ssl/SSLContext;
 	public static synthetic fun create$default (Lmisk/security/ssl/SslContextFactory;Lmisk/security/ssl/CertStoreConfig;Lmisk/security/ssl/TrustStoreConfig;ILjava/lang/Object;)Ljavax/net/ssl/SSLContext;
 	public final fun getDelegate ()Lwisp/security/ssl/SslContextFactory;
 	public final fun loadTrustManagers (Ljava/security/KeyStore;)[Ljavax/net/ssl/TrustManager;
@@ -263,14 +263,25 @@ public final class misk/security/ssl/SslLoader {
 	public final fun loadCertStore (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/security/ssl/CertStore;
 	public final fun loadCertStore (Lmisk/security/ssl/CertStoreConfig;)Lmisk/security/ssl/CertStore;
 	public static synthetic fun loadCertStore$default (Lmisk/security/ssl/SslLoader;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/security/ssl/CertStore;
-	public final fun loadTrustStore (Ljava/lang/String;)Lwisp/security/ssl/TrustStore;
-	public final fun loadTrustStore (Ljava/lang/String;Ljava/lang/String;)Lwisp/security/ssl/TrustStore;
-	public final fun loadTrustStore (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lwisp/security/ssl/TrustStore;
-	public final fun loadTrustStore (Lmisk/security/ssl/TrustStoreConfig;)Lwisp/security/ssl/TrustStore;
-	public static synthetic fun loadTrustStore$default (Lmisk/security/ssl/SslLoader;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lwisp/security/ssl/TrustStore;
+	public final fun loadTrustStore (Ljava/lang/String;)Lmisk/security/ssl/TrustStore;
+	public final fun loadTrustStore (Ljava/lang/String;Ljava/lang/String;)Lmisk/security/ssl/TrustStore;
+	public final fun loadTrustStore (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/security/ssl/TrustStore;
+	public final fun loadTrustStore (Lmisk/security/ssl/TrustStoreConfig;)Lmisk/security/ssl/TrustStore;
+	public static synthetic fun loadTrustStore$default (Lmisk/security/ssl/SslLoader;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/security/ssl/TrustStore;
 }
 
 public final class misk/security/ssl/SslLoader$Companion {
+}
+
+public final class misk/security/ssl/TrustStore {
+	public fun <init> (Ljava/security/KeyStore;)V
+	public final fun component1 ()Ljava/security/KeyStore;
+	public final fun copy (Ljava/security/KeyStore;)Lmisk/security/ssl/TrustStore;
+	public static synthetic fun copy$default (Lmisk/security/ssl/TrustStore;Ljava/security/KeyStore;ILjava/lang/Object;)Lmisk/security/ssl/TrustStore;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKeyStore ()Ljava/security/KeyStore;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/security/ssl/TrustStoreConfig {

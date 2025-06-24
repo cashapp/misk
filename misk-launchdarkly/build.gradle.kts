@@ -24,7 +24,6 @@ dependencies {
   implementation(project(":misk-service"))
   implementation(project(":wisp:wisp-feature"))
   implementation(project(":wisp:wisp-launchdarkly"))
-  implementation(project(":wisp:wisp-ssl"))
   implementation(project(":wisp:wisp-logging"))
 }
 

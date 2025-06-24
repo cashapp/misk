@@ -15,9 +15,9 @@ class SslLoader @Inject constructor(
     path: String,
     format: String = FORMAT_PEM,
     passphrase: String? = null
-  ): TrustStore? = delegate.loadTrustStore(path, format, passphrase)
+  ): TrustStore? = delegate.loadTrustStore(path, format, passphrase)?.let { TrustStore(it.keyStore) }
 
-  fun loadTrustStore(config: TrustStoreConfig) = delegate.loadTrustStore(config.toWispConfig())
+  fun loadTrustStore(config: TrustStoreConfig) = delegate.loadTrustStore(config.toWispConfig())?.let { TrustStore(it.keyStore) }
 
   @JvmOverloads
   fun loadCertStore(
