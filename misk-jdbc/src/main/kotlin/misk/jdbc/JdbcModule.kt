@@ -153,14 +153,7 @@ class JdbcModule @JvmOverloads constructor(
       bind(keyOf<PingDatabaseService>(qualifier)).toProvider {
         PingDatabaseService(config, deploymentProvider.get())
       }.asSingleton()
-      // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
-      // env. This is to remove flakiness in tests that are not waiting until Vitess is ready.
-      // This should be replaced with an ExternalDependency that manages vitess.
-      // TODO(jontirsen): I don't think this is needed anymore...
-      install(
-        ServiceModule<PingDatabaseService>(qualifier)
-          .dependsOn<StartDatabaseService>(this.qualifier)
-      )
+      install(ServiceModule<PingDatabaseService>(qualifier))
     }
 
     // Bind DataSourceService.
