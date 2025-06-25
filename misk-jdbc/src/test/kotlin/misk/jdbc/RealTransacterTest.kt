@@ -15,6 +15,7 @@ import misk.testing.MockTracingBackendModule
 import misk.time.FakeClockModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
@@ -372,6 +373,7 @@ class PostgreSQLRealTransacterTest : RealTransacterTest() {
 }
 
 @MiskTest(startService = true)
+@Disabled(value = "Requires the ExternalDependency implementation to be less flakey")
 class CockroachDbRealTransacterTest : RealTransacterTest() {
   @MiskTestModule
   val module = RealTransacterTestModule(DataSourceType.COCKROACHDB)

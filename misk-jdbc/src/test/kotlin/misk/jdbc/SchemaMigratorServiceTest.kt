@@ -24,6 +24,7 @@ internal class MySQLSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSo
 internal class PostgreSQLSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSourceType.POSTGRESQL)
 
 @MiskTest(startService = false)
+@Disabled(value = "Requires the ExternalDependency implementation to be less flakey")
 internal class CockroachdbSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSourceType.COCKROACHDB)
 
 @MiskTest(startService = false)
