@@ -50,7 +50,7 @@ import kotlin.time.measureTime
  */
 class VitessTestDb(
   private var autoApplySchemaChanges: Boolean = DefaultSettings.AUTO_APPLY_SCHEMA_CHANGES,
-  private var containerName: String = DefaultSettings.CONTAINER_NAME,
+  val containerName: String = DefaultSettings.CONTAINER_NAME,
   private var debugStartup: Boolean = DefaultSettings.DEBUG_STARTUP,
   private var enableDeclarativeSchemaChanges: Boolean = DefaultSettings.ENABLE_DECLARATIVE_SCHEMA_CHANGES,
   private var enableInMemoryStorage: Boolean = DefaultSettings.ENABLE_IN_MEMORY_STORAGE,
