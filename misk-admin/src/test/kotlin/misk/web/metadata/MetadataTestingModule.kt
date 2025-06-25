@@ -1,7 +1,12 @@
 package misk.web.metadata
 
+import jakarta.inject.Qualifier
 import misk.config.AppName
+import misk.config.MiskConfig
+import misk.config.Redact
+import misk.config.Secret
 import misk.inject.KAbstractModule
+import misk.security.authz.AccessAnnotationEntry
 import misk.web.actions.TestWebActionModule
 import misk.web.dashboard.AdminDashboardTestingModule
 import misk.web.dashboard.DashboardHomeUrl
@@ -11,14 +16,9 @@ import misk.web.dashboard.DashboardTab
 import misk.web.dashboard.DashboardTabProvider
 import misk.web.dashboard.DashboardTheme
 import misk.web.dashboard.MiskWebTheme
-import wisp.config.Config
-import jakarta.inject.Qualifier
-import misk.config.MiskConfig
-import misk.config.Redact
-import misk.config.Secret
-import misk.security.authz.AccessAnnotationEntry
 import misk.web.metadata.all.AllMetadataAccess
 import misk.web.metadata.all.AllMetadataModule
+import wisp.config.Config
 
 // Common test module used to be able to test admin dashboard WebActions
 class MetadataTestingModule : KAbstractModule() {

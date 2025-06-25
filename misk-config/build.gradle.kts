@@ -35,6 +35,7 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.logbackClassic)
   testImplementation(libs.slf4jApi)
+  testImplementation(libs.systemStubsJupiter)
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":misk"))
   testImplementation(project(":misk-config"))

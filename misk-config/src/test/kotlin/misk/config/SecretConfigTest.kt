@@ -115,7 +115,7 @@ class SecretConfigTest {
       )
     }
     assertThat(unknownExtensionError).hasMessageContaining(
-      "Unknown file extension \"json\" for secret " +
+      "Unknown file extension \"json\" for resource " +
         "[classpath:/misk/resources/secrets/secret_information_values.json]."
     )
   }
@@ -142,8 +142,8 @@ class SecretConfigTest {
       )
     }
     assertThat(stringTxtMismatchError).hasMessageContaining(
-      "Secret [classpath:/misk/resources/secrets/secret_information_values] " +
-        "needs a file extension for parsing."
+      "Resource [classpath:/misk/resources/secrets/secret_information_values] " +
+        "needs a file extension for parsing class misk.config.SecretInformationConfig."
     )
   }
 
@@ -156,7 +156,7 @@ class SecretConfigTest {
       )
     }
     assertThat(stringTxtMismatchError).hasMessageContaining(
-      "No secret found at: classpath:/file_does_not_exist."
+      "No resource found at: classpath:/file_does_not_exist."
     )
   }
 }

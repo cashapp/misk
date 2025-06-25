@@ -8,6 +8,7 @@ import okio.BufferedSource
  *
  * This uses the scheme `environment:`.
  */
+// TODO change this to use EnvironmentVariableLoader instead so it can be easily faked and tested
 object EnvironmentResourceLoaderBackend : ResourceLoader.Backend() {
 
     const val SCHEME = "environment:"
