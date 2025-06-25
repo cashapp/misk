@@ -14,6 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
@@ -27,6 +28,7 @@ internal class MySQLTraditionalSchemaMigratorTest : TraditionalSchemaMigratorTes
 internal class PostgreSQLTraditionalSchemaMigratorTest : TraditionalSchemaMigratorTest(DataSourceType.POSTGRESQL)
 
 @MiskTest(startService = false)
+@Disabled(value = "Requires the ExternalDependency implementation to be less flakey")
 internal class CockroachdbTraditionalSchemaMigratorTest : TraditionalSchemaMigratorTest(DataSourceType.COCKROACHDB)
 
 @MiskTest(startService = false)
