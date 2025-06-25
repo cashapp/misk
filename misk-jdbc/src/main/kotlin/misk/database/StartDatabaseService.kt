@@ -37,8 +37,6 @@ fun runCommand(command: String): Int {
 }
 
 /**
- * All Vitess clusters used by the app/test are tracked in a global cache as a [DockerVitessCluster].
- *
  * On startup, the service will look for a cluster in the cache, and if not found, look for it in
  * Docker by container name, or as a last resort start the container itself.
  *
