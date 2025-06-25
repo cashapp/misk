@@ -205,6 +205,7 @@ slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
 sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
+systemStubsJupiter = { module = "uk.org.webcompere:system-stubs-jupiter", version = "2.1.6" }
 tempest2Testing = { module = "app.cash.tempest:tempest2-testing" }
 tempest2TestingDocker = { module = "app.cash.tempest:tempest2-testing-docker" }
 tempest2TestingInternal = { module = "app.cash.tempest:tempest2-testing-internal" }
