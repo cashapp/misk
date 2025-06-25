@@ -45,4 +45,7 @@ class DockerVitess(
   override fun afterEach() {
     // no-op
   }
+
+  override val id: String
+    get() = vitessTestDb.containerName
 }

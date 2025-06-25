@@ -260,6 +260,7 @@ public final class misk/vitess/testing/VitessTestDb {
 	public static synthetic fun executeTransaction$default (Lmisk/vitess/testing/VitessTestDb;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
 	public final fun executeUpdate (Ljava/lang/String;Ljava/lang/String;)I
 	public static synthetic fun executeUpdate$default (Lmisk/vitess/testing/VitessTestDb;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)I
+	public final fun getContainerName ()Ljava/lang/String;
 	public final fun getKeyspaces ()Ljava/util/List;
 	public final fun getQueryPlanDebugPort ()I
 	public final fun getTables (Ljava/lang/String;)Ljava/util/List;
