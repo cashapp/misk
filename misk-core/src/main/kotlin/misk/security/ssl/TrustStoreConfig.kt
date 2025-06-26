@@ -11,5 +11,6 @@ data class TrustStoreConfig @Inject constructor(
   val passphrase: String? = null,
   val format: String = FORMAT_JCEKS
 ) {
+  @Deprecated("Duplicate implementations in Wisp are being migrated to the unified type in Misk.")
   fun toWispConfig() = WispTrustStoreConfig(resource, passphrase, format)
 }
