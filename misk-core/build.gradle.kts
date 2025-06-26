@@ -20,8 +20,10 @@ dependencies {
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-testing-api"))
+  implementation(libs.bouncyCastleProvider)
   implementation(libs.guice)
   implementation(libs.kotlinStdLibJdk8)
+  implementation(libs.okio)
   implementation(project(":wisp:wisp-token-testing"))
   implementation(project(":wisp:wisp-resource-loader"))
 
