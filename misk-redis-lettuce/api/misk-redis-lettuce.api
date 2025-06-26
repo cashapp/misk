@@ -10,11 +10,6 @@ public final class misk/redis/lettuce/AsyncCloseableExtensionsKt {
 	public static final fun thenComposeUsing (Ljava/util/concurrent/CompletionStage;Lkotlin/jvm/functions/Function1;)Ljava/util/concurrent/CompletionStage;
 }
 
-public final class misk/redis/lettuce/AsyncCloseableExtensionsKt$sam$i$java_util_function_Function$0 : java/util/function/Function {
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
-	public final synthetic fun apply (Ljava/lang/Object;)Ljava/lang/Object;
-}
-
 public final class misk/redis/lettuce/CommandArgumentsKt {
 	public static final fun aclSetuserArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/AclSetuserArgs;
 	public static final fun bitFieldArgs (Lkotlin/jvm/functions/Function1;)Lio/lettuce/core/BitFieldArgs;
@@ -515,11 +510,6 @@ public final class misk/redis/lettuce/cluster/testing/RedisClusterReadyService :
 }
 
 public final class misk/redis/lettuce/cluster/testing/RedisClusterReadyService$Companion {
-}
-
-public final class misk/redis/lettuce/cluster/testing/RedisClusterReadyService$inlined$sam$i$java_util_function_Function$0 : java/util/function/Function {
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
-	public final synthetic fun apply (Ljava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class misk/redis/lettuce/cluster/testing/RedisClusterReadyServiceModule : misk/inject/KAbstractModule {
