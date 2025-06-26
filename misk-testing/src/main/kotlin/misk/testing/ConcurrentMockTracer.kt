@@ -11,10 +11,8 @@ import jakarta.inject.Singleton
  * Extends [MockTracer] for use in concurrent environments, such as a web server and test client.
  * Prefer this wherever you'd otherwise use [MockTracer].
  */
-// TODO(keefer): Deprecate this (or forward the type via delegate) when wisp-tracing-test-fixtures
-//  publication is fixed. wisp-tracing provides a preferred copy of this class.
 @Singleton
-class ConcurrentMockTracer @Inject constructor() : TestFixture, MockTracer() {
+open class ConcurrentMockTracer @Inject constructor() : TestFixture, MockTracer() {
   private val queue = LinkedBlockingDeque<MockSpan>()
 
   override fun reset() {

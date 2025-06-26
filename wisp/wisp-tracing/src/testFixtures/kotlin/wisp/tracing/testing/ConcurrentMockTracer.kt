@@ -9,6 +9,13 @@ import java.util.concurrent.TimeUnit
  * Extends [MockTracer] for use in concurrent environments, such as a web server and test client.
  * Prefer this wherever you'd otherwise use [MockTracer].
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "ConcurrentMockTracer()",
+    imports = ["misk.testing.ConcurrentMockTracer"]
+  )
+)
 open class ConcurrentMockTracer : MockTracer() {
     private val queue = LinkedBlockingDeque<MockSpan>()
 
