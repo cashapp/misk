@@ -19,8 +19,7 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
   implementation(libs.jakartaInject)
-  implementation(libs.kotlinRetry)
-  implementation(libs.kotlinxCoroutinesCore)
+  implementation(project(":misk-backoff"))
   implementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)
