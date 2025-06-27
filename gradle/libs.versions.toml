@@ -1,12 +1,12 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.787"
-aws2 = "2.31.70"
+aws2 = "2.31.71"
 bucket4j = "8.8.0"
 datadog = "1.50.0"
 dependencyAnalysisPlugin = "2.19.0"
 detekt = "1.23.8"
-docker = "3.5.1"
+docker = "3.5.2"
 googleAuth = "1.37.1"
 googleHttp = "1.47.1"
 hoplite = "2.7.5"
@@ -71,7 +71,7 @@ gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.58.
 gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.29.2" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250523-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
-gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.22.5" }
+gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.22.6" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.95.1" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.8.0" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250605-2.0.0" }
@@ -205,7 +205,7 @@ slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
 sqldelightRuntime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
-systemStubsJupiter = { module = "uk.org.webcompere:system-stubs-jupiter", version = "2.1.6" }
+systemStubsJupiter = { module = "uk.org.webcompere:system-stubs-jupiter", version = "2.1.8" }
 tempest2Testing = { module = "app.cash.tempest:tempest2-testing" }
 tempest2TestingDocker = { module = "app.cash.tempest:tempest2-testing-docker" }
 tempest2TestingInternal = { module = "app.cash.tempest:tempest2-testing-internal" }
@@ -232,7 +232,7 @@ binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibilit
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
-flyway = { id = "org.flywaydb.flyway", version = "11.9.1" }
+flyway = { id = "org.flywaydb.flyway", version = "11.10.0" }
 jooq = { id = "nu.studer.jooq", version = "9.0" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
