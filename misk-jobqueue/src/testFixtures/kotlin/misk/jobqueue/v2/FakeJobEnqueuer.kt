@@ -215,7 +215,10 @@ class FakeJobEnqueuer @Inject constructor(
               JobStatus.OK -> job.acknowledged = true
               JobStatus.DEAD_LETTER -> job.deadLettered = true
               JobStatus.RETRY_LATER -> job.acknowledged = false
-              JobStatus.RETRY_WITH_BACKOFF -> job.acknowledged = false
+              JobStatus.RETRY_WITH_BACKOFF -> {
+                job.acknowledged = false
+                job.delayedForBackoff = true
+              }
             }
           }
         }
@@ -239,8 +242,10 @@ class FakeJobEnqueuer @Inject constructor(
 
     // Re-enqueue deadlettered jobs outside of the main loop to prevent an infinite loop.
     resultedJobs.forEach { job ->
-      if (job.deadLettered || !job.acknowledged) {
+      if (job.deadLettered) {
         deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
+      } else if (!job.acknowledged) {
+        jobQueues.getOrPut(job.queueName, ::PriorityBlockingQueue).add(job)
       }
     }
     // Similarly to above re-enqueue jobs that have been called to have the visibility timeout.
