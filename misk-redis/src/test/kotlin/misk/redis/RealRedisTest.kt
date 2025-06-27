@@ -6,6 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.redis.testing.DockerRedis
+import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
@@ -24,6 +25,7 @@ class RealRedisTest : AbstractRedisTest() {
       install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
+      install(RedisTestFlushModule())
     }
   }
 

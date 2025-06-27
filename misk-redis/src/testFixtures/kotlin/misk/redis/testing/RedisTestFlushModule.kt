@@ -13,7 +13,7 @@ class RedisTestFlushModule : KAbstractModule() {
   override fun configure() {
     install(
       ServiceModule<RedisFlushService>()
-        .enhancedBy<ReadyService>()
+        .dependsOn<ReadyService>()
     )
     bind<TestFixture>().to<RedisFlushService>()
   }
