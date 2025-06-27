@@ -1,14 +1,6 @@
 package misk.jooq
 
-import com.github.michaelbull.retry.ContinueRetrying
-import com.github.michaelbull.retry.StopRetrying
-import com.github.michaelbull.retry.context.retryStatus
-import com.github.michaelbull.retry.policy.RetryPolicy
-import com.github.michaelbull.retry.policy.fullJitterBackoff
-import com.github.michaelbull.retry.policy.limitAttempts
-import com.github.michaelbull.retry.policy.plus
-import com.github.michaelbull.retry.retry
-import kotlinx.coroutines.runBlocking
+import misk.backoff.ExponentialBackoff
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
@@ -29,7 +21,7 @@ import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
 import wisp.logging.getLogger
 import java.time.Clock
-import kotlin.coroutines.coroutineContext
+import java.time.Duration
 
 class JooqTransacter @JvmOverloads constructor(
   private val dataSourceService: DataSourceService,
@@ -46,34 +38,39 @@ class JooqTransacter @JvmOverloads constructor(
     options: TransacterOptions = TransacterOptions(),
     callback: (jooqSession: JooqSession) -> RETURN_TYPE
   ): RETURN_TYPE {
-    return runBlocking {
-      retry(
-        retryJooqExceptionsAlone +
-          limitAttempts(options.maxAttempts) +
-          fullJitterBackoff(base = 10L, max = options.maxRetryDelayMillis)
-      ) {
-        performInTransaction(options, callback)
+    val backoff = ExponentialBackoff(Duration.ofMillis(10L), Duration.ofMillis(options.maxRetryDelayMillis))
+    var attempt = 0
+
+    while (true) {
+      try {
+        return performInTransaction(options, callback, ++attempt)
+      } catch (e: Exception) {
+        if (e !is DataAccessException || attempt >= options.maxAttempts) throw e
+        val sleepDuration = backoff.nextRetry()
+        if (!sleepDuration.isZero) {
+          Thread.sleep(sleepDuration.toMillis())
+        }
       }
     }
   }
 
-  private suspend fun <RETURN_TYPE> performInTransaction(
+  private fun <RETURN_TYPE> performInTransaction(
     options: TransacterOptions,
-    callback: (jooqSession: JooqSession) -> RETURN_TYPE
+    callback: (jooqSession: JooqSession) -> RETURN_TYPE,
+    attempt: Int,
   ): RETURN_TYPE {
-    val attempt1Based = coroutineContext.retryStatus.attempt + 1
     return try {
       val result = createDSLContextAndCallback(options, callback)
-      if (attempt1Based > 1) {
+      if (attempt > 1) {
         log.info {
-          "Retried jooq transaction succeeded after [attempts=$attempt1Based]"
+          "Retried jooq transaction succeeded after [attempts=$attempt]"
         }
       }
       result
     } catch (e: Exception) {
-      if (attempt1Based >= options.maxAttempts) {
+      if (attempt >= options.maxAttempts) {
         log.warn(e) {
-          "Recoverable transaction exception [attempts=$attempt1Based], no more attempts"
+          "Recoverable transaction exception [attempts=$attempt], no more attempts"
         }
         throw e
       }
@@ -166,10 +163,6 @@ class JooqTransacter @JvmOverloads constructor(
 
   companion object {
     private val log = getLogger<JooqTransacter>()
-
-    private val retryJooqExceptionsAlone: RetryPolicy<Throwable> = {
-      if (reason is DataAccessException) ContinueRetrying else StopRetrying
-    }
 
     val noRetriesOptions: TransacterOptions
       get() = TransacterOptions().copy(maxAttempts = 1)
