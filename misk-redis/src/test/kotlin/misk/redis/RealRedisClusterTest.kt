@@ -6,6 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.redis.testing.DockerRedisCluster
+import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import redis.clients.jedis.ConnectionPoolConfig
@@ -20,6 +21,7 @@ class RealRedisClusterTest : AbstractRedisClusterTest() {
       install(RedisClusterModule(DockerRedisCluster.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
+      install(RedisTestFlushModule())
     }
   }
 
