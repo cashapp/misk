@@ -15,12 +15,26 @@ import io.opentracing.tag.Tags
  *
  * If you want a new independent span, use [traceWithNewRootSpan].
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "this.trace(spanName, tags, f)",
+    imports = ["misk.tracing.trace"]
+  )
+)
 fun <T : Any?> Tracer.trace(spanName: String, tags: Map<String, String> = mapOf(), f: () -> T): T =
     traceWithSpan(spanName, tags) { f() }
 
 /**
  * Like [trace], but exposes the new active [Span] to [f].
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "this.traceWithSpan(spanName, tags, f)",
+    imports = ["misk.tracing.traceWithSpan"]
+  )
+)
 fun <T : Any?> Tracer.traceWithSpan(
     spanName: String,
     tags: Map<String, String> = mapOf(),
@@ -31,6 +45,13 @@ fun <T : Any?> Tracer.traceWithSpan(
  * Like [traceWithSpan], but always starts a new independent (root) span.
  * If you'd like to continue propagating baggage that was set on the previous active span, set [retainBaggage] to true.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "this.traceWithNewRootSpan(spanName, tags, retainBaggage, f)",
+    imports = ["misk.tracing.traceWithNewRootSpan"]
+  )
+)
 fun <T : Any?> Tracer.traceWithNewRootSpan(
     spanName: String,
     tags: Map<String, String> = mapOf(),
@@ -95,6 +116,13 @@ private fun SpanBuilder.addAllTags(tags: Map<String, String>): SpanBuilder {
  * }
  * ```
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "this.withNewScope(span, f)",
+    imports = ["misk.tracing.withNewScope"]
+  )
+)
 inline fun <T: Any?> Tracer.withNewScope(
     span: Span,
     crossinline f: () -> T
