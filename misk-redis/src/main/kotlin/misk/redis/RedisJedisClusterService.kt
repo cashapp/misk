@@ -8,6 +8,7 @@ import redis.clients.jedis.DefaultJedisClientConfig
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.UnifiedJedis
+import wisp.logging.getLogger
 
 /**
  * Controls the connection lifecycle for Redis in cluster mode.
@@ -30,6 +31,7 @@ internal class RedisJedisClusterService(
 
   override fun startUp() {
     check(!::jedisCluster.isInitialized) { "JedisCluster is already initialized. Services must be started only once." }
+    logger.info { "Starting ${this::class.simpleName} service" }
 
     // Create our jedis pool with client-side metrics.
     val jedisClientConfig = DefaultJedisClientConfig.builder()
@@ -64,6 +66,7 @@ internal class RedisJedisClusterService(
   }
 
   override fun shutDown() {
+    logger.info { "Stopping ${this::class.simpleName} service" }
     jedisCluster.close()
   }
 
@@ -73,5 +76,9 @@ internal class RedisJedisClusterService(
               "If this was a test, try setting @MiskTest(startService = true) on the test class."
     }
     return jedisCluster
+  }
+
+  companion object {
+    private val logger = getLogger<RedisJedisClusterService>()
   }
 }

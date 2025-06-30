@@ -5,6 +5,7 @@ import com.google.inject.Provider
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import redis.clients.jedis.UnifiedJedis
+import wisp.logging.getLogger
 
 /** Provides a [Redis] built from a [UnifiedJedis] provided by [RedisJedisClusterService] */
 @Singleton
@@ -16,11 +17,13 @@ internal class RedisFacadeClusterService @Inject constructor(
 
   override fun startUp() {
     check(!::redis.isInitialized) { "JedisCluster is already initialized. Services must be started only once." }
+    logger.info { "Starting ${this::class.simpleName} service" }
 
     redis = RealRedis(unifiedJedisProvider.get(), clientMetrics)
   }
 
   override fun shutDown() {
+    logger.info { "Stopping ${this::class.simpleName} service" }
     // This is a facade, the RedisJedisClusterService service will close the real client
   }
 
@@ -30,5 +33,9 @@ internal class RedisFacadeClusterService @Inject constructor(
               "If this was a test, try setting @MiskTest(startService = true) on the test class."
     }
     return redis
+  }
+
+  companion object {
+    private val logger = getLogger<RedisFacadeClusterService>()
   }
 }
