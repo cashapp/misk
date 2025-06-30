@@ -74,7 +74,6 @@ dependencies {
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
   implementation(project(":wisp:wisp-ssl"))
-  implementation(project(":wisp:wisp-tracing"))
   runtimeOnly(libs.jettyAlpnServerJava)
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
   testImplementation(libs.assertj)
@@ -92,6 +91,7 @@ dependencies {
   testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":wisp:wisp-tracing"))
   testImplementation(testFixtures(project(":misk-audit-client")))
 }
 
