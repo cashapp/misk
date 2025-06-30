@@ -77,7 +77,7 @@ class RedisClusterModule @JvmOverloads constructor(
     // RedisFacadeClusterService must depend on the Jedis service, as it provides the UnifiedJedis
     // that RedisFacadeClusterService uses to build RealRedis
     install(ServiceModule<RedisJedisClusterService>().enhancedBy<ReadyService>())
-    install(ServiceModule<RedisFacadeClusterService>().dependsOn<RedisJedisClusterService>())
+    install(ServiceModule<RedisFacadeClusterService>().dependsOn<RedisJedisClusterService>().enhancedBy<ReadyService>())
     requireBinding<Metrics>()
   }
 }

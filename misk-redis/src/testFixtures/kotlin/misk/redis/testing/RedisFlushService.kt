@@ -1,7 +1,8 @@
 package misk.redis.testing
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Inject
+import jakarta.inject.Inject
+import jakarta.inject.Provider
 import jakarta.inject.Singleton
 import misk.redis.Redis
 import misk.testing.TestFixture
@@ -15,7 +16,9 @@ import wisp.logging.getLogger
  */
 @Singleton
 class RedisFlushService @Inject constructor() : AbstractIdleService(), TestFixture {
-  @Inject(optional = true) private lateinit var redis: Redis
+  @Inject private lateinit var redisProvider: Provider<Redis>
+  private val redis by lazy { redisProvider.get() }
+
   override fun startUp() {
     flushAll()
   }
