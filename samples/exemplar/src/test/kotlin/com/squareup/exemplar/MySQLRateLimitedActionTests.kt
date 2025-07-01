@@ -26,7 +26,7 @@ class MySQLRateLimitedActionTests : AbstractRateLimitedActionTests() {
     override fun configure() {
       install(ExemplarTestModule())
       install(DeploymentModule(TESTING))
-      val config = MiskConfig.load<RootConfig>("exemplar", TESTING)
+      val config = MiskConfig.load<RootConfig>("exemplar-testing", TESTING)
       install(JdbcTestingModule(RateLimits::class))
       install(
         HibernateModule(

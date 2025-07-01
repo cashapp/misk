@@ -3,6 +3,7 @@ package com.squareup.exemplar
 import misk.audit.AuditClientConfig
 import misk.config.Redact
 import misk.config.Secret
+import misk.jdbc.DataSourceClustersConfig
 import misk.metrics.backends.prometheus.PrometheusConfig
 import misk.web.WebConfig
 import wisp.config.Config
@@ -14,4 +15,5 @@ data class ExemplarConfig(
   @Redact
   val redacted: String,
   val audit: AuditClientConfig,
+  val data_source_clusters: DataSourceClustersConfig,
 ) : Config
