@@ -6,6 +6,8 @@ import com.squareup.exemplar.actions.HelloWebAction
 import com.squareup.exemplar.actions.HelloWebGrpcAction
 import com.squareup.exemplar.actions.HelloWebPostAction
 import com.squareup.exemplar.actions.HelloWebProtoAction
+import com.squareup.exemplar.actions.LeaseAcquireWebAction
+import com.squareup.exemplar.actions.LeaseCheckWebAction
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 
@@ -17,5 +19,7 @@ class ExemplarWebActionsModule : KAbstractModule() {
     install(WebActionModule.create<EchoFormAction>())
     install(WebActionModule.create<HelloWebProtoAction>())
     install(WebActionModule.create<DownloadAFileWebAction>())
+    install(WebActionModule.create<LeaseAcquireWebAction>())
+    install(WebActionModule.create<LeaseCheckWebAction>())
   }
 }

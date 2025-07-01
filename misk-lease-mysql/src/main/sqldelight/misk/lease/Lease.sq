@@ -1,0 +1,26 @@
+insert:
+INSERT INTO leases (
+  id,
+  held_until,
+  version
+) VALUES (:id, :held_until, :version);
+
+selectById:
+SELECT id, held_until, version
+FROM leases
+WHERE id = :id;
+
+acquire:
+UPDATE leases
+SET
+  held_until = :held_until,
+  version = :version
+WHERE
+  id = :id AND
+  version = :current_version;
+
+release:
+DELETE FROM leases
+WHERE
+  id = :id AND
+  version = :version;

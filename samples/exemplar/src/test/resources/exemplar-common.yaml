@@ -1,6 +1,28 @@
+web:
+  port: 8080
+  idle_timeout: 30000
+  http2: true
+
+prometheus:
+  http_port: 8081
+
+apiKey: "classpath:/secrets/api_key.txt"
+redacted: "super-secret-123"
+audit:
+  url: http://localhost:8081
+
+data_source_clusters:
+  exemplar-001:
+    writer:
+      type: MYSQL
+      username: root
+      password: ""
+      database: exemplar_testing
+      migrations_resource: "classpath:/migrations"
+
 mysql_data_source:
   type: MYSQL
-  database: exemplar
+  database: exemplar_testing
   username: root
   password: ""
   migrations_resource: classpath:/migrations

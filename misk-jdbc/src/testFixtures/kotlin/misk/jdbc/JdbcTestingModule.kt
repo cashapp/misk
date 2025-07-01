@@ -76,3 +76,9 @@ class JdbcTestingModule(
     multibind<DataSourceDecorator>(qualifier).to(mySqlScaleSafetyChecks)
   }
 }
+
+inline fun <reified T : Annotation> JdbcTestingModule(
+  startUpStatements: List<String> = listOf(),
+  shutDownStatements: List<String> = listOf(),
+  scaleSafetyChecks: Boolean = false
+) = JdbcTestingModule(T::class, startUpStatements, shutDownStatements, scaleSafetyChecks)

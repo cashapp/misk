@@ -23,6 +23,7 @@ dependencies {
   implementation(libs.okio)
   implementation(project(":wisp:wisp-config"))
   implementation(project(":wisp:wisp-deployment"))
+  implementation(project(":wisp:wisp-lease"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-rate-limiting"))
   implementation(project(":wisp:wisp-token"))
@@ -36,7 +37,9 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-cron"))
   implementation(project(":misk-inject"))
+  implementation(project(":misk-jdbc"))
   implementation(project(":misk-hotwire"))
+  implementation(project(":misk-lease-mysql"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-service"))
   implementation(project(":misk-tailwind"))
@@ -85,6 +88,4 @@ wire {
     rpcRole = "client"
     javaInterop = true
   }
-
-
 }

@@ -18,7 +18,6 @@ import java.time.ZoneId
 
 class ExemplarCronModule : KAbstractModule() {
   override fun configure() {
-    install(FakeLeaseModule())
     install(ServiceModule<DependentService>().enhancedBy<ReadyService>())
     install(FakeClusterWeightModule())
     install(
