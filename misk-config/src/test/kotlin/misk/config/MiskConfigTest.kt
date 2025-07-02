@@ -165,9 +165,17 @@ class MiskConfigTest {
     assertEquals(42, actual.secret_long.value)
     assertEquals(42f, actual.secret_float.value)
 
+    // URL defaults with colons - these test the fix for the original issue
+    // Since the environment variables don't exist, these should use the default values
+    assertEquals("http://localhost:8888", actual.http_url_default)
+    assertEquals("jdbc:postgresql://localhost:5432/database", actual.jdbc_url_default)
+    assertEquals("https://example.com:443/api/v1", actual.https_url_with_port_default)
+
     // Non-secret values should not be redacted
     assertThat(actual.toString()).contains("abc123")
     assertThat(actual.toString()).contains("14")
+    assertThat(actual.toString()).contains("http://localhost:8888")
+    assertThat(actual.toString()).contains("jdbc:postgresql://localhost:5432/database")
 
     // Secret value should be redacted
     assertThat(actual.toString()).doesNotContain("def456")
@@ -182,6 +190,24 @@ class MiskConfigTest {
     assertThat(exception).hasMessageContaining(
       "Resource references for non-Secret fields must be in the form of \${scheme:path} or \${scheme:path:-defaultValue}",
     )
+  }
+
+  @Test
+  fun environmentVariablesWithUrlDefaultsContainingColons() {
+    // This test specifically verifies the fix for the original issue where URLs with colons
+    // in default values would cause IllegalStateException
+    val actual = MiskConfig.load<EnvironmentTestConfig>("environment", TESTING)
+    
+    // These environment variables don't exist, so should use the default values
+    // The key test is that these don't throw exceptions during parsing
+    assertThat(actual.http_url_default).isEqualTo("http://localhost:8888")
+    assertThat(actual.jdbc_url_default).isEqualTo("jdbc:postgresql://localhost:5432/database")
+    assertThat(actual.https_url_with_port_default).isEqualTo("https://example.com:443/api/v1")
+    
+    // Verify the URLs are properly included in toString (not redacted)
+    assertThat(actual.toString()).contains("http://localhost:8888")
+    assertThat(actual.toString()).contains("jdbc:postgresql://localhost:5432/database")
+    assertThat(actual.toString()).contains("https://example.com:443/api/v1")
   }
 
   @Test

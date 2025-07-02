@@ -11,3 +11,7 @@ secret_api_key: "environment:SECRET_API_KEY"
 secret_int: "environment:SECRET_NUMBER"
 secret_long: "environment:SECRET_NUMBER"
 secret_float: "environment:SECRET_NUMBER"
+# URL defaults with colons - these test the fix for the original issue
+http_url_default: "${environment:MODEL_SERVICE_URL:-http://localhost:8888}"
+jdbc_url_default: "${environment:DATABASE_URL:-jdbc:postgresql://localhost:5432/database}"
+https_url_with_port_default: "${environment:API_URL:-https://example.com:443/api/v1}"

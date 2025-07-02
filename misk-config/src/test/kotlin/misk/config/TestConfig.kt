@@ -37,4 +37,8 @@ data class EnvironmentTestConfig(
   val secret_int: Secret<Int>,
   val secret_long: Secret<Long>,
   val secret_float: Secret<Float>,
+  // URL defaults with colons - these test the fix for the original issue
+  val http_url_default: String,
+  val jdbc_url_default: String,
+  val https_url_with_port_default: String,
 ) : Config

@@ -1,4 +1,4 @@
-string_value: "${environment:STRING_VALUE::}"
+string_value: "${environment::EMPTY_PATH}"
 ignored_classpath_value: "classpath:/path/to/not/load"
 int_value: "${environment:NUMBER_VALUE"
 long_value: "${environment:NUMBER_VALUE}"
