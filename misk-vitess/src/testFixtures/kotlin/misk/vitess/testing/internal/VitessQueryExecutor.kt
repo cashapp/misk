@@ -10,13 +10,17 @@ import java.sql.Statement
 /**
  * VitessQueryExecutor exposes methods for querying against the VTGate on its exposed port.
  */
-internal class VitessQueryExecutor(private val vitessClusterConfig: VitessClusterConfig) {
+internal class VitessQueryExecutor(
+  val hostname: String,
+  val vtgatePort: Int,
+  val vtgateUser: String,
+  val vtgateUserPassword: String) {
   init {
     try {
       getVtgateConnection()
     } catch (e: Exception) {
       throw VitessQueryExecutorException(
-        "Failed to get vtgate connection on port ${vitessClusterConfig.vtgatePort.hostPort}: ${e.message}",
+        "Failed to get vtgate connection on port ${vtgatePort}: ${e.message}",
         e,
       )
     }
@@ -150,8 +154,8 @@ internal class VitessQueryExecutor(private val vitessClusterConfig: VitessCluste
 
   private fun getVtgateConnection(): Connection {
     val url =
-      "jdbc:mysql://${vitessClusterConfig.hostname}:${vitessClusterConfig.vtgatePort.hostPort}/@primary?allowMultiQueries=true"
-    return DriverManager.getConnection(url, vitessClusterConfig.vtgateUser, vitessClusterConfig.vtgateUserPassword)
+      "jdbc:mysql://${hostname}:${vtgatePort}/@primary?allowMultiQueries=true"
+    return DriverManager.getConnection(url, vtgateUser, vtgateUserPassword)
   }
 }
 

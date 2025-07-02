@@ -5,22 +5,9 @@ import com.github.dockerjava.api.exception.DockerClientException
 import com.github.dockerjava.api.model.Container
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Image
-import com.github.dockerjava.core.DefaultDockerClientConfig
-import com.github.dockerjava.core.DockerClientBuilder
-import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.io.path.createDirectories
-import kotlin.io.path.pathString
-import misk.docker.withMiskDefaults
 import misk.vitess.testing.ApplySchemaResult
 import misk.vitess.testing.DdlUpdate
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_GRPC
 import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
 import misk.vitess.testing.DefaultSettings.VTCTLD_CLIENT_IMAGE
 import misk.vitess.testing.VSchemaUpdate
@@ -29,44 +16,48 @@ import misk.vitess.testing.VitessTestDbStartupException
 import wisp.resources.ClasspathResourceLoaderBackend
 import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.ResourceLoader
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.io.path.createDirectories
+import kotlin.io.path.pathString
 
 /**
- * VitessSchemaManager is responsible for applying the schema defined in the schema directory. It validates the schema
- * directory contents, and applies the vschema and .sql DDL's for each keyspace.
+ * VitessSchemaApplier is responsible for applying the vschema and .sql DDL's for each keyspace in the schema directory.
  */
-internal class VitessSchemaManager(
+internal class VitessSchemaApplier(
   private val containerName: String,
+  private val currentSchemaDirPath: Path,
+  private val dbaUser: String,
+  private val dbaUserPassword: String,
   private val debugStartup: Boolean,
-  private val lintSchema: Boolean,
-  private val schemaDir: String,
+  private val dockerClient: DockerClient,
   private val enableDeclarativeSchemaChanges: Boolean,
-  private val vitessClusterConfig: VitessClusterConfig,
+  private val keyspaces: List<VitessKeyspace>,
+  private val hostname: String,
+  private val mysqlPort: Int,
+  private val schemaDir: String,
+  private val vtgatePort: Int,
+  private val vtgateUser: String,
+  private val vtgateUserPassword: String
 ) {
   private companion object {
     const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 10000L
     const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
   }
 
-  private val dockerClient: DockerClient = setupDockerClient()
-  private val skeema = VitessSkeema(vitessClusterConfig)
-  private val currentSchemaDirPath: Path
-  val keyspaces: List<VitessKeyspace>
+  private val skeema = VitessSkeema(
+    hostname = hostname,
+    mysqlPort = mysqlPort,
+    dbaUser = dbaUser,
+    dbaUserPassword = dbaUserPassword)
 
-  init {
-    val supportedSchemaPrefixes = listOf(ClasspathResourceLoaderBackend.SCHEME, FilesystemLoaderBackend.SCHEME)
-    val usesSupportedPrefix = supportedSchemaPrefixes.any { schemaDir.startsWith(it) }
-    if (!usesSupportedPrefix) {
-      throw VitessTestDbStartupException(
-        "Schema directory `$schemaDir` must start with one of the supported prefixes: $supportedSchemaPrefixes"
-      )
-    }
-
-    val tempSchemaDir = createTempSchemaDirectory()
-
-    currentSchemaDirPath = tempSchemaDir
-    keyspaces = VitessSchemaParser(lintSchema, schemaDir, tempSchemaDir).validateAndParse()
-  }
 
   /**
    * Apply the schema defined in the schema directory, which will reinitialize the keyspace vschema's and apply all
@@ -79,11 +70,16 @@ internal class VitessSchemaManager(
     // to handle starting a new container.
     var vitessQueryExecutor: VitessQueryExecutor
     try {
-      vitessQueryExecutor = VitessQueryExecutor(vitessClusterConfig)
+      vitessQueryExecutor = VitessQueryExecutor(
+        hostname = hostname,
+        vtgatePort = vtgatePort,
+        vtgateUser = vtgateUser,
+        vtgateUserPassword = vtgateUserPassword)
+
     } catch (e: VitessQueryExecutorException) {
       return ApplySchemaResult(
         newContainerNeeded = true,
-        newContainerNeededReason = "Failed to connect to vtgate running on port ${vitessClusterConfig.vtgatePort.hostPort}.",
+        newContainerNeededReason = "Failed to connect to vtgate running on port ${vtgatePort}.",
         schemaChangesProcessed = false,
         vschemaUpdates = emptyList(),
         ddlUpdates = emptyList(),
@@ -279,7 +275,7 @@ internal class VitessSchemaManager(
         keyspace.name,
         "--strict",
         "--action_timeout=$VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS",
-        "--server=$containerName:${vitessClusterConfig.grpcPort.containerPort}",
+        "--server=$containerName:${CONTAINER_PORT_GRPC}",
         "--vschema=${keyspace.vschema}",
       )
 
@@ -346,12 +342,6 @@ internal class VitessSchemaManager(
     }
   }
 
-  private fun setupDockerClient(): DockerClient {
-    val dockerClientConfig = DefaultDockerClientConfig.createDefaultConfigBuilder().withMiskDefaults().build()
-    return DockerClientBuilder.getInstance(dockerClientConfig)
-      .withDockerHttpClient(ApacheDockerHttpClient.Builder().dockerHost(dockerClientConfig.dockerHost).build())
-      .build()
-  }
 
   private fun createTempSchemaDirectory(): Path {
     val tempDir = Files.createTempDirectory("schema-")

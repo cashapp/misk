@@ -1,5 +1,6 @@
 package misk.vitess.testing
 
+import wisp.containers.ContainerUtil
 import java.time.Duration
 
 object DefaultSettings {
@@ -29,6 +30,8 @@ object DefaultSettings {
   const val VITESS_IMAGE = "vitess/vttestserver:v21.0.4-mysql80"
   const val VITESS_VERSION = 21
   const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v21.0.4"
+  const val VTGATE_USER = "root"
+  const val VTGATE_USER_PASSWORD = ""
 }
 
 enum class TransactionIsolationLevel(val value: String) {
@@ -37,3 +40,8 @@ enum class TransactionIsolationLevel(val value: String) {
   REPEATABLE_READ("REPEATABLE-READ"),
   SERIALIZABLE("SERIALIZABLE"),
 }
+
+val hostname: String
+  get() {
+    return System.getenv("VITESS_HOST") ?: ContainerUtil.dockerTargetOrLocalHost()
+  }

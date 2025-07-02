@@ -7,7 +7,12 @@ import java.nio.file.Files
  * This class is a wrapper around the Skeema binary (https://github.com/skeema/skeema). Some logic is forked from
  * https://github.com/cashapp/misk/blob/master/misk-jdbc/src/main/kotlin/misk/jdbc/SkeemaWrapper.kt.
  */
-internal class VitessSkeema(private val vitessClusterConfig: VitessClusterConfig) {
+internal class VitessSkeema(
+  private val hostname: String,
+  private val mysqlPort: Int,
+  private val dbaUser: String,
+  private val dbaUserPassword: String
+) {
   companion object {
     val SKEEMA_BINARY = "skeema"
   }
@@ -18,7 +23,7 @@ internal class VitessSkeema(private val vitessClusterConfig: VitessClusterConfig
    * other features we need such as linting.
    */
   fun diff(keyspace: VitessKeyspace): SkeemaDiff {
-    val skeemaDirectory = prepareSkeemaDirectory(keyspace, vitessClusterConfig)
+    val skeemaDirectory = prepareSkeemaDirectory(keyspace)
     try {
       val processBuilder = ProcessBuilder(listOf(SKEEMA_BINARY, "diff", "--allow-unsafe"))
       processBuilder.redirectErrorStream(true) // Combine stderr and stdout
@@ -42,7 +47,7 @@ internal class VitessSkeema(private val vitessClusterConfig: VitessClusterConfig
     }
   }
 
-  private fun prepareSkeemaDirectory(keyspace: VitessKeyspace, vitessClusterConfig: VitessClusterConfig): File {
+  private fun prepareSkeemaDirectory(keyspace: VitessKeyspace): File {
     val tempDir = Files.createTempDirectory("skeema-").toFile()
     keyspace.ddlCommands.forEach { (filename, ddl) ->
       val file = File(tempDir, filename)
@@ -64,10 +69,10 @@ internal class VitessSkeema(private val vitessClusterConfig: VitessClusterConfig
     val skeemaFile = File(tempDir, ".skeema")
     skeemaFile.writeText(
       """
-          host=${vitessClusterConfig.hostname}
-          port=${vitessClusterConfig.mysqlPort.hostPort}
-          user=${vitessClusterConfig.dbaUser}
-          password=${vitessClusterConfig.dbaUserPassword}
+          host=${hostname}
+          port=${mysqlPort}
+          user=${dbaUser}
+          password=${dbaUserPassword}
           schema=$databaseName
         """
         .trimIndent()

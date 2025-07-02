@@ -16,7 +16,7 @@ class NonRunningValidationTest {
     val nonRunningDb = VitessTestDb(containerName = "non_running_vitess_test_db", port = 50003)
     val exception = assertThrows<VitessTestDbTruncateException>(nonRunningDb::truncate)
     assertEquals("Failed to truncate tables", exception.message)
-    assertTrue(exception.cause!!.message!!.contains("Failed to get vtgate connection on port 50003"))
+    assertEquals("Container `non_running_vitess_test_db` not found, unable to get host port mappings.", exception.cause!!.message!!)
   }
 
   @Test

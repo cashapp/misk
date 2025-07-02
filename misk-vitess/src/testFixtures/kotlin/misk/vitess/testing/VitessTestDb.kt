@@ -1,11 +1,7 @@
 package misk.vitess.testing
 
-import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_BASE
-import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_VTGATE
-import misk.vitess.testing.internal.VitessClusterConfig
 import misk.vitess.testing.internal.VitessDockerContainer
 import misk.vitess.testing.internal.VitessQueryExecutor
-import misk.vitess.testing.internal.VitessSchemaManager
 import java.sql.Connection
 import java.time.Duration
 import kotlin.time.measureTime
@@ -67,17 +63,6 @@ class VitessTestDb(
   private var vitessImage: String = DefaultSettings.VITESS_IMAGE,
   private var vitessVersion: Int = DefaultSettings.VITESS_VERSION,
 ) {
-  private val vitessClusterConfig = VitessClusterConfig.create(userPort = port)
-  private val vitessSchemaManager by lazy {
-    VitessSchemaManager(
-      containerName = containerName,
-      debugStartup = debugStartup,
-      lintSchema = lintSchema,
-      schemaDir = schemaDir,
-      enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges,
-      vitessClusterConfig = vitessClusterConfig,
-    )
-  }
   private var isInitialized = false
 
   // Builder added for Java interoperability. This simulates how Kotlin constructors work, which use named parameters
@@ -189,10 +174,6 @@ class VitessTestDb(
       } else {
         println("🐳 Reusing existing VitessTestDb Docker container `$containerName`.")
       }
-
-      if (autoApplySchemaChanges) {
-        vitessSchemaManager.applySchema()
-      }
     }
 
     isInitialized = true
@@ -228,16 +209,34 @@ class VitessTestDb(
    * @return [ApplySchemaResult] which contains information about schema changes that may have been processed, or a
    *   reason for being unable to process schema changes.
    */
-  fun applySchema(): ApplySchemaResult = vitessSchemaManager.applySchema()
+  fun applySchema(): ApplySchemaResult = getVitessDockerContainer().applySchema()
 
   /**
    * Truncate all tables in all keyspaces except for sequence tables. The implementation leverages batched DELETE FROM
    * statements, which is significantly faster than using TRUNCATE (over 20x faster for a large amount of tables).
    */
   fun truncate() {
-    var vitessQueryExecutor: VitessQueryExecutor
     try {
-      vitessQueryExecutor = VitessQueryExecutor(vitessClusterConfig)
+      val vitessDockerContainer = getVitessDockerContainer()
+      vitessDockerContainer.queryExecutor.truncate()
+    } catch (e: Exception) {
+      throw VitessTestDbTruncateException("Failed to truncate tables", e)
+    }
+  }
+
+  /**
+   * Truncate all tables in all keyspaces except for sequence tables using an external vtgate port provided by the user.
+   * This should only be used in scenarios where the `containerName` cannot be relied on to retrieve the
+   * running Vitess Docker container, as default vtgate user credentials will be assumed.
+   */
+  fun truncate(userPort: Int) {
+    try {
+      val vitessQueryExecutor = VitessQueryExecutor(
+        hostname,
+        vtgatePort = userPort,
+        vtgateUser = DefaultSettings.VTGATE_USER,
+        vtgateUserPassword = DefaultSettings.VTGATE_USER_PASSWORD
+      )
       vitessQueryExecutor.truncate()
     } catch (e: Exception) {
       throw VitessTestDbTruncateException("Failed to truncate tables", e)
@@ -249,25 +248,13 @@ class VitessTestDb(
    * connection pool.
    */
   fun truncate(connection: Connection) {
-    var vitessQueryExecutor: VitessQueryExecutor
     try {
-      vitessQueryExecutor = VitessQueryExecutor(vitessClusterConfig)
-      vitessQueryExecutor.truncate(connection)
+      val vitessDockerContainer = getVitessDockerContainer()
+      vitessDockerContainer.queryExecutor.truncate(connection)
     } catch (e: Exception) {
       throw VitessTestDbTruncateException("Failed to truncate tables", e)
     }
   }
-
-  /**
-   * Get the exposed Docker port of the vtgate, which is used to connect to the Vitess database.
-   *
-   * @return The exposed Docker port of the vtgate.
-   */
-  val vtgatePort: Int
-    get() {
-      val container = getVitessDockerContainer()
-      return container.getMappedHostPort(CONTAINER_PORT_VTGATE)
-    }
 
   /**
    * Get the port used to debug query plans at {hostname}:/{query_debug_port}/debug/query_plans
@@ -277,9 +264,19 @@ class VitessTestDb(
   val queryPlanDebugPort: Int
     get() {
       val container = getVitessDockerContainer()
-      return container.getMappedHostPort(CONTAINER_PORT_BASE)
+      return container.queryPlanDebugPort
     }
 
+  /**
+   * Get the exposed Docker port of the vtgate, which is used to connect to the Vitess database.
+   *
+   * @return The exposed Docker port of the vtgate.
+   */
+  val vtgatePort: Int
+    get() {
+      val container = getVitessDockerContainer()
+      return container.vtgatePort
+    }
 
   /**
    * Get the list of keyspaces that are present on the vtgate.
@@ -287,7 +284,8 @@ class VitessTestDb(
    * @return A list of keyspace names as strings.
    */
   fun getKeyspaces(): List<String> {
-    return VitessQueryExecutor(vitessClusterConfig).getKeyspaces()
+    val vitessDockerContainer = getVitessDockerContainer()
+    return vitessDockerContainer.queryExecutor.getKeyspaces()
   }
 
   /**
@@ -298,7 +296,8 @@ class VitessTestDb(
    * @return A list of [VitessTable] objects representing the tables in the specified keyspace.
    */
   fun getTables(keyspace: String): List<VitessTable> {
-    return VitessQueryExecutor(vitessClusterConfig).getTables(keyspace)
+    val vitessDockerContainer = getVitessDockerContainer()
+    return vitessDockerContainer.queryExecutor.getTables(keyspace)
   }
 
   /**
@@ -311,7 +310,8 @@ class VitessTestDb(
    *   key-value pair corresponds to a column name and its value.
    */
   fun executeQuery(query: String, target: String = "@primary"): List<Map<String, Any>> {
-    return VitessQueryExecutor(vitessClusterConfig).executeQuery(query, target)
+    val vitessDockerContainer = getVitessDockerContainer()
+    return vitessDockerContainer.queryExecutor.executeQuery(query, target)
   }
 
   /**
@@ -323,7 +323,8 @@ class VitessTestDb(
    * @return `true` if the execution was successful, `false` otherwise.
    */
   fun executeUpdate(query: String, target: String = "@primary"): Int {
-    return VitessQueryExecutor(vitessClusterConfig).executeUpdate(query, target)
+    val vitessDockerContainer = getVitessDockerContainer()
+    return vitessDockerContainer.queryExecutor.executeUpdate(query, target)
   }
 
   /**
@@ -335,27 +336,30 @@ class VitessTestDb(
    * @return `true` if the transaction was successful, `false` otherwise.
    */
   fun executeTransaction(query: String, target: String = "@primary"): Boolean {
-    return VitessQueryExecutor(vitessClusterConfig).executeTransaction(query, target)
+    val vitessDockerContainer = getVitessDockerContainer()
+    return vitessDockerContainer.queryExecutor.executeTransaction(query, target)
   }
 
   private fun getVitessDockerContainer(): VitessDockerContainer {
-    val container =
-      VitessDockerContainer(
-        containerName,
-        debugStartup,
-        enableInMemoryStorage,
-        enableScatters,
-        inMemoryStorageSize,
-        keepAlive,
-        mysqlVersion,
-        sqlMode,
-        transactionIsolationLevel,
-        transactionTimeoutSeconds,
-        vitessClusterConfig,
-        vitessImage,
-        vitessSchemaManager,
-        vitessVersion,
-      )
+    val container = VitessDockerContainer(
+      autoApplySchemaChanges = autoApplySchemaChanges,
+      containerName = containerName,
+      debugStartup = debugStartup,
+      enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges,
+      enableInMemoryStorage = enableInMemoryStorage,
+      enableScatters = enableScatters,
+      inMemoryStorageSize = inMemoryStorageSize,
+      keepAlive = keepAlive,
+      lintSchema = lintSchema,
+      mysqlVersion = mysqlVersion,
+      schemaDir = schemaDir,
+      sqlMode = sqlMode,
+      transactionIsolationLevel = transactionIsolationLevel,
+      transactionTimeoutSeconds = transactionTimeoutSeconds,
+      userPort = port,
+      vitessImage = vitessImage,
+      vitessVersion = vitessVersion)
+
     return container
   }
 }
