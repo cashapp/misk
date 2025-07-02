@@ -430,13 +430,37 @@ object MiskConfig {
         // Do not try to load if it is a reference without boundary markers since the caller does not want it inlined & loaded.
         maybeReferenceWithMarkers.startsWith("\${$it")
       }?.let { schema ->
-        val parts = maybeReferenceWithMarkers.removePrefix("\${").removeSuffix("}").split(":")
-        require(maybeReferenceWithMarkers.startsWith("\${$schema") && maybeReferenceWithMarkers.endsWith("}") && (parts.size == 2 || parts.size == 3)) {
+        val content = maybeReferenceWithMarkers.removePrefix("\${").removeSuffix("}")
+        
+        // Parse the content more carefully to handle default values that contain colons (like URLs)
+        // Expected formats: "scheme:path" or "scheme:path:-defaultValue"
+        val firstColonIndex = content.indexOf(':')
+        require(firstColonIndex > 0) {
           "Resource references for non-Secret fields must be in the form of \${scheme:path} or \${scheme:path:-defaultValue}"
         }
-        val maybeReference = parts.take(2).joinToString(":")
-        // Parse default if provided within the YAML markers like "${environment:MY_ENV_VAR:-8080}"
-        val default = parts.drop(2).lastOrNull()?.removePrefix("-")
+        
+        val scheme = content.substring(0, firstColonIndex)
+        val remainder = content.substring(firstColonIndex + 1)
+        
+        // Check if there's a default value (indicated by ":-")
+        val defaultSeparator = ":-"
+        val defaultIndex = remainder.indexOf(defaultSeparator)
+        
+        val (path, default) = if (defaultIndex >= 0) {
+          // Has default value: "path:-defaultValue"
+          val pathPart = remainder.substring(0, defaultIndex)
+          val defaultPart = remainder.substring(defaultIndex + defaultSeparator.length)
+          Pair(pathPart, defaultPart)
+        } else {
+          // No default value: just "path"
+          Pair(remainder, null)
+        }
+        
+        require(scheme.isNotEmpty() && path.isNotEmpty() && !path.startsWith(":")) {
+          "Resource references for non-Secret fields must be in the form of \${scheme:path} or \${scheme:path:-defaultValue}"
+        }
+        
+        val maybeReference = "$scheme:$path"
 
         resourceLoader.loadResource(maybeReference, type, mapper, default) as? T?
       } ?: valueAsType as? T? // Not a resource reference, return the type as is.
