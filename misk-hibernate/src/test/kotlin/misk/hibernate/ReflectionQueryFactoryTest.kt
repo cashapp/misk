@@ -11,7 +11,7 @@ import org.hibernate.LazyInitializationException
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.time.Duration.ofSeconds
 import java.time.LocalDate
 import jakarta.inject.Inject

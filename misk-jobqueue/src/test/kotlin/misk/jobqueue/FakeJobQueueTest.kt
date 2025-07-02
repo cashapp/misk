@@ -11,7 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
 import wisp.logging.getLogger
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap

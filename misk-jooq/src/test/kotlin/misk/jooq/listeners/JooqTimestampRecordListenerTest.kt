@@ -11,7 +11,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 

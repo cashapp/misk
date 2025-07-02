@@ -7,7 +7,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.junit.jupiter.api.Test
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.time.Duration
 import jakarta.inject.Inject
 import kotlin.random.Random

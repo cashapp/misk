@@ -41,10 +41,9 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":misk"))
   testImplementation(project(":misk-redis"))
-  testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-redis")))
 
   testImplementation(project(":misk-service"))
