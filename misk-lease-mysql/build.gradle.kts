@@ -2,10 +2,10 @@ import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.mavenPublishBase)
-  alias(libs.plugins.sqldelight)
-  `java-test-fixtures`
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish.base")
+  id("app.cash.sqldelight")
+  id("java-test-fixtures")
 }
 
 // Override JVM target for detekt compatibility
