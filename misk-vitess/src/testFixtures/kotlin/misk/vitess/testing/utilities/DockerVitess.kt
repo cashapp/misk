@@ -19,7 +19,7 @@ class DockerVitess(
   /**
    * The name of the Vitess container. This is used to identify the container in Docker.
    */
-  containerName: String = "vitess_test_db_ext",
+  containerName: String = DefaultSettings.CONTAINER_NAME,
   /**
    * The port to connect to the database, which represents the vtgate.
    */

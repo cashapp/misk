@@ -20,36 +20,46 @@ import com.github.dockerjava.api.model.Volume
 import com.github.dockerjava.core.DefaultDockerClientConfig
 import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
-import java.net.SocketException
-import java.time.Duration
-import java.util.concurrent.TimeUnit
-import kotlin.io.path.pathString
 import misk.docker.withMiskDefaults
+import misk.vitess.testing.ApplySchemaResult
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_BASE
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_MYSQL
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_VTGATE
 import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
 import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_TYPE
+import misk.vitess.testing.DefaultSettings.VTGATE_USER
+import misk.vitess.testing.DefaultSettings.VTGATE_USER_PASSWORD
 import misk.vitess.testing.RemoveContainerResult
 import misk.vitess.testing.StartContainerResult
 import misk.vitess.testing.TransactionIsolationLevel
 import misk.vitess.testing.VitessTestDbException
 import misk.vitess.testing.VitessTestDbStartupException
+import misk.vitess.testing.hostname
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.SocketException
+import java.time.Duration
+import java.util.concurrent.TimeUnit
+import kotlin.io.path.pathString
 
 /** VitessDockerContainer validates user arguments and starts a Docker container with a vttestserver image. */
 internal class VitessDockerContainer(
+  private val autoApplySchemaChanges: Boolean,
   private val containerName: String,
   private val debugStartup: Boolean,
+  private val enableDeclarativeSchemaChanges: Boolean,
   private val enableInMemoryStorage: Boolean,
   private val enableScatters: Boolean,
   private val inMemoryStorageSize: String,
   private val keepAlive: Boolean,
+  private val lintSchema: Boolean,
   private val mysqlVersion: String,
+  private val schemaDir: String,
   private val sqlMode: String,
   private val transactionIsolationLevel: TransactionIsolationLevel,
   private val transactionTimeoutSeconds: Duration,
-  private val vitessClusterConfig: VitessClusterConfig,
+  private val userPort: Int,
   private val vitessImage: String,
-  private val vitessSchemaManager: VitessSchemaManager,
   private val vitessVersion: Int,
 ) {
   private companion object {
@@ -72,6 +82,8 @@ internal class VitessDockerContainer(
     const val READONLY_COUNT =
       -1 // Set to -1 to actually set the read-only count to 0. This overrides a defaults issue in the vtcombo codebase.
 
+    const val DBA_USER = "vt_dba_tcp_full"
+    const val DBA_USER_PASSWORD = ""
     const val DOCKER_HEALTH_CHECK_HOST = "localhost"
     const val DOCKER_START_RETRIES = 6
     const val DOCKER_START_RETRY_DELAY_MS = 5000L
@@ -93,9 +105,12 @@ internal class VitessDockerContainer(
   fun start(): StartContainerResult {
     validateVitessVersionArgs()
     validateInMemoryStorageSize()
+
+    val vitessSchemaPreparer = VitessSchemaPreparer(lintSchema, schemaDir)
+
     startDockerIfNotRunning()
 
-    val shouldCreateContainerResult = shouldCreateContainer(containerName)
+    val shouldCreateContainerResult = shouldCreateContainer(containerName, vitessSchemaPreparer.keyspaces)
 
     if (!shouldCreateContainerResult.newContainerNeeded) {
       return StartVitessContainerResult(
@@ -109,12 +124,18 @@ internal class VitessDockerContainer(
       printDebug("Reason for new container: ${shouldCreateContainerResult.newContainerReason}")
     }
 
-    stopExistingContainers(containerName)
+    val vitessPortConfig = VitessPortConfig.create(userPort)
 
-    val containerId = createContainer()
+    stopExistingContainers(containerName, vitessPortConfig)
+
+    val containerId = createContainer(vitessPortConfig, vitessSchemaPreparer.keyspaces)
     startContainer(containerId)
     waitForContainerHealth(containerId)
     createDbaUserForSideCarDb(containerId)
+
+    if (autoApplySchemaChanges) {
+      getVitessSchemaApplier(vitessSchemaPreparer).applySchema()
+    }
 
     return StartVitessContainerResult(
       newContainerCreated = true,
@@ -147,14 +168,47 @@ internal class VitessDockerContainer(
     return RemoveVitessContainerResult(containerId = null, containerRemoved = false)
   }
 
-  fun getMappedHostPort(containerPort: Int): Int {
+  fun applySchema(): ApplySchemaResult {
+    val vitessSchemaPreparer = VitessSchemaPreparer(lintSchema, schemaDir)
+    return getVitessSchemaApplier(vitessSchemaPreparer).applySchema()
+  }
+
+  val queryExecutor: VitessQueryExecutor
+    get() {
+      return VitessQueryExecutor(
+        hostname = hostname,
+        vtgatePort = vtgatePort,
+        vtgateUser = VTGATE_USER,
+        vtgateUserPassword = VTGATE_USER_PASSWORD
+      )
+    }
+
+  val queryPlanDebugPort: Int
+    get() {
+      return getMappedHostPort(CONTAINER_PORT_BASE)
+    }
+
+  val vtgatePort: Int
+    get() {
+      return getMappedHostPort(CONTAINER_PORT_VTGATE)
+    }
+
+  private val mysqlPort: Int
+    get() {
+      return getMappedHostPort(CONTAINER_PORT_MYSQL)
+    }
+
+  private val portMappings by lazy {
     val existingContainer = findExistingContainer(containerName)
-      ?: throw VitessTestDbException("Container `$containerName` not found, unable to get host port mapping for container port `$containerPort`.")
+      ?: throw VitessTestDbException("Container `$containerName` not found, unable to get host port mappings.")
 
     val inspect = dockerClient.inspectContainerCmd(existingContainer.id).exec()
-    val portBindings = inspect.networkSettings.ports
+    inspect.networkSettings.ports.bindings
+  }
+
+  private fun getMappedHostPort(containerPort: Int): Int {
     val exposedPort = ExposedPort.tcp(containerPort)
-    val bindings: Array<Ports.Binding>? = portBindings.bindings[exposedPort]
+    val bindings: Array<Ports.Binding>? = portMappings[exposedPort]
     val hostPort = bindings?.firstOrNull()?.hostPortSpec
       ?: throw VitessTestDbException("No host port mapped for container port `$containerPort` for container `$containerName`.")
     return hostPort.toInt()
@@ -190,7 +244,7 @@ internal class VitessDockerContainer(
    * This method checks if the container should be created based on the user arguments and the schema directory
    * contents.
    */
-  private fun shouldCreateContainer(containerName: String): ShouldCreateVitessContainerResult {
+  private fun shouldCreateContainer(containerName: String, keyspaces: List<VitessKeyspace>): ShouldCreateVitessContainerResult {
     if (!keepAlive) {
       return ShouldCreateVitessContainerResult(newContainerNeeded = true, "the property `keepAlive` is `false`.")
     }
@@ -237,9 +291,9 @@ internal class VitessDockerContainer(
         ENABLE_IN_MEMORY_STORAGE_ENV to ("$enableInMemoryStorage" to "enableInMemoryStorage"),
         ENABLE_SCATTERS_ENV to ("$enableScatters" to "enableScatters"),
         IN_MEMORY_STORAGE_SIZE_ENV to (inMemoryStorageSize to "inMemoryStorageSize"),
-        KEYSPACES_ENV to (getKeyspacesString() to "keyspaces"),
+        KEYSPACES_ENV to (getKeyspacesArgString(keyspaces) to "keyspaces"),
         MYSQL_VERSION_ENV to (mysqlVersion to "mysqlVersion"),
-        PORT_ENV to ("${vitessClusterConfig.vtgatePort.hostPort}" to "port"),
+        PORT_ENV to ("${userPort}" to "port"),
         SQL_MODE_ENV to (sqlMode to "sqlMode"),
         TRANSACTION_ISOLATION_LEVEL_ENV to (transactionIsolationLevel.value to "transactionIsolationLevel"),
         TRANSACTION_TIMEOUT_SECONDS_ENV to ("${transactionTimeoutSeconds.seconds}" to "transactionTimeoutSeconds"),
@@ -263,13 +317,13 @@ internal class VitessDockerContainer(
     return ShouldCreateVitessContainerResult(newContainerNeeded = false, existingContainerId = containerInfo.id)
   }
 
-  private fun stopExistingContainers(containerName: String) {
+  private fun stopExistingContainers(containerName: String, vitessPortConfig: VitessPortConfig) {
     val existingContainer = findExistingContainer(containerName)
 
     existingContainer?.let { stopContainer(it) }
 
     // Also remove any containers that are using the same ports as the new container.
-    vitessClusterConfig.allHostPorts().forEach { port ->
+    vitessPortConfig.allHostPorts().forEach { port ->
       val containers = dockerClient.listContainersCmd().withShowAll(true).withFilter("publish", listOf("$port")).exec()
       containers.forEach {
         container -> stopContainer(container)
@@ -282,7 +336,7 @@ internal class VitessDockerContainer(
     }
 
     // Ports can still be occupied by other processes.
-    val occupiedPorts = vitessClusterConfig.allHostPorts().filter { isPortInUse(it) }
+    val occupiedPorts = vitessPortConfig.allHostPorts().filter { isPortInUse(it) }
     if (occupiedPorts.isNotEmpty()) {
       println("Ports `[${occupiedPorts.joinToString(", ")}]` are still in use.")
       throw VitessTestDbStartupException("Ports `[${occupiedPorts.joinToString(", ")}]` are in use by another process.")
@@ -306,13 +360,13 @@ internal class VitessDockerContainer(
     }
   }
 
-  private fun removeExistingContainers(containerName: String) {
+  private fun removeExistingContainers(containerName: String, vitessPortConfig: VitessPortConfig) {
     val existingContainer = findExistingContainer(containerName)
 
     existingContainer?.let { removeContainer(it) }
 
     // Also remove any containers that are using the same ports as the new container.
-    vitessClusterConfig.allHostPorts().forEach { port ->
+    vitessPortConfig.allHostPorts().forEach { port ->
       val containers = dockerClient.listContainersCmd().withShowAll(true).withFilter("publish", listOf("$port")).exec()
       containers.forEach { container -> removeContainer(container) }
     }
@@ -438,7 +492,7 @@ internal class VitessDockerContainer(
   }
 
   @Suppress("ALL")
-  private fun createContainer(): String {
+  private fun createContainer(vitessPortConfig: VitessPortConfig, keyspaces: List<VitessKeyspace>): String {
     val images: List<Image> = dockerClient.listImagesCmd().withReferenceFilter(vitessImage).exec()
     if (images.isEmpty()) {
       println("Vitess image `$vitessImage` does not exist, proceeding to pull.")
@@ -448,7 +502,7 @@ internal class VitessDockerContainer(
     val networkId = getOrCreateVitessNetwork()
     printDebug("Using Docker network `$networkId` for container `$containerName`.")
 
-    val portBindings = vitessClusterConfig.allPortMappings().map { portMapping -> PortBinding.parse("${portMapping.hostPort}:${portMapping.containerPort}") }
+    val portBindings = vitessPortConfig.allPortMappings().map { portMapping -> PortBinding.parse("${portMapping.hostPort}:${portMapping.containerPort}") }
     val optionsFileDest = "$TEST_DB_DIR/my.cnf"
     
     val hostConfig = HostConfig().apply {
@@ -481,7 +535,7 @@ internal class VitessDockerContainer(
         .withTest(
           listOf(
             "CMD-SHELL",
-            "mysql -h $DOCKER_HEALTH_CHECK_HOST --protocol=tcp -P ${vitessClusterConfig.vtgatePort.containerPort} -u=${vitessClusterConfig.vtgateUser} --execute 'USE @primary;'",
+            "mysql -h $DOCKER_HEALTH_CHECK_HOST --protocol=tcp -P ${vitessPortConfig.vtgatePort.containerPort} -u=${VTGATE_USER} --execute 'USE @primary;'",
           )
         )
         .withInterval(Duration.ofSeconds(CONTAINER_HEALTH_CHECK_INTERVAL_SECONDS).toNanos())
@@ -492,13 +546,13 @@ internal class VitessDockerContainer(
         "/vt/bin/vttestserver",
         "--alsologtostderr",
         "--port",
-        "${vitessClusterConfig.basePort.containerPort}",
+        "${vitessPortConfig.basePort.containerPort}",
         "--mysql_bind_host",
         "0.0.0.0",
         "--keyspaces",
-        getKeyspacesString(),
+        getKeyspacesArgString(keyspaces),
         "--num_shards",
-        getNumShardsString(),
+        getNumShardsArgString(keyspaces),
         "--extra_my_cnf",
         optionsFileDest,
         "--replica_count",
@@ -520,12 +574,12 @@ internal class VitessDockerContainer(
     }
 
     try {
-      return runCreateContainerCmd(hostConfig, healthCheck, cmd)
+      return runCreateContainerCmd(hostConfig, healthCheck, cmd, vitessPortConfig, keyspaces)
     } catch (e: ConflictException) {
       // If we are in this state, a container already exists, possibly with older presets. We should
       // forcefully remove this container and try again.
-      removeExistingContainers(containerName)
-      return runCreateContainerCmd(hostConfig, healthCheck, cmd)
+      removeExistingContainers(containerName, vitessPortConfig)
+      return runCreateContainerCmd(hostConfig, healthCheck, cmd, vitessPortConfig, keyspaces)
     }
   }
 
@@ -533,6 +587,8 @@ internal class VitessDockerContainer(
     hostConfig: HostConfig?,
     healthCheck: HealthCheck?,
     cmd: MutableList<String>,
+    vitessPortConfig: VitessPortConfig,
+    keyspaces: List<VitessKeyspace>
   ): String {
     val container: CreateContainerResponse =
       dockerClient
@@ -541,15 +597,15 @@ internal class VitessDockerContainer(
         .withHostConfig(hostConfig)
         .withPlatform("linux/amd64")
         .withHealthcheck(healthCheck)
-        .withExposedPorts(*vitessClusterConfig.allPortMappings().map { ExposedPort(it.containerPort) }.toTypedArray())
+        .withExposedPorts(*vitessPortConfig.allPortMappings().map { ExposedPort(it.containerPort) }.toTypedArray())
         .withEnv(
           "$ENABLE_IN_MEMORY_STORAGE_ENV=$enableInMemoryStorage",
           "$ENABLE_SCATTERS_ENV=$enableScatters",
           "$IN_MEMORY_STORAGE_SIZE_ENV=$inMemoryStorageSize",
           "$KEEP_ALIVE_ENV=$keepAlive",
-          "$KEYSPACES_ENV=${getKeyspacesString()}",
+          "$KEYSPACES_ENV=${getKeyspacesArgString(keyspaces)}",
           "$MYSQL_VERSION_ENV=$mysqlVersion",
-          "$PORT_ENV=${vitessClusterConfig.vtgatePort.hostPort}",
+          "$PORT_ENV=${vitessPortConfig.vtgatePort.hostPort}",
           "$SQL_MODE_ENV=$sqlMode",
           "$TRANSACTION_ISOLATION_LEVEL_ENV=${transactionIsolationLevel.value}",
           "$TRANSACTION_TIMEOUT_SECONDS_ENV=${transactionTimeoutSeconds.seconds}",
@@ -611,10 +667,10 @@ internal class VitessDockerContainer(
     throw VitessTestDbStartupException("Failed to start Docker after $DOCKER_START_RETRIES attempts.")
   }
 
-  private fun getKeyspacesString(): String = vitessSchemaManager.keyspaces.map { it.name }.sorted().joinToString(",")
+  private fun getKeyspacesArgString(keyspaces: List<VitessKeyspace>): String = keyspaces.map { it.name }.sorted().joinToString(",")
 
-  private fun getNumShardsString(): String =
-    vitessSchemaManager.keyspaces.sortedBy { it.name }.joinToString(",") { it.shards.toString() }
+  private fun getNumShardsArgString(keyspaces: List<VitessKeyspace>): String =
+    keyspaces.sortedBy { it.name }.joinToString(",") { it.shards.toString() }
 
   /**
    * Create a user that has TCP access to the sidecar db running on port - 1. Once we're on >= v20, we can leverage the
@@ -652,7 +708,7 @@ internal class VitessDockerContainer(
           "root",
           "mysql",
           "-e",
-          "CREATE USER 'vt_dba_tcp_full'@'%'; GRANT ALL ON *.* TO 'vt_dba_tcp_full'@'%';",
+          "CREATE USER '$DBA_USER'@'%'; GRANT ALL ON *.* TO '$DBA_USER'@'%';",
         )
         .exec()
 
@@ -663,6 +719,25 @@ internal class VitessDockerContainer(
     if (exitCode != 0L) {
       throw VitessTestDbStartupException("Failed to create side car dba user: ${logCallback.getLogs()}")
     }
+  }
+
+  private fun getVitessSchemaApplier(vitessSchemaPreparer: VitessSchemaPreparer): VitessSchemaApplier {
+    return VitessSchemaApplier(
+      containerName = containerName,
+      currentSchemaDirPath = vitessSchemaPreparer.currentSchemaDirPath,
+      dbaUser = DBA_USER,
+      dbaUserPassword = DBA_USER_PASSWORD,
+      debugStartup = debugStartup,
+      dockerClient = dockerClient,
+      enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges,
+      hostname = hostname,
+      keyspaces = vitessSchemaPreparer.keyspaces,
+      mysqlPort = mysqlPort,
+      schemaDir = schemaDir,
+      vtgatePort = vtgatePort,
+      vtgateUser = VTGATE_USER,
+      vtgateUserPassword = VTGATE_USER_PASSWORD,
+    )
   }
 
   /**
@@ -774,7 +849,7 @@ internal class VitessDockerContainer(
   private fun isPortInUse(port: Int): Boolean {
     return try {
       Socket().use { socket ->
-        socket.connect(InetSocketAddress(vitessClusterConfig.hostname, port), PORT_CHECK_TIMEOUT_MS)
+        socket.connect(InetSocketAddress(hostname, port), PORT_CHECK_TIMEOUT_MS)
         true
       }
     } catch (e: SocketException) {

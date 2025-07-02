@@ -30,7 +30,7 @@ class JdbcTestFixture(
 
     if (dataSourceService.config().type == DataSourceType.VITESS_MYSQL) {
       val vtgatePort = dataSourceService.config().port ?: DefaultSettings.PORT
-      VitessTestDb(port = vtgatePort).truncate()
+      VitessTestDb(port = vtgatePort).truncate(vtgatePort)
       logger.info("@${qualifier.simpleName} tables truncated via VitessTestDb in $stopwatch")
       return
     }
