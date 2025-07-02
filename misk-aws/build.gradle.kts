@@ -48,11 +48,10 @@ dependencies {
   testImplementation(libs.mockitoKotlin)
   testImplementation(project(":wisp:wisp-containers-testing"))
   testImplementation(project(":wisp:wisp-feature-testing"))
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":misk-clustering"))
   testImplementation(testFixtures(project(":misk-feature")))
-  testImplementation(project(":misk-testing"))
 }
 
 mavenPublishing {

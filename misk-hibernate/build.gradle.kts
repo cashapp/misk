@@ -59,11 +59,10 @@ dependencies {
   testImplementation(libs.prometheusClient)
   testImplementation(project(":wisp:wisp-config"))
   testImplementation(project(":wisp:wisp-logging-testing"))
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-hibernate-testing"))
   testImplementation(testFixtures(project(":misk-audit-client")))
   testImplementation(testFixtures(project(":misk-jdbc")))
-  testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-crypto")))
   testImplementation(testFixtures(project(":misk-vitess")))
 }

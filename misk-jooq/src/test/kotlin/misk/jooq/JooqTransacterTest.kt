@@ -17,7 +17,7 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.jooq.exception.DataAccessException
 import org.junit.jupiter.api.Test
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject

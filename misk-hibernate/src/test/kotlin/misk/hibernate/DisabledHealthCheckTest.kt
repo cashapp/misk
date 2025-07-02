@@ -9,7 +9,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.logging.getLogger
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.sql.Timestamp
 
 @MiskTest(startService = true)

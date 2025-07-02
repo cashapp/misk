@@ -33,11 +33,10 @@ dependencies {
   testImplementation(libs.moshiCore)
   testImplementation(project(":wisp:wisp-logging"))
   testImplementation(project(":wisp:wisp-logging-testing"))
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":misk"))
   testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-jobqueue"))
-  testImplementation(project(":misk-testing"))
 
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-service"))
