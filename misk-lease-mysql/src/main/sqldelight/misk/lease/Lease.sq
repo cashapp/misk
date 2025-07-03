@@ -1,14 +1,14 @@
 insert:
 INSERT INTO leases (
-  id,
-  held_until,
-  version
-) VALUES (:id, :held_until, :version);
+  lease_name,
+  version,
+  held_until
+) VALUES (:lease_name, :version, :held_until);
 
-selectById:
-SELECT id, held_until, version
+selectByLeaseName:
+SELECT id, lease_name, version, held_until
 FROM leases
-WHERE id = :id;
+WHERE lease_name = :lease_name;
 
 acquire:
 UPDATE leases
@@ -16,11 +16,11 @@ SET
   held_until = :held_until,
   version = :version
 WHERE
-  id = :id AND
+  lease_name = :lease_name AND
   version = :current_version;
 
 release:
 DELETE FROM leases
 WHERE
-  id = :id AND
+  lease_name = :lease_name AND
   version = :version;

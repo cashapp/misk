@@ -1,9 +1,9 @@
 package misk.lease.mysql
 
-import java.sql.SQLException
 import java.time.Duration
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
+import misk.annotation.ExperimentalMiskApi
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.lease.mysql.SqlLeaseTestingModule.Companion.LEASE_DURATION_SECONDS
@@ -75,15 +75,18 @@ class SqlLeaseManagerTest {
    * Verifies that a lease cannot be acquired again immediately after the lease duration elapses.
    */
   @Test
+  @OptIn(ExperimentalMiskApi::class)
   fun leaseCannotBeAcquiredImmediatelyBeforeDurationElapses() {
-    val leaseA = leaseManager.requestLease("a")
+    val sqlLeaseManager = leaseManager as SqlLeaseManager
+    // Use explicit 60 second duration for this test
+    val leaseA = sqlLeaseManager.requestLease("test-lease", Duration.ofSeconds(LEASE_DURATION_SECONDS))
     assertThat(leaseA).isNotNull()
     assertThat(leaseA.checkHeld()).isTrue()
 
-    // Advance clock exactly to the lease duration
+    // Advance clock exactly to the lease duration (60 seconds)
     clock.add(Duration.ofSeconds(LEASE_DURATION_SECONDS))
 
-    val leaseA2 = leaseManager.requestLease("a")
+    val leaseA2 = sqlLeaseManager.requestLease("test-lease", Duration.ofSeconds(LEASE_DURATION_SECONDS))
     assertThat(leaseA2).isNotNull()
     assertThat(leaseA2.checkHeld()).isFalse()
   }
@@ -92,16 +95,51 @@ class SqlLeaseManagerTest {
    * Verifies that a lease can be acquired by another requester after the lease duration has fully elapsed.
    */
   @Test
+  @OptIn(ExperimentalMiskApi::class)
   fun leaseCanBeAcquiredAfterDurationElapses() {
-    val leaseA = leaseManager.requestLease("a")
+    val sqlLeaseManager = leaseManager as SqlLeaseManager
+    // Use explicit 60 second duration for this test
+    val leaseA = sqlLeaseManager.requestLease("test-lease", Duration.ofSeconds(LEASE_DURATION_SECONDS))
     assertThat(leaseA).isNotNull()
     assertThat(leaseA.checkHeld()).isTrue()
 
-    // Advance clock past the lease duration
+    // Advance clock past the lease duration (60 seconds + 1)
     clock.add(Duration.ofSeconds(LEASE_DURATION_SECONDS + 1))
 
-    val leaseA2 = leaseManager.requestLease("a")
+    val leaseA2 = sqlLeaseManager.requestLease("test-lease", Duration.ofSeconds(LEASE_DURATION_SECONDS))
     assertThat(leaseA2).isNotNull()
     assertThat(leaseA2.checkHeld()).isTrue()
+  }
+
+  /**
+   * Test the call-site duration configuration approach.
+   */
+  @Test
+  @OptIn(ExperimentalMiskApi::class)
+  fun testCallSiteDurationConfiguration() {
+    val sqlLeaseManager = leaseManager as SqlLeaseManager
+
+    // Test default duration (300 seconds)
+    val defaultLease = sqlLeaseManager.requestLease("default-lease")
+    assertThat(defaultLease.checkHeld()).isTrue()
+
+    // Test explicit short duration (30 seconds)
+    val shortLease = sqlLeaseManager.requestLease("short-lease", Duration.ofSeconds(30))
+    assertThat(shortLease.checkHeld()).isTrue()
+
+    // Test explicit long duration (10 minutes)
+    val longLease = sqlLeaseManager.requestLease("long-lease", Duration.ofMinutes(10))
+    assertThat(longLease.checkHeld()).isTrue()
+
+    // Advance clock by 31 seconds - short lease should expire, others should still be held
+    clock.add(Duration.ofSeconds(31))
+
+    // Short lease should be expired and acquirable by someone else
+    val shortLease2 = sqlLeaseManager.requestLease("short-lease", Duration.ofSeconds(30))
+    assertThat(shortLease2.checkHeld()).isTrue()
+
+    // Default and long leases should still be held
+    assertThat(defaultLease.checkHeld()).isTrue()
+    assertThat(longLease.checkHeld()).isTrue()
   }
 }

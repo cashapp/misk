@@ -16,12 +16,12 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
-  api(project(":wisp:wisp-lease"))
 
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
 
   implementation(project(":misk-api"))
+  implementation(project(":wisp:wisp-lease"))
   implementation(project(":wisp:wisp-logging"))
   implementation(libs.sqldelightJdbcDriver)
   implementation(libs.loggingApi)

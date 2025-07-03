@@ -1,8 +1,10 @@
 import java.time.Instant;
 
 CREATE TABLE leases (
-  `id` varchar(255) NOT NULL,
-  `held_until` timestamp AS Instant NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `lease_name` varchar(255) NOT NULL,
   `version` bigint NOT NULL,
-  PRIMARY KEY (`id`)
+  `held_until` timestamp AS Instant NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_lease_name` (`lease_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
