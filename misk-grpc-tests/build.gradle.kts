@@ -49,16 +49,6 @@ wire {
   }
 }
 
-sourceSets {
-  main {
-    java.srcDir("build/generated/source/proto/main/grpc")
-    java.srcDir("build/generated/source/proto/main/java")
-    java.srcDir("build/generated/source/wire")
-  }
-
-  // TODO(jwilson): we do this to make IntelliJ happy but the Wire Gradle plugin should do that.
-}
-
 dependencies {
   api(libs.grpcApi)
   api(libs.grpcStub)
