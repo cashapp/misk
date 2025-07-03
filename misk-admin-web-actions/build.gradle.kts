@@ -76,7 +76,7 @@ abstract class WebActionsTabBuildTask : DefaultTask() {
         .execute()
     }
 
-    exec(npm, "install")
+    exec(npm, "ci")
     exec(npx, "webpack", "--mode", "production")
     exec(npm, "run-script", "format")
     exec(npm, "run-script", "test")
