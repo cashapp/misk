@@ -14,7 +14,6 @@ class SqlLeaseTestingModule(
   private val dbConfig: DataSourceClustersConfig = defaultDbConfig()
 ) : ReusableTestModule() {
   override fun configure() {
-    bind<SqlLeaseConfig>().toInstance(SqlLeaseConfig(leaseDurationInSec = LEASE_DURATION_SECONDS))
     install(SqlLeaseModule(dbConfig))
     install(JdbcTestingModule<LeaseDb>())
   }

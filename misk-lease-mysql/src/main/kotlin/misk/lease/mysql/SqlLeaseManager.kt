@@ -6,6 +6,7 @@ import wisp.logging.getLogger
 import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration
+import java.time.Instant
 import jakarta.inject.Inject
 import misk.annotation.ExperimentalMiskApi
 
@@ -13,93 +14,86 @@ import misk.annotation.ExperimentalMiskApi
  * A LeaseManager that uses a SQL database to manage distributed leases.
  */
 @ExperimentalMiskApi
-class SqlLeaseManager @Inject constructor(
+internal class SqlLeaseManager @Inject constructor(
   private val clock: Clock,
-  private val config: SqlLeaseConfig,
   private val database: LeaseDatabase,
 ) : LeaseManager {
+
   /**
-   * Attempts to acquire a lease for a given identifier and duration.
+   * Requests a lease for the given name .
    */
-  @Deprecated("Use requestLease(identifier).checkHeld() instead.")
-  fun acquire(identifier: String, duration: Duration): Lease? {
-    val lease = requestLease(identifier)
-    return if (lease.checkHeld()) {
-      lease
-    } else {
-      null
-    }
+  override fun requestLease(name: String): Lease {
+    return requestLease(name, DEFAULT_LEASE_DURATION)
   }
 
   /**
-   * Requests a lease for the given name.
-   * If the lease does not exist, tries to insert a new lease row.
-   * If the lease is already held, returns a lease object that will fail checkHeld().
-   * If the lease is expired, attempts to acquire it by updating the version.
+   * Requests a lease for the given name with an explicit duration.
    */
-  override fun requestLease(name: String): Lease {
-    val lease = database.leaseQueries.selectById(id = name).executeAsOneOrNull()
+  fun requestLease(name: String, duration: Duration): Lease {
+    val lease = database.leaseQueries.selectByLeaseName(lease_name = name).executeAsOneOrNull()
     val now = clock.instant()
-    val heldUntil = now.plus(Duration.ofSeconds(config.leaseDurationInSec))
+    val heldUntil = now.plus(duration)
 
-    if (lease == null) {
-      try {
-        // Try to insert a new lease row
-        database.leaseQueries.insert(
-          id = name,
+    return when {
+      lease == null -> {
+        // Lease doesn't exist, try to create it
+        try {
+          database.leaseQueries.insert(
+            lease_name = name,
+            version = 1L,
+            held_until = heldUntil,
+          )
+          RealSqlLease(name, 1L, heldUntil)
+        } catch (e: SQLException) {
+          logger.debug(e) { "Failed to insert lease '$name', likely due to race condition" }
+          RealSqlLease(name, NOT_HELD, Instant.EPOCH)
+        }
+      }
+      
+      now <= lease.held_until -> {
+        // Lease is currently held by someone else
+        RealSqlLease(name, NOT_HELD, Instant.EPOCH)
+      }
+      
+      else -> {
+        // Lease exists but is expired, try to acquire it
+        val newVersion = lease.version + 1L
+        val updatedRows = database.leaseQueries.acquire(
           held_until = heldUntil,
-          version = 1L,
-        )
-        return RealSqlLease(name, 1L)
-      } catch (e: SQLException) {
-        // If insert fails due to constraint violation (race condition), 
-        // return a lease that will fail checkHeld()
-        logger.debug(e) { "Failed to insert lease '$name', likely due to race condition" }
-        return database.leaseQueries.selectById(id = name).executeAsOne().let {
-          RealSqlLease(name, NOT_HELD)
+          version = newVersion,
+          lease_name = name,
+          current_version = lease.version,
+        ).value
+
+        if (updatedRows == 1L) {
+          // Successfully acquired the lease
+          RealSqlLease(name, newVersion, heldUntil)
+        } else {
+          // Someone else acquired it first (race condition)
+          RealSqlLease(name, NOT_HELD, Instant.EPOCH)
         }
       }
     }
-
-    if (now <= lease.held_until) {
-      // Lease is currently held by someone else
-      return RealSqlLease(name, NOT_HELD)
-    }
-
-    val versionToHold = lease.version + 1L
-
-    // Try to acquire the lease by updating the version and held_until
-    val updatedRows = database.leaseQueries.acquire(
-      held_until = heldUntil,
-      version = versionToHold,
-      id = name,
-      current_version = lease.version,
-    ).value
-
-    if (updatedRows != 1L) {
-      // Failed to acquire lease, return a lease that will fail checkHeld()
-      return RealSqlLease(name, NOT_HELD)
-    }
-
-    return RealSqlLease(name, versionToHold)
   }
 
   /**
    * Implementation of the Lease interface backed by a SQL row.
    */
-  inner class RealSqlLease @JvmOverloads constructor(
-    private val identifier: String,
+  inner class RealSqlLease constructor(
+    override val name: String,
     private val heldVersion: Long,
-    override val name: String = identifier,
+    private val heldUntil: Instant,
   ) : Lease {
     private val listeners = mutableListOf<Lease.StateChangeListener>()
 
     /**
-     * Returns true if this process holds the lease (version matches).
+     * Returns true if this process holds the lease.
      */
     override fun checkHeld(): Boolean {
-      val lease = database.leaseQueries.selectById(id = identifier).executeAsOneOrNull()
-      return lease?.version == heldVersion
+      if (heldVersion == NOT_HELD) return false
+      
+      // We hold the lease until it expires
+      return clock.instant() <= heldUntil
     }
 
     /**
@@ -125,8 +119,14 @@ class SqlLeaseManager @Inject constructor(
      * Notifies listeners before releasing.
      */
     override fun release(): Boolean {
+      if (heldVersion == NOT_HELD) return false
+      
       notifyBeforeRelease()
-      val deletedRows = database.leaseQueries.release(id = identifier, version = heldVersion).value
+      
+      val deletedRows = database.leaseQueries.release(
+        lease_name = name,
+        version = heldVersion
+      ).value
       return deletedRows > 0
     }
 
@@ -160,6 +160,9 @@ class SqlLeaseManager @Inject constructor(
 
   companion object {
     private val logger = getLogger<SqlLeaseManager>()
+    
+    /** Default lease duration (5 minutes) */
+    val DEFAULT_LEASE_DURATION: Duration = Duration.ofSeconds(300)
     
     /** Version number used to indicate a lease is not held by this process */
     const val NOT_HELD = -1L

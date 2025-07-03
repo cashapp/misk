@@ -36,6 +36,7 @@ class SqlLeaseModule(
     val driver = object : JdbcDriver() {
       override fun getConnection(): Connection {
         val connection = dataSource.get().connection
+        // SQLDelight requires autoCommit = true by default for its transaction management to work
         connection.autoCommit = true
         return connection
       }
