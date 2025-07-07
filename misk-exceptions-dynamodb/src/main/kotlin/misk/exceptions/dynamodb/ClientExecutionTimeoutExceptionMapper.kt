@@ -6,8 +6,7 @@ import misk.web.ResponseBody
 import misk.web.exceptions.ExceptionMapper
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.Headers
-import okhttp3.Headers.Companion.toHeaders
+import okhttp3.Headers.Companion.headersOf
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 import jakarta.inject.Inject
 
@@ -21,8 +20,6 @@ class ClientExecutionTimeoutExceptionMapper @Inject constructor() :
   )
 
   private companion object {
-    val HEADERS: Headers = listOf(
-      "Content-Type" to MediaTypes.TEXT_PLAIN_UTF8
-    ).toMap().toHeaders()
+    val HEADERS = headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
   }
 }

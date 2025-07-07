@@ -8,7 +8,7 @@ import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import okhttp3.Headers.Companion.toHeaders
+import okhttp3.Headers.Companion.headersOf
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 
@@ -22,7 +22,7 @@ class DownloadAFileWebAction @Inject constructor() : WebAction {
   ): Response<String> {
     return Response(
       body = "Hey $name, I made you this file",
-      headers = mapOf(HttpHeaders.CONTENT_DISPOSITION to "attachment; filename=\"$name.txt\"").toHeaders()
+      headers = headersOf(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$name.txt\"")
     )
   }
 }
