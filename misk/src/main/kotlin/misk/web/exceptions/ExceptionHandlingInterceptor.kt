@@ -19,7 +19,7 @@ import misk.web.ResponseBody
 import misk.web.interceptors.hooks.RequestResponseLoggedCapture
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.Headers.Companion.toHeaders
+import okhttp3.Headers.Companion.headersOf
 import okio.Buffer
 import okio.BufferedSink
 import okio.ByteString
@@ -183,7 +183,7 @@ class ExceptionHandlingInterceptor private constructor(
 
     val INTERNAL_SERVER_ERROR_RESPONSE = Response(
       "internal server error".toResponseBody(),
-      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
+      headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
       HttpURLConnection.HTTP_INTERNAL_ERROR
     )
   }
