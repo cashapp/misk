@@ -30,6 +30,7 @@ dependencies {
   implementation(libs.guiceTestLib)
   implementation(libs.logbackClassic)
   implementation(libs.mockitoCore)
+  implementation(libs.mockk)
   implementation(libs.okio)
   implementation(libs.openTracing)
   implementation(libs.slf4jApi)
