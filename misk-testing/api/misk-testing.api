@@ -104,6 +104,14 @@ public final class misk/mockito/MockitoTestFixture : misk/testing/TestFixture {
 	public fun reset ()V
 }
 
+public class misk/mockk/MockkTestFixture : misk/testing/FakeFixture {
+	public fun <init> (Ljava/lang/Object;)V
+	public fun <init> (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun initMock ()V
+	public fun reset ()V
+}
+
 public final class misk/random/FakeRandom : misk/random/Random {
 	public fun <init> ()V
 	public final fun getNextBoolean ()Ljava/lang/Boolean;
