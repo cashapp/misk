@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import wisp.containers.ContainerUtil
+import misk.containers.ContainerUtil
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
 

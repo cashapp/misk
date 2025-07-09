@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.moshi.adapter
-import wisp.containers.ContainerUtil
+import misk.containers.ContainerUtil
 
 @Singleton
 internal class QueueResolver @Inject internal constructor(

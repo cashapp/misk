@@ -41,7 +41,6 @@ dependencies {
   testImplementation(testFixtures(project(":misk-redis-lettuce")))
 
   testFixturesImplementation(project(":misk-testing"))
-  testFixturesImplementation(project(":wisp:wisp-containers-testing"))
   testFixturesImplementation(project(":wisp:wisp-logging"))
 
 }

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import wisp.containers.ContainerUtil
+import misk.containers.ContainerUtil
 import jakarta.inject.Inject
 import org.junit.jupiter.api.RepeatedTest
 

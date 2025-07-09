@@ -30,6 +30,10 @@ import io.opentracing.util.GlobalTracer
  *
  * See [Composer] for an example.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "Container","misk.containers.Container")
+)
 data class Container(
     val createCmd: CreateContainerCmd.() -> Unit,
     val beforeStartHook: (docker: DockerClient, id: String) -> Unit
@@ -67,6 +71,10 @@ data class Container(
  *     composer.start()
  * ```
  */
+@Deprecated(
+  "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "Composer","misk.containers.Composer")
+)
 class Composer(private val name: String, private vararg val containers: Container) {
 
     private val network = DockerNetwork(
@@ -204,6 +212,10 @@ class Composer(private val name: String, private vararg val containers: Containe
     }
 }
 
+@Deprecated(
+  "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "ContainerUtil","misk.containers.ContainerUtil")
+)
 object ContainerUtil {
     val isRunningInDocker = File("/proc/1/cgroup")
         .takeIf { it.exists() }?.useLines { lines ->

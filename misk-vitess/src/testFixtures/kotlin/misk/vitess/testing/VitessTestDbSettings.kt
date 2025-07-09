@@ -1,6 +1,6 @@
 package misk.vitess.testing
 
-import wisp.containers.ContainerUtil
+import misk.containers.ContainerUtil
 import java.time.Duration
 
 object DefaultSettings {

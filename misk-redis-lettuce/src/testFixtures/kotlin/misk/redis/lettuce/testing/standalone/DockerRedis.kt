@@ -11,8 +11,8 @@ import misk.redis.lettuce.redisUri
 import misk.redis.lettuce.standalone.redisClient
 import misk.redis.lettuce.standalone.withConnectionBlocking
 import misk.testing.ExternalDependency
-import wisp.containers.Composer
-import wisp.containers.Container
+import misk.containers.Composer
+import misk.containers.Container
 import wisp.logging.getLogger
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
