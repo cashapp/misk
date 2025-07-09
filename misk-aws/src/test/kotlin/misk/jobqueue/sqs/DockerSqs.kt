@@ -12,9 +12,9 @@ import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
 import misk.jobqueue.sqs.DockerSqs.clientPort
 import misk.testing.ExternalDependency
-import wisp.containers.Composer
-import wisp.containers.Container
-import wisp.containers.ContainerUtil
+import misk.containers.Composer
+import misk.containers.Container
+import misk.containers.ContainerUtil
 import wisp.logging.getLogger
 
 /**

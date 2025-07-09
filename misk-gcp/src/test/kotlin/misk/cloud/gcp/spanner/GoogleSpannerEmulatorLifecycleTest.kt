@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import wisp.containers.ContainerUtil
+import misk.containers.ContainerUtil
 import java.time.Duration
 import jakarta.inject.Inject
 import misk.environment.DeploymentModule

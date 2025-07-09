@@ -73,9 +73,15 @@ public final class misk/concurrent/FakeTicker : com/google/common/base/Ticker, m
 }
 
 public final class misk/containers/Composer {
+	public static final field Companion Lmisk/containers/Composer$Companion;
 	public fun <init> (Ljava/lang/String;[Lmisk/containers/Container;)V
+	public final fun getRunning ()Ljava/util/concurrent/atomic/AtomicBoolean;
 	public final fun start ()V
 	public final fun stop ()V
+}
+
+public final class misk/containers/Composer$Companion {
+	public final fun getDockerClient ()Lcom/github/dockerjava/api/DockerClient;
 }
 
 public final class misk/containers/Container {
@@ -90,6 +96,13 @@ public final class misk/containers/Container {
 	public final fun getCreateCmd ()Lkotlin/jvm/functions/Function1;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/containers/ContainerUtil {
+	public static final field INSTANCE Lmisk/containers/ContainerUtil;
+	public final fun dockerTargetOrLocalHost ()Ljava/lang/String;
+	public final fun dockerTargetOrLocalIp ()Ljava/lang/String;
+	public final fun isRunningInDocker ()Z
 }
 
 public final class misk/logging/LogCollectorModule : misk/inject/KAbstractModule {

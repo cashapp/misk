@@ -35,7 +35,7 @@ dependencies {
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.okio)
-  testFixturesImplementation(project(":wisp:wisp-containers-testing"))
+  testFixturesImplementation(project(":misk-testing"))
   testFixturesImplementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)
@@ -52,7 +52,7 @@ dependencies {
   testImplementation(libs.guice)
   testImplementation(libs.loggingApi)
   testImplementation(libs.okio)
-  testImplementation(project(":wisp:wisp-containers-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp:wisp-logging"))
 
   testFixturesImplementation(libs.apacheCommonsPool)

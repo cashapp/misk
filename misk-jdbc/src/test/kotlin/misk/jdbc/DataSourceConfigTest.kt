@@ -2,7 +2,7 @@ package misk.jdbc
 
 import misk.vitess.testing.DefaultSettings
 import org.junit.jupiter.api.Test
-import wisp.containers.ContainerUtil
+import misk.containers.ContainerUtil
 import wisp.deployment.TESTING
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
