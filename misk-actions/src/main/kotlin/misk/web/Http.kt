@@ -35,6 +35,16 @@ annotation class RequestHeaders
 annotation class RequestHeader(val value: String)
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
+annotation class RequestCookies
+
+/**
+ * Extracts the named request cookie as a `String` or a `String?`. If the parameter is not nullable,
+ * and has no default value, and the cookie is absent, the request will fail with an HTTP 400.
+ */
+@Target(AnnotationTarget.VALUE_PARAMETER)
+annotation class RequestCookie(val value: String)
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class PathParam(val value: String = "")
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
