@@ -298,9 +298,9 @@ internal class DeclarativeSchemaMigratorTest {
         KEY idx_customer_token(customer_token),
         KEY idx_transaction_token(transaction_token)
     )
-        ENGINE = InnoDB
-        DEFAULT CHARSET = utf8mb4
-        ROW_FORMAT = DYNAMIC;
+        ENGINE=InnoDB
+        DEFAULT CHARSET=utf8mb4
+        ROW_FORMAT=DYNAMIC;
         """.trimMargin()
     )
 
