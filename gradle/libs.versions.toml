@@ -1,9 +1,9 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.787"
-aws2 = "2.31.77"
+aws2 = "2.31.78"
 bucket4j = "8.8.0"
-datadog = "1.50.1"
+datadog = "1.51.0"
 dependencyAnalysisPlugin = "2.19.0"
 detekt = "1.23.8"
 docker = "3.5.3"
@@ -14,7 +14,7 @@ jackson = "2.19.1"
 junit = "5.13.3"
 kotest = "5.9.1"
 kotlin = "2.1.20"
-kotlinBinaryCompatibilityPlugin = "0.18.0"
+kotlinBinaryCompatibilityPlugin = "0.18.1"
 mavenPublish = "0.32.0"
 micrometer = "1.12.13"
 netty = "4.2.1.Final"
@@ -27,7 +27,7 @@ wire = "5.3.5"
 
 [libraries]
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.19.0" }
-apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
+apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
 apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.1" }
 assertj = { module = "org.assertj:assertj-core", version = "3.27.3" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
@@ -64,7 +64,7 @@ dockerApi = { module = "com.github.docker-java:docker-java-api", version.ref = "
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
 dockerTransportCore = { module = "com.github.docker-java:docker-java-transport", version.ref = "docker" }
 dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
-errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.39.0" }
+errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.40.0" }
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.68.1" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.58.1" }
