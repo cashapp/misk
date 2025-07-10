@@ -28,8 +28,7 @@ internal class RequestHeaderFeatureBinding private constructor(
   ) {
     fun bind(subject: Subject) {
       val requestHeaders = subject.httpCall.requestHeaders
-      val rawValue = requestHeaders[name] ?:
-      when {
+      val rawValue = requestHeaders[name] ?: when {
         parameter.isOptional -> return
         parameter.type.isMarkedNullable -> return
         else -> throw BadRequestException("Required request header $name not present")
@@ -41,7 +40,7 @@ internal class RequestHeaderFeatureBinding private constructor(
       }
 
       val value = try {
-        converter(rawValue)
+        converter.convert(rawValue)
       } catch (e: IllegalArgumentException) {
         throw BadRequestException("Invalid format for parameter: $name", e)
       }
@@ -53,9 +52,10 @@ internal class RequestHeaderFeatureBinding private constructor(
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
-      val bindings = action.parameters.mapNotNull { it.toRequestHeaderBinding() }
+      val bindings = action.parameters.mapNotNull { it.toRequestHeaderBinding(stringConverterFactories) }
       if (bindings.isEmpty()) return null
 
       for (binding in bindings) {
@@ -65,11 +65,13 @@ internal class RequestHeaderFeatureBinding private constructor(
       return RequestHeaderFeatureBinding(bindings)
     }
 
-    private fun KParameter.toRequestHeaderBinding(): ParameterBinding? {
+    private fun KParameter.toRequestHeaderBinding(
+      stringConverterFactories: List<StringConverter.Factory>,
+    ): ParameterBinding? {
       val annotation = findAnnotation<RequestHeader>() ?: return null
       val name = annotation.value.ifBlank { name!! }
 
-      val stringConverter = converterFor(type)
+      val stringConverter = converterFor(type, stringConverterFactories)
         ?: throw IllegalArgumentException("Unable to create converter for $name")
 
       return ParameterBinding(this, stringConverter, name)

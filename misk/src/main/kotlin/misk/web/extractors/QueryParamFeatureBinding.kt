@@ -43,8 +43,8 @@ internal class QueryParamFeatureBinding private constructor(
       if (values.isEmpty()) return null
 
       try {
-        return if (isList) values.map { converter(it) }
-        else converter(values.first())
+        return if (isList) values.map { converter.convert(it) }
+        else converter.convert(values.first())
       } catch (e: IllegalArgumentException) {
         throw BadRequestException("Invalid format for parameter: $name", e)
       }
@@ -55,9 +55,10 @@ internal class QueryParamFeatureBinding private constructor(
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
-      val bindings = action.parameters.mapNotNull { it.toQueryBinding() }
+      val bindings = action.parameters.mapNotNull { it.toQueryBinding(stringConverterFactories) }
       if (bindings.isEmpty()) return null
 
       for (binding in bindings) {
@@ -67,13 +68,15 @@ internal class QueryParamFeatureBinding private constructor(
       return QueryParamFeatureBinding(bindings)
     }
 
-    internal fun KParameter.toQueryBinding(): ParameterBinding? {
+    internal fun KParameter.toQueryBinding(
+      stringConverterFactories: List<StringConverter.Factory>,
+    ): ParameterBinding? {
       val annotation = findAnnotation<QueryParam>() ?: return null
       val name = if (annotation.value.isBlank()) name!! else annotation.value
 
       val isList = type.classifier?.equals(List::class) ?: false
       val elementType = if (isList) type.arguments.first().type!! else type
-      val stringConverter = converterFor(elementType)
+      val stringConverter = converterFor(elementType, stringConverterFactories)
         ?: throw IllegalArgumentException("Unable to create converter for $name")
 
       return ParameterBinding(this, isList, stringConverter, name)

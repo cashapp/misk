@@ -2,6 +2,7 @@ package misk.web
 
 import misk.Action
 import misk.web.actions.WebAction
+import misk.web.extractors.StringConverter
 import okio.BufferedSink
 import okio.BufferedSource
 import java.util.regex.Matcher
@@ -64,7 +65,8 @@ interface FeatureBinding {
     fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory> = listOf(),
     ): FeatureBinding?
   }
 
