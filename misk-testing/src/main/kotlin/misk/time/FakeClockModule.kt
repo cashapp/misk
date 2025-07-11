@@ -1,14 +1,19 @@
 package misk.time
 
+import com.google.inject.Provides
+import com.google.inject.multibindings.ProvidesIntoSet
+import jakarta.inject.Singleton
 import misk.inject.KInstallOnceModule
 import misk.testing.TestFixture
 import java.time.Clock
-import wisp.time.FakeClock as WispFakeClock
 
 class FakeClockModule : KInstallOnceModule() {
-  override fun configure() {
-    bind<Clock>().to<FakeClock>()
-    bind<WispFakeClock>().to<FakeClock>()
-    multibind<TestFixture>().to<FakeClock>()
-  }
+  @Provides @Singleton
+  fun provideFakeClock(): FakeClock = FakeClock()
+  
+  @Provides 
+  fun provideClock(fakeClock: FakeClock): Clock = fakeClock
+  
+  @ProvidesIntoSet
+  fun provideTestFixture(fakeClock: FakeClock): TestFixture = fakeClock
 }
