@@ -32,7 +32,6 @@ dependencies {
   implementation(project(":misk-testing"))
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":wisp:wisp-logging"))
-  implementation(project(":wisp:wisp-tracing"))
   implementation(project(":misk-backoff"))
   implementation(project(":misk-hibernate"))
   implementation(project(":misk-metrics"))

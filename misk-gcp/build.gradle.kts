@@ -93,7 +93,7 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.openTracingDatadog)
   testImplementation(project(":misk-testing"))
-  testImplementation(project(":wisp:wisp-tracing"))
+  testImplementation(project(":misk"))
   testImplementation(project(":misk-gcp"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-docker"))

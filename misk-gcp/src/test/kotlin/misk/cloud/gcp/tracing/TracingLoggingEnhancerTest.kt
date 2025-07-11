@@ -6,7 +6,7 @@ import io.opentracing.mock.MockTracer
 import io.opentracing.noop.NoopTracerFactory
 import io.opentracing.util.GlobalTracer
 import misk.testing.MiskTest
-import wisp.tracing.traceWithSpan
+import misk.tracing.traceWithSpan
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
