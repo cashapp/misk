@@ -57,9 +57,10 @@ internal class RequestCookieFeatureBinding private constructor(
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
-      val bindings = action.parameters.mapNotNull { it.toRequestCookieBinding() }
+      val bindings = action.parameters.mapNotNull { it.toRequestCookieBinding(stringConverterFactories) }
       if (bindings.isEmpty()) return null
 
       for (binding in bindings) {
@@ -69,7 +70,9 @@ internal class RequestCookieFeatureBinding private constructor(
       return RequestCookieFeatureBinding(bindings)
     }
 
-    private fun KParameter.toRequestCookieBinding(): ParameterBinding? {
+    private fun KParameter.toRequestCookieBinding(
+      stringConverterFactories: List<StringConverter.Factory>,
+    ): ParameterBinding? {
       val annotation = findAnnotation<RequestCookie>() ?: return null
       val name = annotation.value.ifBlank { name!! }
 
@@ -77,10 +80,10 @@ internal class RequestCookieFeatureBinding private constructor(
         type.isSubtypeOf(cookieType) -> ({ it })
 
         else -> {
-          val stringConverter = converterFor(type)
+          val stringConverter = converterFor(type, stringConverterFactories)
             ?: throw IllegalArgumentException("Unable to create converter for $name")
 
-          ({ cookie -> stringConverter.invoke(cookie.value) })
+          ({ cookie -> stringConverter.convert(cookie.value) })
         }
       }
 

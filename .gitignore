@@ -21,6 +21,7 @@ lib
 dist
 .hash
 hooks.gradle
+.kotlin
 
 **/site/
 docs/0.x/*
