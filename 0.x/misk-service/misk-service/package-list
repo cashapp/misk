@@ -1,0 +1,46 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.metadata.servicegraph////PointingToDeclaration/misk-service/misk.metadata.servicegraph/index.md
+$dokka.location:misk.metadata.servicegraph/ServiceGraphMetadata.GraphPairs///PointingToDeclaration/misk-service/misk.metadata.servicegraph/-service-graph-metadata/-graph-pairs/index.md
+$dokka.location:misk.metadata.servicegraph/ServiceGraphMetadata.GraphPairs/GraphPairs/#kotlin.String#kotlin.String/PointingToDeclaration/misk-service/misk.metadata.servicegraph/-service-graph-metadata/-graph-pairs/-graph-pairs.md
+$dokka.location:misk.metadata.servicegraph/ServiceGraphMetadata.GraphPairs/source/#/PointingToDeclaration/misk-service/misk.metadata.servicegraph/-service-graph-metadata/-graph-pairs/source.md
+$dokka.location:misk.metadata.servicegraph/ServiceGraphMetadata.GraphPairs/target/#/PointingToDeclaration/misk-service/misk.metadata.servicegraph/-service-graph-metadata/-graph-pairs/target.md
+$dokka.location:misk.metadata.servicegraph/ServiceGraphMetadata///PointingToDeclaration/misk-service/misk.metadata.servicegraph/-service-graph-metadata/index.md
+$dokka.location:misk.metadata.servicegraph/ServiceGraphMetadata/ServiceGraphMetadata/#misk.ServiceGraphBuilderMetadata/PointingToDeclaration/misk-service/misk.metadata.servicegraph/-service-graph-metadata/-service-graph-metadata.md
+$dokka.location:misk.metadata.servicegraph/ServiceGraphMetadata/builderMetadata/#/PointingToDeclaration/misk-service/misk.metadata.servicegraph/-service-graph-metadata/builder-metadata.md
+$dokka.location:misk.metadata.servicegraph/ServiceGraphMetadata/graphVisual/#/PointingToDeclaration/misk-service/misk.metadata.servicegraph/-service-graph-metadata/graph-visual.md
+$dokka.location:misk////PointingToDeclaration/misk-service/misk/index.md
+$dokka.location:misk//ServiceModule/#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-service/misk/-service-module.md
+$dokka.location:misk/CoordinatedServiceMetadata///PointingToDeclaration/misk-service/misk/-coordinated-service-metadata/index.md
+$dokka.location:misk/CoordinatedServiceMetadata/CoordinatedServiceMetadata/#kotlin.collections.Set[kotlin.String]#kotlin.collections.Set[kotlin.String]/PointingToDeclaration/misk-service/misk/-coordinated-service-metadata/-coordinated-service-metadata.md
+$dokka.location:misk/CoordinatedServiceMetadata/dependencies/#/PointingToDeclaration/misk-service/misk/-coordinated-service-metadata/dependencies.md
+$dokka.location:misk/CoordinatedServiceMetadata/directDependsOn/#/PointingToDeclaration/misk-service/misk/-coordinated-service-metadata/direct-depends-on.md
+$dokka.location:misk/DelegatingService///PointingToDeclaration/misk-service/misk/-delegating-service/index.md
+$dokka.location:misk/DelegatingService/service/#/PointingToDeclaration/misk-service/misk/-delegating-service/service.md
+$dokka.location:misk/ReadyService.Companion///PointingToDeclaration/misk-service/misk/-ready-service/-companion/index.md
+$dokka.location:misk/ReadyService///PointingToDeclaration/misk-service/misk/-ready-service/index.md
+$dokka.location:misk/ReadyService/ReadyService/#/PointingToDeclaration/misk-service/misk/-ready-service/-ready-service.md
+$dokka.location:misk/ServiceGraphBuilderMetadata///PointingToDeclaration/misk-service/misk/-service-graph-builder-metadata/index.md
+$dokka.location:misk/ServiceGraphBuilderMetadata/ServiceGraphBuilderMetadata/#kotlin.collections.Map[kotlin.String,com.google.inject.Provider[misk.CoordinatedServiceMetadata]]#kotlin.collections.Map[kotlin.String,kotlin.String]#kotlin.collections.Map[kotlin.String,kotlin.String]#kotlin.String/PointingToDeclaration/misk-service/misk/-service-graph-builder-metadata/-service-graph-builder-metadata.md
+$dokka.location:misk/ServiceGraphBuilderMetadata/asciiVisual/#/PointingToDeclaration/misk-service/misk/-service-graph-builder-metadata/ascii-visual.md
+$dokka.location:misk/ServiceGraphBuilderMetadata/dependencyMap/#/PointingToDeclaration/misk-service/misk/-service-graph-builder-metadata/dependency-map.md
+$dokka.location:misk/ServiceGraphBuilderMetadata/serviceMap/#/PointingToDeclaration/misk-service/misk/-service-graph-builder-metadata/service-map.md
+$dokka.location:misk/ServiceGraphBuilderMetadata/serviceNames/#/PointingToDeclaration/misk-service/misk/-service-graph-builder-metadata/service-names.md
+$dokka.location:misk/ServiceGraphBuilderMetadata/toString/#/PointingToDeclaration/misk-service/misk/-service-graph-builder-metadata/to-string.md
+$dokka.location:misk/ServiceManagerConfig///PointingToDeclaration/misk-service/misk/-service-manager-config/index.md
+$dokka.location:misk/ServiceManagerConfig/ServiceManagerConfig/#kotlin.Boolean/PointingToDeclaration/misk-service/misk/-service-manager-config/-service-manager-config.md
+$dokka.location:misk/ServiceManagerConfig/debug_service_graph/#/PointingToDeclaration/misk-service/misk/-service-manager-config/debug_service_graph.md
+$dokka.location:misk/ServiceManagerModule.Companion///PointingToDeclaration/misk-service/misk/-service-manager-module/-companion/index.md
+$dokka.location:misk/ServiceManagerModule///PointingToDeclaration/misk-service/misk/-service-manager-module/index.md
+$dokka.location:misk/ServiceManagerModule/ServiceManagerModule/#misk.ServiceManagerConfig/PointingToDeclaration/misk-service/misk/-service-manager-module/-service-manager-module.md
+$dokka.location:misk/ServiceModule///PointingToDeclaration/misk-service/misk/-service-module/index.md
+$dokka.location:misk/ServiceModule/ServiceModule/#com.google.inject.Key[com.google.common.util.concurrent.Service]#kotlin.collections.List[com.google.inject.Key[com.google.common.util.concurrent.Service]]#kotlin.collections.List[com.google.inject.Key[com.google.common.util.concurrent.Service]]/PointingToDeclaration/misk-service/misk/-service-module/-service-module.md
+$dokka.location:misk/ServiceModule/dependsOn/#/PointingToDeclaration/misk-service/misk/-service-module/depends-on.md
+$dokka.location:misk/ServiceModule/dependsOn/#com.google.inject.Key[com.google.common.util.concurrent.Service]/PointingToDeclaration/misk-service/misk/-service-module/depends-on.md
+$dokka.location:misk/ServiceModule/dependsOn/#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-service/misk/-service-module/depends-on.md
+$dokka.location:misk/ServiceModule/enhancedBy/#/PointingToDeclaration/misk-service/misk/-service-module/enhanced-by.md
+$dokka.location:misk/ServiceModule/enhancedBy/#com.google.inject.Key[com.google.common.util.concurrent.Service]/PointingToDeclaration/misk-service/misk/-service-module/enhanced-by.md
+$dokka.location:misk/ServiceModule/enhancedBy/#kotlin.reflect.KClass[kotlin.Annotation]?/PointingToDeclaration/misk-service/misk/-service-module/enhanced-by.md
+$dokka.location:misk/ServiceModule/key/#/PointingToDeclaration/misk-service/misk/-service-module/key.md
+misk
+misk.metadata.servicegraph

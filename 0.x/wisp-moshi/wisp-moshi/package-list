@@ -1,0 +1,22 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.moshi////PointingToDeclaration/wisp-moshi/wisp.moshi/index.md
+$dokka.location:wisp.moshi//adapter/com.squareup.moshi.Moshi#/PointingToDeclaration/wisp-moshi/wisp.moshi/adapter.md
+$dokka.location:wisp.moshi//buildMoshi/#kotlin.collections.List[kotlin.Any]#kotlin.collections.List[kotlin.Any]/PointingToDeclaration/wisp-moshi/wisp.moshi/build-moshi.md
+$dokka.location:wisp.moshi//defaultKotlinMoshi/#/PointingToDeclaration/wisp-moshi/wisp.moshi/default-kotlin-moshi.md
+$dokka.location:wisp.moshi/GuiceProviderJsonAdapter///PointingToDeclaration/wisp-moshi/wisp.moshi/-guice-provider-json-adapter/index.md
+$dokka.location:wisp.moshi/GuiceProviderJsonAdapter/GuiceProviderJsonAdapter/#com.squareup.moshi.JsonAdapter[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/wisp-moshi/wisp.moshi/-guice-provider-json-adapter/-guice-provider-json-adapter.md
+$dokka.location:wisp.moshi/GuiceProviderJsonAdapter/fromJson/#com.squareup.moshi.JsonReader/PointingToDeclaration/wisp-moshi/wisp.moshi/-guice-provider-json-adapter/from-json.md
+$dokka.location:wisp.moshi/GuiceProviderJsonAdapter/toJson/#com.squareup.moshi.JsonWriter#com.google.inject.Provider[TypeParam(bounds=[kotlin.Any?])]?/PointingToDeclaration/wisp-moshi/wisp.moshi/-guice-provider-json-adapter/to-json.md
+$dokka.location:wisp.moshi/JakartaProviderJsonAdapter///PointingToDeclaration/wisp-moshi/wisp.moshi/-jakarta-provider-json-adapter/index.md
+$dokka.location:wisp.moshi/JakartaProviderJsonAdapter/JakartaProviderJsonAdapter/#com.squareup.moshi.JsonAdapter[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/wisp-moshi/wisp.moshi/-jakarta-provider-json-adapter/-jakarta-provider-json-adapter.md
+$dokka.location:wisp.moshi/JakartaProviderJsonAdapter/fromJson/#com.squareup.moshi.JsonReader/PointingToDeclaration/wisp-moshi/wisp.moshi/-jakarta-provider-json-adapter/from-json.md
+$dokka.location:wisp.moshi/JakartaProviderJsonAdapter/toJson/#com.squareup.moshi.JsonWriter#jakarta.inject.Provider[TypeParam(bounds=[kotlin.Any?])]?/PointingToDeclaration/wisp-moshi/wisp.moshi/-jakarta-provider-json-adapter/to-json.md
+$dokka.location:wisp.moshi/JavaxProviderJsonAdapter///PointingToDeclaration/wisp-moshi/wisp.moshi/-javax-provider-json-adapter/index.md
+$dokka.location:wisp.moshi/JavaxProviderJsonAdapter/JavaxProviderJsonAdapter/#com.squareup.moshi.JsonAdapter[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/wisp-moshi/wisp.moshi/-javax-provider-json-adapter/-javax-provider-json-adapter.md
+$dokka.location:wisp.moshi/JavaxProviderJsonAdapter/fromJson/#com.squareup.moshi.JsonReader/PointingToDeclaration/wisp-moshi/wisp.moshi/-javax-provider-json-adapter/from-json.md
+$dokka.location:wisp.moshi/JavaxProviderJsonAdapter/toJson/#com.squareup.moshi.JsonWriter#javax.inject.Provider[TypeParam(bounds=[kotlin.Any?])]?/PointingToDeclaration/wisp-moshi/wisp.moshi/-javax-provider-json-adapter/to-json.md
+$dokka.location:wisp.moshi/ProviderJsonAdapterFactory///PointingToDeclaration/wisp-moshi/wisp.moshi/-provider-json-adapter-factory/index.md
+$dokka.location:wisp.moshi/ProviderJsonAdapterFactory/ProviderJsonAdapterFactory/#/PointingToDeclaration/wisp-moshi/wisp.moshi/-provider-json-adapter-factory/-provider-json-adapter-factory.md
+$dokka.location:wisp.moshi/ProviderJsonAdapterFactory/create/#java.lang.reflect.Type#kotlin.collections.Set[kotlin.Annotation]#com.squareup.moshi.Moshi/PointingToDeclaration/wisp-moshi/wisp.moshi/-provider-json-adapter-factory/create.md
+wisp.moshi
