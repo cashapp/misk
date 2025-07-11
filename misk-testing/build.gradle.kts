@@ -19,7 +19,6 @@ dependencies {
   api(libs.okHttp)
   api(libs.openTracingMock)
   api(libs.servletApi)
-  api(project(":wisp:wisp-time-testing"))
   api(project(":misk"))
   api(project(":misk-actions"))
   api(project(":misk-api"))
