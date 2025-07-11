@@ -77,11 +77,6 @@ val buildWebActions = tasks.register("buildWebActions", Exec::class.java) {
   outputs.cacheIf("all inputs/outputs are declared") { true }
 }
 
-tasks.named { it == "explodeCodeSourceMain" || it == "processResources" || it == "sourcesJar" }.configureEach {
-  dependsOn(buildMiskWeb)
-  dependsOn(buildWebActions)
-}
-
 sourceSets {
   main {
     resources.srcDir(buildMiskWeb)
