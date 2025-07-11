@@ -40,23 +40,28 @@ internal class FormAdapter<T : Any> private constructor(
   ) {
     fun valuesToParameter(values: Collection<String>): Any? {
       if (isList) {
-        return values.map { converter?.invoke(it) }.toList()
+        return values.map { converter?.convert(it) }.toList()
       } else {
         val first = values.firstOrNull() ?: return null
-        return converter?.invoke(first)
+        return converter?.convert(first)
       }
     }
   }
 
   companion object {
     /** Returns an adapter for [kClass], or null if it cannot be adapted. */
-    fun <T : Any> create(kClass: KClass<T>): FormAdapter<T>? {
+    fun <T : Any> create(
+      kClass: KClass<T>,
+      stringConverterFactories: List<StringConverter.Factory>,
+    ): FormAdapter<T>? {
       val constructor = kClass.primaryConstructor ?: return null
-      val fields = constructor.parameters.map { it.toField() }
+      val fields = constructor.parameters.map { it.toField(stringConverterFactories) }
       return FormAdapter(constructor, fields)
     }
 
-    private fun KParameter.toField(): Field {
+    private fun KParameter.toField(
+      stringConverterFactories: List<StringConverter.Factory>,
+    ): Field {
       val annotation = findAnnotation<FormField>()
       val name = annotation?.name?.lowercase()
         ?: name?.lowercase()
@@ -70,7 +75,10 @@ internal class FormAdapter<T : Any> private constructor(
         isOptional,
         type.isMarkedNullable,
         isList,
-        converterFor(if (isList) type.arguments.first().type!! else type)
+        converterFor(
+          if (isList) type.arguments.first().type!! else type,
+          stringConverterFactories,
+        )
       )
     }
   }

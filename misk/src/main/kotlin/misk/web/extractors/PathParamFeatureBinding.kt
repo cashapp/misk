@@ -26,7 +26,7 @@ internal class PathParamFeatureBinding private constructor(
   ) {
     fun bind(subject: Subject) {
       val pathParam = subject.pathMatcher.group(patternIndex + 1)
-      subject.setParameter(parameter, converter.invoke(pathParam))
+      subject.setParameter(parameter, converter.convert(pathParam))
     }
   }
 
@@ -34,9 +34,12 @@ internal class PathParamFeatureBinding private constructor(
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
-      val bindings = action.parameters.mapNotNull { it.toParameterBinding(pathPattern) }
+      val bindings = action.parameters.mapNotNull {
+        it.toParameterBinding(pathPattern, stringConverterFactories)
+      }
       if (bindings.isEmpty()) return null
 
       for (binding in bindings) {
@@ -46,14 +49,17 @@ internal class PathParamFeatureBinding private constructor(
       return PathParamFeatureBinding(bindings)
     }
 
-    private fun KParameter.toParameterBinding(pathPattern: PathPattern): ParameterBinding? {
+    private fun KParameter.toParameterBinding(
+      pathPattern: PathPattern,
+      stringConverterFactories: List<StringConverter.Factory>
+    ): ParameterBinding? {
       val annotation = findAnnotation<PathParam>() ?: return null
       val name = if (annotation.value.isBlank()) name else annotation.value
 
       val patternIndex = pathPattern.variableNames.indexOf(name)
       if (patternIndex == -1) return null
 
-      val converter = converterFor(type)
+      val converter = converterFor(type, stringConverterFactories)
         ?: throw IllegalArgumentException("cannot convert path parameters to $type")
 
       return ParameterBinding(patternIndex, this, converter)

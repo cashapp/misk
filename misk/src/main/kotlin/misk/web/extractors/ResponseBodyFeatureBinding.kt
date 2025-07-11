@@ -39,7 +39,8 @@ internal class ResponseBodyFeatureBinding(
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
       if (action.dispatchMechanism == DispatchMechanism.GRPC && action.function.findAnnotation<Grpc>() == null) return null
       if (action.returnType.classifier == Unit::class) return null

@@ -20,7 +20,8 @@ internal class RequestHeadersFeatureBinding(
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
       val parameter = action.parameterAnnotatedOrNull<RequestHeaders>() ?: return null
       claimer.claimParameter(parameter)

@@ -1296,7 +1296,11 @@ public final class misk/web/FeatureBinding$DefaultImpls {
 }
 
 public abstract interface class misk/web/FeatureBinding$Factory {
-	public abstract fun create (Lmisk/Action;Lmisk/web/PathPattern;Lmisk/web/FeatureBinding$Claimer;)Lmisk/web/FeatureBinding;
+	public abstract fun create (Lmisk/Action;Lmisk/web/PathPattern;Lmisk/web/FeatureBinding$Claimer;Ljava/util/List;)Lmisk/web/FeatureBinding;
+}
+
+public final class misk/web/FeatureBinding$Factory$DefaultImpls {
+	public static synthetic fun create$default (Lmisk/web/FeatureBinding$Factory;Lmisk/Action;Lmisk/web/PathPattern;Lmisk/web/FeatureBinding$Claimer;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/FeatureBinding;
 }
 
 public abstract interface class misk/web/FeatureBinding$Subject {
@@ -1857,8 +1861,17 @@ public final class misk/web/extractors/RequestBodyException : java/io/IOExceptio
 	public fun <init> (Ljava/lang/Throwable;)V
 }
 
+public abstract interface class misk/web/extractors/StringConverter {
+	public abstract fun convert (Ljava/lang/String;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/web/extractors/StringConverter$Factory {
+	public abstract fun create (Lkotlin/reflect/KType;)Lmisk/web/extractors/StringConverter;
+}
+
 public final class misk/web/extractors/StringConverterKt {
-	public static final fun converterFor (Lkotlin/reflect/KType;)Lkotlin/jvm/functions/Function1;
+	public static final fun converterFor (Lkotlin/reflect/KType;Ljava/util/List;)Lmisk/web/extractors/StringConverter;
+	public static synthetic fun converterFor$default (Lkotlin/reflect/KType;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/extractors/StringConverter;
 }
 
 public final class misk/web/formatter/ClassNameFormatter {

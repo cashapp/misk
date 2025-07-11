@@ -58,6 +58,7 @@ import misk.web.extractors.RequestCookiesFeatureBinding
 import misk.web.extractors.RequestHeaderFeatureBinding
 import misk.web.extractors.RequestHeadersFeatureBinding
 import misk.web.extractors.ResponseBodyFeatureBinding
+import misk.web.extractors.StringConverter
 import misk.web.extractors.WebSocketFeatureBinding
 import misk.web.extractors.WebSocketListenerFeatureBinding
 import misk.web.interceptors.BeforeContentEncoding
@@ -167,6 +168,7 @@ class MiskWebModule @JvmOverloads constructor(
 
     // Initialize empty sets for our multibindings.
     newMultibinder<NetworkInterceptor.Factory>()
+    newMultibinder<StringConverter.Factory>()
     newMultibinder<ApplicationInterceptor.Factory>()
     newMultibinder<StaticResourceEntry>()
     newMultibinder<WebProxyEntry>()

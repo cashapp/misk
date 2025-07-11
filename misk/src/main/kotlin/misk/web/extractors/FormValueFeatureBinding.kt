@@ -24,13 +24,14 @@ internal class FormValueFeatureBinding<T : Any>(
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
       val parameter = action.parameterAnnotatedOrNull<FormValue>() ?: return null
       if (parameter.type.classifier !is KClass<*>) return null
 
       val kClass = parameter.type.classifier as KClass<*>
-      val formAdapter = FormAdapter.create(kClass) ?: return null
+      val formAdapter = FormAdapter.create(kClass, stringConverterFactories) ?: return null
       claimer.claimRequestBody()
       claimer.claimParameter(parameter)
       return FormValueFeatureBinding(parameter, formAdapter)

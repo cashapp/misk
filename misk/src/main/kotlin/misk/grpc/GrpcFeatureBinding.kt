@@ -15,6 +15,7 @@ import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
 import misk.web.PathPattern
 import misk.web.WebConfig
+import misk.web.extractors.StringConverter
 import misk.web.mediatype.MediaTypes
 import java.lang.reflect.Type
 import kotlin.coroutines.CoroutineContext
@@ -137,7 +138,8 @@ internal class GrpcFeatureBinding(
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
       if (action.dispatchMechanism != DispatchMechanism.GRPC) return null
 
