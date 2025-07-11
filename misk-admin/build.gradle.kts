@@ -53,6 +53,7 @@ val buildMiskWeb = tasks.register("buildMiskWeb", Exec::class.java) {
     exclude("tabs/database/tslint.json")
     exclude("tabs/database/webpack.config.js")
   }).withPropertyName("webfiles").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.files(project.file("../package-lock.json")) // for misk-cli install
   outputs.dir(layout.buildDirectory.dir("web"))
 
   outputs.cacheIf("all inputs/outputs are declared") { true }
