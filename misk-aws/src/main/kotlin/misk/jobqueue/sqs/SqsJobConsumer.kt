@@ -25,7 +25,7 @@ import org.slf4j.MDC
 import wisp.logging.SmartTagsThreadLocalHandler
 import wisp.logging.error
 import wisp.logging.getLogger
-import wisp.tracing.traceWithNewRootSpan
+import misk.tracing.traceWithNewRootSpan
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant

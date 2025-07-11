@@ -13,7 +13,7 @@ import misk.jobqueue.JobQueue.Companion.SQS_MAX_BATCH_ENQUEUE_JOB_SIZE
 import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
-import wisp.tracing.traceWithSpan
+import misk.tracing.traceWithSpan
 import java.time.Duration
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
