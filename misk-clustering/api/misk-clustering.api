@@ -145,8 +145,26 @@ public final class misk/clustering/fake/FakeClusterModule : misk/inject/KAbstrac
 	public fun <init> ()V
 }
 
-public final class misk/clustering/fake/lease/FakeLeaseManager : wisp/lease/FakeLeaseManager {
+public final class misk/clustering/fake/lease/FakeLease : wisp/lease/Lease {
+	public fun <init> (Ljava/lang/String;Lmisk/clustering/fake/lease/FakeLeaseManager;)V
+	public fun acquire ()Z
+	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
+	public fun checkHeld ()Z
+	public fun checkHeldElsewhere ()Z
+	public fun getName ()Ljava/lang/String;
+	public final fun notifyAfterAcquire ()V
+	public final fun notifyBeforeRelease ()V
+	public fun release ()Z
+}
+
+public final class misk/clustering/fake/lease/FakeLeaseManager : misk/testing/FakeFixture, wisp/lease/LeaseManager {
 	public fun <init> ()V
+	public final fun isLeaseHeld (Ljava/lang/String;)Z
+	public final fun isLeaseHeldElsewhere (Ljava/lang/String;)Z
+	public final fun markLeaseHeld (Ljava/lang/String;)V
+	public final fun markLeaseHeldElsewhere (Ljava/lang/String;)V
+	public fun releaseAll ()V
+	public fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
 }
 
 public final class misk/clustering/fake/lease/FakeLeaseModule : misk/inject/KAbstractModule {
