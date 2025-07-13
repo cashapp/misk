@@ -142,7 +142,7 @@ class MiskClientMiskServerTest {
       val e = assertFailsWith<GrpcException> {
         routeGuide.GetFeature().execute(point)
       }
-      assertThat(e.grpcMessage).isEqualTo("unexpected latitude error!")
+      assertThat(e.grpcMessage).startsWith("unexpected latitude error!")
       assertThat(e.grpcStatus).isEqualTo(GrpcStatus.UNKNOWN)
 
       // Assert that _metrics_ counted a 500 and no 200s, even though an HTTP 200 was returned
@@ -173,7 +173,7 @@ class MiskClientMiskServerTest {
       val e = assertFailsWith<GrpcException> {
         routeGuide.GetFeature().execute(point)
       }
-      assertThat(e.grpcMessage).isEqualTo("unexpected latitude error!")
+      assertThat(e.grpcMessage).startsWith("unexpected latitude error!")
       assertThat(e.grpcStatus).isEqualTo(GrpcStatus.NOT_FOUND)
         .withFailMessage("wrong gRPC status ${e.grpcStatus.name}")
 
@@ -216,7 +216,7 @@ class MiskClientMiskServerTest {
       val e = assertFailsWith<GrpcException> {
         routeGuide.GetFeature().execute(point)
       }
-      assertThat(e.grpcMessage).isEqualTo("invalid coordinates")
+      assertThat(e.grpcMessage).startsWith("invalid coordinates")
       assertThat(e.grpcStatus).isEqualTo(GrpcStatus.INVALID_ARGUMENT)
         .withFailMessage("wrong gRPC status ${e.grpcStatus.name}")
 
@@ -228,4 +228,19 @@ class MiskClientMiskServerTest {
     }
   }
 
+  @Test
+  fun grpcMessageContainsStackTrace() {
+    val point = Point(
+      latitude = -91,
+      longitude = 10,
+    )
+
+    runBlocking {
+      val e = assertFailsWith<GrpcException> {
+        routeGuide.GetFeature().execute(point)
+      }
+      assertThat(e.grpcMessage).contains("GetFeatureGrpcAction.GetFeature")
+    }
+
+  }
 }
