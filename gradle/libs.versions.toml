@@ -71,7 +71,7 @@ gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.58.
 gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.30.0" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250523-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
-gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.22.6" }
+gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.0" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.97.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.8.0" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250629-2.0.0" }
