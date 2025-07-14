@@ -17,6 +17,7 @@ data class Tag<T>(val name: String, val value: T) {
 /**
  * Conveniently set tags all at once.
  */
+@Deprecated("This module is deprecated as wisp.tracing is deprecated.")
 fun Span.setTags(tags: Collection<Tag<*>>) = tags.forEach { setTag(it) }
 
 fun Span.setTag(tag: Tag<*>) {
