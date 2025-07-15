@@ -50,7 +50,7 @@ sqldelight {
   }
 }
 
-val compileKotlin by tasks.getting {
+tasks.compileKotlin {
   dependsOn("generateMainLeaseDatabaseInterface")
 }
 
