@@ -53,7 +53,7 @@ bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version.ref = "bucket4
 bucket4jRedis = { module = "com.bucket4j:bucket4j-redis", version.ref = "bucket4j" }
 concurrencyLimitsCore = { module = "com.netflix.concurrency-limits:concurrency-limits-core", version = "0.5.3" }
 cronUtils = { module = "com.cronutils:cron-utils", version = "9.2.1" }
-datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.10.1" }
+datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.11.0" }
 detektApi = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }
 detektParser = { module = "io.gitlab.arturbosch.detekt:detekt-parser", version.ref = "detekt" }
 detektPsiUtils = { module = "io.gitlab.arturbosch.detekt:detekt-psi-utils", version.ref = "detekt" }
@@ -68,7 +68,7 @@ errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotation
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.68.1" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.58.1" }
-gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.30.0" }
+gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.31.0" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250523-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.0" }
