@@ -5,6 +5,8 @@ import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbException
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.SQLRecoverableException
+import java.sql.SQLTransientException
 import java.sql.Statement
 
 /**
@@ -34,6 +36,49 @@ internal class VitessQueryExecutor(
   fun executeUpdate(query: String, target: String = "@primary"): Int {
     val connection = getVtgateConnection()
     return connection.use { conn -> executeUpdate(conn, query, target) }
+  }
+
+  /**
+   * Execute update with retry logic to handle retryable failures.
+   */
+  fun executeUpdateWithRetries(query: String, target: String = "@primary"): Int {
+    var lastException: Exception? = null
+    val maxRetries = 3
+    val retryDelayMs = 500L
+
+    val retryableErrorMessages = listOf(
+      "Keyspace does not have exactly one shard",
+    )
+    
+    for (attempt in 1..maxRetries) {
+      try {
+        return executeUpdate(query, target)
+      } catch (e: Exception) {
+        lastException = e
+
+        // Check if this is a retryable exception type or message
+        val isRetryableException = e.cause is SQLRecoverableException || 
+                                   e.cause is SQLTransientException ||
+                                   e is SQLRecoverableException ||
+                                   e is SQLTransientException
+        
+        val isRetryableMessage = retryableErrorMessages.any { errorMessage ->
+          e.message?.contains(errorMessage, ignoreCase = true) == true
+        }
+        
+        if ((isRetryableException || isRetryableMessage) && attempt < maxRetries) {
+          Thread.sleep(retryDelayMs * attempt)
+        } else {
+          throw e // Re-throw if not a retry-able error or max retries reached
+        }
+      }
+    }
+    
+    // If we get here, all retries failed
+    throw VitessQueryExecutorException(
+      "Failed to executeUpdate after `$maxRetries` attempts. Query: `$query`, Last error: `${lastException?.message}`",
+      lastException
+    )
   }
 
   fun executeTransaction(query: String, target: String = "@primary"): Boolean {
