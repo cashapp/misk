@@ -136,15 +136,28 @@ internal class VitessSchemaApplier(
     val ddlUpdates = ConcurrentLinkedQueue<DdlUpdate>()
     val vschemaUpdates = ConcurrentLinkedQueue<VSchemaUpdate>()
 
-    // Run all keyspace operations in parallel to speed up schema change processing.
-    val executorService = Executors.newFixedThreadPool(keyspaces.size)
+    // Apply VSchemas in parallel but wait for all to complete before proceeding to DDL's.
+    val vschemaExecutorService = Executors.newFixedThreadPool(keyspaces.size)
+    val vschemaFutures = mutableListOf<Future<VSchemaUpdate>>()
+    
+    keyspaces.forEach { keyspace ->
+      vschemaFutures.add(
+        vschemaExecutorService.submit<VSchemaUpdate> {
+          processVschema(keyspace)
+        }
+      )
+    }
+
+    vschemaFutures.forEach { future ->
+      vschemaUpdates.add(future.get())
+    }
+    vschemaExecutorService.shutdown()
+
+    val ddlExecutorService = Executors.newFixedThreadPool(keyspaces.size)
     val futures = mutableListOf<Future<Unit>>()
     keyspaces.forEach { keyspace ->
       futures.add(
-        executorService.submit<Unit> {
-          val vschemaUpdate = processVschema(keyspace)
-          vschemaUpdates.add(vschemaUpdate)
-
+        ddlExecutorService.submit<Unit> {
           var schemaChangesProcessedForKeyspace: Boolean
           if (enableDeclarativeSchemaChanges) {
             schemaChangesProcessedForKeyspace = applyDeclarativeSchemaChanges(keyspace, vitessQueryExecutor, ddlUpdates)
@@ -161,7 +174,7 @@ internal class VitessSchemaApplier(
     }
 
     futures.forEach { it.get() }
-    executorService.shutdown()
+    ddlExecutorService.shutdown()
 
     initializeSequenceTables(vitessQueryExecutor)
     println("🔧 Schema is applied.")
@@ -236,9 +249,9 @@ internal class VitessSchemaApplier(
     keyspace.ddlCommands
       .sortedBy { it.first }
       .map { it.second }
-      .forEach {
-        vitessQueryExecutor.executeUpdate(query = it, target = keyspace.name)
-        ddlUpdates.add(DdlUpdate(ddl = it, keyspace = keyspace.name))
+      .forEach { ddl ->
+        vitessQueryExecutor.executeUpdateWithRetries(ddl, keyspace.name)
+        ddlUpdates.add(DdlUpdate(ddl = ddl, keyspace = keyspace.name))
       }
 
     return true
@@ -286,7 +299,7 @@ internal class VitessSchemaApplier(
 
   private fun applyDdlCommands(ddl: String, keyspace: VitessKeyspace, vitessQueryExecutor: VitessQueryExecutor) {
     printDebug("Applying schema changes:\n$ddl")
-    vitessQueryExecutor.executeUpdate(ddl, keyspace.name)
+    vitessQueryExecutor.executeUpdateWithRetries(ddl, keyspace.name)
   }
 
   private fun executeDockerCommand(command: List<String>, keyspace: String): String {
