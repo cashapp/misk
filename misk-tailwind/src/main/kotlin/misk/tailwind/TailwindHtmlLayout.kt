@@ -10,6 +10,15 @@ import kotlinx.html.script
 import kotlinx.html.title
 import misk.turbo.addHotwireHeadImports
 
+
+internal class DevMode {
+  companion object {
+    val devMode by lazy {
+      System.getProperty("misk.dev.running") == "true"
+    }
+  }
+}
+
 fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: Boolean = false, appCssPath: String? = null, headBlock: TagConsumer<*>.() -> Unit = {}, bodyBlock: TagConsumer<*>.() -> Unit) {
   html {
     attributes["class"] = "h-full bg-white"
@@ -46,6 +55,12 @@ fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: B
         rel = "stylesheet"
       }
       title(title)
+      if (DevMode.devMode) {
+        script {
+          type = "module"
+          src = "/static/js/refresh_dev.js"
+        }
+      }
 
       addHotwireHeadImports(appRoot)
       headBlock()

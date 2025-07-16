@@ -128,7 +128,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
     return kclass.cast(
       Proxy.newProxyInstance(
-        ClassLoader.getSystemClassLoader(),
+        Thread.currentThread().contextClassLoader,
         arrayOf(kclass.java),
         invocationHandler
       )

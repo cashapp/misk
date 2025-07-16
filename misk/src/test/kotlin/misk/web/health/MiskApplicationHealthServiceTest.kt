@@ -10,6 +10,7 @@ import jakarta.inject.Singleton
 import misk.MiskApplication
 import misk.MiskTestingServiceModule
 import misk.ReadyService
+import misk.RunningMiskApplication
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.time.ClockModule
@@ -34,6 +35,7 @@ import java.net.ConnectException
 import java.net.ServerSocket
 import java.net.SocketOptions
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -101,14 +103,16 @@ class MiskApplicationHealthServiceTest {
     val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as? Logger
     root?.let { it.level = INFO }
 
-    val miskShutdownLatch = CountDownLatch(1)
     val miskApplication = MiskApplication(TestModule())
 
+    val futureApp = CompletableFuture<RunningMiskApplication>()
     thread {
-      logger.debug("Running Misk!")
-      miskApplication.doRun(arrayOf())
-      logger.debug("Misk shutdown!")
-      miskShutdownLatch.countDown()
+      try {
+        logger.debug("Running Misk!")
+        futureApp.complete(miskApplication.start())
+      } catch (e : Exception) {
+        futureApp.completeExceptionally(e)
+      }
     }
 
     // Both services should be shutdown
@@ -173,7 +177,7 @@ class MiskApplicationHealthServiceTest {
     get(healthStatusUrl, "health", expectCode = 200)
 
     // Begin the shutdown sequence by invoking the shutdown hook.
-    miskApplication.shutdownHook.start()
+    futureApp.get().stop()
 
     DelayJettyStartNotifyStop.shutdownLatch.await(10, TimeUnit.SECONDS)
 
@@ -190,7 +194,7 @@ class MiskApplicationHealthServiceTest {
 
     // Let the HealthService Shutdown, wait for misk to shut down.
     HealthCheckNotifyStartDelayStop.okToShutdownLatch.countDown()
-    assertThat(miskShutdownLatch.await(10, TimeUnit.SECONDS)).isTrue()
+    assertThat(futureApp.get().awaitTerminated(10, TimeUnit.SECONDS)).isTrue()
 
     logger.info("--- HealthServer Down ---")
     get(webHelloUrl, "web", expectThrowable = ConnectException::class)
