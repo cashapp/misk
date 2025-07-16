@@ -37,6 +37,14 @@ dependencies {
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-testing-api"))
+
+  testImplementation(libs.kotestAssertions)
+  testImplementation(libs.kotestAssertionsShared)
+  testImplementation(libs.kotestCommon)
+  testImplementation(libs.kotestFrameworkApi)
+  testRuntimeOnly(libs.junitEngine)
+  testRuntimeOnly(libs.kotestJunitRunnerJvm)
+
 }
 
 mavenPublishing {
