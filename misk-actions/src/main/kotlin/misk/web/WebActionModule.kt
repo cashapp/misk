@@ -34,6 +34,10 @@ class WebActionModule<A : WebAction> private constructor(
       return WebActionModule(actionClass, "/")
     }
 
+    fun boo(): String {
+      return "boo"
+    }
+
     inline fun <reified A : WebAction> createWithPrefix(url_path_prefix: String):
       WebActionModule<A> = createWithPrefix(A::class, url_path_prefix)
 
