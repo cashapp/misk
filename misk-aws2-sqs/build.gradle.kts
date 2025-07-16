@@ -29,7 +29,6 @@ dependencies {
   implementation(libs.openTracingDatadog)
   implementation(libs.tracingDatadog)
   implementation(project(":misk"))
-  implementation(project(":misk-api"))
   implementation(project(":misk-core"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))

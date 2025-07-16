@@ -2,8 +2,6 @@ package misk.aws2.sqs.jobqueue
 
 import misk.ReadyService
 import misk.ServiceModule
-import misk.annotation.ExperimentalMiskApi
-import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.inject.KAbstractModule
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.JobHandler
@@ -12,7 +10,6 @@ import kotlin.reflect.KClass
 /**
  * Install this module to register a handler for an SQS queue
  */
-@ExperimentalMiskApi
 class SqsJobHandlerModule private constructor(
   private val queueName: QueueName,
   private val handler: KClass<out JobHandler>,
