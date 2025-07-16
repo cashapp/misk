@@ -13,9 +13,9 @@ import misk.vitess.testing.DefaultSettings.VTCTLD_CLIENT_IMAGE
 import misk.vitess.testing.VSchemaUpdate
 import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbStartupException
-import wisp.resources.ClasspathResourceLoaderBackend
-import wisp.resources.FilesystemLoaderBackend
-import wisp.resources.ResourceLoader
+import misk.resources.ClasspathResourceLoaderBackend
+import misk.resources.FilesystemLoaderBackend
+import misk.resources.ResourceLoader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths

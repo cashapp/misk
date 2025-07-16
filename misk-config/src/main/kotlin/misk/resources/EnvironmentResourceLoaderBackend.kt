@@ -1,4 +1,4 @@
-package wisp.resources
+package misk.resources
 
 import okio.Buffer
 import okio.BufferedSource
@@ -8,10 +8,6 @@ import okio.BufferedSource
  *
  * This uses the scheme `environment:`.
  */
-@Deprecated(
-  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
-  ReplaceWith(expression = "EnvironmentResourceLoaderBackend","misk.resources.EnvironmentResourceLoaderBackend")
-)
 // TODO change this to use EnvironmentVariableLoader instead so it can be easily faked and tested
 object EnvironmentResourceLoaderBackend : ResourceLoader.Backend() {
 

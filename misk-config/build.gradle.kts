@@ -27,7 +27,6 @@ dependencies {
   implementation(libs.okio)
   implementation(project(":misk-tailwind"))
   implementation(project(":wisp:wisp-logging"))
-  implementation(project(":wisp:wisp-resource-loader-testing"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
@@ -40,10 +39,16 @@ dependencies {
   testImplementation(project(":misk"))
   testImplementation(project(":misk-config"))
   testImplementation(project(":misk-testing"))
+  testImplementation(libs.junitPioneer)
 }
 
 mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )
+}
+// Allows us to set environment variables in tests using JUnit Pioneer
+tasks.test {
+  jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+  jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }

@@ -146,8 +146,8 @@ class Composer(private val name: String, private vararg val containers: Containe
           span.finish()
         }
     }
-
-    private fun Container.name(): String {
+  @Suppress("DEPRECATION")
+  private fun Container.name(): String {
         val create = dockerClient.createContainerCmd("todo").apply(createCmd)
         require(!create.name.isNullOrBlank()) {
             "must provide a name for the container"
