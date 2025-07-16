@@ -311,7 +311,6 @@ public final class misk/tokens/FakeTokenGenerator : misk/testing/FakeFixture, wi
 public final class misk/tokens/FakeTokenGenerator2 : misk/testing/FakeFixture, misk/tokens/TokenGenerator2 {
 	public fun <init> ()V
 	public fun generate (Ljava/lang/String;I)Ljava/lang/String;
-	public fun reset ()V
 }
 
 public final class misk/tokens/FakeTokenGeneratorModule : misk/inject/KAbstractModule {
@@ -329,11 +328,15 @@ public final class misk/tokens/RealTokenGenerator2 : misk/tokens/TokenGenerator2
 }
 
 public abstract interface class misk/tokens/TokenGenerator2 {
+	public static final field CANONICALIZE_LENGTH_MAX I
+	public static final field CANONICALIZE_LENGTH_MIN I
 	public static final field Companion Lmisk/tokens/TokenGenerator2$Companion;
 	public abstract fun generate (Ljava/lang/String;I)Ljava/lang/String;
 }
 
 public final class misk/tokens/TokenGenerator2$Companion {
+	public static final field CANONICALIZE_LENGTH_MAX I
+	public static final field CANONICALIZE_LENGTH_MIN I
 	public final fun canonicalize (Ljava/lang/String;)Ljava/lang/String;
 }
 

@@ -8,6 +8,13 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import jakarta.inject.Inject
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "FakeTokenGenerator2()",
+    imports = ["misk.tokens.Fake3TokenGenerator2"]
+  )
+)
 class FakeTokenGenerator @Inject constructor(): FakeFixture(), TokenGenerator {
     internal val nextByLabel by resettable {
       Collections.synchronizedMap<String, AtomicLong>(

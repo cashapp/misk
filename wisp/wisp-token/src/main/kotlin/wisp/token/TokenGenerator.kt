@@ -34,6 +34,13 @@ import java.util.*
  * payment000000000000000035
  * ```
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "TokenGenerator2()",
+    imports = ["misk.tokens.TokenGenerator2"]
+  )
+)
 interface TokenGenerator {
     fun generate(label: String? = null, length: Int = 25): String
 

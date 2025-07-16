@@ -8,6 +8,13 @@ import kotlin.experimental.and
 
 private const val REAL_TOKEN_GENERATOR_BIT_MASK = 31.toByte()
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "RealTokenGenerator2()",
+    imports = ["misk.tokens.RealTokenGenerator2"]
+  )
+)
 class RealTokenGenerator : TokenGenerator {
     private val random = SecureRandom()
 

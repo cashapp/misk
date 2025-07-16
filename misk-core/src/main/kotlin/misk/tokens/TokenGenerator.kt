@@ -13,23 +13,26 @@ interface TokenGenerator2 {
   companion object {
     internal const val alphabet = "0123456789abcdefghjkmnpqrstvwxyz"
     internal val indexToChar = alphabet.toCharArray()
-    private val charToIndex = ByteArray(128)
+    private const val CHAR_TO_INDEX_SIZE = 128
+    private val charToIndex = ByteArray(CHAR_TO_INDEX_SIZE)
+    const val CANONICALIZE_LENGTH_MIN = 4
+    const val CANONICALIZE_LENGTH_MAX = 25
 
     init {
       Arrays.fill(charToIndex, (-1).toByte())
       for (i in indexToChar.indices) {
         val c = indexToChar[i]
-        charToIndex[Character.toLowerCase(c).toInt()] = i.toByte()
-        charToIndex[Character.toUpperCase(c).toInt()] = i.toByte()
+        charToIndex[Character.toLowerCase(c).code] = i.toByte()
+        charToIndex[Character.toUpperCase(c).code] = i.toByte()
         if (c == '0') {
-          charToIndex['o'.toInt()] = i.toByte()
-          charToIndex['O'.toInt()] = i.toByte()
+          charToIndex['o'.code] = i.toByte()
+          charToIndex['O'.code] = i.toByte()
         }
         if (c == '1') {
-          charToIndex['i'.toInt()] = i.toByte()
-          charToIndex['I'.toInt()] = i.toByte()
-          charToIndex['l'.toInt()] = i.toByte()
-          charToIndex['L'.toInt()] = i.toByte()
+          charToIndex['i'.code] = i.toByte()
+          charToIndex['I'.code] = i.toByte()
+          charToIndex['l'.code] = i.toByte()
+          charToIndex['L'.code] = i.toByte()
         }
       }
     }
@@ -50,12 +53,12 @@ interface TokenGenerator2 {
       val result = StringBuilder()
       for (c in token) {
         if (c == ' ') continue
-        require(c.toInt() in 0..127) { "unexpected token $token" }
-        val index = charToIndex[c.toInt()].toInt()
+        require(c.code in 0 until CHAR_TO_INDEX_SIZE) { "unexpected token $token" }
+        val index = charToIndex[c.code].toInt()
         require(index != -1) { "unexpected token $token" }
         result.append(indexToChar[index])
       }
-      require(result.length in 4..25)
+      require(result.length in CANONICALIZE_LENGTH_MIN..CANONICALIZE_LENGTH_MAX)
       return result.toString()
     }
   }
