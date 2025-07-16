@@ -94,6 +94,10 @@ internal class VitessDockerContainer(
     const val CONTAINER_STOP_TIMEOUT_SECONDS = 10
     const val PORT_CHECK_TIMEOUT_MS = 200
 
+    // Retry configuration for container startup
+    const val CONTAINER_STARTUP_MAX_RETRIES = 3
+    const val CONTAINER_STARTUP_RETRY_DELAY_MS = 2000L
+
     // Used for synchronizing to prevent race-conditions.
     val containerLock = Any() // Use the same mutex for both starting and removing containers.
     val vitessNetworkLock = Any()
@@ -124,23 +128,76 @@ internal class VitessDockerContainer(
       printDebug("Reason for new container: ${shouldCreateContainerResult.newContainerReason}")
     }
 
-    val vitessPortConfig = VitessPortConfig.create(userPort)
+    return startContainerWithRetries(vitessSchemaPreparer)
+  }
 
-    stopExistingContainers(containerName, vitessPortConfig)
+  private fun startContainerWithRetries(vitessSchemaPreparer: VitessSchemaPreparer): StartContainerResult {
+    var lastResult: StartDockerContainerResult? = null
+    var containerId: String? = null
+    
+    repeat(CONTAINER_STARTUP_MAX_RETRIES) { attemptNumber ->
+      try {
+        val vitessPortConfig = VitessPortConfig.create(userPort)
 
-    val containerId = createContainer(vitessPortConfig, vitessSchemaPreparer.keyspaces)
-    startContainer(containerId)
-    waitForContainerHealth(containerId)
-    createDbaUserForSideCarDb(containerId)
+        if (containerId == null) {
+          stopExistingContainers(containerName, vitessPortConfig)
+          containerId = createContainer(vitessPortConfig, vitessSchemaPreparer.keyspaces)
+        }
+        
+        val startResult = startContainer(containerId)
+        
+        when {
+          startResult.status == StartDockerContainerStatus.SUCCESS ||
+          startResult.status == StartDockerContainerStatus.ALREADY_STARTED -> {
+            waitForContainerHealth(containerId)
+            createDbaUserForSideCarDb(containerId)
 
-    if (autoApplySchemaChanges) {
-      getVitessSchemaApplier(vitessSchemaPreparer).applySchema()
+            if (autoApplySchemaChanges) {
+              getVitessSchemaApplier(vitessSchemaPreparer).applySchema()
+            }
+
+            if (attemptNumber > 0) {
+              println("Container startup succeeded on retry attempt ${attemptNumber + 1}")
+            }
+
+            return StartVitessContainerResult(
+              newContainerCreated = true,
+              newContainerReason = "Container started successfully" + if (attemptNumber > 0) " after ${attemptNumber + 1} attempts" else "",
+              containerId = containerId,
+            )
+          }
+          
+          startResult.shouldRetry -> {
+            lastResult = startResult
+            println("Container start attempt ${attemptNumber + 1}: ${startResult.message}")
+            
+            if (startResult.shouldUseNewPortConfig) {
+              containerId = null // Force new container creation with new port config
+            }
+            // else keep same containerId for retry
+            
+            if (attemptNumber < CONTAINER_STARTUP_MAX_RETRIES - 1) {
+              Thread.sleep(CONTAINER_STARTUP_RETRY_DELAY_MS * (attemptNumber + 1))
+            }
+          }
+          
+          else -> {
+            // Non-retryable failure
+            throw VitessTestDbStartupException(
+              startResult.message ?: "Container startup failed",
+              startResult.cause
+            )
+          }
+        }
+      } catch (e: Exception) {
+        throw VitessTestDbStartupException("Unexpected error during container startup", e)
+      }
     }
-
-    return StartVitessContainerResult(
-      newContainerCreated = true,
-      newContainerReason = shouldCreateContainerResult.newContainerReason,
-      containerId = containerId,
+    
+    // All retries exhausted
+    throw VitessTestDbStartupException(
+      "Failed to start container after `$CONTAINER_STARTUP_MAX_RETRIES` attempts. Last error: `${lastResult?.message}`",
+      lastResult?.cause
     )
   }
 
@@ -390,30 +447,41 @@ internal class VitessDockerContainer(
     }
   }
 
-  private fun startContainer(containerId: String) {
+  private fun startContainer(containerId: String): StartDockerContainerResult {
     synchronized(containerLock) {
       try {
         // Check if the container is already running
         val containerInfo = dockerClient.inspectContainerCmd(containerId).exec()
         if (containerInfo.state.running == true) {
           println("Container `$containerId` is already running. Skipping startContainer.")
-          return
+          return StartDockerContainerResult.success("Container is already running.")
         }
 
         // Start the container
         dockerClient.startContainerCmd(containerId).exec()
+        return StartDockerContainerResult.success("Container started successfully.")
+        
       } catch (notModifiedException: NotModifiedException) {
         // The container is already started, ignore the exception.
         println("Container `$containerId` is already started.")
+        return StartDockerContainerResult.alreadyStarted()
+        
       } catch (notFoundException: NotFoundException) {
-        throw VitessTestDbStartupException("Container for `$containerId` was not found during start up.")
+        return StartDockerContainerResult.nonRetryableFailure(
+          "Container for `$containerId` was not found during start up.",
+          notFoundException
+        )
+        
       } catch (internalServerException: InternalServerErrorException) {
         val message = internalServerException.message ?: ""
         if (message.contains("port is already allocated")) {
           return handlePortAlreadyAllocatedError(containerId, internalServerException)
         }
 
-        throw VitessTestDbStartupException("Failed to start Docker container for `$containerName`.", internalServerException)
+        return StartDockerContainerResult.nonRetryableFailure(
+          "Failed to start Docker container for `$containerName`.",
+          internalServerException
+        )
       }
     }
   }
@@ -792,13 +860,12 @@ internal class VitessDockerContainer(
    * {"message":"driver failed programming external connectivity on endpoint <container_name>
    * (<container_id>): Bind for 0.0.0.0:<port> failed: port is already allocated"}
    *
-   * If the `container_id` found using the port is the same as the one we are trying to start, we return gracefully,
-   * otherwise we throw a `VitessTestDbStartupException` with a message indicating the port conflict.
+   * Returns appropriate `StartDockerContainerResult` based on the port conflict scenario.
    */
   private fun handlePortAlreadyAllocatedError(
     containerId: String,
     internalServerException: Exception,
-  ) {
+  ): StartDockerContainerResult {
     val message = internalServerException.message!!
     val allocatedPort = parseAllocatedPort(message)
     if (allocatedPort != null) {
@@ -809,18 +876,18 @@ internal class VitessDockerContainer(
       val conflictingContainer = containers.firstOrNull()
       when {
         conflictingContainer == null -> {
-          throw VitessTestDbStartupException(
+          return StartDockerContainerResult.retryableSamePortConfig(
             "Port `$allocatedPort` is already allocated, but no container found using it.",
             internalServerException
           )
         }
         conflictingContainer.id == containerId -> {
           println("Port `$allocatedPort` is already allocated by the same container `$containerId`. Returning gracefully.")
-          return
+          return StartDockerContainerResult.alreadyStarted()
         }
         else -> {
           val names = conflictingContainer.names?.joinToString() ?: "unknown"
-          throw VitessTestDbStartupException(
+          return StartDockerContainerResult.retryableNewPortConfig(
             "Port `$allocatedPort` is already allocated by container: `id=${conflictingContainer.id}`, `names=$names`.",
             internalServerException
           )
@@ -828,7 +895,7 @@ internal class VitessDockerContainer(
       }
     }
 
-    throw VitessTestDbStartupException(
+    return StartDockerContainerResult.nonRetryableFailure(
       "Failed to start Docker container for `$containerName` due to possible port conflict or race condition.",
       internalServerException
     )
@@ -861,6 +928,58 @@ internal class VitessDockerContainer(
     if (debugStartup) {
       println(message)
     }
+  }
+
+  /**
+   * Result type for the Docker `startContainer` API operation itself that encodes a retry strategy as needed.
+   */
+  private data class StartDockerContainerResult(
+    val status: StartDockerContainerStatus,
+    val shouldRetry: Boolean = false,
+    val shouldUseNewPortConfig: Boolean = false,
+    val message: String? = null,
+    val cause: Throwable? = null
+  ) {
+    companion object {
+      fun success(message: String? = null) = StartDockerContainerResult(
+        status = StartDockerContainerStatus.SUCCESS,
+        message = message
+      )
+      
+      fun alreadyStarted() = StartDockerContainerResult(
+        status = StartDockerContainerStatus.ALREADY_STARTED,
+        message = "Container is already started"
+      )
+      
+      fun retryableSamePortConfig(message: String, cause: Throwable? = null) = StartDockerContainerResult(
+        status = StartDockerContainerStatus.FAILED,
+        shouldRetry = true,
+        shouldUseNewPortConfig = false,
+        message = message,
+        cause = cause
+      )
+      
+      fun retryableNewPortConfig(message: String, cause: Throwable? = null) = StartDockerContainerResult(
+        status = StartDockerContainerStatus.FAILED,
+        shouldRetry = true,
+        shouldUseNewPortConfig = true,
+        message = message,
+        cause = cause
+      )
+      
+      fun nonRetryableFailure(message: String, cause: Throwable? = null) = StartDockerContainerResult(
+        status = StartDockerContainerStatus.FAILED,
+        shouldRetry = false,
+        message = message,
+        cause = cause
+      )
+    }
+  }
+
+  private enum class StartDockerContainerStatus {
+    SUCCESS,
+    ALREADY_STARTED,
+    FAILED
   }
 }
 
