@@ -12,6 +12,9 @@ import misk.inject.getInstance
 import misk.web.jetty.JettyHealthService
 import misk.web.jetty.JettyService
 import wisp.logging.getLogger
+import java.io.Closeable
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 import kotlin.time.Duration.Companion.milliseconds
@@ -60,7 +63,6 @@ class MiskApplication private constructor(
    *
    * If no command line arguments are specified, the service starts and blocks until terminated.
    */
-  @VisibleForTesting
   internal fun doRun(args: Array<String>) {
     if (args.isEmpty()) {
       startServiceAndAwaitTermination()
@@ -79,7 +81,7 @@ class MiskApplication private constructor(
             binder().requireAtInjectOnConstructors()
           }
         },
-        *command.modules.toTypedArray()
+        *command.modules.toTypedArray(),
       )
 
       injector.injectMembers(command)
@@ -101,18 +103,36 @@ class MiskApplication private constructor(
    * exiting the process.
    */
   @VisibleForTesting
-  internal lateinit var shutdownHook : Thread
+  internal lateinit var shutdownHook: Thread
 
   /**
    * Provides internal testing the ability to get instances this used by the application.
    */
   @VisibleForTesting
-  internal lateinit var injector : Injector
+  internal lateinit var injector: Injector
 
-  private fun startServiceAndAwaitTermination() {
+  internal fun start(): RunningMiskApplication {
     log.info { "creating application injector" }
     injector = injectorGenerator()
     val serviceManager = injector.getInstance<ServiceManager>()
+
+
+    // We manage JettyHealthService outside ServiceManager because it must start and
+    // shutdown last to keep the container alive via liveness checks.
+    val jettyHealthService: JettyHealthService
+    measureTimeMillis {
+      log.info { "starting services" }
+      serviceManager.startAsync()
+      serviceManager.awaitHealthy()
+
+      // Start Health Service Last to ensure any dependencies are started.
+      jettyHealthService = injector.getInstance<JettyHealthService>()
+      jettyHealthService.startAsync()
+      jettyHealthService.awaitRunning()
+    }.also {
+      log.info { "all services started successfully in ${it.milliseconds}" }
+    }
+
     shutdownHook = thread(start = false) {
       measureTimeMillis {
         log.info { "received a shutdown hook! performing an orderly shutdown" }
@@ -135,29 +155,40 @@ class MiskApplication private constructor(
         log.info { "orderly shutdown complete in ${it.milliseconds}" }
       }
     }
+    val shutdown: RunningMiskApplication = object : RunningMiskApplication {
+      override fun stop() {
+        shutdownHook.start()
+      }
 
-    Runtime.getRuntime().addShutdownHook(shutdownHook)
+      override fun awaitTerminated() {
+        serviceManager.awaitStopped()
+        jettyHealthService.awaitTerminated()
+        log.info { "all services stopped" }
+      }
 
-    // We manage JettyHealthService outside ServiceManager because it must start and
-    // shutdown last to keep the container alive via liveness checks.
+      override fun awaitTerminated(time : Long, timeUnit: TimeUnit) : Boolean{
+        val deadline : Long = timeUnit.toMillis(time) + System.currentTimeMillis()
+        try {
+          serviceManager.awaitStopped(time, timeUnit)
+          jettyHealthService.awaitTerminated(deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+        } catch (_ : TimeoutException) {
+          return false
+        }
+        log.info { "all services stopped" }
+        return true
+      }
 
-    val jettyHealthService: JettyHealthService
-    measureTimeMillis {
-      log.info { "starting services" }
-      serviceManager.startAsync()
-      serviceManager.awaitHealthy()
-
-      // Start Health Service Last to ensure any dependencies are started.
-      jettyHealthService = injector.getInstance<JettyHealthService>()
-      jettyHealthService.startAsync()
-      jettyHealthService.awaitRunning()
-    }.also {
-      log.info { "all services started successfully in ${it.milliseconds}" }
+      override fun app(): MiskApplication {
+        return this@MiskApplication
+      }
     }
+    return shutdown
+  }
 
-    serviceManager.awaitStopped()
-    jettyHealthService.awaitTerminated()
-    log.info { "all services stopped" }
+  private fun startServiceAndAwaitTermination() {
+    val app = start()
+    Runtime.getRuntime().addShutdownHook(shutdownHook)
+    app.awaitTerminated()
   }
 
   private companion object {
@@ -165,4 +196,14 @@ class MiskApplication private constructor(
   }
 
   internal class CliException(message: String) : RuntimeException(message)
+}
+
+
+internal interface RunningMiskApplication {
+  fun stop()
+
+  fun awaitTerminated()
+
+  fun app() : MiskApplication
+  fun awaitTerminated(i: Long, seconds: TimeUnit): Boolean
 }

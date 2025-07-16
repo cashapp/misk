@@ -10,6 +10,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.MiskApplication
 import misk.MiskTestingServiceModule
+import misk.RunningMiskApplication
 import misk.ServiceModule
 import misk.client.HTTP_INTERNAL_SERVER_ERROR
 import misk.client.HTTP_SERVICE_UNAVAILABLE
@@ -46,7 +47,6 @@ import java.net.SocketOptions
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 import kotlin.time.Duration.Companion.milliseconds
 
 // Must run isolated because it binds an available port to discover it and then releases it
@@ -55,8 +55,6 @@ import kotlin.time.Duration.Companion.milliseconds
 class GracefulShutdownInterceptorTest {
   private var healthPort: Int = -1
   private var webPort: Int = -1
-
-  private lateinit var miskShutdownLatch : CountDownLatch
 
   private val defaultConfig = TESTING_WEB_CONFIG.copy(
     health_dedicated_jetty_instance = true
@@ -67,7 +65,6 @@ class GracefulShutdownInterceptorTest {
     val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as? Logger
     root?.let { it.level = INFO }
 
-    miskShutdownLatch = CountDownLatch(1)
     JettyStartedService.startedLatch = CountDownLatch(1)
     InFlightAction.okToReturnLatch = CountDownLatch(1)
     InFlightAction.reachedActionLatch = CountDownLatch(1)
@@ -220,7 +217,7 @@ class GracefulShutdownInterceptorTest {
   private fun GracefulInterceptorModule.assertServiceAndInterceptorNotInstalled() {
     val miskApplication = this.startUpMisk()
 
-    val gracefulShutdownService = miskApplication.injector.getInstance<GracefulShutdownService>()
+    val gracefulShutdownService = miskApplication.app().injector.getInstance<GracefulShutdownService>()
     assertThat(gracefulShutdownService.state()).isEqualTo(NEW)
 
     val inflightAction = "http://127.0.0.1:$webPort/inflight".toHttpUrl()
@@ -234,8 +231,7 @@ class GracefulShutdownInterceptorTest {
 
     InFlightAction.okToReturnLatch.countDown()
 
-    miskApplication.shutdownHook.start()
-    miskShutdownLatch.await(10, TimeUnit.SECONDS)
+    miskApplication.stop()
   }
 
   /**
@@ -262,8 +258,8 @@ class GracefulShutdownInterceptorTest {
     InFlightAction.reachedActionLatch.await(10, TimeUnit.SECONDS)
 
     // Shutdown misk and wait for graceful shutdown service to be shutting down.
-    miskApplication.shutdownHook.start()
-    val gracefulShutdownService = miskApplication.injector.getInstance<GracefulShutdownService>()
+    miskApplication.stop()
+    val gracefulShutdownService = miskApplication.app().injector.getInstance<GracefulShutdownService>()
     while (!gracefulShutdownService.shuttingDown) {
       sleep(100)
     }
@@ -279,7 +275,8 @@ class GracefulShutdownInterceptorTest {
     // In flight request should 200, the incoming request should have 503'd
     assertThat(inFlightResult.code).isEqualTo(200)
     assertThat(notInFlightResult.code).isEqualTo(503)
-    assertThat(miskShutdownLatch.await(10, TimeUnit.SECONDS)).isTrue()
+    miskApplication.awaitTerminated()
+    assertThat(miskApplication.awaitTerminated(10, TimeUnit.SECONDS)).isTrue()
   }
 
   /**
@@ -301,8 +298,8 @@ class GracefulShutdownInterceptorTest {
     val notInflightAction = "http://127.0.0.1:$webPort/notinflight".toHttpUrl()
 
     // Shutdown misk and wait for graceful shutdown service to be shutting down.
-    miskApplication.shutdownHook.start()
-    val gracefulShutdownService = miskApplication.injector.getInstance<GracefulShutdownService>()
+    miskApplication.stop()
+    val gracefulShutdownService = miskApplication.app().injector.getInstance<GracefulShutdownService>()
     while (!gracefulShutdownService.shuttingDown) {
       sleep(100)
     }
@@ -312,7 +309,7 @@ class GracefulShutdownInterceptorTest {
     notInFlightResult.callCompleteLatch.await(10, TimeUnit.SECONDS)
     assertThat(notInFlightResult.code).isEqualTo(503)
 
-    val fakeClock = miskApplication.injector.getInstance<FakeClock>()
+    val fakeClock = miskApplication.app().injector.getInstance<FakeClock>()
     fakeClock.add(1, TimeUnit.SECONDS)
 
     assertThat(gracefulShutdownService.state() == Service.State.STOPPING)
@@ -333,7 +330,7 @@ class GracefulShutdownInterceptorTest {
     sleep(1000)
 
     assertThat(gracefulShutdownService.state() == Service.State.TERMINATED)
-    assertThat(miskShutdownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
   /**
@@ -355,8 +352,8 @@ class GracefulShutdownInterceptorTest {
     val notInflightAction = "http://127.0.0.1:$webPort/notinflight".toHttpUrl()
 
     // Shutdown misk and wait for graceful shutdown service to be shutting down.
-    miskApplication.shutdownHook.start()
-    val gracefulShutdownService = miskApplication.injector.getInstance<GracefulShutdownService>()
+    miskApplication.stop()
+    val gracefulShutdownService = miskApplication.app().injector.getInstance<GracefulShutdownService>()
     while (!gracefulShutdownService.shuttingDown) {
       sleep(100)
     }
@@ -366,7 +363,7 @@ class GracefulShutdownInterceptorTest {
     notInFlightResult.callCompleteLatch.await(10, TimeUnit.SECONDS)
     assertThat(notInFlightResult.code).isEqualTo(500)
 
-    val fakeClock = miskApplication.injector.getInstance<FakeClock>()
+    val fakeClock = miskApplication.app().injector.getInstance<FakeClock>()
     fakeClock.add(1, TimeUnit.SECONDS)
 
     assertThat(gracefulShutdownService.state() == Service.State.STOPPING)
@@ -387,7 +384,7 @@ class GracefulShutdownInterceptorTest {
     sleep(1000)
 
     assertThat(gracefulShutdownService.state() == Service.State.TERMINATED)
-    assertThat(miskShutdownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
   /**
@@ -414,8 +411,8 @@ class GracefulShutdownInterceptorTest {
     InFlightAction.reachedActionLatch.await(10, TimeUnit.SECONDS)
 
     // Shutdown misk and wait for graceful shutdown service to be shutting down.
-    miskApplication.shutdownHook.start()
-    val gracefulShutdownService = miskApplication.injector.getInstance<GracefulShutdownService>()
+    miskApplication.stop()
+    val gracefulShutdownService = miskApplication.app().injector.getInstance<GracefulShutdownService>()
     while (!gracefulShutdownService.shuttingDown) {
       sleep(100)
     }
@@ -425,7 +422,7 @@ class GracefulShutdownInterceptorTest {
     notInFlightResult.callCompleteLatch.await(10, TimeUnit.SECONDS)
     assertThat(notInFlightResult.code).isEqualTo(503)
 
-    val fakeClock = miskApplication.injector.getInstance<FakeClock>()
+    val fakeClock = miskApplication.app().injector.getInstance<FakeClock>()
     fakeClock.add(1, TimeUnit.SECONDS)
 
     assertThat(gracefulShutdownService.state() == Service.State.STOPPING)
@@ -454,7 +451,7 @@ class GracefulShutdownInterceptorTest {
     sleep(1000)
     assertThat(gracefulShutdownService.state() == Service.State.TERMINATED)
 
-    assertThat(miskShutdownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
   /**
@@ -483,8 +480,8 @@ class GracefulShutdownInterceptorTest {
     InFlightAction.reachedActionLatch.await(10, TimeUnit.SECONDS)
 
     // Shutdown misk and wait for graceful shutdown service to be shutting down.
-    miskApplication.shutdownHook.start()
-    val gracefulShutdownService = miskApplication.injector.getInstance<GracefulShutdownService>()
+    miskApplication.stop()
+    val gracefulShutdownService = miskApplication.app().injector.getInstance<GracefulShutdownService>()
     while (!gracefulShutdownService.shuttingDown) {
       sleep(100)
     }
@@ -494,7 +491,7 @@ class GracefulShutdownInterceptorTest {
     notInFlightResult.callCompleteLatch.await(10, TimeUnit.SECONDS)
     assertThat(notInFlightResult.code).isEqualTo(200)
 
-    val fakeClock = miskApplication.injector.getInstance<FakeClock>()
+    val fakeClock = miskApplication.app().injector.getInstance<FakeClock>()
     fakeClock.add(1, TimeUnit.SECONDS)
 
     // Will be idle, but there is still a request in flight.
@@ -520,7 +517,7 @@ class GracefulShutdownInterceptorTest {
     sleep(1000)
     assertThat(gracefulShutdownService.state() == Service.State.STOPPING)
 
-    assertThat(miskShutdownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
   /**
@@ -544,8 +541,8 @@ class GracefulShutdownInterceptorTest {
     val notInflightAction = "http://127.0.0.1:$webPort/notinflight".toHttpUrl()
 
     // Shutdown misk and wait for graceful shutdown service to be shutting down.
-    miskApplication.shutdownHook.start()
-    val gracefulShutdownService = miskApplication.injector.getInstance<GracefulShutdownService>()
+    miskApplication.stop()
+    val gracefulShutdownService = miskApplication.app().injector.getInstance<GracefulShutdownService>()
     while (!gracefulShutdownService.shuttingDown) {
       sleep(100)
     }
@@ -555,7 +552,7 @@ class GracefulShutdownInterceptorTest {
     notInFlightResult.callCompleteLatch.await(10, TimeUnit.SECONDS)
     assertThat(notInFlightResult.code).isEqualTo(503)
 
-    val fakeClock = miskApplication.injector.getInstance<FakeClock>()
+    val fakeClock = miskApplication.app().injector.getInstance<FakeClock>()
     fakeClock.add(1, TimeUnit.SECONDS)
 
     assertThat(gracefulShutdownService.state() == Service.State.STOPPING)
@@ -576,21 +573,18 @@ class GracefulShutdownInterceptorTest {
     sleep(1000)
 
     assertThat(gracefulShutdownService.state() == Service.State.TERMINATED)
-    assertThat(miskShutdownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
   /**
    * Starts up misk on a separate thread and awaits started for the current config.
    */
-  private fun GracefulInterceptorModule.startUpMisk() : MiskApplication {
+  private fun GracefulInterceptorModule.startUpMisk() : RunningMiskApplication {
     val miskApplication = MiskApplication(this)
-
-    thread {
-      logger.debug("Running Misk!")
-      miskApplication.doRun(arrayOf())
-      logger.debug("Misk shutdown!")
-      miskShutdownLatch.countDown()
-    }
+    logger.debug("Running Misk!")
+    val app = miskApplication.start()
+      
+    
 
     JettyStartedService.startedLatch.await(10, TimeUnit.SECONDS)
 
@@ -599,7 +593,7 @@ class GracefulShutdownInterceptorTest {
     val serviceManager = miskApplication.injector.getInstance(ServiceManager::class.java)
     serviceManager.awaitHealthy()
 
-    return miskApplication
+    return app
   }
 
   /**

@@ -235,7 +235,7 @@ class TypedClientFactory @Inject constructor() {
 
     return kclass.cast(
       Proxy.newProxyInstance(
-        ClassLoader.getSystemClassLoader(),
+        kclass.java.classLoader,
         arrayOf(kclass.java),
         invocationHandler
       )

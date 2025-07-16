@@ -795,6 +795,11 @@ public final class misk/concurrent/ExplicitReleaseDelayQueue : java/util/concurr
 	public fun toArray ([Ljava/lang/Object;)[Ljava/lang/Object;
 }
 
+public final class misk/dev/DevApplicationKt {
+	public static final fun isRunningDevApplication ()Z
+	public static final fun runDevApplication (Lkotlin/reflect/KFunction;)V
+}
+
 public final class misk/environment/DeploymentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Lwisp/deployment/Deployment;)V
