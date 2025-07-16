@@ -1,4 +1,4 @@
-package wisp.resources
+package misk.resources
 
 import okio.Buffer
 import okio.BufferedSource
@@ -17,10 +17,6 @@ import java.io.IOException
  * copy-pasting and replacing "op" like so: "1password://secretRef/goes/here". To use a specific
  * account, add the accountId like so "1password:accountId@//secretRef/goes/here".
  */
-@Deprecated(
-  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
-  ReplaceWith(expression = "OnePasswordResourceLoaderBackend","misk.resources.OnePasswordResourceLoaderBackend")
-)
 object OnePasswordResourceLoaderBackend : ResourceLoader.Backend() {
   const val SCHEME = "1password:"
 

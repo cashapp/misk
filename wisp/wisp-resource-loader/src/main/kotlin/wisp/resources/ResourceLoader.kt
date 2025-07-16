@@ -5,7 +5,6 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.buffer
 import okio.sink
-import wisp.resources.ResourceLoader.Backend
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
@@ -31,6 +30,10 @@ import java.util.*
  * Other backends are permitted. They should be registered with a `MapBinder` with the backend
  * scheme like `classpath:` as the key.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "ResourceLoader","misk.resources.ResourceLoader")
+)
 open class ResourceLoader(
     private val backends: Map<String, Backend>
 ) {
