@@ -67,17 +67,21 @@ abstract class KAbstractModule : AbstractModule() {
   protected inline fun <reified T : Any, reified A: Annotation> newMultibinder(
   ): Multibinder<T> = newMultibinder(T::class, A::class)
 
-  @Suppress("UNCHECKED_CAST")
   protected fun <T : Any> newMultibinder(
     type: KClass<T>,
     annotation: KClass<out Annotation>? = null
+  ): Multibinder<T> = newMultibinder(type.typeLiteral(), annotation)
+
+  @Suppress("UNCHECKED_CAST")
+  protected fun <T : Any> newMultibinder(
+    type: TypeLiteral<T>,
+    annotation: KClass<out Annotation>? = null
   ): Multibinder<T> {
-    val setOfT = parameterizedType<Set<*>>(type.java).typeLiteral() as TypeLiteral<Set<T>>
+    val setOfT = setOfType(type)
     val mutableSetOfTKey = setOfT.toKey(annotation) as Key<MutableSet<T>>
     // As of Guice 5.1, Set<? out T> is now bound.
-    val listOfT = parameterizedType<List<*>>(type.java).typeLiteral() as TypeLiteral<List<T>>
-    val listOfOutT =
-      parameterizedType<List<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<List<T>>
+    val listOfT = listOfType(type)
+    val listOfOutT = listOfType(type.subtype().typeLiteral()) as TypeLiteral<List<T>>
     val listOfOutTKey = listOfOutT.toKey(annotation)
     val listOfTKey = listOfT.toKey(annotation)
     bind(listOfOutTKey).toProvider(
@@ -86,8 +90,8 @@ abstract class KAbstractModule : AbstractModule() {
     bind(listOfTKey).to(listOfOutTKey)
 
     return when (annotation) {
-      null -> Multibinder.newSetBinder(binder(), type.java)
-      else -> Multibinder.newSetBinder(binder(), type.java, annotation.java)
+      null -> Multibinder.newSetBinder(binder(), type)
+      else -> Multibinder.newSetBinder(binder(), type, annotation.java)
     }
   }
 

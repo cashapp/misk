@@ -17,3 +17,8 @@ class Circle : Shape
 interface Color
 class Blue : Color
 class Red : Color
+
+interface ColorWrapper<T: Color> {
+  class Blue : ColorWrapper<misk.inject.Blue>
+  class Red : ColorWrapper<misk.inject.Red>
+}
