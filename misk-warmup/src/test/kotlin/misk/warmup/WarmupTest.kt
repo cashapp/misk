@@ -16,7 +16,7 @@ import misk.inject.getInstance
 import misk.logging.LogCollectorModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.time.Duration
 import java.util.concurrent.BlockingDeque
 import java.util.concurrent.LinkedBlockingDeque

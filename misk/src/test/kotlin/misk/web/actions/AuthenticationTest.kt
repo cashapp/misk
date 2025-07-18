@@ -23,7 +23,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import jakarta.inject.Inject
 import misk.security.authz.AccessInterceptor
 import misk.web.toResponseBody
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

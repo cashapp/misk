@@ -30,7 +30,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.MDC
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import wisp.logging.SmartTagsThreadLocalHandler
 import wisp.logging.Tag
 import wisp.logging.error

@@ -19,7 +19,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.feature.testing.FakeFeatureFlags
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import wisp.logging.getLogger
 import wisp.logging.withSmartTags
 import java.util.concurrent.CountDownLatch

@@ -23,7 +23,7 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 import uk.org.webcompere.systemstubs.jupiter.SystemStub
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension
 import wisp.deployment.TESTING
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.io.File
 import java.time.Duration
 import kotlin.test.assertEquals

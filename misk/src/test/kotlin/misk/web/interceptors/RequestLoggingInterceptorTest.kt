@@ -35,7 +35,7 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.TimeUnit

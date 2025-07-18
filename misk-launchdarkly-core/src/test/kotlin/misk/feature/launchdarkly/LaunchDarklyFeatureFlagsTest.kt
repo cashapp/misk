@@ -25,7 +25,7 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import wisp.logging.WispQueuedLogCollector
+import misk.logging.QueuedLogCollector
 import wisp.moshi.defaultKotlinMoshi
 import java.util.function.Function
 import wisp.launchdarkly.LaunchDarklyFeatureFlags as WispLaunchDarklyFeatureFlags
@@ -35,7 +35,7 @@ internal class LaunchDarklyFeatureFlagsTest {
   private val moshi = defaultKotlinMoshi
   private val wispLaunchDarklyFeatureFlags = wisp.launchdarkly.LaunchDarklyFeatureFlags(client, moshi)
   private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(wispLaunchDarklyFeatureFlags)
-  private val logCollector = WispQueuedLogCollector()
+  private val logCollector = QueuedLogCollector()
 
   @BeforeEach
   fun beforeEach() {

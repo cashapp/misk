@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.slf4j.MDC
 
 class LoggingTest {
-    private val logCollector = WispQueuedLogCollector()
+    private val logCollector = QueuedLogCollector()
 
     @BeforeEach
     fun beforeEach() {

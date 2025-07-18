@@ -45,7 +45,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.ArrayBlockingQueue

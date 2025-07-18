@@ -10,7 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.LazyInitializationException
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import misk.time.FakeClock
 import java.time.Duration.ofSeconds
 import java.time.LocalDate
