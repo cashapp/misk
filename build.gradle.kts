@@ -186,7 +186,7 @@ val publishWispToMavenCentral = tasks.register("publishWispToMavenCentral")
 
 val publishUrl = System.getProperty("publish_url")
 val hasPublishUrl = !publishUrl.isNullOrBlank()
-if (!hasPublishUrl) {
+if (hasPublishUrl) {
   publishMiskToMavenCentral.configure {
     doFirst {
       error("Cannot publish Misk to Maven Central with a publish_url specified")
