@@ -20,7 +20,7 @@ public final class wisp/logging/LogCollector$DefaultImpls {
 	public static synthetic fun takeMessages$default (Lwisp/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/util/List;
 }
 
-public final class wisp/logging/QueuedLogCollector : misk/testing/FakeFixture, wisp/logging/LogCollector {
+public final class wisp/logging/WispQueuedLogCollector : misk/testing/FakeFixture, wisp/logging/LogCollector {
 	public fun <init> ()V
 	public final fun shutDown ()V
 	public final fun startUp ()V
