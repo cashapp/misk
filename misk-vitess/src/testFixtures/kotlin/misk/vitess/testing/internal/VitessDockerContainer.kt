@@ -117,6 +117,19 @@ internal class VitessDockerContainer(
     val shouldCreateContainerResult = shouldCreateContainer(containerName, vitessSchemaPreparer.keyspaces)
 
     if (!shouldCreateContainerResult.newContainerNeeded) {
+      // At this point we can reuse the same container, but we also apply schema changes if any are present.
+      if (autoApplySchemaChanges) {
+        val applySchemaResult = getVitessSchemaApplier(vitessSchemaPreparer).applySchema()
+        if (applySchemaResult.newContainerNeeded) {
+          // In this state, we find we actually do need a new container, so proceed to start a new container.
+          println("Starting new container `$containerName`.")
+          if (applySchemaResult.newContainerNeededReason != null) {
+            printDebug("Reason for new container: ${applySchemaResult.newContainerNeededReason}")
+          }
+          return startContainerWithRetries(vitessSchemaPreparer)
+        }
+      }
+
       return StartVitessContainerResult(
         newContainerCreated = false,
         containerId = shouldCreateContainerResult.existingContainerId.toString(),

@@ -172,7 +172,7 @@ class VitessTestDb(
       if (containerStartResult.newContainerCreated) {
         println("🐳 Started new VitessTestDb Docker container `$containerName`.")
       } else {
-        println("🐳 Reusing existing VitessTestDb Docker container `$containerName`.")
+        println("🐳 Reused existing VitessTestDb Docker container `$containerName`.")
       }
     }
 
