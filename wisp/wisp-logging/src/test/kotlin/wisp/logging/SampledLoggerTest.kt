@@ -9,7 +9,7 @@ import wisp.sampling.Sampler
 
 class SampledLoggerTest {
 
-    private val logCollector = QueuedLogCollector()
+    private val logCollector = WispQueuedLogCollector()
 
     @BeforeEach
     fun beforeEach() {

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
 class LogCollectorTest {
-    var wispQueuedLogCollector = QueuedLogCollector()
+    var wispQueuedLogCollector = WispQueuedLogCollector()
 
     private var logCollector: LogCollector = wispQueuedLogCollector
 
