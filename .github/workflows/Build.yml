@@ -112,8 +112,8 @@ jobs:
       - name: Publish the artifacts
         run: |
           # disable caching since it breaks publishing to Maven Central
-          gradle clean publishMiskToMavenCentral --stacktrace --no-build-cache --no-configuration-cache --no-configure-on-demand
-          gradle clean publishWispToMavenCentral --stacktrace --no-build-cache --no-configuration-cache --no-configure-on-demand
+          gradle publishMiskToMavenCentral --stacktrace --no-build-cache --no-configuration-cache --no-configure-on-demand
+          gradle publishWispToMavenCentral --stacktrace --no-build-cache --no-configuration-cache --no-configure-on-demand
 
       - name: Tag Misk repo
         uses: mathieudutour/github-tag-action@v6.1
