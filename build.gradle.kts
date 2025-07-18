@@ -181,6 +181,24 @@ val doNotDetekt = listOf(
   "misk-bom",
 )
 
+val publishMiskToMavenCentral = tasks.register("publishMiskToMavenCentral")
+val publishWispToMavenCentral = tasks.register("publishWispToMavenCentral")
+
+val publishUrl = System.getProperty("publish_url")
+val hasPublishUrl = !publishUrl.isNullOrBlank()
+if (!hasPublishUrl) {
+  publishMiskToMavenCentral.configure {
+    doFirst {
+      error("Cannot publish Misk to Maven Central with a publish_url specified")
+    }
+  }
+  publishWispToMavenCentral.configure {
+    doFirst {
+      error("Cannot publish Wisp to Maven Central with a publish_url specified")
+    }
+  }
+}
+
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
   apply(plugin = "io.gitlab.arturbosch.detekt")
@@ -349,8 +367,7 @@ subprojects {
 
 subprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
-    val publishUrl = System.getProperty("publish_url")
-    if (!publishUrl.isNullOrBlank()) {
+    if (hasPublishUrl) {
       configure<PublishingExtension> {
         repositories {
           maven {
@@ -366,6 +383,13 @@ subprojects {
       configure<MavenPublishBaseExtension> {
         publishToMavenCentral(automaticRelease = true)
         signAllPublications()
+      }
+      when (group) {
+        "app.cash.wisp" -> publishWispToMavenCentral
+        "com.squareup.misk" -> publishMiskToMavenCentral
+        else -> error("Unknown group $group in project $path")
+      }.configure {
+        dependsOn(tasks.named("publishToMavenCentral"))
       }
     }
     configure<MavenPublishBaseExtension> {
