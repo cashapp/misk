@@ -27,7 +27,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.MDC
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.web.interceptors.RequestLoggingInterceptor

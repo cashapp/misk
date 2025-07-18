@@ -8,7 +8,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import wisp.logging.getLogger
 import jakarta.inject.Inject
 import kotlin.test.assertFailsWith

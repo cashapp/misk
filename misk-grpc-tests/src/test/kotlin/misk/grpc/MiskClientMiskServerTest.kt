@@ -39,7 +39,7 @@ import routeguide.Feature
 import routeguide.Point
 import routeguide.RouteGuideClient
 import routeguide.RouteNote
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 
 @MiskTest(startService = true)
 class MiskClientMiskServerTest {

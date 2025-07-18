@@ -26,7 +26,7 @@ import kotlin.test.assertFailsWith
 abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var logCollector: wisp.logging.LogCollector
+  @Inject lateinit var logCollector: misk.logging.LogCollector
 
   @Test
   fun happyPath() {

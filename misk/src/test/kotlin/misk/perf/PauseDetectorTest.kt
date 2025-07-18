@@ -15,7 +15,7 @@ import misk.web.WebServerTestingModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 
