@@ -3,9 +3,9 @@ package misk.dev
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal fun runGradleAsyncCompile(compilationComplete: () -> Unit) {
+internal fun runGradleAsyncCompile(compilationComplete: () -> Unit, additionalGradleArgs: List<String>) {
   val t = Thread {
-    val pb = ProcessBuilder("gradle", "compileKotlin", "--continuous")
+    val pb = ProcessBuilder(listOf("gradle", "compileKotlin", "--continuous") + additionalGradleArgs)
 
     val first = AtomicBoolean(false)
     val process = pb.start()!!

@@ -797,7 +797,8 @@ public final class misk/concurrent/ExplicitReleaseDelayQueue : java/util/concurr
 
 public final class misk/dev/DevApplicationKt {
 	public static final fun isRunningDevApplication ()Z
-	public static final fun runDevApplication (Lkotlin/reflect/KFunction;)V
+	public static final fun runDevApplication (Lkotlin/reflect/KFunction;Ljava/util/List;)V
+	public static synthetic fun runDevApplication$default (Lkotlin/reflect/KFunction;Ljava/util/List;ILjava/lang/Object;)V
 }
 
 public final class misk/environment/DeploymentModule : misk/inject/KAbstractModule {
