@@ -19,7 +19,7 @@ fun isRunningDevApplication(): Boolean {
 }
 
 @misk.annotation.ExperimentalMiskApi
-fun runDevApplication(modules : KFunction<MiskApplication>) {
+fun runDevApplication(modules : KFunction<MiskApplication>, additionalGradleArgs : List<String> = emptyList()) {
   DevApplicationState.isRunning = true
   System.setProperty("misk.dev.running", "true") // Some code may not depend on misk-core but still need to know about dev mode
   val lock = Object()
@@ -30,7 +30,7 @@ fun runDevApplication(modules : KFunction<MiskApplication>) {
       restart = true
       lock.notifyAll()
     }
-  })
+  }, additionalGradleArgs)
   val parent = Thread.currentThread().contextClassLoader
   while (true) {
     restart = false
