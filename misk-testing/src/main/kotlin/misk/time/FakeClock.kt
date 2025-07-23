@@ -8,11 +8,18 @@ import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import misk.testing.TestFixture
+import jakarta.inject.Inject
 
-open class FakeClock @JvmOverloads constructor(
+@Suppress("AnnotatePublicApisWithJvmOverloads")
+open class FakeClock (
     epochMillis: Long = initialValue.toEpochMilli(),
     private val zone: ZoneId = ZoneId.of("UTC")
 ) : Clock(), TestFixture {
+
+    constructor(epochMillis: Long) : this(epochMillis, ZoneId.of("UTC"))
+
+    // Explicit overloads constructors are used so that the 0 parameter constructor can be @Inject annotated for easy injection
+    @Inject constructor() : this(initialValue.toEpochMilli(), ZoneId.of("UTC"))
     
     private val millis: AtomicLong = AtomicLong(epochMillis)
 
