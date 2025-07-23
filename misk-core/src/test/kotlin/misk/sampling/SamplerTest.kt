@@ -1,5 +1,6 @@
 package misk.sampling
 
+import misk.concurrent.FakeTicker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -10,5 +11,49 @@ class SamplerTest {
     assertThat(sampler.sample()).isTrue()
     assertThat(sampler.sample()).isTrue()
     assertThat(sampler.sample()).isFalse()
+  }
+
+  @Test
+  fun `always sampler always allows samples`() {
+    val sampler = AlwaysSampler()
+
+    assertThat(sampler.sample()).isTrue
+  }
+
+  @Test
+  fun `percentage sampler allows sample when random value is below percentage`() {
+    val sampler = PercentSampler(50) { 49 }
+
+    assertThat(sampler.sample()).isTrue
+  }
+
+  @Test
+  fun `percentage sampler does not allow sample when random value is equal to percentage`() {
+    val sampler = PercentSampler(50) { 50 }
+
+    assertThat(sampler.sample()).isFalse
+  }
+
+  @Test
+  fun `percentage sampler does not allow sample when random value is above percentage`() {
+    val sampler = PercentSampler(50) { 51 }
+
+    assertThat(sampler.sample()).isFalse
+  }
+
+  @Test
+  fun `rate limiting sampler allows sample when request is below threshold`() {
+    val ticker = FakeTicker()
+    val sampler = RateLimitingSampler(RateLimiter.Factory(ticker, ticker).create(1L))
+
+    assertThat(sampler.sample()).isTrue
+  }
+
+  @Test
+  fun `rate limiting sampler does not allow sample when request is above threshold`() {
+    val ticker = FakeTicker()
+    val sampler = RateLimitingSampler(RateLimiter.Factory(ticker, ticker).create(0L))
+
+    assertThat(sampler.sample()).isFalse
   }
 }

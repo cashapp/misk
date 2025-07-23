@@ -188,8 +188,15 @@ public final class misk/sampling/RateLimitingSampler : misk/sampling/Sampler {
 }
 
 public abstract interface class misk/sampling/Sampler {
+	public static final field Companion Lmisk/sampling/Sampler$Companion;
 	public abstract fun sample ()Z
 	public abstract fun sampledCall (Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class misk/sampling/Sampler$Companion {
+	public final fun always ()Lmisk/sampling/Sampler;
+	public final fun percentage (I)Lmisk/sampling/Sampler;
+	public final fun rateLimiting (J)Lmisk/sampling/Sampler;
 }
 
 public final class misk/sampling/Sampler$DefaultImpls {
