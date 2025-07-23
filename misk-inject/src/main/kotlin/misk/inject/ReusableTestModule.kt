@@ -19,6 +19,7 @@ abstract class ReusableTestModule: KAbstractModule() {
     if (thisProperties.size != otherProperties.size) return false
 
     for (property in thisProperties) {
+      if (property.name in ignorePropertiesForEquality) continue
       property.isAccessible = true
       val thisValue = (property as KProperty1<ReusableTestModule, *>).get(this)
       val otherValue = property.get(other as ReusableTestModule)
@@ -28,9 +29,17 @@ abstract class ReusableTestModule: KAbstractModule() {
     return true
   }
 
+  /**
+   * A set of property names that should be ignored when checking for equality and calculating hashCode.
+   * This is useful for properties that are mocks or other test-specific instances
+   * that should not affect the equality of the module.
+   */
+  open val ignorePropertiesForEquality: Set<String> = emptySet()
+
   override fun hashCode(): Int {
     var result = javaClass.hashCode()
     for (property in this::class.memberProperties) {
+      if (property.name in ignorePropertiesForEquality) continue
       property.isAccessible = true
       result = 31 * result + ((property as KProperty1<ReusableTestModule, *>).get(this)?.hashCode() ?: 0)
     }
