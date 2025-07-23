@@ -30,7 +30,7 @@ class RateLimiter private constructor(
   private val ticker: Ticker,
   private val sleeper: Sleeper
 ) {
-  @Volatile var permitsPerSecond: Long = 0L
+  @field:Volatile var permitsPerSecond: Long = 0L
 
   /**
    * The nanoTime that we've consumed all permits through. This is at most [windowSizeNs] + current
