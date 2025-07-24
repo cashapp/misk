@@ -92,6 +92,7 @@ guava = { module = "com.google.guava:guava" }
 guavaBom = { module = "com.google.guava:guava-bom", version = "33.4.8-jre" }
 guavaTestLib = { module = "com.google.guava:guava-testlib" }
 guice = { module = "com.google.inject:guice" }
+guice6 = { module = "com.google.inject:guice", version = "6.0.0" }
 guice7Bom = { module = "com.google.inject:guice-bom", version = "7.0.0" }
 guiceBom = { module = "com.google.inject:guice-bom", version = "6.0.0" }
 guiceTestLib = { module = "com.google.inject.extensions:guice-testlib" }
