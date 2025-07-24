@@ -11,7 +11,7 @@ dependencies {
   api(libs.aws2Auth)
   api(libs.aws2Sqs)
   api(libs.guava)
-  api(libs.guice)
+  api(libs.guice6)
   api(libs.kotlinxCoroutinesCore)
   api(libs.jakartaInject)
   api(libs.moshiCore)

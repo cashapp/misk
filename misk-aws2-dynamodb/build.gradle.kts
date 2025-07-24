@@ -13,7 +13,7 @@ dependencies {
   api(libs.aws2Auth)
   api(libs.awsSdkCore)
   api(libs.guava)
-  api(libs.guice)
+  api(libs.guice6)
   api(libs.jakartaInject)
   api(project(":misk-aws"))
   api(project(":misk-inject"))
