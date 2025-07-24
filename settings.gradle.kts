@@ -8,9 +8,6 @@ pluginManagement {
 }
 
 plugins {
-  // When updating the cash plugin versions, update .buildkite/scripts/copy.bara.sky too
-  id("com.squareup.cash.develocity") version "1.293.0"
-  id("com.squareup.cash.remotecache") version "1.293.0"
   id("com.gradle.develocity") version "4.0.2"
 }
 
@@ -124,6 +121,7 @@ include(":misk-lease")
 include(":misk-lease-mysql")
 include(":misk-metrics")
 include(":misk-metrics-digester")
+include(":misk-moshi")
 include(":misk-policy")
 include(":misk-prometheus")
 include(":misk-proto")

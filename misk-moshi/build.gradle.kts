@@ -7,24 +7,21 @@ plugins {
 }
 
 dependencies {
-  api(libs.guava)
-  api(libs.guice)
-  api(libs.jakartaInject)
-  api(project(":misk-config"))
   api(project(":misk-inject"))
-  api(project(":wisp:wisp-config"))
-  implementation(libs.loggingApi)
-  implementation(libs.kotlinStdLibJdk8)
-  implementation(libs.moshiCore)
-  implementation(project(":misk-moshi"))
+  api(libs.guice6)
+  api(libs.jakartaInject)
+  api(libs.okio)
+  api(libs.moshiCore)
   implementation(project(":wisp:wisp-moshi"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(libs.moshiAdapters)
+  implementation(libs.wireMoshiAdapter)
+  implementation(libs.wireRuntime)
 
+  testImplementation(project(":misk-testing"))
   testImplementation(libs.assertj)
-  testImplementation(libs.javaxInject)
+  testRuntimeOnly(libs.junitEngine)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
-  testImplementation(project(":misk-testing"))
 }
 
 mavenPublishing {

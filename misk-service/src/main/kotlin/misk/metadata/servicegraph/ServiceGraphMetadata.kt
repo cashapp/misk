@@ -7,7 +7,7 @@ import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.toFormattedJson
 import wisp.moshi.ProviderJsonAdapterFactory
-import wisp.moshi.adapter
+import misk.moshi.adapter
 import wisp.moshi.buildMoshi
 
 data class ServiceGraphMetadata(

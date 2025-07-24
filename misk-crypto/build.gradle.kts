@@ -26,7 +26,7 @@ dependencies {
   implementation(libs.tinkAwskms)
   implementation(libs.tinkGcpkms)
   implementation(project(":wisp:wisp-logging"))
-  implementation(project(":misk"))
+  implementation(project(":misk-moshi"))
 
   runtimeOnly(libs.bouncyCastlePkix)
 
