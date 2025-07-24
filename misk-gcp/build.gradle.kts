@@ -47,6 +47,7 @@ dependencies {
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))
   implementation(project(":misk"))
+  implementation(project(":misk-moshi"))
   implementation(project(":misk-service"))
 
   testFixturesApi(libs.dockerApi)

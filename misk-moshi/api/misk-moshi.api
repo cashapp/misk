@@ -1,0 +1,53 @@
+public final class misk/moshi/MoshiAdapterModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/moshi/MoshiAdapterModule$Companion;
+	public fun <init> (Ljava/lang/Object;)V
+	public fun <init> (Ljava/lang/Object;Z)V
+	public synthetic fun <init> (Ljava/lang/Object;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/moshi/MoshiAdapterModule$Companion {
+}
+
+public final class misk/moshi/MoshiModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/moshi/MoshiModule$Companion;
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public fun <init> (ZZ)V
+	public synthetic fun <init> (ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun provideMoshi (Ljava/util/List;Ljava/util/List;)Lcom/squareup/moshi/Moshi;
+}
+
+public final class misk/moshi/MoshiModule$Companion {
+	public final fun getDefaultMoshiAdapters ()Ljava/util/List;
+}
+
+public final class misk/moshi/adapters/BigDecimalAdapter {
+	public static final field INSTANCE Lmisk/moshi/adapters/BigDecimalAdapter;
+	public final fun decode (Ljava/lang/String;)Ljava/math/BigDecimal;
+	public final fun encode (Ljava/math/BigDecimal;)Ljava/lang/String;
+}
+
+public final class misk/moshi/okio/ByteStringAdapter {
+	public static final field INSTANCE Lmisk/moshi/okio/ByteStringAdapter;
+	public final fun fromJson (Ljava/lang/String;)Lokio/ByteString;
+	public final fun toJson (Lokio/ByteString;)Ljava/lang/String;
+}
+
+public final class misk/moshi/time/InstantAdapter {
+	public static final field INSTANCE Lmisk/moshi/time/InstantAdapter;
+	public final fun fromJson (Ljava/util/Date;)Ljava/time/Instant;
+	public final fun toJson (Ljava/time/Instant;)Ljava/util/Date;
+}
+
+public final class misk/moshi/time/LocalDateAdapter {
+	public static final field INSTANCE Lmisk/moshi/time/LocalDateAdapter;
+	public final fun fromJson (Ljava/util/Date;)Ljava/time/LocalDate;
+	public final fun toJson (Ljava/time/LocalDate;)Ljava/util/Date;
+}
+
+public final class misk/moshi/time/OffsetDateTimeAdapter {
+	public static final field INSTANCE Lmisk/moshi/time/OffsetDateTimeAdapter;
+	public final fun fromJson (Ljava/lang/String;)Ljava/time/OffsetDateTime;
+	public final fun toJson (Ljava/time/OffsetDateTime;)Ljava/lang/String;
+}
+

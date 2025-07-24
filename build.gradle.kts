@@ -96,6 +96,13 @@ dependencyAnalysis {
         exclude(":misk-api")
       }
     }
+    project(":misk") {
+      onIncorrectConfiguration {
+        // For backwards compatibility, we want Moshi classes moved to misk-moshi to still be
+        // part of misk api.
+        exclude(":misk-moshi")
+      }
+    }
   }
 }
 

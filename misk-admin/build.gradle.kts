@@ -27,6 +27,7 @@ dependencies {
   implementation(libs.okHttp)
   implementation(project(":misk-core"))
   implementation(project(":misk-hotwire"))
+  implementation(project(":misk-moshi"))
   implementation(project(":misk-tailwind"))
   implementation(project(":wisp:wisp-config"))
   implementation(project(":wisp:wisp-logging"))
