@@ -26,6 +26,7 @@ dependencies {
   implementation(libs.okio)
   implementation(project(":wisp:wisp-token-testing"))
   implementation(project(":wisp:wisp-resource-loader"))
+  implementation(project(":misk-api"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)

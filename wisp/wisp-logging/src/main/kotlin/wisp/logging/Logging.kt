@@ -7,8 +7,22 @@ import org.slf4j.MDC
 import org.slf4j.event.Level
 import wisp.sampling.Sampler
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "Tag()",
+    imports = ["misk.logging.Tag"]
+  )
+)
 typealias Tag = Pair<String, Any?>
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "getLogger()",
+    imports = ["misk.logging.getLogger"]
+  )
+)
 inline fun <reified T> getLogger(): KLogger {
   return KotlinLogging.logger(T::class.qualifiedName!!)
 }
@@ -39,41 +53,125 @@ inline fun <reified T> getLogger(): KLogger {
  *
  * @return wrapped logger instance
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "sampled(sampler)",
+    imports = ["misk.logging.sampled"]
+  )
+)
 fun KLogger.sampled(sampler: Sampler = Sampler.rateLimiting(1L)): KLogger {
   return SampledLogger(this, sampler)
 }
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "info(*tags, message = message)",
+    imports = ["misk.logging.info"]
+  )
+)
 fun KLogger.info(vararg tags: Tag, message: () -> Any?) =
   log(Level.INFO, message = message, tags = tags)
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "warn(*tags, message = message)",
+    imports = ["misk.logging.warn"]
+  )
+)
 fun KLogger.warn(vararg tags: Tag, message: () -> Any?) =
   log(Level.WARN, message = message, tags = tags)
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "error(*tags, message = message)",
+    imports = ["misk.logging.error"]
+  )
+)
 fun KLogger.error(vararg tags: Tag, message: () -> Any?) =
   log(Level.ERROR, message = message, tags = tags)
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "debug(*tags, message = message)",
+    imports = ["misk.logging.debug"]
+  )
+)
 fun KLogger.debug(vararg tags: Tag, message: () -> Any?) =
   log(Level.DEBUG, message = message, tags = tags)
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "trace(*tags, message = message)",
+    imports = ["misk.logging.trace"]
+  )
+)
 fun KLogger.trace(vararg tags: Tag, message: () -> Any?) =
   log(Level.TRACE, message = message, tags = tags)
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "info(th, *tags, message = message)",
+    imports = ["misk.logging.info"]
+  )
+)
 fun KLogger.info(th: Throwable, vararg tags: Tag, message: () -> Any?) =
   log(Level.INFO, th, message = message, tags = tags)
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "warn(th, *tags, message = message)",
+    imports = ["misk.logging.warn"]
+  )
+)
 fun KLogger.warn(th: Throwable, vararg tags: Tag, message: () -> Any?) =
   log(Level.WARN, th, message = message, tags = tags)
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "error(th, *tags, message = message)",
+    imports = ["misk.logging.error"]
+  )
+)
 fun KLogger.error(th: Throwable, vararg tags: Tag, message: () -> Any?) =
   log(Level.ERROR, th, message = message, tags = tags)
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "debug(th, *tags, message = message)",
+    imports = ["misk.logging.debug"]
+  )
+)
 fun KLogger.debug(th: Throwable, vararg tags: Tag, message: () -> Any?) =
   log(Level.DEBUG, th, message = message, tags = tags)
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "trace(th, *tags, message = message)",
+    imports = ["misk.logging.trace"]
+  )
+)
 fun KLogger.trace(th: Throwable, vararg tags: Tag, message: () -> Any?) =
   log(Level.TRACE, th, message = message, tags = tags)
 
 // This logger takes care of adding the mdc tags and cleaning them up when done
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "log(level, *tags, message = message)",
+    imports = ["misk.logging.log"]
+  )
+)
 fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
   withTags(*tags) {
     when (level) {
@@ -87,6 +185,13 @@ fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
 }
 
 // This logger takes care of adding the mdc tags and cleaning them up when done
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "log(level, th, *tags, message = message)",
+    imports = ["misk.logging.log"]
+  )
+)
 fun KLogger.log(level: Level, th: Throwable?, vararg tags: Tag, message: () -> Any?) {
   withTags(*tags) {
     when (level) {
@@ -99,6 +204,13 @@ fun KLogger.log(level: Level, th: Throwable?, vararg tags: Tag, message: () -> A
   }
 }
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "withTags(*tags, block = block)",
+    imports = ["misk.logging.withTags"]
+  )
+)
 fun <T> withTags(vararg tags: Tag, block: () -> T): T {
   // Establish MDC, saving prior MDC
   val priorMDC = tags.map { (key, value) ->
@@ -119,6 +231,13 @@ fun <T> withTags(vararg tags: Tag, block: () -> T): T {
  * `includeTagsOnExceptionLogs`: For usage instructions, please see docs below on `withSmartTags`
  */
 @OptIn(ExperimentalMiskApi::class)
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "withTags(*tags, includeTagsOnExceptionLogs = includeTagsOnExceptionLogs, block = block)",
+    imports = ["misk.logging.withTags"]
+  )
+)
 fun <T> withTags(
   vararg tags: Tag,
   includeTagsOnExceptionLogs: Boolean = false,
@@ -186,6 +305,13 @@ fun <T> withTags(
  * ```
  */
 @ExperimentalMiskApi
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "withSmartTags(*tags, block = block)",
+    imports = ["misk.logging.withSmartTags"]
+  )
+)
 fun <T> withSmartTags(vararg tags: Tag, block: () -> T): T {
   return withTags(*tags, includeTagsOnExceptionLogs = true, block = block)
 }
