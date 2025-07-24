@@ -5,8 +5,7 @@ plugins {
 
 dependencies {
   api(libs.moshiCore)
-  api(libs.guice)
-  api(platform(libs.guiceBom))
+  api(libs.guice6)
   api(libs.jakartaInject)
   api(libs.javaxInject)
   implementation(libs.moshiKotlin)
