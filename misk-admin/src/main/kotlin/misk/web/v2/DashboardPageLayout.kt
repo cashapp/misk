@@ -90,7 +90,8 @@ class DashboardPageLayout @Inject constructor(
         appRoot = homeUrl,
         title = title(appName, dashboardHomeUrl, dashboardTab),
         playCdn = deployment.isLocalDevelopment,
-        headBlock = headBlock
+        headBlock = headBlock,
+        hotReload = false,
       ) {
         Navbar(
           appName = appName,

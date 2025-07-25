@@ -19,7 +19,7 @@ internal class DevMode {
   }
 }
 
-fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: Boolean = false, appCssPath: String? = null, headBlock: TagConsumer<*>.() -> Unit = {}, bodyBlock: TagConsumer<*>.() -> Unit) {
+fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: Boolean = false, appCssPath: String? = null, headBlock: TagConsumer<*>.() -> Unit = {}, hotReload: Boolean = true, bodyBlock: TagConsumer<*>.() -> Unit) {
   html {
     attributes["class"] = "h-full bg-white"
     head {
@@ -55,7 +55,7 @@ fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: B
         rel = "stylesheet"
       }
       title(title)
-      if (DevMode.devMode) {
+      if (DevMode.devMode && hotReload) {
         script {
           type = "module"
           src = "/static/js/refresh_dev.js"

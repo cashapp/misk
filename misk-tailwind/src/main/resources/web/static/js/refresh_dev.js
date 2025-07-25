@@ -3,7 +3,7 @@
 (function() {
     // Configuration
     const POLL_ENDPOINT = '/_liveness'; // Change this to your backend endpoint
-    const POLL_INTERVAL = 300;
+    const POLL_INTERVAL = 100;
 
     let isServerDown = false;
     let pollInterval;
