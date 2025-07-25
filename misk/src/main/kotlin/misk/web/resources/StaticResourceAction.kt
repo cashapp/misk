@@ -1,5 +1,7 @@
 package misk.web.resources
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.resources.ResourceLoader
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
@@ -18,12 +20,14 @@ import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
+import wisp.logging.getLogger
 import java.net.HttpURLConnection
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /**
  * StaticResourceAction
+ *
+ * Sensitive resources with code file extensions like .class will not be returned by this action
+ *   to prevent security vulnerabilities.
  *
  * This data class is used with Guice multibindings. Register instances by calling `multibind()`
  * in a `KAbstractModule`:
@@ -57,44 +61,58 @@ class StaticResourceAction @Inject constructor(
   fun getResponse(url: HttpUrl): Response<ResponseBody> {
     val staticResourceEntry = resourceEntryFinder
       .staticResource(url) as StaticResourceEntry?
-        ?: return NotFoundAction.response(url.encodedPath.drop(1))
+      ?: return NotFoundAction.response(url.encodedPath.drop(1))
     return MatchedResource(staticResourceEntry).getResponse(url)
   }
 
-  private enum class Kind {
+  private enum class MatchResult {
     NO_MATCH,
     RESOURCE,
     RESOURCE_DIRECTORY,
+    SENSITIVE_RESOURCE,
+  }
+
+  private companion object {
+    private val logger = getLogger<StaticResourceAction>()
+
+    private val sensitiveResourceFileExtensions = setOf("class", "java", "kt", "proto")
   }
 
   private inner class MatchedResource(var matchedEntry: StaticResourceEntry) {
     fun getResponse(url: HttpUrl): Response<ResponseBody> {
       val urlPath = url.encodedPath
-      return when (exists(urlPath)) {
-        Kind.NO_MATCH -> when {
+      return when (getMatchResult(urlPath)) {
+        MatchResult.NO_MATCH -> when {
           !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(url))
           // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
           urlPath.endsWith("/") -> resourceResponse(
-            normalizePath(matchedEntry.url_path_prefix)
+            normalizePath(matchedEntry.url_path_prefix),
           )
 
           else -> null
         }
 
-        Kind.RESOURCE -> resourceResponse(urlPath)
-        Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(url))
+        MatchResult.RESOURCE -> resourceResponse(urlPath)
+        MatchResult.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(url))
+        MatchResult.SENSITIVE_RESOURCE -> {
+          logger.warn("Blocked access to sensitive resource: ${url.encodedPath}")
+          NotFoundAction.response(url.encodedPath.drop(1))
+        }
       } ?: NotFoundAction.response(url.encodedPath.drop(1))
     }
 
     /** Returns true if the mapped path exists on either the resource path or file system. */
-    private fun exists(urlPath: String): Kind {
+    private fun getMatchResult(urlPath: String): MatchResult {
       val resourcePath = matchedEntry.resourcePath(urlPath)
+      val maybeFileExtension = resourcePath.substringAfterLast('.', "")
       return when {
+        // Prevent returning sensitive or code files, which could be a security risk
+        maybeFileExtension in sensitiveResourceFileExtensions -> MatchResult.SENSITIVE_RESOURCE
         // Check if path is a directory before checking if it is a single resource
-        resourceLoader.list(resourcePath).isNotEmpty() -> Kind.RESOURCE_DIRECTORY
-        // If not a directory, check if resource 
-        resourceLoader.exists(resourcePath) -> Kind.RESOURCE
-        else -> Kind.NO_MATCH
+        resourceLoader.list(resourcePath).isNotEmpty() -> MatchResult.RESOURCE_DIRECTORY
+        // If not a directory, check if resource
+        resourceLoader.exists(resourcePath) -> MatchResult.RESOURCE
+        else -> MatchResult.NO_MATCH
       }
     }
 
@@ -121,8 +139,8 @@ class StaticResourceAction @Inject constructor(
     }
 
     private fun resourceResponse(urlPath: String): Response<ResponseBody>? {
-      return when (exists(urlPath)) {
-        Kind.RESOURCE -> {
+      return when (getMatchResult(urlPath)) {
+        MatchResult.RESOURCE -> {
           val responseBody = object : ResponseBody {
             override fun writeTo(sink: BufferedSink) {
               open(urlPath)!!.use {
@@ -135,9 +153,9 @@ class StaticResourceAction @Inject constructor(
             headers = headersOf(
               "Content-Type",
               MediaTypes.fromFileExtension(
-                urlPath.substring(urlPath.lastIndexOf('.') + 1)
-              ).toString()
-            )
+                urlPath.substring(urlPath.lastIndexOf('.') + 1),
+              ).toString(),
+            ),
           )
         }
 
@@ -149,7 +167,7 @@ class StaticResourceAction @Inject constructor(
       return Response(
         body = "".toResponseBody(),
         statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-        headers = headersOf("Location", urlPath)
+        headers = headersOf("Location", urlPath),
       )
     }
   }

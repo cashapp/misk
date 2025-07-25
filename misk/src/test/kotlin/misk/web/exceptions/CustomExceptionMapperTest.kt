@@ -5,7 +5,6 @@ import misk.MiskTestingServiceModule
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.inject.KAbstractModule
-import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
@@ -24,12 +23,9 @@ import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
 internal class CustomExceptionMapperTest {
+  @MiskTestModule val module = TestModule()
 
-  @MiskTestModule
-  val module = TestModule()
-
-  @Inject
-  lateinit var jettyService: JettyService
+  @Inject lateinit var jettyService: JettyService
 
   @Test
   fun customizeUnauthenticated() {
@@ -97,7 +93,6 @@ internal class CustomExceptionMapperTest {
       install(WebActionModule.create<ThrowsUnauthorized>())
       install(ExceptionMapperModule.create<UnauthenticatedException, CustomUnauthenticatedMapper>())
       install(ExceptionMapperModule.create<UnauthorizedException, CustomUnauthorizedMapper>())
-      install(LogCollectorModule())
     }
   }
 }
