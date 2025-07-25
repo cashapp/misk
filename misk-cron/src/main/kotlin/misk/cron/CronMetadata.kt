@@ -4,7 +4,7 @@ import jakarta.inject.Inject
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.toFormattedJson
-import wisp.moshi.adapter
+import misk.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
 internal data class CronData(

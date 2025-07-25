@@ -8,6 +8,7 @@ import kotlinx.html.h1
 import kotlinx.html.script
 import kotlinx.html.unsafe
 import misk.metadata.servicegraph.ServiceGraphMetadata
+import misk.moshi.adapter
 import misk.tailwind.components.AlertInfo
 import misk.tailwind.components.AlertInfoHighlight
 import misk.web.Get
@@ -18,7 +19,6 @@ import misk.web.mediatype.MediaTypes
 import misk.web.metadata.toFormattedJson
 import misk.web.v2.DashboardPageLayout
 import wisp.moshi.ProviderJsonAdapterFactory
-import wisp.moshi.adapter
 import wisp.moshi.buildMoshi
 
 @Singleton

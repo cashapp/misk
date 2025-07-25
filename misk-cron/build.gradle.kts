@@ -23,6 +23,7 @@ dependencies {
   implementation(project(":misk-clustering"))
   implementation(project(":misk-config"))
   implementation(project(":misk-service"))
+  implementation(project(":misk-moshi"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
