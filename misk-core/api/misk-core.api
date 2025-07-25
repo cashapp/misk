@@ -50,6 +50,7 @@ public final class misk/logging/LoggingKt {
 	public static final fun log (Lmu/KLogger;Lorg/slf4j/event/Level;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun log (Lmu/KLogger;Lorg/slf4j/event/Level;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun sampled (Lmu/KLogger;Lmisk/sampling/Sampler;)Lmu/KLogger;
+	public static synthetic fun sampled$default (Lmu/KLogger;Lmisk/sampling/Sampler;ILjava/lang/Object;)Lmu/KLogger;
 	public static final fun trace (Lmu/KLogger;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun trace (Lmu/KLogger;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V
 	public static final fun warn (Lmu/KLogger;Ljava/lang/Throwable;[Lkotlin/Pair;Lkotlin/jvm/functions/Function0;)V

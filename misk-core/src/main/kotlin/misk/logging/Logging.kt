@@ -25,7 +25,7 @@ inline fun <reified T> getLogger(): KLogger {
  *
  *   val logger = getLogger<MyClass>().sampled(PercentSampler(PERCENTAGE_TO_ALLOW))
  */
-fun KLogger.sampled(sampler: Sampler): KLogger {
+fun KLogger.sampled(sampler: Sampler = Sampler.rateLimiting(1L)): KLogger {
   return SampledLogger(this, sampler)
 }
 
