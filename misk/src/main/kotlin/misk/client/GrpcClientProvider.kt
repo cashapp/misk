@@ -173,7 +173,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
     okHttpClientCommonConfigurator.configure(
       builder = clientBuilder,
-      config = endpointConfig.toWispConfig()
+      config = endpointConfig
     )
 
     for (factory in appInterceptorFactories) {

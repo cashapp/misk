@@ -5,6 +5,13 @@ import wisp.security.ssl.TrustStoreConfig
 import java.net.URL
 import java.time.Duration
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "HttpClientsConfig",
+    imports = ["misk.client.HttpClientsConfig"]
+  )
+)
 data class HttpClientsConfig @JvmOverloads constructor(
     // Need to retain ordering, hence LinkedHashMap
     val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
@@ -83,12 +90,24 @@ data class HttpClientsConfig @JvmOverloads constructor(
     /** Names of configured endpoints, all of which can be fetched using [get] */
     fun endpointNames(): Set<String> = endpoints.keys
 }
-
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "HttpClientSSLConfig",
+    imports = ["misk.client.HttpClientSSLConfig"]
+  )
+)
 data class HttpClientSSLConfig(
     val cert_store: CertStoreConfig?,
     val trust_store: TrustStoreConfig
 )
-
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "HttpClientConfig",
+    imports = ["misk.client.HttpClientConfig"]
+  )
+)
 data class HttpClientConfig @JvmOverloads constructor(
     val connectTimeout: Duration? = null,
     val writeTimeout: Duration? = null,
@@ -125,7 +144,13 @@ fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
       followRedirect = this.followRedirect ?: other.followRedirect,
       followSslRedirects = this.followSslRedirects ?: other.followSslRedirects
     )
-
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "HttpClientEndpointConfig",
+    imports = ["misk.client.HttpClientEndpointConfig"]
+  )
+)
 data class HttpClientEndpointConfig @JvmOverloads constructor(
     val url: String? = null,
     val envoy: HttpClientEnvoyConfig? = null,
@@ -135,7 +160,13 @@ data class HttpClientEndpointConfig @JvmOverloads constructor(
         require(url == null || envoy == null) { "Cannot set both url and envoy configs" }
     }
 }
-
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "HttpClientEnvoyConfig",
+    imports = ["misk.client.HttpClientEnvoyConfig"]
+  )
+)
 data class HttpClientEnvoyConfig @JvmOverloads constructor(
     val app: String,
 
