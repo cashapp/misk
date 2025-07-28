@@ -1,8 +1,5 @@
 package misk.security.ssl
 
-import wisp.security.ssl.aliasesOfType
-import wisp.security.ssl.getPrivateKey
-import wisp.security.ssl.getX509CertificateChain
 import java.net.Socket
 import java.security.KeyStore
 import java.security.Principal
