@@ -44,8 +44,6 @@ dependencyAnalysis {
       onUnusedDependencies {
         exclude("com.github.docker-java:docker-java-api")
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
-        // TODO remove when all callsites using old :misk-core callsites are migrated to :misk-backoff
-        exclude(":misk-backoff")
       }
       onIncorrectConfiguration {
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
@@ -101,6 +99,15 @@ dependencyAnalysis {
         // For backwards compatibility, we want Moshi classes moved to misk-moshi to still be
         // part of misk api.
         exclude(":misk-moshi")
+      }
+    }
+    project(":misk-core") {
+      onUnusedDependencies {
+        // For backwards compatibility to prevent existing misk-core consumers from breaking while classes
+        //    are moved out to smaller modules.
+        exclude(":misk-backoff")
+        exclude(":misk-logging")
+        exclude(":misk-sampling")
       }
     }
   }

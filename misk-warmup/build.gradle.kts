@@ -15,6 +15,7 @@ dependencies {
   implementation(libs.loggingApi)
   implementation(project(":misk-api"))
   implementation(project(":misk-core"))
+  implementation(project(":misk-sampling"))
   implementation(project(":wisp:wisp-logging"))
 
   testImplementation(libs.assertj)
