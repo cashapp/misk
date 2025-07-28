@@ -6,6 +6,13 @@ import okhttp3.OkHttpClient.Builder
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "OkHttpClientCommonConfigurator",
+    imports = ["misk.client.OkHttpClientCommonConfigurator"]
+  )
+)
 class OkHttpClientCommonConfigurator {
     fun configure(builder: Builder, config: HttpClientEndpointConfig): Builder {
         configureCallTimeout(builder = builder, config = config)

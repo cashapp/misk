@@ -574,6 +574,8 @@ public final class misk/client/HttpClientEnvoyConfig {
 public final class misk/client/HttpClientFactory {
 	public static final field Companion Lmisk/client/HttpClientFactory$Companion;
 	public fun <init> (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/client/OkHttpClientCommonConfigurator;)V
+	public fun <init> (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/client/OkHttpClientCommonConfigurator;Lwisp/client/EnvoyClientEndpointProvider;Ljava/util/List;Ljava/net/ProxySelector;)V
+	public synthetic fun <init> (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/client/OkHttpClientCommonConfigurator;Lwisp/client/EnvoyClientEndpointProvider;Ljava/util/List;Ljava/net/ProxySelector;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun create (Lmisk/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient;
 	public final fun create (Lmisk/client/HttpClientEndpointConfig;Ljava/lang/String;)Lokhttp3/OkHttpClient;
 	public static synthetic fun create$default (Lmisk/client/HttpClientFactory;Lmisk/client/HttpClientEndpointConfig;Ljava/lang/String;ILjava/lang/Object;)Lokhttp3/OkHttpClient;
@@ -655,9 +657,17 @@ public final class misk/client/JettyPortPeerClientModule : misk/inject/KAbstract
 }
 
 public final class misk/client/OkHttpClientCommonConfigurator {
+	public static final field Companion Lmisk/client/OkHttpClientCommonConfigurator$Companion;
+	public static final field followRedirects Z
+	public static final field followSslRedirects Z
+	public static final field maxIdleConnections I
+	public static final field retryOnConnectionFailure Z
 	public fun <init> ()V
-	public final fun configure (Lokhttp3/OkHttpClient$Builder;Lwisp/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient$Builder;
-	public final fun getDelegate ()Lwisp/client/OkHttpClientCommonConfigurator;
+	public final fun configure (Lokhttp3/OkHttpClient$Builder;Lmisk/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient$Builder;
+}
+
+public final class misk/client/OkHttpClientCommonConfigurator$Companion {
+	public final fun getKeepAliveDuration ()Ljava/time/Duration;
 }
 
 public final class misk/client/PeerClientFactory {

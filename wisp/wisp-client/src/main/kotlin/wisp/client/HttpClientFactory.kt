@@ -10,7 +10,13 @@ import java.io.File
 import java.net.Proxy
 import java.net.ProxySelector
 import javax.net.ssl.X509TrustManager
-
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "HttpClientFactory",
+    imports = ["misk.client.HttpClientFactory"]
+  )
+)
 class HttpClientFactory @JvmOverloads constructor(
     private val sslLoader: SslLoader = SslLoader(ResourceLoader.SYSTEM),
     private val sslContextFactory: SslContextFactory = SslContextFactory(sslLoader),
