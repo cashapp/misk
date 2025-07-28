@@ -25,6 +25,7 @@ dependencies {
   api(project(":misk-api"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
+  api(project(":misk-sampling"))
   api(project(":misk-testing-api"))
   implementation(libs.dockerCore)
   implementation(libs.dockerTransportHttpClient)

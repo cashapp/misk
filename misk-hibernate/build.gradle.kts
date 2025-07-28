@@ -48,6 +48,7 @@ dependencies {
   implementation(project(":misk-backoff"))
   implementation(project(":misk-core"))
   implementation(project(":misk-crypto"))
+  implementation(project(":misk-sampling"))
   implementation(project(":misk-service"))
 
   testImplementation(libs.assertj)

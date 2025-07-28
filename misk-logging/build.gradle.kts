@@ -4,27 +4,15 @@ import com.vanniktech.maven.publish.KotlinJvm
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
+  id("java-test-fixtures")
 }
 
 dependencies {
-  api(libs.jakartaInject)
-  api(libs.kotlinRetry)
-  api(libs.okHttp)
-  api(project(":misk-backoff")) // TODO remove once all usages depend on misk-backoff directly
-  api(project(":wisp:wisp-config"))
-  api(project(":wisp:wisp-ssl"))
-  api(project(":wisp:wisp-token"))
-  api(project(":misk-config"))
-  api(project(":misk-inject"))
-  api(project(":misk-logging")) // TODO remove once all usages depend on misk-logging directly
+  api(libs.loggingApi)
+  api(libs.slf4jApi)
   api(project(":misk-sampling")) // TODO remove once all usages depend on misk-sampling directly
-  api(project(":misk-testing-api"))
-  implementation(libs.bouncyCastleProvider)
-  implementation(libs.guice)
   implementation(libs.kotlinStdLibJdk8)
-  implementation(libs.okio)
-  implementation(project(":wisp:wisp-token-testing"))
-  implementation(project(":wisp:wisp-resource-loader"))
+  implementation(project(":misk-api"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
