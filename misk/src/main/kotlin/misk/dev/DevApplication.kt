@@ -62,6 +62,7 @@ fun runDevApplication(modules : KFunction<MiskApplication>, additionalGradleArgs
       }
     }
     running?.stop()
+    running?.awaitTerminated()
 
   }
 
