@@ -33,6 +33,7 @@ plugins {
 dependencyAnalysis {
   issues {
     all {
+      // TODO do a single pass to cleanup tests / testFixtures deps and then remove this block
       ignoreSourceSet("testFixtures", "test")
       onAny {
         severity("fail")
@@ -49,6 +50,7 @@ dependencyAnalysis {
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
       }
     }
+
     // False positives.
     project(":misk-gcp") {
       onUsedTransitiveDependencies {
