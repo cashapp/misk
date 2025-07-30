@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.788"
-aws2 = "2.32.10"
+aws2 = "2.32.11"
 bucket4j = "8.8.0"
 datadog = "1.51.2"
 dependencyAnalysisPlugin = "2.19.0"
@@ -20,7 +20,7 @@ mavenPublish = "0.34.0"
 micrometer = "1.12.13"
 netty = "4.2.1.Final"
 okHttp = "5.1.0"
-okio = "3.15.0"
+okio = "3.16.0"
 prometheus = "0.16.0"
 protobuf = "3.25.8"
 retrofit = "3.0.0"
@@ -71,7 +71,7 @@ errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotation
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.68.2" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.58.2" }
-gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.31.0" }
+gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.31.1" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250523-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.1" }
