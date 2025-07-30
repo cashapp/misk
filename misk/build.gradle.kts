@@ -70,6 +70,7 @@ dependencies {
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-proto"))
   implementation(project(":misk-tailwind"))
+  implementation(project(":misk-tokens"))
   implementation(project(":wisp:wisp-deployment-testing"))
   implementation(project(":wisp:wisp-logging"))
   implementation(project(":wisp:wisp-moshi"))

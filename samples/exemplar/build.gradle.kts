@@ -43,6 +43,7 @@ dependencies {
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-service"))
   implementation(project(":misk-tailwind"))
+  implementation(project(":misk-tokens"))
   implementation(project(":misk-testing"))
 
   testImplementation(libs.assertj)
