@@ -110,6 +110,7 @@ dependencyAnalysis {
         exclude(":misk-backoff")
         exclude(":misk-logging")
         exclude(":misk-sampling")
+        exclude(":misk-tokens")
       }
     }
   }
