@@ -15,7 +15,7 @@ set -x
 # "$HERMIT_ENV/node_modules/.bin" to the PATH, and we need that for miskweb to be found.
 # Except sometimes we have a different hermit env active, so we deal with that below.
 pushd ..
-bin/npm ci --registry=https://registry.npmjs.org/
+bin/npm ci
 popd
 
 ../node_modules/.bin/miskweb ci-build -e
