@@ -13,8 +13,6 @@ import misk.security.ssl.SslLoader
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
-import wisp.client.EnvoyClientEndpointProvider
-import wisp.client.UnixDomainSocketFactory
 
 @Singleton
 class HttpClientFactory
@@ -25,6 +23,7 @@ constructor(
   private val okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator,
 ) {
 
+  @Deprecated("Misk will soon require Guice and dependency injection and no longer support manual construction.")
   constructor(
     sslLoader: SslLoader = SslLoader(ResourceLoader.SYSTEM),
     sslContextFactory: SslContextFactory = SslContextFactory(sslLoader),
@@ -39,9 +38,10 @@ constructor(
   }
 
   // Field-injected so ClientLoggingInterceptor remains internal.
-  @Inject private lateinit var clientLoggingInterceptor: ClientLoggingInterceptor
+  // TODO: note since ClientLoggingInterceptor is internal, this can now only be used from dependency injection, not direct construction
+  @Inject private var clientLoggingInterceptor: ClientLoggingInterceptor? = null
 
-  @Inject private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
+  @Inject private var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory? = null
 
   @com.google.inject.Inject(optional = true) var envoyClientEndpointProvider: EnvoyClientEndpointProvider? = null
 
@@ -54,9 +54,11 @@ constructor(
   fun create(config: HttpClientEndpointConfig, serviceName: String? = null): OkHttpClient {
     // TODO(mmihic): Cache, proxy, etc
     val builder = unconfiguredClient.newBuilder()
-    builder.interceptors().add(clientLoggingInterceptor)
-    if (serviceName != null) {
-      builder.interceptors().add(clientMetricsInterceptorFactory.create(serviceName))
+    if (clientLoggingInterceptor != null) {
+      builder.interceptors().add(clientLoggingInterceptor!!)
+    }
+    if (serviceName != null && clientMetricsInterceptorFactory != null) {
+      builder.interceptors().add(clientMetricsInterceptorFactory!!.create(serviceName))
     }
     okHttpClientCommonConfigurator.configure(builder = builder, config = config)
     config.clientConfig.ssl?.let {
@@ -80,7 +82,7 @@ constructor(
     config.clientConfig.unixSocketFile?.let {
       builder.socketFactory(UnixDomainSocketFactory(File(it)))
       // No DNS lookup needed since we're just sending the request over a socket.
-      builder.dns(wisp.client.NoOpDns)
+      builder.dns(NoOpDns)
       // Proxy config not supported
       builder.proxy(Proxy.NO_PROXY)
     }
@@ -89,7 +91,7 @@ constructor(
 
     config.envoy?.let {
       builder.socketFactory(
-        UnixDomainSocketFactory(envoyClientEndpointProvider!!.unixSocket(config.envoy.toWispConfig()))
+        UnixDomainSocketFactory(envoyClientEndpointProvider!!.unixSocket(config.envoy))
       )
       // No DNS lookup needed since we're just sending the request over a socket.
       builder.dns(NoOpDns)

@@ -53,6 +53,7 @@ dependencies {
   implementation(libs.jettyUnixSocket)
   implementation(libs.jettyWebsocketApi)
   implementation(libs.jettyWebsocketServer)
+  implementation(libs.jnrUnixsocket)
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
   implementation(libs.kotlinxCoroutinesCore)
