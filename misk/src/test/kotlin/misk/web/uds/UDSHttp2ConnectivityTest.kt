@@ -24,7 +24,7 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import wisp.client.UnixDomainSocketFactory
+import misk.client.UnixDomainSocketFactory
 import java.io.File
 import java.util.UUID
 import jakarta.inject.Inject

@@ -23,7 +23,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
-import wisp.client.UnixDomainSocketFactory
+import misk.client.UnixDomainSocketFactory
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths

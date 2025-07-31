@@ -2,7 +2,6 @@ package misk.client
 
 import com.google.common.util.concurrent.AbstractIdleService
 import okhttp3.mockwebserver.MockWebServer
-import wisp.client.UnixDomainServerSocketFactory
 import java.io.File
 import jakarta.inject.Singleton
 
