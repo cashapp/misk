@@ -480,21 +480,32 @@ internal class VitessDockerContainer(
         return StartDockerContainerResult.alreadyStarted()
         
       } catch (notFoundException: NotFoundException) {
-        return StartDockerContainerResult.nonRetryableFailure(
+        return StartDockerContainerResult.retryableNewPortConfig(
           "Container for `$containerId` was not found during start up.",
           notFoundException
         )
         
       } catch (internalServerException: InternalServerErrorException) {
         val message = internalServerException.message ?: ""
-        if (message.contains("port is already allocated")) {
-          return handlePortAlreadyAllocatedError(containerId, internalServerException)
+        
+        return when {
+          message.contains("port is already allocated") -> {
+            handlePortAlreadyAllocatedError(containerId, internalServerException)
+          }
+          message.contains("OCI runtime create failed") ||
+          message.contains("device or resource busy") -> {
+            StartDockerContainerResult.retryableSamePortConfig(
+              "Failed to start Docker container for `$containerName`.",
+              internalServerException
+            )
+          }
+          else -> {
+            StartDockerContainerResult.nonRetryableFailure(
+              "Failed to start Docker container for `$containerName`.",
+              internalServerException
+            )
+          }
         }
-
-        return StartDockerContainerResult.nonRetryableFailure(
-          "Failed to start Docker container for `$containerName`.",
-          internalServerException
-        )
       }
     }
   }
