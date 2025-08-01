@@ -24,12 +24,12 @@ internal class JettyServletUpstreamResponse(
     get() = response.headers()
 
   override fun setHeader(name: String, value: String) {
-    response.setHeader(name, value)
+    response.headers.put(name, value)
   }
 
   override fun addHeaders(headers: Headers) {
     for (i in 0 until headers.size) {
-      response.addHeader(headers.name(i), headers.value(i))
+      response.headers.add(headers.name(i), headers.value(i))
     }
   }
 
@@ -37,7 +37,7 @@ internal class JettyServletUpstreamResponse(
     sendTrailers = true
 
     // Set the callback that'll return trailers at the end of the response body.
-    response.trailers = Supplier<HttpFields> {
+    response.trailersSupplier = Supplier {
       val httpFields = HttpFields.build()
       for (i in 0 until trailers.size) {
         httpFields.add(trailers.name(i), trailers.value(i))
