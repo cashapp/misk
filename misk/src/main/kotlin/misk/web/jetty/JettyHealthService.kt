@@ -8,18 +8,19 @@ import misk.annotation.ExperimentalMiskApi
 import misk.web.WebConfig
 import mu.KLogger
 import okhttp3.HttpUrl
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler
+import org.eclipse.jetty.ee8.servlet.ServletHolder
+import org.eclipse.jetty.ee8.websocket.server.config.JettyWebSocketServletContainerInitializer
 import org.eclipse.jetty.http.UriCompliance
 import org.eclipse.jetty.io.ConnectionStatistics
+import org.eclipse.jetty.server.Handler
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.StatisticsHandler
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import misk.logging.getLogger
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -100,7 +101,7 @@ internal class JettyHealthService @Inject internal constructor(
   private fun setupHttpConnector() {
     val httpConnectionFactory = HttpConnectionFactory(
       HttpConfiguration().apply {
-        uriCompliance = UriCompliance.RFC3986
+        uriCompliance = UriCompliance.LEGACY
         sendServerVersion = false
         setFormEncodedMethods()
       })
@@ -144,7 +145,10 @@ internal class JettyHealthService @Inject internal constructor(
 
     JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null)
     server.addManaged(servletContextHandler)
-    statisticsHandler.handler = servletContextHandler
+    val handlers = Handler.Sequence().apply {
+      addHandler(servletContextHandler)
+    }
+    statisticsHandler.handler = handlers
   }
 
   private fun setupServer() {

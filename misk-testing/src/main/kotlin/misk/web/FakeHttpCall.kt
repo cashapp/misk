@@ -2,6 +2,7 @@ package misk.web
 
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
@@ -18,6 +19,7 @@ data class FakeHttpCall @JvmOverloads constructor(
   override var requestHeaders: Headers = headersOf(),
   override var statusCode: Int = 200,
   override var networkStatusCode: Int = 200,
+  override val httpVersion: HttpVersion = HttpVersion.HTTP_1_1,
   val headersBuilder: Headers.Builder = Headers.Builder(),
   var sendTrailers: Boolean = false,
   val trailersBuilder: Headers.Builder = Headers.Builder(),

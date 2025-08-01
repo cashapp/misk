@@ -30,6 +30,7 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import jakarta.inject.Inject
+import misk.web.http.HttpVersion
 
 @MiskTest(startService = false)
 class RequestDeadlineInterceptorTest {
@@ -475,7 +476,8 @@ class RequestDeadlineInterceptorTest {
   // Simple fake UpstreamResponse for testing
   internal class FakeUpstreamResponse(
     override var statusCode: Int = 200,
-    override val headers: Headers = headersOf()
+    override val headers: Headers = headersOf(),
+    override val httpVersion: HttpVersion = HttpVersion.HTTP_1_1
   ) : ServletHttpCall.UpstreamResponse {
     private val headersBuilder = Headers.Builder()
     private val trailersMap = mutableMapOf<String, String>()

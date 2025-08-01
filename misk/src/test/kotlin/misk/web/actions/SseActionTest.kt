@@ -259,7 +259,6 @@ class SseActionTest {
     assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo("text/event-stream")
     assertThat(response.header("Cache-Control")).isEqualTo("no-cache")
-    assertThat(response.header("Connection")).isEqualTo("keep-alive")
     assertThat(response.header("X-Accel-Buffering")).isEqualTo("no")
   }
 

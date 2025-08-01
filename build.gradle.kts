@@ -265,6 +265,7 @@ subprojects {
       add("api", platform(rootProject.libs.jacksonBom))
       add("api", platform(rootProject.libs.jerseyBom))
       add("api", platform(rootProject.libs.jettyBom))
+      add("api", platform(rootProject.libs.jettyEe8Bom))
       add("api", platform(rootProject.libs.kotlinBom))
       add("api", platform(rootProject.libs.nettyBom))
       add("api", platform(rootProject.libs.prometheusClientBom))

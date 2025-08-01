@@ -17,6 +17,7 @@ import misk.web.PathPattern
 import misk.web.ResponseSink
 import misk.web.ResponseSinkChannel
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import misk.web.interceptors.ResponseBodyMarshallerFactory
 import misk.web.marshal.Marshaller
 import misk.web.mediatype.MediaTypes
@@ -54,7 +55,10 @@ internal class ResponseBodyFeatureBinding(
     with(subject.httpCall) {
       setResponseHeader("Content-Type", MediaTypes.SERVER_EVENT_STREAM)
       setResponseHeader("Cache-Control", "no-cache")
-      setResponseHeader("Connection", "keep-alive")
+      // Keep-Alive is an HTTP/1.0 mechanism only
+      if (subject.httpCall.httpVersion == HttpVersion.HTTP_1_0) {
+        setResponseHeader("Connection", "keep-alive")
+      }
       setResponseHeader("X-Accel-Buffering", "no")
     }
   }

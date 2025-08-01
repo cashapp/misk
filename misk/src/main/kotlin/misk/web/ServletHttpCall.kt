@@ -2,13 +2,14 @@ package misk.web
 
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import misk.web.jetty.headers
 import misk.web.jetty.httpUrl
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
-import org.eclipse.jetty.server.Request
+import org.eclipse.jetty.ee8.nested.Request
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
@@ -43,6 +44,9 @@ internal data class ServletHttpCall(
 
   override val responseHeaders: Headers
     get() = upstreamResponse.headers
+
+  override val httpVersion: HttpVersion
+    get() = upstreamResponse.httpVersion
 
   override fun setStatusCodes(statusCode: Int, networkStatusCode: Int) {
     _actualStatusCode = statusCode
@@ -106,6 +110,7 @@ internal data class ServletHttpCall(
   interface UpstreamResponse {
     var statusCode: Int
     val headers: Headers
+    val httpVersion: HttpVersion
     fun setHeader(name: String, value: String)
     fun addHeaders(headers: Headers)
     fun requireTrailers()

@@ -62,16 +62,28 @@ class WebActionsServletTest {
   }
 
   @Test
-  fun malformedUriQueryParamsResponseDoesNotContainStacktrace() {
+  fun incompleteUtf8EncodingDoesNotFail() {
     val response = get(
       path = "/potato",
       viaUDS = false,
       viaFileUDS = false,
-      encodedQuery = "test" to "%3C%a%3C",
+      encodedQuery = "test" to "%C1%BF",
     )
 
-    assertThat(response.body.string()).isEqualTo("400: Unable to parse URI query")
+    assertThat(response.body.string()).isEqualTo("TestActionResponse(text=foo)")
+    assertThat(response.code).isEqualTo(200)
+  }
+
+  @Test
+  fun invalidPathCharactersReturns400() {
+    val response = get(
+      path = "/potato%00bb",
+      viaUDS = false,
+      viaFileUDS = false,
+    )
+
     assertThat(response.code).isEqualTo(400)
+    assertThat(response.body.string()).contains("HTTP ERROR 400 Bad Request")
   }
 
   @Test
@@ -95,7 +107,7 @@ class WebActionsServletTest {
         .url(jettyService.httpServerUrl.newBuilder().encodedPath("/fooasdf/").build())
         .patch("bar".toRequestBody())
     )
-    assertThat(response.body?.string()).contains("Nothing found at PATCH", "fooasdf")
+    assertThat(response.body.string()).contains("Nothing found at PATCH", "fooasdf")
   }
 
   internal class WebActionsServletNetworkInterceptor : NetworkInterceptor {
@@ -114,10 +126,11 @@ class WebActionsServletTest {
           )
           .build()
       )
+      chain.proceed(chain.httpCall)
     }
 
     class Factory : NetworkInterceptor.Factory {
-      override fun create(action: Action): NetworkInterceptor? =
+      override fun create(action: Action): NetworkInterceptor =
         WebActionsServletNetworkInterceptor()
     }
   }
