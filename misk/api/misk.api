@@ -1520,6 +1520,10 @@ public final class misk/web/ResponseExtensionsKt {
 }
 
 public abstract class misk/web/SocketAddress {
+	public static final field Companion Lmisk/web/SocketAddress$Companion;
+}
+
+public final class misk/web/SocketAddress$Companion {
 }
 
 public final class misk/web/SocketAddress$Network : misk/web/SocketAddress {

@@ -23,7 +23,7 @@ sealed class SocketAddress {
   class Unix(val path: String) : SocketAddress()
 
   companion object {
-    fun from(javaSocketAddress: java.net.SocketAddress): SocketAddress {
+    internal fun from(javaSocketAddress: java.net.SocketAddress): SocketAddress {
       return when (javaSocketAddress) {
         is InetSocketAddress -> Network(javaSocketAddress.address.hostAddress, javaSocketAddress.port)
         is UnixDomainSocketAddress -> Unix(javaSocketAddress.path.toString())
