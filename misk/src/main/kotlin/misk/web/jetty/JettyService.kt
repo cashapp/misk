@@ -112,7 +112,7 @@ class JettyService @Inject internal constructor(
     val httpConnectionFactories = mutableListOf<ConnectionFactory>()
     val httpConfig = HttpConfiguration()
     httpConfig.customizeForGrpc()
-    httpConfig.uriCompliance = UriCompliance.RFC3986
+    httpConfig.uriCompliance = UriCompliance.LEGACY
     httpConfig.sendServerVersion = false
     if (webConfig.ssl != null) {
       httpConfig.securePort = webConfig.ssl.port

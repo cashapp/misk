@@ -102,7 +102,7 @@ internal class JettyHealthService @Inject internal constructor(
   private fun setupHttpConnector() {
     val httpConnectionFactory = HttpConnectionFactory(
       HttpConfiguration().apply {
-        uriCompliance = UriCompliance.RFC3986
+        uriCompliance = UriCompliance.LEGACY
         sendServerVersion = false
         setFormEncodedMethods()
       })

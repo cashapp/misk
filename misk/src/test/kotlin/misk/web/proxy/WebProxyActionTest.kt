@@ -383,6 +383,8 @@ class WebProxyActionTest {
     }
   }
 
+  // TODO Permitting this necessitates usage of UriCompliance.LEGACY in misk's HttpConfig.
+  //  We should either make this configurable or switch to a strict compliance mode
   @Test
   internal fun getForwardedSlashesOnSlashes() {
     upstreamServer.enqueue(
