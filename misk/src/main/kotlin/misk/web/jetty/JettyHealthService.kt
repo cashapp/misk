@@ -13,6 +13,7 @@ import org.eclipse.jetty.ee8.servlet.ServletHolder
 import org.eclipse.jetty.ee8.websocket.server.config.JettyWebSocketServletContainerInitializer
 import org.eclipse.jetty.http.UriCompliance
 import org.eclipse.jetty.io.ConnectionStatistics
+import org.eclipse.jetty.server.Handler
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.NetworkConnector
@@ -145,7 +146,7 @@ internal class JettyHealthService @Inject internal constructor(
 
     JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null)
     server.addManaged(servletContextHandler)
-    statisticsHandler.handler = servletContextHandler
+    statisticsHandler.handler = servletContextHandler as Handler
   }
 
   private fun setupServer() {
