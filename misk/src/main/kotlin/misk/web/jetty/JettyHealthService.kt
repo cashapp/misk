@@ -146,7 +146,10 @@ internal class JettyHealthService @Inject internal constructor(
 
     JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null)
     server.addManaged(servletContextHandler)
-    statisticsHandler.handler = servletContextHandler as Handler
+    val handlers = Handler.Sequence().apply {
+      addHandler(servletContextHandler)
+    }
+    statisticsHandler.handler = handlers
   }
 
   private fun setupServer() {
