@@ -265,7 +265,8 @@ class Http2ConnectivityTest {
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun disconnect(): Response<String> {
       val request = actionScopedServletRequest.get() as org.eclipse.jetty.server.Request
-      request.httpChannel.abort(Exception("boom")) // Synthesize a connectivity failure.
+      request.connectionMetaData.connection.onClose(Exception("boom")) // Synthesize a connectivity failure.
+      request.connectionMetaData.connection.close()
 
       return Response(body = "")
     }
@@ -279,7 +280,8 @@ class Http2ConnectivityTest {
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun disconnect(): ResponseBody {
       val request = actionScopedServletRequest.get() as org.eclipse.jetty.server.Request
-      request.httpChannel.abort(Exception("boom")) // Synthesize a connectivity failure.
+      request.connectionMetaData.connection.onClose(Exception("boom")) // Synthesize a connectivity failure.
+      request.connectionMetaData.connection.close()
 
       return object : ResponseBody {
         override fun writeTo(sink: BufferedSink) {
