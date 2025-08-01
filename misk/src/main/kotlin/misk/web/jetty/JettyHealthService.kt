@@ -8,6 +8,9 @@ import misk.annotation.ExperimentalMiskApi
 import misk.web.WebConfig
 import mu.KLogger
 import okhttp3.HttpUrl
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler
+import org.eclipse.jetty.ee8.servlet.ServletHolder
+import org.eclipse.jetty.ee8.websocket.server.config.JettyWebSocketServletContainerInitializer
 import org.eclipse.jetty.http.UriCompliance
 import org.eclipse.jetty.io.ConnectionStatistics
 import org.eclipse.jetty.server.HttpConfiguration
@@ -16,8 +19,6 @@ import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.StatisticsHandler
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import misk.logging.getLogger

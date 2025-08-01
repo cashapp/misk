@@ -11,6 +11,8 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import okio.BufferedSource
+import java.net.InetSocketAddress
+import java.net.UnixDomainSocketAddress
 import javax.servlet.http.Cookie
 
 /**
@@ -19,6 +21,16 @@ import javax.servlet.http.Cookie
 sealed class SocketAddress {
   class Network(val ipAddress: String, val port: Int) : SocketAddress()
   class Unix(val path: String) : SocketAddress()
+
+  companion object {
+    fun from(javaSocketAddress: java.net.SocketAddress): SocketAddress {
+      return when (javaSocketAddress) {
+        is InetSocketAddress -> Network(javaSocketAddress.address.hostAddress, javaSocketAddress.port)
+        is UnixDomainSocketAddress -> Unix(javaSocketAddress.path.toString())
+        else -> throw IllegalArgumentException("Unknown SocketAddress type ${javaSocketAddress.javaClass.simpleName}")
+      }
+    }
+  }
 }
 
 /**

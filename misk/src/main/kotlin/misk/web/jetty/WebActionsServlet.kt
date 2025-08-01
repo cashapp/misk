@@ -20,8 +20,12 @@ import okio.BufferedSink
 import okio.buffer
 import okio.sink
 import okio.source
+import org.eclipse.jetty.ee8.websocket.server.JettyServerUpgradeResponse
+import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketServlet
+import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketServletFactory
 import org.eclipse.jetty.http.BadMessageException
 import org.eclipse.jetty.http.HttpMethod
+import org.eclipse.jetty.server.HttpChannel
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.server.ServerConnector
@@ -131,20 +135,10 @@ internal class WebActionsServlet @Inject constructor(
 
       val httpCall = ServletHttpCall.create(
         request = request,
-        linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
-          when (this?.connector) {
-            is UnixDomainServerConnector -> SocketAddress.Unix(
-              (this.connector as UnixDomainServerConnector).unixDomainPath.toString()
-            )
-
-            is UnixSocketConnector -> SocketAddress.Unix(
-              (this.connector as UnixSocketConnector).unixSocket
-            )
-
-            is ServerConnector -> SocketAddress.Network(
-              this.endPoint.remoteAddress.address.hostAddress,
-              (this.connector as ServerConnector).localPort
-            )
+        linkLayerLocalAddress = with((request as? Request)?.let { HttpChannel.from(it) }) {
+          when (this?.connectionMetaData?.connector) {
+            is UnixDomainServerConnector,
+            is ServerConnector -> SocketAddress.from(this.connectionMetaData.localSocketAddress)
 
             else -> throw IllegalStateException("Unknown socket connector.")
           }

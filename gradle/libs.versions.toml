@@ -12,6 +12,7 @@ googleHttp = "2.0.0"
 guava = "33.4.8-jre"
 hoplite = "2.7.5"
 jackson = "2.19.2"
+jetty = "12.0.23"
 junit = "5.13.4"
 kotest = "5.9.1"
 kotlin = "2.1.20"
@@ -124,19 +125,20 @@ jerseyBom = { module = "org.glassfish.jersey:jersey-bom", version = "3.1.11" }
 jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "26.0.2" }
 jettyAlpnServer = { module = "org.eclipse.jetty:jetty-alpn-server" }
 jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
-jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "10.0.24" }
+jettyBom = { module = "org.eclipse.jetty:jetty-bom", version.ref = "jetty" }
+jettyEe8Bom = { module = "org.eclipse.jetty.ee8:jetty-ee8-bom", version.ref = "jetty" }
 jettyHttp = { module = "org.eclipse.jetty:jetty-http" }
-jettyHttp2 = { module = "org.eclipse.jetty.http2:http2-server" }
+jettyHttp2 = { module = "org.eclipse.jetty.http2:jetty-http2-server" }
 jettyIo = { module = "org.eclipse.jetty:jetty-io" }
 jettyServer = { module = "org.eclipse.jetty:jetty-server" }
-jettyServlet = { module = "org.eclipse.jetty:jetty-servlet" }
+jettyServlet = { module = "org.eclipse.jetty.ee8:jetty-ee8-servlet" }
 jettyServletApi = { module = "org.eclipse.jetty.toolchain:jetty-servlet-api", version = "4.0.6" }
-jettyServlets = { module = "org.eclipse.jetty:jetty-servlets" }
+jettyServlets = { module = "org.eclipse.jetty.ee8:jetty-ee8-servlets" }
 jettyUds = { module = "org.eclipse.jetty:jetty-unixdomain-server" }
-jettyUnixSocket = { module = "org.eclipse.jetty:jetty-unixsocket-server" }
 jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
-jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api" }
-jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
+jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:jetty-websocket-jetty-api" }
+jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:jetty-websocket-jetty-server" }
+jettyWebsocketServerE88 = { module = "org.eclipse.jetty.ee8.websocket:jetty-ee8-websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
 jooq = { module = "org.jooq:jooq", version = "3.19.18" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.3" }
