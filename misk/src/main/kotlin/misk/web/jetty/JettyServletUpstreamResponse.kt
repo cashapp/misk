@@ -4,8 +4,8 @@ import misk.web.ServletHttpCall
 import misk.web.actions.WebSocketListener
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
+import org.eclipse.jetty.ee8.nested.Response
 import org.eclipse.jetty.http.HttpFields
-import org.eclipse.jetty.server.Response
 import java.util.function.Supplier
 
 internal class JettyServletUpstreamResponse(
@@ -24,12 +24,12 @@ internal class JettyServletUpstreamResponse(
     get() = response.headers()
 
   override fun setHeader(name: String, value: String) {
-    response.headers.put(name, value)
+    response.setHeader(name, value)
   }
 
   override fun addHeaders(headers: Headers) {
     for (i in 0 until headers.size) {
-      response.headers.add(headers.name(i), headers.value(i))
+      response.addHeader(headers.name(i), headers.value(i))
     }
   }
 
@@ -37,7 +37,7 @@ internal class JettyServletUpstreamResponse(
     sendTrailers = true
 
     // Set the callback that'll return trailers at the end of the response body.
-    response.trailersSupplier = Supplier {
+    response.trailers = Supplier {
       val httpFields = HttpFields.build()
       for (i in 0 until trailers.size) {
         httpFields.add(trailers.name(i), trailers.value(i))

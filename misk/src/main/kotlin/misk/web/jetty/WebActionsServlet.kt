@@ -20,14 +20,13 @@ import okio.BufferedSink
 import okio.buffer
 import okio.sink
 import okio.source
+import org.eclipse.jetty.ee8.nested.Request
+import org.eclipse.jetty.ee8.nested.Response
 import org.eclipse.jetty.ee8.websocket.server.JettyServerUpgradeResponse
 import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketServlet
 import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketServletFactory
 import org.eclipse.jetty.http.BadMessageException
 import org.eclipse.jetty.http.HttpMethod
-import org.eclipse.jetty.server.HttpChannel
-import org.eclipse.jetty.server.Request
-import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
 import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
@@ -135,7 +134,7 @@ internal class WebActionsServlet @Inject constructor(
 
       val httpCall = ServletHttpCall.create(
         request = request,
-        linkLayerLocalAddress = with((request as? Request)?.let { HttpChannel.from(it) }) {
+        linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
           when (this?.connectionMetaData?.connector) {
             is UnixDomainServerConnector,
             is ServerConnector -> SocketAddress.from(this.connectionMetaData.localSocketAddress)
@@ -238,8 +237,10 @@ internal fun HttpServletRequest.headers(): Headers {
 
 internal fun Response.headers(): Headers {
   val result = Headers.Builder()
-  for (header in headers) {
-    result.addUnsafeNonAscii(header.name, header.value)
+  for (name in headerNames) {
+    for (value in getHeaders(name)) {
+      result.addUnsafeNonAscii(name, value)
+    }
   }
   return result.build()
 }
