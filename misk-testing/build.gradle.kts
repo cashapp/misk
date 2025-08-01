@@ -18,7 +18,6 @@ dependencies {
   api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.openTracingMock)
-  api(libs.servletApi)
   api(libs.logbackClassic)
   api(project(":misk"))
   api(project(":misk-actions"))

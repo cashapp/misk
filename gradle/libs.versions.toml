@@ -127,6 +127,7 @@ jettyAlpnServer = { module = "org.eclipse.jetty:jetty-alpn-server" }
 jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
 jettyBom = { module = "org.eclipse.jetty:jetty-bom", version.ref = "jetty" }
 jettyEe8Bom = { module = "org.eclipse.jetty.ee8:jetty-ee8-bom", version.ref = "jetty" }
+jettyEe8Nested = { module = "org.eclipse.jetty.ee8:jetty-ee8-nested" }
 jettyHttp = { module = "org.eclipse.jetty:jetty-http" }
 jettyHttp2 = { module = "org.eclipse.jetty.http2:jetty-http2-server" }
 jettyIo = { module = "org.eclipse.jetty:jetty-io" }
@@ -136,9 +137,8 @@ jettyServletApi = { module = "org.eclipse.jetty.toolchain:jetty-servlet-api", ve
 jettyServlets = { module = "org.eclipse.jetty.ee8:jetty-ee8-servlets" }
 jettyUds = { module = "org.eclipse.jetty:jetty-unixdomain-server" }
 jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
-jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:jetty-websocket-jetty-api" }
-jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:jetty-websocket-jetty-server" }
-jettyWebsocketServerE88 = { module = "org.eclipse.jetty.ee8.websocket:jetty-ee8-websocket-jetty-server" }
+jettyWebsocketApiEE8 = { module = "org.eclipse.jetty.ee8.websocket:jetty-ee8-websocket-jetty-api" }
+jettyWebsocketServerEE8 = { module = "org.eclipse.jetty.ee8.websocket:jetty-ee8-websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
 jooq = { module = "org.jooq:jooq", version = "3.19.18" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.3" }
@@ -211,7 +211,6 @@ retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref
 retrofitProtobuf = { module = "com.squareup.retrofit2:converter-protobuf", version.ref = "retrofit" }
 retrofitScalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version.ref = "retrofit" }
-servletApi = { module = "javax.servlet:javax.servlet-api", version = "4.0.1" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
