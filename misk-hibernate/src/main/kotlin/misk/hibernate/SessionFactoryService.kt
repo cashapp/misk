@@ -80,9 +80,14 @@ internal class SessionFactoryService(
       ) {
       }
     }
-    val bootstrapRegistryBuilder = BootstrapServiceRegistryBuilder()
-      .applyIntegrator(integrator)
-      .build()
+    val bootstrapRegistryBuilder = BootstrapServiceRegistryBuilder().let {
+      it.applyIntegrator(integrator)
+      if (Thread.currentThread().contextClassLoader != null) {
+        it.applyClassLoader(Thread.currentThread().contextClassLoader)
+      }
+      it.build()
+    }
+
 
     val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
     registryBuilder.addInitiator(hibernateInjectorAccess)
