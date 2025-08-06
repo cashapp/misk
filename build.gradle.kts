@@ -25,6 +25,7 @@ plugins {
   alias(libs.plugins.kotlinJvm) apply false
   alias(libs.plugins.mavenPublishBase) apply false
   alias(libs.plugins.protobuf) apply false
+  alias(libs.plugins.schemaMigrator) apply false
   alias(libs.plugins.sqldelight) apply false
   alias(libs.plugins.wire) apply false
 }

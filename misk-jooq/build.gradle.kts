@@ -4,10 +4,8 @@ import com.vanniktech.maven.publish.KotlinJvm
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-
-  // Needed to generate jooq test db classes
   id("nu.studer.jooq")
-  alias(libs.plugins.schemaMigrator)
+  id("com.squareup.misk.schema-migrator")
 }
 
 dependencies {
