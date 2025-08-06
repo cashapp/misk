@@ -88,6 +88,7 @@ dependencies {
   testImplementation(libs.kotlinxCoroutinesTest)
   testImplementation(libs.logbackClassic)
   testImplementation(libs.okHttpMockWebServer)
+  testImplementation(libs.okHttpSse)
   testImplementation(libs.openTracingMock)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-testing"))
