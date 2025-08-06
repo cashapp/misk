@@ -19,7 +19,7 @@ import org.jooq.impl.DSL
 import org.jooq.impl.DataSourceConnectionProvider
 import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 

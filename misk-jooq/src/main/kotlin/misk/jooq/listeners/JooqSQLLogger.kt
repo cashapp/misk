@@ -12,7 +12,7 @@ import org.jooq.VisitListenerProvider
 import org.jooq.impl.DSL
 import org.jooq.impl.DefaultVisitListenerProvider
 import org.jooq.tools.StringUtils
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.Arrays
 
 class JooqSQLLogger : ExecuteListener {

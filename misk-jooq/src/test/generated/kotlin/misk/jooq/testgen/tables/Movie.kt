@@ -4,13 +4,13 @@
 package misk.jooq.testgen.tables
 
 
-import misk.jooq.testgen.Jooq
-import misk.jooq.testgen.keys.KEY_MOVIE_PRIMARY
-import misk.jooq.testgen.tables.records.MovieRecord
-
 import java.time.LocalDateTime
 
 import kotlin.collections.Collection
+
+import misk.jooq.testgen.Jooq
+import misk.jooq.testgen.keys.KEY_MOVIE_PRIMARY
+import misk.jooq.testgen.tables.records.MovieRecord
 
 import org.jooq.Condition
 import org.jooq.Field

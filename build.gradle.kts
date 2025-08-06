@@ -19,7 +19,6 @@ plugins {
   alias(libs.plugins.binaryCompatibilityValidator)
   alias(libs.plugins.detekt) apply false
   alias(libs.plugins.dokka) apply false
-  alias(libs.plugins.flyway) apply false
   alias(libs.plugins.jooq) apply false
   alias(libs.plugins.kotlinAllOpen) apply false
   alias(libs.plugins.kotlinJpa) apply false
