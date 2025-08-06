@@ -140,7 +140,6 @@ internal class WarmupTest {
     }
   }
 
-  @OptIn(ExperimentalMiskApi::class)
   @Singleton
   class SuspendingLoggingWarmupTask @Inject constructor(
     private val events: BlockingDeque<String>

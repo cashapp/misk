@@ -1,11 +1,8 @@
 package misk.warmup
 
-import misk.annotation.ExperimentalMiskApi
-
 /**
  * @see WarmupTask
  */
-@ExperimentalMiskApi
 abstract class SuspendingWarmupTask : WarmupTask() {
   override fun execute() {
     throw UnsupportedOperationException("Suspending warmup task should implement only executeSuspending method")

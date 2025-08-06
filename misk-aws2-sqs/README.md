@@ -1,7 +1,5 @@
 # Module: AWS SQS Module
 
-**This module is still in experimental state.**
-
 This module provides a modern, Kotlin-first interface for working with Amazon Simple Queue Service (SQS) in Misk applications. It leverages Kotlin's coroutines and structured concurrency to offer an efficient, type-safe, and easy-to-use message processing system.
 
 ### Key Features
