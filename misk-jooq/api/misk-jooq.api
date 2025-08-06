@@ -171,6 +171,7 @@ public class misk/jooq/testgen/Jooq : org/jooq/impl/SchemaImpl {
 	public fun <init> ()V
 	public fun getCatalog ()Lorg/jooq/Catalog;
 	public final fun getMOVIE ()Lmisk/jooq/testgen/tables/Movie;
+	public final fun getRECORD_SIGNATURE_TEST ()Lmisk/jooq/testgen/tables/RecordSignatureTest;
 	public fun getTables ()Ljava/util/List;
 }
 
@@ -180,6 +181,7 @@ public final class misk/jooq/testgen/Jooq$Companion {
 
 public final class misk/jooq/testgen/keys/KeysKt {
 	public static final fun getKEY_MOVIE_PRIMARY ()Lorg/jooq/UniqueKey;
+	public static final fun getKEY_RECORD_SIGNATURE_TEST_PRIMARY ()Lorg/jooq/UniqueKey;
 }
 
 public class misk/jooq/testgen/tables/Movie : org/jooq/impl/TableImpl {
@@ -239,6 +241,64 @@ public final class misk/jooq/testgen/tables/Movie$Companion {
 	public final fun getMOVIE ()Lmisk/jooq/testgen/tables/Movie;
 }
 
+public class misk/jooq/testgen/tables/RecordSignatureTest : org/jooq/impl/TableImpl {
+	public static final field Companion Lmisk/jooq/testgen/tables/RecordSignatureTest$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Lorg/jooq/Name;)V
+	public fun <init> (Lorg/jooq/Name;Lorg/jooq/Table;Lorg/jooq/ForeignKey;Lorg/jooq/InverseForeignKey;Lorg/jooq/Table;[Lorg/jooq/Field;Lorg/jooq/Condition;)V
+	public fun as (Ljava/lang/String;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/SelectField;
+	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun as (Lorg/jooq/Name;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/SelectField;
+	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/Table;
+	public fun as (Lorg/jooq/Table;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun as (Lorg/jooq/Table;)Lorg/jooq/Table;
+	public final fun getBINARY_DATA ()Lorg/jooq/TableField;
+	public final fun getCREATED_AT ()Lorg/jooq/TableField;
+	public final fun getCREATED_BY ()Lorg/jooq/TableField;
+	public final fun getID ()Lorg/jooq/TableField;
+	public fun getIdentity ()Lorg/jooq/Identity;
+	public final fun getNAME ()Lorg/jooq/TableField;
+	public fun getPrimaryKey ()Lorg/jooq/UniqueKey;
+	public final fun getRECORD_SIGNATURE ()Lorg/jooq/TableField;
+	public fun getRecordType ()Ljava/lang/Class;
+	public fun getSchema ()Lorg/jooq/Schema;
+	public final fun getUPDATED_AT ()Lorg/jooq/TableField;
+	public final fun getUPDATED_BY ()Lorg/jooq/TableField;
+	public fun rename (Ljava/lang/String;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun rename (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun rename (Lorg/jooq/Name;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun rename (Lorg/jooq/Name;)Lorg/jooq/Table;
+	public fun rename (Lorg/jooq/Table;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun rename (Lorg/jooq/Table;)Lorg/jooq/Table;
+	public fun where (Ljava/lang/String;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun where (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun where (Ljava/lang/String;[Ljava/lang/Object;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun where (Ljava/lang/String;[Ljava/lang/Object;)Lorg/jooq/Table;
+	public fun where (Ljava/lang/String;[Lorg/jooq/QueryPart;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun where (Ljava/lang/String;[Lorg/jooq/QueryPart;)Lorg/jooq/Table;
+	public fun where (Ljava/util/Collection;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun where (Ljava/util/Collection;)Lorg/jooq/Table;
+	public fun where (Lorg/jooq/Condition;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun where (Lorg/jooq/Condition;)Lorg/jooq/Table;
+	public fun where (Lorg/jooq/Field;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun where (Lorg/jooq/Field;)Lorg/jooq/Table;
+	public fun where (Lorg/jooq/SQL;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun where (Lorg/jooq/SQL;)Lorg/jooq/Table;
+	public fun where ([Lorg/jooq/Condition;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun where ([Lorg/jooq/Condition;)Lorg/jooq/Table;
+	public fun whereExists (Lorg/jooq/Select;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun whereExists (Lorg/jooq/Select;)Lorg/jooq/Table;
+	public fun whereNotExists (Lorg/jooq/Select;)Lmisk/jooq/testgen/tables/RecordSignatureTest;
+	public synthetic fun whereNotExists (Lorg/jooq/Select;)Lorg/jooq/Table;
+}
+
+public final class misk/jooq/testgen/tables/RecordSignatureTest$Companion {
+	public final fun getRECORD_SIGNATURE_TEST ()Lmisk/jooq/testgen/tables/RecordSignatureTest;
+}
+
 public class misk/jooq/testgen/tables/records/MovieRecord : org/jooq/impl/UpdatableRecordImpl {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;)V
@@ -259,7 +319,32 @@ public class misk/jooq/testgen/tables/records/MovieRecord : org/jooq/impl/Updata
 	public fun setVersion (Ljava/lang/Integer;)V
 }
 
+public class misk/jooq/testgen/tables/records/RecordSignatureTestRecord : org/jooq/impl/UpdatableRecordImpl {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;[BLjava/lang/String;Ljava/lang/String;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;[B)V
+	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/String;[BLjava/lang/String;Ljava/lang/String;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;[BILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getBinaryData ()[B
+	public fun getCreatedAt ()Ljava/time/LocalDateTime;
+	public fun getCreatedBy ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/Long;
+	public fun getName ()Ljava/lang/String;
+	public fun getRecordSignature ()[B
+	public fun getUpdatedAt ()Ljava/time/LocalDateTime;
+	public fun getUpdatedBy ()Ljava/lang/String;
+	public fun key ()Lorg/jooq/Record1;
+	public synthetic fun key ()Lorg/jooq/Record;
+	public fun setBinaryData ([B)V
+	public fun setCreatedAt (Ljava/time/LocalDateTime;)V
+	public fun setCreatedBy (Ljava/lang/String;)V
+	public fun setId (Ljava/lang/Long;)V
+	public fun setName (Ljava/lang/String;)V
+	public fun setRecordSignature ([B)V
+	public fun setUpdatedAt (Ljava/time/LocalDateTime;)V
+	public fun setUpdatedBy (Ljava/lang/String;)V
+}
+
 public final class misk/jooq/testgen/tables/references/TablesKt {
 	public static final fun getMOVIE ()Lmisk/jooq/testgen/tables/Movie;
+	public static final fun getRECORD_SIGNATURE_TEST ()Lmisk/jooq/testgen/tables/RecordSignatureTest;
 }
 

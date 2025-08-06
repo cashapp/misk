@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.Service
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import org.jooq.impl.DSL.now
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 import com.google.inject.Provider

@@ -6,8 +6,8 @@ plugins {
   id("com.vanniktech.maven.publish.base")
 
   // Needed to generate jooq test db classes
-  id("org.flywaydb.flyway")
   id("nu.studer.jooq")
+  alias(libs.plugins.schemaMigrator)
 }
 
 dependencies {
@@ -20,7 +20,7 @@ dependencies {
   api(project(":misk-jdbc"))
   implementation(libs.jakartaInject)
   implementation(project(":misk-backoff"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
@@ -35,15 +35,25 @@ dependencies {
 
 val dbMigrations = "src/test/resources/db-migrations"
 
-// Needed to generate jooq test db classes
-flyway {
-  url = "jdbc:mysql://localhost:3500/misk-jooq-test-codegen"
-  user = "root"
-  password = "root"
-  schemas = arrayOf("jooq")
-  locations = arrayOf("filesystem:${project.projectDir}/${dbMigrations}")
-  sqlMigrationPrefix = "v"
+val mysqlHost = System.getenv("MYSQL_HOST_DOCKER") ?: "localhost"
+val mysqlPort = System.getenv("MYSQL_PORT") ?: "3500"
+
+val mysqlDb = mapOf(
+  "url" to "jdbc:mysql://$mysqlHost:$mysqlPort/",
+  "schema" to "jooq",
+  "user" to "root",
+  "password" to "root"
+)
+
+miskSchemaMigrator {
+  database = mysqlDb["schema"]
+  host = mysqlHost
+  port = mysqlPort.toInt()
+  username = mysqlDb["user"]
+  password = mysqlDb["password"]
+  migrationsDir.set(layout.projectDirectory.dir(dbMigrations))
 }
+
 // Needed to generate jooq test db classes
 jooq {
   edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
@@ -54,17 +64,18 @@ jooq {
       jooqConfiguration.apply {
         jdbc.apply {
           driver = "com.mysql.cj.jdbc.Driver"
-          url = "jdbc:mysql://localhost:3500/misk-jooq-test-codegen"
-          user = "root"
-          password = "root"
+          url = "jdbc:mysql://$mysqlHost:$mysqlPort/${mysqlDb["schema"]}"
+          user = mysqlDb["user"]
+          password = mysqlDb["password"]
         }
         generator.apply {
           name = "org.jooq.codegen.KotlinGenerator"
           database.apply {
             name = "org.jooq.meta.mysql.MySQLDatabase"
             inputSchema = "jooq"
+            outputSchema = "jooq"
             includes = ".*"
-            excludes = "(.*?FLYWAY_SCHEMA_HISTORY)|(.*?schema_version)"
+            excludes = "(.*?schema_version)"
             recordVersionFields = "version"
           }
           generate.apply {
@@ -82,7 +93,7 @@ jooq {
 
 // Needed to generate jooq test db classes
 tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
-  dependsOn("flywayMigrate")
+  dependsOn("migrateSchema")
 
   // declare migration files as inputs on the jOOQ task and allow it to
   // participate in build caching

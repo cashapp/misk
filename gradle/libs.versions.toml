@@ -237,7 +237,6 @@ binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibilit
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
-flyway = { id = "org.flywaydb.flyway", version = "11.10.5" }
 jooq = { id = "nu.studer.jooq", version = "9.0" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
@@ -245,5 +244,6 @@ kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 mavenPublishBase = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublish" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }
+schemaMigrator = { id = "com.squareup.misk.schema-migrator", version = "2025.07.31.213947-514912f" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }

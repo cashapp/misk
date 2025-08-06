@@ -19,7 +19,7 @@ function waitContainer {
 echo "starting mysql in docker"
 docker run --rm \
   --name misk-jooq-test-codegen \
-  -e MYSQL_DATABASE=misk-jooq-test-codegen \
+  -e MYSQL_DATABASE=jooq \
   -e MYSQL_ROOT_HOST=% \
   -e MYSQL_ROOT_PASSWORD=root \
   -p 3500:3306 \
