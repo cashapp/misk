@@ -2039,6 +2039,7 @@ public final class misk/web/interceptors/RequestResponseBody {
 
 public final class misk/web/interceptors/ResponseBodyMarshallerFactory {
 	public final fun create (Lmisk/Action;)Lmisk/web/marshal/Marshaller;
+	public final fun create (Lokhttp3/MediaType;Lkotlin/reflect/KType;)Lmisk/web/marshal/Marshaller;
 }
 
 public final class misk/web/interceptors/WideOpenDevelopmentInterceptor : misk/web/NetworkInterceptor {
@@ -2488,5 +2489,63 @@ public final class misk/web/resources/StaticResourceEntry : misk/web/dashboard/V
 	public fun hashCode ()I
 	public final fun resourcePath (Ljava/lang/String;)Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/sse/ServerSentEvent {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/Long;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;)Lmisk/web/sse/ServerSentEvent;
+	public static synthetic fun copy$default (Lmisk/web/sse/ServerSentEvent;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/sse/ServerSentEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getComments ()Ljava/lang/String;
+	public final fun getData ()Ljava/lang/String;
+	public final fun getEvent ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getRetry ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/sse/ServerSentEventKt {
+	public static final field LAST_EVENT_ID_HEADER Ljava/lang/String;
+}
+
+public final class misk/web/sse/ServerSentEventMarshaller : misk/web/marshal/Marshaller {
+	public static final field INSTANCE Lmisk/web/sse/ServerSentEventMarshaller;
+	public fun contentType ()Lokhttp3/MediaType;
+	public fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
+}
+
+public final class misk/web/sse/ServerSentEventMarshaller$Factory : misk/web/marshal/Marshaller$Factory {
+	public fun <init> ()V
+	public fun create (Lokhttp3/MediaType;Lkotlin/reflect/KType;)Lmisk/web/marshal/Marshaller;
+}
+
+public final class misk/web/sse/ServerSentEventMarshallerKt {
+	public static final field COLON Ljava/lang/String;
+	public static final field END_OF_LINE Ljava/lang/String;
+	public static final field SPACE Ljava/lang/String;
+	public static final fun getEND_OF_LINE_VARIANTS ()Lkotlin/text/Regex;
+}
+
+public final class misk/web/sse/ServerSentEventUnmarshaller : misk/web/marshal/Unmarshaller {
+	public static final field INSTANCE Lmisk/web/sse/ServerSentEventUnmarshaller;
+	public fun unmarshal (Lokhttp3/Headers;Lokio/BufferedSource;)Ljava/lang/Object;
+}
+
+public final class misk/web/sse/ServerSentEventUnmarshaller$Factory : misk/web/marshal/Unmarshaller$Factory {
+	public fun <init> ()V
+	public fun create (Lokhttp3/MediaType;Lkotlin/reflect/KType;)Lmisk/web/marshal/Unmarshaller;
 }
 

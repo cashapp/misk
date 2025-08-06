@@ -10,6 +10,7 @@ import misk.grpc.GrpcMessageSourceChannel
 import misk.scope.ActionScope
 import misk.web.HttpCall
 import misk.web.RealChain
+import misk.web.ResponseSinkChannel
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -49,15 +50,19 @@ fun WebAction.asChain(
 
         runBlocking(context) {
           // Build the list of Source and Sink Channels (should only be 0 or 1 of each)
-          val sourceChannel = argsMap.values
+          val grpcMessageSourceChannel = argsMap.values
             .mapNotNull { it as? GrpcMessageSourceChannel<*> }
             .singleOrNull()
-          val sinkChannel = argsMap.values
+          val grpcMessageSinkChannel = argsMap.values
             .mapNotNull { it as? GrpcMessageSinkChannel<*> }
             .singleOrNull()
+          val responseSinkChannel = argsMap.values
+            .mapNotNull { it as? ResponseSinkChannel<*> }
+            .singleOrNull()
           // Launch a coroutine for each Source and Sink Channels to bridge the data
-          sourceChannel?.let { launch { sourceChannel.bridgeFromSource() } }
-          sinkChannel?.let { launch { sinkChannel.bridgeToSink() } }
+          grpcMessageSourceChannel?.let { launch { it.bridgeFromSource() } }
+          grpcMessageSinkChannel?.let { launch { it.bridgeToSink() } }
+          responseSinkChannel?.let { launch { it.bridgeToSink() } }
           try {
             (function as? FunctionWithOverrides)?.callSuspendBy(argsMap)
               ?: function.callSuspendBy(argsMap)
@@ -65,7 +70,8 @@ fun WebAction.asChain(
             // Once the action is complete, close the send channel and wait for the jobs to finish
             // This blocks any additional sends to the channel, but will allow existing responses in
             // the channel to be read and bridged to the sink
-            sinkChannel?.close()
+            grpcMessageSinkChannel?.close()
+            responseSinkChannel?.close()
           }
         }
       } ?: throw IllegalStateException("Null return from WebAction")

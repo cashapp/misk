@@ -100,6 +100,8 @@ import misk.web.mdc.RequestURILogContextProvider
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
 import misk.web.shutdown.GracefulShutdownModule
+import misk.web.sse.ServerSentEventMarshaller
+import misk.web.sse.ServerSentEventUnmarshaller
 import org.eclipse.jetty.io.EofException
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -162,8 +164,10 @@ class MiskWebModule @JvmOverloads constructor(
     multibind<Marshaller.Factory>().to<PlainTextMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<JsonMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<ProtobufMarshaller.Factory>()
+    multibind<Marshaller.Factory>().to<ServerSentEventMarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<JsonUnmarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<ProtobufUnmarshaller.Factory>()
+    multibind<Unmarshaller.Factory>().to<ServerSentEventUnmarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<MultipartUnmarshaller.Factory>()
 
     // Initialize empty sets for our multibindings.
