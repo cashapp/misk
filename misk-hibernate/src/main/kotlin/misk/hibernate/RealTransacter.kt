@@ -114,7 +114,7 @@ internal class RealTransacter private constructor(
             // Needs to be fetched on a separate thread to avoid nested transactions
             executorService.submit(
               Callable<Set<Shard>> {
-                transacter.transaction { session ->
+                transacter.replicaRead { session ->
                   session.useConnection { connection ->
                     connection.createStatement().use { s ->
                       val shards = s.executeQuery("SHOW VITESS_SHARDS")
