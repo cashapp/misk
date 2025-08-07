@@ -8,7 +8,6 @@ import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.healthchecks.HealthCheck
 import misk.hibernate.ReflectionQuery.QueryLimitsConfig
-import misk.hibernate.testing.TransacterFaultInjector
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
@@ -24,7 +23,6 @@ import misk.jdbc.DatabasePool
 import misk.jdbc.JdbcModule
 import misk.jdbc.RealDatabasePool
 import misk.jdbc.SchemaMigratorService
-import misk.testing.TestFixture
 import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
@@ -52,7 +50,7 @@ private const val MAX_MAX_ROWS = 10_000
 private const val ROW_COUNT_ERROR_LIMIT = 3000
 private const val ROW_COUNT_WARNING_LIMIT = 2000
 
-class HibernateModule @JvmOverloads constructor(
+open class HibernateModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   config: DataSourceConfig,
   private val readerQualifier: KClass<out Annotation>?,
@@ -153,12 +151,6 @@ class HibernateModule @JvmOverloads constructor(
     newMultibinder<DataSourceDecorator>(qualifier)
 
     val transacterKey = Transacter::class.toKey(qualifier)
-    val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
-    val readerSessionFactoryServiceProvider = if (readerQualifier != null) {
-      getProvider(keyOf<SessionFactoryService>(readerQualifier))
-    } else {
-      null
-    }
 
     install(
       ServiceModule<SchemaMigratorService>(qualifier)
@@ -166,23 +158,7 @@ class HibernateModule @JvmOverloads constructor(
         .enhancedBy<ReadyService>()
     )
 
-    bind(transacterKey).toProvider(object : Provider<Transacter> {
-      @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-      @Inject lateinit var injector: Injector
-      override fun get(): RealTransacter {
-        return RealTransacter(
-          qualifier = qualifier,
-          sessionFactoryService = sessionFactoryServiceProvider.get(),
-          readerSessionFactoryService = readerSessionFactoryServiceProvider?.get(),
-          config = config,
-          executorServiceFactory = executorServiceFactory,
-          hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
-            .map {
-              it.provider.get()
-            }.toSet()
-        )
-      }
-    }).asSingleton()
+    bind(transacterKey).toProvider(getTransacterProvider()).asSingleton()
 
     /**
      * Reader transacter is only supported for MySQL for now. TiDB and Vitess replica read works
@@ -190,25 +166,7 @@ class HibernateModule @JvmOverloads constructor(
      */
     if (readerQualifier != null && config.type == DataSourceType.MYSQL) {
       val readerTransacterKey = Transacter::class.toKey(readerQualifier)
-      bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
-        @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-        @Inject lateinit var injector: Injector
-        override fun get(): Transacter {
-          val sessionFactoryService = readerSessionFactoryServiceProvider!!.get()
-          val realTransacter = RealTransacter(
-            qualifier = readerQualifier,
-            sessionFactoryService = sessionFactoryService,
-            readerSessionFactoryService = sessionFactoryService,
-            config = config,
-            executorServiceFactory = executorServiceFactory,
-            hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
-              .map {
-                it.provider.get()
-              }.toSet()
-          ).readOnly()
-          return realTransacter
-        }
-      }).asSingleton()
+      bind(readerTransacterKey).toProvider(getReaderTransacterProvider()).asSingleton()
     }
 
     // Install other modules.
@@ -232,6 +190,54 @@ class HibernateModule @JvmOverloads constructor(
         .create<OptimisticLockException, OptimisticLockExceptionMapper>()
     )
   }
+
+  protected open fun getTransacterProvider(): Provider<Transacter> {
+    val sessionFactoryServiceProvider = getSessionFactoryServiceProvider()
+    val readerSessionFactoryServiceProvider = getReaderSessionFactoryServiceProvider()
+    val executorServiceFactoryProvider = getProvider(keyOf<ExecutorServiceFactory>())
+    val injectorProvider = getProvider(keyOf<Injector>())
+
+    return Provider<Transacter> {
+      RealTransacter(
+        qualifier = qualifier,
+        sessionFactoryService = sessionFactoryServiceProvider!!.get(),
+        readerSessionFactoryService = readerSessionFactoryServiceProvider?.get(),
+        config = config,
+        executorServiceFactory = executorServiceFactoryProvider.get(),
+        hibernateEntities = injectorProvider.get().findBindingsByType(HibernateEntity::class.typeLiteral())
+          .map {
+            it.provider.get()
+          }.toSet()
+      )
+    }
+  }
+
+  protected open fun getReaderTransacterProvider(): Provider<Transacter> {
+    val sessionFactoryServiceProvider = getReaderSessionFactoryServiceProvider()
+    val executorServiceFactoryProvider = getProvider(keyOf<ExecutorServiceFactory>())
+    val injectorProvider = getProvider(keyOf<Injector>())
+
+    return Provider<Transacter> {
+      val realTransacter = RealTransacter(
+        qualifier = readerQualifier!!,
+        sessionFactoryService = sessionFactoryServiceProvider!!.get(),
+        readerSessionFactoryService = sessionFactoryServiceProvider.get(),
+        config = config,
+        executorServiceFactory = executorServiceFactoryProvider.get(),
+        hibernateEntities = injectorProvider.get().findBindingsByType(HibernateEntity::class.typeLiteral())
+          .map {
+            it.provider.get()
+          }.toSet(),
+      ).readOnly()
+      realTransacter
+    }
+  }
+
+  private fun getSessionFactoryServiceProvider(): Provider<SessionFactoryService>? =
+    getProvider(keyOf<SessionFactoryService>(qualifier))
+
+  private fun getReaderSessionFactoryServiceProvider() =
+    readerQualifier?.let { getProvider(keyOf<SessionFactoryService>(it)) }
 
   private fun bindDataSource(
     qualifier: KClass<out Annotation>,
