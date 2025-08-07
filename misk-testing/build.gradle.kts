@@ -42,10 +42,10 @@ dependencies {
   implementation(project(":misk-action-scopes"))
   implementation(project(":misk-config"))
   implementation(project(":misk-docker"))
+  implementation(project(":misk-logging"))
   implementation(project(":misk-service"))
   implementation(project(":misk-tokens"))
   implementation(project(":wisp:wisp-deployment"))
-  implementation(project(":wisp:wisp-logging"))
   implementation(testFixtures(project(":misk-metrics")))
 
   testImplementation(libs.kotlinTest)

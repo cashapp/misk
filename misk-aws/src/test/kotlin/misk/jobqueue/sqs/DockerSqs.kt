@@ -15,7 +15,7 @@ import misk.testing.ExternalDependency
 import misk.containers.Composer
 import misk.containers.Container
 import misk.containers.ContainerUtil
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * A test SQS Service. Tests can connect to the service at 127.0.0.1:[clientPort]

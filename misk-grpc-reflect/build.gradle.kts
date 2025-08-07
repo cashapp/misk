@@ -31,7 +31,7 @@ dependencies {
   implementation(libs.kotlinReflect)
   implementation(libs.okio)
   implementation(libs.wireRuntime)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)

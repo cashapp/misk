@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import wisp.config.Config
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.net.URL
 import java.time.Duration
 

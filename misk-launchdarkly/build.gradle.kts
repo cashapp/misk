@@ -24,7 +24,7 @@ dependencies {
   implementation(project(":misk-service"))
   implementation(project(":wisp:wisp-feature"))
   implementation(project(":wisp:wisp-launchdarkly"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
 }
 
 mavenPublishing {

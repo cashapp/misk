@@ -15,7 +15,7 @@ dependencies {
   api(libs.micrometerCore)
 
   implementation(project(":misk-jdbc"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(libs.bucket4jCore)
   implementation(libs.bucket4jMySQL)
   implementation(libs.loggingApi)

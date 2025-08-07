@@ -6,7 +6,7 @@ import jakarta.inject.Provider
 import jakarta.inject.Singleton
 import misk.redis.Redis
 import misk.testing.TestFixture
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Flushes all Redis databases on startup.

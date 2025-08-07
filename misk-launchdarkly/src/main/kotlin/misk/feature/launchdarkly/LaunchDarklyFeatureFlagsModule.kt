@@ -23,7 +23,7 @@ import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import wisp.config.Config
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.net.URI
 import java.time.Duration
 import javax.net.ssl.X509TrustManager

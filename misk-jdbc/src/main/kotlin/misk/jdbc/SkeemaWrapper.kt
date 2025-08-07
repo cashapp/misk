@@ -1,7 +1,7 @@
 package misk.jdbc
 
 import misk.resources.ResourceLoader
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.nio.file.Files
 import kotlin.reflect.KClass

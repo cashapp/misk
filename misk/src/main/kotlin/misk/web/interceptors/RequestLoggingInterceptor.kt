@@ -10,7 +10,7 @@ import misk.scope.ActionScoped
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.interceptors.hooks.RequestResponseHook
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 private val logger = getLogger<RequestLoggingInterceptor>()
 

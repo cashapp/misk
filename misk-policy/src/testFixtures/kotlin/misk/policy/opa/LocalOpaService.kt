@@ -22,7 +22,7 @@ import misk.backoff.retry
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.Buffer
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.io.IOException
 import java.time.Duration

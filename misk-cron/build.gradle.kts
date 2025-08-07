@@ -17,7 +17,7 @@ dependencies {
   implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(project(":wisp:wisp-lease"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-moshi"))
   implementation(project(":misk-backoff"))
   implementation(project(":misk-clustering"))

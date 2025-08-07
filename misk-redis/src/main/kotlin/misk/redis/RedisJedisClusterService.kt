@@ -8,7 +8,7 @@ import redis.clients.jedis.DefaultJedisClientConfig
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.UnifiedJedis
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Controls the connection lifecycle for Redis in cluster mode.

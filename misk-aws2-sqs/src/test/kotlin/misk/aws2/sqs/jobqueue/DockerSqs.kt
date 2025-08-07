@@ -14,7 +14,7 @@ import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException
 import misk.containers.Composer
 import misk.containers.Container
 import misk.containers.ContainerUtil
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.net.URI
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException

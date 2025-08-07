@@ -7,7 +7,7 @@ import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
 import java.util.function.Supplier
 

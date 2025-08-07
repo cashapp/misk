@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.ComparisonOperator
 import software.amazon.awssdk.services.dynamodb.model.ExpectedAttributeValue
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import wisp.ratelimiting.RateLimitPrunerMetrics
 import wisp.ratelimiting.bucket4j.Bucket4jPruner
 import wisp.ratelimiting.bucket4j.ClockTimeMeter

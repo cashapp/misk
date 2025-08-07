@@ -13,7 +13,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 @MiskTest
 class CoordinatedServiceToStringTest {

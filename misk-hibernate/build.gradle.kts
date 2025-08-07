@@ -39,7 +39,7 @@ dependencies {
   implementation(libs.okio)
   implementation(libs.tink)
   implementation(libs.wireRuntime)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(project(":misk"))
   implementation(project(":misk-api"))
   implementation(project(":misk-actions"))

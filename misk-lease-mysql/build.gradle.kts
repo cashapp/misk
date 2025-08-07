@@ -22,7 +22,7 @@ dependencies {
 
   implementation(project(":misk-api"))
   implementation(project(":wisp:wisp-lease"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(libs.sqldelightJdbcDriver)
   implementation(libs.loggingApi)
 

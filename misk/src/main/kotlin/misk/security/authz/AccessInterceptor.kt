@@ -8,7 +8,7 @@ import misk.MiskCaller
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.scope.ActionScoped
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import kotlin.reflect.KClass
 
 class AccessInterceptor private constructor(

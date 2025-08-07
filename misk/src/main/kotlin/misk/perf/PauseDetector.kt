@@ -7,7 +7,7 @@ import misk.concurrent.Sleeper
 import misk.metrics.v2.Metrics
 import misk.metrics.v2.PeakGauge
 import org.slf4j.event.Level
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.NANOSECONDS

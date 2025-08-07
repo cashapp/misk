@@ -1,7 +1,7 @@
 package misk.crypto
 
 import jakarta.inject.Inject
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * [ExternalKeyResolver] implements an [KeyResolver] that fetches Tink keysets from an external

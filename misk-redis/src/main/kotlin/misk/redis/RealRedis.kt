@@ -23,7 +23,7 @@ import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method

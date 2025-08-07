@@ -2,7 +2,7 @@ package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import misk.resources.ResourceLoader
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.SortedSet

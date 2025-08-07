@@ -7,7 +7,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec
 import com.amazonaws.services.dynamodbv2.model.ReturnValue
 import io.micrometer.core.instrument.MeterRegistry
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import wisp.ratelimiting.RateLimitPrunerMetrics
 import wisp.ratelimiting.bucket4j.Bucket4jPruner
 import wisp.ratelimiting.bucket4j.ClockTimeMeter

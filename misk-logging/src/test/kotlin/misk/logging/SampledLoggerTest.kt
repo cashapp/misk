@@ -11,10 +11,10 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import misk.logging.LogCollector
-import wisp.logging.error
-import wisp.logging.getLogger
-import wisp.logging.info
-import wisp.logging.warn
+import misk.logging.error
+import misk.logging.getLogger
+import misk.logging.info
+import misk.logging.warn
 import jakarta.inject.Inject
 
 @MiskTest(startService = true)

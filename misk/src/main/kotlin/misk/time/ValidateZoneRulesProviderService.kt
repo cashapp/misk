@@ -3,7 +3,7 @@ package misk.time
 import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Singleton
 import java.time.ZoneId
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Optional service that validates that the ZoneRulesProvider class has been

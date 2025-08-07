@@ -40,7 +40,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import org.slf4j.LoggerFactory
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.lang.Thread.sleep
 import java.net.ServerSocket
 import java.net.SocketOptions

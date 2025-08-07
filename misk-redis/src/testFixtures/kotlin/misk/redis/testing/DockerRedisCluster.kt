@@ -16,7 +16,7 @@ import redis.clients.jedis.util.JedisClusterCRC16
 import misk.containers.Composer
 import misk.containers.Container
 import misk.containers.ContainerUtil
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.lang.Thread.sleep
 import java.time.Duration
 

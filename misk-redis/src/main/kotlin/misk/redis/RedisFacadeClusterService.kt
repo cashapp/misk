@@ -5,7 +5,7 @@ import com.google.inject.Provider
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import redis.clients.jedis.UnifiedJedis
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /** Provides a [Redis] built from a [UnifiedJedis] provided by [RedisJedisClusterService] */
 @Singleton

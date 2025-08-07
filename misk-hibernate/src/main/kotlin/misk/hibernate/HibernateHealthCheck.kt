@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Provider
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.sql.Timestamp
 import java.time.Clock
 import java.time.Duration

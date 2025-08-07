@@ -6,7 +6,7 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.SocketAddress
 import misk.web.WebConfig
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 

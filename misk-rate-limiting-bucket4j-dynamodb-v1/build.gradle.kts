@@ -15,7 +15,7 @@ dependencies {
   api(libs.jakartaInject)
   api(libs.micrometerCore)
 
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(libs.bucket4jCore)
   implementation(libs.bucket4jDynamoDbV1)
   implementation(libs.loggingApi)

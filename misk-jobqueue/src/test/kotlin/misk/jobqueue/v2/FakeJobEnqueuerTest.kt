@@ -14,7 +14,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import misk.logging.LogCollector
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import misk.time.FakeClock
 import java.time.Duration
 import java.time.temporal.ChronoUnit

@@ -3,7 +3,7 @@ package misk.resources
 import okio.BufferedSource
 import okio.buffer
 import okio.source
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.*

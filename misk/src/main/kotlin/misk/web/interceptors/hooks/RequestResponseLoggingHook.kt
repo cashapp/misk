@@ -19,10 +19,10 @@ import misk.web.interceptors.RequestLoggingMode
 import misk.web.interceptors.RequestResponseBody
 import org.slf4j.event.Level
 import wisp.deployment.Deployment
-import wisp.logging.SmartTagsThreadLocalHandler
-import wisp.logging.Tag
-import wisp.logging.getLogger
-import wisp.logging.log
+import misk.logging.SmartTagsThreadLocalHandler
+import misk.logging.Tag
+import misk.logging.getLogger
+import misk.logging.log
 import java.time.Duration
 import kotlin.reflect.full.findAnnotation
 

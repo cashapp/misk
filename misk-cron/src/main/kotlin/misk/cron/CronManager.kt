@@ -7,7 +7,7 @@ import com.cronutils.parser.CronParser
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.cron.CronManager.CronEntry.ExecutionTimeMetadata.Companion.toMetadata
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId

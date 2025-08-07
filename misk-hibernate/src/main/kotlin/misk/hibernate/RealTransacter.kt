@@ -23,7 +23,7 @@ import org.hibernate.exception.ConstraintViolationException
 import org.hibernate.exception.GenericJDBCException
 import org.hibernate.exception.LockAcquisitionException
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLException

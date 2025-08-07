@@ -24,7 +24,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Builds dashboard UI and loads IFrame tab.

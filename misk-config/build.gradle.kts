@@ -25,8 +25,9 @@ dependencies {
   implementation(libs.jacksonKotlin)
   implementation(libs.loggingApi)
   implementation(libs.okio)
+  implementation(project(":misk-logging"))
   implementation(project(":misk-tailwind"))
-  implementation(project(":wisp:wisp-logging"))
+
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)

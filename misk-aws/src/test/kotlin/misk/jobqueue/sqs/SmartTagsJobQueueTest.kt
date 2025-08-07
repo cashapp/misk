@@ -20,8 +20,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.feature.testing.FakeFeatureFlags
 import misk.logging.LogCollector
-import wisp.logging.getLogger
-import wisp.logging.withSmartTags
+import misk.logging.getLogger
+import misk.logging.withSmartTags
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger

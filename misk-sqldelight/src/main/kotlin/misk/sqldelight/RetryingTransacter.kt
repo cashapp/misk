@@ -5,7 +5,7 @@ import app.cash.sqldelight.TransactionWithReturn
 import app.cash.sqldelight.TransactionWithoutReturn
 import app.cash.sqldelight.db.OptimisticLockException
 import misk.backoff.ExponentialBackoff
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.sql.SQLException
 import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException

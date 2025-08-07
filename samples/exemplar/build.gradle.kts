@@ -24,7 +24,7 @@ dependencies {
   implementation(project(":wisp:wisp-config"))
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":wisp:wisp-lease"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-rate-limiting"))
   implementation(project(":wisp:wisp-token"))
   implementation(project(":misk"))
