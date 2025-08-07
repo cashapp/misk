@@ -10,9 +10,9 @@ import misk.web.shutdown.GracefulShutdownService.Companion.ShutdownReason.Idle
 import misk.web.shutdown.GracefulShutdownService.Companion.ShutdownReason.Interrupt
 import misk.web.shutdown.GracefulShutdownService.Companion.ShutdownReason.MaxWait
 import org.jetbrains.annotations.VisibleForTesting
-import wisp.logging.Tag
-import wisp.logging.getLogger
-import wisp.logging.withTags
+import misk.logging.Tag
+import misk.logging.getLogger
+import misk.logging.withTags
 import java.time.Clock
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference

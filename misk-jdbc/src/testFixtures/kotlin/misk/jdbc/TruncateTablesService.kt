@@ -3,7 +3,7 @@ package misk.jdbc
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provider
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import kotlin.reflect.KClass
 
 private val logger = getLogger<TruncateTablesService>()

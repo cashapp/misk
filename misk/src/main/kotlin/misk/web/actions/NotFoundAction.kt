@@ -15,7 +15,7 @@ import misk.web.jetty.WebActionsServlet
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers.Companion.headersOf
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import jakarta.inject.Inject
 import com.google.inject.Provider
 import jakarta.inject.Singleton

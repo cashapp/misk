@@ -20,7 +20,7 @@ import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.net.HttpURLConnection
 
 /**

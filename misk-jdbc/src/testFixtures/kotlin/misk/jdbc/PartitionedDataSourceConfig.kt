@@ -1,7 +1,7 @@
 package misk.jdbc
 
 import misk.testing.updateForParallelTests
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 private  val logger = getLogger<DataSourceConfig>()
 

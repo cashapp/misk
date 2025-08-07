@@ -12,7 +12,7 @@ import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 @MiskTest
 class ReadinessCheckServiceTest {

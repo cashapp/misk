@@ -11,7 +11,7 @@ import jakarta.inject.Singleton
 import misk.backoff.ExponentialBackoff
 import misk.backoff.RetryConfig
 import misk.backoff.retryableFuture
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage

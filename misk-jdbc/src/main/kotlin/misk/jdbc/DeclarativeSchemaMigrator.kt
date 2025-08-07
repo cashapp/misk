@@ -3,7 +3,7 @@ package misk.jdbc
 import misk.resources.ResourceLoader
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.statement.create.table.CreateTable
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.sql.ResultSet
 import java.util.regex.Pattern
 

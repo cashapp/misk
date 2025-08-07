@@ -24,7 +24,7 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.database.DatabaseQueryMetadata
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.lang.reflect.ParameterizedType
 import jakarta.inject.Inject
 import jakarta.inject.Singleton

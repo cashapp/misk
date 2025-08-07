@@ -22,9 +22,9 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import org.slf4j.MDC
-import wisp.logging.SmartTagsThreadLocalHandler
-import wisp.logging.error
-import wisp.logging.getLogger
+import misk.logging.SmartTagsThreadLocalHandler
+import misk.logging.error
+import misk.logging.getLogger
 import misk.tracing.traceWithNewRootSpan
 import java.time.Clock
 import java.time.Duration

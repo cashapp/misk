@@ -15,8 +15,8 @@ import misk.web.NetworkInterceptor
 import misk.web.WebConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import org.slf4j.event.Level
-import wisp.logging.getLogger
-import wisp.logging.log
+import misk.logging.getLogger
+import misk.logging.log
 import java.net.HttpURLConnection
 import java.time.Clock
 import java.time.Duration

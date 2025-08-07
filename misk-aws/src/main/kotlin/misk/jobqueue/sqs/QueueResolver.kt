@@ -9,7 +9,7 @@ import com.squareup.moshi.Moshi
 import misk.cloud.aws.AwsAccountId
 import misk.cloud.aws.AwsRegion
 import misk.jobqueue.QueueName
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject

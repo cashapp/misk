@@ -13,7 +13,7 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation

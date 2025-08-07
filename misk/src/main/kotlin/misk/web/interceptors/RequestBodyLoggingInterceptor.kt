@@ -10,7 +10,7 @@ import misk.scope.ActionScoped
 import misk.web.interceptors.hooks.RequestResponseHook
 import misk.web.interceptors.hooks.RequestResponseLoggingHook
 import okhttp3.Headers
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 private val logger = getLogger<RequestBodyLoggingInterceptor>()
 

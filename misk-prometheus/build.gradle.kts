@@ -18,7 +18,7 @@ dependencies {
   implementation(libs.prometheusHttpserver)
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
 }
 
 mavenPublishing {

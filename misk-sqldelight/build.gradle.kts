@@ -11,7 +11,7 @@ dependencies {
 
   implementation(libs.loggingApi)
   implementation(project(":misk-backoff"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.guice)

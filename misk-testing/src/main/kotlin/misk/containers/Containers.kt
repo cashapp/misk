@@ -11,7 +11,7 @@ import com.github.dockerjava.core.DefaultDockerClientConfig
 import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean

@@ -30,7 +30,7 @@ import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.net.HttpURLConnection
 import java.net.ProtocolException
 import javax.servlet.http.HttpServletRequest

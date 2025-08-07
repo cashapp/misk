@@ -25,7 +25,7 @@ dependencies {
   implementation(libs.okio)
   implementation(libs.tinkAwskms)
   implementation(libs.tinkGcpkms)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(project(":misk-moshi"))
 
   runtimeOnly(libs.bouncyCastlePkix)
@@ -65,7 +65,7 @@ dependencies {
   testFixturesImplementation(libs.okio)
   testFixturesImplementation(libs.tinkAwskms)
   testFixturesImplementation(libs.tinkGcpkms)
-  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk-logging"))
   testFixturesImplementation(project(":misk"))
 }
 

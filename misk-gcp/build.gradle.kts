@@ -44,7 +44,7 @@ dependencies {
   implementation(libs.slf4jApi)
   implementation(libs.threeTenBp)
   implementation(libs.wireRuntime)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-moshi"))
   implementation(project(":misk"))
   implementation(project(":misk-moshi"))
@@ -128,7 +128,7 @@ dependencies {
   testFixturesImplementation(libs.slf4jApi)
   testFixturesImplementation(libs.threeTenBp)
   testFixturesImplementation(libs.wireRuntime)
-  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk-logging"))
   testFixturesImplementation(project(":wisp:wisp-moshi"))
   testFixturesImplementation(project(":misk"))
 }

@@ -18,7 +18,7 @@ dependencies {
   implementation(libs.moshiCore)
   implementation(project(":misk-moshi"))
   implementation(project(":wisp:wisp-moshi"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.javaxInject)

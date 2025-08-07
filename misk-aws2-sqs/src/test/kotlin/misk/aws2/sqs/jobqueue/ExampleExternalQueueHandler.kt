@@ -5,7 +5,7 @@ import jakarta.inject.Singleton
 import misk.jobqueue.v2.Job
 import misk.jobqueue.v2.JobStatus
 import misk.jobqueue.v2.SuspendingJobHandler
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.concurrent.CountDownLatch
 
 @Singleton

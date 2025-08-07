@@ -17,7 +17,7 @@ import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
 import misk.testing.FakeFixture
 import misk.testing.TestFixture
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
 

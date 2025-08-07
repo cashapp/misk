@@ -21,7 +21,7 @@ import org.hibernate.mapping.SimpleValue
 import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import javax.persistence.Column
 import javax.persistence.Table
 import kotlin.reflect.KClass

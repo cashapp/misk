@@ -3,7 +3,7 @@ package misk.web
 import com.squareup.wire.MessageSink
 import misk.web.marshal.Marshaller
 import okio.BufferedSink
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 

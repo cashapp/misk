@@ -2,7 +2,7 @@ package misk.lease.mysql
 
 import wisp.lease.Lease
 import wisp.lease.LeaseManager
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration

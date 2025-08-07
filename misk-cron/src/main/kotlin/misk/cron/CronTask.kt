@@ -5,7 +5,7 @@ import misk.clustering.weights.ClusterWeightProvider
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import wisp.lease.LeaseManager
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 import jakarta.inject.Inject

@@ -11,7 +11,7 @@ import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.web.jetty.JettyHealthService
 import misk.web.jetty.JettyService
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.Closeable
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException

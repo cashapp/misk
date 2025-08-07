@@ -30,7 +30,7 @@ dependencies {
   implementation(project(":misk-moshi"))
   implementation(project(":misk-tailwind"))
   implementation(project(":wisp:wisp-config"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-moshi"))
 
   testImplementation(libs.assertj)

@@ -32,7 +32,7 @@ dependencies {
   implementation(project(":misk-moshi"))
   implementation(project(":misk-service"))
   implementation(project(":misk-tokens"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   runtimeOnly(libs.openTracingDatadog)
   testImplementation(libs.assertj)
   testImplementation(libs.awaitility)

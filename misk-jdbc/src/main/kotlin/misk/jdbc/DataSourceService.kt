@@ -10,7 +10,7 @@ import com.zaxxer.hikari.util.DriverDataSource
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Singleton
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
 import java.util.Properties
 import javax.sql.DataSource

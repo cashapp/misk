@@ -13,7 +13,7 @@ import misk.redis.lettuce.redisUri
 import misk.testing.ExternalDependency
 import misk.containers.Composer
 import misk.containers.Container
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.concurrent.TimeoutException
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds

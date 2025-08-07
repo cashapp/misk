@@ -10,7 +10,7 @@ import misk.vitess.shards
 import misk.vitess.target
 import misk.vitess.testing.DefaultSettings
 import misk.vitess.testing.VitessTestDb
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.Locale
 import kotlin.reflect.KClass
 

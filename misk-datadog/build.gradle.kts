@@ -14,7 +14,7 @@ dependencies {
   implementation(libs.openTracingUtil)
   implementation(libs.slf4jApi)
   implementation(libs.tracingDatadog)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
 }
 
 mavenPublishing {

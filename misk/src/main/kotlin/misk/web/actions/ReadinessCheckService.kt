@@ -10,7 +10,7 @@ import misk.tasks.Result
 import misk.tasks.Status
 import misk.web.ReadinessRefreshQueue
 import misk.web.WebConfig
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant

@@ -12,7 +12,7 @@ import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import jakarta.inject.Inject
 import org.threeten.bp.Duration
 

@@ -6,7 +6,7 @@ import com.google.inject.TypeLiteral
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.inject.typeLiteral
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method

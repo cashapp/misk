@@ -11,7 +11,7 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.Metadata
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 @Singleton
 class AllMetadataAction @Inject constructor(

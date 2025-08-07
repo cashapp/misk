@@ -2,7 +2,7 @@ package misk.hibernate.vitess
 
 import com.google.common.annotations.VisibleForTesting
 import misk.vitess.Shard
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.Optional
 import java.util.function.Consumer
 import java.util.regex.Matcher

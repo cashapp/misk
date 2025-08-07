@@ -6,7 +6,7 @@ import com.google.inject.Singleton
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.JobHandler
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 @Singleton
 class SubscriptionService @Inject constructor(

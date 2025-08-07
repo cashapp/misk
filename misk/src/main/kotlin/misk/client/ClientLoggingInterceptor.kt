@@ -3,7 +3,7 @@ package misk.client
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 

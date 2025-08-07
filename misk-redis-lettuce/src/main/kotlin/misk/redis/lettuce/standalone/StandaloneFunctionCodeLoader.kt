@@ -10,7 +10,7 @@ import misk.backoff.RetryConfig
 import misk.backoff.retryableFuture
 import misk.redis.lettuce.FunctionCodeLoader
 import misk.redis.lettuce.thenComposeUsing
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.TimeUnit

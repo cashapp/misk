@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import misk.logging.LogCollector
-import wisp.logging.error
-import wisp.logging.getLogger
-import wisp.logging.info
-import wisp.logging.warn
+import misk.logging.error
+import misk.logging.getLogger
+import misk.logging.info
+import misk.logging.warn
 import jakarta.inject.Inject
 
 @MiskTest(startService = true)

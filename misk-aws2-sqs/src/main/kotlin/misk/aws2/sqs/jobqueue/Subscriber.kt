@@ -21,7 +21,7 @@ import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
 

@@ -9,7 +9,7 @@ import misk.concurrent.ExecutorServiceFactory
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.metrics.Metrics
 import misk.time.timed
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.BlockingQueue

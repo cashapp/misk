@@ -44,7 +44,7 @@ import org.eclipse.jetty.util.JavaVersion
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.io.IOException
 import java.lang.Thread.sleep

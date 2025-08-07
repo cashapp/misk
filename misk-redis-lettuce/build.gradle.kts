@@ -30,7 +30,7 @@ dependencies {
   implementation(project(":misk-backoff"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
 
 
   testImplementation(libs.junitApi)
@@ -41,7 +41,7 @@ dependencies {
   testImplementation(testFixtures(project(":misk-redis-lettuce")))
 
   testFixturesImplementation(project(":misk-testing"))
-  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk-logging"))
 
 }
 

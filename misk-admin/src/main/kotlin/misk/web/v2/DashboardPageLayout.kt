@@ -16,7 +16,7 @@ import misk.web.dashboard.DashboardNavbarItem
 import misk.web.dashboard.DashboardTab
 import misk.web.v2.DashboardIndexAction.Companion.titlecase
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Builds dashboard UI for index homepage.

@@ -19,7 +19,7 @@ dependencies {
   implementation(libs.kotlinReflect)
   implementation(project(":misk-actions"))
   implementation(libs.retrofitMoshi)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-moshi"))
   implementation(libs.okio)
 

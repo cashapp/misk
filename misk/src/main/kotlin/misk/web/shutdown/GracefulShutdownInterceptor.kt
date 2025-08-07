@@ -7,7 +7,7 @@ import misk.annotation.ExperimentalMiskApi
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.WebConfig
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 @Singleton
 internal class GracefulShutdownInterceptorFactory @Inject constructor(

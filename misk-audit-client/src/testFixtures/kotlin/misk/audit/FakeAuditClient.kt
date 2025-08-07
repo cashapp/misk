@@ -8,7 +8,7 @@ import misk.scope.ActionScoped
 import misk.testing.FakeFixture
 import wisp.deployment.Deployment
 import wisp.deployment.TESTING
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import wisp.time.FakeClock
 import java.time.Clock
 import java.time.Instant

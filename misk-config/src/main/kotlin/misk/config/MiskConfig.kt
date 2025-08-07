@@ -30,7 +30,7 @@ import misk.resources.ResourceLoader
 import org.apache.commons.lang3.StringUtils
 import wisp.config.Config
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.io.FilenameFilter
 import java.util.Locale

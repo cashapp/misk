@@ -23,11 +23,11 @@ import okhttp3.Headers.Companion.headersOf
 import okio.Buffer
 import okio.BufferedSink
 import okio.ByteString
-import wisp.logging.SmartTagsThreadLocalHandler
-import wisp.logging.Tag
-import wisp.logging.error
-import wisp.logging.getLogger
-import wisp.logging.log
+import misk.logging.SmartTagsThreadLocalHandler
+import misk.logging.Tag
+import misk.logging.error
+import misk.logging.getLogger
+import misk.logging.log
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection

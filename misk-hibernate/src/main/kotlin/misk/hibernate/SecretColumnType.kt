@@ -11,7 +11,7 @@ import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
 import org.hibernate.usertype.ParameterizedType
 import org.hibernate.usertype.UserType
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.Serializable
 import java.sql.PreparedStatement
 import java.sql.ResultSet

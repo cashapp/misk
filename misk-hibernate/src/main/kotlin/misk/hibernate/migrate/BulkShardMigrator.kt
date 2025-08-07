@@ -16,7 +16,7 @@ import misk.vitess.Keyspace
 import misk.vitess.Shard
 import misk.vitess.Shard.Companion.SINGLE_KEYSPACE
 import org.hibernate.SessionFactory
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException

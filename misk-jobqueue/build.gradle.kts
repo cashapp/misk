@@ -31,7 +31,7 @@ dependencies {
   testImplementation(libs.kotlinxCoroutinesTest)
   testImplementation(libs.logbackClassic)
   testImplementation(libs.moshiCore)
-  testImplementation(project(":wisp:wisp-logging"))
+  testImplementation(project(":misk-logging"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk"))
