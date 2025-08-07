@@ -3,7 +3,7 @@ package misk.jdbc
 import com.zaxxer.hikari.SQLExceptionOverride
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.sql.SQLException
 import java.util.concurrent.ConcurrentHashMap
 
@@ -14,7 +14,7 @@ internal class VitessExceptionHandler(
 
   private val errorCounter = registry?.let { registry ->
     Counter
-    .build("hikaricp_misk_vitess_exception", "Misk Vitess Exception that were recorded for the hikari pool")
+    .build("hikaricp_misk_vitess_exception", "Misk Vitess Exceptions that were recorded for the hikari pool")
     .labelNames("errorCode", "sqlState", "message", "decision")
       .create()
     .registerOrReplace(registry)

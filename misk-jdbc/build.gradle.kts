@@ -29,6 +29,7 @@ dependencies {
   implementation(libs.mysql)
   implementation(project(":misk-backoff"))
   implementation(project(":misk-docker"))
+  implementation(project(":misk-logging"))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
   implementation(project(":wisp:wisp-logging"))
