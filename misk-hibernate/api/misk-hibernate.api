@@ -121,7 +121,7 @@ public final class misk/hibernate/HibernateExceptionLogLevelConfig : wisp/config
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/hibernate/HibernateModule : misk/inject/KAbstractModule {
+public class misk/hibernate/HibernateModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;Z)V
@@ -138,9 +138,12 @@ public final class misk/hibernate/HibernateModule : misk/inject/KAbstractModule 
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Z)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	protected fun configure ()V
 	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
 	public final fun getDatabasePool ()Lmisk/jdbc/DatabasePool;
 	public final fun getReaderConfig ()Lmisk/jdbc/DataSourceConfig;
+	protected fun getReaderTransacterProvider ()Lcom/google/inject/Provider;
+	protected fun getTransacterProvider ()Lcom/google/inject/Provider;
 }
 
 public final class misk/hibernate/Id : java/io/Serializable, java/lang/Comparable {
