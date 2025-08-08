@@ -32,7 +32,7 @@ wire = "5.3.7"
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.20.0" }
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
 apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.1" }
-assertj = { module = "org.assertj:assertj-core", version = "3.27.3" }
+assertj = { module = "org.assertj:assertj-core", version = "3.27.4" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version.ref = "awaitility" }
 aws2Auth = { module = "software.amazon.awssdk:auth", version.ref = "aws2" }
