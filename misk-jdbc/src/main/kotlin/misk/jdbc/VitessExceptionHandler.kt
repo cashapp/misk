@@ -14,7 +14,7 @@ internal class VitessExceptionHandler(
 
   private val errorCounter = registry?.let { registry ->
     Counter
-    .build("hikaricp_misk_vitess_exception", "Misk Vitess Exceptions that were recorded for the hikari pool")
+    .build("hikaricp_misk_vitess_exception", "Misk Vitess Exception that were recorded for the hikari pool")
     .labelNames("errorCode", "sqlState", "message", "decision")
       .create()
     .registerOrReplace(registry)

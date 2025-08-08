@@ -98,7 +98,6 @@ class DataSourceService @JvmOverloads constructor(
       when (config.type) {
         DataSourceType.MYSQL -> {
           hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
-          hikariConfig.exceptionOverride = MySQLExceptionHandler(collectorRegistry)
         }
         DataSourceType.VITESS_MYSQL -> {
           hikariConfig.exceptionOverride  = VitessExceptionHandler(collectorRegistry)
