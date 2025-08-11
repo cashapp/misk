@@ -63,6 +63,7 @@ internal class VitessDockerContainer(
   private val vitessVersion: Int,
 ) {
   private companion object {
+    const val ENABLE_DECLARATIVE_SCHEMA_CHANGES_ENV = "ENABLE_DECLARATIVE_SCHEMA_CHANGES"
     const val ENABLE_IN_MEMORY_STORAGE_ENV = "ENABLE_IN_MEMORY_STORAGE"
     const val ENABLE_SCATTERS_ENV = "ENABLE_SCATTERS"
     const val IN_MEMORY_STORAGE_SIZE_ENV = "IN_MEMORY_STORAGE_SIZE"
@@ -358,6 +359,7 @@ internal class VitessDockerContainer(
      */
     val argsToValidate: Map<String, Pair<String, String>> =
       mapOf(
+        ENABLE_DECLARATIVE_SCHEMA_CHANGES_ENV to ("$enableDeclarativeSchemaChanges" to "enableDeclarativeSchemaChanges"),
         ENABLE_IN_MEMORY_STORAGE_ENV to ("$enableInMemoryStorage" to "enableInMemoryStorage"),
         ENABLE_SCATTERS_ENV to ("$enableScatters" to "enableScatters"),
         IN_MEMORY_STORAGE_SIZE_ENV to (inMemoryStorageSize to "inMemoryStorageSize"),
@@ -691,6 +693,7 @@ internal class VitessDockerContainer(
         .withHealthcheck(healthCheck)
         .withExposedPorts(*vitessPortConfig.allPortMappings().map { ExposedPort(it.containerPort) }.toTypedArray())
         .withEnv(
+          "$ENABLE_DECLARATIVE_SCHEMA_CHANGES_ENV=$enableDeclarativeSchemaChanges",
           "$ENABLE_IN_MEMORY_STORAGE_ENV=$enableInMemoryStorage",
           "$ENABLE_SCATTERS_ENV=$enableScatters",
           "$IN_MEMORY_STORAGE_SIZE_ENV=$inMemoryStorageSize",
