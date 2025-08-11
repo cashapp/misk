@@ -551,7 +551,7 @@ internal class RealTransacter private constructor(
 
     override fun <T> target(shard: Shard, function: () -> T): T {
       return if (config.type.isVitess) {
-        target(currentTarget().mergedWith(Destination(shard)), function)
+        target(Destination(shard), function)
       } else {
         function()
       }
@@ -560,13 +560,26 @@ internal class RealTransacter private constructor(
     internal fun <T> target(destination: Destination, function: () -> T): T {
       return if (config.type.isVitess) {
         val previous = currentTarget()
-        use(previous.mergedWith(destination))
+        val actualDestination = previous.mergedWith(destination)
+        if (actualDestination != destination) {
+          logger.warn {
+            "The new destination was updated after merging with the existing target. " +
+              "Requested target: $destination, actual target: $actualDestination"
+          }
+        }
         try {
+          use(actualDestination)
           function()
+        } catch (e: Exception) {
+          throw e
         } finally {
           try {
             use(previous)
-          } catch (exception: GenericJDBCException) {
+          } catch (exception: Exception) {
+            logger.error {
+              "Exception restoring destination, previous = $previous, destination = $destination, " +
+                "cause = ${exception.message}"
+            }
             // Ignore the exception if the connection is already closed.
             if (!isConnectionClosed(exception)) {
               throw exception
@@ -578,35 +591,22 @@ internal class RealTransacter private constructor(
       }
     }
 
-    private fun isConnectionClosed(exception: GenericJDBCException) =
+    private fun isConnectionClosed(exception: Exception) =
       exception.cause?.javaClass == SQLException::class.java &&
         exception.cause?.message.equals("Connection is closed")
 
     private fun use(destination: Destination) = useConnection { connection ->
       check(config.type.isVitess)
       connection.createStatement().use { statement ->
-        if (config.type == DataSourceType.VITESS_MYSQL) {
-          val catalog = if (destination.isBlank()) "${Destination.primary()}" else "$destination"
-          connection.catalog = catalog
-        } else {
-          withoutChecks {
-            val sql = if (destination.isBlank()) "USE" else "USE `$destination`"
-            statement.execute(sql)
-          }
-        }
+        val catalog = if (destination.isBlank()) "${Destination.primary()}" else "$destination"
+        connection.catalog = catalog
       }
     }
 
     private fun currentTarget(): Destination = useConnection { connection ->
       check(config.type.isVitess)
       connection.createStatement().use { statement ->
-        val target = if (config.type == DataSourceType.VITESS_MYSQL) {
-          connection.catalog
-        } else {
-          withoutChecks {
-            statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
-          }
-        }
+        val target = connection.catalog
         Destination.parse(target)
       }
     }
