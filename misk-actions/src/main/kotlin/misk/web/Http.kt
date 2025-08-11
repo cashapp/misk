@@ -1,27 +1,27 @@
 package misk.web
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class Get(val pathPattern: String)
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class Post(val pathPattern: String)
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class Put(val pathPattern: String)
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class Grpc(val pathPattern: String)
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class Delete(val pathPattern: String)
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class Patch(val pathPattern: String)
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class ConnectWebSocket(val pathPattern: String)
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class Description(val text: String)
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
@@ -59,7 +59,7 @@ annotation class FormField(val name: String)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class RequestBody
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class RequestContentType(vararg val value: String)
 
 /**
@@ -69,7 +69,7 @@ annotation class RequestContentType(vararg val value: String)
  * supports multiple content types but no `Accept` header is specified, the first content type is
  * used.
  */
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class ResponseContentType(vararg val value: String)
 
 /**
@@ -84,5 +84,5 @@ annotation class ResponseContentType(vararg val value: String)
  * queries or other I/O because unexpected latency there can take down the entire service.
  */
 @Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class AvailableWhenDegraded
