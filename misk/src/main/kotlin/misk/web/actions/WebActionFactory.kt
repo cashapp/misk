@@ -33,10 +33,10 @@ import jakarta.inject.Singleton
 import misk.web.ProtoDocumentationProvider
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
+import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
 
 @Singleton
@@ -263,6 +263,15 @@ internal class WebActionFactory @Inject constructor(
       action,
     )
   }
+
+  /** Finds annotation of type [T] on this element or its transitive annotations. */
+  private inline fun <reified T : Annotation> KAnnotatedElement.findAnnotation(): T? =
+    @Suppress("UNCHECKED_CAST")
+    annotations
+      .asSequence()
+      .flatMap { sequenceOf(it) + it.annotationClass.annotations.asSequence() }
+      .firstOrNull { it is T } as? T
+
 
   /** Returns a copy of this that overrides the current annotations with [annotations]. */
   private fun KParameter.withAnnotations(annotations: List<Annotation>): KParameter {
