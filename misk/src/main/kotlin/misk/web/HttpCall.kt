@@ -41,6 +41,9 @@ interface HttpCall: HttpRequest {
 
   val responseHeaders: Headers
 
+  /** Timestamp when the request was received (milliseconds since epoch) */
+  val requestReceivedTimestamp: Long
+
   /** Set both the raw network status code and the meaningful status code that's
    * recorded in metrics */
   fun setStatusCodes(statusCode: Int, networkStatusCode: Int)
