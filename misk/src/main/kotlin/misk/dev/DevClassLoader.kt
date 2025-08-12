@@ -23,6 +23,10 @@ internal class DevClassLoader(parent: ClassLoader) : ClassLoader(parent) {
   override fun loadClass(className: String, resolve: Boolean): Class<*>? {
     val existing = findLoadedClass(className)
     if (existing != null) return existing
+    if (className.startsWith("misk.") || className.startsWith("wisp.") ) {
+      // Needed for the exemplar in the Misk repo itself
+      return super.loadClass(className, resolve)
+    }
     val classPath = className.replace('.', '/') + ".class"
     val uri = parent.getResource(classPath)
     if (uri == null) {
