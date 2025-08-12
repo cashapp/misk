@@ -381,6 +381,7 @@ public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public fun getNetworkStatusCode ()I
 	public final fun getRequestBody ()Lokio/BufferedSource;
 	public fun getRequestHeaders ()Lokhttp3/Headers;
+	public fun getRequestReceivedTimestamp ()J
 	public final fun getResponseBody ()Lokio/BufferedSink;
 	public fun getResponseHeaders ()Lokhttp3/Headers;
 	public final fun getSendTrailers ()Z

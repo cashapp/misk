@@ -27,6 +27,8 @@ data class FakeHttpCall @JvmOverloads constructor(
   var webSocketListener: WebSocketListener? = null,
   override var cookies: List<Cookie> = listOf(),
 ) : HttpCall {
+  // Add as a separate property to maintain backward compatibility
+  override val requestReceivedTimestamp: Long = System.currentTimeMillis()
 
   override val responseHeaders: Headers
     get() = headersBuilder.build()

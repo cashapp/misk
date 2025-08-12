@@ -205,7 +205,11 @@ data class WebConfig @JvmOverloads constructor(
 
   /** Configurations to enable Jetty to listen for traffic on a unix domain socket being proxied through a sidecar (e.g. envoy, istio) */
   val unix_domain_sockets: List<WebUnixDomainSocketConfig>? = null,
-  ) : Config
+
+  /** Config used by client and server interceptors installed by DeadlinePropagationModule
+   * Only applies if DeadlinePropagationModule is installed, ignored otherwise  */
+  val request_deadlines: RequestDeadlinesConfig = RequestDeadlinesConfig(),
+) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
   /** HTTPS port to listen on, or 0 for any available port. */
@@ -322,3 +326,64 @@ data class GracefulShutdownConfig @JvmOverloads constructor(
   val rejection_status_code: Int = HTTP_SERVICE_UNAVAILABLE
 
 )
+
+/**
+ * Configuration for request deadline tracking and enforcement.
+ *
+ * Request deadlines help prevent cascading failures by tracking how much time remains
+ * for a request chain to complete. Deadlines are propagated through service boundaries
+ * and can be enforced at various points in the request lifecycle.
+ *
+ * @see [RequestDeadlineInterceptor][misk.web.interceptors.RequestDeadlineInterceptor] for inbound deadline handling
+ * @see [DeadlinePropagationInterceptor][misk.client.DeadlinePropagationInterceptor] for outbound deadline propagation
+ */
+data class RequestDeadlinesConfig @JvmOverloads constructor(
+  /**
+   * Default timeout in milliseconds for requests that don't have an explicit deadline.
+   * 
+   * This value is used when:
+   * - No deadline headers are found in incoming requests, and
+   * - Actions don't have [@RequestDeadlineTimeout][misk.web.RequestDeadlineTimeout] annotation
+   *
+   * Defaults to 10s to match the
+   * [default readTimeout](https://github.com/square/okhttp/blob/master/okhttp/src/commonJvmAndroid/kotlin/okhttp3/OkHttpClient.kt#L622)
+   * on the OkHttpClient.
+   */
+  val global_timeout_ms: Long = 10_000,
+
+  /**
+   * Controls how aggressively deadlines are tracked and enforced.
+   *
+   * Default: [METRICS_ONLY] for safe rollout
+   */
+  val mode: RequestDeadlineMode = RequestDeadlineMode.METRICS_ONLY
+)
+
+enum class RequestDeadlineMode {
+  /**
+   * Only collect metrics on deadline violations without propagation or enforcement.
+   * Use this for safe rollout and observability without behavioral changes.
+   */
+  METRICS_ONLY,
+
+  /**
+   * Propagate deadlines to downstream services but don't enforce them locally.
+   * Useful for establishing deadline chains without risking service availability
+   */
+  PROPAGATE_ONLY,
+
+  /**
+   * Enforce deadlines on inbound requests only.
+   */
+  ENFORCE_INBOUND,
+
+  /**
+   * Enforce deadlines on outbound requests only.
+   */
+  ENFORCE_OUTBOUND,
+
+  /**
+   * Enforce deadlines on both inbound and outbound requests.
+   */
+  ENFORCE_ALL
+}
