@@ -46,6 +46,7 @@ class DashboardPageLayout @Inject constructor(
   private val homeUrl by lazy {
     dashboardHomeUrl?.url ?: "/"
   }
+  private var hotReload = true
 
   private fun setNewBuilder() = apply { newBuilder = true }
 
@@ -63,6 +64,10 @@ class DashboardPageLayout @Inject constructor(
     apply {
       this.title = title
     }
+
+  fun hotReload(hotReload: Boolean) = apply {
+    this.hotReload = hotReload
+  }
 
   fun headBlock(block: TagConsumer<*>.() -> Unit) = apply { this.headBlock = block }
 
@@ -91,7 +96,7 @@ class DashboardPageLayout @Inject constructor(
         title = title(appName, dashboardHomeUrl, dashboardTab),
         playCdn = deployment.isLocalDevelopment,
         headBlock = headBlock,
-        hotReload = false,
+        hotReload = hotReload,
       ) {
         Navbar(
           appName = appName,

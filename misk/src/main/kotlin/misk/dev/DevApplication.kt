@@ -4,6 +4,9 @@ import misk.MiskApplication
 import misk.RunningMiskApplication
 import misk.web.actions.javaMethod
 import java.lang.reflect.Method
+import java.nio.file.Paths
+import kotlin.io.path.absolute
+import kotlin.io.path.exists
 import kotlin.reflect.KFunction
 
 internal class DevApplicationState {
@@ -19,13 +22,25 @@ fun isRunningDevApplication(): Boolean {
 }
 
 @misk.annotation.ExperimentalMiskApi
-fun runDevApplication(modules : KFunction<MiskApplication>, additionalGradleArgs : List<String> = emptyList()) {
+fun runDevApplication(miskApplicationBuilder : KFunction<MiskApplication>, additionalGradleArgs : List<String> = emptyList()) {
   DevApplicationState.isRunning = true
   System.setProperty("misk.dev.running", "true") // Some code may not depend on misk-core but still need to know about dev mode
   val lock = Object()
   var restart = false
+  var javaMethod : Method? = null
+  try {
+    javaMethod = miskApplicationBuilder.javaMethod
+      ?: throw IllegalArgumentException("You cannot pass a lambda to runDevApplication, you must use a method reference")
+  } catch (e : ClassNotFoundException) {
+    throw java.lang.RuntimeException("Unable to init live reload, do you have kotlin-reflect as a dependency?",e)
+  }
+  val className = javaMethod.declaringClass.name
 
-  runGradleAsyncCompile({
+  // We need to discover the project directory, if we are running from an IDE the current directory will be the root
+  // Which is not what we want in a monorepo
+  val dir = discoverProjectRoot(className)
+
+  runGradleAsyncCompile(dir, {
     synchronized(lock) {
       restart = true
       lock.notifyAll()
@@ -38,15 +53,8 @@ fun runDevApplication(modules : KFunction<MiskApplication>, additionalGradleArgs
     var running: RunningMiskApplication? = null
     try {
       Thread.currentThread().contextClassLoader = cl
-      var javaMethod : Method? = null
-      try {
-         javaMethod = modules.javaMethod
-          ?: throw IllegalArgumentException("You cannot pass a lambda to runDevApplication, you must use a method reference")
-      } catch (e : ClassNotFoundException) {
-        throw java.lang.RuntimeException("Unable to init live reload, do you have kotlin-reflect as a dependency?",e)
-      }
-      val cls = cl.loadClass(javaMethod.declaringClass.name)!!
 
+      val cls = cl.loadClass(className)!!
       val app: MiskApplication = cls.getDeclaredMethod(javaMethod.name).invoke(cls) as MiskApplication
       running = app.start()
     } catch (e: Exception) {
@@ -65,5 +73,20 @@ fun runDevApplication(modules : KFunction<MiskApplication>, additionalGradleArgs
     running?.awaitTerminated()
 
   }
+}
 
+private fun discoverProjectRoot(className: String): String {
+  val res = Thread.currentThread().contextClassLoader.getResource(className.replace('.', '/') + ".class")
+  var dir = System.getProperty("user.dir")
+  if (res != null && res.protocol == "file") {
+    var current = Paths.get(res.toURI())
+    while (current.parent != null) {
+      current = current.parent
+      if (current.resolve("build.gradle.kts").exists() || current.resolve("build.gradle").exists()) {
+        dir = current.absolute().toString()
+        break
+      }
+    }
+  }
+  return dir
 }

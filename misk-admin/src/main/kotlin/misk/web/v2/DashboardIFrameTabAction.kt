@@ -44,6 +44,9 @@ internal class DashboardIFrameTabAction @Inject constructor(
   @AdminDashboardAccess
   fun get(@PathParam suffix: String?): String = dashboardPageLayout
     .newBuilder()
+    // Assume that any IFrame tabs use a custom front end so full page reloads on service changes
+    //   are more annoying than helpful
+    .hotReload(false)
     .build { _, _, _ ->
       val fullPath = clientHttpCall.get().url.encodedPath
       val entry = entries

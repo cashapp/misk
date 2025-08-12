@@ -1,11 +1,13 @@
 package misk.dev
 
+import java.io.File
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal fun runGradleAsyncCompile(compilationComplete: () -> Unit, additionalGradleArgs: List<String>) {
+internal fun runGradleAsyncCompile(projectDir : String, compilationComplete: () -> Unit, additionalGradleArgs: List<String>) {
   val t = Thread {
     val pb = ProcessBuilder(listOf("gradle", "compileKotlin", "--continuous") + additionalGradleArgs)
+    pb.directory(File(projectDir))
 
     val first = AtomicBoolean(false)
     val process = pb.start()!!
