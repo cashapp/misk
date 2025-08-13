@@ -39,6 +39,7 @@ class JooqModule @JvmOverloads constructor(
   private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions =
     JooqTimestampRecordListenerOptions(install = false),
   private val installHealthChecks: Boolean = true,
+  private val installSchemaMigrator: Boolean = true,
   private val jooqConfigExtension: Configuration.() -> Unit = {},
 ) : KAbstractModule() {
 
@@ -50,7 +51,8 @@ class JooqModule @JvmOverloads constructor(
         readerQualifier,
         dataSourceClusterConfig.reader,
         databasePool,
-        installHealthChecks
+        installHealthChecks,
+        installSchemaMigrator
       )
     )
 

@@ -30,8 +30,9 @@ public final class misk/jooq/JooqModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Z)V
-	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZLkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZZ)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZZLkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZZLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/jooq/JooqSession : misk/jdbc/Session {

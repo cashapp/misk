@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import misk.vitess.testing.DefaultSettings
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import misk.containers.ContainerUtil
 import wisp.deployment.TESTING
@@ -263,5 +264,27 @@ class DataSourceConfigTest {
         declarative_schema_config = DeclarativeSchemaConfig(listOf("table")),
       )
     }
+  }
+
+  @Test
+  fun externallyManagedMigrationsFormatIsValid() {
+    // Should not throw any exception
+    val config = DataSourceConfig(
+      DataSourceType.MYSQL,
+      migrations_format = MigrationsFormat.EXTERNALLY_MANAGED
+    )
+    assertThat(config.migrations_format).isEqualTo(MigrationsFormat.EXTERNALLY_MANAGED)
+  }
+
+  @Test
+  fun externallyManagedMigrationsCanUseDeclarativeSchemaConfig() {
+    // Should not throw any exception - EXTERNALLY_MANAGED can use declarative_schema_config
+    val config = DataSourceConfig(
+      DataSourceType.MYSQL,
+      migrations_format = MigrationsFormat.EXTERNALLY_MANAGED,
+      declarative_schema_config = DeclarativeSchemaConfig(listOf("table"))
+    )
+    assertThat(config.migrations_format).isEqualTo(MigrationsFormat.EXTERNALLY_MANAGED)
+    assertThat(config.declarative_schema_config?.excluded_tables).containsExactly("table")
   }
 }
