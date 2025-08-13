@@ -560,15 +560,14 @@ internal class RealTransacter private constructor(
     internal fun <T> target(destination: Destination, function: () -> T): T {
       return if (config.type.isVitess) {
         val previous = currentTarget()
-        val actualDestination = previous.mergedWith(destination)
-        if (actualDestination != destination) {
+        if (previous != destination) {
           logger.warn {
-            "The new destination was updated after merging with the existing target. " +
-              "Requested target: $destination, actual target: $actualDestination"
+            "The new destination was updated from previous target. Destination target: $destination, " +
+              "previous target: $previous"
           }
         }
         try {
-          use(actualDestination)
+          use(destination)
           function()
         } catch (e: Exception) {
           throw e
