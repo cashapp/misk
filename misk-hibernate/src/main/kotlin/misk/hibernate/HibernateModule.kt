@@ -59,6 +59,7 @@ open class HibernateModule @JvmOverloads constructor(
   private val logLevelConfig: HibernateExceptionLogLevelConfig = HibernateExceptionLogLevelConfig(),
   private val jdbcModuleAlreadySetup: Boolean = false,
   private val installHealthChecks: Boolean = true,
+  private val installSchemaMigrator: Boolean = true,
 ) : KAbstractModule() {
   // Make sure Hibernate logs use slf4j. Otherwise, it will base its decision on the classpath and
   // prefer log4j: https://docs.jboss.org/hibernate/orm/4.3/topical/html/logging/Logging.html
@@ -106,6 +107,23 @@ open class HibernateModule @JvmOverloads constructor(
 
   constructor(
     qualifier: KClass<out Annotation>,
+    readerQualifier: KClass<out Annotation>,
+    cluster: DataSourceClusterConfig,
+    databasePool: DatabasePool = RealDatabasePool,
+    installHealthChecks: Boolean = true,
+    installSchemaMigrator: Boolean = true,
+  ) : this(
+    qualifier = qualifier,
+    config = cluster.writer,
+    readerQualifier = readerQualifier,
+    readerConfig = cluster.reader,
+    databasePool = databasePool,
+    installHealthChecks = installHealthChecks,
+    installSchemaMigrator = installSchemaMigrator
+  )
+
+  constructor(
+    qualifier: KClass<out Annotation>,
     config: DataSourceConfig,
     databasePool: DatabasePool = RealDatabasePool,
     jdbcModuleAlreadySetup: Boolean,
@@ -133,7 +151,8 @@ open class HibernateModule @JvmOverloads constructor(
           readerQualifier = readerQualifier,
           readerConfig = readerConfig,
           databasePool = databasePool,
-          installHealthCheck = installHealthChecks
+          installHealthCheck = installHealthChecks,
+          installSchemaMigrator = installSchemaMigrator
         )
       )
     }

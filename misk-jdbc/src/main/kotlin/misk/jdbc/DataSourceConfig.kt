@@ -52,7 +52,12 @@ enum class MigrationsFormat {
   /**
    * Declarative migrations format where each migration file represents a DB table
    */
-  DECLARATIVE
+  DECLARATIVE,
+  /**
+   * Externally managed migrations where schema migrations are handled outside of the application.
+   * When this format is used, SchemaMigratorService will not be installed.
+   */
+  EXTERNALLY_MANAGED
 }
 
 /** Configuration element for an individual datasource */
