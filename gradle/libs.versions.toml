@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.788"
-aws2 = "2.32.21"
+aws2 = "2.32.22"
 bucket4j = "8.8.0"
 datadog = "1.52.0"
 dependencyAnalysisPlugin = "2.19.0"
@@ -26,7 +26,7 @@ protobuf = "3.25.8"
 retrofit = "3.0.0"
 sqldelight = "2.1.0"
 tempest = "2025.07.15.155806-c1415e3"
-wire = "5.3.9"
+wire = "5.3.10"
 
 [libraries]
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.20.0" }
@@ -221,7 +221,7 @@ tempestTesting = { module = "app.cash.tempest:tempest-testing", version.ref = "t
 tempestTestingDocker = { module = "app.cash.tempest:tempest-testing-docker", version.ref = "tempest" }
 tempestTestingInternal = { module = "app.cash.tempest:tempest-testing-internal", version.ref = "tempest" }
 tempestTestingJvm = { module = "app.cash.tempest:tempest-testing-jvm", version.ref = "tempest" }
-threeTenBp = { module = "org.threeten:threetenbp", version = "1.7.1" }
+threeTenBp = { module = "org.threeten:threetenbp", version = "1.7.2" }
 tink = { module = "com.google.crypto.tink:tink", version = "1.12.0" }
 tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.9.1" }
 tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.10.0" }
