@@ -2,12 +2,13 @@ package misk.dev
 
 import misk.MiskApplication
 import misk.RunningMiskApplication
-import misk.web.actions.javaMethod
+import misk.web.actions.FunctionWithOverrides
 import java.lang.reflect.Method
 import java.nio.file.Paths
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
 import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.javaMethod
 
 internal class DevApplicationState {
   companion object {
@@ -19,6 +20,17 @@ internal class DevApplicationState {
 @misk.annotation.ExperimentalMiskApi
 fun isRunningDevApplication(): Boolean {
   return DevApplicationState.isRunning
+}
+
+
+/**
+ * Intended for use by advanced hot reload use cases that extend the existing hot reload code.
+ *
+ * Should not be called by regular code.
+ */
+@misk.annotation.ExperimentalMiskApi
+fun setDevApplication() {
+   DevApplicationState.isRunning = true
 }
 
 @misk.annotation.ExperimentalMiskApi

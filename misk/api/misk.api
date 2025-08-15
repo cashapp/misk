@@ -299,6 +299,7 @@ public final class misk/MiskApplication {
 	public fun <init> ([Lcom/google/inject/Module;)V
 	public fun <init> ([Lmisk/MiskCommand;)V
 	public final fun run ([Ljava/lang/String;)V
+	public final fun start ()Lmisk/RunningMiskApplication;
 }
 
 public abstract class misk/MiskCommand : java/lang/Runnable {
@@ -318,6 +319,13 @@ public final class misk/MiskRealServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Lmisk/ServiceManagerConfig;)V
 	public synthetic fun <init> (Lmisk/ServiceManagerConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/RunningMiskApplication {
+	public abstract fun app ()Lmisk/MiskApplication;
+	public abstract fun awaitTerminated ()V
+	public abstract fun awaitTerminated (JLjava/util/concurrent/TimeUnit;)Z
+	public abstract fun stop ()V
 }
 
 public final class misk/client/BackwardsCompatibleClientsConfig {
@@ -831,6 +839,11 @@ public final class misk/dev/DevApplicationKt {
 	public static final fun isRunningDevApplication ()Z
 	public static final fun runDevApplication (Lkotlin/reflect/KFunction;Ljava/util/List;)V
 	public static synthetic fun runDevApplication$default (Lkotlin/reflect/KFunction;Ljava/util/List;ILjava/lang/Object;)V
+	public static final fun setDevApplication ()V
+}
+
+public final class misk/dev/GradleKt {
+	public static final fun runGradleAsyncCompile (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Ljava/util/List;)V
 }
 
 public final class misk/environment/DeploymentModule : misk/inject/KAbstractModule {

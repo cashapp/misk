@@ -4,9 +4,9 @@ import java.io.File
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal fun runGradleAsyncCompile(projectDir : String, compilationComplete: () -> Unit, additionalGradleArgs: List<String>) {
+fun runGradleAsyncCompile(projectDir : String, compilationComplete: () -> Unit, additionalGradleArgs: List<String>) {
   val t = Thread {
-    val pb = ProcessBuilder(listOf("gradle", "compileKotlin", "--continuous") + additionalGradleArgs)
+    val pb = ProcessBuilder(listOf("gradle", "classes", "--continuous") + additionalGradleArgs)
     pb.directory(File(projectDir))
 
     val first = AtomicBoolean(false)
@@ -38,7 +38,6 @@ internal fun runGradleAsyncCompile(projectDir : String, compilationComplete: () 
       println("Gradle compilation failed, continuous compilation not available")
     }
   }
-  t.setDaemon(true)
   t.start()
 }
 
