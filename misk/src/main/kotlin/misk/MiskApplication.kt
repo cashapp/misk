@@ -111,7 +111,7 @@ class MiskApplication private constructor(
   @VisibleForTesting
   internal lateinit var injector: Injector
 
-  internal fun start(): RunningMiskApplication {
+  fun start(): RunningMiskApplication {
     log.info { "creating application injector" }
     injector = injectorGenerator()
     val serviceManager = injector.getInstance<ServiceManager>()
@@ -199,7 +199,7 @@ class MiskApplication private constructor(
 }
 
 
-internal interface RunningMiskApplication {
+interface RunningMiskApplication {
   fun stop()
 
   fun awaitTerminated()
