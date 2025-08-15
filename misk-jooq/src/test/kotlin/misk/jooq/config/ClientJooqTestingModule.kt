@@ -11,8 +11,13 @@ import misk.jooq.JooqModule
 import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import misk.logging.LogCollectorModule
 import org.jooq.impl.DefaultExecuteListenerProvider
+import org.jooq.impl.DefaultRecordListenerProvider
 import wisp.deployment.TESTING
 import jakarta.inject.Qualifier
+import misk.jooq.listeners.RecordSignatureListener
+import misk.jooq.listeners.TableSignatureDetails
+import misk.jooq.testgen.tables.references.RECORD_SIGNATURE_TEST
+import org.jooq.RecordListenerProvider
 
 class ClientJooqTestingModule : KAbstractModule() {
   override fun configure() {
@@ -46,12 +51,45 @@ class ClientJooqTestingModule : KAbstractModule() {
         createdAtColumnName = "created_at",
         updatedAtColumnName = "updated_at"
       ),
-      readerQualifier = JooqDBReadOnlyIdentifier::class
-    ) {
-      val executeListeners = this.executeListenerProviders().toMutableList()
-        .apply { add(DefaultExecuteListenerProvider(DeleteOrUpdateWithoutWhereListener())) }
-      set(*executeListeners.toTypedArray())
-    })
+      readerQualifier = JooqDBReadOnlyIdentifier::class,
+      jooqConfigExtension = {
+        // Since JooqTimestampRecordListener might overwrite record listeners, 
+        // we need to ensure both timestamp and signature listeners are present
+        val recordListeners = mutableListOf<RecordListenerProvider>()
+        
+        // Add any existing record listeners (like JooqTimestampRecordListener)
+        recordListeners.addAll(this.recordListenerProviders())
+        
+        // Add our RecordSignatureListener
+        recordListeners.add(
+          DefaultRecordListenerProvider(
+            RecordSignatureListener(
+              recordHasher = FakeRecordHasher(),
+              tableSignatureDetails = listOf(
+                TableSignatureDetails(
+                  signatureKeyName = "signature-record-test",
+                  table = RECORD_SIGNATURE_TEST,
+                  columns = listOf(
+                    RECORD_SIGNATURE_TEST.NAME,
+                    RECORD_SIGNATURE_TEST.UPDATED_BY,
+                    RECORD_SIGNATURE_TEST.BINARY_DATA,
+                  ),
+                  signatureRecordColumn = RECORD_SIGNATURE_TEST.RECORD_SIGNATURE,
+                  allowNullSignatures = false
+                )
+              ),
+            )
+          )
+        )
+        
+        set(*recordListeners.toTypedArray())
+        
+        // Add execute listeners separately
+        val existingExecuteListeners = this.executeListenerProviders().toMutableList()
+        existingExecuteListeners.add(DefaultExecuteListenerProvider(DeleteOrUpdateWithoutWhereListener()))
+        set(*existingExecuteListeners.toTypedArray())
+      }
+    ))
     install(JdbcTestingModule(JooqDBIdentifier::class))
     install(LogCollectorModule())
   }
