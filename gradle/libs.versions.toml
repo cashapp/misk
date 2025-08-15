@@ -1,9 +1,9 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.788"
-aws2 = "2.32.22"
+aws2 = "2.32.23"
 bucket4j = "8.8.0"
-datadog = "1.52.0"
+datadog = "1.52.1"
 dependencyAnalysisPlugin = "2.19.0"
 detekt = "1.23.8"
 docker = "3.5.3"
@@ -76,7 +76,7 @@ gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.2" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.98.1" }
-googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.8.0" }
+googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.8.1" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250718-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
@@ -171,7 +171,7 @@ logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
-mockitoCore = { module = "org.mockito:mockito-core", version = "5.18.0" }
+mockitoCore = { module = "org.mockito:mockito-core", version = "5.19.0" }
 mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.0.0" }
 mockk = { module = "io.mockk:mockk", version = "1.14.5" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.2" }
