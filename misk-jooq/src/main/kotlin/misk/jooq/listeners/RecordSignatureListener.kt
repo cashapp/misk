@@ -1,16 +1,16 @@
 package misk.jooq.listeners
 
-import misk.jooq.toInstant
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import misk.jooq.toInstant
+import misk.logging.getLogger
 import org.jooq.Record
 import org.jooq.RecordContext
+import org.jooq.RecordListener
 import org.jooq.Table
 import org.jooq.TableField
 import org.jooq.exception.DataAccessException
-import misk.logging.getLogger
-import org.jooq.RecordListener
 
 /**
  * Using this listener will allow you to guard against direct DB updates. This listener will compute a MAC signature
@@ -64,9 +64,7 @@ class RecordSignatureListener(
     val tableSignature = tableSignatureDetails.find { ctx.record().field(it.signatureRecordColumn) != null } ?: return
 
     // Skip validation if all signature columns are null (indicates a partially loaded record)
-    val allColumnsNull = tableSignature.columns.all { column ->
-      ctx.record().get(column) == null
-    }
+    val allColumnsNull = tableSignature.columns.all { column -> ctx.record().get(column) == null }
     if (allColumnsNull) return
 
     val concatenatedByteArray = concatenateByteArrayFromColumnValues(tableSignature, ctx)
@@ -97,35 +95,28 @@ class RecordSignatureListener(
     ctx: RecordContext,
   ): ByteArray {
     /**
-    Here, we have implemented LV (length-value) encoding scheme.
-    Encoding the column values and concatenating them as byte array in this manner
-    prevents these two distinct records creating the same signature,
-    given that signature is built using values from foo and bar columns.
-
-    Encoding scheme:
-    - null: 4 bytes with value -1 (no data follows)
-    - non-null: 4 bytes with length >= 0, followed by that many bytes of data
-
-    more info here: https://en.wikipedia.org/wiki/Type%E2%80%93length%E2%80%93value
-
-    without LV encoding
-    id | foo    | bar   |
-    1  | ab     | c     | bytearray(ab) + bytearray(c)
-    2  | a      | bc    | bytearray(a) + bytearray(bc)
-    result: the two bytearrays from record 1 and record 2 are the same
-
-    with LV encoding
-    id | foo    | bar   |
-    1  | ab     | c     | (lengthByte(2) + bytearray(ab)) + (lengthByte(1) + (bytearray(c))
-    2  | a      | bc    | (lengthByte(1) + bytearray(a)) + (lengthByte(2) + bytearray(bc))
-    result: the two bytearrays from record 1 and record 2 are NOT the same
-
-    We also encode null values with a special marker (-1) to prevent collisions like:
-    id | foo    | bar   |
-    1  | null   | a     | bytearray(special_for_null) + (lengthByte(1) + bytearray(a))
-    2  | a      | null  | (lengthByte(1) + bytearray(a)) + bytearray(special_for_null)
-
-    bytearray(special_for_null) cannot be conflicted with other real values
+     * Here, we have implemented LV (length-value) encoding scheme. Encoding the column values and concatenating them as
+     * byte array in this manner prevents these two distinct records creating the same signature, given that signature
+     * is built using values from foo and bar columns.
+     *
+     * Encoding scheme:
+     * - null: 4 bytes with value -1 (no data follows)
+     * - non-null: 4 bytes with length >= 0, followed by that many bytes of data
+     *
+     * more info here: https://en.wikipedia.org/wiki/Type%E2%80%93length%E2%80%93value
+     *
+     * without LV encoding id | foo | bar | 1 | ab | c | bytearray(ab) + bytearray(c) 2 | a | bc | bytearray(a) +
+     * bytearray(bc) result: the two bytearrays from record 1 and record 2 are the same
+     *
+     * with LV encoding id | foo | bar | 1 | ab | c | (lengthByte(2) + bytearray(ab)) + (lengthByte(1) + (bytearray(c))
+     * 2 | a | bc | (lengthByte(1) + bytearray(a)) + (lengthByte(2) + bytearray(bc)) result: the two bytearrays from
+     * record 1 and record 2 are NOT the same
+     *
+     * We also encode null values with a special marker (-1) to prevent collisions like: id | foo | bar | 1 | null | a |
+     * bytearray(special_for_null) + (lengthByte(1) + bytearray(a)) 2 | a | null | (lengthByte(1) + bytearray(a)) +
+     * bytearray(special_for_null)
+     *
+     * bytearray(special_for_null) cannot be conflicted with other real values
      */
     return tableSignature.columns.fold(ByteArray(0)) { bytes, column ->
       when (val columnValue = ctx.record().get(column)) {
@@ -215,4 +206,5 @@ data class TableSignatureDetails(
   val allowNullSignatures: Boolean,
 )
 
-class DataIntegrityException @JvmOverloads constructor(message: String, cause: Exception? = null) : DataAccessException(message, cause)
+class DataIntegrityException @JvmOverloads constructor(message: String, cause: Exception? = null) :
+  DataAccessException(message, cause)
