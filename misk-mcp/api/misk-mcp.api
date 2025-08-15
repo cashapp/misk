@@ -1,0 +1,201 @@
+public abstract interface annotation class misk/mcp/Description : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface class misk/mcp/McpPrompt {
+	public abstract fun getArguments ()Ljava/util/List;
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun handler (Lio/modelcontextprotocol/kotlin/sdk/GetPromptRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/McpPromptModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/mcp/McpPromptModule$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;)V
+}
+
+public final class misk/mcp/McpPromptModule$Companion {
+	public final fun create (Lkotlin/reflect/KClass;)Lmisk/mcp/McpPromptModule;
+}
+
+public abstract interface class misk/mcp/McpResource {
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getMimeType ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getUri ()Ljava/lang/String;
+	public abstract fun handler (Lio/modelcontextprotocol/kotlin/sdk/ReadResourceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/McpResource$DefaultImpls {
+	public static fun getMimeType (Lmisk/mcp/McpResource;)Ljava/lang/String;
+}
+
+public final class misk/mcp/McpResourceModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/mcp/McpResourceModule$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;)V
+}
+
+public final class misk/mcp/McpResourceModule$Companion {
+	public final fun create (Lkotlin/reflect/KClass;)Lmisk/mcp/McpResourceModule;
+}
+
+public final class misk/mcp/McpServerModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/mcp/McpServerModule$Companion;
+	public fun <init> (Lmisk/mcp/config/McpConfig;)V
+	public static final fun create (Lmisk/mcp/config/McpConfig;)Lmisk/mcp/McpServerModule;
+	public final fun providesMcpJson ()Lkotlinx/serialization/json/Json;
+}
+
+public final class misk/mcp/McpServerModule$Companion {
+	public final fun create (Lmisk/mcp/config/McpConfig;)Lmisk/mcp/McpServerModule;
+}
+
+public abstract class misk/mcp/McpTool {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public abstract fun getDescription ()Ljava/lang/String;
+	public final fun getInputClass ()Lkotlin/reflect/KClass;
+	public final fun getInputSchema ()Lio/modelcontextprotocol/kotlin/sdk/Tool$Input;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun handle (Lio/modelcontextprotocol/kotlin/sdk/CallToolRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/McpToolModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/mcp/McpToolModule$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;)V
+}
+
+public final class misk/mcp/McpToolModule$Companion {
+	public final fun create (Lkotlin/reflect/KClass;)Lmisk/mcp/McpToolModule;
+}
+
+public final class misk/mcp/MiskMcpServer : io/modelcontextprotocol/kotlin/sdk/server/Server {
+	public static final field Companion Lmisk/mcp/MiskMcpServer$Companion;
+	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpServerConfig;Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;)V
+	public final fun getConfig ()Lmisk/mcp/config/McpServerConfig;
+	public final fun getName ()Ljava/lang/String;
+	public final fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/JSONRPCMessage;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun handleMessage$default (Lmisk/mcp/MiskMcpServer;Lio/modelcontextprotocol/kotlin/sdk/JSONRPCMessage;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/MiskMcpServer$Companion {
+}
+
+public abstract interface annotation class misk/mcp/action/McpDelete : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class misk/mcp/action/McpGet : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class misk/mcp/action/McpPost : java/lang/annotation/Annotation {
+}
+
+public final class misk/mcp/action/McpSessionManager {
+	public static final field Companion Lmisk/mcp/action/McpSessionManager$Companion;
+	public fun <init> (Lmisk/scope/ActionScoped;Lcom/google/inject/Provider;)V
+	public final fun withResponseChannel (Lkotlinx/coroutines/channels/SendChannel;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/action/McpSessionManager$Companion {
+}
+
+public final class misk/mcp/action/McpSessionManagerKt {
+	public static final field SESSION_ID_PARAM Ljava/lang/String;
+}
+
+public final class misk/mcp/config/McpConfig : java/util/LinkedHashMap, wisp/config/Config {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun containsKey (Ljava/lang/Object;)Z
+	public fun containsKey (Ljava/lang/String;)Z
+	public final fun containsValue (Ljava/lang/Object;)Z
+	public fun containsValue (Lmisk/mcp/config/McpServerConfig;)Z
+	public final fun entrySet ()Ljava/util/Set;
+	public final synthetic fun get (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun get (Ljava/lang/Object;)Lmisk/mcp/config/McpServerConfig;
+	public fun get (Ljava/lang/String;)Lmisk/mcp/config/McpServerConfig;
+	public fun getEntries ()Ljava/util/Set;
+	public fun getKeys ()Ljava/util/Set;
+	public final synthetic fun getOrDefault (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun getOrDefault (Ljava/lang/Object;Lmisk/mcp/config/McpServerConfig;)Lmisk/mcp/config/McpServerConfig;
+	public fun getOrDefault (Ljava/lang/String;Lmisk/mcp/config/McpServerConfig;)Lmisk/mcp/config/McpServerConfig;
+	public fun getSize ()I
+	public fun getValues ()Ljava/util/Collection;
+	public final fun keySet ()Ljava/util/Set;
+	public final synthetic fun remove (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun remove (Ljava/lang/Object;)Lmisk/mcp/config/McpServerConfig;
+	public final fun remove (Ljava/lang/Object;Ljava/lang/Object;)Z
+	public fun remove (Ljava/lang/String;)Lmisk/mcp/config/McpServerConfig;
+	public fun remove (Ljava/lang/String;Lmisk/mcp/config/McpServerConfig;)Z
+	public final fun size ()I
+	public final fun values ()Ljava/util/Collection;
+}
+
+public final class misk/mcp/config/McpPromptConfig : wisp/config/Config {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lmisk/mcp/config/McpPromptConfig;
+	public static synthetic fun copy$default (Lmisk/mcp/config/McpPromptConfig;ZILjava/lang/Object;)Lmisk/mcp/config/McpPromptConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getList_changed ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/config/McpResourceConfig : wisp/config/Config {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public fun <init> (ZZ)V
+	public synthetic fun <init> (ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun copy (ZZ)Lmisk/mcp/config/McpResourceConfig;
+	public static synthetic fun copy$default (Lmisk/mcp/config/McpResourceConfig;ZZILjava/lang/Object;)Lmisk/mcp/config/McpResourceConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getList_changed ()Z
+	public final fun getSubscribe ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/config/McpServerConfig : wisp/config/Config {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;)V
+	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;)V
+	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lmisk/mcp/config/McpPromptConfig;
+	public final fun component3 ()Lmisk/mcp/config/McpResourceConfig;
+	public final fun component4 ()Lmisk/mcp/config/McpToolConfig;
+	public final fun copy (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;)Lmisk/mcp/config/McpServerConfig;
+	public static synthetic fun copy$default (Lmisk/mcp/config/McpServerConfig;Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ILjava/lang/Object;)Lmisk/mcp/config/McpServerConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPrompts ()Lmisk/mcp/config/McpPromptConfig;
+	public final fun getResources ()Lmisk/mcp/config/McpResourceConfig;
+	public final fun getTools ()Lmisk/mcp/config/McpToolConfig;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/config/McpToolConfig : wisp/config/Config {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lmisk/mcp/config/McpToolConfig;
+	public static synthetic fun copy$default (Lmisk/mcp/config/McpToolConfig;ZILjava/lang/Object;)Lmisk/mcp/config/McpToolConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getList_changed ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/internal/McpJsonKt {
+	public static final fun getMcpJson ()Lkotlinx/serialization/json/Json;
+}
+
