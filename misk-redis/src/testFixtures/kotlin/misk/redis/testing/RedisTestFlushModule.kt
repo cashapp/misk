@@ -15,6 +15,6 @@ class RedisTestFlushModule : KAbstractModule() {
       ServiceModule<RedisFlushService>()
         .dependsOn<ReadyService>()
     )
-    bind<TestFixture>().to<RedisFlushService>()
+    multibind<TestFixture>().to<RedisFlushService>()
   }
 }
