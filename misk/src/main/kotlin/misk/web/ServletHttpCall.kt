@@ -8,7 +8,7 @@ import okhttp3.Headers
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
-import org.eclipse.jetty.server.Request
+import org.eclipse.jetty.ee8.nested.Request
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 

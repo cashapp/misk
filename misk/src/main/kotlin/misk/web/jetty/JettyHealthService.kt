@@ -21,7 +21,6 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import misk.logging.getLogger
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor

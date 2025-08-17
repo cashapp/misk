@@ -29,10 +29,6 @@ import org.eclipse.jetty.http.BadMessageException
 import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
-import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
-import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
-import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
-import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
 import misk.logging.getLogger
 import java.net.HttpURLConnection
 import java.net.ProtocolException
