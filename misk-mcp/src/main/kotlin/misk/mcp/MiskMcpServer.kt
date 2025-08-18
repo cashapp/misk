@@ -109,7 +109,7 @@ class MiskMcpServer(
 ) {
 
   init {
-    onInitalized {
+    onInitialized {
       logger.debug { "MCP server $name initialized" }
     }
 
