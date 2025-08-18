@@ -257,7 +257,6 @@ subprojects {
       add("testRuntimeOnly", rootProject.libs.junitLauncher)
 
       // Platform/BOM dependencies constrain versions only.
-      // Enforce misk-bom -- it should take priority over external BOMs.
       add("api", platform(project(":misk-bom")))
       add("api", platform(rootProject.libs.grpcBom))
       add("api", platform(rootProject.libs.guavaBom))
