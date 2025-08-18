@@ -1348,6 +1348,7 @@ public abstract interface class misk/web/HttpCall : misk/api/HttpRequest {
 	public abstract fun computeRequestHeader (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun contentType ()Lokhttp3/MediaType;
 	public abstract fun getCookies ()Ljava/util/List;
+	public abstract fun getHttpVersion ()Lmisk/web/http/HttpVersion;
 	public abstract fun getLinkLayerLocalAddress ()Lmisk/web/SocketAddress;
 	public abstract fun getNetworkStatusCode ()I
 	public abstract fun getRequestReceivedTimestamp ()J
@@ -1925,6 +1926,21 @@ public final class misk/web/formatter/ClassNameFormatter {
 
 public final class misk/web/formatter/ClassNameFormatter$Companion {
 	public final fun format (Lkotlin/reflect/KClass;)Ljava/lang/String;
+}
+
+public final class misk/web/http/HttpVersion : java/lang/Enum {
+	public static final field Companion Lmisk/web/http/HttpVersion$Companion;
+	public static final field HTTP_0_9 Lmisk/web/http/HttpVersion;
+	public static final field HTTP_1_0 Lmisk/web/http/HttpVersion;
+	public static final field HTTP_1_1 Lmisk/web/http/HttpVersion;
+	public static final field HTTP_2_0 Lmisk/web/http/HttpVersion;
+	public static final field HTTP_3_0 Lmisk/web/http/HttpVersion;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/web/http/HttpVersion;
+	public static fun values ()[Lmisk/web/http/HttpVersion;
+}
+
+public final class misk/web/http/HttpVersion$Companion {
 }
 
 public final class misk/web/interceptors/ActionLoggingConfig {

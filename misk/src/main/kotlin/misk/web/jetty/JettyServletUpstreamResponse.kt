@@ -2,6 +2,7 @@ package misk.web.jetty
 
 import misk.web.ServletHttpCall
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
 import org.eclipse.jetty.ee8.nested.Response
@@ -22,6 +23,9 @@ internal class JettyServletUpstreamResponse(
 
   override val headers: Headers
     get() = response.headers()
+
+  override val httpVersion: HttpVersion
+    get() = HttpVersion.fromJetty(response.httpChannel.request.httpVersion)
 
   override fun setHeader(name: String, value: String) {
     response.setHeader(name, value)

@@ -3,6 +3,7 @@ package misk.web
 import misk.api.HttpRequest
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import misk.web.mediatype.MediaRange
 import okhttp3.Headers
 import okhttp3.MediaType
@@ -55,6 +56,8 @@ interface HttpCall: HttpRequest {
 
   /** Timestamp when the request was received (milliseconds since epoch) */
   val requestReceivedTimestamp: Long
+
+  val httpVersion: HttpVersion
 
   /** Set both the raw network status code and the meaningful status code that's
    * recorded in metrics */

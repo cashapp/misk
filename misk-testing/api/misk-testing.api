@@ -343,40 +343,43 @@ public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;)V
 	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;I)V
 	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;II)V
-	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;)V
-	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;Z)V
-	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;)V
-	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;)V
-	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;)V
-	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;)V
-	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;)V
-	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;)V
-	public synthetic fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;Z)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;)V
+	public fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;)V
+	public synthetic fun <init> (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun accepts ()Ljava/util/List;
 	public fun addResponseHeaders (Lokhttp3/Headers;)V
 	public fun asOkHttpRequest ()Lokhttp3/Request;
 	public final fun component1 ()Lokhttp3/HttpUrl;
-	public final fun component10 ()Lokio/BufferedSource;
-	public final fun component11 ()Lokio/BufferedSink;
-	public final fun component12 ()Lmisk/web/actions/WebSocket;
-	public final fun component13 ()Lmisk/web/actions/WebSocketListener;
-	public final fun component14 ()Ljava/util/List;
+	public final fun component10 ()Lokhttp3/Headers$Builder;
+	public final fun component11 ()Lokio/BufferedSource;
+	public final fun component12 ()Lokio/BufferedSink;
+	public final fun component13 ()Lmisk/web/actions/WebSocket;
+	public final fun component14 ()Lmisk/web/actions/WebSocketListener;
+	public final fun component15 ()Ljava/util/List;
 	public final fun component2 ()Lmisk/web/SocketAddress;
 	public final fun component3 ()Lmisk/web/DispatchMechanism;
 	public final fun component4 ()Lokhttp3/Headers;
 	public final fun component5 ()I
 	public final fun component6 ()I
-	public final fun component7 ()Lokhttp3/Headers$Builder;
-	public final fun component8 ()Z
-	public final fun component9 ()Lokhttp3/Headers$Builder;
+	public final fun component7 ()Lmisk/web/http/HttpVersion;
+	public final fun component8 ()Lokhttp3/Headers$Builder;
+	public final fun component9 ()Z
 	public fun computeRequestHeader (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public fun contentType ()Lokhttp3/MediaType;
-	public final fun copy (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;)Lmisk/web/FakeHttpCall;
-	public static synthetic fun copy$default (Lmisk/web/FakeHttpCall;Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/FakeHttpCall;
+	public final fun copy (Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;)Lmisk/web/FakeHttpCall;
+	public static synthetic fun copy$default (Lmisk/web/FakeHttpCall;Lokhttp3/HttpUrl;Lmisk/web/SocketAddress;Lmisk/web/DispatchMechanism;Lokhttp3/Headers;IILmisk/web/http/HttpVersion;Lokhttp3/Headers$Builder;ZLokhttp3/Headers$Builder;Lokio/BufferedSource;Lokio/BufferedSink;Lmisk/web/actions/WebSocket;Lmisk/web/actions/WebSocketListener;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/FakeHttpCall;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getCookies ()Ljava/util/List;
 	public fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
 	public final fun getHeadersBuilder ()Lokhttp3/Headers$Builder;
+	public fun getHttpVersion ()Lmisk/web/http/HttpVersion;
 	public fun getLinkLayerLocalAddress ()Lmisk/web/SocketAddress;
 	public fun getNetworkStatusCode ()I
 	public final fun getRequestBody ()Lokio/BufferedSource;

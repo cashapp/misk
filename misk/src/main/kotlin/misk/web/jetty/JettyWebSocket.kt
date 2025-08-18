@@ -6,6 +6,7 @@ import misk.web.ServletHttpCall
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import okhttp3.Headers
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -64,6 +65,9 @@ internal class JettyWebSocket(
       set(value) {
         response.statusCode = value
       }
+
+    override val httpVersion: HttpVersion
+      get() = error("No http version for websocket responses")
 
     override val headers: Headers
       get() = response.headers()
