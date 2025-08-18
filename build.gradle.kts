@@ -258,7 +258,7 @@ subprojects {
 
       // Platform/BOM dependencies constrain versions only.
       // Enforce misk-bom -- it should take priority over external BOMs.
-      add("api", enforcedPlatform(project(":misk-bom")))
+      add("api", platform(project(":misk-bom")))
       add("api", platform(rootProject.libs.grpcBom))
       add("api", platform(rootProject.libs.guavaBom))
       add("api", platform(rootProject.libs.guiceBom))
