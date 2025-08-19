@@ -9,7 +9,8 @@ a `Dispatcher` is provided that allows for running on multiple threads. Both mod
 
 Mixing thread based concurrency primitives, to synchronize coroutines, can result in deadlocks if threads are blocked waiting
 Example
-```class DangerTest {
+```kotlin
+class DangerTest {
   @Test
   fun threads() {
     val latch = CountDownLatch(3)
@@ -29,7 +30,8 @@ Example
       latch.await()
     }
   }
-}```
+}
+```
 
 
 When an action is declared with the `suspend` modifier, it will be called with a `Dispatcher` that has a single backing
