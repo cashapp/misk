@@ -54,7 +54,7 @@ class MyMcpWebAction @Inject constructor(
     sendChannel: SendChannel<ServerSentEvent>
   ) {
     val sessionId = headers[SESSION_ID_PARAM]
-    mcpSessionManager.withResponseChannel(sendChannel, sessionId) {
+    mcpSessionManager.withResponseChannel(sendChannel) {
       handleMessage(message)
     }
   }
@@ -65,7 +65,7 @@ class MyMcpWebAction @Inject constructor(
     sendChannel: SendChannel<ServerSentEvent>
   ) {
     val sessionId = headers[SESSION_ID_PARAM]
-    mcpSessionManager.withResponseChannel(sendChannel, sessionId) {
+    mcpSessionManager.withResponseChannel(sendChannel) {
       // Stream server-initiated events to client
     }
   }
@@ -78,7 +78,7 @@ class MyMcpWebAction @Inject constructor(
     val sessionId = requireRequestNotNull(headers[SESSION_ID_PARAM] ){
         "Missing session ID"
     }
-    mcpSessionManager.terminateSession(sessionId, sendChannel)
+    // Any session state should be cleaned up here
   }
 }
 ```
@@ -151,32 +151,33 @@ Tools are functions that AI models can execute. Implement the `McpTool` interfac
 
 ```kotlin
 @Singleton
-class CalculatorTool @Inject constructor() : McpTool {
+class CalculatorTool @Inject constructor() : McpTool<Input>(Input::class) {
   override val name = "calculator"
   override val description = "Performs basic arithmetic operations"
-  
-  override val inputSchema = Tool.Input(
-    type = "object",
-    properties = mapOf(
-      "operation" to mapOf("type" to "string", "enum" to listOf("add", "subtract", "multiply", "divide")),
-      "a" to mapOf("type" to "number"),
-      "b" to mapOf("type" to "number")
-    ),
-    required = listOf("operation", "a", "b")
+
+  @Serializable
+  data class Input(
+    @Description("The mathematical operator (\"add\", \"subtract\", \"multiply\", or \"divide\") to execute")
+    val operator: String
+
+    @Description("The first operand in the operation (a number)")
+    val a: Number
+
+    @Description("The second operand in the operation (a number)")
+    val b: Number
   )
   
-  override suspend fun handler(request: CallToolRequest): CallToolResult {
-    val args = request.params.arguments
-    val operation = args["operation"] as String
-    val a = (args["a"] as Number).toDouble()
-    val b = (args["b"] as Number).toDouble()
+  override suspend fun handle(request: CallToolRequest): CallToolResult {
+    val input = request.parseInput<Input>()
+    val aDouble = a.toDouble()
+    val bDouble = b.toDouble()
     
-    val result = when (operation) {
-      "add" -> a + b
-      "subtract" -> a - b
-      "multiply" -> a * b
-      "divide" -> if (b != 0.0) a / b else throw IllegalArgumentException("Division by zero")
-      else -> throw IllegalArgumentException("Unknown operation: $operation")
+    val result = when (input.operator) {
+      "add" -> aDouble + bDouble
+      "subtract" -> aDouble - bDouble
+      "multiply" -> aDouble * bDouble
+      "divide" -> if (bDouble != 0.0) aDouble / bDouble else throw IllegalArgumentException("Division by zero")
+      else -> throw IllegalArgumentException("Unknown operator: $operator")
     }
     
     return CallToolResult(
