@@ -101,6 +101,9 @@ class MiskMcpServer(
   ),
   ServerOptions(
     capabilities = ServerCapabilities(
+      experimental = null,
+      sampling = null,
+      logging = null,
       prompts = if (prompts.isNotEmpty()) config.prompts.asPrompts() else null,
       resources = if (resources.isNotEmpty()) config.resources.asResources() else null,
       tools = if (tools.isNotEmpty()) config.tools.asTools() else null,

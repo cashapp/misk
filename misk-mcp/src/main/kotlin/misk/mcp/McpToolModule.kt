@@ -44,7 +44,7 @@ class McpToolModule<T : McpTool<*>>(
   override fun configure() {
     // Bind the MCP tool to the named server's tool set
     multibind<McpTool<*>>()
-      .toProvider(getProvider(toolClass.java))
+      .to(toolClass.java)
       .asSingleton()
   }
 

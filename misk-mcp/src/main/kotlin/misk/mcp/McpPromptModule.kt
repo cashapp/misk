@@ -44,7 +44,7 @@ class McpPromptModule<T : McpPrompt>(
   override fun configure() {
     // Bind the MCP prompt to the named server's prompt set
     multibind<McpPrompt>()
-      .toProvider(getProvider(promptClass.java))
+      .to(promptClass.java)
       .asSingleton()
   }
 
