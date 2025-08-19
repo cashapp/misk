@@ -44,7 +44,7 @@ class McpResourceModule<T : McpResource>(
   override fun configure() {
     // Bind the MCP resource to the named server's resource set
     multibind<McpResource>()
-      .toProvider(getProvider(resourceClass.java))
+      .to(resourceClass.java)
       .asSingleton()
   }
 
