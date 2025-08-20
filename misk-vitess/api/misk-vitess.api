@@ -103,6 +103,11 @@ public final class misk/vitess/ShardsKt {
 	public static final fun shards (Lmisk/jdbc/DataSourceService;)Lcom/google/common/base/Supplier;
 }
 
+public final class misk/vitess/ShardsLoader {
+	public static final field INSTANCE Lmisk/vitess/ShardsLoader;
+	public final fun shards (Lmisk/jdbc/DataSourceService;)Lcom/google/common/base/Supplier;
+}
+
 public final class misk/vitess/TabletType : java/lang/Enum {
 	public static final field Companion Lmisk/vitess/TabletType$Companion;
 	public static final field PRIMARY Lmisk/vitess/TabletType;
