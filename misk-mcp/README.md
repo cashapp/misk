@@ -390,3 +390,4 @@ class MyMcpTest {
 - [MCP Specification](https://modelcontextprotocol.io/specification/2025-06-18) - Official protocol specification
 - [MCP Examples](https://modelcontextprotocol.io/examples) - Example implementations
 - [MCP SDKs](https://modelcontextprotocol.io) - Available SDKs for different languages
+- [MCP Testing Tool](https://modelcontextprotocol.io/legacy/tools/inspector) - Local dashboard to test MCP server against your local running Misk service (simply run `$ npx @modelcontextprotocol/inspector`)
