@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.788"
-aws2 = "2.32.26"
+aws2 = "2.32.27"
 bucket4j = "8.8.0"
 datadog = "1.52.1"
 dependencyAnalysisPlugin = "2.19.0"
@@ -71,10 +71,10 @@ errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotation
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.70.0" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.60.0" }
-gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.31.2" }
+gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.31.3" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250731-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
-gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.2" }
+gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.3" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.98.1" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.8.1" }
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250814-2.0.0" }
@@ -85,12 +85,12 @@ googleCloudStorage = { module = "com.google.cloud:google-cloud-storage", version
 googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.61.0" }
 googleHttpClient = { module = "com.google.http-client:google-http-client", version.ref = "googleHttp" }
 googleHttpClientJackson = { module = "com.google.http-client:google-http-client-jackson2", version.ref = "googleHttp" }
-grpcApi = { module = "io.grpc:grpc-api", version = "1.74.0" }
-grpcBom = { module = "io.grpc:grpc-bom", version = "1.74.0" }
-grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.74.0" }
-grpcNetty = { module = "io.grpc:grpc-netty", version = "1.74.0" }
-grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.74.0" }
-grpcStub = { module = "io.grpc:grpc-stub", version = "1.74.0" }
+grpcApi = { module = "io.grpc:grpc-api", version = "1.75.0" }
+grpcBom = { module = "io.grpc:grpc-bom", version = "1.75.0" }
+grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.75.0" }
+grpcNetty = { module = "io.grpc:grpc-netty", version = "1.75.0" }
+grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.75.0" }
+grpcStub = { module = "io.grpc:grpc-stub", version = "1.75.0" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 guavaBom = { module = "com.google.guava:guava-bom", version.ref = "guava" }
 guavaTestLib = { module = "com.google.guava:guava-testlib", version.ref = "guava" }
