@@ -10,7 +10,7 @@ application {
 }
 
 dependencies {
-  implementation(libs.findbugsJsr305)
+  compileOnly(libs.findbugsJsr305)
   implementation(libs.guava)
   implementation(libs.guice)
   implementation(libs.jakartaInject)
