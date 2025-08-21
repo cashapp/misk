@@ -1,7 +1,9 @@
 package misk.vitess
 
 import com.google.common.base.Supplier
-import com.google.common.base.Suppliers
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
+import com.google.common.cache.LoadingCache
 import misk.jdbc.DataSourceService
 import misk.jdbc.mapNotNull
 import misk.logging.getLogger
@@ -15,14 +17,22 @@ import kotlin.random.Random
 object ShardsLoader {
   private val logger = getLogger<ShardsLoader>()
 
-  fun shards(dataSourceService: DataSourceService): Supplier<Set<Shard>> =
-    Suppliers.memoizeWithExpiration({
-      if (!dataSourceService.config().type.isVitess) {
-        Shard.SINGLE_SHARD_SET
-      } else {
-        loadVitessShards(dataSourceService)
+  private val vitessCache: LoadingCache<DataSourceService, Set<Shard>> = CacheBuilder.newBuilder()
+    .refreshAfterWrite(4, TimeUnit.MINUTES)
+    .expireAfterWrite(6, TimeUnit.MINUTES)
+    .build(object : CacheLoader<DataSourceService, Set<Shard>>() {
+      override fun load(dataSourceService: DataSourceService): Set<Shard> {
+        return loadVitessShards(dataSourceService)
       }
-    }, 5, TimeUnit.MINUTES)
+    })
+
+  fun shards(dataSourceService: DataSourceService): Supplier<Set<Shard>> {
+    return if (!dataSourceService.config().type.isVitess) {
+      Supplier { Shard.SINGLE_SHARD_SET }
+    } else {
+      Supplier { vitessCache.get(dataSourceService) }
+    }
+  }
 
   private fun loadVitessShards(dataSourceService: DataSourceService): Set<Shard> {
     val maxRetries = 3
@@ -65,7 +75,7 @@ object ShardsLoader {
 
         val isRetryableException =
             e.cause is SQLTimeoutException || e is SQLTimeoutException ||
-            e.cause is SQLRecoverableException  || e is SQLRecoverableException
+            e.cause is SQLRecoverableException || e is SQLRecoverableException ||
             e.cause is SQLTransientException || e is SQLTransientException
 
         val isRetryableMessage = retryableErrorMessages.any { errorMessage ->
@@ -106,10 +116,10 @@ object ShardsLoader {
   }
 
   private fun calculateBackoff(attempt: Int): Long {
-    val baseDelayMs = 500L // Start with 500ms
-    val maxDelayMs = 5000L // Cap at 5 seconds
-    val exponentialDelay = baseDelayMs * (1L shl attempt) // 500ms, 1s, 2s, 4s...
-    val jitter = Random.nextLong(0, 200) // Add up to 200ms jitter
+    val baseDelayMs = 100L // Start with 100ms
+    val maxDelayMs = 1000L // Cap at 1 second
+    val exponentialDelay = baseDelayMs * (1L shl attempt) // 100ms, 200s, 400s, 800ms...
+    val jitter = Random.nextLong(0, 30) // Add up to 30ms jitter
     return minOf(exponentialDelay + jitter, maxDelayMs)
   }
 }
