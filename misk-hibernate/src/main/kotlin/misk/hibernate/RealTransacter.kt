@@ -167,12 +167,25 @@ private constructor(
     // which means any subsequent transaction that gets that connection will think it holds the lock, when it does not.
     val connectionHandlingMode = PhysicalConnectionHandlingMode.IMMEDIATE_ACQUISITION_AND_HOLD
     return withNewHibernateSession(sessionFactory, connectionHandlingMode) { hibernateSession ->
+      val primaryDestinationCatalog = Destination.primary().toString()
+      if (config.type.isVitess) {
+        hibernateSession.doReturningWork { conn ->
+          conn.catalog = primaryDestinationCatalog
+        }
+      }
+
       val didAcquireLock = hibernateSession.tryAcquireLock(lockKey)
       check(didAcquireLock) { "Unable to acquire lock $lockKey" }
 
       val blockResult = runCatching { block() }
 
       try {
+        if (config.type.isVitess) {
+          // Restore to the same destination the lock was acquired on.
+          hibernateSession.doReturningWork { conn ->
+            conn.catalog = primaryDestinationCatalog
+          }
+        }
         hibernateSession.tryReleaseLock(lockKey)
       } catch (e: Throwable) {
         val originalFailure = blockResult.exceptionOrNull()?.apply { addSuppressed(e) }
