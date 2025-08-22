@@ -4,6 +4,8 @@ public abstract interface class misk/redis/DeferredRedis {
 	public abstract fun close ()V
 	public abstract fun del (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun del ([Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun exists (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun exists ([Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun expire (Ljava/lang/String;J)Ljava/util/function/Supplier;
 	public abstract fun expireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
 	public abstract fun get (Ljava/lang/String;)Ljava/util/function/Supplier;
@@ -65,6 +67,8 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun close ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
+	public fun exists (Ljava/lang/String;)Z
+	public fun exists ([Ljava/lang/String;)J
 	public fun expire (Ljava/lang/String;J)Z
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun flushAll ()V
@@ -136,6 +140,8 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun close ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
+	public fun exists (Ljava/lang/String;)Z
+	public fun exists ([Ljava/lang/String;)J
 	public fun expire (Ljava/lang/String;J)Z
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun flushAll ()V
@@ -202,6 +208,8 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun close ()V
 	public abstract fun del (Ljava/lang/String;)Z
 	public abstract fun del ([Ljava/lang/String;)I
+	public abstract fun exists (Ljava/lang/String;)Z
+	public abstract fun exists ([Ljava/lang/String;)J
 	public abstract fun expire (Ljava/lang/String;J)Z
 	public abstract fun expireAt (Ljava/lang/String;J)Z
 	public abstract fun flushAll ()V
@@ -555,6 +563,8 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing
 	public fun close ()V
 	public fun del (Ljava/lang/String;)Z
 	public fun del ([Ljava/lang/String;)I
+	public fun exists (Ljava/lang/String;)Z
+	public fun exists ([Ljava/lang/String;)J
 	public fun expire (Ljava/lang/String;J)Z
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun flushAll ()V
@@ -619,6 +629,8 @@ public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/
 	public fun close ()V
 	public fun del (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun del ([Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun exists (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun exists ([Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun expire (Ljava/lang/String;J)Ljava/util/function/Supplier;
 	public fun expireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
 	public fun get (Ljava/lang/String;)Ljava/util/function/Supplier;

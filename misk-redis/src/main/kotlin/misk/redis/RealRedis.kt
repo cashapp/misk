@@ -352,6 +352,16 @@ class RealRedis(
     return jedis { rpoplpush(sourceKeyBytes, destKeyBytes) }?.toByteString()
   }
 
+  override fun exists(key: String): Boolean {
+    val keyBytes = key.toByteArray(charset)
+    return jedis { exists(keyBytes) }
+  }
+
+  override fun exists(vararg key: String): Long {
+    val keyBytes = key.map { it.toByteArray(charset) }.toTypedArray()
+    return jedis { exists(*keyBytes) }
+  }
+
   override fun persist(key: String): Boolean {
     val keyBytes = key.toByteArray(charset)
     return jedis { persist(keyBytes) == 1L }
