@@ -147,7 +147,7 @@ class DashboardPageLayout @Inject constructor(
           href = if (isAuthorized) it.menuUrl else homeUrl,
           isSelected = currentPath.startsWith(it.menuUrl),
           openInNewTab = isExternalLink,
-          dataTurbo = !isExternalLink,
+          dataTurbo = !it.menuDisableTurboPreload && !isExternalLink,
           hoverText = if (!isAuthorized) "You do not have access to this tab." else null,
         )
       }
