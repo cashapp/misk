@@ -397,6 +397,25 @@ class FakeRedis : Redis {
   )
 
   @Synchronized
+  override fun exists(key: String): Boolean {
+    val value = keyValueStore[key]
+    val hValue = hKeyValueStore[key]
+    val lValue = lKeyValueStore[key]
+    val lValueSize = lValue?.data?.size ?: 0
+
+    return (value != null && clock.instant() < value.expiryInstant) ||
+      (hValue != null && clock.instant() < hValue.expiryInstant) ||
+      (lValue != null && lValueSize > 0 && clock.instant() < lValue.expiryInstant)
+  }
+
+  @Synchronized
+  override fun exists(vararg key: String): Long {
+    return key.sumOf {
+      if (exists(it)) 1L else 0L
+    }
+  }
+
+  @Synchronized
   override fun persist(key: String): Boolean {
     val value = keyValueStore[key]
     val hValue = hKeyValueStore[key]

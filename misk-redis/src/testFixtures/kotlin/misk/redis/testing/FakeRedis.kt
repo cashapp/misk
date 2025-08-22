@@ -433,6 +433,23 @@ class FakeRedis @Inject constructor(
     to = ListDirection.LEFT
   )
 
+  override fun exists(key: String): Boolean {
+    val value = keyValueStore[key]
+    val hValue = hKeyValueStore[key]
+    val lValue = lKeyValueStore[key]
+    val lValueSize = lValue?.data?.size ?: 0
+
+    return (value != null && clock.instant() < value.expiryInstant) ||
+      (hValue != null && clock.instant() < hValue.expiryInstant) ||
+      (lValue != null && lValueSize > 0 && clock.instant() < lValue.expiryInstant)
+  }
+
+  override fun exists(vararg key: String): Long {
+    return key.sumOf {
+      if (exists(it)) 1L else 0L
+    }
+  }
+
   override fun persist(key: String): Boolean {
     val value = keyValueStore[key]
     val hValue = hKeyValueStore[key]
@@ -682,6 +699,14 @@ class FakeRedis @Inject constructor(
       destinationKey: String
     ): Supplier<ByteString?> = Supplier {
       this@FakeRedis.rpoplpush(sourceKey, destinationKey)
+    }
+
+    override fun exists(key: String): Supplier<Boolean> = Supplier {
+      this@FakeRedis.exists(key)
+    }
+
+    override fun exists(vararg keys: String): Supplier<Long> = Supplier {
+      this@FakeRedis.exists(*keys)
     }
 
     override fun persist(key: String): Supplier<Boolean> = Supplier {

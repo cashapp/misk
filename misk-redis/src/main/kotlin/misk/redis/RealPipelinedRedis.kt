@@ -350,6 +350,18 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get()?.toByteString() }
   }
 
+  override fun exists(key: String): Supplier<Boolean> {
+    val keyBytes = key.toByteArray(charset)
+    val response = pipeline.exists(keyBytes)
+    return Supplier { response.get() }
+  }
+
+  override fun exists(vararg keys: String): Supplier<Long> {
+    val keysBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+    val response = pipeline.exists(*keysBytes)
+    return Supplier { response.get() }
+  }
+
   override fun persist(key: String): Supplier<Boolean> {
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.persist(keyBytes)

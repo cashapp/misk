@@ -421,6 +421,20 @@ interface Redis {
   fun rpoplpush(sourceKey: String, destinationKey: String): ByteString?
 
   /**
+   * Returns if [key] exists.
+   *
+   * @return true if [key] exists. false if [key] does not exist.
+   */
+  fun exists(key: String): Boolean
+
+  /**
+   * Returns if [key] exists.
+   *
+   * @return the number of keys that exist. 0 if none of the keys exist.
+   */
+  fun exists(vararg key: String): Long
+
+  /**
    * Remove the existing timeout on key, turning the key from volatile (a key with an expire set)
    * to persistent (a key that will never expire as no timeout is associated).
    *
