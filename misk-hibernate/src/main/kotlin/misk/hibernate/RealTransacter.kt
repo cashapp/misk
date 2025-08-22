@@ -167,15 +167,24 @@ private constructor(
     // which means any subsequent transaction that gets that connection will think it holds the lock, when it does not.
     val connectionHandlingMode = PhysicalConnectionHandlingMode.IMMEDIATE_ACQUISITION_AND_HOLD
     return withNewHibernateSession(sessionFactory, connectionHandlingMode) { hibernateSession ->
-      val primaryDestinationCatalog = Destination.primary().toString()
+      val primaryTarget = Destination.primary().toString()
+      var previousTarget: String? = null
       if (config.type.isVitess) {
         hibernateSession.doReturningWork { conn ->
-          conn.catalog = primaryDestinationCatalog
+          previousTarget = conn.catalog
+          if (previousTarget != primaryTarget) { conn.catalog = primaryTarget }
         }
       }
 
       val didAcquireLock = hibernateSession.tryAcquireLock(lockKey)
       check(didAcquireLock) { "Unable to acquire lock $lockKey" }
+
+      if (config.type.isVitess && previousTarget != primaryTarget) {
+        // Restore previous destination if it is not primary already.
+        hibernateSession.doReturningWork { conn ->
+          conn.catalog = previousTarget
+        }
+      }
 
       val blockResult = runCatching { block() }
 
@@ -183,10 +192,17 @@ private constructor(
         if (config.type.isVitess) {
           // Restore to the same destination the lock was acquired on.
           hibernateSession.doReturningWork { conn ->
-            conn.catalog = primaryDestinationCatalog
+            previousTarget = conn.catalog
+            if (previousTarget != primaryTarget) { conn.catalog = primaryTarget }
           }
         }
         hibernateSession.tryReleaseLock(lockKey)
+        if (config.type.isVitess && previousTarget != primaryTarget) {
+          // Restore to the same destination the lock was acquired on.
+          hibernateSession.doReturningWork { conn ->
+            conn.catalog = previousTarget
+          }
+        }
       } catch (e: Throwable) {
         val originalFailure = blockResult.exceptionOrNull()?.apply { addSuppressed(e) }
         throw originalFailure ?: e
