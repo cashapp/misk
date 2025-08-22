@@ -40,7 +40,13 @@ internal class QueryParamFeatureBinding private constructor(
     }
 
     fun parameterValue(values: List<String>): Any? {
-      if (values.isEmpty()) return null
+      // an empty list means the parameter was not present, if the parameter is optional or
+      // nullable we can return null
+      if (values.isEmpty() && (parameter.isOptional || parameter.type.isMarkedNullable)) return null
+      // if the parameter is required (not optional, not nullable) then we need to have a value
+      if (values.isEmpty()) {
+        throw BadRequestException("Missing required query parameter: $name")
+      }
 
       try {
         return if (isList) values.map { converter.convert(it) }
