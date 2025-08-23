@@ -2,6 +2,7 @@
 
 package misk.mcp.config
 
+import misk.annotation.ExperimentalMiskApi
 import wisp.config.Config
 
 /**
@@ -30,6 +31,7 @@ import wisp.config.Config
  *
  * @param servers Initial map of server name to [McpServerConfig]. Defaults to empty map.
  */
+@ExperimentalMiskApi
 class McpConfig @JvmOverloads constructor(
   servers: Map<String, McpServerConfig> = emptyMap()
 ) : java.util.LinkedHashMap<String, McpServerConfig>(servers), Config

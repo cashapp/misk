@@ -2,6 +2,7 @@ package misk.mcp
 
 import com.google.inject.Provides
 import kotlinx.serialization.json.Json
+import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.inject.setOfType
@@ -12,9 +13,11 @@ import misk.mcp.internal.McpJsonRpcMessageUnmarshaller
 import misk.mcp.internal.MiskMcp
 import misk.web.marshal.Unmarshaller
 
+@ExperimentalMiskApi
 class McpServerModule(
   private val config: McpConfig,
 ) : KAbstractModule() {
+
   override fun configure() {
     val (serverName, serverConfig) = requireNotNull(config.entries.singleOrNull()) {
       "McpConfig must contain only one server configuration"
