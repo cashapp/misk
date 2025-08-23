@@ -3,6 +3,7 @@ package misk.mcp
 import io.modelcontextprotocol.kotlin.sdk.GetPromptRequest
 import io.modelcontextprotocol.kotlin.sdk.GetPromptResult
 import io.modelcontextprotocol.kotlin.sdk.PromptArgument
+import misk.annotation.ExperimentalMiskApi
 
 /**
  * Abstraction for a prompt in the Model Context Protocol (MCP) specification.
@@ -95,6 +96,7 @@ import io.modelcontextprotocol.kotlin.sdk.PromptArgument
  * @see <a href="https://modelcontextprotocol.io/specification/2025-06-18">MCP Specification</a>
  * @see McpPromptModule for registration and dependency injection
  */
+@ExperimentalMiskApi
 interface McpPrompt {
   /**
    * The unique identifier for this prompt within the MCP server context.

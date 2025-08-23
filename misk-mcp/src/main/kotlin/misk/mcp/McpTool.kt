@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonPrimitive
+import misk.annotation.ExperimentalMiskApi
 import misk.mcp.internal.McpJson
 import misk.mcp.internal.generateJsonSchema
 import kotlin.reflect.KClass
@@ -83,6 +84,7 @@ import kotlin.reflect.KClass
  * @see <a href="https://modelcontextprotocol.io/specification/2025-06-18">MCP Specification</a>
  * @see McpToolModule for registration and dependency injection
  */
+@ExperimentalMiskApi
 abstract class McpTool<R : Any>(
   val inputClass: KClass<R>
 ) {

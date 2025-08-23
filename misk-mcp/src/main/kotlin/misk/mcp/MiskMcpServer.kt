@@ -5,6 +5,7 @@ import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
+import misk.annotation.ExperimentalMiskApi
 import misk.logging.getLogger
 import misk.mcp.config.McpServerConfig
 import misk.mcp.config.asPrompts
@@ -88,6 +89,7 @@ import misk.mcp.internal.MiskServerTransport
  * @see McpResource For implementing accessible resources
  * @see McpPrompt For implementing prompt templates
  */
+@ExperimentalMiskApi
 class MiskMcpServer(
   val name: String,
   val config: McpServerConfig,

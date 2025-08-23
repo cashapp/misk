@@ -2,6 +2,7 @@ package misk.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.ReadResourceRequest
 import io.modelcontextprotocol.kotlin.sdk.ReadResourceResult
+import misk.annotation.ExperimentalMiskApi
 
 /**
  * Abstraction for a resource in the Model Context Protocol (MCP) specification.
@@ -84,6 +85,7 @@ import io.modelcontextprotocol.kotlin.sdk.ReadResourceResult
  * @see <a href="https://modelcontextprotocol.io/specification/2025-06-18">MCP Specification</a>
  * @see McpResourceModule for registration and dependency injection
  */
+@ExperimentalMiskApi
 interface McpResource {
   /**
    * The unique URI identifier for this resource within the MCP server context.
