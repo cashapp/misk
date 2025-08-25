@@ -24,6 +24,18 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
+import misk.slack.webapi.helpers.Channel
+import misk.slack.webapi.helpers.ConversationTopic
+import misk.slack.webapi.helpers.InviteRequest
+import misk.slack.webapi.helpers.InviteResponse
+import misk.slack.webapi.helpers.LatestMessage
+import misk.slack.webapi.helpers.Prefs
+import misk.slack.webapi.helpers.SetConversationTopicRequest
+import misk.slack.webapi.helpers.SetConversationTopicResponse
+import misk.slack.webapi.helpers.TopicPurpose
+import misk.slack.webapi.helpers.UserGroup
+import misk.slack.webapi.helpers.UserGroupRequest
+import misk.slack.webapi.helpers.UserGroupResponse
 
 @MiskTest(startService = true)
 class RealSlackClientTest {
@@ -58,6 +70,30 @@ class RealSlackClientTest {
 
     val response = slackApi.getUserByEmail("testuser@company.com").execute()
     assertThat(response.isSuccessful()).isTrue()
+  }
+
+  @Test
+  fun `set conversation topic`() {
+    server.enqueueTopicResponse(sampleTopicResponse)
+
+    val response = slackApi.setConversationTopic(sampleTopicRequest).execute()
+    assertThat(response.isSuccessful).isTrue()
+  }
+
+  @Test
+  fun `invite user to conversation`() {
+    server.enqueueInviteResponse(sampleInviteResponse)
+
+    val response = slackApi.inviteToConversation(sampleInviteRequest).execute()
+    assertThat(response.isSuccessful).isTrue()
+  }
+
+  @Test
+  fun `add user to user group`() {
+    server.enqueueUserGroupResponse(sampleUserGroupResponse)
+
+    val response = slackApi.updateUserGroup(sampleUserGroupRequest).execute()
+    assertThat(response.isSuccessful).isTrue()
   }
 
   inner class SlackTestingModule : KAbstractModule() {
@@ -143,6 +179,139 @@ class RealSlackClientTest {
             "T1234567890",
           )
         )
+    )
+
+    val sampleTopicRequest = SetConversationTopicRequest(
+      channel = "#default-channel",
+      topic = "This is a sample topic for testing",
+    )
+
+    val sampleTopicResponse = SetConversationTopicResponse(
+      ok = true,
+      channel = ConversationTopic(
+        id = "C12345678",
+        name = "tips-and-tricks",
+        is_channel = true,
+        is_group = false,
+        is_im = false,
+        is_mpim = false,
+        is_private = false,
+        created = 1649195947,
+        is_archived = false,
+        is_general = false,
+        unlinked = 0,
+        name_normalized = " tips -and - tricks",
+        is_shared = false,
+        is_frozen = false,
+        is_org_shared = false,
+        is_pending_ext_shared = false,
+        pending_shared = emptyList(),
+        parent_conversation = null,
+        creator = " U12345678 ",
+        is_ext_shared = false,
+        shared_team_ids = listOf("T12345678"),
+        pending_connected_team_ids = emptyList(),
+        is_member = true,
+        last_read = "1649869848.627809",
+        latest = LatestMessage(
+          type = "message",
+          subtype = "channel_topic",
+          ts = "1649952691.429799",
+          user = "U12345678",
+          text = "set the channel topic: Apply topically for best effects",
+          topic = "Apply topically for best effects"
+        ),
+        unread_count = 1,
+        unread_count_display = 0,
+        topic = TopicPurpose(
+          value = "Apply topically for best effects",
+          creator = "U12345678",
+          last_set = 1649952691
+        ),
+        purpose = TopicPurpose(
+          value = "",
+          creator = "",
+          last_set = 0
+        ),
+        previous_names = emptyList()
+      )
+    )
+
+    val sampleInviteRequest = InviteRequest(
+      channel = "#default-channel",
+      users = "U1234567890,U9876543210",
+    )
+
+    val sampleInviteResponse = InviteResponse(
+      ok = true,
+      channel = Channel(
+        id = "C012AB3CD",
+        name = "general",
+        is_channel = true,
+        is_group = false,
+        is_im = false,
+        created = 1449252889,
+        creator= "W012A3BCD",
+        is_archived= false,
+        is_general= true,
+        unlinked = 0,
+        name_normalized = "general",
+        is_read_only = false,
+        is_shared = false,
+        is_ext_shared = false,
+        is_org_shared = false,
+        pending_shared= emptyList(),
+        is_pending_ext_shared = false,
+        is_member = true,
+        is_private = false,
+        is_mpim = false,
+        last_read = "1502126650.228446",
+        topic = TopicPurpose(
+          value = "For public discussion of generalities",
+          creator = "W012A3BCD",
+          last_set = 1449709364
+        ),
+        purpose = TopicPurpose(
+          value = "This part of the workspace is for fun. Make fun here.",
+          creator = "W012A3BCD",
+          last_set = 1449709364
+        ),
+        previous_names = listOf("specifics", "abstractions", "etc")
+      )
+    )
+
+    val sampleUserGroupRequest = UserGroupRequest(
+      usergroup = "U7654321098",
+      users = "U1234567890,U9876543210"
+    )
+
+    val sampleUserGroupResponse = UserGroupResponse(
+      ok = true,
+      usergroup = UserGroup(
+        id = "S0616NG6M",
+        team_id = "T060R4BHN",
+        is_usergroup = true,
+        name = "Marketing Team",
+        description = "Marketing gurus, PR experts and product advocates.",
+        handle = "marketing-team",
+        is_external = false,
+        date_create = 1447096577,
+        date_update = 1447102109,
+        date_delete = 0,
+        auto_type = null,
+        created_by = "U060R4BJ4",
+        updated_by = "U060R4BJ4",
+        deleted_by = null,
+        prefs = Prefs(
+          channels= emptyList(),
+          groups = emptyList(),
+        ),
+        users= listOf(
+          "U060R4BJ4",
+          "U060RNRCZ"
+        ),
+        user_count = 1,
+      )
     )
   }
 }
