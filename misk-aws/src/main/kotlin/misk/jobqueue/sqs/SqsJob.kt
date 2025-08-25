@@ -119,7 +119,7 @@ internal class SqsJob(
     @VisibleForTesting
     fun calculateVisibilityTimeOut(currentReceiveCount: Int, maxReceiveCount: Int): Int {
       val consecutiveRetryCount = (currentReceiveCount + 1).coerceAtMost(maxReceiveCount)
-      val backoff = BigInteger.TWO.pow(consecutiveRetryCount - 1).toLong()
+      val backoff = BigInteger.TWO.pow(consecutiveRetryCount - 1).toLong().coerceAtLeast(2)
       val backoffWithJitter = MAX_JOB_DELAY.coerceAtMost((backoff / 2 + Random.nextLong(0, backoff / 2)))
 
       return backoffWithJitter.toInt()
