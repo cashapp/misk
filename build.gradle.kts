@@ -245,11 +245,11 @@ subprojects {
     tasks.withType<KotlinCompile>().configureEach {
       compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
+        freeCompilerArgs.add("-Xjdk-release=11")
       }
     }
     tasks.withType<JavaCompile>().configureEach {
-      sourceCompatibility = "11"
-      targetCompatibility = "11"
+      options.release.set(11)
     }
 
     dependencies {
