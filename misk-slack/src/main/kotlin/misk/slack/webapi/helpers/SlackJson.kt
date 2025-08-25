@@ -495,3 +495,184 @@ data class GetUserResponse @JvmOverloads constructor(
   val error: String? = null,
   val user: UserData? = null
 )
+
+/**
+ * Message posted to update the usergroup users
+ *
+ * https://slack.com/api/conversations.setTopic
+ */
+data class UserGroupRequest constructor(
+  /**
+   * The encoded ID of the user group to update.
+   */
+  val usergroup: String,
+  /**
+   * A comma separated string of encoded user IDs that represent the entire list of users for the user group.
+   */
+  val users: String,
+)
+
+/**
+ * Message posted after updating the usergroup users
+ *
+ * https://slack.com/api/usergroups.users.update
+ */
+data class UserGroupResponse @JvmOverloads constructor(
+  val ok: Boolean,
+  val error: String? = null,
+  val usergroup: UserGroup? = null,
+)
+
+/**
+ * Message posted to invite users to the conversation
+ *
+ * https://slack.com/api/conversations.invite
+ */
+data class InviteRequest constructor(
+  /**
+   * The ID of the public or private channel to invite user(s) to.
+   */
+  val channel: String,
+  /**
+   * A comma separated list of user IDs. Up to 1000 users may be listed.
+   */
+  val users: String,
+)
+
+/**
+ * Message posted after inviting a user to a conversation
+ *
+ * https://slack.com/api/conversations.invite
+ */
+data class InviteResponse @JvmOverloads constructor(
+  val ok: Boolean,
+  val error: String? = null,
+  val channel: Channel? = null,
+)
+
+/**
+ * Message posted to set a channel topic
+ *
+ * https://slack.com/api/conversations.setTopic
+ */
+data class SetConversationTopicRequest constructor(
+  /**
+   * The ID of the Conversation to set the topic of
+   */
+  val channel: String,
+  /**
+   * The new topic string. Does not support formatting or linkification.
+   */
+  val topic: String,
+)
+
+/**
+ * Message posted after setting a channel tpic
+ *
+ * https://slack.com/api/conversations.setTopic
+ */
+data class SetConversationTopicResponse @JvmOverloads constructor(
+  val ok: Boolean,
+  val error: String? = null,
+  val channel: ConversationTopic? = null,
+)
+
+data class UserGroup @JvmOverloads constructor(
+  val id: String,
+  val team_id: String,
+  val is_usergroup: Boolean,
+  val name: String,
+  val description: String,
+  val handle: String,
+  val is_external: Boolean,
+  val date_create: Long,
+  val date_update: Long,
+  val date_delete: Long,
+  val auto_type: String? = null,
+  val created_by: String,
+  val updated_by: String,
+  val deleted_by: String? = null,
+  val prefs: Prefs,
+  val users: List<String>,
+  val user_count: Int
+)
+
+data class Prefs constructor(
+  val channels: List<String>,
+  val groups: List<String>
+)
+
+data class Channel constructor(
+  val id: String,
+  val name: String,
+  val is_channel: Boolean,
+  val is_group: Boolean,
+  val is_im: Boolean,
+  val created: Long,
+  val creator: String,
+  val is_archived: Boolean,
+  val is_general: Boolean,
+  val unlinked: Int,
+  val name_normalized: String,
+  val is_read_only: Boolean,
+  val is_shared: Boolean,
+  val is_ext_shared: Boolean,
+  val is_org_shared: Boolean,
+  val pending_shared: List<String>,
+  val is_pending_ext_shared: Boolean,
+  val is_member: Boolean,
+  val is_private: Boolean,
+  val is_mpim: Boolean,
+  val last_read: String,
+  val topic: TopicPurpose,
+  val purpose: TopicPurpose,
+  val previous_names: List<String>
+)
+
+data class ConversationTopic constructor(
+  val id: String,
+  val name: String,
+  val is_channel: Boolean,
+  val is_group: Boolean,
+  val is_im: Boolean,
+  val is_mpim: Boolean,
+  val is_private: Boolean,
+  val created: Long,
+  val is_archived: Boolean,
+  val is_general: Boolean,
+  val unlinked: Int,
+  val name_normalized: String,
+  val is_shared: Boolean?,
+  val is_frozen: Boolean?,
+  val is_org_shared: Boolean?,
+  val is_pending_ext_shared: Boolean?,
+  val pending_shared: List<String>,
+  val parent_conversation: String?,
+  val creator: String?,
+  val is_ext_shared: Boolean?,
+  val shared_team_ids: List<String>?,
+  val pending_connected_team_ids: List<String>?,
+  val is_member: Boolean?,
+  val last_read: String?,
+  val latest: LatestMessage?,
+  val unread_count: Int?,
+  val unread_count_display: Int?,
+  val topic: TopicPurpose?,
+  val purpose: TopicPurpose?,
+  val previous_names: List<String>?
+)
+
+data class LatestMessage constructor(
+  val type: String,
+  val subtype: String,
+  val ts: String,
+  val user: String,
+  val text: String,
+  val topic: String
+)
+
+data class TopicPurpose constructor(
+  val value: String,
+  val creator: String,
+  val last_set: Long
+)

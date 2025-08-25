@@ -3,6 +3,12 @@ package misk.slack.webapi
 import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.PostMessageResponse
 import misk.slack.webapi.helpers.GetUserResponse
+import misk.slack.webapi.helpers.InviteRequest
+import misk.slack.webapi.helpers.InviteResponse
+import misk.slack.webapi.helpers.SetConversationTopicRequest
+import misk.slack.webapi.helpers.SetConversationTopicResponse
+import misk.slack.webapi.helpers.UserGroupRequest
+import misk.slack.webapi.helpers.UserGroupResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -43,6 +49,36 @@ interface SlackApi {
   @GET("/api/users.lookupByEmail")
   @Headers(value = ["accept: application/json"])
   fun getUserByEmail(@Query("email") email: String): Call<GetUserResponse>
+
+  /**
+   * Calls Slack and asks it to set a channel topic.
+   * https://slack.com/api/conversations.setTopic
+   */
+  @POST("/api/conversations.setTopic")
+  @Headers(value = ["accept: application/json"])
+  fun setConversationTopic(
+    @Body setConversationTopicJson: SetConversationTopicRequest,
+  ): Call<SetConversationTopicResponse>
+
+  /**
+   * Calls Slack and asks it to invite a user to a conversation.
+   * https://slack.com/api/conversations.invite
+   */
+  @POST("/api/conversations.invite")
+  @Headers(value = ["accept: application/json"])
+  fun inviteToConversation(
+    @Body inviteRequestJson: InviteRequest,
+  ): Call<InviteResponse>
+
+  /**
+   * Calls Slack and asks it to update the users in the usergroup
+   * https://slack.com/api/usergroups.users.update
+   */
+  @POST("/api/usergroups.users.update")
+  @Headers(value = ["accept: application/json"])
+  fun updateUserGroup(
+    @Body updateRequestJson: UserGroupRequest,
+  ): Call<UserGroupResponse>
 }
 
 fun Response<PostMessageResponse>.checkSuccessful() {
