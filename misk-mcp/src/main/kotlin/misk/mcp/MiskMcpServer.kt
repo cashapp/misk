@@ -142,7 +142,8 @@ class MiskMcpServer(
         name = tool.name,
         description = tool.description,
         inputSchema = tool.inputSchema,
-        handler = tool::handle,
+        outputSchema = tool.outputSchema,
+        handler = tool::handler,
       )
     }
   }

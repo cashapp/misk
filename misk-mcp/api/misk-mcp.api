@@ -51,12 +51,35 @@ public final class misk/mcp/McpServerModule$Companion {
 }
 
 public abstract class misk/mcp/McpTool {
-	public fun <init> (Lkotlin/reflect/KClass;)V
+	public fun <init> ()V
+	protected final fun ToolResult (Ljava/util/List;ZLkotlinx/serialization/json/JsonObject;)Lmisk/mcp/McpTool$ToolResult;
+	protected final fun ToolResult ([Lio/modelcontextprotocol/kotlin/sdk/PromptMessageContent;ZLkotlinx/serialization/json/JsonObject;)Lmisk/mcp/McpTool$ToolResult;
+	public static synthetic fun ToolResult$default (Lmisk/mcp/McpTool;Ljava/util/List;ZLkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Lmisk/mcp/McpTool$ToolResult;
+	public static synthetic fun ToolResult$default (Lmisk/mcp/McpTool;[Lio/modelcontextprotocol/kotlin/sdk/PromptMessageContent;ZLkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Lmisk/mcp/McpTool$ToolResult;
 	public abstract fun getDescription ()Ljava/lang/String;
-	public final fun getInputClass ()Lkotlin/reflect/KClass;
 	public final fun getInputSchema ()Lio/modelcontextprotocol/kotlin/sdk/Tool$Input;
 	public abstract fun getName ()Ljava/lang/String;
-	public abstract fun handle (Lio/modelcontextprotocol/kotlin/sdk/CallToolRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getOutputSchema ()Lio/modelcontextprotocol/kotlin/sdk/Tool$Output;
+	protected abstract fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun handler (Lio/modelcontextprotocol/kotlin/sdk/CallToolRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lio/modelcontextprotocol/kotlin/sdk/CallToolResult;
+}
+
+protected final class misk/mcp/McpTool$PromptToolResult : misk/mcp/McpTool$ToolResult {
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Z
+	public final fun component3 ()Lkotlinx/serialization/json/JsonObject;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResult ()Ljava/util/List;
+	public fun get_meta ()Lkotlinx/serialization/json/JsonObject;
+	public fun hashCode ()I
+	public fun isError ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+protected abstract interface class misk/mcp/McpTool$ToolResult {
+	public abstract fun get_meta ()Lkotlinx/serialization/json/JsonObject;
+	public abstract fun isError ()Z
 }
 
 public final class misk/mcp/McpToolModule : misk/inject/KAbstractModule {
@@ -79,6 +102,26 @@ public final class misk/mcp/MiskMcpServer : io/modelcontextprotocol/kotlin/sdk/s
 }
 
 public final class misk/mcp/MiskMcpServer$Companion {
+}
+
+public abstract class misk/mcp/StructuredMcpTool : misk/mcp/McpTool {
+	public fun <init> ()V
+	protected final fun ToolResult (Ljava/lang/Object;ZLkotlinx/serialization/json/JsonObject;)Lmisk/mcp/McpTool$ToolResult;
+	public static synthetic fun ToolResult$default (Lmisk/mcp/StructuredMcpTool;Ljava/lang/Object;ZLkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Lmisk/mcp/McpTool$ToolResult;
+	public fun getOutputSchema ()Lio/modelcontextprotocol/kotlin/sdk/Tool$Output;
+	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lio/modelcontextprotocol/kotlin/sdk/CallToolResult;
+}
+
+protected final class misk/mcp/StructuredMcpTool$StructuredToolResult : misk/mcp/McpTool$ToolResult {
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Z
+	public final fun component3 ()Lkotlinx/serialization/json/JsonObject;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResult ()Ljava/lang/Object;
+	public fun get_meta ()Lkotlinx/serialization/json/JsonObject;
+	public fun hashCode ()I
+	public fun isError ()Z
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface annotation class misk/mcp/action/McpDelete : java/lang/annotation/Annotation {

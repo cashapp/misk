@@ -147,52 +147,151 @@ mcp:
 
 ### Tools
 
-Tools are functions that AI models can execute. Implement the `McpTool` interface:
+Tools are functions that AI models can execute. There are two types of tools:
+
+#### Basic McpTool
+
+Use `McpTool` when returning simple text or media content:
 
 ```kotlin
+@Serializable
+data class CalculatorInput(
+  @Description("The mathematical operator (\"add\", \"subtract\", \"multiply\", or \"divide\") to execute")
+  val operator: String,
+  @Description("The first operand in the operation (a number)")
+  val a: Double,
+  @Description("The second operand in the operation (a number)")
+  val b: Double
+)
+
 @Singleton
-class CalculatorTool @Inject constructor() : McpTool<Input>(Input::class) {
+class CalculatorTool @Inject constructor() : McpTool<CalculatorInput>(
+  inputClass = CalculatorInput::class
+) {
   override val name = "calculator"
   override val description = "Performs basic arithmetic operations"
-
-  @Serializable
-  data class Input(
-    @Description("The mathematical operator (\"add\", \"subtract\", \"multiply\", or \"divide\") to execute")
-    val operator: String
-
-    @Description("The first operand in the operation (a number)")
-    val a: Number
-
-    @Description("The second operand in the operation (a number)")
-    val b: Number
-  )
   
-  override suspend fun handle(request: CallToolRequest): CallToolResult {
-    val input = request.parseInput<Input>()
-    val aDouble = a.toDouble()
-    val bDouble = b.toDouble()
-    
+  override suspend fun handle(input: CalculatorInput): ToolResult {
     val result = when (input.operator) {
-      "add" -> aDouble + bDouble
-      "subtract" -> aDouble - bDouble
-      "multiply" -> aDouble * bDouble
-      "divide" -> if (bDouble != 0.0) aDouble / bDouble else throw IllegalArgumentException("Division by zero")
-      else -> throw IllegalArgumentException("Unknown operator: $operator")
+      "add" -> input.a + input.b
+      "subtract" -> input.a - input.b
+      "multiply" -> input.a * input.b
+      "divide" -> {
+        if (input.b == 0.0) {
+          return ToolResult(
+            TextContent("Error: Division by zero"),
+            isError = true
+          )
+        }
+        input.a / input.b
+      }
+      else -> return ToolResult(
+        TextContent("Unknown operator: ${input.operator}"),
+        isError = true
+      )
     }
     
-    return CallToolResult(
-      content = listOf(
-        TextContent(text = "Result: $result")
-      )
+    return ToolResult(
+      TextContent("Result: $result")
     )
   }
 }
 ```
 
-Register the tool:
+#### StructuredMcpTool
+
+Use `StructuredMcpTool` when returning structured data that AI models need to parse:
+
+```kotlin
+@Serializable
+data class WeatherInput(
+  @Description("The city to get weather for")
+  val city: String,
+  @Description("Temperature units: 'celsius' or 'fahrenheit'")
+  val units: String = "celsius"
+)
+
+@Serializable
+data class WeatherOutput(
+  val city: String,
+  val temperature: Double,
+  val humidity: Int,
+  val conditions: String,
+  val windSpeed: Double,
+  val units: String
+)
+
+@Singleton
+class WeatherTool @Inject constructor(
+  private val weatherService: WeatherService
+) : StructuredMcpTool<WeatherInput, WeatherOutput>(
+  inputClass = WeatherInput::class,
+  outputClass = WeatherOutput::class
+) {
+  override val name = "get_weather"
+  override val description = "Get current weather conditions for a city"
+  
+  override suspend fun handle(input: WeatherInput): ToolResult {
+    return try {
+      val weatherData = weatherService.getCurrentWeather(input.city, input.units)
+      
+      // Return structured data - will be serialized to JSON automatically
+      ToolResult(
+        WeatherOutput(
+          city = input.city,
+          temperature = weatherData.temp,
+          humidity = weatherData.humidity,
+          conditions = weatherData.description,
+          windSpeed = weatherData.windSpeed,
+          units = input.units
+        )
+      )
+    } catch (e: CityNotFoundException) {
+      // Can still return prompt content for errors
+      ToolResult(
+        TextContent("City '${input.city}' not found"),
+        isError = true
+      )
+    }
+  }
+}
+```
+
+Register tools:
 
 ```kotlin
 install(McpToolModule.create<CalculatorTool>())
+install(McpToolModule.create<WeatherTool>())
+```
+
+#### Working with ToolResult
+
+Both tool types use the `ToolResult` sealed interface for type-safe result handling:
+
+```kotlin
+// Return a simple text result
+return ToolResult(TextContent("Success!"))
+
+// Return multiple content items
+return ToolResult(
+  TextContent("Processing complete"),
+  ImageContent(base64Data = imageData, mimeType = "image/png")
+)
+
+// Return an error result
+return ToolResult(
+  TextContent("Failed to process request"),
+  isError = true
+)
+
+// Include metadata
+return ToolResult(
+  TextContent("Result with metadata"),
+  _meta = JsonObject(mapOf("processTime" to JsonPrimitive(123)))
+)
+
+// For StructuredMcpTool - return structured data
+return ToolResult(myOutputObject)
 ```
 
 ### Resources
@@ -359,28 +458,63 @@ MCP enables powerful capabilities through data access and code execution. Follow
 
 ## Testing
 
-Use the fake implementations for testing:
+Test your MCP components with type-safe inputs:
 
 ```kotlin
 class MyMcpTest {
   @Test
   fun testCalculatorTool() {
     val tool = CalculatorTool()
-    val request = CallToolRequest(
-      params = CallToolParams(
-        name = "calculator",
-        arguments = mapOf(
-          "operation" to "add",
-          "a" to 5,
-          "b" to 3
+    
+    // Test successful calculation
+    val result = runBlocking { 
+      tool.handle(
+        CalculatorInput(
+          operator = "add",
+          a = 5.0,
+          b = 3.0
         )
       )
+    }
+    
+    assertThat(result).isInstanceOf(McpTool.PromptToolResult::class.java)
+    val promptResult = result as McpTool.PromptToolResult
+    assertThat(promptResult.result).hasSize(1)
+    assertThat((promptResult.result[0] as TextContent).text).isEqualTo("Result: 8.0")
+    assertThat(promptResult.isError).isFalse()
+  }
+  
+  @Test
+  fun testWeatherTool() {
+    val weatherService = mockk<WeatherService>()
+    val tool = WeatherTool(weatherService)
+    
+    // Mock the weather service
+    coEvery { 
+      weatherService.getCurrentWeather("San Francisco", "celsius") 
+    } returns WeatherData(
+      temp = 18.5,
+      humidity = 65,
+      description = "Partly cloudy",
+      windSpeed = 12.3
     )
     
-    val result = runBlocking { tool.handler(request) }
+    // Test structured output
+    val result = runBlocking {
+      tool.handle(
+        WeatherInput(
+          city = "San Francisco",
+          units = "celsius"
+        )
+      )
+    }
     
-    assertThat(result.content).hasSize(1)
-    assertThat((result.content[0] as TextContent).text).isEqualTo("Result: 8.0")
+    assertThat(result).isInstanceOf(StructuredMcpTool.StructuredToolResult::class.java)
+    val structuredResult = result as StructuredMcpTool.StructuredToolResult<WeatherOutput>
+    assertThat(structuredResult.result.city).isEqualTo("San Francisco")
+    assertThat(structuredResult.result.temperature).isEqualTo(18.5)
+    assertThat(structuredResult.result.humidity).isEqualTo(65)
+    assertThat(structuredResult.isError).isFalse()
   }
 }
 ```
