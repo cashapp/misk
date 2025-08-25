@@ -6,7 +6,6 @@ import com.google.common.util.concurrent.UncheckedExecutionException
 import jakarta.inject.Inject
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.TimeUnit
-import jdk.internal.joptsimple.internal.Messages.message
 import kotlin.test.assertEquals
 import misk.MiskTestingServiceModule
 import misk.audit.FakeAuditClientModule
