@@ -73,6 +73,8 @@ internal class DeclarativeSchemaMigratorTest {
       statement.addBatch("DROP TABLE IF EXISTS table_1")
       statement.addBatch("DROP TABLE IF EXISTS table_2")
       statement.addBatch("DROP TABLE IF EXISTS library_table")
+      statement.addBatch("DROP TABLE IF EXISTS movies")
+      statement.addBatch("DROP TABLE IF EXISTS movie_sales")
       statement.executeBatch()
       connection.commit()
     }
@@ -494,6 +496,85 @@ internal class DeclarativeSchemaMigratorTest {
         CREATE TABLE excluded_table (id bigint, PRIMARY KEY (id))
         """.trimMargin()
     )
+
+    assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
+  }
+
+  @Test
+  fun `handles MySQL table options on multiple lines with normalization`() {
+    val mainSource = config.migrations_resources!![0]
+    
+    val moviesSql = """
+      CREATE TABLE `movies` (
+      `id` bigint NOT NULL AUTO_INCREMENT,
+      `title` varchar(255) NOT NULL,
+      PRIMARY KEY (`id`)
+     ) ENGINE InnoDB,
+       AUTO_INCREMENT=1234,
+       CHARSET utf8mb4,
+       COLLATE utf8mb4_general_ci,
+       ROW_FORMAT DYNAMIC,
+       COMMENT 'test';"""
+
+    resourceLoader.put("$mainSource/movies.sql", moviesSql)
+
+    dataSourceService.dataSource.connection.use { connection ->
+      val statement = connection.createStatement()
+      statement.execute(moviesSql)
+      connection.commit()
+    }
+
+    assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
+  }
+
+  @Test
+  fun `handles MySQL table options in single-line format`() {
+    val mainSource = config.migrations_resources!![0]
+
+    val moviesSql = """
+      CREATE TABLE `movies` (
+      `id` bigint NOT NULL AUTO_INCREMENT,
+      `title` varchar(255) NOT NULL,
+      PRIMARY KEY (`id`)
+     ) ENGINE InnoDB, AUTO_INCREMENT=1234, CHARSET utf8mb4, COLLATE utf8mb4_general_ci, ROW_FORMAT DYNAMIC, COMMENT 'test';"""
+
+    resourceLoader.put("$mainSource/movies.sql", moviesSql)
+
+    dataSourceService.dataSource.connection.use { connection ->
+      val statement = connection.createStatement()
+      statement.execute(moviesSql)
+      connection.commit()
+    }
+
+    assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
+  }
+
+  @Test
+  fun `handles MySQL table with partitioning clause`() {
+    val mainSource = config.migrations_resources!![0]
+
+    val partitionedTableSql = """
+      CREATE TABLE `movie_sales` (
+      `id` bigint NOT NULL AUTO_INCREMENT,
+      `movie_id` bigint NOT NULL,
+      `sale_date` date NOT NULL,
+      `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`, `sale_date`)
+     ) ENGINE=InnoDB,
+       DEFAULT CHARSET=utf8mb4
+     PARTITION BY RANGE COLUMNS (sale_date) (
+       PARTITION day_20240101 VALUES LESS THAN('2024-01-01'),
+       PARTITION day_20250101 VALUES LESS THAN('2025-01-01'),
+       PARTITION future VALUES LESS THAN MAXVALUE
+     );"""
+
+    resourceLoader.put("$mainSource/movie-sales.sql", partitionedTableSql)
+
+    dataSourceService.dataSource.connection.use { connection ->
+      val statement = connection.createStatement()
+      statement.execute(partitionedTableSql)
+      connection.commit()
+    }
 
     assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
   }
