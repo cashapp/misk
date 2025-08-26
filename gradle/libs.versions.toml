@@ -1,10 +1,10 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.788"
-aws2 = "2.32.29"
+aws2 = "2.32.30"
 bucket4j = "8.8.0"
 datadog = "1.52.1"
-dependencyAnalysisPlugin = "3.0.0"
+dependencyAnalysisPlugin = "3.0.1"
 detekt = "1.23.8"
 docker = "3.6.0"
 googleAuth = "1.38.0"
@@ -78,7 +78,7 @@ gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.3" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.98.1" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.8.1" }
-googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250814-2.0.0" }
+googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250815-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
 googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.60.0" }
@@ -139,7 +139,7 @@ jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
 jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api" }
 jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
-jooq = { module = "org.jooq:jooq", version = "3.19.18" }
+jooq = { module = "org.jooq:jooq", version = "3.20.6" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.3" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
@@ -167,7 +167,7 @@ kotlinxSerializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serializati
 kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.9.0" }
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "18.0.1" }
-launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "7.7.0" }
+launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "7.10.1" }
 lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.8.0.RELEASE" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.6" }
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
