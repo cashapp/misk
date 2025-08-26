@@ -1,6 +1,7 @@
 package misk.dev
 
 import java.io.File
+import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 
@@ -28,10 +29,17 @@ internal class DevClassLoader(parent: ClassLoader) : ClassLoader(parent) {
       return super.loadClass(className, resolve)
     }
     val classPath = className.replace('.', '/') + ".class"
-    val uri = parent.getResource(classPath)
-    if (uri == null) {
+    val uris = parent.getResources(classPath)
+    val elements = arrayListOf<URL>()
+    while(uris.hasMoreElements()) {
+      elements.add(uris.nextElement())
+    }
+    if (elements.size != 1) {
+      // If we have more than one class this element is not considered hot reloadable
+      // This can happen if protos are generated in both the project and a library
       return super.loadClass(className, resolve)
     }
+    val uri = elements[0]
     if (uri.protocol != "file") {
       return super.loadClass(className, resolve)
     }
