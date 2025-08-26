@@ -91,8 +91,10 @@ internal class DeclarativeSchemaMigrator(
       val fileContent = resourceLoader.utf8(file.filename).toString()
 
       try {
+        val normalizedContent = removeMySqlTableOptions(fileContent)
+
         // Parse the file content
-        val statement = CCJSqlParserUtil.parse(fileContent)
+        val statement = CCJSqlParserUtil.parse(normalizedContent)
 
         // Check if the parsed statement is a CREATE TABLE statement
         if (statement is CreateTable) {
@@ -109,7 +111,7 @@ internal class DeclarativeSchemaMigrator(
           throw IllegalStateException("No valid CREATE TABLE statement found in ${file.filename}")
         }
       } catch (e: Exception) {
-        throw IllegalStateException("Failed to parse SQL in ${file.filename}")
+        throw IllegalStateException("Failed to parse SQL in ${file.filename}", e)
       }
     }
 
@@ -152,5 +154,17 @@ internal class DeclarativeSchemaMigrator(
     }
 
     return actualTables
+  }
+
+  /**
+   * Remove MySQL table options from CREATE statements to work around JSQLParser limitations,
+   * since we only use JSQLParser to extract table and column names.
+   */
+  private fun removeMySqlTableOptions(sql: String): String {
+    return sql.replace(
+      Regex("\\)(\\s*ENGINE|\\s*DEFAULT|\\s*CHARSET|\\s*COLLATE|\\s*COMMENT|\\s*ROW_FORMAT|\\s*AUTO_INCREMENT|\\s*PARTITION).*?;",
+        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)),
+      ");"
+    )
   }
 }
