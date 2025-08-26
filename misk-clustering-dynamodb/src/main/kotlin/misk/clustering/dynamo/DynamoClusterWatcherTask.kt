@@ -10,12 +10,16 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.Expression
+import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.numberValue
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.endpoints.internal.GetAttr
 import java.time.Clock
 import java.time.Duration
+import java.time.LocalDate
 
 
 /**
@@ -90,7 +94,18 @@ internal class DynamoClusterWatcherTask @Inject constructor(
     prevMembers = members
   }
 
-  override fun shutDown() {}
+  /**
+   * On pod shutdown, remove the pod from the cluster view
+   */
+  override fun shutDown() {
+    val self = cluster.snapshot.self.name
+    val member = table.getItem(
+      Key.builder()
+        .partitionValue(self)
+        .build()
+    )
+    table.deleteItem(member)
+  }
 
   companion object {
     internal val TABLE_SCHEMA = TableSchema.fromClass(DyClusterMember::class.java)

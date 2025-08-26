@@ -32,7 +32,7 @@ class DynamoClusterTest {
       install(FakeClusterWeightModule())
       install(
         InProcessDynamoDbModule(
-          DynamoDbTable("$TEST_SERVICE_NAME.misk-cluster-members", DyClusterMember::class),
+          DynamoDbTable(TEST_TABLE_NAME, DyClusterMember::class),
         )
       )
       install(DynamoClusterModule(DynamoClusterConfig(appName = TEST_SERVICE_NAME)))
@@ -47,6 +47,14 @@ class DynamoClusterTest {
 
   @Test
   fun basic() {
+    val enhancedClient = DynamoDbEnhancedClient.builder()
+      .dynamoDbClient(ddb)
+      .build()
+    val table = enhancedClient.table(
+      TEST_TABLE_NAME,
+      DynamoClusterWatcherTask.TABLE_SCHEMA
+    )
+
     assertThat(cluster.snapshot.readyMembers).hasSize(0)
     waitFor { dynamoClusterWatcherTask.run() }
 
@@ -64,6 +72,13 @@ class DynamoClusterTest {
     // Refreshed, now part of cluster again.
     waitFor { dynamoClusterWatcherTask.run() }
     assertThat(cluster.snapshot.readyMembers).hasSize(1)
+    cluster.snapshot .readyMembers.single()
+
+    // Confirm that on task shutdown, the pod is removed from the cluster
+    assertThat(table.scan().items().stream().findAny().isEmpty).isEqualTo(false)
+    dynamoClusterWatcherTask.stopAsync()
+    dynamoClusterWatcherTask.awaitTerminated()
+    assertThat(table.scan().items().stream().findAny().isEmpty).isEqualTo(true)
   }
 
   @Test
@@ -81,7 +96,7 @@ class DynamoClusterTest {
     val enhancedClient = DynamoDbEnhancedClient.builder()
       .dynamoDbClient(ddb)
       .build()
-    val table = enhancedClient.table("$TEST_SERVICE_NAME.misk-cluster-members", DynamoClusterWatcherTask.TABLE_SCHEMA)
+    val table = enhancedClient.table(TEST_TABLE_NAME, DynamoClusterWatcherTask.TABLE_SCHEMA)
 
     for (i in 0..150) {
       val member = DyClusterMember()
@@ -100,7 +115,7 @@ class DynamoClusterTest {
       .dynamoDbClient(ddb)
       .build()
     val table = enhancedClient.table(
-      "$TEST_SERVICE_NAME.misk-cluster-members",
+      TEST_TABLE_NAME,
       DynamoClusterWatcherTask.TABLE_SCHEMA
     )
 
@@ -139,5 +154,6 @@ class DynamoClusterTest {
 
   companion object {
     const val TEST_SERVICE_NAME = "test-service"
+    const val TEST_TABLE_NAME = "$TEST_SERVICE_NAME.misk-cluster-members"
   }
 }
