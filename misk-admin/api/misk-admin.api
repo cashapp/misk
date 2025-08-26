@@ -649,6 +649,10 @@ public final class misk/web/dashboard/WebTabResourceModule : misk/inject/KAbstra
 	public final fun getWeb_proxy_url ()Ljava/lang/String;
 }
 
+public final class misk/web/dev/DevModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
 public final class misk/web/metadata/DashboardMetadataAction : misk/web/actions/WebAction {
 	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lmisk/scope/ActionScoped;)V
 	public final fun getAll (Ljava/lang/String;)Lmisk/web/metadata/DashboardMetadataAction$Response;
