@@ -41,10 +41,12 @@ public final class misk/jooq/JooqSession : misk/jdbc/Session {
 	public final fun component1 ()Lorg/jooq/DSLContext;
 	public final fun executePostCommitHooks ()V
 	public final fun executePreCommitHooks ()V
+	public final fun executeRollbackHooks (Ljava/lang/Throwable;)V
 	public final fun executeSessionCloseHooks ()V
 	public final fun getCtx ()Lorg/jooq/DSLContext;
 	public fun onPostCommit (Lkotlin/jvm/functions/Function0;)V
 	public fun onPreCommit (Lkotlin/jvm/functions/Function0;)V
+	public fun onRollback (Lkotlin/jvm/functions/Function1;)V
 	public fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
 	public fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }

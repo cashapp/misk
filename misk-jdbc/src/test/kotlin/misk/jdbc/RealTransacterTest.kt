@@ -17,6 +17,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
@@ -165,6 +166,39 @@ abstract class RealTransacterTest {
 
     val afterCount = transacter.transactionWithSession { session -> session.useConnection(count) }
     assertThat(afterCount).isEqualTo(1)
+  }
+
+  @Test
+  fun rollbackHooksCalledOnRollbackOnly() {
+    val rollbackHooksTriggered = mutableListOf<String>()
+
+    // Happy path.
+    transacter.transactionWithSession { session ->
+      session.onRollback { _ ->
+        rollbackHooksTriggered.add("never")
+        error("this should never have happened")
+      }
+    }
+
+    assertThat(rollbackHooksTriggered).isEmpty()
+
+    // Rollback path.
+    assertThrows<IllegalStateException> {
+      transacter.transactionWithSession { session ->
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          assertThat(transacter.inTransaction).isFalse
+          rollbackHooksTriggered.add("first")
+        }
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          assertThat(transacter.inTransaction).isFalse
+          rollbackHooksTriggered.add("second")
+        }
+        error("bad things happened here")
+      }
+    }
+    assertThat(rollbackHooksTriggered).containsExactly("first", "second")
   }
 
   @Test

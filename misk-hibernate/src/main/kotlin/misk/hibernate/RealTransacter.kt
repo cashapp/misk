@@ -123,7 +123,7 @@ private constructor(
                       }
                     }
                   }
-                }
+                },
               )
             },
             5,
@@ -172,7 +172,9 @@ private constructor(
       if (config.type.isVitess) {
         hibernateSession.doReturningWork { conn ->
           previousTarget = conn.catalog
-          if (previousTarget != primaryTarget) { conn.catalog = primaryTarget }
+          if (previousTarget != primaryTarget) {
+            conn.catalog = primaryTarget
+          }
         }
       }
 
@@ -193,7 +195,9 @@ private constructor(
           // Restore to the same destination the lock was acquired on.
           hibernateSession.doReturningWork { conn ->
             previousTarget = conn.catalog
-            if (previousTarget != primaryTarget) { conn.catalog = primaryTarget }
+            if (previousTarget != primaryTarget) {
+              conn.catalog = primaryTarget
+            }
           }
         }
         hibernateSession.tryReleaseLock(lockKey)
@@ -278,6 +282,7 @@ private constructor(
           if (transaction.isActive) {
             try {
               transaction.rollback()
+              session.onSessionClose { session.runRollbackHooks(e) }
             } catch (suppressed: Exception) {
               rethrow.addSuppressed(suppressed)
             }
@@ -332,7 +337,7 @@ private constructor(
       "No reader is configured for replica reads, pass in both a writer and reader qualifier " +
         "and the full DataSourceClustersConfig into HibernateModule, like this:\n" +
         "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, " +
-        "config.data_source_clusters[\"name\"]))"
+        "config.data_source_clusters[\"name\"]))",
     )
   }
 
@@ -503,6 +508,8 @@ private constructor(
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
     private val sessionCloseHooks = mutableListOf<() -> Unit>()
+    private val rollbackHooks = mutableListOf<(error: Throwable) -> Unit>()
+
     internal var inTransaction = false
 
     init {
@@ -616,7 +623,7 @@ private constructor(
 
     internal fun preCommit() {
       preCommitHooks.forEach { preCommitHook ->
-        // Propagate hook exceptions up to the transacter so that the the transaction is rolled
+        // Propagate hook exceptions up to the transacter so that the transaction is rolled
         // back and the error gets returned to the application.
         preCommitHook()
       }
@@ -646,6 +653,14 @@ private constructor(
 
     override fun onSessionClose(work: () -> Unit) {
       sessionCloseHooks.add(work)
+    }
+
+    override fun onRollback(work: (error: Throwable) -> Unit) {
+      rollbackHooks.add(work)
+    }
+
+    internal fun runRollbackHooks(error: Throwable) {
+      rollbackHooks.forEach { rollbackHook -> rollbackHook(error) }
     }
 
     override fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {
