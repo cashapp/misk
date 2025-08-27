@@ -25,6 +25,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.stream.Collectors
 import kotlin.io.path.createDirectories
 import kotlin.io.path.pathString
 
@@ -388,7 +389,7 @@ internal class VitessSchemaApplier(
     }
 
     val keyspaces =
-      Files.list(lastSchemaDirPath).filter { Files.isDirectory(it) }.map { it.fileName.toString() }.sorted().toList()
+      Files.list(lastSchemaDirPath).filter { Files.isDirectory(it) }.map { it.fileName.toString() }.sorted().collect(Collectors.toList())
 
     val schemaDirectoryDiffs = mutableMapOf<String, List<String>>()
     var diffsPresent = false
@@ -457,7 +458,7 @@ internal class VitessSchemaApplier(
     Files.walk(Paths.get(currentSchemaDirPath, keyspace))
       .filter { Files.isRegularFile(it) }
       .map { it.fileName.toString() to it.toFile().readText() }
-      .toList()
+      .collect(Collectors.toList())
       .sortedBy { it.first }
 
   private fun prepareVtctldClientImage() {

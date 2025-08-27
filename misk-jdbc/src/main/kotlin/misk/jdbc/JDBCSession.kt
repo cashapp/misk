@@ -2,10 +2,12 @@ package misk.jdbc
 
 import java.sql.Connection
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
 
-class JDBCSession(val connection: Connection): Session {
+class JDBCSession(val connection: Connection) : Session {
   private val hooks: ConcurrentMap<HookType, List<() -> Unit>> = ConcurrentHashMap()
+  private val rollbackHooks: ConcurrentLinkedQueue<(error: Throwable) -> Unit> = ConcurrentLinkedQueue()
 
   override fun <T> useConnection(work: (Connection) -> T): T {
     return work(connection)
@@ -21,6 +23,10 @@ class JDBCSession(val connection: Connection): Session {
 
   override fun onSessionClose(work: () -> Unit) {
     hooks.add(HookType.SESSION_CLOSE, work)
+  }
+
+  override fun onRollback(work: (error: Throwable) -> Unit) {
+    rollbackHooks.add(work)
   }
 
   fun executePreCommitHooks() {
@@ -41,6 +47,10 @@ class JDBCSession(val connection: Connection): Session {
     hooks[HookType.SESSION_CLOSE]?.forEach { it() }
   }
 
+  fun executeRollbackHooks(error: Throwable) {
+    rollbackHooks.forEach { it(error) }
+  }
+
   fun ConcurrentMap<HookType, List<() -> Unit>>.add(hookType: HookType, work: () -> Unit) {
     merge(hookType, listOf(work)) { oldList, newList ->
       mutableListOf<() -> Unit>().apply {
@@ -50,7 +60,7 @@ class JDBCSession(val connection: Connection): Session {
     }
   }
 
-  enum class HookType{
+  enum class HookType {
     PRE,
     POST,
     SESSION_CLOSE

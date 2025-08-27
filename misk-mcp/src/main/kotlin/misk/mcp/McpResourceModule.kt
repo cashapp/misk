@@ -1,5 +1,6 @@
 package misk.mcp
 
+import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import kotlin.reflect.KClass
@@ -37,6 +38,7 @@ import kotlin.reflect.KClass
  * @see McpServerModule for server configuration
  * @see <a href="https://modelcontextprotocol.io">MCP Specification</a>
  */
+@ExperimentalMiskApi
 class McpResourceModule<T : McpResource>(
   private val resourceClass: KClass<T>,
 ) : KAbstractModule() {

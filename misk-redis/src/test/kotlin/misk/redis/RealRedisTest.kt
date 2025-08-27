@@ -179,6 +179,34 @@ class RealRedisTest : AbstractRedisTest() {
     assertThat(redis.persist("persist_false_key")).isFalse()
   }
 
+  @Test
+  fun `exists returns true if the key exists`() {
+    val key = "mykey"
+
+    redis.set(key, "value".encodeUtf8())
+
+    assertThat(redis.exists(key)).isTrue()
+  }
+
+  @Test
+  fun `exists returns false if the key does not exist`() {
+    val key = "mykey"
+
+    assertThat(redis.exists(key)).isFalse()
+  }
+
+  @Test
+  fun `returns count of keys that exist`() {
+    val key1 = "mykey1"
+    val key2 = "mykey2"
+    val key3 = "mykey3"
+
+    redis.set(key1, "value".encodeUtf8())
+    redis.set(key2, "value".encodeUtf8())
+
+    assertThat(redis.exists(key1, key2, key3)).isEqualTo(2L)
+  }
+
   private fun scanAll(
     initialCursor: String = "0",
     matchPattern: String? = null,

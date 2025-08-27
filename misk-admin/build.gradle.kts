@@ -22,6 +22,8 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-service"))
   api(libs.kotlinXHtml)
+
+  implementation(libs.guava)
   implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(libs.okHttp)
