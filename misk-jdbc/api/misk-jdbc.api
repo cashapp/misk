@@ -419,10 +419,12 @@ public final class misk/jdbc/JDBCSession : misk/jdbc/Session {
 	public final fun component1 ()Ljava/sql/Connection;
 	public final fun executePostCommitHooks ()V
 	public final fun executePreCommitHooks ()V
+	public final fun executeRollbackHooks (Ljava/lang/Throwable;)V
 	public final fun executeSessionCloseHooks ()V
 	public final fun getConnection ()Ljava/sql/Connection;
 	public fun onPostCommit (Lkotlin/jvm/functions/Function0;)V
 	public fun onPreCommit (Lkotlin/jvm/functions/Function0;)V
+	public fun onRollback (Lkotlin/jvm/functions/Function1;)V
 	public fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
 	public fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
@@ -574,6 +576,7 @@ public final class misk/jdbc/SchemaMigratorService : com/google/common/util/conc
 public abstract interface class misk/jdbc/Session {
 	public abstract fun onPostCommit (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun onPreCommit (Lkotlin/jvm/functions/Function0;)V
+	public abstract fun onRollback (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }

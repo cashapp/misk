@@ -87,10 +87,10 @@ class JooqTransacter @JvmOverloads constructor(
     return try {
       dslContext(dataSourceService, clock, dataSourceConfig, options).transactionResult { configuration ->
         jooqSession = JooqSession(DSL.using(configuration))
-        callback(jooqSession!!).also { jooqSession!!.executePreCommitHooks() }
-      }.also {
-        jooqSession?.executePostCommitHooks()
-      }
+        runCatching { callback(jooqSession).also { jooqSession.executePreCommitHooks() } }
+          .onFailure { jooqSession.onSessionClose { jooqSession.executeRollbackHooks(it) } }
+          .getOrElse { throw it } // JooqExtensions.kt shadows Result<T>.getOrThrow()... This is equivalent.
+      }.also { jooqSession?.executePostCommitHooks() }
     } finally {
       jooqSession?.executeSessionCloseHooks()
     }
@@ -108,13 +108,13 @@ class JooqTransacter @JvmOverloads constructor(
         RenderMapping().withSchemata(
           MappedSchema()
             .withInput(jooqCodeGenSchemaName)
-            .withOutput(datasourceConfig.database)
-        )
+            .withOutput(datasourceConfig.database),
+        ),
       )
 
     val connectionProvider = IsolationLevelAwareConnectionProvider(
       dataSourceConnectionProvider = DataSourceConnectionProvider(dataSourceService.dataSource),
-      transacterOptions = options
+      transacterOptions = options,
     )
 
     return DSL.using(connectionProvider, datasourceConfig.type.toSqlDialect(), settings)
@@ -122,11 +122,11 @@ class JooqTransacter @JvmOverloads constructor(
         configuration().set(
           DefaultTransactionProvider(
             configuration().connectionProvider(),
-            false
-          )
+            false,
+          ),
         ).apply {
           val executeListeners = mutableListOf(
-            DefaultExecuteListenerProvider(AvoidUsingSelectStarListener())
+            DefaultExecuteListenerProvider(AvoidUsingSelectStarListener()),
           )
           if ("true" == datasourceConfig.show_sql) {
             executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
@@ -138,8 +138,8 @@ class JooqTransacter @JvmOverloads constructor(
               JooqTimestampRecordListener(
                 clock = clock,
                 createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
-                updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
-              )
+                updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName,
+              ),
             )
           }
         }.apply(jooqConfigExtension)

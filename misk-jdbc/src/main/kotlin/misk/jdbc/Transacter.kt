@@ -17,10 +17,7 @@ interface Transacter {
    * Prefer using [transactionWithSession] instead of this method as it has more functionality such
    * as commit hooks.
    */
-  @Deprecated(
-    "Use transactionWithSession instead",
-    replaceWith = ReplaceWith("transactionWithSession(work)")
-  )
+  @Deprecated("Use transactionWithSession instead", replaceWith = ReplaceWith("transactionWithSession(work)"))
   fun <T> transaction(work: (connection: Connection) -> T): T
 
   /**
@@ -40,6 +37,7 @@ class RealTransacter(private val dataSourceService: DataSourceService) : Transac
 
   override val inTransaction: Boolean get() = transacting.get()
 
+  @Deprecated("Use transactionWithSession instead", replaceWith = ReplaceWith("transactionWithSession(work)"))
   override fun <T> transaction(work: (connection: Connection) -> T): T =
     transactionWithSession { session -> session.useConnection(work) }
 
@@ -61,14 +59,17 @@ class RealTransacter(private val dataSourceService: DataSourceService) : Transac
         if (connection.autoCommit) {
           connection.autoCommit = false
         }
-        // Do stuff
 
+        // Do stuff
         session = JDBCSession(connection)
-        val result = work(session!!)
+        val result = runCatching { work(session) }
+          .onFailure { e -> session.onSessionClose { session.executeRollbackHooks(e) } }
+          .getOrThrow()
+
         // COMMIT
-        session!!.executePreCommitHooks()
+        session.executePreCommitHooks()
         connection.commit()
-        session!!.executePostCommitHooks()
+        session.executePostCommitHooks()
         result
       }
     } finally {

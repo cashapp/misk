@@ -25,6 +25,7 @@ import misk.jooq.JooqTransacter.TransacterOptions
 import misk.jooq.testgen.tables.records.MovieRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.assertThrows
 
 @MiskTest(startService = true)
 internal class JooqTransacterTest {
@@ -256,6 +257,37 @@ internal class JooqTransacterTest {
       ctx.selectCount().from(MOVIE).fetchOne()!!.component1()
     }
     assertThat(numberOfRecords).isEqualTo(1)
+  }
+
+  @Test
+  fun `rollback hooks are called on rollback only`() {
+    val rollbackHooksTriggered = mutableListOf<String>()
+
+    // Happy path.
+    transacter.transaction { session ->
+      session.onRollback { error ->
+        rollbackHooksTriggered.add("never")
+        error("this should never have happened")
+      }
+    }
+
+    assertThat(rollbackHooksTriggered).isEmpty()
+
+    // Rollback path.
+    assertThrows<IllegalStateException> {
+      transacter.transaction { session ->
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          rollbackHooksTriggered.add("first")
+        }
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          rollbackHooksTriggered.add("second")
+        }
+        error("bad things happened here")
+      }
+    }
+    assertThat(rollbackHooksTriggered).containsExactly("first", "second")
   }
 
   @Test fun `session close hooks always execute regardless of exceptions thrown from anywhere`() {

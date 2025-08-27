@@ -696,6 +696,39 @@ abstract class TransacterTest {
   }
 
   @Test
+  fun rollbackHooksCalledOnRollbackOnly() {
+    val rollbackHooksTriggered = mutableListOf<String>()
+
+    // Happy path.
+    transacter.transaction { session ->
+      session.onRollback { error ->
+        rollbackHooksTriggered.add("never")
+        error("this should never have happened")
+      }
+    }
+
+    assertThat(rollbackHooksTriggered).isEmpty()
+
+    // Rollback path.
+    assertThrows<IllegalStateException> {
+      transacter.transaction { session ->
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          assertThat(transacter.inTransaction).isFalse
+          rollbackHooksTriggered.add("first")
+        }
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          assertThat(transacter.inTransaction).isFalse
+          rollbackHooksTriggered.add("second")
+        }
+        error("bad things happened here")
+      }
+    }
+    assertThat(rollbackHooksTriggered).containsExactly("first", "second")
+  }
+
+  @Test
   fun errorInPostCommitHookDoesNotRollback() {
     val postCommitHooksTriggered = mutableListOf<String>()
     lateinit var swid: Id<DbMovie>
