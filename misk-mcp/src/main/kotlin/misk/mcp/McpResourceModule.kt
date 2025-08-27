@@ -31,7 +31,7 @@ import kotlin.reflect.KClass
  * Resources are made available through the MCP server configured via [McpServerModule].
  * All registered resources will be exposed through the server's HTTP endpoints.
  *
- * @param T The type of [McpResource] implementation to register
+ * @param R The type of [McpResource] implementation to register
  * @param resourceClass The [KClass] of the resource implementation
  *
  * @see McpResource for resource implementation details
@@ -39,43 +39,43 @@ import kotlin.reflect.KClass
  * @see <a href="https://modelcontextprotocol.io">MCP Specification</a>
  */
 @ExperimentalMiskApi
-class McpResourceModule<T : McpResource>(
-  private val resourceClass: KClass<T>,
+class McpResourceModule<R : McpResource> private constructor(
+  private val resourceClass: KClass<R>,
+  private val groupAnnotationClass: KClass<out Annotation>?,
 ) : KAbstractModule() {
 
   override fun configure() {
     // Bind the MCP resource to the named server's resource set
-    multibind<McpResource>()
+    multibind<McpResource>(groupAnnotationClass)
       .to(resourceClass.java)
       .asSingleton()
   }
 
   companion object {
-
-    /**
-     * Creates an [McpResourceModule] for the specified resource class.
-     *
-     * @param T The type of [McpResource] implementation to register
-     * @param resourceClass The [KClass] of the resource implementation
-     * @return A configured [McpResourceModule] instance
-     */
-    fun <T : McpResource> create(resourceClass: KClass<T>) =
+    fun <R : McpResource> create(resourceClass: KClass<R>, groupAnnotationClass: KClass<out Annotation>?) =
       McpResourceModule(
         resourceClass = resourceClass,
+        groupAnnotationClass = groupAnnotationClass,
       )
 
     /**
-     * Creates an [McpResourceModule] using reified generics for convenient registration.
-     *
-     * This inline function allows you to specify the resource type without explicitly
-     * passing the [KClass], making resource registration more concise and type-safe.
-     *
-     * @param T The type of [McpResource] implementation to register (inferred)
-     * @return A configured [McpResourceModule] instance
+     * @param GA The annotation type for the tool's MCP group (e.g., @AdminMCP, @PaymentsMCP).
+     * @param R The type of [McpResource] implementation to register
      */
-    inline fun <reified T : McpResource> create() =
+    inline fun <reified GA : Annotation, reified R : McpResource> create() =
       create(
-        resourceClass = T::class,
+        resourceClass = R::class,
+        groupAnnotationClass = GA::class,
+      )
+
+    /**
+     * @param R The type of [McpResource] implementation to register
+     */
+    @JvmName("createWithNoGroup")
+    inline fun <reified R : McpResource> create() =
+      create(
+        resourceClass = R::class,
+        groupAnnotationClass = null,
       )
   }
 }

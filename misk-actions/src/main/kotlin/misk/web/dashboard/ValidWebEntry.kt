@@ -17,7 +17,6 @@ open class ValidWebEntry @JvmOverloads constructor(
   companion object {
     /** Generate a valid slug from an Annotation class. */
     fun slugify(annotation: KClass<out Annotation>) = annotation.simpleName!!
-      .toString()
       .slugify()
 
     /** Generate a valid slug from an Annotation class. */

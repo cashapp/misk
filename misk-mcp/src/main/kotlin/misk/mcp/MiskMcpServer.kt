@@ -90,7 +90,7 @@ import misk.mcp.internal.MiskServerTransport
  * @see McpPrompt For implementing prompt templates
  */
 @ExperimentalMiskApi
-class MiskMcpServer(
+class MiskMcpServer internal constructor(
   val name: String,
   val config: McpServerConfig,
   tools: Set<McpTool<*>>,

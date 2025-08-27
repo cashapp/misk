@@ -150,7 +150,6 @@ abstract class McpTool<I : Any> {
    */
   abstract val description: String
 
-
   val inputSchema: Tool.Input by lazy {
     val schema = inputClass.generateJsonSchema()
     Tool.Input(
