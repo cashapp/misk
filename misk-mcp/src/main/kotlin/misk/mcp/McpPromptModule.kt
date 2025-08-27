@@ -31,7 +31,7 @@ import kotlin.reflect.KClass
  * Prompts are made available through the MCP server configured via [McpServerModule].
  * All registered prompts will be exposed through the server's HTTP endpoints.
  *
- * @param T The type of [McpPrompt] implementation to register
+ * @param P The type of [McpPrompt] implementation to register
  * @param promptClass The [KClass] of the prompt implementation
  *
  * @see McpPrompt for prompt implementation details
@@ -39,43 +39,43 @@ import kotlin.reflect.KClass
  * @see <a href="https://modelcontextprotocol.io">MCP Specification</a>
  */
 @ExperimentalMiskApi
-class McpPromptModule<T : McpPrompt>(
-  private val promptClass: KClass<T>,
+class McpPromptModule<P : McpPrompt> private constructor(
+  private val promptClass: KClass<P>,
+  private val groupAnnotationClass: KClass<out Annotation>?,
 ) : KAbstractModule() {
 
   override fun configure() {
     // Bind the MCP prompt to the named server's prompt set
-    multibind<McpPrompt>()
+    multibind<McpPrompt>(groupAnnotationClass)
       .to(promptClass.java)
       .asSingleton()
   }
 
   companion object {
-
-    /**
-     * Creates an [McpPromptModule] for the specified prompt class.
-     *
-     * @param T The type of [McpPrompt] implementation to register
-     * @param promptClass The [KClass] of the prompt implementation
-     * @return A configured [McpPromptModule] instance
-     */
-    fun <T : McpPrompt> create(promptClass: KClass<T>) =
+    fun <P: McpPrompt> create(promptClass: KClass<P>, groupAnnotationClass: KClass<out Annotation>?) =
       McpPromptModule(
         promptClass = promptClass,
+        groupAnnotationClass = groupAnnotationClass,
       )
 
     /**
-     * Creates an [McpPromptModule] using reified generics for convenient registration.
-     *
-     * This inline function allows you to specify the prompt type without explicitly
-     * passing the [KClass], making prompt registration more concise and type-safe.
-     *
-     * @param T The type of [McpPrompt] implementation to register (inferred)
-     * @return A configured [McpPromptModule] instance
+     * @param GA The annotation type for the tool's MCP group (e.g., @AdminMCP, @PaymentsMCP).
+     * @param P The type of [McpPrompt] implementation to register
      */
+    inline fun <reified GA : Annotation, reified P : McpPrompt> create() =
+      create(
+        promptClass = P::class,
+        groupAnnotationClass = GA::class,
+      )
+
+    /**
+     * @param T The type of [McpPrompt] implementation to register
+     */
+    @JvmName("createWithNoGroup")
     inline fun <reified T : McpPrompt> create() =
       create(
         promptClass = T::class,
+        groupAnnotationClass = null,
       )
   }
 }

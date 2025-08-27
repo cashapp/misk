@@ -39,43 +39,45 @@ import kotlin.reflect.KClass
  * @see <a href="https://modelcontextprotocol.io">MCP Specification</a>
  */
 @ExperimentalMiskApi
-class McpToolModule<T : McpTool<*>>(
+class McpToolModule<T : McpTool<*>> private constructor(
   private val toolClass: KClass<T>,
+  private val groupAnnotationClass: KClass<out Annotation>?,
 ) : KAbstractModule() {
 
   override fun configure() {
     // Bind the MCP tool to the named server's tool set
-    multibind<McpTool<*>>()
+    multibind<McpTool<*>>(groupAnnotationClass)
       .to(toolClass.java)
       .asSingleton()
   }
 
   companion object {
+    fun <T : McpTool<*>> create(
+      toolClass: KClass<T>,
+      groupAnnotationClass: KClass<out Annotation>?
+    ) = McpToolModule(
+      toolClass = toolClass,
+      groupAnnotationClass = groupAnnotationClass,
+    )
 
     /**
-     * Creates an [McpToolModule] for the specified tool class.
-     *
+     * @param GA The annotation type for the tool's MCP group (e.g., @AdminMCP, @PaymentsMCP).
      * @param T The type of [McpTool] implementation to register
-     * @param toolClass The [KClass] of the tool implementation
-     * @return A configured [McpToolModule] instance
      */
-    fun <T : McpTool<*>> create(toolClass: KClass<T>) =
-      McpToolModule(
-        toolClass = toolClass,
+    inline fun <reified GA : Annotation, reified T : McpTool<*>> create() =
+      create(
+        toolClass = T::class,
+        groupAnnotationClass = GA::class,
       )
 
     /**
-     * Creates an [McpToolModule] using reified generics for convenient registration.
-     *
-     * This inline function allows you to specify the tool type without explicitly
-     * passing the [KClass], making tool registration more concise and type-safe.
-     *
-     * @param T The type of [McpTool] implementation to register (inferred)
-     * @return A configured [McpToolModule] instance
+     * @param T The type of [McpTool] implementation to register
      */
+    @JvmName("createWithNoGroup")
     inline fun <reified T : McpTool<*>> create() =
       create(
         toolClass = T::class,
+        groupAnnotationClass = null,
       )
   }
 }

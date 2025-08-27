@@ -1,7 +1,6 @@
 package misk.mcp.action
 
 import com.google.inject.Provider
-import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
@@ -120,11 +119,10 @@ const val SESSION_ID_PARAM = "Mcp-Session-Id"
  */
 @ExperimentalMiskApi
 @Singleton
-class McpSessionManager @Inject constructor(
+class McpSessionManager(
   private val httpCall: ActionScoped<HttpCall>,
-  private val mcpServerProvider: Provider<MiskMcpServer>
+  private val mcpServerProvider: Provider<MiskMcpServer>,
 ) {
-
   suspend fun withResponseChannel(
     sendChannel: SendChannel<ServerSentEvent>,
     block: suspend MiskMcpServer.() -> Unit
