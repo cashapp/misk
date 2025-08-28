@@ -95,11 +95,7 @@ data class HttpClientsConfig @JvmOverloads constructor(
 data class HttpClientSSLConfig(
   val cert_store: CertStoreConfig?,
   val trust_store: TrustStoreConfig
-) {
-  fun toWispConfig(): wisp.client.HttpClientSSLConfig = wisp.client.HttpClientSSLConfig(
-    cert_store?.toWispConfig(), trust_store.toWispConfig()
-  )
-}
+)
 
 data class HttpClientConfig @JvmOverloads constructor(
   val connectTimeout: Duration? = null,
@@ -117,25 +113,7 @@ data class HttpClientConfig @JvmOverloads constructor(
   val retryOnConnectionFailure: Boolean? = null,
   val followRedirects: Boolean? = null,
   val followSslRedirects: Boolean? = null
-) {
-  fun toWispConfig() = wisp.client.HttpClientConfig(
-    connectTimeout,
-    writeTimeout,
-    readTimeout,
-    pingInterval,
-    callTimeout,
-    maxRequests,
-    maxRequestsPerHost,
-    maxIdleConnections,
-    keepAliveDuration,
-    ssl?.toWispConfig(),
-    unixSocketFile,
-    protocols,
-    retryOnConnectionFailure,
-    followRedirects,
-    followSslRedirects
-  )
-}
+)
 
 fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
   HttpClientConfig(
@@ -234,10 +212,6 @@ data class HttpClientEndpointConfig @JvmOverloads constructor(
   )
   val ssl
     get() = clientConfig.ssl
-
-  fun toWispConfig() = wisp.client.HttpClientEndpointConfig(
-    url, envoy?.toWispConfig(), clientConfig.toWispConfig()
-  )
 }
 
 data class HttpClientEnvoyConfig @JvmOverloads constructor(
@@ -245,6 +219,4 @@ data class HttpClientEnvoyConfig @JvmOverloads constructor(
 
   /** Environment to target. If null, the same environment as the app is running in is assumed. */
   val env: String? = null
-) {
-  fun toWispConfig() = wisp.client.HttpClientEnvoyConfig(app, env)
-}
+)

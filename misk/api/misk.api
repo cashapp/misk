@@ -527,7 +527,6 @@ public final class misk/client/HttpClientConfig {
 	public final fun getWriteTimeout ()Ljava/time/Duration;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun toWispConfig ()Lwisp/client/HttpClientConfig;
 }
 
 public final class misk/client/HttpClientConfigUrlProvider {
@@ -565,7 +564,6 @@ public final class misk/client/HttpClientEndpointConfig {
 	public final fun getWriteTimeout ()Ljava/time/Duration;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun toWispConfig ()Lwisp/client/HttpClientEndpointConfig;
 }
 
 public final class misk/client/HttpClientEnvoyConfig {
@@ -581,7 +579,6 @@ public final class misk/client/HttpClientEnvoyConfig {
 	public final fun getEnv ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun toWispConfig ()Lwisp/client/HttpClientEnvoyConfig;
 }
 
 public final class misk/client/HttpClientFactory {
@@ -620,7 +617,6 @@ public final class misk/client/HttpClientSSLConfig {
 	public final fun getTrust_store ()Lmisk/security/ssl/TrustStoreConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun toWispConfig ()Lwisp/client/HttpClientSSLConfig;
 }
 
 public final class misk/client/HttpClientsConfig : wisp/config/Config {
