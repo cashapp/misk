@@ -11,6 +11,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
+import misk.tokens.RealTokenGenerator
 import software.amazon.awssdk.services.s3.model.BucketAlreadyExistsException
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest
@@ -21,7 +22,6 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException
 import wisp.logging.getLogger
 import java.net.URI
-import java.util.UUID
 
 /**
  * Enhanced S3 test container with automatic bucket management and comprehensive cleanup.
@@ -42,7 +42,8 @@ class DockerS3(
 ) : ExternalDependency {
 
   private val logger = getLogger<DockerS3>()
-  private val instanceId = UUID.randomUUID().toString().take(8)
+  private val tokenGenerator = RealTokenGenerator()
+  private val containerId = tokenGenerator.generate("s3", 8)
 
   companion object {
     /**
@@ -66,7 +67,7 @@ class DockerS3(
     Container {
       val exposedClientPort = ExposedPort.tcp(port)
       withImage(localStackImage)
-        .withName("s3-$instanceId")
+        .withName("s3-$containerId")
         .withEnv("SERVICES", "s3")
         .withEnv("DEBUG", "1")
         .apply {
@@ -106,27 +107,36 @@ class DockerS3(
   private val createdBuckets = mutableSetOf<String>()
   
   /**
-   * Create a test bucket with a unique name.
+   * Create a test bucket with a unique name or use a provided exact bucket name.
    * Bucket will be automatically cleaned up after tests.
+   *
+   * @param bucketName If this is the default "test-bucket", a unique name will be generated.
+   *                 Otherwise, the exact bucket name will be used as provided.
    */
-  fun createTestBucket(baseName: String = "test-bucket"): String {
-    val bucketName = "$baseName-$instanceId-${UUID.randomUUID().toString().take(8)}"
+  fun createTestBucket(bucketName: String = "test-bucket"): String {
+    val finalBucketName = if (bucketName == "test-bucket") {
+      // For the default value, generate a unique name
+      "$bucketName-${tokenGenerator.generate(length = 8)}"
+    } else {
+      // Otherwise use the exact bucket name provided
+      bucketName
+    }
     
     try {
       // For LocalStack, don't specify location constraint for us-east-1
       client.createBucket(
         CreateBucketRequest.builder()
-          .bucket(bucketName)
+          .bucket(finalBucketName)
           .build()
       )
-      createdBuckets.add(bucketName)
-      logger.info { "Created test bucket: $bucketName" }
+      createdBuckets.add(finalBucketName)
+      logger.info { "Created test bucket: $finalBucketName" }
     } catch (e: BucketAlreadyExistsException) {
       // Bucket already exists, that's fine
-      createdBuckets.add(bucketName)
+      createdBuckets.add(finalBucketName)
     }
     
-    return bucketName
+    return finalBucketName
   }
   
   /**

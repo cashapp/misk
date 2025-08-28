@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import software.amazon.awssdk.core.async.AsyncResponseTransformer
 import software.amazon.awssdk.core.async.AsyncRequestBody
 
@@ -87,6 +88,41 @@ class S3IntegrationTest {
     val retrievedContent = response.asByteArray().toString(Charsets.UTF_8)
     assertEquals(content, retrievedContent)
     // No cleanup needed - DockerS3 handles it automatically
+  }
+  
+  @Test
+  fun `can use exact bucket names`() {
+    // Create a test bucket with an exact name
+    val exactBucketName = "my-exact-bucket-name-2025"
+    val bucketName = dockerS3.createTestBucket(exactBucketName)
+    
+    // Verify the bucket name is exactly what we specified
+    assertEquals(exactBucketName, bucketName,
+      "Bucket name should be exactly what was provided")
+    
+    // Test basic S3 operations to ensure the custom bucket naming doesn't break functionality
+    val key = "test-key"
+    val content = "Testing exact bucket names"
+    
+    // Put object
+    dockerS3.client.putObject(
+      PutObjectRequest.builder()
+        .bucket(bucketName)
+        .key(key)
+        .build(),
+      RequestBody.fromString(content)
+    )
+    
+    // Get object
+    val response = dockerS3.client.getObject(
+      GetObjectRequest.builder()
+        .bucket(bucketName)
+        .key(key)
+        .build()
+    )
+    
+    val retrievedContent = response.readAllBytes().toString(Charsets.UTF_8)
+    assertEquals(content, retrievedContent)
   }
 
   class TestModule : ReusableTestModule() {
