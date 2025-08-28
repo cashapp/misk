@@ -123,7 +123,17 @@ class MiskApplication private constructor(
     measureTimeMillis {
       log.info { "starting services" }
       serviceManager.startAsync()
-      serviceManager.awaitHealthy()
+      try {
+        serviceManager.awaitHealthy()
+      } catch (e: Exception) {
+        try {
+          serviceManager.stopAsync()
+          serviceManager.awaitStopped()
+        } catch (ex : Exception) {
+          log.error(ex) { "Failed to stop service after failed start" }
+        }
+        throw e
+      }
 
       // Start Health Service Last to ensure any dependencies are started.
       jettyHealthService = injector.getInstance<JettyHealthService>()
