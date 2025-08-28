@@ -51,6 +51,7 @@ dependencies {
   testFixturesImplementation(project(":misk-aws"))
   testFixturesImplementation(project(":misk-inject"))
   testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk-tokens"))
 }
 
 mavenPublishing {
