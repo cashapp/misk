@@ -180,10 +180,15 @@ open class HibernateModule @JvmOverloads constructor(
     bind(transacterKey).toProvider(getTransacterProvider()).asSingleton()
 
     /**
-     * Reader transacter is only supported for MySQL for now. TiDB and Vitess replica read works
-     * a bit differently than MySQL.
+     * Reader transacter is supported for MySQL and Vitess.
+     * 
+     * For MySQL: Uses separate physical connection pools to reader replicas
+     * For Vitess: Uses the same VTGate endpoint but with database="@replica" which
+     *             routes queries to replica tablets instead of primary tablets
+     * 
+     * We don't support separate reader instances for TiDB and CockroachDB .
      */
-    if (readerQualifier != null && config.type == DataSourceType.MYSQL) {
+    if (readerQualifier != null && (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS_MYSQL)) {
       val readerTransacterKey = Transacter::class.toKey(readerQualifier)
       bind(readerTransacterKey).toProvider(getReaderTransacterProvider()).asSingleton()
     }
@@ -241,7 +246,7 @@ open class HibernateModule @JvmOverloads constructor(
         qualifier = readerQualifier!!,
         sessionFactoryService = sessionFactoryServiceProvider!!.get(),
         readerSessionFactoryService = sessionFactoryServiceProvider.get(),
-        config = config,
+        config = readerConfig ?: config,
         executorServiceFactory = executorServiceFactoryProvider.get(),
         hibernateEntities = injectorProvider.get().findBindingsByType(HibernateEntity::class.typeLiteral())
           .map {
