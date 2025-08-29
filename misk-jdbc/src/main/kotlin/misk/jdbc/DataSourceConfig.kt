@@ -218,7 +218,6 @@ data class DataSourceConfig @JvmOverloads constructor(
 
         if (type == DataSourceType.VITESS_MYSQL) {
           queryParams += "&useServerPrepStmts=true"
-          queryParams += "&useUnicode=true"
           // If we leave this as the default (true) the logs get spammed with the following errors:
           // "Ignored inapplicable SET {sql_mode } = strict_trans_tables"
           // Since Vitess always uses strict_trans_tables this makes no difference here except it
