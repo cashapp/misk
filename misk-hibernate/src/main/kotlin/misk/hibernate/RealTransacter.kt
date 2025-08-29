@@ -327,9 +327,7 @@ private constructor(
     if (readerSessionFactoryService != null) {
       return readerSessionFactoryService.sessionFactory
     }
-    if (config.type.isVitess) {
-      return sessionFactory
-    }
+
     if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.TIDB) {
       return sessionFactory
     }

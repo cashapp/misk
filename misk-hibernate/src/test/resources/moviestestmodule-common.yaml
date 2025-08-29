@@ -1,5 +1,14 @@
 vitess_mysql_data_source:
   type: VITESS_MYSQL
+  database: "@primary"
+  username: root
+  password: ""
+  vitess_schema_resource_root: classpath:/vitess/schema
+  generate_hibernate_stats: "true"
+  port: 27003
+vitess_mysql_reader_data_source:
+  type: VITESS_MYSQL
+  database: "@replica"
   username: root
   password: ""
   vitess_schema_resource_root: classpath:/vitess/schema
