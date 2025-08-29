@@ -7,7 +7,7 @@ import kotlin.reflect.KProperty
  *
  * This needs to be implemented by:
  *   1. stateful fakes which hold `var`s or mutable collections. The `reset` implementation should set the state to
- *   the initial values. In such case, prefer extending the `DelegatedPropertiesTestFixture` class instead.
+ *   the initial values. In such case, prefer extending the `FakeFixture` class instead.
  *   2. test dependencies interacting with external stores, such as databases or caches. The `reset` implementation
  *   needs to clear the store.
  *
