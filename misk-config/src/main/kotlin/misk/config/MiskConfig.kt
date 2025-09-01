@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import com.fasterxml.jackson.module.kotlin.KotlinInvalidNullException
 import com.google.common.base.Joiner
 import misk.resources.ResourceLoader
 import org.apache.commons.lang3.StringUtils
@@ -197,7 +197,7 @@ object MiskConfig {
         configEnvironmentName,
         false,
       )
-    } catch (e: MissingKotlinParameterException) {
+    } catch (e: KotlinInvalidNullException) {
       throwMissingPropertyException(e, configClass, configFile, jsonNode)
     } catch (e: MismatchedInputException) {
       throwMissingPropertyException(e, configClass, configFile, jsonNode)
