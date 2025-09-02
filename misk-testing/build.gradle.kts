@@ -17,6 +17,7 @@ dependencies {
   api(libs.loggingApi)
   api(libs.moshiCore)
   api(libs.okHttp)
+  api(libs.okHttpMockWebServer3)
   api(libs.openTracingMock)
   api(libs.servletApi)
   api(libs.logbackClassic)

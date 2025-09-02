@@ -162,6 +162,15 @@ public class misk/mockk/MockkTestFixture : misk/testing/FakeFixture {
 	public fun reset ()V
 }
 
+public final class misk/mockwebserver/MockWebServerTestFixture : misk/testing/TestFixture {
+	public fun <init> (Lmockwebserver3/MockWebServer;)V
+	public final fun enqueue (Lmockwebserver3/MockResponse;)V
+	public final fun getRequestCount ()I
+	public fun reset ()V
+	public final fun takeRequest ()Lmockwebserver3/RecordedRequest;
+	public final fun url ()Lokhttp3/HttpUrl;
+}
+
 public final class misk/random/FakeRandom : misk/random/Random {
 	public fun <init> ()V
 	public final fun getNextBoolean ()Ljava/lang/Boolean;
