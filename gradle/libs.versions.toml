@@ -186,6 +186,7 @@ nettyBom = { module = "io.netty:netty-bom", version.ref = "netty" }
 nettyHandler = { module = "io.netty:netty-handler", version.ref = "netty" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okHttp" }
 okHttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okHttp" }
+okHttpMockWebServer3 = { module = "com.squareup.okhttp3:mockwebserver3", version.ref = "okHttp" }
 okHttpSse = { module = "com.squareup.okhttp3:okhttp-sse", version.ref = "okHttp" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okioFakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
