@@ -220,6 +220,7 @@ open class HibernateModule @JvmOverloads constructor(
     val readerSessionFactoryServiceProvider = getReaderSessionFactoryServiceProvider()
     val executorServiceFactoryProvider = getProvider(keyOf<ExecutorServiceFactory>())
     val injectorProvider = getProvider(keyOf<Injector>())
+    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
 
     return Provider<Transacter> {
       RealTransacter(
@@ -227,6 +228,7 @@ open class HibernateModule @JvmOverloads constructor(
         sessionFactoryService = sessionFactoryServiceProvider!!.get(),
         readerSessionFactoryService = readerSessionFactoryServiceProvider?.get(),
         config = config,
+        dataSourceService = dataSourceServiceProvider.get(),
         executorServiceFactory = executorServiceFactoryProvider.get(),
         hibernateEntities = injectorProvider.get().findBindingsByType(HibernateEntity::class.typeLiteral())
           .map {
@@ -240,6 +242,7 @@ open class HibernateModule @JvmOverloads constructor(
     val sessionFactoryServiceProvider = getReaderSessionFactoryServiceProvider()
     val executorServiceFactoryProvider = getProvider(keyOf<ExecutorServiceFactory>())
     val injectorProvider = getProvider(keyOf<Injector>())
+    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
 
     return Provider<Transacter> {
       val realTransacter = RealTransacter(
@@ -247,6 +250,7 @@ open class HibernateModule @JvmOverloads constructor(
         sessionFactoryService = sessionFactoryServiceProvider!!.get(),
         readerSessionFactoryService = sessionFactoryServiceProvider.get(),
         config = readerConfig ?: config,
+        dataSourceService = dataSourceServiceProvider.get(),
         executorServiceFactory = executorServiceFactoryProvider.get(),
         hibernateEntities = injectorProvider.get().findBindingsByType(HibernateEntity::class.typeLiteral())
           .map {
