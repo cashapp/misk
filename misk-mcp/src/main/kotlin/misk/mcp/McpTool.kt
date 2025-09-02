@@ -150,7 +150,58 @@ abstract class McpTool<I : Any> {
    */
   abstract val description: String
 
-  val inputSchema: Tool.Input by lazy {
+  /**
+   * Human-readable title for this tool.
+   *
+   * Provides a user-friendly display name for the tool that may be shown in user interfaces.
+   * Defaults to the tool's [name] if not overridden.
+   */
+  open val title: String = name
+
+  /**
+   * Hint indicating whether this tool performs read-only operations.
+   *
+   * When true, indicates that the tool only reads data and does not modify any state.
+   * This can be used by clients to optimize caching or to provide appropriate UI indicators.
+   * Defaults to false, indicating the tool may modify state.
+   */
+  open val readOnlyHint: Boolean = false
+
+  /**
+   * Hint indicating whether this tool performs destructive operations.
+   *
+   * When true, indicates that the tool may delete, overwrite, or otherwise destructively
+   * modify data. Clients may use this hint to show warnings or require confirmation
+   * before invoking the tool. Defaults to true for safety.
+   *
+   * Note: This hint is only relevant when [readOnlyHint] is false. Read-only tools
+   * are inherently non-destructive.
+   */
+  open val destructiveHint: Boolean = true
+
+  /**
+   * Hint indicating whether this tool is idempotent.
+   *
+   * When true, indicates that calling the tool multiple times with the same input
+   * will produce the same result and have the same effect as calling it once.
+   * This can be useful for retry logic and error recovery. Defaults to false.
+   *
+   * Note: This hint is only relevant when [readOnlyHint] is false. Read-only tools
+   * are inherently idempotent since they don't modify state.
+   */
+  open val idempotentHint: Boolean = false
+
+  /**
+   * Hint indicating whether this tool operates in an open-world context.
+   *
+   * When true, indicates that the tool may interact with external systems or resources
+   * that are not fully controlled or predictable (e.g., network services, file systems).
+   * When false, indicates the tool operates in a closed, predictable environment.
+   * Defaults to true.
+   */
+  open val openWorldHint: Boolean = true
+
+  internal val inputSchema: Tool.Input by lazy {
     val schema = inputClass.generateJsonSchema()
     Tool.Input(
       properties = requireNotNull(schema["properties"] as? JsonObject) {
@@ -162,10 +213,10 @@ abstract class McpTool<I : Any> {
     )
   }
 
-  open val outputSchema: Tool.Output? = null
+  internal open val outputSchema: Tool.Output? = null
 
   @OptIn(InternalSerializationApi::class)
-  suspend fun handler(request: CallToolRequest): CallToolResult {
+  internal suspend fun handler(request: CallToolRequest): CallToolResult {
     // Parse the input arguments from the request
     val parsedInput = try {
       McpJson.decodeFromJsonElement(inputClass.serializer(), request.arguments)

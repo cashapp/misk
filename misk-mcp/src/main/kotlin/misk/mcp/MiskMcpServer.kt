@@ -3,6 +3,7 @@ package misk.mcp
 import io.modelcontextprotocol.kotlin.sdk.Implementation
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
+import io.modelcontextprotocol.kotlin.sdk.ToolAnnotations
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import misk.annotation.ExperimentalMiskApi
@@ -143,6 +144,13 @@ class MiskMcpServer internal constructor(
         description = tool.description,
         inputSchema = tool.inputSchema,
         outputSchema = tool.outputSchema,
+        toolAnnotations = ToolAnnotations(
+          title = tool.title,
+          readOnlyHint = tool.readOnlyHint,
+          destructiveHint = tool.destructiveHint,
+          idempotentHint = tool.idempotentHint,
+          openWorldHint = tool.openWorldHint,
+        ),
         handler = tool::handler,
       )
     }

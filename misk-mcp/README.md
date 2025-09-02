@@ -171,6 +171,11 @@ class CalculatorTool @Inject constructor() : McpTool<CalculatorInput>(
   override val name = "calculator"
   override val description = "Performs basic arithmetic operations"
   
+  // Optional: Override tool hints to provide additional metadata to clients
+  override val title = "Basic Calculator"  // User-friendly display name
+  override val readOnlyHint = true  // This tool doesn't modify any state
+  // Note: destructiveHint and idempotentHint are only relevant when readOnlyHint = false
+  
   override suspend fun handle(input: CalculatorInput): ToolResult {
     val result = when (input.operator) {
       "add" -> input.a + input.b
@@ -231,6 +236,11 @@ class WeatherTool @Inject constructor(
   override val name = "get_weather"
   override val description = "Get current weather conditions for a city"
   
+  // Optional: Override tool hints
+  override val title = "Weather Service"
+  override val readOnlyHint = true  // Only reads weather data
+  override val openWorldHint = true  // Interacts with external weather API
+  
   override suspend fun handle(input: WeatherInput): ToolResult {
     return try {
       val weatherData = weatherService.getCurrentWeather(input.city, input.units)
@@ -263,6 +273,49 @@ Register tools:
 install(McpToolModule.create<CalculatorTool>())
 install(McpToolModule.create<WeatherTool>())
 ```
+
+#### Tool Hints
+
+Tools can provide optional hints to help clients understand their behavior and requirements:
+
+```kotlin
+@Singleton
+class DatabaseTool @Inject constructor(
+  private val database: Database
+) : McpTool<DatabaseInput>(DatabaseInput::class) {
+  override val name = "database_manager"
+  override val description = "Manages database records"
+  
+  // Tool hints provide metadata about the tool's behavior
+  override val title = "Database Manager"  // User-friendly display name
+  
+  override val readOnlyHint = false  // This tool modifies state
+  
+  // The following hints are only relevant when readOnlyHint = false:
+  override val destructiveHint = true  // May delete or overwrite data
+  override val idempotentHint = false  // Multiple calls may have different effects
+  
+  override val openWorldHint = true  // Interacts with external database
+  
+  override suspend fun handle(input: DatabaseInput): ToolResult {
+    // Implementation
+  }
+}
+```
+
+**Available Tool Hints:**
+
+- **`title`**: User-friendly display name for the tool (defaults to `name`)
+- **`readOnlyHint`**: Whether the tool only reads data without modifying state (default: `false`)
+- **`destructiveHint`**: Whether the tool may delete or overwrite data (default: `true`, only relevant when `readOnlyHint = false`)
+- **`idempotentHint`**: Whether multiple calls with same input produce same result (default: `false`, only relevant when `readOnlyHint = false`)
+- **`openWorldHint`**: Whether the tool interacts with external systems (default: `true`)
+
+These hints help AI clients:
+- Show appropriate warnings for destructive operations
+- Optimize caching for read-only tools
+- Implement retry logic for idempotent tools
+- Understand external dependencies
 
 #### Working with ToolResult
 
