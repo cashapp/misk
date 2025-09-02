@@ -26,7 +26,7 @@ protobuf = "3.25.8"
 retrofit = "3.0.0"
 sqldelight = "2.1.0"
 tempest = "2025.07.15.155806-c1415e3"
-wire = "5.3.11"
+wire = "5.4.0"
 
 [libraries]
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.20.0" }
