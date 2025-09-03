@@ -5,7 +5,7 @@ import com.launchdarkly.sdk.EvaluationReason
 import com.launchdarkly.sdk.LDContext
 import com.launchdarkly.sdk.LDValue
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
-import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
+import com.google.common.base.Preconditions.checkState
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import io.micrometer.core.instrument.MeterRegistry
