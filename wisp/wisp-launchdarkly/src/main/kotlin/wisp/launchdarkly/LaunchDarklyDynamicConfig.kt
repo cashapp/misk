@@ -3,6 +3,13 @@ package wisp.launchdarkly
 import wisp.feature.*
 import java.util.concurrent.Executor
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "LaunchDarklyDynamicConfig(featureFlags)",
+    imports = ["misk.feature.launchdarkly.LaunchDarklyDynamicConfig"]
+  )
+)
 class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : DynamicConfig {
     companion object {
         const val KEY = "dynamic_flag"
