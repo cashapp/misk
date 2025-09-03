@@ -4,6 +4,8 @@ import com.vanniktech.maven.publish.KotlinJvm
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
+  id("java-test-fixtures")
+  id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 dependencies {
@@ -32,6 +34,17 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesTest)
   testImplementation(libs.mockk)
+  testImplementation(testFixtures(project(":misk-mcp")))
+  testImplementation(project(":misk-testing"))
+
+  testFixturesImplementation(libs.mcpKotlinSdk)
+  testFixturesImplementation(libs.kotlinxSerializationJson)
+  testFixturesImplementation(libs.ktorClientContentNegotiation)
+  testFixturesImplementation(libs.ktorClientCore)
+  testFixturesImplementation(libs.ktorClientEncoding)
+  testFixturesImplementation(libs.ktorClientLogging)
+  testFixturesImplementation(libs.ktorClientOkhttp)
+  testFixturesImplementation(libs.ktorSerializationKotlinxJson)
 }
 
 mavenPublishing {
