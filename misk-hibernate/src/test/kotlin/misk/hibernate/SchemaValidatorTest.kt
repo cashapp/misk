@@ -58,13 +58,11 @@ internal class SchemaValidatorTest {
       bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
         @Inject lateinit var injector: Injector
-        @Inject @field:ValidationDb lateinit var dataSourceService: DataSourceService
         override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
           sessionFactoryService = sessionFactoryServiceProvider.get(),
           readerSessionFactoryService = null,
           config = config.data_source,
-          dataSourceService = dataSourceService,
           executorServiceFactory = executorServiceFactory,
           hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
             .map {
