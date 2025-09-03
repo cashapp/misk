@@ -1,27 +1,7 @@
 package misk.hibernate
 
 import com.google.common.base.Supplier
-import misk.backoff.ExponentialBackoff
-import misk.concurrent.ExecutorServiceFactory
-import misk.hibernate.advisorylocks.tryAcquireLock
-import misk.hibernate.advisorylocks.tryReleaseLock
-import misk.jdbc.CheckDisabler
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceService
-import misk.jdbc.DataSourceType
-import misk.logging.getLogger
-import misk.vitess.Destination
-import misk.vitess.Keyspace
-import misk.vitess.Shard
-import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
-import misk.vitess.ShardsLoader
-import misk.vitess.TabletType
-import org.hibernate.FlushMode
-import org.hibernate.SessionFactory
-import org.hibernate.StaleObjectStateException
-import org.hibernate.exception.ConstraintViolationException
-import org.hibernate.exception.LockAcquisitionException
-import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
+import com.google.common.base.Suppliers
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLException
@@ -30,8 +10,33 @@ import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException
 import java.time.Duration
 import java.util.EnumSet
+import java.util.UUID
+import java.util.concurrent.Callable
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
+import misk.backoff.ExponentialBackoff
+import misk.concurrent.ExecutorServiceFactory
+import misk.hibernate.advisorylocks.tryAcquireLock
+import misk.hibernate.advisorylocks.tryReleaseLock
+import misk.jdbc.CheckDisabler
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceType
+import misk.jdbc.map
+import misk.logging.getLogger
+import misk.vitess.Destination
+import misk.vitess.Keyspace
+import misk.vitess.Shard
+import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
+import misk.vitess.TabletType
+import org.hibernate.FlushMode
+import org.hibernate.SessionFactory
+import org.hibernate.StaleObjectStateException
+import org.hibernate.exception.ConstraintViolationException
+import org.hibernate.exception.LockAcquisitionException
+import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
 
 private val logger = getLogger<RealTransacter>()
 
@@ -51,20 +56,14 @@ private constructor(
   private val config: DataSourceConfig,
   private val options: TransacterOptions,
   private val executorServiceFactory: ExecutorServiceFactory,
-  private val dataSourceService: DataSourceService,
+  private val shardListFetcher: ShardListFetcher,
   private val hibernateEntities: Set<HibernateEntity>,
 ) : Transacter {
-  
-  private val shardSupplier: Supplier<Set<Shard>> by lazy {
-    ShardsLoader.shards(dataSourceService)
-  }
-  
   constructor(
     qualifier: KClass<out Annotation>,
     sessionFactoryService: SessionFactoryService,
     readerSessionFactoryService: SessionFactoryService?,
     config: DataSourceConfig,
-    dataSourceService: DataSourceService,
     executorServiceFactory: ExecutorServiceFactory,
     hibernateEntities: Set<HibernateEntity>,
   ) : this(
@@ -74,9 +73,11 @@ private constructor(
     config = config,
     options = TransacterOptions(),
     executorServiceFactory = executorServiceFactory,
-    dataSourceService = dataSourceService,
+    shardListFetcher = ShardListFetcher(),
     hibernateEntities = hibernateEntities,
-  )
+  ) {
+    shardListFetcher.init(this, config, executorServiceFactory)
+  }
 
   override fun config(): DataSourceConfig = config
 
@@ -84,6 +85,55 @@ private constructor(
     return hibernateEntities.map { it.entity }.toSet()
   }
 
+  /**
+   * Uses a dedicated thread to query Vitess for the database's current shards. This caches the set of shards for 5
+   * minutes.
+   */
+  class ShardListFetcher {
+    private lateinit var supplier: Supplier<Future<out Set<Shard>>>
+
+    fun init(transacter: Transacter, config: DataSourceConfig, executorServiceFactory: ExecutorServiceFactory) {
+      check(!this::supplier.isInitialized)
+
+      if (!config.type.isVitess) {
+        this.supplier = Suppliers.ofInstance(CompletableFuture.completedFuture(SINGLE_SHARD_SET))
+      } else {
+        // Add randomness to the executor service name, to avoid
+        // contention with multiple ShardListFetchers/Transacters.
+        val uuid = UUID.randomUUID().toString()
+        val executorService = executorServiceFactory.single(nameFormat = "shard-list-fetcher-$uuid-%d")
+        this.supplier =
+          Suppliers.memoizeWithExpiration(
+            {
+              // Needs to be fetched on a separate thread to avoid nested transactions
+              executorService.submit(
+                Callable<Set<Shard>> {
+                  transacter.transaction { session ->
+                    session.useConnection { connection ->
+                      connection.createStatement().use { s ->
+                        val shards =
+                          s.executeQuery("SHOW VITESS_SHARDS")
+                            .map { rs -> Shard.parse(rs.getString(1)) }
+                            .filterNotNull()
+                            .toSet()
+                        if (shards.isEmpty()) {
+                          throw SQLRecoverableException("Failed to load list of shards")
+                        }
+                        shards
+                      }
+                    }
+                  }
+                },
+              )
+            },
+            5,
+            TimeUnit.MINUTES,
+          )
+      }
+    }
+
+    fun cachedShards(): Set<Shard> = supplier.get().get()
+  }
 
   private val sessionFactory
     get() = sessionFactoryService.sessionFactory
@@ -309,7 +359,7 @@ private constructor(
       options = options,
       config = config,
       executorServiceFactory = executorServiceFactory,
-      dataSourceService = dataSourceService,
+      shardListFetcher = shardListFetcher,
       hibernateEntities = hibernateEntities,
     )
 
@@ -494,7 +544,7 @@ private constructor(
       return hibernateSession.get(type.java, id)
     }
 
-    override fun shards(): Set<Shard> = transacter.shardSupplier.get()
+    override fun shards(): Set<Shard> = transacter.shardListFetcher.cachedShards()
 
     override fun shards(keyspace: Keyspace): Collection<Shard> {
       return if (!config.type.isVitess) {
