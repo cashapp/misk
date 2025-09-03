@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.788"
-aws2 = "2.33.0"
+aws2 = "2.33.1"
 bucket4j = "8.8.0"
 datadog = "1.52.1"
 dependencyAnalysisPlugin = "3.0.1"
@@ -168,7 +168,7 @@ kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serializati
 kubernetesClient = { module = "io.kubernetes:client-java", version = "18.0.1" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "18.0.1" }
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "7.10.2" }
-lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.8.0.RELEASE" }
+lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.8.1.RELEASE" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.6" }
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
