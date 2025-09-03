@@ -513,45 +513,53 @@ private constructor(
       }
     }
 
-    internal fun <T> target(destination: Destination, function: () -> T): T {
-      return if (config.type.isVitess) {
-        val previous = currentTarget()
-        if (previous != destination) {
-          logger.warn {
-            "The new destination was updated from previous target. Destination target: $destination, " +
-              "previous target: $previous"
-          }
-        }
-        try {
-          use(destination)
-          function()
-        } catch (e: Exception) {
-          throw e
-        } finally {
-          try {
-            use(previous)
-          } catch (exception: Exception) {
-            logger.error {
-              "Exception restoring destination, previous = $previous, destination = $destination, " +
-                "cause = ${exception.message}"
+    internal fun <T> target(destination: Destination, function: () -> T): T =
+      when (config.type.isVitess) {
+        false -> function()
+        true -> {
+          val previous = currentTarget()
+          val targetHasChanged = previous != destination
+          val result = runCatching {
+            if (targetHasChanged) {
+              logger.debug {
+                "The new destination was updated from previous target. Destination target: $destination, " +
+                  "previous target: $previous"
+              }
+              use(destination)
             }
-            // Ignore the exception if the connection is already closed.
-            if (!isConnectionClosed(exception)) {
-              throw exception
+            function()
+          }
+          // Always try restoring the previous destination if needed
+          if (targetHasChanged) {
+            runCatching {
+              use(previous)
+            }.onFailure { e ->
+              logger.error(e) {
+                "Exception restoring destination, previous = $previous, destination = $destination," +
+                "cause = ${e.message}"
+              }
+              // If we fail in restoring the previous destination we should throw
+              if (result.isFailure) {
+                val suppressed = result.exceptionOrNull()!!
+                suppressed.addSuppressed(e)
+                // If the original block failed, add our restoration failure as a suppressed exception 
+                // to avoid making the original failure
+                throw suppressed
+              } else {
+                throw e
+              }
             }
           }
+          result.getOrThrow()
         }
-      } else {
-        function()
       }
-    }
 
     private fun isConnectionClosed(exception: Exception) =
       exception.cause?.javaClass == SQLException::class.java && exception.cause?.message.equals("Connection is closed")
 
     private fun use(destination: Destination) = useConnection { connection ->
       check(config.type.isVitess)
-      connection.createStatement().use { statement ->
+      connection.createStatement().use { _ ->
         val catalog = if (destination.isBlank()) "${Destination.primary()}" else "$destination"
         connection.catalog = catalog
       }
@@ -559,7 +567,7 @@ private constructor(
 
     private fun currentTarget(): Destination = useConnection { connection ->
       check(config.type.isVitess)
-      connection.createStatement().use { statement ->
+      connection.createStatement().use { _ ->
         val target = connection.catalog
         Destination.parse(target)
       }
