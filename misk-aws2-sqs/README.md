@@ -168,7 +168,25 @@ aws_sqs:
 
 ### Testing
 
-TODO
+Integration test can leverage fake jobqueue implementations.
+
+Install fake modules in your test guice module:
+
+```kotlin
+install(FakeJobEnqueuerModule())
+install(FakeJobHandlerModule.create<DummySuspendingJobHandler>(QUEUE_NAME))
+```
+
+Inject FakeJobEnqueuer in your tests:
+
+```kotlin
+@Inject private lateinit var jobQueue: FakeJobEnqueuer
+```
+
+You can use the fake enqueuer to publish jobs in order to test handler, to peek into the queues
+in order to assert it's state, as well as trigger actual processing by your handlers.
+
+Fakes store all jobs in memory and there is no communication with SQS executed.
 
 ## Configuration
 
@@ -272,4 +290,11 @@ It's advised to start with the default settings and adjust based on specific wor
 
 ## Migration
 
-TODO - this section will have detailed steps for migrating from the previous implementation
+New module provides a very similar behaviour to the previous one. Thanks to that, migration is 
+limited to a few changes only:
+
+1. Replace the dependency and guice modules with the ones described in the installation section.
+2. Update your handler to extend one of the new interfaces.
+3. Modify your handler code to return correct status instead of calling methods on the job object.
+4. Optionally, provide YAML configuration if needed.
+5. Update your tests to use new fakes.
