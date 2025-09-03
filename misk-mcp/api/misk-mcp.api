@@ -242,3 +242,12 @@ public final class misk/mcp/internal/McpJsonKt {
 	public static final fun getMcpJson ()Lkotlinx/serialization/json/Json;
 }
 
+public final class misk/mcp/testing/ClientExtensionsKt {
+	public static final fun asKtorClient (Lokhttp3/OkHttpClient;)Lio/ktor/client/HttpClient;
+	public static final fun asMcpClient (Lio/modelcontextprotocol/kotlin/sdk/client/StreamableHttpClientTransport;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun asMcpClient (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun asMcpClient$default (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun asMcpStreamableHttpTransport (Lio/ktor/client/HttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;)Lio/modelcontextprotocol/kotlin/sdk/client/StreamableHttpClientTransport;
+	public static synthetic fun asMcpStreamableHttpTransport$default (Lio/ktor/client/HttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;ILjava/lang/Object;)Lio/modelcontextprotocol/kotlin/sdk/client/StreamableHttpClientTransport;
+}
+
