@@ -86,6 +86,8 @@ internal class SqlLeaseManager @Inject constructor(
   ) : Lease {
     private val listeners = mutableListOf<Lease.StateChangeListener>()
 
+    override fun shouldHold(): Boolean = true
+
     /**
      * Returns true if this process holds the lease.
      */

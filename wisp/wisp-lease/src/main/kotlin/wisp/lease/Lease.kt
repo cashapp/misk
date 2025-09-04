@@ -12,6 +12,11 @@ interface Lease {
     val name: String
 
     /**
+     * @return true if this process instance should own the lease.
+     */
+    fun shouldHold(): Boolean
+
+    /**
      * @return true if the lease is owned by this process instance.
      */
     fun checkHeld(): Boolean

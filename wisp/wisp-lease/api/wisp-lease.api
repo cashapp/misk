@@ -7,6 +7,7 @@ public final class wisp/lease/AutoCloseableLease : java/lang/AutoCloseable, wisp
 	public fun close ()V
 	public fun getName ()Ljava/lang/String;
 	public fun release ()Z
+	public fun shouldHold ()Z
 }
 
 public final class wisp/lease/ExtensionsKt {
@@ -20,6 +21,7 @@ public abstract interface class wisp/lease/Lease {
 	public abstract fun checkHeldElsewhere ()Z
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun release ()Z
+	public abstract fun shouldHold ()Z
 }
 
 public abstract interface class wisp/lease/Lease$StateChangeListener {
@@ -44,6 +46,7 @@ public final class wisp/lease/pool/PoolLease : wisp/lease/Lease {
 	public fun checkHeldElsewhere ()Z
 	public fun getName ()Ljava/lang/String;
 	public fun release ()Z
+	public fun shouldHold ()Z
 }
 
 public final class wisp/lease/pool/PoolLeaseConfig {

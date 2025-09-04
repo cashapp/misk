@@ -200,6 +200,10 @@ internal class TestLease(
   private var isHeld: Boolean = true,
   private var isAcquired: Boolean = true,
 ) : Lease {
+  override fun shouldHold(): Boolean {
+    return true
+  }
+
   override fun checkHeld(): Boolean {
     return isHeld
   }
