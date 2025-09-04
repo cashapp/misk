@@ -1,6 +1,7 @@
 package misk.clustering.dynamo
 
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.Service
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.clustering.Cluster.Member
@@ -13,13 +14,10 @@ import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.numberValue
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.endpoints.internal.GetAttr
 import java.time.Clock
 import java.time.Duration
-import java.time.LocalDate
 
 
 /**
@@ -50,6 +48,10 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   }
 
   internal fun run(): Status {
+    if (state() >= Service.State.STOPPING) {
+      return Status.NO_RESCHEDULE
+    }
+
     // If we're not active, we don't want to mark ourselves as part of the active cluster.
     if (clusterWeightProvider.get() > 0) {
       updateOurselfInDynamo()
