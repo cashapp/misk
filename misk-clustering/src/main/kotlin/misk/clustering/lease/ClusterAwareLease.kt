@@ -32,4 +32,8 @@ class ClusterAwareLease(
   override fun release(): Boolean {
     return true
   }
+
+  override fun shouldHold(): Boolean {
+    return (clusterWeightProvider.get() != 0)
+  }
 }

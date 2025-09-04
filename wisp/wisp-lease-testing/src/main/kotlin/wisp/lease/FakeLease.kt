@@ -6,6 +6,8 @@ class FakeLease(
 ) : Lease {
     private val listeners = mutableListOf<Lease.StateChangeListener>()
 
+    override fun shouldHold(): Boolean = true
+
     override fun checkHeld() = manager.isLeaseHeld(name)
 
     /**
