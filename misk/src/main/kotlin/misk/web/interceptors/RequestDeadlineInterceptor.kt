@@ -102,18 +102,24 @@ internal class RequestDeadlineInterceptor private constructor(
 
     return when (action.dispatchMechanism) {
       DispatchMechanism.GRPC -> {
-        val grpcTimeoutString = httpCall.requestHeaders[GrpcTimeoutMarshaller.TIMEOUT_KEY]
-        val grpcTimeoutNanos = grpcTimeoutString?.let { GrpcTimeoutMarshaller.parseAsciiString(it) }?.takeIf { it > 0 }
+        val grpcTimeoutValue = httpCall.requestHeaders[GrpcTimeoutMarshaller.TIMEOUT_KEY]
+        val grpcTimeoutNanos = grpcTimeoutValue?.let { GrpcTimeoutMarshaller.parseAsciiString(it) }?.takeIf { it > 0 }
 
-        if (grpcTimeoutNanos != null) {
-          Duration.ofNanos(grpcTimeoutNanos) to SourceLabel.GRPC_TIMEOUT
+        // "shadow" grpc headers used in METRICS_ONLY/PROPAGATE_ONLY mode to prevent GrpcClient actually hanging up on grpc-timeout
+        val shadowGrpcTimeoutValue = httpCall.requestHeaders[CUSTOM_GRPC_TIMEOUT_PROPAGATE_HEADER]
+        val shadowGrpcTimeoutNanos = shadowGrpcTimeoutValue?.let { GrpcTimeoutMarshaller.parseAsciiString(it) }?.takeIf { it > 0 }
+
+        // Prefer actual to shadow value, though only one of them should be set.
+        val effectiveGrpcTimeout = grpcTimeoutNanos ?: shadowGrpcTimeoutNanos
+        if (effectiveGrpcTimeout != null) {
+          Duration.ofNanos(effectiveGrpcTimeout) to SourceLabel.GRPC_TIMEOUT
         } else {
           fallbackTimeout to fallbackSource
         }
       }
       else -> {
         // HTTP timeout logic with source tracking
-        val xRequestDeadlineTimeout = parseXRequestDeadlineHeader(httpCall.requestHeaders[HTTP_HEADER_X_REQUEST_DEADLINE_SECONDS])
+        val xRequestDeadlineTimeout = parseXRequestDeadlineHeader(httpCall.requestHeaders[HTTP_HEADER_X_REQUEST_DEADLINE])
         val envoyTimeoutMs = httpCall.requestHeaders[HTTP_HEADER_ENVOY_DEADLINE]?.toLongOrNull()
 
         val validTimeouts = mutableListOf<Pair<Duration, String>>()
@@ -162,8 +168,12 @@ internal class RequestDeadlineInterceptor private constructor(
   }
 
   companion object {
-    const val HTTP_HEADER_X_REQUEST_DEADLINE_SECONDS = "X-Request-Deadline"
+    const val HTTP_HEADER_X_REQUEST_DEADLINE = "x-request-deadline"
     const val HTTP_HEADER_ENVOY_DEADLINE = "x-envoy-expected-rq-timeout-ms" // milliseconds
+    // custom header used in METRICS_ONLY/PROPAGATE_ONLY mode to propagate grpc-timeout value, to prevent
+    // GrpcClient actually hanging up
+    const val CUSTOM_GRPC_TIMEOUT_PROPAGATE_HEADER = "x-grpc-timeout-propagate"
+
     const val MISK_REQUEST_DEADLINE_HEADER = "Misk-Request-Deadline"
 
     const val DEADLINE_EXCEEDED_MESSAGE = "deadline exceeded: queued for too long"

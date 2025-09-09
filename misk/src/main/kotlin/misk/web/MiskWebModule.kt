@@ -41,6 +41,7 @@ import misk.web.actions.StatusAction
 import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import misk.web.concurrencylimits.ConcurrencyLimitsModule
 import misk.web.exceptions.ActionExceptionLogLevelConfig
+import misk.web.exceptions.DeadlineExceededExceptionMapper
 import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -53,6 +54,7 @@ import misk.web.extractors.PathParamFeatureBinding
 import misk.web.extractors.QueryParamFeatureBinding
 import misk.web.extractors.RequestBodyException
 import misk.web.extractors.RequestBodyFeatureBinding
+import misk.web.requestdeadlines.DeadlineExceededException
 import misk.web.extractors.RequestCookieFeatureBinding
 import misk.web.extractors.RequestCookiesFeatureBinding
 import misk.web.extractors.RequestHeaderFeatureBinding
@@ -266,6 +268,7 @@ class MiskWebModule @JvmOverloads constructor(
     install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
     install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
     install(ExceptionMapperModule.create<RequestBodyException, RequestBodyExceptionMapper>())
+    install(ExceptionMapperModule.create<DeadlineExceededException, DeadlineExceededExceptionMapper>())
 
     // Register built-in feature bindings.
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)

@@ -2516,6 +2516,13 @@ public final class misk/web/proxy/WebProxyEntryKt {
 	public static synthetic fun WebProxyEntry$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/proxy/WebProxyEntry;
 }
 
+public final class misk/web/requestdeadlines/DeadlineExceededException : java/lang/RuntimeException {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
 public final class misk/web/requestdeadlines/DeadlinePropagationModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
