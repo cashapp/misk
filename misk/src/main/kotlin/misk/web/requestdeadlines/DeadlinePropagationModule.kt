@@ -3,7 +3,6 @@ package misk.web.requestdeadlines
 import com.google.inject.TypeLiteral
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.annotation.ExperimentalMiskApi
 import misk.client.ClientApplicationInterceptorFactory
 import misk.client.DeadlinePropagationInterceptor
 import misk.inject.KAbstractModule
@@ -16,7 +15,6 @@ import misk.web.interceptors.RequestDeadlineInterceptor
 import java.time.Clock
 import java.time.Instant
 
-@ExperimentalMiskApi
 class DeadlinePropagationModule() : KAbstractModule() {
   override fun configure() {
     install(
