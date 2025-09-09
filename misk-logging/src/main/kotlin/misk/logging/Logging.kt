@@ -104,7 +104,6 @@ fun <T> withTags(vararg tags: Tag, block: () -> T): T {
 /**
  * `includeTagsOnExceptionLogs`: For usage instructions, please see docs below on `withSmartTags`
  */
-@OptIn(ExperimentalMiskApi::class)
 fun <T> withTags(
   vararg tags: Tag,
   includeTagsOnExceptionLogs: Boolean = false,
@@ -171,7 +170,6 @@ fun <T> withTags(
  *   Log MDC context: [processValue: "PV_123", contextToken: "contextTokenValue"] Log message: "unexpected error dispatching to ServiceAction" // This log would not normally include the MDC context
  * ```
  */
-@ExperimentalMiskApi
 fun <T> withSmartTags(vararg tags: Tag, block: () -> T): T {
   return withTags(*tags, includeTagsOnExceptionLogs = true, block = block)
 }

@@ -1,8 +1,5 @@
 package misk.logging
 
-import misk.annotation.ExperimentalMiskApi
-
-@ExperimentalMiskApi
 object SmartTagsThreadLocalHandler {
   private val threadLocalMdcContext = ThreadLocal<ThreadLocalSmartTagsMdcContext>()
 
