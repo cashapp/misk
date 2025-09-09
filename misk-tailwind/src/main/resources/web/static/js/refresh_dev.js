@@ -13,21 +13,22 @@
         try {
             let response = await fetch(POLL_ENDPOINT, {
                 method: 'GET',
+                headers : {
+                    'If-None-Match': reloadMarker
+                }
             });
 
-            let nextReloadMarker = await response.text();
-
-            if (!!reloadMarker && reloadMarker !== nextReloadMarker) {
-                console.log('Server has restarted. Reloading page...');
-                window.location.reload();
-            } else {
-                if (isServerDown) {
-                    console.log('Server connection restored.');
-                    isServerDown = false;
-                }
+            let nextReloadMarker = response.headers.get('Etag');
+            if (reloadMarker == null) {
                 reloadMarker = nextReloadMarker;
-                checkServerStatus();
+            } else if (reloadMarker !== nextReloadMarker && nextReloadMarker != null) {
+                console.log('Server has restarted. Reloading page... ' + reloadMarker + ' -> ' + nextReloadMarker);
+                window.location.reload();
+            } else if (isServerDown) {
+                console.log('Server connection restored.');
+                isServerDown = false;
             }
+            checkServerStatus();
         } catch (error) {
             if (!isServerDown) {
                 console.log('Server connection lost. Waiting for it to come back...');
