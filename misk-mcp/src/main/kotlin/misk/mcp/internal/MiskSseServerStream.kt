@@ -4,12 +4,11 @@ import kotlinx.coroutines.channels.SendChannel
 import misk.logging.getLogger
 import misk.web.HttpCall
 import misk.web.sse.ServerSentEvent
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import java.util.UUID
 
 
 /**
- * Represents a single Server-Sent Events (SSE) session for MCP communication.
+ * Represents a single Server-Sent Events (SSE) stream for MCP communication.
  *
  * Manages the SSE connection lifecycle and provides methods to send events to the client.
  * Each session has a unique identifier for tracking and debugging purposes.
@@ -17,13 +16,12 @@ import kotlin.uuid.Uuid
  * @param call The HTTP call context for this session
  * @param sendChannel The channel used to send SSE events to the client
  */
-internal class MiskSseServerSession(
-  @Suppress("unused") val call: HttpCall,
+internal class MiskSseServerStream(
+  val call: HttpCall,
   private val sendChannel: SendChannel<ServerSentEvent>,
 ) {
 
-  @OptIn(ExperimentalUuidApi::class)
-  val sessionId: String = Uuid.random().toString()
+  val streamId: String = UUID.randomUUID().toString()
 
   suspend fun send(event: ServerSentEvent) {
     logger.trace { "Sending SSE: $event" }
@@ -46,6 +44,6 @@ internal class MiskSseServerSession(
   }
 
   companion object {
-    private val logger = getLogger<MiskSseServerSession>()
+    private val logger = getLogger<MiskSseServerStream>()
   }
 }

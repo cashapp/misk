@@ -27,7 +27,7 @@ import misk.web.mediatype.MediaTypes
  * - **Response Content-Type**: `text/event-stream` (for SSE responses)
  *
  * ## Session Support
- * The endpoint accepts an optional `Mcp-Session-Id` header (referenced by [SESSION_ID_PARAM])
+ * The endpoint accepts an optional `Mcp-Session-Id` header (referenced by [SESSION_ID_HEADER])
  * when stateful sessions are used:
  *
  * ```kotlin
@@ -38,7 +38,7 @@ import misk.web.mediatype.MediaTypes
  *   sendChannel: SendChannel<ServerSentEvent>
  * ) {
  *   val sessionId = headers[SESSION_ID_PARAM]
- *   mcpSessionManager.withResponseChannel(sendChannel, sessionId) {
+ *   mcpStreamManager.withResponseChannel(sendChannel, sessionId) {
  *     // Handle the MCP JSON-RPC message
  *     handleMessage(message)
  *   }
@@ -68,7 +68,7 @@ import misk.web.mediatype.MediaTypes
  * ```kotlin
  * @Singleton
  * class McpWebAction @Inject constructor(
- *   private val mcpSessionManager: McpSessionManager
+ *   private val mcpStreamManager: McpStreamManager
  * ) : WebAction {
  *
  *   @McpPost
@@ -78,7 +78,7 @@ import misk.web.mediatype.MediaTypes
  *     sendChannel: SendChannel<ServerSentEvent>
  *   ) {
  *     val sessionId = headers[SESSION_ID_PARAM]
- *     mcpSessionManager.withResponseChannel(sendChannel, sessionId) {
+ *     mcpStreamManager.withResponseChannel(sendChannel, sessionId) {
  *       // Process client JSON-RPC message and send response via SSE
  *       handleMessage(message)
  *     }
@@ -88,8 +88,8 @@ import misk.web.mediatype.MediaTypes
  *
  * @see McpGet for server-to-client event streaming
  * @see McpDelete for session termination
- * @see SESSION_ID_PARAM for the session ID header constant
- * @see McpSessionManager For managing MCP sessions and server lifecycle
+ * @see SESSION_ID_HEADER for the session ID header constant
+ * @see McpStreamManager For managing MCP streams and server lifecycle
  * @see MiskMcpServer For the underlying MCP server implementation
  */
 @Post("/mcp")

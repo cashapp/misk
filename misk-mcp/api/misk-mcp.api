@@ -50,6 +50,22 @@ public final class misk/mcp/McpServerModule$Companion {
 	public final fun createWithNoGroup (Ljava/lang/String;Lmisk/mcp/config/McpConfig;)Lmisk/mcp/McpServerModule;
 }
 
+public abstract interface class misk/mcp/McpSessionHandler {
+	public abstract fun initialize (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun isActive (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun terminate (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/McpSessionHandlerModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/mcp/McpSessionHandlerModule$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
+}
+
+public final class misk/mcp/McpSessionHandlerModule$Companion {
+	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpSessionHandlerModule;
+	public static synthetic fun create$default (Lmisk/mcp/McpSessionHandlerModule$Companion;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/mcp/McpSessionHandlerModule;
+}
+
 public abstract class misk/mcp/McpTool {
 	public fun <init> ()V
 	protected final fun ToolResult (Ljava/util/List;ZLkotlinx/serialization/json/JsonObject;)Lmisk/mcp/McpTool$ToolResult;
@@ -133,17 +149,22 @@ public abstract interface annotation class misk/mcp/action/McpGet : java/lang/an
 public abstract interface annotation class misk/mcp/action/McpPost : java/lang/annotation/Annotation {
 }
 
-public final class misk/mcp/action/McpSessionManager {
-	public static final field Companion Lmisk/mcp/action/McpSessionManager$Companion;
+public final class misk/mcp/action/McpSessionId {
+	public fun <init> (Lmisk/scope/ActionScoped;)V
+	public final fun get ()Ljava/lang/String;
+}
+
+public final class misk/mcp/action/McpSessionIdKt {
+	public static final field SESSION_ID_HEADER Ljava/lang/String;
+}
+
+public final class misk/mcp/action/McpStreamManager {
+	public static final field Companion Lmisk/mcp/action/McpStreamManager$Companion;
 	public fun <init> (Lmisk/scope/ActionScoped;Lcom/google/inject/Provider;)V
 	public final fun withResponseChannel (Lkotlinx/coroutines/channels/SendChannel;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class misk/mcp/action/McpSessionManager$Companion {
-}
-
-public final class misk/mcp/action/McpSessionManagerKt {
-	public static final field SESSION_ID_PARAM Ljava/lang/String;
+public final class misk/mcp/action/McpStreamManager$Companion {
 }
 
 public final class misk/mcp/config/McpConfig : java/util/LinkedHashMap, wisp/config/Config {

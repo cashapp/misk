@@ -2,12 +2,17 @@ package misk.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.Implementation
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.JSONRPCRequest
+import io.modelcontextprotocol.kotlin.sdk.Method
 import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.ToolAnnotations
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import misk.annotation.ExperimentalMiskApi
+import misk.exceptions.BadRequestException
+import misk.exceptions.NotFoundException
 import misk.logging.getLogger
+import misk.mcp.action.SESSION_ID_HEADER
 import misk.mcp.config.McpServerConfig
 import misk.mcp.config.asPrompts
 import misk.mcp.config.asResources
@@ -50,12 +55,12 @@ import misk.mcp.internal.MiskServerTransport
  * ## Usage
  *
  * [McpServerModule] typically creates and manages the server, and web actions access it through
- * [misk.mcp.action.McpSessionManager]:
+ * [misk.mcp.action.McpStreamManager]:
  *
  * ```kotlin
  * @Singleton
  * class MyMcpWebAction @Inject constructor(
- *   private val mcpSessionManager: McpSessionManager
+ *   private val mcpStreamManager: McpStreamManager
  * ) : WebAction {
  *
  *   @McpPost
@@ -63,7 +68,7 @@ import misk.mcp.internal.MiskServerTransport
  *     @RequestBody message: JSONRPCMessage,
  *     sendChannel: SendChannel<ServerSentEvent>
  *   ) {
- *     mcpSessionManager.withResponseChannel(sendChannel) {
+ *     mcpStreamManager.withResponseChannel(sendChannel) {
  *       // 'this' is MiskMcpServer - handle the client message
  *       handleMessage(message)
  *     }
@@ -85,7 +90,7 @@ import misk.mcp.internal.MiskServerTransport
  * @param resources Set of resource implementations to register with the server
  * @param prompts Set of prompt implementations to register with the server
  *
- * @see misk.mcp.action.McpSessionManager For managing SSE sessions and server lifecycle
+ * @see misk.mcp.action.McpStreamManager For managing SSE streams and server lifecycle
  * @see McpTool For implementing executable tools
  * @see McpResource For implementing accessible resources
  * @see McpPrompt For implementing prompt templates
@@ -94,6 +99,7 @@ import misk.mcp.internal.MiskServerTransport
 class MiskMcpServer internal constructor(
   val name: String,
   val config: McpServerConfig,
+  private val mcpSessionHandler: McpSessionHandler?,
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
   prompts: Set<McpPrompt>,
@@ -157,10 +163,30 @@ class MiskMcpServer internal constructor(
   }
 
   @JvmOverloads
-  suspend fun handleMessage(message: JSONRPCMessage, sessionId: String? = null) =
-    checkNotNull((transport as? MiskServerTransport)) {
+  suspend fun handleMessage(message: JSONRPCMessage, sessionId: String? = null) {
+    val miskServerTransport = checkNotNull((transport as? MiskServerTransport)) {
       "MiskMcpServer requires a connected MiskServerTransport to handle messages"
-    }.handleMessage(message, sessionId)
+    }
+    if (mcpSessionHandler != null) {
+      if (message is JSONRPCRequest) {
+        if (message.method == Method.Defined.Initialize.value) {
+          // On an initialization request, initialize a new session for the client and return
+          // in the SESSION_ID_HEADER response header
+          val sessionId = mcpSessionHandler.initialize()
+          miskServerTransport.stream.call.setResponseHeader(SESSION_ID_HEADER, sessionId)
+        } else {
+          // On non-initialization requests, validate that the session ID exists in the request
+          // and that it's a valid, active session
+          val sessionId = miskServerTransport.stream.call.requestHeaders[SESSION_ID_HEADER]
+            ?: throw BadRequestException("Missing required $SESSION_ID_HEADER header")
+          if (!mcpSessionHandler.isActive(sessionId)) {
+            throw NotFoundException("SessionID $SESSION_ID_HEADER does not exist")
+          }
+        }
+      }
+    }
+    miskServerTransport.handleMessage(message, sessionId)
+  }
 
   companion object {
     private val logger = getLogger<MiskMcpServer>()

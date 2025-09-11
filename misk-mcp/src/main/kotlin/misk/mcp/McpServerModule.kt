@@ -2,6 +2,8 @@ package misk.mcp
 
 import com.google.inject.Provider
 import com.google.inject.Provides
+import com.google.inject.TypeLiteral
+import com.google.inject.multibindings.OptionalBinder
 import jakarta.inject.Inject
 import kotlinx.serialization.json.Json
 import misk.annotation.ExperimentalMiskApi
@@ -9,9 +11,11 @@ import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
+import misk.inject.parameterizedType
 import misk.inject.setOfType
 import misk.inject.toKey
-import misk.mcp.action.McpSessionManager
+import misk.inject.typeLiteral
+import misk.mcp.action.McpStreamManager
 import misk.mcp.config.McpConfig
 import misk.mcp.internal.McpJson
 import misk.mcp.internal.McpJsonRpcMessageUnmarshaller
@@ -19,6 +23,8 @@ import misk.mcp.internal.MiskMcp
 import misk.scope.ActionScoped
 import misk.web.HttpCall
 import misk.web.marshal.Unmarshaller
+import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
 import kotlin.reflect.KClass
 
 @ExperimentalMiskApi
@@ -38,6 +44,15 @@ class McpServerModule private constructor(
     val serverConfig = config[name]
       ?: throw IllegalArgumentException("No MCP server configuration found for [name=$name] in [config=$config]")
 
+    // bind the Optional McpSessionHandler and get the optional provider
+    OptionalBinder.newOptionalBinder(binder(), keyOf<McpSessionHandler>(groupAnnotationClass))
+    val mcpSessionHandlerProvider: Provider<Optional<McpSessionHandler>> = binder().run {
+      @Suppress("UNCHECKED_CAST")
+      val optionalType = parameterizedType<Optional<*>>(McpSessionHandler::class.java)
+        .typeLiteral() as TypeLiteral<Optional<McpSessionHandler>>
+      getProvider(optionalType.toKey(groupAnnotationClass))
+    }
+
     // Get the providers for tools, resources, and prompts
     val promptsProvider = binder().getProvider(setOfType<McpPrompt>().toKey(groupAnnotationClass))
     val resourcesProvider = binder().getProvider(setOfType<McpResource>().toKey(groupAnnotationClass))
@@ -49,6 +64,7 @@ class McpServerModule private constructor(
       MiskMcpServer(
         name = name,
         config = serverConfig,
+        mcpSessionHandler = mcpSessionHandlerProvider.get().getOrNull(),
         tools = toolsProvider.get().toSet(),
         resources = resourcesProvider.get().toSet(),
         prompts = promptsProvider.get().toSet(),
@@ -56,13 +72,13 @@ class McpServerModule private constructor(
     }
     bind(serverKey).toProvider(serverProvider).asSingleton()
 
-    val sessionManagerKey = keyOf<McpSessionManager>(groupAnnotationClass)
-    bind(sessionManagerKey).toProvider(
-      object : Provider<McpSessionManager> {
+    val streamManagerKey = keyOf<McpStreamManager>(groupAnnotationClass)
+    bind(streamManagerKey).toProvider(
+      object : Provider<McpStreamManager> {
         @Inject
         lateinit var httpCall: ActionScoped<HttpCall>
-        override fun get(): McpSessionManager =
-          McpSessionManager(httpCall = httpCall, mcpServerProvider = serverProvider)
+        override fun get(): McpStreamManager =
+          McpStreamManager(httpCall = httpCall, mcpServerProvider = serverProvider)
       },
     ).asSingleton()
   }

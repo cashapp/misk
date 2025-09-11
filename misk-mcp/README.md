@@ -18,10 +18,11 @@ The protocol uses JSON-RPC 2.0 messages over various transports to establish com
 Install the MCP server module in your Misk application:
 
 ```kotlin
+@ExperimentalMiskApi
 class MyAppModule : KAbstractModule() {
   override fun configure() {
     // Install the MCP server module with configuration
-    install(McpServerModule(config.mcp))
+    install(McpServerModule.create("my_server", config.mcp))
     
     // Register your MCP components
     install(McpToolModule.create<CalculatorTool>())
@@ -42,9 +43,10 @@ To expose MCP functionality through HTTP endpoints, you need to create web actio
 - **`@McpDelete`** (Optional): Allows clients to explicitly delete an existing stateful session
 
 ```kotlin
+@ExperimentalMiskApi
 @Singleton
 class MyMcpWebAction @Inject constructor(
-  private val mcpSessionManager: McpSessionManager
+  private val mcpStreamManager: McpStreamManager
 ) : WebAction {
 
   @McpPost
@@ -53,8 +55,8 @@ class MyMcpWebAction @Inject constructor(
     @RequestHeaders headers: Headers,
     sendChannel: SendChannel<ServerSentEvent>
   ) {
-    val sessionId = headers[SESSION_ID_PARAM]
-    mcpSessionManager.withResponseChannel(sendChannel) {
+    val sessionId = headers[SESSION_ID_HEADER]
+    mcpStreamManager.withResponseChannel(sendChannel) {
       handleMessage(message)
     }
   }
@@ -64,8 +66,8 @@ class MyMcpWebAction @Inject constructor(
     @RequestHeaders headers: Headers,
     sendChannel: SendChannel<ServerSentEvent>
   ) {
-    val sessionId = headers[SESSION_ID_PARAM]
-    mcpSessionManager.withResponseChannel(sendChannel) {
+    val sessionId = headers[SESSION_ID_HEADER]
+    mcpStreamManager.withResponseChannel(sendChannel) {
       // Stream server-initiated events to client
     }
   }
@@ -75,9 +77,7 @@ class MyMcpWebAction @Inject constructor(
     @RequestHeaders headers: Headers,
     sendChannel: SendChannel<ServerSentEvent>
   ) {
-    val sessionId = requireRequestNotNull(headers[SESSION_ID_PARAM] ){
-        "Missing session ID"
-    }
+    val sessionId = headers[SESSION_ID_HEADER] ?: throw IllegalArgumentException("Missing session ID")
     // Any session state should be cleaned up here
   }
 }
@@ -86,10 +86,11 @@ class MyMcpWebAction @Inject constructor(
 **Important**: You must install a WebActionModule to register your MCP web actions:
 
 ```kotlin
+@ExperimentalMiskApi
 class MyAppModule : KAbstractModule() {
   override fun configure() {
     // Install MCP server module
-    install(McpServerModule(config.mcp))
+    install(McpServerModule.create("my_server", config.mcp))
     
     // Install web action module to register MCP endpoints
     install(WebActionModule.create<MyMcpWebAction>())
@@ -108,7 +109,7 @@ Without the WebActionModule installation, your `@McpPost`, `@McpGet`, and `@McpD
 The MCP server supports stateful sessions using the `Mcp-Session-Id` header. This is optional and allows clients (like LLMs) to maintain context across multiple requests.
 
 ```kotlin
-const val SESSION_ID_PARAM = "Mcp-Session-Id"
+const val SESSION_ID_HEADER = "Mcp-Session-Id"
 ```
 
 When a client includes the `Mcp-Session-Id` header in requests:
@@ -117,6 +118,192 @@ When a client includes the `Mcp-Session-Id` header in requests:
 - Sessions can be explicitly terminated using the `@McpDelete` endpoint
 
 If no session ID is provided, the server operates in a stateless mode where each request is independent.
+
+## Session Management
+
+The MCP server provides comprehensive session management capabilities following the [MCP specification section 2.5](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management). Sessions enable stateful interactions between clients and servers, allowing for context preservation across multiple requests.
+
+### Installing Session Management
+
+To enable session management, implement the `McpSessionHandler` interface and install it using `McpSessionHandlerModule`:
+
+```kotlin
+@Singleton
+class RedisSessionHandler @Inject constructor(
+  private val redis: RedisClient
+) : McpSessionHandler {
+  
+  override suspend fun initialize(): String {
+    // Generate a unique, cryptographically secure session ID
+    val sessionId = UUID.randomUUID().toString()
+    redis.setex("session:$sessionId", 3600, "active") // 1 hour expiry
+    return sessionId
+  }
+  
+  override suspend fun isActive(sessionId: String): Boolean {
+    return redis.exists("session:$sessionId")
+  }
+  
+  override suspend fun terminate(sessionId: String) {
+    redis.del("session:$sessionId")
+    // Clean up any session-related resources
+  }
+}
+```
+
+Install the session handler in your module:
+
+```kotlin
+@ExperimentalMiskApi
+class MyAppModule : KAbstractModule() {
+  override fun configure() {
+    // Install MCP server module
+    install(McpServerModule.create("my_server", config.mcp))
+    
+    // Install session handler
+    install(McpSessionHandlerModule.create<RedisSessionHandler>())
+    
+    // Install other MCP components
+    install(McpToolModule.create<MyTool>())
+  }
+}
+```
+
+### Framework Integration
+
+When a session handler is installed, the framework automatically:
+
+- Calls `initialize()` when a new session is needed
+- Calls `isActive()` to validate existing sessions before processing requests
+- Includes the session ID in the `Mcp-Session-Id` response header
+- Manages session lifecycle across requests
+
+### Accessing Session IDs in Tools
+
+Use `McpSessionId` to access the current session ID within your MCP tools:
+
+```kotlin
+@ExperimentalMiskApi
+@Singleton
+class SessionAwareTool @Inject constructor(
+  private val sessionId: Provider<McpSessionId>,
+  private val userService: UserService
+) : McpTool<UserDataInput>() {
+  
+  override val name = "get_user_data"
+  override val description = "Retrieves user data for the current session"
+  
+  override suspend fun handle(input: UserDataInput): ToolResult {
+    val currentSessionId = sessionId.get().get()
+    val userData = userService.getUserDataForSession(currentSessionId)
+    
+    return ToolResult(
+      TextContent("User data: ${userData.name} (Session: $currentSessionId)")
+    )
+  }
+}
+```
+
+### Session Termination
+
+Sessions can be terminated in several ways:
+
+#### Client-Directed Termination
+
+Clients can terminate sessions using the `@McpDelete` endpoint:
+
+```kotlin
+@McpDelete
+suspend fun terminateSession(
+  @RequestHeaders headers: Headers,
+  sendChannel: SendChannel<ServerSentEvent>
+) {
+  val sessionId = headers[SESSION_ID_HEADER] ?: throw IllegalArgumentException("Missing session ID")
+  
+  // Session handler will be called automatically to clean up
+  // Additional cleanup can be performed here if needed
+}
+```
+
+#### Programmatic Termination
+
+Server code can terminate sessions directly:
+
+```kotlin
+@Singleton
+class MyService @Inject constructor(
+  private val sessionHandler: McpSessionHandler
+) {
+  
+  suspend fun cleanupExpiredSessions() {
+    val expiredSessions = findExpiredSessions()
+    expiredSessions.forEach { sessionId ->
+      sessionHandler.terminate(sessionId)
+    }
+  }
+}
+```
+
+### Session Storage Examples
+
+
+#### Database Session Handler
+
+```kotlin
+@Singleton
+class DatabaseSessionHandler @Inject constructor(
+  private val sessionDao: SessionDao
+) : McpSessionHandler {
+  
+  override suspend fun initialize(): String {
+    val sessionId = UUID.randomUUID().toString()
+    sessionDao.createSession(
+      Session(
+        id = sessionId,
+        createdAt = Clock.System.now(),
+        expiresAt = Clock.System.now().plus(1.hours)
+      )
+    )
+    return sessionId
+  }
+  
+  override suspend fun isActive(sessionId: String): Boolean {
+    val session = sessionDao.findById(sessionId) ?: return false
+    return session.expiresAt > Clock.System.now()
+  }
+  
+  override suspend fun terminate(sessionId: String) {
+    sessionDao.deleteById(sessionId)
+  }
+}
+```
+
+### Multi-Tenant Session Management
+
+For multi-tenant applications, use annotation-based session handlers:
+
+```kotlin
+// Define tenant-specific annotations
+@Qualifier
+annotation class TenantA
+
+@Qualifier  
+annotation class TenantB
+
+// Install tenant-specific session handlers
+install(McpSessionHandlerModule.create<TenantASessionHandler>(TenantA::class))
+install(McpSessionHandlerModule.create<TenantBSessionHandler>(TenantB::class))
+```
+
+### Security Considerations
+
+When implementing session management:
+
+- **Unique Session IDs**: Use cryptographically secure random session identifiers
+- **Session Expiration**: Implement appropriate session timeouts
+- **Concurrent Access**: Ensure thread-safe session storage and access
+- **Cleanup**: Properly clean up session resources to prevent memory leaks
+- **Validation**: Always validate session IDs before processing requests
 
 ## Configuration
 
@@ -129,7 +316,7 @@ mcp:
     prompts:
       list_changed: false
     resources:
-      subscribe: true        # Enable resource update notifications
+      subscribe: false       # Enable resource update notifications (default: false)
       list_changed: false
     tools:
       list_changed: false
@@ -164,10 +351,9 @@ data class CalculatorInput(
   val b: Double
 )
 
+@ExperimentalMiskApi
 @Singleton
-class CalculatorTool @Inject constructor() : McpTool<CalculatorInput>(
-  inputClass = CalculatorInput::class
-) {
+class CalculatorTool @Inject constructor() : McpTool<CalculatorInput>() {
   override val name = "calculator"
   override val description = "Performs basic arithmetic operations"
   
@@ -226,13 +412,11 @@ data class WeatherOutput(
   val units: String
 )
 
+@ExperimentalMiskApi
 @Singleton
 class WeatherTool @Inject constructor(
   private val weatherService: WeatherService
-) : StructuredMcpTool<WeatherInput, WeatherOutput>(
-  inputClass = WeatherInput::class,
-  outputClass = WeatherOutput::class
-) {
+) : StructuredMcpTool<WeatherInput, WeatherOutput>() {
   override val name = "get_weather"
   override val description = "Get current weather conditions for a city"
   
@@ -279,10 +463,11 @@ install(McpToolModule.create<WeatherTool>())
 Tools can provide optional hints to help clients understand their behavior and requirements:
 
 ```kotlin
+@ExperimentalMiskApi
 @Singleton
 class DatabaseTool @Inject constructor(
   private val database: Database
-) : McpTool<DatabaseInput>(DatabaseInput::class) {
+) : McpTool<DatabaseInput>() {
   override val name = "database_manager"
   override val description = "Manages database records"
   
@@ -450,43 +635,6 @@ Register the prompt:
 install(McpPromptModule.create<CodeReviewPrompt>())
 ```
 
-## Resource Update Notifications
-
-When you enable resource subscriptions (`resources.subscribe: true`), you can notify clients when resources change:
-
-```kotlin
-class MyService @Inject constructor(
-  private val mcpServer: MiskMcpServer
-) {
-  
-  suspend fun updateUserData() {
-    // Update your data
-    userRepository.updateUsers()
-    
-    // Notify subscribed MCP clients
-    mcpServer.notifyUpdatedResource("schema://database/users")
-    
-    // Include metadata in the notification
-    val metadata = buildJsonObject {
-      put("lastModified", Clock.System.now().toString())
-      put("recordCount", userRepository.count())
-    }
-    mcpServer.notifyUpdatedResource("schema://database/users", metadata)
-  }
-}
-```
-
-### Configuration for Resource Notifications
-
-To enable resource update notifications, configure your server:
-
-```yaml
-mcp:
-  my_server:
-    resources:
-      subscribe: true  # Required for notifications
-```
-
 ## Resource URI Conventions
 
 Follow consistent URI patterns for resources:
@@ -514,6 +662,7 @@ MCP enables powerful capabilities through data access and code execution. Follow
 Test your MCP components with type-safe inputs:
 
 ```kotlin
+@ExperimentalMiskApi
 class MyMcpTest {
   @Test
   fun testCalculatorTool() {
@@ -530,11 +679,12 @@ class MyMcpTest {
       )
     }
     
-    assertThat(result).isInstanceOf(McpTool.PromptToolResult::class.java)
+    // Use kotlin.test assertions as per misk standards
+    assertTrue(result is McpTool.PromptToolResult)
     val promptResult = result as McpTool.PromptToolResult
-    assertThat(promptResult.result).hasSize(1)
-    assertThat((promptResult.result[0] as TextContent).text).isEqualTo("Result: 8.0")
-    assertThat(promptResult.isError).isFalse()
+    assertEquals(1, promptResult.result.size)
+    assertEquals("Result: 8.0", (promptResult.result[0] as TextContent).text)
+    assertFalse(promptResult.isError)
   }
   
   @Test
@@ -562,12 +712,12 @@ class MyMcpTest {
       )
     }
     
-    assertThat(result).isInstanceOf(StructuredMcpTool.StructuredToolResult::class.java)
+    assertTrue(result is StructuredMcpTool.StructuredToolResult<*>)
     val structuredResult = result as StructuredMcpTool.StructuredToolResult<WeatherOutput>
-    assertThat(structuredResult.result.city).isEqualTo("San Francisco")
-    assertThat(structuredResult.result.temperature).isEqualTo(18.5)
-    assertThat(structuredResult.result.humidity).isEqualTo(65)
-    assertThat(structuredResult.isError).isFalse()
+    assertEquals("San Francisco", structuredResult.result.city)
+    assertEquals(18.5, structuredResult.result.temperature)
+    assertEquals(65, structuredResult.result.humidity)
+    assertFalse(structuredResult.isError)
   }
 }
 ```
