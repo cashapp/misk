@@ -171,11 +171,14 @@ open class HibernateModule @JvmOverloads constructor(
 
     val transacterKey = Transacter::class.toKey(qualifier)
 
-    install(
-      ServiceModule<SchemaMigratorService>(qualifier)
-        .dependsOn<DataSourceService>(qualifier)
-        .enhancedBy<ReadyService>()
-    )
+    // Only install SchemaMigratorService module if schema migrator is enabled
+    if (installSchemaMigrator) {
+      install(
+        ServiceModule<SchemaMigratorService>(qualifier)
+          .dependsOn<DataSourceService>(qualifier)
+          .enhancedBy<ReadyService>()
+      )
+    }
 
     bind(transacterKey).toProvider(getTransacterProvider()).asSingleton()
 
@@ -291,12 +294,16 @@ open class HibernateModule @JvmOverloads constructor(
     }.asSingleton()
 
     if (isWriter) {
-      install(
-        ServiceModule<TransacterService>(qualifier)
-          .enhancedBy<SchemaMigratorService>(qualifier)
-          .enhancedBy<ReadyService>()
-          .dependsOn<DataSourceService>(qualifier)
-      )
+      val transacterServiceModule = ServiceModule<TransacterService>(qualifier)
+        .dependsOn<DataSourceService>(qualifier)
+        .enhancedBy<ReadyService>()
+      
+      // Only enhance with SchemaMigratorService if it's installed
+      if (installSchemaMigrator) {
+        install(transacterServiceModule.enhancedBy<SchemaMigratorService>(qualifier))
+      } else {
+        install(transacterServiceModule)
+      }
     } else {
       install(
         ServiceModule<TransacterService>(qualifier)

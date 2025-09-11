@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.util.Modules
@@ -87,6 +88,36 @@ internal class HibernateModuleInstallSchemaMigratorTest {
     }
     assertThat(exception.message).contains("No implementation for")
     assertThat(exception.message).contains("SchemaMigratorService")
+  }
+
+  @Test
+  fun `installSchemaMigrator=false should allow ServiceManager to be created`() {
+    val module = Modules.combine(
+      deploymentModule,
+      MiskTestingServiceModule(),
+      HibernateModule(
+        qualifier = TestDb::class,
+        config = dataSourceConfig,
+        readerQualifier = null,
+        readerConfig = null,
+        installSchemaMigrator = false
+      ),
+      object : HibernateEntityModule(TestDb::class) {
+        override fun configureHibernate() {
+          addEntities(DbMovie::class)
+        }
+      }
+    )
+
+    val injector = Guice.createInjector(module)
+
+    // ServiceManager should be created successfully without SchemaMigratorService
+    val serviceManager = injector.getInstance(ServiceManager::class.java)
+    assertThat(serviceManager).isNotNull()
+    
+    // DataSourceService should still be bound
+    val dataSourceService = injector.getInstance(Key.get(DataSourceService::class.java, TestDb::class.java))
+    assertThat(dataSourceService).isInstanceOf(DataSourceService::class.java)
   }
 }
 
