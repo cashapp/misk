@@ -16,13 +16,13 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
  */
 @OptIn(ExperimentalAtomicApi::class)
 internal class MiskServerTransport(
-  private val session: MiskSseServerSession,
+  internal val stream: MiskSseServerStream,
 ) : AbstractTransport() {
 
   private val initialized: AtomicBoolean = AtomicBoolean(false)
 
-  val sessionId: String
-    get() = session.sessionId
+  val streamId: String
+    get() = stream.streamId
 
   override suspend fun start() {
     if (!initialized.compareAndSet(expectedValue = false, newValue = true)) {
@@ -35,7 +35,7 @@ internal class MiskServerTransport(
       error("Not connected")
     }
 
-    session.send(
+    stream.send(
       event = "message",
       data = McpJson.encodeToString(message),
     )
@@ -43,7 +43,7 @@ internal class MiskServerTransport(
 
   override suspend fun close() {
     if (initialized.compareAndSet(expectedValue = true, newValue = false)) {
-      session.close()
+      stream.close()
       _onClose.invoke()
     }
   }

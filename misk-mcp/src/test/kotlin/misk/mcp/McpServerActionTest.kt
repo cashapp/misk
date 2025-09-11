@@ -17,7 +17,7 @@ import misk.MiskTestingServiceModule
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
 import misk.mcp.action.McpPost
-import misk.mcp.action.McpSessionManager
+import misk.mcp.action.McpStreamManager
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
 import misk.mcp.internal.McpJson
@@ -48,7 +48,7 @@ import kotlin.test.assertTrue
 internal class McpServerActionTest {
   @Suppress("unused")
   @MiskTestModule
-  val module = TestModule()
+  val module = McpServerActionTestModule()
 
   @Inject
   private lateinit var jettyService: JettyService
@@ -63,7 +63,7 @@ internal class McpServerActionTest {
     assertEquals(
       expected = 2,
       actual = response?.tools?.size,
-      message = "Expecting two tools to be registered",
+      message = "Expecting three tools to be registered",
     )
 
     // Check calculator tool
@@ -208,7 +208,7 @@ internal class McpServerActionTest {
     val textContent = message.content as? io.modelcontextprotocol.kotlin.sdk.TextContent
     assertNotNull(textContent)
     assertContains(
-      textContent.text ?: "",
+      textContent.text!!,
       "Develop a kotlin project named <name>TestProject</name>",
       message = "Expected the project name to be included in the prompt message",
     )
@@ -278,10 +278,10 @@ internal class McpServerActionTest {
   }
 }
 
-val mcpConfig = McpConfig(
+val mcpServerActionTestConfig = McpConfig(
   buildMap {
     put(
-      "test-server",
+      "mcp-server-action-test-server",
       McpServerConfig(
         version = "1.0.0",
       ),
@@ -289,22 +289,21 @@ val mcpConfig = McpConfig(
   },
 )
 
-
 @OptIn(ExperimentalMiskApi::class)
 @Suppress("unused")
 @Singleton
-class TestMcpWebAction @Inject constructor(private val mcpSessionManager: McpSessionManager) : WebAction {
+class McpServerActionTestModulePostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
+  WebAction {
   @McpPost
   suspend fun mcpPost(@RequestBody message: JSONRPCMessage, sendChannel: SendChannel<ServerSentEvent>) {
-    mcpSessionManager.withResponseChannel(sendChannel) { handleMessage(message) }
+    mcpStreamManager.withResponseChannel(sendChannel) { handleMessage(message) }
   }
 }
 
-
-class TestModule : KAbstractModule() {
+class McpServerActionTestModule : KAbstractModule() {
   override fun configure() {
-    install(McpServerModule.create("test-server", mcpConfig))
-    install(WebActionModule.create<TestMcpWebAction>())
+    install(McpServerModule.create("mcp-server-action-test-server", mcpServerActionTestConfig))
+    install(WebActionModule.create<McpServerActionTestModulePostAction>())
     install(McpToolModule.create<CalculatorTool>())
     install(McpToolModule.create<KotlinSdkTool>())
     install(McpPromptModule.create<KotlinDeveloperPrompt>())

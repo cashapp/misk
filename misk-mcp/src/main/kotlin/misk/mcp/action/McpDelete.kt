@@ -61,8 +61,8 @@ import misk.web.mediatype.MediaTypes
  * - Clean up session-specific data and state
  * - Return confirmation of successful termination
  *
- * @see SESSION_ID_PARAM For the header constant ("Mcp-Session-Id")
- * @see McpSessionManager For managing MCP sessions and server lifecycle
+ * @see SESSION_ID_HEADER For the header constant ("Mcp-Session-Id")
+ * @see McpStreamManager For managing MCP streams and server lifecycle
  * @see McpPost For full MCP protocol request handling
  * @see McpGet For read-only MCP endpoints
  */

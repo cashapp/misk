@@ -15,14 +15,14 @@ import kotlin.test.assertTrue
 
 class MiskServerTransportTest {
 
-  private val mockSession = mockk<MiskSseServerSession> {
-    every { sessionId } returns "test-session-123"
+  private val mockStream = mockk<MiskSseServerStream> {
+    every { streamId } returns "test-stream-123"
     coEvery { send(any<ServerSentEvent>()) } returns Unit
     coEvery { send(any(), any(), any(), any(), any()) } returns Unit
     every { close() } returns Unit
   }
 
-  private val transport = MiskServerTransport(mockSession)
+  private val transport = MiskServerTransport(mockStream)
 
   private val testMessage = McpJson.decodeFromString<JSONRPCMessage>(
     """
@@ -51,7 +51,7 @@ class MiskServerTransportTest {
     transport.send(testMessage)
 
     // Verify that the session.send was called
-    coVerify { mockSession.send(event = "message", data = any()) }
+    coVerify { mockStream.send(event = "message", data = any()) }
   }
 
   @Test
@@ -78,8 +78,8 @@ class MiskServerTransportTest {
     assertEquals("Not connected", exception.message)
 
     // Verify that session.send was never called
-    coVerify(exactly = 0) { mockSession.send(any<ServerSentEvent>()) }
-    coVerify(exactly = 0) { mockSession.send(any(), any(), any(), any(), any()) }
+    coVerify(exactly = 0) { mockStream.send(any<ServerSentEvent>()) }
+    coVerify(exactly = 0) { mockStream.send(any(), any(), any(), any(), any()) }
   }
 
   @Test
@@ -92,7 +92,7 @@ class MiskServerTransportTest {
     transport.send(testMessage)
 
     // Verify that session.send was called with correct parameters
-    coVerify { mockSession.send(event = "message", data = any()) }
+    coVerify { mockStream.send(event = "message", data = any()) }
   }
 
   @Test
@@ -102,13 +102,13 @@ class MiskServerTransportTest {
 
     // Verify transport is initialized by sending a message successfully
     transport.send(testMessage)
-    coVerify { mockSession.send(event = "message", data = any()) }
+    coVerify { mockStream.send(event = "message", data = any()) }
 
     // Call close() and verify it succeeds
     transport.close()
 
     // Verify that session.close() was called
-    verify { mockSession.close() }
+    verify { mockStream.close() }
 
     // Verify that after close(), the transport is no longer initialized
     // by trying to send a message, which should fail
@@ -123,16 +123,16 @@ class MiskServerTransportTest {
     transport.close()
 
     // Verify that session.close() was not called since transport was never started
-    verify(exactly = 0) { mockSession.close() }
+    verify(exactly = 0) { mockStream.close() }
   }
 
   @Test
-  fun `test MiskServerTransport sessionId returns session sessionId`() {
-    // Verify that sessionId property returns the session's sessionId
-    assertEquals("test-session-123", transport.sessionId)
+  fun `test MiskServerTransport streamId returns stream streamId`() {
+    // Verify that streamId property returns the session's streamId
+    assertEquals("test-stream-123", transport.streamId)
 
-    // Verify that the session.sessionId was accessed
-    verify { mockSession.sessionId }
+    // Verify that the session.streamId was accessed
+    verify { mockStream.streamId }
   }
 
   @Test
