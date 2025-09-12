@@ -150,7 +150,7 @@ junitPioneer = { module = "org.junit-pioneer:junit-pioneer", version = "2.3.0" }
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotestAssertionsShared = { module = "io.kotest:kotest-assertions-shared", version.ref = "kotest" }
 kotestCommon = { module = "io.kotest:kotest-common", version.ref = "kotest" }
-kotestFrameworkApi = { module = "io.kotest:kotest-framework-api", version.ref = "kotest" }
+kotestFrameworkEngine = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
 kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
