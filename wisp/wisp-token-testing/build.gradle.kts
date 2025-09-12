@@ -9,6 +9,7 @@ dependencies {
     api(project(":misk-testing-api"))
 
     api(libs.jakartaInject)
+    testImplementation(libs.kotestAssertions)
     testImplementation(libs.kotestAssertionsShared)
     testImplementation(libs.kotestCommon)
     testImplementation(libs.kotestFrameworkEngine)
