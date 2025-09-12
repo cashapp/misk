@@ -12,7 +12,8 @@ dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
   api(libs.kotlinxSerializationJson)
-  api(libs.mcpKotlinSdk)
+  api(libs.mcpKotlinSdkCore)
+  api(libs.mcpKotlinSdkServer)
   api(project(":misk-actions"))
   api(project(":misk-api"))
   api(project(":misk-inject"))
@@ -37,7 +38,7 @@ dependencies {
   testImplementation(testFixtures(project(":misk-mcp")))
   testImplementation(project(":misk-testing"))
 
-  testFixturesImplementation(libs.mcpKotlinSdk)
+  testFixturesApi(libs.mcpKotlinSdkClient)
   testFixturesImplementation(libs.kotlinxSerializationJson)
   testFixturesImplementation(libs.ktorClientContentNegotiation)
   testFixturesImplementation(libs.ktorClientCore)
