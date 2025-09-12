@@ -25,7 +25,7 @@ dependencies {
   testImplementation(libs.kotestAssertions)
   testImplementation(libs.kotestAssertionsShared)
   testImplementation(libs.kotestCommon)
-  testImplementation(libs.kotestFrameworkApi)
+  testImplementation(libs.kotestFrameworkEngine)
   testRuntimeOnly(libs.junitEngine)
   testRuntimeOnly(libs.kotestJunitRunnerJvm)
 }
