@@ -59,6 +59,19 @@ public abstract class misk/inject/KInstallOnceModule : misk/inject/KAbstractModu
 	public final fun hashCode ()I
 }
 
+public final class misk/inject/ReusableOverriddenModuleBuilder {
+	public fun <init> (Ljava/util/SortedSet;)V
+	public final fun with ([Lmisk/inject/ReusableTestModule;)Lmisk/inject/ReusableOverridesTestModule;
+}
+
+public final class misk/inject/ReusableOverridesTestModule : misk/inject/ReusableTestModule {
+	public fun <init> (Ljava/util/SortedSet;Ljava/util/SortedSet;)V
+}
+
+public final class misk/inject/ReusableOverridesTestModuleKt {
+	public static final fun overrideReusable ([Lmisk/inject/ReusableTestModule;)Lmisk/inject/ReusableOverriddenModuleBuilder;
+}
+
 public abstract class misk/inject/ReusableTestModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun equals (Ljava/lang/Object;)Z
