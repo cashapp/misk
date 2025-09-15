@@ -106,7 +106,9 @@ internal class DynamoClusterWatcherTask @Inject constructor(
         .partitionValue(self)
         .build()
     )
-    table.deleteItem(member)
+    if (member != null) {
+      table.deleteItem(member)
+    }
   }
 
   companion object {
