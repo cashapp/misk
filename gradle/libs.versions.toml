@@ -1,10 +1,10 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.791"
-aws2 = "2.33.9"
+aws2 = "2.33.10"
 bucket4j = "8.8.0"
 datadog = "1.53.0"
-dependencyAnalysisPlugin = "3.0.2"
+dependencyAnalysisPlugin = "3.0.3"
 detekt = "1.23.8"
 docker = "3.6.0"
 googleAuth = "1.39.0"
@@ -180,8 +180,8 @@ logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.6" 
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version = "0.7.0" }
-mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version = "0.7.0" }
-mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version = "0.7.0" }
+mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version = "0.7.1" }
+mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version = "0.7.1" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.19.0" }
