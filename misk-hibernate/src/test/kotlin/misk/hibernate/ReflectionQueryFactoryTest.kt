@@ -1175,7 +1175,7 @@ class ReflectionQueryFactoryTest {
       .constraint { root -> like(root.get("name"), "Jurassic%") }
       .apply {
         maxRows = 10
-        firstResult = 5
+        firstResult = 0
       }
 
     val clone = original.clone<OperatorsMovieQuery>()
@@ -1187,27 +1187,36 @@ class ReflectionQueryFactoryTest {
     // Original and cloned queries should provide the same result
     assertThat(
       transacter.transaction { session ->
-        original.count(session)
+        original.listAsNames(session)
       }
-    ).isEqualTo(2)
+    ).containsExactlyInAnyOrder(
+      "Jurassic Park",
+      "Jurassic Park: The Lost World",
+    )
     assertThat(
       transacter.transaction { session ->
-        clone.count(session)
+        clone.listAsNames(session)
       }
-    ).isEqualTo(2)
+    ).containsExactlyInAnyOrder(
+      "Jurassic Park",
+      "Jurassic Park: The Lost World",
+    )
 
     // Modify the cloned query. The original query should be unchanged
     clone.constraint { root -> like(root.get("name"), "%World") }
     assertThat(
       transacter.transaction { session ->
-        original.count(session)
+        original.listAsNames(session)
       }
-    ).isEqualTo(2)
+    ).containsExactlyInAnyOrder(
+      "Jurassic Park",
+      "Jurassic Park: The Lost World",
+    )
     assertThat(
       transacter.transaction { session ->
-        clone.count(session)
+        clone.listAsNames(session)
       }
-    ).isEqualTo(1)
+    ).containsExactly("Jurassic Park: The Lost World")
   }
 
   @Test
