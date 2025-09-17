@@ -7,8 +7,12 @@ public final class misk/tailwind/Link {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;Z)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component11 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Lmisk/tailwind/Style;
 	public final fun component4 ()Z
@@ -17,13 +21,15 @@ public final class misk/tailwind/Link {
 	public final fun component7 ()Z
 	public final fun component8 ()Ljava/lang/String;
 	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;Ljava/lang/String;)Lmisk/tailwind/Link;
-	public static synthetic fun copy$default (Lmisk/tailwind/Link;Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/tailwind/Link;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/tailwind/Link;
+	public static synthetic fun copy$default (Lmisk/tailwind/Link;Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Style;ZZLjava/lang/Boolean;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/tailwind/Link;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDataAction ()Ljava/lang/String;
 	public final fun getDataTurbo ()Ljava/lang/Boolean;
 	public final fun getHoverText ()Ljava/lang/String;
 	public final fun getHref ()Ljava/lang/String;
 	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnClick ()Ljava/lang/String;
 	public final fun getOpenInNewTab ()Z
 	public final fun getRawHtml ()Ljava/lang/String;
 	public final fun getStyle ()Lmisk/tailwind/Style;
@@ -46,16 +52,27 @@ public final class misk/tailwind/TailwindHtmlLayoutKt {
 
 public final class misk/tailwind/components/AlertMessageKt {
 	public static final fun Alert (Lkotlinx/html/TagConsumer;Lmisk/tailwind/components/AlertTheme;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)V
+	public static final fun Alert (Lkotlinx/html/TagConsumer;Lmisk/tailwind/components/AlertTheme;Ljava/lang/String;Lmisk/tailwind/Link;ZZ)V
 	public static synthetic fun Alert$default (Lkotlinx/html/TagConsumer;Lmisk/tailwind/components/AlertTheme;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILjava/lang/Object;)V
-	public static final fun AlertError (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)V
-	public static synthetic fun AlertError$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILjava/lang/Object;)V
+	public static synthetic fun Alert$default (Lkotlinx/html/TagConsumer;Lmisk/tailwind/components/AlertTheme;Ljava/lang/String;Lmisk/tailwind/Link;ZZILjava/lang/Object;)V
+	public static final fun AlertError (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZLjava/lang/String;Ljava/lang/String;)V
+	public static final fun AlertError (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lmisk/tailwind/Link;ZZ)V
+	public static synthetic fun AlertError$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun AlertError$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lmisk/tailwind/Link;ZZILjava/lang/Object;)V
 	public static final fun AlertInfo (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)V
+	public static final fun AlertInfo (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lmisk/tailwind/Link;ZZ)V
 	public static synthetic fun AlertInfo$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILjava/lang/Object;)V
+	public static synthetic fun AlertInfo$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lmisk/tailwind/Link;ZZILjava/lang/Object;)V
 	public static final fun AlertInfoHighlight (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)V
+	public static final fun AlertInfoHighlight (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lmisk/tailwind/Link;ZZ)V
 	public static synthetic fun AlertInfoHighlight$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILjava/lang/Object;)V
+	public static synthetic fun AlertInfoHighlight$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lmisk/tailwind/Link;ZZILjava/lang/Object;)V
 	public static final fun AlertMessage (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun AlertMessage (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Link;)V
 	public static final fun AlertSuccess (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)V
+	public static final fun AlertSuccess (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lmisk/tailwind/Link;ZZ)V
 	public static synthetic fun AlertSuccess$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILjava/lang/Object;)V
+	public static synthetic fun AlertSuccess$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lmisk/tailwind/Link;ZZILjava/lang/Object;)V
 }
 
 public final class misk/tailwind/components/AlertTheme : java/lang/Enum {

@@ -6,27 +6,61 @@ import kotlinx.html.div
 import kotlinx.html.p
 import kotlinx.html.span
 import kotlinx.html.unsafe
+import misk.tailwind.Link
 
+@Deprecated("Use AlertSuccess with misk.tailwind.Link parameter instead.")
 fun TagConsumer<*>.AlertMessage(
   successMessage: String?,
   errorMessage: String?,
   label: String?,
-  link: String?
+  link: String?,
+) = AlertMessage(
+  successMessage = successMessage,
+  errorMessage = errorMessage,
+  link = label?.let { Link(label = label, href = link ?: "#") },
+)
+
+fun TagConsumer<*>.AlertMessage(
+  successMessage: String?,
+  errorMessage: String?,
+  link: Link?,
 ) {
   val isSuccessMessage = !successMessage.isNullOrBlank()
   val message = if (isSuccessMessage) successMessage else errorMessage
 
   when (isSuccessMessage) {
-    true -> AlertSuccess(message, label, link)
-    false -> AlertError(message, label, link)
+    true -> AlertSuccess(message, link)
+    false -> AlertError(message, link)
   }
 }
 
+@Deprecated("Use Alert with misk.tailwind.Link parameter instead.")
 fun TagConsumer<*>.Alert(
   theme: AlertTheme,
   message: String?,
   label: String?,
   link: String?,
+  spaceAbove: Boolean = false,
+  spaceBelow: Boolean = true,
+) {
+  Alert(
+    theme = theme,
+    message = message,
+    link = label?.let {
+      Link(
+        label = label,
+        href = link ?: "#"
+      )
+    },
+    spaceAbove = spaceAbove,
+    spaceBelow = spaceBelow,
+  )
+}
+
+fun TagConsumer<*>.Alert(
+  theme: AlertTheme,
+  message: String?,
+  link: Link? = null,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
 ) {
@@ -81,15 +115,29 @@ fun TagConsumer<*>.Alert(
           }
           p("mt-3 text-sm md:ml-6 md:mt-0") {
             a(classes = "whitespace-nowrap font-medium ${theme.textColor} hover:${theme.hoverTextColor}") {
-              if (link in listOf("/_admin/database/")) {
+              if (link?.href in listOf("/_admin/database/")) {
                 // TODO Expose non-hardcoded configurability, this disables turbo for existing Misk-Web tabs so browser history works as expected
                 attributes["data-turbo"] = "false"
               }
 
               link?.let {
-                href = it
+                href = link.href
+                if (link.openInNewTab) {
+                  target = "_blank"
+                }
               }
-              label?.let {
+
+              link?.dataAction?.let {
+                href = "#"
+                attributes["data-action"] = it
+              }
+
+              link?.onClick?.let {
+                href = "#"
+                attributes["onclick"] = it
+              }
+
+              link?.label?.let {
                 +it
                 span {
                   attributes["aria-hidden"] = "true"
@@ -104,37 +152,98 @@ fun TagConsumer<*>.Alert(
   }
 }
 
+@Deprecated("Use AlertSuccess with misk.tailwind.Link parameter instead.")
 fun TagConsumer<*>.AlertSuccess(
   message: String?,
   label: String? = null,
   link: String? = null,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) = Alert(AlertTheme.GREEN, message, label, link, spaceAbove, spaceBelow)
+) = AlertSuccess(
+  message = message,
+  link = label?.let { Link(label = label, href = link ?: "#") },
+  spaceAbove = spaceAbove,
+  spaceBelow = spaceBelow,
+)
 
+fun TagConsumer<*>.AlertSuccess(
+  message: String?,
+  link: Link? = null,
+  spaceAbove: Boolean = false,
+  spaceBelow: Boolean = true,
+) = Alert(AlertTheme.GREEN, message, link, spaceAbove, spaceBelow)
+
+@Deprecated("Use AlertError with misk.tailwind.Link parameter instead.")
 fun TagConsumer<*>.AlertError(
   message: String?,
   label: String? = null,
   link: String? = null,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) = Alert(AlertTheme.RED, message, label, link, spaceAbove, spaceBelow)
+  dataAction: String? = null,
+  onClick: String? = null,
+) = AlertError(
+  message = message,
+  link = label?.let {
+    Link(
+      label = label,
+      href = link ?: "#",
+      dataAction = dataAction,
+      onClick = onClick,
+    )
+  },
+  spaceAbove = spaceAbove,
+  spaceBelow = spaceBelow,
+)
 
+fun TagConsumer<*>.AlertError(
+  message: String?,
+  link: Link? = null,
+  spaceAbove: Boolean = false,
+  spaceBelow: Boolean = true,
+) = Alert(AlertTheme.RED, message, link, spaceAbove, spaceBelow)
+
+@Deprecated("Use AlertInfo with misk.tailwind.Link parameter instead.")
 fun TagConsumer<*>.AlertInfo(
   message: String?,
   label: String? = null,
   link: String? = null,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) = Alert(AlertTheme.BLUE, message, label, link, spaceAbove, spaceBelow)
+) = AlertInfo(
+  message = message,
+  link = label?.let { Link(label = label, href = link ?: "#") },
+  spaceAbove = spaceAbove,
+  spaceBelow = spaceBelow,
+)
 
+fun TagConsumer<*>.AlertInfo(
+  message: String?,
+  link: Link? = null,
+  spaceAbove: Boolean = false,
+  spaceBelow: Boolean = true,
+) = Alert(AlertTheme.BLUE, message, link, spaceAbove, spaceBelow)
+
+@Deprecated("Use AlertInfoHighlight with misk.tailwind.Link parameter instead.")
 fun TagConsumer<*>.AlertInfoHighlight(
   message: String?,
   label: String? = null,
   link: String? = null,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) = Alert(AlertTheme.BLUE_HIGHLIGHT, message, label, link, spaceAbove, spaceBelow)
+) = AlertInfoHighlight(
+  message = message,
+  link = label?.let { Link(label = label, href = link ?: "#") },
+  spaceAbove = spaceAbove,
+  spaceBelow = spaceBelow,
+)
+
+fun TagConsumer<*>.AlertInfoHighlight(
+  message: String?,
+  link: Link? = null,
+  spaceAbove: Boolean = false,
+  spaceBelow: Boolean = true,
+) = Alert(AlertTheme.BLUE_HIGHLIGHT, message, link, spaceAbove, spaceBelow)
 
 enum class AlertTheme(
   val backgroundColor: String,
