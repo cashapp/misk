@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.791"
-aws2 = "2.33.10"
+aws2 = "2.33.11"
 bucket4j = "8.8.0"
 datadog = "1.53.0"
 dependencyAnalysisPlugin = "3.0.3"
@@ -49,9 +49,9 @@ awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version.ref = "a
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version.ref = "aws1" }
 awsSdkCore = { module = "software.amazon.awssdk:sdk-core", version.ref = "aws2" }
 awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version.ref = "aws1" }
-bouncyCastlePgp = { module = "org.bouncycastle:bcpg-jdk18on", version = "1.81" }
-bouncyCastlePkix = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.81" }
-bouncyCastleProvider = { module = "org.bouncycastle:bcprov-jdk18on", version = "1.81" }
+bouncyCastlePgp = { module = "org.bouncycastle:bcpg-jdk18on", version = "1.82" }
+bouncyCastlePkix = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.82" }
+bouncyCastleProvider = { module = "org.bouncycastle:bcprov-jdk18on", version = "1.82" }
 bucket4jCore = { module = "com.bucket4j:bucket4j-core", version.ref = "bucket4j" }
 bucket4jDynamoDbV1 = { module = "com.bucket4j:bucket4j-dynamodb-sdk-v1", version = "8.6.0" }
 bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version.ref = "bucket4j" }
