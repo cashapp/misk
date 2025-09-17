@@ -63,20 +63,19 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
         log.debug { "preparing watch for namespace ${config.my_pod_namespace}" }
         val watch = Watch.createWatch<V1Pod>(
           client,
-          api.listNamespacedPodCall(
-            config.my_pod_namespace, // namespace
-            null, // pretty,
-            false, // allowWatchBookmarks
-            null, // _continue
-            null, // fieldSelector
-            config.clustering_pod_label_selector, // labelSelector
-            null, // limit
-            null, // resourceVersion
-            null, // resourceVersionMatch
-            null, // timeoutSeconds
-            true, // watch
-            null, // _callback
-          ),
+          api.listNamespacedPod(config.my_pod_namespace)
+            .pretty(null)
+            .allowWatchBookmarks(false)
+            ._continue(null)
+            .fieldSelector(null)
+            .labelSelector(config.clustering_pod_label_selector)
+            .limit(null)
+            .resourceVersion(null)
+            .resourceVersionMatch(null)
+            .sendInitialEvents(false)
+            .timeoutSeconds(null)
+            .watch(true)
+            .buildCall(null),
           podType
         )
         // createWatch() throws an exception if the long poll fails. If we get here, it means
