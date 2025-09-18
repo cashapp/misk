@@ -987,6 +987,7 @@ public final class misk/web/metadata/servicegraph/ServiceGraphTabIndexAction : m
 	public static final field PATH Ljava/lang/String;
 	public fun <init> (Lmisk/web/v2/DashboardPageLayout;Lcom/google/inject/Provider;)V
 	public final fun get ()Ljava/lang/String;
+	public final fun getAdapter ()Lcom/squareup/moshi/JsonAdapter;
 }
 
 public final class misk/web/metadata/servicegraph/ServiceGraphTabIndexAction$Companion {

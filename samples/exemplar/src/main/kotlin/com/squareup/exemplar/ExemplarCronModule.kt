@@ -5,7 +5,6 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
-import misk.clustering.fake.lease.FakeLeaseModule
 import misk.clustering.weights.FakeClusterWeightModule
 import misk.cron.CronEntryModule
 import misk.cron.CronPattern
@@ -15,6 +14,7 @@ import misk.inject.toKey
 import misk.logging.getLogger
 import java.lang.Thread.sleep
 import java.time.ZoneId
+import kotlin.time.Duration.Companion.seconds
 
 class ExemplarCronModule : KAbstractModule() {
   override fun configure() {
@@ -22,9 +22,10 @@ class ExemplarCronModule : KAbstractModule() {
     install(FakeClusterWeightModule())
     install(
       FakeCronModule(
-        ZoneId.of("America/Toronto"),
-        dependencies = listOf(DependentService::class.toKey())
-      )
+        zoneId = ZoneId.of("America/Toronto"),
+        dependencies = listOf(DependentService::class.toKey()),
+        installDashboardTab = true
+      ),
     )
     install(CronEntryModule.create<MinuteCron>())
   }
@@ -44,19 +45,19 @@ class ExemplarCronModule : KAbstractModule() {
   }
 
   @Singleton
-  @CronPattern("* * * * *")
+  @CronPattern("1 * * * *")
   class MinuteCron @Inject constructor() : Runnable {
     var counter = 0
 
     override fun run() {
       counter++
-      log.info("Minute Cron $counter Start")
-      sleep(10_000)
-      log.info("Minute Cron $counter End")
+      logger.info("Minute Cron $counter Start")
+      sleep(60.seconds.inWholeMilliseconds)
+      logger.info("Minute Cron $counter End")
     }
 
     companion object {
-      val log = getLogger<MinuteCron>()
+      val logger = getLogger<MinuteCron>()
     }
   }
 }

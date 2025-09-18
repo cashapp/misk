@@ -127,6 +127,10 @@ fun TagConsumer<*>.Alert(
                 }
               }
 
+              if (link?.isPageNavigation == true) {
+                target = "_top"
+              }
+
               link?.dataAction?.let {
                 href = "#"
                 attributes["data-action"] = it
