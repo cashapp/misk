@@ -5,8 +5,8 @@ import com.google.common.hash.Hashing
 import java.util.Arrays
 import java.util.Objects
 
-/** A [ClusterHashRing] maps resources to cluster members based on a consistent hash */
-class ClusterHashRing @JvmOverloads constructor(
+/** A [HashRingClusterResourceMapper] maps resources to cluster members based on a consistent hash */
+class HashRingClusterResourceMapper @JvmOverloads constructor(
   members: Collection<Cluster.Member>,
   private val hashFn: HashFunction = Hashing.murmur3_32_fixed(),
   private val vnodesCount: Int = 16
@@ -47,7 +47,7 @@ class ClusterHashRing @JvmOverloads constructor(
   }
 
   override fun equals(other: Any?): Boolean {
-    val otherRing = other as? ClusterHashRing ?: return false
+    val otherRing = other as? HashRingClusterResourceMapper ?: return false
     return vnodesCount == otherRing.vnodesCount &&
       vnodes.contentEquals(otherRing.vnodes) &&
       vnodesToMembers == other.vnodesToMembers
