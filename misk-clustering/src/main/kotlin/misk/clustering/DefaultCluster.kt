@@ -17,7 +17,7 @@ import jakarta.inject.Singleton
 class DefaultCluster @JvmOverloads constructor(
   self: Cluster.Member,
   private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
-    { ClusterHashRing(it) }
+    { HashRingClusterResourceMapper(it) }
 ) : AbstractExecutionThreadService(), Cluster, ClusterService {
   private val snapshotRef = AtomicReference<Cluster.Snapshot>(
     Cluster.Snapshot(

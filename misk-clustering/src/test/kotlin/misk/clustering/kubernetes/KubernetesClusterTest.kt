@@ -9,7 +9,7 @@ import io.kubernetes.client.openapi.models.V1PodStatus
 import io.kubernetes.client.util.Watches
 import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
-import misk.clustering.ClusterHashRing
+import misk.clustering.HashRingClusterResourceMapper
 import misk.clustering.DefaultCluster
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_ADDED
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_DELETED
@@ -72,7 +72,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(),
-          resourceMapper = ClusterHashRing(setOf())
+          resourceMapper = HashRingClusterResourceMapper(setOf())
         )
       ),
       Cluster.Changes(
@@ -80,7 +80,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = true,
           readyMembers = setOf(expectedSelf),
-          resourceMapper = ClusterHashRing(setOf(expectedSelf))
+          resourceMapper = HashRingClusterResourceMapper(setOf(expectedSelf))
         ),
         added = setOf(expectedSelf)
       ),
@@ -89,7 +89,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(),
-          resourceMapper = ClusterHashRing(setOf())
+          resourceMapper = HashRingClusterResourceMapper(setOf())
         ),
         removed = setOf(expectedSelf)
       )
@@ -112,7 +112,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(),
-          resourceMapper = ClusterHashRing(setOf())
+          resourceMapper = HashRingClusterResourceMapper(setOf())
         )
       ),
       Cluster.Changes(
@@ -120,7 +120,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(Cluster.Member("larry-blerp", "10.0.0.3")),
-          resourceMapper = ClusterHashRing(setOf(Cluster.Member("larry-blerp", "10.0.0.3")))
+          resourceMapper = HashRingClusterResourceMapper(setOf(Cluster.Member("larry-blerp", "10.0.0.3")))
         ),
         added = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))
       ),
@@ -132,7 +132,7 @@ internal class KubernetesClusterTest {
             Cluster.Member("larry-blerp", "10.0.0.3"),
             Cluster.Member("larry-blerp2", "10.0.0.4")
           ),
-          resourceMapper = ClusterHashRing(
+          resourceMapper = HashRingClusterResourceMapper(
             setOf(
               Cluster.Member("larry-blerp", "10.0.0.3"),
               Cluster.Member("larry-blerp2", "10.0.0.4")
@@ -167,7 +167,7 @@ internal class KubernetesClusterTest {
             Cluster.Member("larry-blerp", "10.0.0.3"),
             Cluster.Member("larry-blerp2", "10.0.0.4")
           ),
-          resourceMapper = ClusterHashRing(
+          resourceMapper = HashRingClusterResourceMapper(
             setOf(
               Cluster.Member("larry-blerp", "10.0.0.3"),
               Cluster.Member("larry-blerp2", "10.0.0.4")
@@ -180,7 +180,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
-          resourceMapper = ClusterHashRing(
+          resourceMapper = HashRingClusterResourceMapper(
             setOf(
               Cluster.Member("larry-blerp2", "10.0.0.4")
             )
@@ -207,7 +207,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(),
-          resourceMapper = ClusterHashRing(setOf())
+          resourceMapper = HashRingClusterResourceMapper(setOf())
         )
       )
     )
@@ -229,7 +229,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(),
-          resourceMapper = ClusterHashRing(setOf())
+          resourceMapper = HashRingClusterResourceMapper(setOf())
         )
       )
     )
@@ -258,7 +258,7 @@ internal class KubernetesClusterTest {
             Cluster.Member("larry-blerp", "10.0.0.3"),
             Cluster.Member("larry-blerp2", "10.0.0.4")
           ),
-          resourceMapper = ClusterHashRing(
+          resourceMapper = HashRingClusterResourceMapper(
             setOf(
               Cluster.Member("larry-blerp", "10.0.0.3"),
               Cluster.Member("larry-blerp2", "10.0.0.4")
@@ -271,7 +271,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
-          resourceMapper = ClusterHashRing(
+          resourceMapper = HashRingClusterResourceMapper(
             setOf(
               Cluster.Member("larry-blerp2", "10.0.0.4")
             )
@@ -305,7 +305,7 @@ internal class KubernetesClusterTest {
             Cluster.Member("larry-blerp", "10.0.0.3"),
             Cluster.Member("larry-blerp2", "10.0.0.4")
           ),
-          resourceMapper = ClusterHashRing(
+          resourceMapper = HashRingClusterResourceMapper(
             setOf(
               Cluster.Member("larry-blerp", "10.0.0.3"),
               Cluster.Member("larry-blerp2", "10.0.0.4")
@@ -318,7 +318,7 @@ internal class KubernetesClusterTest {
           self = expectedSelf,
           selfReady = false,
           readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
-          resourceMapper = ClusterHashRing(
+          resourceMapper = HashRingClusterResourceMapper(
             setOf(
               Cluster.Member("larry-blerp2", "10.0.0.4")
             )
