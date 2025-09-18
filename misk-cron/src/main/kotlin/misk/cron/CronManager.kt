@@ -22,7 +22,23 @@ class CronManager @Inject constructor() {
   @Inject @ForMiskCron private lateinit var executorService: ExecutorService
   @Inject @ForMiskCron private lateinit var zoneId: ZoneId
 
-  private val runningCrons = mutableListOf<CompletableFuture<*>>()
+  private val runningCrons = mutableListOf<RunningCronEntry>()
+  internal fun getRunningCrons() = runningCrons.toList()
+
+  data class RunningCronEntry(
+    val completableFuture: CompletableFuture<*>,
+    val entry: CronEntry,
+  ) {
+    internal data class Metadata(
+      val completableFuture: String,
+      val entry: CronEntry.Metadata,
+    )
+
+    internal fun toMetadata() = Metadata(
+      completableFuture = completableFuture.toString(),
+      entry = entry.toMetadata(),
+    )
+  }
 
   data class CronEntry(
     val name: String,
@@ -47,7 +63,7 @@ class CronManager @Inject constructor() {
             nextExecution = nextExecution.getOrNull().toString(),
             timeToNextExecution = timeToNextExecution.getOrNull().toString(),
             lastExecution = lastExecution.getOrNull().toString(),
-            timeFromLastExecution = timeFromLastExecution.getOrNull().toString()
+            timeFromLastExecution = timeFromLastExecution.getOrNull().toString(),
           )
         }
       }
@@ -64,15 +80,16 @@ class CronManager @Inject constructor() {
       name = name,
       cronTab = cronTab,
       executionTime = executionTime.toMetadata(),
-      runnable = runnable.toString()
+      runnable = runnable.toString(),
     )
   }
 
   private val cronEntries = mutableMapOf<String, CronEntry>()
+  internal fun getCronEntries() = cronEntries.toMap()
 
   internal fun getMetadata() = CronData(
     cronEntries = cronEntries.mapValues { it.value.toMetadata() },
-    runningCrons = runningCrons.map { it.toString() }
+    runningCrons = runningCrons.map { it.toMetadata() },
   )
 
   internal fun addCron(name: String, crontab: String, cron: Runnable) {
@@ -115,31 +132,34 @@ class CronManager @Inject constructor() {
   }
 
   private fun removeCompletedCrons() {
-    runningCrons.removeIf { it.isDone }
+    runningCrons.removeIf { it.completableFuture.isDone }
   }
 
-  private fun runCron(cronEntry: CronEntry) {
+  internal fun runCron(cronEntry: CronEntry) {
     runningCrons.add(
-      CompletableFuture.runAsync(
-        {
-          val name = cronEntry.name
+      RunningCronEntry(
+        completableFuture = CompletableFuture.runAsync(
+          {
+            val name = cronEntry.name
 
-          try {
-            logger.info { "Executing cronjob $name" }
-            cronEntry.runnable.run()
-          } catch (t: Throwable) {
-            logger.error { "Exception on cronjob $name: ${t.stackTraceToString()}" }
-          } finally {
-            logger.info { "Executing cronjob $name complete" }
-          }
-        },
-        executorService
-      )
+            try {
+              logger.info { "Executing cronjob $name" }
+              cronEntry.runnable.run()
+            } catch (t: Throwable) {
+              logger.error { "Exception on cronjob $name: ${t.stackTraceToString()}" }
+            } finally {
+              logger.info { "Executing cronjob $name complete" }
+            }
+          },
+          executorService,
+        ),
+        entry = cronEntry,
+      ),
     )
   }
 
   fun waitForCronsComplete() {
-    CompletableFuture.allOf(*runningCrons.toTypedArray()).join()
+    CompletableFuture.allOf(*runningCrons.map { it.completableFuture }.toTypedArray()).join()
     removeCompletedCrons()
   }
 

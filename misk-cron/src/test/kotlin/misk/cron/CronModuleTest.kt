@@ -33,7 +33,8 @@ class CronModuleTest {
       install(FakeClusterWeightModule())
       install(
         CronModule(ZoneId.of("America/Toronto"),
-          dependencies = listOf(DependentService::class.toKey())
+          dependencies = listOf(DependentService::class.toKey()),
+          installDashboardTab = false
         )
       )
       install(
