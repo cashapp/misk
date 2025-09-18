@@ -19,7 +19,7 @@ kotlinBinaryCompatibilityPlugin = "0.18.1"
 ktor = "3.3.0"
 mavenPublish = "0.34.0"
 micrometer = "1.12.13"
-netty = "4.2.1.Final"
+netty = "4.2.6.Final"
 okHttp = "5.1.0"
 okio = "3.16.0"
 prometheus = "0.16.0"
@@ -71,8 +71,8 @@ dockerTransportCore = { module = "com.github.docker-java:docker-java-transport",
 dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
 errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.41.0" }
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
-gax = { module = "com.google.api:gax", version = "2.70.1" }
-gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.60.1" }
+gax = { module = "com.google.api:gax", version = "2.70.2" }
+gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.60.2" }
 gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.32.0" }
 gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250818-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
@@ -82,9 +82,9 @@ googleApiClient = { module = "com.google.api-client:google-api-client", version 
 googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250815-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
-googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.60.1" }
+googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.60.2" }
 googleCloudStorage = { module = "com.google.cloud:google-cloud-storage", version = "1.118.1" }
-googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.61.1" }
+googleCommonProtos = { module = "com.google.api.grpc:proto-google-common-protos", version = "2.61.2" }
 googleHttpClient = { module = "com.google.http-client:google-http-client", version.ref = "googleHttp" }
 googleHttpClientJackson = { module = "com.google.http-client:google-http-client-jackson2", version.ref = "googleHttp" }
 grpcApi = { module = "io.grpc:grpc-api", version = "1.75.0" }
