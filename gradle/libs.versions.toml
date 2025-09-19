@@ -32,6 +32,7 @@ wire = "5.4.0"
 [libraries]
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.20.0" }
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
+apacheCommonsMath3 = { module = " org.apache.commons:commons-math3", version = "3.6.1" }
 apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.1" }
 assertj = { module = "org.assertj:assertj-core", version = "3.27.5" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
@@ -56,6 +57,7 @@ bucket4jCore = { module = "com.bucket4j:bucket4j-core", version.ref = "bucket4j"
 bucket4jDynamoDbV1 = { module = "com.bucket4j:bucket4j-dynamodb-sdk-v1", version = "8.6.0" }
 bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version.ref = "bucket4j" }
 bucket4jRedis = { module = "com.bucket4j:bucket4j-redis", version.ref = "bucket4j" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.2" }
 concurrencyLimitsCore = { module = "com.netflix.concurrency-limits:concurrency-limits-core", version = "0.5.3" }
 cronUtils = { module = "com.cronutils:cron-utils", version = "9.2.1" }
 datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.11.0" }
@@ -101,6 +103,7 @@ guice6 = { module = "com.google.inject:guice", version = "6.0.0" }
 guice7Bom = { module = "com.google.inject:guice-bom", version = "7.0.0" }
 guiceBom = { module = "com.google.inject:guice-bom", version = "6.0.0" }
 guiceTestLib = { module = "com.google.inject.extensions:guice-testlib" }
+hash4j = { module = "com.dynatrace.hash4j:hash4j", version = "0.26.0" }
 hibernate5Core = { module = "org.hibernate:hibernate-core", version = "5.6.15.Final" }
 hibernateJpaApi = { module = "javax.persistence:javax.persistence-api", version = "2.2" }
 hikariCp = { module = "com.zaxxer:HikariCP", version = "6.2.1" }

@@ -12,7 +12,9 @@ dependencies {
   api(libs.loggingApi)
   api(project(":wisp:wisp-config"))
   api(project(":misk-inject"))
+  implementation(libs.caffeine)
   implementation(libs.guice)
+  implementation(libs.hash4j)
   implementation(libs.kubernetesClient)
   implementation(libs.kubernetesClientApi)
   implementation(libs.okHttp)
@@ -23,6 +25,7 @@ dependencies {
   implementation(project(":misk-service"))
   api(project(":misk-testing-api"))
 
+  testImplementation(libs.apacheCommonsMath3)
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(project(":misk-clustering"))
