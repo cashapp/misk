@@ -101,6 +101,12 @@ public final class misk/clustering/NoMembersAvailableException : java/lang/Excep
 	public final fun getResourceId ()Ljava/lang/String;
 }
 
+public final class misk/clustering/RendezvousClusterResourceMapper : misk/clustering/ClusterResourceMapper {
+	public fun <init> (Ljava/util/Collection;)V
+	public fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
+	public final fun getMembers ()Ljava/util/Collection;
+}
+
 public final class misk/clustering/fake/ExplicitClusterResourceMapper : misk/clustering/ClusterResourceMapper {
 	public fun <init> ()V
 	public final fun addMapping (Ljava/lang/String;Lmisk/clustering/Cluster$Member;)V
