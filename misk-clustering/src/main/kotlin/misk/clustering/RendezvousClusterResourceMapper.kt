@@ -7,7 +7,7 @@ import java.time.Duration
 /**
  * Maps cluster members to resources via rendezvous consistent hashing
  */
-class RendezvousClusterResourceMapper(val members: Collection<Cluster.Member>): ClusterResourceMapper {
+class RendezvousClusterResourceMapper(val members: Set<Cluster.Member>): ClusterResourceMapper {
   // Use a cache with TTLs to reduce unbounded cache growth from the creation of ephemeral leases
   private val cache = Caffeine.newBuilder().expireAfterAccess(Duration.ofHours(1)).build<String, Cluster.Member>()
 

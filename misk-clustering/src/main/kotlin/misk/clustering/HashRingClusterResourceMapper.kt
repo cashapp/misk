@@ -7,7 +7,7 @@ import java.util.Objects
 
 /** A [HashRingClusterResourceMapper] maps resources to cluster members based on a consistent hash */
 class HashRingClusterResourceMapper @JvmOverloads constructor(
-  members: Collection<Cluster.Member>,
+  members: Set<Cluster.Member>,
   private val hashFn: HashFunction = Hashing.murmur3_32_fixed(),
   private val vnodesCount: Int = 16
 ) : ClusterResourceMapper {
