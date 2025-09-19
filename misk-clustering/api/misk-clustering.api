@@ -87,10 +87,10 @@ public final class misk/clustering/DefaultCluster$Companion {
 }
 
 public final class misk/clustering/HashRingClusterResourceMapper : misk/clustering/ClusterResourceMapper {
-	public fun <init> (Ljava/util/Collection;)V
-	public fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;)V
-	public fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;I)V
-	public synthetic fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Set;)V
+	public fun <init> (Ljava/util/Set;Lcom/google/common/hash/HashFunction;)V
+	public fun <init> (Ljava/util/Set;Lcom/google/common/hash/HashFunction;I)V
+	public synthetic fun <init> (Ljava/util/Set;Lcom/google/common/hash/HashFunction;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
 	public fun hashCode ()I
@@ -102,9 +102,9 @@ public final class misk/clustering/NoMembersAvailableException : java/lang/Excep
 }
 
 public final class misk/clustering/RendezvousClusterResourceMapper : misk/clustering/ClusterResourceMapper {
-	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> (Ljava/util/Set;)V
 	public fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
-	public final fun getMembers ()Ljava/util/Collection;
+	public final fun getMembers ()Ljava/util/Set;
 }
 
 public final class misk/clustering/fake/ExplicitClusterResourceMapper : misk/clustering/ClusterResourceMapper {
