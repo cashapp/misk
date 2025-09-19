@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.791"
-aws2 = "2.33.12"
+aws2 = "2.33.13"
 bucket4j = "8.8.0"
 datadog = "1.53.0"
 dependencyAnalysisPlugin = "3.0.4"
@@ -33,7 +33,7 @@ wire = "5.4.0"
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.20.0" }
 apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
 apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.1" }
-assertj = { module = "org.assertj:assertj-core", version = "3.27.4" }
+assertj = { module = "org.assertj:assertj-core", version = "3.27.5" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version.ref = "awaitility" }
 aws2Auth = { module = "software.amazon.awssdk:auth", version.ref = "aws2" }
@@ -74,7 +74,7 @@ findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2"
 gax = { module = "com.google.api:gax", version = "2.70.2" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.60.2" }
 gcpDatastore = { module = "com.google.cloud:google-cloud-datastore", version = "2.32.0" }
-gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250818-2.0.0" }
+gcpKms = { module = "com.google.apis:google-api-services-cloudkms", version = "v1-rev20250911-2.0.0" }
 gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.11-alpha" }
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.4" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.100.0" }
@@ -206,7 +206,7 @@ openTracingJdbc = { module = "io.opentracing.contrib:opentracing-jdbc", version 
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
 openTracingUtil = { module = "io.opentracing:opentracing-util", version = "0.33.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.7" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.8" }
 prometheusClient = { module = "io.prometheus:simpleclient", version.ref = "prometheus" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version.ref = "prometheus" }
 prometheusClientCommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus" }
