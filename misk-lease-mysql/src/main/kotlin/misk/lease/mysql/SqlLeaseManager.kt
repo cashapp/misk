@@ -132,6 +132,8 @@ internal class SqlLeaseManager @Inject constructor(
       return deletedRows > 0
     }
 
+    override fun release(lazy: Boolean): Boolean = release()
+
     /**
      * Registers a listener for lease state changes.
      */

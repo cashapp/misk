@@ -47,8 +47,18 @@ class PoolLease(
   }
 
   override fun release(): Boolean {
-    poolLeaseManager.clearPoolLeaseMapEntry(name)
-    return delegateLease.release()
+    val released = delegateLease.release()
+    if (released) {
+      poolLeaseManager.clearPoolLeaseMapEntry(name)
+    }
+    return released
   }
 
+  override fun release(lazy: Boolean): Boolean {
+    val released = delegateLease.release(lazy = lazy)
+    if (released) {
+      poolLeaseManager.clearPoolLeaseMapEntry(name)
+    }
+    return released
+  }
 }

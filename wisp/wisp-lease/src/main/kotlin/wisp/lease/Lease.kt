@@ -35,10 +35,17 @@ interface Lease {
     fun acquire(): Boolean
 
     /**
-     * Release the lock on the lease.  This will return true if released.  Note that it will return
-     * false if the lease was not held.  Listeners should be notified before the lock is released.
+     * Release the lock on the lease. This will return true if released.  Note that it will return
+     * false if the lease was not held. Listeners should be notified before the lock is released.
      */
     fun release(): Boolean
+
+    /**
+     * Release the lock on the lease, with the option of doing it lazily if possible. This should
+     * return false if the lease was not held or if the release is lazy. Listeners should be
+     * notified before the lock is released.
+     */
+    fun release(lazy: Boolean): Boolean
 
     /**
      * Registers a listener that is called on lease state changes.

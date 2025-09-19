@@ -8,6 +8,7 @@ public final class wisp/lease/FakeLease : wisp/lease/Lease {
 	public final fun notifyAfterAcquire ()V
 	public final fun notifyBeforeRelease ()V
 	public fun release ()Z
+	public fun release (Z)Z
 	public fun shouldHold ()Z
 }
 
