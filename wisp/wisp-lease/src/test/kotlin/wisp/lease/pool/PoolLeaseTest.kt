@@ -129,6 +129,43 @@ internal class PoolLeaseTest {
     assertFalse(anotherTestLease.checkHeld())
   }
 
+  @Test
+  fun realDeploymentAndPoolConfigHonorsLazyReleaseTest() {
+    val testLease = TestLease(LEASE_NAME, isAcquired = false, isHeld = false)
+    val anotherTestLease = TestLease(ANOTHER_LEASE_NAME, isAcquired = false, isHeld = false)
+
+    val delegateLeaseManager = Mockito.mock(LeaseManager::class.java)
+    `when`(delegateLeaseManager.requestLease(LEASE_NAME)).thenReturn(testLease)
+    `when`(delegateLeaseManager.requestLease(ANOTHER_LEASE_NAME)).thenReturn(anotherTestLease)
+
+    val poolLeaseManager = PoolLeaseManager(delegateLeaseManager, STAGING, listOf(poolLeaseConfig))
+    val requestedLease = poolLeaseManager.requestLease(LEASE_NAME)
+    val requestedAnotherLease = poolLeaseManager.requestLease(ANOTHER_LEASE_NAME)
+
+    assertEquals(testLease.name, requestedLease.name)
+    assertEquals(anotherTestLease.name, requestedAnotherLease.name)
+
+    assertTrue(requestedLease.acquire())
+    assertTrue(anotherTestLease.checkHeldElsewhere())
+
+    assertFalse(poolLeaseManager.isEmptyPoolLeaseMapEntry(LEASE_NAME))
+    assertFalse(poolLeaseManager.isEmptyPoolLeaseMapEntry(ANOTHER_LEASE_NAME))
+
+    requestedLease.release(lazy = true)
+
+    assertTrue(requestedLease.checkHeld())
+    assertTrue(anotherTestLease.checkHeldElsewhere())
+    assertFalse(poolLeaseManager.isEmptyPoolLeaseMapEntry(LEASE_NAME))
+    assertFalse(poolLeaseManager.isEmptyPoolLeaseMapEntry(ANOTHER_LEASE_NAME))
+
+    requestedLease.release(lazy = false)
+
+    assertFalse(requestedLease.checkHeld())
+    assertFalse(anotherTestLease.checkHeld())
+    assertTrue(poolLeaseManager.isEmptyPoolLeaseMapEntry(LEASE_NAME))
+    assertTrue(poolLeaseManager.isEmptyPoolLeaseMapEntry(ANOTHER_LEASE_NAME))
+  }
+
 @Test
 fun realDeploymentAndPoolConfigMultipleLeaseTests() {
     val testLease = TestLease(LEASE_NAME, isAcquired = false, isHeld = false)
@@ -224,6 +261,14 @@ internal class TestLease(
       return true
     }
     return false
+  }
+
+  override fun release(lazy: Boolean): Boolean {
+    return if (lazy) {
+      false
+    } else {
+      release()
+    }
   }
 
   override fun checkHeldElsewhere(): Boolean {

@@ -1,5 +1,7 @@
 public final class wisp/lease/AutoCloseableLease : java/lang/AutoCloseable, wisp/lease/Lease {
 	public fun <init> (Lwisp/lease/Lease;)V
+	public fun <init> (Lwisp/lease/Lease;Z)V
+	public synthetic fun <init> (Lwisp/lease/Lease;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun acquire ()Z
 	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public fun checkHeld ()Z
@@ -7,11 +9,14 @@ public final class wisp/lease/AutoCloseableLease : java/lang/AutoCloseable, wisp
 	public fun close ()V
 	public fun getName ()Ljava/lang/String;
 	public fun release ()Z
+	public fun release (Z)Z
 	public fun shouldHold ()Z
 }
 
 public final class wisp/lease/ExtensionsKt {
 	public static final fun acquireOrNull (Lwisp/lease/LeaseManager;Ljava/lang/String;)Lwisp/lease/AutoCloseableLease;
+	public static final fun acquireOrNull (Lwisp/lease/LeaseManager;Ljava/lang/String;Z)Lwisp/lease/AutoCloseableLease;
+	public static synthetic fun acquireOrNull$default (Lwisp/lease/LeaseManager;Ljava/lang/String;ZILjava/lang/Object;)Lwisp/lease/AutoCloseableLease;
 }
 
 public abstract interface class wisp/lease/Lease {
@@ -21,6 +26,7 @@ public abstract interface class wisp/lease/Lease {
 	public abstract fun checkHeldElsewhere ()Z
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun release ()Z
+	public abstract fun release (Z)Z
 	public abstract fun shouldHold ()Z
 }
 
@@ -46,6 +52,7 @@ public final class wisp/lease/pool/PoolLease : wisp/lease/Lease {
 	public fun checkHeldElsewhere ()Z
 	public fun getName ()Ljava/lang/String;
 	public fun release ()Z
+	public fun release (Z)Z
 	public fun shouldHold ()Z
 }
 

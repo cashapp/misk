@@ -38,6 +38,8 @@ class FakeLease(
         return true
     }
 
+    override fun release(lazy: Boolean): Boolean = release()
+
     override fun addListener(listener: Lease.StateChangeListener) {
         listeners.add(listener)
         if (checkHeld()) {
