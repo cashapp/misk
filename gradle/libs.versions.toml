@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.791"
-aws2 = "2.33.13"
+aws2 = "2.34.0"
 bucket4j = "8.8.0"
 datadog = "1.53.0"
 dependencyAnalysisPlugin = "3.0.4"
@@ -71,7 +71,7 @@ dockerApi = { module = "com.github.docker-java:docker-java-api", version.ref = "
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
 dockerTransportCore = { module = "com.github.docker-java:docker-java-transport", version.ref = "docker" }
 dockerTransportHttpClient = { module = "com.github.docker-java:docker-java-transport-httpclient5", version.ref = "docker" }
-errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.41.0" }
+errorproneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version = "2.42.0" }
 findbugsJsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 gax = { module = "com.google.api:gax", version = "2.70.2" }
 gcpCloudCore = { module = "com.google.cloud:google-cloud-core", version = "2.60.2" }
@@ -182,12 +182,12 @@ lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.8.1.RELEASE" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.6" }
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
-mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version = "0.7.0" }
-mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version = "0.7.1" }
-mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version = "0.7.1" }
+mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version = "0.7.2" }
+mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version = "0.7.2" }
+mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version = "0.7.2" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
-mockitoCore = { module = "org.mockito:mockito-core", version = "5.19.0" }
+mockitoCore = { module = "org.mockito:mockito-core", version = "5.20.0" }
 mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.0.0" }
 mockk = { module = "io.mockk:mockk", version = "1.14.5" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.2" }
