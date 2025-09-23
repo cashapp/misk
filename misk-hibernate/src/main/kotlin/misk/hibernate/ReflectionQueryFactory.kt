@@ -162,6 +162,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         }
       }
       Operator.IS_NULL -> isNull(path)
+      Operator.LIKE -> {
+        val pattern = value as String
+        addConstraint { root, builder ->
+          builder.like(root.traverse<String>(path), pattern)
+        }
+      }
     }
   }
 
@@ -851,6 +857,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           Operator.IS_NULL -> object : QueryMethodHandler {
             override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
               return reflectionQuery.isNull(path)
+            }
+          }
+          Operator.LIKE -> object : QueryMethodHandler {
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              val pattern = args[0] as String
+              return reflectionQuery.addConstraint { root, builder ->
+                builder.like(root.traverse<String>(path), pattern)
+              }
             }
           }
         }

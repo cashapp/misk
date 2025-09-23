@@ -192,6 +192,7 @@ public final class misk/hibernate/Operator : java/lang/Enum {
 	public static final field IS_NOT_NULL Lmisk/hibernate/Operator;
 	public static final field IS_NULL Lmisk/hibernate/Operator;
 	public static final field LE Lmisk/hibernate/Operator;
+	public static final field LIKE Lmisk/hibernate/Operator;
 	public static final field LT Lmisk/hibernate/Operator;
 	public static final field NE Lmisk/hibernate/Operator;
 	public static final field NOT_IN Lmisk/hibernate/Operator;
