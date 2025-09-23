@@ -1104,6 +1104,48 @@ class ReflectionQueryFactoryTest {
   }
 
   @Test
+  fun likeOperator() {
+    transacter.allowCowrites().transaction { session ->
+      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      session.save(DbMovie("Jurassic Park: The Lost World", LocalDate.of(1997, 5, 19)))
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+      session.save(DbMovie("World Trade Center", LocalDate.of(2026, 2, 25)))
+    }
+
+    val jurassicCount = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowTableScan()
+        .nameLike("Jurassic%")
+        .count(session)
+    }
+    assertThat(jurassicCount).isEqualTo(2)
+
+    val jurassicMovies = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowTableScan()
+        .nameLike("Jurassic%")
+        .listAsNames(session)
+    }
+    assertThat(jurassicMovies).containsExactlyInAnyOrder("Jurassic Park", "Jurassic Park: The Lost World")
+
+    val worldMovies = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowTableScan()
+        .nameLike("%World")
+        .listAsNames(session)
+    }
+    assertThat(worldMovies).containsExactly("Jurassic Park: The Lost World")
+
+    val parkMovies = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowTableScan()
+        .nameLike("%Park%")
+        .listAsNames(session)
+    }
+    assertThat(parkMovies).containsExactlyInAnyOrder("Jurassic Park: The Lost World", "Jurassic Park")
+  }
+
+  @Test
   fun customConstraint() {
     transacter.allowCowrites().transaction { session ->
       session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))

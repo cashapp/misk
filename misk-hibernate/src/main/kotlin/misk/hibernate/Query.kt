@@ -207,7 +207,10 @@ enum class Operator {
   IS_NOT_NULL,
 
   /** `a IS NULL` */
-  IS_NULL
+  IS_NULL,
+
+  /** `a LIKE b` */
+  LIKE
 }
 
 /**
