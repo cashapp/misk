@@ -62,12 +62,12 @@ internal class McpServerActionTest {
     val response = mcpClient.listTools(request)
     assertEquals(
       expected = 2,
-      actual = response?.tools?.size,
+      actual = response.tools.size,
       message = "Expecting three tools to be registered",
     )
 
     // Check calculator tool
-    val calculatorTool = response?.tools?.find { it.name == "calculator" }
+    val calculatorTool = response.tools.find { it.name == "calculator" }
     assertNotNull(calculatorTool)
     assertEquals(
       expected = "calculator",
@@ -149,11 +149,11 @@ internal class McpServerActionTest {
 
     assertEquals(
       expected = 1,
-      actual = response?.prompts?.size,
+      actual = response.prompts.size,
       message = "Expecting one prompt to be registered",
     )
 
-    val kotlinDeveloperPrompt = response?.prompts?.firstOrNull()
+    val kotlinDeveloperPrompt = response.prompts.firstOrNull()
     assertNotNull(kotlinDeveloperPrompt)
     assertEquals(
       expected = "Kotlin Developer",
@@ -222,11 +222,11 @@ internal class McpServerActionTest {
 
     assertEquals(
       expected = 1,
-      actual = response?.resources?.size,
+      actual = response.resources.size,
       message = "Expecting one resource to be registered",
     )
 
-    val webSearchResource = response?.resources?.firstOrNull()
+    val webSearchResource = response.resources.firstOrNull()
     assertNotNull(webSearchResource)
     assertEquals(
       expected = "https://search.com/",

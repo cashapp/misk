@@ -125,7 +125,7 @@ class ExceptionHandlingInterceptor private constructor(
   private fun unwrappedToResponse(th: Throwable, suppressLog: Boolean, mdcTags: Set<Tag>): Response<*> =
     // Prefer the mapper's response, if one exists.
     mapperResolver.mapperFor(th)?.let {
-      if (!suppressLog) {
+      if (!suppressLog && it.isError(th)) {
         log.log(
           level = it.loggingLevel(th),
           th = th,
