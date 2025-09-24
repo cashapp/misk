@@ -2,7 +2,9 @@ package misk.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.Implementation
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.JSONRPCNotification
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCRequest
+import io.modelcontextprotocol.kotlin.sdk.JSONRPCResponse
 import io.modelcontextprotocol.kotlin.sdk.Method
 import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.ToolAnnotations
@@ -11,6 +13,7 @@ import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import misk.annotation.ExperimentalMiskApi
 import misk.exceptions.BadRequestException
 import misk.exceptions.NotFoundException
+import misk.exceptions.WebActionException
 import misk.logging.getLogger
 import misk.mcp.action.SESSION_ID_HEADER
 import misk.mcp.config.McpServerConfig
@@ -185,7 +188,21 @@ class MiskMcpServer internal constructor(
         }
       }
     }
+
     miskServerTransport.handleMessage(message, sessionId)
+
+    when (message) {
+      is JSONRPCNotification,
+      is JSONRPCResponse -> {
+        // Notifications and responses should return a 202 if handled successfully with no content
+        // Because we default to a SSE response and a server session, we need to end the session and directly
+        // return the result. If the handler fails to handle the response or notification, it should throw an
+        // error that should be translated to a JSON-RPC error response
+        throw AcceptedResponseException()
+      }
+
+      else -> Unit
+    }
   }
 
   companion object {
@@ -193,4 +210,6 @@ class MiskMcpServer internal constructor(
   }
 }
 
+/** Represents a 202 Accepted response to indicate a notification or response was handled successfully */
+internal class AcceptedResponseException : WebActionException(202, "Accepted")
 

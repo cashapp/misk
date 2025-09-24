@@ -34,6 +34,8 @@ internal class WebActionExceptionMapper @Inject internal constructor(
     if (th.isClientError) config.client_error_level
     else config.server_error_level
 
+  override fun isError(th: WebActionException) = th.isClientError || th.isServerError
+
   private companion object {
     val HEADERS = headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
 

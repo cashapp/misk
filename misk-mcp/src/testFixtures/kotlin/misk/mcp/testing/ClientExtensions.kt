@@ -7,6 +7,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
+import io.ktor.client.plugins.sse.SSE
 import io.ktor.serialization.kotlinx.json.json
 import io.modelcontextprotocol.kotlin.sdk.Implementation
 import io.modelcontextprotocol.kotlin.sdk.client.Client
@@ -31,6 +32,8 @@ fun OkHttpClient.asKtorClient(): HttpClient = HttpClient(OkHttp) {
       },
     )
   }
+
+  install(SSE)
 
   install(Logging) {
     logger = Logger.SIMPLE
