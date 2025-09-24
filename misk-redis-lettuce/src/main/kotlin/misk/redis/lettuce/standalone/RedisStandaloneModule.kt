@@ -58,7 +58,7 @@ internal class RedisStandaloneModule<K : Any, V : Any> internal constructor(
     // Create a RedisClient for each replication group. If there are more than one,
     // qualify it by the replication group id. If there is only one,
     // for convenience, use no qualifier
-    config.forEach { replicationGroupId, replicationGroupConfig: RedisReplicationGroupConfig ->
+    config.forEach { (replicationGroupId, replicationGroupConfig: RedisReplicationGroupConfig) ->
       // If there is just a single replication group, use no qualifier
       val qualifier = if (config.size == 1) null else Names.named(replicationGroupId)
       val redisClientKey = keyOf<RedisClient>(qualifier)
@@ -67,7 +67,7 @@ internal class RedisStandaloneModule<K : Any, V : Any> internal constructor(
 
       val redisPrimaryUri = redisUri {
         with(replicationGroupConfig.writer_endpoint) {
-          withHost(hostname)
+          withHost(hostname.takeIf { it.isNotBlank() } ?: "localhost")
           withPort(port)
         }
         withPassword(replicationGroupConfig.redis_auth_password.toCharArray())
