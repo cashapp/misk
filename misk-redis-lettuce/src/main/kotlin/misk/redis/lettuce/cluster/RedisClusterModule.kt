@@ -64,7 +64,7 @@ internal class RedisClusterModule<K : Any, V : Any> internal constructor(
         redisClusterClient(
             with(clusterGroupConfig.configuration_endpoint) {
               redisUri {
-                withHost(hostname)
+                withHost(hostname.takeIf { it.isNotBlank() } ?: "localhost")
                 withPort(port)
                 withPassword(clusterGroupConfig.redis_auth_password.toCharArray())
                 withSsl(clusterGroupConfig.use_ssl)
