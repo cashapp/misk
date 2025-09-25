@@ -1,6 +1,6 @@
 package misk.cloud.gcp.security.keys
 
-import wisp.config.Config
+import misk.config.Config
 
 data class GcpKmsConfig(
   val project_id: String,

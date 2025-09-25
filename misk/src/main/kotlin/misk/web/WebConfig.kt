@@ -7,7 +7,7 @@ import misk.security.ssl.TrustStoreConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.slf4j.event.Level
-import wisp.config.Config
+import misk.config.Config
 
 data class WebConfig @JvmOverloads constructor(
   /** HTTP port to listen on, or 0 for any available port. */

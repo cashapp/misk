@@ -1,7 +1,7 @@
 package misk.aws2.sqs.jobqueue.config
 
 import misk.jobqueue.QueueName
-import wisp.config.Config
+import misk.config.Config
 
 /**
  * Sqs Configuration

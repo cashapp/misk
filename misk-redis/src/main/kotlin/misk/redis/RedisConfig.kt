@@ -2,7 +2,7 @@ package misk.redis
 
 import misk.config.Redact
 import redis.clients.jedis.Protocol
-import wisp.config.Config
+import misk.config.Config
 
 class RedisConfig : java.util.LinkedHashMap<String, RedisReplicationGroupConfig>, Config {
   constructor() : super()

@@ -1,7 +1,7 @@
 package misk.cloud.gcp.storage
 
 import misk.cloud.gcp.TransportConfig
-import wisp.config.Config
+import misk.config.Config
 
 /** Configuration for talking to Google Cloud Storage */
 data class StorageConfig @JvmOverloads constructor(

@@ -16,9 +16,9 @@ dependencies {
   
   // Misk core dependencies
   api(project(":misk-aws"))  // For AwsRegion
+  api(project(":misk-config"))
   api(project(":misk-inject"))
-  api(project(":wisp:wisp-config"))
-  
+
   // Implementation dependencies
   implementation(libs.aws2Core)
   implementation(libs.aws2Regions)

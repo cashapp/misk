@@ -22,7 +22,7 @@ import misk.inject.KAbstractModule
 import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
-import wisp.config.Config
+import misk.config.Config
 import misk.logging.getLogger
 import java.net.URI
 import java.time.Duration
