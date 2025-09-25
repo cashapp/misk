@@ -6,7 +6,7 @@ import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 
 class PrimitivesDbTestModule : KAbstractModule() {

@@ -13,7 +13,7 @@ dependencies {
   api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.retrofit)
-  api(project(":misk-core"))
+  api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
   implementation(libs.prometheusClient)

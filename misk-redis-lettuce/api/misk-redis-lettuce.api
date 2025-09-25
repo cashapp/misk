@@ -1,4 +1,4 @@
-public abstract interface class misk/redis/lettuce/AbstractRedisConfig : wisp/config/Config {
+public abstract interface class misk/redis/lettuce/AbstractRedisConfig : misk/config/Config {
 }
 
 public final class misk/redis/lettuce/AsyncCloseableExtensionsKt {

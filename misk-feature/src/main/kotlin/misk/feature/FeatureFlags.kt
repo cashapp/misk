@@ -133,6 +133,18 @@ interface FeatureFlags {
   ): T
 
   /**
+   * Calculates the value of a JSON feature flag for the given key and attributes and returns it as a json string.
+   *
+   * is registered with the impl.
+   * @see [getEnum] for param details
+   */
+  fun getJsonString(
+    feature:Feature,
+    key: String,
+    attributes: Attributes = Attributes()
+  ): String
+
+  /**
    * Registers a tracker for the value of a boolean feature flag for the given key and attributes.
    * @see [trackEnum] for param details
    */
@@ -248,6 +260,11 @@ interface FeatureFlags {
     key: String,
     clazz: Class<T>
   ) = getJson(feature, key, clazz, Attributes())
+
+  fun getJsonString(
+    feature: Feature,
+    key: String,
+  ) = getJsonString(feature, key, Attributes())
 
   fun trackBoolean(
     feature: Feature,

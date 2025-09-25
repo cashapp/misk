@@ -28,7 +28,6 @@ dependencies {
   api(libs.moshiCore)
   api(libs.okio)
   api(libs.openTracing)
-  api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   api(project(":misk-config"))
   api(project(":misk-inject"))

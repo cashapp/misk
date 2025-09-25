@@ -374,7 +374,7 @@ public final class misk/redis/RedisClientMetrics {
 public final class misk/redis/RedisClientMetrics$Companion {
 }
 
-public final class misk/redis/RedisClusterConfig : java/util/LinkedHashMap, wisp/config/Config {
+public final class misk/redis/RedisClusterConfig : java/util/LinkedHashMap, misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/Map;)V
 	public final fun containsKey (Ljava/lang/Object;)Z
@@ -433,7 +433,7 @@ public final class misk/redis/RedisClusterReplicationGroupConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/redis/RedisConfig : java/util/LinkedHashMap, wisp/config/Config {
+public final class misk/redis/RedisConfig : java/util/LinkedHashMap, misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/Map;)V
 	public final fun containsKey (Ljava/lang/Object;)Z

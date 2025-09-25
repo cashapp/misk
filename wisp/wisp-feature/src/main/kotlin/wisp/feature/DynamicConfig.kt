@@ -6,6 +6,13 @@ import java.util.concurrent.Executor
  * Interface for evaluating dynamic flags. Dynamic flags are similar to feature flags, but they
  * don't support different variations for different keys.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "DynamicConfig()",
+    imports = ["misk.feature.DynamicConfig"]
+  )
+)
 interface DynamicConfig {
     /**
      * Returns the value of a boolean dynamic flag.

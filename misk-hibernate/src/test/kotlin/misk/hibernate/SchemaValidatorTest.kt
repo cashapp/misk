@@ -25,7 +25,7 @@ import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import java.time.Instant
 import javax.persistence.Column

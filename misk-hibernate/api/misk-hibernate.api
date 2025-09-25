@@ -108,7 +108,7 @@ public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstra
 	protected final fun installHibernateAdminDashboardWebActions ()V
 }
 
-public final class misk/hibernate/HibernateExceptionLogLevelConfig : wisp/config/Config {
+public final class misk/hibernate/HibernateExceptionLogLevelConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Lorg/slf4j/event/Level;)V
 	public synthetic fun <init> (Lorg/slf4j/event/Level;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

@@ -9,6 +9,14 @@ public final class misk/cloud/aws/AwsAccountId {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/cloud/aws/AwsEnvironment {
+	public static final field INSTANCE Lmisk/cloud/aws/AwsEnvironment;
+	public final fun awsAccountId (Lwisp/deployment/EnvironmentVariableLoader;Ljava/lang/String;)Lmisk/cloud/aws/AwsAccountId;
+	public static synthetic fun awsAccountId$default (Lmisk/cloud/aws/AwsEnvironment;Lwisp/deployment/EnvironmentVariableLoader;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsAccountId;
+	public final fun awsRegion (Lwisp/deployment/EnvironmentVariableLoader;Ljava/util/List;Ljava/lang/String;)Lmisk/cloud/aws/AwsRegion;
+	public static synthetic fun awsRegion$default (Lmisk/cloud/aws/AwsEnvironment;Lwisp/deployment/EnvironmentVariableLoader;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsRegion;
+}
+
 public final class misk/cloud/aws/AwsEnvironmentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun awsAccountId (Lmisk/environment/EnvVarLoader;)Lmisk/cloud/aws/AwsAccountId;
@@ -77,7 +85,7 @@ public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
 	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 }
 
-public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
+public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/Map;)V
 	public fun <init> (Ljava/util/Map;I)V

@@ -11,7 +11,7 @@ import misk.web.MiskWebModule
 import misk.web.WebTestingModule.Companion.TESTING_WEB_CONFIG
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
-import wisp.config.Config
+import misk.config.Config
 
 class HibernateWebActionTestingModule : KAbstractModule() {
   override fun configure() {

@@ -7,8 +7,8 @@ plugins {
 }
 
 dependencies {
+  api(project(":misk-config"))
   api(project(":misk-inject"))
-  api(project(":wisp:wisp-config"))
 
   implementation(libs.aws2Dynamodb)
   implementation(libs.aws2DynamodbEnhanced)

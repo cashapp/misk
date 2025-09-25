@@ -10,6 +10,13 @@ import kotlin.reflect.KClass
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "FakeFeatureFlags()",
+    imports = ["misk.feature.testing.FakeFeatureFlags"]
+  )
+)
 open class FakeFeatureFlags private constructor(
     val legacyFeatureFlags: FakeLegacyFeatureFlags,
     val strongFeatureFlags: FakeStrongFeatureFlags

@@ -65,6 +65,14 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes,
   ): T = delegate.getJson(feature, key, clazz, attributes)
 
+  override fun getJsonString(
+    feature: Feature,
+    key: String,
+    attributes: Attributes
+  ): String {
+    return delegate.getJsonString(feature, key, attributes)
+  }
+
   override fun trackBoolean(
     feature: Feature,
     key: String,

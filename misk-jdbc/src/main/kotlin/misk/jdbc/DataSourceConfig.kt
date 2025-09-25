@@ -1,7 +1,7 @@
 package misk.jdbc
 
 import misk.config.Redact
-import wisp.config.Config
+import misk.config.Config
 import misk.containers.ContainerUtil
 import wisp.deployment.Deployment
 import java.time.Duration

@@ -5,6 +5,13 @@ import java.util.concurrent.Executor
 /**
  * Interface for evaluating feature flags.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "FeatureFlags()",
+    imports = ["misk.feature.FeatureFlags"]
+  )
+)
 interface FeatureFlags : StrongFeatureFlags, LegacyFeatureFlags
 
 interface StrongFeatureFlags {

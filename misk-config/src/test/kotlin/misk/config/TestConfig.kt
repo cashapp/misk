@@ -2,7 +2,7 @@ package misk.config
 
 import misk.web.WebConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
-import wisp.config.Config
+import misk.config.Config
 import java.time.Duration
 
 data class TestConfig(

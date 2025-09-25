@@ -4,7 +4,7 @@ import com.google.auth.Credentials
 import com.google.cloud.spanner.SpannerOptions
 import misk.cloud.gcp.TransportConfig
 import misk.config.Redact
-import wisp.config.Config
+import misk.config.Config
 
 /** Configuration for talking to Google datastore */
 data class SpannerConfig @JvmOverloads constructor(

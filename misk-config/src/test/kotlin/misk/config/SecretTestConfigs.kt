@@ -1,6 +1,6 @@
 package misk.config
 
-import wisp.config.Config
+import misk.config.Config
 
 data class SuperSecretConfig(
   val string_value: String,

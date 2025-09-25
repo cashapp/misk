@@ -7,6 +7,7 @@ public final class misk/feature/launchdarkly/LaunchDarklyDynamicConfig : misk/fe
 	public fun getEnum (Lmisk/feature/Feature;Ljava/lang/Class;)Ljava/lang/Enum;
 	public fun getInt (Lmisk/feature/Feature;)I
 	public fun getJson (Lmisk/feature/Feature;Ljava/lang/Class;)Ljava/lang/Object;
+	public fun getJsonString (Lmisk/feature/Feature;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;)Ljava/lang/String;
 	public fun trackBoolean (Lmisk/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
 	public fun trackDouble (Lmisk/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
@@ -38,6 +39,8 @@ public final class misk/feature/launchdarkly/LaunchDarklyFeatureFlags : com/goog
 	public fun getInt (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)I
 	public fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;)Ljava/lang/Object;
+	public fun getJsonString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public fun getJsonString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;
 	public fun trackBoolean (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;

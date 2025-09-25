@@ -1,6 +1,6 @@
 package misk.clustering.kubernetes
 
-import wisp.config.Config
+import misk.config.Config
 
 /**
  * @property clustering_pod_label_selector Optional Kubernetes label selector to filter which pods
