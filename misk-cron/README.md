@@ -3,8 +3,9 @@ This module gives Misk services a way to run scheduled tasks using [cron](https:
 
 Note that there are **not** strong guarantees on task execution; tasks can be delayed or missed entirely for many reasons, including if the instance currently holding the lease is degraded or if it dies completely while executing the task. This module is not a good choice for highly sensitive, business critical needs.
 
-## Usage
+**For business-critical tasks consider migrating to [Temporal](https://temporal.io/) or other solutions providing at-least-once execution guarantees.**
 
+## Usage
 1. Create a `Runnable`
     ```kotlin
     @CronPattern("* * * * *") // runs every 1 minute
@@ -23,3 +24,60 @@ Note that there are **not** strong guarantees on task execution; tasks can be de
       }
     }
     ```
+
+## Execution Models
+
+### Single-lease mode (default)
+- One cluster-wide lease controls all cron tasks
+- Only one pod in the cluster executes cron tasks at a time
+- **Best when:**
+   - Tasks idempotency is uncertain or unverified
+   - Tasks have execution order dependencies
+
+### Distributed mode
+- Each cron task has its own lease
+- Multiple pods can run tasks concurrently, increasing resource utilization and fault tolerance
+- **Best when:**
+   - You have multiple independent tasks
+   - Tasks are idempotent
+   - You want to avoid a single point of failure
+   - Tasks run infrequently (hourly, daily) or can tolerate occasional overlapping runs
+
+## Distributed Execution
+
+To enable distributed execution, set `useDistributedExecution = true`. In this mode, leases are granted per task, allowing tasks to run in parallel across the cluster:
+
+```kotlin
+class MyAppModule : KAbstractModule {
+  override fun configure() {
+    install(CronModule(
+      zoneId = ZoneId.of("America/Los_Angeles"),
+      useDistributedExecution = true
+    ))
+    install(CronEntryModule.create<MyCronTask>())
+  }
+}
+```
+
+## Migration to Distributed Mode
+
+### Callout
+During rolling deployments, cron tasks may briefly run twice (once per old pod and once per new pod).
+**To mitigate:**
+- Ensure tasks are idempotent, or
+- Deploy during a cron downtime window if tasks run at very high frequency (e.g., every minute).
+
+### Pre-migration Assessment
+**Task frequency:**
+- Low-frequency tasks (hourly, daily): safe for migration.
+- High-frequency tasks (every minute): ensure idempotency or accept possible overlaps.
+
+**Task idempotency:**
+- Tasks should not produce incorrect results or side effects when re-run.
+
+### Migration Steps
+1. Deploy with `useDistributedExecution = false` (no behavior change).
+2. Verify deployment stability across all environments.
+3. **Redeploy** with `useDistributedExecution = true` (requires full redeploy of all pods, not a runtime config toggle).
+4. Monitor logs/metrics to validate task distribution and performance.
+5. If issues arise, redeploy with `useDistributedExecution = false`.
