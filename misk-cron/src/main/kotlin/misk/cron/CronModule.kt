@@ -20,6 +20,7 @@ class CronModule @JvmOverloads constructor(
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = true,
+  private val useDistributedExecution: Boolean = false
 ) : KInstallOnceModule() {
   override fun configure() {
     install(
@@ -28,6 +29,7 @@ class CronModule @JvmOverloads constructor(
         threadPoolSize = threadPoolSize,
         dependencies = dependencies,
         installDashboardTab = installDashboardTab,
+        useDistributedExecution = useDistributedExecution,
       ),
     )
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
@@ -51,6 +53,7 @@ class FakeCronModule @JvmOverloads constructor(
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = false,
+  private val useDistributedExecution: Boolean = false,
 ) : KAbstractModule() {
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
@@ -73,6 +76,15 @@ class FakeCronModule @JvmOverloads constructor(
       install(CronDashboardTabModule())
     }
   }
+
+  @Provides
+  @Singleton
+  fun cronCoordinator(leaseManager: wisp.lease.LeaseManager): CronCoordinator =
+    if (useDistributedExecution) {
+      DistributedCronCoordinator(leaseManager)
+    } else {
+      SingleLeaseCronCoordinator(leaseManager)
+    }
 }
 
 @Qualifier

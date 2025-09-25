@@ -37,6 +37,7 @@ dependencies {
   testImplementation(libs.junitApi)
   testImplementation(libs.logbackClassic)
   testImplementation(project(":wisp:wisp-logging-testing"))
+  testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":misk-testing"))
 }
 

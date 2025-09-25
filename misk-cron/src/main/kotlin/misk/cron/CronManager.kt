@@ -109,7 +109,7 @@ class CronManager @Inject constructor() {
     cronEntries.clear()
   }
 
-  fun runReadyCrons(lastRun: Instant) {
+  fun runReadyCrons(lastRun: Instant, cronCoordinator: CronCoordinator) {
     val now = clock.instant()
     val previousTime = ZonedDateTime.ofInstant(lastRun, zoneId)
 
@@ -122,7 +122,7 @@ class CronManager @Inject constructor() {
         .withSecond(0)
         .withNano(0)
 
-      if (nextExecutionTime.toInstant() <= now) {
+      if (nextExecutionTime.toInstant() <= now && cronCoordinator.shouldRunTask(cronEntry.name)) {
         logger.info {
           "CronJob ${cronEntry.name} was ready at $nextExecutionTime"
         }
