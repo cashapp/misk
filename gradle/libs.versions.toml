@@ -31,7 +31,7 @@ wire = "5.4.0"
 
 [libraries]
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.20.0" }
-apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
+apacheCommonsLang = { module = "org.apache.commons:commons-lang3", version = "3.19.0" }
 apacheCommonsMath3 = { module = " org.apache.commons:commons-math3", version = "3.6.1" }
 apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.12.1" }
 assertj = { module = "org.assertj:assertj-core", version = "3.27.6" }
