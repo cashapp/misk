@@ -156,7 +156,11 @@ private constructor(
     }
     return transactionWithRetriesInternal {
       replicaReadWithoutTransactionInternalSession { session ->
-        session.target(Destination(TabletType.REPLICA)) { block(session) }
+        if (config.type.isVitess && config.database != Destination.replica().toString()) {
+          session.target(Destination.replica(), block)
+        } else {
+          block(session)
+        }
       }
     }
   }
@@ -262,33 +266,31 @@ private constructor(
 
   private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
     return withSession { session ->
-      session.target(Destination(TabletType.PRIMARY)) {
-        val transaction = session.hibernateSession.beginTransaction()!!
-        try {
-          val result = block(session)
+      val transaction = session.hibernateSession.beginTransaction()!!
+      try {
+        val result = block(session)
 
-          // Flush any changes to the database before commit
-          session.hibernateSession.flush()
-          session.preCommit()
-          transaction.commit()
-          session.postCommit()
-          result
-        } catch (e: Throwable) {
-          var rethrow = e
-          if (config.type == DataSourceType.TIDB) {
-            rethrow = mapTidbException(e)
-          }
-
-          if (transaction.isActive) {
-            try {
-              transaction.rollback()
-              session.onSessionClose { session.runRollbackHooks(e) }
-            } catch (suppressed: Exception) {
-              rethrow.addSuppressed(suppressed)
-            }
-          }
-          throw rethrow
+        // Flush any changes to the database before commit
+        session.hibernateSession.flush()
+        session.preCommit()
+        transaction.commit()
+        session.postCommit()
+        result
+      } catch (e: Throwable) {
+        var rethrow = e
+        if (config.type == DataSourceType.TIDB) {
+          rethrow = mapTidbException(e)
         }
+
+        if (transaction.isActive) {
+          try {
+            transaction.rollback()
+            session.onSessionClose { session.runRollbackHooks(e) }
+          } catch (suppressed: Exception) {
+            rethrow.addSuppressed(suppressed)
+          }
+        }
+        throw rethrow
       }
     }
   }
@@ -555,59 +557,49 @@ private constructor(
       }
     }
 
-    override fun <T> target(shard: Shard, function: () -> T): T {
-      return if (config.type.isVitess) {
-        target(Destination(shard), function)
-      } else {
-        function()
+    @Deprecated("Use target(Destination, block) which has more explicit targeting")
+    override fun <T> target(shard: Shard, function: () -> T): T = target(Destination(shard)) { _ -> function() }
+
+    override fun <T> target(destination: Destination, block: (session: Session) -> T): T {
+      return when (config.type.isVitess) {
+        false -> block(this)
+        true -> {
+          useConnection { connection ->
+            val previous = currentTarget(connection)
+            // Merge Destinations to support composition (e.g., targeting a shard with TabletType not specified within a replica read)
+            // This will prefer values from the new Destination when merging.
+            val mergedDestination = previous.mergedWith(destination)
+            val targetHasChanged = previous != mergedDestination
+            
+            try {
+              if (targetHasChanged) {
+                logger.debug {
+                  "The new destination was updated from previous target. Destination target: $mergedDestination, " +
+                    "previous target: $previous"
+                }
+                use(connection, mergedDestination)
+              }
+              block(this)
+            } catch (e: Exception) {
+              throw e
+            } finally {
+              if (targetHasChanged) {
+                try {
+                  use(connection, previous)
+                } catch (e: Exception) {
+                  logger.error(e) {
+                    "Exception restoring destination, previous = $previous, destination = $mergedDestination, " +
+                      "cause = ${e.message}"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
-    internal fun <T> target(destination: Destination, function: () -> T): T =
-      when (config.type.isVitess) {
-        false -> function()
-        true -> {
-          val previous = currentTarget()
-          val targetHasChanged = previous != destination
-          val result = runCatching {
-            if (targetHasChanged) {
-              logger.debug {
-                "The new destination was updated from previous target. Destination target: $destination, " +
-                  "previous target: $previous"
-              }
-              use(destination)
-            }
-            function()
-          }
-          // Always try restoring the previous destination if needed
-          if (targetHasChanged) {
-            runCatching {
-              use(previous)
-            }.onFailure { e ->
-              logger.error(e) {
-                "Exception restoring destination, previous = $previous, destination = $destination," +
-                "cause = ${e.message}"
-              }
-              // If we fail in restoring the previous destination we should throw
-              if (result.isFailure) {
-                val suppressed = result.exceptionOrNull()!!
-                suppressed.addSuppressed(e)
-                // If the original block failed, add our restoration failure as a suppressed exception 
-                // to avoid making the original failure
-                throw suppressed
-              } else {
-                throw e
-              }
-            }
-          }
-          result.getOrThrow()
-        }
-      }
-
-    private fun isConnectionClosed(exception: Exception) =
-      exception.cause?.javaClass == SQLException::class.java && exception.cause?.message.equals("Connection is closed")
-
-    private fun use(destination: Destination) = useConnection { connection ->
+    private fun use(connection: Connection, destination: Destination) {
       check(config.type.isVitess)
       connection.createStatement().use { _ ->
         val catalog = if (destination.isBlank()) "${Destination.primary()}" else "$destination"
@@ -615,11 +607,11 @@ private constructor(
       }
     }
 
-    private fun currentTarget(): Destination = useConnection { connection ->
+    private fun currentTarget(connection: Connection): Destination {
       check(config.type.isVitess)
       connection.createStatement().use { _ ->
         val target = connection.catalog
-        Destination.parse(target)
+        return Destination.parse(target)
       }
     }
 

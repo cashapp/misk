@@ -304,6 +304,7 @@ public abstract interface class misk/hibernate/Session : misk/jdbc/Session {
 	public abstract fun save (Lmisk/hibernate/DbEntity;)Lmisk/hibernate/Id;
 	public abstract fun shards ()Ljava/util/Set;
 	public abstract fun shards (Lmisk/vitess/Keyspace;)Ljava/util/Collection;
+	public abstract fun target (Lmisk/vitess/Destination;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun target (Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public abstract fun withoutChecks ([Lmisk/jdbc/Check;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
