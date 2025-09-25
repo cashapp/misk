@@ -186,7 +186,7 @@ public final class misk/jdbc/DataSourceClusterConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/jdbc/DataSourceClustersConfig : java/util/LinkedHashMap, wisp/config/Config {
+public final class misk/jdbc/DataSourceClustersConfig : java/util/LinkedHashMap, misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/Map;)V
 	public final fun containsKey (Ljava/lang/Object;)Z

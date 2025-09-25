@@ -28,7 +28,6 @@ import com.fasterxml.jackson.module.kotlin.KotlinInvalidNullException
 import com.google.common.base.Joiner
 import misk.resources.ResourceLoader
 import org.apache.commons.lang3.StringUtils
-import wisp.config.Config
 import wisp.deployment.Deployment
 import misk.logging.getLogger
 import java.io.File

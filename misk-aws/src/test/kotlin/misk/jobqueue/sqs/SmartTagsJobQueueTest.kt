@@ -18,7 +18,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import wisp.feature.testing.FakeFeatureFlags
+import misk.feature.testing.FakeFeatureFlags
 import misk.logging.LogCollector
 import misk.logging.getLogger
 import misk.logging.withSmartTags

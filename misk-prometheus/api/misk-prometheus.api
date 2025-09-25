@@ -1,4 +1,4 @@
-public final class misk/metrics/backends/prometheus/PrometheusConfig : wisp/config/Config {
+public final class misk/metrics/backends/prometheus/PrometheusConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;ILjava/lang/Long;Z)V
 	public synthetic fun <init> (Ljava/lang/String;ILjava/lang/Long;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V

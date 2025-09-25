@@ -619,7 +619,7 @@ public final class misk/client/HttpClientSSLConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/client/HttpClientsConfig : wisp/config/Config {
+public final class misk/client/HttpClientsConfig : misk/config/Config {
 	public static final field Companion Lmisk/client/HttpClientsConfig$Companion;
 	public fun <init> ()V
 	public fun <init> (Ljava/util/LinkedHashMap;)V
@@ -1533,7 +1533,7 @@ public abstract interface class misk/web/WebActionSeedDataTransformerFactory {
 	public abstract fun create (Lmisk/web/PathPattern;Lmisk/Action;)Lmisk/scope/SeedDataTransformer;
 }
 
-public final class misk/web/WebConfig : wisp/config/Config {
+public final class misk/web/WebConfig : misk/config/Config {
 	public fun <init> (I)V
 	public fun <init> (IJ)V
 	public fun <init> (IJI)V
@@ -1800,7 +1800,7 @@ public final class misk/web/concurrencylimits/ConcurrencyLimitsModule : misk/inj
 	public final fun concurrencyLimiterFactory (Lcom/google/inject/Provider;Ljava/time/Clock;)Lmisk/web/concurrencylimits/ConcurrencyLimiterFactory;
 }
 
-public final class misk/web/exceptions/ActionExceptionLogLevelConfig : wisp/config/Config {
+public final class misk/web/exceptions/ActionExceptionLogLevelConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Lorg/slf4j/event/Level;)V
 	public fun <init> (Lorg/slf4j/event/Level;Lorg/slf4j/event/Level;)V

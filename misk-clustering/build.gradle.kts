@@ -10,7 +10,7 @@ dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
   api(libs.loggingApi)
-  api(project(":wisp:wisp-config"))
+  api(project(":misk-config"))
   api(project(":misk-inject"))
   implementation(libs.caffeine)
   implementation(libs.guice)
