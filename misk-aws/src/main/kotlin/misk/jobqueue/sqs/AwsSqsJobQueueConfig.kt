@@ -4,7 +4,7 @@ import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_PER_QUEUE
 import misk.jobqueue.sqs.SqsJobConsumer.Companion.POD_CONSUMERS_PER_QUEUE
 import misk.jobqueue.sqs.SqsJobConsumer.Companion.POD_MAX_JOBQUEUE_CONSUMERS
 import misk.tasks.RepeatedTaskQueueConfig
-import wisp.config.Config
+import misk.config.Config
 
 /**
  * [AwsSqsJobQueueConfig] is the configuration for job queueing backed by Amazon's

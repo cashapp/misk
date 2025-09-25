@@ -167,7 +167,7 @@ public final class misk/mcp/action/McpStreamManager {
 public final class misk/mcp/action/McpStreamManager$Companion {
 }
 
-public final class misk/mcp/config/McpConfig : java/util/LinkedHashMap, wisp/config/Config {
+public final class misk/mcp/config/McpConfig : java/util/LinkedHashMap, misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/Map;)V
 	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -196,7 +196,7 @@ public final class misk/mcp/config/McpConfig : java/util/LinkedHashMap, wisp/con
 	public final fun values ()Ljava/util/Collection;
 }
 
-public final class misk/mcp/config/McpPromptConfig : wisp/config/Config {
+public final class misk/mcp/config/McpPromptConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Z)V
 	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -209,7 +209,7 @@ public final class misk/mcp/config/McpPromptConfig : wisp/config/Config {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/mcp/config/McpResourceConfig : wisp/config/Config {
+public final class misk/mcp/config/McpResourceConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Z)V
 	public fun <init> (ZZ)V
@@ -225,7 +225,7 @@ public final class misk/mcp/config/McpResourceConfig : wisp/config/Config {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/mcp/config/McpServerConfig : wisp/config/Config {
+public final class misk/mcp/config/McpServerConfig : misk/config/Config {
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;)V
 	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;)V
@@ -246,7 +246,7 @@ public final class misk/mcp/config/McpServerConfig : wisp/config/Config {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/mcp/config/McpToolConfig : wisp/config/Config {
+public final class misk/mcp/config/McpToolConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Z)V
 	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V

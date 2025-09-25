@@ -12,7 +12,6 @@ dependencies {
   api(libs.jakartaInject)
   api(project(":misk-config"))
   api(project(":misk-inject"))
-  api(project(":wisp:wisp-config"))
   implementation(libs.loggingApi)
   implementation(libs.kotlinStdLibJdk8)
   implementation(libs.moshiCore)

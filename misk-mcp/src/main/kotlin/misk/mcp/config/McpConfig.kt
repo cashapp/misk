@@ -3,7 +3,7 @@
 package misk.mcp.config
 
 import misk.annotation.ExperimentalMiskApi
-import wisp.config.Config
+import misk.config.Config
 
 /**
  * Configuration for Model Context Protocol (MCP) servers.

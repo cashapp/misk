@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import org.slf4j.event.Level
-import wisp.config.Config
+import misk.config.Config
 
 /**
  * Configures the log [Level] for a HibernateException.

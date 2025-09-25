@@ -1,6 +1,6 @@
 package misk.clustering.dynamo
 
-import wisp.config.Config
+import misk.config.Config
 
 data class DynamoClusterConfig @JvmOverloads constructor(
   val appName: String = System.getenv("SERVICE_NAME") ?: "<invalid-service-name>",
