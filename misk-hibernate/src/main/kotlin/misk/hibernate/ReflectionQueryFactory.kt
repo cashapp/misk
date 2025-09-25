@@ -77,12 +77,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       this.queryMethodHandlers,
       this.queryLimitsConfig
     )
-    if (copy.maxRows != -1) {
-      copy.maxRows = this.maxRows
-    }
-    if (copy.firstResult != 0) {
-      copy.firstResult = this.firstResult
-    }
+    copy.maxRows = this.maxRows
+    copy.firstResult = this.firstResult
     copy.hints.addAll(this.hints)
     copy.constraints.addAll(this.constraints)
     copy.orderFactories.addAll(this.orderFactories)
