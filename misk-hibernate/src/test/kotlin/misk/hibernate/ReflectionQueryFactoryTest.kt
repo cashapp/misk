@@ -1173,33 +1173,50 @@ class ReflectionQueryFactoryTest {
     val original = queryFactory.newQuery<OperatorsMovieQuery>()
       .allowTableScan()
       .constraint { root -> like(root.get("name"), "Jurassic%") }
+      .apply {
+        maxRows = 10
+        firstResult = 0
+      }
 
     val clone = original.clone<OperatorsMovieQuery>()
+
+    // Check that fields are cloned correctly
+    assertThat(clone.maxRows).isEqualTo(original.maxRows)
+    assertThat(clone.firstResult).isEqualTo(original.firstResult)
 
     // Original and cloned queries should provide the same result
     assertThat(
       transacter.transaction { session ->
-        original.count(session)
+        original.listAsNames(session)
       }
-    ).isEqualTo(2)
+    ).containsExactlyInAnyOrder(
+      "Jurassic Park",
+      "Jurassic Park: The Lost World",
+    )
     assertThat(
       transacter.transaction { session ->
-        clone.count(session)
+        clone.listAsNames(session)
       }
-    ).isEqualTo(2)
+    ).containsExactlyInAnyOrder(
+      "Jurassic Park",
+      "Jurassic Park: The Lost World",
+    )
 
     // Modify the cloned query. The original query should be unchanged
     clone.constraint { root -> like(root.get("name"), "%World") }
     assertThat(
       transacter.transaction { session ->
-        original.count(session)
+        original.listAsNames(session)
       }
-    ).isEqualTo(2)
+    ).containsExactlyInAnyOrder(
+      "Jurassic Park",
+      "Jurassic Park: The Lost World",
+    )
     assertThat(
       transacter.transaction { session ->
-        clone.count(session)
+        clone.listAsNames(session)
       }
-    ).isEqualTo(1)
+    ).containsExactly("Jurassic Park: The Lost World")
   }
 
   @Test
