@@ -1,3 +1,7 @@
+public abstract interface class misk/cron/CronCoordinator {
+	public abstract fun shouldRunTask (Ljava/lang/String;)Z
+}
+
 public final class misk/cron/CronDashboardTabModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
@@ -57,7 +61,8 @@ public final class misk/cron/CronModule : misk/inject/KInstallOnceModule {
 	public fun <init> (Ljava/time/ZoneId;I)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;Z)V
-	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZ)V
+	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun provideTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
 }
 
@@ -70,6 +75,23 @@ public final class misk/cron/FakeCronModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/time/ZoneId;I)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;Z)V
-	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZ)V
+	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun cronCoordinator (Lwisp/lease/LeaseManager;)Lmisk/cron/CronCoordinator;
+}
+
+public final class misk/cron/MultipleLeaseCronCoordinator : misk/cron/CronCoordinator {
+	public fun <init> (Lwisp/lease/LeaseManager;)V
+	public fun shouldRunTask (Ljava/lang/String;)Z
+}
+
+public final class misk/cron/SingleLeaseCronCoordinator : misk/cron/CronCoordinator {
+	public static final field CRON_CLUSTER_LEASE_NAME Ljava/lang/String;
+	public static final field Companion Lmisk/cron/SingleLeaseCronCoordinator$Companion;
+	public fun <init> (Lwisp/lease/LeaseManager;)V
+	public fun shouldRunTask (Ljava/lang/String;)Z
+}
+
+public final class misk/cron/SingleLeaseCronCoordinator$Companion {
 }
 
