@@ -19,7 +19,7 @@ public final class misk/cron/CronEntryModule$Companion {
 public final class misk/cron/CronManager {
 	public static final field Companion Lmisk/cron/CronManager$Companion;
 	public fun <init> ()V
-	public final fun runReadyCrons (Ljava/time/Instant;Lmisk/cron/CronCoordinator;)V
+	public final fun runReadyCrons (Ljava/time/Instant;)V
 	public final fun waitForCronsComplete ()V
 }
 
@@ -70,11 +70,6 @@ public abstract interface annotation class misk/cron/CronPattern : java/lang/ann
 	public abstract fun pattern ()Ljava/lang/String;
 }
 
-public final class misk/cron/DistributedCronCoordinator : misk/cron/CronCoordinator {
-	public fun <init> (Lwisp/lease/LeaseManager;)V
-	public fun shouldRunTask (Ljava/lang/String;)Z
-}
-
 public final class misk/cron/FakeCronModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/time/ZoneId;)V
 	public fun <init> (Ljava/time/ZoneId;I)V
@@ -83,6 +78,11 @@ public final class misk/cron/FakeCronModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZ)V
 	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun cronCoordinator (Lwisp/lease/LeaseManager;)Lmisk/cron/CronCoordinator;
+}
+
+public final class misk/cron/MultipleLeaseCronCoordinator : misk/cron/CronCoordinator {
+	public fun <init> (Lwisp/lease/LeaseManager;)V
+	public fun shouldRunTask (Ljava/lang/String;)Z
 }
 
 public final class misk/cron/SingleLeaseCronCoordinator : misk/cron/CronCoordinator {
