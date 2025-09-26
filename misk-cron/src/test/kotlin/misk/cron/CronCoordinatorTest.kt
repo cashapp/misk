@@ -39,7 +39,7 @@ class CronCoordinatorTest {
 
   @Test
   fun distributedCoordinatorUsesTaskSpecificLeases() {
-    val coordinator = DistributedCronCoordinator(fakeLeaseManager)
+    val coordinator = MultipleLeaseCronCoordinator(fakeLeaseManager)
 
     fakeLeaseManager.markLeaseHeld("misk.cron.task.task1")
     fakeLeaseManager.markLeaseHeldElsewhere("misk.cron.task.task2")
@@ -69,7 +69,7 @@ class CronCoordinatorTest {
 
   @Test
   fun distributedCoordinatorAcquiresTaskLeaseWhenNotHeld() {
-    val coordinator = DistributedCronCoordinator(fakeLeaseManager)
+    val coordinator = MultipleLeaseCronCoordinator(fakeLeaseManager)
 
     // Mark task lease as held elsewhere first
     fakeLeaseManager.markLeaseHeldElsewhere("misk.cron.task.task1")

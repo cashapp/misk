@@ -15,7 +15,6 @@ import jakarta.inject.Singleton
 internal class CronTask @Inject constructor() : AbstractIdleService() {
   @Inject private lateinit var clock: Clock
   @Inject private lateinit var cronManager: CronManager
-  @Inject private lateinit var cronCoordinator: CronCoordinator
   @Inject @ForMiskCron private lateinit var taskQueue: RepeatedTaskQueue
   @Inject private lateinit var clusterWeight: ClusterWeightProvider
 
@@ -28,7 +27,7 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
         return@scheduleWithBackoff Status.OK
       }
       val now = clock.instant()
-      cronManager.runReadyCrons(lastRun, cronCoordinator)
+      cronManager.runReadyCrons(lastRun)
       lastRun = now
       Status.OK
     }

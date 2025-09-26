@@ -20,7 +20,7 @@ class SingleLeaseCronCoordinator @Inject constructor(
   }
 }
 
-class DistributedCronCoordinator @Inject constructor(
+class MultipleLeaseCronCoordinator @Inject constructor(
   private val leaseManager: LeaseManager
 ) : CronCoordinator {
   override fun shouldRunTask(taskName: String): Boolean {
