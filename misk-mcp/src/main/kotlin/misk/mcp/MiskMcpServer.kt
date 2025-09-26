@@ -1,5 +1,6 @@
 package misk.mcp
 
+import com.google.inject.Provider
 import io.modelcontextprotocol.kotlin.sdk.Implementation
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCNotification
@@ -106,6 +107,7 @@ class MiskMcpServer internal constructor(
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
   prompts: Set<McpPrompt>,
+  instructionsProvider: Provider<String>? = null,
 ) : Server(
   Implementation(
     name = name,
@@ -121,6 +123,7 @@ class MiskMcpServer internal constructor(
       tools = if (tools.isNotEmpty()) config.tools.asTools() else null,
     ),
   ),
+  // TODO: propagate instructionsProvider once supported in MCP SDK
 ) {
 
   init {
