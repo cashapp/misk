@@ -101,10 +101,11 @@ class ClientMetricsInterceptor private constructor(
     return when (grpcStatus) {
       GrpcStatus.OK.code -> HTTP_OK
       GrpcStatus.CANCELLED.code -> HTTP_CLIENT_CLOSED_REQUEST
+
+      GrpcStatus.INTERNAL.code,
       GrpcStatus.UNKNOWN.code,
       GrpcStatus.DATA_LOSS.code -> HTTP_INTERNAL_SERVER_ERROR
 
-      GrpcStatus.INTERNAL.code,  // This aligns with the mapping in ExceptionHandler and https://grpc.github.io/grpc/core/md_doc_http-grpc-status-mapping.html
       GrpcStatus.INVALID_ARGUMENT.code,
       GrpcStatus.FAILED_PRECONDITION.code,
       GrpcStatus.OUT_OF_RANGE.code -> HTTP_BAD_REQUEST
