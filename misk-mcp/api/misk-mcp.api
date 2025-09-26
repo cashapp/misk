@@ -79,11 +79,11 @@ public abstract class misk/mcp/McpTool {
 	public fun getOpenWorldHint ()Z
 	public fun getReadOnlyHint ()Z
 	public fun getTitle ()Ljava/lang/String;
-	protected abstract fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lio/modelcontextprotocol/kotlin/sdk/CallToolResult;
 }
 
-protected final class misk/mcp/McpTool$PromptToolResult : misk/mcp/McpTool$ToolResult {
+public final class misk/mcp/McpTool$PromptToolResult : misk/mcp/McpTool$ToolResult {
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Z
 	public final fun component3 ()Lkotlinx/serialization/json/JsonObject;
@@ -95,7 +95,7 @@ protected final class misk/mcp/McpTool$PromptToolResult : misk/mcp/McpTool$ToolR
 	public fun toString ()Ljava/lang/String;
 }
 
-protected abstract interface class misk/mcp/McpTool$ToolResult {
+public abstract interface class misk/mcp/McpTool$ToolResult {
 	public abstract fun get_meta ()Lkotlinx/serialization/json/JsonObject;
 	public abstract fun isError ()Z
 }
@@ -128,7 +128,7 @@ public abstract class misk/mcp/StructuredMcpTool : misk/mcp/McpTool {
 	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lio/modelcontextprotocol/kotlin/sdk/CallToolResult;
 }
 
-protected final class misk/mcp/StructuredMcpTool$StructuredToolResult : misk/mcp/McpTool$ToolResult {
+public final class misk/mcp/StructuredMcpTool$StructuredToolResult : misk/mcp/McpTool$ToolResult {
 	public final fun component1 ()Ljava/lang/Object;
 	public final fun component2 ()Z
 	public final fun component3 ()Lkotlinx/serialization/json/JsonObject;
