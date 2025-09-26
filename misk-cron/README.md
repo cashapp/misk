@@ -41,7 +41,6 @@ Note that there are **not** strong guarantees on task execution; tasks can be de
    - You have multiple independent tasks
    - Tasks are idempotent
    - You want to avoid a single point of failure
-   - Tasks run infrequently (hourly, daily) or can tolerate occasional overlapping runs
 
 ## Distributed Execution
 
@@ -65,6 +64,7 @@ class MyAppModule : KAbstractModule {
 During rolling deployments, cron tasks may briefly run twice (once per old pod and once per new pod).
 **To mitigate:**
 - Ensure tasks are idempotent, or
+- Deploy between scheduled runs if tasks run at low to moderate frequency (e.g., once a day or every few hours)
 - Deploy during a cron downtime window if tasks run at very high frequency (e.g., every minute).
 
 ### Pre-migration Assessment
