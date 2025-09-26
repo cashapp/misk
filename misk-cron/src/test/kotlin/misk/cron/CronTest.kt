@@ -36,7 +36,6 @@ class CronTest {
   }
 
   @Inject private lateinit var cronManager: CronManager
-  @Inject private lateinit var cronCoordinator: CronCoordinator
   @Inject private lateinit var clock: FakeClock
   @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
   @Inject lateinit var fakeClusterWeight: FakeClusterWeight
@@ -51,7 +50,7 @@ class CronTest {
   // This simulates what the automated part of cron does.
   private fun runCrons() {
     val now = clock.instant()
-    cronManager.runReadyCrons(lastRun, cronCoordinator)
+    cronManager.runReadyCrons(lastRun)
     lastRun = now
     cronManager.waitForCronsComplete()
   }

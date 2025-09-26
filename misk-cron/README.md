@@ -34,7 +34,7 @@ Note that there are **not** strong guarantees on task execution; tasks can be de
    - Tasks idempotency is uncertain or unverified
    - Tasks have execution order dependencies
 
-### Distributed mode
+### Distributed mode (multiple lease execution)
 - Each cron task has its own lease
 - Multiple pods can run tasks concurrently, increasing resource utilization and fault tolerance
 - **Best when:**

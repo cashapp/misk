@@ -20,6 +20,8 @@ class CronModule @JvmOverloads constructor(
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = true,
+  // NOTE: `useDistributedExecution = true` may cause overlapping execution during deployments.
+  // Deploy during downtime or ensure tasks are idempotent.
   private val useDistributedExecution: Boolean = false
 ) : KInstallOnceModule() {
   override fun configure() {
@@ -81,7 +83,7 @@ class FakeCronModule @JvmOverloads constructor(
   @Singleton
   fun cronCoordinator(leaseManager: wisp.lease.LeaseManager): CronCoordinator =
     if (useDistributedExecution) {
-      DistributedCronCoordinator(leaseManager)
+      MultipleLeaseCronCoordinator(leaseManager)
     } else {
       SingleLeaseCronCoordinator(leaseManager)
     }
