@@ -92,6 +92,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-tracing"))
   testImplementation(testFixtures(project(":misk-audit-client")))
+  testImplementation(testFixtures(project(":misk-metrics")))
 }
 
 val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
