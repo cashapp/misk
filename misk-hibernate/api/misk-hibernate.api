@@ -329,7 +329,6 @@ public final class misk/hibernate/Transacter$DefaultImpls {
 
 public final class misk/hibernate/TransacterKt {
 	public static final fun failSafeRead (Lmisk/hibernate/Transacter;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public static final fun failSafeRead (Lmisk/hibernate/Transacter;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static final fun shards (Lmisk/hibernate/Transacter;)Ljava/util/Set;
 	public static final fun shards (Lmisk/hibernate/Transacter;Lmisk/vitess/Keyspace;)Ljava/util/Collection;
 	public static final fun transaction (Lmisk/hibernate/Transacter;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
