@@ -44,6 +44,7 @@ dependencies {
   implementation(libs.jettyAlpnServer)
   implementation(libs.jettyHttp)
   implementation(libs.jettyHttp2)
+  implementation(libs.jettyHttp2Common)
   implementation(libs.jettyIo)
   implementation(libs.jettyServlet)
   implementation(libs.jettyServlets)
